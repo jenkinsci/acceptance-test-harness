@@ -70,6 +70,7 @@ class JenkinsSeleniumTest < Test::Unit::TestCase
 
     @base_url = "http://127.0.0.1:#{@httpPort}/"
     @driver = Selenium::WebDriver.for(:firefox)
+    @waiter = Selenium::WebDriver::Wait.new(:timeout => 10)
   end
 
   def teardown
