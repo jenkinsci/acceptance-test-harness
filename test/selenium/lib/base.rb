@@ -88,8 +88,10 @@ class JenkinsSeleniumTest < Test::Unit::TestCase
     unless @test_passed
       puts "It looks like the test failed/errored, so here's the console from Jenkins:"
       puts "--------------------------------------------------------------------------"
-      File.open(JENKINS_DEBUG_LOG, 'r') do |line|
-        puts line
+      File.open(JENKINS_DEBUG_LOG, 'r') do |fd|
+        fd.each_line do |line|
+          puts line
+        end
       end
     end
   end
