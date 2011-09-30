@@ -16,7 +16,7 @@ class JenkinsSeleniumTest < Test::Unit::TestCase
 
     ENV["JENKINS_HOME"] = @tempdir
     jarfile = File.dirname(__FILE__) + "/../../../jenkins.war"
-    @pipe = IO.popen("java -jar #{jarfile} --controlPort=#{@controlPort} --httpPort=#{@httpPort} 2>&1")
+    @pipe = IO.popen("java -jar #{jarfile} --ajp13Port=-1 --controlPort=#{@controlPort} --httpPort=#{@httpPort} 2>&1")
     start = Time.now
 
     puts
