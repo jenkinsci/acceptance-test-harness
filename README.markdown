@@ -15,3 +15,11 @@ more standard components of Jenkins such as the:
 
 Drop me a line (`rtyler` on [Freenode](http://freenode.net)) if you're
 interested in helping out
+
+
+*What running the tests looks like:*
+
+There is a bit of a delay since we bring up Jenkins for every single test, with
+it's own sandboxed workspace as well:
+
+![](http://strongspace.com/rtyler/public/selenium-jenkins.png)
