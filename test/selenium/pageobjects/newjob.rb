@@ -34,7 +34,7 @@ class NewJob
     name_field.submit
 
     self.waiter.until do
-      driver.title.match("#{name} Config"), "Couldn't verify that the job was created"
+      driver.title.match("#{name} Config")
     end
   end
 
