@@ -7,21 +7,18 @@ class NewJob
 
   def self.goto(driver, base_url)
     driver.navigate.to("#{base_url}/newJob")
-    self.assert_loaded(driver)
   end
 
   def self.waiter
     Selenium::WebDriver::Wait.new(:timeout => 10)
   end
 
-  def self.assert_loaded(driver)
-    self.waiter.until do
-      driver.title.match("New Job")
-    end
-  end
-
   def self.create_freestyle(driver, base_url, name)
     self.goto(driver, base_url)
+
+    self.waiter.until do
+      driver.find_element(:id, "name")
+    end
 
     name_field = driver.find_element(:id, "name")
     assert_not_nil name_field, "Couldn't find the Name input field on the new job page"
