@@ -10,8 +10,7 @@ class BasicSanityTests < JenkinsSeleniumTest
 
   def test_create_new_job
     job_name = "Selenium_Test_Job"
-    newjob = NewJob.new(@driver, @base_url)
-    newjob.goto
-    newjob.create_freestyle(job_name)
+    NewJob.create_freestyle(@driver, @base_url, job_name)
+    assert true
   end
 end
