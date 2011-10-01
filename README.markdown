@@ -23,3 +23,11 @@ There is a bit of a delay since we bring up Jenkins for every single test, with
 it's own sandboxed workspace as well:
 
 ![](http://strongspace.com/rtyler/public/selenium-jenkins.png)
+
+
+*The current test matrix:*
+
+The tests cases that have been completed or nede to be completed can be found
+on the [Seleneium Test
+Cases](https://wiki.jenkins-ci.org/display/JENKINS/Selenium+Test+Cases) page on
+the Jenkins wiki
