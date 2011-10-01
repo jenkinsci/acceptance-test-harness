@@ -56,6 +56,11 @@ class JenkinsSeleniumTest < Test::Unit::TestCase
     end
   end
 
+
+  def go_home
+    @driver.navigate.to @base_url
+  end
+
   def setup
     if File.exists? JENKINS_DEBUG_LOG
       FileUtils.rm JENKINS_DEBUG_LOG

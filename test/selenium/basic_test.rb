@@ -4,7 +4,7 @@ require File.dirname(__FILE__) + "/pageobjects/newjob"
 
 class BasicSanityTests < JenkinsSeleniumTest
   def test_proper_title
-    @driver.navigate.to @base_url
+    go_home
     assert_not_nil @driver.title.match("\[Jenkins\]")
   end
 
