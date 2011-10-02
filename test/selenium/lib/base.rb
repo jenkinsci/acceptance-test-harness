@@ -11,9 +11,6 @@ class JenkinsSeleniumTest < Test::Unit::TestCase
   JENKINS_DEBUG_LOG = Dir.pwd + "/last_test.log"
 
   def start_jenkins
-    @tempdir = TempDir.create(:rootpath => Dir.pwd)
-    @controlPort = 3002
-
     ENV["JENKINS_HOME"] = @tempdir
     jarfile = File.dirname(__FILE__) + "/../../../jenkins.war"
     @pipe = IO.popen("java -jar #{jarfile} --ajp13Port=-1 --controlPort=#{@controlPort} --httpPort=#{@httpPort} 2>&1")
@@ -57,6 +54,11 @@ class JenkinsSeleniumTest < Test::Unit::TestCase
   end
 
 
+  def restart_jenkins
+    stop_jenkins
+    start_jenkins
+  end
+
   def go_home
     @driver.navigate.to @base_url
   end
@@ -66,8 +68,11 @@ class JenkinsSeleniumTest < Test::Unit::TestCase
       FileUtils.rm JENKINS_DEBUG_LOG
     end
 
+    @tempdir = TempDir.create(:rootpath => Dir.pwd)
+
     # Chose a random port, just to be safe
     @httpPort = rand(65000 - 8080) + 8080
+    @controlPort = 3002
 
     @log = File.open(JENKINS_DEBUG_LOG, "w")
     @ready = false
