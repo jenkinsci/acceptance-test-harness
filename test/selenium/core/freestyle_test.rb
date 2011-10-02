@@ -24,4 +24,5 @@ class FreestyleJobTests < JenkinsSeleniumTest
     enable_button = @driver.find_element(:xpath, "//button[text()='Enable']")
     assert_not_nil enable_button, "Couldn't find the [Enable] button, guess we failed to disable the job!"
   end
+
 end
