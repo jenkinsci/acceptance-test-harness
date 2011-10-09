@@ -32,7 +32,7 @@ class GitPluginTests < JenkinsSeleniumTest
 
     build = @job.build(1)
 
-    assert build.succeeded, "The build did not succeed!"
+    assert build.succeeded?, "The build did not succeed!"
 
     assert_not_nil build.console.match("Cloning the remote Git repository")
   end

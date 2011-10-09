@@ -34,7 +34,7 @@ class Build
     end
   end
 
-  def succeeded
+  def succeeded?
     @succeeded ||= begin
       @driver.navigate.to(build_url)
       status_icon = @driver.find_element(:xpath, "//img[@src='buildStatus']")
@@ -43,7 +43,7 @@ class Build
     end
   end
 
-  def failed
+  def failed?
     return !succeeded
   end
 
