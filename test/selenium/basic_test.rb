@@ -29,7 +29,9 @@ class BasicSanityTests < JenkinsSeleniumTest
   # to add the appropriate entries to the array below
 
   ["git", "github", "chucknorris", "warnings", "violations",
-   "xunit", "cobertura", "checkstyle", ["disk-usage", "Disk Usage"]].each do |plugin|
+   "xunit", "cobertura", "checkstyle", ["disk-usage", "Disk Usage"],
+   "greenballs", "groovy", "grails", "gradle", "jobconfighistory",
+   "build-timeout", "backup", "dry", "jira", "sonar"].each do |plugin|
 
     name = plugin
     # Handle plugins whose short-names do not match their "full names"
