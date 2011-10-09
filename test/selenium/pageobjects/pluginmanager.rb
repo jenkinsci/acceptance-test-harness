@@ -44,7 +44,7 @@ class PluginManager
 
     @driver.navigate.to(url + "/available")
 
-    checkbox = @driver.find_element(:xpath, "//input[@name='plugin.#{name.downcase}.default']")
+    checkbox = @driver.find_element(:xpath, "//input[@name='plugin.#{name}.default']")
     assert_not_nil checkbox, "Couldn't find the plugin checkbox for the #{name} plugin"
     checkbox.click
 
@@ -57,7 +57,7 @@ class PluginManager
     @driver.navigate.to(url + "/installed")
 
     waiter.until do
-      @driver.find_element(:xpath, "//input[@url='plugin/#{name.downcase}']")
+      @driver.find_element(:xpath, "//input[@url='plugin/#{name}']")
     end
 
     assert true

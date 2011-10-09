@@ -30,7 +30,7 @@ class BasicSanityTests < JenkinsSeleniumTest
 
   ["git", "github", "chucknorris", "warnings", "violations",
    "xunit", "cobertura", "checkstyle", ["disk-usage", "Disk Usage"],
-   "greenballs", "groovy", "grails", "gradle", "jobconfighistory",
+   ["greenballs", "Green Balls"], "groovy", "grails", "gradle", "jobConfigHistory",
    "build-timeout", "backup", "dry", "jira", "sonar"].each do |plugin|
 
     name = plugin
