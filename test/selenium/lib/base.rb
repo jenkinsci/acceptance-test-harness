@@ -20,7 +20,7 @@ class JenkinsSeleniumTest < Test::Unit::TestCase
     print "Bringing up a temporary Jenkins instance"
     Thread.new do
       while (line = @pipe.gets)
-        @log.write(line)
+        log_line(line)
         if line =~ /Jenkins is fully up and running/
           puts " Jenkins online and ready to be tested"
           @ready = true
@@ -59,6 +59,34 @@ class JenkinsSeleniumTest < Test::Unit::TestCase
     start_jenkins
   end
 
+
+  def log_line(line)
+    @log.write(line)
+    @log.flush
+
+    unless @log_regex.nil?
+      if line.match(@log_regex)
+        @log_found = true
+      end
+    end
+  end
+
+  def wait_until_logged(regex, timeout=60)
+    start = Time.now.to_i
+    @log_regex = regex
+
+    while (Time.now.to_i - start) < timeout
+      if @log_found
+        @log_regex = nil
+        @log_found = false
+        return true
+      end
+      sleep 1
+    end
+
+    return false
+  end
+
   def go_home
     @driver.navigate.to @base_url
   end
@@ -69,6 +97,8 @@ class JenkinsSeleniumTest < Test::Unit::TestCase
     end
 
     @tempdir = TempDir.create(:rootpath => Dir.pwd)
+    @log_regex = nil
+    @log_found = false
 
     # Chose a random port, just to be safe
     @httpPort = rand(65000 - 8080) + 8080
