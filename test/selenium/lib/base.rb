@@ -21,8 +21,8 @@ class JenkinsSeleniumTest < Test::Unit::TestCase
     Thread.new do
       while (line = @pipe.gets)
         log_line(line)
-        if line =~ /Jenkins is fully up and running/
-          puts " Jenkins online and ready to be tested"
+        if line =~ /INFO: Completed initialization/
+          puts " Jenkins completed initialization"
           @ready = true
         else
           unless @ready
@@ -40,6 +40,18 @@ class JenkinsSeleniumTest < Test::Unit::TestCase
 
     unless @ready
       raise "Could not bring up a Jenkins server"
+    end
+
+    go_home
+    # This hack-ish waiter is in place due to current versions of Jenkins LTS
+    # not printing "Jenkins is fully up and running" to the logs once Jenkins
+    # is up and running.
+    #
+    # This means LTS releases for now will drop the user on the "Jenkins is
+    # getting ready to work" page, which means we have to poll until we hit the
+    # proper "home page"
+    Selenium::WebDriver::Wait.new(:timeout => 60).until do
+      @driver.find_element(:xpath, "//a[@href='/view/All/newJob' and text()='New Job']")
     end
   end
 
@@ -106,11 +118,12 @@ class JenkinsSeleniumTest < Test::Unit::TestCase
 
     @log = File.open(JENKINS_DEBUG_LOG, "w")
     @ready = false
-    start_jenkins
 
     @base_url = "http://127.0.0.1:#{@httpPort}/"
     @driver = Selenium::WebDriver.for(:firefox)
     @waiter = Selenium::WebDriver::Wait.new(:timeout => 10)
+
+    start_jenkins
   end
 
   def teardown
