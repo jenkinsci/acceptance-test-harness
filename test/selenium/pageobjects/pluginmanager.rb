@@ -51,19 +51,6 @@ class PluginManager
     installbutton = @driver.find_element(:xpath, "//button[text()='Install']")
     assert_not_nil installbutton, "Couldn't find the install button on this page"
     installbutton.click
-
-
-    # Give ourselves a good long time to find and install the plugin
-    install_wait = Selenium::WebDriver::Wait.new(:timeout => 60)
-    install_wait.until do
-      @driver.navigate.to(url + "/installed")
-      element = @driver.find_element(:xpath, "//div[@id='needRestart']")
-      if element.displayed?
-        element
-      else
-        nil
-      end
-    end
   end
 
   def assert_installed(name)
