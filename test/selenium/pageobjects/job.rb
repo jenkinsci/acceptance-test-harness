@@ -2,6 +2,8 @@ require 'rubygems'
 require 'selenium-webdriver'
 require 'test/unit'
 
+require File.dirname(__FILE__) + "/build"
+
 class Job
   include Test::Unit::Assertions
 
@@ -36,16 +38,15 @@ class Job
     @driver.navigate.to(job_url)
   end
 
-  def build
+  def queue_build
     @driver.navigate.to(job_url + "/build?delay=0sec")
+    # This is kind of silly, but I can't think of a better way to wait for the
+    # build to complete
+    sleep 5
   end
 
-  def console_for_build(number)
-    @driver.navigate.to(job_url + "/#{number}/console")
-
-    console = @driver.find_element(:xpath, "//pre")
-    assert_not_nil console, "Couldn't find the console text on the page"
-    console.text
+  def build(number)
+    Build.new(@driver, @base_url, self, number)
   end
 
   def disable

@@ -6,7 +6,7 @@ require File.dirname(__FILE__) + "/../pageobjects/job"
 class FreestyleJobTests < JenkinsSeleniumTest
   def setup
     super
-    @job_name = "Seleneium_Test_Job"
+    @job_name = "Selenium_Test_Job"
     NewJob.create_freestyle(@driver, @base_url, @job_name)
     @job = Job.new(@driver, @base_url, @job_name)
   end
@@ -30,16 +30,13 @@ class FreestyleJobTests < JenkinsSeleniumTest
       @job.add_build_step "ls"
     end
 
-    @job.build
+    @job.queue_build
 
-    # This is kind of silly, but I can't think of a better way to wait for the
-    # biuld to complete
-    sleep 5
+    build = @job.build(1)
 
-    console = @job.console_for_build(1)
+    assert build.succeeded, "The build did not succeed!"
 
-    assert_not_nil console.match("\\+ ls"), "Could not verify that the script properly ran in the following console: #{console}"
-    assert_not_nil console.match("Finished: SUCCESS"), "Could not verify that the job ran properly"
+    assert_not_nil build.console.match("\\+ ls"), "Could not verify that the script ran in the following console: #{build.console}"
   end
 
 end
