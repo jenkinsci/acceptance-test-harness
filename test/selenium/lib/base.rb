@@ -50,8 +50,13 @@ class JenkinsSeleniumTest < Test::Unit::TestCase
     # This means LTS releases for now will drop the user on the "Jenkins is
     # getting ready to work" page, which means we have to poll until we hit the
     # proper "home page"
-    Selenium::WebDriver::Wait.new(:timeout => 60).until do
-      @driver.find_element(:xpath, "//a[@href='/view/All/newJob' and text()='New Job']")
+    Selenium::WebDriver::Wait.new(:timeout => 60, :interval => 1).until do
+      # Due to a current bug with LTS which results in the "Jenkins is getting
+      # ready to work" page redirecting to a gnarly exception page like this:
+      #   <http://strongspace.com/rtyler/public/lts_startup_400.png>
+      #
+      # We're going to refresh the home page every single second >_<
+      @driver.find_element(:xpath, "//a[@href='/view/All/newJob' and text()='New Job']") if @driver.navigate.refresh
     end
   end
 
