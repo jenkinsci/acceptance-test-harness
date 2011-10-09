@@ -24,7 +24,7 @@ class NewJob
     assert_not_nil name_field, "Couldn't find the Name input field on the new job page"
 
     name_field.send_keys(name)
-    job_type = driver.find_element(:xpath, "//input[@value='hudson.model.FreeStyleProject']")
+    job_type = driver.find_element(:xpath, "//input[starts-with(@value, 'hudson.model.FreeStyleProject')]")
     assert_not_nil job_type, "Couldn't find the Freestyle job type radio button"
 
     job_type.click
