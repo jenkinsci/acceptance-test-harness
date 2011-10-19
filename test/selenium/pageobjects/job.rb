@@ -106,6 +106,12 @@ class Job
     param_def_value.send_keys value
   end
    
+  def wait_for_build
+    #TODO improve it, some smarter approach
+    @driver.navigate.refresh
+    sleep 10
+    @driver.navigate.refresh
+  end
 
   def save
     assert_equal @driver.current_url, configure_url, "Cannot save if I'm not on the configure page!"
