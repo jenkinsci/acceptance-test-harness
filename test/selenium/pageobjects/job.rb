@@ -45,6 +45,12 @@ class Job
     sleep 5
   end
 
+  def queue_param_build
+    build_button = @driver.find_element(:xpath, "//button[text()='Build']")
+    ensure_element(build_button,"Param build button")
+    build_button.click
+  end
+
   def build(number)
     Build.new(@driver, @base_url, self, number)
   end
@@ -81,6 +87,32 @@ class Job
     textarea.send_keys script
   end
 
+  def add_parameter(type,name,value)
+    ensure_config_page
+    param_check_box = @driver.find_element(:name, "parameterized")
+    ensure_element(param_check_box,"Parametrized build check box")
+    param_check_box.click
+    param_type_list = @driver.find_element(:xpath, "//button[text()='Add Parameter']")
+    ensure_element(param_type_list,"Parameter type list")
+    param_type_list.click
+    param_type_link = @driver.find_element(:link,type)
+    ensure_element(param_type_link,"Link to parameter fo type '#{type}'")
+    param_type_link.click
+    param_name = @driver.find_element(:xpath, "//input[@name='parameter.name']")
+    ensure_element(param_name,"Parameter name")
+    param_name.send_keys name
+    param_def_value = @driver.find_element(:xpath, "//input[@name='parameter.defaultValue']")
+    ensure_element(param_def_value,"Parameter default value")
+    param_def_value.send_keys value
+  end
+   
+  def wait_for_build
+    #TODO improve it, some smarter approach
+    @driver.navigate.refresh
+    sleep 10
+    @driver.navigate.refresh
+  end
+
   def save
     assert_equal @driver.current_url, configure_url, "Cannot save if I'm not on the configure page!"
 
@@ -88,4 +120,14 @@ class Job
     assert_not_nil button, "Couldn't find the Save button on the configuration page"
     button.click
   end
+  
+  def ensure_config_page
+    assert_equal @driver.current_url, configure_url, "Cannot configure build steps if I'm not on the configure page"
+  end
+
+  def ensure_element(element,name)
+    assert_not_nil element, "Couldn't find element '#{name}'"
+  end
+    
+
 end
