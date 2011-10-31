@@ -83,6 +83,7 @@ class FreestyleJobTests < JenkinsSeleniumTest
 
     # run the job and check where it run
     @job.queue_build
+    @job.wait_for_build
     build = @job.build(1)
     check_string = "Building remotely on #{@slave_name}"
     assert_not_nil build.console.index(check_string), "Test wasn't run on #{@slave_name}"
