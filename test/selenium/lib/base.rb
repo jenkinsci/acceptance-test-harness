@@ -9,6 +9,7 @@ require 'test/unit'
 class JenkinsSeleniumTest < Test::Unit::TestCase
   TIMEOUT = 60
   JENKINS_DEBUG_LOG = Dir.pwd + "/last_test.log"
+  JENKINS_LIB_DIR = Dir.pwd + "/lib"
 
   def start_jenkins
     ENV["JENKINS_HOME"] = @tempdir
@@ -114,6 +115,7 @@ class JenkinsSeleniumTest < Test::Unit::TestCase
     end
 
     @tempdir = TempDir.create(:rootpath => Dir.pwd)
+    @slave_tempdir = TempDir.create(:rootpath => Dir.pwd)
     @log_regex = nil
     @log_found = false
 
@@ -142,6 +144,7 @@ class JenkinsSeleniumTest < Test::Unit::TestCase
     end
 
     FileUtils.rm_rf(@tempdir)
+    FileUtils.rm_rf(@slave_tempdir)
 
     unless @test_passed
       puts "It looks like the test failed/errored, so here's the console from Jenkins:"
