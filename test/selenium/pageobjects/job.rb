@@ -63,6 +63,16 @@ class Job
     checkbox.click
   end
 
+  def tie_to(expression)
+    restrict = @driver.find_element(:xpath,"//input[@name='hasSlaveAffinity']")
+    ensure_element(restrict,"Restrict where this project can be run")
+    restrict.click
+    restrict.click
+    label_exp = @driver.find_element(:xpath,"//input[@name='_.assignedLabelString']");
+    ensure_element(label_exp,"Label Expression")
+    label_exp.send_keys expression
+  end
+
   def add_build_step(script)
     assert_equal @driver.current_url, configure_url, "Cannot configure build steps if I'm not on the configure page"
 
