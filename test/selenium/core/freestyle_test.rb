@@ -35,7 +35,7 @@ class FreestyleJobTests < JenkinsSeleniumTest
 
     build = @job.build(1)
 
-    assert build.succeeded, "The build did not succeed!"
+    assert build.succeeded?, "The build did not succeed!"
 
     assert_not_nil build.console.match("\\+ ls"), "Could not verify that the script ran in the following console: #{build.console}"
   end
@@ -52,7 +52,7 @@ class FreestyleJobTests < JenkinsSeleniumTest
     @job.queue_param_build
     @job.wait_for_build
     build = @job.build(1)
-    assert build.succeeded, "The build did not succeed!"
+    assert build.succeeded? "The build did not succeed!"
     #assert build.console.include? @PARAM_VALUE, "Test parameter value not found!" # requires ruby 1.9
     assert_not_nil build.console.index(@PARAM_VALUE), "Test parameter value not found!"
   end
@@ -87,6 +87,22 @@ class FreestyleJobTests < JenkinsSeleniumTest
     build = @job.build(1)
     check_string = "Building remotely on #{@slave_name}"
     assert_not_nil build.console.index(check_string), "Test wasn't run on #{@slave_name}"
+
+  end
+
+  def test_svn_checkout
+    @job.configure do
+      # checkout some small project from SVN
+      @job.setup_svn("https://svn.jenkins-ci.org/trunk/hudson/plugins/zfs/")
+      # check workspace if '.svn' dir is present, if not, fail the job
+      @job.add_build_step "if [ '$(ls .svn)' ]; then \n exit 0 \n else \n exit 1 \n fi"
+      sleep 10
+    end
+
+    @job.queue_build
+    @job.wait_for_build
+    build = @job.build(1)
+    assert build.succeeded?, "The build did not succeed!"
 
   end
 
