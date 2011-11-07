@@ -57,6 +57,31 @@ class FreestyleJobTests < JenkinsSeleniumTest
     assert_not_nil build.console.index(@PARAM_VALUE), "Test parameter value not found!"
   end
 
+  def test_concurent_builds
+    @job.configure do
+      @job.allow_concurent_builds
+      @job.add_build_step "sleep 20"
+    end
+    
+    @job.queue_build
+    # schedule another build while the first one is running and again wait for a while to ensure that
+    # also secod build is running
+    @job.queue_build
+    sleep 5
+
+    # check if both builds are running a the same time
+    build1 = @job.build(1)
+    build2 = @job.build(2)
+    assert(build1.in_progress?,"Build #1 is not running!")
+    assert(build2.in_progress?,"Build #2 is not running!")
+    
+    # wait for the build to succeed
+    @job.wait_for_build
+    @job.wait_for_build
+    assert build1.succeeded?, "The build #1 did not succeed!"
+    assert build2.succeeded?, "The build #2 did not succeed!"
+  end
+  
   def test_tie_to_label
     @slave_name = "test_slave"
     @test_label = "test_label"
