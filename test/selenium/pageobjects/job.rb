@@ -83,6 +83,13 @@ class Job
     checkbox.click
   end
 
+  def allow_concurent_builds
+    ensure_config_page
+    checkbox = @driver.find_element(:xpath, "//input[@name='_.concurrentBuild']")
+    ensure_element(checkbox,"Execute concurrent builds if necessary")
+    checkbox.click
+  end
+
   def tie_to(expression)
     restrict = @driver.find_element(:xpath,"//input[@name='hasSlaveAffinity']")
     ensure_element(restrict,"Restrict where this project can be run")
