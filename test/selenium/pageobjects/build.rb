@@ -1,6 +1,9 @@
 require 'rubygems'
 require 'selenium-webdriver'
 require 'test/unit'
+require 'rest_client'
+require 'json'
+
 
 class Build
   include Test::Unit::Assertions
@@ -24,6 +27,11 @@ class Build
     @job.job_url + "/#{@number}"
   end
 
+  def json_rest_url
+    build_url + "/api/json"
+  end
+
+
   def console
     @console ||= begin
       @driver.navigate.to(build_url + "/console")
@@ -46,5 +54,12 @@ class Build
   def failed?
     return !succeeded
   end
+  
+  def in_progress?
+    response = RestClient.get(json_rest_url)
+    json = JSON.parse(response.body)
+    return json['building']
+  end
+
 
 end
