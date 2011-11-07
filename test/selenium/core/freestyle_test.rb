@@ -102,6 +102,8 @@ class FreestyleJobTests < JenkinsSeleniumTest
     @job.queue_build
     @job.wait_for_build
     build = @job.build(1)
+    #build should fail if the project is not checked out. 
+    #TODO any better way how to check it? Check if all file from repo are present?
     assert build.succeeded?, "The build did not succeed!"
 
   end
