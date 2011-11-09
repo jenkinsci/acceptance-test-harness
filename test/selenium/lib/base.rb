@@ -6,6 +6,8 @@ require 'socket'
 require 'temp_dir'
 require 'test/unit'
 
+require File.dirname(__FILE__) + "/../pageobjects/globalconfig"
+
 class JenkinsSeleniumTest < Test::Unit::TestCase
   TIMEOUT = 60
   JENKINS_DEBUG_LOG = Dir.pwd + "/last_test.log"
@@ -131,6 +133,7 @@ class JenkinsSeleniumTest < Test::Unit::TestCase
     @waiter = Selenium::WebDriver::Wait.new(:timeout => 10)
 
     start_jenkins
+    GlobalConfig.instance.init(@driver,@base_url)
   end
 
   def teardown
