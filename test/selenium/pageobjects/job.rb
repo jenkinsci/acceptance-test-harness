@@ -134,6 +134,52 @@ class Job
     textarea.send_keys script
   end
 
+  def add_ant_build_step(ant_targets,ant_build_file)
+    ensure_config_page
+    add_step = @driver.find_element(:xpath, "//button[text()='Add build step']")
+    ensure_element(add_step,"Add build step")
+    add_step.click
+    
+    exec_ant = @driver.find_element(:xpath, "//a[text()='Invoke Ant']")
+    ensure_element(exec_ant,"Invoke Ant")
+    exec_ant.click
+    
+    # choose latest ant version
+    ant = nil
+    Selenium::WebDriver::Wait.new(:timeout => 10).until do
+      ant = @driver.find_element(:name => "ant.antName")
+      ant
+    end
+    ensure_element(ant,"Ant version")
+    ant.click
+    #TODO cannot find any select equivalent in Ruby API
+    ant.send_keys :arrow_down
+    ant.click
+
+    # setup ant targets
+    targets = nil
+    Selenium::WebDriver::Wait.new(:timeout => 10).until do
+      targets = @driver.find_element(:xpath, "//input[@name='_.targets']")
+      targets
+    end
+    ensure_element(targets,"Ant targets")
+    targets.send_keys ant_targets
+    
+    # advanced section
+    advanced = @driver.find_element(:xpath, "//div[@name='builder']//button[text()='Advanced...']")
+    ensure_element(advanced,"Ant advanced")
+    advanced.click
+
+    # setup build file
+    build_file = nil
+    Selenium::WebDriver::Wait.new(:timeout => 10).until do
+      build_file = @driver.find_element(:xpath, "//input[@id='textarea._.buildFile']")
+      build_file
+    end
+    ensure_element(build_file,"Ant build file")
+    build_file.send_keys ant_build_file
+
+  end
 
   def wait_for_build
     #TODO improve it, some smarter approach
