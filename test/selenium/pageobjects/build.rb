@@ -8,6 +8,8 @@ require 'json'
 class Build
   include Test::Unit::Assertions
 
+  BUILD_TIMEOUT = 300
+
   def initialize(driver, base_url, job, number)
     @driver = driver
     @base_url = base_url

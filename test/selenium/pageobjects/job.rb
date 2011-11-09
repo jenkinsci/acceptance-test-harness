@@ -181,11 +181,16 @@ class Job
 
   end
 
-  def wait_for_build
-    #TODO improve it, some smarter approach
-    @driver.navigate.refresh
-    sleep 10
-    @driver.navigate.refresh
+  def wait_for_build(*args)
+    number = 1
+    if args.size == 1
+      number = args[0]
+    end
+    build = self.build(number)   
+    start = Time.now
+    while (build.in_progress? && ((Time.now - start) < Build::BUILD_TIMEOUT))
+      sleep 5
+    end
   end
 
   def save
