@@ -3,6 +3,7 @@ require File.dirname(__FILE__) + "/../pageobjects/newjob"
 require File.dirname(__FILE__) + "/../pageobjects/job"
 require File.dirname(__FILE__) + "/../pageobjects/newslave"
 require File.dirname(__FILE__) + "/../pageobjects/slave"
+require File.dirname(__FILE__) + "/../pageobjects/globalconfig"
 
 class FreestyleJobTests < JenkinsSeleniumTest
   def setup
@@ -133,4 +134,23 @@ class FreestyleJobTests < JenkinsSeleniumTest
 
   end
 
+  def test_ant_build_step
+    # add latest ant installation
+    conf = GlobalConfig.instance
+    conf.configure do
+      conf.add_ant_latest
+    end
+
+    # add ant build step
+    @job.configure do
+      @job.add_build_step("echo '<project default=\"hello\"><target name=\"hello\"><echo message=\"Hello, World\"/></target></project>' > build.xml ")
+      @job.add_ant_build_step("hello","build.xml")
+    end
+
+    @job.queue_build
+    @job.wait_for_build
+    build = @job.build(1)
+    assert build.succeeded?, "The build did not succeed!"
+  end
+  
 end
