@@ -6,9 +6,7 @@ Given /^a bare Jenkins instance$/ do
 end
 
 Given /^a job$/ do
-  suffix = (rand() * 1_000_000).to_s[0 .. 20]
-  name = "test_job_#{suffix}"
-  @job = Job.create_freestyle(@base_url, name)
+  @job = Jenkins::Job.create_freestyle(@base_url, Jenkins::Job.random_name)
 end
 
 
@@ -24,7 +22,7 @@ When /^I visit the home page$/ do
 end
 
 When /^I create a job named "([^"]*)"$/ do |name|
-  @job = Job.create_freestyle(@base_url, name)
+  @job = Jenkins::Job.create_freestyle(@base_url, name)
 end
 
 When /^I add a script build step to run "([^"]*)"$/ do |script|
