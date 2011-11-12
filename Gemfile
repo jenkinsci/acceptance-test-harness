@@ -7,6 +7,7 @@ gem "rest-client"
 gem "cucumber"
 gem "curb"
 gem "capybara"
+gem "json"
 gem "rspec"
 gem "tempdir"
 
