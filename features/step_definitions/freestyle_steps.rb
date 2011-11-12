@@ -47,7 +47,7 @@ Then /^I should see console output matching "([^"]*)"$/ do |script|
   @job.last_build.console.should match /#{Regexp.escape(script)}/
 end
 
-Then /^the job should be disabled$/ do
+Then /^the job page should say "([^"]*)"$/ do |content|
   @job.open
-  page.should have_content('This project is currently disabled')
+  page.should have_content(content)
 end

@@ -18,7 +18,7 @@ Feature: Build freestyle jobs
     When I configure the job
     And I click the "disable" checkbox
     And I save the job
-    Then the job should be disabled
+    Then the job page should say "This project is currently disabled"
 
   Scenario: Enable concurrent builds
     Given a job
