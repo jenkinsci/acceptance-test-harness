@@ -9,16 +9,18 @@ module Jenkins
   class Runner
     TIMEOUT = 60
     JENKINS_DEBUG_LOG = Dir.pwd + "/last_test.log"
-    attr_accessor :base_url
+    attr_accessor :base_url, :real_update_center
 
     def initialize
       @base_url = nil
+      @real_update_center = false
     end
 
     def start_jenkins
       ENV["JENKINS_HOME"] = @tempdir
       jarfile = File.dirname(__FILE__) + "/../jenkins.war"
       @pipe = IO.popen(["java", "-jar", jarfile, "--ajp13Port=-1", "--controlPort=#{@controlPort}",
+                        @real_update_center ? "-Dhudson.model.UpdateCenter.updateCenterUrl=http://not.resolvable" : "",
                           "--httpPort=#{@httpPort}",
                         :err => [:child, :out]])
       start = Time.now
