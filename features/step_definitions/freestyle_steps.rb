@@ -19,6 +19,10 @@ When /^I configure the job$/ do
   @job.configure
 end
 
+When /^I visit the home page$/ do
+  visit "/"
+end
+
 When /^I create a job named "([^"]*)"$/ do |name|
   @job = Job.create_freestyle(@base_url, name)
 end
@@ -39,6 +43,9 @@ When /^I save the job$/ do
   @job.save
 end
 
+When /^I visit the job page$/ do
+  @job.open
+end
 
 ############################################################################
 
@@ -47,7 +54,6 @@ Then /^I should see console output matching "([^"]*)"$/ do |script|
   @job.last_build.console.should match /#{Regexp.escape(script)}/
 end
 
-Then /^the job page should say "([^"]*)"$/ do |content|
-  @job.open
+Then /^the page should say "([^"]*)"$/ do |content|
   page.should have_content(content)
 end

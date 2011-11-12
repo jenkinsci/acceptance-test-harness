@@ -3,11 +3,15 @@ Feature: Build freestyle jobs
   As a user
   I want to create jobs
 
-
   Scenario: Create a simple job
     Given a bare Jenkins instance
-    When I create a job named "test"
-    And I configure the job
+    When I create a job named "MAGICJOB"
+    And I visit the home page
+    Then the page should say "MAGICJOB"
+
+  Scenario: Run a simple job
+    Given a job
+    When I configure the job
     And I add a script build step to run "ls"
     And I save the job
     And I run the job
@@ -18,7 +22,8 @@ Feature: Build freestyle jobs
     When I configure the job
     And I click the "disable" checkbox
     And I save the job
-    Then the job page should say "This project is currently disabled"
+    And I visit the job page
+    Then the page should say "This project is currently disabled"
 
   Scenario: Enable concurrent builds
     Given a job
