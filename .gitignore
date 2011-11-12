@@ -1,4 +1,5 @@
-/lib
 jenkins.war
+*.swp
+*.swn
 last_test.log
 *~
