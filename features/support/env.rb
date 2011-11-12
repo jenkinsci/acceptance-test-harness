@@ -21,6 +21,6 @@ Capybara.default_driver = :selenium
 PAGE_OBJECTS_BASE = File.dirname(__FILE__) + "/../../lib/"
 
 
-["job", "build"].each do |po|
+["job", "build", "slave"].each do |po|
   require PAGE_OBJECTS_BASE + po
 end

@@ -45,6 +45,13 @@ When /^I visit the job page$/ do
   @job.open
 end
 
+When /^I tie the job to the "([^"]*)" label$/ do |label|
+  @job.configure do
+    @job.label_expression = label
+  end
+end
+
+
 ############################################################################
 
 

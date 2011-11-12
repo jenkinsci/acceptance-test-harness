@@ -123,5 +123,9 @@ module Jenkins
 
       FileUtils.rm_rf(@tempdir)
     end
+
+    def slave_jar_path
+      "#{@tempdir}/war/WEB-INF/slave.jar"
+    end
   end
 end

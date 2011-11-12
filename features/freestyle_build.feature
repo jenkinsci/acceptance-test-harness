@@ -1,7 +1,7 @@
-Feature: Build freestyle jobs
-  In order to configure and run simple shell scripts
+Feature: Configure/build freestyle jobs
+  In order to get some basic usage out of freestyle jobs
   As a user
-  I want to create jobs
+  I want to configure and run a series of different freestyle-based jobs
 
   Scenario: Create a simple job
     Given a bare Jenkins instance
@@ -40,6 +40,7 @@ Feature: Build freestyle jobs
     And I add a string parameter "Foo"
     When I try to build the job
     Then I should be prompted to enter the "Foo" parameter
+
 
 
 # vim: tabstop=2 expandtab shiftwidth=2
