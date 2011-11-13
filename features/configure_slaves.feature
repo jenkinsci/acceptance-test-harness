@@ -11,4 +11,12 @@ Feature: configure slaves
     And I tie the job to the "test" label
     Then I should see the job tied to the "test" label
 
+  Scenario: Tie a job to a specific slave
+    Given a job
+    And a dumb slave
+    When I configure the job
+    And I tie the job to the slave
+    Then I should see the job tied to the slave
+
+
 # vim: tabstop=2 expandtab shiftwidth=2

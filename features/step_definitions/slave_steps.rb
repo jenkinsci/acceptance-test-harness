@@ -16,3 +16,9 @@ Then /^I should see the job tied to the "([^"]*)" label$/ do |label|
   visit("/label/#{label}")
   step %{the page should say "#{@job.name}"}
 end
+
+Then /^I should see the job tied to the slave$/ do
+  step %{I should see the job tied to the "#{@slave.name}" label}
+end
+
+

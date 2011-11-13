@@ -51,6 +51,9 @@ When /^I tie the job to the "([^"]*)" label$/ do |label|
   end
 end
 
+When /^I tie the job to the slave$/ do
+  step %{I tie the job to the "#{@slave.name}" label}
+end
 
 ############################################################################
 
