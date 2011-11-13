@@ -18,5 +18,11 @@ Feature: configure slaves
     And I tie the job to the slave
     Then I should see the job tied to the slave
 
+  Scenario: Create a slave with multiple executors
+    Given a dumb slave
+    When I set the executors to "3"
+    And I visit the home page
+    Then I should see "3" executors configured
+
 
 # vim: tabstop=2 expandtab shiftwidth=2

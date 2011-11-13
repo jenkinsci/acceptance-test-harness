@@ -5,11 +5,24 @@ Given /^a dumb slave$/ do
   @slave = Jenkins::Slave.dumb_slave(@base_url)
 end
 
+
+############################################################################
+
+
 When /^I add the label "([^"]*)" to the slave$/ do |label|
   @slave.configure do
     @slave.labels = label
   end
 end
+
+When /^I set the executors to "([^"]*)"$/ do |count|
+  @slave.configure do
+    @slave.executors = count
+  end
+end
+
+
+############################################################################
 
 
 Then /^I should see the job tied to the "([^"]*)" label$/ do |label|
@@ -21,4 +34,7 @@ Then /^I should see the job tied to the slave$/ do
   step %{I should see the job tied to the "#{@slave.name}" label}
 end
 
-
+Then /^I should see "([^"]*)" executors configured$/ do |count|
+  visit("/computer/#{@slave.name}")
+  @slave.executor_count.should == count.to_i
+end

@@ -34,9 +34,18 @@ module Jenkins
     end
 
     def online?
-      uri = URI.parse(json_rest_url)
-      data = JSON.parse(Net::HTTP.get_response(uri).body)
+      data = self.json
       return !data["offline"]
+    end
+
+    def executor_count
+      data = self.json
+      return data["executors"].length
+    end
+
+    def json
+      uri = URI.parse(json_rest_url)
+      return JSON.parse(Net::HTTP.get_response(uri).body)
     end
 
     def self.dumb_slave(base_url)
