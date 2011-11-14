@@ -11,10 +11,15 @@ module Jenkins
       @base_url = base_url
       @job = job
       @number = number
+      super(base_url, "#{job}/#{number}")
     end
 
     def build_url
       @job.job_url + "/#{@number}"
+    end
+
+    def json_api_url
+      "#{build_url}/api/json"
     end
 
     def console
@@ -35,6 +40,11 @@ module Jenkins
 
     def failed?
       return !succeeded
+    end
+
+    def in_progress?
+      data = self.json
+      return data['building']
     end
   end
 end

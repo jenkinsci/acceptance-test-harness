@@ -28,11 +28,11 @@ Feature: Configure/build freestyle jobs
   Scenario: Enable concurrent builds
     Given a job
     When I configure the job
-    And I click the "_.concurrentBuild" checkbox
+    And I enable concurrent builds
     And I add a script build step to run "sleep 20"
     And I save the job
-    Then I should be able to build two jobs
-    And the jobs should run concurrently
+    And I build 2 jobs
+    Then the 2 jobs should run concurrently
 
   Scenario: Create a parameterized job
     Given a job

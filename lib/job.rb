@@ -6,6 +6,13 @@ require File.dirname(__FILE__) + "/build.rb"
 
 module Jenkins
   class Job < PageObject
+    attr_accessor :timeout
+
+    def initialize(*args)
+      @timeout = 60 # Default all builds for this job to a 60s timeout
+      super(*args)
+    end
+
     def job_url
       @base_url + "/job/#{@name}"
     end
@@ -38,6 +45,14 @@ module Jenkins
       # This is kind of silly, but I can't think of a better way to wait for the
       # build to complete
       sleep 5
+    end
+
+    def wait_for_build(number)
+      build = self.build(number)
+      start = Time.now
+      while (build.in_progress? && ((Time.now - start) < @timeout))
+        sleep 1
+      end
     end
 
     def label_expression=(expression)

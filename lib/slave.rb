@@ -17,7 +17,7 @@ module Jenkins
       @base_url + "/computer/#{@name}/configure"
     end
 
-    def json_rest_url
+    def json_api_url
       @base_url + "/computer/#{@name}/api/json"
     end
 
@@ -41,11 +41,6 @@ module Jenkins
     def executor_count
       data = self.json
       return data["executors"].length
-    end
-
-    def json
-      uri = URI.parse(json_rest_url)
-      return JSON.parse(Net::HTTP.get_response(uri).body)
     end
 
     def self.dumb_slave(base_url)

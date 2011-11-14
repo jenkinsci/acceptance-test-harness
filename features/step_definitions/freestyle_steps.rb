@@ -37,6 +37,10 @@ When /^I click the "([^"]*)" checkbox$/ do |name|
   find(:xpath, "//input[@name='#{name}']").set(true)
 end
 
+When /^I enable concurrent builds$/ do
+  step %{I click the "_.concurrentBuild" checkbox}
+end
+
 When /^I save the job$/ do
   @job.save
 end
@@ -55,6 +59,14 @@ When /^I tie the job to the slave$/ do
   step %{I tie the job to the "#{@slave.name}" label}
 end
 
+When /^I build (\d+) jobs$/  do |count|
+  count.to_i.times do |i|
+    @job.queue_build
+  end
+  sleep 6 # Hard-coded sleep to allow the queue delay in Jenkins to expire
+end
+
+
 ############################################################################
 
 
@@ -62,6 +74,10 @@ Then /^I should see console output matching "([^"]*)"$/ do |script|
   @job.last_build.console.should match /#{Regexp.escape(script)}/
 end
 
-Then /^the page should say "([^"]*)"$/ do |content|
-  page.should have_content(content)
+
+Then /^the (\d+) jobs should run concurrently$/ do |count|
+  count.to_i.times do |i|
+    # Build numbers start at 1
+    @job.build(i + 1).in_progress?.should be true
+  end
 end

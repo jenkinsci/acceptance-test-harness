@@ -45,5 +45,18 @@ module Jenkins
       click_button "Save"
     end
 
+    def json_api_url
+      # Should be overridden by subclasses
+      nil
+    end
+
+    def json
+      url = json_api_url
+      unless url.nil?
+        uri = URI.parse(url)
+        return JSON.parse(Net::HTTP.get_response(uri).body)
+      end
+      return nil
+    end
   end
 end
