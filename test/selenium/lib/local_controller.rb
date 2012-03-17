@@ -1,8 +1,7 @@
-require File.dirname(__FILE__) + "/jenkins_controller"
+%w(jenkins_controller log_watcher).each { |f| require File.dirname(__FILE__)+"/"+f }
 
 # Runs jenkins.war on the same system with built-in Winstone container
 class LocalJenkinsController < JenkinsController
-  TIMEOUT = 60
   JENKINS_DEBUG_LOG = Dir.pwd + "/last_test.log"
   register :local
 
@@ -20,71 +19,18 @@ class LocalJenkinsController < JenkinsController
 
     FileUtils.rm JENKINS_DEBUG_LOG if File.exists? JENKINS_DEBUG_LOG
     @log = File.open(JENKINS_DEBUG_LOG, "w")
-    @ready = false
 
     @base_url = "http://127.0.0.1:#{@httpPort}/"
-
-    @log_regex = nil
-    @log_found = false
   end
 
   def start
     ENV["JENKINS_HOME"] = @tempdir
-    @pipe = IO.popen("java -jar #{@war} --ajp13Port=-1 --controlPort=#{@controlPort} --httpPort=#{@httpPort} 2>&1")
-    start_time = Time.now
-
     puts
     print "Bringing up a temporary Jenkins instance"
-    Thread.new do
-      while (line = @pipe.gets)
-        log_line(line)
-        if line =~ /INFO: Completed initialization/
-          puts " Jenkins completed initialization"
-          @ready = true
-        else
-          unless @ready
-            print '.'
-            STDOUT.flush
-          end
-        end
-      end
-      @ready = false
-    end
+    @pipe = IO.popen("java -jar #{@war} --ajp13Port=-1 --controlPort=#{@controlPort} --httpPort=#{@httpPort} 2>&1")
 
-    while !@ready && ((Time.now - start_time) < TIMEOUT)
-      sleep 0.5
-    end
-
-    unless @ready
-      raise "Could not bring up a Jenkins server"
-    end
-  end
-
-  def log_line(line)
-    @log.write(line)
-    @log.flush
-
-    unless @log_regex.nil?
-      if line.match(@log_regex)
-        @log_found = true
-      end
-    end
-  end
-
-  def wait_until_logged(regex, timeout=60)
-    start = Time.now.to_i
-    @log_regex = regex
-
-    while (Time.now.to_i - start) < timeout
-      if @log_found
-        @log_regex = nil
-        @log_found = false
-        return true
-      end
-      sleep 1
-    end
-
-    return false
+    @log_watcher = LogWatcher.new(@pipe,@log)
+    @log_watcher.wait_for_ready
   end
 
   def stop
@@ -93,9 +39,7 @@ class LocalJenkinsController < JenkinsController
         sock.write("0")
       end
 
-      while @ready
-        sleep 1
-      end
+      @log_watcher.wait_for_ready false
     rescue => e
       puts "Failed to cleanly shutdown Jenkins #{e}"
       puts "  "+e.backtrace.join("\n  ")
