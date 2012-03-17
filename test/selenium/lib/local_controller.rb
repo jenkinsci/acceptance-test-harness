@@ -1,12 +1,16 @@
 require File.dirname(__FILE__) + "/jenkins_controller"
 
+# Runs jenkins.war on the same system with built-in Winstone container
 class LocalJenkinsController < JenkinsController
   TIMEOUT = 60
   JENKINS_DEBUG_LOG = Dir.pwd + "/last_test.log"
+  register :local
 
-  def initialize(war)
-    @war = war
-    raise "jenkins.war doesn't exist in #{war}" if !File.exists?(war)
+  # @param [Hash] args
+  #     :war  => specify the location of jenkins.war
+  def initialize(args)
+    @war = args[:war] || ENV['JENKINS_WAR'] || File.dirname(__FILE__) + "/../../../jenkins.war"
+    raise "jenkins.war doesn't exist in #{@war}, maybe you forgot to set JENKINS_WAR env var?" if !File.exists?(@war)
 
     @tempdir = TempDir.create(:rootpath => Dir.pwd)
 

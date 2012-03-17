@@ -44,4 +44,15 @@ class JenkinsController
   def teardown
 
   end
+
+  # registered implementations
+  @@impls = {}
+
+  def self.create(args)
+    @@impls[args[:type]].new(args)
+  end
+
+  def self.register(type)
+    @@impls[type] = self
+  end
 end

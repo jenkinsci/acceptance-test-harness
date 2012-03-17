@@ -11,11 +11,20 @@ require File.dirname(__FILE__) + "/../pageobjects/globalconfig"
 
 class JenkinsSeleniumTest < Test::Unit::TestCase
   TIMEOUT = 60
-  JENKINS_DEBUG_LOG = Dir.pwd + "/last_test.log"
+
+  # TODO: get rid of this by downloading slave.jar
   JENKINS_LIB_DIR = Dir.pwd + "/lib"
 
   # @return [JenkinsController]
   attr_reader :controller
+
+  # default is to run locally
+  @@controller_args = { :type => :local }
+
+  # set the parameters for creating controller
+  def self.controller_args=(hash)
+    @@controller_args = hash
+  end
 
   def start_jenkins
     @controller.start
@@ -53,7 +62,7 @@ class JenkinsSeleniumTest < Test::Unit::TestCase
   end
 
   def setup
-    @controller = LocalJenkinsController.new(ENV['JENKINS_WAR'] || File.dirname(__FILE__) + "/../../../jenkins.war")
+    @controller = JenkinsController.create @@controller_args
     @slave_tempdir = TempDir.create(:rootpath => Dir.pwd)
 
     @driver = Selenium::WebDriver.for(:firefox)
