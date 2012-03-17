@@ -45,7 +45,7 @@ class BasicSanityTests < JenkinsSeleniumTest
       manager = PluginManager.new(@driver, @base_url)
       manager.install_plugin(plugin)
 
-      found = wait_until_logged(/Installation successful: #{name}/i)
+      found = @controller.wait_until_logged(/Installation successful: #{name}/i)
       assert found, "Failed to verify that we properly installed the #{name} plugin"
 
       restart_jenkins
