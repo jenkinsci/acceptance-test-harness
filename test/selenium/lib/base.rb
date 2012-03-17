@@ -75,7 +75,7 @@ class JenkinsSeleniumTest < Test::Unit::TestCase
       end
     rescue => e
       puts "Failed to cleanly shutdown Jenkins #{e}"
-      print e.backtrace.join("\n")
+      puts "  "+e.backtrace.join("\n  ")
     end
   end
 
