@@ -47,6 +47,7 @@ class RemoteSysvInitController < JenkinsController
     # which means system needs to get '.\\\*' (because system runs ssh via shell),
     # and that means Ruby literal needs whopping 6 '\'s. Crazy.
     ssh_exec "sudo perl -p -i -e s%JENKINS_HOME=.\\\\\\*%JENKINS_HOME=#{@tempdir}% /etc/default/jenkins /etc/sysconfig/jenkins"
+    ssh_exec "sudo /etc/init.d/#{@service} stop"    # make sure it's dead
     ssh_exec "sudo /etc/init.d/#{@service} start"
 
     @pipe = ssh_popen("sudo tail -f #{@logfile}")
