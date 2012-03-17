@@ -19,8 +19,14 @@ class JenkinsSeleniumTest < Test::Unit::TestCase
   # @return [JenkinsController]
   attr_reader :controller
 
-  # default is to run locally
-  @@controller_args = { :type => :local }
+  # default is to run locally, but allow the parameters to be given as env vars
+  # so that rake can be invoked like "rake test type=remote_sysv"
+  if ENV['type']
+    @@controller_args = {}
+    ENV.each { |k,v| @@controller_args[k.to_sym]=v }
+  else
+    @@controller_args = { :type => :local }
+  end
 
   # set the parameters for creating controller
   def self.controller_args=(hash)

@@ -49,7 +49,9 @@ class JenkinsController
   @@impls = {}
 
   def self.create(args)
-    @@impls[args[:type]].new(args)
+    t = @@impls[args[:type].to_sym]
+    raise "Undefined controller type #{args[:type]}" if t.nil?
+    t.new(args)
   end
 
   def self.register(type)
