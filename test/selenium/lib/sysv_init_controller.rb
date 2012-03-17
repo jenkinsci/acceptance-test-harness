@@ -43,7 +43,7 @@ class RemoteSysvInitController < JenkinsController
   end
 
   def start
-    # TODO: set JENKINS_HOME to @tempdir
+    ssh_exec "sudo perl -p -i -e 's/JENKINS_HOME=.*/JENKINS_HOME=#{@tempdir}/' /etc/default/jenkins /etc/sysconfig/jenkins"
     ssh_exec "sudo /etc/init.d/#{@service} start"
 
     @pipe = ssh_popen("sudo tail -f #{@logfile}")
@@ -68,10 +68,6 @@ class RemoteSysvInitController < JenkinsController
       @log.close
     end
     ssh_exec "sudo rm -rf #{@tempdir}"
-  end
-
-  def url
-    @base_url
   end
 
   def diagnose
