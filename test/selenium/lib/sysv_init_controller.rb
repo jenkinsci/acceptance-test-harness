@@ -60,7 +60,7 @@ class RemoteSysvInitController < JenkinsController
     begin
       ssh_exec "sudo /etc/init.d/#{@service} stop"
 
-      @log_watcher.wait_for_ready false if @log_watcher
+      @log_watcher.close
     rescue => e
       puts "Failed to cleanly shutdown Jenkins #{e}"
       puts "  "+e.backtrace.join("\n  ")

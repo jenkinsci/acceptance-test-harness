@@ -68,4 +68,7 @@ class LogWatcher
     return false
   end
 
+  def close
+    @pipe.close if @pipe
+  end
 end
