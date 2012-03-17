@@ -15,7 +15,8 @@ class JenkinsSeleniumTest < Test::Unit::TestCase
 
   def start_jenkins
     ENV["JENKINS_HOME"] = @tempdir
-    jarfile = File.dirname(__FILE__) + "/../../../jenkins.war"
+    jarfile = ENV["JENKINS_WAR"] || File.dirname(__FILE__) + "/../../../jenkins.war"
+    raise "jenkins.war doesn't exist in #{jarfile}" if !File.exists?(jarfile)
     @pipe = IO.popen("java -jar #{jarfile} --ajp13Port=-1 --controlPort=#{@controlPort} --httpPort=#{@httpPort} 2>&1")
     start = Time.now
 
@@ -64,12 +65,17 @@ class JenkinsSeleniumTest < Test::Unit::TestCase
   end
 
   def stop_jenkins
-    TCPSocket.open("localhost", @controlPort) do |sock|
-      sock.write("0")
-    end
+    begin
+      TCPSocket.open("localhost", @controlPort) do |sock|
+        sock.write("0")
+      end
 
-    while @ready
-      sleep 1
+      while @ready
+        sleep 1
+      end
+    rescue => e
+      puts "Failed to cleanly shutdown Jenkins #{e}"
+      print e.backtrace.join("\n")
     end
   end
 
