@@ -21,11 +21,11 @@ class RemoteSysvInitController < JenkinsController
     @ssh = args[:ssh]
     @host = args[:host]
     @service = args[:service] || "jenkins"
-    @logfile = [args:logfile] || "/var/log/jenkins/jenkins.log"
+    @logfile = args[:logfile] || "/var/log/jenkins/jenkins.log"
 
     @url = "http://#{@host}/"
-    @tempdir = "/tmp/jenkins/"+(rand(500000)+100000)
-    ssh_exec "mkdir -p #{@tempdir}"
+    @tempdir = "/tmp/jenkins/"+(rand(500000)+100000).to_s
+    ssh_exec "'mkdir -p #{@tempdir} && chmod 777 #{@tempdir}'"
 
     FileUtils.rm JENKINS_DEBUG_LOG if File.exists? JENKINS_DEBUG_LOG
     @log = File.open(JENKINS_DEBUG_LOG, "w")
@@ -43,7 +43,10 @@ class RemoteSysvInitController < JenkinsController
   end
 
   def start
-    ssh_exec "sudo perl -p -i -e 's/JENKINS_HOME=.*/JENKINS_HOME=#{@tempdir}/' /etc/default/jenkins /etc/sysconfig/jenkins"
+    # perl needs to get '.*', which means ssh needs to get '.\*' (because ssh executes perl via shell)
+    # which means system needs to get '.\\\*' (because system runs ssh via shell),
+    # and that means Ruby literal needs whopping 6 '\'s. Crazy.
+    ssh_exec "sudo perl -p -i -e s%JENKINS_HOME=.\\\\\\*%JENKINS_HOME=#{@tempdir}% /etc/default/jenkins /etc/sysconfig/jenkins"
     ssh_exec "sudo /etc/init.d/#{@service} start"
 
     @pipe = ssh_popen("sudo tail -f #{@logfile}")
@@ -56,7 +59,7 @@ class RemoteSysvInitController < JenkinsController
     begin
       ssh_exec "sudo /etc/init.d/#{@service} stop"
 
-      @log_watcher.wait_for_ready false
+      @log_watcher.wait_for_ready false if @log_watcher
     rescue => e
       puts "Failed to cleanly shutdown Jenkins #{e}"
       puts "  "+e.backtrace.join("\n  ")
