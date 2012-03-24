@@ -9,13 +9,6 @@ class BasicSanityTests < JenkinsSeleniumTest
     assert_not_nil @driver.title.match("\[Jenkins\]")
   end
 
-  def test_create_new_job
-    job_name = "Selenium_Test_Job"
-    NewJob.create_freestyle(@driver, @base_url, job_name)
-    assert true
-  end
-
-
   # The following dynamically generates a number of plugin install tests. The
   # entries in the Array can either be a single string which represents the
   # plugin's shortname in the update center *or* it can be an Array of
