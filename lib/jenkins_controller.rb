@@ -1,3 +1,4 @@
+require 'temp_dir'
 
 # This module defines a contract that various Jenkins controller implementations need to support
 #
