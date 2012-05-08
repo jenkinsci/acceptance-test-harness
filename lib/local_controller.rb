@@ -4,6 +4,7 @@
 class LocalJenkinsController < JenkinsController
   JENKINS_DEBUG_LOG = Dir.pwd + "/last_test.log"
   register :local
+  attr_accessor :real_update_center
 
   # @param [Hash] args
   #     :war  => specify the location of jenkins.war
@@ -16,6 +17,7 @@ class LocalJenkinsController < JenkinsController
     # Chose a random port, just to be safe
     @httpPort    = rand(65000 - 8080) + 8080
     @controlPort = rand(65000 - 8080) + 8080
+    @real_update_center = args[:real_update_center] || false
 
     FileUtils.rm JENKINS_DEBUG_LOG if File.exists? JENKINS_DEBUG_LOG
     @log = File.open(JENKINS_DEBUG_LOG, "w")
@@ -27,7 +29,9 @@ class LocalJenkinsController < JenkinsController
     ENV["JENKINS_HOME"] = @tempdir
     puts
     print "Bringing up a temporary Jenkins instance"
-    @pipe = IO.popen("java -jar #{@war} --ajp13Port=-1 --controlPort=#{@controlPort} --httpPort=#{@httpPort} 2>&1")
+    @pipe = IO.popen(["java", "-jar", @war, "--ajp13Port=-1", "--controlPort=#{@controlPort}",
+                        @real_update_center ? "-Dhudson.model.UpdateCenter.updateCenterUrl=http://not.resolvable" : "",
+                        "--httpPort=#{@httpPort}"].join(' '))
 
     @log_watcher = LogWatcher.new(@pipe,@log)
     @log_watcher.wait_for_ready
