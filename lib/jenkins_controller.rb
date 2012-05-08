@@ -34,6 +34,12 @@ class JenkinsController
     raise "Not implemented yet"
   end
 
+  # local file path to obtain slave.jar
+  # TODO: change this to URL.
+  def slave_jar_path
+    "#{@tempdir}/war/WEB-INF/slave.jar"
+  end
+
   # called when a test failed. Produce diagnostic output to the console, to the extent you can,
   # such as printing out the server log, etc.
   def diagnose
