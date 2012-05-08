@@ -31,7 +31,8 @@ class LocalJenkinsController < JenkinsController
     print "Bringing up a temporary Jenkins instance"
     @pipe = IO.popen(["java", "-jar", @war, "--ajp13Port=-1", "--controlPort=#{@controlPort}",
                         @real_update_center ? "-Dhudson.model.UpdateCenter.updateCenterUrl=http://not.resolvable" : "",
-                        "--httpPort=#{@httpPort}"].join(' '))
+                        "--httpPort=#{@httpPort}","2>&1"].join(' '))
+    @pid = @pipe.pid
 
     @log_watcher = LogWatcher.new(@pipe,@log)
     @log_watcher.wait_for_ready
@@ -47,6 +48,8 @@ class LocalJenkinsController < JenkinsController
     rescue => e
       puts "Failed to cleanly shutdown Jenkins #{e}"
       puts "  "+e.backtrace.join("\n  ")
+      puts "Killing #{@pid}"
+      Process.kill("KILL",@pid)
     end
   end
 
