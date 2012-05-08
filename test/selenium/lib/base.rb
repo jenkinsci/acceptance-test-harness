@@ -6,9 +6,11 @@ require 'socket'
 require 'temp_dir'
 require 'test/unit'
 
-require File.dirname(__FILE__) + "/local_controller"
-require File.dirname(__FILE__) + "/sysv_init_controller"
-require File.dirname(__FILE__) + "/../pageobjects/globalconfig"
+$LOAD_PATH.push File.dirname(__FILE__) + "/../../.."
+require "lib/jenkins_controller.rb"
+require "lib/local_controller.rb"
+require "lib/sysv_init_controller.rb"
+require "test/selenium/pageobjects/globalconfig.rb"
 
 class JenkinsSeleniumTest < Test::Unit::TestCase
   TIMEOUT = 60
