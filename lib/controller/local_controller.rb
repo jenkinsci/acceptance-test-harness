@@ -36,6 +36,9 @@ class LocalJenkinsController < JenkinsController
 
     @log_watcher = LogWatcher.new(@pipe,@log)
     @log_watcher.wait_for_ready
+
+    # still seeing occasional first page load problem. adding a bit more delay
+    sleep 1
   end
 
   def stop
