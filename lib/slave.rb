@@ -59,7 +59,7 @@ module Jenkins
 
       # Configure this slave to be automatically launched from the master
       find(:xpath, "//option[@value='hudson.slaves.CommandLauncher']").select_option
-      find(:xpath, "//input[@name='_.command']").set("java -jar /home/tyler/source/github/jenkins-selenium-tests/localtest/war/WEB-INF/slave.jar")
+      find(:xpath, "//input[@name='_.command']").set("sh -c 'curl -s -o slave.jar #{base_url}jnlpJars/slave.jar && java -jar slave.jar'")
 
       slave.save
 
