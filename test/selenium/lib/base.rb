@@ -7,9 +7,9 @@ require 'temp_dir'
 require 'test/unit'
 
 $LOAD_PATH.push File.dirname(__FILE__) + "/../../.."
-require "lib/jenkins_controller.rb"
-require "lib/local_controller.rb"
-require "lib/sysv_init_controller.rb"
+require "lib/controller/jenkins_controller.rb"
+require "lib/controller/local_controller.rb"
+require "lib/controller/sysv_init_controller.rb"
 require "test/selenium/pageobjects/globalconfig.rb"
 
 class JenkinsSeleniumTest < Test::Unit::TestCase

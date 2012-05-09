@@ -2,9 +2,9 @@
 # vim: tabstop=2 expandtab shiftwidth=2
 
 $LOAD_PATH.push File.dirname(__FILE__) + "/../.."
-require "lib/jenkins_controller.rb"
-require "lib/local_controller.rb"
-require "lib/sysv_init_controller.rb"
+require "lib/controller/jenkins_controller.rb"
+require "lib/controller/local_controller.rb"
+require "lib/controller/sysv_init_controller.rb"
 
 Before do
 
