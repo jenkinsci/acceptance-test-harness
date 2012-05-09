@@ -36,6 +36,21 @@ class LocalJenkinsController < JenkinsController
 
     @log_watcher = LogWatcher.new(@pipe,@log)
     @log_watcher.wait_for_ready
+
+    # at least in my environment, initial few tries always fail.
+    # so we need to be patient about loading the first page
+    Capybara.app_host = url
+    s = Capybara.current_session
+    for i in 1..10 do
+      begin
+        s.visit "/"
+        s.find "#search-box"
+        break # found it
+      rescue => e
+        puts e
+        sleep 0.5
+      end
+    end
   end
 
   def stop
