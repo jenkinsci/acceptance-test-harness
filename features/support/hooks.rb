@@ -6,7 +6,7 @@ require "lib/controller/jenkins_controller.rb"
 require "lib/controller/local_controller.rb"
 require "lib/controller/sysv_init_controller.rb"
 
-Before do
+Before do |scenario|
 
   # default is to run locally, but allow the parameters to be given as env vars
   # so that rake can be invoked like "rake test type=remote_sysv"
@@ -25,7 +25,20 @@ Before do
   end
   @base_url = @runner.url
   Capybara.app_host = @base_url
+
+  # wait for Jenkins to properly boot up and finish initialization
+  s = Capybara.current_session
+  for i in 1..20 do
+    begin
+      s.visit "/systemInfo"
+      s.find "TABLE.bigtable"
+      break # found it
+    rescue => e
+      sleep 0.5
+    end
+  end
 end
 
 After do |scenario|
+  puts @runner
 end
