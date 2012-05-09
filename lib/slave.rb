@@ -23,6 +23,9 @@ module Jenkins
 
     def executors=(num_exec)
       find(:xpath, "//input[@name='_.numExecutors']").set(num_exec.to_s)
+      # in my chrome, I need to move the focus out from the control to have it recognize the value entered
+      # perhaps it's related to the way input type=number is emulated?
+      find(:xpath, "//input[@name='_.remoteFS']").click
     end
 
     def remote_fs=(remote_fs)
