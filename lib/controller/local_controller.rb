@@ -9,7 +9,7 @@ class LocalJenkinsController < JenkinsController
   # @param [Hash] args
   #     :war  => specify the location of jenkins.war
   def initialize(args)
-    @war = args[:war] || ENV['JENKINS_WAR'] || File.dirname(__FILE__) + "/../../../jenkins.war"
+    @war = args[:war] || ENV['JENKINS_WAR'] || File.expand_path("./jenkins.war")
     raise "jenkins.war doesn't exist in #{@war}, maybe you forgot to set JENKINS_WAR env var?" if !File.exists?(@war)
 
     @tempdir = TempDir.create(:rootpath => Dir.pwd)
