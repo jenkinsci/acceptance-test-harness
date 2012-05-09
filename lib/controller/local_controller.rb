@@ -29,9 +29,10 @@ class LocalJenkinsController < JenkinsController
     ENV["JENKINS_HOME"] = @tempdir
     puts
     print "    Bringing up a temporary Jenkins instance"
-    @pipe = IO.popen(["java", "-jar", @war, "--ajp13Port=-1", "--controlPort=#{@controlPort}",
-                        @real_update_center ? "-Dhudson.model.UpdateCenter.updateCenterUrl=http://not.resolvable" : "",
-                        "--httpPort=#{@httpPort}","2>&1"].join(' '))
+    @pipe = IO.popen(["java",
+                      @real_update_center ? "" : "-Dhudson.model.UpdateCenter.updateCenterUrl=http://not.resolvable",
+                      "-jar", @war, "--ajp13Port=-1", "--controlPort=#{@controlPort}",
+                      "--httpPort=#{@httpPort}","2>&1"].join(' '))
     @pid = @pipe.pid
 
     @log_watcher = LogWatcher.new(@pipe,@log)
