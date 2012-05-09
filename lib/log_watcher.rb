@@ -15,6 +15,8 @@ class LogWatcher
     Thread.new do
       while (line = @pipe.gets)
         log_line(line)
+        # earlier version of Jenkins doesn't have this line
+        # if line =~ /INFO: Jenkins is fully up and running/
         if line =~ /INFO: Completed initialization/
           puts " Jenkins completed initialization"
           @ready = true
@@ -30,7 +32,7 @@ class LogWatcher
   end
 
   # block until Jenkins is up and running
-  def wait_for_ready(expected=false)
+  def wait_for_ready(expected=true)
     start_time = Time.now
     while @ready!=expected && ((Time.now - start_time) < TIMEOUT)
       sleep 0.5
