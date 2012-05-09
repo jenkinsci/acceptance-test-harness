@@ -21,6 +21,7 @@ Before do
   @runner.start
   at_exit do
     @runner.stop
+    @runner.teardown
   end
   @base_url = @runner.url
   Capybara.app_host = @base_url
