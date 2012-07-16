@@ -42,5 +42,5 @@ end
 
 After do |scenario|
   @runner.stop if @runner.is_running? # if test fails, stop in at_exit is not called
-  puts @runner
+  STDOUT.puts @runner
 end
