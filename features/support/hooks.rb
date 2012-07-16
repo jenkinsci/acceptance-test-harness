@@ -5,6 +5,7 @@ $LOAD_PATH.push File.dirname(__FILE__) + "/../.."
 require "lib/controller/jenkins_controller.rb"
 require "lib/controller/local_controller.rb"
 require "lib/controller/sysv_init_controller.rb"
+require "lib/controller/tomcat_controller.rb"
 
 Before do |scenario|
 
@@ -20,7 +21,7 @@ Before do |scenario|
   @runner = JenkinsController.create(controller_args)
   @runner.start
   at_exit do
-    @runner.stop
+    @runner.stop if @runner.is_running? 
     @runner.teardown
   end
   @base_url = @runner.url
@@ -40,5 +41,6 @@ Before do |scenario|
 end
 
 After do |scenario|
+  @runner.stop if @runner.is_running? # if test fails, stop in at_exit is not called
   puts @runner
 end
