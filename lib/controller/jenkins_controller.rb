@@ -52,6 +52,10 @@ class JenkinsController
 
   end
 
+  def is_running?
+    @is_running
+  end
+
   # registered implementations
   @@impls = {}
 
