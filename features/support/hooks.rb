@@ -5,7 +5,6 @@ $LOAD_PATH.push File.dirname(__FILE__) + "/../.."
 require "lib/controller/jenkins_controller.rb"
 require "lib/controller/local_controller.rb"
 require "lib/controller/sysv_init_controller.rb"
-require "lib/controller/tomcat_controller.rb"
 
 Before do |scenario|
 
