@@ -66,6 +66,12 @@ When /^I build (\d+) jobs$/  do |count|
   sleep 6 # Hard-coded sleep to allow the queue delay in Jenkins to expire
 end
 
+When /^I add a string parameter "(.*?)"$/ do |string_param|
+  @job.configure do
+    @job.add_parameter("String Parameter",string_param,string_param)
+  end
+end
+
 
 ############################################################################
 
@@ -80,4 +86,8 @@ Then /^the (\d+) jobs should run concurrently$/ do |count|
     # Build numbers start at 1
     @job.build(i + 1).in_progress?.should be true
   end
+end
+
+Then /^I should be prompted to enter the "(.*?)" parameter$/ do |param_name|
+  find(:xpath, "//input[@value='#{param_name}']").instance_of?(Capybara::Node::Element).should be true
 end

@@ -21,6 +21,16 @@ module Jenkins
       job_url + "/configure"
     end
 
+    def add_parameter(type,name,value)
+      ensure_config_page
+      find(:xpath, "//input[@name='parameterized']").set(true)
+      find(:xpath, "//button[text()='Add Parameter']").click
+      find(:xpath, "//a[text()='#{type}']").click
+      find(:xpath, "//input[@name='parameter.name']").set(name)
+      find(:xpath, "//input[@name='parameter.defaultValue']").set(value)
+    end
+
+
     def add_script_step(script)
       ensure_config_page
 
