@@ -38,7 +38,7 @@ module Jenkins
 
     def online?
       data = self.json
-      return !data["offline"]
+      return data != nil && !data["offline"]
     end
 
     def executor_count

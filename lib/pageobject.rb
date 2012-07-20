@@ -53,8 +53,12 @@ module Jenkins
     def json
       url = json_api_url
       unless url.nil?
-        uri = URI.parse(url)
-        return JSON.parse(Net::HTTP.get_response(uri).body)
+        begin
+          uri = URI.parse(url)
+          return JSON.parse(Net::HTTP.get_response(uri).body)
+        rescue => e
+            puts "Failed to parse JSON from URL #{url}"
+        end
       end
       return nil
     end
