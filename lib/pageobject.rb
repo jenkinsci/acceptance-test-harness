@@ -62,5 +62,17 @@ module Jenkins
       end
       return nil
     end
+
+    def wait_for(selector, opts={})
+      timeout = opts[:timeout] || 30
+      selector_kind = opts[:with] || :css
+      start = Time.now.to_i
+      begin
+        find(selector_kind, selector)
+      rescue Capybara::TimeoutError, Capybara::ElementNotFound => e
+        retry unless (Time.now.to_i - start) >= timeout
+        raise
+      end
+    end
   end
 end
