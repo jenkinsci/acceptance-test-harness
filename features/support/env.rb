@@ -21,6 +21,6 @@ Capybara.default_driver = :selenium
 PAGE_OBJECTS_BASE = File.dirname(__FILE__) + "/../../lib/"
 
 
-["job", "build", "slave"].each do |po|
-  require PAGE_OBJECTS_BASE + po
+Dir["#{PAGE_OBJECTS_BASE}/*.rb"].each do |name|
+  require File.expand_path(name)
 end
