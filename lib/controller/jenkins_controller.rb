@@ -10,10 +10,11 @@ require 'temp_dir'
 # Each JenkinsController goes through the call sequence of +(start,restart*,stop)+ sprinkled with
 # calls to +url+ and +diagnose+.
 class JenkinsController
-  attr_accessor :is_running
+  attr_accessor :is_running, :log_watcher
 
-  def initialize
+  def initialize(*args)
     @is_running = false
+    @log_watcher = nil
   end
 
   # Starts Jenkins, with a brand new temporary JENKINS_HOME.
