@@ -20,7 +20,9 @@ Before do |scenario|
     controller_args = { :type => :local }
   end
 
-  controller_args = controller_args.merge(@controller_options)
+  if @controller_options
+    controller_args = controller_args.merge(@controller_options)
+  end
   @runner = JenkinsController.create(controller_args)
   @runner.start
   at_exit do
