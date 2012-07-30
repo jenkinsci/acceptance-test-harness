@@ -6,6 +6,10 @@ require "lib/controller/jenkins_controller.rb"
 require "lib/controller/local_controller.rb"
 require "lib/controller/sysv_init_controller.rb"
 
+Before('@realupdatecenter') do |scenario|
+  @controller_options = {:real_update_center => true}
+end
+
 Before do |scenario|
   # default is to run locally, but allow the parameters to be given as env vars
   # so that rake can be invoked like "rake test type=remote_sysv"
@@ -16,6 +20,7 @@ Before do |scenario|
     controller_args = { :type => :local }
   end
 
+  controller_args = controller_args.merge(@controller_options)
   @runner = JenkinsController.create(controller_args)
   @runner.start
   at_exit do
