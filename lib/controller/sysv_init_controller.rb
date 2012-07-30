@@ -42,7 +42,7 @@ class RemoteSysvInitController < JenkinsController
     IO.popen("#{@ssh} #{cmd}")
   end
 
-  def start
+  def start!
     # perl needs to get '.*', which means ssh needs to get '.\*' (because ssh executes perl via shell)
     # which means system needs to get '.\\\*' (because system runs ssh via shell),
     # and that means Ruby literal needs whopping 6 '\'s. Crazy.
@@ -56,7 +56,7 @@ class RemoteSysvInitController < JenkinsController
     @log_watcher.wait_for_ready
   end
 
-  def stop
+  def stop!
     begin
       ssh_exec "sudo /etc/init.d/#{@service} stop"
 

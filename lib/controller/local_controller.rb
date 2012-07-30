@@ -6,10 +6,11 @@ class LocalJenkinsController < JenkinsController
   register :local
   attr_accessor :real_update_center
 
-  # @param [Hash] args
+  # @param [Hash] opts
   #     :war  => specify the location of jenkins.war
-  def initialize(args)
-    @war = args[:war] || ENV['JENKINS_WAR'] || File.expand_path("./jenkins.war")
+  def initialize(opts)
+    super()
+    @war = opts[:war] || ENV['JENKINS_WAR'] || File.expand_path("./jenkins.war")
     raise "jenkins.war doesn't exist in #{@war}, maybe you forgot to set JENKINS_WAR env var?" if !File.exists?(@war)
 
     @tempdir = TempDir.create(:rootpath => Dir.pwd)
@@ -17,7 +18,7 @@ class LocalJenkinsController < JenkinsController
     # Chose a random port, just to be safe
     @httpPort    = rand(65000 - 8080) + 8080
     @controlPort = rand(65000 - 8080) + 8080
-    @real_update_center = args[:real_update_center] || false
+    @real_update_center = opts[:real_update_center] || false
 
     FileUtils.rm JENKINS_DEBUG_LOG if File.exists? JENKINS_DEBUG_LOG
     @log = File.open(JENKINS_DEBUG_LOG, "w")
@@ -25,7 +26,7 @@ class LocalJenkinsController < JenkinsController
     @base_url = "http://127.0.0.1:#{@httpPort}/"
   end
 
-  def start
+  def start!
     ENV["JENKINS_HOME"] = @tempdir
     puts
     print "    Bringing up a temporary Jenkins instance"
@@ -42,12 +43,11 @@ class LocalJenkinsController < JenkinsController
     sleep 1
   end
 
-  def stop
+  def stop!
     begin
       TCPSocket.open("localhost", @controlPort) do |sock|
         sock.write("0")
       end
-
       @log_watcher.wait_for_ready false
     rescue => e
       puts "Failed to cleanly shutdown Jenkins #{e}"

@@ -7,7 +7,6 @@ require "lib/controller/local_controller.rb"
 require "lib/controller/sysv_init_controller.rb"
 
 Before do |scenario|
-
   # default is to run locally, but allow the parameters to be given as env vars
   # so that rake can be invoked like "rake test type=remote_sysv"
   if ENV['type']
@@ -20,7 +19,7 @@ Before do |scenario|
   @runner = JenkinsController.create(controller_args)
   @runner.start
   at_exit do
-    @runner.stop if @runner.is_running? 
+    @runner.stop
     @runner.teardown
   end
   @base_url = @runner.url
@@ -40,6 +39,5 @@ Before do |scenario|
 end
 
 After do |scenario|
-  @runner.stop if @runner.is_running? # if test fails, stop in at_exit is not called
-  STDOUT.puts @runner
+  @runner.stop # if test fails, stop in at_exit is not called
 end

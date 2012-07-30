@@ -10,12 +10,23 @@ require 'temp_dir'
 # Each JenkinsController goes through the call sequence of +(start,restart*,stop)+ sprinkled with
 # calls to +url+ and +diagnose+.
 class JenkinsController
+  attr_accessor :is_running
+
+  def initialize
+    @is_running = false
+  end
+
   # Starts Jenkins, with a brand new temporary JENKINS_HOME.
   #
   # This method can return as soon as the server becomes accessible via HTTP,
   # and it is the caller's responsibility to wait until Jenkins finishes its bootup sequence.
+  def start!
+    raise NotImplementedException
+  end
+
   def start
-    raise "Not implemented yet"
+    start! unless is_running?
+    @is_running = true
   end
 
   # Restarts Jenkins
@@ -25,8 +36,13 @@ class JenkinsController
   end
 
   # Shuts down the Jenkins process.
+  def stop!
+    raise NotImplementedException
+  end
+
   def stop
-    raise "Not implemented yet"
+    stop! if is_running?
+    @is_running = false
   end
 
   # return the URL where Jenkins is running, such as "http://localhost:9999/"
