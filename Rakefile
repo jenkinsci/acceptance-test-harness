@@ -11,6 +11,18 @@ Rake::TestTask.new("test") do |t|
   t.pattern = "test/selenium/**/*_test.rb"
 end
 
-Cucumber::Rake::Task.new(:features) do |t|
-  t.cucumber_opts = "features --format pretty"
+
+namespace :cucumber do
+  desc "Run the 'finished' scenarios (without @wip)"
+  Cucumber::Rake::Task.new(:ready) do |t|
+    t.cucumber_opts = "--tags ~@wip --format pretty"
+  end
+
+  desc "Run the scenarios tagged with @wip"
+  Cucumber::Rake::Task.new(:wip) do |t|
+    t.cucumber_opts = "--tags @wip --format pretty"
+  end
 end
+
+desc "Defaults to running cucumber:ready"
+task :cucumber => "cucumber:ready"
