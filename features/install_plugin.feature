@@ -6,7 +6,7 @@ Feature: Install plugins from the update center
   I should be able to browse a number of plugins and install them directly from
   within Jenkins itself
 
-  @wip @realupdatecenter
+  @realupdatecenter
   Scenario: Install the Git plugin
     Given a bare Jenkins instance
     When I install the "git" plugin from the update center
