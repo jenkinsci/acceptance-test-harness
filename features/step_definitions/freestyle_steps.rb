@@ -2,9 +2,6 @@
 # vim: tabstop=2 expandtab shiftwidth=2
 
 
-Given /^a bare Jenkins instance$/ do
-end
-
 Given /^a job$/ do
   @job = Jenkins::Job.create_freestyle(@base_url, Jenkins::Job.random_name)
 end

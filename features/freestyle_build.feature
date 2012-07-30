@@ -3,9 +3,6 @@ Feature: Configure/build freestyle jobs
   As a user
   I want to configure and run a series of different freestyle-based jobs
 
-  Background: With Jenkins running
-    Given a bare Jenkins instance
-
   Scenario: Create a simple job
     When I create a job named "MAGICJOB"
     And I visit the home page
