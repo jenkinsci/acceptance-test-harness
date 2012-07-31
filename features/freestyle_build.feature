@@ -54,5 +54,10 @@ Feature: Configure/build freestyle jobs
     When I run the job
     Then the build should succeed
 
+  Scenario: Disable a job
+    Given a job
+    When I disable the job
+    Then it should be disabled
+    And it should have an "Enable" button on the job page
 
 # vim: tabstop=2 expandtab shiftwidth=2

@@ -91,6 +91,10 @@ module Jenkins
       find(:xpath, "//input[@name='_.assignedLabelString']").set(expression)
     end
 
+    def disable
+      check 'disable'
+    end
+
     def self.create_freestyle(base_url, name)
       visit("#{@base_url}/newJob")
 

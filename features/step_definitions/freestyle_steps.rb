@@ -90,13 +90,30 @@ Then /^I should be prompted to enter the "(.*?)" parameter$/ do |param_name|
 end
 
 When /^I add an Ant build step for:$/ do |ant_xml|
-  @job.add_script_step("cat > build.xml << EOF
-#{ant_xml}
+  @job.configure do
+    @job.add_script_step("cat > build.xml <<EOF
+  #{ant_xml}
 EOF")
-  @job.add_ant_step('hello', 'build.xml')
-  @job.save
+    @job.add_ant_step('hello', 'build.xml')
+  end
 end
 
 Then /^the build should succeed$/ do
   @job.last_build.succeeded?.should be true
 end
+
+When /^I disable the job$/ do
+  @job.configure do
+    @job.disable
+  end
+end
+
+Then /^it should be disabled$/ do
+  page.should_not have_content 'Build Now'
+end
+
+Then /^it should have an "(.*?)" button on the job page$/ do |button|
+  @job.open
+  page.should have_xpath("//button[text()='Enable']")
+end
+
