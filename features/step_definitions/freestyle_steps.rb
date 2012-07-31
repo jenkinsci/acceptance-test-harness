@@ -88,3 +88,15 @@ end
 Then /^I should be prompted to enter the "(.*?)" parameter$/ do |param_name|
   find(:xpath, "//input[@value='#{param_name}']").instance_of?(Capybara::Node::Element).should be true
 end
+
+When /^I add an Ant build step for:$/ do |ant_xml|
+  @job.add_script_step("cat > build.xml << EOF
+#{ant_xml}
+EOF")
+  @job.add_ant_step('hello', 'build.xml')
+  @job.save
+end
+
+Then /^the build should succeed$/ do
+  @job.last_build.succeeded?.should be true
+end

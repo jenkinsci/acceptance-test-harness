@@ -18,6 +18,10 @@ module Jenkins
       @job.job_url + "/#{@number}"
     end
 
+    def open
+      visit(build_url)
+    end
+
     def json_api_url
       "#{build_url}/api/json"
     end
@@ -32,9 +36,7 @@ module Jenkins
     def succeeded?
       @succeeded ||= begin
         visit(build_url)
-        status_icon = find(:xpath, "//img[@src='buildStatus']")
-
-        status_icon["tooltip"] == "Success"
+        page.has_xpath? "//img[@title='Success']"
       end
     end
 
