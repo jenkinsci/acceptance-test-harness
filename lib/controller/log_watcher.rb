@@ -5,7 +5,8 @@ class LogWatcher
   # Launches a thread that monitors the given +pipe+ for log output and copy them over to +log+
   # @arg [IO]   pipe
   # @arg [IO]   log
-  def initialize(pipe,log)
+  # @arg [Regexp]   pattern
+  def initialize(pipe,log,pattern=/INFO: Completed initialization/)
     @ready = false
     @log_regex = nil
     @log_found = false
@@ -17,7 +18,7 @@ class LogWatcher
         log_line(line)
         # earlier version of Jenkins doesn't have this line
         # if line =~ /INFO: Jenkins is fully up and running/
-        if line =~ /INFO: Completed initialization/
+        if line =~ pattern
           puts " Jenkins completed initialization"
           @ready = true
         else
