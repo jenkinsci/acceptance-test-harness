@@ -5,6 +5,8 @@ $LOAD_PATH.push File.dirname(__FILE__) + "/../.."
 require "lib/controller/jenkins_controller.rb"
 require "lib/controller/local_controller.rb"
 require "lib/controller/sysv_init_controller.rb"
+require "lib/controller/tomcat_controller.rb"
+require "lib/controller/jboss_controller.rb"
 
 Before('@realupdatecenter') do |scenario|
   @controller_options = {:real_update_center => true}
