@@ -2,7 +2,7 @@
 
 # Runs Jenkins on Tomcat
 #
-# @attr [String] args
+# @attr [String] opts
 #    specify the location of jenkins.war
 # @attr [String] catalina_home
 #    specify the location of Tomcat installation 
@@ -10,11 +10,11 @@ class TomcatController < JenkinsController
   register :tomcat
   JENKINS_DEBUG_LOG = Dir.pwd + "/last_test.log"
 
-  def initialize(args)
-    @war = args[:war] || ENV['JENKINS_WAR'] || File.expand_path("./jenkins.war")
+  def initialize(opts)
+    @war = opts[:war] || ENV['JENKINS_WAR'] || File.expand_path("./jenkins.war")
     raise "jenkins.war doesn't exist in #{@war}, maybe you forgot to set JENKINS_WAR env var? "  if !File.exists?(@war)
 
-    @catalina_home = args[:catalina_home] || ENV['CATALINA_HOME'] || File.expand_path("./tomcat")
+    @catalina_home = opts[:catalina_home] || ENV['CATALINA_HOME'] || File.expand_path("./tomcat")
     raise "#{@catalina_home} doesn't exist, maybe you forgot to set CATALINA_HOME env var or provide catalina_home parameter? "  if !File.directory?(@catalina_home)
 
     @tempdir = TempDir.create(:rootpath => Dir.pwd)
@@ -25,7 +25,7 @@ class TomcatController < JenkinsController
     @base_url = "http://127.0.0.1:8080/jenkins/"
   end
 
-  def start
+  def start!
     ENV["JENKINS_HOME"] = @tempdir
     puts
     print "    Bringing up a temporary Jenkins/Tomcat instance\n"
@@ -44,7 +44,7 @@ class TomcatController < JenkinsController
     @log_watcher.wait_for_ready
   end
 
-  def stop
+  def stop!
     puts
     print "    Stopping a temporary Jenkins/Tomcat instance\n"
     @is_running = !system("#{@catalina_home}/bin/shutdown.sh");
