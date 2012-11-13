@@ -1,4 +1,5 @@
 require 'temp_dir'
+require 'restclient'
 
 # This module defines a contract that various Jenkins controller implementations need to support
 #
@@ -15,6 +16,20 @@ class JenkinsController
   def initialize(*args)
     @is_running = false
     @log_watcher = nil
+  end
+
+  # download form-element-path.hpi and return its path
+  def download_path_element
+    target = Dir.pwd+'/path-element.hpi'
+
+    unless File.exist?(target)
+      open(target,'wb') do |f|
+        rsp = RestClient.get 'http://updates.jenkins-ci.org/latest/form-element-path.hpi'
+        f.write(rsp.body)
+      end
+    end
+
+    target
   end
 
   # Starts Jenkins, with a brand new temporary JENKINS_HOME.
