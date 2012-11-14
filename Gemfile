@@ -2,6 +2,7 @@ source :rubygems
 
 gem "rake"
 gem "selenium-webdriver"
+gem "sauce-cucumber"
 gem "rest-client"
 gem "pry"
 

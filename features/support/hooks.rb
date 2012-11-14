@@ -11,6 +11,11 @@ Before('@realupdatecenter') do |scenario|
 end
 
 Before do |scenario|
+  # in case we are using Sauce, set the test name
+  Sauce.config do |c|
+    c[:name] = Sauce::Capybara::Cucumber.name_from_scenario(scenario)
+  end
+
   # default is to run locally, but allow the parameters to be given as env vars
   # so that rake can be invoked like "rake test type=remote_sysv"
   if ENV['type']

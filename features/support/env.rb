@@ -4,6 +4,7 @@
 require 'capybara/cucumber'
 require 'capybara/session'
 require 'selenium-webdriver'
+require 'sauce/cucumber'
 
 Capybara.register_driver :selenium do |app|
   http_client = Selenium::WebDriver::Remote::Http::Default.new
@@ -15,6 +16,15 @@ Capybara.run_server = false
 Capybara.default_selector = :css
 Capybara.default_driver = :selenium
 
+if ENV['SAUCE_ACCESS_KEY']
+  # TODO: how to select the browser to run the test with?
+  puts "Using Sauce OnDemand"
+  Capybara.default_driver = :sauce
+  Sauce.config do |c|
+    c[:username] = 'jenkinsci'
+    c[:start_tunnel] = true
+  end
+end
 
 # Include Page objects:
 
