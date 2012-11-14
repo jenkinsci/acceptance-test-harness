@@ -8,7 +8,7 @@ gem "pry"
 
 gem "cucumber"
 gem "curb"
-gem "capybara"
+gem "capybara", '~> 1.1'
 gem "json"
 gem "rspec"
 gem "tempdir"
