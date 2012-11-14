@@ -4,13 +4,7 @@ require 'rake/testtask'
 require 'cucumber'
 require 'cucumber/rake/task'
 
-task :default => [:test,:features]
-
-desc "Run Selenium tests locally"
-Rake::TestTask.new("test") do |t|
-  t.pattern = "test/selenium/**/*_test.rb"
-end
-
+task :default => :cucumber
 
 namespace :cucumber do
   desc "Run the 'finished' scenarios (without @wip)"
