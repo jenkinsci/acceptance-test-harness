@@ -5,6 +5,7 @@ require 'capybara/cucumber'
 require 'capybara/session'
 require 'selenium-webdriver'
 require 'sauce/cucumber'
+require 'etc'
 
 Capybara.register_driver :selenium do |app|
   http_client = Selenium::WebDriver::Remote::Http::Default.new
@@ -23,6 +24,9 @@ if ENV['SAUCE_ACCESS_KEY']
   Sauce.config do |c|
     c[:username] = 'jenkinsci'
     c[:start_tunnel] = true
+    c[:browser_version] = '16'
+    c['selenium-version'] = '2.26.0'
+    c['custom-data'] = { :by => Etc.getlogin }
   end
 end
 
