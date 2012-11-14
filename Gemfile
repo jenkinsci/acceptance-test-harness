@@ -3,6 +3,7 @@ source :rubygems
 gem "rake"
 gem "selenium-webdriver"
 gem "rest-client"
+gem "pry"
 
 gem "cucumber"
 gem "curb"

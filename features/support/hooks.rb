@@ -2,11 +2,9 @@
 # vim: tabstop=2 expandtab shiftwidth=2
 
 $LOAD_PATH.push File.dirname(__FILE__) + "/../.."
-require "lib/controller/jenkins_controller.rb"
-require "lib/controller/local_controller.rb"
-require "lib/controller/sysv_init_controller.rb"
-require "lib/controller/tomcat_controller.rb"
-require "lib/controller/jboss_controller.rb"
+Dir.glob(File.dirname(__FILE__) + "/../../lib/controller/*.rb") do |name|
+  require name
+end
 
 Before('@realupdatecenter') do |scenario|
   @controller_options = {:real_update_center => true}
