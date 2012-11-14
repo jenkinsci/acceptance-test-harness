@@ -35,7 +35,7 @@ module Jenkins
       end
 
       visit "#{url}/available"
-      check "plugin.#{name}.default"
+      find(:xpath,"//input[starts-with(@name,'plugin.#{name}.')]").click()
       click_button 'Install'
     end
 
