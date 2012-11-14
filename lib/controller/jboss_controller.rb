@@ -1,4 +1,4 @@
-%w(jenkins_controller log_watcher).each { |f| require File.dirname(__FILE__)+"/"+f }
+%w(local_controller log_watcher).each { |f| require File.dirname(__FILE__)+"/"+f }
 
 # Runs Jenkins on JBoss
 #
