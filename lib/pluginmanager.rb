@@ -45,7 +45,6 @@ module Jenkins
         page.execute_script "window.scrollBy(0,-50)"
         chk.click()
       end
-      binding.pry
       click_button 'Install'
     end
 
