@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 # vim: tabstop=2 expandtab shiftwidth=2
+require 'pry'
+
 When /^I visit the home page$/ do
   visit "/"
 end
@@ -12,3 +14,6 @@ Then /^the page should say "([^"]*)"$/ do |content|
   page.should have_content(content)
 end
 
+When /^I debug$/ do
+  binding.pry
+end
