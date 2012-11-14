@@ -14,6 +14,7 @@ class LogWatcher
     @log = log
     @pipe = pipe
     Thread.new do
+      @line_count = 0
       while (line = @pipe.gets)
         log_line(line)
         # earlier version of Jenkins doesn't have this line
@@ -23,7 +24,8 @@ class LogWatcher
           @ready = true
         else
           unless @ready
-            print '.'
+            print '.' if (@line_count%5)==0
+            @line_count+=1
             STDOUT.flush
           end
         end
