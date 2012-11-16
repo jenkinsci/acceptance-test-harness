@@ -4,7 +4,9 @@ class LogWatcher
 
   # Launches a thread that monitors the given +pipe+ for log output and copy them over to +log+
   # @arg [IO]   pipe
+  #       Raw console output from Jenkins
   # @arg [IO]   log
+  #       Log output from Jenkins that's read from 'pipe' gets written here.
   # @arg [Regexp]   pattern
   def initialize(pipe,log,pattern=/INFO: Completed initialization/)
     @ready = false

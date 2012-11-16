@@ -3,3 +3,5 @@ jenkins.war
 *.swn
 last_test.log
 *~
+.vagrant
+Gemfile.lock

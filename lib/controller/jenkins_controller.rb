@@ -11,11 +11,16 @@ require 'restclient'
 # Each JenkinsController goes through the call sequence of +(start,restart*,stop)+ sprinkled with
 # calls to +url+ and +diagnose+.
 class JenkinsController
+  JENKINS_DEBUG_LOG = Dir.pwd + "/last_test.log"
+
   attr_accessor :is_running, :log_watcher
 
   def initialize(*args)
     @is_running = false
     @log_watcher = nil
+
+    FileUtils.rm JENKINS_DEBUG_LOG if File.exists? JENKINS_DEBUG_LOG
+    @log = File.open(JENKINS_DEBUG_LOG, "w")
   end
 
   # download form-element-path.hpi and return its path

@@ -13,6 +13,8 @@ gem "json"
 gem "rspec"
 gem "tempdir"
 
+gem "vagrant", '~> 1.0'
+
 gem "rdoc"
 
 if RUBY_VERSION < "1.9"

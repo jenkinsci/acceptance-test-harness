@@ -3,8 +3,6 @@
 # Abstract base class for those JenkinsController that runs the JVM locally on
 # the same box as the test harness
 class LocalJenkinsController < JenkinsController
-  JENKINS_DEBUG_LOG = Dir.pwd + "/last_test.log"
-
   attr_accessor :real_update_center
 
   # @param [Hash] opts
@@ -18,9 +16,6 @@ class LocalJenkinsController < JenkinsController
 
     # Chose a random port, just to be safe
     @real_update_center = opts[:real_update_center] || false
-
-    FileUtils.rm JENKINS_DEBUG_LOG if File.exists? JENKINS_DEBUG_LOG
-    @log = File.open(JENKINS_DEBUG_LOG, "w")
 
     # copy it into $JENKINS_HOME/plugins
     @path_element_hpi = download_path_element
