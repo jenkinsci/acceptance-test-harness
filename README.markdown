@@ -54,7 +54,35 @@ See [the source code](tree/master/lib/controller/) for the list of available con
 
 To select a controller, run the test with the 'type' environment variable set to the controller ID, such as:
 `type=remote_sysv bundle exec rake`. Controllers take their configurations from environment variables. Again,
-see the controller source code for details until we document them here.
+
+#### Winstone controller (type=winstone)
+This controller runs Jenkins via `java -jar jenkins.war` on the same host where the test is run.
+The behaviour of this controller can be customized through the following environment variables.
+
+* `JENKINS_WAR` the path to `jenkins.war` to be tested.
+
+#### Tomcat controller (type=tomcat)
+This controller deploys Jenkins inside Tomcat and run the test with it. This controller requires a functioning Tomcat installation listening on port 8080, on the same system that the tests run. During the test, Jenkins is deployed here, and Tomcat gets started/stopped.
+
+The behaviour of this controller can be customized through the following environment variables.
+
+* `JENKINS_WAR` see above
+* `CATALINA_HOME` The directory in which Tomcat is already installed.
+
+#### JBoss controller (type=jboss)
+Similar to the above Tomcat controller except it uses JBoss.
+
+The behaviour of this controller can be customized through the following environment variables.
+
+* `JENKINS_WAR` see above
+* `JBOSS_HOME` The directory in which JBoss is already installed.
+
+#### Ubuntu controller (type=ubuntu)
+This controller uses Vagrant to run Ubuntu, then deploy Jenkins from an APT repository as a debian package. (This controller is not yet capable of testing individual `*.deb` file.)
+
+* `REPO_URL` The location of APT repository in the format of `/etc/apt/sources.list`, such as `http://pkg.jenkins-ci.org/debian binary/'
+
+When run for the first time, this will create a virtual machine. To make repeated tests easy, the VM won't get shut down automatically at the end. To do so, cd `vagrant/ubuntu` and run `vagrant halt`. You can run any other vagrant commands in this manner, which is useful for debugging.
 
 ### Running one test
 You can run a single cucumber test by pointing to a test scenario in terms of its file name and line number like
