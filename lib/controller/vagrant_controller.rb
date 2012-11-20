@@ -36,7 +36,7 @@ class VagrantController < JenkinsController
     @vm.channel.system_ssh("sudo kill -9 $(pgrep java) > /dev/null 2>&1", :error_check=>false)
     self.class.wipe
     @vm.channel.system_ssh("sudo /etc/init.d/jenkins start")
-    @pipe = IO.popen("ssh -p 2222 -i ~/.vagrant.d/insecure_private_key vagrant@127.0.0.1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null sudo tail -F /var/log/jenkins/jenkins.log")
+    @pipe = IO.popen("ssh -q -p 2222 -i ~/.vagrant.d/insecure_private_key vagrant@127.0.0.1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null sudo tail -F /var/log/jenkins/jenkins.log")
     @pid = @pipe.pid
 
     @log_watcher = LogWatcher.new(@pipe,@log)
