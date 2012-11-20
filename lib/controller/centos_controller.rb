@@ -5,16 +5,11 @@ class CentOSController < VagrantController
 
   def initialize(opts)
     super(opts)
-
-    self.class.repo_url = opts[:repo_url] || ENV['REPO_URL'] || 'http://pkg.jenkins-ci.org/redhat/jenkins.repo'
+    @repo_url = opts[:repo_url] || ENV['REPO_URL'] || 'http://pkg.jenkins-ci.org/redhat/jenkins.repo'
   end
 
-  def self.repo_url=(v)
-    @repo_url=v
-  end
-
-  # start VM and install debian package, but only for the first time
-  def self.configure
+  # start VM and install RPM package, but only for the first time
+  def configure
     @vm.channel.system_ssh("sudo wget -O /etc/yum.repos.d/jenkins.repo #@repo_url")
     @vm.channel.system_ssh("sudo rpm --import http://pkg.jenkins-ci.org/redhat/jenkins-ci.org.key",:error_check=>false)
     @vm.channel.system_ssh("sudo yum -y install jenkins")

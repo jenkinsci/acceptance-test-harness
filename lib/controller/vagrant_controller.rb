@@ -14,27 +14,38 @@ class VagrantController < JenkinsController
       @env.cli("up")
 
       @vm = @env.vms[:default]
-
-      configure   # to be provided by subtypes to actually install Jenkins
-
+      yield @vm
       @launched = true
     end
     return @vm
   end
 
-  def self.wipe
-    # clean up JENKINS_HOME
+  # clean up JENKINS_HOME before we start a new Jenkins instance
+  def wipe
     @vm.channel.system_ssh("sudo rm -rf /var/lib/jenkins/*")
   end
 
+  def hook_script(name)
+    if File.exists? name
+      puts "Running #{name}"
+      @vm.channel.system_ssh IO.read(name)
+    end
+  end
+
   def start!
-    @vm = self.class.launch
+    @vm = self.class.launch do |vm|
+      @vm = vm
+      hook_script "pre-configure.sh"
+      configure   # to be provided by subtypes to actually install Jenkins
+      hook_script "post-configure.sh"
+    end
 
     puts
     print "    Bringing up a temporary Jenkins instance"
 
     @vm.channel.system_ssh("sudo kill -9 $(pgrep java) > /dev/null 2>&1", :error_check=>false)
-    self.class.wipe
+    wipe
+    hook_script "pre-start.sh"
     @vm.channel.system_ssh("sudo /etc/init.d/jenkins start")
     @pipe = IO.popen("ssh -q -p 2222 -i ~/.vagrant.d/insecure_private_key vagrant@127.0.0.1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null sudo tail -F /var/log/jenkins/jenkins.log")
     @pid = @pipe.pid

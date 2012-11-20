@@ -5,16 +5,11 @@ class DebianController < JenkinsController
 
   def initialize(opts)
     super(opts)
-
-    self.class.repo_url = opts[:repo_url] || ENV['REPO_URL'] || 'http://pkg.jenkins-ci.org/debian binary/'
-  end
-
-  def self.repo_url=(v)
-    @repo_url=v
+    @repo_url = opts[:repo_url] || ENV['REPO_URL'] || 'http://pkg.jenkins-ci.org/debian binary/'
   end
 
   # start VM and install debian package, but only for the first time
-  def self.configure
+  def configure
     @vm.channel.system_ssh("wget -O - http://pkg.jenkins-ci.org/debian/jenkins-ci.org.key | sudo apt-key add -")
     @vm.channel.system_ssh("echo deb #@repo_url > /etc/apt/sources.list.d/jenkins.list", :sudo=>true)
     @vm.channel.system_ssh("sudo apt-get update")
