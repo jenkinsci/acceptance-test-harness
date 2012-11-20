@@ -47,6 +47,7 @@ class LocalJenkinsController < JenkinsController
   def teardown
     unless @log.nil?
       @log.close
+      @log = nil
     end
     FileUtils.rm_rf(@tempdir)
   end
