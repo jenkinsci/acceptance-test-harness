@@ -54,6 +54,9 @@ Then /^I should be prompted to enter the "(.*?)" parameter$/ do |param_name|
 end
 
 Then /^the build should succeed$/ do
+  while @job.last_build.in_progress?
+    sleep 1
+  end
   @job.last_build.succeeded?.should be true
 end
 
