@@ -74,5 +74,15 @@ module Jenkins
         raise
       end
     end
+
+    # scrolling logic in WebDriver isn't smart enough to understand the floating DIVs,
+    # so this method hides them temporarily and then lets you execute block
+    def with_hidden_stickers
+      page.execute_script "$$('.top-sticker')[0].style.display='none'"
+      page.execute_script "$$('#bottom-sticker')[0].style.display='none'"
+      yield
+      page.execute_script "$$('.top-sticker')[0].style.display=''"
+      page.execute_script "$$('#bottom-sticker')[0].style.display=''"
+    end
   end
 end

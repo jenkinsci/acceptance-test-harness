@@ -35,16 +35,20 @@ module Jenkins
       end
 
       visit "#{url}/available"
-      page.execute_script "$$('.top-sticker')[0].style.display='none'"
-      chk = find(:xpath, "//input[starts-with(@name,'plugin.#{name}.')]")
-      chk.click()
-      unless chk.selected?
-        # not really sure why this is needed, by on Sauce OnDemand Windows 2003 + Firefox 16 (at least),
-        # the above click() command still doesn't click it. Maybe it still thinks the checkbox
-        # is under the breadcrumb, even though we hide it
-        page.execute_script "window.scrollBy(0,-50)"
+
+      with_hidden_stickers do
+        chk = find(:xpath, "//input[starts-with(@name,'plugin.#{name}.')]")
+        binding.pry
         chk.click()
+        unless chk.selected?
+          # not really sure why this is needed, by on Sauce OnDemand Windows 2003 + Firefox 16 (at least),
+          # the above click() command still doesn't click it. Maybe it still thinks the checkbox
+          # is under the breadcrumb, even though we hide it
+          page.execute_script "window.scrollBy(0,-50)"
+          chk.click()
+        end
       end
+
       click_button 'Install'
     end
 
