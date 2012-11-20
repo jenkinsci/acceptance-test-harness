@@ -76,6 +76,9 @@ class LogWatcher
   end
 
   def close
-    @pipe.close if @pipe
+    if @pipe
+      @pipe.close
+      @pipe = nil
+    end
   end
 end

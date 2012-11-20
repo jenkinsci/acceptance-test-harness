@@ -51,6 +51,7 @@ class VagrantController < JenkinsController
     @log_watcher.close
     unless @log.nil?
       @log.close
+      @log = nil
     end
   end
 
