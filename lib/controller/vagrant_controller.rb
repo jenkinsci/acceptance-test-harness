@@ -48,7 +48,6 @@ class VagrantController < JenkinsController
     unless @log.nil?
       @log.close
     end
-    Process.kill(9,@pid)
   end
 
   def stop!
