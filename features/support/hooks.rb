@@ -52,4 +52,5 @@ end
 
 After do |scenario|
   @runner.stop # if test fails, stop in at_exit is not called
+  @runner.teardown
 end
