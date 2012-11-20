@@ -84,6 +84,8 @@ This controller uses Vagrant to run Ubuntu, then deploy Jenkins from an APT repo
 
 When run for the first time, this will create a virtual machine. To make repeated tests easy, the VM won't get shut down automatically at the end. To do so, cd `vagrant/ubuntu` and run `vagrant halt`. You can run any other vagrant commands in this manner, which is useful for debugging.
 
+You can create `pre-configure.sh` and/or `post-configure.sh` as needed to customize.
+
 ### Running one test
 You can run a single cucumber test by pointing to a test scenario in terms of its file name and line number like
 `bundle exec cucumber features/freestyle_build.feature:6`
