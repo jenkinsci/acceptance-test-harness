@@ -29,8 +29,10 @@ and newer tests that are written for cucumber (in the `features` directory.)
 
 ## Running tests
 
-To run the test, `JENKINS_WAR=path/to/your/jenkins.war bundle exec rake`. This will run both
-the older `test/unit` tests as well as cucumber tests in one go.
+First, run `bundle install` to install required dependencies.
+
+To run the test, `JENKINS_WAR=path/to/your/jenkins.war bundle exec rake`. 
+This runs the entire test suite, so it might take a while. 
 
 There is a bit of a delay since we bring up Jenkins for every single test, with
 it's own sandboxed workspace as well:
@@ -40,8 +42,7 @@ it's own sandboxed workspace as well:
 
 ### Choosing the JenkinsController
 This test harness has an abstraction called `JenkinsController` that allows you to use different logic
-for starting/stopping Jenkins. We use this to reuse the same set of tests for testing stand-alone `jenkins.war`
-to testing packages.
+for starting/stopping Jenkins. We use this to so that the same set of tests can be run against many different ways of launching Jenkins, such as `java -jar jenkins.war`, Jenkins on JBoss, Jenkins via debian package, etc.
 
 See [the source code](tree/master/lib/controller/) for the list of available controllers. If you see a line like
 `register :remote_sysv`, that means the ID of that controller is `remote_sysv`.
@@ -53,5 +54,3 @@ see the controller source code for details until we document them here.
 ### Running one test
 You can run a single cucumber test by pointing to a test scenario in terms of its file name and line number like
 `bundle exec cucumber features/freestyle_build.feature:6`
-
-If someone knows how to run a single `test/unit` test case, please update this document.
