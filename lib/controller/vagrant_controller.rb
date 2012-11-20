@@ -44,6 +44,10 @@ class VagrantController < JenkinsController
   end
 
   def teardown
+    unless @pid.nil?
+      Process.kill 9,@pid
+      @pid = nil
+    end
     @log_watcher.close
     unless @log.nil?
       @log.close
