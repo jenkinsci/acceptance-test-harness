@@ -38,7 +38,6 @@ module Jenkins
 
       with_hidden_stickers do
         chk = find(:xpath, "//input[starts-with(@name,'plugin.#{name}.')]")
-        binding.pry
         chk.click()
         unless chk.selected?
           # not really sure why this is needed, by on Sauce OnDemand Windows 2003 + Firefox 16 (at least),
