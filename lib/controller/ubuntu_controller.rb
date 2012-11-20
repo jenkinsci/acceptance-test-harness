@@ -1,6 +1,6 @@
-%w(jenkins_controller).each { |f| require File.dirname(__FILE__)+"/"+f }
+%w(vagrant_controller).each { |f| require File.dirname(__FILE__)+"/"+f }
 
-class UbuntuController < JenkinsController
+class UbuntuController < VagrantController
   register :ubuntu
 
   def initialize(opts)
