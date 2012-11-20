@@ -104,5 +104,10 @@ class JenkinsController
 
   def self.register(type)
     @@impls[type] = self
+    @type = type
+  end
+
+  def self.type
+    @type
   end
 end
