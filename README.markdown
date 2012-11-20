@@ -37,6 +37,8 @@ First, run `bundle install` to install required dependencies.
 To run the test, `JENKINS_WAR=path/to/your/jenkins.war bundle exec rake`. 
 This runs the entire test suite, so it might take a while. 
 
+Set `BROWSER=chrome` and install http://code.google.com/p/chromedriver/downloads/list in `$PATH` if desired. (But tests may fail.)
+
 There is a bit of a delay since we bring up Jenkins for every single test, with
 it's own sandboxed workspace as well:
 
