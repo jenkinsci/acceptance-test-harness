@@ -7,7 +7,7 @@ class VagrantController < JenkinsController
   def self.launch
     unless @launched
       @env = Vagrant::Environment.new({ :ui_class => Vagrant::UI::Colored,
-                                        :cwd => "#{File.dirname(__FILE__)}/vagrant/#@type" })
+                                        :cwd => "#{File.dirname(__FILE__)}/../../vagrant/#@type" })
       @env.load!
 
       # start the VM
