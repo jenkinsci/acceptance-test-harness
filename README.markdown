@@ -16,6 +16,9 @@ more standard components of Jenkins such as the:
 Drop me a line (`rtyler` on [Freenode](http://freenode.net)) if you're
 interested in helping out
 
+## Installing
+
+On Ubuntu you may need to install: libxslt1-dev, libxml2-dev, libcurl4-openssl-dev
 
 ## Current test matrix
 
