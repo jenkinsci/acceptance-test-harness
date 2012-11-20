@@ -1,7 +1,7 @@
 %w(jenkins_controller).each { |f| require File.dirname(__FILE__)+"/"+f }
 
-class DebianController < JenkinsController
-  register :debian
+class UbuntuController < JenkinsController
+  register :ubuntu
 
   def initialize(opts)
     super(opts)
