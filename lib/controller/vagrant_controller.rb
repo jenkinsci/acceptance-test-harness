@@ -44,6 +44,7 @@ class VagrantController < JenkinsController
   end
 
   def teardown
+    @log_watcher.close
     unless @log.nil?
       @log.close
     end
