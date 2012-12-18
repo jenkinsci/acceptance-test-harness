@@ -21,11 +21,11 @@ function clean_lib_dir {
 }
 
 function grab_latest_rc {
-    curl "http://mirrors.jenkins-ci.org/war-rc/latest/jenkins.war" > $JENKINS_WAR
+    curl -L "http://mirrors.jenkins-ci.org/war-rc/latest/jenkins.war" > $JENKINS_WAR
 }
 
 function grab_latest_lts {
-    curl "http://mirrors.jenkins-ci.org/war-stable/latest/jenkins.war" > $JENKINS_WAR
+    curl -L "http://mirrors.jenkins-ci.org/war-stable/latest/jenkins.war" > $JENKINS_WAR
 }
 
 function extract_slave {
