@@ -43,6 +43,10 @@ module Jenkins
 
     def save
       click_button "Save"
+      if page.html =~ /This page expects a form submission/
+
+        raise "Job was not saved.\n" + page.html
+      end
     end
 
     def json_api_url
