@@ -16,8 +16,8 @@ Given /^I have installed the "(.*?)" plugin$/ do |plugin|
   install_plugin! plugin
 end
 
-Then /^the job should be able to use the Git SCM$/ do
-  page.should have_content 'Git'
+Then /^the job should be able to use the "(.*?)" SCM$/ do |scm|
+  page.should have_content scm
 end
 
 Then /^the build should fail$/ do
