@@ -9,10 +9,10 @@ class LocalJenkinsController < JenkinsController
   #     :war  => specify the location of jenkins.war
   def initialize(opts)
     super()
-    @war = opts[:war] || ENV['JENKINS_WAR'] || File.expand_path("./jenkins.war")
+    @war = opts[:war] || ENV['JENKINS_WAR'] || File.expand_path("#{WORKSPACE}/jenkins.war")
     raise "jenkins.war doesn't exist in #{@war}, maybe you forgot to set JENKINS_WAR env var?" if !File.exists?(@war)
 
-    @tempdir = TempDir.create(:rootpath => ENV['WORKSPACE'] || Dir.pwd)
+    @tempdir = TempDir.create(:rootpath => WORKSPACE)
 
     # Chose a random port, just to be safe
     @real_update_center = opts[:real_update_center] || false

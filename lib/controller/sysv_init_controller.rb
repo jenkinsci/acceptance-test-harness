@@ -13,7 +13,7 @@
 class RemoteSysvInitController < JenkinsController
   register :remote_sysv
 
-  JENKINS_DEBUG_LOG = Dir.pwd + "/last_test.log"
+  JENKINS_DEBUG_LOG = WORKSPACE + "/last_test.log"
 
   attr_reader :url
 
