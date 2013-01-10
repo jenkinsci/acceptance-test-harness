@@ -7,3 +7,4 @@ last_test.log
 Gemfile.lock
 iso
 *.box
+workspace/
