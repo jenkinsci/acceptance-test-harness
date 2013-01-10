@@ -40,20 +40,6 @@ Feature: Configure/build freestyle jobs
     And I run the job
     Then I should be prompted to enter the "Foo" parameter
 
-  Scenario: Configure a job with Ant build steps
-    Given a job
-    When I configure the job
-    And I add an Ant build step for:
-      """
-        <project default="hello">
-          <target name="hello">
-            <echo message="Hello World"/>
-          </target>
-        </project>
-      """
-    When I run the job
-    Then the build should succeed
-
   Scenario: Disable a job
     Given a job
     When I disable the job
