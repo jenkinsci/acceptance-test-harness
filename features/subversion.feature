@@ -19,3 +19,12 @@ Feature: Subversion support
     Then the build should succeed
     And I should see console output matching "test -d .svn"
 
+  @realupdatecenter
+  Scenario: Checkout Specified Subversion revision
+    Given I have installed the "subversion" plugin
+    And a job
+    When I check out code from Subversion repository "https://svn.jenkins-ci.org/trunk/jenkins/test-projects/model-ant-project@40156"
+    And I save the job
+    And I run the job
+    Then the build should succeed
+    And I should see console output matching "At revision 40156"
