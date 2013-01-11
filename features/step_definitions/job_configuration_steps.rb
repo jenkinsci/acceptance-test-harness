@@ -41,3 +41,7 @@ When /^I disable the job$/ do
   end
 end
 
+Then /^the job should be able to use the "(.*)" buildstep$/ do |build_step|
+  find(:xpath, "//button[text()='Add build step']").click
+  find(:xpath, "//a[text()='#{build_step}']").instance_of?(Capybara::Node::Element).should be true
+end
