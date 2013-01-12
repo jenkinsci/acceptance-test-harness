@@ -10,6 +10,13 @@ When /^I click the "([^"]*)" checkbox$/ do |name|
   find(:xpath, "//input[@name='#{name}']").set(true)
 end
 
+# Choose an option by value or text in select identified by it's visual label
+When /^I select "(.*?)" as a "(.*?)"$/ do |choice, select|
+  select = find(:xpath, "//td[@class='setting-name' and text()='#{select}']/../td[@class='setting-main']/select")
+  option = select.find(:xpath, "option[@value='#{choice}' or text()='#{choice}']")
+  option.select_option
+end
+
 Then /^the page should say "([^"]*)"$/ do |content|
   page.should have_content(content)
 end

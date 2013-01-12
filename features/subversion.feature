@@ -28,3 +28,14 @@ Feature: Subversion support
     And I run the job
     Then the build should succeed
     And I should see console output matching "At revision 40156"
+
+  @realupdatecenter
+  Scenario: Allways checkout fresh copy
+    Given I have installed the "subversion" plugin
+    And a job
+    When I check out code from Subversion repository "https://svn.jenkins-ci.org/trunk/jenkins/test-projects/model-ant-project"
+    And I select "Always check out a fresh copy" as a "Check-out Strategy"
+    And I save the job
+    And I build 2 jobs
+    Then the build should succeed
+    And I should see console output matching "Checking out https://svn.jenkins-ci.org/trunk/jenkins/test-projects/model-ant-project"
