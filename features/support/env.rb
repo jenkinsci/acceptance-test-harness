@@ -35,6 +35,6 @@ end
 PAGE_OBJECTS_BASE = File.dirname(__FILE__) + "/../../lib/"
 
 
-Dir["#{PAGE_OBJECTS_BASE}/*.rb"].each do |name|
+Dir["#{PAGE_OBJECTS_BASE}/*.rb", "#{PAGE_OBJECTS_BASE}/plugins/*.rb"].each do |name|
   require File.expand_path(name)
 end

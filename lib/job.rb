@@ -52,12 +52,6 @@ module Jenkins
       find(:xpath, "//textarea[@name='command']").set(script)
     end
 
-    def add_ant_step(targets, ant_build_file)
-      click_button 'Add build step'
-      click_link 'Invoke Ant'
-      fill_in '_.targets', :with => targets
-    end
-
     def open
       visit(job_url)
     end
