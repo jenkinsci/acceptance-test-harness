@@ -8,3 +8,6 @@ Gemfile.lock
 iso
 *.box
 workspace/
+path-element.hpi
+slave.jar
+temp_dir_*
