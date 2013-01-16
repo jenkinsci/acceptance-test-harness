@@ -14,7 +14,7 @@ class JenkinsController
   WORKSPACE = ENV['WORKSPACE'] || Dir.pwd
   JENKINS_DEBUG_LOG = WORKSPACE + "/last_test.log"
 
-  attr_accessor :is_running, :log_watcher
+  attr_accessor :is_running, :log_watcher, :tempdir
 
   def initialize(*args)
     @is_running = false
