@@ -30,7 +30,7 @@ class JenkinsController
 
     unless File.exist?(target)
       open(target,'wb') do |f|
-        rsp = RestClient.get 'http://updates.jenkins-ci.org/latest/form-element-path.hpi'
+        rsp = RestClient.get 'http://maven.jenkins-ci.org:8081/content/repositories/releases/org/jenkins-ci/plugins/form-element-path/1.1/form-element-path-1.1.hpi'
         f.write(rsp.body)
       end
     end
