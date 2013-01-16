@@ -1,7 +1,7 @@
-Feature: Test Matrix-realoader plugin
+Feature: Test matrix-reloaded plugin
  
   @realupdatecenter
-  Scenario: Instal Matrix-realoader plugin
+  Scenario: Install matrix-reloaded plugin
     When I install the "matrix-reloaded" plugin from the update center
     And I create a matrix job   
     And I run the job
