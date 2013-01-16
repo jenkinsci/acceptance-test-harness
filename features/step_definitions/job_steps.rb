@@ -18,6 +18,18 @@ When /^I create a job named "([^"]*)"$/ do |name|
   @job = Jenkins::Job.create_freestyle(@base_url, name)
 end
 
+Given /^a matrix job$/ do
+  @job = Jenkins::Job.create_matrix(@base_url, Jenkins::Job.random_name)
+end
+
+When /^I create a matrix job named "([^"]*)"$/ do |name|
+  @job = Jenkins::Job.create_matrix(@base_url, name)
+end
+
+When /^I create a matrix job$/ do
+  @job = Jenkins::Job.create_matrix(@base_url, Jenkins::Job.random_name)
+end
+
 When /^I run the job$/ do
   @job.queue_build
 end
@@ -28,6 +40,11 @@ end
 
 When /^I visit the job page$/ do
   @job.open
+end
+
+When /^I visit "([^"]*)" action on build page$/ do |action|
+  @job.last_build.open
+  find(:xpath, "//div[@id='tasks']/div/a[text()='#{action}']").click
 end
 
 When /^I build (\d+) jobs$/  do |count|
@@ -41,6 +58,10 @@ Then /^I should see console output matching "([^"]*)"$/ do |script|
   @job.last_build.console.should match /#{Regexp.escape(script)}/
 end
 
+Then /^the job should see "([^"]*)" action on the build page$/ do |action|
+  @job.last_build.open
+  page.should have_xpath("//div[@id='tasks']/div/a[text()='#{action}']")
+end
 
 Then /^the (\d+) jobs should run concurrently$/ do |count|
   count.to_i.times do |i|
