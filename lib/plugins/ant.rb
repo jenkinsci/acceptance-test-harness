@@ -7,7 +7,6 @@ module Plugins
 
     def self.select_ant(name)
       find(:xpath, "//select[@name='ant.antName']").click
-      # sleep(10000)
       find(:xpath, "//option[@value='#{name}']").click
     end
 
