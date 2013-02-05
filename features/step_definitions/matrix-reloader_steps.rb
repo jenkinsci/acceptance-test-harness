@@ -36,4 +36,3 @@ Then /^combination "([^"]*)" should not be built$/ do |configuration|
    visit @job.job_url + "/#{configuration}/lastBuild"
    page.should_not have_xpath("//h1[contains(text(),'Build #{build_name}')]")
 end
-

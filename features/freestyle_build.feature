@@ -46,7 +46,7 @@ Feature: Configure/build freestyle jobs
     Then it should be disabled
     And it should have an "Enable" button on the job page
 
-  Scenario: Old build should be discarted
+  Scenario: Old build should be discarded
     Given a simple job
     When I configure the job
     And I set 2 builds to keep
@@ -71,7 +71,7 @@ Feature: Configure/build freestyle jobs
     And  the job should have build 3
     And  the job should not have build 4
 
-  Scenario: Do not discard last successfull build
+  Scenario: Do not discard last successful build
     Given a simple job
     When I configure the job
     And I set 1 build to keep

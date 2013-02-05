@@ -11,5 +11,3 @@ Feature: Install plugins from the update center
     When I install the "git" plugin from the update center
     And I create a job named "git-test"
     Then the job should be able to use the "Git" SCM
-
-

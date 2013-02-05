@@ -1,5 +1,5 @@
 Feature: Display build history
-  As a Jenkins user or adminstrator
+  As a Jenkins user or administrator
   I should be able to view the build history both globally or per-job
   So that I can identify build trends, times, etc.
 
