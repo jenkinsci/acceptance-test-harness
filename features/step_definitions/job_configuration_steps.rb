@@ -22,7 +22,7 @@ When /^I tie the job to the slave$/ do
 end
 
 When /^I enable concurrent builds$/ do
-  step %{I click the "_.concurrentBuild" checkbox}
+  step %{I check the "_.concurrentBuild" checkbox}
 end
 
 When /^I add a string parameter "(.*?)"$/ do |string_param|
@@ -43,6 +43,6 @@ Then /^the job should be able to use the "(.*)" buildstep$/ do |build_step|
 end
 
 When /^I set (\d+) builds? to keep$/ do |number|
-    step %{I click the "logrotate" checkbox}
+    step %{I check the "logrotate" checkbox}
     find(:xpath, "//input[@name='logrotate_nums']").set(number)
 end

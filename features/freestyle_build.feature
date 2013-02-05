@@ -19,7 +19,7 @@ Feature: Configure/build freestyle jobs
   Scenario: Disable a job
     Given a job
     When I configure the job
-    And I click the "disable" checkbox
+    And I check the "disable" checkbox
     And I save the job
     And I visit the job page
     Then the page should say "This project is currently disabled"
