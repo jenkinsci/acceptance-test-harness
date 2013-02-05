@@ -87,5 +87,5 @@ end
 
 Then /^it should have an "(.*?)" button on the job page$/ do |button|
   @job.open
-  page.should have_xpath("//button[text()='Enable']")
+  page.should have_xpath("//button[text()='#{button}']")
 end
