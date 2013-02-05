@@ -46,4 +46,44 @@ Feature: Configure/build freestyle jobs
     Then it should be disabled
     And it should have an "Enable" button on the job page
 
+  Scenario: Old build should be discarted
+    Given a simple job
+    When I configure the job
+    And I set 2 builds to keep
+    And I save the job
+    And I build 4 jobs
+    Then the job should not have build 1
+    And  the job should not have build 2
+    And  the job should have build 3
+    And  the job should have build 4
+    And  the job should not have build 5
+
+  Scenario: Do not discard build kept forever
+    Given a simple job
+    When I configure the job
+    And I set 1 build to keep
+    And I save the job
+    And I run the job
+    And I lock the build
+    And I build 2 jobs
+    Then the job should have build 1
+    And  the job should not have build 2
+    And  the job should have build 3
+    And  the job should not have build 4
+
+  Scenario: Do not discard last successfull build
+    Given a simple job
+    When I configure the job
+    And I set 1 build to keep
+    And I save the job
+    And I run the job
+    And I configure the job
+    And I add always fail build step
+    And I save the job
+    And I build 2 jobs
+    Then the job should have build 1
+    And  the job should not have build 2
+    And  the job should have build 3
+    And  the job should not have build 4
+
 # vim: tabstop=2 expandtab shiftwidth=2
