@@ -11,6 +11,10 @@ When /^I add always fail build step$/ do
   step %{I add a script build step to run "exit 1"}
 end
 
+When /^I add "([^"]*)" post-build action$/ do |action|
+  @job.add_postbuild_action(action)
+end
+
 When /^I tie the job to the "([^"]*)" label$/ do |label|
   @job.configure do
     @job.label_expression = label
