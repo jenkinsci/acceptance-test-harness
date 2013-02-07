@@ -13,5 +13,5 @@ Feature: Fail builds that take too long
   #  When I configure the job
   #  And I add a script build step to run "sleep 10000"
   #  And I set the build timeout to 3 minutes
-  #  When I run the job
+  #  When I build the job
   #  Then the build should fail

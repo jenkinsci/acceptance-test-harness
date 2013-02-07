@@ -30,7 +30,7 @@ When /^I create a matrix job$/ do
   @job = Jenkins::Job.create_matrix(@base_url, Jenkins::Job.random_name)
 end
 
-When /^I run the job$/ do
+When /^I build the job$/ do
   @job.queue_build
 end
 

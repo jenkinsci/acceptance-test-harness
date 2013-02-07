@@ -5,5 +5,5 @@ Feature: Display build history
 
   Scenario: Viewing global build history
     Given a simple job
-    When I run the job
+    When I build the job
     Then the global build history should show the build

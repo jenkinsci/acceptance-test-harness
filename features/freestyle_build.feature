@@ -13,7 +13,7 @@ Feature: Configure/build freestyle jobs
     When I configure the job
     And I add a script build step to run "ls"
     And I save the job
-    And I run the job
+    And I build the job
     Then I should see console output matching "+ ls"
 
   Scenario: Disable a job
@@ -37,7 +37,7 @@ Feature: Configure/build freestyle jobs
     Given a job
     When I configure the job
     And I add a string parameter "Foo"
-    And I run the job
+    And I build the job
     Then I should be prompted to enter the "Foo" parameter
 
   Scenario: Disable a job
@@ -63,7 +63,7 @@ Feature: Configure/build freestyle jobs
     When I configure the job
     And I set 1 build to keep
     And I save the job
-    And I run the job
+    And I build the job
     And I lock the build
     And I build 2 jobs
     Then the job should have build 1
@@ -76,7 +76,7 @@ Feature: Configure/build freestyle jobs
     When I configure the job
     And I set 1 build to keep
     And I save the job
-    And I run the job
+    And I build the job
     And I configure the job
     And I add always fail build step
     And I save the job

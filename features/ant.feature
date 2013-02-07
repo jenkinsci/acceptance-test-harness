@@ -20,7 +20,7 @@ Feature: Adds Apache Ant support
           </target>
         </project>
       """
-    When I run the job
+    When I build the job
     Then the build should succeed
 
   Scenario: Add Auto-Installed Ant
@@ -36,7 +36,7 @@ Feature: Adds Apache Ant support
         </project>
       """
     And I select Ant named "ant_1.8.4"
-    And I run the job
+    And I build the job
     Then I should see console output matching "Unpacking http://archive.apache.org/dist/ant/binaries/apache-ant-1.8.4-bin.zip"
     And the build should succeed
 
@@ -54,6 +54,6 @@ Feature: Adds Apache Ant support
         </project>
       """
     And I select Ant named "local_ant_1.8.4"
-    And I run the job
+    And I build the job
     Then I should see console output matching "/opt/apache/apache-ant-1.8.4/bin/ant"
     And the build should succeed
