@@ -42,12 +42,7 @@ module Jenkins
     def add_script_step(script)
       ensure_config_page
 
-      # HACK: on a sufficiently busy configuration page, the "add build step" button can end up below
-      # the sticky "save" button, and Chrome driver says that's not clickable. So we first scroll all
-      # the way down, so that "add build step" will appear top of the page.
-      page.execute_script "window.scrollTo(0, document.body.scrollHeight)"
-
-      find(:xpath, "//button[text()='Add build step']").click
+      locate("//button[text()='Add build step']").click
       find(:xpath, "//a[text()='Execute shell']").click
       find(:xpath, "//textarea[@name='command']").set(script)
     end
@@ -56,12 +51,7 @@ module Jenkins
     def add_postbuild_action(action)
       ensure_config_page
 
-      # HACK: on a sufficiently busy configuration page, the "add build step" button can end up below
-      # the sticky "save" button, and Chrome driver says that's not clickable. So we first scroll all
-      # the way down, so that "add build step" will appear top of the page.
-      page.execute_script "window.scrollTo(0, document.body.scrollHeight)"
-
-      find(:xpath, "//button[text()='Add post-build action']").click
+      locate("//button[text()='Add post-build action']").click
       find(:xpath, "//a[text()='#{action}']").click
     end
 
@@ -98,7 +88,7 @@ module Jenkins
 
     def label_expression=(expression)
       ensure_config_page
-      find(:xpath, "//input[@name='hasSlaveAffinity']").set(true)
+      locate("//input[@name='hasSlaveAffinity']").set(true)
       find(:xpath, "//input[@name='_.assignedLabelString']").set(expression)
     end
 

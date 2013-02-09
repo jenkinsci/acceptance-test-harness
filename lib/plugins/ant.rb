@@ -5,11 +5,6 @@ require File.dirname(__FILE__) + "/../pageobject.rb"
 module Plugins
   class Ant < Jenkins::PageObject
 
-    def self.select_ant(name)
-      find(:xpath, "//select[@name='ant.antName']").click
-      find(:xpath, "//option[@value='#{name}']").click
-    end
-
     def self.add_ant_step(targets, ant_build_file)
       click_button 'Add build step'
       click_link 'Invoke Ant'

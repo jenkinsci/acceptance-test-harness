@@ -2,7 +2,8 @@
 
 When /^I select Ant named "([^\"]*)"$/ do |name|
   @job.configure do
-    Plugins::Ant.select_ant(name)
+    @job.locate("//select[@name='ant.antName']").click
+    find(:xpath, "//option[@value='#{name}']").click
   end
 end
 
