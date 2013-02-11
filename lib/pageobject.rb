@@ -79,6 +79,19 @@ module Jenkins
       end
     end
 
+    # Navigate to the element identified by xpath
+    # Such an element should be in visible area after the call and thus clickable
+    def locate(xpath, opts={})
+      opts[:with] = :xpath
+      element = wait_for(xpath, opts)
+      page.execute_script %{
+          element = document.evaluate(
+              "#{xpath}", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null
+          ).singleNodeValue.scrollIntoView();
+      }
+      return element
+    end
+
     # scrolling logic in WebDriver isn't smart enough to understand the floating DIVs,
     # so this method hides them temporarily and then lets you execute block
     def with_hidden_stickers
