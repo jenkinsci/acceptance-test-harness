@@ -28,6 +28,10 @@ class JenkinsController
   def download_path_element
     target = WORKSPACE+'/path-element.hpi'
 
+    if File.exist?(target) && Digest::MD5.hexdigest(File.read(target))!="ba8f63a87103c39b5f82eb42de2bce38"
+      File.delete target
+    end
+
     unless File.exist?(target)
       open(target,'wb') do |f|
         rsp = RestClient.get 'http://maven.jenkins-ci.org:8081/content/repositories/releases/org/jenkins-ci/plugins/form-element-path/1.1/form-element-path-1.1.hpi'
