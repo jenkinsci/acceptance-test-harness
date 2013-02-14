@@ -82,9 +82,31 @@ This controller uses Vagrant to run Ubuntu, then deploy Jenkins from an APT repo
 
 * `REPO_URL` The location of APT repository in the format of `/etc/apt/sources.list`, such as `http://pkg.jenkins-ci.org/debian binary/'
 
-When run for the first time, this will create a virtual machine. To make repeated tests easy, the VM won't get shut down automatically at the end. To do so, cd `vagrant/ubuntu` and run `vagrant halt`. You can run any other vagrant commands in this manner, which is useful for debugging.
+#### CentOS controller (type=centos)
+This controller uses Vagrant to run CentOS, then deploy Jenkins from an RPM repository.
+This controller is not yet capable of testing individual `*.rpm` file.
 
-You can create `pre-configure.sh` and/or `post-configure.sh` as needed to customize.
+* `REPO_URL` The location of RPM repository, such as `http://pkg.jenkins-ci.org/opensuse/`
+
+#### OpenSUSE controller (type=opensuse)
+This controller uses Vagrant to run CentOS, then deploy Jenkins from an RPM repository.
+This controller is not yet capable of testing individual `*.rpm` file.
+
+* `REPO_URL` The location of RPM repository, such as `http://pkg.jenkins-ci.org/opensuse/`
+
+#### Common characteristics of all the Vagrant-based controllers
+When run for the first time, this test harness will create a virtual machine.
+To make repeated tests fast, the VM won't get shut down automatically at the end of a run.
+To do so, cd `vagrant/*` and run `vagrant halt`. You can run any other vagrant commands
+in this manner, which is useful for debugging.
+
+You can also create `pre-configure.sh` and/or `post-configure.sh` in the current directory as needed
+to customize how the Vagrant VM is initialized. These scripts are copied into the VM and then executed:
+
+* `pre-configure.sh` runs before the controller attempts to install Jenkins
+* `post-configure.sh` runs after the controller finished installing Jenkins
+
+
 
 ### Running one test
 You can run a single cucumber test by pointing to a test scenario in terms of its file name and line number like
