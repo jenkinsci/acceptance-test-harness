@@ -34,6 +34,7 @@ module Jenkins
 
     def configure(&block)
       visit(configure_url)
+      wait_until { !find('DIV.behavior-loading').visible? } # script has to fully load
 
       unless block.nil?
         yield
