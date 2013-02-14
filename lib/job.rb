@@ -21,14 +21,6 @@ module Jenkins
       job_url + "/configure"
     end
 
-    def configure(&block)
-      visit configure_url
-      unless block.nil?
-        yield
-        save
-      end
-    end
-
     def add_parameter(type,name,value)
       ensure_config_page
       find(:xpath, "//input[@name='parameterized']").set(true)
