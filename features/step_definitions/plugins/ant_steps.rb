@@ -32,4 +32,18 @@ When /^I add Ant version with name "([^"]*)" and Ant home "([^"]*)" to Jenkins c
   end
 end
 
+Given /^fake Ant installation at "([^"]*)"$/ do |path|
+  # where is the real ant?
+  real = ENV['PATH'].split(':').find { |p| File.exists? "#{p}/ant" }
 
+  FileUtils.mkdir_p "#{path}/bin"
+  ant="#{path}/bin/ant"
+  open(ant,'wb') do |f|
+    f.write """#!/bin/sh
+echo fake ant at $0
+export ANT_HOME=
+exec #{real}/ant \"$@\"
+"""
+  end
+  File.chmod(0755,ant)
+end

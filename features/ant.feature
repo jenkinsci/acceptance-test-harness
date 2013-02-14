@@ -40,11 +40,11 @@ Feature: Adds Apache Ant support
     Then I should see console output matching "Unpacking http://archive.apache.org/dist/ant/binaries/apache-ant-1.8.4-bin.zip"
     And the build should succeed
 
-  @needs_preinstalled_sw
   Scenario: Add locally installed Ant
     Given I have installed the "ant" plugin
+    And fake Ant installation at "/tmp/fake-ant"
     And a job
-    When I add Ant version with name "local_ant_1.8.4" and Ant home "/opt/apache/apache-ant-1.8.4/" to Jenkins config page
+    When I add Ant version with name "local_ant_1.8.4" and Ant home "/tmp/fake-ant" to Jenkins config page
     And I add an Ant build step for:
       """
         <project default="hello">
@@ -55,5 +55,5 @@ Feature: Adds Apache Ant support
       """
     And I select Ant named "local_ant_1.8.4"
     And I build the job
-    Then I should see console output matching "/opt/apache/apache-ant-1.8.4/bin/ant"
+    Then I should see console output matching "fake ant at /tmp/fake-ant/bin/ant"
     And the build should succeed
