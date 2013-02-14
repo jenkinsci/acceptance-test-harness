@@ -1,0 +1,9 @@
+Vagrant::Config.run do |config|
+  # TODO: upload this box file to somewhere
+  config.vm.box = "jenkins-test-opensuse-11.4"
+
+  # port on VM, port on Host
+  config.vm.forward_port 8080, 8080
+
+  # config.vm.share_folder "shared", "/shared", "#{Dir.pwd}data"
+end
