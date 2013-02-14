@@ -34,7 +34,13 @@ module Jenkins
 
     def configure(&block)
       visit(configure_url)
-      wait_until { !find('DIV.behavior-loading').visible? } # script has to fully load
+      wait_until do # script has to fully load
+        begin
+          !find('DIV.behavior-loading').visible?
+        rescue Capybara::ElementNotFound
+          true # if there's no behavior-loading, that's fine, too
+        end
+       end
 
       unless block.nil?
         yield
