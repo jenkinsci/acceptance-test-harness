@@ -17,15 +17,6 @@ module Jenkins
       visit(configure_url)
     end
     
-    def configure(&block)
-      visit configure_url
-      unless block.nil?
-        yield
-        save
-      end
-    end
-
-
     def add_tool(name)
       click_button(name)
     end
