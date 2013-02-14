@@ -10,7 +10,7 @@ class OpenSUSEController < VagrantController
 
   # start VM and install RPM package, but only for the first time
   def configure
-    @vm.channel.system_ssh("sudo zypper addrepo http://pkg.jenkins-ci.org/opensuse/ jenkins")
+    @vm.channel.system_ssh("sudo zypper addrepo #@repo_url jenkins")
     @vm.channel.system_ssh("sudo zypper -n --gpg-auto-import-keys install jenkins")
     @vm.channel.system_ssh("sudo /etc/init.d/jenkins stop")
   end
