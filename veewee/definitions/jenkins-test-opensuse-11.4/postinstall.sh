@@ -44,5 +44,8 @@ sh /mnt/VBoxLinuxAdditions.run
 umount /mnt
 rm -f VBoxGuestAdditions_$VBOX_VERSION.iso
 
+# other baseline used by Jenkins (somehow they don't install well from autoionst_en.xml
+zypper --non-interactive install java-1_6_0-openjdk-devel ant
+
 echo -e "\nall done.\n"
 exit
