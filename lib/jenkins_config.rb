@@ -10,7 +10,7 @@ module Jenkins
     end
     
     def configure_url
-      @base_url + "/configure"
+      @base_url + "configure"
     end
 
     def open
@@ -19,6 +19,23 @@ module Jenkins
     
     def add_tool(name)
       click_button(name)
+    end
+
+    def add_jdk_auto_installation(name, version)
+      ensure_config_page
+      find(:xpath, "//input[@path='/hudson-model-JDK/tool/name']").set(name)
+      # by default Install automatically is checked
+      find(:xpath, "//select[@path='/hudson-model-JDK/tool/properties/hudson-tools-InstallSourceProperty/installers/id']").click
+      find(:xpath, "//option[@value='#{version}']").click
+      find(:xpath, "//input[@path='/hudson-model-JDK/tool/properties/hudson-tools-InstallSourceProperty/installers/acceptLicense']").click
+    end
+
+    def enter_oracle_credentials(login, password)
+      visit("/descriptorByName/hudson.tools.JDKInstaller/enterCredential")
+      find(:xpath, "//input[@name='username']").set(login)
+      find(:xpath, "//input[@name='password']").set(password)
+      click_button("OK")
+      click_button("Close")
     end
 
     def self.get(base_url, name)
