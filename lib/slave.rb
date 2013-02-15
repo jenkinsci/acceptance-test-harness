@@ -60,9 +60,11 @@ module Jenkins
       slave.executors = 1
       slave.remote_fs = "/tmp/#{slave.name}"
 
+      jar="/tmp/slave#{Process.pid}.jar"
+
       # Configure this slave to be automatically launched from the master
       find(:xpath, "//option[@value='hudson.slaves.CommandLauncher']").select_option
-      find(:xpath, "//input[@name='_.command']").set("sh -c 'curl -s -o #{JenkinsController::WORKSPACE}/slave.jar #{base_url}jnlpJars/slave.jar && java -jar #{JenkinsController::WORKSPACE}/slave.jar'")
+      find(:xpath, "//input[@name='_.command']").set("sh -c 'curl -s -o #{jar} #{base_url}jnlpJars/slave.jar && java -jar #{jar}'")
 
       slave.save
 

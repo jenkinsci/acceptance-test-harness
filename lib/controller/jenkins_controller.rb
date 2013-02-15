@@ -11,7 +11,13 @@ require 'restclient'
 # Each JenkinsController goes through the call sequence of +(start,restart*,stop)+ sprinkled with
 # calls to +url+ and +diagnose+.
 class JenkinsController
+
+  # directory on the computer where this code is running that points to a directory
+  # where test code can place log files, cache files, etc.
+  # Note that this directory might not exist on the Jenkins master, since it can be
+  # running on a separate computer.
   WORKSPACE = ENV['WORKSPACE'] || Dir.pwd
+
   JENKINS_DEBUG_LOG = WORKSPACE + "/last_test.log"
 
   attr_accessor :is_running, :log_watcher, :tempdir
