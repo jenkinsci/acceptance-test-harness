@@ -34,7 +34,7 @@ module Jenkins
     def add_script_step(script)
       ensure_config_page
 
-      locate("//button[text()='Add build step']").click
+      find(:xpath, "//button[text()='Add build step']").locate.click
       find(:xpath, "//a[text()='Execute shell']").click
       find(:xpath, "//textarea[@name='command']").set(script)
     end
@@ -43,7 +43,7 @@ module Jenkins
     def add_postbuild_action(action)
       ensure_config_page
 
-      locate("//button[text()='Add post-build action']").click
+      find(:xpath, "//button[text()='Add post-build action']").locate.click
       find(:xpath, "//a[text()='#{action}']").click
     end
 
@@ -80,7 +80,7 @@ module Jenkins
 
     def label_expression=(expression)
       ensure_config_page
-      locate("//input[@name='hasSlaveAffinity']").set(true)
+      find(:xpath, "//input[@name='hasSlaveAffinity']").locate.set(true)
       find(:xpath, "//input[@name='_.assignedLabelString']").set(expression)
     end
 

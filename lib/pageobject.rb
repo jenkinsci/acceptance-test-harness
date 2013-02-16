@@ -85,22 +85,5 @@ module Jenkins
         raise
       end
     end
-
-    # Navigate to the element identified by xpath
-    # Such an element should be in visible area after the call and thus clickable
-    def locate(xpath, opts={})
-      opts[:with] = :xpath
-      element = wait_for(xpath, opts)
-      page.execute_script %{
-          // Scroll to the element. It will appear at the top edge of the screen.
-          element = document.evaluate(
-              "#{xpath}", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null
-          ).singleNodeValue.scrollIntoView();
-
-          // Scroll a bit back so breadcrumbs are not hiding the element.
-          window.scrollBy(0, -40);
-      }
-      return element
-    end
   end
 end

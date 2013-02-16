@@ -36,7 +36,7 @@ module Jenkins
 
       visit "#{url}/available"
 
-      locate("//input[starts-with(@name,'plugin.#{name}.')]").set(true)
+      find(:xpath, "//input[starts-with(@name,'plugin.#{name}.')]").locate.set(true)
 
       find_button('Install').click
     end
