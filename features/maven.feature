@@ -16,3 +16,15 @@ Feature: Adds Apache Maven support
     Then I should see console output matching "Apache Maven 3.0.4"
     And the build should succeed
 
+  Scenario: Add and use locally installed Maven
+    Given fake Maven installation at "/tmp/fake-maven"
+    And I add Maven with name "local_maven_3.0.4" and Maven home "/tmp/fake-maven" to Jenkins config page
+    And a job
+    When I configure the job
+    And I add a top-level maven target "archetype:generate -DarchetypeGroupId=org.apache.maven.archetypes -DgroupId=com.mycompany.app -DartifactId=my-app -Dversion=1.0 -B -X" for maven "local_maven_3.0.4"
+    And I save the job
+    And I build the job
+    And the build completes	
+    Then I should see console output matching "fake maven at /tmp/fake-maven/bin/mvn"	
+    And the build should succeed
+

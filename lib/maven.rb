@@ -20,6 +20,13 @@ module Jenkins
       find(:xpath, "//option[@value='#{version}']").click
     end
 
+    def add_local_installation(name, maven_home)
+      find(:xpath, "//input[@path='/hudson-tasks-Maven$MavenInstallation/tool/name']").set(name)
+      # by default Install automatically is checked - need to uncheck
+      find(:xpath, "//input[@path='/hudson-tasks-Maven$MavenInstallation/tool/properties/hudson-tools-InstallSourceProperty']").click 
+      find(:xpath, "//input[@path='/hudson-tasks-Maven$MavenInstallation/tool/home']").set(maven_home)
+    end
+
     def prepare_autoinstall(runner)
       tempdir = runner.tempdir
       Dir.mkdir tempdir+'/updates'
