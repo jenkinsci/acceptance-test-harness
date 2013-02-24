@@ -1,3 +1,7 @@
+Given /^a Maven$/ do
+  @maven = Jenkins::Maven.new(@basedir, "Maven")
+end
+
 Given /^I add Maven version "([^"]*)" with name "([^"]*)" installed automatically to Jenkins config page$/ do |version, name|
   @maven = Jenkins::Maven.new(@basedir, "Maven")
   # @maven.prepare_autoinstall(@runner)
@@ -33,7 +37,14 @@ exec #{real}/mvn \"$@\"
   File.chmod(0755,maven)
 end
 
-When /^I add a top-level maven target "([^"]*)" for maven "([^"]*)"$/ do |goals, version|
-  @maven.add_maven_step(version, goals)
+When /^I add a top-level maven target "([^"]*)"$/ do |goals|
+  @maven.add_maven_step(goals: goals)
 end
 
+When /^I add a top-level maven target "([^"]*)" for maven "([^"]*)"$/ do |goals, version|
+  @maven.add_maven_step(goals: goals, version: version)
+end
+
+When /^I use local Maven repository$/ do
+  @maven.use_local_repo
+end

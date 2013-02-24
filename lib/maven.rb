@@ -5,12 +5,19 @@ require File.dirname(__FILE__) + "/pageobject.rb"
 module Jenkins
   class Maven < Jenkins::PageObject
 
-    def add_maven_step(version, goals)
+    def add_maven_step(options)
       click_button 'Add build step'
       click_link 'Invoke top-level Maven targets'
-      find(:xpath, "//input[@path='/builder/targets']").set(goals)
-      find(:xpath, "//select[@name='maven.name']").click
-      find(:xpath, "//option[@value='#{version}']").click
+      find(:xpath, "//input[@path='/builder/targets']").set(options[:goals])
+      if(options[:version])
+        find(:xpath, "//select[@name='maven.name']").click
+        find(:xpath, "//option[@value='#{options[:version]}']").click
+      end
+    end
+
+    def use_local_repo()
+      find(:xpath, "//button[@path='/builder/advanced-button']").click
+      find(:xpath, "//input[@path='/builder/usePrivateRepository']").click
     end
 
     def add_auto_installation(name, version)

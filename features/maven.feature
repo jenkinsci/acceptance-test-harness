@@ -28,3 +28,15 @@ Feature: Adds Apache Maven support
     Then I should see console output matching "fake maven at /tmp/fake-maven/bin/mvn"	
     And the build should succeed
 
+  Scenario: Use local Maven repository
+    Given a Maven
+    And a job
+    When I configure the job
+    And I add a top-level maven target "archetype:generate -DarchetypeGroupId=org.apache.maven.archetypes -DgroupId=com.mycompany.app -DartifactId=my-app -Dversion=1.0 -B"
+    And I use local Maven repository
+    And I save the job
+    And I build the job
+    And the build completes	
+    Then I should see console output matching regexp "-Dmaven.repo.local=([^\n]*)/.repository"	
+    And the build should succeed
+
