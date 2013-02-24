@@ -64,6 +64,10 @@ Then /^I should see console output matching "(.*)"$/ do |script|
   @job.last_build.console.should match /#{Regexp.escape(script)}/
 end
 
+Then /^I should see console output matching regexp "(.*)"$/ do |script|
+  @job.last_build.console.should match /#{script}/
+end
+
 Then /^the job should see "([^"]*)" action on the build page$/ do |action|
   @job.last_build.open
   page.should have_xpath("//div[@id='tasks']/div/a[text()='#{action}']")
