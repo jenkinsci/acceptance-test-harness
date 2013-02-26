@@ -9,7 +9,7 @@ Feature: Executing groovy scripts
 
  @realupdatecenter
   Scenario: Run groovy script
-    Given I have installed the "groovy" plugin as a command
+    Given I have installed the "groovy" plugin
     And a job
     When I set groovy build step "Execute Groovy script"
     And I set groovy script "println('hello world')"
@@ -29,7 +29,7 @@ Feature: Executing groovy scripts
     Then the build should succeed
     And I should see console output matching "this is a job system-groovy-test"
 
-@realupdatecenter
+  @realupdatecenter
   Scenario: Run groovy script from a file
     Given I have installed the "groovy" plugin
     And a job
