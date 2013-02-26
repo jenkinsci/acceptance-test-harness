@@ -2,7 +2,7 @@ def install_plugin!(plugin)
   manager = Jenkins::PluginManager.new(@base_url, nil)
   unless manager.installed?(plugin)
     manager.install_plugin plugin
-    found = @runner.log_watcher.wait_until_logged(/(Installation successful: #{plugin})|(Plugin #{plugin} dynamically installed)/i)
+    found = @runner.log_watcher.wait_until_logged(/(Installation successful: #{plugin} Plugin)|(Plugin #{plugin} dynamically installed)/i)
     found.should be true
   end
   manager.installed?(plugin).should be true
