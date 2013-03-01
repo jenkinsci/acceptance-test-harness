@@ -21,6 +21,18 @@ module Jenkins
       job_url + "/configure"
     end
 
+    def config_xml
+       job_url + "/config.xml"
+    end
+
+    def configure(&block)
+      visit configure_url
+      unless block.nil?
+        yield
+        save
+      end
+    end
+
     def add_parameter(type,name,value)
       ensure_config_page
       find(:xpath, "//input[@name='parameterized']").set(true)
@@ -103,6 +115,16 @@ module Jenkins
 
       fill_in "name", :with => name
       find(:xpath, "//input[starts-with(@value, 'hudson.matrix.MatrixProject')]").set(true)
+      click_button "OK"
+
+      self.new(base_url, name)
+    end
+
+    def self.copy_job(base_url, name, source_job_name)
+      visit("#{@base_url}/newJob")
+      fill_in "name", :with => name
+      find(:xpath, "//input[@id='copy']").set(true)
+      fill_in "from", :with => source_job_name
       click_button "OK"
 
       self.new(base_url, name)
