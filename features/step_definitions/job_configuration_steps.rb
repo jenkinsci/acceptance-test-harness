@@ -63,12 +63,18 @@ When /^I add archive the artifacts "([^"]*)" and exclude "([^"]*)" in the job co
   end
 end
 
-Then /^the job should be able to use the "(.*)" buildstep$/ do |build_step|
-  find(:xpath, "//button[text()='Add build step']").click
-  find(:xpath, "//a[text()='#{build_step}']").instance_of?(Capybara::Node::Element).should be true
+When /^I want to keep only the latest successful artifacts$/ do
+  @job.configure do
+    @job.archive_artifacts(latestOnly: true)
+  end
 end
 
 When /^I set (\d+) builds? to keep$/ do |number|
     step %{I check the "logrotate" checkbox}
     find(:xpath, "//input[@name='logrotate_nums']").set(number)
+end
+
+Then /^the job should be able to use the "(.*)" buildstep$/ do |build_step|
+  find(:xpath, "//button[text()='Add build step']").click
+  find(:xpath, "//a[text()='#{build_step}']").instance_of?(Capybara::Node::Element).should be true
 end

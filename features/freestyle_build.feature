@@ -107,6 +107,16 @@ Feature: Configure/build freestyle jobs
     And the artifact "test1.txt" should be archived
     And the artifact "test2.txt" should not be archived
 
+  Scenario: Archive artifact and keep only the last successful
+    Given a job
+    When I add a shell build step to run "echo 'archive test' > test.txt" in the job configuration
+    And I add archive the artifacts "test.txt" in the job configuration
+    And I want to keep only the latest successful artifacts
+    And I build 3 jobs
+    Then the build #1 should not has archived "test.txt" artifact
+    And the build #2 should has archived "test.txt" artifact
+    And the build #3 should has archived "test.txt" artifact
+
   @realupdatecenter
   Scenario: Add Auto-Installed Java
     Given I add Java version "jdk-7u11-oth-JPR" with name "jdk_1.7.0" installed automatically to Jenkins config page

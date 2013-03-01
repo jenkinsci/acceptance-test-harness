@@ -101,15 +101,16 @@ module Jenkins
     end
 
     def archive_artifacts(options)
-      add_postbuild_action "Archive the artifacts"
-      find(:xpath, "//input[@path='/publisher/artifacts']").set(options[:includes])
-      if(options[:excludes])
-        find(:xpath, "//button[@path='/publisher/advanced-button']").click
+      case
+      when options[:includes]
+        add_postbuild_action "Archive the artifacts"
+        find(:xpath, "//input[@path='/publisher/artifacts']").set(options[:includes])
+      when options[:excludes]
+        find(:xpath, "//button[@path='/publisher/advanced-button']").localte.click
         find(:xpath, "//input[@path='/publisher/excludes']").set(options[:excludes])
-      end
-      if(options[:latestOnly])
-        find(:xpath, "//button[@path='/publisher/advanced-button']").click
-        find(:xpath, "//input[@path='/publisher/latestOnly']").set(true)
+      when options[:latestOnly]
+        find(:xpath, "//button[@path='/publisher/advanced-button']").locate.click
+        find(:xpath, "//input[@path='/publisher/latestOnly']").set(options[:latestOnly])
       end
 
     end
