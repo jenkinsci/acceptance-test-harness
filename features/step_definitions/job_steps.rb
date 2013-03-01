@@ -111,9 +111,9 @@ Then /^the job configuration should be equals to "([^"]*)" configuration$/ do |s
   (page.html.eql? source_page).should be true
 end
 
-Then /^the artifact "([^"]*)" should be archived$/ do |artifact|
+Then /^the artifact "([^"]*)" (should|should not) be archived$/ do |artifact, should_or_not|
   @job.last_build.open
-  page.should have_xpath "//a[@href='artifact/#{artifact}']"
+  page.send should_or_not, have_xpath("//a[@href='artifact/#{artifact}']")
 end
 
 Then /^the content of artifact "([^"]*)" should be "([^"]*)"$/ do |artifact, content|

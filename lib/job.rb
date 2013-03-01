@@ -100,9 +100,18 @@ module Jenkins
       check 'disable'
     end
 
-    def archive_artifacts(artifacts)
+    def archive_artifacts(options)
       add_postbuild_action "Archive the artifacts"
-      find(:xpath, "//input[@path='/publisher/artifacts']").set(artifacts)
+      find(:xpath, "//input[@path='/publisher/artifacts']").set(options[:includes])
+      if(options[:excludes])
+        find(:xpath, "//button[@path='/publisher/advanced-button']").click
+        find(:xpath, "//input[@path='/publisher/excludes']").set(options[:excludes])
+      end
+      if(options[:latestOnly])
+        find(:xpath, "//button[@path='/publisher/advanced-button']").click
+        find(:xpath, "//input[@path='/publisher/latestOnly']").set(true)
+      end
+
     end
 
     def self.create_freestyle(base_url, name)

@@ -97,6 +97,16 @@ Feature: Configure/build freestyle jobs
     And the artifact "test.txt" should be archived
     And the content of artifact "test.txt" should be "archive test"
 
+  Scenario: Archive artifact and exclude another
+    Given a job
+    When I add a shell build step to run "echo 'archive include test' > test1.txt; echo 'archive exclude test' > test2.txt" in the job configuration
+    And I add archive the artifacts "test1.txt" and exclude "test2.txt" in the job configuration
+    And I build the job
+    And the build completes
+    Then the build should succeed
+    And the artifact "test1.txt" should be archived
+    And the artifact "test2.txt" should not be archived
+
   @realupdatecenter
   Scenario: Add Auto-Installed Java
     Given I add Java version "jdk-7u11-oth-JPR" with name "jdk_1.7.0" installed automatically to Jenkins config page
