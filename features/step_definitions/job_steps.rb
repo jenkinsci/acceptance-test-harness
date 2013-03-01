@@ -30,6 +30,10 @@ When /^I create a matrix job$/ do
   @job = Jenkins::Job.create_matrix(@base_url, Jenkins::Job.random_name)
 end
 
+When /^I copy the job named "([^"]*)" from job named "([^"]*)"$/ do |name, source_job_name|
+  @job = Jenkins::Job.copy_job(@base_url, name, source_job_name)
+end
+
 When /^I build the job$/ do
   @job.queue_build
 end
@@ -89,3 +93,11 @@ Then /^it should have an "(.*?)" button on the job page$/ do |button|
   @job.open
   page.should have_xpath("//button[text()='#{button}']")
 end
+
+Then /^the job configuration should be equals to "([^"]*)" configuration$/ do |source_name|
+  visit @job.config_xml
+  source_page = page.html
+  visit @base_url + "/job/#{source_name}/config.xml"  
+  (page.html.eql? source_page).should be true
+end
+
