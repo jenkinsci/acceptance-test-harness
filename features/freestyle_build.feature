@@ -86,6 +86,17 @@ Feature: Configure/build freestyle jobs
     And  the job should have build 3
     And  the job should not have build 4
 
+  Scenario: Archive artifact and check content of archived artifact
+    Given a job
+    When I add a shell build step to run "echo 'archive test' > test.txt" to the job configuration
+    And I archive the artifacts "test.txt" to the job configuration
+    And I build the job
+    And the build completes
+    Then the build should succeed
+    And I should see console output matching "Archiving artifacts"
+    And the artifact "test.txt" should be archived
+    And the content of artifact "test.txt" should be "archive test"
+
   @realupdatecenter
   Scenario: Add Auto-Installed Java
     Given I add Java version "jdk-7u11-oth-JPR" with name "jdk_1.7.0" installed automatically to Jenkins config page

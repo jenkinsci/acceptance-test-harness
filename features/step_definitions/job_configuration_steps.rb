@@ -41,6 +41,22 @@ When /^I disable the job$/ do
   end
 end
 
+When /^I add a shell build step to run "([^"]*)" to the job configuration$/ do |script|
+  @job.configure do
+    @job.add_script_step(script)
+  end
+end
+
+When /^I archive the artifacts "([^"]*)"$/ do |artifacts|
+  @job.archive_artifacts artifacts
+end
+
+When /^I archive the artifacts "([^"]*)" to the job configuration$/ do |artifacts|
+  @job.configure do
+    @job.archive_artifacts artifacts
+  end
+end
+
 Then /^the job should be able to use the "(.*)" buildstep$/ do |build_step|
   find(:xpath, "//button[text()='Add build step']").click
   find(:xpath, "//a[text()='#{build_step}']").instance_of?(Capybara::Node::Element).should be true

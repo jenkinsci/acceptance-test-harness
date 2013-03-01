@@ -100,6 +100,11 @@ module Jenkins
       check 'disable'
     end
 
+    def archive_artifacts(artifacts)
+      add_postbuild_action "Archive the artifacts"
+      find(:xpath, "//input[@path='/publisher/artifacts']").set(artifacts)
+    end
+
     def self.create_freestyle(base_url, name)
       visit("#{@base_url}/newJob")
 

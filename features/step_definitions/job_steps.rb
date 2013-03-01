@@ -111,3 +111,13 @@ Then /^the job configuration should be equals to "([^"]*)" configuration$/ do |s
   (page.html.eql? source_page).should be true
 end
 
+Then /^the artifact "([^"]*)" should be archived$/ do |artifact|
+  @job.last_build.open
+  page.should have_xpath "//a[@href='artifact/#{artifact}']"
+end
+
+Then /^the content of artifact "([^"]*)" should be "([^"]*)"$/ do |artifact, content|
+  visit @job.last_build.artifact_url(artifact)
+  page.should have_content content
+end
+

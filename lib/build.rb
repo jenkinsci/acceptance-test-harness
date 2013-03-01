@@ -18,6 +18,10 @@ module Jenkins
       @job.job_url + "/#{@number}"
     end
 
+    def artifact_url(artifact)
+      build_url + "/artifact/#{artifact}"
+    end
+
     def open
       visit(build_url)
     end
