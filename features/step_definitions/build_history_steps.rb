@@ -9,14 +9,9 @@ Then /^the global build history should show the build$/ do
   page.should have_content("#{@job.name} #1")
 end
 
-Then /^the job (should|should not) have build (\d+)$/ do |operator, buildNumber|
+Then /^the job (should|should not) have build (\d+)$/ do |should_or_not, buildNumber|
   @job.build(buildNumber).open
 
   hold_the_build = have_content("Build ##{buildNumber}")
-
-  if operator == 'should'
-    page.should hold_the_build
-  else
-    page.should_not hold_the_build
-  end
+  page.send should_or_not hold_the_build
 end

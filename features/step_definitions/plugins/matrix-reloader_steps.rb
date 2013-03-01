@@ -22,16 +22,12 @@ When /^I rebuild matrix job$/ do
   find(:xpath, "//form[@action='configSubmit']//button[text()='Rebuild Matrix']").click
 end
 
-Then /^combination "([^"]*)" (should|should not) be built$/ do |configuration, operator|
+Then /^combination "([^"]*)" (should|should not) be built$/ do |configuration, should_or_not|
   visit @job.last_build.build_url
   build_title = find(:xpath,"//h1[contains(text(),'Build')]").text()
   build_name = build_title.split(" ")[2]
   visit @job.job_url + "/#{configuration}/lastBuild"
 
-  haveBuiltConfig = have_xpath("//h1[contains(text(),'Build #{build_name}')]");
-  if operator == "should"
-    page.should haveBuiltConfig
-  else
-    page.should_not haveBuiltConfig
-  end
+  page.send should_or_not, have_xpath("//h1[contains(text(),'Build #{build_name}')]");
+  
 end
