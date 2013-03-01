@@ -88,8 +88,8 @@ Feature: Configure/build freestyle jobs
 
   Scenario: Archive artifact and check content of archived artifact
     Given a job
-    When I add a shell build step to run "echo 'archive test' > test.txt" to the job configuration
-    And I archive the artifacts "test.txt" to the job configuration
+    When I add a shell build step to run "echo 'archive test' > test.txt" in the job configuration
+    And I add archive the artifacts "test.txt" in the job configuration
     And I build the job
     And the build completes
     Then the build should succeed

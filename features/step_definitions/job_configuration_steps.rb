@@ -41,7 +41,7 @@ When /^I disable the job$/ do
   end
 end
 
-When /^I add a shell build step to run "([^"]*)" to the job configuration$/ do |script|
+When /^I add a shell build step to run "([^"]*)" in the job configuration$/ do |script|
   @job.configure do
     @job.add_script_step(script)
   end
@@ -51,7 +51,7 @@ When /^I archive the artifacts "([^"]*)"$/ do |artifacts|
   @job.archive_artifacts artifacts
 end
 
-When /^I archive the artifacts "([^"]*)" to the job configuration$/ do |artifacts|
+When /^I add archive the artifacts "([^"]*)" in the job configuration$/ do |artifacts|
   @job.configure do
     @job.archive_artifacts artifacts
   end
