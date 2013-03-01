@@ -2,6 +2,10 @@
 # vim: tabstop=2 expandtab shiftwidth=2
 require 'pry'
 
+Transform /^(should|should not)$/ do |should_or_not|
+  should_or_not.gsub(' ', '_').to_sym
+end
+
 When /^I visit the home page$/ do
   visit "/"
 end
