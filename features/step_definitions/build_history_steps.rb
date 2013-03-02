@@ -13,5 +13,5 @@ Then /^the job (should|should not) have build (\d+)$/ do |should_or_not, buildNu
   @job.build(buildNumber).open
 
   hold_the_build = have_content("Build ##{buildNumber}")
-  page.send should_or_not hold_the_build
+  page.send should_or_not, hold_the_build
 end
