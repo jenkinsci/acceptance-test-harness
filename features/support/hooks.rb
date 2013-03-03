@@ -50,6 +50,18 @@ Before do |scenario|
   end
 end
 
+# Skip scenarios that are not applicable for given Jenkins version
+Before do |scenario|
+
+  version = Jenkins::JenkinsConfig.new(@runner.url, '').jenkins_version;
+
+  should_run = scenario.feature.applicable_for?(version) && scenario.applicable_for?(version)
+
+  if !should_run
+    scenario.skip_invoke!
+  end
+end
+
 After do |scenario|
   @runner.stop # if test fails, stop in at_exit is not called
   @runner.teardown

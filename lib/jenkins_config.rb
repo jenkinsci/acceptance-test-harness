@@ -38,6 +38,15 @@ module Jenkins
       click_button("Close")
     end
 
+    # Get the version of Jenkins under test
+    def jenkins_version()
+      artifactId = 'org.jenkins-ci.main:jenkins-core'
+      visit @base_url + 'about'
+
+      text = wait_for("//*[starts-with(., '#{artifactId}:')]").text
+      text.match("^#{artifactId}:(.*)$")[1]
+    end
+
     def self.get(base_url, name)
       self.new(base_url, name)
     end
