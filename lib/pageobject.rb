@@ -76,7 +76,7 @@ module Jenkins
 
     def wait_for(selector, opts={})
       timeout = opts[:timeout] || 30
-      selector_kind = opts[:with] || :css
+      selector_kind = opts[:with] || :xpath
       start = Time.now.to_i
       begin
         find(selector_kind, selector)
