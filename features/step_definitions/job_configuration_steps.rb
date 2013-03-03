@@ -71,7 +71,12 @@ end
 
 When /^I set (\d+) builds? to keep$/ do |number|
     step %{I check the "logrotate" checkbox}
-    find(:xpath, "//input[@name='logrotate_nums']").set(number)
+
+    name = if @runner.jenkins_version < Gem::Version.new('1.503') then
+      'logrotate_nums' else '_.numToKeepStr'
+    end
+
+    find(:xpath, "//input[@name='#{name}']").set(number)
 end
 
 Then /^the job should be able to use the "(.*)" buildstep$/ do |build_step|

@@ -53,7 +53,7 @@ end
 # Skip scenarios that are not applicable for given Jenkins version
 Before do |scenario|
 
-  version = Jenkins::JenkinsConfig.new(@runner.url, '').jenkins_version;
+  version = @runner.jenkins_version
 
   should_run = scenario.feature.applicable_for?(version) && scenario.applicable_for?(version)
 
