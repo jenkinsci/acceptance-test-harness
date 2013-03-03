@@ -20,7 +20,7 @@ class JenkinsController
 
   JENKINS_DEBUG_LOG = WORKSPACE + "/last_test.log"
 
-  attr_accessor :is_running, :log_watcher, :tempdir
+  attr_accessor :is_running, :log_watcher, :tempdir, :jenkins_version
 
   def initialize(*args)
     @is_running = false
@@ -59,6 +59,8 @@ class JenkinsController
   def start
     start! unless is_running?
     @is_running = true
+
+    @jenkins_version =  Jenkins::PageObject.new(url, '').jenkins_version
   end
 
   # Restarts Jenkins

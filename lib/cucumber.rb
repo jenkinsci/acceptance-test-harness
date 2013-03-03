@@ -43,8 +43,8 @@ module Cucumber
         return true
       end
 
-      required_version = since_tag.values[0]
-      return (required_version.casecmp version) == -1
+      required_version = Gem::Version.new(since_tag.values[0])
+      return version > required_version
     end
 
     # Find tag by name

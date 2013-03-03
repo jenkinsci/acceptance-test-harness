@@ -85,5 +85,17 @@ module Jenkins
         raise
       end
     end
+
+    # Get the version of Jenkins under test
+    def jenkins_version
+      artifactId = 'org.jenkins-ci.main:jenkins-core'
+      visit @base_url + 'about'
+
+      text = wait_for("//*[starts-with(., '#{artifactId}:')]").text
+
+      return Gem::Version.new(
+          text.match("^#{artifactId}:(.*)$")[1]
+      )
+    end
   end
 end
