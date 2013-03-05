@@ -129,4 +129,13 @@ Feature: Configure/build freestyle jobs
     Then I should see console output matching "Downloading JDK from http://download.oracle.com"
     # Then I should see console output matching "java version "1.7.0_11""
 
+  Scenario: Schedule build periodically
+    Given a job
+    When I configure the job
+    And I schedule job to run periodically at "* * * * *"
+    And I save the job
+    And I wait for 70 seconds
+    Then the job should have build 1
+    And  the job should not have build 2
+
 # vim: tabstop=2 expandtab shiftwidth=2

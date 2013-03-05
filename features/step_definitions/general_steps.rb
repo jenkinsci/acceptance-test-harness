@@ -25,10 +25,14 @@ When /^I select "(.*?)" as a "(.*?)"$/ do |choice, select|
   option.select_option
 end
 
-Then /^the page should say "([^"]*)"$/ do |content|
-  page.should have_content(content)
-end
-
 When /^I debug$/ do
   binding.pry
+end
+
+When /^I wait for (\d+) seconds?$/ do |seconds|
+  sleep seconds.to_i
+end
+
+Then /^the page should say "([^"]*)"$/ do |content|
+  page.should have_content(content)
 end

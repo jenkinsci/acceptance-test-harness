@@ -70,13 +70,18 @@ When /^I want to keep only the latest successful artifacts$/ do
 end
 
 When /^I set (\d+) builds? to keep$/ do |number|
-    step %{I check the "logrotate" checkbox}
+  step %{I check the "logrotate" checkbox}
 
-    name = if @runner.jenkins_version < Jenkins::Version.new('1.503') then
-      'logrotate_nums' else '_.numToKeepStr'
-    end
+  name = if @runner.jenkins_version < Jenkins::Version.new('1.503') then
+    'logrotate_nums' else '_.numToKeepStr'
+  end
 
-    find(:xpath, "//input[@name='#{name}']").set(number)
+  find(:xpath, "//input[@name='#{name}']").set(number)
+end
+
+When /^I schedule job to run periodically at "([^"]*)"$/ do |schedule|
+  step 'I check the "hudson-triggers-TimerTrigger" checkbox'
+  find(:xpath, '//textarea[@path="/hudson-triggers-TimerTrigger/spec"]').set(schedule)
 end
 
 Then /^the job should be able to use the "(.*)" buildstep$/ do |build_step|
