@@ -47,6 +47,11 @@ When /^I visit "([^"]*)" action on build page$/ do |action|
   find(:xpath, "//div[@id='tasks']/div/a[text()='#{action}']").click
 end
 
+When /^I visit "([^"]*)" action on the job page$/ do |action|
+  @job.open
+  find(:xpath, "//div[@id='tasks']/div/a[text()='#{action}']").click
+end
+
 When /^I build (\d+) jobs$/  do |count|
   count.to_i.times do |i|
     @job.queue_build
@@ -60,6 +65,11 @@ end
 
 Then /^the job should see "([^"]*)" action on the build page$/ do |action|
   @job.last_build.open
+  page.should have_xpath("//div[@id='tasks']/div/a[text()='#{action}']")
+end
+
+Then /^I should see "([^"]*)" action on the job page$/ do |action|
+  @job.open
   page.should have_xpath("//div[@id='tasks']/div/a[text()='#{action}']")
 end
 

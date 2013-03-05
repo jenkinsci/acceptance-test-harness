@@ -52,6 +52,17 @@ module Jenkins
       find(:xpath, "//textarea[@name='command']").set(script)
     end
 
+    def change_script_step(script)
+      ensure_config_page
+
+      # HACK: on a sufficiently busy configuration page, the "add build step" button can end up below
+      # the sticky "save" button, and Chrome driver says that's not clickable. So we first scroll all
+      # the way down, so that "add build step" will appear top of the page.
+      page.execute_script "window.scrollTo(0, document.body.scrollHeight)"
+
+      find(:xpath, "//textarea[@name='command']").set(script)
+    end
+
 
     def add_postbuild_action(action)
       ensure_config_page

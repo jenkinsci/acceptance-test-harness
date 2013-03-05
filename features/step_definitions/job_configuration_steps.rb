@@ -7,6 +7,11 @@ When /^I add a script build step to run "([^"]*)"$/ do |script|
   @job.add_script_step(script)
 end
 
+When /^I change a script build step to run "([^"]*)"$/ do |script|
+  @job.change_script_step(script)
+end
+
+
 When /^I add always fail build step$/ do
   step %{I add a script build step to run "exit 1"}
 end
