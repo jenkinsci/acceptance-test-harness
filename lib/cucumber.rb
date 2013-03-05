@@ -28,6 +28,10 @@ module Cucumber
       def applicable_for?(version)
         Ast::applicable_for?(version, @tags.tags)
       end
+
+      def skip!
+        @steps.each{|step_invocation| step_invocation.skip_invoke!}
+      end
     end
 
     class Feature

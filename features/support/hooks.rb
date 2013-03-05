@@ -58,7 +58,7 @@ Before do |scenario|
   should_run = scenario.feature.applicable_for?(version) && scenario.applicable_for?(version)
 
   if !should_run
-    scenario.skip_invoke!
+    scenario.skip!
   end
 end
 
