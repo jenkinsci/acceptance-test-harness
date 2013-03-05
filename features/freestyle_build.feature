@@ -136,6 +136,7 @@ Feature: Configure/build freestyle jobs
     And I save the job
     And I wait for 70 seconds
     Then the job should have build 1
-    And  the job should not have build 2
+    # number 2 might exist
+    And  the job should not have build 3
 
 # vim: tabstop=2 expandtab shiftwidth=2
