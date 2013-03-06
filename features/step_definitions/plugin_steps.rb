@@ -19,8 +19,3 @@ end
 Then /^the job should be able to use the "(.*?)" SCM$/ do |scm|
   page.should have_content scm
 end
-
-Then /^the build should fail$/ do
-  pending # express the regexp above with the code you wish you had
-end
-

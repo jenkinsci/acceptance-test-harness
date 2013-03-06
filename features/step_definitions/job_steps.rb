@@ -72,9 +72,9 @@ Then /^I should see console output matching regexp "(.*)"$/ do |script|
   @job.last_build.console.should match /#{script}/
 end
 
-Then /^the job should see "([^"]*)" action on the build page$/ do |action|
+Then /^the job (should|should not) see "([^"]*)" action on the build page$/ do |should_or_not, action|
   @job.last_build.open
-  page.should have_xpath("//div[@id='tasks']/div/a[text()='#{action}']")
+  page.send should_or_not, have_xpath("//div[@id='tasks']/div/a[text()='#{action}']")
 end
 
 Then /^the (\d+) jobs should run concurrently$/ do |count|
@@ -88,11 +88,12 @@ Then /^I should be prompted to enter the "(.*?)" parameter$/ do |param_name|
   find(:xpath, "//input[@value='#{param_name}']").instance_of?(Capybara::Node::Element).should be true
 end
 
-Then /^the build should succeed$/ do
+Then /^the build should (succeed|fail)$/ do |status|
   while @job.last_build.in_progress?
     sleep 1
   end
-  @job.last_build.succeeded?.should be true
+  expected = status == 'succeed'
+  @job.last_build.succeeded?.should be expected
 end
 
 Then /^it should be disabled$/ do

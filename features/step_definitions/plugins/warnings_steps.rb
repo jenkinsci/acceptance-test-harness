@@ -1,0 +1,26 @@
+When /^I add console parser for "([^"]*)"$/ do |tool|
+  find(:xpath, '//*[@path="/publisher/repeatable-add"]').click
+  find(:xpath, "//select[@path='/publisher/consoleParsers/parserName']/option[text()='#{tool}']")
+      .select_option
+end
+
+When /^I add workspace parser for "([^"]*)" applied at "([^"]*)"$/ do |tool, pattern|
+  find(:xpath, '//*[@path="/publisher/repeatable-add[1]"]').locate.click
+  find(:xpath, '//input[@path="/publisher/parserConfigurations/pattern"]').set(pattern)
+  find(:xpath, "//select[@path='/publisher/parserConfigurations/parserName']/option[text()='#{tool}']")
+      .select_option
+end
+
+
+Then /^I should be able to configure warnings collection$/ do
+  @job.configure
+  @job.add_postbuild_action 'Scan for compiler warnings'
+end
+
+Then /^build should have (\d+) "([^"]+)" warnings?$/ do |count, tool|
+  @job.last_build.open
+
+  should_or_not = count.to_i > 0 ? 'should' : 'should not'
+  step %{the job #{should_or_not} see "#{tool} Warnings" action on the build page}
+  step %{the page should say "#{tool} Warnings: #{count}"};
+end

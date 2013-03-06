@@ -33,6 +33,6 @@ When /^I wait for (\d+) seconds?$/ do |seconds|
   sleep seconds.to_i
 end
 
-Then /^the page should say "([^"]*)"$/ do |content|
-  page.should have_content(content)
+Then /^the page (should|should not) say "([^"]*)"$/ do |should_or_not, content|
+  page.send should_or_not, have_content(content)
 end
