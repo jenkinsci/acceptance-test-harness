@@ -11,6 +11,10 @@ Before('@realupdatecenter') do |scenario|
 end
 
 Before do |scenario|
+
+  # skip scenario and initialization when not applicable
+  next if scenario.skip_not_applicable($version)
+
   # in case we are using Sauce, set the test name
   Sauce.config do |c|
     c[:name] = Sauce::Capybara::Cucumber.name_from_scenario(scenario)
@@ -30,6 +34,7 @@ Before do |scenario|
   end
   @runner = JenkinsController.create(controller_args)
   @runner.start
+  $version = @runner.jenkins_version
   at_exit do
     @runner.stop
     @runner.teardown
@@ -48,21 +53,12 @@ Before do |scenario|
       sleep 0.5
     end
   end
-end
 
-# Skip scenarios that are not applicable for given Jenkins version
-Before do |scenario|
-
-  version = Jenkins::PageObject.new(@runner.url, '').jenkins_version
-
-  should_run = scenario.feature.applicable_for?(version) && scenario.applicable_for?(version)
-
-  if !should_run
-    scenario.skip_invoke!
-  end
+  scenario.skip_not_applicable($version)
 end
 
 After do |scenario|
+  next if @runner.nil? # skip if not initialized
   @runner.stop # if test fails, stop in at_exit is not called
   @runner.teardown
 end

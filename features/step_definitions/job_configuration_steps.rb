@@ -72,7 +72,7 @@ end
 When /^I set (\d+) builds? to keep$/ do |number|
   step %{I check the "logrotate" checkbox}
 
-  name = if @runner.jenkins_version < Jenkins::Version.new('1.503') then
+  name = if @runner.jenkins_version < Gem::Version.new('1.503') then
     'logrotate_nums' else '_.numToKeepStr'
   end
 

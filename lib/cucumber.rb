@@ -25,8 +25,21 @@ module Cucumber
     end
 
     class Scenario
+
+      def skip_not_applicable(version)
+        return false if version.nil?
+
+        return false if feature.applicable_for?(version) && applicable_for?(version)
+        skip!
+        return true
+      end
+
       def applicable_for?(version)
         Ast::applicable_for?(version, @tags.tags)
+      end
+
+      def skip!
+        @steps.each{|step_invocation| step_invocation.skip_invoke!}
       end
     end
 
