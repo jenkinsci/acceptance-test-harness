@@ -6,17 +6,17 @@ module Plugins
   class Groovy < Jenkins::PageObject
 
     def self.add_auto_installation(name, version)
-      find(:xpath, "//input[@path='/hudson-plugins-groovy-GroovyInstallation/tool/name']").set(name)
+      find(:path, "/hudson-plugins-groovy-GroovyInstallation/tool/name").set(name)
       # by default Install automatically is checked
-      find(:xpath, "//select[@path='/hudson-plugins-groovy-GroovyInstallation/tool/properties/hudson-tools-InstallSourceProperty/installers/id']").click
+      find(:path, "/hudson-plugins-groovy-GroovyInstallation/tool/properties/hudson-tools-InstallSourceProperty/installers/id").click
       find(:xpath, "//option[@value='#{version}']").click
     end
 
     def self.add_local_installation(name, groovy_home)
-      find(:xpath, "//input[@path='/hudson-plugins-groovy-GroovyInstallation/tool/name']").set(name)
+      find(:path, "/hudson-plugins-groovy-GroovyInstallation/tool/name").set(name)
       # by default Install automatically is checked - need to uncheck
-      find(:xpath, "//input[@path='/hudson-plugins-groovy-GroovyInstallation/tool/properties/hudson-tools-InstallSourceProperty']").click 
-      find(:xpath, "//input[@path='/hudson-plugins-groovy-GroovyInstallation/tool/home']").set(groovy_home)
+      find(:path, "/hudson-plugins-groovy-GroovyInstallation/tool/properties/hudson-tools-InstallSourceProperty").click 
+      find(:path, "/hudson-plugins-groovy-GroovyInstallation/tool/home").set(groovy_home)
     end
 
     def prepare_autoinstall(runner)

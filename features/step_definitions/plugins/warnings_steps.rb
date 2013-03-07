@@ -1,12 +1,12 @@
 When /^I add console parser for "([^"]*)"$/ do |tool|
-  find(:xpath, '//*[@path="/publisher/repeatable-add"]').click
+  find(:path, '/publisher/repeatable-add').click
   find(:xpath, "//select[@path='/publisher/consoleParsers/parserName']/option[text()='#{tool}']")
       .select_option
 end
 
 When /^I add workspace parser for "([^"]*)" applied at "([^"]*)"$/ do |tool, pattern|
-  find(:xpath, '//*[@path="/publisher/repeatable-add[1]"]').locate.click
-  find(:xpath, '//input[@path="/publisher/parserConfigurations/pattern"]').set(pattern)
+  find(:path, '/publisher/repeatable-add[1]').locate.click
+  find(:path, '/publisher/parserConfigurations/pattern').set(pattern)
   find(:xpath, "//select[@path='/publisher/parserConfigurations/parserName']/option[text()='#{tool}']")
       .select_option
 end

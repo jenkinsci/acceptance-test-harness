@@ -19,3 +19,8 @@ module Capybara
     end
   end
 end
+
+# Introduce ':path' selector to find an element with matching path attribute
+Capybara.add_selector(:path) do
+  xpath { |path| XPath.descendant[XPath.attr(:path) == path.to_s] }
+end

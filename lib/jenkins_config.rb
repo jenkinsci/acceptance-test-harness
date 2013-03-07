@@ -23,11 +23,11 @@ module Jenkins
 
     def add_jdk_auto_installation(name, version)
       ensure_config_page
-      find(:xpath, "//input[@path='/hudson-model-JDK/tool/name']").set(name)
+      find(:path, "/hudson-model-JDK/tool/name").set(name)
       # by default Install automatically is checked
-      find(:xpath, "//select[@path='/hudson-model-JDK/tool/properties/hudson-tools-InstallSourceProperty/installers/id']").click
+      find(:path, "/hudson-model-JDK/tool/properties/hudson-tools-InstallSourceProperty/installers/id").click
       find(:xpath, "//option[@value='#{version}']").click
-      find(:xpath, "//input[@path='/hudson-model-JDK/tool/properties/hudson-tools-InstallSourceProperty/installers/acceptLicense']").click
+      find(:path, "/hudson-model-JDK/tool/properties/hudson-tools-InstallSourceProperty/installers/acceptLicense").click
     end
 
     def enter_oracle_credentials(login, password)

@@ -104,13 +104,13 @@ module Jenkins
       case
       when options[:includes]
         add_postbuild_action "Archive the artifacts"
-        find(:xpath, "//input[@path='/publisher/artifacts']").set(options[:includes])
+        find(:path, "/publisher/artifacts").set(options[:includes])
       when options[:excludes]
-        find(:xpath, "//button[@path='/publisher/advanced-button']").localte.click
-        find(:xpath, "//input[@path='/publisher/excludes']").set(options[:excludes])
+        find(:path, "/publisher/advanced-button").localte.click
+        find(:path, "/publisher/excludes").set(options[:excludes])
       when options[:latestOnly]
-        find(:xpath, "//button[@path='/publisher/advanced-button']").locate.click
-        find(:xpath, "//input[@path='/publisher/latestOnly']").set(options[:latestOnly])
+        find(:path, "/publisher/advanced-button").locate.click
+        find(:path, "/publisher/latestOnly").set(options[:latestOnly])
       end
 
     end

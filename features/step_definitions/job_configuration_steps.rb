@@ -91,7 +91,7 @@ end
 
 When /^I schedule job to run periodically at "([^"]*)"$/ do |schedule|
   step 'I check the "hudson-triggers-TimerTrigger" checkbox'
-  find(:xpath, '//textarea[@path="/hudson-triggers-TimerTrigger/spec"]').set(schedule)
+  find(:path, '/hudson-triggers-TimerTrigger/spec').set(schedule)
 end
 
 Then /^the job should be able to use the "(.*)" buildstep$/ do |build_step|
