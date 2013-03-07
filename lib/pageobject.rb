@@ -93,8 +93,9 @@ module Jenkins
 
       text = wait_for("//*[starts-with(., '#{artifactId}:')]").text
 
+      # Ignore the part after dash. Not supported by Gem::Version
       return Gem::Version.new(
-          text.match("^#{artifactId}:(.*)$")[1]
+          text.match("^#{artifactId}:([^-]*)")[1]
       )
     end
   end
