@@ -37,20 +37,21 @@ module Jenkins
       end
     end
 
+    def result?
+      @result ||= self.json['result']
+    end
+
     def succeeded?
-      @succeeded ||= begin
-        visit(build_url)
-        page.has_xpath? "//img[@title='Success']"
-      end
+      result? == 'SUCCESS'
     end
 
     def failed?
-      return !succeeded
+      result? == 'FAILED'
     end
 
     def in_progress?
       data = self.json
-      return data['building']
+      return data['building'] || result?.nil?
     end
   end
 end
