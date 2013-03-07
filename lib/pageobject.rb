@@ -88,14 +88,14 @@ module Jenkins
 
     # Get the version of Jenkins under test
     def jenkins_version
-      artifactId = 'org.jenkins-ci.main:jenkins-core'
+      prefix = 'About Jenkins '
       visit @base_url + 'about'
 
-      text = wait_for("//*[starts-with(., '#{artifactId}:')]").text
+      text = wait_for("//h1[starts-with(., '#{prefix}')]").text
 
       # Ignore the part after dash. Not supported by Gem::Version
       return Gem::Version.new(
-          text.match("^#{artifactId}:([^-]*)")[1]
+          text.match("^#{prefix}([^-]*)")[1]
       )
     end
   end
