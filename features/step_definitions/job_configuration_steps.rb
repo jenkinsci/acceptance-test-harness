@@ -7,7 +7,17 @@ When /^I add a shell build step "([^"]*)"$/ do |script|
   @job.add_shell_step(script)
 end
 
+When /^I add a shell build step$/ do |script|
+  @job.add_shell_step(script)
+end
+
 When /^I add a shell build step "([^"]*)" in the job configuration$/ do |script|
+  @job.configure do
+    @job.add_shell_step(script)
+  end
+end
+
+When /^I add a shell build step in the job configuration$/ do |script|
   @job.configure do
     @job.add_shell_step(script)
   end

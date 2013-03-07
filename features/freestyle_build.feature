@@ -99,7 +99,11 @@ Feature: Configure/build freestyle jobs
 
   Scenario: Archive artifact and exclude another
     Given a job
-    When I add a shell build step "echo 'archive include test' > test1.txt; echo 'archive exclude test' > test2.txt" in the job configuration
+    When I add a shell build step in the job configuration
+        """
+            echo 'archive include test' > test1.txt
+            echo 'archive exclude test' > test2.txt
+        """
     And I add archive the artifacts "test1.txt" and exclude "test2.txt" in the job configuration
     And I build the job
     And the build completes
