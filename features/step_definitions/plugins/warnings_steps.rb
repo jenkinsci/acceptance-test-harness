@@ -18,9 +18,11 @@ Then /^I should be able to configure warnings collection$/ do
 end
 
 Then /^build should have (\d+) "([^"]+)" warnings?$/ do |count, tool|
-  @job.last_build.open
 
   should_or_not = count.to_i > 0 ? 'should' : 'should not'
-  step %{the job #{should_or_not} see "#{tool} Warnings" action on the build page}
+
+  step %{the job #{should_or_not} have "#{tool} Warnings" action}
+  step %{the build #{should_or_not} have "#{tool} Warnings" action}
+  @job.last_build.open
   step %{the page should say "#{tool} Warnings: #{count}"};
 end

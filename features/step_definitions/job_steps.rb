@@ -72,8 +72,9 @@ Then /^I should see console output matching regexp "(.*)"$/ do |script|
   @job.last_build.console.should match /#{script}/
 end
 
-Then /^the job (should|should not) see "([^"]*)" action on the build page$/ do |should_or_not, action|
-  @job.last_build.open
+Then /^the (job|build) (should|should not) have "([^"]*)" action$/ do |entity, should_or_not, action|
+  page_object = entity == 'job' ? @job : @job.last_build
+  page_object.open
   page.send should_or_not, have_xpath("//div[@id='tasks']/div/a[text()='#{action}']")
 end
 
