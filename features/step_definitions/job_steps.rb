@@ -94,7 +94,7 @@ Then /^the build should (succeed|fail)$/ do |status|
     sleep 1
   end
   expected = status == 'succeed'
-  @job.last_build.succeeded?.should be expected
+  @job.last_build.succeeded?.should eql(expected), "\nConsole output:\n#{@job.last_build.console}\n\n"
 end
 
 Then /^it should be disabled$/ do
