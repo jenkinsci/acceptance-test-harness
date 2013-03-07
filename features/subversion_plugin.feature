@@ -13,7 +13,7 @@ Feature: Subversion support
     Given I have installed the "subversion" plugin
     And a job
     When I check out code from Subversion repository "https://svn.jenkins-ci.org/trunk/jenkins/test-projects/model-ant-project/"
-    And I add a script build step to run "test -d .svn"
+    And I add a shell build step "test -d .svn"
     And I save the job
     And I build 1 jobs
     Then the build should succeed

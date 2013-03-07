@@ -5,7 +5,7 @@
 Given /^a simple job$/ do
   @job = Jenkins::Job.create_freestyle(@base_url, Jenkins::Job.random_name)
   @job.configure do
-    @job.add_script_step("ls")
+    @job.add_shell_step("ls")
   end
 end
 

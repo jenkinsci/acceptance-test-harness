@@ -43,7 +43,7 @@ module Jenkins
     end
 
 
-    def add_script_step(script)
+    def add_shell_step(script)
       ensure_config_page
 
       find(:xpath, "//button[text()='Add build step']").locate.click

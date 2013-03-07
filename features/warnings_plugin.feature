@@ -29,7 +29,7 @@ Feature: Adds Warnings collection support
     When I configure the job
     And I add "Scan for compiler warnings" post-build action
     And I add console parser for "Maven"
-    And I add a script build step to run "mvn clean install || true"
+    And I add a shell build step "mvn clean install || true"
     And I save the job
     And I build the job
     Then build should have 1 "Maven" warning
@@ -41,7 +41,7 @@ Feature: Adds Warnings collection support
     When I configure the job
     And I add "Scan for compiler warnings" post-build action
     And I add workspace parser for "Java Compiler (javac)" applied at "**/*"
-    And I add a script build step to run "echo '@Deprecated class a {} class b extends a {}' > a.java && javac -Xlint a.java 2> out.log || true"
+    And I add a shell build step "echo '@Deprecated class a {} class b extends a {}' > a.java && javac -Xlint a.java 2> out.log || true"
     And I save the job
     And I build the job
     Then build should have 1 "Java" warning

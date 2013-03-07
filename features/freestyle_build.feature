@@ -11,7 +11,7 @@ Feature: Configure/build freestyle jobs
   Scenario: Run a simple job
     Given a job
     When I configure the job
-    And I add a script build step to run "ls"
+    And I add a shell build step "ls"
     And I save the job
     And I build the job
     Then I should see console output matching "+ ls"
@@ -28,7 +28,7 @@ Feature: Configure/build freestyle jobs
     Given a job
     When I configure the job
     And I enable concurrent builds
-    And I add a script build step to run "sleep 20"
+    And I add a shell build step "sleep 20"
     And I save the job
     And I build 2 jobs
     Then the 2 jobs should run concurrently
@@ -88,7 +88,7 @@ Feature: Configure/build freestyle jobs
 
   Scenario: Archive artifact and check content of archived artifact
     Given a job
-    When I add a shell build step to run "echo 'archive test' > test.txt" in the job configuration
+    When I add a shell build step "echo 'archive test' > test.txt" in the job configuration
     And I add archive the artifacts "test.txt" in the job configuration
     And I build the job
     And the build completes
@@ -99,7 +99,7 @@ Feature: Configure/build freestyle jobs
 
   Scenario: Archive artifact and exclude another
     Given a job
-    When I add a shell build step to run "echo 'archive include test' > test1.txt; echo 'archive exclude test' > test2.txt" in the job configuration
+    When I add a shell build step "echo 'archive include test' > test1.txt; echo 'archive exclude test' > test2.txt" in the job configuration
     And I add archive the artifacts "test1.txt" and exclude "test2.txt" in the job configuration
     And I build the job
     And the build completes
@@ -109,7 +109,7 @@ Feature: Configure/build freestyle jobs
 
   Scenario: Archive artifact and keep only the last successful
     Given a job
-    When I add a shell build step to run "echo 'archive test' > test.txt" in the job configuration
+    When I add a shell build step "echo 'archive test' > test.txt" in the job configuration
     And I add archive the artifacts "test.txt" in the job configuration
     And I want to keep only the latest successful artifacts
     And I build 3 jobs
@@ -121,7 +121,7 @@ Feature: Configure/build freestyle jobs
   Scenario: Add Auto-Installed Java
     Given I add Java version "jdk-7u11-oth-JPR" with name "jdk_1.7.0" installed automatically to Jenkins config page
     And a job
-    When I add a script build step to run "java -version"
+    When I add a shell build step "java -version"
     And I save the job
     And I build the job
     And the build completes

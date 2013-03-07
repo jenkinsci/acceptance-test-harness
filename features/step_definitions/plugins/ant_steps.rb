@@ -9,7 +9,7 @@ end
 
 When /^I add an Ant build step for:$/ do |ant_xml|
   @job.configure do
-    @job.add_script_step("cat > build.xml << EOF \n #{ant_xml} \nEOF")
+    @job.add_shell_step("cat > build.xml << EOF \n #{ant_xml} \nEOF")
     Plugins::Ant.add_ant_step('hello', 'build.xml')
   end
 end

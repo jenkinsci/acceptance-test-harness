@@ -13,7 +13,7 @@ Feature: Cleanup job workspace
     Given I have installed the "ws-cleanup" plugin
     And a simple job
     When I configure the job
-    And I add a script build step to run "touch artifact"
+    And I add a shell build step "touch artifact"
     And I save the job
     And I build the job
     Then there should be "artifact" in the workspace
@@ -23,7 +23,7 @@ Feature: Cleanup job workspace
     Given I have installed the "ws-cleanup" plugin
     And a simple job
     When I configure the job
-    And I add a script build step to run "touch artifact"
+    And I add a shell build step "touch artifact"
     And I add "Delete workspace when build is done" post-build action
     And I build the job
     Then there should not be "artifact" in the workspace
@@ -35,7 +35,7 @@ Feature: Cleanup job workspace
     When I configure the job
     And I check the "hudson-plugins-ws_cleanup-PreBuildCleanup" checkbox
     # Creating directory that already exists would fail the build
-    And I add a script build step to run "mkdir artifact.d"
+    And I add a shell build step "mkdir artifact.d"
     And I save the job
     And I build 2 jobs
     Then the build should succeed

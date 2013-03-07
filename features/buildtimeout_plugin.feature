@@ -11,7 +11,7 @@ Feature: Fail builds that take too long
   #  Given I have installed the "build-timeout" plugin
   #  And a job
   #  When I configure the job
-  #  And I add a script build step to run "sleep 10000"
+  #  And I add a shell build step "sleep 10000"
   #  And I set the build timeout to 3 minutes
   #  When I build the job
   #  Then the build should fail

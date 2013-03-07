@@ -33,7 +33,7 @@ Feature: Executing groovy scripts
   Scenario: Run groovy script from a file
     Given I have installed the "groovy" plugin
     And a job
-    When I add a script build step to run "echo println \'hello\' > hello.groovy"
+    When I add a shell build step "echo println \'hello\' > hello.groovy"
     And I set groovy build step "Execute Groovy script"
     And I set groovy script from file "hello.groovy"
     And I save the job

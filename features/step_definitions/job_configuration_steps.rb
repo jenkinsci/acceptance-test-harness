@@ -3,12 +3,18 @@ When /^I configure the job$/ do
   @job.configure
 end
 
-When /^I add a script build step to run "([^"]*)"$/ do |script|
-  @job.add_script_step(script)
+When /^I add a shell build step "([^"]*)"$/ do |script|
+  @job.add_shell_step(script)
+end
+
+When /^I add a shell build step "([^"]*)" in the job configuration$/ do |script|
+  @job.configure do
+    @job.add_shell_step(script)
+  end
 end
 
 When /^I add always fail build step$/ do
-  step %{I add a script build step to run "exit 1"}
+  @job.add_shell_step "exit 1"
 end
 
 When /^I add "([^"]*)" post-build action$/ do |action|
@@ -38,12 +44,6 @@ end
 When /^I disable the job$/ do
   @job.configure do
     @job.disable
-  end
-end
-
-When /^I add a shell build step to run "([^"]*)" in the job configuration$/ do |script|
-  @job.configure do
-    @job.add_script_step(script)
   end
 end
 
