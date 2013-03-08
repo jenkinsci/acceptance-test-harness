@@ -35,7 +35,7 @@ Feature: Adds Warnings collection support
     Then build should have 1 "Maven" warning
 
   @realupdatecenter
-  Scenario: Detect errors in worspace
+  Scenario: Detect errors in workspace
     Given I have installed the "warnings" plugin
     And a job
     When I configure the job
@@ -49,3 +49,15 @@ Feature: Adds Warnings collection support
     And I save the job
     And I build the job
     Then build should have 1 "Java" warning
+
+  @realupdatecenter
+  Scenario: Do not detect errors in ignored parts of the workspace
+    Given I have installed the "warnings" plugin
+    And a job
+    When I configure the job
+    And I add "Scan for compiler warnings" post-build action
+    And I add workspace parser for "Maven" applied at "no_errors_here.log"
+    And I add a shell build step "mvn clean install > errors.log || true"
+    And I save the job
+    And I build the job
+    Then build should have 0 "Maven" warning
