@@ -57,7 +57,7 @@ module Cucumber
       end
 
       required_version = Gem::Version.new(since_tag.values[0])
-      return version > required_version
+      return version >= required_version
     end
 
     # Find tag by name

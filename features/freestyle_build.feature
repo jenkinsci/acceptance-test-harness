@@ -143,4 +143,15 @@ Feature: Configure/build freestyle jobs
     # number 2 might exist
     And  the job should not have build 3
 
+  # JENKINS-16630
+  @since(1.504)
+  Scenario: Format zero-sized artifact size properly
+    Given a job
+    When I configure the job
+    And I add a shell build step "touch empty.file"
+    And I add archive the artifacts "empty.file"
+    And I save the job
+    And I build the job
+    Then the size of artifact "empty.file" should be "0 B"
+
 # vim: tabstop=2 expandtab shiftwidth=2

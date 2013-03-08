@@ -57,8 +57,8 @@ When /^I disable the job$/ do
   end
 end
 
-When /^I archive the artifacts "([^"]*)"$/ do |artifacts|
-  @job.archive_artifacts artifacts
+When /^I add archive the artifacts "([^"]*)"$/ do |artifacts|
+  @job.archive_artifacts includes:artifacts
 end
 
 When /^I add archive the artifacts "([^"]*)" in the job configuration$/ do |artifacts|

@@ -128,3 +128,9 @@ Then /^the content of artifact "([^"]*)" should be "([^"]*)"$/ do |artifact, con
   page.should have_content content
 end
 
+Then /^the size of artifact "([^"]*)" should be "([^"]*)"$/ do |artifact, size|
+  @job.last_build.open
+  actual = "//a[text()='#{artifact}']/../../td[@class='fileSize']"
+  match = actual + "[text()='#{size}']"
+  page.should have_xpath(match), 'Actual size: ' + find(:xpath, actual).text
+end
