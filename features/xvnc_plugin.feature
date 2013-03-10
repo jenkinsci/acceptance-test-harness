@@ -6,4 +6,4 @@ Feature: Adds Xvnc support
   @realupdatecenter
   Scenario: Install Xvnc plugin
     When I install the "xvnc" plugin from the update center
-    Then I should be able to configure Xvnc
+    Then I should be able to configure Xvnc globally

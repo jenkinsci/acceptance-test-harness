@@ -9,7 +9,7 @@ Given /^I add Java version "([^"]*)" with name "([^"]*)" installed automatically
   end
 end
 
-Then /^I should be able to configure (.*)$/ do |section_name|
+Then /^I should be able to configure (.*) globally$/ do |section_name|
   @jenkins_config = Jenkins::JenkinsConfig.get(@base_url, 'Jenkins global configuration')
   @jenkins_config.open
   page.should have_xpath "//div[@class='section-header' and normalize-space(text())='#{section_name}']"
