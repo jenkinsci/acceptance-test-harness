@@ -8,6 +8,7 @@ Feature: Executing groovy scripts
     And  the job should be able to use the "Execute system Groovy script" buildstep
 
  @realupdatecenter
+ @needs_preinstalled_sw
   Scenario: Run groovy script
     Given I have installed the "groovy" plugin
     And a job
@@ -30,6 +31,7 @@ Feature: Executing groovy scripts
     And I should see console output matching "this is a job system-groovy-test"
 
   @realupdatecenter
+  @needs_preinstalled_sw
   Scenario: Run groovy script from a file
     Given I have installed the "groovy" plugin
     And a job
