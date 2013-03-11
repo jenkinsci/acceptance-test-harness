@@ -39,11 +39,11 @@ Feature: Test Junit test result publisher
        mvn archetype:generate -DgroupId=com.simple.project -DartifactId=simple-project -DinteractiveMode=false
        sed -i "s/true/false/" simple-project/src/test/java/com/simple/project/AppTest.java
        cd simple-project
-       mvn test
+       mvn -fn test
      """
     And I set Junit archiver path "simple-project/target/surefire-reports/*.xml"
     And I save the job
     And I build the job
-    Then the build should not succeed
+    Then the build should be unstable
     And I visit "Test Result" action on build page
     Then the page should say "1 failures" 

@@ -45,6 +45,14 @@ module Jenkins
       result? == 'SUCCESS'
     end
 
+    def unstable?
+      @succeeded ||= begin
+        visit(build_url)
+        page.has_xpath? "//img[@title='Unstable']"
+      end
+    end
+
+
     def failed?
       result? == 'FAILED'
     end
