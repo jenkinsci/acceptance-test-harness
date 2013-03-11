@@ -97,6 +97,13 @@ Then /^the build should (succeed|fail)$/ do |status|
   @job.last_build.succeeded?.should eql(expected), "\nConsole output:\n#{@job.last_build.console}\n\n"
 end
 
+Then /^the build should not succeed$/ do
+  while @job.last_build.in_progress?
+    sleep 1
+  end
+  @job.last_build.succeeded?.should be false
+end
+
 Then /^it should be disabled$/ do
   page.should_not have_content 'Build Now'
 end
