@@ -111,4 +111,10 @@ to customize how the Vagrant VM is initialized. These scripts are copied into th
 
 ### Running one test
 You can run a single cucumber test by pointing to a test scenario in terms of its file name and line number like
-`bundle exec cucumber features/freestyle_build.feature:6`
+`bundle exec cucumber features/freestyle_build.feature:6` or `bundle exec rake FEATURE=features/freestyle_build.feature:6`. Line number can be omitted.
+
+## Describing features
+
+While creating new features you can check whether all steps are declared
+and unambiguous using `bundle exec rake cucumber:dryrun` as it is
+considerably faster that actually running the scenarios.

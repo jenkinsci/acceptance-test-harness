@@ -21,6 +21,11 @@ namespace :cucumber do
   Cucumber::Rake::Task.new(:wip) do |t|
     t.cucumber_opts = "--tags @wip,@needs_preinstalled_sw --format pretty"
   end
+
+  desc "Run step definition check"
+  Cucumber::Rake::Task.new(:dryrun) do |t|
+    t.cucumber_opts = "--format pretty --strict --dry-run"
+  end
 end
 
 desc "Defaults to running cucumber:ready"
