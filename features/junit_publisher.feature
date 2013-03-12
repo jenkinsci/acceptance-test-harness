@@ -3,7 +3,7 @@ Feature: Test Junit test result publisher
   Scenario: Publish test results
     When I create a job named "javadoc-test"
     And I configure the job
-    And I add a script build step to prepare test results 
+    And I add a shell build step
      """
        mvn archetype:generate -DgroupId=com.simple.project -DartifactId=simple-project -DinteractiveMode=false
        cd simple-project
@@ -13,12 +13,12 @@ Feature: Test Junit test result publisher
     And I save the job
     And I build the job
     Then the build should succeed
-    Then the job should see "Test Result" action on the build page
+    And the build should have "Test Result" action
 
   Scenario: Publish test result which passed
     When I create a job named "javadoc-test"
     And I configure the job
-    And I add a script build step to prepare test results
+    And I add a shell build step
      """
        mvn archetype:generate -DgroupId=com.simple.project -DartifactId=simple-project -DinteractiveMode=false
        cd simple-project
@@ -34,7 +34,7 @@ Feature: Test Junit test result publisher
  Scenario: Publish test result which failed
     When I create a job named "javadoc-test"
     And I configure the job
-    And I add a script build step to prepare test results
+    And I add a shell build step
      """
        mvn archetype:generate -DgroupId=com.simple.project -DartifactId=simple-project -DinteractiveMode=false
        sed -i "s/true/false/" simple-project/src/test/java/com/simple/project/AppTest.java
