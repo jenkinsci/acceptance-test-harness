@@ -59,6 +59,7 @@ Feature: Executing groovy scripts
     And I should see console output matching "Groovy version: 2.1.1"
 
   @realupdatecenter
+  @needs_preinstalled_sw
   Scenario: Add and run auto-installed Groovy
     Given I have installed the "groovy" plugin
     And fake Groovy installation at "/tmp/fake-groovy"

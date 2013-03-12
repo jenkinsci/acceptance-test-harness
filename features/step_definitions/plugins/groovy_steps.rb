@@ -39,6 +39,7 @@ When /^I add Groovy version with name "([^"]*)" and Groovy home "([^"]*)" to Jen
   end
 end
 
+# tHis needs preinstalled groovy to work
 Given /^fake Groovy installation at "([^"]*)"$/ do |path|
   real = ENV['PATH'].split(':').find { |p| File.exists? "#{p}/groovy" }
 
