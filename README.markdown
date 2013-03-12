@@ -1,7 +1,8 @@
 # Selenium tests for Jenkins
 
-This is a project to flesh out some of the [manual test cases for
-Jenkins LTS](https://wiki.jenkins-ci.org/display/JENKINS/LTS+1.409.x+RC+Testing) in an automated fashion.
+This is a project to flesh out some of the [manual test cases for Jenkins
+LTS](https://wiki.jenkins-ci.org/display/JENKINS/LTS+1.409.x+RC+Testing) in
+an automated fashion. Up to date test results can be found at https://jenkins.ci.cloudbees.com/job/selenium-tests.
 
 Right now the project is in a very early state, and is in dire need of some
 [Page Objects](https://code.google.com/p/selenium/wiki/PageObjects) for the
@@ -80,7 +81,7 @@ The behaviour of this controller can be customized through the following environ
 #### Ubuntu controller (type=ubuntu)
 This controller uses Vagrant to run Ubuntu, then deploy Jenkins from an APT repository as a debian package. (This controller is not yet capable of testing individual `*.deb` file.)
 
-* `REPO_URL` The location of APT repository in the format of `/etc/apt/sources.list`, such as `http://pkg.jenkins-ci.org/debian binary/'
+* `REPO_URL` The location of APT repository in the format of `/etc/apt/sources.list`, such as `http://pkg.jenkins-ci.org/debian binary/`
 
 #### CentOS controller (type=centos)
 This controller uses Vagrant to run CentOS, then deploy Jenkins from an RPM repository.
