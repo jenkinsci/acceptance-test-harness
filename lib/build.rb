@@ -46,10 +46,7 @@ module Jenkins
     end
 
     def unstable?
-      @succeeded ||= begin
-        visit(build_url)
-        page.has_xpath? "//img[@title='Unstable']"
-      end
+      result? == 'UNSTABLE'
     end
 
 
