@@ -46,8 +46,9 @@ When /^I visit the job page$/ do
   @job.open
 end
 
-When /^I visit "([^"]*)" action on build page$/ do |action|
-  @job.last_build.open
+When /^I visit (job|build) action named "([^"]*)"$/ do |entity, action|
+  page_object = entity == 'job' ? @job : @job.last_build
+  page_object.open
   find(:xpath, "//div[@id='tasks']/div/a[text()='#{action}']").click
 end
 

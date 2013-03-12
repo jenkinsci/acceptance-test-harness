@@ -1,5 +1,5 @@
 Feature: Test Junit test result publisher
- 
+
   Scenario: Publish test results
     When I create a job named "javadoc-test"
     And I configure the job
@@ -28,7 +28,7 @@ Feature: Test Junit test result publisher
     And I save the job
     And I build the job
     Then the build should succeed
-    And I visit "Test Result" action on build page
+    And I visit build action named "Test Result"
     Then the page should say "0 failures" 
 
  Scenario: Publish test result which failed
@@ -45,5 +45,5 @@ Feature: Test Junit test result publisher
     And I save the job
     And I build the job
     Then the build should be unstable
-    And I visit "Test Result" action on build page
+    And I visit build action named "Test Result"
     Then the page should say "1 failures" 

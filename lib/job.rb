@@ -51,6 +51,12 @@ module Jenkins
       find(:xpath, "//textarea[@name='command']").set(script)
     end
 
+    def change_script_step(script)
+      ensure_config_page
+
+      find(:xpath, "//textarea[@name='command']").locate.set(script)
+    end
+
 
     def add_postbuild_action(action)
       ensure_config_page

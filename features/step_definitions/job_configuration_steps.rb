@@ -23,6 +23,11 @@ When /^I add a shell build step in the job configuration$/ do |script|
   end
 end
 
+When /^I change a shell build step to "([^"]*)"$/ do |script|
+  @job.change_script_step(script)
+end
+
+
 When /^I add always fail build step$/ do
   @job.add_shell_step "exit 1"
 end

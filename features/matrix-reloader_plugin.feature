@@ -15,7 +15,7 @@ Feature: Test matrix-reloaded plugin
     And I configure user axis "BBB" with values "333 444"
     And I save the job
     And I build the job
-    And I visit "Matrix Reloaded" action on build page
+    And I visit build action named "Matrix Reloaded"
     Then I should see matrix configuration "AAA=111,BBB=333"
     And I should see matrix configuration "AAA=111,BBB=444"
     And I should see matrix configuration "AAA=222,BBB=333"
@@ -29,7 +29,7 @@ Feature: Test matrix-reloaded plugin
     And I configure user axis "BBB" with values "333 444"
     And I save the job
     And I build the job
-    And I visit "Matrix Reloaded" action on build page
+    And I visit build action named "Matrix Reloaded"
     And I select matrix configuration "AAA=111,BBB=333"
     And I rebuild matrix job
     Then combination "AAA=111,BBB=333" should be built
