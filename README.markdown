@@ -1,7 +1,7 @@
 # Selenium tests for Jenkins
 
 This is a project to flesh out some of the [manual test cases for Jenkins
-LTS](https://wiki.jenkins-ci.org/display/JENKINS/LTS+1.409.x+RC+Testing) in
+LTS](https://wiki.jenkins-ci.org/display/JENKINS/LTS+RC+Testing) in
 an automated fashion. Up to date test results can be found at https://jenkins.ci.cloudbees.com/job/selenium-tests.
 
 Right now the project is in a very early state, and is in dire need of some
