@@ -7,3 +7,42 @@ Feature: Adds Xvnc support
   Scenario: Install Xvnc plugin
     When I install the "xvnc" plugin from the update center
     Then I should be able to configure Xvnc globally
+
+  @realupdatecenter
+  @needs_preinstalled_sw
+  Scenario: Run xvnc during build
+    Given I have installed the "xvnc" plugin
+    And a job
+    When I configure the job
+    And I let xvnc run during the build
+    And I save the job
+    And I build the job
+    Then the build should succeed
+    And xvnc run during the build
+
+  @realupdatecenter
+  @needs_preinstalled_sw
+  Scenario: Run xvnc during build taking screenshot at the end
+    Given I have installed the "xvnc" plugin
+    And a job
+    When I configure the job
+    And I let xvnc run during the build taking screanshot at the end
+    And I save the job
+    And I build the job
+    Then the build should succeed
+    And xvnc run during the build
+    And took a screanshot
+
+  @realupdatecenter
+  @needs_preinstalled_sw
+  Scenario: Run xvnc on specific display number
+    Given I have installed the "xvnc" plugin
+    And a job
+    When I set xvnc display number to 42
+    And I configure the job
+    And I let xvnc run during the build
+    And I save the job
+    And I build the job
+    Then the build should succeed
+    And xvnc run during the build
+    And used display number 42

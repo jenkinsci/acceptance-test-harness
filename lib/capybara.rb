@@ -16,6 +16,23 @@ module Capybara
         }
         return self
       end
+
+      def check
+        ensure_checkbox.set(true)
+      end
+
+      def uncheck
+        ensure_checkbox.set(true)
+      end
+
+      def ensure_checkbox
+        type = self[:type]
+        elementDescription = !type ? tag_name : "#{tag_name} of type #{type}"
+
+        raise "Element #{elementDescription} is not checkbox" if type != 'checkbox'
+
+        return self
+      end
     end
   end
 end
