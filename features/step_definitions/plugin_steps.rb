@@ -19,3 +19,7 @@ end
 Then /^the job should be able to use the "(.*?)" SCM$/ do |scm|
   page.should have_content scm
 end
+
+Then /^plugin page "([^"]*)" should exist$/ do |page|
+  visit "#{@baseurl}/plugin/#{page}"
+end
