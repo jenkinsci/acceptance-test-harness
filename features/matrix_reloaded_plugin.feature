@@ -1,9 +1,9 @@
 Feature: Test matrix-reloaded plugin
- 
+
   @realupdatecenter
   Scenario: Install matrix-reloaded plugin
     When I install the "matrix-reloaded" plugin from the update center
-    And I create a matrix job   
+    And I create a matrix job
     And I build the job
     Then the build should have "Matrix Reloaded" action
 
@@ -24,7 +24,7 @@ Feature: Test matrix-reloaded plugin
   @realupdatecenter
   Scenario: Run Matrix configuration
     Given I have installed the "matrix-reloaded" plugin
-    When I create a matrix job 
+    When I create a matrix job
     And I configure user axis "AAA" with values "111 222"
     And I configure user axis "BBB" with values "333 444"
     And I save the job

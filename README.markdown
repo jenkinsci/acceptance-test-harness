@@ -115,6 +115,32 @@ You can run a single cucumber test by pointing to a test scenario in terms of it
 
 ## Describing features
 
+New feature definitions can take advantage of existing step definitions as well
+as introduce it's own. It is desirable to reuse steps that already exists and
+keep feature specific steps separated at the same time.
+
 While creating new features you can check whether all steps are declared
 and unambiguous using `bundle exec rake cucumber:dryrun` as it is
 considerably faster that actually running the scenarios.
+
+### Features
+
+All features are located in `features` directory and the filenames are suffixed
+with `.feature` or `_plugin.feature` provided the feature describes functionality
+of a plugin.
+
+```
+features/configure_slaves.feature
+features/git_plugin.feature
+```
+
+### Step definitions
+
+All step definitions are located in `features/step_definitions` directory or
+`features/step_definitions/plugins` provided the feature describes functionality
+of a plugin. Filenames are suffixed with `_steps.rb`.
+
+```
+features/step_definitions/job_steps.rb
+features/step_definitions/plugins/ant_steps.rb
+```

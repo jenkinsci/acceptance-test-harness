@@ -1,7 +1,7 @@
 When /^I configure user axis "([^"]*)" with values "([^"]*)"$/ do |name, value|
   if !(page.current_url.eql? @job.configure_url)
       visit @job.configure_url
-  end  
+  end
   find(:xpath, "//button[text()='Add axis']").click
   find(:xpath, "//li/a[text()='User-defined Axis']").click
   sleep 0.1 # wait until axis appear
@@ -29,5 +29,4 @@ Then /^combination "([^"]*)" (should|should not) be built$/ do |configuration, s
   visit @job.job_url + "/#{configuration}/lastBuild"
 
   page.send should_or_not, have_xpath("//h1[contains(text(),'Build #{build_name}')]");
-  
 end
