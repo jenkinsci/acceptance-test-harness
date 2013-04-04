@@ -89,7 +89,7 @@ Feature: Configure/build freestyle jobs
   Scenario: Archive artifact and check content of archived artifact
     Given a job
     When I add a shell build step "echo 'archive test' > test.txt" in the job configuration
-    And I add archive the artifacts "test.txt" in the job configuration
+    And I set artifact "test.txt" to archive in the job configuration
     And I build the job
     And the build completes
     Then the build should succeed
@@ -104,7 +104,7 @@ Feature: Configure/build freestyle jobs
             echo 'archive include test' > test1.txt
             echo 'archive exclude test' > test2.txt
         """
-    And I add archive the artifacts "test1.txt" and exclude "test2.txt" in the job configuration
+    And I set artifact "test1.txt" to archive and exclude "test2.txt" in the job configuration
     And I build the job
     And the build completes
     Then the build should succeed
@@ -114,7 +114,7 @@ Feature: Configure/build freestyle jobs
   Scenario: Archive artifact and keep only the last successful
     Given a job
     When I add a shell build step "echo 'archive test' > test.txt" in the job configuration
-    And I add archive the artifacts "test.txt" in the job configuration
+    And I set artifact "test.txt" to archive in the job configuration
     And I want to keep only the latest successful artifacts
     And I build 3 jobs
     Then the build #1 should not has archived "test.txt" artifact
@@ -149,7 +149,7 @@ Feature: Configure/build freestyle jobs
     Given a job
     When I configure the job
     And I add a shell build step "touch empty.file"
-    And I add archive the artifacts "empty.file"
+    And I set artifact "empty.file" to archive
     And I save the job
     And I build the job
     Then the size of artifact "empty.file" should be "0 B"
