@@ -99,6 +99,10 @@ When /^I schedule job to run periodically at "([^"]*)"$/ do |schedule|
   find(:path, '/hudson-triggers-TimerTrigger/spec').set(schedule)
 end
 
+When /^I use "([^"]*)" as custom workspace$/ do |workspace|
+  @job.use_custom_workspace(workspace)
+end
+
 Then /^the job should be able to use the "(.*)" buildstep$/ do |build_step|
   find(:xpath, "//button[text()='Add build step']").click
   find(:xpath, "//a[text()='#{build_step}']").instance_of?(Capybara::Node::Element).should be true

@@ -154,4 +154,12 @@ Feature: Configure/build freestyle jobs
     And I build the job
     Then the size of artifact "empty.file" should be "0 B"
 
+  Scenario: Use custom workspace
+    Given a job
+    When I configure the job
+    And I use "custom_workspace" as custom workspace
+    And I save the job
+    And I build the job
+    Then I should see console output matching regexp "^Building in workspace (.*)custom_workspace$"
+
 # vim: tabstop=2 expandtab shiftwidth=2

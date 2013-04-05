@@ -121,6 +121,13 @@ module Jenkins
 
     end
 
+    def use_custom_workspace(workspace)
+      ensure_config_page
+      click_button "Advanced..."
+      find(:path, "/customWorkspace").set(true)
+      find(:path, "/customWorkspace/directory").set(workspace)
+    end
+
     def self.create_freestyle(base_url, name)
       visit("#{@base_url}/newJob")
 
