@@ -69,6 +69,10 @@ module Jenkins
       visit(job_url)
     end
 
+    def open_config
+      visit configure_url
+    end
+
     def last_build
       return build("lastBuild") # Hacks!
     end

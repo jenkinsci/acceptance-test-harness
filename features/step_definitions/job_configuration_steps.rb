@@ -107,3 +107,8 @@ Then /^the job should be able to use the "(.*)" buildstep$/ do |build_step|
   find(:xpath, "//button[text()='Add build step']").click
   find(:xpath, "//a[text()='#{build_step}']").instance_of?(Capybara::Node::Element).should be true
 end
+
+Then /^I the job should be able to use the "([^"]*)" build environment action$/ do |env_action|
+  find(:xpath, "//label[text()='#{env_action}']").instance_of?(Capybara::Node::Element).should be true
+end
+
