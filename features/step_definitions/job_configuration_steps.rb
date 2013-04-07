@@ -103,6 +103,11 @@ When /^I use "([^"]*)" as custom workspace$/ do |workspace|
   @job.use_custom_workspace(workspace)
 end
 
+When /^I copy resource "([^"]*)" into workspace as "([^"]*)" via shell command$/ do |resource, target|
+  @job.add_shell_step("cp #{File.dirname(__FILE__)}/../../resources/#{resource} ./#{target}")
+end
+
+
 Then /^the job should be able to use the "(.*)" buildstep$/ do |build_step|
   find(:xpath, "//button[text()='Add build step']").click
   find(:xpath, "//a[text()='#{build_step}']").instance_of?(Capybara::Node::Element).should be true
@@ -112,3 +117,7 @@ Then /^I the job should be able to use the "([^"]*)" build environment action$/ 
   find(:xpath, "//label[text()='#{env_action}']").instance_of?(Capybara::Node::Element).should be true
 end
 
+Then /^I should be able to use "([^"]*)" post-build action$/ do |action|
+  find(:xpath, "//button[text()='Add post-build action']").click
+  find(:xpath, "//a[text()='#{action}']").instance_of?(Capybara::Node::Element).should be true
+end
