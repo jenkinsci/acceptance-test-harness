@@ -13,6 +13,14 @@ module Jenkins
       @base_url + "configure"
     end
 
+    def configure(&block)
+      open
+      unless block.nil?
+        yield
+        save
+      end
+    end
+
     def open
       visit(configure_url)
     end

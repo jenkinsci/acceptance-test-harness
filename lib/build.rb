@@ -22,6 +22,10 @@ module Jenkins
       build_url + "/artifact/#{artifact}"
     end
 
+    def console_url()
+      "#{build_url}/console"
+    end
+
     def open
       visit(build_url)
     end
@@ -32,7 +36,7 @@ module Jenkins
 
     def console
       @console ||= begin
-        visit("#{build_url}/console")
+        visit(console_url)
         find(:xpath, "//pre").text
       end
     end
