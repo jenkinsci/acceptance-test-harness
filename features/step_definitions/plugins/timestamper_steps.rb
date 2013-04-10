@@ -1,5 +1,5 @@
 Given /^a job inserting timestamps$/ do
-  step "Given a job"
+  step "a job"
 
   @job.configure do
     find(:path, '/hudson-plugins-timestamper-TimestamperBuildWrapper').check
