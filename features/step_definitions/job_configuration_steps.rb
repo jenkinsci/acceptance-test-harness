@@ -32,6 +32,12 @@ When /^I add always fail build step$/ do
   @job.add_shell_step "exit 1"
 end
 
+When /^I add always fail build step in the job configuration$/ do
+  @job.configure do
+    step 'I add always fail build step'
+  end
+end
+
 When /^I add "([^"]*)" post-build action$/ do |action|
   @job.add_postbuild_action(action)
 end
