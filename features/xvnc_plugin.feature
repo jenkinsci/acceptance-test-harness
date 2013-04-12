@@ -4,11 +4,6 @@ Feature: Adds Xvnc support
   I want to able to setup Xvnc server
 
   @realupdatecenter
-  Scenario: Install Xvnc plugin
-    When I install the "xvnc" plugin from the update center
-    Then I should be able to configure Xvnc globally
-
-  @realupdatecenter
   @needs_preinstalled_sw
   Scenario: Run xvnc during build
     Given I have installed the "xvnc" plugin

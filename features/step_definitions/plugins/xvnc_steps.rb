@@ -10,7 +10,10 @@ end
 When /^I set xvnc display number to (\d+)$/ do |displayNumber|
   jenkins = Jenkins::JenkinsConfig.get(@base_url, 'Jenkins global configuration')
   jenkins.configure do
-    find(:path, '/hudson-plugins-xvnc-Xvnc/baseDisplayNumber').set(displayNumber)
+    # xvnc 1.11 and earlier
+    # find(:path, '/hudson-plugins-xvnc-Xvnc/baseDisplayNumber').set(displayNumber)
+    find(:path, '/hudson-plugins-xvnc-Xvnc/minDisplayNumber').set(displayNumber)
+    find(:path, '/hudson-plugins-xvnc-Xvnc/maxDisplayNumber').set(displayNumber)
   end
 end
 
