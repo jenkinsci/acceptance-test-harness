@@ -29,21 +29,33 @@ module Jenkins
       sleep 5
     end
 
-    def install_plugin(name)
+    def installed?(name)
+      visit "#{url}/installed"
+      page.has_xpath?("//input[@url='plugin/#{name}']")
+    end
+
+    def install_plugin!(name)
+
+      return if installed?(name)
+
       unless @updated
         check_for_updates
       end
 
       visit "#{url}/available"
-
       find(:xpath, "//input[starts-with(@name,'plugin.#{name}.')]").locate.set(true)
-
       find_button('Install').click
-    end
 
-    def installed?(name)
-      visit "#{url}/installed"
-      page.has_xpath?("//input[@url='plugin/#{name}']")
+      start = Time.now.to_i
+      # wait for plugin to appear in the interface
+      until installed?(name) do
+        sleep 1
+      end
+
+      installation_time = Time.now.to_i - start
+      if installation_time > 30
+        puts "Plugin installation took #{installation_time} seconds"
+      end
     end
   end
 end
