@@ -60,17 +60,17 @@ When /^I build (\d+) jobs$/  do |count|
 end
 
 When /^the build completes$/ do
-  while @job.last_build.in_progress?
-    sleep 1
-  end
+  @job.last_build.wait_until_finished
 end
 
 Then /^I should see console output matching "(.*)"$/ do |script|
-  @job.last_build.console.should match /#{Regexp.escape(script)}/
+  build = @job.last_build.wait_until_finished
+  build.console.should match /#{Regexp.escape(script)}/
 end
 
 Then /^I should see console output matching regexp "(.*)"$/ do |script|
-  @job.last_build.console.should match /#{script}/
+  build = @job.last_build.wait_until_finished
+  build.console.should match /#{script}/
 end
 
 Then /^the (job|build) (should|should not) have "([^"]*)" action$/ do |entity, should_or_not, action|
@@ -91,17 +91,11 @@ Then /^I should be prompted to enter the "(.*?)" parameter$/ do |param_name|
 end
 
 Then /^the build should (succeed|fail)$/ do |status|
-  while @job.last_build.in_progress?
-    sleep 1
-  end
   expected = status == 'succeed'
   @job.last_build.succeeded?.should eql(expected), "\nConsole output:\n#{@job.last_build.console}\n\n"
 end
 
 Then /^the build should be unstable$/ do
-  while @job.last_build.in_progress?
-    sleep 1
-  end
   @job.last_build.unstable?.should be true
 end
 
@@ -117,7 +111,7 @@ end
 Then /^the job configuration should be equals to "([^"]*)" configuration$/ do |source_name|
   visit @job.config_xml
   source_page = page.html
-  visit @base_url + "/job/#{source_name}/config.xml"  
+  visit @base_url + "/job/#{source_name}/config.xml"
   (page.html.eql? source_page).should be true
 end
 

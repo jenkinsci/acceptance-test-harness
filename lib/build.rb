@@ -42,7 +42,17 @@ module Jenkins
     end
 
     def result?
+      wait_until_finished
+
       @result ||= self.json['result']
+    end
+
+    def wait_until_finished
+      while in_progress?
+        sleep 1
+      end
+
+      return self
     end
 
     def succeeded?
@@ -53,14 +63,16 @@ module Jenkins
       result? == 'UNSTABLE'
     end
 
-
     def failed?
       result? == 'FAILED'
     end
 
     def in_progress?
+
+      return false if !@result.nil?
+
       data = self.json
-      return data['building'] || result?.nil?
+      return data['building'] || data['result'].nil?
     end
   end
 end
