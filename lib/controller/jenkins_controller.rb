@@ -32,20 +32,19 @@ class JenkinsController
 
   # download form-element-path.hpi and return its path
   def download_path_element
+
+    source = 'http://updates.jenkins-ci.org/latest/form-element-path.hpi'
+
     target = WORKSPACE+'/path-element.hpi'
 
-    if File.exist?(target) && Digest::MD5.hexdigest(File.read(target))!="ba8f63a87103c39b5f82eb42de2bce38"
-      File.delete target
+    File.delete target
+
+    open(target,'wb') do |f|
+      rsp = RestClient.get source
+      f.write(rsp.body)
     end
 
-    unless File.exist?(target)
-      open(target,'wb') do |f|
-        rsp = RestClient.get 'http://maven.jenkins-ci.org:8081/content/repositories/releases/org/jenkins-ci/plugins/form-element-path/1.1/form-element-path-1.1.hpi'
-        f.write(rsp.body)
-      end
-    end
-
-    target
+    return target
   end
 
   # Starts Jenkins, with a brand new temporary JENKINS_HOME.
