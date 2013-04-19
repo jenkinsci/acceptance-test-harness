@@ -37,7 +37,7 @@ class JenkinsController
 
     target = WORKSPACE+'/path-element.hpi'
 
-    File.delete target
+    File.delete target if File.exists? target
 
     open(target,'wb') do |f|
       rsp = RestClient.get source
