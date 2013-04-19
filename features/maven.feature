@@ -11,7 +11,6 @@ Feature: Adds Apache Maven support
     And I add a top-level maven target "archetype:generate -DarchetypeGroupId=org.apache.maven.archetypes -DgroupId=com.mycompany.app -DartifactId=my-app -Dversion=1.0 -B -X" for maven "maven_3.0.4"
     And I save the job
     And I build the job
-    And the build completes	
     Then I should see console output matching "Unpacking http://archive.apache.org/dist/maven/binaries/apache-maven-3.0.4-bin.zip"
     Then I should see console output matching "Apache Maven 3.0.4"
     And the build should succeed
@@ -24,8 +23,7 @@ Feature: Adds Apache Maven support
     And I add a top-level maven target "archetype:generate -DarchetypeGroupId=org.apache.maven.archetypes -DgroupId=com.mycompany.app -DartifactId=my-app -Dversion=1.0 -B -X" for maven "local_maven_3.0.4"
     And I save the job
     And I build the job
-    And the build completes	
-    Then I should see console output matching "fake maven at /tmp/fake-maven/bin/mvn"	
+    Then I should see console output matching "fake maven at /tmp/fake-maven/bin/mvn"
     And the build should succeed
 
   Scenario: Use local Maven repository
@@ -36,7 +34,6 @@ Feature: Adds Apache Maven support
     And I use local Maven repository
     And I save the job
     And I build the job
-    And the build completes	
-    Then I should see console output matching regexp "-Dmaven.repo.local=([^\n]*)/.repository"	
+    Then I should see console output matching regexp "-Dmaven.repo.local=([^\n]*)/.repository"
     And the build should succeed
 

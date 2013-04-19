@@ -59,10 +59,6 @@ When /^I build (\d+) jobs$/  do |count|
   sleep 6 # Hard-coded sleep to allow the queue delay in Jenkins to expire
 end
 
-When /^the build completes$/ do
-  @job.last_build.wait_until_finished
-end
-
 Then /^I should see console output matching "(.*)"$/ do |script|
   build = @job.last_build.wait_until_finished
   build.console.should match /#{Regexp.escape(script)}/

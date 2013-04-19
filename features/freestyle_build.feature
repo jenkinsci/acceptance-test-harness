@@ -91,7 +91,6 @@ Feature: Configure/build freestyle jobs
     When I add a shell build step "echo 'archive test' > test.txt" in the job configuration
     And I set artifact "test.txt" to archive in the job configuration
     And I build the job
-    And the build completes
     Then the build should succeed
     And I should see console output matching "Archiving artifacts"
     And the artifact "test.txt" should be archived
@@ -106,7 +105,6 @@ Feature: Configure/build freestyle jobs
         """
     And I set artifact "test1.txt" to archive and exclude "test2.txt" in the job configuration
     And I build the job
-    And the build completes
     Then the build should succeed
     And the artifact "test1.txt" should be archived
     And the artifact "test2.txt" should not be archived
@@ -128,7 +126,6 @@ Feature: Configure/build freestyle jobs
     When I add a shell build step "java -version"
     And I save the job
     And I build the job
-    And the build completes
     Then I should see console output matching "Installing JDK jdk-7u11-oth-JPR"
     Then I should see console output matching "Downloading JDK from http://download.oracle.com"
     # Then I should see console output matching "java version "1.7.0_11""
