@@ -15,7 +15,7 @@ module Jenkins
       end
     end
 
-    def use_local_repo()
+    def use_local_repo
       find(:path, "/builder/advanced-button").click
       find(:path, "/builder/usePrivateRepository").click
     end
@@ -30,7 +30,7 @@ module Jenkins
     def add_local_installation(name, maven_home)
       find(:path, "/hudson-tasks-Maven$MavenInstallation/tool/name").set(name)
       # by default Install automatically is checked - need to uncheck
-      find(:path, "/hudson-tasks-Maven$MavenInstallation/tool/properties/hudson-tools-InstallSourceProperty").click 
+      find(:path, "/hudson-tasks-Maven$MavenInstallation/tool/properties/hudson-tools-InstallSourceProperty").click
       find(:path, "/hudson-tasks-Maven$MavenInstallation/tool/home").set(maven_home)
     end
 
@@ -39,6 +39,53 @@ module Jenkins
       Dir.mkdir tempdir+'/updates'
       File.open("#{tempdir}/updates/hudson.tasks.Maven.MavenInstaller", 'w') { |file| file.write('{"list": [{"id": "3.0.4", "name": "3.0.4", "url": "http://archive.apache.org/dist/maven/binaries/apache-maven-3.0.4-bin.zip"}]}') }
     end
+  end
 
+  class MavenJob < Job
+
+    def self.value
+      return 'hudson.maven.MavenModuleSet'
+    end
+
+    def add_prebuild_shell_step(script)
+      ensure_config_page
+
+      find(:xpath, "//button[text()='Add pre-build step']").locate.click
+      find(:xpath, "//a[text()='Execute shell']").click
+      find(:path, '/prebuilder/command').set(script)
+    end
+
+    def copy_resource(resource, target)
+      add_prebuild_shell_step "cp -r #{File.dirname(__FILE__)}/../resources/#{resource} ./#{target}"
+    end
+
+    def maven_goals(goals)
+      find(:path, "/goals").set(goals)
+    end
+
+    def maven_version(version)
+      open_advanced
+      find(:xpath, "//select[@name='maven_version']").click
+      find(:xpath, "//option[@value='#{options[:version]}']").click
+    end
+
+    def use_local_repo
+      open_advanced
+      find(:path, "/usePrivateRepository").click
+    end
+
+    private
+
+    @advanced_open = false
+
+    def open_advanced
+      return if advanced_open
+
+      # Lets see how long will it take for this to blow up
+      find(:path, "/advanced-button[1]").click
+      advanced_open = true
+    end
   end
 end
+
+Jenkins::Job.register('Maven', Jenkins::MavenJob)

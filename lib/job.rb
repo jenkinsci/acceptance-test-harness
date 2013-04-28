@@ -51,7 +51,6 @@ module Jenkins
       find(:xpath, "//input[@name='parameter.defaultValue']").set(value)
     end
 
-
     def add_shell_step(script)
       ensure_config_page
 
@@ -66,14 +65,13 @@ module Jenkins
       find(:xpath, "//textarea[@name='command']").locate.set(script)
     end
 
-
     def add_postbuild_action(action)
       ensure_config_page
 
       find(:xpath, "//button[text()='Add post-build action']").locate.click
       find(:xpath, "//a[text()='#{action}']").click
     end
-    
+
     def add_build_action(action)
       ensure_config_page
 
@@ -160,6 +158,10 @@ module Jenkins
       find(:path, "/customWorkspace/directory").set(workspace)
     end
 
+    def copy_resource(resource, target)
+      add_shell_step "cp -r #{File.dirname(__FILE__)}/../resources/#{resource} ./#{target}"
+    end
+
     def self.create_freestyle(base_url, name)
       visit("#{@base_url}/newJob")
 
@@ -188,6 +190,31 @@ module Jenkins
       click_button "OK"
 
       self.new(base_url, name)
+    end
+
+    def self.create(title, base_url)
+      type = @@job_types[title];
+      value = type.value
+      name = Jenkins::PageObject.random_name
+
+      visit "#{base_url}/newJob"
+      fill_in "name", :with => name
+      find(:xpath, "//input[starts-with(@value, '#{value}')]").set(true)
+      click_button "OK"
+
+      type.new(base_url, name)
+    end
+
+    @@job_types = Hash.new
+
+    # Register job type
+    def self.register(title, type)
+      @@job_types[title] = type
+    end
+
+    # Get type by title
+    def self.get(title)
+      return @@job_types[title]
     end
   end
 end

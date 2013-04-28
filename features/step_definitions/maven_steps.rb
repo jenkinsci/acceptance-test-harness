@@ -2,6 +2,14 @@ Given /^a Maven$/ do
   @maven = Jenkins::Maven.new(@basedir, "Maven")
 end
 
+Given /^a Maven job$/ do
+  @job = Jenkins::Job.create('Maven', @base_url)
+end
+
+Given /^I have system Maven configured$/ do
+  step 'I add Maven with name "system-maven" and Maven home "/opt/maven" to Jenkins config page'
+end
+
 Given /^I add Maven version "([^"]*)" with name "([^"]*)" installed automatically to Jenkins config page$/ do |version, name|
   @maven = Jenkins::Maven.new(@basedir, "Maven")
   # @maven.prepare_autoinstall(@runner)
@@ -38,13 +46,26 @@ exec #{real}/mvn \"$@\"
 end
 
 When /^I add a top-level maven target "([^"]*)"$/ do |goals|
-  @maven.add_maven_step(goals: goals)
+  if @job.is_a? Jenkins::MavenJob
+    @job.maven_goals goals
+  else
+    @maven.add_maven_step(goals: goals)
+  end
 end
 
 When /^I add a top-level maven target "([^"]*)" for maven "([^"]*)"$/ do |goals, version|
-  @maven.add_maven_step(goals: goals, version: version)
+  if @job.is_a? Jenkins::MavenJob
+    @job.maven_goals goals
+    @job.maven_version version
+  else
+    @maven.add_maven_step(goals: goals, version: version)
+  end
 end
 
 When /^I use local Maven repository$/ do
-  @maven.use_local_repo
+  if @job.is_a? Jenkins::MavenJob
+    @job.use_local_repo
+  else
+    @maven.use_local_repo
+  end
 end

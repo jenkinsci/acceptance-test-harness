@@ -114,13 +114,12 @@ When /^I use "([^"]*)" as custom workspace$/ do |workspace|
 end
 
 When /^I copy resource "([^"]*)" into workspace via shell command$/ do |resource|
-  step %{I copy resource "#{resource}" into workspace as "" via shell command}
+  @job.copy_resource(resource, "")
 end
 
 When /^I copy resource "([^"]*)" into workspace as "([^"]*)" via shell command$/ do |resource, target|
-  @job.add_shell_step("cp -r #{File.dirname(__FILE__)}/../../resources/#{resource} ./#{target}")
+  @job.copy_resource(resource, target)
 end
-
 
 Then /^the job should be able to use the "(.*)" buildstep$/ do |build_step|
   find(:xpath, "//button[text()='Add build step']").click
