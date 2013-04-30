@@ -41,6 +41,12 @@ module Jenkins
       end
     end
 
+    def configuration(name)
+      return Jenkins::BuiltConfiguration.new(
+          self, Jenkins::Configuration.new(@job, name)
+      )
+    end
+
     def result?
       wait_until_finished
 
@@ -48,6 +54,8 @@ module Jenkins
     end
 
     def wait_until_finished
+      wait_until_started
+
       while in_progress?
         sleep 1
       end

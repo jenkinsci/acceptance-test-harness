@@ -60,10 +60,13 @@ When /^I enable concurrent builds$/ do
   step %{I check the "_.concurrentBuild" checkbox}
 end
 
-When /^I add a string parameter "(.*?)"$/ do |string_param|
-  @job.configure do
-    @job.add_parameter("String Parameter",string_param,string_param)
-  end
+When /^I add a string parameter "([^"]*)"$/ do |name|
+  @job.add_parameter("String Parameter",name,name)
+end
+
+When /^I set "([^"]*)" parameter to "([^"]*)"$/ do |name, value|
+  input = find(:xpath, "//td[@class='setting-name' and text()='#{name}']/../td[@class='setting-main']//input[@type='text']")
+  input.set(value)
 end
 
 When /^I disable the job$/ do

@@ -37,6 +37,7 @@ Feature: Configure/build freestyle jobs
     Given a job
     When I configure the job
     And I add a string parameter "Foo"
+    And I save the job
     And I build the job
     Then I should be prompted to enter the "Foo" parameter
 
