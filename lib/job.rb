@@ -87,9 +87,6 @@ module Jenkins
 
     def queue_build
       visit("#{job_url}/build?delay=0sec")
-      # This is kind of silly, but I can't think of a better way to wait for the
-      # build to complete
-      sleep 5
     end
 
     def wait_for_build(number)
