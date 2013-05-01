@@ -55,6 +55,18 @@ module Jenkins
       return self
     end
 
+    def wait_until_started
+      loop do
+        begin
+          self.json
+          return # We have json. Build has started
+        rescue Exception
+          sleep 1
+          next # retry
+        end
+      end
+    end
+
     def succeeded?
       result? == 'SUCCESS'
     end

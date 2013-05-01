@@ -86,7 +86,15 @@ module Jenkins
     end
 
     def queue_build
-      visit("#{job_url}/build?delay=0sec")
+      suffix = '/build?delay=0sec'
+      visit job_url + suffix
+
+      if !page.current_url.end_with?(suffix)
+        # Build scheduled immediately
+        last_build.wait_until_started
+      else
+        # We are waiting for parameters
+      end
     end
 
     def wait_for_build(number)

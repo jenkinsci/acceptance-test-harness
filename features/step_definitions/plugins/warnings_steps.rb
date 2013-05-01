@@ -18,6 +18,7 @@ Then /^I should be able to configure warnings collection$/ do
 end
 
 Then /^build should have (\d+) "([^"]+)" warnings?$/ do |count, tool|
+  @job.last_build.wait_until_finished
 
   should_or_not = count.to_i > 0 ? 'should' : 'should not'
 
