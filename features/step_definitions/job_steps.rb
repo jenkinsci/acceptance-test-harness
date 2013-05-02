@@ -47,7 +47,7 @@ When /^I visit the job page$/ do
 end
 
 When /^I visit (job|build) action named "([^"]*)"$/ do |entity, action|
-  page_object = entity == 'job' ? @job : @job.last_build
+  page_object = entity == 'job' ? @job : @job.last_build.wait_until_finished
   page_object.open
   find(:xpath, "//div[@id='tasks']/div/a[text()='#{action}']").click
 end
@@ -70,7 +70,7 @@ Then /^I should see console output matching regexp "(.*)"$/ do |script|
 end
 
 Then /^the (job|build) (should|should not) have "([^"]*)" action$/ do |entity, should_or_not, action|
-  page_object = entity == 'job' ? @job : @job.last_build
+  page_object = entity == 'job' ? @job : @job.last_build.wait_until_finished
   page_object.open
   page.send should_or_not, have_xpath("//div[@id='tasks']/div/a[text()='#{action}']")
 end

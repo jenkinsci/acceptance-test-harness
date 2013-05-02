@@ -59,12 +59,14 @@ module Jenkins
       loop do
         begin
           self.json
-          return # We have json. Build has started
+          return self# We have json. Build has started
         rescue Exception
           sleep 1
           next # retry
         end
       end
+
+      return self
     end
 
     def succeeded?

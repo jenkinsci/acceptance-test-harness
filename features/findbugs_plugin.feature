@@ -19,4 +19,5 @@ Feature: Allow reporting for FindBugs analysis
     And I set up "findbugsXml.xml" as the FindBugs results
     And I save the job
     And I build the job
-    Then job and build should have FindBugs action
+    Then the build should have "FindBugs Warnings" action
+    And the job should have "FindBugs Warnings" action
