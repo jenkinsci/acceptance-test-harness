@@ -48,9 +48,18 @@ module Jenkins
       end
     end
 
+    def encode(text) # http://stackoverflow.com/a/8873922/12916
+      if String.method_defined?(:encode)
+        text.encode('UTF-8', 'UTF-8', :invalid => :replace)
+      else
+        require 'iconv'
+        Iconv.new('UTF-8', 'UTF-8//IGNORE').iconv(text)
+      end
+    end
+
     def save
       click_button "Save"
-      if page.html =~ /This page expects a form submission/
+      if encode(page.html) =~ /This page expects a form submission/
 
         raise "Job was not saved.\n" + page.html
       end
