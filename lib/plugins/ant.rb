@@ -27,7 +27,7 @@ module Plugins
 
     def prepare_autoinstall(runner)
       tempdir = runner.tempdir
-      Dir.mkdir tempdir+'/updates'
+      FileUtils.mkdir_p tempdir+'/updates'
       File.open("#{tempdir}/updates/hudson.tasks.Ant.AntInstaller", 'w') { |file| file.write('{"list": [{"id": "1.8.4", "name": "1.8.4", "url": "http://archive.apache.org/dist/ant/binaries/apache-ant-1.8.4-bin.zip"}]}') }
     end
 
