@@ -5,7 +5,6 @@ curl -s -o use-ruby https://repository-cloudbees.forge.cloudbees.com/distributio
 RUBY_VERSION=1.9.3-p194 source ./use-ruby
 
 gem install --conservative bundle
-bundle check || bundle install
-bundle list
+bundle update
 
 JENKINS_WAR=jenkins.war bundle exec rake
