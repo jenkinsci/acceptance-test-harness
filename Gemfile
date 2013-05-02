@@ -9,7 +9,7 @@ gem "sauce-cucumber"
 gem "rest-client"
 gem "pry"
 
-gem "cucumber"
+gem "cucumber", '1.2.5'
 gem "curb"
 gem "capybara", '~> 1.1'
 gem "json"
