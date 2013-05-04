@@ -8,8 +8,8 @@ Feature: Allow to inject build environment variables
     Given I have installed the "envinject" plugin
     And a job
     Then I should be able to prepare an environment for the build
-    And I the job should be able to use the "Inject environment variables to the build process" build environment action
-    And I the job should be able to use the "Inject passwords to the build as environment variables" build environment action
+    And I should be able to use the "Inject environment variables to the build process" build environment action
+    And I should be able to use the "Inject passwords to the build as environment variables" build environment action
     And the job should be able to use the "Inject environment variables" buildstep
 
   @realupdatecenter
