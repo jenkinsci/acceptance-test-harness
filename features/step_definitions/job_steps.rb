@@ -132,3 +132,9 @@ Then /^the size of artifact "([^"]*)" should be "([^"]*)"$/ do |artifact, size|
   match = actual + "[text()='#{size}']"
   page.should have_xpath(match), 'Actual size: ' + find(:xpath, actual).text
 end
+
+Then /^the job should have description "([^"]*)"$/ do |description|
+  @job.open
+  desc = find(:xpath,'//div[@id="description"]/div')
+  desc.should have_content(description)
+end
