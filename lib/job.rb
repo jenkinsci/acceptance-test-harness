@@ -33,6 +33,15 @@ module Jenkins
       end
     end
 
+    def add_scm(title)
+      xpath = "//label[contains(text(),'#{title}')]/input[@name='scm']"
+      element = find(:xpath, xpath)
+      element.set(true)
+
+      type = Jenkins::Scm.get title
+      return type.new(self, element[:path])
+    end
+
     def add_parameter(type,name,value)
       ensure_config_page
       find(:xpath, "//input[@name='parameterized']").set(true)
