@@ -21,3 +21,23 @@ Feature: Allow publishing of Cobertura analysis
     And I build the job
     Then the build should have "Coverage Report" action
     And the job should have "Coverage Report" action
+
+  @realupdatecenter
+  Scenario: View Cobertura coverage report
+    Given I have installed the "cobertura" plugin
+    And a job
+    When I configure the job
+    And I copy resource "cobertura_plugin/coverage.xml" into workspace as "coverage.xml" via shell command
+    And I add "Publish Cobertura Coverage Report" post-build action
+    And I set up "coverage.xml" as the Cobertura report
+    And I save the job
+    And I build the job
+    Then the build should succeed
+    When I visit Cobertura report
+    Then I should see the coverage of packages is 100%
+    Then I should see the coverage of files is 50%
+    Then I should see the coverage of classes is 31%
+    Then I should see the coverage of methods is 23%
+    Then I should see the coverage of lines is 16%
+    Then I should see the coverage of conditionals is 10%
+
