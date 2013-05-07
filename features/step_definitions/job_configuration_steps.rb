@@ -38,6 +38,10 @@ When /^I add always fail build step in the job configuration$/ do
   end
 end
 
+When /^I add "([^"]*)" build action$/ do |action|
+  @job.add_build_action(action)
+end
+
 When /^I add "([^"]*)" post-build action$/ do |action|
   @job.add_postbuild_action(action)
 end

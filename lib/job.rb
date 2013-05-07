@@ -73,6 +73,13 @@ module Jenkins
       find(:xpath, "//button[text()='Add post-build action']").locate.click
       find(:xpath, "//a[text()='#{action}']").click
     end
+    
+    def add_build_action(action)
+      ensure_config_page
+
+      find(:xpath, "//button[text()='Add build step']").click
+      find(:xpath, "//a[text()='#{action}']").click
+    end
 
     def open
       visit(job_url)
