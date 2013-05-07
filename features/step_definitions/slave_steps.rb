@@ -2,7 +2,15 @@
 # vim: tabstop=2 expandtab shiftwidth=2
 
 Given /^a dumb slave$/ do
-  @slave = Jenkins::Slave.dumb_slave(@base_url)
+  @slave = Jenkins::Slave.dumb_slave(@base_url, Jenkins::Slave.random_name)
+end
+
+
+############################################################################
+
+
+When /^I create dumb slave named "([^"]*)"$/ do |name|
+  @slave = Jenkins::Slave.dumb_slave(@base_url, name)
 end
 
 
