@@ -113,8 +113,12 @@ When /^I use "([^"]*)" as custom workspace$/ do |workspace|
   @job.use_custom_workspace(workspace)
 end
 
+When /^I copy resource "([^"]*)" into workspace via shell command$/ do |resource|
+  step %{I copy resource "#{resource}" into workspace as "" via shell command}
+end
+
 When /^I copy resource "([^"]*)" into workspace as "([^"]*)" via shell command$/ do |resource, target|
-  @job.add_shell_step("cp #{File.dirname(__FILE__)}/../../resources/#{resource} ./#{target}")
+  @job.add_shell_step("cp -r #{File.dirname(__FILE__)}/../../resources/#{resource} ./#{target}")
 end
 
 
