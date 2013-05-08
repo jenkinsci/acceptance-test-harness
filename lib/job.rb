@@ -134,7 +134,14 @@ module Jenkins
     def archive_artifacts(options)
       case
       when options[:includes]
-        add_postbuild_action "Archive the artifacts"
+        ensure_config_page
+        find(:xpath, "//button[text()='Add post-build action']").locate.click
+        begin
+          find(:xpath, "//a[text()='Archive the artifacts']").click
+        rescue Capybara::ElementNotFound
+          # When cloudbees-jsync-archiver installed (pending JENKINS-17236):
+          find(:xpath, "//a[text()='Archive artifacts (fast)']").click
+        end
         find(:path, "/publisher/artifacts").set(options[:includes])
       when options[:excludes]
         find(:path, "/publisher/advanced-button").localte.click
