@@ -18,7 +18,7 @@ module Jenkins
 
     def use_local_repo
       find(:path, "/builder/advanced-button").click
-      find(:path, "/builder/usePrivateRepository").click
+      find(:path, "/builder/usePrivateRepository").locate.click
     end
 
     def add_auto_installation(name, version)
