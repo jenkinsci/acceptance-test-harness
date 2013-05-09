@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 require File.dirname(__FILE__) + "/pageobject.rb"
+require File.dirname(__FILE__) + "/job.rb"
 
 module Jenkins
   class Maven < Jenkins::PageObject
