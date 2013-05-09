@@ -56,7 +56,6 @@ When /^I build (\d+) jobs$/  do |count|
   count.to_i.times do |i|
     @job.queue_build
   end
-  sleep 6 # Hard-coded sleep to allow the queue delay in Jenkins to expire
 end
 
 Then /^I should see console output matching "(.*)"$/ do |script|
