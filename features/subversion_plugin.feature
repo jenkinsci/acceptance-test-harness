@@ -15,7 +15,7 @@ Feature: Subversion support
     When I check out code from Subversion repository "https://svn.jenkins-ci.org/trunk/jenkins/test-projects/model-ant-project/"
     And I add a shell build step "test -d .svn"
     And I save the job
-    And I build 1 jobs
+    And I build the job
     Then the build should succeed
     And I should see console output matching "test -d .svn"
 

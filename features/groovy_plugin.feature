@@ -15,7 +15,7 @@ Feature: Executing groovy scripts
     When I set groovy build step "Execute Groovy script"
     And I set groovy script "println('hello world')"
     And I save the job
-    And I build 1 jobs
+    And I build the job
     Then the build should succeed
     And I should see console output matching "hello world"
 
@@ -26,7 +26,7 @@ Feature: Executing groovy scripts
     And I set groovy build step "Execute system Groovy script"
     And I set groovy script "println('this is a job ' + jenkins.model.Jenkins.getInstance().getItem('system-groovy-test').getDisplayName())"
     And I save the job
-    And I build 1 jobs
+    And I build the job
     Then the build should succeed
     And I should see console output matching "this is a job system-groovy-test"
 
@@ -39,7 +39,7 @@ Feature: Executing groovy scripts
     And I set groovy build step "Execute Groovy script"
     And I set groovy script from file "hello.groovy"
     And I save the job
-    And I build 1 jobs
+    And I build the job
     Then the build should succeed
     And I should see console output matching "hello"
 
