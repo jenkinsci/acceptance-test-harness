@@ -12,6 +12,7 @@ class LogWatcher
     @ready = false
     @log_regex = nil
     @log_found = false
+    @logged_lines = Array.new
 
     @log = log
     @pipe = pipe
@@ -51,6 +52,7 @@ class LogWatcher
   def log_line(line)
     @log.write(line)
     @log.flush
+    @logged_lines.push line
 
     unless @log_regex.nil?
       if line.match(@log_regex)
@@ -60,19 +62,28 @@ class LogWatcher
   end
 
   def wait_until_logged(regex, timeout=60)
-    start = Time.now.to_i
+
     @log_regex = regex
+
+    return if has_logged regex
+
+    start = Time.now.to_i
 
     while (Time.now.to_i - start) < timeout
       if @log_found
         @log_regex = nil
         @log_found = false
-        return true
+        return
       end
       sleep 1
     end
 
-    return false
+    raise "Pattern '#{regex.source}' was not logged within #{timeout} seconds"
+  end
+
+  def has_logged(regex)
+    line_index = @logged_lines.index { |l| l.match regex }
+    return !line_index.nil?
   end
 
   def close

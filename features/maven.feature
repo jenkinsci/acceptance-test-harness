@@ -37,8 +37,9 @@ Feature: Adds Apache Maven support
     Then I should see console output matching regexp "-Dmaven.repo.local=([^\n]*)/.repository"
     And the build should succeed
 
+  @realupdatecenter
   Scenario: Build multimodule maven project
-    And I have system Maven configured
+    Given I have default Maven configured
     And a Maven job
     When I configure the job
     And I copy resource "maven/repositories/multimodule/*" into workspace via shell command

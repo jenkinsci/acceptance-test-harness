@@ -6,11 +6,12 @@ Given /^a Maven job$/ do
   @job = Jenkins::Job.create('Maven', @base_url)
 end
 
-Given /^I have system Maven configured$/ do
-  step 'I add Maven with name "system-maven" and Maven home "/opt/maven" to Jenkins config page'
+Given /^I have default Maven configured$/ do
+  step 'I add Maven version "3.0.4" with name "default" installed automatically to Jenkins config page'
 end
 
 Given /^I add Maven version "([^"]*)" with name "([^"]*)" installed automatically to Jenkins config page$/ do |version, name|
+  @runner.wait_for_updates
   @maven = Jenkins::Maven.new(@basedir, "Maven")
   # @maven.prepare_autoinstall(@runner)
   @jenkins_config = Jenkins::JenkinsConfig.get(@base_url, 'Jenkins global configuration')

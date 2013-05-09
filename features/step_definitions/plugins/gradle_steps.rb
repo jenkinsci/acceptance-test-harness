@@ -1,4 +1,5 @@
 Given /^I add Gradle version "([^"]*)" with name "([^"]*)" installed automatically to Jenkins config page$/ do |version, name|
+  @runner.wait_for_updates 'Gradle'
   @jenkins_config = Jenkins::JenkinsConfig.get(@base_url, 'Jenkins global configuration')
   @jenkins_config.configure do
     @jenkins_config.add_tool("Gradle")

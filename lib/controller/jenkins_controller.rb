@@ -101,6 +101,19 @@ class JenkinsController
 
   end
 
+  # Wait for tool installer updates
+  def wait_for_updates(name = 'hudson.tools.JDKInstaller')
+
+    pattern = /INFO: Obtained the updated data file for .*#{Regexp.quote(name)}.*/i
+
+    plugin_manager = Jenkins::PluginManager.new(url, nil)
+    until @log_watcher.has_logged pattern
+      plugin_manager.check_for_updates
+
+      sleep 1
+    end
+  end
+
   def is_running?
     @is_running
   end
