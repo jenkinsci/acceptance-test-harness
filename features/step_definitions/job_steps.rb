@@ -58,6 +58,13 @@ When /^I build (\d+) jobs$/  do |count|
   end
 end
 
+When /^I build (\d+) jobs sequently$/  do |count|
+  count.to_i.times do |i|
+    @job.queue_build
+    @job.last_build.wait_until_finished
+  end
+end
+
 Then /^I should see console output matching "(.*)"$/ do |script|
   build = @job.last_build.wait_until_finished
   build.console.should match /#{Regexp.escape(script)}/

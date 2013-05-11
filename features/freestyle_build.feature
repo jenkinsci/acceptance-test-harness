@@ -51,7 +51,7 @@ Feature: Configure/build freestyle jobs
     When I configure the job
     And I set 2 builds to keep
     And I save the job
-    And I build 4 jobs
+    And I build 4 jobs sequently
     Then the job should not have build 1
     And  the job should not have build 2
     And  the job should have build 3
