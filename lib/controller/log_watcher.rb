@@ -20,17 +20,18 @@ class LogWatcher
       @line_count = 0
       while (line = @pipe.gets)
         log_line(line)
+
+        next if @ready
+
         # earlier version of Jenkins doesn't have this line
         # if line =~ /INFO: Jenkins is fully up and running/
         if line =~ pattern
           puts " Jenkins completed initialization"
           @ready = true
         else
-          unless @ready
-            print '.' if (@line_count%5)==0
-            @line_count+=1
-            STDOUT.flush
-          end
+          print '.' if (@line_count%5)==0
+          @line_count+=1
+          STDOUT.flush
         end
       end
       @ready = false
