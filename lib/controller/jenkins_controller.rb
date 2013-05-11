@@ -102,7 +102,7 @@ class JenkinsController
   end
 
   # Wait for tool installer updates
-  def wait_for_updates(name = 'hudson.tools.JDKInstaller')
+  def wait_for_updates(name)
 
     pattern = /INFO: Obtained the updated data file for .*#{Regexp.quote(name)}.*/i
 

@@ -22,7 +22,7 @@ When /^I select groovy named "([^\"]*)"$/ do |name|
 end
 
 When /^I add Groovy version "([^"]*)" with name "([^"]*)" installed automatically to Jenkins config page$/ do |version, name|
-  @runner.wait_for_updates
+  @runner.wait_for_updates 'Groovy'
   @jenkins_config = Jenkins::JenkinsConfig.get(@base_url, 'Jenkins global configuration')
   @jenkins_config.configure do
     @jenkins_config.add_tool("Groovy")

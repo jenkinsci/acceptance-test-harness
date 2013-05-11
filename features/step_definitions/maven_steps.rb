@@ -11,7 +11,7 @@ Given /^I have default Maven configured$/ do
 end
 
 Given /^I add Maven version "([^"]*)" with name "([^"]*)" installed automatically to Jenkins config page$/ do |version, name|
-  @runner.wait_for_updates
+  @runner.wait_for_updates 'Maven'
   @maven = Jenkins::Maven.new(@basedir, "Maven")
   # @maven.prepare_autoinstall(@runner)
   @jenkins_config = Jenkins::JenkinsConfig.get(@base_url, 'Jenkins global configuration')

@@ -9,7 +9,7 @@ module Plugins
     end
 
     def wait_for_update(log_watcher)
-      log_watcher.wait_until_logged(/Finished Project disk usage. \d+ ms/, 50)
+      log_watcher.wait_until_logged(/Finished Project disk usage. \d+ ms/, 5)
     end
 
   end
