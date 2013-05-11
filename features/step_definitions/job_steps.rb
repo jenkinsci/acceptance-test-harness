@@ -115,8 +115,8 @@ Then /^the artifact "([^"]*)" (should|should not) be archived$/ do |artifact, sh
   page.send should_or_not, have_xpath("//a[@href='artifact/#{artifact}']")
 end
 
-Then /^the build #(\d+) (should|should not) has archived "([^"]*)" artifact$/ do |number, should_or_not, artifact|
-  @job.build(number).open
+Then /^the build #(\d+) (should|should not) have archived "([^"]*)" artifact$/ do |number, should_or_not, artifact|
+  @job.build(number).wait_until_finished.open
   page.send should_or_not, have_xpath("//a[@href='artifact/#{artifact}']")
 end
 

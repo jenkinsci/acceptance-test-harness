@@ -115,9 +115,9 @@ Feature: Configure/build freestyle jobs
     And I set artifact "test.txt" to archive in the job configuration
     And I want to keep only the latest successful artifacts
     And I build 3 jobs
-    Then the build #1 should not has archived "test.txt" artifact
-    And the build #2 should has archived "test.txt" artifact
-    And the build #3 should has archived "test.txt" artifact
+    Then the build #1 should not have archived "test.txt" artifact
+    And the build #2 should have archived "test.txt" artifact
+    And the build #3 should have archived "test.txt" artifact
 
   @realupdatecenter
   Scenario: Add Auto-Installed Java
