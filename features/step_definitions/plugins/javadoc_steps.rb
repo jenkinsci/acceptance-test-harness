@@ -27,7 +27,7 @@ When /^I add build steps to generate javadoc$/ do
   click_button 'Add build step'
   click_link 'Invoke top-level Maven targets'
   find(:path, "/builder[1]/targets").set(options)
-  
+
 end
 
 When /^I add a top-level maven target to create project$/ do
@@ -35,6 +35,7 @@ When /^I add a top-level maven target to create project$/ do
 end
 
 Then /^javadoc should display "([^"]*)" for default configuration$/ do |content|
+  @job.last_build.wait_until_finished
   visit (@job.job_url + "/default")
   find(:xpath, "//div[@id='tasks']/div/a[text()='Javadoc']").click
   page.should have_content(content)
