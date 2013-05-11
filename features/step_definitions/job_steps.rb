@@ -58,9 +58,10 @@ When /^I build (\d+) jobs$/  do |count|
   end
 end
 
-When /^I build (\d+) jobs sequently$/  do |count|
+When /^I build (\d+) jobs sequentially$/  do |count|
   count.to_i.times do |i|
     @job.queue_build
+    sleep 0.5 # Wait for newly queued build to become the last build
     @job.last_build.wait_until_finished
   end
 end
@@ -82,8 +83,13 @@ Then /^the (job|build) (should|should not) have "([^"]*)" action$/ do |entity, s
 end
 
 Then /^the (\d+) jobs should run concurrently$/ do |count|
+  # Wait until all jobs have started
   count.to_i.times do |i|
-    # Build numbers start at 1
+    @job.build(i + 1).wait_until_started
+  end
+
+  # then all jobs should be in progress at the same time
+  count.to_i.times do |i|
     @job.build(i + 1).in_progress?.should be true
   end
 end
@@ -118,7 +124,7 @@ Then /^the job configuration should be equals to "([^"]*)" configuration$/ do |s
 end
 
 Then /^the artifact "([^"]*)" (should|should not) be archived$/ do |artifact, should_or_not|
-  @job.last_build.open
+  @job.last_build.wait_until_finished.open
   page.send should_or_not, have_xpath("//a[@href='artifact/#{artifact}']")
 end
 

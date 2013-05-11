@@ -51,7 +51,7 @@ Feature: Configure/build freestyle jobs
     When I configure the job
     And I set 2 builds to keep
     And I save the job
-    And I build 4 jobs sequently
+    And I build 4 jobs sequentially
     Then the job should not have build 1
     And  the job should not have build 2
     And  the job should have build 3
@@ -65,7 +65,7 @@ Feature: Configure/build freestyle jobs
     And I save the job
     And I build the job
     And I lock the build
-    And I build 2 jobs
+    And I build 2 jobs sequentially
     Then the job should have build 1
     And  the job should not have build 2
     And  the job should have build 3
@@ -80,7 +80,7 @@ Feature: Configure/build freestyle jobs
     And I configure the job
     And I add always fail build step
     And I save the job
-    And I build 2 jobs
+    And I build 2 jobs sequentially
     Then the job should have build 1
     And  the job should not have build 2
     And  the job should have build 3
@@ -114,7 +114,7 @@ Feature: Configure/build freestyle jobs
     When I add a shell build step "echo 'archive test' > test.txt" in the job configuration
     And I set artifact "test.txt" to archive in the job configuration
     And I want to keep only the latest successful artifacts
-    And I build 3 jobs
+    And I build 3 jobs sequentially
     Then the build #1 should not have archived "test.txt" artifact
     And the build #2 should have archived "test.txt" artifact
     And the build #3 should have archived "test.txt" artifact

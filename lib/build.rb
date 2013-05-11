@@ -48,6 +48,7 @@ module Jenkins
     end
 
     def wait_until_finished
+      wait_until_started
       while in_progress?
         sleep 1
       end
@@ -56,14 +57,8 @@ module Jenkins
     end
 
     def wait_until_started
-      loop do
-        begin
-          self.json
-          return self# We have json. Build has started
-        rescue Exception
-          sleep 1
-          next # retry
-        end
+      until has_started?
+        sleep 1
       end
 
       return self
@@ -81,9 +76,23 @@ module Jenkins
       result? == 'FAILED'
     end
 
+    def has_started?
+
+      return true if !@result.nil?
+
+      begin
+        self.json
+        return true # We have json. Build has started
+      rescue Exception
+        return false
+      end
+    end
+
     def in_progress?
 
       return false if !@result.nil?
+
+      return false if !has_started?
 
       data = self.json
       return data['building'] || data['result'].nil?
