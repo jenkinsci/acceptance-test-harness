@@ -59,6 +59,7 @@ end
 
 After do |scenario|
   next if @runner.nil? # skip if not initialized
+  @runner.diagnose if scenario.failed?
   @runner.stop # if test fails, stop in at_exit is not called
   @runner.teardown
 end
