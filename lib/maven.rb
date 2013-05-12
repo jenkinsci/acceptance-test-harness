@@ -2,6 +2,7 @@
 
 require File.dirname(__FILE__) + "/pageobject.rb"
 require File.dirname(__FILE__) + "/job.rb"
+require File.dirname(__FILE__) + "/build.rb"
 
 module Jenkins
   class Maven < Jenkins::PageObject
@@ -48,6 +49,15 @@ module Jenkins
       return 'hudson.maven.MavenModuleSet'
     end
 
+    # override
+    def build(number)
+      Jenkins::MavenBuild.new(self, number)
+    end
+
+    def module(name)
+      Jenkins::MavenModule.new(self, name)
+    end
+
     def add_prebuild_shell_step(script)
       ensure_config_page
 
@@ -85,6 +95,51 @@ module Jenkins
       # Lets see how long will it take for this to blow up
       find(:path, "/advanced-button[1]").click
       advanced_open = true
+    end
+  end
+
+  class MavenBuild < Build
+
+    def initialize(job, number)
+      super(job.base_url, job, number)
+    end
+
+    def module(name)
+      Jenkins::MavenModuleBuild.new(Jenkins::MavenModule.new(job, name), self)
+    end
+  end
+
+  class MavenModule < PageObject
+
+    attr_accessor :job;
+
+    def initialize(job, name)
+      super(job.base_url, nil)
+
+      @job = job
+      @name = name
+    end
+
+    def build(number)
+      Jenkins::MavenModuleBuild.new(self, Jenkins::MavenBuild.new(job, number))
+    end
+
+    def url
+      "#{@job.job_url}/#{@name}"
+    end
+  end
+
+  class MavenModuleBuild < PageObject
+
+    def initialize(maven_module, maven_build)
+      super(maven_build.base_url, "Maven module build")
+
+      @module = maven_module
+      @build = maven_build
+    end
+
+    def url
+      "#{@module.url}/#{@build.number}"
     end
   end
 end

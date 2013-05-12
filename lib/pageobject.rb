@@ -10,7 +10,7 @@ module Jenkins
     include Capybara::DSL
     extend Capybara::DSL
 
-    attr_accessor :name
+    attr_accessor :base_url, :name
 
     def initialize(base_url, name)
       @base_url = base_url
