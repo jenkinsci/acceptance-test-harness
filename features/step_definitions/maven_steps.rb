@@ -78,3 +78,19 @@ When /^I set maven options "([^"]+)"$/ do |opts|
     raise "Maven job only"
   end
 end
+
+Then /^the job should have module named "([^"]+)"$/ do |module_name|
+
+  # Module build page should exist
+  module_page = @job.last_build.wait_until_finished.module(module_name)
+  module_page.exists.should be
+
+  # Build page should have module links
+  @job.last_build.open
+  page.should have_xpath "//a[@href='#{module_name}/']"
+
+  # Modules action should have correct module links
+  visit @job.job_url + '/modules'
+  find(:xpath, "//a[contains(@href,'#{module_name}')]").click
+  page.current_url.should be(module_page.url)
+end
