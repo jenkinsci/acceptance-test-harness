@@ -122,7 +122,7 @@ When /^I copy resource "([^"]*)" into workspace as "([^"]*)" via shell command$/
 end
 
 Then /^the job should be able to use the "(.*)" buildstep$/ do |build_step|
-  find(:xpath, "//button[text()='Add build step']").click
+  find(:xpath, "//button[text()='Add build step']").locate.click
   find(:xpath, "//a[text()='#{build_step}']").instance_of?(Capybara::Node::Element).should be true
 end
 
@@ -131,6 +131,6 @@ Then /^I should be able to use the "([^"]*)" build environment action$/ do |env_
 end
 
 Then /^I should be able to use "([^"]*)" post-build action$/ do |action|
-  find(:xpath, "//button[text()='Add post-build action']").click
+  find(:xpath, "//button[text()='Add post-build action']").locate.click
   find(:xpath, "//a[text()='#{action}']").instance_of?(Capybara::Node::Element).should be true
 end

@@ -1,7 +1,6 @@
 When /^I set Junit archiver path "([^"]*)"$/ do |path|
   @job.ensure_config_page
-  page.execute_script "window.scrollTo(0, document.body.scrollHeight)"
-  find(:xpath, "//button[text()='Add post-build action']").click
+  find(:xpath, "//button[text()='Add post-build action']").locate.click
   find(:xpath, "//a[text()='Publish JUnit test result report']").click
   find(:xpath, "//input[@name='_.testResults']").set(path)
 end

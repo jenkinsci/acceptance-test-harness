@@ -10,8 +10,7 @@ end
 
 When /^I set groovy build step "([^"]*)"$/ do |step_name|
   @job.ensure_config_page
-  page.execute_script "window.scrollTo(0, document.body.scrollHeight)"
-  find(:xpath, "//button[text()='Add build step']").click
+  find(:xpath, "//button[text()='Add build step']").locate.click
   find(:xpath, "//a[text()='#{step_name}']").click
 end
 
