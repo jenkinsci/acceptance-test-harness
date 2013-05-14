@@ -66,17 +66,12 @@ module Jenkins
     end
 
     def json_api_url
-      # Should be overridden by subclasses
-      nil
+      raise "json_api_url not overridden by subclass"
     end
 
     def json
-      url = json_api_url
-      unless url.nil?
-        uri = URI.parse(url)
-        return JSON.parse(Net::HTTP.get_response(uri).body)
-      end
-      return nil
+      uri = URI.parse(json_api_url)
+      return JSON.parse(Net::HTTP.get_response(uri).body)
     end
 
     def wait_for(selector, opts={})

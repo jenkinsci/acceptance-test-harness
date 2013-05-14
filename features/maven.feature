@@ -38,7 +38,7 @@ Feature: Adds Apache Maven support
     And the build should succeed
 
   @realupdatecenter
-  Scenario: Build multimodule maven project
+  Scenario: Build multimodule Maven project
     Given I have default Maven configured
     And a Maven job
     When I configure the job
@@ -48,6 +48,19 @@ Feature: Adds Apache Maven support
     And I build the job
     Then the build should succeed
     And the job should have "Modules" action
-    And I should see console output matching "Building root 1.0"
-    And I should see console output matching "Building module_a 2.0"
-    And I should see console output matching "Building module_b 3.0"
+    And I should see console output matching "[INFO] Building root 1.0"
+    And I should see console output matching "[INFO] Building module_a 2.0"
+    And I should see console output matching "[INFO] Building module_b 3.0"
+
+  @realupdatecenter
+  Scenario: Set maven options
+    Given I have default Maven configured
+    And a Maven job
+    When I configure the job
+    And I copy resource "maven/repositories/multimodule/*" into workspace via shell command
+    And I add a top-level maven target "package"
+    And I set maven options "--quiet"
+    And I save the job
+    And I build the job
+    Then I should not see console output matching "[INFO]"
+    And  I should not see console output matching "[WARNING]"

@@ -70,11 +70,11 @@ module Jenkins
       add_prebuild_shell_step "cp -r #{File.dirname(__FILE__)}/../resources/#{resource} ./#{target}"
     end
 
-    def maven_goals(goals)
+    def goals(goals)
       find(:path, "/goals").set(goals)
     end
 
-    def maven_version(version)
+    def version(version)
       open_advanced
       find(:xpath, "//select[@name='maven_version']").click
       find(:xpath, "//option[@value='#{options[:version]}']").click
@@ -85,16 +85,21 @@ module Jenkins
       find(:path, "/usePrivateRepository").click
     end
 
+    def options(options)
+      open_advanced
+      find(:path, '/mavenOpts').set(options)
+    end
+
     private
 
     @advanced_open = false
 
     def open_advanced
-      return if advanced_open
+      return if @advanced_open
 
       # Lets see how long will it take for this to blow up
       find(:path, "/advanced-button[1]").click
-      advanced_open = true
+      @advanced_open = true
     end
   end
 
@@ -140,6 +145,20 @@ module Jenkins
 
     def url
       "#{@module.url}/#{@build.number}"
+    end
+
+    def exists
+      begin
+        json
+      rescue JSON::ParserError
+        return false
+      end
+
+      return true
+    end
+
+    def json_api_url
+      url + '/api/json'
     end
   end
 end

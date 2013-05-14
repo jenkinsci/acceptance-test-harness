@@ -66,9 +66,9 @@ When /^I build (\d+) jobs sequentially$/  do |count|
   end
 end
 
-Then /^I should see console output matching "(.*)"$/ do |script|
+Then /^I (should|should not) see console output matching "(.*)"$/ do |should_or_not, script|
   build = @job.last_build.wait_until_finished
-  build.console.should match /#{Regexp.escape(script)}/
+  build.console.send should_or_not, match(/#{Regexp.escape(script)}/)
 end
 
 Then /^I should see console output matching regexp "(.*)"$/ do |script|

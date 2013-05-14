@@ -48,7 +48,7 @@ end
 
 When /^I add a top-level maven target "([^"]*)"$/ do |goals|
   if @job.is_a? Jenkins::MavenJob
-    @job.maven_goals goals
+    @job.goals goals
   else
     @maven.add_maven_step(goals: goals)
   end
@@ -56,8 +56,8 @@ end
 
 When /^I add a top-level maven target "([^"]*)" for maven "([^"]*)"$/ do |goals, version|
   if @job.is_a? Jenkins::MavenJob
-    @job.maven_goals goals
-    @job.maven_version version
+    @job.goals goals
+    @job.version version
   else
     @maven.add_maven_step(goals: goals, version: version)
   end
@@ -68,5 +68,13 @@ When /^I use local Maven repository$/ do
     @job.use_local_repo
   else
     @maven.use_local_repo
+  end
+end
+
+When /^I set maven options "([^"]+)"$/ do |opts|
+  if @job.is_a? Jenkins::MavenJob
+    @job.options opts
+  else
+    raise "Maven job only"
   end
 end
