@@ -49,6 +49,10 @@ module Jenkins
 
         visit "#{@page.url}/runScript?id=#{@id}"
 
+        if opts.has_key? :on
+          find(:xpath, "//option[@value='#{opts[:on]}']").select_option
+        end
+
         if !with.empty?
           find(:path, '/defineParams').click
           index = 0

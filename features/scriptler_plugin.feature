@@ -14,7 +14,7 @@ Feature: Use Sciptler plugin
   Scenario: Run new parameterized script
     Given I have installed the "scriptler" plugin
     When I upload script "scriptler_plugin/hello_parameterized.groovy"
-    And I run the script with:
+    And I run parametrized script with:
         | noun | space |
     Then the script output should match "Hello space!"
 
@@ -27,3 +27,40 @@ Feature: Use Sciptler plugin
     Then script "hello_parameterized.groovy" should exist
     But  script "hello_world.groovy" should not exist
 
+  @realupdatecenter
+  Scenario: Run script on particular slave
+    Given I have installed the "scriptler" plugin
+    And a slave named "slave42"
+    When I upload script "scriptler_plugin/hello_world.groovy"
+    And I run the script on slave42
+    Then the script output on slave42 should match "Hello world!"
+    And  the script should not be run on "master"
+
+  @realupdatecenter
+  Scenario: Run script on master
+    Given I have installed the "scriptler" plugin
+    And a slave named "slave42"
+    When I upload script "scriptler_plugin/hello_world.groovy"
+    And I run the script on master
+    Then the script output on master should match "Hello world!"
+    And  the script should not be run on slave42
+
+  @realupdatecenter
+  Scenario: Run script on all nodes
+    Given I have installed the "scriptler" plugin
+    And a slave named "slave42"
+    When I upload script "scriptler_plugin/hello_world.groovy"
+    And I run the script on all nodes
+    Then the script output on slave42 should match "Hello world!"
+    And  the script output on master should match "Hello world!"
+
+  @realupdatecenter
+  Scenario: Run script on all slaves
+    Given I have installed the "scriptler" plugin
+    And a slave named "slave42"
+    And a slave named "slave43"
+    When I upload script "scriptler_plugin/hello_world.groovy"
+    And I run the script on all slaves
+    Then the script output on slave42 should match "Hello world!"
+    And  the script output on slave43 should match "Hello world!"
+    And  the script should not be run on master
