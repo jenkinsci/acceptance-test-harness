@@ -78,3 +78,10 @@ When /^I set maven options "([^"]+)"$/ do |opts|
     raise "Maven job only"
   end
 end
+
+When /^I set global MAVEN_OPTS "([^"]*)"$/ do |opts|
+  @jenkins_config = Jenkins::JenkinsConfig.get(@base_url, 'Jenkins global configuration')
+  @jenkins_config.configure do
+    @maven.use_global_options opts
+  end
+end

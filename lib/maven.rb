@@ -41,6 +41,10 @@ module Jenkins
       Dir.mkdir tempdir+'/updates'
       File.open("#{tempdir}/updates/hudson.tasks.Maven.MavenInstaller", 'w') { |file| file.write('{"list": [{"id": "3.0.4", "name": "3.0.4", "url": "http://archive.apache.org/dist/maven/binaries/apache-maven-3.0.4-bin.zip"}]}') }
     end
+
+    def use_global_options(opts)
+      find(:path, '/hudson-maven-MavenModuleSet/globalMavenOpts').set(opts)
+    end
   end
 
   class MavenJob < Job
