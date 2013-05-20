@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pmd version="4.3" timestamp="2013-05-20T19:08:17.319">
+<suppressedviolation filename="/home/lucinka/jira/kveten/jbqa-7941/selenium-tests/temp_dir_26827_26830_oeszs/workspace/rand_name_4756080.672297921/src/main/java/hudson/plugins/pmd/MavenPmdResultAction.java" suppressiontype="annotation" msg="Avoid unused private fields such as 'height'." usermsg=""/>
+<suppressedviolation filename="/home/lucinka/jira/kveten/jbqa-7941/selenium-tests/temp_dir_26827_26830_oeszs/workspace/rand_name_4756080.672297921/src/main/java/hudson/plugins/pmd/PmdPublisher.java" suppressiontype="annotation" msg="Avoid really long parameter lists." usermsg=""/>
+<suppressedviolation filename="/home/lucinka/jira/kveten/jbqa-7941/selenium-tests/temp_dir_26827_26830_oeszs/workspace/rand_name_4756080.672297921/src/main/java/hudson/plugins/pmd/PmdReporter.java" suppressiontype="annotation" msg="Avoid really long parameter lists." usermsg=""/>
+<suppressedviolation filename="/home/lucinka/jira/kveten/jbqa-7941/selenium-tests/temp_dir_26827_26830_oeszs/workspace/rand_name_4756080.672297921/src/main/java/hudson/plugins/pmd/PmdReporter.java" suppressiontype="annotation" msg="Avoid unused private fields such as 'pattern'." usermsg=""/>
+<suppressedviolation filename="/home/lucinka/jira/kveten/jbqa-7941/selenium-tests/temp_dir_26827_26830_oeszs/workspace/rand_name_4756080.672297921/src/main/java/hudson/plugins/pmd/parser/Bug.java" suppressiontype="annotation" msg="Avoid unused private fields such as 'tooltip'." usermsg=""/>
