@@ -64,3 +64,16 @@ Feature: Use Sciptler plugin
     Then the script output on slave42 should match "Hello world!"
     And  the script output on slave43 should match "Hello world!"
     And  the script should not be run on master
+
+  @realupdatecenter
+  Scenario: Create and run parametrized test
+    Given I have installed the "scriptler" plugin
+    When I create script named "parameterized"
+        """
+            println lhs + ' + ' + rhs;
+        """
+    And I add script parameters
+        | lhs |  7 |
+        | rhs | 11 |
+    And I run the script
+    Then the script output should match "7 + 11"

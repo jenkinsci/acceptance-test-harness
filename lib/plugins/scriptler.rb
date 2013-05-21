@@ -1,4 +1,5 @@
 require File.dirname(__FILE__) + "/../pageobject.rb"
+require File.dirname(__FILE__) + "/../util/codemirror.rb"
 
 module Jenkins
   module Scriptler
@@ -10,6 +11,18 @@ module Jenkins
 
       def url
         "#{base_url}/scriptler"
+      end
+
+      def create_script(id, script)
+        visit "#{url}/scriptsettings"
+        find(:path, '/id').set(id)
+        find(:path, '/name').set(id)
+
+        textarea = Jenkins::Util::CodeMirror.new(page, find(:path, '/script'))
+        textarea.set_content script
+
+        click_button 'Submit'
+        return get_script id + '.groovy'
       end
 
       def upload_script_from(local_path)
@@ -43,9 +56,16 @@ module Jenkins
         return all(:xpath, "//a[@href='removeScript?id=#{@id}']").length == 1
       end
 
-      def run(opts = {})
+      def set_parameters(params)
 
-        with = opts[:with] || {}
+        visit "#{@page.url}/editScript?id=#{@id}"
+
+        set_params params
+
+        click_button 'Submit'
+      end
+
+      def run(opts = {})
 
         visit "#{@page.url}/runScript?id=#{@id}"
 
@@ -53,22 +73,38 @@ module Jenkins
           find(:xpath, "//option[@value='#{opts[:on]}']").select_option
         end
 
-        if !with.empty?
-          find(:path, '/defineParams').click
-          index = 0
-          with.each_pair { |name, value|
-              prefix = '/defineParams/parameters' + if index == 0
-                  '' else "[#{index}]"
-              end
-              find(:path, "#{prefix}/name").set(name)
-              find(:path, "#{prefix}/value").set(value)
-          }
-        end
+        set_params(opts[:with] || {})
 
         click_button 'Run'
 
         @output = find(:xpath, '//h2[text()="Result"]/../pre').text
         return self
+      end
+
+      private
+      def set_params(params)
+
+        if !params.empty?
+          find(:path, '/defineParams').click
+          index = 0
+          params.each_pair { |name, value|
+
+            # click Add Parameter if present
+            if index != 0
+              add_parameter = '/defineParams/parameters/add_button/repeatable-add'
+              button = all(:path, add_parameter).first
+              button.click if !button.nil?
+            end
+
+            prefix = '/defineParams/parameters' + if index == 0
+                '' else "[#{index}]"
+            end
+            find(:path, "#{prefix}/name").set(name)
+            find(:path, "#{prefix}/value").set(value)
+
+            index += 1
+          }
+        end
       end
     end
   end
