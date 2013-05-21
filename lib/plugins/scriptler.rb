@@ -73,7 +73,7 @@ module Jenkins
           find(:xpath, "//option[@value='#{opts[:on]}']").select_option
         end
 
-        set_params(opts[:with] || {})
+        fill_params(opts[:with] || {})
 
         click_button 'Run'
 
@@ -82,10 +82,26 @@ module Jenkins
       end
 
       private
+      def fill_params(params)
+
+        if !params.empty?
+          find(:path, '/defineParams').check
+
+          params.each_pair { |name, value|
+
+            value_element = find(:xpath,
+                "//input[@name='name' and @value='#{name}']/../input[@name='value']"
+            )
+
+            value_element.set value
+          }
+        end
+      end
+
       def set_params(params)
 
         if !params.empty?
-          find(:path, '/defineParams').click
+          find(:path, '/defineParams').check
           index = 0
           params.each_pair { |name, value|
 
@@ -99,8 +115,8 @@ module Jenkins
             prefix = '/defineParams/parameters' + if index == 0
                 '' else "[#{index}]"
             end
-            find(:path, "#{prefix}/name").set(name)
-            find(:path, "#{prefix}/value").set(value)
+            find(:path, "#{prefix}/name").set name
+            find(:path, "#{prefix}/value").set value
 
             index += 1
           }

@@ -3,9 +3,10 @@ When /^I upload script "([^"]+)"$/ do |local_path|
   @script = @scriptler.upload_script_from local_path
 end
 
-When /^I create script named "(.*?)"$/  do |id, script|
+When /^I create script$/ do |script|
   @scriptler = Jenkins::Scriptler::Page.new(@base_url)
-  @script = @scriptler.create_script id, script
+  name = Jenkins::PageObject.random_name
+  @script = @scriptler.create_script name, script
 end
 
 When /^I delete script "([^"]+)"$/ do |id|
@@ -20,11 +21,11 @@ When /^I run the script on ([^"]+)/ do |node|
   @script.run on: transform(node)
 end
 
-When /^I run parametrized script with:$/  do |table|
+When /^I run parameterized script with:$/  do |table|
   @script.run with: table.rows_hash
 end
 
-When /^I add script parameters$/  do |table|
+When /^I add script parameters:$/  do |table|
   @script.set_parameters table.rows_hash
 end
 

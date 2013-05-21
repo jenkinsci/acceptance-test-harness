@@ -14,8 +14,9 @@ Feature: Use Sciptler plugin
   Scenario: Run new parameterized script
     Given I have installed the "scriptler" plugin
     When I upload script "scriptler_plugin/hello_parameterized.groovy"
-    And I run parametrized script with:
+    And I add script parameters:
         | noun | space |
+    And I run the script
     Then the script output should match "Hello space!"
 
   @realupdatecenter
@@ -66,14 +67,28 @@ Feature: Use Sciptler plugin
     And  the script should not be run on master
 
   @realupdatecenter
-  Scenario: Create and run parametrized test
+  Scenario: Create and run parameterized test
     Given I have installed the "scriptler" plugin
-    When I create script named "parameterized"
+    When I create script
         """
             println lhs + ' + ' + rhs;
         """
-    And I add script parameters
+    And I add script parameters:
         | lhs |  7 |
         | rhs | 11 |
     And I run the script
     Then the script output should match "7 + 11"
+
+  @realupdatecenter
+  Scenario: Override default parameters
+    Given I have installed the "scriptler" plugin
+    When I create script
+        """
+            println lhs + ' + ' + rhs;
+        """
+    And I add script parameters:
+        | lhs |  7 |
+        | rhs | 11 |
+    And I run parameterized script with:
+        | rhs |  9 |
+    Then the script output should match "7 + 9"
