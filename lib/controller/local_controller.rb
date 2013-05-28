@@ -67,4 +67,24 @@ class LocalJenkinsController < JenkinsController
       end
     end
   end
+
+  protected
+  # Get free random local port in specified range
+  def random_local_port(opts = {})
+    from = opts[:from] || 1024
+    to = opts[:to] || 65535
+
+    loop do
+      candidate = rand(to - from) + from
+      return candidate if port_free?(candidate)
+      puts "Port #{candidate} is in use"
+    end
+  end
+
+  def port_free?(port)
+    TCPSocket.open("localhost", port).close
+    false
+  rescue Errno::ECONNREFUSED # No one is listening
+    true
+  end
 end
