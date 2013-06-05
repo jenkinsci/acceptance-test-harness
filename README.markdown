@@ -62,6 +62,7 @@ The behaviour of this controller can be customized through the following environ
 
 * `JENKINS_WAR` the path to `jenkins.war` to be tested.
 * `INTERACTIVE` keep browser session opened after failed scenario for interactive investigation.
+* `PLUGINS_DIR` a directory of plugins to be loaded on Jenkins startup
 
 #### Tomcat controller (type=tomcat)
 This controller deploys Jenkins inside Tomcat and run the test with it. This controller requires a functioning Tomcat installation listening on port 8080, on the same system that the tests run. During the test, Jenkins is deployed here, and Tomcat gets started/stopped.
@@ -70,6 +71,7 @@ The behaviour of this controller can be customized through the following environ
 
 * `JENKINS_WAR` see above
 * `INTERACTIVE` see above
+* `PLUGINS_DIR` see above
 * `CATALINA_HOME` The directory in which Tomcat is already installed.
 
 #### JBoss controller (type=jboss)
@@ -79,6 +81,7 @@ The behaviour of this controller can be customized through the following environ
 
 * `JENKINS_WAR` see above
 * `INTERACTIVE` see above
+* `PLUGINS_DIR` see above
 * `JBOSS_HOME` The directory in which JBoss is already installed.
 
 #### Ubuntu controller (type=ubuntu)

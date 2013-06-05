@@ -19,8 +19,14 @@ class LocalJenkinsController < JenkinsController
 
     # copy it into $JENKINS_HOME/plugins
     @path_element_hpi = download_path_element
-    Dir.mkdir @tempdir+'/plugins'
-    FileUtils.copy_file(@path_element_hpi,"#{@tempdir}/plugins/path-element.hpi")
+    plugins_dir = @tempdir+'/plugins'
+    Dir.mkdir plugins_dir
+
+    if ENV['PLUGINS_DIR']
+      FileUtils.cp_r Dir.glob(ENV['PLUGINS_DIR'] + '/*.[hj]pi'), plugins_dir
+    end
+
+    FileUtils.copy_file(@path_element_hpi,"#{plugins_dir}/path-element.hpi")
   end
 
   # to be supplied by subclass.
