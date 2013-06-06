@@ -61,15 +61,14 @@ When /^I enable concurrent builds$/ do
 end
 
 When /^I add a string parameter "([^"]*)"$/ do |name|
-  @job.configure do
-    @job.add_parameter("String Parameter",name,name)
-  end
+  parameter = @job.add_parameter("String Parameter")
+  parameter.name(name)
 end
 
 When /^I add a string parameter "([^"]*)" defaulting to "(.*?)"$/ do |name, default|
-  @job.configure do
-    @job.add_parameter("String Parameter",name,default)
-  end
+  parameter = @job.add_parameter("String Parameter")
+  parameter.name(name)
+  parameter.default(default)
 end
 
 When /^I disable the job$/ do

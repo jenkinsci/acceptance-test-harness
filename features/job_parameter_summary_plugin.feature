@@ -7,6 +7,9 @@ Feature: Sumarize job parameters
   Scenario: Show freestyle job parameter summary
     Given I have installed the "job-parameter-summary" plugin
     And a job
-    When I add a string parameter "MY_STRING_PARAM" defaulting to "MY_STRING_VAL"
-    And I visit the job page
-    Then summary should contain String Parameter "MY_STRING_PARAM" defaulting to "MY_STRING_VAL"
+    When I configure the job
+    And I add a string parameter "MY_STRING_PARAM_0" defaulting to "MY_STRING_VAL_0"
+    And I add a string parameter "MY_STRING_PARAM_1" defaulting to "MY_STRING_VAL_1"
+    And I save the job
+    Then summary should contain String Parameter "MY_STRING_PARAM_0" defaulting to "MY_STRING_VAL_0"
+    And summary should contain String Parameter "MY_STRING_PARAM_1" defaulting to "MY_STRING_VAL_1"

@@ -42,13 +42,10 @@ module Jenkins
       return type.new(self, element[:path])
     end
 
-    def add_parameter(type,name,value)
+    def add_parameter(type)
       ensure_config_page
-      find(:xpath, "//input[@name='parameterized']").set(true)
-      find(:xpath, "//button[text()='Add Parameter']").click
-      find(:xpath, "//a[text()='#{type}']").click
-      find(:xpath, "//input[@name='parameter.name']").set(name)
-      find(:xpath, "//input[@name='parameter.defaultValue']").set(value)
+
+      return Jenkins::Parameter.add(self, type)
     end
 
     def add_shell_step(script)
