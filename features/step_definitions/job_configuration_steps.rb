@@ -60,9 +60,15 @@ When /^I enable concurrent builds$/ do
   step %{I check the "_.concurrentBuild" checkbox}
 end
 
-When /^I add a string parameter "(.*?)"$/ do |string_param|
+When /^I add a string parameter "([^"]*)"$/ do |name|
   @job.configure do
-    @job.add_parameter("String Parameter",string_param,string_param)
+    @job.add_parameter("String Parameter",name,name)
+  end
+end
+
+When /^I add a string parameter "([^"]*)" defaulting to "(.*?)"$/ do |name, default|
+  @job.configure do
+    @job.add_parameter("String Parameter",name,default)
   end
 end
 
