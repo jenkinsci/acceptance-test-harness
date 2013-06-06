@@ -71,6 +71,11 @@ When /^I add a string parameter "([^"]*)" defaulting to "(.*?)"$/ do |name, defa
   parameter.default(default)
 end
 
+When /^I set "([^"]*)" parameter to "([^"]*)"$/ do |name, value|
+  input = find(:xpath, "//td[@class='setting-name' and text()='#{name}']/../td[@class='setting-main']//input[@type='text']")
+  input.set(value)
+end
+
 When /^I disable the job$/ do
   @job.configure do
     @job.disable
