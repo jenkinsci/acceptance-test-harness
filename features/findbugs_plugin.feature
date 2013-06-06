@@ -4,12 +4,6 @@ Feature: Allow reporting for FindBugs analysis
   I want to be able to show reports from FindBugs analysis
 
   @realupdatecenter
-  Scenario: Install FindBugs plugin
-    Given I have installed the "findbugs" plugin
-    And a job
-    Then I should be able to use "Publish FindBugs analysis results" post-build action
-
-  @realupdatecenter
   Scenario: Record FindBugs analysis
     Given I have installed the "findbugs" plugin
     And a job

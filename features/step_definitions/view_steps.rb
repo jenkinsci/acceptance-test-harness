@@ -18,11 +18,6 @@ When /^I visit the view page$/ do
   @view.open
 end
 
-Then /^I should see "([^"]*)" choice when I creating a new view$/ do |type|
-  visit(@base_url + "/newView")
-  page.should have_xpath("//input[following-sibling::label[child::b[text()='#{type}']]]")
-end
-
 Then /^I should see the view on the main page$/ do
   visit(@base_url)
   page.should have_xpath("//table[@id='viewList']//a[text()='#{@view.name}']")

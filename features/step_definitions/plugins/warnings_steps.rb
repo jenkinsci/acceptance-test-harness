@@ -12,11 +12,6 @@ When /^I add workspace parser for "([^"]*)" applied at "([^"]*)"$/ do |tool, pat
 end
 
 
-Then /^I should be able to configure warnings collection$/ do
-  @job.configure
-  @job.add_postbuild_action 'Scan for compiler warnings'
-end
-
 Then /^build should have (\d+) "([^"]+)" warnings?$/ do |count, tool|
   @job.last_build.wait_until_finished
 
