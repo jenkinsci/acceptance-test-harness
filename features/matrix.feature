@@ -2,6 +2,7 @@ Feature: Use multi configuration job
   As a Jenkins user
   I want to configure and run multi configuration jobs
 
+  @since(1.515)
   Scenario: Use Job parameters in combination filters
     Given a matrix job
     When I configure the job
