@@ -1,12 +1,5 @@
 Feature: Executing groovy scripts
 
-  @realupdatecenter
-  Scenario: Install Groovy plugin
-    When I install the "groovy" plugin from the update center
-    And I create a job named "groovy-test"
-    Then the job should be able to use the "Execute Groovy script" buildstep
-    And  the job should be able to use the "Execute system Groovy script" buildstep
-
  @realupdatecenter
  @needs_preinstalled_sw
   Scenario: Run groovy script

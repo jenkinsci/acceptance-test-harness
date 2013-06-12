@@ -3,12 +3,6 @@ Feature: Cleanup job workspace
   I want to automatically cleanup my workspace
 
   @realupdatecenter
-  Scenario: Install Workspace cleanup plugin
-    Given a simple job
-    When I install the "ws-cleanup" plugin from the update center
-    Then I should be able to configure workspace cleanup
-
-  @realupdatecenter
   Scenario: Do not clean up by default
     Given I have installed the "ws-cleanup" plugin
     And a simple job

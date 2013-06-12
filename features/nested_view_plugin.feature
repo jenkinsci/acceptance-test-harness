@@ -1,11 +1,6 @@
 Feature: Test Nested view plugin
 
   @realupdatecenter
-  Scenario: Install Nested view plugin
-    When I install the "nested-view" plugin from the update center
-    Then I should see "Nested View" choice when I creating a new view
-
-  @realupdatecenter
   Scenario: Create Nested view
     Given I have installed the "nested-view" plugin
     And a simple job

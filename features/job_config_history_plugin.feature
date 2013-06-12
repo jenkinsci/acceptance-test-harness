@@ -1,12 +1,6 @@
 Feature: Test JobConfigHistory plugin
 
   @realupdatecenter
-  Scenario: Install JobConfigHistory plugin
-    When I install the "jobConfigHistory" plugin from the update center
-    And I create a job named "config-history-test"
-    Then the job should have "Job Config History" action
-
-  @realupdatecenter
   Scenario: Save job config history
     Given I have installed the "jobConfigHistory" plugin
     And a simple job

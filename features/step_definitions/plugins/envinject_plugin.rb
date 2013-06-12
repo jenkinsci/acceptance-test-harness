@@ -17,7 +17,3 @@ When /^I add build step injecting variables "([^"]*)" to the build$/ do |env_var
   find(:xpath, "//a[text()='Inject environment variables']").click
   find(:path, "/builder/propertiesContent").set(env_var)
 end
-
-Then /^I should be able to prepare an environment for the build$/ do
-  find(:path, '/properties/org-jenkinsci-plugins-envinject-EnvInjectJobProperty/on').instance_of?(Capybara::Node::Element).should be true
-end
