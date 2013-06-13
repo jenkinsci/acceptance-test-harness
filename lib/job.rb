@@ -21,6 +21,10 @@ module Jenkins
       job_url + "/configure"
     end
 
+    def json_api_url
+      "#{job_url}/api/json"
+    end
+
     def config_xml
        job_url + "/config.xml"
     end
@@ -86,6 +90,10 @@ module Jenkins
 
     def last_build
       return build("lastBuild") # Hacks!
+    end
+
+    def next_build_number
+      return json['nextBuildNumber']
     end
 
     def workspace
