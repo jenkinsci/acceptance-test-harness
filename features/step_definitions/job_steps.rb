@@ -59,10 +59,12 @@ When /^I build (\d+) jobs$/  do |count|
 end
 
 When /^I build (\d+) jobs sequentially$/  do |count|
+  base = @job.next_build_number
+
   count.to_i.times do |i|
+    build_number = base + i
     @job.queue_build
-    sleep 0.5 # Wait for newly queued build to become the last build
-    @job.last_build.wait_until_finished
+    @job.build(build_number).wait_until_finished
   end
 end
 

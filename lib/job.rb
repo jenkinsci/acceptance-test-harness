@@ -14,11 +14,15 @@ module Jenkins
     end
 
     def job_url
-      @base_url + "/job/#{@name}"
+      @base_url + "job/#{@name}"
     end
 
     def configure_url
       job_url + "/configure"
+    end
+
+    def json_api_url
+      "#{job_url}/api/json"
     end
 
     def config_xml
@@ -42,13 +46,10 @@ module Jenkins
       return type.new(self, element[:path])
     end
 
-    def add_parameter(type,name,value)
+    def add_parameter(type)
       ensure_config_page
-      find(:xpath, "//input[@name='parameterized']").set(true)
-      find(:xpath, "//button[text()='Add Parameter']").click
-      find(:xpath, "//a[text()='#{type}']").click
-      find(:xpath, "//input[@name='parameter.name']").set(name)
-      find(:xpath, "//input[@name='parameter.defaultValue']").set(value)
+
+      return Jenkins::Parameter.add(self, type)
     end
 
     def add_shell_step(script)
@@ -91,12 +92,20 @@ module Jenkins
       return build("lastBuild") # Hacks!
     end
 
+    def next_build_number
+      return json['nextBuildNumber']
+    end
+
     def workspace
       Jenkins::Workspace.new(job_url)
     end
 
     def build(number)
       Jenkins::Build.new(@base_url, self, number)
+    end
+
+    def configuration(name)
+      Jenkins::Configuration.new(self, name)
     end
 
     def queue_build

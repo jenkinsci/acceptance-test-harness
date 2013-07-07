@@ -35,8 +35,8 @@ and newer tests that are written for cucumber (in the `features` directory.)
 
 First, run `bundle install` to install required dependencies.
 
-To run the test, `JENKINS_WAR=path/to/your/jenkins.war bundle exec rake`. 
-This runs the entire test suite, so it might take a while. 
+To run the test, `JENKINS_WAR=path/to/your/jenkins.war bundle exec rake`.
+This runs the entire test suite, so it might take a while.
 
 Set `BROWSER=chrome` and install http://code.google.com/p/chromedriver/downloads/list in `$PATH` if desired. (But tests may fail.)
 
@@ -61,6 +61,8 @@ This controller runs Jenkins via `java -jar jenkins.war` on the same host where 
 The behaviour of this controller can be customized through the following environment variables.
 
 * `JENKINS_WAR` the path to `jenkins.war` to be tested.
+* `INTERACTIVE` keep browser session opened after failed scenario for interactive investigation.
+* `PLUGINS_DIR` a directory of plugins to be loaded on Jenkins startup
 
 #### Tomcat controller (type=tomcat)
 This controller deploys Jenkins inside Tomcat and run the test with it. This controller requires a functioning Tomcat installation listening on port 8080, on the same system that the tests run. During the test, Jenkins is deployed here, and Tomcat gets started/stopped.
@@ -68,6 +70,8 @@ This controller deploys Jenkins inside Tomcat and run the test with it. This con
 The behaviour of this controller can be customized through the following environment variables.
 
 * `JENKINS_WAR` see above
+* `INTERACTIVE` see above
+* `PLUGINS_DIR` see above
 * `CATALINA_HOME` The directory in which Tomcat is already installed.
 
 #### JBoss controller (type=jboss)
@@ -76,6 +80,8 @@ Similar to the above Tomcat controller except it uses JBoss.
 The behaviour of this controller can be customized through the following environment variables.
 
 * `JENKINS_WAR` see above
+* `INTERACTIVE` see above
+* `PLUGINS_DIR` see above
 * `JBOSS_HOME` The directory in which JBoss is already installed.
 
 #### Ubuntu controller (type=ubuntu)

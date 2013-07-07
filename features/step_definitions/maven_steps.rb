@@ -79,18 +79,34 @@ When /^I set maven options "([^"]+)"$/ do |opts|
   end
 end
 
+When /^I set global MAVEN_OPTS "([^"]*)"$/ do |opts|
+  @jenkins_config = Jenkins::JenkinsConfig.get(@base_url, 'Jenkins global configuration')
+  @jenkins_config.configure do
+    @maven.use_global_options opts
+  end
+end
+
 Then /^the job should have module named "([^"]+)"$/ do |module_name|
 
-  # Module build page should exist
-  module_page = @job.last_build.wait_until_finished.module(module_name)
-  module_page.exists.should be
+  # Module action should exist
+  build = @job.last_build.wait_until_finished
+  maven_module = @job.module module_name
+  maven_module.should exist
 
-  # Build page should have module links
-  @job.last_build.open
-  page.should have_xpath "//a[@href='#{module_name}/']"
+  module_build = build.module module_name
+  module_build.should exist
 
   # Modules action should have correct module links
+  build.open
+  find(:xpath, "//a[@href='#{maven_module.url_chunk}/']").click
+  page.current_url.should eq(build.module(module_name).url)
+
   visit @job.job_url + '/modules'
-  find(:xpath, "//a[contains(@href,'#{module_name}')]").click
-  page.current_url.should be(module_page.url)
+
+  # substring-after(a, b) = '' is an equivalent of ends-with(a, b)
+  xpath = "//a[contains(@href,'#{maven_module.url_chunk}/') and not(contains(@href, 'lastBuild'))]"
+  find(:xpath, xpath).click
+  page.current_url.should eq(maven_module.url)
+
+  page.should have_content "Project name: #{@job.name}/#{maven_module.name}"
 end

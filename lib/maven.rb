@@ -41,6 +41,10 @@ module Jenkins
       Dir.mkdir tempdir+'/updates'
       File.open("#{tempdir}/updates/hudson.tasks.Maven.MavenInstaller", 'w') { |file| file.write('{"list": [{"id": "3.0.4", "name": "3.0.4", "url": "http://archive.apache.org/dist/maven/binaries/apache-maven-3.0.4-bin.zip"}]}') }
     end
+
+    def use_global_options(opts)
+      find(:path, '/hudson-maven-MavenModuleSet/globalMavenOpts').set(opts)
+    end
   end
 
   class MavenJob < Job
@@ -130,7 +134,29 @@ module Jenkins
     end
 
     def url
-      "#{@job.job_url}/#{@name}"
+      "#{@job.job_url}/#{url_chunk}/"
+    end
+
+    def url_chunk
+      @name.gsub(':', '$')
+    end
+
+    def open
+      visit url
+    end
+
+    def json_api_url
+      url + '/api/json'
+    end
+
+    def exists?
+      begin
+        json
+      rescue JSON::ParserError
+        return false
+      end
+
+      return true
     end
   end
 
@@ -144,10 +170,14 @@ module Jenkins
     end
 
     def url
-      "#{@module.url}/#{@build.number}"
+      "#{@module.job.job_url}/#{@build.number}/#{@module.url_chunk}/"
     end
 
-    def exists
+    def json_api_url
+      url + '/api/json'
+    end
+
+    def exists?
       begin
         json
       rescue JSON::ParserError
@@ -155,10 +185,6 @@ module Jenkins
       end
 
       return true
-    end
-
-    def json_api_url
-      url + '/api/json'
     end
   end
 end

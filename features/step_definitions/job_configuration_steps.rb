@@ -60,10 +60,20 @@ When /^I enable concurrent builds$/ do
   step %{I check the "_.concurrentBuild" checkbox}
 end
 
-When /^I add a string parameter "(.*?)"$/ do |string_param|
-  @job.configure do
-    @job.add_parameter("String Parameter",string_param,string_param)
-  end
+When /^I add a string parameter "([^"]*)"$/ do |name|
+  parameter = @job.add_parameter("String Parameter")
+  parameter.name(name)
+end
+
+When /^I add a string parameter "([^"]*)" defaulting to "(.*?)"$/ do |name, default|
+  parameter = @job.add_parameter("String Parameter")
+  parameter.name(name)
+  parameter.default(default)
+end
+
+When /^I set "([^"]*)" parameter to "([^"]*)"$/ do |name, value|
+  input = find(:xpath, "//td[@class='setting-name' and text()='#{name}']/../td[@class='setting-main']//input[@type='text']")
+  input.set(value)
 end
 
 When /^I disable the job$/ do
@@ -119,18 +129,4 @@ end
 
 When /^I copy resource "([^"]*)" into workspace as "([^"]*)" via shell command$/ do |resource, target|
   @job.copy_resource(resource, target)
-end
-
-Then /^the job should be able to use the "(.*)" buildstep$/ do |build_step|
-  find(:xpath, "//button[text()='Add build step']").locate.click
-  find(:xpath, "//a[text()='#{build_step}']").instance_of?(Capybara::Node::Element).should be true
-end
-
-Then /^I should be able to use the "([^"]*)" build environment action$/ do |env_action|
-  find(:xpath, "//label[text()='#{env_action}']").instance_of?(Capybara::Node::Element).should be true
-end
-
-Then /^I should be able to use "([^"]*)" post-build action$/ do |action|
-  find(:xpath, "//button[text()='Add post-build action']").locate.click
-  find(:xpath, "//a[text()='#{action}']").instance_of?(Capybara::Node::Element).should be true
 end

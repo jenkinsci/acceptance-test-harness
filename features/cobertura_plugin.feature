@@ -4,12 +4,6 @@ Feature: Allow publishing of Cobertura analysis
   I want to be able to publish Cobertura analysis report
 
   @realupdatecenter
-  Scenario: Install Cobertura plugin
-    Given I have installed the "cobertura" plugin
-    And a job
-    Then I should be able to use "Publish Cobertura Coverage Report" post-build action
-
-  @realupdatecenter
   Scenario: Record Cobertura coverage report
     Given I have installed the "cobertura" plugin
     And a job

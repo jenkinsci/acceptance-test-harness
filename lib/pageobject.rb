@@ -11,6 +11,7 @@ module Jenkins
     extend Capybara::DSL
 
     attr_accessor :base_url, :name
+    alias_method :to_s, :name
 
     def initialize(base_url, name)
       @base_url = base_url
@@ -97,6 +98,10 @@ module Jenkins
       return Gem::Version.new(
           text.match("^#{prefix}([^-]*)")[1]
       )
+    end
+
+    def resource(relative_path)
+      return "#{File.dirname(__FILE__)}/../resources/#{relative_path}"
     end
   end
 end

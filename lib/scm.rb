@@ -15,8 +15,8 @@ module Jenkins
     @@types = Hash.new
 
     # Register SCM type
-    def self.register(title, type)
-      @@types[title] = type
+    def self.register(title)
+      @@types[title] = self
     end
 
     # Get type by title

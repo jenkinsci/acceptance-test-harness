@@ -1,6 +1,8 @@
 module Jenkins
   class GitScm < Scm
 
+    register 'Git'
+
     def url(url)
       find(:path, path("userRemoteConfigs/url")).set(url)
     end
@@ -34,5 +36,3 @@ module Jenkins
     end
   end
 end
-
-Jenkins::Scm.register('Git', Jenkins::GitScm)

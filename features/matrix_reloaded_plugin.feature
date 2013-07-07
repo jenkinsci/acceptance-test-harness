@@ -1,13 +1,6 @@
 Feature: Test matrix-reloaded plugin
 
   @realupdatecenter
-  Scenario: Install matrix-reloaded plugin
-    When I install the "matrix-reloaded" plugin from the update center
-    And I create a matrix job
-    And I build the job
-    Then the build should have "Matrix Reloaded" action
-
-  @realupdatecenter
   Scenario: Build Matrix configuration
     Given I have installed the "matrix-reloaded" plugin
     When I create a matrix job

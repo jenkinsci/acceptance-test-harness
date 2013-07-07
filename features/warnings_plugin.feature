@@ -4,12 +4,6 @@ Feature: Adds Warnings collection support
   I want to install and configure Warnings plugin
 
   @realupdatecenter
-  Scenario: Install Warnings plugin
-    Given I have installed the "warnings" plugin
-    And a job
-    Then I should be able to configure warnings collection
-
-  @realupdatecenter
   Scenario: Detect no errors in console log and workspace when there are none
     Given I have installed the "warnings" plugin
     And a job

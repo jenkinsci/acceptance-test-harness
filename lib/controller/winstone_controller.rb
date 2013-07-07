@@ -11,8 +11,8 @@ class WinstoneJenkinsController < LocalJenkinsController
     super(opts)
 
     # Chose a random port, just to be safe
-    @http_port    = rand(65000 - 8080) + 8080
-    @control_port = rand(65000 - 8080) + 8080
+    @http_port    = random_local_port
+    @control_port = random_local_port
   end
 
   def start_process

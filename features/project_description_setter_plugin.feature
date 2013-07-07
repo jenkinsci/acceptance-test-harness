@@ -4,12 +4,6 @@ Feature: Set project description based on file in workspace
   I want to be able to set project description using a file in the workspace
 
   @realupdatecenter
-  Scenario: Install Project description setter plugin
-    Given I have installed the "project-description-setter" plugin
-    And a job
-    Then I should be able to use the "Set a project description from a file in the workspace" build environment action
-
-  @realupdatecenter
   Scenario: Set project description based upon file in workspace
     Given I have installed the "project-description-setter" plugin
     And a job

@@ -37,11 +37,13 @@ class JenkinsController
 
     target = WORKSPACE+'/path-element.hpi'
 
-    File.delete target if File.exists? target
+    # Download file only if missing
+    if !File.exists? target
 
-    open(target,'wb') do |f|
-      rsp = RestClient.get source
-      f.write(rsp.body)
+      open(target,'wb') do |f|
+        rsp = RestClient.get source
+        f.write(rsp.body)
+      end
     end
 
     return target

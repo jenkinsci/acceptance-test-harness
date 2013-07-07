@@ -4,12 +4,6 @@ Feature: Allow publishing of Checkstyle report
   I want to be able to publish Checkstyle report
 
   @realupdatecenter
-  Scenario: Install Checkstyle plugin
-    Given I have installed the "checkstyle" plugin
-    And a job
-    Then I should be able to use "Publish Checkstyle analysis results" post-build action
-
-  @realupdatecenter
   Scenario: Record Checkstyle report
     Given I have installed the "checkstyle" plugin
     And a job

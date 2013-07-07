@@ -1,11 +1,4 @@
 Feature: Test Gradle plugin
- 
-  @realupdatecenter
-  Scenario: Install Gradle plugin
-    Given a job
-    When I install the "gradle" plugin from the update center  
-    And I configure the job
-    Then the job should be able to use the "Invoke Gradle script" buildstep
 
   @realupdatecenter
   Scenario: Add Auto-Installed Gradle

@@ -19,8 +19,14 @@ class LocalJenkinsController < JenkinsController
 
     # copy it into $JENKINS_HOME/plugins
     @path_element_hpi = download_path_element
-    Dir.mkdir @tempdir+'/plugins'
-    FileUtils.copy_file(@path_element_hpi,"#{@tempdir}/plugins/path-element.hpi")
+    plugins_dir = @tempdir+'/plugins'
+    Dir.mkdir plugins_dir
+
+    if ENV['PLUGINS_DIR']
+      FileUtils.cp_r Dir.glob(ENV['PLUGINS_DIR'] + '/*.[hj]pi'), plugins_dir
+    end
+
+    FileUtils.copy_file(@path_element_hpi,"#{plugins_dir}/path-element.hpi")
   end
 
   # to be supplied by subclass.
@@ -53,12 +59,38 @@ class LocalJenkinsController < JenkinsController
   end
 
   def diagnose
-    puts "It looks like the test failed/errored, so here's the console from Jenkins:"
-    puts "--------------------------------------------------------------------------"
-    File.open(JENKINS_DEBUG_LOG, 'r') do |fd|
-      fd.each_line do |line|
-        puts line
+    if ENV["INTERACTIVE"] == 'true'
+      puts 'Commencing interactive debugging. Browser session was kept open.'
+      puts 'Press return to proceed.'
+      STDIN.getc
+    else
+      puts "It looks like the test failed/errored, so here's the console from Jenkins:"
+      puts "--------------------------------------------------------------------------"
+      File.open(JENKINS_DEBUG_LOG, 'r') do |fd|
+        fd.each_line do |line|
+          puts line
+        end
       end
     end
+  end
+
+  protected
+  # Get free random local port in specified range
+  def random_local_port(opts = {})
+    from = opts[:from] || 1024
+    to = opts[:to] || 65535
+
+    loop do
+      candidate = rand(to - from) + from
+      return candidate if port_free?(candidate)
+      puts "Port #{candidate} is in use"
+    end
+  end
+
+  def port_free?(port)
+    TCPSocket.open("localhost", port).close
+    false
+  rescue Errno::ECONNREFUSED # No one is listening
+    true
   end
 end

@@ -5,6 +5,10 @@ Given /^a dumb slave$/ do
   @slave = Jenkins::Slave.dumb_slave(@base_url)
 end
 
+Given /^a slave named "([^"]*)"$/ do |name|
+  @slave = Jenkins::Slave.named_slave(@base_url, name)
+end
+
 
 ############################################################################
 

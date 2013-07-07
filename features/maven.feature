@@ -65,6 +65,18 @@ Feature: Adds Apache Maven support
     Then I should not see console output matching "[INFO]"
     And  I should not see console output matching "[WARNING]"
 
+  @realupdatecenter
+  Scenario: Set global maven options
+    Given I have default Maven configured
+    And a Maven job
+    When I configure the job
+    And I copy resource "maven/repositories/multimodule/*" into workspace via shell command
+    And I add a top-level maven target "package"
+    And I save the job
+    And I set global MAVEN_OPTS "-verbose"
+    And I build the job
+    Then I should see console output matching regexp "[Loaded java\.lang\.Objects from .*jar]"
+
   @bug(17713)
   @realupdatecenter
   Scenario: Display job modules for Maven project
@@ -75,6 +87,6 @@ Feature: Adds Apache Maven support
     And I add a top-level maven target "package"
     And I save the job
     And I build the job
-    Then the job should have module named "gid$root"
-    Then the job should have module named "gid$module_a"
-    Then the job should have module named "gid$module_b"
+    Then the job should have module named "gid:root"
+    Then the job should have module named "gid:module_a"
+    Then the job should have module named "gid:module_b"

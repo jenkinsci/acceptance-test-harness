@@ -47,7 +47,12 @@ module Jenkins
     end
 
     def self.dumb_slave(base_url)
-      slave = self.new(base_url, self.random_name)
+      return named_slave(base_url, self.random_name)
+    end
+
+    def self.named_slave(base_url, name)
+      slave = self.new(base_url, name)
+
       visit("/computer/new")
 
       find(:xpath, "//input[@id='name']").set(slave.name)
