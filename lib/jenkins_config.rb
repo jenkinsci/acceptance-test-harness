@@ -10,7 +10,7 @@ module Jenkins
     end
     
     def configure_url
-      @base_url + "configure"
+      @base_url + "/configure"
     end
 
     def configure(&block)

@@ -37,6 +37,6 @@ class WinstoneJenkinsController < LocalJenkinsController
   end
 
   def url
-    "http://127.0.0.1:#@http_port/"
+    "http://127.0.0.1:#@http_port"
   end
 end

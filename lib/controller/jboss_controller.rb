@@ -5,7 +5,7 @@
 # @attr [String] opts
 #    specify the location of jenkins.war
 # @attr [String] jboss_home
-#    specify the location of JBoss installation 
+#    specify the location of JBoss installation
 class JBossController < LocalJenkinsController
   register :jboss
 
@@ -33,6 +33,6 @@ class JBossController < LocalJenkinsController
   end
 
   def url
-    "http://127.0.0.1:8080/jenkins/"
+    "http://127.0.0.1:8080/jenkins"
   end
 end

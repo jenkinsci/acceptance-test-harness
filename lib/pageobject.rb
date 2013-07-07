@@ -90,7 +90,7 @@ module Jenkins
     # Get the version of Jenkins under test
     def jenkins_version
       prefix = 'About Jenkins '
-      visit @base_url + 'about'
+      visit @base_url + '/about'
 
       text = wait_for("//h1[starts-with(., '#{prefix}')]").text
 

@@ -14,7 +14,7 @@ module Jenkins
     end
 
     def job_url
-      @base_url + "job/#{@name}"
+      @base_url + "/job/#{@name}"
     end
 
     def configure_url

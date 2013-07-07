@@ -5,7 +5,7 @@
 # @attr [String] opts
 #    specify the location of jenkins.war
 # @attr [String] catalina_home
-#    specify the location of Tomcat installation 
+#    specify the location of Tomcat installation
 class TomcatController < LocalJenkinsController
   register :tomcat
 
@@ -36,6 +36,6 @@ class TomcatController < LocalJenkinsController
   end
 
   def url
-    "http://127.0.0.1:8080/jenkins/"
+    "http://127.0.0.1:8080/jenkins"
   end
 end
