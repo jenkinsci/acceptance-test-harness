@@ -18,18 +18,6 @@ When /^I create a job named "([^"]*)"$/ do |name|
   @job = Jenkins::Job.create_freestyle(@base_url, name)
 end
 
-Given /^a matrix job$/ do
-  @job = Jenkins::Job.create_matrix(@base_url, Jenkins::Job.random_name)
-end
-
-When /^I create a matrix job named "([^"]*)"$/ do |name|
-  @job = Jenkins::Job.create_matrix(@base_url, name)
-end
-
-When /^I create a matrix job$/ do
-  @job = Jenkins::Job.create_matrix(@base_url, Jenkins::Job.random_name)
-end
-
 When /^I copy the job named "([^"]*)" from job named "([^"]*)"$/ do |name, source_job_name|
   @job = Jenkins::Job.copy_job(@base_url, name, source_job_name)
 end
