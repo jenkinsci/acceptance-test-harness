@@ -1,11 +1,22 @@
 require File.dirname(__FILE__) + "/pageobject.rb"
 require File.dirname(__FILE__) + "/build.rb"
+require File.dirname(__FILE__) + "/job.rb"
 
+#                 MatrixJob
+#                  /     \
+# MatrixConfiguration   MatrixBuild
+#                  \     /
+#          MatrixConfigurationBuild
 module Jenkins
   class MatrixJob < Job
 
     def initialize(*args)
       super(*args)
+    end
+
+    # override
+    def build(number)
+      Jenkins::MatrixBuild.new(self, number)
     end
 
     def add_user_axis(name,value)
@@ -29,22 +40,17 @@ module Jenkins
 
     def add_slaves_axis(value)
        ensure_config_page
-       #puts find(:xpath, "//div[@name='axis' and @descriptorid='hudson.matrix.LabelAxis']")
        input = "//div[@name='axis' and @descriptorid='hudson.matrix.LabelAxis']//td/input";
        if !(page.has_xpath?("//div[@name='axis' and @descriptorid='hudson.matrix.LabelAxis']"))
-           puts (page.has_xpath?(:xpath, "//div[@name='axis' and @descriptorid='hudson.matrix.LabelAxis']"))
           find(:xpath, "//button[text()='Add axis']").click
           find(:xpath, "//li/a[text()='Slaves']").click
           sleep 0.1 # wait until axis appear
        end
        if !(find(:xpath, "(#{input}[@name='values' and @json='#{value}'])").visible?)
-          puts "not visible"
           find(:xpath, "//div[@class='yahooTree labelAxis-tree']//table[@id='ygtvtableel1']//a").click
           find(:xpath, "//div[@class='yahooTree labelAxis-tree']//table[@id='ygtvtableel2']//a").click
        end
-       puts ("visible")
        find(:xpath, "(#{input}[@name='values' and @json='#{value}'])").set(true)
-       puts(find(:xpath, "//div[@name='axis' and @descriptorid='hudson.matrix.LabelAxis']"))
     end
 
     def add_jdk_axis(value)
@@ -77,19 +83,17 @@ module Jenkins
        find(:xpath, "//select[@name='touchStoneResultCondition']/option[@value='#{result}']").click
     end
 
-    def matrix_configurations
-      visit(job_url + "/ajaxMatrix")
-      if !(page.has_xpath?("//div[@id='matrix']//a"))
-        return Array.new(0)
+    def configuration(name)
+      Jenkins::MatrixConfiguration.new(self, name)
+    end
+
+    def configurations
+      configurations = []
+      json['activeConfigurations'].each do |config|
+
+        configurations << configuration(config['name'])
       end
-      paths = page.all(:xpath,"//div[@id='matrix']//a")
-      index = 0
-      configurations = Array.new(paths.length)
-      while index < paths.length do
-        name = paths[index].[]("href").split(job_url)[1].delete("/") #remove / from the path to gain name of configuration
-        configurations[index] = Jenkins::MatrixConfiguration.new(@base_url, name, self)
-        index += 1
-      end
+
       return configurations
     end
 
@@ -103,4 +107,102 @@ module Jenkins
       self.new(base_url, name)
     end
   end
+
+  class MatrixConfiguration < PageObject
+    attr_accessor :timeout, :job, :combination
+
+    def initialize(job, combination)
+      super(@base_url, 'Matrix configuration')
+      @timeout = 60 # Default all builds for this job to a 60s timeout
+      @job = job
+      @combination = combination
+    end
+
+    def url
+      "#{@job.job_url}/#{@combination}"
+    end
+
+    def json_api_url
+      "#{url}/api/json"
+    end
+
+    def open
+      visit(job_url)
+    end
+
+    def last_build
+      return build("lastBuild") # Hacks!
+    end
+
+    def workspace
+      Jenkins::Workspace.new(job_url)
+    end
+
+    def build(number)
+      Jenkins::MatrixConfigurationBuild.new(MatrixBuild.new(@job, number), self)
+    end
+
+    def wait_for_build(number)
+      build = self.build(number)
+      start = Time.now
+      while (build.in_progress? && ((Time.now - start) < @timeout))
+        sleep 1
+      end
+    end
+  end
+
+  class MatrixBuild < Build
+
+    def initialize(job, number)
+      super(job.base_url, job, number)
+    end
+
+    def configurations
+      configuration_builds = []
+      @job.configurations.each do |config|
+        configuration_builds << MatrixConfigurationBuild.new(self, config)
+      end
+
+      return configuration_builds
+    end
+
+    def configuration(name)
+      Jenkins::MatrixConfigurationBuild.new(self, Jenkins::MatrixConfiguration.new(job, name))
+    end
+  end
+
+  class MatrixConfigurationBuild < Build
+    attr_reader :build, :configuration
+
+    # do not invoke superclass constructor
+    def initialize(build, configuration)
+      @build = build
+      @configuration = configuration
+      @base_url = build.base_url
+      @name = 'Matrix configuration build'
+    end
+
+    def build_url
+      "#{@build.build_url}/#{@configuration.combination}"
+    end
+
+    def json_api_url
+      "#{build_url}/api/json"
+    end
+
+    # Determine whether the combination was built in a given build
+    def exists?
+      number = @build.json['number']
+
+      @build.json['runs'].each do |run|
+        if run['number'] == number
+          return true if run['url'].include?(@configuration.combination)
+        end
+      end
+
+      return false
+    end
+  end
 end
+
+Jenkins::Job.register('Matrix', Jenkins::MatrixJob)

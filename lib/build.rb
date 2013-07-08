@@ -41,12 +41,6 @@ module Jenkins
       end
     end
 
-    def configuration(name)
-      return Jenkins::BuiltConfiguration.new(
-          self, Jenkins::Configuration.new(@job, name)
-      )
-    end
-
     def result?
       wait_until_finished
 

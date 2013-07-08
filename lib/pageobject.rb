@@ -67,7 +67,7 @@ module Jenkins
     end
 
     def json_api_url
-      raise "json_api_url not overridden by subclass"
+      raise "json_api_url not overridden by #{self.class.name}"
     end
 
     def json

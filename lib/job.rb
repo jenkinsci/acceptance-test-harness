@@ -104,10 +104,6 @@ module Jenkins
       Jenkins::Build.new(@base_url, self, number)
     end
 
-    def configuration(name)
-      Jenkins::Configuration.new(self, name)
-    end
-
     def queue_build
       suffix = '/build?delay=0sec'
       visit job_url + suffix
