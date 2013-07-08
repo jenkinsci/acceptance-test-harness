@@ -49,9 +49,7 @@ module Jenkins
 
   class MavenJob < Job
 
-    def self.value
-      return 'hudson.maven.MavenModuleSet'
-    end
+    register 'Maven', 'hudson.maven.MavenModuleSet'
 
     # override
     def build(number)
@@ -188,5 +186,3 @@ module Jenkins
     end
   end
 end
-
-Jenkins::Job.register('Maven', Jenkins::MavenJob)

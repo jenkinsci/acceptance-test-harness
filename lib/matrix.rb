@@ -10,6 +10,8 @@ require File.dirname(__FILE__) + "/job.rb"
 module Jenkins
   class MatrixJob < Job
 
+    register 'Matrix', 'hudson.matrix.MatrixProject'
+
     def initialize(*args)
       super(*args)
     end
@@ -204,5 +206,3 @@ module Jenkins
     end
   end
 end
-
-Jenkins::Job.register('Matrix', Jenkins::MatrixJob)

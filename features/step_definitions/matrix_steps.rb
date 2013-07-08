@@ -1,9 +1,9 @@
 Given /^a matrix job$/ do
-  @job = Jenkins::MatrixJob.create_matrix(@base_url, Jenkins::Job.random_name)
+  @job = Jenkins::Job.create('Matrix', @base_url)
 end
 
 When /^I create a matrix job$/ do
-  @job = Jenkins::MatrixJob.create_matrix(@base_url, Jenkins::Job.random_name)
+  @job = Jenkins::Job.create('Matrix', @base_url)
 end
 
 When /^I configure user axis "([^"]*)" with values "([^"]*)"$/ do |name ,value|

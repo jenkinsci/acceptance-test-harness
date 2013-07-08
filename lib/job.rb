@@ -188,23 +188,24 @@ module Jenkins
     end
 
     def self.create(title, base_url)
-      type = @@job_types[title];
-      value = type.value
+      sut_type = @@job_types[title][:sut];
+      page_object_type = @@job_types[title][:page_object];
+
       name = Jenkins::PageObject.random_name
 
       visit "#{base_url}/newJob"
       fill_in "name", :with => name
-      find(:xpath, "//input[starts-with(@value, '#{value}')]").set(true)
+      find(:xpath, "//input[starts-with(@value, '#{sut_type}')]").set(true)
       click_button "OK"
 
-      type.new(base_url, name)
+      page_object_type.new(base_url, name)
     end
 
     @@job_types = Hash.new
 
     # Register job type
     def self.register(title, type)
-      @@job_types[title] = type
+      @@job_types[title] = { page_object: self, sut: type }
     end
 
     # Get type by title
