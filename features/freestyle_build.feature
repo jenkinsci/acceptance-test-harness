@@ -31,7 +31,7 @@ Feature: Configure/build freestyle jobs
     And I add a shell build step "sleep 20"
     And I save the job
     And I build 2 jobs
-    Then the 2 jobs should run concurrently
+    Then the 2 builds should run concurrently
 
   Scenario: Create a parameterized job
     Given a job

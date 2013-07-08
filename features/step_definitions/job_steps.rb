@@ -72,7 +72,7 @@ Then /^the (job|build) (should|should not) have "([^"]*)" action$/ do |entity, s
   page.send should_or_not, have_xpath("//div[@id='tasks']/div/a[text()='#{action}']")
 end
 
-Then /^the (\d+) jobs should run concurrently$/ do |count|
+Then /^the (\d+) builds should run concurrently$/ do |count|
   # Wait until all jobs have started
   count.to_i.times do |i|
     @job.build(i + 1).wait_until_started
@@ -80,12 +80,12 @@ Then /^the (\d+) jobs should run concurrently$/ do |count|
 
   # then all jobs should be in progress at the same time
   count.to_i.times do |i|
-    @job.build(i + 1).in_progress?.should be true
+    @job.build(i + 1).should be_in_progress
   end
 end
 
 Then /^I should be prompted to enter the "(.*?)" parameter$/ do |param_name|
-  find(:xpath, "//input[@value='#{param_name}']").instance_of?(Capybara::Node::Element).should be true
+  page.should have_xpath "//input[@value='#{param_name}']"
 end
 
 Then /^the build should (succeed|fail)$/ do |status|
@@ -94,7 +94,7 @@ Then /^the build should (succeed|fail)$/ do |status|
 end
 
 Then /^the build should be unstable$/ do
-  @job.last_build.unstable?.should be true
+  @job.last_build.should be_unstable
 end
 
 Then /^it should be disabled$/ do
@@ -106,11 +106,11 @@ Then /^it should have an "(.*?)" button on the job page$/ do |button|
   page.should have_xpath("//button[text()='#{button}']")
 end
 
-Then /^the job configuration should be equals to "([^"]*)" configuration$/ do |source_name|
+Then /^the job configuration should be equal to "([^"]*)" configuration$/ do |source_name|
   visit @job.config_xml
   source_page = page.html
   visit @base_url + "/job/#{source_name}/config.xml"
-  (page.html.eql? source_page).should be true
+  page.html.should == source_page
 end
 
 Then /^the artifact "([^"]*)" (should|should not) be archived$/ do |artifact, should_or_not|

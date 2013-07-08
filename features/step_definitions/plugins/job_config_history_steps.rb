@@ -1,7 +1,7 @@
 Then /^jobConfigHistory page should show difference/ do
   sleep 1
-  all(:xpath, "//tr//a[contains(text(),'View as XML')]").length.should >= 2
-  all(:xpath, "//tr//a[contains(text(),'(RAW)')]").length.should >= 2
+  all(:xpath, "//tr//a[contains(text(),'View as XML')]").length.should be >= 2
+  all(:xpath, "//tr//a[contains(text(),'(RAW)')]").length.should be >= 2
 end
 
 When /^I dispaly difference/ do
