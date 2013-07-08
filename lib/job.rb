@@ -116,14 +116,6 @@ module Jenkins
       end
     end
 
-    def wait_for_build(number)
-      build = self.build(number)
-      start = Time.now
-      while (build.in_progress? && ((Time.now - start) < @timeout))
-        sleep 1
-      end
-    end
-
     def label_expression=(expression)
       ensure_config_page
       find(:xpath, "//input[@name='hasSlaveAffinity']").locate.set(true)

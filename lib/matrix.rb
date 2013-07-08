@@ -143,14 +143,6 @@ module Jenkins
     def build(number)
       Jenkins::MatrixConfigurationBuild.new(MatrixBuild.new(@job, number), self)
     end
-
-    def wait_for_build(number)
-      build = self.build(number)
-      start = Time.now
-      while (build.in_progress? && ((Time.now - start) < @timeout))
-        sleep 1
-      end
-    end
   end
 
   class MatrixBuild < Build
