@@ -14,24 +14,24 @@ module Jenkins
       super(base_url, "#{job}/#{number}")
     end
 
-    def build_url
-      @job.job_url + "/#{@number}"
+    def url
+      @job.url + "/#{@number}"
     end
 
     def artifact_url(artifact)
-      build_url + "/artifact/#{artifact}"
+      url + "/artifact/#{artifact}"
     end
 
     def console_url()
-      "#{build_url}/console"
+      "#{url}/console"
     end
 
     def open
-      visit(build_url)
+      visit(url)
     end
 
     def json_api_url
-      "#{build_url}/api/json"
+      "#{url}/api/json"
     end
 
     def console

@@ -13,7 +13,7 @@ module Plugins
     end
 
     def url
-      @job.job_url + "/cobertura"
+      @job.url + "/cobertura"
     end
 
 

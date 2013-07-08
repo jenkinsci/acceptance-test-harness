@@ -1,5 +1,5 @@
 When /^I create a subview of the view with a type "([^"]*)" and name "([^"]*)"$/ do |type, name|
-  visit("#{@view.view_url}/newView")
+  visit("#{@view.url}/newView")
   fill_in "name", :with => name
   find(:xpath, "//input[following-sibling::label[child::b[text()='#{type}']]]").set(true)
   click_button "OK"

@@ -4,7 +4,7 @@ module Jenkins
   class View < PageObject
     attr_accessor :timeout
 
-    def view_url
+    def url
       @base_url + "/view/#{@name}"
     end
 
@@ -13,7 +13,7 @@ module Jenkins
     end
 
     def open
-      visit(view_url)
+      visit(url)
     end
 
     def self.create_view(base_url, name, type)

@@ -121,7 +121,7 @@ module Jenkins
     end
 
     def url
-      "#{@job.job_url}/#{@combination}"
+      "#{@job.url}/#{@combination}"
     end
 
     def json_api_url
@@ -129,7 +129,7 @@ module Jenkins
     end
 
     def open
-      visit(job_url)
+      visit(url)
     end
 
     def last_build
@@ -137,7 +137,7 @@ module Jenkins
     end
 
     def workspace
-      Jenkins::Workspace.new(job_url)
+      Jenkins::Workspace.new(url)
     end
 
     def build(number)
@@ -176,12 +176,12 @@ module Jenkins
       @name = 'Matrix configuration build'
     end
 
-    def build_url
-      "#{@build.build_url}/#{@configuration.combination}"
+    def url
+      "#{@build.url}/#{@configuration.combination}"
     end
 
     def json_api_url
-      "#{build_url}/api/json"
+      "#{url}/api/json"
     end
 
     # Determine whether the combination was built in a given build

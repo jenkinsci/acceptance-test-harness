@@ -132,7 +132,7 @@ module Jenkins
     end
 
     def url
-      "#{@job.job_url}/#{url_chunk}/"
+      "#{@job.url}/#{url_chunk}/"
     end
 
     def url_chunk
@@ -168,7 +168,7 @@ module Jenkins
     end
 
     def url
-      "#{@module.job.job_url}/#{@build.number}/#{@module.url_chunk}/"
+      "#{@module.job.url}/#{@build.number}/#{@module.url_chunk}/"
     end
 
     def json_api_url

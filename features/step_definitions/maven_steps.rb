@@ -101,7 +101,7 @@ Then /^the job should have module named "([^"]+)"$/ do |module_name|
   find(:xpath, "//a[@href='#{maven_module.url_chunk}/']").click
   page.current_url.should eq(build.module(module_name).url)
 
-  visit @job.job_url + '/modules'
+  visit @job.url + '/modules'
 
   # substring-after(a, b) = '' is an equivalent of ends-with(a, b)
   xpath = "//a[contains(@href,'#{maven_module.url_chunk}/') and not(contains(@href, 'lastBuild'))]"

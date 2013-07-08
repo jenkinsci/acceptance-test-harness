@@ -13,20 +13,20 @@ module Jenkins
       super(*args)
     end
 
-    def job_url
+    def url
       @base_url + "/job/#{@name}"
     end
 
     def configure_url
-      job_url + "/configure"
+      url + "/configure"
     end
 
     def json_api_url
-      "#{job_url}/api/json"
+      "#{url}/api/json"
     end
 
     def config_xml
-       job_url + "/config.xml"
+       url + "/config.xml"
     end
 
     def configure(&block)
@@ -81,7 +81,7 @@ module Jenkins
     end
 
     def open
-      visit(job_url)
+      visit(url)
     end
 
     def open_config
@@ -97,7 +97,7 @@ module Jenkins
     end
 
     def workspace
-      Jenkins::Workspace.new(job_url)
+      Jenkins::Workspace.new(url)
     end
 
     def build(number)
@@ -106,7 +106,7 @@ module Jenkins
 
     def queue_build
       suffix = '/build?delay=0sec'
-      visit job_url + suffix
+      visit url + suffix
 
       if !page.current_url.end_with?(suffix)
         # Build scheduled immediately
