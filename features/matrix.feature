@@ -65,7 +65,6 @@ Feature: Use multi configuration job
     Then combination "run=no" should not be built in build 1
     Then combination "run=no" should not be built in build 2
 
-  @wip
   Scenario: Run configurations on with a given label
     Given a matrix job
     When I create dumb slave named "slave"
