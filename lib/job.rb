@@ -52,6 +52,12 @@ module Jenkins
       return Jenkins::Parameter.add(self, type)
     end
 
+    def add_build_step(type)
+      ensure_config_page
+
+      return Jenkins::BuildStep.add(self, type)
+    end
+
     def add_shell_step(script)
       ensure_config_page
 

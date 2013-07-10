@@ -4,6 +4,7 @@ end
 
 Given /^a Maven job$/ do
   @job = Jenkins::Job.create('Maven', @base_url)
+  @step = @job.step
 end
 
 Given /^I have default Maven configured$/ do
@@ -47,28 +48,24 @@ exec #{real}/mvn \"$@\"
 end
 
 When /^I add a top-level maven target "([^"]*)"$/ do |goals|
-  if @job.is_a? Jenkins::MavenJob
-    @job.goals goals
-  else
-    @maven.add_maven_step(goals: goals)
+  if !@job.is_a? Jenkins::MavenJob
+    @step = @job.add_build_step 'Maven'
   end
+
+  @step.goals goals
 end
 
 When /^I add a top-level maven target "([^"]*)" for maven "([^"]*)"$/ do |goals, version|
-  if @job.is_a? Jenkins::MavenJob
-    @job.goals goals
-    @job.version version
-  else
-    @maven.add_maven_step(goals: goals, version: version)
+  if !@job.is_a? Jenkins::MavenJob
+    @step = @job.add_build_step 'Maven'
   end
+
+  @step.goals goals
+  @step.version version
 end
 
 When /^I use local Maven repository$/ do
-  if @job.is_a? Jenkins::MavenJob
-    @job.use_local_repo
-  else
-    @maven.use_local_repo
-  end
+  @step.use_local_repo
 end
 
 When /^I set maven options "([^"]+)"$/ do |opts|
@@ -77,6 +74,10 @@ When /^I set maven options "([^"]+)"$/ do |opts|
   else
     raise "Maven job only"
   end
+end
+
+When /^I set maven properties$/ do |properties|
+  @step.properties properties
 end
 
 When /^I set global MAVEN_OPTS "([^"]*)"$/ do |opts|

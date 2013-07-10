@@ -7,21 +7,6 @@ require File.dirname(__FILE__) + "/build.rb"
 module Jenkins
   class Maven < Jenkins::PageObject
 
-    def add_maven_step(options)
-      click_button 'Add build step'
-      click_link 'Invoke top-level Maven targets'
-      find(:path, "/builder/targets").set(options[:goals])
-      if(options[:version])
-        find(:xpath, "//select[@name='maven.name']").click
-        find(:xpath, "//option[@value='#{options[:version]}']").click
-      end
-    end
-
-    def use_local_repo
-      find(:path, "/builder/advanced-button").click
-      find(:path, "/builder/usePrivateRepository").locate.click
-    end
-
     def add_auto_installation(name, version)
       find(:path, "/hudson-tasks-Maven$MavenInstallation/tool/name").set(name)
       # by default Install automatically is checked
@@ -72,19 +57,8 @@ module Jenkins
       add_prebuild_shell_step "cp -r #{File.dirname(__FILE__)}/../resources/#{resource} ./#{target}"
     end
 
-    def goals(goals)
-      find(:path, "/goals").set(goals)
-    end
-
-    def version(version)
-      open_advanced
-      find(:xpath, "//select[@name='maven_version']").click
-      find(:xpath, "//option[@value='#{options[:version]}']").click
-    end
-
-    def use_local_repo
-      open_advanced
-      find(:path, "/usePrivateRepository").click
+    def step
+      MavenJobBuildStep.new(self)
     end
 
     def options(options)
@@ -183,6 +157,60 @@ module Jenkins
       end
 
       return true
+    end
+  end
+
+  class MavenBuildStep < Jenkins::BuildStep
+
+    register 'Maven', 'Invoke top-level Maven targets'
+
+    def goals(goals)
+      find(:path, path("targets")).set(goals)
+    end
+
+    def version(version)
+      open_advanced
+      select_path = path("name")
+      find(:path, select_path).click
+      find(:xpath, "//select[@path='#{select_path}']/option[@value='#{version}']").click
+    end
+
+    def properties(properties)
+      open_advanced
+      find(:path, path('properties')).set(properties)
+    end
+
+    def use_local_repo
+      open_advanced
+      find(:path, path("usePrivateRepository")).locate.click
+    end
+
+    private
+
+    @advanced_open = false
+
+    def open_advanced
+      return if @advanced_open
+
+      find(:path, path("advanced-button")).click
+      @advanced_open = true
+    end
+  end
+
+  private
+  # The only build step of Maven job
+  class MavenJobBuildStep < Jenkins::MavenBuildStep
+
+    def initialize(job)
+      super(job, '')
+    end
+
+    def goals(goals)
+      find(:path, path("goals")).set(goals)
+    end
+
+    def properties(properties)
+      raise "There is no such thing in maven job"
     end
   end
 end
