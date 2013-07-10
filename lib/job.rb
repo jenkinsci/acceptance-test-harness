@@ -59,17 +59,9 @@ module Jenkins
     end
 
     def add_shell_step(script)
-      ensure_config_page
-
-      find(:xpath, "//button[text()='Add build step']").locate.click
-      find(:xpath, "//a[text()='Execute shell']").click
-      find(:xpath, "//textarea[@name='command']").set(script)
-    end
-
-    def change_script_step(script)
-      ensure_config_page
-
-      find(:xpath, "//textarea[@name='command']").locate.set(script)
+      step = add_build_step 'Shell'
+      step.command script
+      return step
     end
 
     def add_postbuild_action(action)

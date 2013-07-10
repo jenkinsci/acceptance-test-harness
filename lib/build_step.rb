@@ -30,11 +30,26 @@ module Jenkins
     end
 
     def self.label(title)
-      return @@types[title][:label]
+      return get(title)[:label]
     end
 
     def self.type(title)
-      return @@types[title][:type]
+      return get(title)[:type]
+    end
+
+    def self.get(title)
+      return @@types[title] if @@types.has_key? title
+
+      raise "Unknown build step type #{title}"
+    end
+  end
+
+  class ShellBuildStep < BuildStep
+
+    register 'Shell', 'Execute shell'
+
+    def command(text)
+      find(:path, path('command')).locate.set(text)
     end
   end
 end

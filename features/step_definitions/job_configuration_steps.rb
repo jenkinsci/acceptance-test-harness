@@ -4,32 +4,32 @@ When /^I configure the job$/ do
 end
 
 When /^I add a shell build step "([^"]*)"$/ do |script|
-  @job.add_shell_step(script)
+  @step = @job.add_shell_step(script)
 end
 
 When /^I add a shell build step$/ do |script|
-  @job.add_shell_step(script)
+  @step = @job.add_shell_step(script)
 end
 
 When /^I add a shell build step "([^"]*)" in the job configuration$/ do |script|
   @job.configure do
-    @job.add_shell_step(script)
+    @step = @job.add_shell_step(script)
   end
 end
 
 When /^I add a shell build step in the job configuration$/ do |script|
   @job.configure do
-    @job.add_shell_step(script)
+    @step = @job.add_shell_step(script)
   end
 end
 
 When /^I change a shell build step to "([^"]*)"$/ do |script|
-  @job.change_script_step(script)
+  @step.command script
 end
 
 
 When /^I add always fail build step$/ do
-  @job.add_shell_step "exit 1"
+  @step = @job.add_shell_step "exit 1"
 end
 
 When /^I add always fail build step in the job configuration$/ do
