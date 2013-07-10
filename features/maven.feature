@@ -80,7 +80,7 @@ Feature: Adds Apache Maven support
   @bug(17713)
   @realupdatecenter
   Scenario: Display job modules for Maven project
-    And I have default Maven configured
+    Given I have default Maven configured
     And a Maven job
     When I configure the job
     And I copy resource "maven/repositories/multimodule/*" into workspace via shell command
@@ -90,3 +90,23 @@ Feature: Adds Apache Maven support
     Then the job should have module named "gid:root"
     Then the job should have module named "gid:module_a"
     Then the job should have module named "gid:module_b"
+
+  @bug(10539)
+  @realupdatecenter
+  Scenario: Preserve backslash in property
+    Given I have default Maven configured
+    And a job
+    When I configure the job
+    And I add a string parameter "CMD" defaulting to "C:\System"
+    And I add a string parameter "PROPERTY" defaulting to "C:\Windows"
+    And I copy resource "maven/repositories/multimodule/*" into workspace via shell command
+    And I add a top-level maven target "validate -Dcmdline.property=$CMD"
+    And I set maven properties
+       """
+       property.property=$PROPERTY
+       """
+    And I save the job
+    And I build the job
+    And I click the "Build" button
+    Then I should see console output matching "cmdline.property=C:\System"
+    And  I should see console output matching "property.property=C:\Windows"
