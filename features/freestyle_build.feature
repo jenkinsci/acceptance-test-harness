@@ -143,8 +143,7 @@ Feature: Configure/build freestyle jobs
     # number 2 might exist
     And  the job should not have build 3
 
-  # JENKINS-16630
-  @since(1.504)
+  @bug(16630)
   Scenario: Format zero-sized artifact size properly
     Given a job
     When I configure the job
