@@ -15,6 +15,7 @@ gem "capybara", '~> 1.1'
 gem "json"
 gem "rspec"
 gem "tempdir"
+gem "mail"
 
 gem "vagrant", '~> 1.0'
 

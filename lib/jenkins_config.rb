@@ -4,11 +4,11 @@ require File.dirname(__FILE__) + "/pageobject.rb"
 
 module Jenkins
   class JenkinsConfig < PageObject
-    
+
     def initialize(*args)
       super(*args)
     end
-    
+
     def configure_url
       @base_url + "/configure"
     end
@@ -24,7 +24,7 @@ module Jenkins
     def open
       visit(configure_url)
     end
-    
+
     def add_tool(name)
       click_button(name)
     end
@@ -46,9 +46,12 @@ module Jenkins
       click_button("Close")
     end
 
+    def mailer
+      return Plugins::Mailer.new(self, '/hudson-tasks-Mailer')
+    end
+
     def self.get(base_url, name)
       self.new(base_url, name)
     end
-
   end
 end
