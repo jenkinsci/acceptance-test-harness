@@ -1,6 +1,6 @@
 Feature: Test Javadoc plugin
- 
-  Scenario: Publish javadoc
+
+  Scenario: Publish javadoc from freestyle job
     Given a Maven
     And a job
     When I configure the job
@@ -12,7 +12,7 @@ Feature: Test Javadoc plugin
     And the job should have "Javadoc" action
     And the javadoc should display "com.mycompany.app"
 
-  Scenario: Publish javadoc
+  Scenario: Publish javadoc from matrix job
     Given a Maven
     And a matrix job
     When I configure the job

@@ -64,6 +64,12 @@ module Jenkins
       return step
     end
 
+    def add_postbuild_step(type)
+      ensure_config_page
+
+      return Jenkins::PostBuildStep.add(self, type)
+    end
+
     def add_postbuild_action(action)
       ensure_config_page
 

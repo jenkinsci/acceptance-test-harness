@@ -1,37 +1,20 @@
 When /^I add a Publish javadoc post build step with path "([^"]*)"$/ do |path|
-  @job.add_postbuild_action("Publish Javadoc")
-  find(:path, "/publisher/javadocDir").set(path)
-end
-
-When /^I set retain javadoc for each sucessful build$/ do
-  find(:xpath, "//input[@name='_.keepAll']").set(true)
-end
-
-When /^the javadoc should display "([^"]*)"$/ do |content|
-  @job.open
-  find(:xpath, "//div[@id='tasks']/div/a[text()='Javadoc']").click
-  page.should have_content(content)
-end
-
-
-When /^I add an Javadoc build step for:$/ do |script|
-  @job.add_script_step("#{script}")
+  step = @job.add_postbuild_step 'Javadoc'
+  step.dir path
 end
 
 When /^I add build steps to generate javadoc$/ do
-  options = "archetype:generate -DarchetypeGroupId=org.apache.maven.archetypes -DgroupId=com.mycompany.app -DartifactId=my-app -Dversion=1.0 -B"
-  click_button 'Add build step'
-  click_link 'Invoke top-level Maven targets'
-  find(:path, "/builder/targets").set(options)
-  options = "javadoc:javadoc -f my-app/pom.xml"
-  click_button 'Add build step'
-  click_link 'Invoke top-level Maven targets'
-  find(:path, "/builder[1]/targets").set(options)
+  create_project = @job.add_build_step 'Maven'
+  create_project.goals "archetype:generate -DarchetypeGroupId=org.apache.maven.archetypes -DgroupId=com.mycompany.app -DartifactId=my-app -Dversion=1.0 -B"
 
+  generate_javadoc = @job.add_build_step 'Maven'
+  generate_javadoc.goals "javadoc:javadoc -f my-app/pom.xml"
 end
 
-When /^I add a top-level maven target to create project$/ do
-  @maven.add_maven_step("archetype:generate -DarchetypeGroupId=org.apache.maven.archetypes -DgroupId=com.mycompany.app -DartifactId=my-app -Dversion=1.0 -B")
+Then /^the javadoc should display "([^"]*)"$/ do |content|
+  @job.open
+  find(:xpath, "//div[@id='tasks']/div/a[text()='Javadoc']").click
+  page.should have_content(content)
 end
 
 Then /^javadoc should display "([^"]*)" for default configuration$/ do |content|
@@ -40,4 +23,3 @@ Then /^javadoc should display "([^"]*)" for default configuration$/ do |content|
   find(:xpath, "//div[@id='tasks']/div/a[text()='Javadoc']").click
   page.should have_content(content)
 end
-
