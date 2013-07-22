@@ -14,13 +14,13 @@ Feature: Test Gradle plugin
           }
         }
       """
-    And I add "Invoke Gradle script" build action
+    And I add Gradle build step
     And I set Gradle version "gradle-1.5", build step description "test" and tasks "hello"
     And I save the job
     And I build the job
     Then the build should succeed
-    And I should see console output matching "Hello world!" 
- 
+    And I should see console output matching "Hello world!"
+
  @realupdatecenter
   Scenario: Execute gradle script hello.gradle from gradle directory with quiet switch
     Given I have installed the "gradle" plugin
@@ -35,7 +35,7 @@ Feature: Test Gradle plugin
           }
         }
       """
-    And I add "Invoke Gradle script" build action
+    And I add Gradle build step
     And I set Gradle version "gradle-1.5", build step description "test" and tasks "hello"
     And I set Gradle script file name "hello.gradle"
     And I set Gradle script direcotry path "gradle"

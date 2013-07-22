@@ -18,20 +18,24 @@ When /^I add script for creating "([^"]*)" file in directory "([^"]*)" :$/ do |f
   @job.add_shell_step("mkdir #{directory} \n cd #{directory} \n cat > #{file} << EOF \n #{gradle_script} \nEOF")
 end
 
+When /I add Gradle build step/ do
+  @step = @job.add_build_step 'Gradle'
+end
+
 When /^I set Gradle script file name "([^"]*)"$/ do |name|
-  find(:xpath, "//div[@descriptorid='hudson.plugins.gradle.Gradle']//input[@name='_.buildFile']").set(name)
+  @step.file name
 end
 
 When /^I set Gradle script direcotry path "([^"]*)"$/ do |path|
-  find(:xpath, "//div[@descriptorid='hudson.plugins.gradle.Gradle']//input[@name='_.rootBuildScriptDir']").set(path)
+  @step.dir path
 end
 
 When /^I set Gradle switches "([^"]*)"$/ do |switches|
-  find(:xpath, "//div[@descriptorid='hudson.plugins.gradle.Gradle']//input[@name='_.switches']").set(switches)
+  @step.switches switches
 end
 
 When /^I set Gradle version "([^"]*)", build step description "([^"]*)" and tasks "([^"]*)"$/ do |version, description, tasks|
-  find(:xpath, "//div[@descriptorid='hudson.plugins.gradle.Gradle']//input[@name='_.description']").set(description)
-  find(:xpath, "//div[@descriptorid='hudson.plugins.gradle.Gradle']//input[@name='_.tasks']").set(tasks)
-  find(:xpath, "//div[@descriptorid='hudson.plugins.gradle.Gradle']//select[@name='gradleName']/option[@value='#{version}']").click
+  @step.version version
+  @step.description description
+  @step.tasks tasks
 end
