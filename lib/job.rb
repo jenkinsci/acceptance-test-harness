@@ -37,13 +37,10 @@ module Jenkins
       end
     end
 
-    def add_scm(title)
-      xpath = "//label[contains(text(),'#{title}')]/input[@name='scm']"
-      element = find(:xpath, xpath)
-      element.set(true)
+    def add_scm(type)
+      ensure_config_page
 
-      type = Jenkins::Scm.get title
-      return type.new(self, element[:path])
+      return Jenkins::Scm.add(self, type)
     end
 
     def add_parameter(type)

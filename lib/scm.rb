@@ -4,6 +4,15 @@ module Jenkins
   class Scm
     include Jenkins::PageArea
 
+    def self.add(job, title)
+      xpath = "//label[contains(text(),'#{title}')]/input[@name='scm']"
+      element = find(:xpath, xpath)
+      element.set(true)
+
+      type = get title
+      return type.new(job, element[:path])
+    end
+
     @@types = Hash.new
 
     # Register SCM type
