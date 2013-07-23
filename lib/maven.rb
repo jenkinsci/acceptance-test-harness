@@ -3,6 +3,7 @@
 require File.dirname(__FILE__) + "/pageobject.rb"
 require File.dirname(__FILE__) + "/job.rb"
 require File.dirname(__FILE__) + "/build.rb"
+require File.dirname(__FILE__) + "/build_step.rb"
 
 module Jenkins
   class Maven < Jenkins::PageObject
