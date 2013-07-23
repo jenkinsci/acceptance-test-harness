@@ -1,27 +1,23 @@
+require File.dirname(__FILE__) + "/pagearea.rb"
+
 module Jenkins
   class Scm
-    include Capybara::DSL
-    extend Capybara::DSL
-
-    def initialize(job, path_prefix)
-      @job = job
-      @path_prefix = path_prefix
-    end
-
-    def path(relative_path)
-      return "#{@path_prefix}/#{relative_path}"
-    end
+    include Jenkins::PageArea
 
     @@types = Hash.new
 
     # Register SCM type
     def self.register(title)
+      raise "#{title} already registered" if @@types.has_key? title
+
       @@types[title] = self
     end
 
     # Get type by title
     def self.get(title)
-      return @@types[title]
+      return @@types[title] if @@types.has_key? title
+
+      raise "Unknown #{self.name.split('::').last} type #{title}. #{@@types.keys}"
     end
   end
 end

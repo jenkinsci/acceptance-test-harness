@@ -1,7 +1,6 @@
 module Jenkins
   class Parameter
-    include Capybara::DSL
-    extend Capybara::DSL
+    include Jenkins::PageArea
 
     def self.add(job, title)
       find(:xpath, "//input[@name='parameterized']").check
@@ -11,15 +10,6 @@ module Jenkins
       prefix = all(:xpath, "//div[@name='parameter']").last[:path]
 
       return get(title).new(job, prefix)
-    end
-
-    def initialize(job, path_prefix)
-      @job = job
-      @path_prefix = path_prefix
-    end
-
-    def path(relative_path)
-      return "#{@path_prefix}/#{relative_path}"
     end
 
     def description(description)
