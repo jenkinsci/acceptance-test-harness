@@ -98,16 +98,6 @@ module Jenkins
 
       return configurations
     end
-
-    def self.create_matrix(base_url, name)
-      visit("#{@base_url}/newJob")
-
-      fill_in "name", :with => name
-      find(:xpath, "//input[starts-with(@value, 'hudson.matrix.MatrixProject')]").set(true)
-      click_button "OK"
-
-      self.new(base_url, name)
-    end
   end
 
   class MatrixConfiguration < PageObject

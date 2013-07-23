@@ -156,16 +156,6 @@ module Jenkins
       add_shell_step "cp -r #{File.dirname(__FILE__)}/../resources/#{resource} ./#{target}"
     end
 
-    def self.create_freestyle(base_url, name)
-      visit("#{@base_url}/newJob")
-
-      fill_in "name", :with => name
-      find(:xpath, "//input[starts-with(@value, 'hudson.model.FreeStyleProject')]").set(true)
-      click_button "OK"
-
-      self.new(base_url, name)
-    end
-
     def self.copy_job(base_url, name, source_job_name)
       visit("#{@base_url}/newJob")
       fill_in "name", :with => name
@@ -177,10 +167,12 @@ module Jenkins
     end
 
     def self.create(title, base_url)
+      create_named title, base_url, Jenkins::PageObject.random_name
+    end
+
+    def self.create_named(title, base_url, name)
       sut_type = @@job_types[title][:sut];
       page_object_type = @@job_types[title][:page_object];
-
-      name = Jenkins::PageObject.random_name
 
       visit "#{base_url}/newJob"
       fill_in "name", :with => name
@@ -201,5 +193,7 @@ module Jenkins
     def self.get(title)
       return @@job_types[title]
     end
+
+    register 'FreeStyle', 'hudson.model.FreeStyleProject'
   end
 end

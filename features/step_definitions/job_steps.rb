@@ -3,19 +3,19 @@
 
 
 Given /^a simple job$/ do
-  @job = Jenkins::Job.create_freestyle(@base_url, Jenkins::Job.random_name)
+  @job = Jenkins::Job.create 'FreeStyle', @base_url
   @job.configure do
     @job.add_shell_step("ls")
   end
 end
 
 Given /^a job$/ do
-  @job = Jenkins::Job.create_freestyle(@base_url, Jenkins::Job.random_name)
+  @job = Jenkins::Job.create 'FreeStyle', @base_url
 end
 
 
 When /^I create a job named "([^"]*)"$/ do |name|
-  @job = Jenkins::Job.create_freestyle(@base_url, name)
+  @job = Jenkins::Job.create_named 'FreeStyle', @base_url, name
 end
 
 When /^I copy the job named "([^"]*)" from job named "([^"]*)"$/ do |name, source_job_name|
