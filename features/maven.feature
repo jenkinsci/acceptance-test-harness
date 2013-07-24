@@ -48,9 +48,9 @@ Feature: Adds Apache Maven support
     And I build the job
     Then the build should succeed
     And the job should have "Modules" action
-    And I should see console output matching "[INFO] Building root 1.0"
-    And I should see console output matching "[INFO] Building module_a 2.0"
-    And I should see console output matching "[INFO] Building module_b 3.0"
+    And I should see console output matching "Building root 1.0"
+    And I should see console output matching "Building module_a 2.0"
+    And I should see console output matching "Building module_b 3.0"
 
   @realupdatecenter
   Scenario: Set maven options
