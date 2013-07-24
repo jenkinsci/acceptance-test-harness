@@ -1,3 +1,5 @@
+require File.dirname(__FILE__) + "/pagearea.rb"
+
 module Jenkins
   class Parameter
     include Jenkins::PageArea
