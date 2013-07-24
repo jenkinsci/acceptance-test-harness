@@ -122,7 +122,7 @@ You can run a single cucumber test by pointing to a test scenario in terms of it
 ## Describing features
 
 New feature definitions can take advantage of existing step definitions as well
-as introduce it's own. It is desirable to reuse steps that already exists and
+as introduce its own. It is desirable to reuse steps that already exists and
 keep feature specific steps separated at the same time.
 
 While creating new features you can check whether all steps are declared
@@ -149,4 +149,24 @@ of a plugin. Filenames are suffixed with `_steps.rb`.
 ```
 features/step_definitions/job_steps.rb
 features/step_definitions/plugins/ant_steps.rb
+```
+### Page objects
+
+All page object resides in `lib` directory or `lib/plugins/`.
+
+```
+lib/build.rb
+lib/plugins/git.rb
+```
+
+Special kind of page object, PageArea, can be used to represent several controls
+within a page object (one buildstep for instance).
+
+### Resources
+
+Features might need specific resources as a fixture. Directory `resources` is
+dedicated for that purpose.
+
+```
+resources/cobertura_plugin/
 ```
