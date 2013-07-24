@@ -83,25 +83,26 @@ When /^I disable the job$/ do
 end
 
 When /^I set artifacts? "([^"]*)" to archive$/ do |artifacts|
-  @job.archive_artifacts includes:artifacts
+  @artifact_archiver = Jenkins::ArtifactArchiver.add(@job)
+  @artifact_archiver.includes artifacts
 end
 
 When /^I set artifacts? "([^"]*)" to archive in the job configuration$/ do |artifacts|
   @job.configure do
-    @job.archive_artifacts includes:artifacts
+    Jenkins::ArtifactArchiver.add(@job).includes artifacts
   end
 end
 
 When /^I set artifacts? "([^"]*)" to archive and exclude "([^"]*)" in the job configuration$/ do |include, exclude|
   @job.configure do
-    @job.archive_artifacts(includes: include, excludes: exclude)
+    archiver = Jenkins::ArtifactArchiver.add(@job)
+    archiver.includes include
+    archiver.excludes exclude
   end
 end
 
 When /^I want to keep only the latest successful artifacts$/ do
-  @job.configure do
-    @job.archive_artifacts(latestOnly: true)
-  end
+  @artifact_archiver.latest_only true
 end
 
 When /^I set (\d+) builds? to keep$/ do |number|
