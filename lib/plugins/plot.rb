@@ -13,8 +13,8 @@ module Plugins
       end
 
       def source(type, path)
-        find(:path, path('plots/series/file')).set path
-        find(:path, path("plots/series/fileType[#{type}]")).set true
+        find(:path, path('plots/series/file')).locate.set path
+        find(:path, path("plots/series/fileType[#{type}]")).locate.set true
       end
     end
   end
