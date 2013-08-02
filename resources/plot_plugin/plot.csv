@@ -1,0 +1,2 @@
+recs avg,recs min,recs max,station avg,station min,station max,personalized avg,personalized min,personalized max,autoplay avg,autoplay min,autoplay max,station count,personalized count,autoplay count,threads,host,errors
+236.55357142857147,75.0,2091.0,207.20731707317069,69.0,947.0,436.80000000000007,165.0,594.0,133.39999999999998,117.0,160.0,82,5,20,threads,hostname,0
