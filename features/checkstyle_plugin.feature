@@ -28,9 +28,9 @@ Feature: Allow publishing of Checkstyle report
     And I build the job
     Then the build should succeed
     When I visit Checkstyle report
-    Then I should see there are 730 warnings	
-    And I should see there are 730 new warnings	
-    And I should see there are 0 fixed warnings	
-    And I should see there are 730 high priority warnings
+    Then I should see there are 776 warnings
+    And I should see there are 776 new warnings
+    And I should see there are 0 fixed warnings
+    And I should see there are 776 high priority warnings
     And I should see there are 0 normal priority warnings
     And I should see there are 0 low priority warnings
