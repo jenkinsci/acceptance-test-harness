@@ -3,7 +3,6 @@ Feature: Adds Apache Maven support
   As a Jenkins user
   I want to install and configure Maven and build Maven based project
 
-  @realupdatecenter
   Scenario: Use Auto-Installed Maven from FreeStyle job
     Given I add Maven version "3.0.4" with name "maven_3.0.4" installed automatically to Jenkins config page
     And a job
@@ -37,7 +36,6 @@ Feature: Adds Apache Maven support
     Then I should see console output matching regexp "-Dmaven.repo.local=([^\n]*)/.repository"
     And the build should succeed
 
-  @realupdatecenter
   Scenario: Build multimodule Maven project
     Given I have default Maven configured
     And a Maven job
@@ -52,7 +50,6 @@ Feature: Adds Apache Maven support
     And I should see console output matching "Building module_a 2.0"
     And I should see console output matching "Building module_b 3.0"
 
-  @realupdatecenter
   Scenario: Set maven options
     Given I have default Maven configured
     And a Maven job
@@ -65,7 +62,6 @@ Feature: Adds Apache Maven support
     Then I should not see console output matching "[INFO]"
     And  I should not see console output matching "[WARNING]"
 
-  @realupdatecenter
   Scenario: Set global maven options
     Given I have default Maven configured
     And a Maven job
@@ -78,7 +74,6 @@ Feature: Adds Apache Maven support
     Then I should see console output matching regexp "[Loaded java\.lang\.Objects from .*jar]"
 
   @bug(17713)
-  @realupdatecenter
   Scenario: Display job modules for Maven project
     Given I have default Maven configured
     And a Maven job
@@ -92,7 +87,6 @@ Feature: Adds Apache Maven support
     Then the job should have module named "gid:module_b"
 
   @bug(10539)
-  @realupdatecenter
   Scenario: Preserve backslash in property
     Given I have default Maven configured
     And a job

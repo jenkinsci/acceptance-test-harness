@@ -2,7 +2,6 @@ Feature: Subversion support
   As a user
   I want to be able to check out source code from Subversion
 
-  @realupdatecenter
   Scenario: Run basic Subversion build
     Given I have installed the "subversion" plugin
     And a job
@@ -13,7 +12,6 @@ Feature: Subversion support
     Then the build should succeed
     And I should see console output matching "test -d .svn"
 
-  @realupdatecenter
   Scenario: Check out specified Subversion revision
     Given I have installed the "subversion" plugin
     And a job
@@ -23,7 +21,6 @@ Feature: Subversion support
     Then the build should succeed
     And I should see console output matching "At revision 40156"
 
-  @realupdatecenter
   Scenario: Always check out fresh copy
     Given I have installed the "subversion" plugin
     And a job

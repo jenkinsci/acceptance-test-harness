@@ -3,7 +3,6 @@ Feature: Set project description based on file in workspace
   As a Jenkins user
   I want to be able to set project description using a file in the workspace
 
-  @realupdatecenter
   Scenario: Set project description based upon file in workspace
     Given I have installed the "project-description-setter" plugin
     And a job

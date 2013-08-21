@@ -124,7 +124,6 @@ Feature: Configure/build freestyle jobs
     And the build #2 should have archived "test.txt" artifact
     And the build #3 should have archived "test.txt" artifact
 
-  @realupdatecenter
   Scenario: Add Auto-Installed Java
     Given I add Java version "jdk-7u11-oth-JPR" with name "jdk_1.7.0" installed automatically to Jenkins config page
     And a job

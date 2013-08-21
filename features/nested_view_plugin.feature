@@ -1,13 +1,11 @@
 Feature: Test Nested view plugin
 
-  @realupdatecenter
   Scenario: Create Nested view
     Given I have installed the "nested-view" plugin
     And a simple job
     When I create a view with a type "Nested View" and name "Nested"
     Then I should see the view on the main page
 
-  @realupdatecenter
   Scenario: Add subviews to a Nested view
     Given I have installed the "nested-view" plugin
     And a simple job
@@ -18,7 +16,6 @@ Feature: Test Nested view plugin
     Then I should see "list" view as a subview of the view
     And I should see "list2" view as a subview of the view
 
- @realupdatecenter
   Scenario: Set default view of a Nested view
    Given I have installed the "nested-view" plugin
    And a simple job

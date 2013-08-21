@@ -3,7 +3,6 @@ Feature:  Allow use of Git as a build SCM
   As a Jenkins user
   I want to poll and checkout source code from Git repository
 
-  @realupdatecenter
   Scenario: Simple checkout from Git repository
     Given I have installed the "git" plugin
     And a job
@@ -14,7 +13,6 @@ Feature:  Allow use of Git as a build SCM
     Then the build should succeed
     And I should see console output matching "origin git://github.com/jenkinsci/git-plugin.git"
 
-  @realupdatecenter
   Scenario: Checkout branch from Git repository
     Given I have installed the "git" plugin
     And a job
@@ -31,7 +29,6 @@ Feature:  Allow use of Git as a build SCM
     And I build the job
     Then the build should succeed
 
-  @realupdatecenter
   Scenario: Checkout branch from Git repository
     Given I have installed the "git" plugin
     And a job
@@ -48,7 +45,6 @@ Feature:  Allow use of Git as a build SCM
     And I build the job
     Then the build should succeed
 
-  @realupdatecenter
   Scenario: Simple checkout from Git repository
     Given I have installed the "git" plugin
     And a job
@@ -67,7 +63,6 @@ Feature:  Allow use of Git as a build SCM
     Then the build should succeed
     And I should see console output matching "origin git://github.com/jenkinsci/git-plugin.git"
 
-  @realupdatecenter
   Scenario: Simple checkout from Git repository
     Given I have installed the "git" plugin
     And a job

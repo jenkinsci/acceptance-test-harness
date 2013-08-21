@@ -17,7 +17,6 @@ class WinstoneJenkinsController < LocalJenkinsController
 
   def start_process
     IO.popen(["java",
-      @real_update_center ? "" : "-Dhudson.model.UpdateCenter.updateCenterUrl=http://not.resolvable",
       "-jar", @war, "--ajp13Port=-1", "--controlPort=#@control_port",
       "--httpPort=#@http_port","2>&1"].join(' '))
   end

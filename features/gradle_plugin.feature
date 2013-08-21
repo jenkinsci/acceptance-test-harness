@@ -1,6 +1,5 @@
 Feature: Test Gradle plugin
 
-  @realupdatecenter
   Scenario: Add Auto-Installed Gradle
     Given I have installed the "gradle" plugin
     And I add Gradle version "1.5" with name "gradle-1.5" installed automatically to Jenkins config page
@@ -21,7 +20,6 @@ Feature: Test Gradle plugin
     Then the build should succeed
     And I should see console output matching "Hello world!"
 
- @realupdatecenter
   Scenario: Execute gradle script hello.gradle from gradle directory with quiet switch
     Given I have installed the "gradle" plugin
     And I add Gradle version "1.5" with name "gradle-1.5" installed automatically to Jenkins config page

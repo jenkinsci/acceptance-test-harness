@@ -3,7 +3,6 @@ Feature: Adds Warnings collection support
   As a Jenkins user
   I want to install and configure Warnings plugin
 
-  @realupdatecenter
   Scenario: Detect no errors in console log and workspace when there are none
     Given I have installed the "warnings" plugin
     And a job
@@ -16,7 +15,6 @@ Feature: Adds Warnings collection support
     Then build should have 0 "Java" warnings
     Then build should have 0 "Maven" warnings
 
-  @realupdatecenter
   Scenario: Detect errors in console log
     Given I have installed the "warnings" plugin
     And a job
@@ -28,7 +26,6 @@ Feature: Adds Warnings collection support
     And I build the job
     Then build should have 1 "Maven" warning
 
-  @realupdatecenter
   Scenario: Detect errors in workspace
     Given I have installed the "warnings" plugin
     And a job
@@ -44,7 +41,6 @@ Feature: Adds Warnings collection support
     And I build the job
     Then build should have 1 "Java" warning
 
-  @realupdatecenter
   Scenario: Do not detect errors in ignored parts of the workspace
     Given I have installed the "warnings" plugin
     And a job

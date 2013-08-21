@@ -3,7 +3,6 @@ Feature: Allow reporting for FindBugs analysis
   As a Jenkins user
   I want to be able to show reports from FindBugs analysis
 
-  @realupdatecenter
   Scenario: Record FindBugs analysis
     Given I have installed the "findbugs" plugin
     And a job

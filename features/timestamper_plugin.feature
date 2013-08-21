@@ -7,32 +7,27 @@ Feature: Timestamper support
     Given I have installed the "timestamper" plugin
     And a job inserting timestamps
 
-  @realupdatecenter
   Scenario: Display no timestamps
     When I build the job
     And I select no timestamps
     Then there are no timestamps in the console
 
-  @realupdatecenter
   Scenario: Display system time timestamps
     When I build the job
     And I select system time timestamps
     Then console timestamps matches regexp "\d\d:\d\d:\d\d"
 
-  @realupdatecenter
   Scenario: Display elapsed time timestamps
     When I build the job
     And I select elapsed time timestamps
     Then console timestamps matches regexp "\d\d:\d\d:\d\d.\d\d\d"
 
-  @realupdatecenter
   Scenario: Display specific system time timestamps
     When I set "'At 'HH:mm:ss' system time'" as system time timestamp format
     And I build the job
     And I select system time timestamps
     Then console timestamps matches regexp "At \d\d:\d\d:\d\d system time"
 
-  @realupdatecenter
   Scenario: Display specific elapsed time timestamps
     When I set "'Exactly 'HH:mm:ss.S' after launch'" as elapsed time timestamp format
     And I build the job

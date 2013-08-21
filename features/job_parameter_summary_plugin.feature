@@ -3,7 +3,6 @@ Feature: Sumarize job parameters
   As a Jenkins user
   I want to be able to publish Checkstyle report
 
-  @realupdatecenter
   Scenario: Show freestyle job parameter summary
     Given I have installed the "job-parameter-summary" plugin
     And a job

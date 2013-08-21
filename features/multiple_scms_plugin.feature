@@ -1,6 +1,5 @@
 Feature: Test Multiple SCMs plugin
 
-  @realupdatecenter
   Scenario: Checkout from multiple SCMs
     Given I have installed the "subversion" plugin
     And I have installed the "git" plugin

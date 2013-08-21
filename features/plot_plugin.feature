@@ -3,7 +3,6 @@ Feature: Adds Plotting support
   As a Jenkins user
   I want to configure and generate various plots
 
-  @realupdatecenter
   Scenario: Generate simple plot
     Given I have installed the "plot" plugin
     And a job
@@ -18,7 +17,6 @@ Feature: Adds Plotting support
 
   @bug(18585)
   @bug(18674)
-  @realupdatecenter
   Scenario: Post-build rendering should work
     Given I have installed the "plot" plugin
     And a job

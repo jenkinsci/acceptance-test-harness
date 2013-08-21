@@ -6,10 +6,6 @@ Dir.glob(File.dirname(__FILE__) + "/../../lib/controller/*.rb") do |name|
   require name
 end
 
-Before('@realupdatecenter') do |scenario|
-  @controller_options = {:real_update_center => true}
-end
-
 Before do |scenario|
 
   # skip scenario and initialization when not applicable

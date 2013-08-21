@@ -1,6 +1,5 @@
 Feature: Executing groovy scripts
 
- @realupdatecenter
  @needs_preinstalled_sw
   Scenario: Run groovy script
     Given I have installed the "groovy" plugin
@@ -12,7 +11,6 @@ Feature: Executing groovy scripts
     Then the build should succeed
     And I should see console output matching "hello world"
 
- @realupdatecenter
   Scenario: Run system groovy script as a command
     Given I have installed the "groovy" plugin
     When I create a job named "system-groovy-test"
@@ -23,7 +21,6 @@ Feature: Executing groovy scripts
     Then the build should succeed
     And I should see console output matching "this is a job system-groovy-test"
 
-  @realupdatecenter
   @needs_preinstalled_sw
   Scenario: Run groovy script from a file
     Given I have installed the "groovy" plugin
@@ -36,7 +33,6 @@ Feature: Executing groovy scripts
     Then the build should succeed
     And I should see console output matching "hello"
 
-  @realupdatecenter
   Scenario: Add and run auto-installed Groovy
     Given I have installed the "groovy" plugin
     And a job
@@ -51,7 +47,6 @@ Feature: Executing groovy scripts
     And I should see console output matching "Unpacking http://dist.groovy.codehaus.org/distributions/groovy-binary-2.1.1.zip"
     And I should see console output matching "Groovy version: 2.1.1"
 
-  @realupdatecenter
   @needs_preinstalled_sw
   Scenario: Add and run auto-installed Groovy
     Given I have installed the "groovy" plugin

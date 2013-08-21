@@ -3,14 +3,12 @@ Feature: Use Sciptler plugin
   As a Jenkins user
   I want to use Scriptler plugin
 
-  @realupdatecenter
   Scenario: Run new script
     Given I have installed the "scriptler" plugin
     When I upload script "scriptler_plugin/hello_world.groovy"
     And I run the script
     Then the script output should match "Hello world!"
 
-  @realupdatecenter
   Scenario: Run new parameterized script
     Given I have installed the "scriptler" plugin
     When I upload script "scriptler_plugin/hello_parameterized.groovy"
@@ -19,7 +17,6 @@ Feature: Use Sciptler plugin
     And I run the script
     Then the script output should match "Hello space!"
 
-  @realupdatecenter
   Scenario: Delete script
     Given I have installed the "scriptler" plugin
     When I upload script "scriptler_plugin/hello_world.groovy"
@@ -28,7 +25,6 @@ Feature: Use Sciptler plugin
     Then script "hello_parameterized.groovy" should exist
     But  script "hello_world.groovy" should not exist
 
-  @realupdatecenter
   Scenario: Run script on particular slave
     Given I have installed the "scriptler" plugin
     And a slave named "slave42"
@@ -37,7 +33,6 @@ Feature: Use Sciptler plugin
     Then the script output on slave42 should match "Hello world!"
     And  the script should not be run on "master"
 
-  @realupdatecenter
   Scenario: Run script on master
     Given I have installed the "scriptler" plugin
     And a slave named "slave42"
@@ -46,7 +41,6 @@ Feature: Use Sciptler plugin
     Then the script output on master should match "Hello world!"
     And  the script should not be run on slave42
 
-  @realupdatecenter
   Scenario: Run script on all nodes
     Given I have installed the "scriptler" plugin
     And a slave named "slave42"
@@ -55,7 +49,6 @@ Feature: Use Sciptler plugin
     Then the script output on slave42 should match "Hello world!"
     And  the script output on master should match "Hello world!"
 
-  @realupdatecenter
   Scenario: Run script on all slaves
     Given I have installed the "scriptler" plugin
     And a slave named "slave42"
@@ -66,7 +59,6 @@ Feature: Use Sciptler plugin
     And  the script output on slave43 should match "Hello world!"
     And  the script should not be run on master
 
-  @realupdatecenter
   Scenario: Create and run parameterized test
     Given I have installed the "scriptler" plugin
     When I create script
@@ -79,7 +71,6 @@ Feature: Use Sciptler plugin
     And I run the script
     Then the script output should match "7 + 11"
 
-  @realupdatecenter
   Scenario: Override default parameters
     Given I have installed the "scriptler" plugin
     When I create script

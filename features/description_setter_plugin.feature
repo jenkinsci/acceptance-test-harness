@@ -3,7 +3,6 @@ Feature: Set the description for each build, based upon a RegEx test of the buil
   As a Jenkins user
   I want to be able to set build description based upon regular expression
 
-  @realupdatecenter
   Scenario: Set build description based upon build log file
     Given I have installed the "description-setter" plugin
     And a job

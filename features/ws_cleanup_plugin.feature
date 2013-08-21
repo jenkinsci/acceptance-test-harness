@@ -2,7 +2,6 @@ Feature: Cleanup job workspace
   As a Jenkins user
   I want to automatically cleanup my workspace
 
-  @realupdatecenter
   Scenario: Do not clean up by default
     Given I have installed the "ws-cleanup" plugin
     And a simple job
@@ -12,7 +11,6 @@ Feature: Cleanup job workspace
     And I build the job
     Then there should be "artifact" in the workspace
 
-  @realupdatecenter
   Scenario: Clean up after build
     Given I have installed the "ws-cleanup" plugin
     And a simple job
@@ -22,7 +20,6 @@ Feature: Cleanup job workspace
     And I build the job
     Then there should not be "artifact" in the workspace
 
-  @realupdatecenter
   Scenario: Clean up before build
     Given I have installed the "ws-cleanup" plugin
     And a simple job

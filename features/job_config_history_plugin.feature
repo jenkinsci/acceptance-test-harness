@@ -1,6 +1,5 @@
 Feature: Test JobConfigHistory plugin
 
-  @realupdatecenter
   Scenario: Save job config history
     Given I have installed the "jobConfigHistory" plugin
     And a simple job
@@ -10,7 +9,6 @@ Feature: Test JobConfigHistory plugin
     And I visit job action named "Job Config History"
     Then jobConfigHistory page should show difference
 
-  @realupdatecenter
   Scenario: Show difference in config history
     Given I have installed the "jobConfigHistory" plugin
     And a simple job

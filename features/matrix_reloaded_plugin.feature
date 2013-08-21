@@ -1,6 +1,5 @@
 Feature: Test matrix-reloaded plugin
 
-  @realupdatecenter
   Scenario: Build Matrix configuration
     Given I have installed the "matrix-reloaded" plugin
     When I create a matrix job
@@ -14,7 +13,6 @@ Feature: Test matrix-reloaded plugin
     And I should see matrix configuration "AAA=222,BBB=333"
     And I should see matrix configuration "AAA=222,BBB=444"
 
-  @realupdatecenter
   Scenario: Run Matrix configuration
     Given I have installed the "matrix-reloaded" plugin
     When I create a matrix job

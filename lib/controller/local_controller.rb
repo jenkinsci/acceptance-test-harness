@@ -3,7 +3,6 @@
 # Abstract base class for those JenkinsController that runs the JVM locally on
 # the same box as the test harness
 class LocalJenkinsController < JenkinsController
-  attr_accessor :real_update_center
 
   # @param [Hash] opts
   #     :war  => specify the location of jenkins.war
@@ -13,9 +12,6 @@ class LocalJenkinsController < JenkinsController
     raise "jenkins.war doesn't exist in #{@war}, maybe you forgot to set JENKINS_WAR env var?" if !File.exists?(@war)
 
     @tempdir = TempDir.create(:rootpath => WORKSPACE)
-
-    # Chose a random port, just to be safe
-    @real_update_center = opts[:real_update_center] || false
 
     # copy it into $JENKINS_HOME/plugins
     @path_element_hpi = download_path_element

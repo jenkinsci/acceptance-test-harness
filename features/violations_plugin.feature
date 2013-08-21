@@ -3,7 +3,6 @@ Feature: Add violations support
   As a Jenkins user
   I want to configure, collect and visualize violations
 
-  @realupdatecenter
   Scenario: Report violations in FreeStyle project
     Given I have installed the "violations" plugin
     And a job
@@ -17,7 +16,6 @@ Feature: Add violations support
     And the job should have "Violations" action
     And there should be 2 "fxcop" violations in 2 files
 
-  @realupdatecenter
   Scenario: Report violations in Maven project
     Given I have installed the "violations" plugin
     And I have default Maven configured

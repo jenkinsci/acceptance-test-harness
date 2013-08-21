@@ -1,6 +1,5 @@
 Feature: Tests for PMD plugin
 
-  @realupdatecenter
   Scenario: Configure a job with PMD post-build steps
     Given I have installed the "pmd" plugin
     And a job
@@ -13,8 +12,6 @@ Feature: Tests for PMD plugin
     Then the build should succeed
     And build page should has pmd summary "0 warnings"
 
-
- @realupdatecenter
   Scenario: Configure a job with PMD post-build steps to run always
     Given I have installed the "pmd" plugin
     And a job
@@ -29,7 +26,6 @@ Feature: Tests for PMD plugin
     Then the build should fail
     And build page should has pmd summary "0 warnings"
 
-@realupdatecenter
   Scenario: Configure a job with PMD post-build steps which display some warnings
     Given I have installed the "pmd" plugin
     And a job

@@ -6,7 +6,6 @@ Feature: Fail builds that take too long
 
   # TODO: The build-timeout plugin doesn't allow timeouts less than 3 minutes
   # in duration.
-  @realupdatecenter
   Scenario: Fail a blocked build with absolute timeouts
     Given I have installed the "build-timeout" plugin
     And a job
@@ -18,7 +17,6 @@ Feature: Fail builds that take too long
     And I build the job
     Then the build should fail
 
-  @realupdatecenter
   Scenario: Fail a blocked build if likely stuck
     Given I have installed the "build-timeout" plugin
     And a job

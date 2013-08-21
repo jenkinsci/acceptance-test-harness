@@ -3,7 +3,6 @@ Feature: Allow publishing of Checkstyle report
   As a Jenkins user
   I want to be able to publish Checkstyle report
 
-  @realupdatecenter
   Scenario: Record Checkstyle report
     Given I have installed the "checkstyle" plugin
     And a job
@@ -16,7 +15,6 @@ Feature: Allow publishing of Checkstyle report
     Then the build should have "Checkstyle Warnings" action
     And the job should have "Checkstyle Warnings" action
 
-  @realupdatecenter
   Scenario: View Checkstyle report
     Given I have installed the "checkstyle" plugin
     And a job

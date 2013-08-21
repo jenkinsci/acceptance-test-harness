@@ -5,7 +5,6 @@ Feature: Audit trail plugin
     Given I have set up the Audit Trail plugin
     Then the audit trail should be empty
 
-  @realupdatecenter
   Scenario: Trail should contain logged events
     Given I have set up the Audit Trail plugin
     When I create a job named "job"

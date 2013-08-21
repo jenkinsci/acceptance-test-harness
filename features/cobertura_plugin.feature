@@ -3,7 +3,6 @@ Feature: Allow publishing of Cobertura analysis
   As a Jenkins user
   I want to be able to publish Cobertura analysis report
 
-  @realupdatecenter
   Scenario: Record Cobertura coverage report
     Given I have installed the "cobertura" plugin
     And a job
@@ -16,7 +15,6 @@ Feature: Allow publishing of Cobertura analysis
     Then the build should have "Coverage Report" action
     And the job should have "Coverage Report" action
 
-  @realupdatecenter
   Scenario: View Cobertura coverage report
     Given I have installed the "cobertura" plugin
     And a job
