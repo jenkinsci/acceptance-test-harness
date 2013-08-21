@@ -49,6 +49,9 @@ module Jenkins
       start = Time.now.to_i
       # wait for plugin to appear in the interface
       until installed?(name) do
+        if Time.now.to_i - start > 180
+          throw "Plugin installation took too long"
+        end
         sleep 1
       end
 
