@@ -9,7 +9,7 @@ The script runs dryrun tests first to discover trivial problems immediately.
 It can use jenkins.war from local maven repository or download it when missing.
 
 BROWSER: Value for BROWSER variable
-JENKINS: Path to the jenkins.war or Jenkins version to use
+JENKINS: Path to the jenkins.war, Jenkins version of one of "latest", "latest-rc", "lts" and "lts-rc"
 FEATURE: Cucumber feature specification (run everything when not specified)
 
 Examples:
@@ -19,6 +19,9 @@ $ ./run firefox ./jenkins.war
 
 # Run Ant feature in chrome against Jenkins 1.512.
 $ ./run chrome 1.512 features/ant_plugin.feature
+
+# Run full suite in FF against LTS release candidate
+$ ./run firefox lts-rc
 USAGE
   exit -2
 fi
@@ -37,6 +40,32 @@ if [ $dryrunRet -ne 0 ]; then
 fi
 
 war=$2
+if [ ! -f $war ]; then
+    mirrors=http://mirrors.jenkins-ci.org
+    case "$war" in
+        "latest")
+            war=jenkins-latest.war
+            url=$mirrors/war/latest/jenkins.war
+        ;;
+        "latest-rc")
+            war=jenkins-latest-rc.war
+            url=$mirrors/war-rc/latest/jenkins.war
+        ;;
+        "lts")
+            war=jenkins-lts.war
+            url=$mirrors/war-stable/latest/jenkins.war
+        ;;
+        "lts-rc")
+            war=jenkins-lts-rc.war
+            url=$mirrors/war-stable-rc/latest/jenkins.war
+        ;;
+    esac
+
+    if [ ! -f $war ] && [ -n "$url" ]; then
+        curl -sL -o $war $url
+    fi
+fi
+
 if [ ! -f $war ]; then
 
 	wardir=~/.m2/repository/org/jenkins-ci/main/jenkins-war
