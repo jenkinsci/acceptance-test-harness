@@ -87,6 +87,7 @@ Feature: Adds Apache Maven support
     Then the job should have module named "gid:module_b"
 
   @bug(10539)
+  @since(1.527)
   Scenario: Preserve backslash in property
     Given I have default Maven configured
     And a job
