@@ -14,7 +14,7 @@ module Jenkins
       end
 
       def create_script(id, script)
-        visit "#{url}/scriptsettings"
+        new_script
         find(:path, '/id').set(id)
         find(:path, '/name').set(id)
 
@@ -26,7 +26,7 @@ module Jenkins
       end
 
       def upload_script_from(local_path)
-        visit "#{url}/scriptsettings"
+        new_script
         attach_file('file', resource(local_path))
         click_button 'Upload'
         return get_script File.basename(local_path)
@@ -34,6 +34,15 @@ module Jenkins
 
       def get_script(id)
         return Script.new(self, id)
+      end
+
+      private
+      def new_script
+        # Reload until there is some meaningful content.
+        # Occasional 404s observed on first load.
+        begin
+          visit "#{url}/scriptsettings"
+        end while !page.has_xpath?("//h1[contains(text(), 'Groovy script')]")
       end
     end
 
