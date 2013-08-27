@@ -102,7 +102,7 @@ module Jenkins
       suffix = '/build?delay=0sec'
       visit url + suffix
 
-      if !page.current_url.end_with?(suffix)
+      if !page.has_button?('Build')
         # Build scheduled immediately
         last_build.wait_until_started
       else
