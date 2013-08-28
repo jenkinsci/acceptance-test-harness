@@ -1,7 +1,5 @@
 Feature: Test Javadoc plugin
 
-  #JENKINS-19168
-  @wip
   Scenario: Publish javadoc from freestyle job
     Given a Maven
     And a job
@@ -14,8 +12,6 @@ Feature: Test Javadoc plugin
     And the job should have "Javadoc" action
     And the javadoc should display "com.mycompany.app"
 
-  #JENKINS-19168
-  @wip
   Scenario: Publish javadoc from matrix job
     Given a Maven
     And a matrix job
