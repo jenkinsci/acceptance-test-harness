@@ -67,6 +67,10 @@ if [ ! -f $war ]; then
 fi
 
 if [ ! -f $war ]; then
+    curl -sL -o jenkins.war $war && war=jenkins.war
+fi
+
+if [ ! -f $war ]; then
 
 	wardir=~/.m2/repository/org/jenkins-ci/main/jenkins-war
 
