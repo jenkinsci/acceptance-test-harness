@@ -36,11 +36,7 @@ class LocalJenkinsController < JenkinsController
     ENV["JENKINS_HOME"] = @tempdir
     puts
     print "    Bringing up a temporary Jenkins instance"
-    @pipe = start_process
-    @pid = @pipe.pid
-
-    @log_watcher = LogWatcher.new(@pipe,@log)
-    @log_watcher.wait_for_ready
+    bring_up!
 
     # still seeing occasional first page load problem. adding a bit more delay
     sleep 1
@@ -83,10 +79,22 @@ class LocalJenkinsController < JenkinsController
     end
   end
 
+  private
   def port_free?(port)
     TCPSocket.open("localhost", port).close
     false
   rescue Errno::ECONNREFUSED # No one is listening
     true
+  end
+
+  def bring_up!
+    @pipe = start_process
+    @pid = @pipe.pid
+
+    @log_watcher = LogWatcher.new(@pipe,@log)
+    @log_watcher.wait_for_ready
+  rescue RetryException => e
+    puts e.message
+    bring_up!
   end
 end

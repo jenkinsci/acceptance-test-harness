@@ -44,10 +44,8 @@ class LogWatcher
     while @ready!=expected && ((Time.now - start_time) < TIMEOUT)
       sleep 0.5
 
-      pattern = /java.io.IOException: Failed to listen on port (\d+)/
-      if has_logged(pattern)
-        output = IO.popen "lsof -Pnl +M -i4"
-        raise "Port conflict detected\n#{output.readlines.join}"
+      if has_logged /java.io.IOException: Failed to listen on port (\d+)/
+        raise JenkinsController::RetryException.new "Port conflict detected"
       end
     end
 

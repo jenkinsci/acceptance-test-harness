@@ -9,13 +9,12 @@ class WinstoneJenkinsController < LocalJenkinsController
   #     :war  => specify the location of jenkins.war
   def initialize(opts)
     super(opts)
-
-    # Chose a random port, just to be safe
-    @http_port    = random_local_port
-    @control_port = random_local_port
   end
 
   def start_process
+    # Chose a random port, just to be safe
+    @http_port    = random_local_port
+    @control_port = random_local_port
     IO.popen(["java",
       "-jar", @war, "--ajp13Port=-1", "--controlPort=#@control_port",
       "--httpPort=#@http_port","2>&1"].join(' '))

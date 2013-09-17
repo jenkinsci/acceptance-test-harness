@@ -137,4 +137,7 @@ class JenkinsController
   def self.type
     @type
   end
+
+  class RetryException < Exception
+  end
 end
