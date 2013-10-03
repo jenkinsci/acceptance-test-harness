@@ -6,7 +6,7 @@ module Jenkins
 
     def self.add(job, title)
 
-      click_button 'Add build step'
+      find(:path, '/hetero-list-add[builder]').locate.click
       click_link label(title)
 
       sleep 1
