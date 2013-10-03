@@ -59,6 +59,16 @@ module Jenkins
       if installation_time > 30
         puts "Plugin installation took #{installation_time} seconds"
       end
+
+      # TODO install several plugins in one step so will have to wait and
+      # restart at most once per scenario
+      visit '/updateCenter'
+      if page.has_content?('Jenkins needs to be restarted for the update to take effect')
+        raise RestartNeeded.new
+      end
+    end
+
+    class RestartNeeded < Exception
     end
   end
 end
