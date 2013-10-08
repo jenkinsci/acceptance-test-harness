@@ -61,6 +61,21 @@ Feature: Configure/build freestyle jobs
     And  the job should have build 4
     And  the job should not have build 5
 
+  Scenario: Schedule build from view
+    When I create a job named "viewed_job"
+    And I visit the home page
+    And I build "viewed_job" in view
+    Then the build should succeed
+
+  Scenario: Schedule parameterized build from view
+    When I create a job named "viewed_job"
+    When I configure the job
+    And I add a string parameter "Foo"
+    And I save the job
+    And I visit the home page
+    And I build "viewed_job" in view
+    Then I should be prompted to enter the "Foo" parameter
+
   Scenario: Do not discard build kept forever
     Given a simple job
     When I configure the job
