@@ -6,7 +6,7 @@ module Jenkins
 
     def self.add(job, title)
 
-      click_button 'Add post-build action'
+      find_button('Add post-build action').locate.click
       click_link label(title)
 
       sleep 1

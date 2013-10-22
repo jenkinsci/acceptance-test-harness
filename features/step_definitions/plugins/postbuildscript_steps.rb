@@ -23,7 +23,7 @@ When /^I allow the script to run only for builds that (failed|succeeded)$/ do |s
   }
 
   @job.configure do
-    check checkboxes[status]
+    find(:xpath, "//input[@name='#{checkboxes[status]}']").locate.check
   end
 end
 
