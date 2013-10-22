@@ -36,13 +36,13 @@ module Jenkins
 
     def self.add(job)
 
-      click_button 'Add post-build action'
+      find_button('Add post-build action').locate.click
 
       title = 'Artifact Archiver'
       begin
         click_link label title
       rescue Capybara::ElementNotFound
-        # When cloudbees-jsync-archiver installed (pending JENKINS-17236):
+        # When cloudbees-jsync-archiver installed (pending 5.0 and Jenkins 1.532+):
         click_link 'Archive artifacts (fast)'
       end
 
