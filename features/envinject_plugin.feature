@@ -3,7 +3,7 @@ Feature: Allow to inject build environment variables
   As a Jenkins user
   I want to be able to have an isolated environment for my job.
 
-  Scenario: Prepare environment for the build build process via properties content
+  Scenario: Prepare environment for the build process via properties content
     Given I have installed the "envinject" plugin
     And a job
     When I prepare environment for the build by injecting variables "ENV_VAR_TEST=injected variable test"
