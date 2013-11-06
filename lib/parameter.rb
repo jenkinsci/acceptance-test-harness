@@ -15,7 +15,7 @@ module Jenkins
     end
 
     def description(description)
-      find(:path, path('description')).set(value)
+      control('description').set(value)
     end
 
     @@types = Hash.new
@@ -36,11 +36,11 @@ module Jenkins
     register 'String Parameter'
 
     def name(name)
-      find(:path, path('name')).set(name)
+      control('name').set(name)
     end
 
     def default(value)
-      find(:path, path('defaultValue')).set(value)
+      control('defaultValue').set(value)
     end
   end
 end

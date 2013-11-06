@@ -5,16 +5,16 @@ module Jenkins
       register 'Git'
 
       def url(url)
-        find(:path, path("userRemoteConfigs/url")).set(url)
+        control("userRemoteConfigs/url").set(url)
       end
 
       def branch(branch)
-        find(:path, path("branches/name")).set(branch)
+        control("branches/name").set(branch)
       end
 
       def local_branch(branch)
         advanced
-        find(:path, path("localBranch")).set(branch)
+        control("localBranch").set(branch)
       rescue Capybara::ElementNotFound => ex # git 2.0
         localBranch = add_behaviour 'Check out to specific local branch'
         localBranch.name = branch
@@ -22,7 +22,7 @@ module Jenkins
 
       def local_dir(dir)
         advanced
-        find(:path, path("relativeTargetDir")).set(dir)
+        control("relativeTargetDir").set(dir)
       rescue Capybara::ElementNotFound => ex # git 2.0
         subDir = add_behaviour 'Check out to a sub-directory'
         subDir.path = dir
@@ -30,7 +30,7 @@ module Jenkins
 
       def repo_name(repo_name)
         remote_advanced
-        find(:path, path("userRemoteConfigs/name")).set(repo_name)
+        control("userRemoteConfigs/name").set(repo_name)
       end
 
       def add_behaviour(title)
@@ -39,11 +39,11 @@ module Jenkins
 
       private
       def advanced
-        find(:path, path("advanced-button")).click
+        control("advanced-button").click
       end
 
       def remote_advanced
-        find(:path, path("userRemoteConfigs/advanced-button")).click
+        control("userRemoteConfigs/advanced-button").click
       end
     end
 
@@ -81,7 +81,7 @@ module Jenkins
       register 'Check out to specific local branch'
 
       def name=(branchName)
-        find(:path, path('localBranch')).set branchName
+        control('localBranch').set branchName
       end
     end
 
@@ -90,7 +90,7 @@ module Jenkins
       register 'Check out to a sub-directory'
 
       def path=(path)
-        find(:path, path('relativeTargetDir')).set path
+        control('relativeTargetDir').set path
       end
     end
   end

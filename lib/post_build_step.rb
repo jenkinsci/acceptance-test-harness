@@ -53,17 +53,17 @@ module Jenkins
     end
 
     def includes(includes)
-      find(:path, path("artifacts")).set includes
+      control("artifacts").set includes
     end
 
     def excludes(excludes)
-      find(:path, path("advanced-button")).locate.click
-      find(:path, path("excludes")).set excludes
+      control("advanced-button").locate.click
+      control("excludes").set excludes
     end
 
     def latest_only(latest)
-      find(:path, path("advanced-button")).locate.click
-      find(:path, path("latestOnly")).set latest
+      control("advanced-button").locate.click
+      control("latestOnly").set latest
     end
   end
 end

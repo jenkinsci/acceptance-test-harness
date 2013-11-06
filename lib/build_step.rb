@@ -35,7 +35,7 @@ module Jenkins
     register 'Shell', 'Execute shell'
 
     def command(text)
-      find(:path, path('command')).locate.set(text)
+      control('command').locate.set(text)
     end
   end
 end

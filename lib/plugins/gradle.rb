@@ -4,15 +4,15 @@ module Plugins
     register 'Gradle', 'Invoke Gradle script'
 
     def file(name)
-      find(:path, path("buildFile")).set(name)
+      control("buildFile").set(name)
     end
 
     def dir(name)
-      find(:path, path("rootBuildScriptDir")).set(name)
+      control("rootBuildScriptDir").set(name)
     end
 
     def switches(switches)
-      find(:path, path("switches")).set(switches)
+      control("switches").set(switches)
     end
 
     def version(version)
@@ -21,11 +21,11 @@ module Plugins
     end
 
     def description(description)
-      find(:path, path("description")).set(description)
+      control("description").set(description)
     end
 
     def tasks(tasks)
-      find(:path, path("tasks")).set(tasks)
+      control("tasks").set(tasks)
     end
   end
 end

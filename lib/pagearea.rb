@@ -11,6 +11,10 @@ module Jenkins
       return "#{@path_prefix}/#{relative_path}"
     end
 
+    def control(relative_path)
+      return find(:path, path(relative_path))
+    end
+
     def self.included(receiver)
       receiver.extend Capybara::DSL
     end

@@ -166,7 +166,7 @@ module Jenkins
     register 'Maven', 'Invoke top-level Maven targets'
 
     def goals(goals)
-      find(:path, path("targets")).set(goals)
+      control("targets").set(goals)
     end
 
     def version(version)
@@ -176,12 +176,12 @@ module Jenkins
 
     def properties(properties)
       open_advanced
-      find(:path, path('properties')).set(properties)
+      control('properties').set(properties)
     end
 
     def use_local_repo
       open_advanced
-      find(:path, path("usePrivateRepository")).locate.click
+      control("usePrivateRepository").locate.click
     end
 
     private
@@ -191,7 +191,7 @@ module Jenkins
     def open_advanced
       return if @advanced_open
 
-      find(:path, path("advanced-button")).click
+      control("advanced-button").click
       @advanced_open = true
     end
   end
@@ -205,7 +205,7 @@ module Jenkins
     end
 
     def goals(goals)
-      find(:path, path("goals")).set(goals)
+      control("goals").set(goals)
     end
 
     def properties(properties)

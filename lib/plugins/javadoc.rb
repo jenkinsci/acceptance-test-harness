@@ -6,7 +6,7 @@ module Plugins
     register 'Javadoc', 'Publish Javadoc'
 
     def dir(path)
-      find(:path, path("javadocDir")).set path
+      control("javadocDir").set path
     end
   end
 end
