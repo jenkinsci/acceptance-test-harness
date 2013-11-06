@@ -8,7 +8,7 @@ end
 
 Then /^the build should have description "([^"]*)"$/ do |description|
   @job.last_build.open
-  desc = find(:xpath,'//div[@id="description"]/div')
+  desc = first(:xpath,'//div[@id="description"]/div')
   desc.should have_content(description)
 end
 

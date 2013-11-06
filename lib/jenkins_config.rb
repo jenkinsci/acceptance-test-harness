@@ -4,11 +4,11 @@ require File.dirname(__FILE__) + "/pageobject.rb"
 
 module Jenkins
   class JenkinsConfig < PageObject
-    
+
     def initialize(*args)
       super(*args)
     end
-    
+
     def configure_url
       @base_url + "/configure"
     end
@@ -24,7 +24,7 @@ module Jenkins
     def open
       visit(configure_url)
     end
-    
+
     def add_tool(name)
       find_button(name).locate.click
     end
@@ -33,8 +33,8 @@ module Jenkins
       ensure_config_page
       find(:path, "/hudson-model-JDK/tool/name").set(name)
       # by default Install automatically is checked
-      find(:path, "/hudson-model-JDK/tool/properties/hudson-tools-InstallSourceProperty/installers/id").click
-      find(:xpath, "//option[@value='#{version}']").click
+      select = find(:path, "/hudson-model-JDK/tool/properties/hudson-tools-InstallSourceProperty/installers/id")
+      select.find(:xpath, "//option[@value='#{version}']").click
       find(:path, "/hudson-model-JDK/tool/properties/hudson-tools-InstallSourceProperty/installers/acceptLicense").click
     end
 

@@ -48,11 +48,15 @@ module Jenkins
           find(:xpath, "//li/a[text()='Slaves']").click
           sleep 0.1 # wait until axis appear
        end
-       if !(find(:xpath, "(#{input}[@name='values' and @json='#{value}'])").visible?)
+
+       checkbox = find(:xpath, "#{input}[@name='values' and @json='#{value}']", visible: false)
+
+       if !checkbox.visible?
           find(:xpath, "//div[@class='yahooTree labelAxis-tree']//table[@id='ygtvtableel1']//a").click
           find(:xpath, "//div[@class='yahooTree labelAxis-tree']//table[@id='ygtvtableel2']//a").click
        end
-       find(:xpath, "(#{input}[@name='values' and @json='#{value}'])").set(true)
+
+       checkbox.check
     end
 
     def add_jdk_axis(value)

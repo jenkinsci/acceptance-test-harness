@@ -14,12 +14,16 @@ end
 Then /^the javadoc should display "([^"]*)"$/ do |content|
   @job.open
   find(:xpath, "//div[@id='tasks']/div/a[text()='Javadoc']").click
-  page.should have_content(content)
+  within_frame "classFrame" do
+    page.should have_content content
+  end
 end
 
 Then /^javadoc should display "([^"]*)" for default configuration$/ do |content|
   @job.last_build.wait_until_finished
   visit (@job.url + "/default")
   find(:xpath, "//div[@id='tasks']/div/a[text()='Javadoc']").click
-  page.should have_content(content)
+  within_frame "classFrame" do
+    page.should have_content content
+  end
 end

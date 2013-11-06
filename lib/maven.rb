@@ -11,8 +11,8 @@ module Jenkins
     def add_auto_installation(name, version)
       find(:path, "/hudson-tasks-Maven$MavenInstallation/tool/name").set(name)
       # by default Install automatically is checked
-      find(:path, "/hudson-tasks-Maven$MavenInstallation/tool/properties/hudson-tools-InstallSourceProperty/installers/id").click
-      find(:xpath, "//option[@value='#{version}']").click
+      select = find(:path, "/hudson-tasks-Maven$MavenInstallation/tool/properties/hudson-tools-InstallSourceProperty/installers/id")
+      select.find(:xpath, "//option[@value='#{version}']").click
     end
 
     def add_local_installation(name, maven_home)
@@ -171,9 +171,7 @@ module Jenkins
 
     def version(version)
       open_advanced
-      select_path = path("name")
-      find(:path, select_path).click
-      find(:xpath, "//select[@path='#{select_path}']/option[@value='#{version}']").click
+      select version
     end
 
     def properties(properties)

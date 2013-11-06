@@ -18,7 +18,7 @@ module Jenkins
         find(:path, '/id').set(id)
         find(:path, '/name').set(id)
 
-        textarea = Jenkins::Util::CodeMirror.new(page, find(:path, '/script'))
+        textarea = Jenkins::Util::CodeMirror.new(page, find(:path, '/script', :visible => false))
         textarea.set_content script
 
         click_button 'Submit'
@@ -86,7 +86,7 @@ module Jenkins
 
         click_button 'Run'
 
-        @output = find(:xpath, '//h2[text()="Result"]/../pre').text
+        @output = find(:xpath, '//h2[text()="Result"]/../pre').plain
         return self
       end
 

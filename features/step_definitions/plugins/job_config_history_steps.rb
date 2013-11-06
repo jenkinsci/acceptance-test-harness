@@ -5,7 +5,8 @@ Then /^jobConfigHistory page should show difference/ do
 end
 
 When /^I dispaly difference/ do
-  find(:xpath, "//button[text()='Show Diffs']").click
+  # There are two buttons
+  first(:xpath, "//button[text()='Show Diffs']").click
 end
 
 Then /^configuration should have "([^"]*)" instead of "([^"]*)"/ do |current, original|

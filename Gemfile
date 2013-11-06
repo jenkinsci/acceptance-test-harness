@@ -11,7 +11,7 @@ gem "pry"
 
 gem "cucumber", '1.2.5'
 gem "curb"
-gem "capybara", '~> 1.1'
+gem "capybara", "~> 2.1.0"
 gem "json"
 gem "rspec"
 gem "tempdir"

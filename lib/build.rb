@@ -37,7 +37,7 @@ module Jenkins
     def console
       @console ||= begin
         visit(console_url)
-        find(:xpath, "//pre").text
+        find(:xpath, "//pre").plain
       end
     end
 

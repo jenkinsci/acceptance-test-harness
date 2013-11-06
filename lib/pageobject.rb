@@ -35,13 +35,6 @@ module Jenkins
 
     def configure(&block)
       visit(configure_url)
-      wait_until do # script has to fully load
-        begin
-          !find('DIV.behavior-loading').visible?
-        rescue Capybara::ElementNotFound
-          true # if there's no behavior-loading, that's fine, too
-        end
-       end
 
       unless block.nil?
         yield
@@ -81,7 +74,7 @@ module Jenkins
       start = Time.now.to_i
       begin
         find(selector_kind, selector)
-      rescue Capybara::TimeoutError, Capybara::ElementNotFound => e
+      rescue Capybara::ElementNotFound => e
         retry unless (Time.now.to_i - start) >= timeout
         raise
       end

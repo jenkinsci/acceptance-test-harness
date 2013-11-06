@@ -38,18 +38,6 @@ Before do |scenario|
   @base_url = @runner.url
   Capybara.app_host = @base_url
 
-  # wait for Jenkins to properly boot up and finish initialization
-  s = Capybara.current_session
-  for i in 1..20 do
-    begin
-      s.visit "/systemInfo"
-      s.find "TABLE.bigtable"
-      break # found it
-    rescue => e
-      sleep 0.5
-    end
-  end
-
   scenario.skip_not_applicable($version)
 end
 

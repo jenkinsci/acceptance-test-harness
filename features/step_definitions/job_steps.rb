@@ -89,7 +89,7 @@ Then /^the (\d+) builds should run concurrently$/ do |count|
 end
 
 Then /^I should be prompted to enter the "(.*?)" parameter$/ do |param_name|
-  page.should have_xpath "//input[@value='#{param_name}']"
+  page.should have_xpath("//input[@value='#{param_name}']", :visible => false)
 end
 
 Then /^the build should (succeed|fail)$/ do |status|
@@ -141,6 +141,6 @@ end
 
 Then /^the job should have description "([^"]*)"$/ do |description|
   @job.open
-  desc = find(:xpath,'//div[@id="description"]/div')
+  desc = first(:xpath,'//div[@id="description"]/div')
   desc.should have_content(description)
 end

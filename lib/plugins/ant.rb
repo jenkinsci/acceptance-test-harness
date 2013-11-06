@@ -14,14 +14,14 @@ module Plugins
     def self.add_auto_installation(name, version)
       find(:path, "/hudson-tasks-Ant$AntInstallation/tool/name").set(name)
       # by default Install automatically is checked
-      find(:path, "/hudson-tasks-Ant$AntInstallation/tool/properties/hudson-tools-InstallSourceProperty/installers/id").click
+      find(:path, "/hudson-tasks-Ant$AntInstallation/tool/properties/hudson-tools-InstallSourceProperty/installers/id")
       find(:xpath, "//option[@value='#{version}']").click
     end
 
     def self.add_local_installation(name, ant_home)
       find(:path, "/hudson-tasks-Ant$AntInstallation/tool/name").set(name)
       # by default Install automatically is checked - need to uncheck
-      find(:path, "/hudson-tasks-Ant$AntInstallation/tool/properties/hudson-tools-InstallSourceProperty").click 
+      find(:path, "/hudson-tasks-Ant$AntInstallation/tool/properties/hudson-tools-InstallSourceProperty").click
       find(:path, "/hudson-tasks-Ant$AntInstallation/tool/home").set(ant_home)
     end
 

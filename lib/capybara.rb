@@ -33,6 +33,10 @@ module Capybara
 
         return self
       end
+
+      def plain
+        native.text
+      end
     end
   end
 end
