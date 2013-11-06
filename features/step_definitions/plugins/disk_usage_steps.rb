@@ -17,6 +17,7 @@ end
 
 Then /^the project page should contain disk usage graph$/ do
   step %{I visit the job page}
-  page.should have_xpath("//img[@src='disk-usage/graph/png']")
+  # changed v0.22
+  page.should have_xpath("//img[@src='disk-usage/graph/png' or @src='diskUsage/graph/png']")
 end
 

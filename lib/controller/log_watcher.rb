@@ -44,7 +44,7 @@ class LogWatcher
     while @ready!=expected && ((Time.now - start_time) < TIMEOUT)
       sleep 0.5
 
-      if has_logged /java.io.IOException: Failed to listen on port (\d+)/
+      if has_logged? /java.io.IOException: Failed to listen on port (\d+)/
         raise JenkinsController::RetryException.new "Port conflict detected"
       end
     end
@@ -70,7 +70,7 @@ class LogWatcher
 
     @log_regex = regex
 
-    return if has_logged regex
+    return if has_logged? regex
 
     start = Time.now.to_i
 
@@ -83,10 +83,13 @@ class LogWatcher
       sleep 1
     end
 
-    raise "Pattern '#{regex.source}' was not logged within #{timeout} seconds"
+    raise TimeoutException.new "Pattern '#{regex.source}' was not logged within #{timeout} seconds"
   end
 
-  def has_logged(regex)
+  class TimeoutException < Exception
+  end
+
+  def has_logged?(regex)
     line_index = @logged_lines.index { |l| l.match regex }
     return !line_index.nil?
   end

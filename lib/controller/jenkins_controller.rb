@@ -109,7 +109,7 @@ class JenkinsController
     pattern = /INFO: Obtained the updated data file for .*#{Regexp.quote(name)}.*/i
 
     plugin_manager = Jenkins::PluginManager.new(url, nil)
-    until @log_watcher.has_logged pattern
+    until @log_watcher.has_logged? pattern
       plugin_manager.check_for_updates
 
       sleep 1

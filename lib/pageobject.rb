@@ -7,6 +7,7 @@ require 'capybara/dsl'
 
 module Jenkins
   class PageObject
+    include RSpec::Matchers
     include Capybara::DSL
     extend Capybara::DSL
 
