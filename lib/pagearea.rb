@@ -2,8 +2,8 @@ module Jenkins
   module PageArea
     include Capybara::DSL
 
-    def initialize(pageobject, path_prefix)
-      @pageobject = pageobject
+    def initialize(parent, path_prefix)
+      @parent = parent
       @path_prefix = path_prefix
     end
 
