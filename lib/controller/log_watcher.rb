@@ -1,6 +1,6 @@
 # Mix-in for JenkinsController that watches the log output by Jenkins
 class LogWatcher
-  TIMEOUT = 60
+  TIMEOUT = 70
 
   # Launches a thread that monitors the given +pipe+ for log output and copy them over to +log+
   # @arg [IO]   pipe
