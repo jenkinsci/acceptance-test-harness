@@ -79,7 +79,7 @@ module Jenkins
 
     def run_configurations_sequentially
        ensure_config_page
-       find(:xpath, "//input[@name='_.runSequentially']").locate.set(true)
+       find(:xpath, "//input[@name='_.runSequentially']").set(true)
     end
 
     def touchstone_builds_first(filter, result)

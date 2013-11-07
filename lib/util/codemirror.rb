@@ -8,7 +8,7 @@ module Jenkins
 
       def initialize(page, textarea)
         @page = page
-        @textarea = textarea.locate
+        @textarea = textarea
       end
 
 

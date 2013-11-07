@@ -5,7 +5,7 @@ When /^I add console parser for "([^"]*)"$/ do |tool|
 end
 
 When /^I add workspace parser for "([^"]*)" applied at "([^"]*)"$/ do |tool, pattern|
-  find(:path, '/publisher/repeatable-add[1]').locate.click
+  find(:path, '/publisher/repeatable-add[1]').click
   find(:path, '/publisher/parserConfigurations/pattern').set(pattern)
   find(:xpath, "//select[@path='/publisher/parserConfigurations/parserName']/option[text()='#{tool}']")
       .select_option

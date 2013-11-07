@@ -10,13 +10,13 @@ end
 
 When /^I set groovy build step "([^"]*)"$/ do |step_name|
   @job.ensure_config_page
-  find(:xpath, "//button[text()='Add build step']").locate.click
+  find(:xpath, "//button[text()='Add build step']").click
   find(:xpath, "//a[text()='#{step_name}']").click
 end
 
 When /^I select groovy named "([^\"]*)"$/ do |name|
   @job.ensure_config_page
-  find(:xpath, "//select[@name='groovy.groovyName']").locate.click
+  find(:xpath, "//select[@name='groovy.groovyName']").click
   find(:xpath, "//option[@value='#{name}']").click
 end
 

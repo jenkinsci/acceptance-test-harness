@@ -6,7 +6,7 @@ module Plugins
   class Ant < Jenkins::PageObject
 
     def self.add_ant_step(targets, ant_build_file)
-      find_button('Add build step').locate.click
+      find_button('Add build step').click
       click_link 'Invoke Ant'
       fill_in '_.targets', :with => targets
     end

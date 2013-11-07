@@ -6,7 +6,7 @@ module Jenkins
 
     def self.add(job, title)
 
-      find_button('Add post-build action').locate.click
+      click_button 'Add post-build action'
       click_link label(title)
 
       sleep 1
@@ -36,7 +36,7 @@ module Jenkins
 
     def self.add(job)
 
-      find_button('Add post-build action').locate.click
+      click_button 'Add post-build action'
 
       title = 'Artifact Archiver'
       begin
@@ -57,12 +57,12 @@ module Jenkins
     end
 
     def excludes(excludes)
-      control("advanced-button").locate.click
+      control("advanced-button").click
       control("excludes").set excludes
     end
 
     def latest_only(latest)
-      control("advanced-button").locate.click
+      control("advanced-button").click
       control("latestOnly").set latest
     end
   end

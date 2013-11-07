@@ -2,7 +2,7 @@
 
 When /^I select Ant named "([^\"]*)"$/ do |name|
   @job.configure do
-    select = find(:xpath, "//select[@name='ant.antName']").locate
+    select = find(:xpath, "//select[@name='ant.antName']")
     select.find(:xpath, "//option[@value='#{name}']").click
   end
 end

@@ -9,7 +9,7 @@ When /^I add marker post-build script$/ do
       # The prefix was stripped in 0.12
       find(:xpath, "//a[text()='[PostBuildScript] - Execute a set of scripts']").click
     end
-    step = find(:path, '/publisher/hetero-list-add[buildStep]').locate.click
+    step = find(:path, '/publisher/hetero-list-add[buildStep]').click
     find(:path, '/publisher').click_link 'Execute shell'
     find(:path, '/publisher/buildStep/command').set("echo '#{@marker}'")
   end
@@ -23,7 +23,7 @@ When /^I allow the script to run only for builds that (failed|succeeded)$/ do |s
   }
 
   @job.configure do
-    find(:xpath, "//input[@name='#{checkboxes[status]}']").locate.check
+    check checkboxes[status]
   end
 end
 

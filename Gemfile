@@ -20,4 +20,6 @@ gem "vagrant", '~> 1.0'
 
 gem "rdoc"
 
+gem "aspector"
+
 # vim: set ft=conf

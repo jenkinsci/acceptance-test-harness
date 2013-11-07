@@ -70,7 +70,7 @@ module Jenkins
     def add_postbuild_action(action)
       ensure_config_page
 
-      find(:xpath, "//button[text()='Add post-build action']").locate.click
+      find(:xpath, "//button[text()='Add post-build action']").click
       find(:xpath, "//a[text()='#{action}']").click
     end
 
@@ -112,7 +112,7 @@ module Jenkins
 
     def label_expression=(expression)
       ensure_config_page
-      find(:xpath, "//input[@name='hasSlaveAffinity']").locate.set(true)
+      find(:xpath, "//input[@name='hasSlaveAffinity']").set(true)
       find(:xpath, "//input[@name='_.assignedLabelString']").set(expression)
     end
 

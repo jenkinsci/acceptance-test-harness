@@ -49,7 +49,7 @@ module Jenkins
     def add_prebuild_shell_step(script)
       ensure_config_page
 
-      find(:xpath, "//button[text()='Add pre-build step']").locate.click
+      find(:xpath, "//button[text()='Add pre-build step']").click
       find(:xpath, "//a[text()='Execute shell']").click
       find(:path, '/prebuilder/command').set(script)
     end
@@ -181,7 +181,7 @@ module Jenkins
 
     def use_local_repo
       open_advanced
-      control("usePrivateRepository").locate.click
+      control("usePrivateRepository").click
     end
 
     private

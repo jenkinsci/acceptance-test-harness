@@ -43,7 +43,7 @@ module Jenkins
       end
 
       visit "#{url}/available"
-      first(:xpath, "//input[starts-with(@name,'plugin.#{name}.')]").locate.set(true)
+      first(:xpath, "//input[starts-with(@name,'plugin.#{name}.')]").set(true)
       find_button('Install').click
 
       start = Time.now.to_i

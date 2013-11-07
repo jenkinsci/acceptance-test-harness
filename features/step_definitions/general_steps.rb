@@ -11,7 +11,7 @@ When /^I visit the home page$/ do
 end
 
 When /^I check the "([^"]*)" checkbox$/ do |name|
-  find(:xpath, "//input[@name='#{name}']").locate.set(true)
+  find(:xpath, "//input[@name='#{name}']").set(true)
 end
 
 When /^I click the "([^"]*)" button$/ do |name|

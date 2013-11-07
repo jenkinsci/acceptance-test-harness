@@ -6,7 +6,7 @@ module Jenkins
 
     def self.add(job, title)
       find(:xpath, "//input[@name='parameterized']").check
-      find(:xpath, "//button[text()='Add Parameter']").locate.click
+      find(:xpath, "//button[text()='Add Parameter']").click
       find(:xpath, "//a[text()='#{title}']").click
       sleep 0.1
       prefix = all(:xpath, "//div[@name='parameter']").last[:path]

@@ -9,7 +9,8 @@ module Jenkins
     end
 
     def add(title)
-      control('hetero-list-add[scmList]').locate.click
+      control('hetero-list-add[scmList]').click
+
       find(:xpath, "//a[text() = '#{title}']").click
 
       new_path = path 'scmList'

@@ -26,7 +26,7 @@ module Jenkins
     end
 
     def add_tool(name)
-      find_button(name).locate.click
+      click_button(name)
     end
 
     def add_jdk_auto_installation(name, version)

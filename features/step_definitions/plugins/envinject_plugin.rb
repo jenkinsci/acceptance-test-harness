@@ -13,7 +13,7 @@ end
 
 When /^I add build step injecting variables "([^"]*)" to the build$/ do |env_var|
   @job.open_config
-  find(:xpath, "//button[text()='Add build step']").locate.click
+  find(:xpath, "//button[text()='Add build step']").click
   find(:xpath, "//a[text()='Inject environment variables']").click
   find(:path, "/builder/propertiesContent").set(env_var)
 end

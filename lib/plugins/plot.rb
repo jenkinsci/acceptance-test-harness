@@ -13,8 +13,8 @@ module Plugins
       end
 
       def source(type, path)
-        control('plots/series/file').locate.set path
-        control("plots/series/fileType[#{type}]").locate.set true
+        control('plots/series/file').set path
+        control("plots/series/fileType[#{type}]").set true
       end
     end
   end

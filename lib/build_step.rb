@@ -6,7 +6,7 @@ module Jenkins
 
     def self.add(job, title)
 
-      find(:path, '/hetero-list-add[builder]').locate.click
+      find(:path, '/hetero-list-add[builder]').click
       click_link label(title)
 
       sleep 1
@@ -35,7 +35,7 @@ module Jenkins
     register 'Shell', 'Execute shell'
 
     def command(text)
-      control('command').locate.set(text)
+      control('command').set(text)
     end
   end
 end
