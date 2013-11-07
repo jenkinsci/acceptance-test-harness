@@ -95,7 +95,7 @@ module Jenkins
     end
 
     def resource(relative_path)
-      return "#{File.dirname(__FILE__)}/../resources/#{relative_path}"
+      return File.expand_path("../resources/#{relative_path}", File.dirname(__FILE__))
     end
   end
 end
