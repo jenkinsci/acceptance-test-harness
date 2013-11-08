@@ -12,3 +12,5 @@ path-element.hpi
 slave.jar
 temp_dir_*
 chromedriver.log
+.buildpath
+.project
