@@ -8,7 +8,7 @@ class LogWatcher
   # @arg [IO]   log
   #       Log output from Jenkins that's read from 'pipe' gets written here.
   # @arg [Regexp]   pattern
-  def initialize(pipe,log,pattern=/INFO: Completed initialization/)
+  def initialize(pipe,log,pattern=/: Completed initialization/)
     @ready = false
     @log_regex = nil
     @log_found = false
