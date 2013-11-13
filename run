@@ -66,7 +66,7 @@ if [ ! -f $war ]; then
     fi
 fi
 
-if [ ! -f $war ]; then
+if [ ! -f $war ] && [[ $war == *.war ]]; then
     curl -sL -o jenkins.war $war && war=jenkins.war
 fi
 
