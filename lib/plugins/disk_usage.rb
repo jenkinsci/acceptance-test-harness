@@ -5,7 +5,11 @@ module Plugins
 
     def update
       visit "#{@baseurl}/plugin/disk-usage"
-      find(:xpath, "//button[text()='Record Disk Usage']").click
+      click_button 'Record Disk Usage'
+    rescue Capybara::ElementNotFound => ex #v0.22
+      click_button 'Record Builds Disk Usage'
+      click_button 'Record Jobs Disk Usage'
+      click_button 'Record Workspaces Disk Usage'
     end
 
     def wait_for_update(log_watcher)

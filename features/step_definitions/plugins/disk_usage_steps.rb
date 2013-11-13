@@ -14,10 +14,8 @@ Then /^the disk usage should be updated$/ do
   @disk_usage.wait_for_update(@runner.log_watcher)
 end
 
-
 Then /^the project page should contain disk usage graph$/ do
   step %{I visit the job page}
-  # changed v0.22
-  page.should have_xpath("//img[@src='disk-usage/graph/png' or @src='diskUsage/graph/png']")
+  # changed in v0.22 and v0.23
+  page.should have_xpath("//img[@src='disk-usage/graph/png' or starts-with(@src, 'diskUsage/graph/png')]")
 end
-
