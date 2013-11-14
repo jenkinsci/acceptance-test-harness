@@ -26,11 +26,12 @@ Feature: Use multi configuration job
     When I configure the job
     And I configure user axis "user_axis" with values "axis1 axis2 axis3"
     And I add always fail build step
-    And I configure to execute touchstone builds first with filter "user_axis=='axis1'" and required result "UNSTABLE"
+    And I configure to execute touchstone builds first with filter "user_axis=='axis3'" and required result "UNSTABLE"
     And I save the job
     And I build the job
     Then combination "user_axis=axis2" should not be built
-    And combination "user_axis=axis3" should not be built
+    And combination "user_axis=axis1" should not be built
+    And combination "user_axis=axis3" should be built
 
   Scenario: Run build with combination filter
     Given a matrix job
@@ -45,6 +46,7 @@ Feature: Use multi configuration job
     And combination "user_axis=axis3" should not be built
 
   @since(1.515)
+  @bug(7285)
   Scenario: Use Job parameters in combination filters
     Given a matrix job
     When I configure the job
