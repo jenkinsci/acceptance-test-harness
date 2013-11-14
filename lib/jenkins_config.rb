@@ -46,9 +46,12 @@ module Jenkins
       click_button("Close")
     end
 
+    def mailer
+      return Plugins::Mailer.new(self, '/hudson-tasks-Mailer')
+    end
+
     def self.get(base_url, name)
       self.new(base_url, name)
     end
-
   end
 end
