@@ -32,12 +32,6 @@ class WinstoneJenkinsController < LocalJenkinsController
       TCPSocket.open("localhost", @control_port) do |sock|
         sock.write("0")
       end
-      @log_watcher.wait_for_ready false
-    rescue => e
-      puts "Failed to cleanly shutdown Jenkins #{e}: Jenkins log:"
-      puts @log_watcher.full_log
-      puts "Trace:\n  "+e.backtrace.join("\n  ")
-      puts "Killing #@pid"
       Process.kill("KILL",@pid)
     end
   end
