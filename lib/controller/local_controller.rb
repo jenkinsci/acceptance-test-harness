@@ -93,9 +93,5 @@ class LocalJenkinsController < JenkinsController
 
     @log_watcher = LogWatcher.new(@pipe,@log)
     @log_watcher.wait_for_ready
-  rescue RetryException => e
-    print e.message
-    STDOUT.flush
-    bring_up!
   end
 end

@@ -44,8 +44,9 @@ class LogWatcher
     while @ready!=expected && ((Time.now - start_time) < TIMEOUT)
       sleep 0.5
 
-      if has_logged? /java.io.IOException: Failed to listen on port (\d+)/
-        raise JenkinsController::RetryException.new "Port conflict detected"
+      match = has_logged? /java.io.IOException: Failed to listen on port (\d+)/
+      if !match.nil?
+        raise JenkinsController::RetryException.new "Port conflict detected at " + match[1]
       end
     end
 
@@ -89,9 +90,13 @@ class LogWatcher
   class TimeoutException < Exception
   end
 
+  # nil if not logged, matchdata of last record otherwise
   def has_logged?(regex)
-    line_index = @logged_lines.index { |l| l.match regex }
-    return !line_index.nil?
+    for line in @logged_lines.reverse
+      match = line.match regex
+      return match if !match.nil?
+    end
+    return nil
   end
 
   def close
