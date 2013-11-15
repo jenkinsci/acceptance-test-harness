@@ -14,6 +14,17 @@ Feature: Adds Apache Maven support
     Then I should see console output matching "Apache Maven 3.0.4"
     And the build should succeed
 
+  Scenario: Use Auto-Installed Maven2 from FreeStyle job
+    Given I add Maven version "2.2.1" with name "maven_2.2.1" installed automatically to Jenkins config page
+    And a job
+    When I configure the job
+    And I add a top-level maven target "archetype:generate -DarchetypeGroupId=org.apache.maven.archetypes -DgroupId=com.mycompany.app -DartifactId=my-app -Dversion=1.0 -B -X" for maven "maven_2.2.1"
+    And I save the job
+    And I build the job
+    Then I should see console output matching "Unpacking http://archive.apache.org/dist/maven/binaries/apache-maven-2.2.1-bin.zip"
+    Then I should see console output matching "Apache Maven 2.2.1"
+    And the build should succeed
+
   Scenario: Use locally installed Maven from FreeStyle job
     Given fake Maven installation at "/tmp/fake-maven"
     And I add Maven with name "local_maven_3.0.4" and Maven home "/tmp/fake-maven" to Jenkins config page
