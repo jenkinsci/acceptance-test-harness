@@ -105,4 +105,9 @@ class LogWatcher
       @pipe = nil
     end
   end
+
+  # Get log as string
+  def full_log
+    @logged_lines.join ''
+  end
 end
