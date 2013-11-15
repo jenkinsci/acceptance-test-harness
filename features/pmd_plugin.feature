@@ -5,7 +5,7 @@ Feature: Tests for PMD plugin
     And a job
     When I configure the job
     And I add "Publish PMD analysis results" post-build action
-    And I copy resource "pmd_plugin/pmd.xml" into workspace as "pmd.xml" via shell command
+    And I copy resource "pmd_plugin/pmd.xml" into workspace
     And I set path to the pmd result "pmd.xml"
     And I save the job
     And I build the job
@@ -17,7 +17,7 @@ Feature: Tests for PMD plugin
     And a job
     When I configure the job
     And I add "Publish PMD analysis results" post-build action
-    And I copy resource "pmd_plugin/pmd.xml" into workspace as "pmd.xml" via shell command
+    And I copy resource "pmd_plugin/pmd.xml" into workspace
     And I set path to the pmd result "pmd.xml"
     And I add always fail build step
     And I set publish always pdm
@@ -31,7 +31,7 @@ Feature: Tests for PMD plugin
     And a job
     When I configure the job
     And I add "Publish PMD analysis results" post-build action
-    And I copy resource "pmd_plugin/pmd-warnings.xml" into workspace as "pmd-warnings.xml" via shell command
+    And I copy resource "pmd_plugin/pmd-warnings.xml" into workspace
     And I set path to the pmd result "pmd-warnings.xml"
     And I save the job
     And I build the job

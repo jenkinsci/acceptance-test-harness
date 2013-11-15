@@ -40,7 +40,7 @@ Feature: Adds Apache Maven support
     Given I have default Maven configured
     And a Maven job
     When I configure the job
-    And I copy resource "maven/repositories/multimodule/*" into workspace via shell command
+    And I copy resource "maven/repositories/multimodule/*" into workspace
     And I add a top-level maven target "package"
     And I save the job
     And I build the job
@@ -54,7 +54,7 @@ Feature: Adds Apache Maven support
     Given I have default Maven configured
     And a Maven job
     When I configure the job
-    And I copy resource "maven/repositories/multimodule/*" into workspace via shell command
+    And I copy resource "maven/repositories/multimodule/*" into workspace
     And I add a top-level maven target "package"
     And I set maven options "--quiet"
     And I save the job
@@ -66,7 +66,7 @@ Feature: Adds Apache Maven support
     Given I have default Maven configured
     And a Maven job
     When I configure the job
-    And I copy resource "maven/repositories/multimodule/*" into workspace via shell command
+    And I copy resource "maven/repositories/multimodule/*" into workspace
     And I add a top-level maven target "package"
     And I save the job
     And I set global MAVEN_OPTS "-verbose"
@@ -78,7 +78,7 @@ Feature: Adds Apache Maven support
     Given I have default Maven configured
     And a Maven job
     When I configure the job
-    And I copy resource "maven/repositories/multimodule/*" into workspace via shell command
+    And I copy resource "maven/repositories/multimodule/*" into workspace
     And I add a top-level maven target "package"
     And I save the job
     And I build the job
@@ -94,7 +94,7 @@ Feature: Adds Apache Maven support
     When I configure the job
     And I add a string parameter "CMD" defaulting to "C:\System"
     And I add a string parameter "PROPERTY" defaulting to "C:\Windows"
-    And I copy resource "maven/repositories/multimodule/*" into workspace via shell command
+    And I copy resource "maven/repositories/multimodule/*" into workspace
     And I add a top-level maven target "validate -Dcmdline.property=$CMD"
     And I set maven properties
        """

@@ -6,7 +6,7 @@ Feature: Publish HTML directories
     Given I have installed the "htmlpublisher" plugin
     And a simple job
     When I configure the job
-    And I copy resource "htmlpublisher_plugin/*" into workspace via shell command
+    And I copy resource "htmlpublisher_plugin/*" into workspace
     And I configure "." directory to be published as "My report"
     And I set index file to "home.html"
     And I save the job

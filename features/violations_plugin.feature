@@ -7,7 +7,7 @@ Feature: Add violations support
     Given I have installed the "violations" plugin
     And a job
     When I configure the job
-    And I copy resource "violations_plugin/*" into workspace via shell command
+    And I copy resource "violations_plugin/*" into workspace
     And I configure violations reporting
     And I set "fxcop" reporter applied at "fxcop/*"
     And I save the job
@@ -21,7 +21,7 @@ Feature: Add violations support
     And I have default Maven configured
     And a Maven job
     When I configure the job
-    And I copy resource "violations_plugin/*" into workspace via shell command
+    And I copy resource "violations_plugin/*" into workspace
     And I configure violations reporting
     And I set "fxcop" reporter applied at "fxcop/*"
     And I save the job

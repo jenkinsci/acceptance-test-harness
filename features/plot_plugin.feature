@@ -7,7 +7,7 @@ Feature: Adds Plotting support
     Given I have installed the "plot" plugin
     And a job
     When I configure the job
-    And I copy resource "plot_plugin/plot.csv" into workspace via shell command
+    And I copy resource "plot_plugin/plot.csv" into workspace
     And I add plot "My plot" in group "My group"
     And I configure csv data source "plot.csv"
     And I save the job

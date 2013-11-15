@@ -124,10 +124,10 @@ When /^I use "([^"]*)" as custom workspace$/ do |workspace|
   @job.use_custom_workspace(workspace)
 end
 
-When /^I copy resource "([^"]*)" into workspace via shell command$/ do |resource|
+When /^I copy resource "([^"]*)" into workspace$/ do |resource|
   @job.copy_resource(resource, "")
 end
 
-When /^I copy resource "([^"]*)" into workspace as "([^"]*)" via shell command$/ do |resource, target|
+When /^I copy resource "([^"]*)" into workspace as "([^"]*)"$/ do |resource, target|
   @job.copy_resource(resource, target)
 end

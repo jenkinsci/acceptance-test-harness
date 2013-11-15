@@ -7,7 +7,7 @@ Feature: Allow reporting for FindBugs analysis
     Given I have installed the "findbugs" plugin
     And a job
     When I configure the job
-    And I copy resource "findbugs_plugin/findbugsXml.xml" into workspace as "findbugsXml.xml" via shell command
+    And I copy resource "findbugs_plugin/findbugsXml.xml" into workspace
     And I add "Publish FindBugs analysis results" post-build action
     And I set up "findbugsXml.xml" as the FindBugs results
     And I save the job

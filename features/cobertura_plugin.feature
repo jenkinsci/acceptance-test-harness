@@ -7,7 +7,7 @@ Feature: Allow publishing of Cobertura analysis
     Given I have installed the "cobertura" plugin
     And a job
     When I configure the job
-    And I copy resource "cobertura_plugin/coverage.xml" into workspace as "coverage.xml" via shell command
+    And I copy resource "cobertura_plugin/coverage.xml" into workspace
     And I add "Publish Cobertura Coverage Report" post-build action
     And I set up "coverage.xml" as the Cobertura report
     And I save the job
@@ -19,7 +19,7 @@ Feature: Allow publishing of Cobertura analysis
     Given I have installed the "cobertura" plugin
     And a job
     When I configure the job
-    And I copy resource "cobertura_plugin/coverage.xml" into workspace as "coverage.xml" via shell command
+    And I copy resource "cobertura_plugin/coverage.xml" into workspace
     And I add "Publish Cobertura Coverage Report" post-build action
     And I set up "coverage.xml" as the Cobertura report
     And I save the job

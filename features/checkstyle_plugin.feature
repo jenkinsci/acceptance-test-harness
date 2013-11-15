@@ -7,7 +7,7 @@ Feature: Allow publishing of Checkstyle report
     Given I have installed the "checkstyle" plugin
     And a job
     When I configure the job
-    And I copy resource "checkstyle_plugin/checkstyle-result.xml" into workspace as "checkstyle-result.xml" via shell command
+    And I copy resource "checkstyle_plugin/checkstyle-result.xml" into workspace
     And I add "Publish Checkstyle analysis results" post-build action
     And I set up "checkstyle-result.xml" as the Checkstyle results
     And I save the job
@@ -19,7 +19,7 @@ Feature: Allow publishing of Checkstyle report
     Given I have installed the "checkstyle" plugin
     And a job
     When I configure the job
-    And I copy resource "checkstyle_plugin/checkstyle-result.xml" into workspace as "checkstyle-result.xml" via shell command
+    And I copy resource "checkstyle_plugin/checkstyle-result.xml" into workspace
     And I add "Publish Checkstyle analysis results" post-build action
     And I set up "checkstyle-result.xml" as the Checkstyle results
     And I save the job
