@@ -2,7 +2,12 @@
 
 This is a project to flesh out some of the [manual test cases for Jenkins
 LTS](https://wiki.jenkins-ci.org/display/JENKINS/LTS+RC+Testing) in
-an automated fashion. Up to date test results can be found at https://jenkins.ci.cloudbees.com/job/selenium-tests.
+an automated fashion.
+
+master|stable
+---|---
+[![Build Status of master branch](https://jenkins.ci.cloudbees.com/buildStatus/icon?job=selenium-tests)](https://jenkins.ci.cloudbees.com/job/selenium-tests/)|[![Build Status of stable branch](https://jenkins.ci.cloudbees.com/buildStatus/icon?job=selenium-tests-stable)](https://jenkins.ci.cloudbees.com/job/selenium-tests-stable/)|
+
 
 Right now the project is in a very early state, and is in dire need of some
 [Page Objects](https://code.google.com/p/selenium/wiki/PageObjects) for the
@@ -14,22 +19,9 @@ more standard components of Jenkins such as the:
  * Node configuration
  * etc
 
-Drop me a line (`rtyler` on [Freenode](http://freenode.net)) if you're
-interested in helping out
-
 ## Installing
 
 On Ubuntu you may need to install: libxslt1-dev, libxml2-dev, libcurl4-openssl-dev
-
-## Current test matrix
-
-The tests cases that have been completed or nede to be completed can be found
-on the [Selenium Test
-Cases](https://wiki.jenkins-ci.org/display/JENKINS/Selenium+Test+Cases) page on
-the Jenkins wiki
-
-For historical reasons, there are older tests that are written for `test/unit` (in the `test` directory)
-and newer tests that are written for cucumber (in the `features` directory.)
 
 ## Running tests
 
