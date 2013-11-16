@@ -22,7 +22,7 @@ end
 
 Then /^the job workspace should occupy some space$/ do
   @job.open
-  page.should have_text /Workspace [1-9]\d+,/
+  page.should have_text /Workspace [1-9]\d*,/
 end
 
 Then /^the job workspace should occupy no space$/ do
