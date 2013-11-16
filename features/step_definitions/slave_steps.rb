@@ -33,7 +33,7 @@ Then /^the job should be tied to the slave$/ do
   step %{the job should be tied to the "#{@slave.name}" label}
 end
 
-Then /^the build should run on the slave$/ do |slave|
+Then /^the build should run on the slave$/ do
   @job.last_build.console.should include "Building remotely on #{@slave.name}"
 end
 
