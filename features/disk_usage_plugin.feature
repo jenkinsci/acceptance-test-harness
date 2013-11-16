@@ -20,3 +20,16 @@ Feature: Monitor disk usage builds and jobs
     And I enable disk usage graph on the project page
     And I update disk usage
     Then the project page should contain disk usage graph
+
+  Scenario: Reflect disk changes in disk usage report
+    Given I have installed the "disk-usage" plugin
+    And a job
+    When I add a shell build step in the job configuration
+        """
+            touch file
+        """
+    And I build the job
+    Then the job workspace should occupy some space
+    When I wipe out job workspace
+    And I update disk usage
+    Then the job workspace should occupy no space

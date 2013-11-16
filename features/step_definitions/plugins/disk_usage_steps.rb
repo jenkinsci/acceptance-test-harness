@@ -19,3 +19,13 @@ Then /^the project page should contain disk usage graph$/ do
   # changed in v0.22 and v0.23
   page.should have_xpath("//img[@src='disk-usage/graph/png' or starts-with(@src, 'diskUsage/graph/png')]")
 end
+
+Then /^the job workspace should occupy some space$/ do
+  @job.open
+  page.should have_text /Workspace [1-9]\d+,/
+end
+
+Then /^the job workspace should occupy no space$/ do
+  @job.open
+  page.should have_text "Workspace 0,"
+end

@@ -13,6 +13,12 @@ module Jenkins
       visit(url)
     end
 
+    def wipe_out!
+      open
+      click_link 'Wipe Out Current Workspace'
+      page.driver.browser.switch_to.alert.accept
+    end
+
     def contains(filename)
       open
       page.has_xpath? "//table[@class='fileList']//a[text()='#{filename}']"
