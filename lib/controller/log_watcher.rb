@@ -44,9 +44,8 @@ class LogWatcher
     while @ready!=expected && ((Time.now - start_time) < TIMEOUT)
       sleep 0.5
 
-      match = has_logged? /java.io.IOException: Failed to listen on port (\d+)/
-      if !match.nil?
-        raise JenkinsController::RetryException.new "Port conflict detected at " + match[1]
+      if has_logged? /java.net.BindException: Address already in use/
+        raise JenkinsController::RetryException.new "Port conflict detected"
       end
     end
 
