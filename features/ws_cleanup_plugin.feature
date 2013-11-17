@@ -17,6 +17,7 @@ Feature: Cleanup job workspace
     When I configure the job
     And I add a shell build step "touch artifact"
     And I add "Delete workspace when build is done" post-build action
+    And I save the job
     And I build the job
     Then there should not be "artifact" in the workspace
 
