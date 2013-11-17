@@ -84,10 +84,6 @@ module Jenkins
     # Get the version of Jenkins under test
     def jenkins_version
       prefix = 'About Jenkins '
-begin
-  puts "Alert: " + page.driver.browser.switch_to.alert.text
-rescue Selenium::WebDriver::Error::NoAlertPresentError
-end
       visit @base_url + '/about'
 
       text = wait_for("//h1[starts-with(., '#{prefix}')]").text

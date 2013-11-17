@@ -101,10 +101,7 @@ module Jenkins
     def queue_build
       suffix = '/build?delay=0sec'
       visit url + suffix
-begin
-  puts "Alert: " + page.driver.browser.switch_to.alert.text
-rescue Selenium::WebDriver::Error::NoAlertPresentError
-end
+
       if !page.has_button?('Build')
         # Build scheduled immediately
         last_build.wait_until_started
