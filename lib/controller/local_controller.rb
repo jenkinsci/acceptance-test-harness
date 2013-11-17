@@ -65,7 +65,8 @@ class LocalJenkinsController < JenkinsController
   protected
   # Get free random local port in specified range
   def random_local_port(opts = {})
-    from = opts[:from] || 1024
+    # Use ephemeral port range in hope to eliminate the likelihood of port collision
+    from = opts[:from] || 49152
     to = opts[:to] || 65535
 
     loop do
