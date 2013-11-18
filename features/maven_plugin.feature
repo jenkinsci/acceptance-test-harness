@@ -4,10 +4,13 @@ Feature: Adds Apache Maven support
   I want to install and configure Maven and build Maven based project
 
   Scenario: Use Auto-Installed Maven from FreeStyle job
-    Given I add Maven version "3.0.4" with name "maven_3.0.4" installed automatically to Jenkins config page
+    Given I have Maven "3.0.4" auto-installation named "maven_3.0.4" configured
     And a job
     When I configure the job
-    And I add a top-level maven target "archetype:generate -DarchetypeGroupId=org.apache.maven.archetypes -DgroupId=com.mycompany.app -DartifactId=my-app -Dversion=1.0 -B -X" for maven "maven_3.0.4"
+    And I add a top-level maven target for maven "maven_3.0.4"
+        """
+            archetype:generate -DarchetypeGroupId=org.apache.maven.archetypes -DgroupId=com.mycompany.app -DartifactId=my-app -Dversion=1.0 -B -X
+        """
     And I save the job
     And I build the job
     Then I should see console output matching "Unpacking http://archive.apache.org/dist/maven/binaries/apache-maven-3.0.4-bin.zip"
@@ -15,10 +18,13 @@ Feature: Adds Apache Maven support
     And the build should succeed
 
   Scenario: Use Auto-Installed Maven2 from FreeStyle job
-    Given I add Maven version "2.2.1" with name "maven_2.2.1" installed automatically to Jenkins config page
+    Given I have Maven "2.2.1" auto-installation named "maven_2.2.1" configured
     And a job
     When I configure the job
-    And I add a top-level maven target "archetype:generate -DarchetypeGroupId=org.apache.maven.archetypes -DgroupId=com.mycompany.app -DartifactId=my-app -Dversion=1.0 -B -X" for maven "maven_2.2.1"
+    And I add a top-level maven target for maven "maven_2.2.1"
+        """
+            archetype:generate -DarchetypeGroupId=org.apache.maven.archetypes -DgroupId=com.mycompany.app -DartifactId=my-app -Dversion=1.0 -B -X
+        """
     And I save the job
     And I build the job
     Then I should see console output matching "Unpacking http://archive.apache.org/dist/maven/binaries/apache-maven-2.2.1-bin.zip"
@@ -27,10 +33,13 @@ Feature: Adds Apache Maven support
 
   Scenario: Use locally installed Maven from FreeStyle job
     Given fake Maven installation at "/tmp/fake-maven"
-    And I add Maven with name "local_maven_3.0.4" and Maven home "/tmp/fake-maven" to Jenkins config page
+    And I have Maven "local_maven_3.0.4" installed in "/tmp/fake-maven" configured
     And a job
     When I configure the job
-    And I add a top-level maven target "archetype:generate -DarchetypeGroupId=org.apache.maven.archetypes -DgroupId=com.mycompany.app -DartifactId=my-app -Dversion=1.0 -B -X" for maven "local_maven_3.0.4"
+    And I add a top-level maven target for maven "local_maven_3.0.4"
+        """
+           archetype:generate -DarchetypeGroupId=org.apache.maven.archetypes -DgroupId=com.mycompany.app -DartifactId=my-app -Dversion=1.0 -B -X
+        """
     And I save the job
     And I build the job
     Then I should see console output matching "fake maven at /tmp/fake-maven/bin/mvn"
@@ -40,7 +49,10 @@ Feature: Adds Apache Maven support
     Given a Maven
     And a job
     When I configure the job
-    And I add a top-level maven target "archetype:generate -DarchetypeGroupId=org.apache.maven.archetypes -DgroupId=com.mycompany.app -DartifactId=my-app -Dversion=1.0 -B"
+    And I add a top-level maven target
+        """
+           archetype:generate -DarchetypeGroupId=org.apache.maven.archetypes -DgroupId=com.mycompany.app -DartifactId=my-app -Dversion=1.0 -B
+        """
     And I use local Maven repository
     And I save the job
     And I build the job

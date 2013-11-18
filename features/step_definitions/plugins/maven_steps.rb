@@ -8,10 +8,10 @@ Given /^a Maven job$/ do
 end
 
 Given /^I have default Maven configured$/ do
-  step 'I add Maven version "3.0.4" with name "default" installed automatically to Jenkins config page'
+  step 'I have Maven "3.0.4" auto-installation named "default" configured'
 end
 
-Given /^I add Maven version "([^"]*)" with name "([^"]*)" installed automatically to Jenkins config page$/ do |version, name|
+Given /^I have Maven "([^"]*)" auto-installation named "([^"]*)" configured$/ do |version, name|
   @runner.wait_for_updates 'Maven'
   @maven = Jenkins::Maven.new(@basedir, "Maven")
   # @maven.prepare_autoinstall(@runner)
@@ -22,7 +22,7 @@ Given /^I add Maven version "([^"]*)" with name "([^"]*)" installed automaticall
   end
 end
 
-Given /^I add Maven with name "([^"]*)" and Maven home "([^"]*)" to Jenkins config page$/ do |name, maven_home|
+Given /^I have Maven "([^"]*)" installed in "([^"]*)" configured$/ do |name, maven_home|
   @maven = Jenkins::Maven.new(@basedir, "Maven")
   @jenkins_config = Jenkins::JenkinsConfig.get(@base_url, 'Jenkins global configuration')
   @jenkins_config.configure do
@@ -47,6 +47,10 @@ exec #{real}/mvn \"$@\"
   File.chmod(0755,maven)
 end
 
+When /^I add a top-level maven target$/ do |goals|
+  step %{I add a top-level maven target "#{goals}"}
+end
+
 When /^I add a top-level maven target "([^"]*)"$/ do |goals|
   if !@job.is_a? Jenkins::MavenJob
     @step = @job.add_build_step 'Maven'
@@ -55,7 +59,7 @@ When /^I add a top-level maven target "([^"]*)"$/ do |goals|
   @step.goals goals
 end
 
-When /^I add a top-level maven target "([^"]*)" for maven "([^"]*)"$/ do |goals, version|
+When /^I add a top-level maven target for maven "([^"]*)"$/ do |version, goals|
   if !@job.is_a? Jenkins::MavenJob
     @step = @job.add_build_step 'Maven'
   end
