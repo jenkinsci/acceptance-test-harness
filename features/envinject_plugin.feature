@@ -6,7 +6,10 @@ Feature: Allow to inject build environment variables
   Scenario: Prepare environment for the build process via properties content
     Given I have installed the "envinject" plugin
     And a job
-    When I prepare environment for the build by injecting variables "ENV_VAR_TEST=injected variable test"
+    When I prepare environment for the build by injecting variables
+        """
+            ENV_VAR_TEST=injected variable test
+        """
     And I add a shell build step "echo $ENV_VAR_TEST"
     And I save the job
     And I build the job
@@ -16,7 +19,10 @@ Feature: Allow to inject build environment variables
   Scenario: Inject environment variables to the build process via properties content
     Given I have installed the "envinject" plugin
     And a job
-    When I inject environment variables "ENV_VAR_TEST=injected variable test" to the build
+    When I inject environment variables to the build
+        """
+            ENV_VAR_TEST=injected variable test
+        """
     And I add a shell build step "echo $ENV_VAR_TEST"
     And I save the job
     And I build the job
@@ -26,7 +32,10 @@ Feature: Allow to inject build environment variables
   Scenario: Inject environment variables as a build step via properties content
     Given I have installed the "envinject" plugin
     And a job
-    When I add build step injecting variables "ENV_VAR_TEST=injected variable test" to the build
+    When I add build step injecting variables to the build
+        """
+            ENV_VAR_TEST=injected variable test
+        """
     And I add a shell build step "echo $ENV_VAR_TEST"
     And I save the job
     And I build the job
