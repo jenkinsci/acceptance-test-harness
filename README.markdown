@@ -25,7 +25,7 @@ On Ubuntu you may need to install: libxslt1-dev, libxml2-dev, libcurl4-openssl-d
 
 ## Running tests
 
-First, run `bundle install` to install required dependencies.
+First, run `bundle install` to install required dependencies, or `bundle update` if you are updating sources of this repository.
 
 To run the test, `JENKINS_WAR=path/to/your/jenkins.war bundle exec rake`.
 This runs the entire test suite, so it might take a while.
