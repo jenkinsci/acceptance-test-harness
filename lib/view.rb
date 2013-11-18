@@ -16,6 +16,10 @@ module Jenkins
       visit(url)
     end
 
+    def save
+      click_button "OK"
+    end
+
     def self.create_view(base_url, name, type)
       visit("#{@base_url}/newView")
 
