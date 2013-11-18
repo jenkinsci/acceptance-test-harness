@@ -37,8 +37,16 @@ module Plugins
         find(:path, path('useSMTPAuth/smtpAuthUserName')).set MAILBOX
         find(:path, path('useSMTPAuth/smtpAuthPassword')).set PASSWORD
         find(:path, path('smtpPort')).set PORT
+
         # Fingerprint to identify message sent from this test run
         find(:path, path('replyToAddress')).set @fingerprint
+        # Set for email-ext plugin as well if available
+        begin
+          path = '/hudson-plugins-emailext-ExtendedEmailPublisher/ext_mailer_default_replyto'
+          find(:path, path).set @fingerprint
+        rescue
+          # noop
+        end
       end
     end
 
@@ -88,6 +96,7 @@ module Plugins
     private
     # Use only messages with matching fingerprint
     def is_ours?(message)
+      return false if message.reply_to.nil?
       message.reply_to.include? @fingerprint
     end
 
