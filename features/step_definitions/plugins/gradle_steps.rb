@@ -1,4 +1,4 @@
-Given /^I add Gradle version "([^"]*)" with name "([^"]*)" installed automatically to Jenkins config page$/ do |version, name|
+Given /^I have Gradle "([^"]*)" auto-installation named "([^"]*)" configured$/ do |version, name|
   @runner.wait_for_updates 'Gradle'
   @jenkins_config = Jenkins::JenkinsConfig.get(@base_url, 'Jenkins global configuration')
   @jenkins_config.configure do

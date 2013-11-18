@@ -2,7 +2,7 @@ Feature: Test Gradle plugin
 
   Scenario: Add Auto-Installed Gradle
     Given I have installed the "gradle" plugin
-    And I add Gradle version "1.5" with name "gradle-1.5" installed automatically to Jenkins config page
+    And I have Gradle "1.5" auto-installation named "gradle-1.5" configured
     And a job
     When I configure the job
     And I add script for creating "build.gradle" file :
@@ -22,7 +22,7 @@ Feature: Test Gradle plugin
 
   Scenario: Execute gradle script hello.gradle from gradle directory with quiet switch
     Given I have installed the "gradle" plugin
-    And I add Gradle version "1.5" with name "gradle-1.5" installed automatically to Jenkins config page
+    And I have Gradle "1.5" auto-installation named "gradle-1.5" configured
     And a job
     When I configure the job
     And I add script for creating "hello.gradle" file in directory "gradle" :

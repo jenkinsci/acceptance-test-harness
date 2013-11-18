@@ -1,20 +1,4 @@
-#!/usr/bin/env ruby
-
-When /^I select Ant named "([^\"]*)"$/ do |name|
-  @job.configure do
-    select = find(:xpath, "//select[@name='ant.antName']")
-    select.find(:xpath, "//option[@value='#{name}']").click
-  end
-end
-
-When /^I add an Ant build step for:$/ do |ant_xml|
-  @job.configure do
-    @job.add_shell_step("cat > build.xml << EOF \n #{ant_xml} \nEOF")
-    Plugins::Ant.add_ant_step('hello', 'build.xml')
-  end
-end
-
-When /^I add Ant version "([^"]*)" with name "([^"]*)" installed automatically to Jenkins config page$/ do |version, name|
+Given /^I have Ant "([^"]*)" auto-installation named "([^"]*)" configured$/ do |version, name|
   @ant_plugin = Plugins::Ant.new(@basedir, "Ant plugin")
   @ant_plugin.prepare_autoinstall(@runner)
   @jenkins_config = Jenkins::JenkinsConfig.get(@base_url, 'Jenkins global configuration')
@@ -24,7 +8,7 @@ When /^I add Ant version "([^"]*)" with name "([^"]*)" installed automatically t
   end
 end
 
-When /^I add Ant version with name "([^"]*)" and Ant home "([^"]*)" to Jenkins config page$/ do |name, ant_home|
+Given /^I have Ant "([^"]*)" installed in "([^"]*)" configured$/ do |name, ant_home|
   @jenkins_config = Jenkins::JenkinsConfig.get(@base_url, 'Jenkins global configuration')
   @jenkins_config.configure do
     @jenkins_config.add_tool("Ant")
@@ -46,4 +30,18 @@ exec #{real}/ant \"$@\"
 """
   end
   File.chmod(0755,ant)
+end
+
+When /^I select Ant named "([^\"]*)"$/ do |name|
+  @job.configure do
+    select = find(:xpath, "//select[@name='ant.antName']")
+    select.find(:xpath, "//option[@value='#{name}']").click
+  end
+end
+
+When /^I add an Ant build step for:$/ do |ant_xml|
+  @job.configure do
+    @job.add_shell_step("cat > build.xml << EOF \n #{ant_xml} \nEOF")
+    Plugins::Ant.add_ant_step('hello', 'build.xml')
+  end
 end

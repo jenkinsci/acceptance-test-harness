@@ -20,9 +20,9 @@ Feature: Adds Apache Ant support
 
   Scenario: Add Auto-Installed Ant
     Given I have installed the "ant" plugin
+    And I have Ant "1.8.4" auto-installation named "ant_1.8.4" configured
     And a job
-    When I add Ant version "1.8.4" with name "ant_1.8.4" installed automatically to Jenkins config page
-    And I add an Ant build step for:
+    When I add an Ant build step for:
       """
         <project default="hello">
           <target name="hello">
@@ -39,8 +39,8 @@ Feature: Adds Apache Ant support
     Given I have installed the "ant" plugin
     And fake Ant installation at "/tmp/fake-ant"
     And a job
-    When I add Ant version with name "local_ant_1.8.4" and Ant home "/tmp/fake-ant" to Jenkins config page
-    And I add an Ant build step for:
+    And I have Ant "local_ant_1.8.4" installed in "/tmp/fake-ant" configured
+    When I add an Ant build step for:
       """
         <project default="hello">
           <target name="hello">
