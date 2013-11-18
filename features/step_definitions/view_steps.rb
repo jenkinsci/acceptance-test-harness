@@ -23,7 +23,12 @@ When /^I visit the view page$/ do
 end
 
 When /^I build "([^"]*)" in view$/ do |job|
-  @view.open
+  if @view.nil?
+    visit @base_url
+  else
+    @view.open
+  end
+
   find(:xpath, "//a[contains(@href, '/#{job}/build?')]/img[contains(@title, 'Schedule a build')]").click
 end
 
