@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
 
-require File.dirname(__FILE__) + "/pageobject.rb"
-require File.dirname(__FILE__) + "/job.rb"
-require File.dirname(__FILE__) + "/build.rb"
-require File.dirname(__FILE__) + "/build_step.rb"
+require File.dirname(__FILE__) + "/../pageobject.rb"
+require File.dirname(__FILE__) + "/../job.rb"
+require File.dirname(__FILE__) + "/../build.rb"
+require File.dirname(__FILE__) + "/../build_step.rb"
 
 module Jenkins
   class Maven < Jenkins::PageObject
@@ -55,7 +55,7 @@ module Jenkins
     end
 
     def copy_resource(resource, target)
-      add_prebuild_shell_step "cp -r #{File.dirname(__FILE__)}/../resources/#{resource} ./#{target}"
+      add_prebuild_shell_step "cp -r #{File.dirname(__FILE__)}/../../resources/#{resource} ./#{target}"
     end
 
     def step
