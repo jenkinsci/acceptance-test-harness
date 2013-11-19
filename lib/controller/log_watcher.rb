@@ -1,6 +1,6 @@
 # Mix-in for JenkinsController that watches the log output by Jenkins
 class LogWatcher
-  TIMEOUT = 100
+  TIMEOUT = ENV.fetch('STARTUP_TIMEOUT', 100).to_i
 
   # Launches a thread that monitors the given +pipe+ for log output and copy them over to +log+
   # @arg [IO]   pipe
