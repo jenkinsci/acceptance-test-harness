@@ -33,10 +33,12 @@ This runs the entire test suite, so it might take a while.
 Set `BROWSER=chrome` and install http://code.google.com/p/chromedriver/downloads/list in `$PATH` if desired. (But tests may fail.)
 
 There is a bit of a delay since we bring up Jenkins for every single test, with
-it's own sandboxed workspace as well:
+it's own sandboxed workspace.
 
-![](http://strongspace.com/rtyler/public/selenium-jenkins.png)
+### Common environment variables
 
+* `BROWSER` browser to be used to run the tests. Default `firefox`.
+* `STARTUP_TIMEOUT` Timeout in seconds for Jenkins to start. Default `100`.
 
 ### Choosing the JenkinsController
 This test harness has an abstraction called `JenkinsController` that allows you to use different logic
