@@ -17,6 +17,11 @@ module Jenkins
       @base_url + "/job/#{@name}"
     end
 
+
+    def json_api_url
+      "#{@base_url}/job/#{@name}/api/json"
+    end
+
     def configure_url
       url + "/configure"
     end
@@ -99,12 +104,15 @@ module Jenkins
     end
 
     def queue_build
+      nb = json["nextBuildNumber"]
+
       suffix = '/build?delay=0sec'
       visit url + suffix
 
       if !page.has_button?('Build')
         # Build scheduled immediately
-        last_build.wait_until_started
+        # wait for the build to start before we go back
+        build(nb).wait_until_started
       else
         # We are waiting for parameters
       end
