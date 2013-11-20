@@ -13,7 +13,7 @@ class WinstoneJenkinsController < LocalJenkinsController
   end
 
   def start_process
-    IO.popen(["java",
+    @process = IO.popen(["java",
       "-jar", @war, "--ajp13Port=-1", "--controlPort=#@control_port",
       "--httpPort=#@http_port","2>&1"].join(' '))
   end
@@ -28,12 +28,11 @@ class WinstoneJenkinsController < LocalJenkinsController
   end
 
   def stop!
-    begin
-      TCPSocket.open("localhost", @control_port) do |sock|
-        sock.write("0")
-      end
-      Process.kill("KILL",@pid)
+    TCPSocket.open("localhost", @control_port) do |sock|
+      sock.write("0")
     end
+    Process.kill("KILL",@pid)
+    @process.close
   end
 
   def url
