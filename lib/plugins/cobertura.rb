@@ -1,5 +1,3 @@
-#!/usr/bin/env ruby
-
 require 'capybara'
 require 'capybara/dsl'
 
@@ -16,37 +14,34 @@ module Plugins
       @job.url + "/cobertura"
     end
 
-
     def packages_coverage
       visit url
-      find(:xpath, '//td[text()="Cobertura Coverage Report"]/following-sibling::td[1]').text.to_i
+      find(:xpath, '//th[text()="Packages"]/../td').text.to_i
     end
 
     def files_coverage
       visit url
-      find(:xpath, '//td[text()="Cobertura Coverage Report"]/following-sibling::td[2]').text.to_i
+      find(:xpath, '//th[text()="Files"]/../td').text.to_i
     end
 
     def classes_coverage
       visit url
-      find(:xpath, '//td[text()="Cobertura Coverage Report"]/following-sibling::td[3]').text.to_i
+      find(:xpath, '//th[text()="Classes"]/../td').text.to_i
     end
 
     def methods_coverage
       visit url
-      find(:xpath, '//td[text()="Cobertura Coverage Report"]/following-sibling::td[4]').text.to_i
+      find(:xpath, '//th[text()="Methods"]/../td').text.to_i
     end
 
     def lines_coverage
       visit url
-      find(:xpath, '//td[text()="Cobertura Coverage Report"]/following-sibling::td[5]').text.to_i
+      find(:xpath, '//th[text()="Lines"]/../td').text.to_i
     end
 
     def conditionals_coverage
       visit url
-      find(:xpath, '//td[text()="Cobertura Coverage Report"]/following-sibling::td[6]').text.to_i
+      find(:xpath, '//th[text()="Conditionals"]/../td').text.to_i
     end
-
-
   end
 end
