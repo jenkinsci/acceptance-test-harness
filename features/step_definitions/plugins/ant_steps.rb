@@ -32,16 +32,19 @@ exec #{real}/ant \"$@\"
   File.chmod(0755,ant)
 end
 
-When /^I select Ant named "([^\"]*)"$/ do |name|
+When /^I add an Ant build step for "([^\"]*)"$/ do |version, ant_xml|
   @job.configure do
-    select = find(:xpath, "//select[@name='ant.antName']")
-    select.find(:xpath, "//option[@value='#{name}']").click
+    @job.add_shell_step("cat > build.xml << EOF \n #{ant_xml} \nEOF")
+    @ant_step = @job.add_build_step 'Ant'
+    @ant_step.target = 'hello'
+    @ant_step.version = version
   end
 end
 
-When /^I add an Ant build step for:$/ do |ant_xml|
+When /^I add an Ant build step$/ do |ant_xml|
   @job.configure do
     @job.add_shell_step("cat > build.xml << EOF \n #{ant_xml} \nEOF")
-    Plugins::Ant.add_ant_step('hello', 'build.xml')
+    @ant_step = @job.add_build_step 'Ant'
+    @ant_step.target = 'hello'
   end
 end

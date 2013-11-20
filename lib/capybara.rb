@@ -43,6 +43,10 @@ module Capybara
       def plain
         native.text
       end
+
+      def select(opition)
+        self.find(:option, opition).select_option
+      end
     end
   end
 end

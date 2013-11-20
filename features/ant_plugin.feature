@@ -7,7 +7,7 @@ Feature: Adds Apache Ant support
     Given I have installed the "ant" plugin
     And a job
     When I configure the job
-    And I add an Ant build step for:
+    And I add an Ant build step
       """
         <project default="hello">
           <target name="hello">
@@ -22,7 +22,7 @@ Feature: Adds Apache Ant support
     Given I have installed the "ant" plugin
     And I have Ant "1.8.4" auto-installation named "ant_1.8.4" configured
     And a job
-    When I add an Ant build step for:
+    When I add an Ant build step for "ant_1.8.4"
       """
         <project default="hello">
           <target name="hello">
@@ -30,7 +30,6 @@ Feature: Adds Apache Ant support
           </target>
         </project>
       """
-    And I select Ant named "ant_1.8.4"
     And I build the job
     Then I should see console output matching "Unpacking http://archive.apache.org/dist/ant/binaries/apache-ant-1.8.4-bin.zip"
     And the build should succeed
@@ -40,7 +39,7 @@ Feature: Adds Apache Ant support
     And fake Ant installation at "/tmp/fake-ant"
     And a job
     And I have Ant "local_ant_1.8.4" installed in "/tmp/fake-ant" configured
-    When I add an Ant build step for:
+    When I add an Ant build step for "local_ant_1.8.4"
       """
         <project default="hello">
           <target name="hello">
@@ -48,7 +47,6 @@ Feature: Adds Apache Ant support
           </target>
         </project>
       """
-    And I select Ant named "local_ant_1.8.4"
     And I build the job
     Then I should see console output matching "fake ant at /tmp/fake-ant/bin/ant"
     And the build should succeed
