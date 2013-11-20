@@ -8,6 +8,8 @@ gem "selenium-webdriver"
 gem "sauce-cucumber"
 gem "rest-client"
 gem "pry"
+gem "debugger"
+gem "ruby-debug-ide"
 
 gem "cucumber", '1.2.5'
 gem "capybara", "~> 2.1.0"
