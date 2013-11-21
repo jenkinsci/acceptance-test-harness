@@ -13,10 +13,10 @@ class WinstoneJenkinsController < LocalJenkinsController
   end
 
   def start_process
-    @process = IO.popen(["exec", "java",
+    @process = IO.popen(["java",
       "-DJENKINS_HOME=#{@tempdir}",
       "-jar", @war, "--ajp13Port=-1", "--controlPort=#@control_port",
-      "--httpPort=#@http_port","2>&1"].join(' '))
+      "--httpPort=#@http_port"].join(' '), :err=>[:child, :out])
   end
 
   def start!

@@ -13,7 +13,6 @@ end
 
 When /^I add build step injecting variables to the build$/ do |env_var|
   @job.open_config
-  find(:xpath, "//button[text()='Add build step']").click
-  find(:xpath, "//a[text()='Inject environment variables']").click
-  find(:path, "/builder/propertiesContent").set(env_var)
+  envinject_step = @job.add_build_step 'Env Inject'
+  envinject_step.vars = env_var
 end

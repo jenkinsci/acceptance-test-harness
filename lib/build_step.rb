@@ -6,9 +6,8 @@ module Jenkins
 
     def self.add(job, title)
 
-      select_step label(title), 'Add build step'
+      select_step label(title), find(:path, '/hetero-list-add[builder]')
 
-      sleep 1
       prefix = all(:xpath, "//div[@name='builder']").last[:path]
 
       return type(title).new(job, prefix)
