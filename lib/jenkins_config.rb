@@ -3,6 +3,7 @@
 require File.dirname(__FILE__) + "/pageobject.rb"
 
 module Jenkins
+  # System configuration page
   class JenkinsConfig < PageObject
 
     def initialize(*args)
