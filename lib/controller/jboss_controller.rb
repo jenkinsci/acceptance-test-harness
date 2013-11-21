@@ -17,6 +17,7 @@ class JBossController < LocalJenkinsController
   end
 
   def start_process
+    ENV["JENKINS_HOME"] = @tempdir
     FileUtils.rm("#@jboss_home/standalone/deployments/jenkins.war") if File.exists?("#@jboss_home/standalone/deployments/jenkins.war")
     FileUtils.rm("#@jboss_home/standalone/deployments/jenkins.war.deployed") if File.exists?("#@jboss_home/standalone/deployments/jenkins.war.deployed")
     FileUtils.rm("#@jboss_home/standalone/deployments/jenkins.war.failed") if File.exists?("#@jboss_home/standalone/deployments/jenkins.war.failed")

@@ -25,7 +25,10 @@ class LocalJenkinsController < JenkinsController
     FileUtils.copy_file(@path_element_hpi,"#{plugins_dir}/path-element.hpi")
   end
 
-  # to be supplied by subclass.
+  # to be supplied by subclass to actually start a process.
+  #
+  #  JENKINS_HOME should be set to `@tempdir`
+  #
   # @return
   #   IO that represents the process
   def start_process
@@ -33,7 +36,6 @@ class LocalJenkinsController < JenkinsController
   end
 
   def start!
-    ENV["JENKINS_HOME"] = @tempdir
     puts
     print "    Bringing up a temporary Jenkins instance"
     bring_up!

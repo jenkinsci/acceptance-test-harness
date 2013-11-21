@@ -16,6 +16,7 @@ class TomcatController < LocalJenkinsController
   end
 
   def start_process
+    ENV["JENKINS_HOME"] = @tempdir
     FileUtils.rm_rf("#@catalina_home/webapps/jenkins") if Dir.exists?("#@catalina_home/webapps/jenkins")
     FileUtils.rm("#@catalina_home/webapps/jenkins.war") if File.exists?("#@catalina_home/webapps/jenkins.war")
     FileUtils.cp(@war,"#@catalina_home/webapps")
