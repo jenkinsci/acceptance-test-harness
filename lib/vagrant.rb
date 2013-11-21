@@ -1,5 +1,6 @@
 require 'log4r'
 require 'vagrant'
+require 'vagrant/command'
 require 'vagrant/cli'
 require 'vagrant/util/platform'
 

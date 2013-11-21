@@ -4,7 +4,6 @@ jenkins*.war
 last_test.log
 *~
 .vagrant
-Gemfile.lock
 iso
 *.box
 workspace/
