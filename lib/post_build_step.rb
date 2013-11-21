@@ -6,10 +6,8 @@ module Jenkins
 
     def self.add(job, title)
 
-      click_button 'Add post-build action'
-      click_link label(title)
+      select_step label(title), find(:path, '/hetero-list-add[publisher]')
 
-      sleep 1
       prefix = all(:xpath, "//div[@name='publisher']").last[:path]
 
       return type(title).new(job, prefix)

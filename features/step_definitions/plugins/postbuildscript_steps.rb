@@ -3,15 +3,9 @@ When /^I add marker post-build script$/ do
   @marker = Jenkins::PageObject.random_name
 
   @job.configure do
-    begin
-      @job.add_postbuild_action 'Execute a set of scripts'
-    rescue Capybara::ElementNotFound
-      # The prefix was stripped in 0.12
-      find(:xpath, "//a[text()='[PostBuildScript] - Execute a set of scripts']").click
-    end
-    step = find(:path, '/publisher/hetero-list-add[buildStep]').click
-    find(:path, '/publisher').click_link 'Execute shell'
-    find(:path, '/publisher/buildStep/command').set("echo '#{@marker}'")
+    postBuildStep = Plugins::PostBuildScript::Publisher.add(@job)
+    shell_step = postBuildStep.add_step 'Shell'
+    shell_step.command "echo '#{@marker}'"
   end
 end
 

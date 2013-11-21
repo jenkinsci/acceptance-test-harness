@@ -13,8 +13,8 @@ module Jenkins
         return get(title)[:type]
       end
 
-      def select_step(step, from)
-        click_button from
+      def select_step(step, button)
+        button.click
 
         # With enough implementations registered the one we are looking for might
         # require scrolling in menu to become visible. This dirty hack stretch
@@ -30,6 +30,7 @@ module Jenkins
         }
 
         click_link step
+        sleep 1
       end
     end
 
