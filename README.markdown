@@ -57,6 +57,7 @@ The behaviour of this controller can be customized through the following environ
 * `JENKINS_WAR` the path to `jenkins.war` to be tested.
 * `INTERACTIVE` keep browser session opened after failed scenario for interactive investigation.
 * `PLUGINS_DIR` a directory of plugins to be loaded on Jenkins startup
+* `PRELAUNCH` when set, Jenkins will launch multiple Jenkins instances in advance to speed up test execution.
 
 #### Tomcat controller (type=tomcat)
 This controller deploys Jenkins inside Tomcat and run the test with it. This controller requires a functioning Tomcat installation listening on port 8080, on the same system that the tests run. During the test, Jenkins is deployed here, and Tomcat gets started/stopped.

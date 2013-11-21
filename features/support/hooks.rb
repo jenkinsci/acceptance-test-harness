@@ -6,7 +6,10 @@ Dir.glob(File.dirname(__FILE__) + "/../../lib/controller/*.rb") do |name|
   require name
 end
 
-controller_factory = CachedJenkinsControllerFactory.new(DefaultJenkinsControllerFactory.new())
+controller_factory = DefaultJenkinsControllerFactory.new()
+if ENV['PRELAUNCH']
+  controller_factory = CachedJenkinsControllerFactory.new(controller_factory)
+end
 
 Before do |scenario|
 
