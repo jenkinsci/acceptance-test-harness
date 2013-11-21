@@ -5,5 +5,5 @@ Feature: Fixtures via docker
   @docker
   Scenario: Run an SSH server
     Given a docker fixture "sshd"
-    Then I login via ssh
+    Then I can login via ssh
 
