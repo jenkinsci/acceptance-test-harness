@@ -6,6 +6,8 @@ Dir.glob(File.dirname(__FILE__) + "/../../lib/controller/*.rb") do |name|
   require name
 end
 
+controller_factory = CachedJenkinsControllerFactory.new(DefaultJenkinsControllerFactory.new())
+
 Before do |scenario|
 
   # skip scenario and initialization when not applicable
@@ -16,19 +18,7 @@ Before do |scenario|
     c[:name] = Sauce::Capybara::Cucumber.name_from_scenario(scenario)
   end
 
-  # default is to run locally, but allow the parameters to be given as env vars
-  # so that rake can be invoked like "rake test type=remote_sysv"
-  if ENV['type']
-    controller_args = {}
-    ENV.each { |k,v| controller_args[k.to_sym]=v }
-  else
-    controller_args = { :type => :local }
-  end
-
-  if @controller_options
-    controller_args = controller_args.merge(@controller_options)
-  end
-  @runner = JenkinsController.create(controller_args)
+  @runner = controller_factory.create(@controller_options||{})
   @runner.start
   $version = @runner.jenkins_version
   at_exit do

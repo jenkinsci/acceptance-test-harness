@@ -17,7 +17,7 @@ gem "json"
 gem "rspec"
 gem "tempdir"
 gem "mail"
-
+gem "promise"
 gem "vagrant", '~> 1.0'
 
 gem "rdoc"
