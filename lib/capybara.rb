@@ -60,14 +60,8 @@ end
 aspector(Capybara::Node::Finders) do
   logger.level = Aspector::Logging::WARN
 
-  after :find do |element, *args|
+  after :find, :first do |element, *args|
     return nil if element.nil?
-    return element.locate
-  end
-
-  # Throw Capybara::ElementNotFound in case there is no such element
-  after :first do |element, *args|
-    find(*args) if element.nil? # Rerun find to get correct message and stacktrace
     return element.locate
   end
 end
