@@ -58,10 +58,16 @@ class JenkinsController
   end
 
   def start
-    start! unless is_running?
-    @is_running = true
+    prestart
 
     @jenkins_version =  Jenkins::PageObject.new(url, '').jenkins_version
+  end
+
+  # Works like the start method, but don't use Capybara, which doesn't support concurrency
+  #
+  def prestart
+    start! unless is_running?
+    @is_running = true
   end
 
   # Restarts Jenkins
@@ -123,6 +129,7 @@ class JenkinsController
   # registered implementations
   @@impls = {}
 
+  # @return [JenkinsController]
   def self.create(args)
     t = @@impls[args[:type].to_sym]
     raise "Undefined controller type #{args[:type]}" if t.nil?
