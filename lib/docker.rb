@@ -78,6 +78,13 @@ module Jenkins::Docker
       end
     end
 
+    # copy a files/folders from inside the container to outside
+    def cp(from,to)
+      if !system("#{DOCKER} cp #{@cid}:#{from} #{to}")
+        raise "Failed to copy #{from} to #{to}"
+      end
+    end
+
     def to_s
       "Docker container #{@cid}"
     end
