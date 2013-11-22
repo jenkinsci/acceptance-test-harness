@@ -6,7 +6,7 @@ require 'json'
 require 'net/http'
 require 'uri'
 
-require File.dirname(__FILE__) + "/pageobject.rb"
+require 'pageobject'
 
 module Jenkins
   class Slave < PageObject

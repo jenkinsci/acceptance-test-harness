@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + "/../post_build_step.rb"
+require 'post_build_step'
 
 module Plugins
   module PostBuildScript

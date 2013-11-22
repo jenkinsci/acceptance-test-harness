@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-require File.dirname(__FILE__) + "/pageobject.rb"
+require 'pageobject'
 
 module Jenkins
   # System configuration page

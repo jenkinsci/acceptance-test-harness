@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + "/pageobject.rb"
+require "pageobject"
 
 module Jenkins
   class View < PageObject

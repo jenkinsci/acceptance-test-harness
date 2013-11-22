@@ -1,5 +1,5 @@
-require File.dirname(__FILE__) + "/../build_step.rb"
-require File.dirname(__FILE__) + "/../pageobject.rb"
+require 'build_step'
+require 'pageobject'
 
 module Plugins
   class Ant < Jenkins::PageObject

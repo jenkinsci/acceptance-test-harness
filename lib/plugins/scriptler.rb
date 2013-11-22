@@ -1,5 +1,5 @@
-require File.dirname(__FILE__) + "/../pageobject.rb"
-require File.dirname(__FILE__) + "/../util/codemirror.rb"
+require 'pageobject'
+require 'util/codemirror'
 
 module Jenkins
   module Scriptler

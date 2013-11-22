@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + "/step.rb"
+require 'step'
 
 module Jenkins
   class BuildStep

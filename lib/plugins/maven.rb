@@ -1,9 +1,8 @@
 #!/usr/bin/env ruby
 
-require File.dirname(__FILE__) + "/../pageobject.rb"
-require File.dirname(__FILE__) + "/../job.rb"
-require File.dirname(__FILE__) + "/../build.rb"
-require File.dirname(__FILE__) + "/../build_step.rb"
+require 'pageobject'
+require 'job'
+require 'build_step'
 
 module Jenkins
   class Maven < Jenkins::PageObject

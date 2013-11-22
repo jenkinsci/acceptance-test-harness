@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + "/../pagearea.rb"
+require 'pagearea'
 
 module Plugins
   module EnvInject

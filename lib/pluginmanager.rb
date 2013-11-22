@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # vim: tabstop=2 expandtab shiftwidth=2
 
-require File.dirname(__FILE__) + "/pageobject.rb"
+require 'pageobject'
 
 module Jenkins
   class PluginManager < PageObject

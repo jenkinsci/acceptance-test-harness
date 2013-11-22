@@ -1,6 +1,5 @@
 #!/usr/bin/env ruby
-
-require File.dirname(__FILE__) + "/../pageobject.rb"
+require 'pageobject'
 
 module Plugins
   class Groovy < Jenkins::PageObject
