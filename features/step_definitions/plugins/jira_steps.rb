@@ -1,5 +1,5 @@
 When /^"([^"]*)" project on docker jira fixture$/ do |name|
-  p = Plugins::JIRA::JIRA.new(@docker['jira'])
-  p.wait_for_ready
-  pending   # TODO: actually create a project
+  c = @docker['jira']
+  c.wait_for_ready
+  c.create_project(name)
 end
