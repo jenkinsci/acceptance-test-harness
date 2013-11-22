@@ -1,11 +1,7 @@
-module Plugins
-  module JIRA
-    class JIRA
-      # @param docker [Jenkins::Docker::Container] container that runs JIRA
-      def initialize(docker)
-        @docker = docker
-      end
-
+module Jenkins
+  module Fixtures
+    # Represents the JIRA instance
+    class JIRA < Fixture
       # block until JIRA becomes ready
       def wait_for_ready
         print "Waiting for JIRA to be ready... "
@@ -14,7 +10,7 @@ module Plugins
         start = Time.now.to_i
         Capybara.current_session.tap do |c|
           while true
-            c.visit "http://localhost:#{@docker.port(2990)}/jira/"
+            c.visit url
             if c.title =~ /System Dashboard/
               puts " done"
               return
@@ -23,6 +19,14 @@ module Plugins
           end
         end
       end
+
+      # JIRA top URL
+      # @return [String]
+      def url
+        "http://localhost:#{port(2990)}/jira/"
+      end
+
+      register "jira", [2990]
     end
   end
 end

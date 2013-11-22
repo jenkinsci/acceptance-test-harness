@@ -13,16 +13,15 @@ module Jenkins::Docker
 
   # build a fixture
   #
-  # @param name [String]    a directory name inside fixtures/ that designate the container to build
+  # @param tag [String]     name to give to the created image
+  # @param dir [String]     a directory that houses Dockerfile
   # @return [Image]         a prepared docker image
-  def self.build(name)
-    image_name = "jenkins/#{name}"
-    fixture = File.dirname(__FILE__)+"/../fixtures/#{name}"
-    if !system("#{DOCKER} build -t #{image_name} .", :chdir=>fixture)
+  def self.build(tag,dir)
+    if !system("#{DOCKER} build -t #{tag} .", :chdir=>dir)
       raise "Failed to build container"
     end
 
-    Image.new(image_name)
+    Image.new(tag)
   end
 
   # Container image, a template to launch virtual machines from.

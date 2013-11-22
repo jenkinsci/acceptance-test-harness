@@ -1,23 +1,14 @@
+require 'fixtures'
+
 Given /^a docker fixture "([^"]*)"$/ do |name|
   @docker ||= {}
-  fixtures = File.dirname(__FILE__)+"/../../fixtures/#{name}"
-  img = Jenkins::Docker.build(name)
-
-  # figure out ports that should be exposed from this image
-  ports = File.open("#{fixtures}/ports.txt").map {|p| p.to_i }
-
-  @docker[:default] = @docker[name] = img.start(ports)
+  @docker[:default] = @docker[name] = Jenkins::Fixtures::Fixture.start(name)
 end
 
 # this is for illustration only and we'll remove this
 Then /^I can login via ssh( to fixture "([^"]*)")?$/ do |_,name|
   name ||= :default
-  key = File.dirname(__FILE__)+"/../../fixtures/sshd/unsafe"
-  File.chmod(0600,key)
-
-  if !system("ssh -p #{@docker[name].port(22)} -o StrictHostKeyChecking=no -i #{key} test@localhost uname -a")
-    raise "ssh failed!"
-  end
+  @docker[name].ssh_with_publickey()
 end
 
 Before('@docker') do |scenario|
