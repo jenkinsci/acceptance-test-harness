@@ -1,7 +1,9 @@
 source 'https://rubygems.org'
 
 # ruby directive does not seem to support relational operators to constrain version number
-ruby "2.0" if RUBY_VERSION < "2.0"
+if RUBY_VERSION < "2.0"
+  ruby "2.0"
+end
 
 gem "rake"
 gem "selenium-webdriver"
