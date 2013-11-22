@@ -2,7 +2,11 @@ Given /^a docker fixture "([^"]*)"$/ do |name|
   @docker ||= {}
   fixtures = File.dirname(__FILE__)+"/../../fixtures/#{name}"
   img = Jenkins::Docker.build(name)
-  @docker[:default] = @docker[name] = img.start([22])
+
+  # figure out ports that should be exposed from this image
+  ports = File.open("#{fixtures}/ports.txt").map {|p| p.to_i }
+
+  @docker[:default] = @docker[name] = img.start(ports)
 end
 
 # this is for illustration only and we'll remove this
