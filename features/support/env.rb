@@ -7,6 +7,8 @@ require 'selenium-webdriver'
 require 'sauce/cucumber'
 require 'etc'
 
+$LOAD_PATH.push File.dirname(__FILE__) + "/../../lib"
+
 Capybara.register_driver :selenium do |app|
   http_client = Selenium::WebDriver::Remote::Http::Default.new
   http_client.timeout = 120
