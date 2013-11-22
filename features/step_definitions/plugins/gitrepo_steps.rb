@@ -2,7 +2,7 @@
 # Steps for interacting with local Git repository for tests
 #
 
-Given /^An empty test git repository$/ do
+Given /^an empty test git repository$/ do
   @repo = Jenkins::Git::GitRepo.new
   @repo.init
   @cleanup << Proc.new do
@@ -10,6 +10,10 @@ Given /^An empty test git repository$/ do
   end
 end
 
-Given /^I check out code from the test Git repository$/ do
-  step
+When /^I check out code from the test Git repository$/ do
+  step "I check out code from Git repository \"#{@repo.ws}\""
+end
+
+When(/^I commit "([^"]*)" to the test Git repository$/) do |msg|
+  @repo.commit msg
 end

@@ -115,7 +115,11 @@ module Jenkins
 
       # create a new commit
       def commit(msg)
-        git "commit --allow-empty -m '#{msg}'"
+        File.open("#@ws/foo","a") do |io|
+          io.write("more")
+        end
+        git "add foo"
+        git "commit -m '#{msg}'"
       end
 
       # @return [String]    path of the workspace directory
