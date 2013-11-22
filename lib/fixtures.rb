@@ -8,6 +8,15 @@ module Jenkins
       # maps fixture name to the fixture class
       @@types = {}
 
+      @@search_path = [ File.dirname(__FILE__)+"/../fixtures" ]
+
+      # directories to search for test fixtures.
+      # @return [Array<String>]
+      def self.search_path
+        @@search_path
+      end
+
+
       # @return [Array<Integer>]  ports that are exposed from this container
       def self.ports
         @ports || self.superclass.ports
@@ -40,17 +49,21 @@ module Jenkins
       # @return [Fixture]       a running fixture instance
       def self.start(name)
         # try to load a fixture if it hasn't been
-        dir = File.dirname(__FILE__)+"/../fixtures/#{name}"
-        n = "#{dir}/#{name}.rb"
-        if File.exists?(n)
-          require n
+        @@search_path.each do |path|
+          dir = "#{path}/#{name}"
+          next if !Dir.exists? dir
+
+          n = "#{dir}/#{name}.rb"
+          if File.exists?(n)
+            require n
+          end
+
+          t = @@types[name]
+          t.dir = dir
+
+          img = t.build()
+          t.new(img.start(t.ports).cid)
         end
-
-        t = @@types[name]
-        t.dir = dir
-
-        img = t.build()
-        t.new(img.start(t.ports).cid)
       end
 
       # used by subtypes to register the fixture type by the fixture name to enable instance type selection
