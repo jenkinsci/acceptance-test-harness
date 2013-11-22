@@ -1,0 +1,22 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    coderay (1.0.8)
+    handsoap (1.1.8)
+    jiraSOAP (0.10.9)
+      handsoap (~> 1.1.8)
+      nokogiri (~> 1.5.0)
+    method_source (0.8.1)
+    nokogiri (1.5.10)
+    pry (0.9.12)
+      coderay (~> 1.0.5)
+      method_source (~> 0.8)
+      slop (~> 3.4)
+    slop (3.4.3)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  jiraSOAP
+  pry

@@ -1,0 +1,8 @@
+source 'https://rubygems.org'
+
+gem 'pry'
+
+# REST API doesn't support project creation
+#gem 'jira-ruby'
+
+gem 'jiraSOAP'

@@ -19,9 +19,10 @@ gem "tempdir"
 gem "mail"
 gem "promise"
 gem "vagrant", '~> 1.0'
-
+gem "jiraSOAP"    # for testing JIRA plugin
 gem "rdoc"
 
 gem "aspector"
+
 
 # vim: set ft=conf

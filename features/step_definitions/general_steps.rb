@@ -36,3 +36,7 @@ end
 Then /^the page (should|should not) say "([^"]*)"$/ do |should_or_not, content|
   page.send should_or_not, have_content(content)
 end
+
+Then(/^I will write the rest of the test$/) do
+  pending
+end

@@ -88,5 +88,9 @@ module Jenkins::Docker
     def to_s
       "Docker container #{@cid}"
     end
+
+    def self.of(test,name)
+      test.instance_variable_get('@docker')[name]
+    end
   end
 end
