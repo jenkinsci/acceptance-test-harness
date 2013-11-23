@@ -19,3 +19,12 @@ When /^the build should link to JIRA ([^ ]+) ticket$/ do |ticket|
   @job.last_build.open
   find_link(ticket).click  # make sure you can jump to it
 end
+
+When /^JIRA ([^ ]+) ticket has comment from admin that refers to the build$/ do |ticket|
+  build_url = @job.build(@job.last_build.json['number']).url
+  comments = @docker['jira'].soap.get_comments_for_issue_with_key(ticket)
+
+  raise "matching comment not found that links to #{build_url}" unless comments.find do |comment|
+    comment.body =~ /#{build_url}/
+  end
+end

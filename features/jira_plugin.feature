@@ -32,8 +32,7 @@ Feature: Update JIRA tickets when a build is ready
     Then the build should succeed
     And the build should link to JIRA ABC-1 ticket
     And the build should link to JIRA ABC-2 ticket
-
-    Then I will write the rest of the test
+    And JIRA ABC-1 ticket has comment from admin that refers to the build
 
 
   @nojenkins
