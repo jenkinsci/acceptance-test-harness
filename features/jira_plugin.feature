@@ -19,6 +19,7 @@ Feature: Update JIRA tickets when a build is ready
 
     Then I configure the job
     And I check out code from the test Git repository
+    And I add "Update relevant JIRA issues" post-build action
     And I save the job
 
     Then I commit "initial commit" to the test Git repository
@@ -29,8 +30,8 @@ Feature: Update JIRA tickets when a build is ready
     And I commit "[ABC-2] fixed" to the test Git repository
     And I build the job
     Then the build should succeed
-
-    Then I debug
+    And the build should link to JIRA ABC-1 ticket
+    And the build should link to JIRA ABC-2 ticket
 
     Then I will write the rest of the test
 

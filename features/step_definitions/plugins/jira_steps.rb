@@ -14,3 +14,8 @@ end
 When /^a new issue in "([^"]*)" project on docker jira fixture$/ do |project|
   @docker['jira'].create_issue project
 end
+
+When /^the build should link to JIRA ([^ ]+) ticket$/ do |ticket|
+  @job.last_build.open
+  find_link(ticket).click  # make sure you can jump to it
+end
