@@ -93,5 +93,40 @@ module Jenkins
         control('relativeTargetDir').set path
       end
     end
+
+
+    #
+    # Encapsulates a local Git repository and operations to it
+    #
+    class GitRepo
+      def initialize
+        @ws = TempDir.create()
+      end
+
+      def git(cmd)
+        if !system("git #{cmd}", :chdir => @ws)
+          raise "git command failed: #{cmd}"
+        end
+      end
+
+      def init
+        git "init #@ws"
+      end
+
+      # create a new commit
+      def commit(msg)
+        git "commit --allow-empty -m '#{msg}'"
+      end
+
+      # @return [String]    path of the workspace directory
+      def ws
+        @ws
+      end
+
+      # wipe out this repository
+      def clean
+        FileUtils.rm_rf(@ws)
+      end
+    end
   end
 end
