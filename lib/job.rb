@@ -86,6 +86,7 @@ module Jenkins
       visit configure_url
     end
 
+    # @return [Jenkins::Build]
     def last_build
       return build("lastBuild") # Hacks!
     end
@@ -98,6 +99,7 @@ module Jenkins
       Jenkins::Workspace.new(url)
     end
 
+    # @return [Jenkins::Build]
     def build(number)
       Jenkins::Build.new(@base_url, self, number)
     end
