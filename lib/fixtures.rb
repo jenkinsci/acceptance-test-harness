@@ -62,7 +62,7 @@ module Jenkins
           t.dir = dir
 
           img = t.build()
-          t.new(img.start(t.ports).cid)
+          return t.new(img.start(t.ports).cid)
         end
       end
 
