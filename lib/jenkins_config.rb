@@ -24,6 +24,16 @@ module Jenkins
 
     def open
       visit(configure_url)
+
+      wait_for_cond do
+        begin
+          # wait until the config screen gets fully loaded
+          !find(:css,"div.behavior-loading").visible?
+        rescue Capybara::ElementNotFound
+          # At least in Firefox, element with "display:none" results in element not found
+          true
+        end
+      end
     end
 
     def add_tool(name)

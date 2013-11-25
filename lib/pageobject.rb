@@ -81,6 +81,19 @@ module Jenkins
       end
     end
 
+    # repeatedly evaluate the given block until it returns true
+    # if the method keeps returning false for 10 seconds, a test is considered a failure
+    def wait_for_cond(opts={}, &block)
+      timeout = opts[:timeout] || 30
+      selector_kind = opts[:with] || :xpath
+      start = Time.now.to_i
+      while true
+        return if block.call
+        raise "Failed to wait for condition #{block}" if (Time.now.to_i - start) >= timeout
+        sleep 1
+      end
+    end
+
     # Get the version of Jenkins under test
     def jenkins_version
       prefix = 'About Jenkins '
