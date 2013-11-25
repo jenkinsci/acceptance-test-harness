@@ -1,6 +1,9 @@
 #
 # Wrapper around docker
 #
+module Jenkins
+end
+
 module Jenkins::Docker
 
   # command to invoke docker
