@@ -85,11 +85,17 @@ module Jenkins
         end
       end
 
+      # provide details of this container
       # @return [Hash]   output from 'docker inspect'
       def docker_inspect
         IO.popen("#{DOCKER} inspect #{@cid}") do |io|
           JSON.parse(io.read)[0]
         end
+      end
+
+      # IP address of this container reachable through the bridge
+      def ip_address
+        docker_inspect['NetworkSettings']['IPAddress']
       end
 
       def to_s
