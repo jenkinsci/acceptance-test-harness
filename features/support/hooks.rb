@@ -1,5 +1,5 @@
-#!/usr/bin/env ruby
-# vim: tabstop=2 expandtab shiftwidth=2
+# This is not loaded by cucumber in dryrun mode
+require File.dirname(__FILE__) + '/env.rb'
 
 controller_factory = JenkinsControllerFactory.get
 
