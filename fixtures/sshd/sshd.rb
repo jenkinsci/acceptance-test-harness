@@ -6,14 +6,14 @@ module Jenkins
       # SSH private key to talk to this host
       # @return [String]
       def private_key
-        key = dir+"/unsafe"
+        key = SSHD.dir+"/unsafe"    # 'self.dir' which might point to subtype
         File.chmod(0600,key)
         key
       end
 
       # login with SSH public key and make sure you can connect
-      def ssh_with_publickey
-        if !system("ssh -p #{port(22)} -o StrictHostKeyChecking=no -i #{private_key} test@localhost uname -a")
+      def ssh_with_publickey(cmd)
+        if !system("ssh -p #{port(22)} -o StrictHostKeyChecking=no -i #{private_key} test@localhost #{cmd}")
           raise "ssh failed!"
         end
       end

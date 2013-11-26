@@ -8,7 +8,7 @@ end
 # this is for illustration only and we'll remove this
 Then /^I can login via ssh( to fixture "([^"]*)")?$/ do |_,name|
   name ||= :default
-  @docker[name].ssh_with_publickey()
+  @docker[name].ssh_with_publickey("uname -a")
 end
 
 Before('@docker') do |scenario|
