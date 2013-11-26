@@ -42,8 +42,8 @@ module RSpec
       # Run the given block with JenkinsRoot and tear it down in the end
       # use this inside the 'it do ... end' block
       def with_jenkins(opts,&block)
+        j = JenkinsControllerFactory.get.create(opts)
         begin
-          j = JenkinsControllerFactory.get.create(opts)
           j.start
           yield Jenkins::JenkinsRoot.new(j)
         ensure
