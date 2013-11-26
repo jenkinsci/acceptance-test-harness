@@ -20,17 +20,17 @@ class WinstoneDockerJenkinsController < LocalJenkinsController
   end
 
   def start_process
-    @war = File.expand_path(@war) # turn into absolute path
+    @war = File.expand_path(File.readlink(@war)) # turn into absolute path
     
     @container = Jenkins::Fixtures::Fixture.find("winstone_docker").start! "-v #{@tempdir}:/work -v #{File.dirname(@war)}:/war"
 
     @process = @container.ssh_popen(["java","-DJENKINS_HOME=/work",
-                         "-jar", "/war/#{File.basename(@war)}", "--ajp13Port=-1", "--controlPort=#@control_port",
-                         "--httpPort=#@http_port"].join(' '))
+                         "-jar", "/war/#{File.basename(@war)}", "--ajp13Port=-1", "--controlPort=8081",
+                         "--httpPort=8080"].join(' '))
   end
 
   def stop!
-    TCPSocket.open(container.ip_address, @control_port) do |sock|
+    TCPSocket.open(container.ip_address, 8081) do |sock|
       sock.write("0")
     end
     Process.kill("INT",@pid)
@@ -39,12 +39,6 @@ class WinstoneDockerJenkinsController < LocalJenkinsController
   end
 
   def url
-    "http://#{container.ip_address}:#@http_port"
-  end
-
-  private
-  def set_random_ports
-    @http_port    = random_local_port
-    @control_port = random_local_port
+    "http://#{container.ip_address}:8080"
   end
 end
