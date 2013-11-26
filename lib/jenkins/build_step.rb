@@ -5,7 +5,6 @@ module Jenkins
     include Jenkins::Step
 
     def self.add(job, title)
-
       select_step label(title), find(:path, '/hetero-list-add[builder]')
 
       prefix = all(:xpath, "//div[@name='builder']").last[:path]

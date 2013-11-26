@@ -57,6 +57,7 @@ module Jenkins
       return self
     end
 
+    # @return [Jenkins::Build]    this object itself
     def wait_until_started
       until has_started?
         sleep 1

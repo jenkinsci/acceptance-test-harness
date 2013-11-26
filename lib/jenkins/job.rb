@@ -2,6 +2,7 @@
 # vim: tabstop=2 expandtab shiftwidth=2
 
 require 'jenkins/build'
+require 'jenkins/build_step'
 
 module Jenkins
   class Job < PageObject
@@ -104,6 +105,10 @@ module Jenkins
       Jenkins::Build.new(@base_url, self, number)
     end
 
+    # Schedule a build.
+    #
+    # If the job isn't parameterized, this method waits for it to start then return it
+    # @return [Jenkins::Build]    only if this job isn't parameterized.
     def queue_build
       nb = json["nextBuildNumber"]
 

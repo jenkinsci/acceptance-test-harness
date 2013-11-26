@@ -1,4 +1,5 @@
 require 'capybara'
+require 'jenkins/capybara'
 require 'capybara/session'
 require 'selenium-webdriver'
 require 'etc'
