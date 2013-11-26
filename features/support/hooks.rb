@@ -1,15 +1,7 @@
 #!/usr/bin/env ruby
 # vim: tabstop=2 expandtab shiftwidth=2
 
-$LOAD_PATH.push File.dirname(__FILE__) + "/../.."
-Dir.glob(File.dirname(__FILE__) + "/../../lib/jenkins/controller/*.rb") do |name|
-  require name
-end
-
-controller_factory = DefaultJenkinsControllerFactory.new()
-if ENV['PRELAUNCH']
-  controller_factory = CachedJenkinsControllerFactory.new(controller_factory)
-end
+controller_factory = JenkinsControllerFactory.get
 
 Before do |scenario|
   # in case we are using Sauce, set the test name

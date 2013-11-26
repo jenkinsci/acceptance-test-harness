@@ -1,5 +1,6 @@
 require 'temp_dir'
 require 'restclient'
+require 'jenkins/pageobject'
 
 # This module defines a contract that various Jenkins controller implementations need to support
 #

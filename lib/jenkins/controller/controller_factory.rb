@@ -8,6 +8,22 @@ class JenkinsControllerFactory
     # to be implemented by subtypes
     raise NotImplementedException
   end
+
+
+
+  @@controller_factory = nil
+
+  # gets the default instance
+  # @return [JenkinsControllerFactory]
+  def self.get
+    if @@controller_factory.nil?
+      @@controller_factory = DefaultJenkinsControllerFactory.new()
+      if ENV['PRELAUNCH']
+        @@controller_factory = CachedJenkinsControllerFactory.new(@@controller_factory)
+      end
+    end
+    @@controller_factory
+  end
 end
 
 #
