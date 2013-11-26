@@ -35,11 +35,11 @@ Before("~@nojenkins") do |scenario|
   scenario.skip_not_applicable($version)
 end
 
-After("~@nojenkins") do |scenario|
-  @runner.diagnose if scenario.failed?
-end
-
 After do |scenario|
   @cleanup.each { |c| c.call() }
   @cleanup.clear
+end
+
+After("~@nojenkins") do |scenario|
+  @runner.diagnose if scenario.failed?
 end
