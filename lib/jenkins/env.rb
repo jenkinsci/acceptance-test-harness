@@ -3,11 +3,7 @@ require 'jenkins/capybara'
 require 'capybara/session'
 require 'selenium-webdriver'
 require 'etc'
-
-Dir.glob(File.dirname(__FILE__) + "/controller/*.rb") do |name|
-  require name
-end
-
+require 'jenkins/version'
 
 Capybara.register_driver :selenium do |app|
   http_client = Selenium::WebDriver::Remote::Http::Default.new
@@ -35,7 +31,13 @@ end
 # Include Page objects:
 PAGE_OBJECTS_BASE = File.dirname(__FILE__) + "/.."
 
-
-Dir["#{PAGE_OBJECTS_BASE}/jenkins/*.rb", "#{PAGE_OBJECTS_BASE}/jenkins/plugins/*.rb"].each do |name|
-  require File.expand_path(name)
+%w[
+/lib/jenkins/*.rb
+/lib/jenkins/controller/*.rb
+/lib/jenkins/plugins/*.rb
+]. each do |path|
+  Dir.glob(Jenkins::ROOTDIR+path).each do |name|
+    require name
+  end
 end
+
