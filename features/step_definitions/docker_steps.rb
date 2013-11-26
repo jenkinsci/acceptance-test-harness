@@ -1,4 +1,4 @@
-require 'fixtures'
+require 'jenkins/fixtures'
 
 Given /^a docker fixture "([^"]*)"$/ do |name|
   @docker ||= {}

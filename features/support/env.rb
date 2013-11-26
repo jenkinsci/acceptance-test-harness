@@ -5,4 +5,5 @@ $LOAD_PATH.push File.dirname(__FILE__) + "/../../lib"
 
 require 'capybara/cucumber'
 require 'sauce/cucumber'
+require 'jenkins/cucumber'
 require 'jenkins/env'

@@ -33,10 +33,9 @@ if ENV['SAUCE_ACCESS_KEY']
 end
 
 # Include Page objects:
+PAGE_OBJECTS_BASE = File.dirname(__FILE__) + "/.."
 
-PAGE_OBJECTS_BASE = File.dirname(__FILE__) + "/../../lib/"
 
-
-Dir["#{PAGE_OBJECTS_BASE}/*.rb", "#{PAGE_OBJECTS_BASE}/plugins/*.rb"].each do |name|
+Dir["#{PAGE_OBJECTS_BASE}/jenkins/*.rb", "#{PAGE_OBJECTS_BASE}/jenkins/plugins/*.rb"].each do |name|
   require File.expand_path(name)
 end
