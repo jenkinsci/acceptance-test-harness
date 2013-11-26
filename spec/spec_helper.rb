@@ -4,6 +4,8 @@ require 'jenkins/jenkins'
 require 'pry'
 
 module Jenkins
+  # Use this method like you use 'describe'. This adds
+  # a hook around the test to launch Jenkins and put [JenkinsRoot] in @jenkins
   def self.rspec(name,&block)
     describe name do
       around do |test|

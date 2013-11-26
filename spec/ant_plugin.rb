@@ -20,6 +20,6 @@ eos
       end
     end
 
-    j.queue_build.succeeded?.should eql(true), "\nConsole output:\n#{j.last_build.console}\n\n"
+    j.queue_build.should_succeed
   end
 end

@@ -99,5 +99,10 @@ module Jenkins
       data = self.json
       return data['building'] || data['result'].nil?
     end
+
+    # assert that the build should have succeeded
+    def should_succeed
+      succeeded?.should eql(true), "\nConsole output:\n#{console}\n\n"
+    end
   end
 end
