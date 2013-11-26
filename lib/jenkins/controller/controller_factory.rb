@@ -17,7 +17,7 @@ class JenkinsControllerFactory
   # @return [JenkinsControllerFactory]
   def self.get
     if @@controller_factory.nil?
-      @@controller_factory = DefaultJenkinsControllerFactory.new()
+      @@controller_factory = DefaultJenkinsControllerFactory.new(ENV)
       if ENV['PRELAUNCH']
         @@controller_factory = CachedJenkinsControllerFactory.new(@@controller_factory)
       end
@@ -30,7 +30,10 @@ end
 # Factory of JenkinsController that picks up the one based on environment variables
 #
 class DefaultJenkinsControllerFactory < JenkinsControllerFactory
-  def initialize()
+  # @param map [Hash{String=>String}]
+  #     parameter bag that controls how controller gets configured.
+  #     normally this is 'ENV'
+  def initialize(map)
     # default is to run locally, but allow the parameters to be given as env vars
     # so that rake can be invoked like "rake test type=remote_sysv"
     if ENV['type']
