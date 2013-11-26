@@ -85,6 +85,13 @@ module Jenkins
         end
       end
 
+      # @return [Hash]   output from 'docker inspect'
+      def docker_inspect
+        IO.popen("#{DOCKER} inspect #{@cid}") do |io|
+          JSON.parse(io.read)[0]
+        end
+      end
+
       def to_s
         "Docker container #{@cid}"
       end
