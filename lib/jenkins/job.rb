@@ -66,6 +66,16 @@ module Jenkins
       return step
     end
 
+    # Add a shell script step that creates a file of the given name with the specified string contents
+    def add_create_file_step(name,contents)
+      add_shell_step <<eos
+cat > #{name} << EOF
+#{contents}
+EOF
+eos
+    end
+
+
     def add_postbuild_step(type)
       ensure_config_page
 
