@@ -5,26 +5,11 @@ if RUBY_VERSION < "2.0"
   ruby "2.0"
 end
 
-gem "rake"
-gem "selenium-webdriver"
-gem "sauce-cucumber"
-gem "rest-client"
-gem "pry"
-gem "debugger"
-gem "ruby-debug-ide"
+gemspec
 
-gem "cucumber", '1.2.5'
-gem "capybara", "~> 2.1.0"
-gem "json"
-gem "rspec"
-gem "tempdir"
-gem "mail"
-gem "promise"
-gem "vagrant", '~> 1.0'
-gem "jiraSOAP"    # for testing JIRA plugin
-gem "rdoc"
-
-gem "aspector"
-
+group :development do
+  gem "debugger"
+  gem "ruby-debug-ide"
+end
 
 # vim: set ft=conf
