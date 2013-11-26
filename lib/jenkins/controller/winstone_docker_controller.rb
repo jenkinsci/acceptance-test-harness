@@ -21,8 +21,9 @@ class WinstoneDockerJenkinsController < LocalJenkinsController
 
   def start_process
     @war = File.expand_path(File.readlink(@war)) # turn into absolute path
-    
-    @container = Jenkins::Fixtures::Fixture.find("winstone_docker").start! "-v #{@tempdir}:/work -v #{File.dirname(@war)}:/war"
+    fixture = @opts[:fixture]||"winstone_docker"  # fixture to use
+
+    @container = Jenkins::Fixtures::Fixture.find(fixture).start! "-v #{@tempdir}:/work -v #{File.dirname(@war)}:/war"
 
     @process = @container.ssh_popen(["java","-DJENKINS_HOME=/work",
                          "-jar", "/war/#{File.basename(@war)}", "--ajp13Port=-1", "--controlPort=8081",
