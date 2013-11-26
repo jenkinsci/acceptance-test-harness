@@ -1,5 +1,5 @@
-require 'build_step'
-require 'pageobject'
+require 'jenkins/build_step'
+require 'jenkins/pageobject'
 
 module Plugins
   class Ant < Jenkins::PageObject

@@ -2,7 +2,7 @@
 # vim: tabstop=2 expandtab shiftwidth=2
 
 $LOAD_PATH.push File.dirname(__FILE__) + "/../.."
-Dir.glob(File.dirname(__FILE__) + "/../../lib/controller/*.rb") do |name|
+Dir.glob(File.dirname(__FILE__) + "/../../lib/jenkins/controller/*.rb") do |name|
   require name
 end
 

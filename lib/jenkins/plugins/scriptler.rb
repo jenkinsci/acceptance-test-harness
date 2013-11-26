@@ -1,5 +1,5 @@
-require 'pageobject'
-require 'util/codemirror'
+require 'jenkins/pageobject'
+require 'jenkins/util/codemirror'
 
 module Jenkins
   module Scriptler

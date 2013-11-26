@@ -1,4 +1,4 @@
-require 'pageobject'
+require 'jenkins/pageobject'
 
 module Jenkins
   class Workspace < PageObject

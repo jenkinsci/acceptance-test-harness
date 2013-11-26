@@ -1,4 +1,4 @@
-require 'step'
+require 'jenkins/step'
 
 module Jenkins
   class BuildStep

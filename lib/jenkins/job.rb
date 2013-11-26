@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # vim: tabstop=2 expandtab shiftwidth=2
 
-require 'build'
+require 'jenkins/build'
 
 module Jenkins
   class Job < PageObject

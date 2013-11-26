@@ -1,4 +1,4 @@
-require 'job'
+require 'jenkins/job'
 
 #                 MatrixJob
 #                  /     \

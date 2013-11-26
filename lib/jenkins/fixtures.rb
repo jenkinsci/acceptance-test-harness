@@ -1,4 +1,4 @@
-require 'docker'
+require 'jenkins/docker'
 
 module Jenkins
   module Fixtures

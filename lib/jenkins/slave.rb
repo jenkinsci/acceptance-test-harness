@@ -6,7 +6,7 @@ require 'json'
 require 'net/http'
 require 'uri'
 
-require 'pageobject'
+require 'jenkins/pageobject'
 
 module Jenkins
   class Slave < PageObject

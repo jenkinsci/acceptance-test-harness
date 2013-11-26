@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 
-require 'pageobject'
-require 'job'
-require 'build_step'
+require 'jenkins/pageobject'
+require 'jenkins/job'
+require 'jenkins/build_step'
 
 module Jenkins
   class Maven < Jenkins::PageObject

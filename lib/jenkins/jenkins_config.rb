@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-require 'pageobject'
+require 'jenkins/pageobject'
 
 module Jenkins
   # System configuration page

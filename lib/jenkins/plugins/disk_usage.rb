@@ -1,4 +1,4 @@
-require 'pageobject'
+require 'jenkins/pageobject'
 
 module Plugins
   class DiskUsage < Jenkins::PageObject

@@ -1,4 +1,4 @@
-require 'post_build_step'
+require 'jenkins/post_build_step'
 
 module Plugins
   module PostBuildScript

@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-require 'pageobject'
+require 'jenkins/pageobject'
 
 module Plugins
   class Groovy < Jenkins::PageObject

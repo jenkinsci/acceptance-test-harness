@@ -1,4 +1,4 @@
-require 'pagearea'
+require 'jenkins/pagearea'
 
 module Plugins
   module EnvInject
