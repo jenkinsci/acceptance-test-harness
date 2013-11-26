@@ -14,27 +14,43 @@ module Jenkins
         # skip scenario and initialization when not applicable
         # TODO: pending if scenario.skip_not_applicable($version)
 
-        @runner = JenkinsControllerFactory.get.create(@controller_options||{})
-        @runner.start
-        $version = @runner.jenkins_version
+        with_jenkins(@controller_options||{}) do |j|
+          @jenkins = j
+          @runner = j.controller
 
-        @base_url = @runner.url
-        Capybara.app_host = @base_url
+          $version = @runner.jenkins_version
 
-        @jenkins = Jenkins::JenkinsRoot.new(@base_url)
+          @base_url = @runner.url
+          Capybara.app_host = @base_url
 
-        # TODO: scenario.skip_not_applicable($version)
+          # TODO: scenario.skip_not_applicable($version)
 
-        begin
           test.run
-        ensure
-          # @runner.diagnose if scenario.failed?
-          @runner.stop # if test fails, stop in at_exit is not called
-          @runner.teardown
         end
       end
 
       self.module_eval(&block)
+    end
+  end
+end
+
+
+module RSpec
+  module Core
+    # Extend RSpec DSL
+    class ExampleGroup
+      # Run the given block with JenkinsRoot and tear it down in the end
+      # use this inside the 'it do ... end' block
+      def with_jenkins(opts,&block)
+        begin
+          j = JenkinsControllerFactory.get.create(opts)
+          j.start
+          yield Jenkins::JenkinsRoot.new(j)
+        ensure
+          j.stop
+          j.teardown
+        end
+      end
     end
   end
 end

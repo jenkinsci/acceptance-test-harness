@@ -8,8 +8,15 @@ module Jenkins
   class JenkinsRoot
     attr_accessor :base_url
 
-    def initialize(base_url)
-      @base_url = base_url
+    # @param controller [JenkinsController]   encapsulates running Jenkins
+    def initialize(controller)
+      @controller = controller
+      @base_url = controller.url
+    end
+
+    # @return [JenkinsController] encapsulates running Jenkins
+    def controller
+      @controller
     end
 
     # @return [Jenkins::PluginManager]
