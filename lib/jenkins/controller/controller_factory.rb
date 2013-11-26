@@ -2,7 +2,7 @@ require 'future'
 
 class JenkinsControllerFactory
   # instantiate a new JenkinsController for the next test
-  # @param opts [Hash]  bag of controller specific options
+  # @param opts [Hash{Symbol=>Object}]  bag of controller specific options
   # @return [JenkinsController]
   def create(opts)
     # to be implemented by subtypes
