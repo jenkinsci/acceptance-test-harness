@@ -65,7 +65,9 @@ module Jenkins
       # @return [Integer]
       def port(n)
         IO.popen("#{DOCKER} port #{@cid} #{n}") do |io|   # this returns single line like "0.0.0.0:55326"
-          io.gets.split(":")[1].to_i
+          out = io.gets
+          raise "port #{n} is not mapped for container #{@cid}" if out.nil?
+          out.split(":")[1].to_i
         end
       end
 
