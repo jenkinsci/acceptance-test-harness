@@ -16,7 +16,7 @@ module Jenkins
     #
     # @param tag [String]     name to give to the created image
     # @param dir [String]     a directory that houses Dockerfile
-    # @return [Image]         a prepared docker image
+    # @return [Jenkins::Docker::Image]         a prepared docker image
     def self.build(tag,dir)
       if !system("#{DOCKER} build -t #{tag} .", :chdir=>dir)
         raise "Failed to build container"
@@ -33,9 +33,10 @@ module Jenkins
       end
 
       # @param ports [Array<Integer>]   ports to expose
+      # @param opts [String]    additional options
       # @return [Container]
-      def start(ports)
-        opts = ports.map {|y| " -p 127.0.0.1::#{y}"}.join
+      def start(ports, opts="")
+        opts += ports.map {|y| " -p 127.0.0.1::#{y}"}.join
         IO.popen("#{DOCKER} run -d #{opts} #{@name}") do |p|
           sleep 3   # TODO: find out how to properly wait for the service to start. maybe just wait for port to start listening?
 
