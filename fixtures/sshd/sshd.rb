@@ -24,7 +24,7 @@ module Jenkins
       end
 
       def ssh_popen(cmd,&block)
-        IO.popen("#{ssh} #{cmd}",&block)
+        IO.popen("exec #{ssh} #{cmd} 2>&1",&block)
       end
 
       register "sshd", [22]
