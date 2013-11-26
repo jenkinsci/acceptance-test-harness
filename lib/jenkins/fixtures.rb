@@ -56,9 +56,9 @@ module Jenkins
       # this method is always invoked with the right fixture subtype as the left-hand side value.
       #
       # @return [Jenkins::Docker::Fixture]       a running fixture instance
-      def self.start!()
+      def self.start!(opts="")
         img = self.build()
-        return self.new(img.start(self.ports,@docker_opts).cid)
+        return self.new(img.start(self.ports,"#{@docker_opts} #{opts}").cid)
       end
 
       # Loads a fixture class identified by the given name
