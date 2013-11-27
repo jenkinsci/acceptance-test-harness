@@ -1,9 +1,7 @@
 module Jenkins
   module Fixtures
-    Fixture.find("sshd")
-
     # Let Jenkins run inside this container
-    class WinstoneDocker < SSHD
+    class WinstoneDocker < Fixture.find("sshd")
 
       register "winstone_docker", [22,8080]
 
