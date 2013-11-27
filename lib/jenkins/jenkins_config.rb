@@ -36,6 +36,11 @@ module Jenkins
       end
     end
 
+    # set the number of executors on the master
+    def executors=(v)
+      find(:path, '/jenkins-model-MasterBuildConfiguration/numExecutors').set v.to_s
+    end
+
     def add_tool(name)
       click_button(name)
     end
