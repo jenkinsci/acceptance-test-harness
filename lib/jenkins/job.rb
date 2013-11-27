@@ -165,8 +165,8 @@ eos
       self.new(base_url, name)
     end
 
-    def self.create(title, base_url)
-      create_named title, base_url, Jenkins::PageObject.random_name
+    def self.create(title, base_url, name=nil)
+      create_named title, base_url, name||Jenkins::PageObject.random_name
     end
 
     def self.create_named(title, base_url, name)

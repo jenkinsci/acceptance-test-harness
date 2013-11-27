@@ -26,9 +26,10 @@ module Jenkins
 
     # create a new job with a random name
     # @param title [String]   prefix of the display name that indicates the job type to be created.
+    # @param name  [String]   the name of the newly created job. leave it to nil to assign a random value
     # @return [Jenkins::Job]
-    def create_job(title)
-      Jenkins::Job.create title, @base_url
+    def create_job(title, name=nil)
+      Jenkins::Job.create title, @base_url, name
     end
   end
 end
