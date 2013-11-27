@@ -37,7 +37,7 @@ module Jenkins
     def configure(&block)
       visit configure_url
       unless block.nil?
-        yield
+        yield self
         save
       end
     end

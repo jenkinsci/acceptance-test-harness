@@ -17,7 +17,7 @@ module Jenkins
     def configure(&block)
       open
       unless block.nil?
-        yield
+        yield self
         save
       end
     end
