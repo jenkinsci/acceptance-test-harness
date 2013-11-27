@@ -5,6 +5,7 @@ require 'jenkins/pageobject'
 module Jenkins
   # System configuration page
   class JenkinsConfig < PageObject
+    include Jenkins::Step::Static
 
     def initialize(*args)
       super(*args)
@@ -60,6 +61,11 @@ module Jenkins
       find(:xpath, "//input[@name='password']").set(password)
       click_button("OK")
       click_button("Close")
+    end
+
+    def add_cloud(name)
+      select_step name, find(:path, '/jenkins-model-GlobalCloudConfiguration/hetero-list-add[cloud]')
+      # TODO: binding of fragments like BuildStep does
     end
 
     def mailer
