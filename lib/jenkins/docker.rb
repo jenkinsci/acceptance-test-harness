@@ -33,11 +33,20 @@ module Jenkins
       end
 
       # @param ports [Array<Integer>]   ports to expose
-      # @param opts [String]    additional options
+      # @param opts [String] additional command line options for 'docker run'
+      # @param cmd  [String] command to run inside the container. defaults to what Dockerfile specifies.
+      #                      overriding this parameter allows the caller to control what gets launched.
       # @return [Container]
-      def start(ports, opts="")
+      def start(ports, opts="", cmd=nil)
         opts += ports.map {|y| " -p 127.0.0.1::#{y}"}.join
-        IO.popen("#{DOCKER} run -d #{opts} #{@name}") do |p|
+
+        if cmd.nil? then
+          cmd=""
+        else
+          cmd = " #{cmd}"
+        end
+
+        IO.popen("#{DOCKER} run -d #{opts} #{@name}#{cmd}") do |p|
           sleep 3   # TODO: find out how to properly wait for the service to start. maybe just wait for port to start listening?
 
           Container.new(p.gets)

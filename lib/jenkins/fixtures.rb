@@ -55,10 +55,13 @@ module Jenkins
       # Start the fixture identified by 'self'
       # this method is always invoked with the right fixture subtype as the left-hand side value.
       #
+      # @param opts [String] additional command line options for 'docker run'
+      # @param cmd  [String] command to run inside the container. defaults to what Dockerfile specifies.
+      #                      overriding this parameter allows the caller to control what gets launched.
       # @return [Jenkins::Docker::Fixture]       a running fixture instance
-      def self.start!(opts="")
+      def self.start!(opts="",cmd=nil)
         img = self.build()
-        return self.new(img.start(self.ports,"#{@docker_opts} #{opts}").cid)
+        return self.new(img.start(self.ports,"#{@docker_opts} #{opts}",cmd).cid)
       end
 
       # Loads a fixture class identified by the given name
