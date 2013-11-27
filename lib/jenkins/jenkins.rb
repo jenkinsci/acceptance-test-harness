@@ -31,5 +31,14 @@ module Jenkins
     def create_job(title, name=nil)
       Jenkins::Job.create title, @base_url, name
     end
+
+    # Create a page object for the global configuration page
+    # If a block is passed, it gets called in the context of the global config page object
+    # @return [Jenkins::JenkinsConfig]
+    def configure(&block)
+      config = Jenkins::JenkinsConfig.new(@base_url, 'Jenkins global configuration')
+      config.configure(&block) if block
+      config
+    end
   end
 end
