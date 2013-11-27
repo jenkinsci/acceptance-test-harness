@@ -9,18 +9,8 @@ require 'uri'
 require 'jenkins/pageobject'
 
 module Jenkins
-  class Slave < PageObject
-    include Capybara::DSL
-    extend Capybara::DSL
-
-    def configure_url
-      @base_url + "/computer/#{@name}/configure"
-    end
-
-    def json_api_url
-      @base_url + "/computer/#{@name}/api/json"
-    end
-
+  # Mix-in for page object that has a slave configuration UI
+  module Slaveish
     def executors=(num_exec)
       find(:xpath, "//input[@name='_.numExecutors']").set(num_exec.to_s)
       # in my chrome, I need to move the focus out from the control to have it recognize the value entered
@@ -34,6 +24,30 @@ module Jenkins
 
     def labels=(labels)
       find(:xpath, "//input[@name='_.labelString']").set(labels)
+    end
+
+    # Set up this slave as a local slave that launches slave on the same host as Jenkins
+    # call this in the context of the config UI
+    def as_local
+      jar="/tmp/slave#{Process.pid}.jar"
+
+      # Configure this slave to be automatically launched from the master
+      find(:xpath, "//option[@value='hudson.slaves.CommandLauncher']").select_option
+      find(:xpath, "//input[@name='_.command']").set("sh -c 'curl -s -o #{jar} #{base_url}/jnlpJars/slave.jar && java -jar #{jar}'")
+    end
+  end
+
+  class Slave < PageObject
+    include Capybara::DSL
+    extend Capybara::DSL
+    include Slaveish
+
+    def configure_url
+      @base_url + "/computer/#{@name}/configure"
+    end
+
+    def json_api_url
+      @base_url + "/computer/#{@name}/api/json"
     end
 
     def online?
@@ -64,12 +78,7 @@ module Jenkins
       # with a FS root and executors
       slave.executors = 1
       slave.remote_fs = "/tmp/#{slave.name}"
-
-      jar="/tmp/slave#{Process.pid}.jar"
-
-      # Configure this slave to be automatically launched from the master
-      find(:xpath, "//option[@value='hudson.slaves.CommandLauncher']").select_option
-      find(:xpath, "//input[@name='_.command']").set("sh -c 'curl -s -o #{jar} #{base_url}/jnlpJars/slave.jar && java -jar #{jar}'")
+      slave.as_local
 
       slave.save
 
