@@ -27,7 +27,7 @@ class WinstoneDockerJenkinsController < LocalJenkinsController
 
     @process = @container.ssh_popen(["java","-DJENKINS_HOME=/work",
                          "-jar", "/war/#{File.basename(@war)}", "--ajp13Port=-1", "--controlPort=8081",
-                         "--httpPort=8080"].join(' '))
+                         "--httpPort=8080","< /dev/null"].join(' '))
   end
 
   def stop!
