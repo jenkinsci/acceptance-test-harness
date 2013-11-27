@@ -11,4 +11,5 @@ Feature: Publish HTML directories
     And I set index file to "home.html"
     And I save the job
     And I build the job
-    Then the html report "My report" should be correclty published
+    Then the build should succeed
+    And the html report "My report" should be correclty published

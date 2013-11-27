@@ -1,5 +1,5 @@
-#!/usr/bin/env ruby
-# vim: tabstop=2 expandtab shiftwidth=2
+# This is not loaded by cucumber in dryrun mode
+require File.dirname(__FILE__) + '/env.rb'
 
 controller_factory = JenkinsControllerFactory.get
 
@@ -35,11 +35,11 @@ Before("~@nojenkins") do |scenario|
   scenario.skip_not_applicable($version)
 end
 
-After("~@nojenkins") do |scenario|
-  @runner.diagnose if scenario.failed?
-end
-
 After do |scenario|
   @cleanup.each { |c| c.call() }
   @cleanup.clear
+end
+
+After("~@nojenkins") do |scenario|
+  @runner.diagnose if scenario.failed?
 end

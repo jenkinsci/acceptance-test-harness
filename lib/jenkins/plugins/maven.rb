@@ -53,8 +53,8 @@ module Jenkins
       find(:path, '/prebuilder/command').set(script)
     end
 
-    def copy_resource(resource, target)
-      add_prebuild_shell_step "cp -r #{File.dirname(__FILE__)}/../../resources/#{resource} ./#{target}"
+    def copy_resource(name, target)
+      add_prebuild_shell_step "cp -r #{resource(name)} ./#{target}"
     end
 
     def step

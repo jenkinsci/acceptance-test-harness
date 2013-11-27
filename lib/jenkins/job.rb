@@ -151,8 +151,8 @@ eos
       find(:path, "/customWorkspace/directory").set(workspace)
     end
 
-    def copy_resource(resource, target)
-      add_shell_step "cp -r #{File.dirname(__FILE__)}/../resources/#{resource} ./#{target}"
+    def copy_resource(name, target)
+      add_shell_step "cp -r #{resource(name)} ./#{target}"
     end
 
     def self.copy_job(base_url, name, source_job_name)
