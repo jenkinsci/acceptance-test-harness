@@ -61,7 +61,8 @@ module Jenkins
       # @return [Jenkins::Docker::Fixture]       a running fixture instance
       def self.start!(opts="",cmd=nil)
         img = self.build()
-        return self.new(img.start(self.ports,"#{@docker_opts} #{opts}",cmd).cid)
+        c = img.start(self.ports,"#{@docker_opts} #{opts}",cmd)
+        return self.new(c.cid, c.pid, c.logfile)
       end
 
       # Loads a fixture class identified by the given name

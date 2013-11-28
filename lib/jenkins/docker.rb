@@ -1,6 +1,8 @@
 #
 # Wrapper around docker
 #
+require 'tempfile'
+
 module Jenkins
   module Docker
 
@@ -36,7 +38,7 @@ module Jenkins
       # @param opts [String] additional command line options for 'docker run'
       # @param cmd  [String] command to run inside the container. defaults to what Dockerfile specifies.
       #                      overriding this parameter allows the caller to control what gets launched.
-      # @return [Container]
+      # @return [Jenkins::Docker::Container]
       def start(ports, opts="", cmd=nil)
         opts += ports.map {|y| " -p 127.0.0.1::#{y}"}.join
 
@@ -46,28 +48,71 @@ module Jenkins
           cmd = " #{cmd}"
         end
 
-        IO.popen("#{DOCKER} run -d #{opts} #{@name}#{cmd}") do |p|
-          sleep 3   # TODO: find out how to properly wait for the service to start. maybe just wait for port to start listening?
+        cid = tempfile('cid')
 
-          Container.new(p.gets)
+        log = tempfile('docker-log')
+
+        pid = spawn("#{DOCKER} run -cidfile=#{cid} #{opts} #{@name}#{cmd}", :in => '/dev/null', :err =>[:child,:out], :out => log)
+
+        sleep 1   # TODO: properly wait for either cidfile to appear or process to exit
+
+        if File.exists?(cid)
+          cid = File.read(cid)
+          # rename the log file to match the container name
+          logfile = "#{Dir.tmpdir}/#{cid}.log"
+          File.rename log, logfile
+          puts "Launching Docker container #{cid}: logfile is at #{logfile}"
+
+          Container.new(cid, pid, logfile)
+        else
+          dead = Process.waitpid(pid, Process::WNOHANG) == pid
+          if dead
+            raise "docker #{@name}#{cmd} died unexpectedly: #{File.read(log)}"
+          else
+            raise "docker #{@name}#{cmd} didn't leave cidfile and is still running. Huh?"
+          end
         end
       end
 
       def to_s
         "Docker image #{@name}"
       end
+
+      # create a new temporary file without letting Ruby delete it in the end
+      private
+      def tempfile(prefix)
+        Tempfile.open(prefix) do |t|
+          path = t.path
+          t.unlink
+          path
+        end
+      end
     end
 
     # Running container, a virtual machine
     class Container
-      def initialize(cid)
-        @cid = cid.chomp
+      # @param cid [String]   container ID
+      # @param proc [IO]      IO object connected to the process
+      def initialize(cid, pid, logfile)
+        @cid = cid
+        @pid = pid
+        @logfile = logfile
       end
 
       # Container ID
       # @return [String]
       def cid
         @cid
+      end
+
+      # Process ID of the docker command
+      def pid
+        @pid
+      end
+
+      # Where is the log file for this container?
+      def logfile
+        @logfile
       end
 
       # find the ephemeral port that the given container port is mapped to
@@ -82,6 +127,7 @@ module Jenkins
 
       # stop and remove any trace of the container
       def clean
+        Process.kill "INT",@pid
         if !system("#{DOCKER} kill #{@cid}", :out => '/dev/null')
           raise "Failed to kill #{@cid}"
         end
