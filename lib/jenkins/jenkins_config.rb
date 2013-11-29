@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'jenkins/pageobject'
+require 'jenkins/step'
 
 module Jenkins
   # System configuration page

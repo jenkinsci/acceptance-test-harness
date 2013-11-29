@@ -1,6 +1,6 @@
 Feature: Executing groovy scripts
 
-  @needs_preinstalled_sw
+  @native(groovy)
   Scenario: Run groovy script
     Given I have installed the "groovy" plugin
     And a job
@@ -28,7 +28,7 @@ Feature: Executing groovy scripts
     Then the build should succeed
     And I should see console output matching "this is a job system-groovy-test"
 
-  @needs_preinstalled_sw
+  @native(groovy)
   Scenario: Run groovy script from a file
     Given I have installed the "groovy" plugin
     And a job
@@ -57,7 +57,7 @@ Feature: Executing groovy scripts
     And I should see console output matching "Unpacking http://dist.groovy.codehaus.org/distributions/groovy-binary-2.1.1.zip"
     And I should see console output matching "Groovy version: 2.1.1"
 
-  @needs_preinstalled_sw
+  @native(groovy)
   Scenario: Add and run auto-installed Groovy
     Given I have installed the "groovy" plugin
     And fake Groovy installation at "/tmp/fake-groovy"

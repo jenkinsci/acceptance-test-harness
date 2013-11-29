@@ -26,43 +26,24 @@ module Cucumber
 
     class Scenario
 
-      def skip_not_applicable(version)
-        return false if version.nil?
+      def skip_not_applicable(runner=nil)
+        should_run = if runner.nil?
+          Jenkins::ScenarioSkipper.should_run? self
+        else
+          Jenkins::ScenarioSkipper.should_run_against? self, runner
+        end
 
-        return false if feature.applicable_for?(version) && applicable_for?(version)
-        skip!
-        return true
-      end
+        skip! if !should_run
 
-      def applicable_for?(version)
-        Ast::applicable_for?(version, @tags.tags)
+        return !should_run
       end
 
       def skip!
         @steps.each{|step_invocation| step_invocation.skip_invoke!}
       end
-    end
 
-    class Feature
-      def applicable_for?(version)
-        Ast::applicable_for?(version, @tags.tags)
-      end
-    end
-
-    def self.applicable_for?(version, tags)
-      since_tag = find_tag('since', tags)
-
-      if since_tag.nil?
-        return true
-      end
-
-      required_version = Gem::Version.new(since_tag.values[0])
-      return version >= required_version
-    end
-
-    # Find tag by name
-    def self.find_tag(name, tags)
-      for tagString in tags
+      def tag(name)
+        for tagString in tags
         tag = Cucumber::Ast::Tag.parse(tagString)
           if !tag.nil? && tag.name == name
             return tag
@@ -70,6 +51,18 @@ module Cucumber
         end
 
       return nil
+      end
+
+      def tags
+        @tags.tags + feature.tags
+      end
+    end
+
+    class Feature
+
+      def tags
+        @tags.tags
+      end
     end
   end
 end

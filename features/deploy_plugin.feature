@@ -3,7 +3,7 @@ Feature: Auto-deployment to application server via deploy plugin
   As a Jenkins user
   I want to automate the delivery of web applications
 
-  @docker
+  @native(docker)
   Scenario: Deploy sample webapp to Tomcat7
     Given I have installed the "deploy" plugin
     And a docker fixture "tomcat7"

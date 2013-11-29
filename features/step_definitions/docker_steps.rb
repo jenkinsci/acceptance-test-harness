@@ -11,13 +11,6 @@ Then /^I can login via ssh( to fixture "([^"]*)")?$/ do |_,name|
   @docker[name].ssh_with_publickey("uname -a")
 end
 
-Before('@docker') do |scenario|
-  if !Jenkins::Docker.available?
-    puts 'Skipping: docker not available'
-    scenario.skip!
-  end
-end
-
 After('@docker') do |scenario|
   if @docker
     @docker.each do |k,v|

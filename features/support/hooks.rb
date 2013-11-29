@@ -17,11 +17,10 @@ end
 
 Before("~@nojenkins") do |scenario|
   # skip scenario and initialization when not applicable
-  next if scenario.skip_not_applicable($version)
+  next if scenario.skip_not_applicable
 
   @runner = controller_factory.create(@controller_options||{})
   @runner.start
-  $version = @runner.jenkins_version
 
   @cleanup << Proc.new do
     @runner.stop # if test fails, stop in at_exit is not called
@@ -32,7 +31,7 @@ Before("~@nojenkins") do |scenario|
   @base_url = @runner.url
   Capybara.app_host = @base_url
 
-  scenario.skip_not_applicable($version)
+  scenario.skip_not_applicable @runner
 end
 
 After do |scenario|

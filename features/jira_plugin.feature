@@ -3,7 +3,7 @@ Feature: Update JIRA tickets when a build is ready
   As a Jenkins developer
   I want JIRA issues to be updated when a new build is made
 
-  @docker
+  @native(docker)
   Scenario: JIRA ticket gets updated with a build link
     Given a docker fixture "jira"
     And "ABC" project on docker jira fixture

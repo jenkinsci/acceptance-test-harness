@@ -1,6 +1,6 @@
 Feature: Tests for SCP plugin
 
-  @docker
+  @native(docker)
   Scenario: Configure a job with SCP publishing
     Given I have installed the "scp" plugin
     And a docker fixture "sshd"

@@ -3,7 +3,7 @@ Feature: Adds Xvnc support
   As a Jenkins user
   I want to able to setup Xvnc server
 
-  @needs_preinstalled_sw
+  @native(vncserver)
   Scenario: Run xvnc during build
     Given I have installed the "xvnc" plugin
     And a job
@@ -14,7 +14,7 @@ Feature: Adds Xvnc support
     Then the build should succeed
     And xvnc run during the build
 
-  @needs_preinstalled_sw
+  @native(vncserver,import)
   Scenario: Run xvnc during build taking screenshot at the end
     Given I have installed the "xvnc" plugin
     And a job
@@ -26,7 +26,7 @@ Feature: Adds Xvnc support
     And xvnc run during the build
     And took a screanshot
 
-  @needs_preinstalled_sw
+  @native(vncserver)
   Scenario: Run xvnc on specific display number
     Given I have installed the "xvnc" plugin
     And a job

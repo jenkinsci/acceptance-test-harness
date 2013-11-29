@@ -12,18 +12,16 @@ module Jenkins
     describe name do
       around do |test|
         # skip scenario and initialization when not applicable
-        # TODO: pending if scenario.skip_not_applicable($version)
+        # TODO: pending if scenario.skip_not_applicable
 
         with_jenkins(@controller_options||{}) do |j|
           @jenkins = j
           @runner = j.controller
 
-          $version = @runner.jenkins_version
-
           @base_url = @runner.url
           Capybara.app_host = @base_url
 
-          # TODO: scenario.skip_not_applicable($version)
+          # TODO: scenario.skip_not_applicable $runner
 
           test.run
         end
