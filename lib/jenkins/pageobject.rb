@@ -85,10 +85,11 @@ module Jenkins
     # if the method keeps returning false for :timeout seconds, a test is considered a failure
     def wait_for_cond(opts={}, &block)
       timeout = opts[:timeout] || 30
+      message = opts[:message] || "Failed to wait for condition #{block}"
       start = Time.now.to_i
       while true
         return if block.call
-        raise "Failed to wait for condition #{block}" if (Time.now.to_i - start) >= timeout
+        raise message if (Time.now.to_i - start) >= timeout
         sleep 1
       end
     end

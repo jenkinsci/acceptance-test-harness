@@ -47,12 +47,11 @@ module Jenkins
       find_button('Install').click
 
       start = Time.now.to_i
-      # wait for plugin to appear in the interface
-      until installed?(name) do
-        if Time.now.to_i - start > 180
-          throw "Plugin installation took too long"
-        end
-        sleep 1
+
+      wait_for_cond(timeout: 180, message: "Plugin installation took too long") do
+        failed = $jenkins.log.has_logged? /IOException: (?<msg>Failed to download from .*\.hpi)/
+        raise failed[:msg] if failed
+        installed? name
       end
 
       installation_time = Time.now.to_i - start

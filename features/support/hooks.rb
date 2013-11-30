@@ -21,6 +21,7 @@ Before("~@nojenkins") do |scenario|
 
   @runner = controller_factory.create(@controller_options||{})
   @runner.start
+  $jenkins = Jenkins::JenkinsRoot.new @runner
 
   @cleanup << Proc.new do
     @runner.stop # if test fails, stop in at_exit is not called

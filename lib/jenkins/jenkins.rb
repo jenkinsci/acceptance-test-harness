@@ -40,5 +40,10 @@ module Jenkins
       config.configure(&block) if block
       config
     end
+
+    # @return [LogWatcher]
+    def log
+      @controller.log_watcher
+    end
   end
 end
