@@ -82,10 +82,9 @@ module Jenkins
     end
 
     # repeatedly evaluate the given block until it returns true
-    # if the method keeps returning false for 10 seconds, a test is considered a failure
+    # if the method keeps returning false for :timeout seconds, a test is considered a failure
     def wait_for_cond(opts={}, &block)
       timeout = opts[:timeout] || 30
-      selector_kind = opts[:with] || :xpath
       start = Time.now.to_i
       while true
         return if block.call
