@@ -10,7 +10,7 @@ Feature: Subversion support
     And I save the job
     And I build the job
     Then the build should succeed
-    And I should see console output matching "test -d .svn"
+    And console output should contain "test -d .svn"
 
   Scenario: Check out specified Subversion revision
     Given I have installed the "subversion" plugin
@@ -19,7 +19,7 @@ Feature: Subversion support
     And I save the job
     And I build the job
     Then the build should succeed
-    And I should see console output matching "At revision 40156"
+    And console output should contain "At revision 40156"
 
   Scenario: Always check out fresh copy
     Given I have installed the "subversion" plugin
@@ -29,4 +29,4 @@ Feature: Subversion support
     And I save the job
     And I build 2 jobs
     Then the build should succeed
-    And I should see console output matching "Checking out https://svn.jenkins-ci.org/trunk/jenkins/test-projects/model-ant-project"
+    And console output should contain "Checking out https://svn.jenkins-ci.org/trunk/jenkins/test-projects/model-ant-project"

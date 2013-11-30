@@ -11,7 +11,7 @@ Feature:  Allow use of Git as a build SCM
     And I save the job
     And I build the job
     Then the build should succeed
-    And I should see console output matching "origin git://github.com/jenkinsci/git-plugin.git"
+    And console output should contain "origin git://github.com/jenkinsci/git-plugin.git"
 
   Scenario: Checkout branch from Git repository
     Given I have installed the "git" plugin
@@ -61,7 +61,7 @@ Feature:  Allow use of Git as a build SCM
     And I save the job
     And I build the job
     Then the build should succeed
-    And I should see console output matching "origin git://github.com/jenkinsci/git-plugin.git"
+    And console output should contain "origin git://github.com/jenkinsci/git-plugin.git"
 
   Scenario: Simple checkout from Git repository
     Given I have installed the "git" plugin
@@ -72,4 +72,4 @@ Feature:  Allow use of Git as a build SCM
     And I save the job
     And I build the job
     Then the build should succeed
-    And I should see console output matching "selenium_test_repo git://github.com/jenkinsci/git-plugin.git"
+    And console output should contain "selenium_test_repo git://github.com/jenkinsci/git-plugin.git"

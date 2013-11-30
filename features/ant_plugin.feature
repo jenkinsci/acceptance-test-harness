@@ -31,8 +31,11 @@ Feature: Adds Apache Ant support
         </project>
       """
     And I build the job
-    Then I should see console output matching "Unpacking http://archive.apache.org/dist/ant/binaries/apache-ant-1.8.4-bin.zip"
-    And the build should succeed
+    Then the build should succeed
+    And console output should contain
+        """
+        Unpacking http://archive.apache.org/dist/ant/binaries/apache-ant-1.8.4-bin.zip
+        """
 
   Scenario: Add locally installed Ant
     Given I have installed the "ant" plugin
@@ -48,5 +51,5 @@ Feature: Adds Apache Ant support
         </project>
       """
     And I build the job
-    Then I should see console output matching "fake ant at /tmp/fake-ant/bin/ant"
+    Then console output should contain "fake ant at /tmp/fake-ant/bin/ant"
     And the build should succeed

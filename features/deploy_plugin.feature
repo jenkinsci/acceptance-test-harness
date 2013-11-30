@@ -20,7 +20,7 @@ Feature: Auto-deployment to application server via deploy plugin
     And I save the job
     And I build the job
     Then the build should succeed
-    And I should see console output matching regexp "to container Tomcat 7.x Remote"
+    And console output should match "to container Tomcat 7.x Remote"
     And docker tomcat7 fixture should show "Hello World!" at "/test/"
 
     When I configure the job
@@ -28,7 +28,7 @@ Feature: Auto-deployment to application server via deploy plugin
     And I save the job
     When I build the job
     Then the build should succeed
-    And I should see console output matching regexp "Redeploying"
+    And console output should match "Redeploying"
     And docker tomcat7 fixture should show "Hello Jenkins" at "/test/"
 
 

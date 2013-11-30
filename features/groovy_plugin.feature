@@ -12,7 +12,7 @@ Feature: Executing groovy scripts
     And I save the job
     And I build the job
     Then the build should succeed
-    And I should see console output matching "hello world"
+    And console output should contain "hello world"
 
   Scenario: Run system groovy script as a command
     Given I have installed the "groovy" plugin
@@ -26,7 +26,7 @@ Feature: Executing groovy scripts
     And I save the job
     And I build the job
     Then the build should succeed
-    And I should see console output matching "this is a job system-groovy-test"
+    And console output should contain "this is a job system-groovy-test"
 
   @native(groovy)
   Scenario: Run groovy script from a file
@@ -38,7 +38,7 @@ Feature: Executing groovy scripts
     And I save the job
     And I build the job
     Then the build should succeed
-    And I should see console output matching "hello"
+    And console output should contain "hello"
 
   Scenario: Add and run auto-installed Groovy
     Given I have installed the "groovy" plugin
@@ -54,8 +54,12 @@ Feature: Executing groovy scripts
     And I save the job
     And I build the job
     Then the build should succeed
-    And I should see console output matching "Unpacking http://dist.groovy.codehaus.org/distributions/groovy-binary-2.1.1.zip"
-    And I should see console output matching "Groovy version: 2.1.1"
+    And console output should contain "Groovy version: 2.1.1"
+    And console output should contain
+        """
+        Unpacking http://dist.groovy.codehaus.org/distributions/groovy-binary-2.1.1.zip
+        """
+
 
   @native(groovy)
   Scenario: Add and run auto-installed Groovy
@@ -73,4 +77,4 @@ Feature: Executing groovy scripts
     And I save the job
     And I build the job
     Then the build should succeed
-    And I should see console output matching "fake groovy at /tmp/fake-groovy/bin/groovy"
+    And console output should contain "fake groovy at /tmp/fake-groovy/bin/groovy"

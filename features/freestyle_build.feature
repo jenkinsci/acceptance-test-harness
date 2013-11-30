@@ -14,7 +14,7 @@ Feature: Configure/build freestyle jobs
     And I add a shell build step "ls"
     And I save the job
     And I build the job
-    Then I should see console output matching "+ ls"
+    Then console output should contain "+ ls"
 
   Scenario: Disable a job
     Given a job
@@ -110,7 +110,7 @@ Feature: Configure/build freestyle jobs
     And I set artifact "test.txt" to archive in the job configuration
     And I build the job
     Then the build should succeed
-    And I should see console output matching "Archiving artifacts"
+    And console output should contain "Archiving artifacts"
     And the artifact "test.txt" should be archived
     And the content of artifact "test.txt" should be "archive test"
 
@@ -145,9 +145,9 @@ Feature: Configure/build freestyle jobs
     When I add a shell build step "java -version"
     And I save the job
     And I build the job
-    Then I should see console output matching "Installing JDK jdk-7u11-oth-JPR"
-    Then I should see console output matching "Downloading JDK from http://download.oracle.com"
-    # Then I should see console output matching "java version "1.7.0_11""
+    Then console output should contain "Installing JDK jdk-7u11-oth-JPR"
+    Then console output should contain "Downloading JDK from http://download.oracle.com"
+    # Then console output should contain "java version "1.7.0_11""
 
   Scenario: Schedule build periodically
     Given a job
@@ -175,6 +175,6 @@ Feature: Configure/build freestyle jobs
     And I use "custom_workspace" as custom workspace
     And I save the job
     And I build the job
-    Then I should see console output matching regexp "^Building in workspace (.*)custom_workspace$"
+    Then console output should match "^Building in workspace (.*)custom_workspace$"
 
 # vim: tabstop=2 expandtab shiftwidth=2

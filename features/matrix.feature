@@ -19,7 +19,7 @@ Feature: Use multi configuration job
     And I add a shell build step "ls"
     And I save the job
     And I build the job
-    Then I shoud see console output of configurations matching "+ ls"
+    Then I console output of configurations should match "+ ls"
 
   Scenario: Run touchstone builds first with resul stable
     Given a matrix job

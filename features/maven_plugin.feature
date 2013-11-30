@@ -13,9 +13,13 @@ Feature: Adds Apache Maven support
         """
     And I save the job
     And I build the job
-    Then I should see console output matching "Unpacking http://archive.apache.org/dist/maven/binaries/apache-maven-3.0.4-bin.zip"
-    Then I should see console output matching "Apache Maven 3.0.4"
-    And the build should succeed
+    Then the build should succeed
+    And console output should contain "Apache Maven 3.0.4"
+    And console output should contain
+        """
+            Unpacking http://archive.apache.org/dist/maven/binaries/apache-maven-3.0.4-bin.zip
+        """
+
 
   Scenario: Use Auto-Installed Maven2 from FreeStyle job
     Given I have Maven "2.2.1" auto-installation named "maven_2.2.1" configured
@@ -27,9 +31,13 @@ Feature: Adds Apache Maven support
         """
     And I save the job
     And I build the job
-    Then I should see console output matching "Unpacking http://archive.apache.org/dist/maven/binaries/apache-maven-2.2.1-bin.zip"
-    Then I should see console output matching "Apache Maven 2.2.1"
-    And the build should succeed
+    Then the build should succeed
+    And console output should contain "Apache Maven 2.2.1"
+    And console output should contain
+        """
+            Unpacking http://archive.apache.org/dist/maven/binaries/apache-maven-2.2.1-bin.zip
+        """
+
 
   Scenario: Use locally installed Maven from FreeStyle job
     Given fake Maven installation at "/tmp/fake-maven"
@@ -42,7 +50,7 @@ Feature: Adds Apache Maven support
         """
     And I save the job
     And I build the job
-    Then I should see console output matching "fake maven at /tmp/fake-maven/bin/mvn"
+    Then console output should contain "fake maven at /tmp/fake-maven/bin/mvn"
     And the build should succeed
 
   Scenario: Use local Maven repository from FreeStyle job
@@ -56,7 +64,7 @@ Feature: Adds Apache Maven support
     And I use local Maven repository
     And I save the job
     And I build the job
-    Then I should see console output matching regexp "-Dmaven.repo.local=([^\n]*)/.repository"
+    Then console output should match "-Dmaven.repo.local=([^\n]*)/.repository"
     And the build should succeed
 
   Scenario: Build multimodule Maven project
@@ -69,9 +77,9 @@ Feature: Adds Apache Maven support
     And I build the job
     Then the build should succeed
     And the job should have "Modules" action
-    And I should see console output matching "Building root 1.0"
-    And I should see console output matching "Building module_a 2.0"
-    And I should see console output matching "Building module_b 3.0"
+    And console output should contain "Building root 1.0"
+    And console output should contain "Building module_a 2.0"
+    And console output should contain "Building module_b 3.0"
 
   Scenario: Set maven options
     Given I have default Maven configured
@@ -82,8 +90,8 @@ Feature: Adds Apache Maven support
     And I set maven options "--quiet"
     And I save the job
     And I build the job
-    Then I should not see console output matching "[INFO]"
-    And  I should not see console output matching "[WARNING]"
+    Then console output should match "[INFO]"
+    And  console output should match "[WARNING]"
 
   Scenario: Set global maven options
     Given I have default Maven configured
@@ -94,7 +102,7 @@ Feature: Adds Apache Maven support
     And I save the job
     And I set global MAVEN_OPTS "-verbose"
     And I build the job
-    Then I should see console output matching regexp "[Loaded java\.lang\.Objects from .*jar]"
+    Then console output should match "[Loaded java\.lang\.Objects from .*jar]"
 
   @bug(17713)
   Scenario: Display job modules for Maven project
@@ -126,5 +134,5 @@ Feature: Adds Apache Maven support
     And I save the job
     And I build the job
     And I click the "Build" button
-    Then I should see console output matching "cmdline.property=C:\System"
-    And  I should see console output matching "property.property=C:\Windows"
+    Then console output should contain "cmdline.property=C:\System"
+    And  console output should contain "property.property=C:\Windows"

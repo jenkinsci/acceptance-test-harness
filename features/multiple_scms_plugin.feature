@@ -18,4 +18,4 @@ Feature: Test Multiple SCMs plugin
     And I save the job
     And I build the job
     Then the build should succeed
-    And I should see console output matching "origin git://github.com/jenkinsci/git-plugin.git"
+    And console output should contain "origin git://github.com/jenkinsci/git-plugin.git"

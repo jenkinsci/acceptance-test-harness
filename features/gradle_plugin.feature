@@ -18,7 +18,7 @@ Feature: Test Gradle plugin
     And I save the job
     And I build the job
     Then the build should succeed
-    And I should see console output matching "Hello world!"
+    And console output should contain "Hello world!"
 
   Scenario: Execute gradle script hello.gradle from gradle directory with quiet switch
     Given I have installed the "gradle" plugin
@@ -41,5 +41,5 @@ Feature: Test Gradle plugin
     And I save the job
     And I build the job
     Then the build should succeed
-    And I should see console output matching "gradle --quiet"
-    And I should see console output matching "Hello world!"
+    And console output should contain "gradle --quiet"
+    And console output should contain "Hello world!"

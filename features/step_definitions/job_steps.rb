@@ -64,14 +64,24 @@ When /^I wipe out job workspace$/ do
   @job.workspace.wipe_out!
 end
 
-Then /^I (should|should not) see console output matching "(.*)"$/ do |should_or_not, script|
+Then /^console output (should|should not) contain "(.*)"$/ do |should_or_not, script|
   build = @job.last_build.wait_until_finished
   build.console.send should_or_not, match(/#{Regexp.escape(script)}/)
 end
 
-Then /^I should see console output matching regexp "(.*)"$/ do |script|
+Then /^console output (should|should not) match "(.*)"$/ do |should_or_not, script|
   build = @job.last_build.wait_until_finished
-  build.console.should match /#{script}/
+  build.console.send should_or_not, match(/#{script}/)
+end
+
+Then /^console output (should|should not) contain$/ do |should_or_not, script|
+  build = @job.last_build.wait_until_finished
+  build.console.send should_or_not, match(/#{Regexp.escape(script)}/)
+end
+
+Then /^console output (should|should not) match$/ do |should_or_not, script|
+  build = @job.last_build.wait_until_finished
+  build.console.send should_or_not, match(/#{script}/)
 end
 
 Then /^the (job|build) (should|should not) have "([^"]*)" action$/ do |entity, should_or_not, action|

@@ -13,8 +13,8 @@ Feature: Allow to inject build environment variables
     And I add a shell build step "echo $ENV_VAR_TEST"
     And I save the job
     And I build the job
-    Then I should see console output matching regexp "^ENV_VAR_TEST=injected variable test$"
-    Then I should see console output matching regexp "^injected variable test$"
+    Then console output should match "^ENV_VAR_TEST=injected variable test$"
+    Then console output should match "^injected variable test$"
 
   Scenario: Inject environment variables to the build process via properties content
     Given I have installed the "envinject" plugin
@@ -26,8 +26,8 @@ Feature: Allow to inject build environment variables
     And I add a shell build step "echo $ENV_VAR_TEST"
     And I save the job
     And I build the job
-    Then I should see console output matching regexp "^ENV_VAR_TEST=injected variable test$"
-    Then I should see console output matching regexp "^injected variable test$"
+    Then console output should match "^ENV_VAR_TEST=injected variable test$"
+    Then console output should match "^injected variable test$"
 
   Scenario: Inject environment variables as a build step via properties content
     Given I have installed the "envinject" plugin
@@ -39,5 +39,5 @@ Feature: Allow to inject build environment variables
     And I add a shell build step "echo $ENV_VAR_TEST"
     And I save the job
     And I build the job
-    Then I should see console output matching regexp "^ENV_VAR_TEST=injected variable test$"
-    Then I should see console output matching regexp "^injected variable test$"
+    Then console output should match "^ENV_VAR_TEST=injected variable test$"
+    Then console output should match "^injected variable test$"

@@ -43,7 +43,7 @@ Then /^the configuration "([^"]*)" should be built on "([^"]*)"$/ do |configurat
   config.last_build.wait_until_finished.console.should match expression
 end
 
-Then /^I shoud see console output of configurations matching "([^"]*)"$/ do |script|
+Then /^I console output of configurations should match "([^"]*)"$/ do |script|
   @job.last_build.wait_until_finished
   configurations = @job.configurations
   index = 0
