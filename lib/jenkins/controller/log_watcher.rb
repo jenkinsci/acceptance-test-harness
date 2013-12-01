@@ -7,8 +7,9 @@ class LogWatcher
   #       Raw console output from Jenkins
   # @arg [IO]   log
   #       Log output from Jenkins that's read from 'pipe' gets written here.
-  # @arg [Regexp]   pattern
-  def initialize(pipe,log,pattern=/: Completed initialization/)
+  def initialize(pipe,log,opts={})
+    pattern = opts[:pattern] || /: Completed initialization/
+    silent = opts[:silent] || false
     @ready = false
     @log_regex = nil
     @log_found = false
@@ -26,9 +27,9 @@ class LogWatcher
         # earlier version of Jenkins doesn't have this line
         # if line =~ /INFO: Jenkins is fully up and running/
         if line =~ pattern
-          puts " Jenkins completed initialization"
+          puts " Jenkins completed initialization" unless silent
           @ready = true
-        else
+        elseif !silent
           print '.' if (@line_count%5)==0
           @line_count+=1
           STDOUT.flush

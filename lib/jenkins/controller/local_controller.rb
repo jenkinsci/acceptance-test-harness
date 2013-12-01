@@ -37,8 +37,7 @@ class LocalJenkinsController < JenkinsController
   end
 
   def start!
-    puts
-    print "    Bringing up a temporary Jenkins instance"
+    print "\n    Bringing up a temporary Jenkins instance" unless @opts[:silent]
     bring_up!
 
     # still seeing occasional first page load problem. adding a bit more delay
@@ -91,7 +90,7 @@ class LocalJenkinsController < JenkinsController
     @pipe = start_process
     @pid = @pipe.pid
 
-    @log_watcher = LogWatcher.new(@pipe,@log)
+    @log_watcher = LogWatcher.new(@pipe,@log, silent: @opts[:silent])
     @log_watcher.wait_for_ready
   end
 end

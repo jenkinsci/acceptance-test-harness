@@ -68,12 +68,12 @@ class CachedJenkinsControllerFactory < JenkinsControllerFactory
 
   def create(opts)
     opts = opts.clone
+    opts[:silent] = opts[:silent] || true
 
     x = @cache[opts]
     if x.nil?   # no cached instance available, need to launch
       x = @nested.create(opts)
     else
-      puts "Waiting for pre-launched instance to complete initialization"
       x = x.__force__    # retrieve the promised value
     end
 
