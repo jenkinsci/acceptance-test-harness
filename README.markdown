@@ -44,7 +44,7 @@ it's own sandboxed workspace.
 This test harness has an abstraction called `JenkinsController` that allows you to use different logic
 for starting/stopping Jenkins. We use this to so that the same set of tests can be run against many different ways of launching Jenkins, such as `java -jar jenkins.war`, Jenkins on JBoss, Jenkins via debian package, etc.
 
-See [the source code](master/lib/jenkins/controller/) for the list of available controllers. If you see a line like
+See [the source code](lib/jenkins/controller/) for the list of available controllers. If you see a line like
 `register :remote_sysv`, that means the ID of that controller is `remote_sysv`.
 
 To select a controller, run the test with the 'type' environment variable set to the controller ID, such as:
