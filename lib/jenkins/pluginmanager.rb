@@ -42,15 +42,16 @@ module Jenkins
         check_for_updates
       end
 
-      visit "#{url}/available"
-      first(:xpath, "//input[starts-with(@name,'plugin.#{name}.')]").set(true)
-      find_button('Install').click
+      install! name
 
       start = Time.now.to_i
-
+      try_again = true
       wait_for_cond(timeout: 180, message: "Plugin installation took too long") do
-        failed = $jenkins.log.has_logged? /IOException: (?<msg>Failed to download from .*\.hpi)/
-        raise failed[:msg] if failed
+        if try_again && $jenkins.log.has_logged?(/: (?<msg>Failed to download from .*\.hpi)/)
+          puts "Plugin installation failed. Retrying."
+          install! name
+          try_again = false
+        end
         installed? name
       end
 
@@ -63,11 +64,15 @@ module Jenkins
       # restart at most once per scenario
       visit '/updateCenter'
       if page.has_content?('Jenkins needs to be restarted for the update to take effect')
-        raise RestartNeeded.new
+        raise Jenkins::RestartNeeded.new
       end
     end
 
-    class RestartNeeded < Exception
+    private
+    def install!(name)
+      visit "#{url}/available"
+      first(:xpath, "//input[starts-with(@name,'plugin.#{name}.')]").set(true)
+      find_button('Install').click
     end
   end
 end
