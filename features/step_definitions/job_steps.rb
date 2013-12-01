@@ -76,12 +76,12 @@ end
 
 Then /^console output (should|should not) contain$/ do |should_or_not, script|
   build = @job.last_build.wait_until_finished
-  build.console.send should_or_not, match(/#{Regexp.escape(script)}/)
+  build.console.send should_or_not, match(/#{Regexp.escape(script.strip)}/)
 end
 
 Then /^console output (should|should not) match$/ do |should_or_not, script|
   build = @job.last_build.wait_until_finished
-  build.console.send should_or_not, match(/#{script}/)
+  build.console.send should_or_not, match(/#{script.strip}/)
 end
 
 Then /^the (job|build) (should|should not) have "([^"]*)" action$/ do |entity, should_or_not, action|
