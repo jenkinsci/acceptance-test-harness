@@ -29,10 +29,12 @@ class LogWatcher
         if line =~ pattern
           puts " Jenkins completed initialization" unless silent
           @ready = true
-        elseif !silent
-          print '.' if (@line_count%5)==0
-          @line_count+=1
-          STDOUT.flush
+        else
+          unless silent
+            print '.' if (@line_count%5)==0
+            @line_count+=1
+            STDOUT.flush
+          end
         end
       end
       @ready = false
