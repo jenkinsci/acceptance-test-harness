@@ -9,4 +9,4 @@ bundle update
 
 curl -s -o jenkins.war $WAR_URL
 
-JENKINS_WAR=jenkins.war bundle exec rake
+PRELAUNCH=true JENKINS_WAR=jenkins.war bundle exec rake
