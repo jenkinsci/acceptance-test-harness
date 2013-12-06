@@ -106,10 +106,6 @@ Then /^the (\d+) builds should run concurrently$/ do |count|
   end
 end
 
-Then /^I should be prompted to enter the "(.*?)" parameter$/ do |param_name|
-  page.should have_xpath("//input[@value='#{param_name}']", :visible => false)
-end
-
 Then /^the build should (succeed|fail)$/ do |status|
   expected = status == 'succeed'
   @job.last_build.succeeded?.should eql(expected), "\nConsole output:\n#{@job.last_build.console}\n\n"

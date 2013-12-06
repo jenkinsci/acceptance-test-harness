@@ -38,10 +38,13 @@ Feature: Configure/build freestyle jobs
     When I configure the job
     And I add a string parameter "Foo"
     And I add a string parameter "Bar"
+    And I add a shell build step "echo $Foo '!=' $Bar"
     And I save the job
-    And I build the job
-    Then I should be prompted to enter the "Foo" parameter
-    And  I should be prompted to enter the "Bar" parameter
+    And I build the job with parameters
+        | Foo | val |
+        | Bar | var |
+    Then the build should succeed
+    And console output should contain "val != var"
 
   Scenario: Disable a job
     Given a job
@@ -74,7 +77,8 @@ Feature: Configure/build freestyle jobs
     And I save the job
     And I visit the home page
     And I build "viewed_job" in view
-    Then I should be prompted to enter the "Foo" parameter
+    Then the page should say "This build requires parameters:"
+    Then the page should say "Foo"
 
   Scenario: Do not discard build kept forever
     Given a simple job
