@@ -28,8 +28,9 @@ Feature: Monitor disk usage builds and jobs
         """
             touch file
         """
-    And I enable disk usage graph on the project page
     And I build the job
+    And I enable disk usage graph on the project page
+    And I update disk usage
     Then the job workspace should occupy some space
     When I wipe out job workspace
     And I update disk usage
