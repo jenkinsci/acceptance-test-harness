@@ -46,4 +46,7 @@ module Jenkins
       @controller.log_watcher
     end
   end
+
+  class RestartNeeded < Exception
+  end
 end
