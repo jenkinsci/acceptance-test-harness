@@ -34,7 +34,15 @@ Then /^the job should be tied to the slave$/ do
 end
 
 Then /^the build should run on the slave$/ do
-  @job.last_build.console.should include "Building remotely on #{@slave.name}"
+  @job.last_build.wait_until_finished.node.should eq @slave.name
+end
+
+Then /^the build should run on "(.*?)"$/ do |name|
+  @job.last_build.wait_until_finished.node.should eq name
+end
+
+Then /^the build #(\d+) should run on "(.*?)"$/ do |number, name|
+  @job.build(number).wait_until_finished.node.should eq name
 end
 
 Then /^I should see "([^"]*)" executors configured$/ do |count|

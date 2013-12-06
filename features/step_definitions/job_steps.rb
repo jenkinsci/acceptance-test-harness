@@ -26,6 +26,10 @@ When /^I build the job$/ do
   @job.queue_build
 end
 
+When /^I build the job with parameters?$/ do |table|
+  @job.queue_build table.rows_hash
+end
+
 When /^I save the job$/ do
   @job.save
 end

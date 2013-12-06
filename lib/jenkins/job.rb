@@ -9,6 +9,7 @@ module Jenkins
     attr_accessor :timeout
 
     def initialize(*args)
+      @parameters = []
       @timeout = 60 # Default all builds for this job to a 60s timeout
       super(*args)
     end
@@ -51,7 +52,9 @@ module Jenkins
     def add_parameter(type)
       ensure_config_page
 
-      return Jenkins::Parameter.add(self, type)
+      parameter = Jenkins::Parameter.add(self, type)
+      @parameters << parameter
+      return parameter
     end
 
     def add_build_step(type)
@@ -119,19 +122,23 @@ eos
     #
     # If the job isn't parameterized, this method waits for it to start then return it
     # @return [Jenkins::Build]    only if this job isn't parameterized.
-    def queue_build
+    def queue_build(params={})
       nb = json["nextBuildNumber"]
 
       suffix = '/build?delay=0sec'
       visit url + suffix
 
-      if !page.has_button?('Build')
-        # Build scheduled immediately
-        # wait for the build to start before we go back
-        build(nb).wait_until_started
-      else
-        # We are waiting for parameters
+      # Fill configured parameters with provided values
+      if !@parameters.empty?
+        @parameters.each do |definition|
+          value = params[definition.name]
+          definition.fill_with value if !value.nil?
+        end
+
+        click_button 'Build'
       end
+
+      build(nb).wait_until_started
     end
 
     def label_expression=(expression)

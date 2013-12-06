@@ -54,12 +54,10 @@ Feature: Use multi configuration job
     And I set combination filter to "run=='yes' || (run=='maybe' && condition=='true')"
     And I add a string parameter "condition"
     And I save the job
-    And I build the job
-    And I set "condition" parameter to "false"
-    And I click the "Build" button
-    And I build the job
-    And I set "condition" parameter to "true"
-    And I click the "Build" button
+    And I build the job with parameter
+        | condition | false |
+    And I build the job with parameter
+        | condition | true |
     Then combination "run=yes" should be built in build 1
     Then combination "run=yes" should be built in build 2
     Then combination "run=maybe" should not be built in build 1

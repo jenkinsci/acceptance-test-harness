@@ -41,6 +41,12 @@ module Jenkins
       end
     end
 
+    def node
+      slave = json['builtOn']
+      return 'master' if slave == ''
+      return slave
+    end
+
     def result?
       wait_until_finished
 

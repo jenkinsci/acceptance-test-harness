@@ -61,19 +61,14 @@ When /^I enable concurrent builds$/ do
 end
 
 When /^I add a string parameter "([^"]*)"$/ do |name|
-  parameter = @job.add_parameter("String Parameter")
-  parameter.name(name)
+  parameter = @job.add_parameter "String Parameter"
+  parameter.name = name
 end
 
 When /^I add a string parameter "([^"]*)" defaulting to "(.*?)"$/ do |name, default|
-  parameter = @job.add_parameter("String Parameter")
-  parameter.name(name)
-  parameter.default(default)
-end
-
-When /^I set "([^"]*)" parameter to "([^"]*)"$/ do |name, value|
-  input = find(:xpath, "//td[@class='setting-name' and text()='#{name}']/../td[@class='setting-main']//input[@type='text']")
-  input.set(value)
+  parameter = @job.add_parameter "String Parameter"
+  parameter.name = name
+  parameter.default = default
 end
 
 When /^I disable the job$/ do
