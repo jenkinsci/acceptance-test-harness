@@ -133,6 +133,5 @@ Feature: Adds Apache Maven support
        """
     And I save the job
     And I build the job
-    And I click the "Build" button
     Then console output should contain "cmdline.property=C:\System"
     And  console output should contain "property.property=C:\Windows"
