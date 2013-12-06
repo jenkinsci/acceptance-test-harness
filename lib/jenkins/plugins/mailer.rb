@@ -8,7 +8,7 @@ module Plugins
     register 'Mailer', 'E-mail Notification'
 
     def recipients(recipients)
-      find(:path, path('mailer_recipients')).set recipients
+      find(:path, path('recipients')).set recipients
     end
   end
 
