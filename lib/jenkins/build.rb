@@ -38,6 +38,8 @@ module Jenkins
       @console ||= begin
         visit(console_url)
         find(:xpath, "//pre").plain
+      rescue Capybara::Ambiguous
+        find(:xpath, "//pre[@id='out']").plain
       end
     end
 
