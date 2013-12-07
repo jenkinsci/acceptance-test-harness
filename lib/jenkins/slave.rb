@@ -43,11 +43,19 @@ module Jenkins
     include Slaveish
 
     def configure_url
-      @base_url + "/computer/#{@name}/configure"
+      url + "configure"
     end
 
     def json_api_url
-      @base_url + "/computer/#{@name}/api/json"
+      url + "api/json"
+    end
+
+    def url
+      "#{@base_url}/computer/#{name}/"
+    end
+
+    def build_history
+      BuildHistory.new self
     end
 
     def online?
@@ -89,6 +97,43 @@ module Jenkins
       end
 
       return slave
+    end
+  end
+
+  class Master < Slave
+
+    def initialize(base_url)
+      super(base_url, 'master')
+    end
+
+    def url
+      "#{@base_url}/computer/(#{name})/"
+    end
+  end
+
+  class BuildHistory < PageObject
+
+    def initialize(node)
+      super(node.base_url, 'Builds on ' + node.name)
+      @node = node
+    end
+
+    def url
+      @node.url + '/builds'
+    end
+
+    def include?(job_or_build)
+      visit url
+      page.should have_link_to job_or_build
+    end
+
+    private
+    def have_link_to(node)
+      have_xpath "//a[@href='#{relative_url(node.url)}/']"
+    end
+
+    def relative_url(url)
+      url.gsub(@base_url, '')
     end
   end
 end

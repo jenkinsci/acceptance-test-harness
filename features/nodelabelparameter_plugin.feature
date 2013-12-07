@@ -40,5 +40,6 @@ Feature: Use node name and label as parameter
     And I save the job
     And I build the job with parameter
         | slavename | slave42, master |
-    Then the build #1 should run on "slave42"
-    Then the build #2 should run on "master"
+    Then the job should have 2 builds
+    And  the job should be built on "master"
+    And  the job should be built on "slave42"
