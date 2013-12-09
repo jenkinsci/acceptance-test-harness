@@ -15,8 +15,14 @@ module Jenkins
 
     def wipe_out!
       open
-      click_link 'Wipe Out Current Workspace'
-      page.driver.browser.switch_to.alert.accept
+      begin
+        click_link 'Wipe Out Current Workspace'
+        page.driver.browser.switch_to.alert.accept
+      rescue Capybara::ElementNotFound
+        click_link 'Wipe Out Workspace'
+        click_button 'Yes'
+      end
+
     end
 
     def contains(filename)
