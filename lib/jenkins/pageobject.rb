@@ -81,14 +81,16 @@ module Jenkins
       end
     end
 
-    # repeatedly evaluate the given block until it returns true
-    # if the method keeps returning false for :timeout seconds, a test is considered a failure
+    # repeatedly evaluate the given block until it returns true-ish
+    # if the method keeps returning false for :timeout seconds, an Exception is thrown
+    # @return true-ish returned from block
     def wait_for_cond(opts={}, &block)
       timeout = opts[:timeout] || 30
       message = opts[:message] || "Failed to wait for condition #{block}"
       start = Time.now.to_i
       while true
-        return if block.call
+        ret = block.call
+        return ret if ret
         raise message if (Time.now.to_i - start) >= timeout
         sleep 1
       end

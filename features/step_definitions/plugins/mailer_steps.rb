@@ -1,5 +1,5 @@
 Given /^a default mailer setup$/ do
-  @mailer = Jenkins::JenkinsConfig.new(@base_url, 'Jenkins global configuration').mailer
+  @mailer = $jenkins.configure.mailer
   @mailer.setup_defaults
 end
 
@@ -15,10 +15,8 @@ When /^I configure mail notification for "(.*?)"$/ do |recipients|
 end
 
 Then /^a mail message "(.*?)" for "(.*?)" should match$/ do |subject, recipients, body|
-  message = nil
-  while message.nil? do
-    sleep 1
-    message = @mailer.mail subject
+  message = $jenkins.configure.wait_for_cond(message: "Email not delivered in time") do
+    @mailer.mail subject
   end
 
   message.subject.should match subject
