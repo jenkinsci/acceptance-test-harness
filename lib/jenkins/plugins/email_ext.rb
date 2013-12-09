@@ -11,6 +11,8 @@ module Plugins
 
     def recipient=(recipient)
       control("project_recipient_list").set recipient
+    rescue Capybara::ElementNotFound
+      control("recipientlist_recipients").set recipient
     end
 
     def body=(body)
