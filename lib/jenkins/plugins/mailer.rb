@@ -8,7 +8,9 @@ module Plugins
     register 'Mailer', 'E-mail Notification'
 
     def recipients(recipients)
-      find(:path, path('recipients')).set recipients
+      control('recipients').set recipients
+    rescue Capybara::ElementNotFound
+      control('mailer_recipients').set recipients
     end
   end
 
