@@ -12,10 +12,9 @@ Feature: Test Multiple SCMs plugin
     And I add a shell build step
         """
             test -d model-ant-project/.svn
-            cd git-plugin
-            git remote -v
+            cd git-plugin/
+            test -f pom.xml
         """
     And I save the job
     And I build the job
     Then the build should succeed
-    And console output should contain "origin git://github.com/jenkinsci/git-plugin.git"

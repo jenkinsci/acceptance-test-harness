@@ -7,11 +7,10 @@ Feature:  Allow use of Git as a build SCM
     Given I have installed the "git" plugin
     And a job
     When I check out code from Git repository "git://github.com/jenkinsci/git-plugin.git"
-    And I add a shell build step "git remote -v"
+    And I add a shell build step "test -f pom.xml"
     And I save the job
     And I build the job
     Then the build should succeed
-    And console output should contain "origin git://github.com/jenkinsci/git-plugin.git"
 
   Scenario: Checkout branch from Git repository
     Given I have installed the "git" plugin
@@ -56,20 +55,18 @@ Feature:  Allow use of Git as a build SCM
                 exit 1
             fi
             cd selenium_test_dir
-            git remote -v
+            test -f pom.xml
         """
     And I save the job
     And I build the job
     Then the build should succeed
-    And console output should contain "origin git://github.com/jenkinsci/git-plugin.git"
 
   Scenario: Simple checkout from Git repository
     Given I have installed the "git" plugin
     And a job
     When I check out code from Git repository "git://github.com/jenkinsci/git-plugin.git"
     And I setup Git repo name to "selenium_test_repo"
-    And I add a shell build step "git remote -v"
+    And I add a shell build step "test -f pom.xml"
     And I save the job
     And I build the job
     Then the build should succeed
-    And console output should contain "selenium_test_repo git://github.com/jenkinsci/git-plugin.git"
