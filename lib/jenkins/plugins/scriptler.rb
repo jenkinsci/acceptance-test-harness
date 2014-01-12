@@ -18,7 +18,7 @@ module Jenkins
         find(:path, '/id').set(id)
         find(:path, '/name').set(id)
 
-        textarea = Jenkins::Util::CodeMirror.new(page, find(:path, '/script', :visible => false))
+        textarea = Jenkins::Util::CodeMirror.new(page, '/script')
         textarea.set_content script
 
         click_button 'Submit'

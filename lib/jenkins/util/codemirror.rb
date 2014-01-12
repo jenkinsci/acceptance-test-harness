@@ -5,10 +5,11 @@ module Jenkins
     # This implementation creates new instance as it can not reach the original
     # one. Ugly but working.
     class CodeMirror
+      include Capybara::DSL
 
       def initialize(page, textarea)
         @page = page
-        @textarea = textarea
+        @textarea = find(:path, textarea, :visible => false)
       end
 
 
