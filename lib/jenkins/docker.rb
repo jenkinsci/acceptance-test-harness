@@ -48,16 +48,21 @@ module Jenkins
           cmd = " #{cmd}"
         end
 
-        cid = tempfile('cid')
+        cid_file = tempfile('cid')
 
         log = tempfile('docker-log')
 
-        pid = spawn("#{DOCKER} run -cidfile=#{cid} #{opts} #{@name}#{cmd}", :in => '/dev/null', :err =>[:child,:out], :out => log)
+        pid = spawn("#{DOCKER} run -cidfile=#{cid_file} #{opts} #{@name}#{cmd}", :in => '/dev/null', :err =>[:child,:out], :out => log)
 
         sleep 1   # TODO: properly wait for either cidfile to appear or process to exit
 
-        if File.exists?(cid)
-          cid = File.read(cid)
+        if File.exists?(cid_file)
+          cid = ''
+          loop do
+            cid = File.read(cid_file)
+            break if cid != ''
+            sleep 0.5
+          end
           # rename the log file to match the container name
           logfile = "#{Dir.tmpdir}/#{cid}.log"
           File.rename log, logfile
