@@ -14,5 +14,15 @@ module Plugins
         find(:path,"#{path}/site/keyfile").set(privatekey)
       end
     end
+
+    class Publisher < Jenkins::PostBuildStep
+      register 'Publish artifacts to SCP Repository', 'Publish artifacts to SCP Repository'
+
+      def add(source, destination)
+        control('repeatable-add').click()
+        control('entries/sourceFile').set(source)
+        control('entries/filePath').set(destination)
+      end
+    end
   end
 end

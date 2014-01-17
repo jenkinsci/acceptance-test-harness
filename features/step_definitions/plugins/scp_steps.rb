@@ -8,10 +8,8 @@ When /^I configure docker fixture as SCP site$/ do
 end
 
 When /^I publish "([^"]*)" with SCP plugin$/ do |files|
-  section = find(:xpath, "//div[@descriptorId='be.certipost.hudson.plugin.SCPRepositoryPublisher']")
-  section.find(:path, '/publisher/repeatable-add').click()
-  section.find(:path, '/publisher/entries/sourceFile').set(files)
-  section.find(:path, '/publisher/entries/filePath').set(files)
+  step = @job.add_postbuild_step('Publish artifacts to SCP Repository')
+  step.add(files, files)
 end
 
 When /^SCP plugin should have published "([^"]*)" on docker fixture$/ do |name|
