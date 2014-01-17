@@ -15,7 +15,6 @@ Feature: Auto-deployment to application server via deploy plugin
       cd my-webapp
       mvn install
     """
-    And I add "Deploy war/ear to a container" post-build action
     And I deploy "my-webapp/target/*.war" to docker tomcat7 fixture at context path "test"
     And I save the job
     And I build the job
