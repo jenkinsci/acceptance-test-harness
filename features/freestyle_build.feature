@@ -181,4 +181,20 @@ Feature: Configure/build freestyle jobs
     And I build the job
     Then console output should match "^Building in workspace (.*)custom_workspace$"
 
-# vim: tabstop=2 expandtab shiftwidth=2
+  @Bug(21457)
+  Scenario: Show error message after apply
+    Given a job
+    When I configure the job
+    And I schedule job to run periodically at "not_a_time"
+    And I click the "Apply" button
+    Then the error description should contain
+        """
+        Invalid input: "not_a_time"
+        """
+    And I close the error dialog
+    And I schedule job to run periodically at "not_a_time_either"
+    And I click the "Apply" button
+    Then the error description should contain
+        """
+        Invalid input: "not_a_time_either"
+        """

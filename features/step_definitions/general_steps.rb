@@ -33,10 +33,18 @@ When /^I wait for (\d+) seconds?$/ do |seconds|
   sleep seconds.to_i
 end
 
+When /^I close the error dialog$/ do
+  click_link 'Close'
+end
+
 Then /^the page (should|should not) say "([^"]*)"$/ do |should_or_not, content|
   page.send should_or_not, have_content(content)
 end
 
 Then(/^I will write the rest of the test$/) do
   pending
+end
+
+Then /^the error description should contain$/ do |text|
+  find(:css, "#error-description pre").text.should include text
 end
