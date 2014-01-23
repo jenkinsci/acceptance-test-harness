@@ -181,7 +181,7 @@ Feature: Configure/build freestyle jobs
     And I build the job
     Then console output should match "^Building in workspace (.*)custom_workspace$"
 
-  @Bug(21457)
+  @bug(21457) @bug(20772) @bug(21478)
   Scenario: Show error message after apply
     Given a job
     When I configure the job
