@@ -61,8 +61,12 @@ if [ ! -f $war ]; then
         ;;
     esac
 
-    if [ ! -f $war ] && [ -n "$url" ]; then
-        curl -sL -o $war $url
+    if [ -n "$url" ]; then
+        find $war -maxdepth 0 -mtime +1 -delete 2> /dev/null
+        if [ ! -f $war ]; then
+            echo "Fetching $war"
+            curl -sL -o $war $url
+        fi
     fi
 fi
 
