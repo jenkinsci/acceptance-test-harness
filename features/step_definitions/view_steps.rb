@@ -10,6 +10,10 @@ When /^I create a view with a type "([^"]*)" and name "([^"]*)"$/ do |type, name
   @view = Jenkins::View.create_view(@base_url, name, type)
 end
 
+When /^I create a view named "(.*?)"$/ do |name|
+  @view = Jenkins::View.create_view(@base_url, name, "List View")
+end
+
 When /^I create job "(.*?)" in the view$/ do |name|
   @job = Jenkins::Job.create_named 'FreeStyle', @view.url, name
 end

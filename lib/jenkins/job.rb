@@ -125,8 +125,7 @@ eos
     def queue_build(params={})
       nb = json["nextBuildNumber"]
 
-      suffix = '/build?delay=0sec'
-      visit url + suffix
+      visit build_url
 
       # Fill configured parameters with provided values
       if !@parameters.empty?
@@ -139,6 +138,10 @@ eos
       end
 
       build(nb).wait_until_started
+    end
+
+    def build_url
+      url + '/build?delay=0sec'
     end
 
     def label_expression=(expression)

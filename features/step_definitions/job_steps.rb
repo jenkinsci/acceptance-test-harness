@@ -22,6 +22,10 @@ When /^I copy the job named "([^"]*)" from job named "([^"]*)"$/ do |name, sourc
   @job = Jenkins::Job.copy_job(@base_url, name, source_job_name)
 end
 
+When /^I queue a build$/ do
+  visit @job.build_url
+end
+
 When /^I build the job$/ do
   @job.queue_build
 end

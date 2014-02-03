@@ -49,3 +49,8 @@ Then /^I should see "([^"]*)" executors configured$/ do |count|
   visit("/computer/#{@slave.name}")
   @slave.executor_count.should == count.to_i
 end
+
+Then /^jobs should be executed in order on the slave$/ do |table|
+  visit @slave.url + '/builds'
+  page.text.should match table.raw[0].reverse.join('.*')
+end
