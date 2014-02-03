@@ -57,6 +57,10 @@ module Jenkins
     def log
       @controller.log_watcher
     end
+
+    def logger(name)
+      Jenkins::Logger.new name
+    end
   end
 
   class RestartNeeded < Exception

@@ -2,7 +2,7 @@
 # It is supposed to be ready after this step.
 Given /^I have set up the Audit Trail plugin$/ do
   step 'I have installed the "audit-trail" plugin'
-  @auditTrail = Plugins::AuditTrail.new @base_url
+  @auditTrail = $jenkins.logger 'Audit Trail'
 end
 
 Then /^the audit trail should be empty$/ do

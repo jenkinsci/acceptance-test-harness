@@ -1,6 +1,5 @@
 Feature: Audit trail plugin
 
-  @realtupdatecenter
   Scenario: Trail should be empty after installation
     Given I have set up the Audit Trail plugin
     Then the audit trail should be empty
