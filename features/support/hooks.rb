@@ -41,5 +41,5 @@ After do |scenario|
 end
 
 After("~@nojenkins") do |scenario|
-  @runner.diagnose if scenario.failed?
+  @runner.diagnose if @runner && scenario.failed?
 end
