@@ -1,9 +1,5 @@
 module Jenkins
   module Util
-    # Interact with code mirror instance.
-    #
-    # This implementation creates new instance as it can not reach the original
-    # one. Ugly but working.
     class CodeMirror
       include Capybara::DSL
 
@@ -12,25 +8,30 @@ module Jenkins
         @textarea = find(:path, textarea, :visible => false)
       end
 
-
       def set_content(content)
-        @page.execute_script %{
-          #{code_mirror_instance}.setValue("#{content}")
-        }
+        @page.execute_script script content
       end
 
       private
-      def code_mirror_instance
+      # This implementation relies on 'codemirrorObject' attached to the textarea.
+      # In case it does not exist (plugin creates codemirror enhanced textarea
+      # in a nonstandard way) it creates new instance as it can not reach
+      # the original one. This used to work for scriptler.
+      def script(content)
+        content = content.gsub "\n", '\n'
+        xpath = "//*[@path='#{@textarea[:path]}']"
         return %{
-            CodeMirror.fromTextArea(#{get_element(@textarea[:path])})
-        }
-      end
+            textarea = document.evaluate(
+                "#{xpath}", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null
+            ).singleNodeValue;
 
-      def get_element(path)
-
-        return %{document.evaluate(
-            "//*[@path='#{path}']", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null
-        ).singleNodeValue}
+            codemirror = textarea.codemirrorObject;
+            if (codemirror == null) {
+              codemirror = CodeMirror.fromTextArea(textarea)
+            }
+            codemirror.setValue("#{content}");
+            codemirror.focus();
+          }
       end
     end
   end

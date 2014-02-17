@@ -24,20 +24,11 @@ module Capybara
       end
 
       def check
-        ensure_checkbox.set(true)
+        ensure_checkable.set(true)
       end
 
       def uncheck
-        ensure_checkbox.set(true)
-      end
-
-      def ensure_checkbox
-        type = self[:type]
-        elementDescription = !type ? tag_name : "#{tag_name} of type #{type}"
-
-        raise "Element #{elementDescription} is not checkbox" if type != 'checkbox'
-
-        return self
+        ensure_checkable.set(false)
       end
 
       def plain
@@ -46,6 +37,18 @@ module Capybara
 
       def select(opition)
         self.find(:option, opition).select_option
+      end
+
+      private
+      def ensure_checkable
+        type = self[:type]
+        elementDescription = !type ? tag_name : "#{tag_name} of type #{type}"
+
+        if type != 'checkbox' && type != 'radio'
+          raise "Element #{elementDescription} is not checkbox nor radio"
+        end
+
+        return self
       end
     end
   end

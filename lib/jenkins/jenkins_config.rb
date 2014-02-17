@@ -43,6 +43,13 @@ module Jenkins
       find(:path, '/jenkins-model-MasterBuildConfiguration/numExecutors').set v.to_s
     end
 
+    def add_tool_installer(title)
+      click_button "Add #{title}"
+
+      type = Jenkins::ToolInstaller.get title
+      return type.new self
+    end
+
     def add_tool(name)
       click_button(name)
     end

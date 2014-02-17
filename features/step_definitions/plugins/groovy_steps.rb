@@ -1,40 +1,39 @@
 Given /^I have Groovy "([^"]*)" auto-installation named "([^"]*)" configured$/ do |version, name|
   @runner.wait_for_updates 'Groovy'
-  @jenkins_config = Jenkins::JenkinsConfig.get(@base_url, 'Jenkins global configuration')
-  @jenkins_config.configure do
-    @jenkins_config.add_tool("Groovy")
-    Plugins::Groovy.add_auto_installation(name, version)
+  $jenkins.configure do
+    tool = $jenkins.configure.add_tool_installer 'Groovy'
+    tool.name = name
+    tool.install_version = version
   end
 end
 
 Given /^I have Groovy "([^"]*)" installed in "([^"]*)" configured$/ do |name, groovy_home|
-  @jenkins_config = Jenkins::JenkinsConfig.get(@base_url, 'Jenkins global configuration')
-  @jenkins_config.configure do
-    @jenkins_config.add_tool("Groovy")
-    Plugins::Groovy.add_local_installation(name, groovy_home)
+  $jenkins.configure do
+    tool = $jenkins.configure.add_tool_installer 'Groovy'
+    tool.name = name
+    tool.home = groovy_home
   end
 end
 
-When /^I set groovy script from file "([^"]*)"$/ do |script|
-  @job.find(:xpath,"//input[@type='radio'][(following-sibling::label[1]/text()='Groovy script file') or (normalize-space(../text())='Groovy script file')]").click
-  @job.find(:xpath,"//input[@name='groovy.scriptFile']").set(script)
+When /^I add system groovy script step$/ do |script|
+  step = @job.add_build_step 'System groovy'
+  step.command = script
 end
 
-When /^I set groovy script$/ do |file|
-  @job.find(:xpath,"//input[@type='radio'][(following-sibling::label[1]/text()='Groovy command') or (normalize-space(../text())='Groovy command')]").click
-  @job.find(:xpath,"//textarea[@name='groovy.command']").set(file)
+When /^I add groovy script step$/ do |script|
+  step = @job.add_build_step 'Groovy'
+  step.command = script
 end
 
-When /^I set groovy build step "([^"]*)"$/ do |step_name|
-  @job.ensure_config_page
-  find(:xpath, "//button[text()='Add build step']").click
-  find(:xpath, "//a[text()='#{step_name}']").click
+When /^I add groovy script step using "(.*?)"$/ do |groovy, script|
+  step = @job.add_build_step 'Groovy'
+  step.version = groovy
+  step.command = script
 end
 
-When /^I select groovy named "([^\"]*)"$/ do |name|
-  @job.ensure_config_page
-  find(:xpath, "//select[@name='groovy.groovyName']").click
-  find(:xpath, "//option[@value='#{name}']").click
+When /^I add groovy file step "(.*?)"$/ do |path|
+  step = @job.add_build_step 'Groovy'
+  step.file = path
 end
 
 # this needs preinstalled groovy to work
