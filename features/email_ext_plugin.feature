@@ -7,7 +7,6 @@ Feature: Adds support for editable email configuration
     Given I have installed the "email-ext" plugin
     And a default mailer setup
     And a job
-    When I configure the job
     And I add always fail build step
     And I configure editable email "Modified $DEFAULT_SUBJECT" for "dev@example.com"
         """
