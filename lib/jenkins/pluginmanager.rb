@@ -21,7 +21,7 @@ module Jenkins
     def check_for_updates
       visit "#{url}/checkUpdates"
 
-      wait_for("//span[@id='completionMarker' and text()='Done']", timeout: 60)
+      wait_for("//span[@id='completionMarker' and text()='Done']", timeout: 100)
 
       @updated = true
       # This is totally arbitrary, it seems that the Available page doesn't
