@@ -10,7 +10,7 @@ module Jenkins
       find(:xpath, "//input[@name='parameterized']").check
       find(:xpath, "//button[text()='Add Parameter']").click
       find(:xpath, "//a[text()='#{title}']").click
-      sleep 0.1
+      sleep 0.5
       prefix = all(:xpath, "//div[@name='parameter']").last[:path]
 
       return get(title).new(job, prefix)
