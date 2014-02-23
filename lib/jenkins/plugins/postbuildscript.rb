@@ -17,7 +17,7 @@ module Plugins
           click_link '[PostBuildScript] - Execute a set of scripts'
         end
 
-        sleep 1
+        sleep 2
         prefix = all(:xpath, "//div[@name='publisher']").last[:path]
 
         return self.new(job, prefix)
