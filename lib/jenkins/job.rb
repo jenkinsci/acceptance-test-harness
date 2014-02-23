@@ -37,6 +37,13 @@ module Jenkins
 
     def configure(&block)
       visit configure_url
+
+      # Turn off leave page confirmation. When scenario fails on job config page
+      # in firefox, next scenario navigates away without confirmation resulting
+      # to failure of all consecutive scenarios with Selenium::WebDriver::Error
+      # ::UnhandledAlertError). There might be more elegant way to fix this.
+      page.evaluate_script 'window.onbeforeunload = null';
+
       unless block.nil?
         yield self
         save
