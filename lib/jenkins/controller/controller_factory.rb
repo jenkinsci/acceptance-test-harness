@@ -80,7 +80,11 @@ class CachedJenkinsControllerFactory < JenkinsControllerFactory
     # pre-launch the next instance asynchronously
     @cache[opts] = future do
       y = @nested.create(opts)
-      y.prestart
+      begin
+        y.prestart
+      rescue => ex
+        FailedController.new ex, y
+      end
       y
     end
 
@@ -93,5 +97,23 @@ class CachedJenkinsControllerFactory < JenkinsControllerFactory
       c.stop
       c.teardown
     end
+  end
+end
+
+# Wrapper controller that failed to start. Meant to be passed to test runner
+# thread to be diagnosed at predictable time.
+class FailedController
+
+  def initialize(exception, controller)
+    @exception = exception
+    @controller = controller
+  end
+
+  def diagnose
+    @controller.diagnose
+  end
+
+  def method_missing(method, *args, &block)
+    raise @exception
   end
 end
