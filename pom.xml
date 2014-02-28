@@ -24,22 +24,7 @@
   </build>
 
   <dependencies>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-      <version>2.2.3</version>
-    </dependency>
-    <dependency>
-      <groupId>org.jenkins-ci</groupId>
-      <artifactId>version-number</artifactId>
-      <version>1.1</version>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.11</version>
-      <scope>test</scope>
-    </dependency>
+    <!-- Cucumber -->
     <dependency>
       <groupId>info.cukes</groupId>
       <artifactId>cucumber-guice</artifactId>
@@ -51,10 +36,24 @@
       <version>1.1.5</version>
     </dependency>
     <dependency>
+      <groupId>org.kohsuke</groupId>
+      <artifactId>cucumber-annotation-indexer</artifactId>
+      <version>1.0</version>
+    </dependency>
+
+    <!-- Selenium -->
+    <dependency>
       <groupId>org.seleniumhq.selenium</groupId>
       <artifactId>selenium-api</artifactId>
       <version>2.28.0</version>
     </dependency>
+    <dependency>
+      <groupId>org.seleniumhq.selenium</groupId>
+      <artifactId>selenium-firefox-driver</artifactId>
+      <version>2.28.0</version>
+    </dependency>
+
+    <!-- other random stuff -->
     <dependency>
       <groupId>org.codehaus.groovy</groupId>
       <artifactId>groovy</artifactId>
@@ -71,14 +70,25 @@
       <version>3.0</version>
     </dependency>
     <dependency>
-      <groupId>org.kohsuke</groupId>
-      <artifactId>cucumber-annotation-indexer</artifactId>
-      <version>1.0</version>
-    </dependency>
-    <dependency>
       <groupId>com.cloudbees</groupId>
       <artifactId>extensibility</artifactId>
       <version>1.4</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>2.2.3</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci</groupId>
+      <artifactId>version-number</artifactId>
+      <version>1.1</version>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.11</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 
