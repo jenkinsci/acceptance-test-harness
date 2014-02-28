@@ -38,6 +38,11 @@
       <artifactId>extensibility</artifactId>
       <version>1.4</version>
     </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci</groupId>
+      <artifactId>annotation-indexer</artifactId>
+      <version>1.7</version>
+    </dependency>
   </dependencies>
   <scm>
     <connection>scm:git:git://github.com/jenkinsci/${project.artifactId}.git</connection>
