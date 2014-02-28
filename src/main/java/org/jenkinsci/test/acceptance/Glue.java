@@ -9,10 +9,12 @@ import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
 
 /**
+ * Indexed for runtime dicovery
+ *
  * @author Kohsuke Kawaguchi
  */
 @Retention(RUNTIME)
 @Target(TYPE)
 @Indexed
-public @interface StepDefinition {
+public @interface Glue {
 }

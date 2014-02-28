@@ -8,7 +8,7 @@ import javax.inject.Inject;
 /**
  * @author Kohsuke Kawaguchi
  */
-@StepDefinition
+@Glue
 public class SampleSteps {
     @Inject
     Context c;
