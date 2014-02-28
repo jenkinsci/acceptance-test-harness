@@ -15,4 +15,9 @@ public abstract class AbstractSteps extends CapybaraPortingLayer {
     @Inject
     Jenkins jenkins;
 
+    /**
+     * Contextual variables.
+     */
+    @Inject
+    Context my;
 }

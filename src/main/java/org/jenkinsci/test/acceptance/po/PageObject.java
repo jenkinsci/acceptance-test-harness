@@ -13,6 +13,8 @@ import java.net.URL;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static org.hamcrest.CoreMatchers.*;
+
 /**
  * @author Kohsuke Kawaguchi
  */
@@ -57,7 +59,14 @@ public abstract class PageObject extends CapybaraPortingLayer {
         save();
     }
 
-    protected URL getConfigUrl() throws Exception {
+    /**
+     * Makes sure that the browser is currently opening the configuration page.
+     */
+    public void ensureConfigPage() {
+        assertThat(driver.getCurrentUrl(), is(url.toExternalForm()));
+    }
+
+    public URL getConfigUrl() throws Exception {
         return new URL(url,"configure");
     }
 

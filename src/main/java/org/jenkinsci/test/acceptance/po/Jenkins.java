@@ -56,6 +56,10 @@ public class Jenkins extends PageObject {
                 .newInstance(injector, new URL(url, "job/" + name + "/"), name);
     }
 
+    public <T extends Job> T createJob(Class<T> type) throws Exception {
+        return createJob(type, createRandomName());
+    }
+
 
     private static final Pattern VERSION = Pattern.compile("^About Jenkins ([^-]*)");
 }
