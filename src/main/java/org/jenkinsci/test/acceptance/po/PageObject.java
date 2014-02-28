@@ -23,6 +23,14 @@ public abstract class PageObject {
         injector.injectMembers(this);
     }
 
+    /**
+     * URL of the object that this page object represents to, relative to the host name
+     * (thus including the context path, if any.)
+     *
+     * Ends without '/', such as "/jenkins/job/foo"
+     */
+    public abstract String getUrl();
+
     public void configure(Closure body) {
         driver.get(getConfigUrl());
         body.call(this);
@@ -45,6 +53,6 @@ public abstract class PageObject {
     }
 
     public void clickButton(String text) {
-        driver.findElement(By.xpath("//button[text()='"+text"']")).click();
+        driver.findElement(By.xpath("//button[text()='"+text+"']")).click();
     }
 }
