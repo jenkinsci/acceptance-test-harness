@@ -17,13 +17,10 @@ public class Hooks {
 
     @Before
     public void before() {
-
-        System.out.println("before");
     }
 
     @After
     public void bar() {
         driver.close();
-        System.out.println("after");
     }
 }
