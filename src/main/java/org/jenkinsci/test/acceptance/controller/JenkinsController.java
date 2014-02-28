@@ -55,6 +55,7 @@ public abstract class JenkinsController {
                 }
             }
         }
+        return target;
     }
 
 
