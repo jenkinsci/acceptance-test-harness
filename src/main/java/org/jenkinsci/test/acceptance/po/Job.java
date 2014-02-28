@@ -36,4 +36,23 @@ public class Job extends PageObject {
         step.setCommand(shell);
         return step;
     }
+
+    public URL getBuildUrl() throws Exception {
+        return new URL(url,"build?delay=0sec");
+    }
+
+    public Build queueBuild(Parameter... parameters) throws Exception {
+        int nb = getJson().get("nextBuildNumber").intValue();
+        visit(getBuildUrl());
+
+        return build(nb).waitUntilStarted();
+    }
+
+    private Build build(int buildNumber) throws Exception {
+        return new Build(this,buildNumber);
+    }
+
+    public Build getLastBuild() throws Exception {
+        return new Build(this,"lastBuild");
+    }
 }

@@ -2,14 +2,13 @@ package org.jenkinsci.test.acceptance.po;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Predicate;
 import com.google.inject.Injector;
 import groovy.lang.Closure;
 import org.openqa.selenium.TimeoutException;
-import org.openqa.selenium.WebDriver;
 
 import javax.inject.Inject;
 import java.net.URL;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -93,13 +92,17 @@ public abstract class PageObject extends CapybaraPortingLayer {
      *
      * If it times out, an exception will be thrown.
      */
-    public void waitForCond(Predicate<WebDriver> block, int timeoutSec) throws InterruptedException {
+    public void waitForCond(Callable<Boolean> block, int timeoutSec) throws Exception {
         long endTime = System.currentTimeMillis()+ TimeUnit.SECONDS.toMillis(timeoutSec);
         while (System.currentTimeMillis()<endTime) {
-            if (block.apply(driver))
+            if (block.call())
                 return;
             Thread.sleep(1000);
         }
         throw new TimeoutException("Failed to wait for condition "+block);
+    }
+
+    public void waitForCond(Callable<Boolean> block) throws Exception {
+        waitForCond(block,30);
     }
 }
