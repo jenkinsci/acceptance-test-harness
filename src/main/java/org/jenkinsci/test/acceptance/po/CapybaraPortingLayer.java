@@ -1,5 +1,6 @@
 package org.jenkinsci.test.acceptance.po;
 
+import com.google.inject.Injector;
 import org.junit.Assert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -20,6 +21,24 @@ import static org.jenkinsci.test.acceptance.cucumber.By2.*;
 public class CapybaraPortingLayer extends Assert {
     @Inject
     protected WebDriver driver;
+
+    /**
+     * Access to the rest of the world.
+     */
+    @Inject
+    protected Injector injector;
+
+    /**
+     * Some subtypes are constructed via Guice, in which case injection is done by outside this class.
+     * The injector parameter should be null for that case.
+     *
+     * Some subtypes are constructed programmatically. In that case, non-null injector must be supplied.
+     */
+    public CapybaraPortingLayer(Injector injector) {
+        this.injector = injector;
+        if (injector!=null)
+            injector.injectMembers(this);
+    }
 
     /**
      * Navigates the browser to the page.

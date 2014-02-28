@@ -34,6 +34,6 @@ public abstract class By2 extends org.openqa.selenium.By {
      *      Text, id, title, or image alt attribute of the link
      */
     public static By link(String locator) {
-        return xpath(".//A[@href]([@id='%1$s' | text()='%1$s' | @title='%1$s' | .//img[@alt='%1%s']]",locator);
+        return xpath(".//A[@href][@id='%1$s' or text()='%1$s' or @title='%1$s' or .//img[@alt='%1$s']]",locator);
     }
 }

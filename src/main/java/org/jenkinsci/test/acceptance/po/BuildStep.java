@@ -7,7 +7,7 @@ public class BuildStep extends Step {
     public final Job parent;
 
     public BuildStep(Job parent, String path) {
-        super(path);
+        super(parent.injector,path);
         this.parent = parent;
     }
 }

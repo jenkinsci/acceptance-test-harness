@@ -1,5 +1,6 @@
 package org.jenkinsci.test.acceptance.steps;
 
+import com.google.inject.Injector;
 import org.jenkinsci.test.acceptance.po.CapybaraPortingLayer;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 
@@ -20,4 +21,8 @@ public abstract class AbstractSteps extends CapybaraPortingLayer {
      */
     @Inject
     Context my;
+
+    protected AbstractSteps() {
+        super(null);
+    }
 }

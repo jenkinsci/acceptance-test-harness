@@ -48,7 +48,7 @@ public class Job extends PageObject {
         return build(nb).waitUntilStarted();
     }
 
-    private Build build(int buildNumber) throws Exception {
+    public Build build(int buildNumber) throws Exception {
         return new Build(this,buildNumber);
     }
 

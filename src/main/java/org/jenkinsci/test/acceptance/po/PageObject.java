@@ -19,11 +19,6 @@ import static org.hamcrest.CoreMatchers.*;
  */
 @SuppressWarnings("CdiManagedBeanInconsistencyInspection")
 public abstract class PageObject extends CapybaraPortingLayer {
-    /**
-     * Access to the rest of the world.
-     */
-    protected final Injector injector;
-
     @Inject
     protected ObjectMapper jsonParser;
 
@@ -36,9 +31,10 @@ public abstract class PageObject extends CapybaraPortingLayer {
     private static final AtomicLong IOTA = new AtomicLong(System.currentTimeMillis());
 
     public PageObject(Injector injector, URL url) {
-        this.injector = injector;
+        super(injector);
         this.url = url;
-        injector.injectMembers(this);
+        if (!url.toExternalForm().endsWith("/"))
+            throw new IllegalArgumentException("URL should end with '/': "+url);
     }
 
     /**
@@ -61,8 +57,8 @@ public abstract class PageObject extends CapybaraPortingLayer {
     /**
      * Makes sure that the browser is currently opening the configuration page.
      */
-    public void ensureConfigPage() {
-        assertThat(driver.getCurrentUrl(), is(url.toExternalForm()));
+    public void ensureConfigPage() throws Exception {
+        assertThat(driver.getCurrentUrl(), is(getConfigUrl().toExternalForm()));
     }
 
     public URL getConfigUrl() throws Exception {

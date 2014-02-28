@@ -1,5 +1,6 @@
 package org.jenkinsci.test.acceptance.po;
 
+import com.google.inject.Injector;
 import org.jenkinsci.test.acceptance.cucumber.By2;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -14,7 +15,8 @@ public abstract class PageArea extends CapybaraPortingLayer {
      */
     public final String path;
 
-    protected PageArea(String path) {
+    protected PageArea(Injector injector, String path) {
+        super(injector);
         this.path = path;
     }
 

@@ -23,13 +23,13 @@ public class Build extends PageObject {
     private String console;
 
     public Build(Job job, int buildNumber) throws Exception {
-        super(job.injector,new URL(job.url,String.valueOf(buildNumber)));
+        super(job.injector,new URL(job.url,String.valueOf(buildNumber)+"/"));
         this.buildNumber = buildNumber;
         this.job = job;
     }
 
     public Build(Job job, String permalink) throws Exception {
-        super(job.injector,new URL(job.url,permalink));
+        super(job.injector,new URL(job.url,permalink+"/"));
         this.buildNumber = -1;  // HACK
         this.job = job;
     }
