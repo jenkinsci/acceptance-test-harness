@@ -7,7 +7,6 @@ import cucumber.runtime.RuntimeOptions;
 import cucumber.runtime.io.MultiLoader;
 import cucumber.runtime.io.ResourceLoader;
 import cucumber.runtime.java.BetterJavaBackend;
-import cucumber.runtime.java.guice.GuiceFactory;
 import org.jenkinsci.test.acceptance.cucumber.ObjectFactoryImpl;
 
 import java.util.Collections;
@@ -18,6 +17,7 @@ import java.util.Collections;
 public class Driver {
     public static void main(String[] args) throws Exception {
         args = new String[]{"features/test.feature"};
+
         RuntimeOptions runtimeOptions = new RuntimeOptions(new Env("cucumber-jvm"), args);
 
         ClassLoader classLoader = Driver.class.getClassLoader();

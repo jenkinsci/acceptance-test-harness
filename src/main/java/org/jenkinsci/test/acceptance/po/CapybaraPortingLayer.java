@@ -5,6 +5,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import javax.inject.Inject;
+import java.net.URL;
 
 /**
  * For assisting porting from Capybara.
@@ -22,8 +23,8 @@ public class CapybaraPortingLayer {
      *      URL relative to the context path of Jenkins, such as "/about" or
      *      "/job/foo/configure".
      */
-    protected final WebDriver visit(String url) {
-        driver.get(url);
+    protected final WebDriver visit(URL url) {
+        driver.get(url.toExternalForm());
         return driver;
     }
 
@@ -37,5 +38,13 @@ public class CapybaraPortingLayer {
      */
     public WebElement waitFor(By selector) {
         return driver.findElement(selector);
+    }
+
+    protected WebElement find(By selector) {
+        return driver.findElement(selector);
+    }
+
+    protected void fillIn(String formFieldName, String value) {
+        driver.findElement(By.name(formFieldName)).sendKeys(value);
     }
 }

@@ -5,15 +5,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Predicate;
 import com.google.inject.Injector;
 import groovy.lang.Closure;
-import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 
 import javax.inject.Inject;
-import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -28,28 +27,39 @@ public abstract class PageObject extends CapybaraPortingLayer {
     @Inject
     protected ObjectMapper jsonParser;
 
+    /**
+     * Full URL of the object that this page object represents. Ends with '/',
+     * like "http://localhsot:8080/job/foo/"
+     */
+    public final URL url;
 
-    public PageObject(Injector injector) {
+    private static final AtomicInteger IOTA = new AtomicInteger();
+
+    public PageObject(Injector injector, URL url) {
         this.injector = injector;
+        this.url = url;
         injector.injectMembers(this);
     }
 
     /**
-     * URL of the object that this page object represents to, relative to the context path.
-     * (Thus Jenkins top page always return "/" from this method.)
-     *
-     * Ends without '/', such as "/job/foo"
+     * Given the path relative to {@link #url}, visit that page
      */
-    public abstract String getUrl();
+    public void visit(String relativePath) throws Exception {
+        visit(new URL(url,relativePath));
+    }
 
-    public void configure(Closure body) {
-        driver.get(getConfigUrl());
+    public String createRandomName() {
+        return "rand_name_"+IOTA.incrementAndGet();
+    }
+
+    public void configure(Closure body) throws Exception {
+        visit(getConfigUrl());
         body.call(this);
         save();
     }
 
-    protected String getConfigUrl() {
-        return getUrl()+"/configure";
+    protected URL getConfigUrl() throws Exception {
+        return new URL(url,"configure");
     }
 
     public void save() {
@@ -59,15 +69,15 @@ public abstract class PageObject extends CapybaraPortingLayer {
         }
     }
 
-    public String getJsonApiUrl() {
-        return getUrl()+"/api/json";
+    public URL getJsonApiUrl() throws Exception {
+        return new URL(url,"api/json");
     }
 
     /**
      * Makes the API call and obtains JSON representation.
      */
-    public JsonNode getJson() throws IOException {
-        return jsonParser.readTree(new URL(getJsonApiUrl()));
+    public JsonNode getJson() throws Exception {
+        return jsonParser.readTree(getJsonApiUrl());
     }
 
     /**

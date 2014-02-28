@@ -3,6 +3,8 @@ package org.jenkinsci.test.acceptance;
 import com.cloudbees.sdk.extensibility.Extension;
 import com.cloudbees.sdk.extensibility.ExtensionModule;
 import com.google.inject.AbstractModule;
+import org.jenkinsci.test.acceptance.controller.JenkinsController;
+import org.jenkinsci.test.acceptance.controller.ScaffoldController;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 
@@ -15,9 +17,14 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 public class Scaffold extends AbstractModule implements ExtensionModule {
     @Override
     protected void configure() {
-        // for now, bind WebDriver to Firefox
-        bind(WebDriver.class).toInstance(new FirefoxDriver());
+        try {
+            // for now, bind WebDriver to Firefox
+            bind(WebDriver.class).toInstance(new FirefoxDriver());
 
-
+            // bind from scaffolding
+            bind(JenkinsController.class).toInstance(new ScaffoldController());
+        } catch (Exception e) {
+            throw new Error(e);
+        }
     }
 }
