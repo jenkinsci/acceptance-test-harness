@@ -1,12 +1,10 @@
 package cucumber.runtime.java;
 
-import cucumber.api.java.After;
-import cucumber.api.java.Before;
 import cucumber.runtime.io.ResourceLoader;
 import cucumber.runtime.io.ResourceLoaderClassFinder;
 import cucumber.runtime.java.guice.GuiceFactory;
 import org.jenkinsci.test.acceptance.Glue;
-import org.jvnet.hudson.annotation_indexer.Index;
+import org.kohsuke.cukes.StepDefFinder;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -33,20 +31,27 @@ public class JavaBackend2 extends JavaBackend {
     public void loadGlue(cucumber.runtime.Glue glue, List<String> gluePaths) {
         super.loadGlue(glue, gluePaths);
         try {
-            for (Class c : Index.list(Glue.class, classLoader, Class.class)) {
-                for (Method method : c.getMethods()) {
-                    for (Annotation a : method.getAnnotations()) {
-                        if (a.annotationType().isAnnotationPresent(StepDefAnnotation.class)) {
-                            addStepDefinition(a, method);
-                            break;
-                        }
-                        if (a.annotationType()==Before.class || a.annotationType()==After.class) {
-                            addHook(a, method);
-                            break;
-                        }
+            for (Method method : StepDefFinder.list(classLoader)) {
+                for (Annotation a : method.getAnnotations()) {
+                    if (a.annotationType().isAnnotationPresent(StepDefAnnotation.class)) {
+                        addStepDefinition(a, method);
                     }
                 }
             }
+//            for (Class c : Index.list(Glue.class, classLoader, Class.class)) {
+//                for (Method method : c.getMethods()) {
+//                    for (Annotation a : method.getAnnotations()) {
+//                        if (a.annotationType().isAnnotationPresent(StepDefAnnotation.class)) {
+//                            addStepDefinition(a, method);
+//                            break;
+//                        }
+//                        if (a.annotationType()==Before.class || a.annotationType()==After.class) {
+//                            addHook(a, method);
+//                            break;
+//                        }
+//                    }
+//                }
+//            }
         } catch (IOException e) {
             throw new Error(e);
         }
