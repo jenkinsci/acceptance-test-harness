@@ -1,0 +1,15 @@
+jenkins*.war
+*.swp
+*.swn
+last_test.log
+*~
+.vagrant
+iso
+*.box
+workspace/
+path-element.hpi
+slave.jar
+temp_dir_*
+chromedriver.log
+.buildpath
+.project

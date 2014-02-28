@@ -1,0 +1,99 @@
+#!/bin/bash
+
+
+if [ $# -lt 2 ]; then
+	cat <<USAGE
+Usage: $0 BROWSER JENKINS [FEATURE]
+
+The script runs dryrun tests first to discover trivial problems immediately.
+It can use jenkins.war from local maven repository or download it when missing.
+
+BROWSER: Value for BROWSER variable
+JENKINS: Path to the jenkins.war, Jenkins version of one of "latest", "latest-rc", "lts" and "lts-rc"
+FEATURE: Cucumber feature specification (run everything when not specified)
+
+Examples:
+
+# Run full suite in FF against ./jenkins.war.
+$ ./run firefox ./jenkins.war
+
+# Run Ant feature in chrome against Jenkins 1.512.
+$ ./run chrome 1.512 features/ant_plugin.feature
+
+# Run full suite in FF against LTS release candidate
+$ ./run firefox lts-rc
+USAGE
+  exit -2
+fi
+
+feature=""
+if [ $# -eq 3 ]; then
+    feature="FEATURE=$3"
+fi
+
+dryrunOut=`bundle exec rake cucumber:dryrun`
+dryrunRet=$?
+if [ $dryrunRet -ne 0 ]; then
+    echo -e "$dryrunOut"
+    echo "Dry run failed"
+    exit $dryrunRet
+fi
+
+war=$2
+if [ ! -f $war ]; then
+    mirrors=http://mirrors.jenkins-ci.org
+    case "$war" in
+        "latest")
+            war=jenkins-latest.war
+            url=$mirrors/war/latest/jenkins.war
+        ;;
+        "latest-rc")
+            war=jenkins-latest-rc.war
+            url=$mirrors/war-rc/latest/jenkins.war
+        ;;
+        "lts")
+            war=jenkins-lts.war
+            url=$mirrors/war-stable/latest/jenkins.war
+        ;;
+        "lts-rc")
+            war=jenkins-lts-rc.war
+            url=$mirrors/war-stable-rc/latest/jenkins.war
+        ;;
+    esac
+
+    if [ -n "$url" ]; then
+        find $war -maxdepth 0 -mtime +1 -delete 2> /dev/null
+        if [ ! -f $war ]; then
+            echo "Fetching $war"
+            curl -sL -o $war $url
+        fi
+    fi
+fi
+
+if [ ! -f $war ] && [[ $war == *.war ]]; then
+    curl -sL -o jenkins.war $war && war=jenkins.war
+fi
+
+if [ ! -f $war ]; then
+
+	wardir=~/.m2/repository/org/jenkins-ci/main/jenkins-war
+
+    war=$wardir/$2/jenkins-war-$2.war
+    if [ ! -f $war ]; then
+
+        mvn org.apache.maven.plugins:maven-dependency-plugin:2.7:get\
+            -DremoteRepositories=repo.jenkins-ci.org::::http://repo.jenkins-ci.org/public/\
+            -Dartifact=org.jenkins-ci.main:jenkins-war:$2:war
+    fi
+
+    if [ ! -f $war ]; then
+
+        echo "No such jenkins.war. Available local versions:"
+        ls $wardir/*/jenkins-war-*.war | sed -r -e 's/.*jenkins-war-(.+)\.war/\1/'
+        exit -1
+    fi
+fi
+
+set -x
+
+BROWSER=$1 JENKINS_WAR=$war bundle exec rake $feature

@@ -1,0 +1,9 @@
+Vagrant::Config.run do |config|
+  # Every Vagrant virtual environment requires a box to build off of.
+  config.vm.box = "lucid32"
+
+  # port on VM, port on Host
+  config.vm.forward_port 8080, 8080
+
+  # config.vm.share_folder "shared", "/shared", "#{Dir.pwd}data"
+end

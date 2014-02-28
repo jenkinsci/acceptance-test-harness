@@ -1,0 +1,2456 @@
+<?xml version="1.0"?>
+<!DOCTYPE coverage SYSTEM "http://cobertura.sourceforge.net/xml/coverage-03.dtd">
+
+<coverage line-rate="0.15789473684210525" branch-rate="0.10227272727272728" version="1.9" timestamp="1367691889344">
+	<sources>
+		<source>--source</source>
+		<source>/mnt/hudson_workspace/workspace/HTS-CoberturaTest/target/generated-sources/localizer</source>
+		<source>/mnt/hudson_workspace/workspace/HTS-CoberturaTest/src/main/java</source>
+	</sources>
+	<packages>
+		<package name="hudson.plugins.sshslaves" line-rate="0.15789473684210525" branch-rate="0.10227272727272728" complexity="0.0">
+			<classes>
+				<class name="hudson.plugins.sshslaves.JavaProvider" filename="hudson/plugins/sshslaves/JavaProvider.java" line-rate="0.0" branch-rate="1.0" complexity="0.0">
+					<methods>
+						<method name="&lt;init&gt;" signature="()V" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="39" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="all" signature="()Lhudson/ExtensionList;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="62" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="getJavas" signature="(Lhudson/model/TaskListener;Lcom/trilead/ssh2/Connection;)Ljava/util/List;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="45" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="getJavas" signature="(Lhudson/slaves/SlaveComputer;Lhudson/model/TaskListener;Lcom/trilead/ssh2/Connection;)Ljava/util/List;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="55" hits="0" branch="false"/>
+							</lines>
+						</method>
+					</methods>
+					<lines>
+						<line number="39" hits="0" branch="false"/>
+						<line number="45" hits="0" branch="false"/>
+						<line number="55" hits="0" branch="false"/>
+						<line number="62" hits="0" branch="false"/>
+					</lines>
+				</class>
+				<class name="hudson.plugins.sshslaves.Messages" filename="hudson/plugins/sshslaves/Messages.java" line-rate="0.1" branch-rate="1.0" complexity="0.0">
+					<methods>
+						<method name="&lt;clinit&gt;" signature="()V" line-rate="1.0" branch-rate="1.0">
+							<lines>
+								<line number="14" hits="1" branch="false"/>
+							</lines>
+						</method>
+						<method name="&lt;init&gt;" signature="()V" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="12" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="SSHLauncher_AbortedDuringConnectionOpen" signature="()Ljava/lang/String;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="409" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="SSHLauncher_AuthenticatingPublicKey" signature="(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/String;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="277" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="SSHLauncher_AuthenticatingUserPass" signature="(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/String;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="101" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="SSHLauncher_AuthenticationFailed" signature="(Ljava/lang/Object;)Ljava/lang/String;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="165" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="SSHLauncher_AuthenticationFailedException" signature="()Ljava/lang/String;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="345" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="SSHLauncher_AuthenticationSuccessful" signature="(Ljava/lang/Object;)Ljava/lang/String;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="197" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="SSHLauncher_CheckingDefaultJava" signature="(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/String;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="133" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="SSHLauncher_ConnectionClosed" signature="(Ljava/lang/Object;)Ljava/lang/String;" line-rate="1.0" branch-rate="1.0">
+							<lines>
+								<line number="229" hits="2" branch="false"/>
+							</lines>
+						</method>
+						<method name="SSHLauncher_CopiedXXXBytes" signature="(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/String;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="85" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="SSHLauncher_CopyingSlaveJar" signature="(Ljava/lang/Object;)Ljava/lang/String;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="393" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="SSHLauncher_DescriptorDisplayName" signature="()Ljava/lang/String;" line-rate="1.0" branch-rate="1.0">
+							<lines>
+								<line number="181" hits="237" branch="false"/>
+							</lines>
+						</method>
+						<method name="SSHLauncher_ErrorCopyingSlaveJar" signature="()Ljava/lang/String;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="53" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="SSHLauncher_ErrorCopyingSlaveJarTo" signature="(Ljava/lang/Object;)Ljava/lang/String;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="441" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="SSHLauncher_ErrorDeletingFile" signature="(Ljava/lang/Object;)Ljava/lang/String;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="213" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="SSHLauncher_ErrorWhileClosingConnection" signature="()Ljava/lang/String;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="293" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="SSHLauncher_FailedToDetectEnvironment" signature="(Ljava/lang/Object;)Ljava/lang/String;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="309" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="SSHLauncher_JavaVersionResult" signature="(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/String;" line-rate="1.0" branch-rate="1.0">
+							<lines>
+								<line number="261" hits="5" branch="false"/>
+							</lines>
+						</method>
+						<method name="SSHLauncher_NoJavaFound" signature="(Ljava/lang/Object;)Ljava/lang/String;" line-rate="1.0" branch-rate="1.0">
+							<lines>
+								<line number="117" hits="1" branch="false"/>
+							</lines>
+						</method>
+						<method name="SSHLauncher_NoPrivateKey" signature="(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/String;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="149" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="SSHLauncher_OpeningSSHConnection" signature="(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/String;" line-rate="1.0" branch-rate="1.0">
+							<lines>
+								<line number="473" hits="2" branch="false"/>
+							</lines>
+						</method>
+						<method name="SSHLauncher_RemoteFSDoesNotExist" signature="(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/String;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="69" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="SSHLauncher_RemoteFSIsAFile" signature="(Ljava/lang/Object;)Ljava/lang/String;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="377" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="SSHLauncher_RemoteUserEnvironment" signature="(Ljava/lang/Object;)Ljava/lang/String;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="37" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="SSHLauncher_SSHHeeaderJunkDetected" signature="()Ljava/lang/String;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="327" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="SSHLauncher_StartingSCPClient" signature="(Ljava/lang/Object;)Ljava/lang/String;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="21" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="SSHLauncher_StartingSFTPClient" signature="(Ljava/lang/Object;)Ljava/lang/String;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="457" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="SSHLauncher_StartingSlaveProcess" signature="(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/String;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="361" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="SSHLauncher_UknownJavaVersion" signature="(Ljava/lang/Object;)Ljava/lang/String;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="245" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="SSHLauncher_UnexpectedError" signature="()Ljava/lang/String;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="425" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="_SSHLauncher_AbortedDuringConnectionOpen" signature="()Lorg/jvnet/localizer/Localizable;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="417" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="_SSHLauncher_AuthenticatingPublicKey" signature="(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Lorg/jvnet/localizer/Localizable;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="285" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="_SSHLauncher_AuthenticatingUserPass" signature="(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Lorg/jvnet/localizer/Localizable;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="109" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="_SSHLauncher_AuthenticationFailed" signature="(Ljava/lang/Object;)Lorg/jvnet/localizer/Localizable;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="173" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="_SSHLauncher_AuthenticationFailedException" signature="()Lorg/jvnet/localizer/Localizable;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="353" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="_SSHLauncher_AuthenticationSuccessful" signature="(Ljava/lang/Object;)Lorg/jvnet/localizer/Localizable;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="205" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="_SSHLauncher_CheckingDefaultJava" signature="(Ljava/lang/Object;Ljava/lang/Object;)Lorg/jvnet/localizer/Localizable;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="141" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="_SSHLauncher_ConnectionClosed" signature="(Ljava/lang/Object;)Lorg/jvnet/localizer/Localizable;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="237" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="_SSHLauncher_CopiedXXXBytes" signature="(Ljava/lang/Object;Ljava/lang/Object;)Lorg/jvnet/localizer/Localizable;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="93" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="_SSHLauncher_CopyingSlaveJar" signature="(Ljava/lang/Object;)Lorg/jvnet/localizer/Localizable;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="401" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="_SSHLauncher_DescriptorDisplayName" signature="()Lorg/jvnet/localizer/Localizable;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="189" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="_SSHLauncher_ErrorCopyingSlaveJar" signature="()Lorg/jvnet/localizer/Localizable;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="61" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="_SSHLauncher_ErrorCopyingSlaveJarTo" signature="(Ljava/lang/Object;)Lorg/jvnet/localizer/Localizable;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="449" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="_SSHLauncher_ErrorDeletingFile" signature="(Ljava/lang/Object;)Lorg/jvnet/localizer/Localizable;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="221" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="_SSHLauncher_ErrorWhileClosingConnection" signature="()Lorg/jvnet/localizer/Localizable;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="301" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="_SSHLauncher_FailedToDetectEnvironment" signature="(Ljava/lang/Object;)Lorg/jvnet/localizer/Localizable;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="317" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="_SSHLauncher_JavaVersionResult" signature="(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Lorg/jvnet/localizer/Localizable;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="269" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="_SSHLauncher_NoJavaFound" signature="(Ljava/lang/Object;)Lorg/jvnet/localizer/Localizable;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="125" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="_SSHLauncher_NoPrivateKey" signature="(Ljava/lang/Object;Ljava/lang/Object;)Lorg/jvnet/localizer/Localizable;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="157" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="_SSHLauncher_OpeningSSHConnection" signature="(Ljava/lang/Object;Ljava/lang/Object;)Lorg/jvnet/localizer/Localizable;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="481" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="_SSHLauncher_RemoteFSDoesNotExist" signature="(Ljava/lang/Object;Ljava/lang/Object;)Lorg/jvnet/localizer/Localizable;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="77" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="_SSHLauncher_RemoteFSIsAFile" signature="(Ljava/lang/Object;)Lorg/jvnet/localizer/Localizable;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="385" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="_SSHLauncher_RemoteUserEnvironment" signature="(Ljava/lang/Object;)Lorg/jvnet/localizer/Localizable;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="45" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="_SSHLauncher_SSHHeeaderJunkDetected" signature="()Lorg/jvnet/localizer/Localizable;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="337" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="_SSHLauncher_StartingSCPClient" signature="(Ljava/lang/Object;)Lorg/jvnet/localizer/Localizable;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="29" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="_SSHLauncher_StartingSFTPClient" signature="(Ljava/lang/Object;)Lorg/jvnet/localizer/Localizable;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="465" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="_SSHLauncher_StartingSlaveProcess" signature="(Ljava/lang/Object;Ljava/lang/Object;)Lorg/jvnet/localizer/Localizable;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="369" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="_SSHLauncher_UknownJavaVersion" signature="(Ljava/lang/Object;)Lorg/jvnet/localizer/Localizable;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="253" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="_SSHLauncher_UnexpectedError" signature="()Lorg/jvnet/localizer/Localizable;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="433" hits="0" branch="false"/>
+							</lines>
+						</method>
+					</methods>
+					<lines>
+						<line number="12" hits="0" branch="false"/>
+						<line number="14" hits="1" branch="false"/>
+						<line number="21" hits="0" branch="false"/>
+						<line number="29" hits="0" branch="false"/>
+						<line number="37" hits="0" branch="false"/>
+						<line number="45" hits="0" branch="false"/>
+						<line number="53" hits="0" branch="false"/>
+						<line number="61" hits="0" branch="false"/>
+						<line number="69" hits="0" branch="false"/>
+						<line number="77" hits="0" branch="false"/>
+						<line number="85" hits="0" branch="false"/>
+						<line number="93" hits="0" branch="false"/>
+						<line number="101" hits="0" branch="false"/>
+						<line number="109" hits="0" branch="false"/>
+						<line number="117" hits="1" branch="false"/>
+						<line number="125" hits="0" branch="false"/>
+						<line number="133" hits="0" branch="false"/>
+						<line number="141" hits="0" branch="false"/>
+						<line number="149" hits="0" branch="false"/>
+						<line number="157" hits="0" branch="false"/>
+						<line number="165" hits="0" branch="false"/>
+						<line number="173" hits="0" branch="false"/>
+						<line number="181" hits="237" branch="false"/>
+						<line number="189" hits="0" branch="false"/>
+						<line number="197" hits="0" branch="false"/>
+						<line number="205" hits="0" branch="false"/>
+						<line number="213" hits="0" branch="false"/>
+						<line number="221" hits="0" branch="false"/>
+						<line number="229" hits="2" branch="false"/>
+						<line number="237" hits="0" branch="false"/>
+						<line number="245" hits="0" branch="false"/>
+						<line number="253" hits="0" branch="false"/>
+						<line number="261" hits="5" branch="false"/>
+						<line number="269" hits="0" branch="false"/>
+						<line number="277" hits="0" branch="false"/>
+						<line number="285" hits="0" branch="false"/>
+						<line number="293" hits="0" branch="false"/>
+						<line number="301" hits="0" branch="false"/>
+						<line number="309" hits="0" branch="false"/>
+						<line number="317" hits="0" branch="false"/>
+						<line number="327" hits="0" branch="false"/>
+						<line number="337" hits="0" branch="false"/>
+						<line number="345" hits="0" branch="false"/>
+						<line number="353" hits="0" branch="false"/>
+						<line number="361" hits="0" branch="false"/>
+						<line number="369" hits="0" branch="false"/>
+						<line number="377" hits="0" branch="false"/>
+						<line number="385" hits="0" branch="false"/>
+						<line number="393" hits="0" branch="false"/>
+						<line number="401" hits="0" branch="false"/>
+						<line number="409" hits="0" branch="false"/>
+						<line number="417" hits="0" branch="false"/>
+						<line number="425" hits="0" branch="false"/>
+						<line number="433" hits="0" branch="false"/>
+						<line number="441" hits="0" branch="false"/>
+						<line number="449" hits="0" branch="false"/>
+						<line number="457" hits="0" branch="false"/>
+						<line number="465" hits="0" branch="false"/>
+						<line number="473" hits="2" branch="false"/>
+						<line number="481" hits="0" branch="false"/>
+					</lines>
+				</class>
+				<class name="hudson.plugins.sshslaves.PluginImpl" filename="hudson/plugins/sshslaves/PluginImpl.java" line-rate="0.631578947368421" branch-rate="0.25" complexity="0.0">
+					<methods>
+						<method name="&lt;clinit&gt;" signature="()V" line-rate="1.0" branch-rate="1.0">
+							<lines>
+								<line number="45" hits="1" branch="false"/>
+								<line number="101" hits="1" branch="false"/>
+							</lines>
+						</method>
+						<method name="&lt;init&gt;" signature="()V" line-rate="1.0" branch-rate="1.0">
+							<lines>
+								<line number="40" hits="8" branch="false"/>
+							</lines>
+						</method>
+						<method name="closeRegisteredConnections" signature="()V" line-rate="0.6" branch-rate="0.5">
+							<lines>
+								<line number="69" hits="8" branch="true" condition-coverage="50% (1/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="50%"/>
+									</conditions>
+								</line>
+								<line number="70" hits="0" branch="false"/>
+								<line number="73" hits="0" branch="false"/>
+								<line number="75" hits="8" branch="false"/>
+								<line number="76" hits="8" branch="false"/>
+							</lines>
+						</method>
+						<method name="register" signature="(Lcom/trilead/ssh2/Connection;)V" line-rate="0.0" branch-rate="0.0">
+							<lines>
+								<line number="84" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="85" hits="0" branch="false"/>
+								<line number="87" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="start" signature="()V" line-rate="1.0" branch-rate="1.0">
+							<lines>
+								<line number="52" hits="8" branch="false"/>
+								<line number="53" hits="8" branch="false"/>
+							</lines>
+						</method>
+						<method name="stop" signature="()V" line-rate="1.0" branch-rate="1.0">
+							<lines>
+								<line number="60" hits="8" branch="false"/>
+								<line number="61" hits="8" branch="false"/>
+								<line number="62" hits="8" branch="false"/>
+								<line number="63" hits="8" branch="false"/>
+							</lines>
+						</method>
+						<method name="unregister" signature="(Lcom/trilead/ssh2/Connection;)V" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="95" hits="0" branch="false"/>
+								<line number="96" hits="0" branch="false"/>
+							</lines>
+						</method>
+					</methods>
+					<lines>
+						<line number="40" hits="8" branch="false"/>
+						<line number="45" hits="1" branch="false"/>
+						<line number="52" hits="8" branch="false"/>
+						<line number="53" hits="8" branch="false"/>
+						<line number="60" hits="8" branch="false"/>
+						<line number="61" hits="8" branch="false"/>
+						<line number="62" hits="8" branch="false"/>
+						<line number="63" hits="8" branch="false"/>
+						<line number="69" hits="8" branch="true" condition-coverage="50% (1/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="50%"/>
+							</conditions>
+						</line>
+						<line number="70" hits="0" branch="false"/>
+						<line number="73" hits="0" branch="false"/>
+						<line number="75" hits="8" branch="false"/>
+						<line number="76" hits="8" branch="false"/>
+						<line number="84" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="85" hits="0" branch="false"/>
+						<line number="87" hits="0" branch="false"/>
+						<line number="95" hits="0" branch="false"/>
+						<line number="96" hits="0" branch="false"/>
+						<line number="101" hits="1" branch="false"/>
+					</lines>
+				</class>
+				<class name="hudson.plugins.sshslaves.RemoteLauncher" filename="hudson/plugins/sshslaves/RemoteLauncher.java" line-rate="0.0" branch-rate="0.0" complexity="0.0">
+					<methods>
+						<method name="&lt;init&gt;" signature="(Lhudson/model/TaskListener;Lcom/trilead/ssh2/Connection;)V" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="60" hits="0" branch="false"/>
+								<line number="61" hits="0" branch="false"/>
+								<line number="62" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="kill" signature="(Ljava/util/Map;)V" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="141" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="launch" signature="(Lhudson/Launcher$ProcStarter;)Lhudson/Proc;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="65" hits="0" branch="false"/>
+								<line number="69" hits="0" branch="false"/>
+								<line number="71" hits="0" branch="false"/>
+								<line number="72" hits="0" branch="false"/>
+								<line number="73" hits="0" branch="false"/>
+								<line number="74" hits="0" branch="false"/>
+								<line number="75" hits="0" branch="false"/>
+								<line number="76" hits="0" branch="false"/>
+								<line number="77" hits="0" branch="false"/>
+								<line number="78" hits="0" branch="false"/>
+								<line number="80" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="launchChannel" signature="([Ljava/lang/String;Ljava/io/OutputStream;Lhudson/FilePath;Ljava/util/Map;)Lhudson/remoting/Channel;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="125" hits="0" branch="false"/>
+								<line number="127" hits="0" branch="false"/>
+								<line number="128" hits="0" branch="false"/>
+								<line number="130" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="makeCommandLine" signature="(Ljava/util/List;Lhudson/FilePath;)Ljava/lang/String;" line-rate="0.0" branch-rate="0.0">
+							<lines>
+								<line number="135" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="136" hits="0" branch="false"/>
+							</lines>
+						</method>
+					</methods>
+					<lines>
+						<line number="60" hits="0" branch="false"/>
+						<line number="61" hits="0" branch="false"/>
+						<line number="62" hits="0" branch="false"/>
+						<line number="65" hits="0" branch="false"/>
+						<line number="69" hits="0" branch="false"/>
+						<line number="71" hits="0" branch="false"/>
+						<line number="72" hits="0" branch="false"/>
+						<line number="73" hits="0" branch="false"/>
+						<line number="74" hits="0" branch="false"/>
+						<line number="75" hits="0" branch="false"/>
+						<line number="76" hits="0" branch="false"/>
+						<line number="77" hits="0" branch="false"/>
+						<line number="78" hits="0" branch="false"/>
+						<line number="80" hits="0" branch="false"/>
+						<line number="125" hits="0" branch="false"/>
+						<line number="127" hits="0" branch="false"/>
+						<line number="128" hits="0" branch="false"/>
+						<line number="130" hits="0" branch="false"/>
+						<line number="135" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="136" hits="0" branch="false"/>
+						<line number="141" hits="0" branch="false"/>
+					</lines>
+				</class>
+				<class name="hudson.plugins.sshslaves.RemoteLauncher$1" filename="hudson/plugins/sshslaves/RemoteLauncher.java" line-rate="0.0" branch-rate="0.0" complexity="0.0">
+					<methods>
+						<method name="&lt;init&gt;" signature="(Lhudson/plugins/sshslaves/RemoteLauncher;Lcom/trilead/ssh2/Session;Ljava/lang/Thread;Ljava/lang/Thread;Ljava/lang/Thread;)V" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="80" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="getStderr" signature="()Ljava/io/InputStream;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="113" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="getStdin" signature="()Ljava/io/OutputStream;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="118" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="getStdout" signature="()Ljava/io/InputStream;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="108" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="isAlive" signature="()Z" line-rate="0.0" branch-rate="0.0">
+							<lines>
+								<line number="82" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+							</lines>
+						</method>
+						<method name="join" signature="()I" line-rate="0.0" branch-rate="0.0">
+							<lines>
+								<line number="94" hits="0" branch="false"/>
+								<line number="95" hits="0" branch="false"/>
+								<line number="96" hits="0" branch="false"/>
+								<line number="97" hits="0" branch="false"/>
+								<line number="98" hits="0" branch="false"/>
+								<line number="99" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="100" hits="0" branch="false"/>
+								<line number="102" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="kill" signature="()V" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="86" hits="0" branch="false"/>
+								<line number="87" hits="0" branch="false"/>
+								<line number="88" hits="0" branch="false"/>
+								<line number="89" hits="0" branch="false"/>
+								<line number="90" hits="0" branch="false"/>
+							</lines>
+						</method>
+					</methods>
+					<lines>
+						<line number="80" hits="0" branch="false"/>
+						<line number="82" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="86" hits="0" branch="false"/>
+						<line number="87" hits="0" branch="false"/>
+						<line number="88" hits="0" branch="false"/>
+						<line number="89" hits="0" branch="false"/>
+						<line number="90" hits="0" branch="false"/>
+						<line number="94" hits="0" branch="false"/>
+						<line number="95" hits="0" branch="false"/>
+						<line number="96" hits="0" branch="false"/>
+						<line number="97" hits="0" branch="false"/>
+						<line number="98" hits="0" branch="false"/>
+						<line number="99" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="100" hits="0" branch="false"/>
+						<line number="102" hits="0" branch="false"/>
+						<line number="108" hits="0" branch="false"/>
+						<line number="113" hits="0" branch="false"/>
+						<line number="118" hits="0" branch="false"/>
+					</lines>
+				</class>
+				<class name="hudson.plugins.sshslaves.SFTPClient" filename="hudson/plugins/sshslaves/SFTPClient.java" line-rate="0.0" branch-rate="0.0" complexity="0.0">
+					<methods>
+						<method name="&lt;init&gt;" signature="(Lcom/trilead/ssh2/Connection;)V" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="45" hits="0" branch="false"/>
+								<line number="46" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="_stat" signature="(Ljava/lang/String;)Lcom/trilead/ssh2/SFTPv3FileAttributes;" line-rate="0.0" branch-rate="0.0">
+							<lines>
+								<line number="60" hits="0" branch="false"/>
+								<line number="61" hits="0" branch="false"/>
+								<line number="62" hits="0" branch="false"/>
+								<line number="63" hits="0" branch="true" condition-coverage="0% (0/4)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+										<condition number="1" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="64" hits="0" branch="false"/>
+								<line number="66" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="chmod" signature="(Ljava/lang/String;I)V" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="147" hits="0" branch="false"/>
+								<line number="148" hits="0" branch="false"/>
+								<line number="149" hits="0" branch="false"/>
+								<line number="150" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="exists" signature="(Ljava/lang/String;)Z" line-rate="0.0" branch-rate="0.0">
+							<lines>
+								<line number="52" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+							</lines>
+						</method>
+						<method name="mkdirs" signature="(Ljava/lang/String;I)V" line-rate="0.0" branch-rate="0.0">
+							<lines>
+								<line number="74" hits="0" branch="false"/>
+								<line number="75" hits="0" branch="true" condition-coverage="0% (0/4)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+										<condition number="1" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="76" hits="0" branch="false"/>
+								<line number="78" hits="0" branch="false"/>
+								<line number="79" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="80" hits="0" branch="false"/>
+								<line number="83" hits="0" branch="false"/>
+								<line number="84" hits="0" branch="false"/>
+								<line number="85" hits="0" branch="false"/>
+								<line number="86" hits="0" branch="false"/>
+								<line number="87" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="read" signature="(Ljava/lang/String;)Ljava/io/InputStream;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="114" hits="0" branch="false"/>
+								<line number="115" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="writeToFile" signature="(Ljava/lang/String;)Ljava/io/OutputStream;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="93" hits="0" branch="false"/>
+								<line number="94" hits="0" branch="false"/>
+							</lines>
+						</method>
+					</methods>
+					<lines>
+						<line number="45" hits="0" branch="false"/>
+						<line number="46" hits="0" branch="false"/>
+						<line number="52" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="60" hits="0" branch="false"/>
+						<line number="61" hits="0" branch="false"/>
+						<line number="62" hits="0" branch="false"/>
+						<line number="63" hits="0" branch="true" condition-coverage="0% (0/4)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+								<condition number="1" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="64" hits="0" branch="false"/>
+						<line number="66" hits="0" branch="false"/>
+						<line number="74" hits="0" branch="false"/>
+						<line number="75" hits="0" branch="true" condition-coverage="0% (0/4)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+								<condition number="1" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="76" hits="0" branch="false"/>
+						<line number="78" hits="0" branch="false"/>
+						<line number="79" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="80" hits="0" branch="false"/>
+						<line number="83" hits="0" branch="false"/>
+						<line number="84" hits="0" branch="false"/>
+						<line number="85" hits="0" branch="false"/>
+						<line number="86" hits="0" branch="false"/>
+						<line number="87" hits="0" branch="false"/>
+						<line number="93" hits="0" branch="false"/>
+						<line number="94" hits="0" branch="false"/>
+						<line number="114" hits="0" branch="false"/>
+						<line number="115" hits="0" branch="false"/>
+						<line number="147" hits="0" branch="false"/>
+						<line number="148" hits="0" branch="false"/>
+						<line number="149" hits="0" branch="false"/>
+						<line number="150" hits="0" branch="false"/>
+					</lines>
+				</class>
+				<class name="hudson.plugins.sshslaves.SFTPClient$1" filename="hudson/plugins/sshslaves/SFTPClient.java" line-rate="0.0" branch-rate="1.0" complexity="0.0">
+					<methods>
+						<method name="&lt;init&gt;" signature="(Lhudson/plugins/sshslaves/SFTPClient;Lcom/trilead/ssh2/SFTPv3FileHandle;)V" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="94" hits="0" branch="false"/>
+								<line number="95" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="close" signature="()V" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="108" hits="0" branch="false"/>
+								<line number="109" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="write" signature="(I)V" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="97" hits="0" branch="false"/>
+								<line number="98" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="write" signature="([BII)V" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="102" hits="0" branch="false"/>
+								<line number="103" hits="0" branch="false"/>
+								<line number="104" hits="0" branch="false"/>
+							</lines>
+						</method>
+					</methods>
+					<lines>
+						<line number="94" hits="0" branch="false"/>
+						<line number="95" hits="0" branch="false"/>
+						<line number="97" hits="0" branch="false"/>
+						<line number="98" hits="0" branch="false"/>
+						<line number="102" hits="0" branch="false"/>
+						<line number="103" hits="0" branch="false"/>
+						<line number="104" hits="0" branch="false"/>
+						<line number="108" hits="0" branch="false"/>
+						<line number="109" hits="0" branch="false"/>
+					</lines>
+				</class>
+				<class name="hudson.plugins.sshslaves.SFTPClient$2" filename="hudson/plugins/sshslaves/SFTPClient.java" line-rate="0.0" branch-rate="0.0" complexity="0.0">
+					<methods>
+						<method name="&lt;init&gt;" signature="(Lhudson/plugins/sshslaves/SFTPClient;Lcom/trilead/ssh2/SFTPv3FileHandle;)V" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="115" hits="0" branch="false"/>
+								<line number="116" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="close" signature="()V" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="141" hits="0" branch="false"/>
+								<line number="142" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="read" signature="()I" line-rate="0.0" branch-rate="0.0">
+							<lines>
+								<line number="119" hits="0" branch="false"/>
+								<line number="120" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="121" hits="0" branch="false"/>
+								<line number="122" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="read" signature="([BII)I" line-rate="0.0" branch-rate="0.0">
+							<lines>
+								<line number="127" hits="0" branch="false"/>
+								<line number="128" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="129" hits="0" branch="false"/>
+								<line number="130" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="skip" signature="(J)J" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="135" hits="0" branch="false"/>
+								<line number="136" hits="0" branch="false"/>
+							</lines>
+						</method>
+					</methods>
+					<lines>
+						<line number="115" hits="0" branch="false"/>
+						<line number="116" hits="0" branch="false"/>
+						<line number="119" hits="0" branch="false"/>
+						<line number="120" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="121" hits="0" branch="false"/>
+						<line number="122" hits="0" branch="false"/>
+						<line number="127" hits="0" branch="false"/>
+						<line number="128" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="129" hits="0" branch="false"/>
+						<line number="130" hits="0" branch="false"/>
+						<line number="135" hits="0" branch="false"/>
+						<line number="136" hits="0" branch="false"/>
+						<line number="141" hits="0" branch="false"/>
+						<line number="142" hits="0" branch="false"/>
+					</lines>
+				</class>
+				<class name="hudson.plugins.sshslaves.SFTPFileSystem" filename="hudson/plugins/sshslaves/SFTPFileSystem.java" line-rate="0.0" branch-rate="0.0" complexity="0.0">
+					<methods>
+						<method name="&lt;init&gt;" signature="(Lhudson/plugins/sshslaves/SFTPClient;)V" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="43" hits="0" branch="false"/>
+								<line number="44" hits="0" branch="false"/>
+								<line number="45" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="chmod" signature="(Ljava/lang/String;I)V" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="52" hits="0" branch="false"/>
+								<line number="53" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="delete" signature="(Ljava/lang/String;)V" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="48" hits="0" branch="false"/>
+								<line number="49" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="listSubDirectories" signature="(Ljava/lang/String;)Ljava/util/List;" line-rate="0.0" branch-rate="0.0">
+							<lines>
+								<line number="60" hits="0" branch="false"/>
+								<line number="61" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="62" hits="0" branch="false"/>
+								<line number="63" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="pullUp" signature="(Ljava/lang/String;Ljava/lang/String;)V" line-rate="0.0" branch-rate="0.0">
+							<lines>
+								<line number="67" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="68" hits="0" branch="true" condition-coverage="0% (0/4)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+										<condition number="1" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="69" hits="0" branch="false"/>
+								<line number="71" hits="0" branch="false"/>
+								<line number="72" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="read" signature="(Ljava/lang/String;)Ljava/io/InputStream;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="56" hits="0" branch="false"/>
+							</lines>
+						</method>
+					</methods>
+					<lines>
+						<line number="43" hits="0" branch="false"/>
+						<line number="44" hits="0" branch="false"/>
+						<line number="45" hits="0" branch="false"/>
+						<line number="48" hits="0" branch="false"/>
+						<line number="49" hits="0" branch="false"/>
+						<line number="52" hits="0" branch="false"/>
+						<line number="53" hits="0" branch="false"/>
+						<line number="56" hits="0" branch="false"/>
+						<line number="60" hits="0" branch="false"/>
+						<line number="61" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="62" hits="0" branch="false"/>
+						<line number="63" hits="0" branch="false"/>
+						<line number="67" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="68" hits="0" branch="true" condition-coverage="0% (0/4)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+								<condition number="1" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="69" hits="0" branch="false"/>
+						<line number="71" hits="0" branch="false"/>
+						<line number="72" hits="0" branch="false"/>
+					</lines>
+				</class>
+				<class name="hudson.plugins.sshslaves.SSHConnector" filename="hudson/plugins/sshslaves/SSHConnector.java" line-rate="0.0" branch-rate="0.0" complexity="0.0">
+					<methods>
+						<method name="&lt;init&gt;" signature="(ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lhudson/tools/JDKInstaller;Ljava/lang/String;Ljava/lang/String;)V" line-rate="0.0" branch-rate="0.0">
+							<lines>
+								<line number="111" hits="0" branch="false"/>
+								<line number="112" hits="0" branch="false"/>
+								<line number="113" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="114" hits="0" branch="false"/>
+								<line number="115" hits="0" branch="false"/>
+								<line number="116" hits="0" branch="false"/>
+								<line number="117" hits="0" branch="false"/>
+								<line number="118" hits="0" branch="false"/>
+								<line number="119" hits="0" branch="false"/>
+								<line number="120" hits="0" branch="false"/>
+								<line number="121" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="&lt;init&gt;" signature="(ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="104" hits="0" branch="false"/>
+								<line number="105" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="launch" signature="(Ljava/lang/String;Lhudson/model/TaskListener;)Lhudson/plugins/sshslaves/SSHLauncher;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="125" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="launch" signature="(Ljava/lang/String;Lhudson/model/TaskListener;)Lhudson/slaves/ComputerLauncher;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="48" hits="0" branch="false"/>
+							</lines>
+						</method>
+					</methods>
+					<lines>
+						<line number="48" hits="0" branch="false"/>
+						<line number="104" hits="0" branch="false"/>
+						<line number="105" hits="0" branch="false"/>
+						<line number="111" hits="0" branch="false"/>
+						<line number="112" hits="0" branch="false"/>
+						<line number="113" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="114" hits="0" branch="false"/>
+						<line number="115" hits="0" branch="false"/>
+						<line number="116" hits="0" branch="false"/>
+						<line number="117" hits="0" branch="false"/>
+						<line number="118" hits="0" branch="false"/>
+						<line number="119" hits="0" branch="false"/>
+						<line number="120" hits="0" branch="false"/>
+						<line number="121" hits="0" branch="false"/>
+						<line number="125" hits="0" branch="false"/>
+					</lines>
+				</class>
+				<class name="hudson.plugins.sshslaves.SSHConnector$DescriptorImpl" filename="hudson/plugins/sshslaves/SSHConnector.java" line-rate="1.0" branch-rate="1.0" complexity="0.0">
+					<methods>
+						<method name="&lt;init&gt;" signature="()V" line-rate="1.0" branch-rate="1.0">
+							<lines>
+								<line number="129" hits="8" branch="false"/>
+							</lines>
+						</method>
+						<method name="getDisplayName" signature="()Ljava/lang/String;" line-rate="1.0" branch-rate="1.0">
+							<lines>
+								<line number="132" hits="80" branch="false"/>
+							</lines>
+						</method>
+					</methods>
+					<lines>
+						<line number="129" hits="8" branch="false"/>
+						<line number="132" hits="80" branch="false"/>
+					</lines>
+				</class>
+				<class name="hudson.plugins.sshslaves.SSHLauncher" filename="hudson/plugins/sshslaves/SSHLauncher.java" line-rate="0.20141342756183744" branch-rate="0.13333333333333333" complexity="0.0">
+					<methods>
+						<method name="&lt;clinit&gt;" signature="()V" line-rate="1.0" branch-rate="1.0">
+							<lines>
+								<line number="912" hits="1" branch="false"/>
+							</lines>
+						</method>
+						<method name="&lt;init&gt;" signature="(Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="217" hits="0" branch="false"/>
+								<line number="218" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="&lt;init&gt;" signature="(Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lhudson/tools/JDKInstaller;Ljava/lang/String;Ljava/lang/String;)V" line-rate="0.9285714285714286" branch-rate="0.75">
+							<lines>
+								<line number="148" hits="7" branch="false"/>
+								<line number="201" hits="7" branch="false"/>
+								<line number="202" hits="7" branch="false"/>
+								<line number="203" hits="7" branch="false"/>
+								<line number="204" hits="7" branch="true" condition-coverage="100% (2/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="100%"/>
+									</conditions>
+								</line>
+								<line number="205" hits="7" branch="false"/>
+								<line number="206" hits="7" branch="false"/>
+								<line number="207" hits="7" branch="false"/>
+								<line number="208" hits="7" branch="false"/>
+								<line number="209" hits="7" branch="true" condition-coverage="50% (1/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="50%"/>
+									</conditions>
+								</line>
+								<line number="210" hits="0" branch="false"/>
+								<line number="212" hits="7" branch="false"/>
+								<line number="213" hits="7" branch="false"/>
+								<line number="214" hits="7" branch="false"/>
+							</lines>
+						</method>
+						<method name="&lt;init&gt;" signature="(Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V" line-rate="1.0" branch-rate="1.0">
+							<lines>
+								<line number="182" hits="7" branch="false"/>
+								<line number="184" hits="7" branch="false"/>
+							</lines>
+						</method>
+						<method name="access$000" signature="(Lhudson/slaves/SlaveComputer;)Ljava/lang/String;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="92" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="afterDisconnect" signature="(Lhudson/slaves/SlaveComputer;Lhudson/model/TaskListener;)V" line-rate="0.19047619047619047" branch-rate="0.125">
+							<lines>
+								<line number="759" hits="1" branch="false"/>
+								<line number="760" hits="1" branch="true" condition-coverage="50% (1/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="50%"/>
+									</conditions>
+								</line>
+								<line number="761" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="762" hits="0" branch="false"/>
+								<line number="763" hits="0" branch="false"/>
+								<line number="765" hits="0" branch="false"/>
+								<line number="767" hits="0" branch="false"/>
+								<line number="768" hits="0" branch="false"/>
+								<line number="769" hits="0" branch="false"/>
+								<line number="770" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="772" hits="0" branch="false"/>
+								<line number="773" hits="0" branch="false"/>
+								<line number="774" hits="0" branch="false"/>
+								<line number="775" hits="0" branch="false"/>
+								<line number="777" hits="0" branch="false"/>
+								<line number="780" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="781" hits="0" branch="false"/>
+								<line number="786" hits="0" branch="false"/>
+								<line number="787" hits="0" branch="false"/>
+								<line number="789" hits="1" branch="false"/>
+								<line number="790" hits="1" branch="false"/>
+							</lines>
+						</method>
+						<method name="attemptToInstallJDK" signature="(Lhudson/model/TaskListener;Ljava/lang/String;)Ljava/lang/String;" line-rate="0.0" branch-rate="0.0">
+							<lines>
+								<line number="416" hits="0" branch="false"/>
+								<line number="417" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="418" hits="0" branch="false"/>
+								<line number="432" hits="0" branch="false"/>
+								<line number="433" hits="0" branch="false"/>
+								<line number="434" hits="0" branch="false"/>
+								<line number="435" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="436" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="437" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="438" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="440" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="441" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="442" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="444" hits="0" branch="true" condition-coverage="0% (0/4)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+										<condition number="1" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="445" hits="0" branch="false"/>
+								<line number="447" hits="0" branch="false"/>
+								<line number="448" hits="0" branch="false"/>
+								<line number="450" hits="0" branch="false"/>
+								<line number="452" hits="0" branch="false"/>
+								<line number="453" hits="0" branch="false"/>
+								<line number="455" hits="0" branch="false"/>
+								<line number="457" hits="0" branch="false"/>
+								<line number="458" hits="0" branch="false"/>
+								<line number="459" hits="0" branch="false"/>
+								<line number="461" hits="0" branch="false"/>
+								<line number="462" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="checkJavaVersion" signature="(Lhudson/model/TaskListener;Ljava/lang/String;)Ljava/lang/String;" line-rate="0.0" branch-rate="0.0">
+							<lines>
+								<line number="625" hits="0" branch="false"/>
+								<line number="626" hits="0" branch="false"/>
+								<line number="628" hits="0" branch="false"/>
+								<line number="629" hits="0" branch="false"/>
+								<line number="630" hits="0" branch="false"/>
+								<line number="631" hits="0" branch="false"/>
+								<line number="633" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="634" hits="0" branch="false"/>
+								<line number="635" hits="0" branch="false"/>
+								<line number="636" hits="0" branch="false"/>
+								<line number="638" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="checkJavaVersion" signature="(Ljava/io/PrintStream;Ljava/lang/String;Ljava/io/BufferedReader;Ljava/io/StringWriter;)Ljava/lang/String;" line-rate="0.8" branch-rate="0.75">
+							<lines>
+								<line number="659" hits="5" branch="true" condition-coverage="50% (1/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="50%"/>
+									</conditions>
+								</line>
+								<line number="660" hits="5" branch="false"/>
+								<line number="661" hits="5" branch="false"/>
+								<line number="662" hits="5" branch="false"/>
+								<line number="663" hits="5" branch="true" condition-coverage="75% (3/4)">
+									<conditions>
+										<condition number="0" type="jump" coverage="100%"/>
+										<condition number="1" type="jump" coverage="50%"/>
+									</conditions>
+								</line>
+								<line number="665" hits="5" branch="false"/>
+								<line number="667" hits="5" branch="false"/>
+								<line number="672" hits="5" branch="false"/>
+								<line number="674" hits="5" branch="true" condition-coverage="100% (2/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="100%"/>
+									</conditions>
+								</line>
+								<line number="675" hits="1" branch="false"/>
+								<line number="678" hits="0" branch="false"/>
+								<line number="679" hits="0" branch="false"/>
+								<line number="680" hits="4" branch="false"/>
+								<line number="681" hits="4" branch="false"/>
+								<line number="684" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="cleanupConnection" signature="(Lhudson/model/TaskListener;)V" line-rate="1.0" branch-rate="0.5">
+							<lines>
+								<line number="309" hits="2" branch="true" condition-coverage="50% (1/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="50%"/>
+									</conditions>
+								</line>
+								<line number="310" hits="2" branch="false"/>
+								<line number="311" hits="2" branch="false"/>
+								<line number="312" hits="2" branch="false"/>
+								<line number="314" hits="2" branch="false"/>
+							</lines>
+						</method>
+						<method name="copySlaveJar" signature="(Lhudson/model/TaskListener;Ljava/lang/String;)V" line-rate="0.0" branch-rate="0.0">
+							<lines>
+								<line number="533" hits="0" branch="false"/>
+								<line number="535" hits="0" branch="false"/>
+								<line number="536" hits="0" branch="false"/>
+								<line number="538" hits="0" branch="false"/>
+								<line number="541" hits="0" branch="false"/>
+								<line number="542" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="543" hits="0" branch="false"/>
+								<line number="545" hits="0" branch="false"/>
+								<line number="546" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="547" hits="0" branch="false"/>
+								<line number="553" hits="0" branch="false"/>
+								<line number="554" hits="0" branch="false"/>
+								<line number="556" hits="0" branch="false"/>
+								<line number="558" hits="0" branch="false"/>
+								<line number="561" hits="0" branch="false"/>
+								<line number="562" hits="0" branch="false"/>
+								<line number="565" hits="0" branch="false"/>
+								<line number="566" hits="0" branch="false"/>
+								<line number="567" hits="0" branch="false"/>
+								<line number="568" hits="0" branch="false"/>
+								<line number="569" hits="0" branch="false"/>
+								<line number="570" hits="0" branch="false"/>
+								<line number="571" hits="0" branch="false"/>
+								<line number="572" hits="0" branch="false"/>
+								<line number="573" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="575" hits="0" branch="false"/>
+								<line number="577" hits="0" branch="false"/>
+								<line number="580" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="581" hits="0" branch="false"/>
+								<line number="584" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="copySlaveJarUsingSCP" signature="(Lhudson/model/TaskListener;Ljava/lang/String;)V" line-rate="0.0" branch-rate="0.0">
+							<lines>
+								<line number="595" hits="0" branch="false"/>
+								<line number="596" hits="0" branch="false"/>
+								<line number="599" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="600" hits="0" branch="false"/>
+								<line number="602" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="603" hits="0" branch="false"/>
+								<line number="608" hits="0" branch="false"/>
+								<line number="611" hits="0" branch="false"/>
+								<line number="612" hits="0" branch="false"/>
+								<line number="613" hits="0" branch="false"/>
+								<line number="614" hits="0" branch="false"/>
+								<line number="615" hits="0" branch="false"/>
+								<line number="616" hits="0" branch="false"/>
+								<line number="617" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="expandExpression" signature="(Lhudson/slaves/SlaveComputer;Ljava/lang/String;)Ljava/lang/String;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="353" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="getConnection" signature="()Lcom/trilead/ssh2/Connection;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="838" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="getEnvVars" signature="(Lhudson/model/Hudson;)Lhudson/EnvVars;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="378" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="getEnvVars" signature="(Lhudson/model/Node;)Lhudson/EnvVars;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="382" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="getEnvVars" signature="(Lhudson/slaves/SlaveComputer;)Lhudson/EnvVars;" line-rate="0.0" branch-rate="0.0">
+							<lines>
+								<line number="357" hits="0" branch="false"/>
+								<line number="359" hits="0" branch="false"/>
+								<line number="361" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="362" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="363" hits="0" branch="false"/>
+								<line number="364" hits="0" branch="false"/>
+								<line number="366" hits="0" branch="false"/>
+								<line number="368" hits="0" branch="false"/>
+								<line number="370" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="371" hits="0" branch="false"/>
+								<line number="373" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="getEnvVars" signature="(Lhudson/util/DescribableList;)Lhudson/EnvVars;" line-rate="0.0" branch-rate="0.0">
+							<lines>
+								<line number="386" hits="0" branch="false"/>
+								<line number="387" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="388" hits="0" branch="false"/>
+								<line number="391" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="getHost" signature="()Ljava/lang/String;" line-rate="1.0" branch-rate="1.0">
+							<lines>
+								<line number="798" hits="5" branch="false"/>
+							</lines>
+						</method>
+						<method name="getJDKInstaller" signature="()Lhudson/tools/JDKInstaller;" line-rate="0.0" branch-rate="0.0">
+							<lines>
+								<line number="409" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+							</lines>
+						</method>
+						<method name="getJavaPath" signature="()Ljava/lang/String;" line-rate="1.0" branch-rate="0.5">
+							<lines>
+								<line number="241" hits="5" branch="true" condition-coverage="50% (1/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="50%"/>
+									</conditions>
+								</line>
+							</lines>
+						</method>
+						<method name="getJvmOptions" signature="()Ljava/lang/String;" line-rate="1.0" branch-rate="0.5">
+							<lines>
+								<line number="233" hits="5" branch="true" condition-coverage="50% (1/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="50%"/>
+									</conditions>
+								</line>
+							</lines>
+						</method>
+						<method name="getPassword" signature="()Ljava/lang/String;" line-rate="1.0" branch-rate="0.5">
+							<lines>
+								<line number="825" hits="5" branch="true" condition-coverage="50% (1/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="50%"/>
+									</conditions>
+								</line>
+							</lines>
+						</method>
+						<method name="getPort" signature="()I" line-rate="1.0" branch-rate="1.0">
+							<lines>
+								<line number="807" hits="5" branch="false"/>
+							</lines>
+						</method>
+						<method name="getPrefixStartSlaveCmd" signature="()Ljava/lang/String;" line-rate="1.0" branch-rate="0.5">
+							<lines>
+								<line number="842" hits="5" branch="true" condition-coverage="50% (1/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="50%"/>
+									</conditions>
+								</line>
+							</lines>
+						</method>
+						<method name="getPrivatekey" signature="()Ljava/lang/String;" line-rate="1.0" branch-rate="1.0">
+							<lines>
+								<line number="834" hits="5" branch="false"/>
+							</lines>
+						</method>
+						<method name="getSuffixStartSlaveCmd" signature="()Ljava/lang/String;" line-rate="1.0" branch-rate="0.5">
+							<lines>
+								<line number="846" hits="5" branch="true" condition-coverage="50% (1/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="50%"/>
+									</conditions>
+								</line>
+							</lines>
+						</method>
+						<method name="getTimestamp" signature="()Ljava/lang/String;" line-rate="1.0" branch-rate="1.0">
+							<lines>
+								<line number="250" hits="9" branch="false"/>
+							</lines>
+						</method>
+						<method name="getUsername" signature="()Ljava/lang/String;" line-rate="1.0" branch-rate="1.0">
+							<lines>
+								<line number="816" hits="5" branch="false"/>
+							</lines>
+						</method>
+						<method name="getWorkingDirectory" signature="(Lhudson/model/Slave;)Ljava/lang/String;" line-rate="0.0" branch-rate="0.0">
+							<lines>
+								<line number="265" hits="0" branch="false"/>
+								<line number="266" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="267" hits="0" branch="false"/>
+								<line number="269" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="getWorkingDirectory" signature="(Lhudson/slaves/SlaveComputer;)Ljava/lang/String;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="261" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="isLaunchSupported" signature="()Z" line-rate="1.0" branch-rate="1.0">
+							<lines>
+								<line number="225" hits="2" branch="false"/>
+							</lines>
+						</method>
+						<method name="launch" signature="(Lhudson/slaves/SlaveComputer;Lhudson/model/TaskListener;)V" line-rate="0.3" branch-rate="1.0">
+							<lines>
+								<line number="277" hits="2" branch="false"/>
+								<line number="279" hits="2" branch="false"/>
+								<line number="281" hits="0" branch="false"/>
+								<line number="282" hits="0" branch="false"/>
+								<line number="284" hits="0" branch="false"/>
+								<line number="286" hits="0" branch="false"/>
+								<line number="287" hits="0" branch="false"/>
+								<line number="289" hits="0" branch="false"/>
+								<line number="291" hits="0" branch="false"/>
+								<line number="292" hits="0" branch="false"/>
+								<line number="293" hits="0" branch="false"/>
+								<line number="294" hits="0" branch="false"/>
+								<line number="295" hits="0" branch="false"/>
+								<line number="296" hits="0" branch="false"/>
+								<line number="297" hits="0" branch="false"/>
+								<line number="298" hits="2" branch="false"/>
+								<line number="299" hits="2" branch="false"/>
+								<line number="300" hits="2" branch="false"/>
+								<line number="301" hits="0" branch="false"/>
+								<line number="302" hits="2" branch="false"/>
+							</lines>
+						</method>
+						<method name="openConnection" signature="(Lhudson/model/TaskListener;)V" line-rate="0.06976744186046512" branch-rate="0.0">
+							<lines>
+								<line number="688" hits="2" branch="false"/>
+								<line number="689" hits="2" branch="false"/>
+								<line number="690" hits="2" branch="false"/>
+								<line number="692" hits="0" branch="false"/>
+								<line number="693" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="694" hits="0" branch="false"/>
+								<line number="695" hits="0" branch="false"/>
+								<line number="698" hits="0" branch="false"/>
+								<line number="700" hits="0" branch="false"/>
+								<line number="702" hits="0" branch="false"/>
+								<line number="703" hits="0" branch="true" condition-coverage="0% (0/4)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+										<condition number="1" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="705" hits="0" branch="false"/>
+								<line number="706" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="707" hits="0" branch="false"/>
+								<line number="708" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="709" hits="0" branch="false"/>
+								<line number="711" hits="0" branch="false"/>
+								<line number="713" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="714" hits="0" branch="false"/>
+								<line number="715" hits="0" branch="false"/>
+								<line number="717" hits="0" branch="true" condition-coverage="0% (0/4)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+										<condition number="1" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="718" hits="0" branch="false"/>
+								<line number="719" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="720" hits="0" branch="false"/>
+								<line number="722" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="723" hits="0" branch="false"/>
+								<line number="725" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="726" hits="0" branch="false"/>
+								<line number="727" hits="0" branch="false"/>
+								<line number="728" hits="0" branch="false"/>
+								<line number="729" hits="0" branch="false"/>
+								<line number="730" hits="0" branch="false"/>
+								<line number="733" hits="0" branch="false"/>
+								<line number="737" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="738" hits="0" branch="true" condition-coverage="0% (0/4)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+										<condition number="1" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="739" hits="0" branch="false"/>
+								<line number="741" hits="0" branch="false"/>
+								<line number="743" hits="0" branch="false"/>
+								<line number="746" hits="0" branch="true" condition-coverage="0% (0/4)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+										<condition number="1" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="747" hits="0" branch="false"/>
+								<line number="749" hits="0" branch="false"/>
+								<line number="750" hits="0" branch="false"/>
+								<line number="752" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="reportEnvironment" signature="(Lhudson/model/TaskListener;)V" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="620" hits="0" branch="false"/>
+								<line number="621" hits="0" branch="false"/>
+								<line number="622" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="resolveJava" signature="(Lhudson/slaves/SlaveComputer;Lhudson/model/TaskListener;)Ljava/lang/String;" line-rate="0.0" branch-rate="0.0">
+							<lines>
+								<line number="322" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="323" hits="0" branch="false"/>
+								<line number="326" hits="0" branch="false"/>
+								<line number="328" hits="0" branch="false"/>
+								<line number="329" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="330" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="331" hits="0" branch="false"/>
+								<line number="333" hits="0" branch="false"/>
+								<line number="334" hits="0" branch="false"/>
+								<line number="335" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="336" hits="0" branch="false"/>
+								<line number="337" hits="0" branch="false"/>
+								<line number="338" hits="0" branch="false"/>
+								<line number="340" hits="0" branch="false"/>
+								<line number="346" hits="0" branch="false"/>
+								<line number="347" hits="0" branch="false"/>
+								<line number="348" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="startSlave" signature="(Lhudson/slaves/SlaveComputer;Lhudson/model/TaskListener;Ljava/lang/String;Ljava/lang/String;)V" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="477" hits="0" branch="false"/>
+								<line number="478" hits="0" branch="false"/>
+								<line number="481" hits="0" branch="false"/>
+								<line number="483" hits="0" branch="false"/>
+								<line number="484" hits="0" branch="false"/>
+								<line number="485" hits="0" branch="false"/>
+								<line number="486" hits="0" branch="false"/>
+								<line number="490" hits="0" branch="false"/>
+								<line number="494" hits="0" branch="false"/>
+								<line number="518" hits="0" branch="false"/>
+								<line number="519" hits="0" branch="false"/>
+								<line number="520" hits="0" branch="false"/>
+								<line number="521" hits="0" branch="false"/>
+								<line number="522" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="verifyNoHeaderJunk" signature="(Lhudson/model/TaskListener;)V" line-rate="0.0" branch-rate="0.0">
+							<lines>
+								<line number="398" hits="0" branch="false"/>
+								<line number="399" hits="0" branch="false"/>
+								<line number="400" hits="0" branch="false"/>
+								<line number="401" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="402" hits="0" branch="false"/>
+								<line number="403" hits="0" branch="false"/>
+								<line number="404" hits="0" branch="false"/>
+								<line number="406" hits="0" branch="false"/>
+							</lines>
+						</method>
+					</methods>
+					<lines>
+						<line number="92" hits="0" branch="false"/>
+						<line number="148" hits="7" branch="false"/>
+						<line number="182" hits="7" branch="false"/>
+						<line number="184" hits="7" branch="false"/>
+						<line number="201" hits="7" branch="false"/>
+						<line number="202" hits="7" branch="false"/>
+						<line number="203" hits="7" branch="false"/>
+						<line number="204" hits="7" branch="true" condition-coverage="100% (2/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="100%"/>
+							</conditions>
+						</line>
+						<line number="205" hits="7" branch="false"/>
+						<line number="206" hits="7" branch="false"/>
+						<line number="207" hits="7" branch="false"/>
+						<line number="208" hits="7" branch="false"/>
+						<line number="209" hits="7" branch="true" condition-coverage="50% (1/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="50%"/>
+							</conditions>
+						</line>
+						<line number="210" hits="0" branch="false"/>
+						<line number="212" hits="7" branch="false"/>
+						<line number="213" hits="7" branch="false"/>
+						<line number="214" hits="7" branch="false"/>
+						<line number="217" hits="0" branch="false"/>
+						<line number="218" hits="0" branch="false"/>
+						<line number="225" hits="2" branch="false"/>
+						<line number="233" hits="5" branch="true" condition-coverage="50% (1/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="50%"/>
+							</conditions>
+						</line>
+						<line number="241" hits="5" branch="true" condition-coverage="50% (1/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="50%"/>
+							</conditions>
+						</line>
+						<line number="250" hits="9" branch="false"/>
+						<line number="261" hits="0" branch="false"/>
+						<line number="265" hits="0" branch="false"/>
+						<line number="266" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="267" hits="0" branch="false"/>
+						<line number="269" hits="0" branch="false"/>
+						<line number="277" hits="2" branch="false"/>
+						<line number="279" hits="2" branch="false"/>
+						<line number="281" hits="0" branch="false"/>
+						<line number="282" hits="0" branch="false"/>
+						<line number="284" hits="0" branch="false"/>
+						<line number="286" hits="0" branch="false"/>
+						<line number="287" hits="0" branch="false"/>
+						<line number="289" hits="0" branch="false"/>
+						<line number="291" hits="0" branch="false"/>
+						<line number="292" hits="0" branch="false"/>
+						<line number="293" hits="0" branch="false"/>
+						<line number="294" hits="0" branch="false"/>
+						<line number="295" hits="0" branch="false"/>
+						<line number="296" hits="0" branch="false"/>
+						<line number="297" hits="0" branch="false"/>
+						<line number="298" hits="2" branch="false"/>
+						<line number="299" hits="2" branch="false"/>
+						<line number="300" hits="2" branch="false"/>
+						<line number="301" hits="0" branch="false"/>
+						<line number="302" hits="2" branch="false"/>
+						<line number="309" hits="2" branch="true" condition-coverage="50% (1/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="50%"/>
+							</conditions>
+						</line>
+						<line number="310" hits="2" branch="false"/>
+						<line number="311" hits="2" branch="false"/>
+						<line number="312" hits="2" branch="false"/>
+						<line number="314" hits="2" branch="false"/>
+						<line number="322" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="323" hits="0" branch="false"/>
+						<line number="326" hits="0" branch="false"/>
+						<line number="328" hits="0" branch="false"/>
+						<line number="329" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="330" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="331" hits="0" branch="false"/>
+						<line number="333" hits="0" branch="false"/>
+						<line number="334" hits="0" branch="false"/>
+						<line number="335" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="336" hits="0" branch="false"/>
+						<line number="337" hits="0" branch="false"/>
+						<line number="338" hits="0" branch="false"/>
+						<line number="340" hits="0" branch="false"/>
+						<line number="346" hits="0" branch="false"/>
+						<line number="347" hits="0" branch="false"/>
+						<line number="348" hits="0" branch="false"/>
+						<line number="353" hits="0" branch="false"/>
+						<line number="357" hits="0" branch="false"/>
+						<line number="359" hits="0" branch="false"/>
+						<line number="361" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="362" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="363" hits="0" branch="false"/>
+						<line number="364" hits="0" branch="false"/>
+						<line number="366" hits="0" branch="false"/>
+						<line number="368" hits="0" branch="false"/>
+						<line number="370" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="371" hits="0" branch="false"/>
+						<line number="373" hits="0" branch="false"/>
+						<line number="378" hits="0" branch="false"/>
+						<line number="382" hits="0" branch="false"/>
+						<line number="386" hits="0" branch="false"/>
+						<line number="387" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="388" hits="0" branch="false"/>
+						<line number="391" hits="0" branch="false"/>
+						<line number="398" hits="0" branch="false"/>
+						<line number="399" hits="0" branch="false"/>
+						<line number="400" hits="0" branch="false"/>
+						<line number="401" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="402" hits="0" branch="false"/>
+						<line number="403" hits="0" branch="false"/>
+						<line number="404" hits="0" branch="false"/>
+						<line number="406" hits="0" branch="false"/>
+						<line number="409" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="416" hits="0" branch="false"/>
+						<line number="417" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="418" hits="0" branch="false"/>
+						<line number="432" hits="0" branch="false"/>
+						<line number="433" hits="0" branch="false"/>
+						<line number="434" hits="0" branch="false"/>
+						<line number="435" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="436" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="437" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="438" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="440" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="441" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="442" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="444" hits="0" branch="true" condition-coverage="0% (0/4)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+								<condition number="1" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="445" hits="0" branch="false"/>
+						<line number="447" hits="0" branch="false"/>
+						<line number="448" hits="0" branch="false"/>
+						<line number="450" hits="0" branch="false"/>
+						<line number="452" hits="0" branch="false"/>
+						<line number="453" hits="0" branch="false"/>
+						<line number="455" hits="0" branch="false"/>
+						<line number="457" hits="0" branch="false"/>
+						<line number="458" hits="0" branch="false"/>
+						<line number="459" hits="0" branch="false"/>
+						<line number="461" hits="0" branch="false"/>
+						<line number="462" hits="0" branch="false"/>
+						<line number="477" hits="0" branch="false"/>
+						<line number="478" hits="0" branch="false"/>
+						<line number="481" hits="0" branch="false"/>
+						<line number="483" hits="0" branch="false"/>
+						<line number="484" hits="0" branch="false"/>
+						<line number="485" hits="0" branch="false"/>
+						<line number="486" hits="0" branch="false"/>
+						<line number="490" hits="0" branch="false"/>
+						<line number="494" hits="0" branch="false"/>
+						<line number="518" hits="0" branch="false"/>
+						<line number="519" hits="0" branch="false"/>
+						<line number="520" hits="0" branch="false"/>
+						<line number="521" hits="0" branch="false"/>
+						<line number="522" hits="0" branch="false"/>
+						<line number="533" hits="0" branch="false"/>
+						<line number="535" hits="0" branch="false"/>
+						<line number="536" hits="0" branch="false"/>
+						<line number="538" hits="0" branch="false"/>
+						<line number="541" hits="0" branch="false"/>
+						<line number="542" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="543" hits="0" branch="false"/>
+						<line number="545" hits="0" branch="false"/>
+						<line number="546" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="547" hits="0" branch="false"/>
+						<line number="553" hits="0" branch="false"/>
+						<line number="554" hits="0" branch="false"/>
+						<line number="556" hits="0" branch="false"/>
+						<line number="558" hits="0" branch="false"/>
+						<line number="561" hits="0" branch="false"/>
+						<line number="562" hits="0" branch="false"/>
+						<line number="565" hits="0" branch="false"/>
+						<line number="566" hits="0" branch="false"/>
+						<line number="567" hits="0" branch="false"/>
+						<line number="568" hits="0" branch="false"/>
+						<line number="569" hits="0" branch="false"/>
+						<line number="570" hits="0" branch="false"/>
+						<line number="571" hits="0" branch="false"/>
+						<line number="572" hits="0" branch="false"/>
+						<line number="573" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="575" hits="0" branch="false"/>
+						<line number="577" hits="0" branch="false"/>
+						<line number="580" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="581" hits="0" branch="false"/>
+						<line number="584" hits="0" branch="false"/>
+						<line number="595" hits="0" branch="false"/>
+						<line number="596" hits="0" branch="false"/>
+						<line number="599" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="600" hits="0" branch="false"/>
+						<line number="602" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="603" hits="0" branch="false"/>
+						<line number="608" hits="0" branch="false"/>
+						<line number="611" hits="0" branch="false"/>
+						<line number="612" hits="0" branch="false"/>
+						<line number="613" hits="0" branch="false"/>
+						<line number="614" hits="0" branch="false"/>
+						<line number="615" hits="0" branch="false"/>
+						<line number="616" hits="0" branch="false"/>
+						<line number="617" hits="0" branch="false"/>
+						<line number="620" hits="0" branch="false"/>
+						<line number="621" hits="0" branch="false"/>
+						<line number="622" hits="0" branch="false"/>
+						<line number="625" hits="0" branch="false"/>
+						<line number="626" hits="0" branch="false"/>
+						<line number="628" hits="0" branch="false"/>
+						<line number="629" hits="0" branch="false"/>
+						<line number="630" hits="0" branch="false"/>
+						<line number="631" hits="0" branch="false"/>
+						<line number="633" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="634" hits="0" branch="false"/>
+						<line number="635" hits="0" branch="false"/>
+						<line number="636" hits="0" branch="false"/>
+						<line number="638" hits="0" branch="false"/>
+						<line number="659" hits="5" branch="true" condition-coverage="50% (1/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="50%"/>
+							</conditions>
+						</line>
+						<line number="660" hits="5" branch="false"/>
+						<line number="661" hits="5" branch="false"/>
+						<line number="662" hits="5" branch="false"/>
+						<line number="663" hits="5" branch="true" condition-coverage="75% (3/4)">
+							<conditions>
+								<condition number="0" type="jump" coverage="100%"/>
+								<condition number="1" type="jump" coverage="50%"/>
+							</conditions>
+						</line>
+						<line number="665" hits="5" branch="false"/>
+						<line number="667" hits="5" branch="false"/>
+						<line number="672" hits="5" branch="false"/>
+						<line number="674" hits="5" branch="true" condition-coverage="100% (2/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="100%"/>
+							</conditions>
+						</line>
+						<line number="675" hits="1" branch="false"/>
+						<line number="678" hits="0" branch="false"/>
+						<line number="679" hits="0" branch="false"/>
+						<line number="680" hits="4" branch="false"/>
+						<line number="681" hits="4" branch="false"/>
+						<line number="684" hits="0" branch="false"/>
+						<line number="688" hits="2" branch="false"/>
+						<line number="689" hits="2" branch="false"/>
+						<line number="690" hits="2" branch="false"/>
+						<line number="692" hits="0" branch="false"/>
+						<line number="693" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="694" hits="0" branch="false"/>
+						<line number="695" hits="0" branch="false"/>
+						<line number="698" hits="0" branch="false"/>
+						<line number="700" hits="0" branch="false"/>
+						<line number="702" hits="0" branch="false"/>
+						<line number="703" hits="0" branch="true" condition-coverage="0% (0/4)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+								<condition number="1" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="705" hits="0" branch="false"/>
+						<line number="706" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="707" hits="0" branch="false"/>
+						<line number="708" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="709" hits="0" branch="false"/>
+						<line number="711" hits="0" branch="false"/>
+						<line number="713" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="714" hits="0" branch="false"/>
+						<line number="715" hits="0" branch="false"/>
+						<line number="717" hits="0" branch="true" condition-coverage="0% (0/4)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+								<condition number="1" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="718" hits="0" branch="false"/>
+						<line number="719" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="720" hits="0" branch="false"/>
+						<line number="722" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="723" hits="0" branch="false"/>
+						<line number="725" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="726" hits="0" branch="false"/>
+						<line number="727" hits="0" branch="false"/>
+						<line number="728" hits="0" branch="false"/>
+						<line number="729" hits="0" branch="false"/>
+						<line number="730" hits="0" branch="false"/>
+						<line number="733" hits="0" branch="false"/>
+						<line number="737" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="738" hits="0" branch="true" condition-coverage="0% (0/4)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+								<condition number="1" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="739" hits="0" branch="false"/>
+						<line number="741" hits="0" branch="false"/>
+						<line number="743" hits="0" branch="false"/>
+						<line number="746" hits="0" branch="true" condition-coverage="0% (0/4)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+								<condition number="1" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="747" hits="0" branch="false"/>
+						<line number="749" hits="0" branch="false"/>
+						<line number="750" hits="0" branch="false"/>
+						<line number="752" hits="0" branch="false"/>
+						<line number="759" hits="1" branch="false"/>
+						<line number="760" hits="1" branch="true" condition-coverage="50% (1/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="50%"/>
+							</conditions>
+						</line>
+						<line number="761" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="762" hits="0" branch="false"/>
+						<line number="763" hits="0" branch="false"/>
+						<line number="765" hits="0" branch="false"/>
+						<line number="767" hits="0" branch="false"/>
+						<line number="768" hits="0" branch="false"/>
+						<line number="769" hits="0" branch="false"/>
+						<line number="770" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="772" hits="0" branch="false"/>
+						<line number="773" hits="0" branch="false"/>
+						<line number="774" hits="0" branch="false"/>
+						<line number="775" hits="0" branch="false"/>
+						<line number="777" hits="0" branch="false"/>
+						<line number="780" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="781" hits="0" branch="false"/>
+						<line number="786" hits="0" branch="false"/>
+						<line number="787" hits="0" branch="false"/>
+						<line number="789" hits="1" branch="false"/>
+						<line number="790" hits="1" branch="false"/>
+						<line number="798" hits="5" branch="false"/>
+						<line number="807" hits="5" branch="false"/>
+						<line number="816" hits="5" branch="false"/>
+						<line number="825" hits="5" branch="true" condition-coverage="50% (1/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="50%"/>
+							</conditions>
+						</line>
+						<line number="834" hits="5" branch="false"/>
+						<line number="838" hits="0" branch="false"/>
+						<line number="842" hits="5" branch="true" condition-coverage="50% (1/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="50%"/>
+							</conditions>
+						</line>
+						<line number="846" hits="5" branch="true" condition-coverage="50% (1/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="50%"/>
+							</conditions>
+						</line>
+						<line number="912" hits="1" branch="false"/>
+					</lines>
+				</class>
+				<class name="hudson.plugins.sshslaves.SSHLauncher$1" filename="hudson/plugins/sshslaves/SSHLauncher.java" line-rate="0.0" branch-rate="0.0" complexity="0.0">
+					<methods>
+						<method name="&lt;init&gt;" signature="(Lhudson/plugins/sshslaves/SSHLauncher;Lhudson/model/TaskListener;Lcom/trilead/ssh2/Session;Lcom/trilead/ssh2/StreamGobbler;Lcom/trilead/ssh2/StreamGobbler;)V" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="494" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="onClosed" signature="(Lhudson/remoting/Channel;Ljava/io/IOException;)V" line-rate="0.0" branch-rate="0.0">
+							<lines>
+								<line number="497" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="498" hits="0" branch="false"/>
+								<line number="501" hits="0" branch="false"/>
+								<line number="502" hits="0" branch="false"/>
+								<line number="503" hits="0" branch="false"/>
+								<line number="504" hits="0" branch="false"/>
+								<line number="506" hits="0" branch="false"/>
+								<line number="507" hits="0" branch="false"/>
+								<line number="508" hits="0" branch="false"/>
+								<line number="509" hits="0" branch="false"/>
+								<line number="511" hits="0" branch="false"/>
+								<line number="512" hits="0" branch="false"/>
+								<line number="513" hits="0" branch="false"/>
+								<line number="514" hits="0" branch="false"/>
+								<line number="515" hits="0" branch="false"/>
+							</lines>
+						</method>
+					</methods>
+					<lines>
+						<line number="494" hits="0" branch="false"/>
+						<line number="497" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="498" hits="0" branch="false"/>
+						<line number="501" hits="0" branch="false"/>
+						<line number="502" hits="0" branch="false"/>
+						<line number="503" hits="0" branch="false"/>
+						<line number="504" hits="0" branch="false"/>
+						<line number="506" hits="0" branch="false"/>
+						<line number="507" hits="0" branch="false"/>
+						<line number="508" hits="0" branch="false"/>
+						<line number="509" hits="0" branch="false"/>
+						<line number="511" hits="0" branch="false"/>
+						<line number="512" hits="0" branch="false"/>
+						<line number="513" hits="0" branch="false"/>
+						<line number="514" hits="0" branch="false"/>
+						<line number="515" hits="0" branch="false"/>
+					</lines>
+				</class>
+				<class name="hudson.plugins.sshslaves.SSHLauncher$DefaultJDKInstaller" filename="hudson/plugins/sshslaves/SSHLauncher.java" line-rate="0.0" branch-rate="1.0" complexity="0.0">
+					<methods>
+						<method name="&lt;init&gt;" signature="()V" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="99" hits="0" branch="false"/>
+								<line number="100" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="readResolve" signature="()Ljava/lang/Object;" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="103" hits="0" branch="false"/>
+							</lines>
+						</method>
+					</methods>
+					<lines>
+						<line number="99" hits="0" branch="false"/>
+						<line number="100" hits="0" branch="false"/>
+						<line number="103" hits="0" branch="false"/>
+					</lines>
+				</class>
+				<class name="hudson.plugins.sshslaves.SSHLauncher$DefaultJavaProvider" filename="hudson/plugins/sshslaves/SSHLauncher.java" line-rate="0.0" branch-rate="0.0" complexity="0.0">
+					<methods>
+						<method name="&lt;init&gt;" signature="()V" line-rate="0.0" branch-rate="1.0">
+							<lines>
+								<line number="880" hits="0" branch="false"/>
+							</lines>
+						</method>
+						<method name="getJavas" signature="(Lhudson/slaves/SlaveComputer;Lhudson/model/TaskListener;Lcom/trilead/ssh2/Connection;)Ljava/util/List;" line-rate="0.0" branch-rate="0.0">
+							<lines>
+								<line number="883" hits="0" branch="false"/>
+								<line number="892" hits="0" branch="false"/>
+								<line number="893" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="894" hits="0" branch="false"/>
+								<line number="895" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="896" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="897" hits="0" branch="false"/>
+								<line number="898" hits="0" branch="true" condition-coverage="0% (0/4)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+										<condition number="1" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="899" hits="0" branch="false"/>
+								<line number="900" hits="0" branch="false"/>
+								<line number="901" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="902" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="903" hits="0" branch="true" condition-coverage="0% (0/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="0%"/>
+									</conditions>
+								</line>
+								<line number="904" hits="0" branch="false"/>
+								<line number="908" hits="0" branch="false"/>
+							</lines>
+						</method>
+					</methods>
+					<lines>
+						<line number="880" hits="0" branch="false"/>
+						<line number="883" hits="0" branch="false"/>
+						<line number="892" hits="0" branch="false"/>
+						<line number="893" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="894" hits="0" branch="false"/>
+						<line number="895" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="896" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="897" hits="0" branch="false"/>
+						<line number="898" hits="0" branch="true" condition-coverage="0% (0/4)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+								<condition number="1" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="899" hits="0" branch="false"/>
+						<line number="900" hits="0" branch="false"/>
+						<line number="901" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="902" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="903" hits="0" branch="true" condition-coverage="0% (0/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="0%"/>
+							</conditions>
+						</line>
+						<line number="904" hits="0" branch="false"/>
+						<line number="908" hits="0" branch="false"/>
+					</lines>
+				</class>
+				<class name="hudson.plugins.sshslaves.SSHLauncher$DescriptorImpl" filename="hudson/plugins/sshslaves/SSHLauncher.java" line-rate="1.0" branch-rate="0.5" complexity="0.0">
+					<methods>
+						<method name="&lt;init&gt;" signature="()V" line-rate="1.0" branch-rate="1.0">
+							<lines>
+								<line number="850" hits="8" branch="false"/>
+							</lines>
+						</method>
+						<method name="getDisplayName" signature="()Ljava/lang/String;" line-rate="1.0" branch-rate="1.0">
+							<lines>
+								<line number="860" hits="157" branch="false"/>
+							</lines>
+						</method>
+						<method name="getHelpFile" signature="(Ljava/lang/String;)Ljava/lang/String;" line-rate="1.0" branch-rate="0.5">
+							<lines>
+								<line number="872" hits="9" branch="false"/>
+								<line number="873" hits="9" branch="true" condition-coverage="50% (1/2)">
+									<conditions>
+										<condition number="0" type="jump" coverage="50%"/>
+									</conditions>
+								</line>
+								<line number="874" hits="9" branch="false"/>
+								<line number="875" hits="9" branch="false"/>
+							</lines>
+						</method>
+						<method name="getSshConnectorClass" signature="()Ljava/lang/Class;" line-rate="1.0" branch-rate="1.0">
+							<lines>
+								<line number="864" hits="1" branch="false"/>
+							</lines>
+						</method>
+					</methods>
+					<lines>
+						<line number="850" hits="8" branch="false"/>
+						<line number="860" hits="157" branch="false"/>
+						<line number="864" hits="1" branch="false"/>
+						<line number="872" hits="9" branch="false"/>
+						<line number="873" hits="9" branch="true" condition-coverage="50% (1/2)">
+							<conditions>
+								<condition number="0" type="jump" coverage="50%"/>
+							</conditions>
+						</line>
+						<line number="874" hits="9" branch="false"/>
+						<line number="875" hits="9" branch="false"/>
+					</lines>
+				</class>
+			</classes>
+		</package>
+	</packages>
+</coverage>

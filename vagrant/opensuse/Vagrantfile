@@ -1,0 +1,10 @@
+Vagrant::Config.run do |config|
+  config.vm.box = "jenkins-test-opensuse-11.4"
+  config.vm.box_url = "http://boxes.jenkins-ci.org/jenkins-test-opensuse-11.4.box"
+
+
+  # port on VM, port on Host
+  config.vm.forward_port 8080, 8080
+
+  # config.vm.share_folder "shared", "/shared", "#{Dir.pwd}data"
+end
