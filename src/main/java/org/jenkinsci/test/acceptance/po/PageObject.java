@@ -9,10 +9,9 @@ import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 
 import javax.inject.Inject;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -33,7 +32,7 @@ public abstract class PageObject extends CapybaraPortingLayer {
      */
     public final URL url;
 
-    private static final AtomicInteger IOTA = new AtomicInteger();
+    private static final AtomicLong IOTA = new AtomicLong(System.currentTimeMillis());
 
     public PageObject(Injector injector, URL url) {
         this.injector = injector;
