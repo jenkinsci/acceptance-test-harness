@@ -1,14 +1,17 @@
-package org.jenkinsci.test.acceptance;
+package org.jenkinsci.test.acceptance.cucumber;
 
 import cucumber.api.java.After;
 import cucumber.api.java.Before;
 
 /**
+ *
+ *
  * @author Kohsuke Kawaguchi
  */
-public class HookImpl {
+public class Hooks {
     @Before
-    public void foo() {
+    public void before() {
+
         System.out.println("before");
     }
 
