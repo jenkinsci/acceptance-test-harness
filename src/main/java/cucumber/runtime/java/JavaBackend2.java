@@ -1,9 +1,11 @@
 package cucumber.runtime.java;
 
+import cucumber.api.java.After;
+import cucumber.api.java.Before;
 import cucumber.runtime.io.ResourceLoader;
 import cucumber.runtime.io.ResourceLoaderClassFinder;
 import cucumber.runtime.java.guice.GuiceFactory;
-import org.jenkinsci.test.acceptance.Glue;
+import org.jvnet.hudson.annotation_indexer.Index;
 import org.kohsuke.cukes.StepDefFinder;
 
 import java.io.IOException;
@@ -25,12 +27,13 @@ public class JavaBackend2 extends JavaBackend {
     }
 
     /**
-     * Scan {@link Glue} classes, then add hooks and steps.
+     * Find cucumber annotated step definitions and hook through index
      */
     @Override
     public void loadGlue(cucumber.runtime.Glue glue, List<String> gluePaths) {
         super.loadGlue(glue, gluePaths);
         try {
+
             for (Method method : StepDefFinder.list(classLoader)) {
                 for (Annotation a : method.getAnnotations()) {
                     if (a.annotationType().isAnnotationPresent(StepDefAnnotation.class)) {
@@ -38,20 +41,14 @@ public class JavaBackend2 extends JavaBackend {
                     }
                 }
             }
-//            for (Class c : Index.list(Glue.class, classLoader, Class.class)) {
-//                for (Method method : c.getMethods()) {
-//                    for (Annotation a : method.getAnnotations()) {
-//                        if (a.annotationType().isAnnotationPresent(StepDefAnnotation.class)) {
-//                            addStepDefinition(a, method);
-//                            break;
-//                        }
-//                        if (a.annotationType()==Before.class || a.annotationType()==After.class) {
-//                            addHook(a, method);
-//                            break;
-//                        }
-//                    }
-//                }
-//            }
+
+            for (Method method : Index.list(Before.class, classLoader, Method.class)) {
+                addHook(method.getAnnotation(Before.class), method);
+            }
+
+            for (Method method : Index.list(After.class, classLoader, Method.class)) {
+                addHook(method.getAnnotation(After.class), method);
+            }
         } catch (IOException e) {
             throw new Error(e);
         }
