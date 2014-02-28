@@ -1,5 +1,7 @@
 package org.jenkinsci.test.acceptance.steps;
 
+import cucumber.api.PendingException;
+import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Jenkins;
@@ -12,10 +14,7 @@ import javax.inject.Singleton;
  * @author Kohsuke Kawaguchi
  */
 @Singleton
-public class JobSteps {
-
-    @Inject
-    Jenkins jenkins;
+public class JobSteps extends AbstractSteps {
 
     /**
      * These job steps often assume contextual "it" job. This variable captures that.
@@ -27,4 +26,6 @@ public class JobSteps {
         //   @job = Jenkins::Job.create_named 'FreeStyle', @base_url, name
         job = jenkins.createJob(FreeStyleJob.class, name);
     }
+
+
 }

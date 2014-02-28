@@ -1,5 +1,6 @@
 package org.jenkinsci.test.acceptance.po;
 
+import org.junit.Assert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -12,7 +13,7 @@ import java.net.URL;
  *
  * @author Kohsuke Kawaguchi
  */
-public class CapybaraPortingLayer {
+public class CapybaraPortingLayer extends Assert {
     @Inject
     protected WebDriver driver;
 
