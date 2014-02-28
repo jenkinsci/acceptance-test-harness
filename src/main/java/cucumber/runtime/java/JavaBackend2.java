@@ -36,7 +36,7 @@ public class JavaBackend2 extends JavaBackend {
             for (Class c : Index.list(Glue.class, classLoader, Class.class)) {
                 for (Method method : c.getMethods()) {
                     for (Annotation a : method.getAnnotations()) {
-                        if (a.annotationType().getAnnotation(StepDefAnnotation.class)!=null) {
+                        if (a.annotationType().isAnnotationPresent(StepDefAnnotation.class)) {
                             addStepDefinition(a, method);
                             break;
                         }
