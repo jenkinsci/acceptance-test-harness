@@ -9,4 +9,4 @@ bundle update
 
 curl -s -o jenkins.war $WAR_URL
 
-STARTUP_TIMEOUT=240 PRELAUNCH=true JENKINS_WAR=jenkins.war bundle exec rake
+STARTUP_TIMEOUT=240 JENKINS_WAR=jenkins.war bundle exec rake
