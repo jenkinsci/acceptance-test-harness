@@ -21,25 +21,30 @@ import java.util.regex.Pattern;
  */
 @Singleton
 public class Jenkins extends PageObject {
-    public Jenkins(Injector injector, URL url) {
+    private VersionNumber version;
+
+    public Jenkins(Injector injector, URL url) throws Exception {
         super(injector,url);
+        getVersion();
     }
 
     @Inject
-    public Jenkins(Injector injector, JenkinsController controller) {
+    public Jenkins(Injector injector, JenkinsController controller) throws Exception {
         this(injector, controller.getUrl());
     } 
     /**
      * Get the version of Jenkins under test.
      */
     public VersionNumber getVersion() throws Exception {
+        if (version!=null)      return  version;
+
         String prefix = "About Jenkins ";
         visit("about");
         String text = waitFor(By.xpath("//h1[starts-with(., '"+prefix+"')]")).getText();
 
         Matcher m = VERSION.matcher(text);
-        if (m.matches())
-            return new VersionNumber(m.group(1));
+        if (m.find())
+            return version = new VersionNumber(m.group(1));
         else
             throw new AssertionError("Unexpected version string: "+text);
     }
