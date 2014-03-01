@@ -26,6 +26,7 @@ public class Should {
         else
         if (token.equals("should not"))
             value = false;
+        else
         throw new AssertionError("Unexpected: "+token);
     }
 
