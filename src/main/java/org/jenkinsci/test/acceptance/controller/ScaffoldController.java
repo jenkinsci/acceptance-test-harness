@@ -1,7 +1,5 @@
 package org.jenkinsci.test.acceptance.controller;
 
-import com.cloudbees.sdk.extensibility.Extension;
-
 import java.io.IOException;
 import java.net.URL;
 
@@ -10,12 +8,12 @@ import java.net.URL;
  *
  * @author Kohsuke Kawaguchi
  */
-@Extension
 public class ScaffoldController extends JenkinsController {
 
     private URL url;
 
     public ScaffoldController() throws IOException {
+        super(null);
         this.url = new URL("http://localhost:8080/");
     }
 
@@ -25,7 +23,17 @@ public class ScaffoldController extends JenkinsController {
     }
 
     @Override
+    public void startNow() {
+
+    }
+
+    @Override
     public void stop() {
+
+    }
+
+    @Override
+    public void stopNow() {
 
     }
 
@@ -42,5 +50,10 @@ public class ScaffoldController extends JenkinsController {
     @Override
     public void tearDown() {
 
+    }
+
+    @Override
+    public String getTempDir() {
+        return null;
     }
 }

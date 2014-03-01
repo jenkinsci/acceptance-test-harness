@@ -52,7 +52,7 @@
     <dependency>
       <groupId>org.jenkins-ci</groupId>
       <artifactId>process-utils</artifactId>
-      <version>1.0</version>
+      <version>1.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.codehaus.groovy</groupId>
@@ -84,7 +84,12 @@
       <artifactId>version-number</artifactId>
       <version>1.1</version>
     </dependency>
-    <dependency>
+      <dependency>
+          <groupId>commons-httpclient</groupId>
+          <artifactId>commons-httpclient</artifactId>
+          <version>3.1</version>
+      </dependency>
+      <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.11</version>
