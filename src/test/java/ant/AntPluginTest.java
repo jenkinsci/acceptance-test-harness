@@ -15,6 +15,7 @@ import java.util.concurrent.Callable;
  *
  * @author Kohsuke Kawaguchi
  */
+@SuppressWarnings("CdiInjectionPointsInspection")
 public class AntPluginTest extends AbstractJUnitTest {
     @Inject
     Jenkins jenkins;
