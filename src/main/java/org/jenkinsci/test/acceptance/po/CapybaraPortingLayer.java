@@ -32,7 +32,7 @@ public class CapybaraPortingLayer extends Assert {
     @Inject
     protected Injector injector;
 
-    public final ByFactory by = new ByFactory();
+    public static final ByFactory by = new ByFactory();
 
     /**
      * Some subtypes are constructed via Guice, in which case injection is done by outside this class.
