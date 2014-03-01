@@ -1,5 +1,7 @@
 package org.jenkinsci.test.acceptance.steps;
 
+import cucumber.api.PendingException;
+import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 
@@ -28,5 +30,10 @@ public class GeneralSteps extends AbstractSteps {
     public void the_page_should_say(String content) throws Exception {
         String url = driver.getCurrentUrl();
         assertThat(url+" doesn't have expected content!", driver, hasContent(content));
+    }
+
+    @And("^I wait for (\\d+) seconds$")
+    public void I_wait_for_seconds(int n) throws Throwable {
+        Thread.sleep(n*1000);
     }
 }
