@@ -5,7 +5,9 @@ import org.openqa.selenium.By;
 /**
  * More factories for {@link org.openqa.selenium.By} objects.
  *
- * Mainly from Capybara's "selector.rb"
+ * Mainly from Capybara's "selector.rb". To obtain the actual evaluation, I run
+ * "bundle exec irb" from selenium-tests, then "require 'xpath'", and just evaluate
+ * XPath::HTML.radio_button("XXX").
  *
  * @author Kohsuke Kawaguchi
  */
@@ -44,12 +46,22 @@ public abstract class By2 extends org.openqa.selenium.By {
      *      Text, id, title.
      */
     public static By checkbox(String locator) {
-        return xpath("//input[@type='checkbox']"+fieldXPath(locator));
+        return xpath(fieldXPath("//input[@type='checkbox']",locator));
     }
 
-    private static String fieldXPath(String locator) {
+    /**
+     * Finds input fields.
+     *
+     * @param locator
+     *      Text, id, title.
+     */
+    public static By input(String locator) {
+        return xpath(fieldXPath("(//input|//textarea|//select)",locator));
+    }
+
+    private static String fieldXPath(String base, String locator) {
         // TODO: there's actually a lot more
-        return String.format("[@id='%1$s' or @attr='%1$s' or @name='%1$s']",locator);
+        return String.format(base+"[@id='%1$s' or @attr='%1$s' or @name='%1$s']",locator);
     }
 
     /**
@@ -57,8 +69,8 @@ public abstract class By2 extends org.openqa.selenium.By {
      */
     public static By button(String locator) {
         return xpath(
-                "//input[@type='submit' or @type='reset' or @type='image' or @type='button'][@id='%1$s' or @value='%1$s' or @title='%1$s'] |"+
-                "//button[@id='%1$s' or text()='%1$s' or @value='%1$s' or @title='%1$s']"
+                ".//input[./@type = 'submit' or ./@type = 'reset' or ./@type = 'image' or ./@type = 'button'][((./@id = '%1$s' or contains(./@value, '%1$s')) or contains(./@title, '%1$s'))] | .//input[./@type = 'image'][contains(./@alt, '%1$s')] | .//button[(((./@id = '%1$s' or contains(./@value, '%1$s')) or contains(normalize-space(string(.)), '%1$s')) or contains(./@title, '%1$s'))] | .//input[./@type = 'image'][contains(./@alt, '%1$s')]"
                 ,locator);
     }
+
 }

@@ -38,8 +38,6 @@ public abstract class PageObject extends CapybaraPortingLayer {
     public PageObject(Injector injector, URL url) {
         super(injector);
         this.url = url;
-        if (!url.toExternalForm().endsWith("/"))
-            throw new IllegalArgumentException("URL should end with '/': "+url);
     }
 
     /**
@@ -120,6 +118,6 @@ public abstract class PageObject extends CapybaraPortingLayer {
      * Visits the top page of this object.
      */
     public void open() throws Exception {
-        visit(".");
+        visit(url);
     }
 }

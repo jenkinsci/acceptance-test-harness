@@ -1,13 +1,14 @@
 package org.jenkinsci.test.acceptance.controller;
 
 import com.cloudbees.sdk.extensibility.ExtensionPoint;
-import org.codehaus.groovy.util.StringUtil;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
-import org.codehaus.plexus.util.StringUtils;
 import org.jenkinsci.test.acceptance.ControllerException;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -59,6 +60,7 @@ public abstract class JenkinsController {
     }
 
 
-
-
+    public void waitForUpdates() {
+        // TODO
+    }
 }

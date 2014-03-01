@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
  * @author Kohsuke Kawaguchi
  */
 @Singleton
-public class Jenkins extends PageObject {
+public class Jenkins extends ContainerPageObject {
     private VersionNumber version;
 
     public Jenkins(Injector injector, URL url) throws Exception {
@@ -65,6 +65,12 @@ public class Jenkins extends PageObject {
         return createJob(type, createRandomName());
     }
 
+    /**
+     * Access global configuration page.
+     */
+    public JenkinsConfig getConfigPage() throws Exception {
+        return new JenkinsConfig(this);
+    }
 
     private static final Pattern VERSION = Pattern.compile("^About Jenkins ([^-]*)");
 }

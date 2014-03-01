@@ -55,7 +55,7 @@ public class CapybaraPortingLayer extends Assert {
     }
 
     public void clickButton(String text) {
-        driver.findElement(By.xpath("//button[text()='" + text + "']")).click();
+        driver.findElement(By2.button(text)).click();
     }
 
     /**

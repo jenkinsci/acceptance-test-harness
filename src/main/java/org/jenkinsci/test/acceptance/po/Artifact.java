@@ -13,13 +13,11 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
  *
  * @author Kohsuke Kawaguchi
  */
-public class Artifact extends CapybaraPortingLayer {
+public class Artifact extends PageObject {
     public final Build build;
-    public final URL url;
 
     public Artifact(Build build, URL url) {
-        super(build.injector);
-        this.url = url;
+        super(build.injector,url);
         this.build = build;
     }
 
@@ -27,7 +25,7 @@ public class Artifact extends CapybaraPortingLayer {
      * Asserts that this artifact have the given content.
      */
     public void shouldHaveContent(String content) throws Exception {
-        visit(url);
+        open();
         assertThat(driver, hasContent(content));
     }
 

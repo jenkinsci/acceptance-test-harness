@@ -11,7 +11,7 @@ import static org.jenkinsci.test.acceptance.cucumber.By2.*;
 /**
  * @author Kohsuke Kawaguchi
  */
-public class Build extends PageObject {
+public class Build extends ContainerPageObject {
     public final int buildNumber;
     public final Job job;
 

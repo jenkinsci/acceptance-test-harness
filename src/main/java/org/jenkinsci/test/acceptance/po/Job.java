@@ -16,7 +16,7 @@ import static org.jenkinsci.test.acceptance.cucumber.By2.*;
 /**
  * @author Kohsuke Kawaguchi
  */
-public class Job extends PageObject {
+public class Job extends ContainerPageObject {
     public final String name;
     private List<Parameter> parameters = new ArrayList<>();
 
