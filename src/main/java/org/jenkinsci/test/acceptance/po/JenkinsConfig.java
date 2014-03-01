@@ -2,12 +2,12 @@ package org.jenkinsci.test.acceptance.po;
 
 import org.openqa.selenium.WebElement;
 
-import java.net.URL;
-
 import static org.hamcrest.CoreMatchers.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 
 /**
+ * Page object for the system configuration page.
+ *
  * @author Kohsuke Kawaguchi
  */
 public class JenkinsConfig extends PageObject {
@@ -19,16 +19,15 @@ public class JenkinsConfig extends PageObject {
     }
 
     public void enterOracleCredential(String login, String password) {
-        visit("descriptorByName/hudson.tools.JDKInstaller/enterCredential");
+        jenkins.visit("descriptorByName/hudson.tools.JDKInstaller/enterCredential");
         find(by.input("username")).sendKeys(login);
         find(by.input("password")).sendKeys(password);
         clickButton("OK");
         clickButton("Close");
     }
 
-    @Override
-    public URL getConfigUrl() {
-        return url;
+    public void configure() {
+        jenkins.configure();
     }
 
     public void save() {
@@ -41,7 +40,7 @@ public class JenkinsConfig extends PageObject {
     }
 
     public void addJdkAutoInstallation(String name, String version) {
-        ensureConfigPage();
+        jenkins.ensureConfigPage();
         find(by.path("/hudson-model-JDK/tool/name")).sendKeys(name);
         // by default Install automatically is checked
         WebElement select = find(by.path("/hudson-model-JDK/tool/properties/hudson-tools-InstallSourceProperty/installers/id"));
