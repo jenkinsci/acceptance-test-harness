@@ -6,6 +6,7 @@ import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.openqa.selenium.WebDriver;
 
 import javax.inject.Inject;
+import java.io.IOException;
 
 /**
  *
@@ -22,13 +23,21 @@ public class Hooks {
 
     @Before
     public void before() {
-        jenkinsController.start();
+        try {
+            jenkinsController.start();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
     }
 
     @After
     public void bar() {
-        jenkinsController.stop();
+        try {
+            jenkinsController.stop();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         driver.close();
     }
 }

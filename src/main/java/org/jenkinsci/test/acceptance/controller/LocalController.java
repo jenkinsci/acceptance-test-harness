@@ -89,10 +89,14 @@ public abstract class LocalController extends JenkinsController{
         return tempDir;
     }
 
-    public abstract ProcessInputStream startProcess();
+    public String getJenkinsHome(){
+        return tempDir;
+    }
+
+    public abstract ProcessInputStream startProcess() throws IOException;
 
     @Override
-    public void startNow() {
+    public void startNow() throws IOException{
         out.println("\n    Bringing up a temporary Jenkins instance");
         bringItUp();
         try {
@@ -157,7 +161,7 @@ public abstract class LocalController extends JenkinsController{
         return randomLocalPort(-1,-1);
     }
 
-    private void bringItUp(){
+    private void bringItUp() throws IOException{
         this.process = startProcess();
         this.pid = ProcessUtils.getPid(process.getProcess());
         this.logWatcher = new LogWatcher(this.process, logger, options);

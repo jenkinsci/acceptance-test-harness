@@ -21,18 +21,14 @@ public class WinstoneController extends LocalController {
     }
 
     @Override
-    public ProcessInputStream startProcess() {
+    public ProcessInputStream startProcess() throws IOException{
         CommandBuilder cb = new CommandBuilder("java","-DJENKINS_HOME="+getTempDir(), "-jar", warLocation,
                 "--ajp13Port=-1", "--controlPort="+controlPort, "--httpPort="+httpPort, "2>&1");
-        try {
-            return cb.popen();
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to launch Jenkins", e);
-        }
+        return cb.popen();
     }
 
     @Override
-    public void stopNow() {
+    public void stopNow() throws IOException{
         process.getProcess().destroy();
     }
 

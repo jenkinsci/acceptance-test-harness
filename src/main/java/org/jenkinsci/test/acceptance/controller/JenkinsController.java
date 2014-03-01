@@ -2,13 +2,15 @@ package org.jenkinsci.test.acceptance.controller;
 
 import com.cloudbees.sdk.extensibility.ExtensionPoint;
 import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.jenkinsci.test.acceptance.ControllerException;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Map;
@@ -39,25 +41,46 @@ public abstract class JenkinsController {
         }
     }
 
-    public void start(){
+    /**
+     * Starts Jenkins
+     *
+     * @throws IOException
+     */
+    public void start() throws IOException{
         if(!isRunning){
             startNow();
             this.isRunning = true;
         }
     }
 
-    public abstract void startNow();
+    /**
+     * Jenkins controller specific startup logic
+     */
+    public abstract void startNow() throws IOException;
 
-    public void stop(){
+
+    /**
+     * Stops Jenkins
+     *
+     * @throws IOException
+     */
+    public void stop() throws IOException{
         if(isRunning){
             stopNow();
         }
     }
 
-    public abstract void stopNow();
+    /**
+     * Jenkins controller specific stop logic
+     */
+    public abstract void stopNow() throws IOException;
 
 
-    public void restart(){
+    /**
+     * Stops and starts running Jenkins
+     * @throws IOException
+     */
+    public void restart() throws IOException{
         stop();
         start();
     }
@@ -66,6 +89,9 @@ public abstract class JenkinsController {
         return isRunning;
     }
 
+    /**
+     * Gives URL where Jenkins is listening. Must end with "/"
+     */
     public abstract URL getUrl();
 
     public abstract void diagnose();
