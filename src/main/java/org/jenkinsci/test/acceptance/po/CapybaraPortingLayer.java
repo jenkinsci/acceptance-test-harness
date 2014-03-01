@@ -197,4 +197,11 @@ public class CapybaraPortingLayer extends Assert {
         check(find(by.checkbox(locator)));
     }
 
+    public void sleep(int ms) {
+        try {
+            Thread.sleep(ms);
+        } catch (InterruptedException e) {
+            throw new Error(e);
+        }
+    }
 }

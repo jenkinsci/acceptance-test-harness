@@ -48,6 +48,10 @@ public class Job extends ContainerPageObject {
         return step;
     }
 
+    public void addCreateFileStep(String name, String content) throws Exception {
+        addShellStep(String.format("cat > %s << ENDOFFILE\n%s\nENDOFFILE",name,content));
+    }
+
     public URL getBuildUrl() throws Exception {
         return new URL(url,"build?delay=0sec");
     }

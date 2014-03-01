@@ -6,6 +6,8 @@ import org.openqa.selenium.NoSuchElementException;
 import java.net.URL;
 import java.util.concurrent.Callable;
 
+import static org.hamcrest.CoreMatchers.*;
+
 /**
  * @author Kohsuke Kawaguchi
  */
@@ -103,5 +105,9 @@ public class Build extends ContainerPageObject {
 
     public Artifact getArtifact(String artifact) throws Exception {
         return new Artifact(this,new URL(url,"artifact/"+artifact));
+    }
+
+    public void shouldSucceed() throws Exception {
+        assertThat(getResult(), is("SUCCESS"));
     }
 }

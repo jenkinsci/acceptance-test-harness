@@ -72,5 +72,13 @@ public class Jenkins extends ContainerPageObject {
         return new JenkinsConfig(this);
     }
 
+    /**
+     * Access the plugin manager page object
+     */
+    public PluginManager getPluginManager() throws Exception {
+        return new PluginManager(this);
+    }
+
     private static final Pattern VERSION = Pattern.compile("^About Jenkins ([^-]*)");
+
 }
