@@ -20,6 +20,11 @@ import static java.lang.annotation.RetentionPolicy.*;
 @Inherited
 public @interface DockerFixture {
     /**
+     * Unique ID of this fixture. Used from cucumber, etc. to find this annotation.
+     */
+    String id();
+
+    /**
      * Ports that are exposed from this fixture.
      */
     int[] ports() default {};

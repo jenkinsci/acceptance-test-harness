@@ -7,6 +7,7 @@ TODO: explain how to write tests
 - explain how cucumber hooks into Guice
 - using scaffold.config for win
 - hamcrest matchers
+- how to use this from your own module
 
 TODO: explain how to run tests
 - controller

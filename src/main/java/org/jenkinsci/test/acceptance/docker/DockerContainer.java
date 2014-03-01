@@ -2,6 +2,7 @@ package org.jenkinsci.test.acceptance.docker;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.utils.process.ProcessUtils;
 
 import java.io.File;
@@ -15,14 +16,30 @@ import static java.lang.String.*;
  * @author Kohsuke Kawaguchi
  */
 public class DockerContainer {
-    public final String cid;
-    private final Process p;
-    public final File logfile;
+    private String cid;
+    private Process p;
+    private File logfile;
 
-    public DockerContainer(String cid, Process p, File logfile) {
+    /*package*/ void init(String cid, Process p, File logfile) {
         this.cid = cid;
         this.p = p;
         this.logfile = logfile;
+    }
+
+    /**
+     * By convention, docker fixtures put their resources into a sub-directory that has the same name as
+     * the class name.
+     */
+    public Resource resource(String relativePath) {
+        return new Resource(getClass().getResource(getClass().getSimpleName()+"/"+relativePath));
+    }
+
+    public String getCid() {
+        return cid;
+    }
+
+    public File getLogfile() {
+        return logfile;
     }
 
     public int getPid() {
@@ -63,7 +80,7 @@ public class DockerContainer {
      * Provides details of this container.
      */
     public JsonNode inspect() throws IOException {
-        return new ObjectMapper().readTree(Docker.cmd("inspect").add(cid).popen().withErrorCheck());
+        return new ObjectMapper().readTree(Docker.cmd("inspect").add(cid).popen().withErrorCheck()).get(0);
     }
 
     /**

@@ -22,21 +22,18 @@ public class DockerImage {
      * Starts a container from this image.
      */
     public <T extends DockerContainer> T start(Class<T> type, int[] ports, CommandBuilder options, CommandBuilder cmd) throws InterruptedException, IOException {
-        CommandBuilder docker = Docker.cmd("run").addAll(cmd.toList());
+        CommandBuilder docker = Docker.cmd("run");
         for (int p : ports) {
             docker.add("-p","127.0.0.1::"+p);
         }
 
         File cid = File.createTempFile("docker", "cid");
+        cid.delete();
         docker.add("--cidfile="+cid);
 
-        if (options!=null)
-            docker.addAll(options.toList());
-
+        docker.add(options);
         docker.add(tag);
-
-        if (cmd!=null)
-            docker.addAll(cmd.toList());
+        docker.add(cmd);
 
         File tmplog = File.createTempFile("docker", "log"); // initially create a log file here
 
@@ -63,7 +60,9 @@ public class DockerImage {
             System.out.printf("Launching Docker container %s: logfile is at %s\n", cid, logfile);
 
             try {
-                return type.getConstructor(String.class, Process.class, File.class).newInstance(id,p,logfile);
+                T t = type.newInstance();
+                t.init(id,p,logfile);
+                return t;
             } catch (ReflectiveOperationException e) {
                 throw new AssertionError(e);
             }
