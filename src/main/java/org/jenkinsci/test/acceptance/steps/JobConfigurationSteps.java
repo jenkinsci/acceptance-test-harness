@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.steps;
 
 import cucumber.api.java.en.And;
+import cucumber.api.java.en.When;
 import org.jenkinsci.test.acceptance.po.StringParameter;
 
 import javax.inject.Inject;
@@ -26,5 +27,12 @@ public class JobConfigurationSteps extends AbstractSteps {
     public void I_add_a_string_parameter(String name) throws Exception {
         StringParameter p = my.job.addParameter(StringParameter.class);
         p.setName(name);
+    }
+
+    @When("^I disable the job$")
+    public void I_disable_the_job() throws Throwable {
+        my.job.configure();
+        my.job.disable();
+        my.job.save();
     }
 }

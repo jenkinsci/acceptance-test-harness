@@ -1,7 +1,6 @@
 package org.jenkinsci.test.acceptance.steps;
 
 import cucumber.api.DataTable;
-import cucumber.api.PendingException;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
@@ -12,6 +11,7 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import javax.inject.Singleton;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.jenkinsci.test.acceptance.cucumber.By2.*;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -83,5 +83,16 @@ public class JobSteps extends AbstractSteps {
         assertThat(
                 "Console Output:\n" + lb.getConsole(),
                 lb.isSuccess(), is(expected));
+    }
+
+    @Then("^it should be disabled$")
+    public void it_should_be_disabled() throws Throwable {
+        assertThat(driver.getPageSource(),not(containsString("Build Now")));
+    }
+
+    @And("^it should have an \"([^\"]*)\" button on the job page$")
+    public void it_shoulud_have_an_button_on_the_job_page(String title) throws Throwable {
+        my.job.open();
+        assertThat(find(button(title)),is(notNullValue()));
     }
 }

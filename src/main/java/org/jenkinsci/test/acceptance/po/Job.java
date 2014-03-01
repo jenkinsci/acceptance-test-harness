@@ -3,7 +3,6 @@ package org.jenkinsci.test.acceptance.po;
 import com.google.inject.Injector;
 import cucumber.api.DataTable;
 import org.jenkinsci.test.acceptance.cucumber.By2;
-import org.openqa.selenium.By;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -102,4 +101,7 @@ public class Job extends PageObject {
         return p;
     }
 
+    public void disable() {
+        check("disable");
+    }
 }

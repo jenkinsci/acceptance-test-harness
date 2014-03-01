@@ -49,9 +49,20 @@ public abstract class PageObject extends CapybaraPortingLayer {
     }
 
     public void configure(Closure body) throws Exception {
-        visit(getConfigUrl());
+        configure();
         body.call(this);
         save();
+    }
+
+    public <T> T configure(Callable<T> body) throws Exception {
+        configure();
+        T v = body.call();
+        save();
+        return v;
+    }
+
+    public void configure() throws Exception {
+        visit(getConfigUrl());
     }
 
     /**

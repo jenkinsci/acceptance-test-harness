@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.po;
 
 import com.google.inject.Injector;
+import org.jenkinsci.test.acceptance.cucumber.By2;
 import org.junit.Assert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -130,4 +131,9 @@ public class CapybaraPortingLayer extends Assert {
     public void clickLink(String locator) {
         find(link(locator)).click();
     }
+
+    public void check(String locator) {
+        check(find(By2.checkbox(locator)));
+    }
+
 }
