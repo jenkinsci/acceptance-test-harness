@@ -1,33 +1,28 @@
-# Selenium tests for Jenkins
+# Acceptance tests for Jenkins
 
-This is a project to flesh out some of the [manual test cases for Jenkins
+This is an attempted Java-ported version of [selenium-tests](https://github.com/jenkinsci/selenium-tests),
+which is a project to flesh out some of the [manual test cases for Jenkins
 LTS](https://wiki.jenkins-ci.org/display/JENKINS/LTS+RC+Testing) in
 an automated fashion.
 
-master|stable
----|---
-[![Build Status of master branch](https://jenkins.ci.cloudbees.com/buildStatus/icon?job=selenium-tests)](https://jenkins.ci.cloudbees.com/job/selenium-tests/)|[![Build Status of stable branch](https://jenkins.ci.cloudbees.com/buildStatus/icon?job=selenium-tests-stable)](https://jenkins.ci.cloudbees.com/job/selenium-tests-stable/)|
+Right now the project is in a very early state. The following parts are working:
 
+ * Drive Cucumber to run tests
+ * Many key page object types are ported, even though they are still missing many methods
+ * Some step definitions are ported, but more needs to be poreted
 
-Right now the project is in a very early state, and is in dire need of some
-[Page Objects](https://code.google.com/p/selenium/wiki/PageObjects) for the
-more standard components of Jenkins such as the:
+Following areas are still worked on:
 
- * Root actions link listing (top left sidebar)
- * New Job control
- * Various plugin configuration sections on the `job/configure` page
- * Node configuration
- * etc
+ * `JenkinsController`
+ * Docker support
 
 ## Installing
 
-On Ubuntu you may need to install: libxslt1-dev, libxml2-dev, libcurl4-openssl-dev
+Run `mvn install` to build the test harness and tests.
 
 ## Running tests
 
-First, run `bundle install` to install required dependencies, or `bundle update` if you are updating sources of this repository.
-
-To run the test, `JENKINS_WAR=path/to/your/jenkins.war bundle exec rake`.
+To run the test, `JENKINS_WAR=path/to/your/jenkins.war mvn test`.
 This runs the entire test suite, so it might take a while.
 
 Set `BROWSER=chrome` and install http://code.google.com/p/chromedriver/downloads/list in `$PATH` if desired. (But tests may fail.)
