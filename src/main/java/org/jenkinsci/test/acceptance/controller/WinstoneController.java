@@ -8,6 +8,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
+ * Launches Jenkins via "java -jar jenkins.war" on the local machine.
+ *
  * @author: Vivek Pandey
  */
 public class WinstoneController extends LocalController {
