@@ -1,7 +1,7 @@
 package org.jenkinsci.test.acceptance.steps;
 
 import cucumber.api.java.en.And;
-import org.jenkinsci.test.acceptance.cucumber.By2;
+import org.jenkinsci.test.acceptance.ByFactory;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -14,6 +14,6 @@ public class ViewSteps extends AbstractSteps {
         else
             my.view.open();
 
-        find(By2.xpath("//a[contains(@href, '/%1$s/build?')]/img[contains(@title, 'Schedule a build')]",job)).click();
+        find(by.xpath("//a[contains(@href, '/%1$s/build?')]/img[contains(@title, 'Schedule a build')]", job)).click();
     }
 }

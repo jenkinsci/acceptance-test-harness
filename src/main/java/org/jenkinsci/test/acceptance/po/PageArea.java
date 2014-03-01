@@ -1,12 +1,9 @@
 package org.jenkinsci.test.acceptance.po;
 
 import com.google.inject.Injector;
-import org.jenkinsci.test.acceptance.cucumber.By2;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
-
-import static org.openqa.selenium.By.xpath;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -28,7 +25,7 @@ public abstract class PageArea extends CapybaraPortingLayer {
      * https://wiki.jenkins-ci.org/display/JENKINS/Form+Element+Path+Plugin
      */
     public By path(String rel) {
-        return By2.path(path+'/'+rel);
+        return by.path(path+'/'+rel);
     }
 
     /**

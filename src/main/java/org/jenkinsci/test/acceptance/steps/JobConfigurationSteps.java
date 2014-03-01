@@ -1,16 +1,12 @@
 package org.jenkinsci.test.acceptance.steps;
 
-import cucumber.api.PendingException;
 import cucumber.api.java.en.And;
-import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import hudson.util.VersionNumber;
 import org.jenkinsci.test.acceptance.po.ArtifactArchiver;
 import org.jenkinsci.test.acceptance.po.StringParameter;
 
 import javax.inject.Inject;
-
-import static org.jenkinsci.test.acceptance.cucumber.By2.*;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -46,7 +42,7 @@ public class JobConfigurationSteps extends AbstractSteps {
     public void I_set_builds_to_keep(int n) throws Throwable {
         check("logrotate");
         String name = jenkins.getVersion().compareTo(new VersionNumber("1.503"))<0 ? "logrotate_nums" : "_.numToKeepStr";
-        find(xpath("//input[@name='%s']",name)).sendKeys(String.valueOf(n));
+        find(by.xpath("//input[@name='%s']",name)).sendKeys(String.valueOf(n));
     }
 
     @And("^I add always fail build step$")

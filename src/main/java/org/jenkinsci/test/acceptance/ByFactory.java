@@ -1,22 +1,28 @@
-package org.jenkinsci.test.acceptance.cucumber;
+package org.jenkinsci.test.acceptance;
 
+import org.jenkinsci.test.acceptance.po.PageObject;
 import org.openqa.selenium.By;
 
 /**
- * More factories for {@link org.openqa.selenium.By} objects.
+ * More factories for {@link By} objects.
  *
+ * <p>
+ * To make the code flow, instantiate this object in the variable named "by"
+ *
+ * <p>
  * Mainly from Capybara's "selector.rb". To obtain the actual evaluation, I run
  * "bundle exec irb" from selenium-tests, then "require 'xpath'", and just evaluate
  * XPath::HTML.radio_button("XXX").
  *
  * @author Kohsuke Kawaguchi
+ * @see PageObject#by
  */
-public abstract class By2 extends org.openqa.selenium.By {
-    public static By xpath(String xpath) {
+public class ByFactory {
+    public By xpath(String xpath) {
         return By.xpath(xpath);
     }
 
-    public static By xpath(String format, Object... args) {
+    public By xpath(String format, Object... args) {
         return By.xpath(String.format(format,args));
     }
 
@@ -25,8 +31,8 @@ public abstract class By2 extends org.openqa.selenium.By {
      *
      * https://wiki.jenkins-ci.org/display/JENKINS/Form+Element+Path+Plugin
      */
-    public static By path(String path, Object... args) {
-        return By2.xpath(".//*[@path='%s']",String.format(path,args));
+    public By path(String path, Object... args) {
+        return xpath(".//*[@path='%s']", String.format(path, args));
     }
 
     /**
@@ -35,7 +41,7 @@ public abstract class By2 extends org.openqa.selenium.By {
      * @param locator
      *      Text, id, title, or image alt attribute of the link
      */
-    public static By link(String locator) {
+    public By link(String locator) {
         return xpath(".//A[@href][@id='%1$s' or text()='%1$s' or @title='%1$s' or .//img[@alt='%1$s']]",locator);
     }
 
@@ -45,7 +51,7 @@ public abstract class By2 extends org.openqa.selenium.By {
      * @param locator
      *      Text, id, title.
      */
-    public static By checkbox(String locator) {
+    public By checkbox(String locator) {
         return xpath(fieldXPath("//input[@type='checkbox']",locator));
     }
 
@@ -55,7 +61,7 @@ public abstract class By2 extends org.openqa.selenium.By {
      * @param locator
      *      Text, id, title.
      */
-    public static By input(String locator) {
+    public By input(String locator) {
         return xpath(fieldXPath("(//input|//textarea|//select)",locator));
     }
 
@@ -67,7 +73,7 @@ public abstract class By2 extends org.openqa.selenium.By {
     /**
      * Finds a button
      */
-    public static By button(String locator) {
+    public By button(String locator) {
         return xpath(
                 ".//input[./@type = 'submit' or ./@type = 'reset' or ./@type = 'image' or ./@type = 'button'][((./@id = '%1$s' or contains(./@value, '%1$s')) or contains(./@title, '%1$s'))] | .//input[./@type = 'image'][contains(./@alt, '%1$s')] | .//button[(((./@id = '%1$s' or contains(./@value, '%1$s')) or contains(normalize-space(string(.)), '%1$s')) or contains(./@title, '%1$s'))] | .//input[./@type = 'image'][contains(./@alt, '%1$s')]"
                 ,locator);

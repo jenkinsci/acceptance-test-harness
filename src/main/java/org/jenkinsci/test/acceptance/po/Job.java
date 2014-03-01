@@ -2,7 +2,6 @@ package org.jenkinsci.test.acceptance.po;
 
 import com.google.inject.Injector;
 import cucumber.api.DataTable;
-import org.jenkinsci.test.acceptance.cucumber.By2;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -10,8 +9,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static org.jenkinsci.test.acceptance.cucumber.By2.*;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -38,8 +35,8 @@ public class Job extends ContainerPageObject {
 
         String caption = type.getAnnotation(BuildStepPageObject.class).value();
 
-        selectDropdownMenu(caption, find(By2.path("/hetero-list-add[%s]",section)));
-        String path = last(xpath("//div[@name='%s']",section)).getAttribute("path");
+        selectDropdownMenu(caption, find(by.path("/hetero-list-add[%s]",section)));
+        String path = last(by.xpath("//div[@name='%s']",section)).getAttribute("path");
 
         return type.getConstructor(Job.class,String.class).newInstance(this,path);
     }
@@ -95,14 +92,14 @@ public class Job extends ContainerPageObject {
 
         String displayName = type.getAnnotation(ParameterPageObject.class).value();
 
-        check(find(xpath("//input[@name='parameterized']")));
-        selectDropdownMenu(displayName, find(xpath("//button[text()='Add Parameter']")));
+        check(find(by.xpath("//input[@name='parameterized']")));
+        selectDropdownMenu(displayName, find(by.xpath("//button[text()='Add Parameter']")));
 //        find(xpath("//button[text()='Add Parameter']")).click();
 //        find(xpath("//a[text()='%s']",displayName)).click();
 
         Thread.sleep(500);
 
-        String path = last(xpath("//div[@name='parameter']")).getAttribute("path");
+        String path = last(by.xpath("//div[@name='parameter']")).getAttribute("path");
 
         T p = type.getConstructor(Job.class,String.class).newInstance(this,path);
         parameters.add(p);

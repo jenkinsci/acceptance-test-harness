@@ -1,7 +1,7 @@
 package org.jenkinsci.test.acceptance.po;
 
 import com.google.inject.Injector;
-import org.jenkinsci.test.acceptance.cucumber.By2;
+import org.jenkinsci.test.acceptance.ByFactory;
 import org.junit.Assert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -11,8 +11,6 @@ import org.openqa.selenium.WebElement;
 import javax.inject.Inject;
 import java.net.URL;
 import java.util.List;
-
-import static org.jenkinsci.test.acceptance.cucumber.By2.*;
 
 /**
  * For assisting porting from Capybara.
@@ -29,6 +27,8 @@ public class CapybaraPortingLayer extends Assert {
      */
     @Inject
     protected Injector injector;
+
+    public final ByFactory by = new ByFactory();
 
     /**
      * Some subtypes are constructed via Guice, in which case injection is done by outside this class.
@@ -55,7 +55,7 @@ public class CapybaraPortingLayer extends Assert {
     }
 
     public void clickButton(String text) {
-        driver.findElement(By2.button(text)).click();
+        driver.findElement(by.button(text)).click();
     }
 
     /**
@@ -138,14 +138,14 @@ public class CapybaraPortingLayer extends Assert {
      *      Text, ID, or link.
      */
     public void clickLink(String locator) {
-        find(link(locator)).click();
+        find(by.link(locator)).click();
     }
 
     /**
      * Checks the specified checkbox.
      */
     public void check(String locator) {
-        check(find(By2.checkbox(locator)));
+        check(find(by.checkbox(locator)));
     }
 
 }

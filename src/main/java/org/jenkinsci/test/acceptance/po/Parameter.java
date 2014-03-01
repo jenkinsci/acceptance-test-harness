@@ -1,9 +1,6 @@
 package org.jenkinsci.test.acceptance.po;
 
-import org.jenkinsci.test.acceptance.cucumber.By2;
 import org.openqa.selenium.By;
-
-import static org.jenkinsci.test.acceptance.cucumber.By2.*;
 
 /**
  * Parameter for builds.
@@ -46,8 +43,8 @@ public abstract class Parameter extends PageArea {
         if (driver.getCurrentUrl().endsWith("/configure"))
             return super.path(rel);
 
-        String np = find(xpath("//input[@name='name' and @value='%s']", name)).getAttribute("path");
+        String np = find(by.xpath("//input[@name='name' and @value='%s']", name)).getAttribute("path");
         String path = np.replaceAll("/name$", "") + "/" + rel;
-        return By2.path(path);
+        return by.path(path);
     }
 }

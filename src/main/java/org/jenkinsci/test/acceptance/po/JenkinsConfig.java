@@ -1,7 +1,6 @@
 package org.jenkinsci.test.acceptance.po;
 
 import groovy.lang.Closure;
-import org.jenkinsci.test.acceptance.cucumber.By2;
 import org.openqa.selenium.WebElement;
 
 import java.net.URL;
@@ -23,8 +22,8 @@ public class JenkinsConfig extends PageObject {
 
     public void enterOracleCredential(String login, String password) throws Exception {
         visit("descriptorByName/hudson.tools.JDKInstaller/enterCredential");
-        find(By2.input("username")).sendKeys(login);
-        find(By2.input("password")).sendKeys(password);
+        find(by.input("username")).sendKeys(login);
+        find(by.input("password")).sendKeys(password);
         clickButton("OK");
         clickButton("Close");
     }
@@ -57,10 +56,10 @@ public class JenkinsConfig extends PageObject {
 
     public void addJdkAutoInstallation(String name, String version) throws Exception {
         ensureConfigPage();
-        find(By2.path("/hudson-model-JDK/tool/name")).sendKeys(name);
+        find(by.path("/hudson-model-JDK/tool/name")).sendKeys(name);
         // by default Install automatically is checked
-        WebElement select = find(By2.path("/hudson-model-JDK/tool/properties/hudson-tools-InstallSourceProperty/installers/id"));
-        select.findElement(By2.xpath("//option[@value='%s']",version)).click();
-        find(By2.path("/hudson-model-JDK/tool/properties/hudson-tools-InstallSourceProperty/installers/acceptLicense")).click();
+        WebElement select = find(by.path("/hudson-model-JDK/tool/properties/hudson-tools-InstallSourceProperty/installers/id"));
+        select.findElement(by.xpath("//option[@value='%s']",version)).click();
+        find(by.path("/hudson-model-JDK/tool/properties/hudson-tools-InstallSourceProperty/installers/acceptLicense")).click();
     }
 }

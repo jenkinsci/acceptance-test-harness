@@ -6,8 +6,6 @@ import org.openqa.selenium.NoSuchElementException;
 import java.net.URL;
 import java.util.concurrent.Callable;
 
-import static org.jenkinsci.test.acceptance.cucumber.By2.*;
-
 /**
  * @author Kohsuke Kawaguchi
  */
@@ -84,9 +82,9 @@ public class Build extends ContainerPageObject {
 
         visit(getConsoleUrl());
         try {
-            console = find(xpath("//pre[@id='out']")).getText();
+            console = find(by.xpath("//pre[@id='out']")).getText();
         } catch (NoSuchElementException _) {
-            console = find(xpath("//pre")).getText();
+            console = find(by.xpath("//pre")).getText();
         }
         return console;
     }

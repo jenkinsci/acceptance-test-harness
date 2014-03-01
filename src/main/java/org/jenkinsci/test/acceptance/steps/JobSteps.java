@@ -13,7 +13,6 @@ import javax.inject.Singleton;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
-import static org.jenkinsci.test.acceptance.cucumber.By2.*;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -103,7 +102,7 @@ public class JobSteps extends AbstractSteps {
     @And("^it should have an \"([^\"]*)\" button on the job page$")
     public void it_shoulud_have_an_button_on_the_job_page(String title) throws Throwable {
         my.job.open();
-        assertThat(find(button(title)),is(notNullValue()));
+        assertThat(find(by.button(title)),is(notNullValue()));
     }
 
     @And("^I build (\\d+) jobs sequentially$")
