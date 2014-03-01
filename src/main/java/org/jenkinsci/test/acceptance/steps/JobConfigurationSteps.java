@@ -39,7 +39,7 @@ public class JobConfigurationSteps extends AbstractSteps {
         my.job.save();
     }
 
-    @And("^I set (\\d+) builds to keep$")
+    @And("^I set (\\d+) builds? to keep$")
     public void I_set_builds_to_keep(int n) throws Throwable {
         check("logrotate");
         String name = jenkins.getVersion().compareTo(new VersionNumber("1.503"))<0 ? "logrotate_nums" : "_.numToKeepStr";

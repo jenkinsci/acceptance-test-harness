@@ -1,10 +1,10 @@
 package org.jenkinsci.test.acceptance.steps;
 
-import cucumber.api.PendingException;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.jenkinsci.test.acceptance.cucumber.By2.*;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -19,5 +19,11 @@ public class BuildHistorySteps extends AbstractSteps {
         } else {
             assertThat(driver.getPageSource(), not(containsString("Build #" + n)));
         }
+    }
+
+    @And("^I lock the build$")
+    public void I_lock_the_build() throws Throwable {
+        my.job.getLastBuild().open();
+        find(button("Keep this build forever")).click();
     }
 }
