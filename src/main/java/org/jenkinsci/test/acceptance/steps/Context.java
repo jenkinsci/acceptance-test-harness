@@ -2,6 +2,7 @@ package org.jenkinsci.test.acceptance.steps;
 
 import org.jenkinsci.test.acceptance.po.BuildStep;
 import org.jenkinsci.test.acceptance.po.Job;
+import org.jenkinsci.test.acceptance.po.View;
 
 import javax.inject.Singleton;
 import java.util.ArrayList;
@@ -20,6 +21,6 @@ import java.util.List;
 @Singleton
 public class Context {
     Job job;
-
     BuildStep step;
+    View view;
 }
