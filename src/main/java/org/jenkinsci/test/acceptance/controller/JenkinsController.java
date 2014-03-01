@@ -1,6 +1,9 @@
 package org.jenkinsci.test.acceptance.controller;
 
 import com.cloudbees.sdk.extensibility.ExtensionPoint;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.jenkinsci.test.acceptance.ControllerException;
@@ -29,7 +32,7 @@ public abstract class JenkinsController {
         }
         try {
             File f = new File(JENKINS_DEBUG_LOG);
-            FileUtils.forceMkdir(f);
+            f.createNewFile();
             this.logger = new FileWriter(f);
         } catch (IOException e) {
             throw new RuntimeException("Failed to create log file "+ JENKINS_DEBUG_LOG);
@@ -79,17 +82,24 @@ public abstract class JenkinsController {
         String source = "http://updates.jenkins-ci.org/latest/form-element-path.hpi";
         String target =  WORKSPACE+"/path-element.hpi";
         if(!FileUtils.fileExists(target)){
-            FileWriter fileWriter = null;
+            FileOutputStream fileWriter = null;
             HttpURLConnection uc = null;
             try {
-                fileWriter = new FileWriter(target);
-                uc = (HttpURLConnection) new URL(target).openConnection();
-                IOUtil.copy(uc.getInputStream(), fileWriter);
+                fileWriter = new FileOutputStream(target);
+                HttpClient client = new HttpClient();
+                GetMethod get = new GetMethod(source);
+                get.setFollowRedirects(true);
+                int status = client.executeMethod(get);
+                if(status != 200){
+                    throw new RuntimeException("Failed to get form-element-path.hpi: "+get.getResponseBodyAsString());
+                }
+                IOUtil.copy(get.getResponseBodyAsStream(), fileWriter);
             } catch (IOException e) {
                 throw new ControllerException(String.format("Failed to open %s for write operation", target), e);
             }finally {
                 if(fileWriter != null){
                     try {
+                        fileWriter.flush();
                         fileWriter.close();
                     } catch (IOException e) {
                         throw new ControllerException(String.format("Failed to close %s after writing",target),e);

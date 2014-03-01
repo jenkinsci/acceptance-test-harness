@@ -1,27 +1,25 @@
 package org.jenkinsci.test.acceptance.controller;
 
-import org.codehaus.plexus.util.IOUtil;
 import org.jenkinsci.utils.process.ProcessInputStream;
 
+import java.io.BufferedReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.ByteOrder;
-import java.nio.CharBuffer;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.regex.Pattern;
 
 /**
  * @author: Vivek Pandey
  */
 public class LogWatcher {
     private final boolean silent;
-    private final Pattern pattern;
-    private final AtomicReference<Pattern> logPattern = new AtomicReference<>(null);
-    private final AtomicReference<JenkinsPipe> jenkinsPipe = new AtomicReference<>();
+    private final String pattern;
+    private final AtomicReference<String> logPattern = new AtomicReference<>(null);
+    private final AtomicReference<ProcessInputStream> jenkinsPipe = new AtomicReference<>();
     private final FileWriter log;
     private final AtomicBoolean ready = new AtomicBoolean(false);
 
@@ -36,15 +34,15 @@ public class LogWatcher {
     public LogWatcher(final ProcessInputStream pipe, final FileWriter log, Map<String,String> opts) {
         this.silent = opts.get("silent") != null && opts.get("silent").equalsIgnoreCase("true");
         if(opts.get("pattern") == null){
-            this.pattern = Pattern.compile(": Completed initialization");
+            this.pattern = ": Completed initialization";
         }else{
-            this.pattern = Pattern.compile(opts.get("pattern"));
+            this.pattern = opts.get("pattern");
         }
         if(opts.get("log_pattern") != null){
-            this.logPattern.set(Pattern.compile(opts.get("log_pattern")));
+            this.logPattern.set(opts.get("log_pattern"));
         }
 
-        this.jenkinsPipe.set(new JenkinsPipe(pipe));
+        this.jenkinsPipe.set(pipe);
         this.log = log;
 
 
@@ -56,13 +54,15 @@ public class LogWatcher {
                 String line = null;
                 try {
                     int lineCount=0;
-                    while((line = jenkinsPipe.get().readLine()) != null){
-                        logLine(line);
+
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(jenkinsPipe.get().getInputStream()));
+                    while((line = reader.readLine()) != null){
+                        logLine(line+"\n");
                         if(ready.get()){
                             continue;
                         }
 
-                        if(pattern.matcher(line).matches()){
+                        if(line.contains(pattern)){
                             ready.set(true);
                         }else{
                             if(!silent){
@@ -75,7 +75,7 @@ public class LogWatcher {
                     }
                     ready.set(false);
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    System.out.println("Jenkins is stopped");
                 }
             }
         };
@@ -112,7 +112,7 @@ public class LogWatcher {
      */
     public void waitUntilLogged(String regex, Integer timeout) throws InterruptedException, TimeoutException {
         timeout = (timeout == null) ? 60 : timeout;
-        logPattern.set(Pattern.compile(regex));
+        logPattern.set(regex);
 
         if(hasLogged(regex)){
             return;
@@ -150,7 +150,7 @@ public class LogWatcher {
 
     public void close() throws IOException {
         if(jenkinsPipe != null){
-            jenkinsPipe.get().pis.close();
+            jenkinsPipe.get().close();
             jenkinsPipe.set(null);
         }
     }
@@ -170,7 +170,7 @@ public class LogWatcher {
         loggedLines.add(line);
 
         if(logPattern.get() != null){
-            if(logPattern.get().matcher(line).matches()){
+            if(line.contains(logPattern.get())){
                 logFound.set(true);
             }
         }

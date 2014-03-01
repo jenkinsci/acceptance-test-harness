@@ -38,7 +38,7 @@
     <dependency>
       <groupId>org.kohsuke</groupId>
       <artifactId>cucumber-annotation-indexer</artifactId>
-      <version>1.1</version>
+      <version>1.2-SNAPSHOT</version>
     </dependency>
 
     <!-- Selenium -->
@@ -89,7 +89,12 @@
       <artifactId>version-number</artifactId>
       <version>1.1</version>
     </dependency>
-    <dependency>
+      <dependency>
+          <groupId>commons-httpclient</groupId>
+          <artifactId>commons-httpclient</artifactId>
+          <version>3.1</version>
+      </dependency>
+      <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.11</version>

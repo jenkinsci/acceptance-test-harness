@@ -1,7 +1,5 @@
 package org.jenkinsci.test.acceptance.controller;
 
-import com.cloudbees.sdk.extensibility.Extension;
-
 import java.io.IOException;
 import java.net.URL;
 
@@ -10,7 +8,6 @@ import java.net.URL;
  *
  * @author Kohsuke Kawaguchi
  */
-@Extension
 public class ScaffoldController extends JenkinsController {
 
     private URL url;

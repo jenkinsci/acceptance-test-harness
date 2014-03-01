@@ -42,7 +42,7 @@ public abstract class LocalController extends JenkinsController{
     }
 
     @Inject(optional=true)
-    protected LocalController(String warLocation, boolean silentLog) {
+    protected LocalController(String warLocation) {
         super(null);
         if(warLocation == null){
             warLocation = getenv("JENKINS_WAR");
@@ -56,10 +56,10 @@ public abstract class LocalController extends JenkinsController{
 
         this.warLocation = warLocation;
 
-        this.tempDir = FileUtils.dirname(WORKSPACE);
-        new File(this.tempDir).mkdirs();
+        File tDir = FileUtils.createTempFile("temp", "dir",new File(WORKSPACE));
+        this.tempDir = tDir.getAbsolutePath();
         this.formPathElement = downloadPathElement();
-        String pluginDirPath = FileUtils.dirname(this.tempDir+File.separator+"plugins");
+        String pluginDirPath = this.tempDir+"/plugins";
         File pluginDir = new File(pluginDirPath);
         pluginDir.mkdirs();
 
@@ -81,7 +81,7 @@ public abstract class LocalController extends JenkinsController{
     }
 
     protected LocalController(){
-        this(null, false);
+        this(null);
     }
 
     @Override
@@ -100,16 +100,6 @@ public abstract class LocalController extends JenkinsController{
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    @Override
-    public void stop() {
-
-    }
-
-    @Override
-    public URL getUrl() {
-        return null;
     }
 
     @Override
@@ -153,9 +143,9 @@ public abstract class LocalController extends JenkinsController{
         from = (from <=0) ? 49152 : from;
         to = (to <= 0) ? 65535 : to;
 
-        Random random = new Random(to-from);
+
         while(true){
-            int candidate = random.nextInt() + from;
+            int candidate = (int) ((Math.random() * (to-from)) + from);
             if(isFreePort(candidate)){
                 return candidate;
             }

@@ -1,6 +1,5 @@
 package org.jenkinsci.test.acceptance.controller;
 
-import com.cloudbees.sdk.extensibility.Extension;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.jenkinsci.utils.process.ProcessInputStream;
 
@@ -11,7 +10,6 @@ import java.net.URL;
 /**
  * @author: Vivek Pandey
  */
-@Extension
 public class WinstoneController extends LocalController {
 
     private final int httpPort;
@@ -24,7 +22,7 @@ public class WinstoneController extends LocalController {
 
     @Override
     public ProcessInputStream startProcess() {
-        CommandBuilder cb = new CommandBuilder("exec", "java","-DJENKINS_HOME="+getTempDir(), "-jar", warLocation,
+        CommandBuilder cb = new CommandBuilder("java","-DJENKINS_HOME="+getTempDir(), "-jar", warLocation,
                 "--ajp13Port=-1", "--controlPort="+controlPort, "--httpPort="+httpPort, "2>&1");
         try {
             return cb.popen();
@@ -41,7 +39,7 @@ public class WinstoneController extends LocalController {
     @Override
     public URL getUrl() {
         try {
-            return new URL("http://127.0.0.1:%"+httpPort);
+            return new URL(String.format("http://127.0.0.1:%s/",httpPort));
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
