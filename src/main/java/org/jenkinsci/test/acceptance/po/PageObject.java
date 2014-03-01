@@ -114,7 +114,7 @@ public abstract class PageObject extends CapybaraPortingLayer {
     }
 
     /**
-     * Visits the job page.
+     * Visits the top page of this object.
      */
     public void open() throws Exception {
         visit(".");

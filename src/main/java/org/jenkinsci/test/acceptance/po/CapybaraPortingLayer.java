@@ -132,6 +132,9 @@ public class CapybaraPortingLayer extends Assert {
         find(link(locator)).click();
     }
 
+    /**
+     * Checks the specified checkbox.
+     */
     public void check(String locator) {
         check(find(By2.checkbox(locator)));
     }

@@ -104,4 +104,8 @@ public class Job extends PageObject {
     public void disable() {
         check("disable");
     }
+
+    public int getNextBuildNumber() throws Exception {
+        return getJson().get("nextBuildNumber").intValue();
+    }
 }

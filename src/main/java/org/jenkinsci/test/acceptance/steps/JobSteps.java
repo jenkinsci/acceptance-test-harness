@@ -28,6 +28,14 @@ public class JobSteps extends AbstractSteps {
         my.job = jenkins.createJob(FreeStyleJob.class);
     }
 
+    @Given("^a simple job$")
+    public void a_simple_job() throws Throwable {
+        my.job = jenkins.createJob(FreeStyleJob.class);
+        my.job.configure();
+        my.job.addShellStep("ls");
+        my.job.save();
+    }
+
     @When("^I configure the job$")
     public void I_configure_the_job() throws Exception {
         visit(my.job.getConfigUrl());
@@ -94,5 +102,12 @@ public class JobSteps extends AbstractSteps {
     public void it_shoulud_have_an_button_on_the_job_page(String title) throws Throwable {
         my.job.open();
         assertThat(find(button(title)),is(notNullValue()));
+    }
+
+    @And("^I build (\\d+) jobs sequentially$")
+    public void I_build_jobs_sequentially(int n) throws Throwable {
+        for (int i=0; i<n; i++) {
+            my.job.queueBuild().waitUntilFinished();
+        }
     }
 }
