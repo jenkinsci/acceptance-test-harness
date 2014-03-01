@@ -1,3 +1,5 @@
+package ant;
+
 import org.jenkinsci.test.acceptance.po.BuildStep;
 import org.jenkinsci.test.acceptance.po.BuildStepPageObject;
 import org.jenkinsci.test.acceptance.po.Job;
