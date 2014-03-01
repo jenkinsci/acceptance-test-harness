@@ -3,7 +3,7 @@ package org.jenkinsci.test.acceptance.cucumber;
 import org.openqa.selenium.By;
 
 /**
- * More factories for {@link By} objects.
+ * More factories for {@link org.openqa.selenium.By} objects.
  *
  * Mainly from Capybara's "selector.rb"
  *

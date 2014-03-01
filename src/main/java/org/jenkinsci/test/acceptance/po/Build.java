@@ -21,6 +21,7 @@ public class Build extends PageObject {
      * Console output. Cached.
      */
     private String console;
+    private boolean success;
 
     public Build(Job job, int buildNumber) throws Exception {
         super(job.injector,new URL(job.url,String.valueOf(buildNumber)+"/"));
@@ -88,5 +89,17 @@ public class Build extends PageObject {
             console = find(xpath("//pre")).getText();
         }
         return console;
+    }
+
+    public boolean isSuccess() throws Exception {
+        return getResult().equals("SUCCESS");
+    }
+
+    private String getResult() throws Exception {
+        if (result!=null)   return result;
+
+        waitUntilFinished();
+        result = getJson().get("result").asText();
+        return result;
     }
 }

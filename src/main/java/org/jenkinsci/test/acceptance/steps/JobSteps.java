@@ -1,5 +1,7 @@
 package org.jenkinsci.test.acceptance.steps;
 
+import cucumber.api.DataTable;
+import cucumber.api.PendingException;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
@@ -67,5 +69,19 @@ public class JobSteps extends AbstractSteps {
         // then all jobs should be in progress at the same time
         for (int i=0; i<n; i++)
             assertTrue(my.job.build(i + 1).isInProgress());
+    }
+
+    @And("^I build the job with parameters?$")
+    public void I_build_the_job_with_parameters(DataTable table) throws Exception {
+        my.job.queueBuild(table);
+    }
+
+    @Then("^the build should (succeed|fail)$")
+    public void the_build_should_succeed(String outcome) throws Exception {
+        boolean expected = outcome.equals("succeed");
+        Build lb = my.job.getLastBuild();
+        assertThat(
+                "Console Output:\n" + lb.getConsole(),
+                lb.isSuccess(), is(expected));
     }
 }

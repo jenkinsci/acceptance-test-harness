@@ -85,6 +85,14 @@ public class CapybaraPortingLayer extends Assert {
     }
 
     /**
+     * Picks up the last element that matches given selector.
+     */
+    public WebElement last(By selector) {
+        List<WebElement> l = driver.findElements(selector);
+        return l.get(l.size()-1);
+    }
+
+    /**
      * Executes JavaScript.
      */
     public Object executeScript(String javaScript, Object... args) {
@@ -95,7 +103,7 @@ public class CapybaraPortingLayer extends Assert {
      * Given a menu button that shows a list of build steps, select the right item from the menu
      * to insert the said build step.
      */
-    public void selectStep(String displayName, WebElement menuButton) throws Exception {
+    public void selectDropdownMenu(String displayName, WebElement menuButton) throws Exception {
         menuButton.click();
 
         // With enough implementations registered the one we are looking for might
