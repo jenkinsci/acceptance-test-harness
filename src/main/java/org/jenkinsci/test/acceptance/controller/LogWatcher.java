@@ -34,7 +34,7 @@ public class LogWatcher {
     public LogWatcher(final ProcessInputStream pipe, final FileWriter log, Map<String,String> opts) {
         this.silent = opts.get("silent") != null && opts.get("silent").equalsIgnoreCase("true");
         if(opts.get("pattern") == null){
-            this.pattern = ": Completed initialization";
+            this.pattern = " Completed initialization";
         }else{
             this.pattern = opts.get("pattern");
         }
