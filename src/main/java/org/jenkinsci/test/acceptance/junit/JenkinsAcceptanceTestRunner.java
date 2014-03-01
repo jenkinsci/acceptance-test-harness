@@ -12,6 +12,8 @@ import org.junit.runners.model.InitializationError;
  * among with all the components provided by the test harness.
  *
  * @author Kohsuke Kawaguchi
+ * @deprecated
+ *      Use {@link JenkinsAcceptanceTestRule}
  */
 public class JenkinsAcceptanceTestRunner extends BlockJUnit4ClassRunner {
     public JenkinsAcceptanceTestRunner(Class<?> klass) throws InitializationError {

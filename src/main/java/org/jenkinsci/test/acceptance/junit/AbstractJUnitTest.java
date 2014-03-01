@@ -1,7 +1,7 @@
 package org.jenkinsci.test.acceptance.junit;
 
 import org.junit.Assert;
-import org.junit.runner.RunWith;
+import org.junit.Rule;
 
 /**
  * Convenience base class to derive your plain-old JUnit tests from.
@@ -11,8 +11,10 @@ import org.junit.runner.RunWith;
  *
  * @author Kohsuke Kawaguchi
  */
-@RunWith(JenkinsAcceptanceTestRunner.class)
 public class AbstractJUnitTest extends Assert {
+    @Rule
+    public JenkinsAcceptanceTestRule env = new JenkinsAcceptanceTestRule();
+
     /**
      * Obtains a resource in a wrapper.
      */
