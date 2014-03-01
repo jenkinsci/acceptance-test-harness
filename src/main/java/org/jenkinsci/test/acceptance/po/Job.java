@@ -26,12 +26,20 @@ public class Job extends PageObject {
     }
 
     public <T extends BuildStep> T addBuildStep(Class<T> type) throws Exception {
+        return addStep(type,"builder");
+    }
+
+    public <T extends PostBuildStep> T addPublisher(Class<T> type) throws Exception {
+        return addStep(type,"publisher");
+    }
+
+    private <T extends Step> T addStep(Class<T> type, String section) throws Exception {
         ensureConfigPage();
 
         String caption = type.getAnnotation(BuildStepPageObject.class).value();
 
-        selectDropdownMenu(caption, find(By2.path("/hetero-list-add[builder]")));
-        String path = last(xpath("//div[@name='builder']")).getAttribute("path");
+        selectDropdownMenu(caption, find(By2.path("/hetero-list-add[%s]",section)));
+        String path = last(xpath("//div[@name='%s']",section)).getAttribute("path");
 
         return type.getConstructor(Job.class,String.class).newInstance(this,path);
     }

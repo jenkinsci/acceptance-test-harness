@@ -5,6 +5,7 @@ import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 import static org.jenkinsci.test.acceptance.cucumber.By2.*;
 
 /**
@@ -29,6 +30,6 @@ public class GeneralSteps extends AbstractSteps {
     @Then("^the page should say \"([^\"]*)\"$")
     public void the_page_should_say(String content) throws Exception {
         String url = driver.getCurrentUrl();
-        assertThat(url+" doesn't have expected content!", driver.getPageSource(), containsString(content));
+        assertThat(url+" doesn't have expected content!", driver, hasContent(content));
     }
 }

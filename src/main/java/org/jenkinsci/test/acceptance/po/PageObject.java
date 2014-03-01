@@ -13,8 +13,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.jenkinsci.test.acceptance.Matchers.*;
 
 /**
+ * Encapsulates a model in Jenkins and wraps interactions with it.
+ *
+ * See https://code.google.com/p/selenium/wiki/PageObjects
+ *
  * @author Kohsuke Kawaguchi
  */
 @SuppressWarnings("CdiManagedBeanInconsistencyInspection")
@@ -78,9 +83,7 @@ public abstract class PageObject extends CapybaraPortingLayer {
 
     public void save() {
         clickButton("Save");
-        if (driver.getPageSource().contains("This page expects a form submission")) {
-            throw new AssertionError("Job was not saved\n"+driver.getPageSource());
-        }
+        assertThat(driver, not(hasContent("This page expects a form submission")));
     }
 
     public URL getJsonApiUrl() throws Exception {

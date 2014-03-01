@@ -7,10 +7,12 @@ import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.openqa.selenium.NoSuchElementException;
 
 import javax.inject.Singleton;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.jenkinsci.test.acceptance.Matchers.*;
 import static org.jenkinsci.test.acceptance.cucumber.By2.*;
 
 /**
@@ -95,7 +97,7 @@ public class JobSteps extends AbstractSteps {
 
     @Then("^it should be disabled$")
     public void it_should_be_disabled() throws Throwable {
-        assertThat(driver.getPageSource(),not(containsString("Build Now")));
+        assertThat(driver, not(hasContent("Build Now")));
     }
 
     @And("^it should have an \"([^\"]*)\" button on the job page$")
@@ -109,5 +111,22 @@ public class JobSteps extends AbstractSteps {
         for (int i=0; i<n; i++) {
             my.job.queueBuild().waitUntilFinished();
         }
+    }
+
+    @And("^the artifact \"([^\"]*)\" (should|should not) be archived$")
+    public void the_artifact_should_be_archived(String artifact, String shouldOrNot) throws Throwable {
+        my.job.getLastBuild().waitUntilFinished().open();
+
+        try {
+            find(xpath("//a[@href='artifact/%s']", artifact));
+            assertTrue("Expected to find elements", shouldOrNot.equals("should"));
+        } catch (NoSuchElementException e) {
+            assertTrue("Expected not to find elements", shouldOrNot.equals("should not"));
+        }
+    }
+
+    @And("^the content of artifact \"([^\"]*)\" should be \"([^\"]*)\"$")
+    public void the_content_of_artifact_should_be(String artifact, String content) throws Throwable {
+        my.job.getLastBuild().getArtifact(artifact).shouldHaveContent(content);
     }
 }

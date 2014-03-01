@@ -19,6 +19,7 @@ import static org.jenkinsci.test.acceptance.cucumber.By2.*;
  *
  * @author Kohsuke Kawaguchi
  */
+@SuppressWarnings("CdiManagedBeanInconsistencyInspection")
 public class CapybaraPortingLayer extends Assert {
     @Inject
     protected WebDriver driver;
@@ -78,6 +79,14 @@ public class CapybaraPortingLayer extends Assert {
      */
     public void check(WebElement e) {
         if (!e.isSelected())
+            e.click();
+    }
+
+    /**
+     * Sets the state of the checkbox to the specified value.
+     */
+    public void check(WebElement e, boolean state) {
+        if (e.isSelected()!=state)
             e.click();
     }
 

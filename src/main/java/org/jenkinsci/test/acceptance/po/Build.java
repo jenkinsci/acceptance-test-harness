@@ -102,4 +102,8 @@ public class Build extends PageObject {
         result = getJson().get("result").asText();
         return result;
     }
+
+    public Artifact getArtifact(String artifact) throws Exception {
+        return new Artifact(this,new URL(url,"artifact/"+artifact));
+    }
 }

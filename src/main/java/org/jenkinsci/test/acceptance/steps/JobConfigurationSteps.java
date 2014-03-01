@@ -4,6 +4,7 @@ import cucumber.api.PendingException;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.When;
 import hudson.util.VersionNumber;
+import org.jenkinsci.test.acceptance.po.ArtifactArchiver;
 import org.jenkinsci.test.acceptance.po.StringParameter;
 
 import javax.inject.Inject;
@@ -50,5 +51,24 @@ public class JobConfigurationSteps extends AbstractSteps {
     @And("^I add always fail build step$")
     public void I_add_always_fail_build_step() throws Throwable {
         my.job.addShellStep("exit 1");
+    }
+
+    @When("^I add a shell build step \"([^\"]*)\" in the job configuration$")
+    public void I_add_a_shell_build_step_in_the_job_configuration(String shell) throws Throwable {
+        my.job.configure();
+        my.job.addShellStep(shell);
+        my.job.save();
+    }
+
+    @And("^I set artifact \"([^\"]*)\" to archive$")
+    public void I_set_artifact_to_archive(String artifacts) throws Throwable {
+        my.job.addPublisher(ArtifactArchiver.class).includes(artifacts);
+    }
+
+    @And("^I set artifact \"([^\"]*)\" to archive in the job configuration$")
+    public void I_set_artifact_to_archive_in_the_job_configuration(String includes) throws Throwable {
+        my.job.configure();
+        my.job.addPublisher(ArtifactArchiver.class).includes(includes);
+        my.job.save();
     }
 }

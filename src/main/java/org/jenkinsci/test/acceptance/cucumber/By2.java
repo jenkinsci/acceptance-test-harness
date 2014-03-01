@@ -23,8 +23,8 @@ public abstract class By2 extends org.openqa.selenium.By {
      *
      * https://wiki.jenkins-ci.org/display/JENKINS/Form+Element+Path+Plugin
      */
-    public static By path(String path) {
-        return By2.xpath(".//*[@path='%s']",path);
+    public static By path(String path, Object... args) {
+        return By2.xpath(".//*[@path='%s']",String.format(path,args));
     }
 
     /**

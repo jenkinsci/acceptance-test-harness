@@ -4,6 +4,7 @@ import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.jenkinsci.test.acceptance.Matchers.*;
 import static org.jenkinsci.test.acceptance.cucumber.By2.*;
 
 /**
@@ -15,9 +16,9 @@ public class BuildHistorySteps extends AbstractSteps {
         my.job.build(n).open();
 
         if (shouldOrNot.equals("should")) {
-            assertThat(driver.getPageSource(), containsString("Build #" + n));
+            assertThat(driver, hasContent("Build #" + n));
         } else {
-            assertThat(driver.getPageSource(), not(containsString("Build #" + n)));
+            assertThat(driver, not(hasContent("Build #" + n)));
         }
     }
 
