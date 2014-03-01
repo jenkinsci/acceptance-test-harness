@@ -1,5 +1,6 @@
-package org.jenkinsci.test.acceptance.cucumber;
+package cucumber.runtime;
 
+import com.cloudbees.sdk.extensibility.ExtensionFinder;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -23,6 +24,13 @@ public class ObjectFactoryImpl implements ObjectFactory {
     private final List<Module> modules = new ArrayList<Module>();
     private final Set<Class<?>> classes = new HashSet<Class<?>>();
     private Injector injector;
+
+    /**
+     * This is the constructor automatically instantiated by Cucumber.
+     */
+    public ObjectFactoryImpl() {
+        this(new ExtensionFinder(Thread.currentThread().getContextClassLoader()));
+    }
 
     public ObjectFactoryImpl(Module... modules) {
         Collections.addAll(this.modules, modules);

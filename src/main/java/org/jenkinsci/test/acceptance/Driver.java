@@ -7,7 +7,7 @@ import cucumber.runtime.RuntimeOptions;
 import cucumber.runtime.io.MultiLoader;
 import cucumber.runtime.io.ResourceLoader;
 import cucumber.runtime.java.BetterJavaBackend;
-import org.jenkinsci.test.acceptance.cucumber.ObjectFactoryImpl;
+import cucumber.runtime.ObjectFactoryImpl;
 
 import java.util.Collections;
 
