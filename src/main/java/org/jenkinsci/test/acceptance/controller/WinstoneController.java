@@ -25,7 +25,7 @@ public class WinstoneController extends LocalController {
     @Override
     public ProcessInputStream startProcess() throws IOException{
         CommandBuilder cb = new CommandBuilder("java","-DJENKINS_HOME="+getTempDir(), "-jar", warLocation,
-                "--ajp13Port=-1", "--controlPort="+controlPort, "--httpPort="+httpPort, "2>&1");
+                "--ajp13Port=-1", "--controlPort="+controlPort, "--httpPort="+httpPort);
         return cb.popen();
     }
 
