@@ -2,9 +2,9 @@ package org.jenkinsci.test.acceptance.po;
 
 import org.openqa.selenium.NoSuchElementException;
 
-import java.net.URL;
-
 /**
+ * Page objecct for plugin manager.
+ *
  * @author Kohsuke Kawaguchi
  */
 public class PluginManager extends ContainerPageObject {
@@ -13,14 +13,14 @@ public class PluginManager extends ContainerPageObject {
      */
     private boolean updated;
 
-    public PluginManager(Jenkins jenkins) throws Exception {
-        super(jenkins.injector, new URL(jenkins.url,"pluginManager/"));
+    public PluginManager(Jenkins jenkins) {
+        super(jenkins.injector, jenkins.url("pluginManager/"));
     }
 
     /**
      * Force update the plugin update center metadata.
      */
-    public void checkForUpdates() throws Exception {
+    public void checkForUpdates() {
         visit("checkUpdates");
         waitFor(by.xpath("//span[@id='completionMarker' and text()='Done']"));
         updated = true;
@@ -29,7 +29,7 @@ public class PluginManager extends ContainerPageObject {
         sleep(5000);
     }
 
-    public boolean isInstalled(String... shortNames) throws Exception {
+    public boolean isInstalled(String... shortNames) {
         visit("installed");
         try {
             for (String n : shortNames) {
@@ -41,7 +41,7 @@ public class PluginManager extends ContainerPageObject {
         }
     }
 
-    public void installPlugin(String... shortNames) throws Exception {
+    public void installPlugin(String... shortNames) {
         if (isInstalled(shortNames))
             return;
 

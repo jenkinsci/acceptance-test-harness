@@ -1,10 +1,8 @@
 package org.jenkinsci.test.acceptance.po;
 
-import groovy.lang.Closure;
 import org.openqa.selenium.WebElement;
 
 import java.net.URL;
-import java.util.concurrent.Callable;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
@@ -15,12 +13,12 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
 public class JenkinsConfig extends PageObject {
     public final Jenkins jenkins;
 
-    public JenkinsConfig(Jenkins jenkins) throws Exception {
-        super(jenkins.injector,new URL(jenkins.url,"configure"));
+    public JenkinsConfig(Jenkins jenkins) {
+        super(jenkins.injector, jenkins.url("configure"));
         this.jenkins = jenkins;
     }
 
-    public void enterOracleCredential(String login, String password) throws Exception {
+    public void enterOracleCredential(String login, String password) {
         visit("descriptorByName/hudson.tools.JDKInstaller/enterCredential");
         find(by.input("username")).sendKeys(login);
         find(by.input("password")).sendKeys(password);
@@ -28,21 +26,9 @@ public class JenkinsConfig extends PageObject {
         clickButton("Close");
     }
 
-    public void configure(Closure body) throws Exception {
-        configure();
-        body.call(this);
-        save();
-    }
-
-    public <T> T configure(Callable<T> body) throws Exception {
-        configure();
-        T v = body.call();
-        save();
-        return v;
-    }
-
-    public void configure() throws Exception {
-        open();
+    @Override
+    public URL getConfigUrl() {
+        return url;
     }
 
     public void save() {
@@ -54,7 +40,7 @@ public class JenkinsConfig extends PageObject {
         clickButton(name);
     }
 
-    public void addJdkAutoInstallation(String name, String version) throws Exception {
+    public void addJdkAutoInstallation(String name, String version) {
         ensureConfigPage();
         find(by.path("/hudson-model-JDK/tool/name")).sendKeys(name);
         // by default Install automatically is checked

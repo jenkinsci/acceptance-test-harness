@@ -21,11 +21,11 @@ public class AntPluginTest extends AbstractJUnitTest {
     Jenkins jenkins;
 
     @Test
-    public void allow_user_to_use_Ant_in_freestyle_project() throws Exception {
+    public void allow_user_to_use_Ant_in_freestyle_project() {
         jenkins.getPluginManager().installPlugin("ant");
         final FreeStyleJob j = jenkins.createJob(FreeStyleJob.class);
         j.configure(new Callable<Object>() {
-            public Object call() throws Exception {
+            public Object call() {
                 j.addCreateFileStep("build.xml",resource("echo-helloworld.xml").asText());
                 j.addBuildStep(AntBuildStep.class).setTarget("hello");
                 return null;

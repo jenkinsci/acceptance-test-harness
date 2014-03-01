@@ -66,9 +66,9 @@ public class CapybaraPortingLayer extends Assert {
     /**
      * Wait until the element that matches the given selector appears.
      */
-    public WebElement waitFor(final By selector) throws Exception {
+    public WebElement waitFor(final By selector) {
         return waitForCond(new Callable<WebElement>() {
-            public WebElement call() throws Exception {
+            public WebElement call() {
                 try {
                     return find(selector);
                 } catch (NoSuchElementException e) {
@@ -83,15 +83,19 @@ public class CapybaraPortingLayer extends Assert {
      *
      * If it times out, an exception will be thrown.
      */
-    public <T> T waitForCond(Callable<T> block, int timeoutSec) throws Exception {
-        long endTime = System.currentTimeMillis()+ TimeUnit.SECONDS.toMillis(timeoutSec);
-        while (System.currentTimeMillis()<endTime) {
-            T v = block.call();
-            if (isTrueish(v))
-                return v;
-            Thread.sleep(1000);
+    public <T> T waitForCond(Callable<T> block, int timeoutSec) {
+        try {
+            long endTime = System.currentTimeMillis()+ TimeUnit.SECONDS.toMillis(timeoutSec);
+            while (System.currentTimeMillis()<endTime) {
+                T v = block.call();
+                if (isTrueish(v))
+                    return v;
+                sleep(1000);
+            }
+            throw new TimeoutException("Failed to wait for condition "+block);
+        } catch (Exception e) {
+            throw new Error("Failed to wait for condition "+block,e);
         }
-        throw new TimeoutException("Failed to wait for condition "+block);
     }
 
     private boolean isTrueish(Object v) {
@@ -99,7 +103,7 @@ public class CapybaraPortingLayer extends Assert {
         return v!=null;
     }
 
-    public <T> T waitForCond(Callable<T> block) throws Exception {
+    public <T> T waitForCond(Callable<T> block) {
         return waitForCond(block,30);
     }
 
@@ -162,7 +166,7 @@ public class CapybaraPortingLayer extends Assert {
      * Given a menu button that shows a list of build steps, select the right item from the menu
      * to insert the said build step.
      */
-    public void selectDropdownMenu(String displayName, WebElement menuButton) throws Exception {
+    public void selectDropdownMenu(String displayName, WebElement menuButton) {
         menuButton.click();
 
         // With enough implementations registered the one we are looking for might
@@ -179,7 +183,7 @@ public class CapybaraPortingLayer extends Assert {
         );
 
         clickLink(displayName);
-        Thread.sleep(1000);
+        sleep(1000);
     }
 
     /**

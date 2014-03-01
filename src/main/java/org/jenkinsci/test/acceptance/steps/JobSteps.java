@@ -41,33 +41,33 @@ public class JobSteps extends AbstractSteps {
     }
 
     @When("^I configure the job$")
-    public void I_configure_the_job() throws Exception {
+    public void I_configure_the_job() {
         visit(my.job.getConfigUrl());
     }
 
     @And("^I save the job$")
-    public void I_save_the_job() throws Exception {
+    public void I_save_the_job() {
         my.job.save();
     }
 
     @And("^I build the job$")
-    public void I_build_the_job() throws Exception {
+    public void I_build_the_job() {
         my.job.queueBuild();
     }
 
     @Then("^console output should contain \"([^\"]*)\"$")
-    public void console_output_should_contain(String text) throws Exception {
+    public void console_output_should_contain(String text) {
         Build build = my.job.getLastBuild().waitUntilFinished();
         assertThat(build.getConsole(), containsString(text));
     }
 
     @And("^I visit the job page$")
-    public void I_visit_the_job_page() throws Exception {
+    public void I_visit_the_job_page() {
         my.job.open();
     }
 
     @And("^I build (\\d+) jobs$")
-    public void I_build_jobs(int n) throws Exception {
+    public void I_build_jobs(int n) {
         for (int i=0; i<n; i++)
             my.job.queueBuild();
     }
@@ -84,12 +84,12 @@ public class JobSteps extends AbstractSteps {
     }
 
     @And("^I build the job with parameters?$")
-    public void I_build_the_job_with_parameters(DataTable table) throws Exception {
+    public void I_build_the_job_with_parameters(DataTable table) {
         my.job.queueBuild(table);
     }
 
     @Then("^the build should (succeed|fail)$")
-    public void the_build_should_succeed(String outcome) throws Exception {
+    public void the_build_should_succeed(String outcome) {
         boolean expected = outcome.equals("succeed");
         Build lb = my.job.getLastBuild();
         assertThat(

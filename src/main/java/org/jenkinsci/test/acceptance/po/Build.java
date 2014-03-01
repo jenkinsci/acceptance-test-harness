@@ -23,21 +23,21 @@ public class Build extends ContainerPageObject {
     private String console;
     private boolean success;
 
-    public Build(Job job, int buildNumber) throws Exception {
-        super(job.injector,new URL(job.url,String.valueOf(buildNumber)+"/"));
+    public Build(Job job, int buildNumber) {
+        super(job.injector,job.url("%d/",buildNumber));
         this.buildNumber = buildNumber;
         this.job = job;
     }
 
-    public Build(Job job, String permalink) throws Exception {
-        super(job.injector,new URL(job.url,permalink+"/"));
+    public Build(Job job, String permalink) {
+        super(job.injector,job.url(permalink+"/"));
         this.buildNumber = -1;  // HACK
         this.job = job;
     }
 
-    public Build waitUntilStarted() throws Exception {
+    public Build waitUntilStarted() {
         waitForCond(new Callable<Boolean>() {
-            public Boolean call() throws Exception {
+            public Boolean call() {
                 return hasStarted();
             }
         });
@@ -57,17 +57,17 @@ public class Build extends ContainerPageObject {
         }
     }
 
-    public Build waitUntilFinished() throws Exception {
+    public Build waitUntilFinished() {
         waitUntilStarted();
         waitForCond(new Callable<Boolean>() {
-            public Boolean call() throws Exception {
+            public Boolean call() {
                 return !isInProgress();
             }
         });
         return this;
     }
 
-    public boolean isInProgress() throws Exception {
+    public boolean isInProgress() {
         if (result!=null)   return false;
         if (!hasStarted())  return false;
 
@@ -75,11 +75,11 @@ public class Build extends ContainerPageObject {
         return d.get("building").booleanValue() || d.get("result")==null;
     }
 
-    public URL getConsoleUrl() throws Exception {
-        return new URL(url,"console");
+    public URL getConsoleUrl() {
+        return url("console");
     }
 
-    public String getConsole() throws Exception {
+    public String getConsole() {
         if (console!=null)  return console;
 
         visit(getConsoleUrl());
@@ -91,11 +91,11 @@ public class Build extends ContainerPageObject {
         return console;
     }
 
-    public boolean isSuccess() throws Exception {
+    public boolean isSuccess() {
         return getResult().equals("SUCCESS");
     }
 
-    private String getResult() throws Exception {
+    private String getResult() {
         if (result!=null)   return result;
 
         waitUntilFinished();
@@ -103,11 +103,11 @@ public class Build extends ContainerPageObject {
         return result;
     }
 
-    public Artifact getArtifact(String artifact) throws Exception {
-        return new Artifact(this,new URL(url,"artifact/"+artifact));
+    public Artifact getArtifact(String artifact) {
+        return new Artifact(this,url("artifact/%s",artifact));
     }
 
-    public void shouldSucceed() throws Exception {
+    public void shouldSucceed() {
         assertThat(getResult(), is("SUCCESS"));
     }
 }

@@ -2,7 +2,6 @@ package org.jenkinsci.test.acceptance.po;
 
 import com.google.inject.Injector;
 import cucumber.api.DataTable;
-import org.openqa.selenium.WebElement;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -23,15 +22,15 @@ public class Job extends ContainerPageObject {
         this.name = name;
     }
 
-    public <T extends BuildStep> T addBuildStep(Class<T> type) throws Exception {
+    public <T extends BuildStep> T addBuildStep(Class<T> type) {
         return addStep(type,"builder");
     }
 
-    public <T extends PostBuildStep> T addPublisher(Class<T> type) throws Exception {
+    public <T extends PostBuildStep> T addPublisher(Class<T> type) {
         return addStep(type,"publisher");
     }
 
-    private <T extends Step> T addStep(Class<T> type, String section) throws Exception {
+    private <T extends Step> T addStep(Class<T> type, String section) {
         ensureConfigPage();
 
         String caption = type.getAnnotation(BuildStepPageObject.class).value();
@@ -39,24 +38,28 @@ public class Job extends ContainerPageObject {
         selectDropdownMenu(caption, find(by.path("/hetero-list-add[%s]",section)));
         String path = last(by.xpath("//div[@name='%s']", section)).getAttribute("path");
 
-        return type.getConstructor(Job.class,String.class).newInstance(this,path);
+        try {
+            return type.getConstructor(Job.class,String.class).newInstance(this,path);
+        } catch (ReflectiveOperationException e) {
+            throw new Error(e);
+        }
     }
 
-    public ShellBuildStep addShellStep(String shell) throws Exception {
+    public ShellBuildStep addShellStep(String shell) {
         ShellBuildStep step = addBuildStep(ShellBuildStep.class);
         step.setCommand(shell);
         return step;
     }
 
-    public void addCreateFileStep(String name, String content) throws Exception {
+    public void addCreateFileStep(String name, String content) {
         addShellStep(String.format("cat > %s << ENDOFFILE\n%s\nENDOFFILE",name,content));
     }
 
-    public URL getBuildUrl() throws Exception {
-        return new URL(url,"build?delay=0sec");
+    public URL getBuildUrl() {
+        return url("build?delay=0sec");
     }
 
-    public Build queueBuild(DataTable table) throws Exception {
+    public Build queueBuild(DataTable table) {
         Map<String,String> params = new HashMap<>();
         for (List<String> row : table.raw()) {
             params.put(row.get(0), row.get(1));
@@ -64,11 +67,11 @@ public class Job extends ContainerPageObject {
         return queueBuild(params);
     }
 
-    public Build queueBuild() throws Exception {
+    public Build queueBuild() {
         return queueBuild(Collections.<String,Object>emptyMap());
     }
 
-    public Build queueBuild(Map<String,?> params) throws Exception {
+    public Build queueBuild(Map<String,?> params) {
         int nb = getJson().get("nextBuildNumber").intValue();
         visit(getBuildUrl());
 
@@ -84,15 +87,15 @@ public class Job extends ContainerPageObject {
         return build(nb).waitUntilStarted();
     }
 
-    public Build build(int buildNumber) throws Exception {
+    public Build build(int buildNumber) {
         return new Build(this,buildNumber);
     }
 
-    public Build getLastBuild() throws Exception {
+    public Build getLastBuild() {
         return new Build(this,"lastBuild");
     }
 
-    public <T extends Parameter> T addParameter(Class<T> type) throws Exception {
+    public <T extends Parameter> T addParameter(Class<T> type) {
         ensureConfigPage();
 
         String displayName = type.getAnnotation(ParameterPageObject.class).value();
@@ -102,24 +105,28 @@ public class Job extends ContainerPageObject {
 //        find(xpath("//button[text()='Add Parameter']")).click();
 //        find(xpath("//a[text()='%s']",displayName)).click();
 
-        Thread.sleep(500);
+        sleep(500);
 
         String path = last(by.xpath("//div[@name='parameter']")).getAttribute("path");
 
-        T p = type.getConstructor(Job.class,String.class).newInstance(this,path);
-        parameters.add(p);
-        return p;
+        try {
+            T p = type.getConstructor(Job.class,String.class).newInstance(this,path);
+            parameters.add(p);
+            return p;
+        } catch (ReflectiveOperationException e) {
+            throw new Error(e);
+        }
     }
 
     public void disable() {
         check("disable");
     }
 
-    public int getNextBuildNumber() throws Exception {
+    public int getNextBuildNumber() {
         return getJson().get("nextBuildNumber").intValue();
     }
 
-    public void useCustomWorkspace(String ws) throws Exception {
+    public void useCustomWorkspace(String ws) {
         ensureConfigPage();
         clickButton("Advanced...");
 

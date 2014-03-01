@@ -17,17 +17,17 @@ public class JobConfigurationSteps extends AbstractSteps {
     GeneralSteps generalsteps;
 
     @And("^I add a shell build step \"([^\"]*)\"$")
-    public void I_add_a_shell_build_step(String shell) throws Exception {
+    public void I_add_a_shell_build_step(String shell) {
         my.step = my.job.addShellStep(shell);
     }
 
     @And("^I enable concurrent builds$")
-    public void I_enable_concurrent_builds() throws Exception {
+    public void I_enable_concurrent_builds() {
         generalsteps.checkTheCheckbox("_.concurrentBuild");
     }
 
     @And("^I add a string parameter \"([^\"]*)\"$")
-    public void I_add_a_string_parameter(String name) throws Exception {
+    public void I_add_a_string_parameter(String name) {
         StringParameter p = my.job.addParameter(StringParameter.class);
         p.setName(name);
     }

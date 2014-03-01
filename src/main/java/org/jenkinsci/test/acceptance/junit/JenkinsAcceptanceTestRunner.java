@@ -23,7 +23,7 @@ public class JenkinsAcceptanceTestRunner extends BlockJUnit4ClassRunner {
      * Here we do so with Guice.
      */
     @Override
-    protected Object createTest() throws Exception {
+    protected Object createTest() {
         Injector injector = Guice.createInjector(new ExtensionFinder(Thread.currentThread().getContextClassLoader()));
         return injector.getInstance(getTestClass().getJavaClass());
     }

@@ -23,19 +23,19 @@ import java.util.regex.Pattern;
 public class Jenkins extends ContainerPageObject {
     private VersionNumber version;
 
-    public Jenkins(Injector injector, URL url) throws Exception {
+    public Jenkins(Injector injector, URL url) {
         super(injector,url);
         getVersion();
     }
 
     @Inject
-    public Jenkins(Injector injector, JenkinsController controller) throws Exception {
+    public Jenkins(Injector injector, JenkinsController controller) {
         this(injector, controller.getUrl());
     } 
     /**
      * Get the version of Jenkins under test.
      */
-    public VersionNumber getVersion() throws Exception {
+    public VersionNumber getVersion() {
         if (version!=null)      return  version;
 
         String prefix = "About Jenkins ";
@@ -49,7 +49,7 @@ public class Jenkins extends ContainerPageObject {
             throw new AssertionError("Unexpected version string: "+text);
     }
 
-    public <T extends Job> T createJob(Class<T> type, String name) throws Exception {
+    public <T extends Job> T createJob(Class<T> type, String name) {
         String sut_type = type.getAnnotation(JobPageObject.class).value();
 
         visit("newJob");
@@ -57,25 +57,29 @@ public class Jenkins extends ContainerPageObject {
         find(By.xpath("//input[starts-with(@value, '"+sut_type+"')]")).click();
         clickButton("OK");
 
-        return type.getConstructor(Injector.class,URL.class,String.class)
-                .newInstance(injector, new URL(url, "job/" + name + "/"), name);
+        try {
+            return type.getConstructor(Injector.class,URL.class,String.class)
+                    .newInstance(injector, url("job/%s/", name), name);
+        } catch (ReflectiveOperationException e) {
+            throw new AssertionError(e);
+        }
     }
 
-    public <T extends Job> T createJob(Class<T> type) throws Exception {
+    public <T extends Job> T createJob(Class<T> type) {
         return createJob(type, createRandomName());
     }
 
     /**
      * Access global configuration page.
      */
-    public JenkinsConfig getConfigPage() throws Exception {
+    public JenkinsConfig getConfigPage() {
         return new JenkinsConfig(this);
     }
 
     /**
      * Access the plugin manager page object
      */
-    public PluginManager getPluginManager() throws Exception {
+    public PluginManager getPluginManager() {
         return new PluginManager(this);
     }
 

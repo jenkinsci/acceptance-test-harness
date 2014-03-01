@@ -12,7 +12,7 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
  */
 public class GeneralSteps extends AbstractSteps {
     @When("^I visit the home page$")
-    public void I_visit_the_home_page() throws Exception {
+    public void I_visit_the_home_page() {
         jenkins.visit("");
     }
 
@@ -27,7 +27,7 @@ public class GeneralSteps extends AbstractSteps {
     }
 
     @Then("^the page should say \"([^\"]*)\"$")
-    public void the_page_should_say(String content) throws Exception {
+    public void the_page_should_say(String content) {
         String url = driver.getCurrentUrl();
         assertThat(url+" doesn't have expected content!", driver, hasContent(content));
     }

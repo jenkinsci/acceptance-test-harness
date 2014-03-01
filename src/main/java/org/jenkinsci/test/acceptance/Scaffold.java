@@ -4,6 +4,7 @@ import com.cloudbees.sdk.extensibility.Extension;
 import com.cloudbees.sdk.extensibility.ExtensionModule;
 import com.google.inject.AbstractModule;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
+import org.jenkinsci.test.acceptance.controller.ScaffoldController;
 import org.jenkinsci.test.acceptance.controller.WinstoneController;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;

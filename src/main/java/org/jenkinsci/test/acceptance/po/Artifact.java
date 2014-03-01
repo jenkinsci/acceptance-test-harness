@@ -2,6 +2,7 @@ package org.jenkinsci.test.acceptance.po;
 
 import org.jenkinsci.test.acceptance.cucumber.Should;
 
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -24,7 +25,7 @@ public class Artifact extends PageObject {
     /**
      * Asserts that this artifact have the given content.
      */
-    public void shouldHaveContent(String content) throws Exception {
+    public void shouldHaveContent(String content) {
         open();
         assertThat(driver, hasContent(content));
     }
@@ -32,8 +33,12 @@ public class Artifact extends PageObject {
     /**
      * Asserts that this artifact should or shouldn't exist.
      */
-    public void assertThatExists(Should should) throws Exception {
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-        assertThat(con.getResponseCode(), is(should.value ? 200 : 404));
+    public void assertThatExists(Should should) {
+        try {
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            assertThat(con.getResponseCode(), is(should.value ? 200 : 404));
+        } catch (IOException e) {
+            throw new AssertionError("Failed to check status of "+url,e);
+        }
     }
 }
