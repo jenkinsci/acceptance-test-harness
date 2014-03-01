@@ -44,7 +44,7 @@ public class Matchers {
     /**
      * Matches that matches {@link WebDriver} when it has an element that matches to the given selector.
      */
-    public static Matcher<WebDriver> hasElementOf(final By selector) {
+    public static Matcher<WebDriver> hasElement(final By selector) {
         return new TypeSafeMatcher<WebDriver>() {
             @Override
             protected boolean matchesSafely(WebDriver item) {

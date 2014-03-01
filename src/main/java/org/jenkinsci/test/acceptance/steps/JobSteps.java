@@ -8,8 +8,11 @@ import cucumber.api.java.en.When;
 import org.jenkinsci.test.acceptance.cucumber.Should;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import sun.misc.Regexp;
 
 import javax.inject.Singleton;
+
+import java.util.regex.Pattern;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
@@ -125,5 +128,21 @@ public class JobSteps extends AbstractSteps {
     @Then("^the build #(\\d+) (should|should not) have archived \"([^\"]*)\" artifact$")
     public void the_build_should_not_have_archived_artifact(int n, Should should, String artifact) throws Throwable {
         my.job.build(n).waitUntilFinished().getArtifact(artifact).assertThatExists(should);
+    }
+
+    @Then("^the size of artifact \"([^\"]*)\" should be \"([^\"]*)\"$")
+    public void the_size_of_artifact_should_be(String artifact, String size) throws Throwable {
+        my.job.getLastBuild().waitUntilFinished().open();
+        String actual = String.format("//a[text()='%s']/../../td[@class='fileSize']",artifact);
+        String match = actual + String.format("[text()='%s']",size);
+
+        assertThat("Actual size: "+find(by.xpath(actual)).getText(), driver, hasElement(by.xpath(match)));
+    }
+
+    @Then("^console output (should|should not) match \"([^\"]*)\"$")
+    public void console_output_should_match(Should should, String regexp) throws Throwable {
+        String console = my.job.getLastBuild().waitUntilFinished().getConsole();
+        assertTrue("Expecting to match " + regexp + " but got " + console,
+                Pattern.compile(regexp,Pattern.MULTILINE).matcher(console).find());
     }
 }

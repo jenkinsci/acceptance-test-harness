@@ -2,6 +2,7 @@ package org.jenkinsci.test.acceptance.po;
 
 import com.google.inject.Injector;
 import cucumber.api.DataTable;
+import org.openqa.selenium.WebElement;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -36,7 +37,7 @@ public class Job extends ContainerPageObject {
         String caption = type.getAnnotation(BuildStepPageObject.class).value();
 
         selectDropdownMenu(caption, find(by.path("/hetero-list-add[%s]",section)));
-        String path = last(by.xpath("//div[@name='%s']",section)).getAttribute("path");
+        String path = last(by.xpath("//div[@name='%s']", section)).getAttribute("path");
 
         return type.getConstructor(Job.class,String.class).newInstance(this,path);
     }
@@ -112,5 +113,13 @@ public class Job extends ContainerPageObject {
 
     public int getNextBuildNumber() throws Exception {
         return getJson().get("nextBuildNumber").intValue();
+    }
+
+    public void useCustomWorkspace(String ws) throws Exception {
+        ensureConfigPage();
+        clickButton("Advanced...");
+
+        check(find(by.path("/customWorkspace")));
+        find(by.path("/customWorkspace/directory")).sendKeys(ws);
     }
 }

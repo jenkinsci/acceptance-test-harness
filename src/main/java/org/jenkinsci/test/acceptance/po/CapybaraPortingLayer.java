@@ -5,12 +5,16 @@ import org.jenkinsci.test.acceptance.ByFactory;
 import org.junit.Assert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import javax.inject.Inject;
 import java.net.URL;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 /**
  * For assisting porting from Capybara.
@@ -55,19 +59,64 @@ public class CapybaraPortingLayer extends Assert {
     }
 
     public void clickButton(String text) {
-        driver.findElement(by.button(text)).click();
+        WebElement e = find(by.button(text));
+        e.click();
     }
 
     /**
-     * @deprecated
-     *      {@link WebDriver#findElement(By)} already does waiting, so this isn't needed.
+     * Wait until the element that matches the given selector appears.
      */
-    public WebElement waitFor(By selector) {
-        return driver.findElement(selector);
+    public WebElement waitFor(final By selector) throws Exception {
+        return waitForCond(new Callable<WebElement>() {
+            public WebElement call() throws Exception {
+                try {
+                    return find(selector);
+                } catch (NoSuchElementException e) {
+                    return null;
+                }
+            }
+        });
     }
 
+    /**
+     * Repeated evaluate the given predicate until it returns true.
+     *
+     * If it times out, an exception will be thrown.
+     */
+    public <T> T waitForCond(Callable<T> block, int timeoutSec) throws Exception {
+        long endTime = System.currentTimeMillis()+ TimeUnit.SECONDS.toMillis(timeoutSec);
+        while (System.currentTimeMillis()<endTime) {
+            T v = block.call();
+            if (isTrueish(v))
+                return v;
+            Thread.sleep(1000);
+        }
+        throw new TimeoutException("Failed to wait for condition "+block);
+    }
+
+    private boolean isTrueish(Object v) {
+        if (v instanceof Boolean)   return (Boolean)v;
+        return v!=null;
+    }
+
+    public <T> T waitForCond(Callable<T> block) throws Exception {
+        return waitForCond(block,30);
+    }
+
+
+    /**
+     * Returns the first visible element that matches the selector.
+     */
     public WebElement find(By selector) {
-        return driver.findElement(selector);
+        WebElement e = driver.findElement(selector);
+        if (e.isDisplayed())
+            return e;
+
+        for (WebElement f : driver.findElements(selector)) {
+            if (f.isDisplayed())
+                return f;
+        }
+        return e;   // hmm, not sure what to return here!
     }
 
     public void fillIn(String formFieldName, String value) {

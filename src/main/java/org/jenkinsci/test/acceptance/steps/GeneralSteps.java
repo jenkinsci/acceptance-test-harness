@@ -1,11 +1,11 @@
 package org.jenkinsci.test.acceptance.steps;
 
-import cucumber.api.PendingException;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 
-import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+import static org.hamcrest.CoreMatchers.*;
+import static org.jenkinsci.test.acceptance.Matchers.*;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -35,5 +35,17 @@ public class GeneralSteps extends AbstractSteps {
     @And("^I wait for (\\d+) seconds$")
     public void I_wait_for_seconds(int n) throws Throwable {
         Thread.sleep(n*1000);
+    }
+
+    @Then("^the error description should contain$")
+    public void the_error_description_should_contain(String msg) throws Throwable {
+        assertThat(
+            waitFor(by.css("#error-description pre")).getText(),
+            containsString(msg));
+    }
+
+    @And("^I close the error dialog$")
+    public void I_close_the_error_dialog() throws Throwable {
+        find(by.css(".container-close")).click();
     }
 }

@@ -79,4 +79,11 @@ public class ByFactory {
                 ,locator);
     }
 
+    public By css(String css) {
+        return By.cssSelector(css);
+    }
+
+    public By tagName(String name) {
+        return By.tagName(name);
+    }
 }

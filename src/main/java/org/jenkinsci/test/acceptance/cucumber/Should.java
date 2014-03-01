@@ -34,7 +34,7 @@ public class Should {
      * Creates a matcher that asserts the presence (or absence) of the element.
      */
     public Matcher<WebDriver> haveElement(By path) {
-        return apply(Matchers.hasElementOf(path));
+        return apply(Matchers.hasElement(path));
     }
 
     /**

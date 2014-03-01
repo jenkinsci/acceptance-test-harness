@@ -93,4 +93,9 @@ public class JobConfigurationSteps extends AbstractSteps {
         check("hudson-triggers-TimerTrigger");
         find(by.path("/hudson-triggers-TimerTrigger/spec")).sendKeys(cron);
     }
+
+    @And("^I use \"([^\"]*)\" as custom workspace$")
+    public void I_use_as_custom_workspace(String ws) throws Throwable {
+        my.job.useCustomWorkspace(ws);
+    }
 }

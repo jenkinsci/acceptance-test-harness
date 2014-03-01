@@ -96,25 +96,6 @@ public abstract class PageObject extends CapybaraPortingLayer {
     }
 
     /**
-     * Repeated evaluate the given predicate until it returns true.
-     *
-     * If it times out, an exception will be thrown.
-     */
-    public void waitForCond(Callable<Boolean> block, int timeoutSec) throws Exception {
-        long endTime = System.currentTimeMillis()+ TimeUnit.SECONDS.toMillis(timeoutSec);
-        while (System.currentTimeMillis()<endTime) {
-            if (block.call())
-                return;
-            Thread.sleep(1000);
-        }
-        throw new TimeoutException("Failed to wait for condition "+block);
-    }
-
-    public void waitForCond(Callable<Boolean> block) throws Exception {
-        waitForCond(block,30);
-    }
-
-    /**
      * Visits the top page of this object.
      */
     public void open() throws Exception {
