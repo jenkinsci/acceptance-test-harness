@@ -101,4 +101,11 @@ public abstract class PageObject extends CapybaraPortingLayer {
     public void waitForCond(Callable<Boolean> block) throws Exception {
         waitForCond(block,30);
     }
+
+    /**
+     * Visits the job page.
+     */
+    public void open() throws Exception {
+        visit(".");
+    }
 }
