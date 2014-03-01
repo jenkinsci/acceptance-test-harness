@@ -5,9 +5,9 @@ import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
+import org.jenkinsci.test.acceptance.cucumber.Should;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
-import org.openqa.selenium.NoSuchElementException;
 
 import javax.inject.Singleton;
 
@@ -114,19 +114,17 @@ public class JobSteps extends AbstractSteps {
     }
 
     @And("^the artifact \"([^\"]*)\" (should|should not) be archived$")
-    public void the_artifact_should_be_archived(String artifact, String shouldOrNot) throws Throwable {
-        my.job.getLastBuild().waitUntilFinished().open();
-
-        try {
-            find(xpath("//a[@href='artifact/%s']", artifact));
-            assertTrue("Expected to find elements", shouldOrNot.equals("should"));
-        } catch (NoSuchElementException e) {
-            assertTrue("Expected not to find elements", shouldOrNot.equals("should not"));
-        }
+    public void the_artifact_should_be_archived(String artifact, Should should) throws Throwable {
+        my.job.getLastBuild().waitUntilFinished().getArtifact(artifact).assertThatExists(should);
     }
 
     @And("^the content of artifact \"([^\"]*)\" should be \"([^\"]*)\"$")
     public void the_content_of_artifact_should_be(String artifact, String content) throws Throwable {
         my.job.getLastBuild().getArtifact(artifact).shouldHaveContent(content);
+    }
+
+    @Then("^the build #(\\d+) (should|should not) have archived \"([^\"]*)\" artifact$")
+    public void the_build_should_not_have_archived_artifact(int n, Should should, String artifact) throws Throwable {
+        my.job.build(n).waitUntilFinished().getArtifact(artifact).assertThatExists(should);
     }
 }

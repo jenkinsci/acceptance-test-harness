@@ -1,6 +1,8 @@
 package org.jenkinsci.test.acceptance.steps;
 
+import cucumber.api.PendingException;
 import cucumber.api.java.en.And;
+import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import hudson.util.VersionNumber;
 import org.jenkinsci.test.acceptance.po.ArtifactArchiver;
@@ -66,21 +68,26 @@ public class JobConfigurationSteps extends AbstractSteps {
 
     @And("^I set artifact \"([^\"]*)\" to archive$")
     public void I_set_artifact_to_archive(String artifacts) throws Throwable {
-        my.job.addPublisher(ArtifactArchiver.class).includes(artifacts);
+        my.artifactArchiver = my.job.addPublisher(ArtifactArchiver.class).includes(artifacts);
     }
 
     @And("^I set artifact \"([^\"]*)\" to archive in the job configuration$")
     public void I_set_artifact_to_archive_in_the_job_configuration(String includes) throws Throwable {
         my.job.configure();
-        my.job.addPublisher(ArtifactArchiver.class).includes(includes);
+        my.artifactArchiver = my.job.addPublisher(ArtifactArchiver.class).includes(includes);
         my.job.save();
     }
 
     @And("^I set artifact \"([^\"]*)\" to archive and exclude \"([^\"]*)\" in the job configuration$")
     public void I_set_artifact_to_archive_and_exclude_in_the_job_configuration(String include, String exclude) throws Throwable {
         my.job.configure();
-        ArtifactArchiver aa = my.job.addPublisher(ArtifactArchiver.class);
-        aa.includes(include).excludes(exclude);
+        my.artifactArchiver = my.job.addPublisher(ArtifactArchiver.class)
+            .includes(include).excludes(exclude);
         my.job.save();
+    }
+
+    @And("^I want to keep only the latest successful artifacts$")
+    public void I_want_to_keep_only_the_latest_successful_artifacts() throws Throwable {
+        my.artifactArchiver.latestOnly(true);
     }
 }
