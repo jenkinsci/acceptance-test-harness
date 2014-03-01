@@ -46,6 +46,11 @@ public class Config extends AbstractModule implements ExtensionModule {
                 m = new GroovyWiringModule(new URL(loc));
             }
 
+            m.addStarImports(
+                JenkinsController.class.getPackage().getName(),
+                WebDriver.class.getPackage().getName()
+            );
+
             // install the config
             Modules.override(base).with(m).configure(binder());
         } catch (IOException e) {
