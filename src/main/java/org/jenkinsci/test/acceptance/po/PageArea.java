@@ -19,13 +19,18 @@ public abstract class PageArea extends CapybaraPortingLayer {
         this.path = path;
     }
 
+    protected PageArea(PageObject context, String path) {
+        super(context.injector);
+        this.path = path;
+    }
+
     /**
      * Returns the "path" selector that finds an element by following the form-element-path plugin.
      *
      * https://wiki.jenkins-ci.org/display/JENKINS/Form+Element+Path+Plugin
      */
     public By path(String rel) {
-        return by.path(path+'/'+rel);
+        return by.path(path + '/' + rel);
     }
 
     /**

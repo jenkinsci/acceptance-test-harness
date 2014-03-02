@@ -1,10 +1,12 @@
 package org.jenkinsci.test.acceptance.po;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.jenkinsci.test.acceptance.Matchers;
 import org.openqa.selenium.NoSuchElementException;
 
 import java.net.URL;
 import java.util.concurrent.Callable;
+import java.util.regex.Pattern;
 
 import static org.hamcrest.CoreMatchers.*;
 
@@ -91,6 +93,16 @@ public class Build extends ContainerPageObject {
         return console;
     }
 
+    public Build shouldContainsConsoleOutput(String fragment) {
+        assertThat(this.getConsole(), Matchers.containsRegexp(fragment, Pattern.MULTILINE));
+        return this;
+    }
+
+    public Build shouldNotContainsConsoleOutput(String fragment) {
+        assertThat(this.getConsole(), not(Matchers.containsRegexp(fragment, Pattern.MULTILINE)));
+        return this;
+    }
+
     public boolean isSuccess() {
         return getResult().equals("SUCCESS");
     }
@@ -107,7 +119,8 @@ public class Build extends ContainerPageObject {
         return new Artifact(this,url("artifact/%s",artifact));
     }
 
-    public void shouldSucceed() {
+    public Build shouldSucceed() {
         assertThat(getResult(), is("SUCCESS"));
+        return this;
     }
 }

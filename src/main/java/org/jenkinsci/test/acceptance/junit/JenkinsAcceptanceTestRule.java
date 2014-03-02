@@ -5,6 +5,7 @@ import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
+import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.junit.rules.MethodRule;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.Statement;
@@ -17,15 +18,22 @@ import org.openqa.selenium.WebDriver;
  */
 public class JenkinsAcceptanceTestRule implements MethodRule {
     @Override
-    public Statement apply(final Statement base, FrameworkMethod method, final Object target) {
+    public Statement apply(final Statement base, final FrameworkMethod method, final Object target) {
         return new Statement() {
             @Inject(optional=true)
             WebDriver driver;
+
+            @Inject
+            Jenkins jenkins;
 
             public void evaluate() throws Throwable {
                 Injector injector = Guice.createInjector(new ExtensionFinder(Thread.currentThread().getContextClassLoader()));
                 injector.injectMembers(target);
                 injector.injectMembers(this);
+
+                // honor this annotation on a method, and if not try looking at the class
+                if (!installPlugins(method.getAnnotation(WithPlugins.class)))
+                    installPlugins(method.getType().getAnnotation(WithPlugins.class));
 
                 try {
                     base.evaluate();
@@ -33,6 +41,12 @@ public class JenkinsAcceptanceTestRule implements MethodRule {
                     if (driver!=null)
                         driver.close();
                 }
+            }
+
+            private boolean installPlugins(WithPlugins wp) {
+                if (wp!=null)
+                    jenkins.getPluginManager().installPlugin(wp.value());
+                return wp!=null;
             }
         };
     }
