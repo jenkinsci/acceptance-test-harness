@@ -1,4 +1,4 @@
-package ant;
+package org.jenkinsci.test.acceptance.plugins.ant;
 
 import org.jenkinsci.test.acceptance.po.BuildStep;
 import org.jenkinsci.test.acceptance.po.BuildStepPageObject;
