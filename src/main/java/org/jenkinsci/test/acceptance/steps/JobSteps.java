@@ -8,10 +8,8 @@ import cucumber.api.java.en.When;
 import org.jenkinsci.test.acceptance.cucumber.Should;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
-import sun.misc.Regexp;
 
 import javax.inject.Singleton;
-
 import java.util.regex.Pattern;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -143,6 +141,6 @@ public class JobSteps extends AbstractSteps {
     public void console_output_should_match(Should should, String regexp) throws Throwable {
         String console = my.job.getLastBuild().waitUntilFinished().getConsole();
         assertTrue("Expecting to match " + regexp + " but got " + console,
-                Pattern.compile(regexp,Pattern.MULTILINE).matcher(console).find());
+                should.apply(Pattern.compile(regexp,Pattern.MULTILINE).matcher(console).find()));
     }
 }

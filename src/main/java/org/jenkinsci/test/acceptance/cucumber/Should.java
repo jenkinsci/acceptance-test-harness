@@ -48,4 +48,9 @@ public class Should {
         if (!value)  m = CoreMatchers.not(m);
         return m;
     }
+
+    public boolean apply(boolean b) {
+        if (value)  return b;
+        else        return !b;
+    }
 }
