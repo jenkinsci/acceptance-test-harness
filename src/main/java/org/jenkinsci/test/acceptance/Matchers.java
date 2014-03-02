@@ -3,12 +3,11 @@ package org.jenkinsci.test.acceptance;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
-import org.jenkinsci.test.acceptance.steps.JobSteps;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 
-import static org.hamcrest.CoreMatchers.*;
+import java.util.regex.Pattern;
 
 /**
  * Hamcrest matchers.
@@ -64,6 +63,29 @@ public class Matchers {
             @Override
             protected void describeMismatchSafely(WebDriver item, Description d) {
                 d.appendText("was at ").appendValue(item.getCurrentUrl());
+            }
+        };
+    }
+
+    public static Matcher<String> containsRegexp(String regexp) {
+        return containsRegexp(regexp,0);
+    }
+
+    /**
+     * Matches if a string contains a portion that matches to the regular expression.
+     */
+    public static Matcher<String> containsRegexp(final String regexp, int opts) {
+        final Pattern re = Pattern.compile(regexp, opts);
+
+        return new TypeSafeMatcher<String>() {
+            @Override
+            protected boolean matchesSafely(String item) {
+                return re.matcher(item).find();
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("Matches regexp "+regexp);
             }
         };
     }
