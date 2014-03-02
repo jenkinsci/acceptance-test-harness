@@ -67,20 +67,4 @@ public class Matchers {
             }
         };
     }
-
-    /**
-     * In several step definitions, the assertion gets negated depending on whether
-     * or not the step is "should" or "should not". This method decorates the given matcher
-     * accordingly.
-     *
-     * @see JobSteps#the_artifact_should_be_archived
-     */
-    public static <T> Matcher<T> dependingOn(String shouldOrNot, Matcher<T> actual) {
-        if (shouldOrNot.equals("should"))
-            return actual;
-        if (shouldOrNot.equals("should not"))
-            return not(actual);
-
-        throw new AssertionError("Unecpted matcher token: "+shouldOrNot);
-    }
 }
