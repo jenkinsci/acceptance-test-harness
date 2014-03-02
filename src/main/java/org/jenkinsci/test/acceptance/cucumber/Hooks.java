@@ -32,7 +32,7 @@ public class Hooks {
     }
 
     @After
-    public void bar() {
+    public void after() {
         try {
             jenkinsController.stop();
         } catch (IOException e) {
