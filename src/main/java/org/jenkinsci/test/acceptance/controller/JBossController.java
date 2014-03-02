@@ -11,12 +11,14 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
+ * Launches Jenkins in JBoss.
+ *
  * @author: Vivek Pandey
  */
-public class JbossController extends LocalController {
+public class JBossController extends LocalController {
     private final File jbossHome;
 
-    public JbossController(File war, File jbossHome) {
+    public JBossController(File war, File jbossHome) {
         super(war);
         if(!jbossHome.isDirectory()){
             throw new RuntimeException("Invalid JBoss Home: "+jbossHome.getAbsolutePath());
@@ -85,8 +87,8 @@ public class JbossController extends LocalController {
         }
 
         @Override
-        public JbossController create() {
-            return new JbossController(getWarFile(), getJBossHome());
+        public JBossController create() {
+            return new JBossController(getWarFile(), getJBossHome());
         }
 
         protected File getJBossHome() {
