@@ -1,8 +1,10 @@
 package org.jenkinsci.test.acceptance;
 
+import com.cloudbees.sdk.extensibility.ExtensionList;
 import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
+import org.jenkinsci.test.acceptance.controller.ControllerFactory;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
-import org.jenkinsci.test.acceptance.controller.WinstoneController;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
@@ -10,6 +12,7 @@ import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.safari.SafariDriver;
 
+import javax.inject.Singleton;
 import java.util.Locale;
 
 /**
@@ -47,10 +50,28 @@ public class FallbackConfig extends AbstractModule {
                 bind(WebDriver.class).toInstance(new HtmlUnitDriver());
                 break;
             }
-
-            bind(JenkinsController.class).toInstance(new WinstoneController());
         } catch (Exception e) {
             throw new Error("Failed to configure Jenkins acceptance test harness",e);
         }
     }
+
+    /**
+     * Instantiates a controller through the "TYPE" attribute and {@link ControllerFactory}.
+     */
+    @Provides @Singleton
+    public JenkinsController createController(ExtensionList<ControllerFactory> factories) {
+        String type = System.getenv("type");  // this is lower case for backward compatibility
+        if (type==null)
+            type = System.getenv("TYPE");
+        if (type==null)
+            type = "local";
+
+        for (ControllerFactory f : factories) {
+            if (f.getId().equalsIgnoreCase(type))
+                return f.create();
+        }
+
+        throw new AssertionError("Invalid controller type: "+type);
+    }
+
 }

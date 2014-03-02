@@ -1,5 +1,6 @@
 package org.jenkinsci.test.acceptance.controller;
 
+import com.cloudbees.sdk.extensibility.Extension;
 import org.codehaus.plexus.util.FileUtils;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.jenkinsci.utils.process.ProcessInputStream;
@@ -15,7 +16,8 @@ import java.net.URL;
 public class JbossController extends LocalController {
     private final String jbossHome;
 
-    public JbossController(File jbossHome) {
+    public JbossController(File war, File jbossHome) {
+        super(war);
         if(jbossHome == null){
             if(System.getenv("CATALINA_HOME") != null){
                 jbossHome = new File(System.getenv("CATALINA_HOME"));
@@ -47,7 +49,7 @@ public class JbossController extends LocalController {
             FileUtils.forceDelete(jenkinsWarDeploymentPath);
         }
 
-        FileUtils.copyFile(new File(warLocation), new File(jenkinsWarDeploymentPath));
+        FileUtils.copyFile(war, new File(jenkinsWarDeploymentPath));
 
         String jbossLog = jbossHome + "/standalone/log/server.log";
         if(FileUtils.fileExists(jbossLog)){
@@ -79,6 +81,26 @@ public class JbossController extends LocalController {
             return new URL("http://127.0.0.1:8080/jenkins/");
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    @Extension
+    public static class FactoryImpl extends LocalFactoryImpl {
+        @Override
+        public String getId() {
+            return "jboss";
+        }
+
+        @Override
+        public JbossController create() {
+            return new JbossController(getWarFile(), getJBossHome());
+        }
+
+        protected File getJBossHome() {
+            File home = new File(defaultsTo(System.getenv("JBOSS_HOME"), "./jboss"));
+            if (!home.isDirectory())
+                throw new AssertionError(home+" doesn't exist, maybe you forgot to set JBOSS_HOME env var? ");
+            return home;
         }
     }
 }

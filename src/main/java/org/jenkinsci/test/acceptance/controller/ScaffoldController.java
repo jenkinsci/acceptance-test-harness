@@ -13,7 +13,7 @@ public class ScaffoldController extends JenkinsController {
     private URL url;
 
     public ScaffoldController() throws IOException {
-        super(null);
+        super();
         this.url = new URL("http://localhost:8080/");
     }
 
@@ -50,10 +50,5 @@ public class ScaffoldController extends JenkinsController {
     @Override
     public void tearDown() {
 
-    }
-
-    @Override
-    public String getTempDir() {
-        return null;
     }
 }

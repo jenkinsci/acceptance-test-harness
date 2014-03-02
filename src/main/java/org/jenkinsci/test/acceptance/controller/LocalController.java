@@ -1,31 +1,35 @@
 package org.jenkinsci.test.acceptance.controller;
 
-import com.google.inject.Inject;
 import org.codehaus.plexus.util.FileUtils;
 import org.jenkinsci.test.acceptance.ControllerException;
 import org.jenkinsci.utils.process.ProcessInputStream;
-import org.jenkinsci.utils.process.ProcessUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 
 import static java.lang.System.*;
 
 /**
+ * Abstract base class for those JenkinsController that runs the JVM locally on
+ * the same box as the test harness
+ *
  * @author: Vivek Pandey
  */
-public abstract class LocalController extends JenkinsController{
+public abstract class LocalController extends JenkinsController {
+    /**
+     * jenkins.war. Subject under test.
+     */
+    protected final File war;
 
-    protected final String warLocation;
-    private final String tempDir;
-    private final String formPathElement;
+    /**
+     * JENKINS_HOME directory for jenkins.war to be launched.
+     */
+    protected final File tempDir;
+
     protected ProcessInputStream process;
-    private int pid;
 
     private static final Map<String,String> options = new HashMap<>();
 
@@ -41,26 +45,39 @@ public abstract class LocalController extends JenkinsController{
         options.put("log_pattern", getenv("log_pattern"));
     }
 
-    @Inject(optional=true)
-    protected LocalController(String warLocation) {
-        super(null);
-        if(warLocation == null){
-            warLocation = getenv("JENKINS_WAR");
-            if(warLocation == null){
-                warLocation = WORKSPACE;
-            }
-        }
-        if(warLocation == null){
-            throw new ControllerException("Need WAR file location. Please set environment varialbe JENKINS_WAR pointing to the Jenkins war location");
+    /**
+     * Partial implementation of {@link ControllerFactory} for subtypes.
+     */
+    public static abstract class LocalFactoryImpl implements ControllerFactory {
+        /**
+         * Determines the location of the war file.
+         */
+        protected File getWarFile() {
+            String war = defaultsTo(getenv("JENKINS_WAR"), WORKSPACE + "/jenkins.war");
+
+            File warfile = new File(war);
+            if (!warfile.exists())
+                throw new ControllerException("jenkins.war doesn't exist in " + war + ", maybe you forgot to set JENKINS_WAR env var?");
+            return warfile;
         }
 
-        this.warLocation = warLocation;
+        protected final String defaultsTo(String v, String w) {
+            if (v==null)    v = w;
+            return v;
+        }
+    }
 
-        File tDir = FileUtils.createTempFile("temp", "dir",new File(WORKSPACE));
-        this.tempDir = tDir.getAbsolutePath();
-        this.formPathElement = downloadPathElement();
-        String pluginDirPath = this.tempDir+"/plugins";
-        File pluginDir = new File(pluginDirPath);
+    /**
+     * @param war
+     *      Where is the jenkins.war file to be tested?
+     */
+    protected LocalController(File war) {
+        this.war = war;
+
+        this.tempDir = FileUtils.createTempFile("temp", "dir",new File(WORKSPACE));
+
+        File formPathElement = downloadPathElement();
+        File pluginDir = new File(tempDir,"plugins");
         pluginDir.mkdirs();
 
         if(getenv("PLUGINS_DIR") != null){
@@ -69,27 +86,31 @@ public abstract class LocalController extends JenkinsController{
             try {
                 FileUtils.copyDirectory(new File(givenPluginDir), pluginDir,"/*.[hj]pi",null);
             } catch (IOException e) {
-                throw new RuntimeException(String.format("Failed to copy plugins from %s to %s", pluginDirPath, givenPluginDir));
+                throw new RuntimeException(String.format("Failed to copy plugins from %s to %s", pluginDir, givenPluginDir));
             }
         }
 
         try {
-            FileUtils.copyFile(new File(formPathElement), new File(pluginDirPath+File.separator+"path-element.hpi"));
+            FileUtils.copyFile(formPathElement, new File(pluginDir,"path-element.hpi"));
         } catch (IOException e) {
-            throw new RuntimeException(String.format("Failed to copy form path element file %s to plugin dir %s.", formPathElement, pluginDirPath));
+            throw new RuntimeException(String.format("Failed to copy form path element file %s to plugin dir %s.", formPathElement, pluginDir));
         }
     }
 
-    protected LocalController(){
-        this(null);
-    }
-
-    @Override
-    public String getTempDir() {
+    /**
+     * @deprecated
+     *      Use {@link #getJenkinsHome()}, which explains the nature of the directory better.
+     */
+    public File getTempDir() {
         return tempDir;
     }
 
-    public String getJenkinsHome(){
+    public File getSlaveJarPath() {
+        return new File(getJenkinsHome(),"war/WEB-INF/slave.jar");
+    }
+
+
+    public File getJenkinsHome(){
         return tempDir;
     }
 
@@ -108,7 +129,7 @@ public abstract class LocalController extends JenkinsController{
 
     @Override
     public void diagnose() {
-        if(getenv("INTERACTIVE") != null && getenv("INTERACTIVE") == "true"){
+        if(getenv("INTERACTIVE") != null && getenv("INTERACTIVE").equals("true")){
             out.println("Commencing interactive debugging. Browser session was kept open.");
             out.println("Press return to proceed.");
             try {
@@ -138,10 +159,10 @@ public abstract class LocalController extends JenkinsController{
     }
 
     /**
-     * Gives random availabe port in the given range.
+     * Gives random available port in the given range.
      *
      * @param from if <=0 then default value 49152 is used
-     * @param to   if <= 0 then default value 65535 is used
+     * @param to   if <=0 then default value 65535 is used
      */
     protected int randomLocalPort(int from, int to){
         from = (from <=0) ? 49152 : from;
@@ -163,7 +184,6 @@ public abstract class LocalController extends JenkinsController{
 
     private void bringItUp() throws IOException{
         this.process = startProcess();
-        this.pid = ProcessUtils.getPid(process.getProcess());
         this.logWatcher = new LogWatcher(this.process, logger, options);
         try {
             this.logWatcher.waitTillReady(true);

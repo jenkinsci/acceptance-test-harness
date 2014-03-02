@@ -11,16 +11,21 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Map;
 
 /**
  * @author: Vivek Pandey
  */
 @ExtensionPoint
 public abstract class JenkinsController {
+    /**
+     * directory on the computer where this code is running that points to a directory
+     * where test code can place log files, cache files, etc.
+     * Note that this directory might not exist on the Jenkins master, since it can be
+     * running on a separate computer.
+     */
     protected static final String WORKSPACE = System.getenv("WORKSPACE") != null? System.getenv("WORKSPACE") : System.getProperty("user.dir");
+
     protected static final String JENKINS_DEBUG_LOG = WORKSPACE + "/last_test.log";
 
     private boolean isRunning;
@@ -28,7 +33,7 @@ public abstract class JenkinsController {
     protected FileWriter logger;
     protected LogWatcher logWatcher;
 
-    protected JenkinsController(Map<String,String> opts) {
+    protected JenkinsController() {
         if(FileUtils.fileExists(JENKINS_DEBUG_LOG)){
             FileUtils.removePath(JENKINS_DEBUG_LOG);
         }
@@ -98,39 +103,24 @@ public abstract class JenkinsController {
 
     public abstract void tearDown();
 
-    public abstract String getTempDir();
-
-    public String getSlaveJarPath(){
-        return getTempDir()+"/war/WEB-INF/slave.jar";
-    }
-
-    protected String downloadPathElement(){
+    /**
+     * Downloads the latest version of the form-element-path plugin that we use for testing.
+     */
+    protected File downloadPathElement() {
         String source = "http://updates.jenkins-ci.org/latest/form-element-path.hpi";
-        String target =  WORKSPACE+"/path-element.hpi";
-        if(!FileUtils.fileExists(target)){
-            FileOutputStream fileWriter = null;
-            HttpURLConnection uc = null;
-            try {
-                fileWriter = new FileOutputStream(target);
+        File target =  new File(WORKSPACE,"path-element.hpi");
+        if (!target.exists()) {
+            try(FileOutputStream fos = new FileOutputStream(target)) {
                 HttpClient client = new HttpClient();
                 GetMethod get = new GetMethod(source);
                 get.setFollowRedirects(true);
                 int status = client.executeMethod(get);
-                if(status != 200){
-                    throw new RuntimeException("Failed to get form-element-path.hpi: "+get.getResponseBodyAsString());
+                if (status != 200) {
+                    throw new RuntimeException("Failed to get form-element-path.hpi: " + get.getResponseBodyAsString());
                 }
-                IOUtil.copy(get.getResponseBodyAsStream(), fileWriter);
+                IOUtil.copy(get.getResponseBodyAsStream(), fos);
             } catch (IOException e) {
                 throw new ControllerException(String.format("Failed to open %s for write operation", target), e);
-            }finally {
-                if(fileWriter != null){
-                    try {
-                        fileWriter.flush();
-                        fileWriter.close();
-                    } catch (IOException e) {
-                        throw new ControllerException(String.format("Failed to close %s after writing",target),e);
-                    }
-                }
             }
         }
         return target;
