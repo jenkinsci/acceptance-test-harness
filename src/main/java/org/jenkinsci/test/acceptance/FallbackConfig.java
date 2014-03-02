@@ -13,6 +13,7 @@ import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.safari.SafariDriver;
 
 import javax.inject.Singleton;
+import java.io.IOException;
 import java.util.Locale;
 
 /**
@@ -59,7 +60,7 @@ public class FallbackConfig extends AbstractModule {
      * Instantiates a controller through the "TYPE" attribute and {@link ControllerFactory}.
      */
     @Provides @Singleton
-    public JenkinsController createController(ExtensionList<ControllerFactory> factories) {
+    public JenkinsController createController(ExtensionList<ControllerFactory> factories) throws IOException {
         String type = System.getenv("type");  // this is lower case for backward compatibility
         if (type==null)
             type = System.getenv("TYPE");
@@ -67,8 +68,11 @@ public class FallbackConfig extends AbstractModule {
             type = "winstone";
 
         for (ControllerFactory f : factories) {
-            if (f.getId().equalsIgnoreCase(type))
-                return f.create();
+            if (f.getId().equalsIgnoreCase(type)) {
+                JenkinsController c = f.create();
+                c.start();
+                return c;
+            }
         }
 
         throw new AssertionError("Invalid controller type: "+type);
