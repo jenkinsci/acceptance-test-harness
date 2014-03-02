@@ -33,7 +33,7 @@ public class Config extends AbstractModule implements ExtensionModule {
                 loc = System.getenv("CONFIG");
             if (loc==null) {
                 // none specified. fallback.
-                base.configure(binder());
+                install(base);
                 return;
             }
 
@@ -52,7 +52,7 @@ public class Config extends AbstractModule implements ExtensionModule {
             );
 
             // install the config
-            Modules.override(base).with(m).configure(binder());
+            install(Modules.override(base).with(m));
         } catch (IOException e) {
             throw new Error("Failed to load configuration script",e);
         }
