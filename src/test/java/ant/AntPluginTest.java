@@ -121,6 +121,6 @@ public class AntPluginTest extends AbstractJUnitTest {
             }
         });
 
-        return job.queueBuild().shouldSucceed();
+        return job.queueBuild().shouldSucceed().shouldContainsConsoleOutput("Hello World");
     }
 }
