@@ -14,45 +14,38 @@ import java.net.URL;
  * @author: Vivek Pandey
  */
 public class JbossController extends LocalController {
-    private final String jbossHome;
+    private final File jbossHome;
 
     public JbossController(File war, File jbossHome) {
         super(war);
-        if(jbossHome == null){
-            if(System.getenv("CATALINA_HOME") != null){
-                jbossHome = new File(System.getenv("CATALINA_HOME"));
-            }else{
-                jbossHome = FileUtils.resolveFile(new File(WORKSPACE), "./tomcat");
-            }
-        }
-        if(!jbossHome.isDirectory() || !jbossHome.exists()){
-            throw new RuntimeException("Invalid CATALINA_HOME: "+jbossHome.getAbsolutePath());
+        if(!jbossHome.isDirectory()){
+            throw new RuntimeException("Invalid JBoss Home: "+jbossHome.getAbsolutePath());
         }
 
-        this.jbossHome = jbossHome.getAbsolutePath();
+        this.jbossHome = jbossHome.getAbsoluteFile();
     }
 
     @Override
     public ProcessInputStream startProcess() throws IOException {
-        File jenkinsDeploymentDir = new File(jbossHome+"/standalone/deployments/jenkins.war.deployed");
+        File jenkinsDeploymentDir = new File(jbossHome,"standalone/deployments/jenkins.war.deployed");
         if(jenkinsDeploymentDir.exists()){
             FileUtils.forceDelete(jenkinsDeploymentDir);
         }
 
-        File jenkinsDeploymentFailDir = new File(jbossHome+"/standalone/deployments/jenkins.war.failed");
+        File jenkinsDeploymentFailDir = new File(jbossHome,"standalone/deployments/jenkins.war.failed");
         if(jenkinsDeploymentFailDir.exists()){
             FileUtils.forceDelete(jenkinsDeploymentFailDir);
         }
 
-        String jenkinsWarDeploymentPath = jbossHome+"/standalone/deployments/jenkins.war";
-        if(FileUtils.fileExists(jenkinsWarDeploymentPath)){
+        File jenkinsWarDeploymentPath = new File(jbossHome,"standalone/deployments/jenkins.war");
+        if(jenkinsWarDeploymentPath.exists()){
             FileUtils.forceDelete(jenkinsWarDeploymentPath);
         }
 
-        FileUtils.copyFile(war, new File(jenkinsWarDeploymentPath));
+        FileUtils.copyFile(war, jenkinsWarDeploymentPath);
 
-        String jbossLog = jbossHome + "/standalone/log/server.log";
-        if(FileUtils.fileExists(jbossLog)){
+        File jbossLog = new File(jbossHome,"/standalone/log/server.log");
+        if(jbossLog.exists()){
             FileUtils.forceDelete(jbossLog);
         }
 

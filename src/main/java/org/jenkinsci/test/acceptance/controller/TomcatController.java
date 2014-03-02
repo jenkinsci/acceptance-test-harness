@@ -15,42 +15,33 @@ import java.net.URL;
  */
 public class TomcatController extends LocalController {
 
-    private String catalinaHome;
+    protected final File catalinaHome;
 
     public TomcatController(File war, File catalinaHome) {
         super(war);
-
-        if(catalinaHome == null){
-            if(System.getenv("CATALINA_HOME") != null){
-                catalinaHome = new File(System.getenv("CATALINA_HOME"));
-            }else{
-                catalinaHome = FileUtils.resolveFile(new File(WORKSPACE), "./tomcat");
-            }
+        if (!catalinaHome.isDirectory()) {
+            throw new RuntimeException("Invalid CATALINA_HOME: " + catalinaHome.getAbsolutePath());
         }
-        if(!catalinaHome.isDirectory() || !catalinaHome.exists()){
-            throw new RuntimeException("Invalid CATALINA_HOME: "+catalinaHome.getAbsolutePath());
-        }
-
-        this.catalinaHome = catalinaHome.getAbsolutePath();
+        this.catalinaHome = catalinaHome.getAbsoluteFile();
     }
 
     @Override
     public ProcessInputStream startProcess() throws IOException{
         try {
-            File jenkinsDeploymentDir = new File(catalinaHome+"/webapps/jenkins");
+            File jenkinsDeploymentDir = new File(catalinaHome,"webapps/jenkins");
             if(jenkinsDeploymentDir.exists()){
                 FileUtils.forceDelete(jenkinsDeploymentDir);
             }
 
-            String jenkinsWarDeploymentPath = catalinaHome+"/webapps/jenkins.war";
-            if(FileUtils.fileExists(jenkinsWarDeploymentPath)){
+            File jenkinsWarDeploymentPath = new File(catalinaHome,"webapps/jenkins.war");
+            if(jenkinsWarDeploymentPath.exists()){
                 FileUtils.forceDelete(jenkinsWarDeploymentPath);
             }
 
-            FileUtils.copyFile(war, new File(jenkinsWarDeploymentPath));
+            FileUtils.copyFile(war, jenkinsWarDeploymentPath);
 
-            String tomcatLog = catalinaHome + "/logs/catalina.out";
-            if(FileUtils.fileExists(tomcatLog)){
+            File tomcatLog = new File(catalinaHome,"logs/catalina.out");
+            if(tomcatLog.exists()){
                 FileUtils.forceDelete(tomcatLog);
             }
 
@@ -60,7 +51,7 @@ public class TomcatController extends LocalController {
             if(status != 0){
                 throw new RuntimeException("Failed during Tomcat startup: "+cb.toString());
             }
-            CommandBuilder tail = new CommandBuilder("tail","-f", tomcatLog);
+            CommandBuilder tail = new CommandBuilder("tail").add("-f", tomcatLog);
             return tail.popen();
         } catch (InterruptedException e) {
             throw new IOException(e);
