@@ -64,7 +64,7 @@ public class FallbackConfig extends AbstractModule {
         if (type==null)
             type = System.getenv("TYPE");
         if (type==null)
-            type = "local";
+            type = "winstone";
 
         for (ControllerFactory f : factories) {
             if (f.getId().equalsIgnoreCase(type))
