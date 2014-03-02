@@ -21,8 +21,8 @@ import java.util.Set;
  * @author Kohsuke Kawaguchi
  */
 public class ObjectFactoryImpl implements ObjectFactory {
-    private final List<Module> modules = new ArrayList<Module>();
-    private final Set<Class<?>> classes = new HashSet<Class<?>>();
+    private final List<Module> modules = new ArrayList<>();
+    private final Set<Class<?>> classes = new HashSet<>();
     private Injector injector;
 
     /**
@@ -34,6 +34,10 @@ public class ObjectFactoryImpl implements ObjectFactory {
 
     public ObjectFactoryImpl(Module... modules) {
         Collections.addAll(this.modules, modules);
+    }
+
+    public Injector getInjector() {
+        return injector;
     }
 
     public <T> T getInstance(Class<T> type) {

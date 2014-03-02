@@ -1,8 +1,6 @@
 package org.jenkinsci.test.acceptance.junit;
 
-import com.cloudbees.sdk.extensibility.ExtensionFinder;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
+import cucumber.runtime.ObjectFactoryImpl;
 import org.junit.runner.Runner;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.InitializationError;
@@ -26,7 +24,8 @@ public class JenkinsAcceptanceTestRunner extends BlockJUnit4ClassRunner {
      */
     @Override
     protected Object createTest() {
-        Injector injector = Guice.createInjector(new ExtensionFinder(Thread.currentThread().getContextClassLoader()));
-        return injector.getInstance(getTestClass().getJavaClass());
+        ObjectFactoryImpl of = new ObjectFactoryImpl();
+        of.start();
+        return of.getInstance(getTestClass().getJavaClass());
     }
 }

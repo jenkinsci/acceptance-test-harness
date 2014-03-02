@@ -1,9 +1,8 @@
 package org.jenkinsci.test.acceptance.junit;
 
-import com.cloudbees.sdk.extensibility.ExtensionFinder;
-import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import cucumber.runtime.ObjectFactoryImpl;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.junit.rules.MethodRule;
@@ -27,7 +26,10 @@ public class JenkinsAcceptanceTestRule implements MethodRule {
             Jenkins jenkins;
 
             public void evaluate() throws Throwable {
-                Injector injector = Guice.createInjector(new ExtensionFinder(Thread.currentThread().getContextClassLoader()));
+                ObjectFactoryImpl of = new ObjectFactoryImpl();
+                of.start();
+                Injector injector = of.getInjector();
+
                 injector.injectMembers(target);
                 injector.injectMembers(this);
 
