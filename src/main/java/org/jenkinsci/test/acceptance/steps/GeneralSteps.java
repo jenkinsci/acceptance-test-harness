@@ -1,8 +1,6 @@
 package org.jenkinsci.test.acceptance.steps;
 
-import cucumber.api.PendingException;
 import cucumber.api.java.en.And;
-import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 
@@ -31,19 +29,19 @@ public class GeneralSteps extends AbstractSteps {
     @Then("^the page should say \"([^\"]*)\"$")
     public void the_page_should_say(String content) {
         String url = driver.getCurrentUrl();
-        assertThat(url+" doesn't have expected content!", driver, hasContent(content));
+        assertThat(url + " doesn't have expected content!", driver, hasContent(content));
     }
 
     @And("^I wait for (\\d+) seconds$")
     public void I_wait_for_seconds(int n) throws Throwable {
-        Thread.sleep(n*1000);
+        Thread.sleep(n * 1000);
     }
 
     @Then("^the error description should contain$")
     public void the_error_description_should_contain(String msg) throws Throwable {
         assertThat(
-            waitFor(by.css("#error-description pre")).getText(),
-            containsString(msg));
+                waitFor(by.css("#error-description pre")).getText(),
+                containsString(msg));
     }
 
     @And("^I close the error dialog$")
