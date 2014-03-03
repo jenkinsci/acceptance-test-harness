@@ -1,5 +1,7 @@
 package org.jenkinsci.test.acceptance.guice;
 
+import com.google.inject.ScopeAnnotation;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
@@ -20,5 +22,6 @@ import static java.lang.annotation.RetentionPolicy.*;
 @Target({TYPE, METHOD})
 @Inherited
 @Documented
+@ScopeAnnotation
 public @interface TestScope {
 }
