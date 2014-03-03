@@ -124,7 +124,7 @@ public class CapybaraPortingLayer extends Assert {
     }
 
     public void fillIn(String formFieldName, String value) {
-        driver.findElement(By.name(formFieldName)).sendKeys(value);
+        find(By.name(formFieldName)).sendKeys(value);
     }
 
     /**
