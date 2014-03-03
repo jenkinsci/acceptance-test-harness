@@ -17,10 +17,6 @@ import java.io.IOException;
 @TestScope
 public class Hooks {
     @Inject
-    WebDriver driver;
-
-
-    @Inject
     JenkinsController jenkinsController;
 
     @Before
@@ -40,6 +36,5 @@ public class Hooks {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        driver.close();
     }
 }

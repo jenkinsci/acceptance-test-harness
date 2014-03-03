@@ -5,6 +5,9 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import org.jenkinsci.test.acceptance.controller.ControllerFactory;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
+import org.jenkinsci.test.acceptance.guice.TestCleaner;
+import org.jenkinsci.test.acceptance.guice.TestScope;
+import org.junit.runners.model.Statement;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
@@ -12,7 +15,6 @@ import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.safari.SafariDriver;
 
-import javax.inject.Singleton;
 import java.io.IOException;
 import java.util.Locale;
 
@@ -27,39 +29,50 @@ import java.util.Locale;
 public class FallbackConfig extends AbstractModule {
     @Override
     protected void configure() {
-        try {
-            String browser = System.getenv("BROWSER");
-            if (browser==null)  browser="firefox";
-            browser = browser.toLowerCase(Locale.ENGLISH);
+    }
 
-            switch (browser) {
-            case "firefox":
-                bind(WebDriver.class).toInstance(new FirefoxDriver());
-                break;
-            case "ie":
-            case "iexplore":
-            case "iexplorer":
-                bind(WebDriver.class).toInstance(new InternetExplorerDriver());
-                break;
-            case "chrome":
-                bind(WebDriver.class).toInstance(new ChromeDriver());
-                break;
-            case "safari":
-                bind(WebDriver.class).toInstance(new SafariDriver());
-                break;
-            case "htmlunit":
-                bind(WebDriver.class).toInstance(new HtmlUnitDriver());
-                break;
-            }
-        } catch (Exception e) {
-            throw new Error("Failed to configure Jenkins acceptance test harness",e);
+    private WebDriver createWebDriver() {
+        String browser = System.getenv("BROWSER");
+        if (browser==null)  browser="firefox";
+        browser = browser.toLowerCase(Locale.ENGLISH);
+
+        switch (browser) {
+        case "firefox":
+            return new FirefoxDriver();
+        case "ie":
+        case "iexplore":
+        case "iexplorer":
+            return new InternetExplorerDriver();
+        case "chrome":
+            return new ChromeDriver();
+        case "safari":
+            return new SafariDriver();
+        case "htmlunit":
+            return new HtmlUnitDriver();
+        default:
+            throw new Error("Unrecognized browser type: "+browser);
         }
+    }
+
+    /**
+     * Creates a {@link WebDriver} for each test, then make sure to clean it up at the end.
+     */
+    @Provides @TestScope
+    public WebDriver createWebDriver(TestCleaner cleaner) {
+        final WebDriver d = createWebDriver();
+        cleaner.addTask(new Statement() {
+            @Override
+            public void evaluate() throws Throwable {
+                d.close();
+            }
+        });
+        return d;
     }
 
     /**
      * Instantiates a controller through the "TYPE" attribute and {@link ControllerFactory}.
      */
-    @Provides @Singleton
+    @Provides @TestScope
     public JenkinsController createController(ExtensionList<ControllerFactory> factories) throws IOException {
         String type = System.getenv("type");  // this is lower case for backward compatibility
         if (type==null)

@@ -19,9 +19,6 @@ public class JenkinsAcceptanceTestRule implements MethodRule {
     @Override
     public Statement apply(final Statement base, final FrameworkMethod method, final Object target) {
         return new Statement() {
-            @Inject(optional=true)
-            WebDriver driver;
-
             @Inject
             Jenkins jenkins;
 
@@ -41,8 +38,6 @@ public class JenkinsAcceptanceTestRule implements MethodRule {
                     base.evaluate();
                 } finally {
                     world.endTestScope();
-                    if (driver!=null)
-                        driver.close();
                 }
             }
 
