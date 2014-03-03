@@ -1,18 +1,7 @@
 package cucumber.runtime;
 
-import com.cloudbees.sdk.extensibility.ExtensionFinder;
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Module;
-import com.google.inject.util.Modules;
 import cucumber.runtime.java.ObjectFactory;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import org.jenkinsci.test.acceptance.guice.World;
 
 /**
  * Takes over cucumber object instantiation by Guice to incorporating
@@ -21,45 +10,26 @@ import java.util.Set;
  * @author Kohsuke Kawaguchi
  */
 public class ObjectFactoryImpl implements ObjectFactory {
-    private final List<Module> modules = new ArrayList<>();
-    private final Set<Class<?>> classes = new HashSet<>();
-    private Injector injector;
+    private final World world = World.get();
 
     /**
      * This is the constructor automatically instantiated by Cucumber.
      */
     public ObjectFactoryImpl() {
-        this(new ExtensionFinder(Thread.currentThread().getContextClassLoader()));
-    }
-
-    public ObjectFactoryImpl(Module... modules) {
-        Collections.addAll(this.modules, modules);
-    }
-
-    public Injector getInjector() {
-        return injector;
     }
 
     public <T> T getInstance(Class<T> type) {
-        return injector.getInstance(type);
+        return world.getInjector().getInstance(type);
     }
 
     public void stop() {
-        injector = null;
     }
 
     public void addClass(Class<?> glue) {
-        classes.add(glue);
+        // we let people to put these classes into the right scope and let auto-binder find them
     }
 
     public void start() {
-        injector = Guice.createInjector(Modules.override(new AbstractModule() {
-            @Override
-            protected void configure() {
-                for (Class<?> c : classes) {
-                    bind(c).in(javax.inject.Singleton.class);
-                }
-            }
-        }).with(modules));
+        world.onNewTest();
     }
 }

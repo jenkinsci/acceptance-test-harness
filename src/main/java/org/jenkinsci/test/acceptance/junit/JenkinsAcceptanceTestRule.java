@@ -2,8 +2,8 @@ package org.jenkinsci.test.acceptance.junit;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import cucumber.runtime.ObjectFactoryImpl;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
+import org.jenkinsci.test.acceptance.guice.World;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.junit.rules.MethodRule;
 import org.junit.runners.model.FrameworkMethod;
@@ -26,9 +26,9 @@ public class JenkinsAcceptanceTestRule implements MethodRule {
             Jenkins jenkins;
 
             public void evaluate() throws Throwable {
-                ObjectFactoryImpl of = new ObjectFactoryImpl();
-                of.start();
-                Injector injector = of.getInjector();
+                World world = World.get();
+                world.onNewTest();
+                Injector injector = world.getInjector();
 
                 injector.injectMembers(target);
                 injector.injectMembers(this);

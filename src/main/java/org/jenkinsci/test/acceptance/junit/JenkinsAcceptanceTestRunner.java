@@ -1,6 +1,6 @@
 package org.jenkinsci.test.acceptance.junit;
 
-import cucumber.runtime.ObjectFactoryImpl;
+import org.jenkinsci.test.acceptance.guice.World;
 import org.junit.runner.Runner;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.InitializationError;
@@ -24,8 +24,8 @@ public class JenkinsAcceptanceTestRunner extends BlockJUnit4ClassRunner {
      */
     @Override
     protected Object createTest() {
-        ObjectFactoryImpl of = new ObjectFactoryImpl();
-        of.start();
-        return of.getInstance(getTestClass().getJavaClass());
+        World world = World.get();
+        world.onNewTest();
+        return world.getInjector().getInstance(getTestClass().getJavaClass());
     }
 }
