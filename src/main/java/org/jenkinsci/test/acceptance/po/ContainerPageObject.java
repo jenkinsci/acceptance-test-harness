@@ -10,7 +10,7 @@ import java.net.URL;
 import java.util.concurrent.Callable;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+import static org.jenkinsci.test.acceptance.Matchers.*;
 
 /**
  * {@link PageObject} that represents a model that has multiple views underneath.
@@ -94,7 +94,7 @@ public abstract class ContainerPageObject extends PageObject {
         try {
             return jsonParser.readTree(getJsonApiUrl());
         } catch (IOException e) {
-            throw new AssertionError("Failed to read from "+getJsonApiUrl(),e);
+            throw new RuntimeException("Failed to read from "+getJsonApiUrl(),e);
         }
     }
 }
