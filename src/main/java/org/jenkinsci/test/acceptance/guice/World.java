@@ -50,8 +50,13 @@ public class World extends AbstractModule {
     /**
      * Call this method when a new test starts, to reset the {@link TestScope}.
      */
-    public void onNewTest() {
+    public void startTestScope() {
         testScopeObjects.set(new HashMap());
+    }
+
+    public void endTestScope() {
+        getInjector().getInstance(TestCleaner.class).performCleanUp();
+        testScopeObjects.set(null);
     }
 
     @Override
@@ -76,8 +81,14 @@ public class World extends AbstractModule {
     private static World INSTANCE;
 
     public static World get() {
-        if (INSTANCE==null)
+        if (INSTANCE==null) {
             INSTANCE = new World(Thread.currentThread().getContextClassLoader());
+            Runtime.getRuntime().addShutdownHook(new Thread() {
+                public void run() {
+                    INSTANCE.getInjector().getInstance(WorldCleaner.class).performCleanUp();
+                }
+            });
+        }
         return INSTANCE;
     }
 }
