@@ -3,7 +3,9 @@ package org.jenkinsci.test.acceptance.junit;
 import org.jenkinsci.test.acceptance.guice.World;
 import org.junit.runner.Runner;
 import org.junit.runners.BlockJUnit4ClassRunner;
+import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
+import org.junit.runners.model.Statement;
 
 /**
  * JUnit test {@link Runner} that uses Guice to instantiate the test class,
@@ -24,8 +26,23 @@ public class JenkinsAcceptanceTestRunner extends BlockJUnit4ClassRunner {
      */
     @Override
     protected Object createTest() {
-        World world = World.get();
-        world.onNewTest();
-        return world.getInjector().getInstance(getTestClass().getJavaClass());
+        return World.get().getInjector().getInstance(getTestClass().getJavaClass());
     }
+
+    protected Statement methodBlock(FrameworkMethod method) {
+        final Statement base = super.methodBlock(method);
+        return new Statement() {
+            @Override
+            public void evaluate() throws Throwable {
+                World world = World.get();
+                world.startTestScope();
+                try {
+                    base.evaluate();
+                } finally {
+                    world.endTestScope();
+                }
+            }
+        };
+    }
+
 }

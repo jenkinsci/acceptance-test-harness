@@ -27,7 +27,7 @@ public class JenkinsAcceptanceTestRule implements MethodRule {
 
             public void evaluate() throws Throwable {
                 World world = World.get();
-                world.onNewTest();
+                world.startTestScope();
                 Injector injector = world.getInjector();
 
                 injector.injectMembers(target);
@@ -40,6 +40,7 @@ public class JenkinsAcceptanceTestRule implements MethodRule {
                 try {
                     base.evaluate();
                 } finally {
+                    world.endTestScope();
                     if (driver!=null)
                         driver.close();
                 }

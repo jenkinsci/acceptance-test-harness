@@ -22,14 +22,15 @@ public class ObjectFactoryImpl implements ObjectFactory {
         return world.getInjector().getInstance(type);
     }
 
-    public void stop() {
-    }
-
     public void addClass(Class<?> glue) {
         // we let people to put these classes into the right scope and let auto-binder find them
     }
 
     public void start() {
-        world.onNewTest();
+        world.startTestScope();
+    }
+
+    public void stop() {
+        world.endTestScope();
     }
 }
