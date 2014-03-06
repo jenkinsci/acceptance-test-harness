@@ -122,6 +122,36 @@
       <artifactId>junit</artifactId>
       <version>4.11</version>
     </dependency>
+      <dependency>
+          <groupId>org.jclouds</groupId>
+          <artifactId>jclouds-compute</artifactId>
+          <version>1.6.0</version>
+      </dependency>
+      <dependency>
+          <groupId>org.jclouds</groupId>
+          <artifactId>jclouds-allcompute</artifactId>
+          <version>1.6.0</version>
+      </dependency>
+      <dependency>
+          <groupId>org.jclouds</groupId>
+          <artifactId>jclouds-enterprise</artifactId>
+          <version>1.0-beta-8</version>
+      </dependency>
+      <dependency>
+          <groupId>org.jclouds.driver</groupId>
+          <artifactId>jclouds-sshj</artifactId>
+          <version>1.6.0</version>
+      </dependency>
+      <dependency>
+          <groupId>org.jvnet.hudson</groupId>
+          <artifactId>trilead-ssh2</artifactId>
+          <version>build212-hudson-6</version>
+      </dependency>
+      <dependency>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-log4j12</artifactId>
+          <version>1.6.1</version>
+      </dependency>
   </dependencies>
 
   <scm>

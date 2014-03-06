@@ -2,10 +2,7 @@ package org.jenkinsci.test.acceptance.controller;
 
 import org.jenkinsci.utils.process.ProcessInputStream;
 
-import java.io.BufferedReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -19,8 +16,8 @@ public class LogWatcher {
     private final boolean silent;
     private final String pattern;
     private final AtomicReference<String> logPattern = new AtomicReference<>(null);
-    private final AtomicReference<ProcessInputStream> jenkinsPipe = new AtomicReference<>();
-    private final FileWriter log;
+    private final AtomicReference<InputStream> jenkinsPipe = new AtomicReference<>();
+    private final OutputStream log;
     private final AtomicBoolean ready = new AtomicBoolean(false);
 
     private final List<String> loggedLines = new ArrayList<>();
@@ -31,7 +28,7 @@ public class LogWatcher {
     private static final int TIMEOUT = System.getenv("STARTUP_TIME") != null && Integer.getInteger(System.getenv("STARTUP_TIME")) > 0
             ? Integer.getInteger(System.getenv("STARTUP_TIME")) : DEFAULT_TIMEOUT;
 
-    public LogWatcher(final ProcessInputStream pipe, final FileWriter log, Map<String,String> opts) {
+    public LogWatcher(final InputStream pipe, final OutputStream log, Map<String,String> opts) {
         this.silent = opts.get("silent") != null && opts.get("silent").equalsIgnoreCase("true");
         if(opts.get("pattern") == null){
             this.pattern = " Completed initialization";
@@ -55,7 +52,7 @@ public class LogWatcher {
                 try {
                     int lineCount=0;
 
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(jenkinsPipe.get().getInputStream()));
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(jenkinsPipe.get()));
                     while((line = reader.readLine()) != null){
                         logLine(line+"\n");
                         if(ready.get()){
@@ -165,7 +162,7 @@ public class LogWatcher {
 
 
     private void logLine(String line) throws IOException {
-        log.write(line);
+        log.write(line.getBytes("UTF-8"));
         log.flush();
         loggedLines.add(line);
 

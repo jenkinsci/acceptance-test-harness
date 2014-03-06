@@ -18,7 +18,6 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
 /**
  * @author Kohsuke Kawaguchi
  */
-@Singleton
 public class JobSteps extends AbstractSteps {
     @When("^I create a job named \"([^\"]*)\"$")
     public void I_create_a_job_named(String name) throws Throwable {

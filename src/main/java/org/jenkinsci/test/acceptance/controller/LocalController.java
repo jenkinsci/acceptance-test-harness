@@ -1,7 +1,6 @@
 package org.jenkinsci.test.acceptance.controller;
 
 import org.codehaus.plexus.util.FileUtils;
-import org.jenkinsci.test.acceptance.ControllerException;
 import org.jenkinsci.utils.process.ProcessInputStream;
 
 import java.io.File;
@@ -31,6 +30,8 @@ public abstract class LocalController extends JenkinsController {
 
     protected ProcessInputStream process;
 
+    protected LogWatcher logWatcher;
+
     private static final Map<String,String> options = new HashMap<>();
 
     static{
@@ -57,7 +58,7 @@ public abstract class LocalController extends JenkinsController {
 
             File warfile = new File(war);
             if (!warfile.exists())
-                throw new ControllerException("jenkins.war doesn't exist in " + war + ", maybe you forgot to set JENKINS_WAR env var?");
+                throw new RuntimeException("jenkins.war doesn't exist in " + war + ", maybe you forgot to set JENKINS_WAR env var?");
             return warfile;
         }
 
@@ -149,7 +150,6 @@ public abstract class LocalController extends JenkinsController {
         try {
             if (logger != null) {
                 logger.close();
-                logger = null;
             }
 
             FileUtils.forceDelete(tempDir);

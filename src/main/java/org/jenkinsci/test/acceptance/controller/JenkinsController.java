@@ -5,12 +5,8 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
-import org.jenkinsci.test.acceptance.ControllerException;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 
 /**
@@ -30,8 +26,7 @@ public abstract class JenkinsController {
 
     private boolean isRunning;
 
-    protected FileWriter logger;
-    protected LogWatcher logWatcher;
+    protected final  OutputStream logger;
 
     protected JenkinsController() {
         if(FileUtils.fileExists(JENKINS_DEBUG_LOG)){
@@ -40,7 +35,7 @@ public abstract class JenkinsController {
         try {
             File f = new File(JENKINS_DEBUG_LOG);
             f.createNewFile();
-            this.logger = new FileWriter(f);
+            this.logger = new FileOutputStream(f);
         } catch (IOException e) {
             throw new RuntimeException("Failed to create log file "+ JENKINS_DEBUG_LOG);
         }
@@ -120,7 +115,7 @@ public abstract class JenkinsController {
                 }
                 IOUtil.copy(get.getResponseBodyAsStream(), fos);
             } catch (IOException e) {
-                throw new ControllerException(String.format("Failed to open %s for write operation", target), e);
+                throw new RuntimeException(String.format("Failed to open %s for write operation", target), e);
             }
         }
         return target;

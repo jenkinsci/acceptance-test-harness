@@ -18,7 +18,6 @@ import java.util.Map.Entry;
 /**
  * @author Kohsuke Kawaguchi
  */
-@Singleton
 public class DockerSteps extends AbstractSteps {
     // contextual variables used from cucumber steps
     public final Map<String,DockerContainer> containers = new HashMap<>();
