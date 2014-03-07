@@ -24,6 +24,11 @@ public interface Machine extends Closeable {
     void terminate();
 
     /**
+     * Client of {@link Machine} can use this directory and undearneath for whatever purpose.
+     */
+    String dir();
+
+    /**
      * Allocates a TCP/IP port on the machine to be used by a test
      * (for example to let Jenkins listen on this port for HTTP.)
      */
