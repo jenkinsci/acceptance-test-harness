@@ -5,7 +5,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.inject.Module;
 import com.google.inject.Provider;
-import com.google.inject.Singleton;
 import org.jclouds.ContextBuilder;
 import org.jclouds.apis.ApiMetadata;
 import org.jclouds.apis.Apis;
@@ -99,7 +98,7 @@ public abstract class MachineProvider implements Provider<Machine> {
 
         authorizePorts(); //authorize ports for inbound connections
 
-        Machine machine = new Machine(this,node);
+        Machine machine = new JcloudsMachine(this,node);
 
         machines.put(node.getId(), machine);
         waitForSsh(machine); //wait for ssh to be ready
