@@ -38,7 +38,6 @@ import static org.jclouds.compute.config.ComputeServiceProperties.TIMEOUT_SCRIPT
  *
  * @author Vivek Pandey
  */
-@Singleton
 public abstract class MachineProvider implements Provider<Machine> {
     private static final Map<String, ApiMetadata> allApis = Maps.uniqueIndex(Apis.viewableAs(ComputeServiceContext.class),
             Apis.idFunction());
