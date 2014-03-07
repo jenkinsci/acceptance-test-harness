@@ -24,7 +24,7 @@ public class SshSlaveProvider implements SlaveProvider {
         // TODO: multi-tenant
         Machine m = provider.get();
         SshSlaveController sc = new SshSlaveController(m);
-        testCleaner.get().addTask(m.createCleaner());   // release a machine
+        testCleaner.get().addTask(m);   // release a machine
         return sc;
     }
 }
