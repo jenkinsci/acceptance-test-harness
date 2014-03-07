@@ -4,20 +4,46 @@ import org.jclouds.compute.domain.NodeMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * @author Vivek Pandey
  */
-public class Machine {
+public class Machine{
     private final NodeMetadata nodeMetadata;
     private final MachineProvider machineProvider;
+
+    public static final int BEGINNING_PORT = 20000;
+
+    private AtomicInteger nextPort = new AtomicInteger(0);
+    private List<Integer> availablePorts;
+    private final int maxAvailablePort;
 
     public Machine(MachineProvider machineProvider, NodeMetadata nodeMetadata) {
         this.nodeMetadata = nodeMetadata;
         this.machineProvider = machineProvider;
+        List<Integer> ports = new ArrayList<>();
+        for(int port:machineProvider.getAvailableInboundPorts()){
+            ports.add(port);
+        }
+
+        this.availablePorts = Collections.unmodifiableList(ports);
+        this.maxAvailablePort = ports.get(ports.size()-1);
+
+        //set to the first port
+        nextPort.set(availablePorts.get(0));
+
     }
 
-    public NodeMetadata getNodeMetadata() {
-        return nodeMetadata;
+    public String getPublicIpAddress(){
+        return nodeMetadata.getPublicAddresses().iterator().next();
+    }
+
+    public String getUser(){
+        return (nodeMetadata.getCredentials() == null) ? "ubuntu" : nodeMetadata.getCredentials().getUser();
     }
 
     /**
@@ -26,6 +52,14 @@ public class Machine {
     public void terminate(){
         logger.error("Destroying node: "+nodeMetadata);
         machineProvider.destroy(nodeMetadata.getId());
+    }
+
+    public int getNextAvailablePort(){
+        int p = nextPort.incrementAndGet();
+        if(p > maxAvailablePort){
+            throw new RuntimeException("no more available ports");
+        }
+        return p;
     }
 
     /**
@@ -44,4 +78,6 @@ public class Machine {
 
 
     private static final Logger logger = LoggerFactory.getLogger(Machine.class);
+
+
 }

@@ -75,15 +75,17 @@ public class Ssh{
         connection.close();
     }
 
-    private  LoginCredentials getLoginForCommandExecution(){
+    public static  LoginCredentials getLoginForCommandExecution(){
         try {
             String user = System.getProperty("user.name");
             String privateKey = Files.toString(
-                    new File(System.getProperty("user.home") + "/.ssh/id_rsa"), UTF_8);
+                    new File(PRIVATE_KEY_FILE), UTF_8);
             return LoginCredentials.builder().
                     user(user).privateKey(privateKey).build();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
+
+    public static final String PRIVATE_KEY_FILE=System.getProperty("user.home") + "/.ssh/id_rsa";
 }

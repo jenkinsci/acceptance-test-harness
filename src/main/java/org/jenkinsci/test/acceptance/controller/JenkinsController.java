@@ -101,7 +101,7 @@ public abstract class JenkinsController {
     /**
      * Downloads the latest version of the form-element-path plugin that we use for testing.
      */
-    protected File downloadPathElement() {
+    public static File downloadPathElement() {
         String source = "http://updates.jenkins-ci.org/latest/form-element-path.hpi";
         File target =  new File(WORKSPACE,"path-element.hpi");
         if (!target.exists()) {

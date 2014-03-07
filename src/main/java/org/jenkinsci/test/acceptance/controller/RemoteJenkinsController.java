@@ -1,10 +1,14 @@
 package org.jenkinsci.test.acceptance.controller;
 
+import org.jenkinsci.utils.process.CommandBuilder;
+import org.jenkinsci.utils.process.ProcessInputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.SecureRandom;
-import java.util.Random;
+import java.util.Collections;
 
 /**
  * @author Vivek Pandey
@@ -13,46 +17,45 @@ public class RemoteJenkinsController extends JenkinsController {
 
     private final Machine machine;
     private final String jenkinsHome;
-    private int pid;
+    private final int httpPort;
+    private final int controlPort;
+    private LogWatcher logWatcher;
+    protected ProcessInputStream process;
 
-    public RemoteJenkinsController(Machine machine) {
+    public RemoteJenkinsController(Machine machine, String jenkinsHome) {
         this.machine = machine;
-        this.jenkinsHome = newJenkinsHome(machine);
-        try {
-            Ssh ssh = new Ssh(machine.getNodeMetadata().getCredentials().getUser(), machine.getNodeMetadata().getPublicAddresses().iterator().next());
-            ssh.executeRemoteCommand("mkdir " + jenkinsHome, logger);
-            ssh.destroy();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-
+        this.jenkinsHome = jenkinsHome;
+        this.httpPort = machine.getNextAvailablePort();
+        this.controlPort = machine.getNextAvailablePort();
     }
 
     @Override
     public void startNow() throws IOException {
-        if(pid > 0){
-            throw new RuntimeException("Jenkins instance is already running...");
+        CommandBuilder cb = new CommandBuilder("ssh", "-t",String.format("%s@%s",machine.getUser(),machine.getPublicIpAddress())).add(
+                " java -DJENKINS_HOME=" + jenkinsHome +
+                " -jar jenkins.war" +
+                " --ajp13Port=-1" +
+                " --controlPort=" + controlPort +
+                " --httpPort=" + httpPort);
+        this.process =  cb.popen();
+        this.logWatcher = new LogWatcher(process, logger, Collections.EMPTY_MAP);
+        try {
+            this.logWatcher.waitTillReady(true);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
-        Ssh ssh = new Ssh(machine.getNodeMetadata().getCredentials().getUser(), machine.getNodeMetadata().getPublicAddresses().iterator().next());
-        this.pid = ssh.executeRemoteCommand(String.format("java -jar jenkins.war -DJENKINS_HOME=%s --ajp13Port=-1 --controlPort=%s --httpPort=%s", jenkinsHome, 8081, 8080), logger);
-        ssh.destroy();
     }
 
     @Override
     public void stopNow() throws IOException {
-        if(pid <= 0){
-            throw new RuntimeException("Jenkins instance is not running...");
-        }
-        Ssh ssh = new Ssh(machine.getNodeMetadata().getCredentials().getUser(), machine.getNodeMetadata().getPublicAddresses().iterator().next());
-        ssh.executeRemoteCommand(String.format("kill -INT "+pid), logger);
-        ssh.destroy();
+
+        process.getProcess().destroy();
     }
 
     @Override
     public URL getUrl() {
         try {
-            return new URL(String.format("http://%s:%s/", machine.getNodeMetadata().getPublicAddresses().iterator().next(), "8080"));
+            return new URL(String.format("http://%s:%s/", machine.getPublicIpAddress(), httpPort));
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
@@ -68,11 +71,8 @@ public class RemoteJenkinsController extends JenkinsController {
 
     }
 
-    private String newJenkinsHome(Machine machine){
-        SecureRandom secureRandom = new SecureRandom();
-        long secureInitializer = secureRandom.nextLong();
-        Random rand = new Random( secureInitializer + Runtime.getRuntime().freeMemory() );
-        return String.format("%s_%s",machine.getNodeMetadata().getGroup(), rand.nextInt());
-    }
+    private static final Logger localLogger = LoggerFactory.getLogger(RemoteJenkinsController.class);
+
+
 
 }

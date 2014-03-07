@@ -4,7 +4,11 @@ import com.google.common.io.Files;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.jclouds.compute.domain.Template;
+import org.jclouds.ec2.EC2Client;
 import org.jclouds.ec2.compute.options.EC2TemplateOptions;
+import org.jclouds.ec2.domain.IpProtocol;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,6 +33,26 @@ public class Ec2Provider extends MachineProvider {
     }
 
     @Override
+    public void authorizePorts() {
+        if(config.getSecurityGroups().size() > 0){
+            EC2Client client = contextBuilder.buildApi(EC2Client.class);
+
+            try{
+            client.getSecurityGroupServices().authorizeSecurityGroupIngressInRegion(config.getRegion(), config.getSecurityGroups().get(0),
+                    IpProtocol.TCP, config.getInboundPorts()[0],config.getInboundPorts()[config.getInboundPorts().length - 1],"0.0.0.0/0");
+            }catch(IllegalStateException e){
+                // Lets ignore it, most likely its due to existing security roles, it might fail
+                logger.error("Failed to authorize IP ports in security group"+e.getMessage());
+            }
+        }
+    }
+
+    @Override
+    public int[] getAvailableInboundPorts() {
+        return config.getInboundPorts();
+    }
+
+    @Override
     public Template getTemplate() throws IOException{
         Template template =  computeService.templateBuilder().imageId(config.getRegion()+"/"+config.getImageId()).
                 locationId(config.getRegion()).hardwareId(config.getInstanceType()).
@@ -40,6 +64,11 @@ public class Ec2Provider extends MachineProvider {
                 securityGroups(config.getSecurityGroups()).inboundPorts(config.getInboundPorts()).overrideLoginUser(config.getUser());
         return template;
     }
+
+
+    private static final Logger logger = LoggerFactory.getLogger(Ec2Provider.class);
+
+
 
 
 }

@@ -5,6 +5,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.inject.Module;
 import com.google.inject.Provider;
+import com.google.inject.Singleton;
 import org.jclouds.ContextBuilder;
 import org.jclouds.apis.ApiMetadata;
 import org.jclouds.apis.Apis;
@@ -22,9 +23,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static com.google.common.collect.Iterables.*;
 import static org.jclouds.compute.config.ComputeServiceProperties.TIMEOUT_SCRIPT_COMPLETE;
@@ -34,6 +38,7 @@ import static org.jclouds.compute.config.ComputeServiceProperties.TIMEOUT_SCRIPT
  *
  * @author Vivek Pandey
  */
+@Singleton
 public abstract class MachineProvider implements Provider<Machine> {
     private static final Map<String, ApiMetadata> allApis = Maps.uniqueIndex(Apis.viewableAs(ComputeServiceContext.class),
             Apis.idFunction());
@@ -45,49 +50,78 @@ public abstract class MachineProvider implements Provider<Machine> {
 
     protected final ComputeService computeService;
 
+    protected final ContextBuilder contextBuilder;
+
     private final String groupName="jenkins-test";
 
-    private final AtomicReference<Machine> machine = new AtomicReference();
+    private final Map<String, Machine> machines = new ConcurrentHashMap<>();
+
 
 
     public MachineProvider(String provider, String identity, String credential) {
+        logger.info("Machine Provider created");
         if(!contains(supportedProviders, provider)){
             throw new RuntimeException(String.format("Provider %s is not supported. Supported providers: %s",provider, Arrays.toString(supportedProviders.toArray())));
         }
 
-        ContextBuilder contextBuilder = initComputeService(provider, identity, credential);
+        this.contextBuilder = initComputeService(provider, identity, credential);
         this.computeService =  contextBuilder.buildView(ComputeServiceContext.class).getComputeService();
     }
 
 
+    public abstract void authorizePorts();
+
+
     @Override
     public Machine get() {
-        if(machine.get() == null){
-            logger.info(String.format("Adding node to group %s", groupName));
+        logger.info("new Machine instantiated...");
+        logger.info(String.format("Adding node to group %s", groupName));
 
-            Template template;
-            try {
-                template = getTemplate();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-
-            NodeMetadata node;
-            try {
-                node = getOnlyElement(computeService.createNodesInGroup(groupName, 1, template));
-            } catch (RunNodesException e) {
-                throw new RuntimeException(e);
-            }
-            logger.info(String.format("Added node %s: %s", node.getId(), concat(node.getPrivateAddresses(), node.getPublicAddresses())));
-            machine.set(new Machine(this,node));
+        Template template;
+        try {
+            template = getTemplate();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-        return machine.get();
+
+
+//        NodeMetadata node=computeService.getNodeMetadata("i-913433b0");
+
+
+        NodeMetadata node;
+
+        try {
+            node = getOnlyElement(computeService.createNodesInGroup(groupName, 1, template));
+        } catch (RunNodesException e) {
+            throw new RuntimeException(e);
+        }
+
+        logger.info(String.format("Added node %s: %s", node.getId(), concat(node.getPrivateAddresses(), node.getPublicAddresses())));
+
+        authorizePorts(); //authorize ports for inbound connections
+
+        Machine machine = new Machine(this,node);
+
+        machines.put(node.getId(), machine);
+        waitForSsh(machine); //wait for ssh to be ready
+
+        return machine;
+    }
+
+    public abstract int[] getAvailableInboundPorts();
+
+
+    public Machine get(String id){
+        if(machines.get(id) != null){
+            return machines.get(id);
+        }
+        return get();
     }
 
     public void destroy(String id){
-        if(machine.get() != null){
+        if(machines.get(id) != null){
             computeService.destroyNode(id);
-            machine.set(null);
+            machines.remove(id);
         }
     }
 
@@ -127,6 +161,28 @@ public abstract class MachineProvider implements Provider<Machine> {
         logger.info(String.format("Initializing %s", contextBuilder.getApiMetadata()));
 
         return contextBuilder;
+    }
+
+    private void waitForSsh(Machine machine){
+        int timeout = 120000; //2 minute
+        long startTime = System.currentTimeMillis();
+        while(true){
+            try {
+                if(System.currentTimeMillis() - startTime > timeout){
+                    break;
+                }
+                Ssh ssh = new Ssh(machine.getUser(), machine.getPublicIpAddress());
+                ssh.destroy();
+                return;
+            } catch (IOException e) {
+                try {
+                    Thread.sleep(10000); //sleep 10 sec
+                } catch (InterruptedException e1) {
+                    logger.error(e.getMessage(), e);
+                    return; //exit from this loop
+                }
+            }
+        }
     }
     private static final Logger logger = LoggerFactory.getLogger(MachineProvider.class);
 }
