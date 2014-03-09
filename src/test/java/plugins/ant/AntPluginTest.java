@@ -1,4 +1,4 @@
-package ant;
+package plugins.ant;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
