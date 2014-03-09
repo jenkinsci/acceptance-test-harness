@@ -85,6 +85,7 @@ public class World extends AbstractModule {
             INSTANCE = new World(Thread.currentThread().getContextClassLoader());
             Runtime.getRuntime().addShutdownHook(new Thread() {
                 public void run() {
+                    INSTANCE.getInjector().getInstance(TestCleaner.class).performCleanUp();
                     INSTANCE.getInjector().getInstance(WorldCleaner.class).performCleanUp();
                 }
             });
