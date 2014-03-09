@@ -7,6 +7,7 @@ import org.jenkinsci.test.acceptance.plugins.batch_task.BatchTaskDeclaration;
 import org.jenkinsci.test.acceptance.plugins.batch_task.BatchTaskTrigger;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Jenkins;
+import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.ShellBuildStep;
 import org.junit.Before;
 import org.junit.Test;
@@ -73,11 +74,11 @@ public class BatchTaskPluginTest extends AbstractJUnitTest {
         job.configure();
         addBatchTask("runit");
         addBatchTask("dontrunit");
-        configureBatchTrigger(task("runit"));
+        configureBatchTrigger(job,task("runit"));
         job.save();
 
         job.queueBuild().waitUntilFinished().shouldSucceed();
-        task("ruint").shouldExist();
+        task("runit").shouldExist();
         task("dontrunit").shouldNotExist();
     }
 
@@ -111,7 +112,7 @@ public class BatchTaskPluginTest extends AbstractJUnitTest {
 
         FreeStyleJob trigger = j.createJob();
         trigger.configure();
-        configureBatchTrigger(task("runit"));
+        configureBatchTrigger(trigger,task("runit"));
         trigger.save();
         trigger.queueBuild().shouldSucceed();
 
@@ -136,14 +137,14 @@ public class BatchTaskPluginTest extends AbstractJUnitTest {
         job.configure();
         addBatchTask("dontrunit");
         job.addBuildStep(ShellBuildStep.class).setCommand("false");
-        configureBatchTrigger(task("dontrunit"));
+        configureBatchTrigger(job,task("dontrunit"));
         job.save();
         job.queueBuild().waitUntilFinished();
         task("dontrunit").shouldNotExist();
     }
 
 
-    private void configureBatchTrigger(BatchTask task) {
+    private void configureBatchTrigger(Job job, BatchTask task) {
         job.save();
         // Needed to save configured batch tasks before configuring triggers
         job.configure();
