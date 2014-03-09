@@ -19,6 +19,7 @@ public class BatchTask extends ContainerPageObject {
     public void build() {
         open();
         clickLink("Build Now");
+        sleep(1000);    // TODO: properly wait until the task is completed
     }
 
     public boolean exists() {

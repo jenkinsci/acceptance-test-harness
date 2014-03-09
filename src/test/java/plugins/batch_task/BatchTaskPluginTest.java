@@ -7,6 +7,7 @@ import org.jenkinsci.test.acceptance.plugins.batch_task.BatchTaskDeclaration;
 import org.jenkinsci.test.acceptance.plugins.batch_task.BatchTaskTrigger;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Jenkins;
+import org.jenkinsci.test.acceptance.po.ShellBuildStep;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -115,6 +116,29 @@ public class BatchTaskPluginTest extends AbstractJUnitTest {
         trigger.queueBuild().shouldSucceed();
 
         task("runit").shouldExist();
+        task("dontrunit").shouldNotExist();
+    }
+
+    /**
+     Scenario: Do not trigger for failed build
+       Given I have installed the "batch-task" plugin
+       And a job
+       And I configure the job
+       And I add batch task "dontrunit"
+       And I add always fail build step
+       And I configure batch trigger for "dontrunit"
+       And I save the job
+       And I build the job
+       Then the batch task "dontrunit" should not run
+     */
+    @Test
+    public void do_not_trigger_for_failed_build() {
+        job.configure();
+        addBatchTask("dontrunit");
+        job.addBuildStep(ShellBuildStep.class).setCommand("false");
+        configureBatchTrigger(task("dontrunit"));
+        job.save();
+        job.queueBuild().waitUntilFinished();
         task("dontrunit").shouldNotExist();
     }
 
