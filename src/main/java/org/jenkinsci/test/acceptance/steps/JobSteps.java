@@ -9,7 +9,6 @@ import org.jenkinsci.test.acceptance.cucumber.Should;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 
-import javax.inject.Singleton;
 import java.util.regex.Pattern;
 
 import static org.hamcrest.CoreMatchers.*;

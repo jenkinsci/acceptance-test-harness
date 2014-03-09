@@ -22,7 +22,7 @@ public class JenkinsLogger extends ContainerPageObject {
             public WebElement call() throws Exception {
                 Thread.sleep(100);
                 open();
-                return hasElement(by.xpath("//h1[text()='%s']",name));
+                return getElement(by.xpath("//h1[text()='%s']", name));
             }
         });
     }
@@ -64,7 +64,7 @@ public class JenkinsLogger extends ContainerPageObject {
 
     public boolean isEmpty() {
         open();
-        return hasElement(by.css("#main-panel pre"))!=null;
+        return getElement(by.css("#main-panel pre"))!=null;
     }
 
     private static final Pattern LOG_PATTERN = Pattern.compile("((?:\\/\\w+)+.*?) by ");

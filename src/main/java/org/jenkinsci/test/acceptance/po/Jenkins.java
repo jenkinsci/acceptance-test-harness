@@ -93,7 +93,10 @@ public class Jenkins extends ContainerPageObject {
         return JenkinsLogger.create(this,name,levels);
     }
 
+    public DumbSlave createDumbSlave(String name) {
+        return DumbSlave.create(this,name);
+    }
+
 
     private static final Pattern VERSION = Pattern.compile("^About Jenkins ([^-]*)");
-
 }

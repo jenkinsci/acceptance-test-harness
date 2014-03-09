@@ -38,7 +38,7 @@ public abstract class PageObject extends CapybaraPortingLayer {
         this.url = url;
     }
 
-    public String createRandomName() {
+    public static String createRandomName() {
         return "rand_name_"+IOTA.incrementAndGet();
     }
 

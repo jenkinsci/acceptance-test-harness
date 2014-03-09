@@ -127,7 +127,7 @@ public class CapybaraPortingLayer extends Assert {
      * Works like {@link #find(By)} but instead of throwing an exception,
      * this method returns null.
      */
-    public WebElement hasElement(By selector) {
+    public WebElement getElement(By selector) {
         try {
             return find(selector);
         } catch (NoSuchElementException e) {
