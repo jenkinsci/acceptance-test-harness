@@ -2,6 +2,7 @@ package org.jenkinsci.test.acceptance.po;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Injector;
+import org.openqa.selenium.WebDriver;
 
 import javax.inject.Inject;
 import java.net.URL;
@@ -45,7 +46,7 @@ public abstract class PageObject extends CapybaraPortingLayer {
     /**
      * Visits the top page of this object.
      */
-    public void open() {
-        visit(url);
+    public WebDriver open() {
+        return visit(url);
     }
 }

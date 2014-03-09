@@ -67,6 +67,10 @@ public class Jenkins extends ContainerPageObject {
         }
     }
 
+    public FreeStyleJob createJob() {
+        return createJob(FreeStyleJob.class);
+    }
+
     public <T extends Job> T createJob(Class<T> type) {
         return createJob(type, createRandomName());
     }
