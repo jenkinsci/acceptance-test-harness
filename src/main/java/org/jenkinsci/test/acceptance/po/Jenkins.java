@@ -3,10 +3,10 @@ package org.jenkinsci.test.acceptance.po;
 import com.google.inject.Injector;
 import hudson.util.VersionNumber;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
+import org.jenkinsci.test.acceptance.guice.TestScope;
 import org.openqa.selenium.By;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.net.URL;
 import java.util.Map;
 import java.util.logging.Level;
@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
  *
  * @author Kohsuke Kawaguchi
  */
-@Singleton
+@TestScope
 public class Jenkins extends ContainerPageObject {
     private VersionNumber version;
 
