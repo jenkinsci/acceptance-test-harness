@@ -68,6 +68,7 @@ public class World extends AbstractModule {
                     @Override
                     public T get() {
                         Map m = testScopeObjects.get();
+                        if (m==null)    return null;
                         T v = (T)m.get(key);
                         if (v==null)
                             m.put(key, v = base.get());
@@ -85,8 +86,11 @@ public class World extends AbstractModule {
             INSTANCE = new World(Thread.currentThread().getContextClassLoader());
             Runtime.getRuntime().addShutdownHook(new Thread() {
                 public void run() {
-                    INSTANCE.getInjector().getInstance(TestCleaner.class).performCleanUp();
-                    INSTANCE.getInjector().getInstance(WorldCleaner.class).performCleanUp();
+                    Injector i = INSTANCE.getInjector();
+
+                    TestCleaner tc = i.getInstance(TestCleaner.class);
+                    if (tc!=null)   tc.performCleanUp();
+                    i.getInstance(WorldCleaner.class).performCleanUp();
                 }
             });
         }
