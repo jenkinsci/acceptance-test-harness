@@ -24,6 +24,10 @@ public abstract class ContainerPageObject extends PageObject {
             throw new IllegalArgumentException("URL should end with '/': "+url);
     }
 
+    protected ContainerPageObject(PageObject context, URL url) {
+        this(context.injector,url);
+    }
+
     /**
      * Given the path relative to {@link #url}, visit that page
      */

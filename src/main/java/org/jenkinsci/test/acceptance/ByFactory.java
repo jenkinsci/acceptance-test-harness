@@ -86,4 +86,10 @@ public class ByFactory {
     public By tagName(String name) {
         return By.tagName(name);
     }
+
+    public By option(String name) {
+        return xpath(
+            ".//option[contains(normalize-space(string(.)), '%1$s')]", name
+        );
+    }
 }

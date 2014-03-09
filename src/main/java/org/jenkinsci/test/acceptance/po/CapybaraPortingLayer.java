@@ -123,6 +123,18 @@ public class CapybaraPortingLayer extends Assert {
         return e;   // hmm, not sure what to return here!
     }
 
+    /**
+     * Works like {@link #find(By)} but instead of throwing an exception,
+     * this method returns null.
+     */
+    public WebElement hasElement(By selector) {
+        try {
+            return find(selector);
+        } catch (NoSuchElementException e) {
+            return null;
+        }
+    }
+
     public void fillIn(String formFieldName, String value) {
         find(By.name(formFieldName)).sendKeys(value);
     }

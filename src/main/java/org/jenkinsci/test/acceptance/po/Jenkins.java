@@ -8,6 +8,8 @@ import org.openqa.selenium.By;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.net.URL;
+import java.util.Map;
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -82,6 +84,15 @@ public class Jenkins extends ContainerPageObject {
     public PluginManager getPluginManager() {
         return new PluginManager(this);
     }
+
+    public JenkinsLogger getLogger(String name) {
+        return new JenkinsLogger(this,name);
+    }
+
+    public JenkinsLogger createLogger(String name, Map<String,Level> levels) {
+        return JenkinsLogger.create(this,name,levels);
+    }
+
 
     private static final Pattern VERSION = Pattern.compile("^About Jenkins ([^-]*)");
 
