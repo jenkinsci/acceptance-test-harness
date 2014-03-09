@@ -22,7 +22,7 @@ public class ArtifactArchiver extends PostBuildStep {
 
     public ArtifactArchiver latestOnly(boolean check) {
         control("advanced-button").click();
-        check(control("latestOnly"),check);
+        control("latestOnly").check(check);
         return this;
     }
 }

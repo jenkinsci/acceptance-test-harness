@@ -78,7 +78,9 @@ public class AntPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void autoInstallAnt() {
+        jenkins.configure();
         antgc.addAutoInstallation("ant_1.8.4", "1.8.4");
+        jenkins.save();
 
         buildHelloWorld().shouldContainsConsoleOutput(
                 "Unpacking http://archive.apache.org/dist/ant/binaries/apache-ant-1.8.4-bin.zip"
@@ -105,7 +107,9 @@ public class AntPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void locallyInstalledAnt() {
+        jenkins.configure();
         antgc.addFakeInstallation("local_ant_1.8.4", "/tmp/fake-ant");
+        jenkins.save();
 
         buildHelloWorld().shouldContainsConsoleOutput(
             "fake ant at /tmp/fake-ant/bin/ant"
@@ -116,7 +120,7 @@ public class AntPluginTest extends AbstractJUnitTest {
         job.configure(new Callable<Object>() {
             public Object call() {
                 job.addCreateFileStep("build.xml", resource("echo-helloworld.xml").asText());
-                job.addBuildStep(AntBuildStep.class).setTarget("hello");
+                job.addBuildStep(AntBuildStep.class).targets.sendKeys("hello");
                 return null;
             }
         });

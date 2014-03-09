@@ -5,6 +5,7 @@ import com.google.common.collect.Iterables;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
+import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.PageArea;
 
@@ -23,23 +24,26 @@ public class AntGlobalConfig extends PageArea {
     @Inject
     JenkinsController controller;
 
+    public final Control name = control("tool/name");
+    public final Control home = control("tool/home");
+
     @Inject
     public AntGlobalConfig(Jenkins jenkins) {
         super(jenkins, "/hudson-tasks-Ant$AntInstallation");
     }
 
     public void addAutoInstallation(String name, String version) {
-        control("tool/name").sendKeys(name);
+        this.name.sendKeys(name);
         // by default Install automatically is checked
-        control("tool/properties/hudson-tools-InstallSourceProperty/installers/id");
+        control("tool/properties/hudson-tools-InstallSourceProperty/installers/id").resolve();
         find(by.xpath("//option[@value='%s']",version)).click();
     }
 
     public void addLocalInstallation(String name, String antHome) {
-        control("tool/name").sendKeys(name);
+        this.name.sendKeys(name);
         // by default Install automatically is checked - need to uncheck
-        check(control("tool/properties/hudson-tools-InstallSourceProperty"), false);
-        control("tool/home").sendKeys(antHome);
+        control("tool/properties/hudson-tools-InstallSourceProperty").uncheck();
+        home.sendKeys(antHome);
     }
 
     /**
