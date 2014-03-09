@@ -2,6 +2,7 @@ package org.jenkinsci.test.acceptance.guice;
 
 import org.junit.runners.model.Statement;
 
+import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -30,6 +31,15 @@ public class Cleaner {
         });
     }
 
+    public void addTask(final Closeable c) {
+        addTask(new Statement() {
+            @Override
+            public void evaluate() throws Throwable {
+                c.close();
+            }
+        });
+    }
+
     public void addTask(final Callable<?> c) {
         addTask(new Statement() {
             @Override
@@ -38,7 +48,6 @@ public class Cleaner {
             }
         });
     }
-
     /*package*/ void performCleanUp() {
         for (Statement task : tasks) {
             try {

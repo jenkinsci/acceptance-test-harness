@@ -13,7 +13,7 @@ import java.net.URL;
  * @author: Vivek Pandey
  */
 @ExtensionPoint
-public abstract class JenkinsController {
+public abstract class JenkinsController implements Closeable {
     /**
      * directory on the computer where this code is running that points to a directory
      * where test code can place log files, cache files, etc.
@@ -68,6 +68,13 @@ public abstract class JenkinsController {
         if(isRunning){
             stopNow();
         }
+    }
+
+    /**
+     * Alias for {@link #stop()}
+     */
+    public final void close() throws IOException {
+        stop();
     }
 
     /**
