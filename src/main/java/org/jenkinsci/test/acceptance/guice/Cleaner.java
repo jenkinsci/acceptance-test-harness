@@ -56,5 +56,6 @@ public class Cleaner {
                 throw new AssertionError(task+" failed",t);
             }
         }
+        tasks.clear();
     }
 }
