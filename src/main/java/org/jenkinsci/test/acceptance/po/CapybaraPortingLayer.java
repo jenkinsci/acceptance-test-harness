@@ -112,15 +112,19 @@ public class CapybaraPortingLayer extends Assert {
      * Returns the first visible element that matches the selector.
      */
     public WebElement find(By selector) {
-        WebElement e = driver.findElement(selector);
-        if (e.isDisplayed())
-            return e;
+        try {
+            WebElement e = driver.findElement(selector);
+            if (e.isDisplayed())
+                return e;
 
-        for (WebElement f : driver.findElements(selector)) {
-            if (f.isDisplayed())
-                return f;
+            for (WebElement f : driver.findElements(selector)) {
+                if (f.isDisplayed())
+                    return f;
+            }
+            return e;   // hmm, not sure what to return here!
+        } catch (NoSuchElementException x) {
+            throw new NoSuchElementException("Unable to locate "+selector+" in "+driver.getCurrentUrl(),x);
         }
-        return e;   // hmm, not sure what to return here!
     }
 
     /**
