@@ -1,6 +1,7 @@
 package plugins.audit_trail;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.JenkinsLogger;
@@ -16,6 +17,7 @@ import static org.jenkinsci.test.acceptance.po.PageObject.*;
 /**
  * @author Kohsuke Kawaguchi
  */
+@WithPlugins("audit-trail")
 public class AuditTrailPluginTest extends AbstractJUnitTest {
     @Inject
     Jenkins jenkins;
@@ -24,11 +26,6 @@ public class AuditTrailPluginTest extends AbstractJUnitTest {
 
     @Before
     public void setUp() {
-        jenkins.getPluginManager().installPlugin("audit-trail");
-        /*
-            It takes a couple of seconds for the plugin to start recording and displaying events.
-            It is supposed to be ready after this step.
-         */
         auditTrail = jenkins.getLogger("Audit Trail");
     }
 

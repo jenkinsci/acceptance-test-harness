@@ -1,5 +1,6 @@
 package org.jenkinsci.test.acceptance.po;
 
+import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.openqa.selenium.NoSuchElementException;
 
 /**
@@ -41,6 +42,17 @@ public class PluginManager extends ContainerPageObject {
         }
     }
 
+    /**
+     * Installs specified plugins.
+     *
+     * @deprecated
+     *      Please be encouraged to use {@link WithPlugins} annotations to statically declare
+     *      the required plugins you need. If you really do need to install plugins in the middle
+     *      of a test, as opposed to be in the beginning, then this is the right method.
+     *
+     *      The deprecation marker is to call attention to {@link WithPlugins}. This method
+     *      is not really deprecated.
+     */
     public void installPlugin(String... shortNames) {
         if (isInstalled(shortNames))
             return;
