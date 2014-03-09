@@ -67,7 +67,7 @@ public class ByFactory {
 
     private static String fieldXPath(String base, String locator) {
         // TODO: there's actually a lot more
-        return String.format(base+"[@id='%1$s' or @attr='%1$s' or @name='%1$s']",locator);
+        return String.format(base+"[@id='%1$s' or @attr='%1$s' or @name='%1$s' or @value='%1$s']",locator);
     }
 
     /**
@@ -89,7 +89,7 @@ public class ByFactory {
 
     public By option(String name) {
         return xpath(
-            ".//option[contains(normalize-space(string(.)), '%1$s')]", name
+            ".//option[contains(normalize-space(string(.)), '%1$s') or @value='%1$s']", name
         );
     }
 }

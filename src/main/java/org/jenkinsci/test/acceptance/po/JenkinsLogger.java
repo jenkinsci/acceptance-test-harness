@@ -15,9 +15,13 @@ import java.util.regex.Pattern;
  * @author Kohsuke Kawaguchi
  */
 public class JenkinsLogger extends ContainerPageObject {
-    public JenkinsLogger(Jenkins jenkins, final String name) {
+    public final String name;
+    public JenkinsLogger(Jenkins jenkins, String name) {
         super(jenkins, jenkins.url("log/" + name + "/"));
+        this.name = name;
+    }
 
+    public void waitForExistence() {
         waitForCond(new Callable<WebElement>() {
             public WebElement call() throws Exception {
                 Thread.sleep(100);
@@ -51,6 +55,9 @@ public class JenkinsLogger extends ContainerPageObject {
         }
     }
 
+    /**
+     * TODO: this is audit-trail specific
+     */
     public List<String> getEvents() {
         open();
         List<String> events = new ArrayList<>();
@@ -67,5 +74,5 @@ public class JenkinsLogger extends ContainerPageObject {
         return getElement(by.css("#main-panel pre"))!=null;
     }
 
-    private static final Pattern LOG_PATTERN = Pattern.compile("((?:\\/\\w+)+.*?) by ");
+    private static final Pattern LOG_PATTERN = Pattern.compile("((?:\\/\\w+)+.*?) by (.*)");
 }

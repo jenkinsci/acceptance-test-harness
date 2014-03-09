@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.jenkinsci.test.acceptance.po.PageObject.*;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -36,18 +37,24 @@ public class AuditTrailPluginTest extends AbstractJUnitTest {
      * Scenario: Trail should be empty after installation
      *   Given I have set up the Audit Trail plugin
      *   Then the audit trail should be empty
-     *
+     */
+    @Test
+    public void trail_should_be_empty_after_login() {
+        assertThat(auditTrail.isEmpty(), is(true));
+    }
+
+    /**
+     * Scenario: Trail should contain logged events
+     *   Given I have set up the Audit Trail plugin
      *   When I create a job named "job"
      *   And  I create dumb slave named "slave"
      *   Then the audit trail should contain event "/createItem"
      *   And  the audit trail should contain event "/computer/createItem"
      */
     @Test
-    public void trail_should_be_empty_after_login() {
-        assertThat(auditTrail.isEmpty(), is(true));
-
-        jenkins.createJob(FreeStyleJob.class, "job");
-        jenkins.createDumbSlave("slave");
+    public void trail_should_contain_logged_events() {
+        jenkins.createJob(FreeStyleJob.class);
+        jenkins.createDumbSlave(createRandomName());
 
         List<String> events = auditTrail.getEvents();
         assertThat(events, hasItem("/createItem"));

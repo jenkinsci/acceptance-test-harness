@@ -25,7 +25,6 @@ public class DumbSlave extends Slave {
         // Just to make sure the dumb slave is set up properly, we should seed it
         // with a FS root and executors
         final DumbSlave s = new DumbSlave(j,name);
-        s.configure();
         s.setExecutors(1);
         s.setRemoteFs("/tmp/"+name);
         s.asLocal();
