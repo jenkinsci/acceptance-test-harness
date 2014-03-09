@@ -37,11 +37,6 @@ public class WinstoneController extends LocalController {
     }
 
     @Override
-    public void stopNow() throws IOException{
-        process.getProcess().destroy();
-    }
-
-    @Override
     public URL getUrl() {
         try {
             return new URL(String.format("http://127.0.0.1:%s/",httpPort));

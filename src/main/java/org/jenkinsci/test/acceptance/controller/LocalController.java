@@ -34,6 +34,13 @@ public abstract class LocalController extends JenkinsController {
 
     private static final Map<String,String> options = new HashMap<>();
 
+    private final Thread shutdownHook = new Thread() {
+        @Override
+        public void run() {
+            process.getProcess().destroy();
+        }
+    };
+
     static{
         String warLocation = getenv("JENKINS_WAR");
         if(warLocation == null){
@@ -129,6 +136,12 @@ public abstract class LocalController extends JenkinsController {
     }
 
     @Override
+    public void stopNow() throws IOException{
+        process.getProcess().destroy();
+        Runtime.getRuntime().removeShutdownHook(shutdownHook);
+    }
+
+    @Override
     public void diagnose() {
         if(getenv("INTERACTIVE") != null && getenv("INTERACTIVE").equals("true")){
             out.println("Commencing interactive debugging. Browser session was kept open.");
@@ -184,6 +197,8 @@ public abstract class LocalController extends JenkinsController {
 
     private void bringItUp() throws IOException{
         this.process = startProcess();
+        Runtime.getRuntime().addShutdownHook(shutdownHook);
+
         this.logWatcher = new LogWatcher(this.process, logger, options);
         try {
             this.logWatcher.waitTillReady(true);
