@@ -7,6 +7,7 @@ import org.jenkinsci.test.acceptance.plugins.ant.AntGlobalConfig;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Jenkins;
+import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -78,9 +79,11 @@ public class AntPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void autoInstallAnt() {
-        jenkins.configure();
+        JenkinsConfig c = jenkins.getConfigPage();
+        c.configure();
+        c.addTool("Add Ant");
         antgc.addAutoInstallation("ant_1.8.4", "1.8.4");
-        jenkins.save();
+        c.save();
 
         buildHelloWorld().shouldContainsConsoleOutput(
                 "Unpacking http://archive.apache.org/dist/ant/binaries/apache-ant-1.8.4-bin.zip"
@@ -107,9 +110,11 @@ public class AntPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void locallyInstalledAnt() {
-        jenkins.configure();
+        JenkinsConfig c = jenkins.getConfigPage();
+        c.configure();
+        c.addTool("Add Ant");
         antgc.addFakeInstallation("local_ant_1.8.4", "/tmp/fake-ant");
-        jenkins.save();
+        c.save();
 
         buildHelloWorld().shouldContainsConsoleOutput(
             "fake ant at /tmp/fake-ant/bin/ant"
