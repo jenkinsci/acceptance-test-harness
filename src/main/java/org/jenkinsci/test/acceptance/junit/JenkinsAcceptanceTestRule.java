@@ -32,7 +32,7 @@ public class JenkinsAcceptanceTestRule implements MethodRule {
 
                 // honor this annotation on a method, and if not try looking at the class
                 if (!installPlugins(method.getAnnotation(WithPlugins.class)))
-                    installPlugins(method.getType().getAnnotation(WithPlugins.class));
+                    installPlugins(target.getClass().getAnnotation(WithPlugins.class));
 
                 try {
                     base.evaluate();
