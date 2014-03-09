@@ -2,7 +2,11 @@ package org.jenkinsci.test.acceptance.controller;
 
 import org.jenkinsci.utils.process.ProcessInputStream;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -136,10 +140,12 @@ public class LogWatcher {
         }
     }
 
-    public boolean hasLogged(String regex){
-        for(String line:loggedLines){
-            if(line.matches(regex)){
-                return true;
+    public boolean hasLogged(String regex) {
+        synchronized (loggedLines) {
+            for (String line : loggedLines) {
+                if (line.matches(regex)) {
+                    return true;
+                }
             }
         }
         return false;
@@ -152,19 +158,23 @@ public class LogWatcher {
         }
     }
 
-    public String fullLog(){
-        StringBuilder sb = new StringBuilder();
-        for(String line: loggedLines){
-            sb.append(line);
+    public String fullLog() {
+        synchronized (loggedLines) {
+            StringBuilder sb = new StringBuilder();
+            for (String line : loggedLines) {
+                sb.append(line);
+            }
+            return sb.toString();
         }
-        return sb.toString();
     }
 
 
     private void logLine(String line) throws IOException {
         log.write(line.getBytes("UTF-8"));
         log.flush();
-        loggedLines.add(line);
+        synchronized (loggedLines) {
+            loggedLines.add(line);
+        }
 
         if(logPattern.get() != null){
             if(line.contains(logPattern.get())){
