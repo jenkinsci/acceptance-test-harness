@@ -15,7 +15,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.jenkinsci.test.acceptance.po.PageObject.*;
 
 /**
- * @author Kohsuke Kawaguchi
+ * Test audit_trail plugin
  */
 @WithPlugins("audit-trail")
 public class AuditTrailPluginTest extends AbstractJUnitTest {

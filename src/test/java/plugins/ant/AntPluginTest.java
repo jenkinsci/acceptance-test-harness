@@ -18,8 +18,6 @@ import java.util.concurrent.Callable;
  * Plugin test for Ant.
  *
  * Also acting as an example for writing tests in plain-old JUnit.
- *
- * @author Kohsuke Kawaguchi
  */
 @SuppressWarnings("CdiInjectionPointsInspection")
 @WithPlugins("ant")

@@ -15,7 +15,7 @@ import org.junit.Test;
 import javax.inject.Inject;
 
 /**
- * @author Kohsuke Kawaguchi
+ * Batch-task plugin test.
  */
 @WithPlugins("batch-task")
 public class BatchTaskPluginTest extends AbstractJUnitTest {
