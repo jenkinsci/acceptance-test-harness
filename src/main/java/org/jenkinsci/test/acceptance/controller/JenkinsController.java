@@ -71,10 +71,11 @@ public abstract class JenkinsController implements Closeable {
     }
 
     /**
-     * Alias for {@link #stop()}
+     * Alias for {@link #tearDown()}.
      */
     public final void close() throws IOException {
         stop();
+        tearDown();
     }
 
     /**
@@ -103,7 +104,7 @@ public abstract class JenkinsController implements Closeable {
 
     public abstract void diagnose();
 
-    public abstract void tearDown();
+    public abstract void tearDown() throws IOException;
 
     /**
      * Downloads the latest version of the form-element-path plugin that we use for testing.
