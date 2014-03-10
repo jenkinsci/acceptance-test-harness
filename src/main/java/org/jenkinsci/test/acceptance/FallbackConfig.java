@@ -17,6 +17,7 @@ import org.openqa.selenium.safari.SafariDriver;
 
 import java.io.IOException;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The default configuration for running tests.
@@ -60,6 +61,7 @@ public class FallbackConfig extends AbstractModule {
     @Provides @TestScope
     public WebDriver createWebDriver(TestCleaner cleaner) {
         final WebDriver d = createWebDriver();
+        d.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
         cleaner.addTask(new Statement() {
             @Override
             public void evaluate() throws Throwable {
