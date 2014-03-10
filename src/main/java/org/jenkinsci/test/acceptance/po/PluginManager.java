@@ -32,7 +32,6 @@ public class PluginManager extends ContainerPageObject {
 
     public boolean isInstalled(String... shortNames) {
         visit("installed");
-        sleep(100);
         try {
             for (String n : shortNames) {
                 find(by.xpath("//input[@url='plugin/%s']", n));
