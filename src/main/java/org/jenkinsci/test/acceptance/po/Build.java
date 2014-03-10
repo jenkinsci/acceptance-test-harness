@@ -2,9 +2,10 @@ package org.jenkinsci.test.acceptance.po;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.jenkinsci.test.acceptance.Matchers;
-import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebElement;
 
 import java.net.URL;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 
@@ -85,11 +86,13 @@ public class Build extends ContainerPageObject {
         if (console!=null)  return console;
 
         visit(getConsoleUrl());
-        try {
+
+        List<WebElement> a = all(by.xpath("//pre"));
+        if (a.size()>1)
             console = find(by.xpath("//pre[@id='out']")).getText();
-        } catch (NoSuchElementException _) {
-            console = find(by.xpath("//pre")).getText();
-        }
+        else
+            console = a.get(0).getText();
+
         return console;
     }
 
