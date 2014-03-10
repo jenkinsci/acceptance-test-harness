@@ -152,6 +152,11 @@
           <artifactId>slf4j-log4j12</artifactId>
           <version>1.6.1</version>
       </dependency>
+    <dependency>
+      <groupId>com.github.jnr</groupId>
+      <artifactId>jnr-unixsocket</artifactId>
+      <version>0.3</version>
+    </dependency>
   </dependencies>
 
   <scm>
