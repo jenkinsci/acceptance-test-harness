@@ -54,7 +54,7 @@ public class AntPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void allow_user_to_use_Ant_in_freestyle_project() {
-        buildHelloWorld();
+        buildHelloWorld(null);
     }
 
     /**
@@ -79,13 +79,16 @@ public class AntPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void autoInstallAnt() {
+        // auto-installation requires metadata
+        jenkins.getPluginManager().checkForUpdates();
+
         JenkinsConfig c = jenkins.getConfigPage();
         c.configure();
         c.addTool("Add Ant");
         antgc.addAutoInstallation("ant_1.8.4", "1.8.4");
         c.save();
 
-        buildHelloWorld().shouldContainsConsoleOutput(
+        buildHelloWorld("ant_1.8.4").shouldContainsConsoleOutput(
                 "Unpacking http://archive.apache.org/dist/ant/binaries/apache-ant-1.8.4-bin.zip"
         );
     }
@@ -116,16 +119,19 @@ public class AntPluginTest extends AbstractJUnitTest {
         antgc.addFakeInstallation("local_ant_1.8.4", "/tmp/fake-ant");
         c.save();
 
-        buildHelloWorld().shouldContainsConsoleOutput(
+        buildHelloWorld("local_ant_1.8.4").shouldContainsConsoleOutput(
             "fake ant at /tmp/fake-ant/bin/ant"
         );
     }
 
-    private Build buildHelloWorld() {
+    private Build buildHelloWorld(final String name) {
         job.configure(new Callable<Object>() {
             public Object call() {
                 job.addCreateFileStep("build.xml", resource("echo-helloworld.xml").asText());
-                job.addBuildStep(AntBuildStep.class).targets.sendKeys("hello");
+                AntBuildStep ant = job.addBuildStep(AntBuildStep.class);
+                if (name!=null)
+                    ant.antName.sendKeys(name);
+                ant.targets.sendKeys("hello");
                 return null;
             }
         });
