@@ -35,8 +35,9 @@ public class AntGlobalConfig extends PageArea {
     public void addAutoInstallation(String name, String version) {
         this.name.sendKeys(name);
         // by default Install automatically is checked
-        control("tool/properties/hudson-tools-InstallSourceProperty/installers/id").resolve();
-        find(by.xpath("//option[@value='%s']",version)).click();
+        control("tool/properties/hudson-tools-InstallSourceProperty/installers/id").sendKeys(version);
+        // TODO: whereas we expect a drop-down, we are seeing a text box (indicative of master not getting tool installer updates?)
+//            .findElement(by.option(version)).click();
     }
 
     public void addLocalInstallation(String name, String antHome) {
