@@ -59,6 +59,8 @@ public class PooledJenkinsController extends JenkinsController {
 
     @Override
     public URL getUrl() {
+        if (url==null)
+            throw new IllegalStateException("This controller has not been started");
         return url;
     }
 
