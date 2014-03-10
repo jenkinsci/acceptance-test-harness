@@ -1,4 +1,4 @@
-package plugins;
+package core;
 
 import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;

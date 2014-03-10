@@ -1,4 +1,4 @@
-package plugins.audit_trail;
+package plugins;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;

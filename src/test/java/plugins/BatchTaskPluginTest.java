@@ -1,4 +1,4 @@
-package plugins.batch_task;
+package plugins;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
