@@ -2,13 +2,20 @@ package org.jenkinsci.test.acceptance.po;
 
 import com.google.inject.Injector;
 import cucumber.api.DataTable;
+import net.schmizz.sshj.common.Base64;
+import org.apache.commons.io.IOUtils;
+import org.jenkinsci.test.acceptance.junit.Resource;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -53,6 +60,23 @@ public class Job extends ContainerPageObject {
 
     public void addCreateFileStep(String name, String content) {
         addShellStep(String.format("cat > %s << ENDOFFILE\n%s\nENDOFFILE",name,content));
+    }
+
+    /**
+     * Adds a shell step that copies a resource inside the test project into a file on the build machine.
+     */
+    public void copyResource(Resource resource, String fileName) {
+        try (InputStream in=resource.asInputStream()) {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            GZIPOutputStream gz = new GZIPOutputStream(out);
+            IOUtils.copy(in, gz);
+            gz.close();
+
+            addShellStep(String.format("base64 -d | gunzip > %s << ENDOFFILE\n%s\nENDOFFILE",
+                    fileName, Base64.encodeBytes(out.toByteArray())));
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
     }
 
     public URL getBuildUrl() {

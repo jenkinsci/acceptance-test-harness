@@ -3,6 +3,7 @@ package org.jenkinsci.test.acceptance;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
+import org.jenkinsci.test.acceptance.po.PageObject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
@@ -67,6 +68,33 @@ public class Matchers {
         };
     }
 
+    /**
+     * For asserting that a {@link PageObject}'s top page has an action of the given name.
+     */
+    public static Matcher<PageObject> hasAction(final String displayName) {
+        return new TypeSafeMatcher<PageObject>() {
+            @Override
+            protected boolean matchesSafely(PageObject po) {
+                try {
+                    po.open();
+                    po.find(by.xpath("//div[@id='tasks']/div/a[text()='%s']", displayName));
+                    return true;
+                } catch (NoSuchElementException _) {
+                    return false;
+                }
+            }
+
+            @Override
+            public void describeTo(Description d) {
+                d.appendText("contains action titled ").appendValue(displayName);
+            }
+
+            @Override
+            protected void describeMismatchSafely(PageObject po, Description d) {
+                d.appendValue(po.url).appendText(" does not have action: ").appendValue(displayName);
+            }
+        };
+    } 
     public static Matcher<String> containsRegexp(String regexp) {
         return containsRegexp(regexp,0);
     }
@@ -89,4 +117,6 @@ public class Matchers {
             }
         };
     }
+
+    public static final ByFactory by = new ByFactory();
 }

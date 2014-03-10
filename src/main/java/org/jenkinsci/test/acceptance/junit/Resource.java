@@ -44,4 +44,10 @@ public class Resource {
             throw new IOError(e);
         }
     }
+
+    public byte[] asByteArray() throws IOException {
+        try (InputStream is = asInputStream()) {
+            return IOUtils.toByteArray(is);
+        }
+    }
 }
