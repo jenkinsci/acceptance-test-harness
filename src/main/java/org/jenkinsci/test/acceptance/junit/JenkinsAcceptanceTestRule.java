@@ -30,11 +30,11 @@ public class JenkinsAcceptanceTestRule implements MethodRule {
                 injector.injectMembers(target);
                 injector.injectMembers(this);
 
-                // honor this annotation on a method, and if not try looking at the class
-                if (!installPlugins(method.getAnnotation(WithPlugins.class)))
-                    installPlugins(target.getClass().getAnnotation(WithPlugins.class));
-
                 try {
+                    // honor this annotation on a method, and if not try looking at the class
+                    if (!installPlugins(method.getAnnotation(WithPlugins.class)))
+                        installPlugins(target.getClass().getAnnotation(WithPlugins.class));
+
                     base.evaluate();
                 } finally {
                     world.endTestScope();
