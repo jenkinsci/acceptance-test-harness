@@ -1,6 +1,7 @@
 package ant;
 
 import com.google.inject.Injector;
+import org.jenkinsci.test.acceptance.controller.Authenticator;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.JenkinsProvider;
 import org.jenkinsci.test.acceptance.po.Jenkins;

@@ -3,6 +3,8 @@ package org.jenkinsci.test.acceptance.controller;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import org.jenkinsci.test.acceptance.guice.TestScope;
+import org.jenkinsci.test.acceptance.resolver.JenkinsResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +19,7 @@ import static java.lang.System.getenv;
 /**
  * @author Vivek Pandey
  */
-@Singleton
+@TestScope
 public class JenkinsProvider implements Provider<JenkinsController> {
 
     private static final Logger logger = LoggerFactory.getLogger(JenkinsProvider.class);
@@ -29,42 +31,32 @@ public class JenkinsProvider implements Provider<JenkinsController> {
     private final JenkinsController jenkinsController;
 
     @Inject
-    public JenkinsProvider(Machine machine) {
+    public JenkinsProvider(Machine machine, JenkinsResolver jenkinsResolver) {
         this.machine = machine;
         logger.info("New Jenkins Provider created");
-        Ssh ssh=null;
         try{
-            String warLocation = getenv("JENKINS_WAR");
-
-            String user = machine.getUser();
-            ssh = new Ssh(user, machine.getPublicIpAddress());
-
-            ssh.copyTo(warLocation, "jenkins.war", ".");
-
-            this.jenkinsHome = newJenkinsHome();
-
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            this.jenkinsHome = machine.dir()+"/"+newJenkinsHome();
             try {
-                ssh.executeRemoteCommand("mkdir -p " + jenkinsHome + "/plugins", os);
+                Ssh ssh = machine.connect();
+                ssh.executeRemoteCommand("mkdir -p " + jenkinsHome + "/plugins");
 
                 File formPathElement = JenkinsController.downloadPathElement();
 
                 //copy form-path-element
                 ssh.copyTo(formPathElement.getAbsolutePath(), "path-element.hpi", "./"+jenkinsHome+"/plugins/");
 
-                ssh.destroy();
                 this.jenkinsController = new RemoteJenkinsController(machine, jenkinsHome);
             } catch (IOException e) {
-                throw new RuntimeException(new String(os.toByteArray()),e);
+                throw new AssertionError("Failed to copy form-path-element.hpi",e);
             }
 
         }catch(Exception e){
-            machine.terminate(); //any exception and we clean the ec2 resource
-            throw new RuntimeException(e);
-        }finally {
-            if(ssh != null){
-                ssh.destroy();
+            try {
+                machine.close();
+            } catch (IOException e1) {
+                throw new AssertionError(e);
             }
+            throw new RuntimeException(e);
         }
     }
 
@@ -78,7 +70,7 @@ public class JenkinsProvider implements Provider<JenkinsController> {
         SecureRandom secureRandom = new SecureRandom();
         long secureInitializer = secureRandom.nextLong();
         Random rand = new Random( secureInitializer + Runtime.getRuntime().freeMemory() );
-        return String.format("temp%sdir", rand.nextInt());
+        return String.format("jenkins_home_%s", rand.nextInt());
     }
 
 }

@@ -7,6 +7,7 @@ import org.jclouds.compute.domain.Template;
 import org.jclouds.ec2.EC2Client;
 import org.jclouds.ec2.compute.options.EC2TemplateOptions;
 import org.jclouds.ec2.domain.IpProtocol;
+import org.jenkinsci.test.acceptance.resolver.JenkinsResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +20,7 @@ import static com.google.common.base.Charsets.UTF_8;
  * @author Vivek Pandey
  */
 @Singleton
-public class Ec2Provider extends MachineProvider {
+public class Ec2Provider extends JCloudsMachineProvider {
 
     @Inject
     private Ec2Config config;
@@ -33,7 +34,7 @@ public class Ec2Provider extends MachineProvider {
     }
 
     @Override
-    public void authorizePorts() {
+    public void authorizeInboundPorts() {
         if(config.getSecurityGroups().size() > 0){
             EC2Client client = contextBuilder.buildApi(EC2Client.class);
 
@@ -53,7 +54,12 @@ public class Ec2Provider extends MachineProvider {
     }
 
     @Override
-    public Template getTemplate() throws IOException{
+    public Authenticator authenticator() {
+        return new Authenticator.PublicKeyAuthenticator(config.getUser());
+    }
+
+    @Override
+    public Template getTemplate() throws IOException {
         Template template =  computeService.templateBuilder().imageId(config.getRegion()+"/"+config.getImageId()).
                 locationId(config.getRegion()).hardwareId(config.getInstanceType()).
                 build();
@@ -67,8 +73,4 @@ public class Ec2Provider extends MachineProvider {
 
 
     private static final Logger logger = LoggerFactory.getLogger(Ec2Provider.class);
-
-
-
-
 }

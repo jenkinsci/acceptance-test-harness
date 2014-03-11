@@ -13,18 +13,22 @@ public interface Machine extends Closeable {
     /**
      * Connects to this computer over SSH so that we can do stuff
      *
-     * TODO: maybe consider using Overthere
      */
     Ssh connect();
 
+    /**
+     * Public IP address of the machine
+     */
     String getPublicIpAddress();
 
+    /**
+     * User authorized to use the machine
+     *
+     */
     String getUser();
 
-    void terminate();
-
     /**
-     * Client of {@link Machine} can use this directory and undearneath for whatever purpose.
+     * Client of {@link Machine} can use this directory and underneath for whatever purpose.
      */
     String dir();
 
@@ -41,4 +45,9 @@ public interface Machine extends Closeable {
      * Once this method is called, no other methods should be called.
      */
     void close() throws IOException;
+
+    /**
+     * Every machine must have Jenkins installed, this gives location to Jenkins war file
+     */
+    String jenkinsWarLocation();
 }

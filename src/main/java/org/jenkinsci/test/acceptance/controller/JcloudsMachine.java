@@ -4,38 +4,53 @@ import org.jclouds.compute.domain.NodeMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.io.IOException;
+import java.security.SecureRandom;
+import java.util.EmptyStackException;
+import java.util.Random;
+import java.util.Stack;
 
 /**
  * @author Vivek Pandey
  */
 public class JcloudsMachine implements Machine {
     private final NodeMetadata nodeMetadata;
-    private final MachineProvider machineProvider;
+    private final JCloudsMachineProvider machineProvider;
 
     public static final int BEGINNING_PORT = 20000;
 
-    private AtomicInteger nextPort = new AtomicInteger(0);
-    private List<Integer> availablePorts;
-    private final int maxAvailablePort;
+    private final Stack<Integer> availablePorts = new Stack<>();
 
-    public JcloudsMachine(MachineProvider machineProvider, NodeMetadata nodeMetadata) {
+    private final String dir;
+    private final String jenkinsHome;
+
+    public JcloudsMachine(JCloudsMachineProvider machineProvider, NodeMetadata nodeMetadata) {
         this.nodeMetadata = nodeMetadata;
         this.machineProvider = machineProvider;
-        List<Integer> ports = new ArrayList<>();
         for(int port:machineProvider.getAvailableInboundPorts()){
-            ports.add(port);
+            availablePorts.push(port);
         }
 
-        this.availablePorts = Collections.unmodifiableList(ports);
-        this.maxAvailablePort = ports.get(ports.size()-1);
+        this.dir = "./machine_home_"+newDirSuffix();
+        Ssh ssh = connect();
+        ssh.executeRemoteCommand("mkdir -p "+this.dir);
 
-        //set to the first port
-        nextPort.set(availablePorts.get(0));
+        this.jenkinsHome = this.dir+"/jenkins.war";
 
+        //install jenkins
+        machineProvider.jenkinsResolver().materialize(this,jenkinsHome);
+
+    }
+
+    @Override
+    public Ssh connect() {
+        try {
+            Ssh ssh = new Ssh(getUser(),getPublicIpAddress());
+            machineProvider.authenticator().authenticate(ssh.getConnection());
+            return ssh;
+        } catch (IOException e) {
+            throw new AssertionError("Failed to create ssh connection",e);
+        }
     }
 
     @Override
@@ -48,38 +63,36 @@ public class JcloudsMachine implements Machine {
         return (nodeMetadata.getCredentials() == null) ? "ubuntu" : nodeMetadata.getCredentials().getUser();
     }
 
-    /**
-     * Terminate a running machine
-     */
     @Override
-    public void terminate(){
+    public String dir() {
+        return dir;
+    }
+
+    @Override
+    public int getNextAvailablePort(){
+        try{
+            return availablePorts.pop();
+        }catch (EmptyStackException e){
+            throw new AssertionError("No more free inbound ports",e);
+        }
+    }
+
+    @Override
+    public void close() throws IOException {
         logger.error("Destroying node: "+nodeMetadata);
         machineProvider.destroy(nodeMetadata.getId());
     }
 
     @Override
-    public int getNextAvailablePort(){
-        int p = nextPort.incrementAndGet();
-        if(p > maxAvailablePort){
-            throw new RuntimeException("no more available ports");
-        }
-        return p;
+    public String jenkinsWarLocation() {
+        return jenkinsHome;
     }
 
-    /**
-     *  Terminate all running instances in the group this machine instance is created in to
-     */
-//    public void terminateAll(){
-//        logger.info("Destroying nodes in group %s%n", nodeMetadata.getGroup());
-//
-//        // you can use predicates to select which nodes you wish to destroy.
-//        Set<? extends NodeMetadata> destroyed = computeService.destroyNodesMatching(Predicates.and(not(TERMINATED), inGroup(nodeMetadata.getGroup())));
-//        System.out.printf("Destroyed nodes %s%n", destroyed);
-//    }
-
-
-
-
+    public static long newDirSuffix(){
+        SecureRandom secureRandom = new SecureRandom();
+        long secureInitializer = secureRandom.nextLong();
+        return Math.abs(new Random( secureInitializer + Runtime.getRuntime().freeMemory()).nextInt());
+    }
 
     private static final Logger logger = LoggerFactory.getLogger(JcloudsMachine.class);
 

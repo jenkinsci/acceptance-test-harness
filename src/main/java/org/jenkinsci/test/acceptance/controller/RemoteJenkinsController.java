@@ -33,7 +33,7 @@ public class RemoteJenkinsController extends JenkinsController {
     public void startNow() throws IOException {
         CommandBuilder cb = new CommandBuilder("ssh", "-t",String.format("%s@%s",machine.getUser(),machine.getPublicIpAddress())).add(
                 " java -DJENKINS_HOME=" + jenkinsHome +
-                " -jar jenkins.war" +
+                " -jar " + machine.jenkinsWarLocation() +
                 " --ajp13Port=-1" +
                 " --controlPort=" + controlPort +
                 " --httpPort=" + httpPort);

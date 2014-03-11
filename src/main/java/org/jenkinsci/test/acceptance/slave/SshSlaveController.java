@@ -4,6 +4,8 @@ import org.jenkinsci.test.acceptance.controller.Machine;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.Slave;
 
+import java.io.IOException;
+
 /**
  * @author Kohsuke Kawaguchi
  */
@@ -28,5 +30,10 @@ public class SshSlaveController extends SlaveController {
     @Override
     public void stop() {
         // no-op
+    }
+
+    @Override
+    public void close() throws IOException {
+
     }
 }

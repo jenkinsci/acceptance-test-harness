@@ -1,5 +1,7 @@
 package org.jenkinsci.test.acceptance.resolver;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import org.jenkinsci.test.acceptance.controller.Machine;
 import org.jenkinsci.test.acceptance.controller.Ssh;
 
@@ -15,16 +17,18 @@ import java.io.IOException;
 public class JenkinsUploader implements JenkinsResolver {
     File war;
 
-    public JenkinsUploader(File war) {
-        this.war = war;
+    @Inject
+    public JenkinsUploader(@Named("jenkins-war-location") String war) {
+        this.war = new File(war);
+        if(!this.war.exists()){
+            throw new AssertionError("Jenkins war file location "+war+" does not exist");
+        }
     }
 
     @Override
     public void materialize(Machine machine, String path) {
         try {
             Ssh ssh = machine.connect();
-
-            // TODO: do it properly
             File target = new File(path);
             ssh.copyTo(war.getPath(), target.getName(), target.getParent());
         } catch (IOException e) {
