@@ -7,7 +7,6 @@ import org.jclouds.compute.domain.Template;
 import org.jclouds.ec2.EC2Client;
 import org.jclouds.ec2.compute.options.EC2TemplateOptions;
 import org.jclouds.ec2.domain.IpProtocol;
-import org.jenkinsci.test.acceptance.resolver.JenkinsResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +19,7 @@ import static com.google.common.base.Charsets.UTF_8;
  * @author Vivek Pandey
  */
 @Singleton
-public class Ec2Provider extends JCloudsMachineProvider {
+public class Ec2Provider extends JcloudsMachineProvider {
 
     @Inject
     private Ec2Config config;

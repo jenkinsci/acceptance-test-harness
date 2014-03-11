@@ -15,7 +15,7 @@ import java.util.Stack;
  */
 public class JcloudsMachine implements Machine {
     private final NodeMetadata nodeMetadata;
-    private final JCloudsMachineProvider machineProvider;
+    private final JcloudsMachineProvider machineProvider;
 
     public static final int BEGINNING_PORT = 20000;
 
@@ -24,7 +24,7 @@ public class JcloudsMachine implements Machine {
     private final String dir;
     private final String jenkinsHome;
 
-    public JcloudsMachine(JCloudsMachineProvider machineProvider, NodeMetadata nodeMetadata) {
+    public JcloudsMachine(JcloudsMachineProvider machineProvider, NodeMetadata nodeMetadata) {
         this.nodeMetadata = nodeMetadata;
         this.machineProvider = machineProvider;
         for(int port:machineProvider.getAvailableInboundPorts()){

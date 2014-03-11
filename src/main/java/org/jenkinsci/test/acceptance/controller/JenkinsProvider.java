@@ -67,10 +67,7 @@ public class JenkinsProvider implements Provider<JenkinsController> {
     }
 
     private String newJenkinsHome(){
-        SecureRandom secureRandom = new SecureRandom();
-        long secureInitializer = secureRandom.nextLong();
-        Random rand = new Random( secureInitializer + Runtime.getRuntime().freeMemory() );
-        return String.format("jenkins_home_%s", rand.nextInt());
+        return String.format("jenkins_home_%s", JcloudsMachine.newDirSuffix());
     }
 
 }
