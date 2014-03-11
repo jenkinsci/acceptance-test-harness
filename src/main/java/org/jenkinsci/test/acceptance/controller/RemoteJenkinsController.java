@@ -20,11 +20,13 @@ public class RemoteJenkinsController extends JenkinsController {
     private final int httpPort;
     private final int controlPort;
     private LogWatcher logWatcher;
+    private final String jenkinsWarLocation;
     protected ProcessInputStream process;
 
-    public RemoteJenkinsController(Machine machine, String jenkinsHome) {
+    public RemoteJenkinsController(Machine machine, String jenkinsHome, String jenkinsWar) {
         this.machine = machine;
         this.jenkinsHome = jenkinsHome;
+        this.jenkinsWarLocation = jenkinsWar;
         this.httpPort = machine.getNextAvailablePort();
         this.controlPort = machine.getNextAvailablePort();
     }
@@ -33,7 +35,7 @@ public class RemoteJenkinsController extends JenkinsController {
     public void startNow() throws IOException {
         CommandBuilder cb = new CommandBuilder("ssh", "-t",String.format("%s@%s",machine.getUser(),machine.getPublicIpAddress())).add(
                 " java -DJENKINS_HOME=" + jenkinsHome +
-                " -jar " + machine.jenkinsWarLocation() +
+                " -jar " + jenkinsWarLocation +
                 " --ajp13Port=-1" +
                 " --controlPort=" + controlPort +
                 " --httpPort=" + httpPort);
@@ -68,6 +70,11 @@ public class RemoteJenkinsController extends JenkinsController {
 
     @Override
     public void tearDown() {
+        try {
+            machine.close();
+        } catch (IOException e) {
+            throw new AssertionError("Failed to clean machine");
+        }
 
     }
 

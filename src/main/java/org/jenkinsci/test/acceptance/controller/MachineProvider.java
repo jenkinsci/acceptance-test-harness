@@ -17,9 +17,4 @@ public interface MachineProvider extends Provider<Machine>{
      * {@link org.jenkinsci.test.acceptance.controller.Authenticator} contract.
      */
     public Authenticator authenticator();
-
-    /**
-     * Resolves Jenkins installation on the machine
-     */
-    public JenkinsResolver jenkinsResolver();
 }

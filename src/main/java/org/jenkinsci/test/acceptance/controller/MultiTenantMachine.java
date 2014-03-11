@@ -1,8 +1,6 @@
 package org.jenkinsci.test.acceptance.controller;
 
 import com.google.inject.Inject;
-import org.jenkinsci.test.acceptance.resolver.JenkinsLinker;
-import org.jenkinsci.test.acceptance.resolver.JenkinsResolver;
 
 import java.io.IOException;
 
@@ -13,7 +11,6 @@ public class MultiTenantMachine implements Machine{
 
     private final Machine base;
     private final String dir;
-    private final String jenkinsHome;
 
     @Inject
     public MultiTenantMachine(Machine machine) {
@@ -21,9 +18,6 @@ public class MultiTenantMachine implements Machine{
         this.dir = String.format("%s/mt_%s",machine.dir(), JcloudsMachine.newDirSuffix());
         Ssh ssh = connect();
         ssh.executeRemoteCommand("mkdir -p "+this.dir);
-
-        this.jenkinsHome = this.dir + "/jenkins.war";
-        new JenkinsLinker(machine.jenkinsWarLocation()).materialize(this, this.jenkinsHome);
     }
 
     @Override
@@ -46,6 +40,10 @@ public class MultiTenantMachine implements Machine{
         return dir;
     }
 
+    public Machine baseMachine(){
+        return base;
+    }
+
     @Override
     public int getNextAvailablePort() {
         return base.getNextAvailablePort();
@@ -56,10 +54,5 @@ public class MultiTenantMachine implements Machine{
         Ssh ssh = connect();
         //cleanup all directories for the next reuse
         ssh.executeRemoteCommand("rm -rf "+dir());
-    }
-
-    @Override
-    public String jenkinsWarLocation() {
-        return jenkinsHome;
     }
 }

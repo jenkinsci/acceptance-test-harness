@@ -20,8 +20,8 @@ public class MultitenancyMachineProvider implements MachineProvider {
     private final MachineProvider base;
 
     @Inject(optional = true)
-    @Named("max_multitenant_machines")
-    private final int max = 10;
+    @Named("max_mt_machines")
+    private int max = 10;
 
     private final AtomicInteger cur = new AtomicInteger(1);
 
@@ -56,8 +56,4 @@ public class MultitenancyMachineProvider implements MachineProvider {
         return base.authenticator();
     }
 
-    @Override
-    public JenkinsResolver jenkinsResolver() {
-        return base.jenkinsResolver();
-    }
 }

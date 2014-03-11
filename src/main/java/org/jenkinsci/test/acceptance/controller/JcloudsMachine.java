@@ -22,7 +22,6 @@ public class JcloudsMachine implements Machine {
     private final Stack<Integer> availablePorts = new Stack<>();
 
     private final String dir;
-    private final String jenkinsHome;
 
     public JcloudsMachine(JcloudsMachineProvider machineProvider, NodeMetadata nodeMetadata) {
         this.nodeMetadata = nodeMetadata;
@@ -34,12 +33,6 @@ public class JcloudsMachine implements Machine {
         this.dir = "./machine_home_"+newDirSuffix();
         Ssh ssh = connect();
         ssh.executeRemoteCommand("mkdir -p "+this.dir);
-
-        this.jenkinsHome = this.dir+"/jenkins.war";
-
-        //install jenkins
-        machineProvider.jenkinsResolver().materialize(this,jenkinsHome);
-
     }
 
     @Override
@@ -83,10 +76,6 @@ public class JcloudsMachine implements Machine {
         machineProvider.destroy(nodeMetadata.getId());
     }
 
-    @Override
-    public String jenkinsWarLocation() {
-        return jenkinsHome;
-    }
 
     public static long newDirSuffix(){
         SecureRandom secureRandom = new SecureRandom();

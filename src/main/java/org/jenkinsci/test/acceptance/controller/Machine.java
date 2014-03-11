@@ -45,9 +45,4 @@ public interface Machine extends Closeable {
      * Once this method is called, no other methods should be called.
      */
     void close() throws IOException;
-
-    /**
-     * Every machine must have Jenkins installed, this gives location to Jenkins war file
-     */
-    String jenkinsWarLocation();
 }

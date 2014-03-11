@@ -150,10 +150,6 @@ public abstract class JcloudsMachineProvider implements MachineProvider {
         return properties;
     }
 
-    @Override
-    public JenkinsResolver jenkinsResolver() {
-        return jenkinsResolver;
-    }
 
     private ContextBuilder initComputeService(String provider, String identity, String credential) {
         Iterable<Module> modules = ImmutableSet.<Module>of(

@@ -2,19 +2,14 @@ package org.jenkinsci.test.acceptance.controller;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.google.inject.Singleton;
 import org.jenkinsci.test.acceptance.guice.TestScope;
+import org.jenkinsci.test.acceptance.resolver.JenkinsLinker;
 import org.jenkinsci.test.acceptance.resolver.JenkinsResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.security.SecureRandom;
-import java.util.Random;
-
-import static java.lang.System.getenv;
 
 /**
  * @author Vivek Pandey
@@ -30,11 +25,16 @@ public class JenkinsProvider implements Provider<JenkinsController> {
 
     private final JenkinsController jenkinsController;
 
+    private final JenkinsResolver jenkinsResolver;
+
     @Inject
     public JenkinsProvider(Machine machine, JenkinsResolver jenkinsResolver) {
         this.machine = machine;
+        this.jenkinsResolver = jenkinsResolver;
         logger.info("New Jenkins Provider created");
         try{
+            //install jenkins
+            String jenkinsWar = installJenkins(machine);
             this.jenkinsHome = machine.dir()+"/"+newJenkinsHome();
             try {
                 Ssh ssh = machine.connect();
@@ -45,7 +45,7 @@ public class JenkinsProvider implements Provider<JenkinsController> {
                 //copy form-path-element
                 ssh.copyTo(formPathElement.getAbsolutePath(), "path-element.hpi", "./"+jenkinsHome+"/plugins/");
 
-                this.jenkinsController = new RemoteJenkinsController(machine, jenkinsHome);
+                this.jenkinsController = new RemoteJenkinsController(machine, jenkinsHome,jenkinsWar);
             } catch (IOException e) {
                 throw new AssertionError("Failed to copy form-path-element.hpi",e);
             }
@@ -70,4 +70,20 @@ public class JenkinsProvider implements Provider<JenkinsController> {
         return String.format("jenkins_home_%s", JcloudsMachine.newDirSuffix());
     }
 
+    private String installJenkins(Machine machine){
+        String target = machine.dir()+"/jenkins.war";
+        jenkinsResolver.materialize(machine,target);
+        return target;
+
+//        //TODO: there should be better way to do it?
+//        if(machine instanceof MultiTenantMachine){
+//            String warLocation = ((MultiTenantMachine)machine).baseMachine().dir() + "/jenkins.war";
+//            String targetWar = machine.dir()+"/jenkins.war";
+//            new JenkinsLinker(warLocation).materialize(machine, targetWar);
+//            return targetWar;
+//        }else{
+//            jenkinsResolver.materialize(machine,machine.dir());
+//            return machine.dir()+"/jenkins.war";
+//        }
+    }
 }
