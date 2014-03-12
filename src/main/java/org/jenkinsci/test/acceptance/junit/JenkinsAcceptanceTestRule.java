@@ -13,6 +13,14 @@ import org.openqa.selenium.WebDriver;
 /**
  * Runs Guice container that houses {@link JenkinsController}, {@link WebDriver}, and so on.
  *
+ * <p>
+ * Add this rule to your Unit test class if you want to leverage this harness.
+ *
+ * <p>
+ * This is the glue that connects JUnit to the logic of the test harness (but to support other test harnesses
+ * like cucumber, we are trying to minimize what to put in here.)
+ *
+ *
  * @author Kohsuke Kawaguchi
  */
 public class JenkinsAcceptanceTestRule implements MethodRule {
