@@ -15,9 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author Kohsuke Kawaguchi
  */
-public class JocTest {
+public class JocTest extends AbstractJUnitTest {
     @Inject
     JenkinsController jocc;
 
@@ -35,10 +34,15 @@ public class JocTest {
 
     @Test
     public void bigFamily() throws Exception{
-        List<Jenkins> armyOfJEs = new ArrayList<>();
+        List<JenkinsController> controllers = new ArrayList<>();
         for (int i=0; i<2; i++) {
             JenkinsController c = provider.get();
-            c.start();
+//            c.start();    // we are making Provider<JenkinsController> responsible for this
+            controllers.add(c);
+        }
+
+        List<Jenkins> armyOfJEs = new ArrayList<>();
+        for (JenkinsController c : controllers) {
             armyOfJEs.add(new Jenkins(injector,c));
         }
 
