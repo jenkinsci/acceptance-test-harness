@@ -18,7 +18,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.nio.channels.Channels;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.SynchronousQueue;
 
 /**
@@ -60,7 +59,7 @@ public class JenkinsControllerPoolProcess {
                         JenkinsController c = f.createController(factories, cleaner);
                         queue.put(c);
                     }
-                } catch (InterruptedException|IOException e) {
+                } catch (Throwable e) {
                     // fail fatally
                     e.printStackTrace();
                     System.exit(1);
