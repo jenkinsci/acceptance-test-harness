@@ -23,8 +23,8 @@ public class JenkinsUploader implements JenkinsResolver {
 
 
     @Inject
-    public JenkinsUploader(@Named("jenkins-war-location") String war) {
-        this.war = new File(war);
+    public JenkinsUploader(@Named("jenkins-war-location") File war) {
+        this.war = war;
         if(!this.war.exists()){
             throw new AssertionError("Jenkins war file location "+war+" does not exist");
         }
