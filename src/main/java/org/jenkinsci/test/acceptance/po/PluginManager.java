@@ -1,10 +1,11 @@
 package org.jenkinsci.test.acceptance.po;
 
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.po.UpdateCenter.InstallationFailedException;
 import org.openqa.selenium.NoSuchElementException;
 
 /**
- * Page objecct for plugin manager.
+ * Page object for plugin manager.
  *
  * @author Kohsuke Kawaguchi
  */
@@ -14,8 +15,11 @@ public class PluginManager extends ContainerPageObject {
      */
     private boolean updated;
 
+    public final Jenkins jenkins;
+
     public PluginManager(Jenkins jenkins) {
         super(jenkins.injector, jenkins.url("pluginManager/"));
+        this.jenkins = jenkins;
     }
 
     /**
@@ -60,10 +64,24 @@ public class PluginManager extends ContainerPageObject {
         if (!updated)
             checkForUpdates();
 
-        visit("available");
-        for (String n : shortNames) {
-            check(find(by.xpath("//input[starts-with(@name,'plugin.%s.')]", n)));
+        OUTER:
+        for (final String n : shortNames) {
+            for (int attempt=0; attempt<2; attempt++) {// # of installations attempted, considering retries
+                visit("available");
+                check(find(by.xpath("//input[starts-with(@name,'plugin.%s.')]", n)));
+
+                clickButton("Install");
+
+                try {
+                    new UpdateCenter(jenkins).waitForInstallationToComplete(n);
+                } catch (InstallationFailedException e) {
+                    if (e.getMessage().contains("Failed to download from")) {
+                        continue;   // retry
+                    }
+                }
+
+                continue OUTER;  // installation completed
+            }
         }
-        clickButton("Install");
     }
 }

@@ -95,10 +95,21 @@ public abstract class ContainerPageObject extends PageObject {
      * Makes the API call and obtains JSON representation.
      */
     public JsonNode getJson() {
+        return getJson(null);
+    }
+
+    /**
+     * @param queryString
+     *      Additional query string to narrow down the data retrieval, like "tree=..." or "depth=..."
+     */
+    public JsonNode getJson(String queryString) {
+        URL url = getJsonApiUrl();
         try {
-            return jsonParser.readTree(getJsonApiUrl());
+            if (queryString!=null)
+                url = new URL(url,"?"+queryString);
+            return jsonParser.readTree(url);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to read from "+getJsonApiUrl(),e);
+            throw new RuntimeException("Failed to read from "+ url,e);
         }
     }
 }
