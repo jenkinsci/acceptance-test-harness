@@ -4,6 +4,7 @@ import com.google.inject.Injector;
 import org.jenkinsci.test.acceptance.controller.Authenticator;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.JenkinsProvider;
+import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.jenkinsci.test.acceptance.slave.SlaveProvider;

@@ -122,9 +122,6 @@ public abstract class JcloudsMachineProvider implements MachineProvider {
 
         Machine machine = new JcloudsMachine(this,node);
 
-        //we always reset a machine to get a clean slate
-        machine.reset();
-
         machines.put(node.getId(), machine);
         waitForSsh(machine); //wait for ssh to be ready
 
