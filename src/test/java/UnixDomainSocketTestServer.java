@@ -1,5 +1,3 @@
-package org.jenkinsci.test.acceptance.server;
-
 import jnr.unixsocket.UnixServerSocketChannel;
 import jnr.unixsocket.UnixSocketAddress;
 import jnr.unixsocket.UnixSocketChannel;
@@ -15,7 +13,7 @@ import java.nio.channels.Channels;
  *
  * @author Kohsuke Kawaguchi
  */
-public class EchoServer {
+public class UnixDomainSocketTestServer {
     public static void main(String[] args) throws Exception {
         File path = new File("./jenkins.sock");
         path.deleteOnExit();
