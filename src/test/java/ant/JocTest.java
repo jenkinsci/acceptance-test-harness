@@ -8,19 +8,20 @@ import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.jenkinsci.test.acceptance.slave.SlaveProvider;
+import org.junit.Before;
 import org.junit.Test;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  */
 public class JocTest extends AbstractJUnitTest {
-    @Inject
+    @Inject @Named("joc")
     JenkinsController jocc;
 
-    @Inject
     Jenkins joc;
 
     @Inject
@@ -31,6 +32,11 @@ public class JocTest extends AbstractJUnitTest {
 
     @Inject
     SlaveProvider slave;
+
+    @Before
+    public void setUp() {
+        joc = new Jenkins(injector,jocc);
+    }
 
     @Test
     public void bigFamily() throws Exception{
