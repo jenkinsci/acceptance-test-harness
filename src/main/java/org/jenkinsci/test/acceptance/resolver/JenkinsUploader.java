@@ -18,6 +18,11 @@ public class JenkinsUploader implements JenkinsResolver {
     File war;
 
     @Inject
+    @Named("jenkins_md5_sum")
+    private String jenkinsMd5Sum;
+
+
+    @Inject
     public JenkinsUploader(@Named("jenkins-war-location") String war) {
         this.war = new File(war);
         if(!this.war.exists()){
@@ -30,9 +35,17 @@ public class JenkinsUploader implements JenkinsResolver {
         try {
             Ssh ssh = machine.connect();
             File target = new File(path);
-            ssh.copyTo(war.getPath(), target.getName(), target.getParent());
+            if(!JenkinsDownloader.jenkinsWarExists(ssh.getConnection(),path,jenkinsMd5Sum)){
+                ssh.copyTo(war.getPath(), target.getName(), target.getParent());
+            }
         } catch (IOException e) {
             throw new AssertionError("Failed to copy "+war+" into "+path,e);
         }
+    }
+
+    @Override
+    public String materialize(Machine machine) {
+        materialize(machine,JENKINS_WAR_TARGET_LOCATION);
+        return JENKINS_WAR_TARGET_LOCATION;
     }
 }

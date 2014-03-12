@@ -55,4 +55,13 @@ public class MultiTenantMachine implements Machine{
         //cleanup all directories for the next reuse
         ssh.executeRemoteCommand("rm -rf "+dir());
     }
+
+    @Override
+    public void reset(){
+        try {
+            close();
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
+    }
 }

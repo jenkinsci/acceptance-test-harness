@@ -45,4 +45,9 @@ public interface Machine extends Closeable {
      * Once this method is called, no other methods should be called.
      */
     void close() throws IOException;
+
+    /**
+     * Reset a machine for re-use
+     */
+    void reset();
 }

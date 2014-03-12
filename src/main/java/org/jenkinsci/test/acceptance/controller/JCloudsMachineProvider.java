@@ -6,6 +6,7 @@ import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Module;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import org.jclouds.ContextBuilder;
 import org.jclouds.apis.ApiMetadata;
 import org.jclouds.apis.Apis;
@@ -55,6 +56,10 @@ public abstract class JcloudsMachineProvider implements MachineProvider {
 
     private final String groupName="jenkins-test";
 
+    @Inject(optional = true)
+    @Named("node_id")
+    private String nodeId;
+
     @Inject
     private JenkinsResolver jenkinsResolver;
 
@@ -100,23 +105,25 @@ public abstract class JcloudsMachineProvider implements MachineProvider {
             throw new RuntimeException(e);
         }
 
-
-//        NodeMetadata node=computeService.getNodeMetadata("i-b7948096");
-
-
         NodeMetadata node;
 
-        try {
-            node = getOnlyElement(computeService.createNodesInGroup(groupName, 1, template));
-        } catch (RunNodesException e) {
-            throw new RuntimeException(e);
+        if(nodeId != null){
+            node=computeService.getNodeMetadata(nodeId);
+        }else{
+            try {
+                node = getOnlyElement(computeService.createNodesInGroup(groupName, 1, template));
+            } catch (RunNodesException e) {
+                throw new RuntimeException(e);
+            }
         }
-
         logger.info(String.format("Added node %s: %s", node.getId(), concat(node.getPrivateAddresses(), node.getPublicAddresses())));
 
         authorizeInboundPorts();
 
         Machine machine = new JcloudsMachine(this,node);
+
+        //we always reset a machine to get a clean slate
+        machine.reset();
 
         machines.put(node.getId(), machine);
         waitForSsh(machine); //wait for ssh to be ready

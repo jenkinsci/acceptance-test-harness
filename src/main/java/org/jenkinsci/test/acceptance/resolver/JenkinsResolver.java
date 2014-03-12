@@ -14,4 +14,13 @@ public interface JenkinsResolver {
      * How it does so is up to implementations.
      */
     void materialize(Machine machine, String path);
+
+    /**
+     * Makes jenkins.war available at the the default JENKINS_WAR_TARGET_LOCATION
+     *
+     * Returns the installed Jenkins war path
+     */
+    String materialize(Machine machine);
+
+    public static final String JENKINS_WAR_TARGET_LOCATION = "./.jenkins_test/jenkins.war";
 }

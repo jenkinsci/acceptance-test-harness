@@ -72,8 +72,21 @@ public class JcloudsMachine implements Machine {
 
     @Override
     public void close() throws IOException {
-        logger.error("Destroying node: "+nodeMetadata);
+        logger.info("Destroying node: " + nodeMetadata);
         machineProvider.destroy(nodeMetadata.getId());
+    }
+
+    @Override
+    public void reset(){
+        logger.info("Resetting node: "+nodeMetadata);
+        Ssh ssh = connect();
+        ssh.executeRemoteCommand("rm -rd machine*");
+        try{
+            ssh.executeRemoteCommand("killall java");
+        }catch (Exception e){
+            //ignore errors, if no java process is running, it gives error
+            logger.error("Failed to kill java processes: "+e.getMessage());
+        }
     }
 
 
