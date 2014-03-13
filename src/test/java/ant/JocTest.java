@@ -35,6 +35,8 @@ public class JocTest extends AbstractJUnitTest {
 
     @Before
     public void setUp() {
+        //Workaround as Jenkins tries to verify on different port???
+        //TODO: remove this code
         try {
             jocc.start();
         } catch (IOException e) {
