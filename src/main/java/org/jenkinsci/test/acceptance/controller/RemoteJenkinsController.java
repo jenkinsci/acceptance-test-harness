@@ -1,13 +1,17 @@
 package org.jenkinsci.test.acceptance.controller;
 
+import jnr.ffi.LibraryLoader;
+import org.jenkinsci.test.acceptance.utils.GNUCLibrary;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.jenkinsci.utils.process.ProcessInputStream;
+import org.jenkinsci.utils.process.ProcessUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
@@ -57,8 +61,17 @@ public class RemoteJenkinsController extends JenkinsController {
 
     @Override
     public void stopNow() throws IOException {
-
-        process.getProcess().destroy();
+        Process p = process.getProcess();
+        int pid = ProcessUtils.getPid(p);
+        LibraryLoader.create(GNUCLibrary.class).load("c").kill(pid,2);
+        synchronized (p) {
+            try {
+                p.wait(3000);
+            } catch (InterruptedException e) {
+                throw (IOException)new InterruptedIOException().initCause(e);
+            }
+        }
+        p.destroy();    // if it hasn't died after 3 sec, just kill it
     }
 
     @Override
