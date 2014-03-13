@@ -6,6 +6,7 @@ import com.google.inject.Binder;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.google.inject.Module;
 import com.google.inject.name.Names;
 import com.google.inject.util.Modules;
 import groovy.lang.Binding;
@@ -56,13 +57,42 @@ public abstract class AdditionalBinderDsl extends BinderClosureScript {
 
             // export all that's promised
             for (Key key : sub.keys) {
-                binder.bind(Key.get(key.getTypeLiteral(),Names.named(name))).toProvider(i.getProvider(key));
+                binder.bind(Key.get(key.getTypeLiteral(), Names.named(name))).toProvider(i.getProvider(key));
             }
 
             return i;
         } finally {
             setBinder(binder);
         }
+    }
+
+    /**
+     * Installs the given binding DSL closure as a module.
+     */
+    public void install(Closure c) {
+        getBinder().install(module(c));
+    }
+
+    /**
+     * Given a closure that uses Groovy binder DSL, wrap that into a Guice {@link Module}.
+     *
+     * <p>
+     * To reuse the DSL methods defined on {@link AdditionalBinderDsl} and its super types,
+     * while we call the closure we temporarily swap {@link Binder} object.
+     */
+    public Module module(final Closure c) {
+        return new AbstractModule() {
+            @Override
+            protected void configure() {
+                final Binder old = getBinder();
+                try {
+                    c.setDelegate(binder());
+                    c.call();
+                } finally {
+                    setBinder(old);
+                }
+            }
+        };
     }
 
     public class SubWorld extends GroovyObjectSupport {
