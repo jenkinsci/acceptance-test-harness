@@ -74,7 +74,7 @@ public class Ec2Config {
 
         String[] ports = inboundPortRange.split("\\.\\.");
         if(ports.length == 0){
-            throw new RuntimeException(String.format("inboundPortRange %s must be of format 'from_port..to_port', from_port>to_port and from_port >= %s", inboundPortRange,Machine.BEGINNING_PORT));
+            throw new RuntimeException(String.format("inboundPortRange %s must be of format 'from_port..to_port', from_port>to_port and from_port >= %s", inboundPortRange, JcloudsMachine.BEGINNING_PORT));
         }
         int from = Integer.parseInt(ports[0]);
         int to;

@@ -1,83 +1,53 @@
 package org.jenkinsci.test.acceptance.controller;
 
-import org.jclouds.compute.domain.NodeMetadata;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.io.Closeable;
+import java.io.IOException;
 
 /**
+ * Represents a system accessible through SSH to run commands (like Jenkins masters and slaves.)
+ *
  * @author Vivek Pandey
+ * @author Kohsuke Kawaguchi
  */
-public class Machine{
-    private final NodeMetadata nodeMetadata;
-    private final MachineProvider machineProvider;
-
-    public static final int BEGINNING_PORT = 20000;
-
-    private AtomicInteger nextPort = new AtomicInteger(0);
-    private List<Integer> availablePorts;
-    private final int maxAvailablePort;
-
-    public Machine(MachineProvider machineProvider, NodeMetadata nodeMetadata) {
-        this.nodeMetadata = nodeMetadata;
-        this.machineProvider = machineProvider;
-        List<Integer> ports = new ArrayList<>();
-        for(int port:machineProvider.getAvailableInboundPorts()){
-            ports.add(port);
-        }
-
-        this.availablePorts = Collections.unmodifiableList(ports);
-        this.maxAvailablePort = ports.get(ports.size()-1);
-
-        //set to the first port
-        nextPort.set(availablePorts.get(0));
-
-    }
-
-    public String getPublicIpAddress(){
-        return nodeMetadata.getPublicAddresses().iterator().next();
-    }
-
-    public String getUser(){
-        return (nodeMetadata.getCredentials() == null) ? "ubuntu" : nodeMetadata.getCredentials().getUser();
-    }
+public interface Machine extends Closeable {
+    /**
+     * Connects to this computer over SSH so that we can do stuff
+     *
+     */
+    Ssh connect();
 
     /**
-     * Terminate a running machine
+     * Public IP address of the machine
      */
-    public void terminate(){
-        logger.error("Destroying node: "+nodeMetadata);
-        machineProvider.destroy(nodeMetadata.getId());
-    }
-
-    public int getNextAvailablePort(){
-        int p = nextPort.incrementAndGet();
-        if(p > maxAvailablePort){
-            throw new RuntimeException("no more available ports");
-        }
-        return p;
-    }
+    String getPublicIpAddress();
 
     /**
-     *  Terminate all running instances in the group this machine instance is created in to
+     * User authorized to use the machine
+     *
      */
-//    public void terminateAll(){
-//        logger.info("Destroying nodes in group %s%n", nodeMetadata.getGroup());
-//
-//        // you can use predicates to select which nodes you wish to destroy.
-//        Set<? extends NodeMetadata> destroyed = computeService.destroyNodesMatching(Predicates.and(not(TERMINATED), inGroup(nodeMetadata.getGroup())));
-//        System.out.printf("Destroyed nodes %s%n", destroyed);
-//    }
+    String getUser();
 
+    /**
+     * Client of {@link Machine} can use this directory and underneath for whatever purpose.
+     */
+    String dir();
 
+    /**
+     * Allocates a TCP/IP port on the machine to be used by a test
+     * (for example to let Jenkins listen on this port for HTTP.)
+     */
+    int getNextAvailablePort();
 
+    /**
+     * Convey the intention that this machine is no longer needed.
+     * The implementation will releases this machine / recycle the machine, etc.
+     *
+     * Once this method is called, no other methods should be called.
+     */
+    void close() throws IOException;
 
-
-    private static final Logger logger = LoggerFactory.getLogger(Machine.class);
-
-
+    /**
+     * Reset a machine for re-use
+     */
+    void reset();
 }

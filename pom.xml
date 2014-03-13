@@ -177,4 +177,39 @@
       <url>http://jenkins-ci.org/mit-license</url>
     </license>
   </licenses>
+
+  <profiles>
+    <profile>
+      <!-- this profile is to launch local JenkinsController server: "mvn -Ppool" -->
+      <id>pool</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>1.2.1</version>
+            <executions>
+              <execution>
+                <phase>verify</phase>
+                <goals>
+                  <goal>java</goal>
+                </goals>
+                <configuration>
+                  <mainClass>org.jenkinsci.test.acceptance.server.JenkinsControllerPoolProcess</mainClass>
+                  <!-- to specify arguments -Dexec.args="..." -->
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <skipTests>true</skipTests>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

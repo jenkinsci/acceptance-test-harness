@@ -29,8 +29,8 @@ public class LogWatcher {
 
     private static final int DEFAULT_TIMEOUT = 100;//100 sec
     private static final long DEFAULT_SLEEP_TIME = 500;//0.5 sec
-    private static final int TIMEOUT = System.getenv("STARTUP_TIME") != null && Integer.getInteger(System.getenv("STARTUP_TIME")) > 0
-            ? Integer.getInteger(System.getenv("STARTUP_TIME")) : DEFAULT_TIMEOUT;
+    private static final int TIMEOUT = System.getenv("STARTUP_TIME") != null && Integer.parseInt(System.getenv("STARTUP_TIME")) > 0
+            ? Integer.parseInt(System.getenv("STARTUP_TIME")) : DEFAULT_TIMEOUT;
 
     public LogWatcher(final InputStream pipe, final OutputStream log, Map<String,String> opts) {
         this.silent = opts.get("silent") != null && opts.get("silent").equalsIgnoreCase("true");

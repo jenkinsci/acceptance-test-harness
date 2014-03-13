@@ -18,22 +18,34 @@ import static com.google.common.base.Charsets.UTF_8;
  */
 public class Ssh{
     private final Connection connection;
-    private final Session session;
     private final LoginCredentials loginCredentials;
+    private final String user;
 
     public Ssh(String user, String hostname) throws IOException {
         this.loginCredentials = getLoginForCommandExecution();
         this.connection = new Connection(hostname);
 
+        this.user = user;
         connection.connect();
+    }
 
-        if(!connection.authenticateWithPublicKey(user,
-                loginCredentials.getPrivateKey().toCharArray(), loginCredentials.getPassword())){
-            throw new RuntimeException("Authentication failed");
+    /**
+     * Get the connection and authenticate before using any method
+     */
+    public Connection getConnection(){
+        return connection;
+    }
+
+    public void authenticateWithPublicKey(LoginCredentials credential){
+        try {
+            if(!connection.authenticateWithPublicKey(user,
+                    loginCredentials.getPrivateKey().toCharArray(),
+                    loginCredentials.getPassword())){
+                throw new RuntimeException("Authentication failed");
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-
-        this.session = connection.openSession();
-
     }
 
     public static void main(String[] args) throws IOException {
@@ -51,35 +63,46 @@ public class Ssh{
         System.out.println(new String(os.toByteArray()));
     }
 
-    public int executeRemoteCommand(String cmd,OutputStream os) throws IOException {
+    public int executeRemoteCommand(String cmd,OutputStream os){
+        Session session=null;
         try {
+            session = connection.openSession();
             int status = connection.exec(cmd, os);
             if(status != 0){
                 throw new RuntimeException("Failed to execute command: "+cmd);
             }
             return status;
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }finally {
-            session.close();
+            throw new AssertionError(e);
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        } finally {
+            if(session != null)
+                session.close();
         }
     }
 
+    /** Execute remote command, log output using System.out **/
+    public int executeRemoteCommand(String cmd){
+        return executeRemoteCommand(cmd,System.out);
+    }
     public void copyTo(String localFile, String remoteFile, String targetDir) throws IOException {
         SCPClient scpClient = new SCPClient(connection);
         scpClient.put(localFile,remoteFile, targetDir,"0755");
     }
 
     public void destroy(){
-        session.close();
         connection.close();
     }
 
     public static  LoginCredentials getLoginForCommandExecution(){
+        return getLoginForCommandExecution(System.getProperty("user.name"),new File(PRIVATE_KEY_FILE));
+    }
+
+    public static  LoginCredentials getLoginForCommandExecution(String user, File privateKeyFile){
         try {
-            String user = System.getProperty("user.name");
             String privateKey = Files.toString(
-                    new File(PRIVATE_KEY_FILE), UTF_8);
+                    privateKeyFile, UTF_8);
             return LoginCredentials.builder().
                     user(user).privateKey(privateKey).build();
         } catch (IOException e) {

@@ -3,6 +3,7 @@ package org.jenkinsci.test.acceptance.controller;
 import com.google.common.io.Files;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import org.jclouds.compute.domain.Template;
 import org.jclouds.ec2.EC2Client;
 import org.jclouds.ec2.compute.options.EC2TemplateOptions;
@@ -19,11 +20,18 @@ import static com.google.common.base.Charsets.UTF_8;
  * @author Vivek Pandey
  */
 @Singleton
-public class Ec2Provider extends MachineProvider {
+public class Ec2Provider extends JcloudsMachineProvider {
 
     @Inject
     private Ec2Config config;
 
+    @Inject
+    @Named("publicKeyAuthenticator")
+    private  Authenticator authenticator;
+
+    @Inject
+    @Named("publicKeyFile")
+    private  File publicKeyFile;
 
     @Inject
     public Ec2Provider(Ec2Config config){
@@ -33,7 +41,7 @@ public class Ec2Provider extends MachineProvider {
     }
 
     @Override
-    public void authorizePorts() {
+    public void authorizeInboundPorts() {
         if(config.getSecurityGroups().size() > 0){
             EC2Client client = contextBuilder.buildApi(EC2Client.class);
 
@@ -53,12 +61,17 @@ public class Ec2Provider extends MachineProvider {
     }
 
     @Override
-    public Template getTemplate() throws IOException{
+    public Authenticator authenticator() {
+        return authenticator;
+    }
+
+    @Override
+    public Template getTemplate() throws IOException {
         Template template =  computeService.templateBuilder().imageId(config.getRegion()+"/"+config.getImageId()).
                 locationId(config.getRegion()).hardwareId(config.getInstanceType()).
                 build();
 
-        String publicKey = Files.toString(new File(System.getProperty("user.home") + "/.ssh/id_rsa.pub"), UTF_8);
+        String publicKey = Files.toString(publicKeyFile, UTF_8);
 
         template.getOptions().as(EC2TemplateOptions.class).authorizePublicKey(publicKey).keyPair(config.getKeyPairName()).
                 securityGroups(config.getSecurityGroups()).inboundPorts(config.getInboundPorts()).overrideLoginUser(config.getUser());
@@ -67,8 +80,4 @@ public class Ec2Provider extends MachineProvider {
 
 
     private static final Logger logger = LoggerFactory.getLogger(Ec2Provider.class);
-
-
-
-
 }

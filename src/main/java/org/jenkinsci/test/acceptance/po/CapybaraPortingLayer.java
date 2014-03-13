@@ -106,7 +106,7 @@ public class CapybaraPortingLayer extends Assert {
     }
 
     public <T> T waitForCond(Callable<T> block) {
-        return waitForCond(block,30);
+        return waitForCond(block,300);
     }
 
 
