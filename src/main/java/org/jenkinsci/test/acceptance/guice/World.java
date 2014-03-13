@@ -34,6 +34,10 @@ public class World extends AbstractModule {
         this.cl = cl;
     }
 
+    public ClassLoader getClassLoader() {
+        return cl;
+    }
+
     public Injector getInjector() {
         if (injector==null)
             injector = Guice.createInjector(this);
