@@ -1,7 +1,6 @@
 package ant;
 
 import com.google.inject.Injector;
-import org.jenkinsci.test.acceptance.controller.Authenticator;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.JenkinsProvider;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
@@ -13,6 +12,7 @@ import org.junit.Test;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,6 +35,11 @@ public class JocTest extends AbstractJUnitTest {
 
     @Before
     public void setUp() {
+        try {
+            jocc.start();
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
         joc = new Jenkins(injector,jocc);
     }
 
@@ -43,7 +48,6 @@ public class JocTest extends AbstractJUnitTest {
         List<JenkinsController> controllers = new ArrayList<>();
         for (int i=0; i<2; i++) {
             JenkinsController c = provider.get();
-//            c.start();    // we are making Provider<JenkinsController> responsible for this
             controllers.add(c);
         }
 
@@ -60,10 +64,14 @@ public class JocTest extends AbstractJUnitTest {
 //        }
 
         System.out.println(joc.getVersion());
-        for (Jenkins je : armyOfJEs) {
-            System.out.println(je.getVersion());
 
             SlaveController s = slave.get();
+            s.install(joc);
+            s.start();
+
+        for (Jenkins je : armyOfJEs) {
+            System.out.println(je.getVersion());
+            s = slave.get();
             s.install(je);
             s.start();
         }

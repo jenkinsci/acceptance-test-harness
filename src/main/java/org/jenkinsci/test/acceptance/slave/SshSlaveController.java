@@ -1,69 +1,90 @@
 package org.jenkinsci.test.acceptance.slave;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
+import com.google.inject.name.Named;
 import org.apache.commons.codec.binary.Base64;
 import org.codehaus.plexus.util.FileUtils;
 import org.jenkinsci.test.acceptance.controller.Machine;
-import org.jenkinsci.test.acceptance.controller.Ssh;
 import org.jenkinsci.test.acceptance.po.Jenkins;
-import org.jenkinsci.test.acceptance.po.RemoteSshSlave;
 import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.po.SshPrivateKeyCredential;
+import org.jenkinsci.test.acceptance.po.SshSlave;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.security.*;
 
 /**
  * @author Kohsuke Kawaguchi
+ * @author Vivek Pandey
  */
 public class SshSlaveController extends SlaveController {
     private final Machine machine;
+    private final File privateKeyFile;
 
     @Inject
-    public SshSlaveController(Machine machine) {
+    public SshSlaveController(Machine machine,@Named("privateKeyFile")File privateKeyFile) {
         this.machine = machine;
+        this.privateKeyFile = privateKeyFile;
     }
 
     @Override
     public Slave install(Jenkins j) {
-        SecureRandom random;
-        KeyPairGenerator keyGen;
-        try {
-            keyGen = KeyPairGenerator.getInstance("DSA", "SUN");
-            random = SecureRandom.getInstance("SHA1PRNG", "SUN");
-        } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
-            throw new AssertionError(e);
-        }
-        keyGen.initialize(1024, random);
-        KeyPair pair = keyGen.generateKeyPair();
-        PrivateKey priv = pair.getPrivate();
-        PublicKey pub = pair.getPublic();
-
-        String priKey = new String(Base64.encodeBase64(priv.getEncoded()));
-        String pubKey = new String(Base64.encodeBase64(pub.getEncoded()));
 
         SshPrivateKeyCredential credential = new SshPrivateKeyCredential(j);
 
         try {
-            File sshPrivKeyFile = FileUtils.createTempFile("id","dsa", new File(".jenkins_test"));
-            FileUtils.fileWrite(sshPrivKeyFile,priKey);
-
-            File sshPubKeyFile = FileUtils.createTempFile("id","dsa.pub", new File(".jenkins_test"));
-            FileUtils.fileWrite(sshPubKeyFile,pubKey);
-            Ssh ssh = machine.connect();
-
-            ssh.copyTo(sshPrivKeyFile.getAbsolutePath(), "id_dsa", ".ssh");
-            ssh.copyTo(sshPubKeyFile.getAbsolutePath(), "id_dsa.pub", ".ssh");
+            credential.create("GLOBAL",machine.getUser(),FileUtils.fileRead(privateKeyFile,"UTF-8"));
         } catch (IOException e) {
             throw new AssertionError(e);
         }
 
-        credential.create("GLOBAL",machine.getUser(),priKey);
+        return SshSlave.create(j, machine.getPublicIpAddress());
+    }
 
-        return RemoteSshSlave.create(j,priKey,machine.getPublicIpAddress());
+
+    /**
+     * Returns privateKey and publicKey files. Index 0 is privateKey and index 1 public key
+     */
+    private static KeyFiles createKeysIfNotExists(){
+        File privKeyFile = new File(".jenkins_test/.ssh/id_dsa");
+        File pubKeyFile = new File(".jenkins_test/.ssh/id_dsa.pub");
+        if(!privKeyFile.exists() || !pubKeyFile.exists()){
+            FileUtils.mkdir(privKeyFile.getParent());
+            try {
+                FileUtils.cleanDirectory(privKeyFile.getParent());
+                privKeyFile.createNewFile();
+                pubKeyFile.createNewFile();
+            } catch (IOException e) {
+                logger.error("Failed to clean ssh dir: "+privKeyFile.getParent());
+            }
+
+            SecureRandom random;
+            KeyPairGenerator keyGen;
+            try {
+                keyGen = KeyPairGenerator.getInstance("DSA", "SUN");
+                random = SecureRandom.getInstance("SHA1PRNG", "SUN");
+            } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+                throw new AssertionError(e);
+            }
+            keyGen.initialize(1024, random);
+            KeyPair pair = keyGen.generateKeyPair();
+            PrivateKey priv = pair.getPrivate();
+            PublicKey pub = pair.getPublic();
+
+            String priKey = new String(Base64.encodeBase64(priv.getEncoded()));
+            String pubKey = new String(Base64.encodeBase64(pub.getEncoded()));
+
+            try {
+                FileUtils.fileWrite(privKeyFile,"UTF-8",priKey);
+                FileUtils.fileWrite(pubKeyFile,"UTF-8",pubKey);
+            } catch (IOException e) {
+                throw new AssertionError(e);
+            }
+        }
+        return new KeyFiles(privKeyFile,pubKeyFile);
     }
 
     @Override
@@ -80,4 +101,16 @@ public class SshSlaveController extends SlaveController {
     public void close() throws IOException {
 
     }
+
+    private static class KeyFiles{
+        private final File privateKeyFile;
+        private final File publicKeyFile;
+
+        private KeyFiles(File privateKeyFile, File publicKeyFile) {
+            this.privateKeyFile = privateKeyFile;
+            this.publicKeyFile = publicKeyFile;
+        }
+    }
+
+    private static final Logger logger = LoggerFactory.getLogger(SshSlaveController.class);
 }

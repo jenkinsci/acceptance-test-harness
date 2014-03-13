@@ -3,7 +3,6 @@ package org.jenkinsci.test.acceptance.resolver;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.trilead.ssh2.Connection;
-import com.trilead.ssh2.Session;
 import org.codehaus.plexus.util.FileUtils;
 import org.jenkinsci.test.acceptance.controller.Machine;
 import org.jenkinsci.test.acceptance.controller.Ssh;

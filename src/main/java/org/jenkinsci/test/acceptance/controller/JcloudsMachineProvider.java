@@ -20,7 +20,6 @@ import org.jclouds.logging.slf4j.config.SLF4JLoggingModule;
 import org.jclouds.providers.ProviderMetadata;
 import org.jclouds.providers.Providers;
 import org.jclouds.sshj.config.SshjSshClientModule;
-import org.jenkinsci.test.acceptance.resolver.JenkinsResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,8 +59,6 @@ public abstract class JcloudsMachineProvider implements MachineProvider {
     @Named("node_id")
     private String nodeId;
 
-    @Inject
-    private JenkinsResolver jenkinsResolver;
 
 
     private final Map<String, Machine> machines = new ConcurrentHashMap<>();
@@ -95,8 +92,6 @@ public abstract class JcloudsMachineProvider implements MachineProvider {
 
     @Override
     public Machine get() {
-        logger.info("new Machine instantiated...");
-        logger.info(String.format("Adding node to group %s", groupName));
 
         Template template;
         try {
@@ -108,8 +103,12 @@ public abstract class JcloudsMachineProvider implements MachineProvider {
         NodeMetadata node;
 
         if(nodeId != null){
+            logger.info("Reusing machine: "+nodeId);
             node=computeService.getNodeMetadata(nodeId);
         }else{
+            logger.info("new Machine instantiated...");
+            logger.info(String.format("Adding node to group %s", groupName));
+
             try {
                 node = getOnlyElement(computeService.createNodesInGroup(groupName, 1, template));
             } catch (RunNodesException e) {
@@ -120,10 +119,12 @@ public abstract class JcloudsMachineProvider implements MachineProvider {
 
         authorizeInboundPorts();
 
+        String user = node.getCredentials() == null ? "ubuntu" :node.getCredentials().getUser();
+        waitForSsh(user, node.getPublicAddresses().iterator().next()); //wait for ssh to be ready
+
         Machine machine = new JcloudsMachine(this,node);
 
         machines.put(node.getId(), machine);
-        waitForSsh(machine); //wait for ssh to be ready
 
         return machine;
     }
@@ -170,15 +171,17 @@ public abstract class JcloudsMachineProvider implements MachineProvider {
         return contextBuilder;
     }
 
-    private void waitForSsh(Machine machine){
+    private void waitForSsh(String user, String host){
         int timeout = 120000; //2 minute
         long startTime = System.currentTimeMillis();
         while(true){
+            logger.info("Making sure sshd is up...");
             try {
                 if(System.currentTimeMillis() - startTime > timeout){
                     break;
                 }
-                Ssh ssh = new Ssh(machine.getUser(), machine.getPublicIpAddress());
+                Ssh ssh = new Ssh(user, host);
+                authenticator().authenticate(ssh.getConnection());
                 ssh.destroy();
                 return;
             } catch (IOException e) {

@@ -3,8 +3,6 @@ package org.jenkinsci.test.acceptance.controller;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import org.jenkinsci.test.acceptance.resolver.JenkinsLinker;
-import org.jenkinsci.test.acceptance.resolver.JenkinsResolver;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -23,7 +21,7 @@ public class MultitenancyMachineProvider implements MachineProvider {
     @Named("max_mt_machines")
     private int max = 10;
 
-    private final AtomicInteger cur = new AtomicInteger(1);
+    private final AtomicInteger cur = new AtomicInteger(0);
 
 
     private volatile Machine machine;

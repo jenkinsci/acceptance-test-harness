@@ -4,6 +4,7 @@ import org.codehaus.plexus.util.FileUtils;
 import org.jenkinsci.utils.process.ProcessInputStream;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.HashMap;
@@ -40,6 +41,8 @@ public abstract class LocalController extends JenkinsController {
             process.getProcess().destroy();
         }
     };
+
+    private final File logFile;
 
     static{
         String warLocation = getenv("JENKINS_WAR");
@@ -82,7 +85,9 @@ public abstract class LocalController extends JenkinsController {
     protected LocalController(File war) {
         this.war = war;
 
-        this.tempDir = FileUtils.createTempFile("temp", "dir",new File(WORKSPACE));
+        this.tempDir = FileUtils.createTempFile("jenkins", "home",new File(WORKSPACE));
+
+        this.logFile = new File(this.tempDir.getName()+"_log.log");
 
         File formPathElement = downloadPathElement();
         File pluginDir = new File(tempDir,"plugins");
@@ -199,7 +204,7 @@ public abstract class LocalController extends JenkinsController {
         this.process = startProcess();
         Runtime.getRuntime().addShutdownHook(shutdownHook);
 
-        this.logWatcher = new LogWatcher(this.process, logger, options);
+        this.logWatcher = new LogWatcher(this.process, new FileOutputStream(logFile), options);
         try {
             this.logWatcher.waitTillReady(true);
         } catch (InterruptedException e) {

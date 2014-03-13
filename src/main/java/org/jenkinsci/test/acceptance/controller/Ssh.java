@@ -96,10 +96,13 @@ public class Ssh{
     }
 
     public static  LoginCredentials getLoginForCommandExecution(){
+        return getLoginForCommandExecution(System.getProperty("user.name"),new File(PRIVATE_KEY_FILE));
+    }
+
+    public static  LoginCredentials getLoginForCommandExecution(String user, File privateKeyFile){
         try {
-            String user = System.getProperty("user.name");
             String privateKey = Files.toString(
-                    new File(PRIVATE_KEY_FILE), UTF_8);
+                    privateKeyFile, UTF_8);
             return LoginCredentials.builder().
                     user(user).privateKey(privateKey).build();
         } catch (IOException e) {

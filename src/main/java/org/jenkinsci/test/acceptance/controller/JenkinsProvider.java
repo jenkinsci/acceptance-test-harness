@@ -2,6 +2,7 @@ package org.jenkinsci.test.acceptance.controller;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.name.Named;
 import org.jenkinsci.test.acceptance.guice.TestScope;
 import org.jenkinsci.test.acceptance.resolver.JenkinsResolver;
 import org.slf4j.Logger;
@@ -27,7 +28,7 @@ public class JenkinsProvider implements Provider<JenkinsController> {
     private final JenkinsResolver jenkinsResolver;
 
     @Inject
-    public JenkinsProvider(Machine machine, JenkinsResolver jenkinsResolver) {
+    public JenkinsProvider(Machine machine, JenkinsResolver jenkinsResolver, @Named("privateKeyFile") File privateKeyFile) {
         this.machine = machine;
         this.jenkinsResolver = jenkinsResolver;
         logger.info("New Jenkins Provider created");
@@ -44,7 +45,7 @@ public class JenkinsProvider implements Provider<JenkinsController> {
                 //copy form-path-element
                 ssh.copyTo(formPathElement.getAbsolutePath(), "path-element.hpi", "./"+jenkinsHome+"/plugins/");
 
-                this.jenkinsController = new RemoteJenkinsController(machine, jenkinsHome,jenkinsWar);
+                this.jenkinsController = new RemoteJenkinsController(machine, jenkinsHome,jenkinsWar,privateKeyFile);
             } catch (IOException e) {
                 throw new AssertionError("Failed to copy form-path-element.hpi",e);
             }
@@ -62,6 +63,11 @@ public class JenkinsProvider implements Provider<JenkinsController> {
     @Override
     public JenkinsController get() {
         logger.info("New RemoteJenkinsController created");
+        try {
+            jenkinsController.start();
+        } catch (IOException e) {
+            throw new AssertionError("Failed to start Jenkins: "+e.getMessage(),e);
+        }
         return jenkinsController;
     }
 

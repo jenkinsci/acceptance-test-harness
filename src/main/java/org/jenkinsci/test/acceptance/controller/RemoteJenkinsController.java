@@ -5,6 +5,8 @@ import org.jenkinsci.utils.process.ProcessInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -22,25 +24,30 @@ public class RemoteJenkinsController extends JenkinsController {
     private LogWatcher logWatcher;
     private final String jenkinsWarLocation;
     protected ProcessInputStream process;
+    private final File logFile;
+    private final File privateKeyLocation;
 
-    public RemoteJenkinsController(Machine machine, String jenkinsHome, String jenkinsWar) {
+    public RemoteJenkinsController(Machine machine, String jenkinsHome, String jenkinsWar, File privateKeyLocation) {
         this.machine = machine;
         this.jenkinsHome = jenkinsHome;
         this.jenkinsWarLocation = jenkinsWar;
+        this.logFile = new File(new File(jenkinsHome).getName()+"_log.log");
         this.httpPort = machine.getNextAvailablePort();
         this.controlPort = machine.getNextAvailablePort();
+        this.privateKeyLocation = privateKeyLocation;
     }
 
     @Override
     public void startNow() throws IOException {
-        CommandBuilder cb = new CommandBuilder("ssh", "-t",String.format("%s@%s",machine.getUser(),machine.getPublicIpAddress())).add(
-                " java -DJENKINS_HOME=" + jenkinsHome +
+        CommandBuilder cb = new CommandBuilder("ssh","-i", privateKeyLocation.getAbsolutePath() , "-t", "-oStrictHostKeyChecking=no" ,String.format("%s@%s",machine.getUser(),machine.getPublicIpAddress())).add(
+                "java -DJENKINS_HOME=" + jenkinsHome +
                 " -jar " + jenkinsWarLocation +
                 " --ajp13Port=-1" +
                 " --controlPort=" + controlPort +
                 " --httpPort=" + httpPort);
+        localLogger.info("Launching Jenkins: "+cb);
         this.process =  cb.popen();
-        this.logWatcher = new LogWatcher(process, logger, Collections.EMPTY_MAP);
+        this.logWatcher = new LogWatcher(process, new FileOutputStream(logFile), Collections.EMPTY_MAP);
         try {
             this.logWatcher.waitTillReady(true);
         } catch (InterruptedException e) {

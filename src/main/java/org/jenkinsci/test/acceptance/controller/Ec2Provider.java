@@ -3,6 +3,7 @@ package org.jenkinsci.test.acceptance.controller;
 import com.google.common.io.Files;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import org.jclouds.compute.domain.Template;
 import org.jclouds.ec2.EC2Client;
 import org.jclouds.ec2.compute.options.EC2TemplateOptions;
@@ -24,6 +25,13 @@ public class Ec2Provider extends JcloudsMachineProvider {
     @Inject
     private Ec2Config config;
 
+    @Inject
+    @Named("publicKeyAuthenticator")
+    private  Authenticator authenticator;
+
+    @Inject
+    @Named("publicKeyFile")
+    private  File publicKeyFile;
 
     @Inject
     public Ec2Provider(Ec2Config config){
@@ -54,7 +62,7 @@ public class Ec2Provider extends JcloudsMachineProvider {
 
     @Override
     public Authenticator authenticator() {
-        return new Authenticator.PublicKeyAuthenticator(config.getUser());
+        return authenticator;
     }
 
     @Override
@@ -63,7 +71,7 @@ public class Ec2Provider extends JcloudsMachineProvider {
                 locationId(config.getRegion()).hardwareId(config.getInstanceType()).
                 build();
 
-        String publicKey = Files.toString(new File(System.getProperty("user.home") + "/.ssh/id_rsa.pub"), UTF_8);
+        String publicKey = Files.toString(publicKeyFile, UTF_8);
 
         template.getOptions().as(EC2TemplateOptions.class).authorizePublicKey(publicKey).keyPair(config.getKeyPairName()).
                 securityGroups(config.getSecurityGroups()).inboundPorts(config.getInboundPorts()).overrideLoginUser(config.getUser());
