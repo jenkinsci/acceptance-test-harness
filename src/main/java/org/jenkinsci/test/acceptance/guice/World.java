@@ -7,6 +7,7 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
+import org.jenkinsci.test.acceptance.Config;
 
 import javax.inject.Singleton;
 import java.util.HashMap;
@@ -66,6 +67,7 @@ public class World extends AbstractModule {
     @Override
     protected void configure() {
         install(new ExtensionFinder(cl));
+        install(new Config());
         bindScope(TestScope.class, new Scope() {
             public <T> Provider<T> scope(final Key<T> key, final Provider<T> base) {
                 return new Provider<T>() {

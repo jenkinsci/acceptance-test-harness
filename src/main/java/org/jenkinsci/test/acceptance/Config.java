@@ -1,11 +1,10 @@
 package org.jenkinsci.test.acceptance;
 
-import com.cloudbees.sdk.extensibility.Extension;
-import com.cloudbees.sdk.extensibility.ExtensionModule;
 import com.google.inject.AbstractModule;
 import com.google.inject.util.Modules;
 import org.jenkinsci.groovy.binder.GroovyWiringModule;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
+import org.jenkinsci.test.acceptance.guice.GroovyWiringModule2;
 import org.openqa.selenium.WebDriver;
 
 import java.io.File;
@@ -21,8 +20,7 @@ import java.net.URL;
  *
  * @author Kohsuke Kawaguchi
  */
-@Extension
-public class Config extends AbstractModule implements ExtensionModule {
+public class Config extends AbstractModule {
     @Override
     protected void configure() {
         try {
@@ -41,9 +39,9 @@ public class Config extends AbstractModule implements ExtensionModule {
 
             File f = new File(loc);
             if (f.exists()) {
-                m = GroovyWiringModule.allOf(f);
+                m = new GroovyWiringModule2(f.toURI().toURL());
             } else {
-                m = new GroovyWiringModule(new URL(loc));
+                m = new GroovyWiringModule2(new URL(loc));
             }
 
             m.addStarImports(

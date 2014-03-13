@@ -24,7 +24,7 @@ public class JocTest extends AbstractJUnitTest {
 
     Jenkins joc;
 
-    @Inject
+    @Inject @Named("masters")
     JenkinsProvider provider;
 
     @Inject

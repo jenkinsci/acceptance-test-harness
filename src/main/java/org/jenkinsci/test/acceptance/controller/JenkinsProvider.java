@@ -18,6 +18,7 @@ import java.io.IOException;
 public class JenkinsProvider implements Provider<JenkinsController> {
 
     private static final Logger logger = LoggerFactory.getLogger(JenkinsProvider.class);
+
     private final Machine machine;
 
 
