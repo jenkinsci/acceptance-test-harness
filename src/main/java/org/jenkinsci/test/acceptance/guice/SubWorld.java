@@ -1,9 +1,7 @@
 package org.jenkinsci.test.acceptance.guice;
 
 import com.google.inject.Injector;
-import com.google.inject.Key;
 import com.google.inject.Provider;
-import com.google.inject.name.Names;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -26,13 +24,9 @@ public class SubWorld {
      *     bind Foo to ...
      * }
      *
-     * bind Foo to masters[Foo]  // export Foo from master to its parent
+     * bind Foo toProvider masters[Foo]  // export Foo from master to its parent
      * </pre>
      */
-//    public <T> Key<T> getAt(Class<T> c) {
-//        return Key.get(c, Names.named(name));
-//    }
-
     public <T> Provider<T> getAt(Class<T> t) {
         return injector.getProvider(t);
     }

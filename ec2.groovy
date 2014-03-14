@@ -19,7 +19,7 @@ def common = module {
     // bind JenkinsResolver toInstance new JenkinsUploader(localWar)
 }
 
-def slaves = subworld("slaves") {
+subworld("slaves") {
     install(common)
 
     user="ubuntu1"
