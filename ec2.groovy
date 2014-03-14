@@ -10,8 +10,6 @@ import org.jenkinsci.test.acceptance.slave.SshSlaveProvider
 def localWar = new File("jenkins.war")
 
 max_mt_machines=2
-privateKeyFile = new File(".jenkins_test/.ssh/id_rsa")
-publicKeyFile = new File(".jenkins_test/.ssh/id_rsa.pub")
 bind(Authenticator).named("publicKeyAuthenticator").to(PublicKeyAuthenticator)
 
 user = "ubuntu"

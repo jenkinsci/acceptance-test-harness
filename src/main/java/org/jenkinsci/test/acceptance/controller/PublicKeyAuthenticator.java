@@ -18,8 +18,8 @@ public class PublicKeyAuthenticator implements Authenticator {
     private final LoginCredentials credentials;
 
     @Inject
-    public PublicKeyAuthenticator(@Named("user") String user, @Named("privateKeyFile") File privateKeyFile) {
-        this.credentials = Ssh.getLoginForCommandExecution(user, privateKeyFile);
+    public PublicKeyAuthenticator(@Named("user") String user, SshKeyPair keyPair) {
+        this.credentials = Ssh.getLoginForCommandExecution(user, keyPair.privateKey);
     }
 
     @Override
