@@ -3,6 +3,7 @@ package org.jenkinsci.test.acceptance.guice;
 import com.cloudbees.sdk.extensibility.ExtensionFinder;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
+import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -61,6 +62,8 @@ public abstract class AdditionalBinderDsl extends BinderClosureScript {
             }
 
             return i;
+        } catch (CreationException e) {
+            throw new RuntimeException("Failed to create a sub-world "+name,e);
         } finally {
             setBinder(binder);
         }
