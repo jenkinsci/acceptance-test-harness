@@ -4,7 +4,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.util.Modules;
 import org.jenkinsci.groovy.binder.GroovyWiringModule;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
-import org.jenkinsci.test.acceptance.guice.GroovyWiringModule2;
+import org.jenkinsci.test.acceptance.guice.AdditionalBinderDsl;
 import org.openqa.selenium.WebDriver;
 
 import java.io.File;
@@ -39,11 +39,12 @@ public class Config extends AbstractModule {
 
             File f = new File(loc);
             if (f.exists()) {
-                m = new GroovyWiringModule2(f.toURI().toURL());
+                m = GroovyWiringModule.allOf(f);
             } else {
-                m = new GroovyWiringModule2(new URL(loc));
+                m = new GroovyWiringModule(new URL(loc));
             }
 
+            m.getCompilerConfiguration().setScriptBaseClass(AdditionalBinderDsl.class.getName());
             m.addStarImports(
                 JenkinsController.class.getPackage().getName(),
                 WebDriver.class.getPackage().getName()
