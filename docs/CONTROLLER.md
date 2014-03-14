@@ -1,12 +1,16 @@
 # Choosing the JenkinsController
-This test harness has an abstraction called `JenkinsController` that allows you to use different logic
-for starting/stopping Jenkins. We use this to so that the same set of tests can be run against many different ways of launching Jenkins, such as `java -jar jenkins.war`, Jenkins on JBoss, Jenkins via debian package, etc.
-
-See [the source code](lib/jenkins/controller/) for the list of available controllers. If you see a line like
-`register :remote_sysv`, that means the ID of that controller is `remote_sysv`.
+This test harness has an abstraction called [JenkinsController](../src/main/java/org/jenkinsci/test/acceptance/controller/JenkinsController.java)
+that allows you to use different logic for starting/stopping Jenkins.
+We use this to so that the same set of tests can be run against many different ways of launching Jenkins,
+such as `java -jar jenkins.war`, Jenkins on JBoss, Jenkins via debian package, etc.
 
 To select a controller, run the test with the 'type' environment variable set to the controller ID, such as:
-`type=remote_sysv bundle exec rake`. Controllers take their configurations from environment variables. Again,
+`type=remote_sysv mvn test`.
+
+Common configuration of Controllers can be done through environment variables, and the following controller-specific
+section describes them.
+
+For more sophisticated customization, see [WIRING.md](WIRING.md).
 
 ## Winstone controller (type=winstone)
 This controller runs Jenkins via `java -jar jenkins.war` on the same host where the test is run.
@@ -16,6 +20,8 @@ The behaviour of this controller can be customized through the following environ
 * `INTERACTIVE` keep browser session opened after failed scenario for interactive investigation.
 * `PLUGINS_DIR` a directory of plugins to be loaded on Jenkins startup
 * `PRELAUNCH` when set, Jenkins will launch multiple Jenkins instances in advance to speed up test execution.
+
+This is the default controller.
 
 ## Tomcat controller (type=tomcat)
 This controller deploys Jenkins inside Tomcat and run the test with it. This controller requires a functioning Tomcat installation listening on port 8080, on the same system that the tests run. During the test, Jenkins is deployed here, and Tomcat gets started/stopped.

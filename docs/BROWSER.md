@@ -35,4 +35,4 @@ For example,
         return d;
     } as Provider _in TestScope
 
-See [WIRING.md] for details of where to put this.
+See [WIRING.md](WIRING.md) for details of where to put this.
