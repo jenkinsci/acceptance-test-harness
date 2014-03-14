@@ -20,6 +20,8 @@ Following areas are still worked on:
  * Either more steps need to be written to make existing cucumber tests work,
    or they need to be ported over to JUnit.
 
+[![Build Status](https://jenkins.ci.cloudbees.com/buildStatus/icon?job=core/acceptance-test-harness)](https://jenkins.ci.cloudbees.com/job/core/job/acceptance-test-harness/)
+
 ## Getting Started
 
 Let's start by running tests locally with `JENKINS_WAR=path/to/your/jenkins.war mvn test`.

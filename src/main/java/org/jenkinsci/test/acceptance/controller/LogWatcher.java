@@ -17,7 +17,6 @@ import java.util.concurrent.atomic.AtomicReference;
  * @author: Vivek Pandey
  */
 public class LogWatcher {
-    private final boolean silent;
     private final String pattern;
     private final AtomicReference<String> logPattern = new AtomicReference<>(null);
     private final AtomicReference<InputStream> jenkinsPipe = new AtomicReference<>();
@@ -33,7 +32,6 @@ public class LogWatcher {
             ? Integer.parseInt(System.getenv("STARTUP_TIME")) : DEFAULT_TIMEOUT;
 
     public LogWatcher(final InputStream pipe, final OutputStream log, Map<String,String> opts) {
-        this.silent = opts.get("silent") != null && opts.get("silent").equalsIgnoreCase("true");
         if(opts.get("pattern") == null){
             this.pattern = " Completed initialization";
         }else{
@@ -54,8 +52,6 @@ public class LogWatcher {
             public void run() {
                 String line = null;
                 try {
-                    int lineCount=0;
-
                     BufferedReader reader = new BufferedReader(new InputStreamReader(jenkinsPipe.get()));
                     while((line = reader.readLine()) != null){
                         logLine(line+"\n");
@@ -65,13 +61,6 @@ public class LogWatcher {
 
                         if(line.contains(pattern)){
                             ready.set(true);
-                        }else{
-                            if(!silent){
-                                if(lineCount%5 == 0){
-                                    System.out.print(".");
-                                }
-                                lineCount++;
-                            }
                         }
                     }
                     ready.set(false);
