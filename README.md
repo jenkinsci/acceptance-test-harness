@@ -16,6 +16,8 @@ Following areas are still worked on:
  * `JenkinsController`
  * Docker support
 
+[![Build Status](https://jenkins.ci.cloudbees.com/buildStatus/icon?job=core/acceptance-test-harness)](https://jenkins.ci.cloudbees.com/job/core/job/acceptance-test-harness/)
+
 ## Running tests
 
 Let's start by running tests locally with `JENKINS_WAR=path/to/your/jenkins.war mvn test`.
