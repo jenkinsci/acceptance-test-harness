@@ -4,6 +4,7 @@ import org.jclouds.compute.domain.NodeMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.EmptyStackException;
@@ -30,8 +31,12 @@ public class JcloudsMachine implements Machine {
             availablePorts.push(port);
         }
 
-        this.dir = "./machine_home_"+newDirSuffix();
         Ssh ssh = connect();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ssh.executeRemoteCommand("echo `pwd`/machine_home_"+newDirSuffix()+"/",baos);
+
+        this.dir = new String(baos.toByteArray()).trim();
+
         ssh.executeRemoteCommand("mkdir -p "+this.dir);
     }
 

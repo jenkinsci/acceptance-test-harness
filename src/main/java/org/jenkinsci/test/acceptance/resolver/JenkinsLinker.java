@@ -21,9 +21,4 @@ public class JenkinsLinker implements JenkinsResolver{
         Ssh ssh = machine.connect();
         ssh.executeRemoteCommand(String.format("ln -s `pwd`/%s %s", jenkinsWarLocation, path));
     }
-
-    @Override
-    public String materialize(Machine machine) {
-        throw new UnsupportedOperationException("Not implemented");
-    }
 }

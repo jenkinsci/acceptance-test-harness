@@ -3,6 +3,8 @@ package org.jenkinsci.test.acceptance.controller;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -28,6 +30,7 @@ public class MultitenancyMachineProvider implements MachineProvider {
 
     @Inject
     public MultitenancyMachineProvider(@Named("raw") MachineProvider base) {
+        logger.info("Initializing Mt Machine Provider...");
         this.base = base;
         this.machine = this.base.get();
     }
@@ -36,11 +39,13 @@ public class MultitenancyMachineProvider implements MachineProvider {
     public Machine get() {
         if (cur.incrementAndGet()==max) {
             synchronized (this){
+                logger.info(String.format("Max MT machine limit %s reached Getting new Machine instance...",max));
                 machine = base.get();
                 cur.set(0);
             }
 
         }
+        logger.info("Creating new MT machine...");
         return new MultiTenantMachine(machine);
     }
 
@@ -53,5 +58,7 @@ public class MultitenancyMachineProvider implements MachineProvider {
     public Authenticator authenticator() {
         return base.authenticator();
     }
+
+    private static final Logger logger = LoggerFactory.getLogger(MultitenancyMachineProvider.class);
 
 }

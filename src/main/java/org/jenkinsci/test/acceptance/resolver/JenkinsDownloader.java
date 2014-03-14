@@ -32,24 +32,17 @@ public class JenkinsDownloader implements JenkinsResolver {
     @Override
     public void materialize(Machine machine, String path) {
         Ssh ssh = machine.connect();
-        if(!jenkinsWarExists(ssh.getConnection(),path,jenkinsMd5Sum)){
-            ssh.executeRemoteCommand("mkdir -p "+ FileUtils.dirname(JENKINS_WAR_TARGET_LOCATION));
+        if(!remoteFileExists(ssh.getConnection(),path,jenkinsMd5Sum)){
+            ssh.executeRemoteCommand("mkdir -p "+ FileUtils.dirname(path));
             ssh.executeRemoteCommand(String.format("wget -O %s %s",path, jenkinsWarLocation));
         }
     }
 
-    @Override
-    public String materialize(Machine machine) {
-        materialize(machine, JENKINS_WAR_TARGET_LOCATION);
-        return JENKINS_WAR_TARGET_LOCATION;
-    }
-
-    public static  boolean jenkinsWarExists(Connection connection, String target, String expectedMd5Sum){
+    public static  boolean remoteFileExists(Connection connection, String target, String expectedMd5Sum){
         try {
             int status  = connection.exec(String.format("stat %s > /dev/null 2>&1", target), System.out);
-            if(status == 0 && expectedMd5Sum != null){
-                //jenkins.war exists, lets check the md5 sum
-                return validateMd5Sum(connection,target,expectedMd5Sum);
+            if(status == 0){
+                return expectedMd5Sum == null || validateMd5Sum(connection, target, expectedMd5Sum);
             }
         } catch (IOException | InterruptedException e) {
             logger.error(e.getMessage());

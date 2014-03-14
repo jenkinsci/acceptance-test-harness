@@ -1,7 +1,6 @@
 package org.jenkinsci.test.acceptance.controller;
 
 import com.google.inject.Provider;
-import org.jenkinsci.test.acceptance.resolver.JenkinsResolver;
 
 /**
  * Provider for {@link org.jenkinsci.test.acceptance.controller.Machine}
