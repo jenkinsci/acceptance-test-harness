@@ -7,7 +7,9 @@ import org.jenkinsci.test.acceptance.slave.SshSlaveProvider
 def localWar = new File("/Users/vivek/Downloads/jenkins.war")
 
 def common = module {
-    max_mt_machines=2
+    max_mt_machines=10
+    privateKeyFile = new File(".jenkins_test/.ssh/id_rsa")
+    publicKeyFile = new File(".jenkins_test/.ssh/id_rsa.pub")
     bind(Authenticator).named("publicKeyAuthenticator").to(PublicKeyAuthenticator)
 
     jenkins_md5_sum="b6aacb5f25a323120f8c791fe2d947b9"
@@ -20,7 +22,9 @@ slaves = subworld {
 
     user="ubuntu"
 
-    bind MachineProvider to Ec2Provider
+    bind MachineProvider to MultitenancyMachineProvider
+    bind MachineProvider named "raw" to Ec2Provider
+
 }
 
 masters = subworld {
@@ -28,7 +32,8 @@ masters = subworld {
 
     user="ubuntu"
 
-    bind MachineProvider to Ec2Provider
+    bind MachineProvider to MultitenancyMachineProvider
+    bind MachineProvider named "raw" to Ec2Provider
 }
 
 joc = subworld {
