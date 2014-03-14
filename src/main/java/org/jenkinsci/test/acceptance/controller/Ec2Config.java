@@ -3,9 +3,9 @@ package org.jenkinsci.test.acceptance.controller;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import org.ini4j.Wini;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -17,9 +17,20 @@ import java.util.Properties;
 @Singleton
 public class Ec2Config {
 
+    /**
+     * This is the file we read credentials from. We reuse AWS CLI format.
+     */
     @Inject(optional = true)
     @Named("ec2ConfigFile")
-    private String ec2ConfigFile = System.getProperty("user.home")+"/.ssh/ec2_keys";
+    private String ec2ConfigFile = System.getProperty("user.home")+"/.aws/config";
+
+    /**
+     * Section in {@link #ec2ConfigFile} to pick credential from.
+     */
+    @Inject(optional = true)
+    @Named("profile")
+    private String profile = "default";
+
     /** Ec2 key and secret read from ec2Config file **/
     private String key;
 
@@ -56,18 +67,19 @@ public class Ec2Config {
     private String user="ubuntu";
 
     public Ec2Config() {
-        Properties properties = new Properties();
         File f  = new File(ec2ConfigFile);
         try {
-            properties.load(new FileInputStream(f));
-            if(properties.getProperty("key") == null){
+            Wini wini = new Wini(f);
+
+            this.key = wini.get(profile,"aws_access_key_id",String.class);
+            this.secret = wini.get(profile,"aws_secret_access_key",String.class);
+
+            if(key == null){
                 throw new RuntimeException(String.format("EC2 config file %s does not have 'key'",ec2ConfigFile));
             }
-            if(properties.getProperty("secret") == null){
+            if(secret == null){
                 throw new RuntimeException(String.format("EC2 config file %s does not have 'secret'",ec2ConfigFile));
             }
-            this.key = properties.getProperty("key");
-            this.secret = properties.getProperty("secret");
         } catch (IOException e) {
             throw new RuntimeException(String.format("EC2 credential configuration file %s does not exist", ec2ConfigFile));
         }
