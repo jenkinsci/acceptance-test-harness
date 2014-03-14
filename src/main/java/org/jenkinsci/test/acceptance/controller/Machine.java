@@ -1,5 +1,7 @@
 package org.jenkinsci.test.acceptance.controller;
 
+import com.google.inject.ProvidedBy;
+
 import java.io.Closeable;
 import java.io.IOException;
 
@@ -9,6 +11,7 @@ import java.io.IOException;
  * @author Vivek Pandey
  * @author Kohsuke Kawaguchi
  */
+@ProvidedBy(MachineProvider.class)
 public interface Machine extends Closeable {
     /**
      * Connects to this computer over SSH so that we can do stuff
