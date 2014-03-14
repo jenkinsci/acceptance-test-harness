@@ -19,3 +19,36 @@ Or:
     ec2ConfigFile = "/home/you/ec2config"
     bind MachineProvider to Ec2Provider
     bind JenkinsController toProvider JenkinsProvider in TestScope
+
+    // allocate slaves from the above MachineProvider, then attach them to Jenkins
+    // as SSH slaves
+    bind SlaveProvider to SshSlaveProvider
+
+
+### Sub-worlds
+In the last example above, both Jenkins masters and slaves come from the same EC2 image types,
+because they both use the same `MachineProvider` to acquire machines.
+
+Sometimes this is not sufficient, and one would want to configure two sets of `Ec2Provider`.
+You can do this by creating two "sub-worlds", which are really independent Guice injectors.
+
+    // create an entirely independent guice injector named "master"
+    master = subworld {
+        // use the same groovy guice binder DSL to define bindings in the sub-world
+        ec2ConfigFile = "/home/you/ec2config-for-masters"
+        bind MachineProvider to Ec2Provider
+        bind JenkinsController toProvider JenkinsProvider in TestScope
+    }
+
+    // ditto for slaves
+    slaves = subworld {
+        // bindings you define here are independent of those you define in the master sub-world above.
+        ec2ConfigFile = "/home/you/ec2config-for-slaves"
+        bind MachineProvider to Ec2Provider
+    }
+
+    // then alias JenkinsController to the one defined in the master sub-world
+    bind JenkinsController toProvider master[JenkinsController]
+
+    // ditto
+    bind SlaveProvider toProvider slaves[SshSlaveProvider]
