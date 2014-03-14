@@ -12,6 +12,8 @@ import java.io.File;
 import java.io.IOException;
 
 /**
+ * Creates {@link JenkinsController} that launches Jenkins on a {@link Machine}.
+ *
  * @author Vivek Pandey
  */
 @TestScope
@@ -46,6 +48,7 @@ public class JenkinsProvider implements Provider<JenkinsController> {
                 //copy form-path-element
                 ssh.copyTo(formPathElement.getAbsolutePath(), "path-element.hpi", "./"+jenkinsHome+"/plugins/");
 
+                // TODO: should support different controllers that launches Jenkins differently
                 this.jenkinsController = new RemoteJenkinsController(machine, jenkinsHome,jenkinsWar,privateKeyFile);
             } catch (IOException e) {
                 throw new AssertionError("Failed to copy form-path-element.hpi",e);
