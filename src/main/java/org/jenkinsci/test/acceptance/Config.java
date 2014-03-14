@@ -5,6 +5,7 @@ import com.google.inject.util.Modules;
 import org.jenkinsci.groovy.binder.GroovyWiringModule;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.guice.AdditionalBinderDsl;
+import org.jenkinsci.test.acceptance.guice.TestScope;
 import org.openqa.selenium.WebDriver;
 
 import java.io.File;
@@ -49,6 +50,7 @@ public class Config extends AbstractModule {
                 JenkinsController.class.getPackage().getName(),
                 WebDriver.class.getPackage().getName()
             );
+            m.addImports(TestScope.class);
 
             // install the config
             install(Modules.override(base).with(m));
