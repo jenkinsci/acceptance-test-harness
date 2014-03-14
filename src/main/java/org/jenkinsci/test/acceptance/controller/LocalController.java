@@ -131,7 +131,6 @@ public abstract class LocalController extends JenkinsController {
 
     @Override
     public void startNow() throws IOException{
-        out.println("\n    Bringing up a temporary Jenkins instance");
         bringItUp();
         try {
             Thread.sleep(1000);
