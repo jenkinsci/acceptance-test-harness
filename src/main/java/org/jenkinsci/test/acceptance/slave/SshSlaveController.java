@@ -1,10 +1,10 @@
 package org.jenkinsci.test.acceptance.slave;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import org.apache.commons.codec.binary.Base64;
 import org.codehaus.plexus.util.FileUtils;
 import org.jenkinsci.test.acceptance.controller.Machine;
+import org.jenkinsci.test.acceptance.controller.SshKeyPair;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.po.SshPrivateKeyCredential;
@@ -14,7 +14,13 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.security.*;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -22,12 +28,12 @@ import java.security.*;
  */
 public class SshSlaveController extends SlaveController {
     private final Machine machine;
-    private final File privateKeyFile;
+    private final SshKeyPair keyPair;
 
     @Inject
-    public SshSlaveController(Machine machine,@Named("privateKeyFile")File privateKeyFile) {
+    public SshSlaveController(Machine machine, SshKeyPair keyPair) {
         this.machine = machine;
-        this.privateKeyFile = privateKeyFile;
+        this.keyPair = keyPair;
     }
 
     @Override
@@ -36,7 +42,7 @@ public class SshSlaveController extends SlaveController {
         SshPrivateKeyCredential credential = new SshPrivateKeyCredential(j);
 
         try {
-            credential.create("GLOBAL",machine.getUser(),FileUtils.fileRead(privateKeyFile,"UTF-8"));
+            credential.create("GLOBAL",machine.getUser(),keyPair.readPrivateKey());
         } catch (IOException e) {
             throw new AssertionError(e);
         }

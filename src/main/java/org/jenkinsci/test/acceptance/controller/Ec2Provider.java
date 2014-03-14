@@ -30,8 +30,7 @@ public class Ec2Provider extends JcloudsMachineProvider {
     private  Authenticator authenticator;
 
     @Inject
-    @Named("publicKeyFile")
-    private  File publicKeyFile;
+    private SshKeyPair keyPair;
 
     @Inject
     public Ec2Provider(Ec2Config config){
@@ -71,7 +70,7 @@ public class Ec2Provider extends JcloudsMachineProvider {
                 locationId(config.getRegion()).hardwareId(config.getInstanceType()).
                 build();
 
-        String publicKey = Files.toString(publicKeyFile, UTF_8);
+        String publicKey = keyPair.readPublicKey();
 
         template.getOptions().as(EC2TemplateOptions.class).authorizePublicKey(publicKey).keyPair(config.getKeyPairName()).
                 securityGroups(config.getSecurityGroups()).inboundPorts(config.getInboundPorts()).overrideLoginUser(config.getUser());
