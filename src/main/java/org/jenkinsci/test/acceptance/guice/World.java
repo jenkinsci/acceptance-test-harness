@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.guice;
 
 import com.cloudbees.sdk.extensibility.ExtensionFinder;
+import com.cloudbees.sdk.extensibility.ExtensionList;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -26,6 +27,8 @@ public class World extends AbstractModule {
     private final ClassLoader cl;
     private Injector injector;
 
+    private final ExtensionList<SubWorld> subworlds = new ExtensionList<>(SubWorld.class);
+
     private World(ClassLoader cl) {
         this.cl = cl;
     }
@@ -45,11 +48,20 @@ public class World extends AbstractModule {
      */
     public void startTestScope() {
         injector.getInstance(TestLifecycle.class).startTestScope();
+
+        for (SubWorld sw : subworlds.list(injector)) {
+            sw.injector.getInstance(TestLifecycle.class).startTestScope();
+        }
     }
 
     public void endTestScope() {
         injector.getInstance(TestCleaner.class).performCleanUp();
         injector.getInstance(TestLifecycle.class).endTestScope();
+
+        for (SubWorld sw : subworlds.list(injector)) {
+            sw.injector.getInstance(TestCleaner.class).performCleanUp();
+            sw.injector.getInstance(TestLifecycle.class).endTestScope();
+        }
     }
 
     @Override
