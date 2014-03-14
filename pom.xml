@@ -23,6 +23,25 @@
           <target>1.7</target>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>cuke4duke</groupId>
+        <artifactId>cuke4duke-maven-plugin</artifactId>
+        <version>0.4.4</version>
+        <executions>
+          <execution>
+            <phase>test</phase>
+            <goals>
+              <goal>cucumber</goal>
+            </goals>
+            <configuration>
+              <cucumberargs>
+                <cucumberarg>${basedir}/target/test-classes</cucumberarg>
+                <cucumberarg>--tags ~@wip</cucumberarg>
+              </cucumberargs>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 
@@ -180,6 +199,12 @@
       <url>http://repo.jenkins-ci.org/public/</url>
     </repository>
   </repositories>
+  <pluginRepositories>
+      <pluginRepository>
+        <id>cukes</id>
+        <url>http://cukes.info/maven</url>
+      </pluginRepository>
+  </pluginRepositories>
 
   <licenses>
     <license>
@@ -216,6 +241,19 @@
             <artifactId>maven-surefire-plugin</artifactId>
             <configuration>
               <skipTests>true</skipTests>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>no-junit</id>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <skip>true</skip>
             </configuration>
           </plugin>
         </plugins>
