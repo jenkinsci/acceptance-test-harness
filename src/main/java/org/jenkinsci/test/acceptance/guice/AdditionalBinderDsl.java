@@ -37,9 +37,9 @@ public abstract class AdditionalBinderDsl extends BinderClosureScript {
      *
      * The newly created injector will be returned.
      */
-    public Injector subworld(final String name, final Closure config) {
+    public SubWorld subworld(final String name, final Closure config) {
         final Binder binder = getBinder();
-        final SubWorld sub = new SubWorld(name);
+        final SubWorldBuilder sub = new SubWorldBuilder(name);
         try {
             World w = World.get();
             Injector i = Guice.createInjector(
@@ -53,15 +53,20 @@ public abstract class AdditionalBinderDsl extends BinderClosureScript {
                             config.run();
                         }
                     }));
-            // expose this injector
-            binder.bind(Injector.class).annotatedWith(Names.named(name)).toInstance(i);
+            SubWorld sw = new SubWorld(name, i);
+
+            // expose this world
+            binder.bind(SubWorld.class).annotatedWith(Names.named(name)).toInstance(sw);
 
             // export all that's promised
             for (Key key : sub.keys) {
                 binder.bind(Key.get(key.getTypeLiteral(), Names.named(name))).toProvider(i.getProvider(key));
             }
 
-            return i;
+            // expose the subworld by its name to the rest of the script
+            getBinding().setProperty(name,sw);
+
+            return sw;
         } catch (CreationException e) {
             throw new RuntimeException("Failed to create a sub-world "+name,e);
         } finally {
@@ -98,12 +103,12 @@ public abstract class AdditionalBinderDsl extends BinderClosureScript {
         };
     }
 
-    public class SubWorld extends GroovyObjectSupport {
+    public class SubWorldBuilder extends GroovyObjectSupport {
         private final String name;
         private final Set<Key> keys = new HashSet<>();
 
 
-        public SubWorld(String name) {
+        public SubWorldBuilder(String name) {
             this.name = name;
         }
 
