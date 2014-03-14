@@ -36,13 +36,13 @@ it's own sandboxed workspace.
 
 ### Running tests
 
-* [Selecting browser](blob/master/docs/BROWSER.md)
-* [Selecting how to launch Jenkins under test](blob/master/docs/CONTROLLER.md)
-* [Running one test](blob/master/docs/SINGLE-TEST.md)
+* [Selecting browser](docs/BROWSER.md)
+* [Selecting how to launch Jenkins under test](docs/CONTROLLER.md)
+* [Running one test](docs/SINGLE-TEST.md)
 
 ### Writing tests
-* [Docker fixtures](blob/amster/docs/FIXTURES.md)
-* [Page objects](blob/amster/docs/PAGE-OBJECTS.md)
+* [Docker fixtures](docs/FIXTURES.md)
+* [Page objects](docs/PAGE-OBJECTS.md)
 * how to add page objects?
   * convention of exception handling
 * explain two ways: cucumber and junit
