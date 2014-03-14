@@ -10,6 +10,13 @@ import java.io.*;
 import java.net.URL;
 
 /**
+ * Starts/stops Jenkins and exposes where it is running.
+ *
+ * <p>
+ * This abstracts away how the test harness launches Jenkins-under-test and where,
+ * which is determined at runtime by the user who runs the tests, not by the author
+ * of tests.
+ *
  * @author: Vivek Pandey
  */
 @ExtensionPoint
