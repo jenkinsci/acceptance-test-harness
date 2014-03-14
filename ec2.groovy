@@ -8,8 +8,8 @@ def localWar = new File("/Users/vivek/Downloads/jenkins.war")
 
 def common = module {
     max_mt_machines=2
-    privateKeyFile = new File("/Users/vivek/ws/jenkins/acceptance-test-harness/.jenkins_test/.ssh/id_rsa")
-    publicKeyFile = new File("/Users/vivek/ws/jenkins/acceptance-test-harness/.jenkins_test/.ssh/id_rsa.pub")
+    privateKeyFile = new File(".jenkins_test/.ssh/id_rsa")
+    publicKeyFile = new File(".jenkins_test/.ssh/id_rsa.pub")
     bind(Authenticator).named("publicKeyAuthenticator").to(PublicKeyAuthenticator)
 
     jenkins_md5_sum="b6aacb5f25a323120f8c791fe2d947b9"
