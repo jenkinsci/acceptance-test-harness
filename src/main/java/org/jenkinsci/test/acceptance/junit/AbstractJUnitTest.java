@@ -1,5 +1,7 @@
 package org.jenkinsci.test.acceptance.junit;
 
+import java.net.URL;
+
 import org.jenkinsci.test.acceptance.ByFactory;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -26,7 +28,9 @@ public class AbstractJUnitTest extends Assert {
      * Obtains a resource in a wrapper.
      */
     public Resource resource(String path) {
-        return new Resource(getClass().getResource(path));
+        final URL resource = getClass().getResource(path);
+        if (resource == null) throw new AssertionError("No such resource " + path + " for " + getClass().getName());
+        return new Resource(resource);
     }
 
     public static final ByFactory by = new ByFactory();

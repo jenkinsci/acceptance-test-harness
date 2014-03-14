@@ -125,7 +125,7 @@ public class AntPluginTest extends AbstractJUnitTest {
     private Build buildHelloWorld(final String name) {
         job.configure(new Callable<Object>() {
             public Object call() {
-                job.addCreateFileStep("build.xml", resource("echo-helloworld.xml").asText());
+                job.addCreateFileStep("build.xml", resource("ant/echo-helloworld.xml").asText());
                 AntBuildStep ant = job.addBuildStep(AntBuildStep.class);
                 if (name!=null)
                     ant.antName.sendKeys(name);
