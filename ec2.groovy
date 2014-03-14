@@ -19,7 +19,7 @@ def common = module {
     // bind JenkinsResolver toInstance new JenkinsUploader(localWar)
 }
 
-subworld("slaves") {
+slaves = subworld {
     install(common)
 
     user="ubuntu1"
@@ -27,7 +27,7 @@ subworld("slaves") {
     bind MachineProvider to Ec2Provider
 }
 
-subworld("masters") {
+masters = subworld {
     install(common)
 
     user="ubuntu2"
@@ -35,7 +35,7 @@ subworld("masters") {
     bind MachineProvider to Ec2Provider
 }
 
-subworld("joc") {
+joc = subworld {
     bind JenkinsController toInstance new WinstoneController(localWar)
 }
 
