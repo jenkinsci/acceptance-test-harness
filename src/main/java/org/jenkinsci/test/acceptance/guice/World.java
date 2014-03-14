@@ -47,7 +47,7 @@ public class World extends AbstractModule {
      * Call this method when a new test starts, to reset the {@link TestScope}.
      */
     public void startTestScope() {
-        injector.getInstance(TestLifecycle.class).startTestScope();
+        getInjector().getInstance(TestLifecycle.class).startTestScope();
 
         for (SubWorld sw : subworlds.list(injector)) {
             sw.injector.getInstance(TestLifecycle.class).startTestScope();
