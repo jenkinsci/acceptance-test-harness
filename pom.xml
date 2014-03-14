@@ -24,20 +24,29 @@
         </configuration>
       </plugin>
       <plugin>
-        <groupId>cuke4duke</groupId>
-        <artifactId>cuke4duke-maven-plugin</artifactId>
-        <version>0.4.4</version>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.2.1</version>
         <executions>
           <execution>
+            <id>cucumber</id>
             <phase>test</phase>
             <goals>
-              <goal>cucumber</goal>
+              <goal>java</goal>
             </goals>
             <configuration>
-              <cucumberargs>
-                <cucumberarg>${basedir}/target/test-classes</cucumberarg>
-                <cucumberarg>--tags ~@wip</cucumberarg>
-              </cucumberargs>
+              <mainClass>org.jenkinsci.test.acceptance.cucumber.Main</mainClass>
+              <arguments>
+                <argument>--format</argument>
+                <argument>junit:target/cucumber.xml</argument>
+                <argument>--format</argument>
+                <argument>pretty</argument>
+                <argument>--format</argument>
+                <argument>html:target/cucumber-html-report</argument>
+                <argument>--tags</argument>
+                <argument>~@wip</argument>
+                <argument>${project.basedir}/features</argument>
+              </arguments>
             </configuration>
           </execution>
         </executions>
@@ -199,12 +208,6 @@
       <url>http://repo.jenkins-ci.org/public/</url>
     </repository>
   </repositories>
-  <pluginRepositories>
-      <pluginRepository>
-        <id>cukes</id>
-        <url>http://cukes.info/maven</url>
-      </pluginRepository>
-  </pluginRepositories>
 
   <licenses>
     <license>
@@ -246,7 +249,9 @@
         </plugins>
       </build>
     </profile>
+
     <profile>
+      <!-- this profile skips JUnit tests -->
       <id>no-junit</id>
       <build>
         <plugins>
@@ -255,6 +260,27 @@
             <configuration>
               <skip>true</skip>
             </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <!-- this profile skips Cucumber tests -->
+      <id>no-cucumber</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>cucumber</id>
+                <configuration>
+                  <skip>true</skip>
+                </configuration>
+              </execution>
+            </executions>
           </plugin>
         </plugins>
       </build>

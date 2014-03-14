@@ -11,6 +11,14 @@ import cucumber.runtime.java.BetterJavaBackend;
 import java.util.Collections;
 
 /**
+ * Entry point to run cucumber tests.
+ *
+ * There appears to be no Maven plugin based on the conversation in
+ * https://groups.google.com/forum/#!topic/cukes/Gr9TVxS0fr8
+ * and http://cukes.info/running.html
+ *
+ * Using a separate driver makes it easier to specify options to cucumber.
+ *
  * @author Kohsuke Kawaguchi
  */
 public class Main {
