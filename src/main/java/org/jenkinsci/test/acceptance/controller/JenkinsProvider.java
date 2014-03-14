@@ -3,8 +3,8 @@ package org.jenkinsci.test.acceptance.controller;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
-import org.jenkinsci.test.acceptance.guice.TestScope;
 import org.jenkinsci.test.acceptance.resolver.JenkinsResolver;
+import org.jenkinsci.test.acceptance.resolver.PluginDownloader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,7 +14,6 @@ import java.io.IOException;
 /**
  * @author Vivek Pandey
  */
-@TestScope
 public class JenkinsProvider implements Provider<JenkinsController> {
 
     private static final Logger logger = LoggerFactory.getLogger(JenkinsProvider.class);
@@ -22,11 +21,12 @@ public class JenkinsProvider implements Provider<JenkinsController> {
     private final Machine machine;
 
 
-    private final String jenkinsHome;
-
-    private final JenkinsController jenkinsController;
 
     private final JenkinsResolver jenkinsResolver;
+
+    private final String jenkinsWar;
+
+    private final File privateKeyFile;
 
     @Inject
     public JenkinsProvider(Machine machine, JenkinsResolver jenkinsResolver, @Named("privateKeyFile") File privateKeyFile) {
@@ -34,42 +34,41 @@ public class JenkinsProvider implements Provider<JenkinsController> {
         this.jenkinsResolver = jenkinsResolver;
         logger.info("New Jenkins Provider created");
         try{
-            //install jenkins
-            String jenkinsWar = jenkinsResolver.materialize(machine);
-            this.jenkinsHome = machine.dir()+"/"+newJenkinsHome();
-            try {
-                Ssh ssh = machine.connect();
-                ssh.executeRemoteCommand("mkdir -p " + jenkinsHome + "/plugins");
-
-                File formPathElement = JenkinsController.downloadPathElement();
-
-                //copy form-path-element
-                ssh.copyTo(formPathElement.getAbsolutePath(), "path-element.hpi", "./"+jenkinsHome+"/plugins/");
-
-                this.jenkinsController = new RemoteJenkinsController(machine, jenkinsHome,jenkinsWar,privateKeyFile);
-            } catch (IOException e) {
-                throw new AssertionError("Failed to copy form-path-element.hpi",e);
-            }
-
+            //install jenkins WAR
+            this.jenkinsWar = JenkinsResolver.JENKINS_TEMP_DIR+"jenkins.war";
+            jenkinsResolver.materialize(machine, jenkinsWar);
+            this.privateKeyFile = privateKeyFile;
         }catch(Exception e){
-            try {
-                machine.close();
-            } catch (IOException e1) {
-                throw new AssertionError(e);
-            }
-            throw new RuntimeException(e);
+            logger.error("Error during setting up Jenkins: "+e.getMessage(),e);
+            throw new AssertionError(e);
         }
     }
 
     @Override
     public JenkinsController get() {
-        logger.info("New RemoteJenkinsController created");
+        logger.info("Creating new RemoteJenkinsController...");
+        JenkinsController jenkinsController = createNewJenkinsController();
         try {
             jenkinsController.start();
         } catch (IOException e) {
             throw new AssertionError("Failed to start Jenkins: "+e.getMessage(),e);
         }
         return jenkinsController;
+    }
+
+    private JenkinsController createNewJenkinsController(){
+        String jenkinsHome = machine.dir()+newJenkinsHome()+"/";
+        String pluginDir = jenkinsHome +"plugins/";
+        String path = JenkinsResolver.JENKINS_TEMP_DIR+"form-element-path.hpi";
+
+        //install form-path-element plugin
+        new PluginDownloader("form-element-path").materialize(machine, path);
+        Ssh ssh = machine.connect();
+        ssh.executeRemoteCommand("mkdir -p " + pluginDir);
+
+        ssh.executeRemoteCommand(String.format("cp %s %s", path, pluginDir));
+
+        return new RemoteJenkinsController(machine, jenkinsHome,jenkinsWar,privateKeyFile);
     }
 
     private String newJenkinsHome(){

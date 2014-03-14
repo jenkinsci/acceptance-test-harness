@@ -15,7 +15,7 @@ public class MultiTenantMachine implements Machine{
     @Inject
     public MultiTenantMachine(Machine machine) {
         this.base = machine;
-        this.dir = String.format("%s/mt_%s",machine.dir(), JcloudsMachine.newDirSuffix());
+        this.dir = String.format("%smt_%s/",machine.dir(), JcloudsMachine.newDirSuffix());
         Ssh ssh = connect();
         ssh.executeRemoteCommand("mkdir -p "+this.dir);
     }

@@ -51,6 +51,12 @@ public class RemoteJenkinsController extends JenkinsController {
                 " --httpPort=" + httpPort);
         localLogger.info("Launching Jenkins: "+cb);
         this.process =  cb.popen();
+
+        /** Write to System.out so that JUnit Attachment Plugin catches up the log
+         *  https://wiki.jenkins-ci.org/display/JENKINS/JUnit+Attachments+Plugin
+         **/
+        System.out.println(String.format("[[ATTACHMENT|%s]]", logFile.getAbsolutePath()));
+
         this.logWatcher = new LogWatcher(process, new FileOutputStream(logFile), Collections.EMPTY_MAP);
         try {
             this.logWatcher.waitTillReady(true);
@@ -63,6 +69,8 @@ public class RemoteJenkinsController extends JenkinsController {
     public void stopNow() throws IOException {
         Process p = process.getProcess();
         int pid = ProcessUtils.getPid(p);
+
+        localLogger.info(String.format("Killing Jenkins Process, pid: %s running at JENKINS_HOME: %s",pid, jenkinsHome));
         LibraryLoader.create(GNUCLibrary.class).load("c").kill(pid,2);
         synchronized (p) {
             try {

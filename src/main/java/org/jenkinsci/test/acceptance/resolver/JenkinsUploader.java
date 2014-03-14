@@ -35,17 +35,11 @@ public class JenkinsUploader implements JenkinsResolver {
         try {
             Ssh ssh = machine.connect();
             File target = new File(path);
-            if(!JenkinsDownloader.jenkinsWarExists(ssh.getConnection(),path,jenkinsMd5Sum)){
+            if(!JenkinsDownloader.remoteFileExists(ssh.getConnection(),path,jenkinsMd5Sum)){
                 ssh.copyTo(war.getPath(), target.getName(), target.getParent());
             }
         } catch (IOException e) {
             throw new AssertionError("Failed to copy "+war+" into "+path,e);
         }
-    }
-
-    @Override
-    public String materialize(Machine machine) {
-        materialize(machine,JENKINS_WAR_TARGET_LOCATION);
-        return JENKINS_WAR_TARGET_LOCATION;
     }
 }

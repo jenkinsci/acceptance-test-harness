@@ -31,7 +31,7 @@ public interface Machine extends Closeable {
     String getUser();
 
     /**
-     * Client of {@link Machine} can use this directory and underneath for whatever purpose.
+     * Client of {@link Machine} can use this directory and underneath for whatever purpose. Always ends with '/'
      */
     String dir();
 
