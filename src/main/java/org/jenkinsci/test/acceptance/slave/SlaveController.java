@@ -8,6 +8,18 @@ import java.io.Closeable;
 import java.io.IOException;
 
 /**
+ * Controls where/how to run slaves.
+ *
+ * <p>
+ * Jenkins supports different ways of launching slaves, and sometimes this affects
+ * behaviours of plugins. This abstraction hides the details of where the slaves
+ * are running (local machine? EC2? Docker?) and how slaves are hooked up to Jenkins.
+ *
+ * <p>
+ * Test authors write tests by injecting {@link SlaveController} and
+ *
+ *
+ * @see SlaveProvider
  * @author Kohsuke Kawaguchi
  */
 @ExtensionPoint
