@@ -29,7 +29,7 @@ public class JenkinsProvider implements Provider<JenkinsController> {
     private final JenkinsResolver jenkinsResolver;
 
     @Inject
-    public JenkinsProvider(Machine machine, JenkinsResolver jenkinsResolver, @Named("privateKeyFile") File privateKeyFile) {
+    public JenkinsProvider(Machine machine, JenkinsResolver jenkinsResolver, SshKeyPair keyPair) {
         this.machine = machine;
         this.jenkinsResolver = jenkinsResolver;
         logger.info("New Jenkins Provider created");
@@ -46,7 +46,7 @@ public class JenkinsProvider implements Provider<JenkinsController> {
                 //copy form-path-element
                 ssh.copyTo(formPathElement.getAbsolutePath(), "path-element.hpi", "./"+jenkinsHome+"/plugins/");
 
-                this.jenkinsController = new RemoteJenkinsController(machine, jenkinsHome,jenkinsWar,privateKeyFile);
+                this.jenkinsController = new RemoteJenkinsController(machine, jenkinsHome,jenkinsWar,keyPair.privateKey);
             } catch (IOException e) {
                 throw new AssertionError("Failed to copy form-path-element.hpi",e);
             }

@@ -1,6 +1,5 @@
 package org.jenkinsci.test.acceptance.controller;
 
-import com.google.common.io.Files;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
@@ -11,10 +10,7 @@ import org.jclouds.ec2.domain.IpProtocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
-
-import static com.google.common.base.Charsets.UTF_8;
 
 /**
  * @author Vivek Pandey

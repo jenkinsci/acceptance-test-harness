@@ -1,14 +1,13 @@
 package org.jenkinsci.test.acceptance.slave;
 
-import com.google.inject.name.Named;
 import org.jenkinsci.test.acceptance.controller.Machine;
 import org.jenkinsci.test.acceptance.controller.MachineProvider;
+import org.jenkinsci.test.acceptance.controller.SshKeyPair;
 import org.jenkinsci.test.acceptance.guice.TestCleaner;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
-import java.io.File;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -19,8 +18,7 @@ public class SshSlaveProvider implements SlaveProvider {
     private MachineProvider provider;
 
     @Inject
-    @Named("privateKeyFile")
-    private File privateKeyFile;
+    private SshKeyPair keyPair;
 
     @Inject
     private Provider<TestCleaner> testCleaner;
@@ -29,7 +27,7 @@ public class SshSlaveProvider implements SlaveProvider {
     public SlaveController get() {
         // TODO: multi-tenant
         Machine m = provider.get();
-        SshSlaveController sc = new SshSlaveController(m,privateKeyFile);
+        SshSlaveController sc = new SshSlaveController(m,keyPair);
         testCleaner.get().addTask(m);   // release a machine
         return sc;
     }
