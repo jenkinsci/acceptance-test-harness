@@ -19,6 +19,10 @@ public class WinstoneController extends LocalController {
     private final int httpPort;
     private final int controlPort;
 
+    public WinstoneController(String war) {
+        this(new File(war));
+    }
+
     public WinstoneController(File war) {
         super(war);
         httpPort = randomLocalPort();
