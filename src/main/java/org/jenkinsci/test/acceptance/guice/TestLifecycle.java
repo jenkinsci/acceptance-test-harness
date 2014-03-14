@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * Keeps track of {@link TestScope} objects.
+ *
 * @author Kohsuke Kawaguchi
 */
 public class TestLifecycle implements Scope {

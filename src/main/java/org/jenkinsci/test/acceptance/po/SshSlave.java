@@ -35,7 +35,7 @@ public class SshSlave extends Slave {
             public Boolean call() throws Exception {
                 return s.isOnline();
             }
-        });
+        }, 300);
 
         return s;
 

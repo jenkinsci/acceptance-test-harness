@@ -54,6 +54,7 @@ public abstract class JcloudsMachineProvider implements MachineProvider {
     protected final ContextBuilder contextBuilder;
 
     private final String groupName="jenkins-test";
+    private final String provider;
 
     @Inject(optional = true)
     @Named("node_id")
@@ -64,10 +65,12 @@ public abstract class JcloudsMachineProvider implements MachineProvider {
     private final Map<String, Machine> machines = new ConcurrentHashMap<>();
 
     public JcloudsMachineProvider(String provider, String identity, String credential) {
-        logger.info("Machine Provider created");
+        logger.info("Initializing JCloudMachineProvider...");
         if(!contains(supportedProviders, provider)){
             throw new RuntimeException(String.format("Provider %s is not supported. Supported providers: %s",provider, Arrays.toString(supportedProviders.toArray())));
         }
+
+        this.provider = provider;
 
         this.contextBuilder = initComputeService(provider, identity, credential);
         this.computeService =  contextBuilder.buildView(ComputeServiceContext.class).getComputeService();
@@ -79,10 +82,12 @@ public abstract class JcloudsMachineProvider implements MachineProvider {
      */
     public abstract Template getTemplate() throws IOException;
 
+
     /**
-     * Authorize inbound ports on the machine being provisioned
+     * Each JCloud machine provider gets a chance to perform post startup setups, for example, authorize ports, tag instances etc.
      */
-    public abstract void authorizeInboundPorts();
+    public abstract  void postStartupSetup(NodeMetadata node);
+
 
     /**
      * Gives all available inbound ports
@@ -106,8 +111,7 @@ public abstract class JcloudsMachineProvider implements MachineProvider {
             logger.info("Reusing machine: "+nodeId);
             node=computeService.getNodeMetadata(nodeId);
         }else{
-            logger.info("new Machine instantiated...");
-            logger.info(String.format("Adding node to group %s", groupName));
+            logger.info(String.format("Instantiating new %s machine ...",provider));
 
             try {
                 node = getOnlyElement(computeService.createNodesInGroup(groupName, 1, template));
@@ -115,9 +119,9 @@ public abstract class JcloudsMachineProvider implements MachineProvider {
                 throw new RuntimeException(e);
             }
         }
-        logger.info(String.format("Added node %s: %s", node.getId(), concat(node.getPrivateAddresses(), node.getPublicAddresses())));
+        logger.info(String.format("Added node %s: %s", node.getId(), node.getPublicAddresses()));
 
-        authorizeInboundPorts();
+        postStartupSetup(node);
 
         String user = node.getCredentials() == null ? "ubuntu" :node.getCredentials().getUser();
         waitForSsh(user, node.getPublicAddresses().iterator().next()); //wait for ssh to be ready
