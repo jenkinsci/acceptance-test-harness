@@ -49,19 +49,19 @@ public abstract class JenkinsController implements Closeable {
     }
 
     /**
-     * Starts Jenkins
+     * Starts Jenkins.
      *
      * @throws IOException
      */
-    public void start() throws IOException{
-        if(!isRunning){
+    public void start() throws IOException {
+        if(!isRunning) {
             startNow();
             this.isRunning = true;
         }
     }
 
     /**
-     * Jenkins controller specific startup logic
+     * Synchronously start Jenkins instance until it starts responding to {@linkplain #getUrl() the specified URL}.
      */
     public abstract void startNow() throws IOException;
 
@@ -71,11 +71,20 @@ public abstract class JenkinsController implements Closeable {
      *
      * @throws IOException
      */
-    public void stop() throws IOException{
-        if(isRunning){
+    public void stop() throws IOException {
+        if(isRunning) {
             stopNow();
         }
     }
+
+    /**
+     * Synchronously shutdown Jenkins instance.
+     *
+     * <p>
+     * This method must leave JENKINS_HOME intact so that it can be {@linkplain #start() started} later.
+     * To really delete the data and clean up, see {@link #tearDown()}.
+     */
+    public abstract void stopNow() throws IOException;
 
     /**
      * Alias for {@link #tearDown()}.
@@ -86,13 +95,15 @@ public abstract class JenkinsController implements Closeable {
     }
 
     /**
-     * Jenkins controller specific stop logic
+     * Assuming the instance had already {@linkplain #stop() stopped}, destroy JENKINS_HOME and release resources
+     * used by Jenkins.
      */
-    public abstract void stopNow() throws IOException;
+    public abstract void tearDown() throws IOException;
 
 
     /**
-     * Stops and starts running Jenkins
+     * Stops and starts running Jenkins to perform a full JVM restart.
+     *
      * @throws IOException
      */
     public void restart() throws IOException{
@@ -111,7 +122,6 @@ public abstract class JenkinsController implements Closeable {
 
     public abstract void diagnose();
 
-    public abstract void tearDown() throws IOException;
 
     /**
      * Downloads the latest version of the form-element-path plugin that we use for testing.

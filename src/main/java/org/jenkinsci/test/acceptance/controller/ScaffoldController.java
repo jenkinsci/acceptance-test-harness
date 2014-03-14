@@ -21,11 +21,6 @@ public class ScaffoldController extends JenkinsController {
     }
 
     @Override
-    public void start() {
-
-    }
-
-    @Override
     public void startNow() {
 
     }
