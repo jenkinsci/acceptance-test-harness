@@ -27,9 +27,9 @@ public class MultitenancyMachineProvider implements MachineProvider {
     private volatile Machine machine;
 
     @Inject
-    public MultitenancyMachineProvider(MachineProvider base) {
+    public MultitenancyMachineProvider(@Named("raw") MachineProvider base) {
         this.base = base;
-        this.machine = base.get();
+        this.machine = this.base.get();
     }
 
     @Override
