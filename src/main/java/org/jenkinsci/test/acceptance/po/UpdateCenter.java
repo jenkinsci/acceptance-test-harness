@@ -34,12 +34,12 @@ public class UpdateCenter extends ContainerPageObject {
             JsonNode p = job.get("plugin");
             if (p!=null) {
                 if (pluginShortName.equals(p.get("name").asText())) {
-                    String errorMessage = p.get("errorMessage").asText();
+                    JsonNode errorMessage = p.get("errorMessage");
                     if (errorMessage!=null) {
-                        throw new InstallationFailedException(errorMessage);
+                        throw new InstallationFailedException(errorMessage.asText());
                     }
 
-                    JsonNode st = p.get("status");
+                    JsonNode st = job.get("status");
                     if (st.get("success").asBoolean()) {
                         return true;    // successfully installed
                     }
