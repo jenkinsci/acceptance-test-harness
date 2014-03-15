@@ -42,9 +42,11 @@ public class ConfigureSlavesTest extends AbstractJUnitTest {
 
         s.configure();
         s.setLabels("test");
+        s.save();
 
         j.configure();
         j.setLabelExpression("test");
+        j.save();
 
         Build b = j.queueBuild().shouldSucceed();
         j.shouldBeTiedToLabel("test");
