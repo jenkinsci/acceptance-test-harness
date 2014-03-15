@@ -1,5 +1,3 @@
-require File.expand_path('../lib/jenkins/version', __FILE__)
-
 Gem::Specification.new do |gem|
   gem.authors       = ['Jenkins project']
   gem.description   = %q{End-to-end test harness for Jenkins}
@@ -10,7 +8,7 @@ Gem::Specification.new do |gem|
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.name          = "jenkins-selenium-tests"
   gem.require_paths = ["lib"]
-  gem.version       = Jenkins::VERSION
+  gem.version       = 0.1
 
   gem.add_dependency "rake"
   gem.add_dependency "selenium-webdriver"

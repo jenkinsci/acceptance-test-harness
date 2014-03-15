@@ -61,12 +61,16 @@ public class Build extends ContainerPageObject {
     }
 
     public Build waitUntilFinished() {
+        return waitUntilFinished(30);
+    }
+
+    public Build waitUntilFinished(int timeout) {
         waitUntilStarted();
         waitForCond(new Callable<Boolean>() {
             public Boolean call() {
                 return !isInProgress();
             }
-        });
+        },timeout);
         return this;
     }
 
@@ -124,6 +128,16 @@ public class Build extends ContainerPageObject {
 
     public Build shouldSucceed() {
         assertThat(getResult(), is("SUCCESS"));
+        return this;
+    }
+
+    public Build shouldFail() {
+        assertThat(getResult(), is("FAILURE"));
+        return this;
+    }
+
+    public Build shouldAbort() {
+        assertThat(getResult(), is("ABORTED"));
         return this;
     }
 }

@@ -56,6 +56,13 @@ public class ByFactory {
     }
 
     /**
+     * Select radio button by its name, id, or label text.
+     */
+    public By radioButton(String locator) {
+        return xpath(fieldXPath("//input[@type='radio']",locator));
+    }
+
+    /**
      * Finds input fields.
      *
      * @param locator
@@ -67,7 +74,9 @@ public class ByFactory {
 
     private static String fieldXPath(String base, String locator) {
         // TODO: there's actually a lot more
-        return String.format(base+"[@id='%1$s' or @attr='%1$s' or @name='%1$s' or @value='%1$s']",locator);
+        return String.format(base+
+                "[./@id = '%1$s' or ./@name = '%1$s' or ./@placeholder = '%1$s' or ./@id = //label[contains(normalize-space(string(.)), '%1$s')]/@for]"+
+                "| .//label[contains(normalize-space(string(.)), '%1$s')]"+base,locator);
     }
 
     /**
