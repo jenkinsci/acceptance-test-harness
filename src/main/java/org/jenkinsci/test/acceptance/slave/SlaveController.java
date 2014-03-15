@@ -6,6 +6,7 @@ import org.jenkinsci.test.acceptance.po.Slave;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.concurrent.Future;
 
 /**
  * Controls where/how to run slaves.
@@ -24,7 +25,7 @@ import java.io.IOException;
  */
 @ExtensionPoint
 public abstract class SlaveController implements Closeable {
-    public abstract Slave install(Jenkins jenkinsToInstallTo);
+    public abstract Future<Slave> install(Jenkins jenkinsToInstallTo);
     public abstract void start();
     public abstract void stop();
 

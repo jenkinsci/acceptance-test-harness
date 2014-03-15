@@ -10,8 +10,11 @@ import org.jenkinsci.test.acceptance.po.SshSlave;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -20,6 +23,7 @@ import java.io.IOException;
 public class SshSlaveController extends SlaveController {
     private final Machine machine;
     private final SshKeyPair keyPair;
+    private final ExecutorService executor = Executors.newFixedThreadPool(1);
 
     @Inject
     public SshSlaveController(Machine machine, SshKeyPair keyPair) {
@@ -28,17 +32,8 @@ public class SshSlaveController extends SlaveController {
     }
 
     @Override
-    public Slave install(Jenkins j) {
-
-        SshPrivateKeyCredential credential = new SshPrivateKeyCredential(j);
-
-        try {
-            credential.create("GLOBAL",machine.getUser(),keyPair.readPrivateKey());
-        } catch (IOException e) {
-            throw new AssertionError(e);
-        }
-
-        return SshSlave.create(j, machine.getPublicIpAddress());
+    public Future<Slave> install(Jenkins j) {
+        return executor.submit(new SlaveInstaller(j));
     }
 
     @Override
@@ -53,7 +48,29 @@ public class SshSlaveController extends SlaveController {
 
     @Override
     public void close() throws IOException {
+        executor.shutdown();
+        executor.shutdownNow();
+    }
 
+    private class SlaveInstaller implements Callable<Slave>{
+
+        private final Jenkins j;
+
+        private SlaveInstaller(Jenkins j) {
+            this.j = j;
+        }
+        @Override
+        public Slave call() throws Exception {
+            SshPrivateKeyCredential credential = new SshPrivateKeyCredential(j);
+
+            try {
+                credential.create("GLOBAL",machine.getUser(),keyPair.readPrivateKey());
+            } catch (IOException e) {
+                throw new AssertionError(e);
+            }
+
+            return SshSlave.create(j, machine.getPublicIpAddress());
+        }
     }
 
     private static final Logger logger = LoggerFactory.getLogger(SshSlaveController.class);
