@@ -1,5 +1,6 @@
 package org.jenkinsci.test.acceptance.po;
 
+import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
@@ -11,13 +12,27 @@ import org.openqa.selenium.WebElement;
  * @see PageArea#control(String...)
  */
 public class Control extends CapybaraPortingLayer {
-    private final PageArea parent;
+    private final Owner parent;
     private final String[] relativePaths;
 
-    public Control(PageArea parent, String[] relativePaths) {
+    public Control(PageArea parent, String... relativePaths) {
         super(parent.injector);
         this.parent = parent;
         this.relativePaths = relativePaths;
+    }
+
+    /**
+     * Creates a control by giving their full path in the page
+     */
+    public Control(PageObject parent, String... paths) {
+        super(parent.injector);
+        this.parent = new Owner() {
+            @Override
+            public By path(String rel) {
+                return by.path(rel);
+            }
+        };
+        this.relativePaths = paths;
     }
 
     public WebElement resolve() {
@@ -56,5 +71,12 @@ public class Control extends CapybaraPortingLayer {
         WebElement e = resolve();
         e.clear();
         e.sendKeys(text);
+    }
+
+    public interface Owner {
+        /**
+         * Resolves relative path into a selector.
+         */
+        By path(String rel);
     }
 }

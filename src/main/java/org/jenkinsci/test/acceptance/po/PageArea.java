@@ -12,7 +12,7 @@ import org.openqa.selenium.By;
  *
  * @author Oliver Gondza
  */
-public abstract class PageArea extends CapybaraPortingLayer {
+public abstract class PageArea extends CapybaraPortingLayer implements Control.Owner {
     /**
      * Element path that points to this page area.
      */

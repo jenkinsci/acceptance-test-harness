@@ -12,6 +12,9 @@ import java.net.URL;
  */
 @ViewPageObject("Dashboard")
 public class DashboardView extends View {
+    public final Control topPortlet = new Control(this,"/hetero-list-add[topPortlet]");
+    public final Control bottomPortlet = new Control(this,"/hetero-list-add[bottomPortlet]");
+
     public DashboardView(Injector injector, URL url) {
         super(injector, url);
     }
