@@ -3,6 +3,8 @@ package org.jenkinsci.test.acceptance;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
+import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -119,4 +121,5 @@ public class Matchers {
     }
 
     public static final ByFactory by = new ByFactory();
+
 }

@@ -140,4 +140,10 @@ public class Build extends ContainerPageObject {
         assertThat(getResult(), is("ABORTED"));
         return this;
     }
+
+    public String getNode() {
+        String n = getJson().get("builtOn").asText();
+        if (n.length()==0)  return "master";
+        return n;
+    }
 }

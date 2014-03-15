@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 
+import static org.jenkinsci.test.acceptance.Matchers.*;
+
 /**
  * @author Kohsuke Kawaguchi
  */
@@ -168,5 +170,17 @@ public class Job extends ContainerPageObject {
 
         check(find(by.path("/customWorkspace")));
         find(by.path("/customWorkspace/directory")).sendKeys(ws);
+    }
+
+    public void setLabelExpression(String l) {
+        ensureConfigPage();
+        check(find(by.input("hasSlaveAffinity")));
+        find(by.input("_.assignedLabelString")).sendKeys(l);
+    }
+
+    public Job shouldBeTiedToLabel(final String label) {
+        visit("/label/" + label); // TODO: this doesn't work correctly if the URL has non-empty context path
+        assertThat(driver, hasContent(name));
+        return this;
     }
 }
