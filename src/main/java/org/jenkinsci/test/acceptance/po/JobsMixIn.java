@@ -11,9 +11,9 @@ import java.net.URL;
  *
  * @author Kohsuke Kawaguchi
  */
-public class JobsMixIn extends ContainerPageObject {
+public class JobsMixIn extends MixIn {
     public JobsMixIn(ContainerPageObject context) {
-        super(context, context.url);
+        super(context);
     }
 
     public <T extends Job> T create(Class<T> type, String name) {

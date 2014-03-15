@@ -27,11 +27,13 @@ public class Jenkins extends ContainerPageObject {
     private VersionNumber version;
 
     public final JobsMixIn jobs;
+    public final ViewsMixIn views;
 
     public Jenkins(Injector injector, URL url) {
         super(injector,url);
         getVersion();
         jobs = new JobsMixIn(this);
+        views = new ViewsMixIn(this);
     }
 
     @Inject
@@ -63,22 +65,6 @@ public class Jenkins extends ContainerPageObject {
             return version = new VersionNumber(m.group(1));
         else
             throw new AssertionError("Unexpected version string: "+text);
-    }
-
-    public <T extends View> T createView(Class<T> type, String name) {
-        String sut_type = type.getAnnotation(ViewPageObject.class).value();
-
-        visit("newView");
-        fillIn("name",name);
-        check(find(by.radioButton(sut_type)));
-        clickButton("OK");
-
-        try {
-            return type.getConstructor(Injector.class,URL.class)
-                    .newInstance(injector, url("view/%s/", name));
-        } catch (ReflectiveOperationException e) {
-            throw new AssertionError(e);
-        }
     }
 
     /**

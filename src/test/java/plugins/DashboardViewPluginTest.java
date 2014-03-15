@@ -26,7 +26,7 @@ public class DashboardViewPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void configure_dashboard() {
-        DashboardView v = jenkins.createView(DashboardView.class,"dashboard");
+        DashboardView v = jenkins.views.create(DashboardView.class, "dashboard");
         v.configure();
         {
             //TODO: move this XPath to DashboardView
