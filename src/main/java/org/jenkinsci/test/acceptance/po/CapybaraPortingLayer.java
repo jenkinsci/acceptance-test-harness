@@ -147,7 +147,9 @@ public class CapybaraPortingLayer extends Assert {
     }
 
     public void fillIn(String formFieldName, Object value) {
-        find(By.name(formFieldName)).sendKeys(value.toString());
+        WebElement e = find(By.name(formFieldName));
+        e.clear();
+        e.sendKeys(value.toString());
     }
 
     /**
