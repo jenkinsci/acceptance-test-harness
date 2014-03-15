@@ -1,6 +1,8 @@
 package org.jenkinsci.test.acceptance.slave;
 
 import com.cloudbees.sdk.extensibility.ExtensionPoint;
+import com.google.inject.ProvidedBy;
+import org.jenkinsci.test.acceptance.guice.AutoCleaned;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.Slave;
 
@@ -24,7 +26,8 @@ import java.util.concurrent.Future;
  * @author Kohsuke Kawaguchi
  */
 @ExtensionPoint
-public abstract class SlaveController implements Closeable {
+@ProvidedBy(SlaveProvider.class)
+public abstract class SlaveController implements Closeable, AutoCleaned {
     public abstract Future<Slave> install(Jenkins jenkinsToInstallTo);
     public abstract void start();
     public abstract void stop();
