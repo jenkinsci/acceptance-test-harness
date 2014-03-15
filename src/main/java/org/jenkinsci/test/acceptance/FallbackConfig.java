@@ -81,7 +81,7 @@ public class FallbackConfig extends AbstractModule {
         if (type==null)
             type = System.getenv("TYPE");
         if (type==null) {
-            if (JenkinsControllerPoolProcess.SOCKET.exists())
+            if (JenkinsControllerPoolProcess.SOCKET.exists() && !JenkinsControllerPoolProcess.MAIN)
                 return new PooledJenkinsController(JenkinsControllerPoolProcess.SOCKET);
             else
                 type = "winstone";

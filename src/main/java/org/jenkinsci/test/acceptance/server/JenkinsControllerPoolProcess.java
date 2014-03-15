@@ -9,6 +9,9 @@ import org.jenkinsci.test.acceptance.controller.ControllerFactory;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.guice.TestCleaner;
 import org.jenkinsci.test.acceptance.guice.World;
+import org.kohsuke.args4j.CmdLineException;
+import org.kohsuke.args4j.CmdLineParser;
+import org.kohsuke.args4j.Option;
 
 import javax.inject.Inject;
 import java.io.BufferedReader;
@@ -18,6 +21,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.nio.channels.Channels;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.SynchronousQueue;
 
 /**
@@ -37,13 +41,31 @@ public class JenkinsControllerPoolProcess {
 
     TestCleaner cleaner = new TestCleaner();
 
-    private final BlockingQueue<JenkinsController> queue = new SynchronousQueue<>(); // new LinkedBlockingQueue<>(0);
+    private BlockingQueue<JenkinsController> queue;
+
+    @Option(name="-n",usage="Number of instances to pool. >=0.")
+    public int n = Integer.getInteger("count",1);
 
     public static void main(String[] args) throws Exception {
-        new JenkinsControllerPoolProcess().run();
+        MAIN = true;
+        JenkinsControllerPoolProcess proc = new JenkinsControllerPoolProcess();
+        CmdLineParser p = new CmdLineParser(proc);
+        try {
+            p.parseArgument(args);
+            proc.run();
+        } catch (CmdLineException e) {
+            System.err.println(e.getMessage());
+            System.err.println("Usage: java -jar TODO.jar ...options...");
+            p.printUsage(System.err);
+        }
     }
 
     public void run() throws Exception {
+        if (n==0)
+            queue = new SynchronousQueue<>();
+        else
+            queue = new LinkedBlockingDeque<>(n);
+
         World w = World.get();
         w.getInjector().injectMembers(this);
 
@@ -130,4 +152,8 @@ public class JenkinsControllerPoolProcess {
     }
 
     public static final File SOCKET = new File(System.getProperty("user.home"),"jenkins.sock");
+    /**
+     * Are we running the JUT server?
+     */
+    public static boolean MAIN = false;
 }

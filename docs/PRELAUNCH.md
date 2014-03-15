@@ -22,9 +22,14 @@ To launch a JUT server, run the following command:
 The server will keep running until you kill the Maven process. The server listens to
 Unix domain socket at `~/jenkins.sock`
 
+JUT server internally uses to other real `JenkinsController` implementations to launch JUT,
+and you configure it the same way you configure normal test executions.
+See [this document](CONTROLLER.md) for how to select JenkinsController.
+
+To specify the size of the pool, add the `-Dcount=2` or something like that as a Maven option.
 
 
-## Selecting `PooledJenkinsController`
+## Selecting PooledJenkinsController
 
 If no controller is explicitly specified, the harness checks the presence of `~/jenkins.sock` and
 it automatically selects `PooledJenkinsController`.
