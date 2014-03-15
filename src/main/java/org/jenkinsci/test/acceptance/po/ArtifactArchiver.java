@@ -10,13 +10,13 @@ public class ArtifactArchiver extends PostBuildStep {
     }
 
     public ArtifactArchiver includes(String value) {
-        control("artifacts").sendKeys(value);
+        control("artifacts").set(value);
         return this;
     }
 
     public ArtifactArchiver excludes(String value) {
         control("advanced-button").click();
-        control("excludes").sendKeys(value);
+        control("excludes").set(value);
         return this;
     }
 

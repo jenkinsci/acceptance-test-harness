@@ -10,7 +10,7 @@ public class ShellBuildStep extends BuildStep {
     }
 
     public ShellBuildStep setCommand(String text) {
-        control("command").sendKeys(text);
+        control("command").set(text);
         return this;
     }
 }

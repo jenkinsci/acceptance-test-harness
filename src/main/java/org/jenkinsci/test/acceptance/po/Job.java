@@ -87,6 +87,10 @@ public class Job extends ContainerPageObject {
         }
     }
 
+    public void copyResource(Resource resource) {
+        copyResource(resource,resource.getName());
+    }
+
     public URL getBuildUrl() {
         return url("build?delay=0sec");
     }

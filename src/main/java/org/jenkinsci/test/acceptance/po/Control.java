@@ -51,4 +51,10 @@ public class Control extends CapybaraPortingLayer {
     public void click() {
         resolve().click();
     }
+
+    public void set(String text) {
+        WebElement e = resolve();
+        e.clear();
+        e.sendKeys(text);
+    }
 }

@@ -80,9 +80,9 @@ public class CheckstylePluginTest extends AbstractJUnitTest {
     private FreeStyleJob setupJob() {
         FreeStyleJob job = jenkins.createJob();
         job.configure();
-        job.copyResource(resource("/checkstyle_plugin/checkstyle-result.xml"), "checkstyle-result.xml");
+        job.copyResource(resource("/checkstyle_plugin/checkstyle-result.xml"));
         job.addPublisher(CheckstylePublisher.class)
-            .pattern.sendKeys("checkstyle-result.xml");
+            .pattern.set("checkstyle-result.xml");
         job.save();
         return job;
     }

@@ -22,11 +22,11 @@ public abstract class Parameter extends PageArea {
 
     public void setName(String name) {
         this.name = name;
-        control("name").sendKeys(name);
+        control("name").set(name);
     }
 
     public void setDescription(String v) {
-        control("description").sendKeys(v);
+        control("description").set(v);
     }
 
     /**

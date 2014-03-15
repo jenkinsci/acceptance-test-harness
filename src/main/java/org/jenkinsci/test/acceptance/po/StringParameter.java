@@ -11,6 +11,6 @@ public class StringParameter extends Parameter {
 
     @Override
     public void fillWith(Object v) {
-        control("value").sendKeys(v.toString());
+        control("value").set(v.toString());
     }
 }

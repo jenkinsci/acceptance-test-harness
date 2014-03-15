@@ -37,11 +37,11 @@ public class BatchTaskDeclaration extends PageArea {
 
     public void setName(String name) {
         this.name = name;
-        control("name").sendKeys(name);
+        control("name").set(name);
     }
 
     public void setScript(String script) {
-        control("script").sendKeys(script);
+        control("script").set(script);
     }
 
     public BatchTask getTask() {

@@ -21,6 +21,14 @@ public class Resource {
         this.url = url;
     }
 
+    /**
+     * Gets just the file name portion without any paths, like "foo.txt"
+     */
+    public String getName() {
+        String s = url.toExternalForm();
+        return s.substring(s.lastIndexOf('/')+1);
+    }
+
     public InputStream asInputStream() {
         try {
             return url.openStream();
