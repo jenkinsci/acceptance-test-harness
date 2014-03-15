@@ -27,12 +27,14 @@ public class Jenkins extends ContainerPageObject {
 
     public final JobsMixIn jobs;
     public final ViewsMixIn views;
+    public final SlavesMixIn slaves;
 
     public Jenkins(Injector injector, URL url) {
         super(injector,url);
         getVersion();
         jobs = new JobsMixIn(this);
         views = new ViewsMixIn(this);
+        slaves = new SlavesMixIn(this);
     }
 
     @Inject

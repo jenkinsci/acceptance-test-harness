@@ -6,6 +6,7 @@ import java.io.File;
  * A slave object
  *
  * @author Kohsuke Kawaguchi
+ * @see Jenkins#slaves
  */
 public abstract class Slave extends ContainerPageObject {
     private final String name;
