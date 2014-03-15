@@ -8,7 +8,7 @@ import com.cloudbees.sdk.extensibility.ExtensionPoint;
  * @author Kohsuke Kawaguchi
  */
 @ExtensionPoint
-public interface ControllerFactory {
+public interface JenkinsControllerFactory {
     /**
      * Unique short name that distinguishes this controller from others.
      *

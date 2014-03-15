@@ -6,7 +6,6 @@ import org.jenkinsci.utils.process.ProcessInputStream;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.HashMap;
@@ -59,9 +58,9 @@ public abstract class LocalController extends JenkinsController {
     }
 
     /**
-     * Partial implementation of {@link ControllerFactory} for subtypes.
+     * Partial implementation of {@link JenkinsControllerFactory} for subtypes.
      */
-    public static abstract class LocalFactoryImpl implements ControllerFactory {
+    public static abstract class LocalFactoryImpl implements JenkinsControllerFactory {
         /**
          * Determines the location of the war file.
          */

@@ -5,7 +5,7 @@ import jnr.unixsocket.UnixServerSocketChannel;
 import jnr.unixsocket.UnixSocketAddress;
 import jnr.unixsocket.UnixSocketChannel;
 import org.jenkinsci.test.acceptance.FallbackConfig;
-import org.jenkinsci.test.acceptance.controller.ControllerFactory;
+import org.jenkinsci.test.acceptance.controller.JenkinsControllerFactory;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.guice.TestCleaner;
 import org.jenkinsci.test.acceptance.guice.World;
@@ -37,7 +37,7 @@ import java.util.concurrent.SynchronousQueue;
  */
 public class JenkinsControllerPoolProcess {
     @Inject
-    ExtensionList<ControllerFactory> factories;
+    ExtensionList<JenkinsControllerFactory> factories;
 
     TestCleaner cleaner = new TestCleaner();
 

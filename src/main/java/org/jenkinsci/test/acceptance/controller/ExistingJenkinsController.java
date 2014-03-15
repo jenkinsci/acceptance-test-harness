@@ -42,7 +42,7 @@ public class ExistingJenkinsController extends JenkinsController {
     }
 
     @Extension
-    public static class FactoryImpl implements ControllerFactory {
+    public static class FactoryImpl implements JenkinsControllerFactory {
         @Override
         public String getId() {
             return "existing";

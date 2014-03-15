@@ -3,7 +3,7 @@ package org.jenkinsci.test.acceptance;
 import com.cloudbees.sdk.extensibility.ExtensionList;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
-import org.jenkinsci.test.acceptance.controller.ControllerFactory;
+import org.jenkinsci.test.acceptance.controller.JenkinsControllerFactory;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.guice.TestCleaner;
 import org.jenkinsci.test.acceptance.guice.TestScope;
@@ -73,10 +73,10 @@ public class FallbackConfig extends AbstractModule {
     }
 
     /**
-     * Instantiates a controller through the "TYPE" attribute and {@link ControllerFactory}.
+     * Instantiates a controller through the "TYPE" attribute and {@link JenkinsControllerFactory}.
      */
     @Provides @TestScope
-    public JenkinsController createController(ExtensionList<ControllerFactory> factories, TestCleaner cleaner) throws IOException {
+    public JenkinsController createController(ExtensionList<JenkinsControllerFactory> factories, TestCleaner cleaner) throws IOException {
         String type = System.getenv("type");  // this is lower case for backward compatibility
         if (type==null)
             type = System.getenv("TYPE");
@@ -87,7 +87,7 @@ public class FallbackConfig extends AbstractModule {
                 type = "winstone";
         }
 
-        for (ControllerFactory f : factories) {
+        for (JenkinsControllerFactory f : factories) {
             if (f.getId().equalsIgnoreCase(type)) {
                 final JenkinsController c = f.create();
                 c.start();
