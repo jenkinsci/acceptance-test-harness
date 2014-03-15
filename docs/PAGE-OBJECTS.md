@@ -40,11 +40,16 @@ to refer to input controls relative to its location in the hierarchy of controls
 Controls are mapped to `Control` instances by their relative path name, which maps to the "field" attribute
 of the &lt;f:entry> tag on the sever side:
 
+    // this annotation associates the text showin the drop-menu down to the page area it inserts
+    // this maps to BuildStepDescriptor.getDisplayName() on the server-side
     @BuildStepPageObject("Invoke Ant")
     public class AntBuildStep extends BuildStep {
+        // Ant configuration page defines two INPUT elements, so you bind them each to controls
         public final Control targets = control("targets");
         public final Control antName = control("antName");
 
+        // parent represents the job URL your control is in, and
+        // path represents the portion in the configuration page this build step is at
         public AntBuildStep(Job parent, String path) {
             super(parent, path);
         }
