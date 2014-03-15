@@ -93,7 +93,8 @@ public class LogWatcher {
 
         if(ready.get() != expected){
             String msg = expected ? "Could not bring up a Jenkins server" : "Shut down of Jenkins server had timed out";
-            throw new RuntimeException(msg);
+            msg += "\n" + fullLog();
+            throw new AssertionError(msg);
         }
     }
 
