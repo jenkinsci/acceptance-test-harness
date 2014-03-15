@@ -24,6 +24,7 @@ public class AuditTrailPluginTest extends AbstractJUnitTest {
     @Before
     public void setUp() {
         auditTrail = jenkins.getLogger("Audit Trail");
+        auditTrail.waitForExistence();
     }
 
 
