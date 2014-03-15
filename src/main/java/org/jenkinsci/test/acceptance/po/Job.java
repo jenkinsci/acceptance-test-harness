@@ -9,6 +9,7 @@ import org.jenkinsci.test.acceptance.junit.Resource;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -68,11 +69,12 @@ public class Job extends ContainerPageObject {
     public void copyResource(Resource resource, String fileName) {
         try (InputStream in=resource.asInputStream()) {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
-            GZIPOutputStream gz = new GZIPOutputStream(out);
-            IOUtils.copy(in, gz);
-            gz.close();
 
-            addShellStep(String.format("base64 -d | gunzip > %s << ENDOFFILE\n%s\nENDOFFILE",
+            try (OutputStream gz = new GZIPOutputStream(out)) {
+                IOUtils.copy(in, gz);
+            }
+
+            addShellStep(String.format("base64 -d << ENDOFFILE | gunzip > %s \n%s\nENDOFFILE",
                     fileName, new String(Base64.encodeBase64Chunked(out.toByteArray()))));
         } catch (IOException e) {
             throw new AssertionError(e);
