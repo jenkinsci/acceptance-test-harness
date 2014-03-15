@@ -29,11 +29,10 @@ public class DashboardViewPluginTest extends AbstractJUnitTest {
         DashboardView v = jenkins.views.create(DashboardView.class, "dashboard");
         v.configure();
         {
-            //TODO: move this XPath to DashboardView
-            find(by.path("/hetero-list-add[topPortlet]")).click();
+            v.topPortlet.click();
             clickLink("Build statistics");
 
-            find(by.path("/hetero-list-add[bottomPortlet]")).click();
+            v.bottomPortlet.click();
             clickLink("Jenkins jobs list");
         }
         v.save();
@@ -41,9 +40,8 @@ public class DashboardViewPluginTest extends AbstractJUnitTest {
         FreeStyleJob j = v.jobs.create(FreeStyleJob.class, "job_in_view");
 
         v.open();
-        find(by.xpath("//a[contains(@href, '/%s/build?')]/img[contains(@title, 'Schedule a build')]",j.name)).click();
+        v.build(j.name);
         j.getLastBuild().shouldSucceed();
-
 
     }
 }
