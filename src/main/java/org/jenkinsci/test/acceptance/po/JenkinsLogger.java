@@ -71,7 +71,7 @@ public class JenkinsLogger extends ContainerPageObject {
 
     public boolean isEmpty() {
         open();
-        return getElement(by.css("#main-panel pre"))!=null;
+        return getElement(by.css("#main-panel pre"))==null;
     }
 
     private static final Pattern LOG_PATTERN = Pattern.compile("((?:\\/\\w+)+.*?) by (.*)");
