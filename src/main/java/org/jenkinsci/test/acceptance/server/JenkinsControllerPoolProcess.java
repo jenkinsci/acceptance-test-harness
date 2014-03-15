@@ -41,7 +41,7 @@ public class JenkinsControllerPoolProcess {
 
     private BlockingQueue<JenkinsController> queue;
 
-    @Option(name="-n",usage="Number of instances to pool. >=0.")
+    @Option(name="-n",usage="Number of instances to pool. >=1.")
     public int n = Integer.getInteger("count",1);
 
     public static void main(String[] args) throws Exception {
@@ -59,10 +59,12 @@ public class JenkinsControllerPoolProcess {
     }
 
     public void run() throws Exception {
-        if (n==0)
+        // there's always one process that's waiting to be in the queue,
+        // so the actual length of the queue has to be n-1.
+        if (n==1)
             queue = new SynchronousQueue<>();
         else
-            queue = new LinkedBlockingDeque<>(n);
+            queue = new LinkedBlockingDeque<>(n-1);
 
         World w = World.get();
         w.getInjector().injectMembers(this);
