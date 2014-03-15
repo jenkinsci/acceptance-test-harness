@@ -25,10 +25,16 @@ public class LogWatcher {
     private final List<String> loggedLines = new ArrayList<>();
     private final AtomicBoolean logFound = new AtomicBoolean(false);
 
+    /**
+     * Thread that reads input stream.
+     */
+    private final Thread reader;
+
     private static final int DEFAULT_TIMEOUT = 100;//100 sec
     private static final long DEFAULT_SLEEP_TIME = 500;//0.5 sec
     private static final int TIMEOUT = System.getenv("STARTUP_TIME") != null && Integer.parseInt(System.getenv("STARTUP_TIME")) > 0
             ? Integer.parseInt(System.getenv("STARTUP_TIME")) : DEFAULT_TIMEOUT;
+
 
     /**
      * @param pipe
@@ -71,8 +77,8 @@ public class LogWatcher {
                 }
             }
         };
-        Thread t = new Thread(r);
-        t.start();
+        reader = new Thread(r);
+        reader.start();
     }
 
     /**
@@ -83,7 +89,11 @@ public class LogWatcher {
     public void waitTillReady(Boolean expected) throws InterruptedException {
         expected = (expected == null)?true:expected;
         long startTime = System.currentTimeMillis();
-        while(ready.get() != expected && (System.currentTimeMillis()-startTime)/1000 < TIMEOUT){
+
+        while(reader.isAlive() && (System.currentTimeMillis()-startTime)/1000 < TIMEOUT){
+            if (ready.get()==expected)
+                return; // condition met
+
             Thread.sleep(500); //sleep for 0.5 sec
         }
 
@@ -91,11 +101,9 @@ public class LogWatcher {
             throw new RuntimeException("Port conflict detected");
         }
 
-        if(ready.get() != expected){
-            String msg = expected ? "Could not bring up a Jenkins server" : "Shut down of Jenkins server had timed out";
-            msg += "\n" + fullLog();
-            throw new AssertionError(msg);
-        }
+        String msg = expected ? "Could not bring up a Jenkins server" : "Shut down of Jenkins server had timed out";
+        msg += "\n" + fullLog();
+        throw new AssertionError(msg);
     }
 
     /**
