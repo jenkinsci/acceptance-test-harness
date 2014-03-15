@@ -4,11 +4,14 @@ import com.google.inject.Injector;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.JenkinsProvider;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.JenkinsAcceptanceTestRule;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.jenkinsci.test.acceptance.slave.SlaveProvider;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.openqa.selenium.WebDriver;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -18,7 +21,10 @@ import java.util.List;
 
 /**
  */
-public class JocTest extends AbstractJUnitTest {
+public class JocTest {
+    @Rule
+    public JenkinsAcceptanceTestRule env = new JenkinsAcceptanceTestRule();
+
     @Inject @Named("joc")
     JenkinsController jocc;
 
