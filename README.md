@@ -37,9 +37,9 @@ it's own sandboxed workspace.
 ### Running tests
 
 * [Selecting browser](docs/BROWSER.md)
-* [Selecting how to launch Jenkins under test](docs/CONTROLLER.md)
+* [Selecting how to launch Jenkins under test (JUT)](docs/CONTROLLER.md)
 * [Running one test](docs/SINGLE-TEST.md)
-* [Prelaunch Jenkins under test](docs/PRELAUNCH.md)
+* [Prelaunch JUT](docs/PRELAUNCH.md)
 
 ### Writing tests
 * [Docker fixtures](docs/FIXTURES.md)

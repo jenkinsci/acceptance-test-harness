@@ -23,6 +23,18 @@ The behaviour of this controller can be customized through the following environ
 
 This is the default controller.
 
+## 'Existing Jenkins' controller (type=existing)
+This controller assumes that you already have a Jenkins instance somewhere that you want the tests to run in.
+Note that tests mutate this Jenkins instance, so this is not meant to be used with your production Jenkins instance.
+Instead, run `java -jar jenkins.war` somewhere, and use this controller.
+
+The behaviour of this controller can be customized through the following environment variables.
+
+* `JENKINS_URL` the URL to the running Jenkins. Defaults to `http://localhost:8080/`
+
+This controller is useful when you want to debug Jenkins while you run a test. It can be also used during
+iterative test development to execute tests quickly.
+
 ## Tomcat controller (type=tomcat)
 This controller deploys Jenkins inside Tomcat and run the test with it. This controller requires a functioning Tomcat installation listening on port 8080, on the same system that the tests run. During the test, Jenkins is deployed here, and Tomcat gets started/stopped.
 

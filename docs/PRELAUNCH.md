@@ -13,6 +13,8 @@ implementation you'd use when you run a test, which asks the JUT server to hand 
 
 This drastically cuts down the wait time until the actual meat of your test starts.
 
+There's also a related [TYPE=existing JenkinsController](CONTROLLER.md).
+
 ## Launching JUT server
 
 To launch a JUT server, run the following command:
