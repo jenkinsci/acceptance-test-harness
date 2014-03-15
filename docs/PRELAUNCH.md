@@ -25,10 +25,11 @@ The server will keep running until you kill the Maven process. The server listen
 Unix domain socket at `~/jenkins.sock`
 
 JUT server internally uses to other real `JenkinsController` implementations to launch JUT,
-and you configure it the same way you configure normal test executions.
-See [this document](CONTROLLER.md) for how to select JenkinsController.
+and you configure it the same way you configure normal test executions. That is, the above example
+actually uses `WinstoneController` (the default controller type), which recognizes `JENKINS_WAR` environment
+variable. See [this document](CONTROLLER.md) for how to select JenkinsController properly.
 
-To specify the size of the pool, add the `-Dcount=2` or something like that as a Maven option.
+To specify the size of the pool explicitly, add the `-Dcount=2` or something as a Maven option.
 
 
 ## Selecting PooledJenkinsController
