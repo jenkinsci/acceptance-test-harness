@@ -70,6 +70,10 @@ public class Jenkins extends ContainerPageObject {
         find(By.xpath("//input[starts-with(@value, '"+sut_type+"')]")).click();
         clickButton("OK");
 
+        return getJob(type, name);
+    }
+
+    public <T extends Job> T getJob(Class<T> type, String name) {
         try {
             return type.getConstructor(Injector.class,URL.class,String.class)
                     .newInstance(injector, url("job/%s/", name), name);
@@ -84,6 +88,18 @@ public class Jenkins extends ContainerPageObject {
 
     public <T extends Job> T createJob(Class<T> type) {
         return createJob(type, createRandomName());
+    }
+
+    public void copyJob(Job from, String to) {
+        copyJob(from.name,to);
+    }
+
+    public void copyJob(String from, String to) {
+        visit("newJob");
+        fillIn("name",to);
+        check(find(by.radioButton("copy")));
+        fillIn("from",from);
+        clickButton("OK");
     }
 
     /**
