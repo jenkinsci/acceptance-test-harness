@@ -44,7 +44,7 @@ public class CheckstylePluginTest extends AbstractJUnitTest {
         Build b = job.queueBuild().waitUntilFinished().shouldSucceed();
 
         assertThat(b, hasAction("Checkstyle Warnings"));
-        assertThat(j, hasAction("Checkstyle Warnings"));
+        assertThat(job, hasAction("Checkstyle Warnings"));
     }
 
     /**
