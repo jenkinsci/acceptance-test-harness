@@ -51,7 +51,7 @@ public class LogWatcher {
 
             @Override
             public void run() {
-                String line = null;
+                String line;
                 try {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(jenkinsPipe));
                     while ((line = reader.readLine()) != null) {
@@ -64,9 +64,10 @@ public class LogWatcher {
                             ready.set(true);
                         }
                     }
-                    ready.set(false);
                 } catch (IOException e) {
                     System.out.println("Jenkins is stopped");
+                } finally {
+                    ready.set(false);
                 }
             }
         };
