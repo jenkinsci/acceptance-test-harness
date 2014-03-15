@@ -59,12 +59,18 @@ public class Job extends ContainerPageObject {
         return step;
     }
 
+    /**
+     * Adds a shell step that creates a file of the given name in the workspace that has the specified content.
+     */
     public void addCreateFileStep(String name, String content) {
         addShellStep(String.format("cat > %s << ENDOFFILE\n%s\nENDOFFILE",name,content));
     }
 
     /**
      * Adds a shell step that copies a resource inside the test project into a file on the build machine.
+     *
+     * Because there's no direct file system access to Jenkins master, we do this by packing file content in
+     * base64 and put it as a heredoc in the shell script.
      */
     public void copyResource(Resource resource, String fileName) {
         try (InputStream in=resource.asInputStream()) {
