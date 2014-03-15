@@ -34,6 +34,7 @@ public abstract class PageArea extends CapybaraPortingLayer {
      * https://wiki.jenkins-ci.org/display/JENKINS/Form+Element+Path+Plugin
      */
     public By path(String rel) {
+        if (rel.length()==0)    return by.path(path);
         return by.path(path + '/' + rel);
     }
 
