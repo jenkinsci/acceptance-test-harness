@@ -3,6 +3,7 @@ package org.jenkinsci.test.acceptance.junit;
 import java.net.URL;
 
 import org.jenkinsci.test.acceptance.ByFactory;
+import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.openqa.selenium.WebDriver;
@@ -21,6 +22,9 @@ public class AbstractJUnitTest extends Assert {
     @Rule
     public JenkinsAcceptanceTestRule env = new JenkinsAcceptanceTestRule();
 
+    /**
+     * This field receives a valid web driver object you can use to talk to Jenkins.
+     */
     @Inject
     public WebDriver driver;
 
