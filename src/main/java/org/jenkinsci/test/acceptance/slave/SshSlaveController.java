@@ -3,7 +3,6 @@ package org.jenkinsci.test.acceptance.slave;
 import com.google.inject.Inject;
 import org.jenkinsci.test.acceptance.controller.Machine;
 import org.jenkinsci.test.acceptance.controller.SshKeyPair;
-import org.jenkinsci.test.acceptance.po.CapybaraPortingLayer;
 import org.jenkinsci.test.acceptance.po.DumbSlave;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.Slave;
@@ -53,12 +52,11 @@ public class SshSlaveController extends SlaveController {
         executor.shutdownNow();
     }
 
-    private class SlaveInstaller extends CapybaraPortingLayer implements Callable<Slave> {
+    private class SlaveInstaller implements Callable<Slave> {
 
         private final Jenkins j;
 
         private SlaveInstaller(Jenkins j) {
-            super(j.injector);
             this.j = j;
         }
 

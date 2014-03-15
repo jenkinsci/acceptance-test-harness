@@ -1,8 +1,10 @@
 package org.jenkinsci.test.acceptance.slave;
 
 import com.cloudbees.sdk.extensibility.ExtensionPoint;
+import com.google.inject.Injector;
 import com.google.inject.ProvidedBy;
 import org.jenkinsci.test.acceptance.guice.AutoCleaned;
+import org.jenkinsci.test.acceptance.po.CapybaraPortingLayer;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.Slave;
 
@@ -27,7 +29,11 @@ import java.util.concurrent.Future;
  */
 @ExtensionPoint
 @ProvidedBy(SlaveProvider.class)
-public abstract class SlaveController implements Closeable, AutoCleaned {
+public abstract class SlaveController extends CapybaraPortingLayer implements Closeable, AutoCleaned {
+    protected SlaveController() {
+        super(null);
+    }
+
     public abstract Future<Slave> install(Jenkins jenkinsToInstallTo);
     public abstract void start();
     public abstract void stop();

@@ -21,13 +21,11 @@ public class LocalSlaveController extends SlaveController {
         // with a FS root and executors
         final DumbSlave s = jenkins.slaves.create(DumbSlave.class);
 
-        s.setExecutors(1);
-        s.setRemoteFs("/tmp/"+s.getName());
         s.asLocal();
         s.save();
 
         // Fire the slave up before we move on
-        s.waitForCond(new Callable<Boolean>() {
+        waitForCond(new Callable<Boolean>() {
             public Boolean call() throws Exception {
                 return s.isOnline();
             }
