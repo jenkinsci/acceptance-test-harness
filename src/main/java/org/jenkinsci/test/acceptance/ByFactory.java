@@ -52,14 +52,14 @@ public class ByFactory {
      *      Text, id, title.
      */
     public By checkbox(String locator) {
-        return xpath(fieldXPath("//input[@type='checkbox']",locator));
+        return xpath(fieldXPath("input[@type='checkbox']",locator));
     }
 
     /**
      * Select radio button by its name, id, or label text.
      */
     public By radioButton(String locator) {
-        return xpath(fieldXPath("//input[@type='radio']",locator));
+        return xpath(fieldXPath("input[@type='radio']",locator));
     }
 
     /**
@@ -69,14 +69,15 @@ public class ByFactory {
      *      Text, id, title.
      */
     public By input(String locator) {
-        return xpath(fieldXPath("(//input|//textarea|//select)",locator));
+        return xpath(fieldXPath("(input|textarea|select)",locator));
     }
 
     private static String fieldXPath(String base, String locator) {
         // TODO: there's actually a lot more
-        return String.format(base+
-                "[./@id = '%1$s' or ./@name = '%1$s' or ./@placeholder = '%1$s' or ./@id = //label[contains(normalize-space(string(.)), '%1$s')]/@for]"+
-                "| .//label[contains(normalize-space(string(.)), '%1$s')]"+base,locator);
+        return String.format(
+                "  .//%2$s[./@id = '%1$s' or ./@name = '%1$s' or ./@placeholder = '%1$s' or ./@id = //label[contains(normalize-space(string(.)), '%1$s')]/@for]"+
+                "| .//label[contains(normalize-space(string(.)), '%1$s')]//%2$s"+
+                "| .//label[contains(normalize-space(string(.)), '%1$s')][@class='attach-previous']/preceding-sibling::%2$s",locator, base);
     }
 
     /**
