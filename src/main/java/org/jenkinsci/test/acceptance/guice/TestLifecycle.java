@@ -4,6 +4,7 @@ import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,6 +30,13 @@ public class TestLifecycle implements Scope {
 
     public void endTestScope() {
         testScopeObjects.set(null);
+    }
+
+    /**
+     * Returns already existing instances.
+     */
+    /*package*/ Collection<Object> getInstances() {
+        return testScopeObjects.get().values();
     }
 
     public <T> Provider<T> scope(final Key<T> key, final Provider<T> base) {

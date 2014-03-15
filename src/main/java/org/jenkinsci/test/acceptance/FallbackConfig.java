@@ -76,7 +76,7 @@ public class FallbackConfig extends AbstractModule {
      * Instantiates a controller through the "TYPE" attribute and {@link JenkinsControllerFactory}.
      */
     @Provides @TestScope
-    public JenkinsController createController(ExtensionList<JenkinsControllerFactory> factories, TestCleaner cleaner) throws IOException {
+    public JenkinsController createController(ExtensionList<JenkinsControllerFactory> factories) throws IOException {
         String type = System.getenv("type");  // this is lower case for backward compatibility
         if (type==null)
             type = System.getenv("TYPE");
@@ -91,7 +91,6 @@ public class FallbackConfig extends AbstractModule {
             if (f.getId().equalsIgnoreCase(type)) {
                 final JenkinsController c = f.create();
                 c.start();
-                cleaner.addTask(c);
 
                 return c;
             }

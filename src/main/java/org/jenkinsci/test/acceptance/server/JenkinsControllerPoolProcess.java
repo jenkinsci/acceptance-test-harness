@@ -39,8 +39,6 @@ public class JenkinsControllerPoolProcess {
     @Inject
     ExtensionList<JenkinsControllerFactory> factories;
 
-    TestCleaner cleaner = new TestCleaner();
-
     private BlockingQueue<JenkinsController> queue;
 
     @Option(name="-n",usage="Number of instances to pool. >=0.")
@@ -79,7 +77,7 @@ public class JenkinsControllerPoolProcess {
                 try {
                     FallbackConfig f = new FallbackConfig();
                     while (true) {
-                        JenkinsController c = f.createController(factories, cleaner);
+                        JenkinsController c = f.createController(factories);
                         queue.put(c);
                     }
                 } catch (Throwable e) {

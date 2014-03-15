@@ -5,6 +5,7 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
+import org.jenkinsci.test.acceptance.guice.AutoCleaned;
 
 import java.io.*;
 import java.net.URL;
@@ -20,7 +21,7 @@ import java.net.URL;
  * @author: Vivek Pandey
  */
 @ExtensionPoint
-public abstract class JenkinsController implements Closeable {
+public abstract class JenkinsController implements Closeable, AutoCleaned {
     /**
      * directory on the computer where this code is running that points to a directory
      * where test code can place log files, cache files, etc.
