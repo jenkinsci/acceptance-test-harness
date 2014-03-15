@@ -48,6 +48,5 @@ it's own sandboxed workspace.
  * junit: rule and annotations
 * explain guice world that's common to both
 * explain how cucumber hooks into Guice
-* using scaffold.config for win
 * hamcrest matchers
 * how to use this from your own module
