@@ -77,14 +77,18 @@ public class ByFactory {
      *      Text, id, title.
      */
     public By input(String locator) {
-        return xpath(fieldXPath("(//input|//textarea|//select)",locator));
+        return xpath(fieldXPath("(//input|//textarea|//select)","/*[self::input or self::textarea or self::select]",locator));
+    }
+
+    private static String fieldXPath(String head, String tail, String locator) {
+        // TODO: there's actually a lot more
+        return String.format(head+
+                "[./@id = '%1$s' or ./@name = '%1$s' or ./@placeholder = '%1$s' or ./@id = //label[contains(normalize-space(string(.)), '%1$s')]/@for]"+
+                "| .//label[contains(normalize-space(string(.)), '%1$s')]"+tail,locator);
     }
 
     private static String fieldXPath(String base, String locator) {
-        // TODO: there's actually a lot more
-        return String.format(base+
-                "[./@id = '%1$s' or ./@name = '%1$s' or ./@placeholder = '%1$s' or ./@id = //label[contains(normalize-space(string(.)), '%1$s')]/@for]"+
-                "| .//label[contains(normalize-space(string(.)), '%1$s')]"+base,locator);
+        return fieldXPath(base, base, locator);
     }
 
     /**
