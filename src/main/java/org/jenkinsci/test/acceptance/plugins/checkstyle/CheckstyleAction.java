@@ -12,7 +12,7 @@ public class CheckstyleAction extends ContainerPageObject {
     private final ContainerPageObject parent;
 
     public CheckstyleAction(ContainerPageObject parent) {// Build or Job
-        super(parent, parent.url("checkstyle"));
+        super(parent, parent.url("checkstyle/"));
         this.parent = parent;
     }
 
