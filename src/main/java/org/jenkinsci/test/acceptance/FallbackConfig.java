@@ -7,6 +7,8 @@ import org.jenkinsci.test.acceptance.controller.ControllerFactory;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.guice.TestCleaner;
 import org.jenkinsci.test.acceptance.guice.TestScope;
+import org.jenkinsci.test.acceptance.server.JenkinsControllerPoolProcess;
+import org.jenkinsci.test.acceptance.server.PooledJenkinsController;
 import org.junit.runners.model.Statement;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -22,8 +24,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * The default configuration for running tests.
  *
- * See {@link Config} for how to override it. Even when you specify your own config, it still
- * "inherits" from this setting.
+ * See {@link Config} for how to override it.
  *
  * @author Kohsuke Kawaguchi
  */
@@ -79,8 +80,12 @@ public class FallbackConfig extends AbstractModule {
         String type = System.getenv("type");  // this is lower case for backward compatibility
         if (type==null)
             type = System.getenv("TYPE");
-        if (type==null)
-            type = "winstone";
+        if (type==null) {
+            if (JenkinsControllerPoolProcess.SOCKET.exists())
+                return new PooledJenkinsController(JenkinsControllerPoolProcess.SOCKET);
+            else
+                type = "winstone";
+        }
 
         for (ControllerFactory f : factories) {
             if (f.getId().equalsIgnoreCase(type)) {
