@@ -3,12 +3,14 @@ package org.jenkinsci.test.acceptance;
 import com.cloudbees.sdk.extensibility.ExtensionList;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
-import org.jenkinsci.test.acceptance.controller.JenkinsControllerFactory;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
+import org.jenkinsci.test.acceptance.controller.JenkinsControllerFactory;
 import org.jenkinsci.test.acceptance.guice.TestCleaner;
 import org.jenkinsci.test.acceptance.guice.TestScope;
 import org.jenkinsci.test.acceptance.server.JenkinsControllerPoolProcess;
 import org.jenkinsci.test.acceptance.server.PooledJenkinsController;
+import org.jenkinsci.test.acceptance.slave.LocalSlaveProvider;
+import org.jenkinsci.test.acceptance.slave.SlaveProvider;
 import org.junit.runners.model.Statement;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -31,6 +33,8 @@ import java.util.concurrent.TimeUnit;
 public class FallbackConfig extends AbstractModule {
     @Override
     protected void configure() {
+        // default in case nothing is specified
+        bind(SlaveProvider.class).to(LocalSlaveProvider.class);
     }
 
     private WebDriver createWebDriver() {
@@ -98,5 +102,4 @@ public class FallbackConfig extends AbstractModule {
 
         throw new AssertionError("Invalid controller type: "+type);
     }
-
 }

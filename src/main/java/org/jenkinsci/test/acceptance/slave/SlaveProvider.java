@@ -9,7 +9,7 @@ import javax.inject.Provider;
  *
  * @author Kohsuke Kawaguchi
  */
-public interface SlaveProvider extends Provider<SlaveController> {
+public interface SlaveProvider extends Provider<SlaveController>, com.google.inject.Provider<SlaveController> {
     /**
      * Provisions a new place to run a computer from somewhere and return
      * an object that encapsulates how to let Jenkins connect to it.
