@@ -21,6 +21,6 @@ public class BatchTaskTrigger extends PostBuildStep {
     public void setTask(BatchTask t) {
         project.set(t.job.name);
         task.click();
-        task.set(t.name);
+        task.sendKeys(t.name);
     }
 }
