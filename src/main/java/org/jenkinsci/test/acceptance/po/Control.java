@@ -73,6 +73,15 @@ public class Control extends CapybaraPortingLayer {
         e.sendKeys(text);
     }
 
+    /**
+     * Select an option.
+     *
+     * {@link Control#sendKeys(String)} works here but makes very little sense.
+     */
+    public void select(String option) {
+        sendKeys(option);
+    }
+
     public interface Owner {
         /**
          * Resolves relative path into a selector.
