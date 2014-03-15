@@ -220,14 +220,13 @@
 
   <profiles>
     <profile>
-      <!-- this profile is to launch local JenkinsController server: "mvn -Ppool" -->
-      <id>pool</id>
+      <!-- this profile is to launch JUT server: see PRELAUNCH.md -->
+      <id>jut-server</id>
       <build>
         <plugins>
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>exec-maven-plugin</artifactId>
-            <version>1.2.1</version>
             <executions>
               <execution>
                 <phase>verify</phase>
@@ -237,6 +236,12 @@
                 <configuration>
                   <mainClass>org.jenkinsci.test.acceptance.server.JenkinsControllerPoolProcess</mainClass>
                   <!-- to specify arguments -Dexec.args="..." -->
+                </configuration>
+              </execution>
+              <execution>
+                <id>cucumber</id>
+                <configuration>
+                  <skip>true</skip>
                 </configuration>
               </execution>
             </executions>
