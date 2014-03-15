@@ -53,7 +53,7 @@ public class Jenkins extends ContainerPageObject {
 
         String prefix = "About Jenkins ";
         visit("about");
-        String text = waitFor(By.xpath("//h1[starts-with(., '"+prefix+"')]")).getText();
+        String text = waitFor(by.xpath("//h1[starts-with(., '"+prefix+"')]")).getText();
 
         Matcher m = VERSION.matcher(text);
         if (m.find())
@@ -67,7 +67,7 @@ public class Jenkins extends ContainerPageObject {
 
         visit("newJob");
         fillIn("name", name);
-        find(By.xpath("//input[starts-with(@value, '"+sut_type+"')]")).click();
+        find(by.xpath("//input[starts-with(@value, '"+sut_type+"')]")).click();
         clickButton("OK");
 
         return getJob(type, name);

@@ -1,5 +1,8 @@
 package org.jenkinsci.test.acceptance;
 
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.openqa.selenium.By;
 
@@ -19,11 +22,16 @@ import org.openqa.selenium.By;
  */
 public class ByFactory {
     public By xpath(String xpath) {
+        try {
+            XPathFactory.newInstance().newXPath().compile(xpath);
+        } catch (XPathExpressionException ex) {
+            throw new AssertionError("Invalid xpath syntax: " + xpath, ex);
+        }
         return By.xpath(xpath);
     }
 
     public By xpath(String format, Object... args) {
-        return By.xpath(String.format(format,args));
+        return xpath(String.format(format,args));
     }
 
     /**
