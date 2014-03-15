@@ -72,6 +72,8 @@ public class PluginManager extends ContainerPageObject {
 
                 clickButton("Install");
 
+                sleep(1000);
+
                 try {
                     new UpdateCenter(jenkins).waitForInstallationToComplete(n);
                 } catch (InstallationFailedException e) {
