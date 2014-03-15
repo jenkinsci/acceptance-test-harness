@@ -14,6 +14,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
+ * Monitor console output from Jenkins and detect certain state changes.
  *
  * @author: Vivek Pandey
  */
@@ -54,20 +55,20 @@ public class LogWatcher {
         this.log = log;
 
 
-        Runnable r = new Runnable(){
+        Runnable r = new Runnable() {
 
             @Override
             public void run() {
                 String line = null;
                 try {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(jenkinsPipe));
-                    while((line = reader.readLine()) != null){
-                        logLine(line+"\n");
-                        if(ready.get()){
+                    while ((line = reader.readLine()) != null) {
+                        logLine(line + "\n");
+                        if (ready.get()) {
                             continue;
                         }
 
-                        if(line.contains(pattern)){
+                        if (line.contains(pattern)) {
                             ready.set(true);
                         }
                     }
@@ -178,32 +179,5 @@ public class LogWatcher {
                 logFound.set(true);
             }
         }
-    }
-
-
-    public class JenkinsPipe{
-
-        private final ProcessInputStream pis;
-        public JenkinsPipe(ProcessInputStream pipe){
-            this.pis = pipe;
-        }
-
-
-        public String readLine() throws IOException {
-            int c = pis.read();
-            if(c < 0){
-                return null;
-            }
-            StringBuilder line = new StringBuilder();
-            while(c != -1){
-                line.append(c);
-                if(c==10){
-                    break;
-                }
-                c = pis.read();
-            }
-            return line.toString();
-        }
-
     }
 }
