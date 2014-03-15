@@ -19,7 +19,7 @@ There's also a related [TYPE=existing JenkinsController](CONTROLLER.md).
 
 To launch a JUT server, run the following command:
 
-    mvn -Pjut-server
+    JENKINS_WAR=/path/to/jenkins.war mvn -Pjut-server
 
 The server will keep running until you kill the Maven process. The server listens to
 Unix domain socket at `~/jenkins.sock`

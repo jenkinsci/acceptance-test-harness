@@ -2,6 +2,7 @@ package org.jenkinsci.test.acceptance.junit;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.guice.World;
 import org.jenkinsci.test.acceptance.po.Jenkins;
@@ -27,8 +28,8 @@ public class JenkinsAcceptanceTestRule implements MethodRule {
     @Override
     public Statement apply(final Statement base, final FrameworkMethod method, final Object target) {
         return new Statement() {
-            @Inject
-            Jenkins jenkins;
+            @Inject Jenkins jenkins;
+            @Inject JenkinsController controller;
 
             public void evaluate() throws Throwable {
                 World world = World.get();
@@ -45,6 +46,9 @@ public class JenkinsAcceptanceTestRule implements MethodRule {
                         installPlugins(target.getClass().getAnnotation(WithPlugins.class));
 
                     base.evaluate();
+                } catch (Exception e) {
+                    controller.diagnose(e);
+                    throw e;
                 } finally {
                     world.endTestScope();
                 }

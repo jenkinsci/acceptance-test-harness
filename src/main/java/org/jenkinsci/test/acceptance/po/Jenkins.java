@@ -4,7 +4,6 @@ import com.google.inject.Injector;
 import hudson.util.VersionNumber;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.guice.TestScope;
-import org.openqa.selenium.By;
 
 import javax.inject.Inject;
 import java.io.IOException;
@@ -58,7 +57,7 @@ public class Jenkins extends ContainerPageObject {
 
         String prefix = "About Jenkins ";
         visit("about");
-        String text = waitFor(By.xpath("//h1[starts-with(., '"+prefix+"')]")).getText();
+        String text = waitFor(by.xpath("//h1[starts-with(., '"+prefix+"')]")).getText();
 
         Matcher m = VERSION.matcher(text);
         if (m.find())

@@ -93,7 +93,7 @@ public class RemoteJenkinsController extends JenkinsController {
     }
 
     @Override
-    public void diagnose() {
+    public void diagnose(Throwable cause) {
         throw new UnsupportedOperationException("Not implemented yet");
     }
 

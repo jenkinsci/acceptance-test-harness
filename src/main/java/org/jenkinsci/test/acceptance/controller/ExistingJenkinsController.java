@@ -34,10 +34,6 @@ public class ExistingJenkinsController extends JenkinsController {
     }
 
     @Override
-    public void diagnose() {
-    }
-
-    @Override
     public void tearDown() {
     }
 

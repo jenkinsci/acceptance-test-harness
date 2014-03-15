@@ -65,10 +65,6 @@ public class PooledJenkinsController extends JenkinsController {
     }
 
     @Override
-    public void diagnose() {
-    }
-
-    @Override
     public void tearDown() throws IOException {
         w.close();
         r.close();
