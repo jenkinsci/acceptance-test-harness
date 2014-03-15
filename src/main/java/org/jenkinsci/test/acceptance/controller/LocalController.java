@@ -5,6 +5,7 @@ import org.jenkinsci.utils.process.ProcessInputStream;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.HashMap;
@@ -203,7 +204,7 @@ public abstract class LocalController extends JenkinsController {
         this.process = startProcess();
         Runtime.getRuntime().addShutdownHook(shutdownHook);
 
-        this.logWatcher = new LogWatcher(this.process, new FileOutputStream(logFile), options);
+        this.logWatcher = new LogWatcher(this.process, new FileWriter(logFile), options);
         try {
             this.logWatcher.waitTillReady(true);
         } catch (InterruptedException e) {

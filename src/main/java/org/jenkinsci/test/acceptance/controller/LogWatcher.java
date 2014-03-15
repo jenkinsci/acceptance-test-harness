@@ -1,12 +1,11 @@
 package org.jenkinsci.test.acceptance.controller;
 
-import org.jenkinsci.utils.process.ProcessInputStream;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +25,7 @@ public class LogWatcher {
     /**
      * Log output from Jenkins under test is also sent to this stream.
      */
-    private final OutputStream log;
+    private final PrintWriter log;
     private final AtomicBoolean ready = new AtomicBoolean(false);
 
     private final List<String> loggedLines = new ArrayList<>();
@@ -41,7 +40,7 @@ public class LogWatcher {
      * @param pipe
      *      Output from Jenkins is expected to come here.
      */
-    public LogWatcher(final InputStream pipe, final OutputStream log, Map<String,String> opts) {
+    public LogWatcher(final InputStream pipe, final Writer log, Map<String,String> opts) {
         if(opts.get("pattern") == null){
             this.pattern = " Completed initialization";
         }else{
@@ -52,7 +51,7 @@ public class LogWatcher {
         }
 
         this.jenkinsPipe = pipe;
-        this.log = log;
+        this.log = new PrintWriter(log);
 
 
         Runnable r = new Runnable() {
@@ -166,9 +165,8 @@ public class LogWatcher {
         }
     }
 
-
     private void logLine(String line) throws IOException {
-        log.write(line.getBytes("UTF-8"));
+        log.println(line);
         log.flush();
         synchronized (loggedLines) {
             loggedLines.add(line);
