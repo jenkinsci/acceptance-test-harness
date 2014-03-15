@@ -82,6 +82,8 @@ public class JenkinsControllerPoolProcess {
             channel.configureBlocking(true);
             channel.socket().bind(new UnixSocketAddress(SOCKET));
 
+            System.out.println("JUT Server is ready");
+
             while (true) {
                 final UnixSocketChannel c = channel.accept();
                 System.out.println("Accepted");
