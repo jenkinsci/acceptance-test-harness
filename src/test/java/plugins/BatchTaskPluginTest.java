@@ -19,14 +19,11 @@ import javax.inject.Inject;
  */
 @WithPlugins("batch-task")
 public class BatchTaskPluginTest extends AbstractJUnitTest {
-    @Inject
-    Jenkins j;
-
     FreeStyleJob job;
 
     @Before
     public void setUp() {
-        job = j.createJob();
+        job = jenkins.createJob();
     }
 
     /**
@@ -110,7 +107,7 @@ public class BatchTaskPluginTest extends AbstractJUnitTest {
         job.save();
         job.queueBuild().shouldSucceed();
 
-        FreeStyleJob trigger = j.createJob();
+        FreeStyleJob trigger = jenkins.createJob();
         trigger.configure();
         configureBatchTrigger(trigger,task("runit"));
         trigger.save();

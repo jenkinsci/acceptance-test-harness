@@ -22,9 +22,6 @@ import java.util.concurrent.Callable;
 @SuppressWarnings("CdiInjectionPointsInspection")
 @WithPlugins("ant")
 public class AntPluginTest extends AbstractJUnitTest {
-    @Inject
-    Jenkins jenkins;
-
     AntGlobalConfig antgc;
     FreeStyleJob job;
 

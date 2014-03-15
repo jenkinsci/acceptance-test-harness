@@ -17,12 +17,6 @@ import javax.inject.Inject;
 
  */
 public class BuildHistoryTest extends AbstractJUnitTest {
-    @Inject
-    Jenkins j;
-
-    @Inject
-    WebDriver driver;
-
     /**
        Scenario: Viewing global build history
          Given a simple job
@@ -31,10 +25,10 @@ public class BuildHistoryTest extends AbstractJUnitTest {
      */
     @Test
     public void view_global_build_history() {
-        FreeStyleJob job = j.createJob();
+        FreeStyleJob job = jenkins.createJob();
         job.queueBuild().waitUntilFinished();
 
-        j.visit("view/All/builds");
+        jenkins.visit("view/All/builds");
         assertThat(driver, Matchers.hasContent(String.format("%s #1", job.name)));
     }
 }

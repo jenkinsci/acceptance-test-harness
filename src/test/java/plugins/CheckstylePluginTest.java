@@ -22,9 +22,6 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
  */
 @WithPlugins("checkstyle")
 public class CheckstylePluginTest extends AbstractJUnitTest {
-    @Inject
-    Jenkins j;
-
     /**
      * Scenario: Record Checkstyle report
          Given I have installed the "checkstyle" plugin
@@ -81,7 +78,7 @@ public class CheckstylePluginTest extends AbstractJUnitTest {
     }
 
     private FreeStyleJob setupJob() {
-        FreeStyleJob job = j.createJob();
+        FreeStyleJob job = jenkins.createJob();
         job.configure();
         job.copyResource(resource("/checkstyle_plugin/checkstyle-result.xml"), "checkstyle-result.xml");
         job.addPublisher(CheckstylePublisher.class)

@@ -23,6 +23,12 @@ public class AbstractJUnitTest extends Assert {
     public JenkinsAcceptanceTestRule env = new JenkinsAcceptanceTestRule();
 
     /**
+     * Jenkins under test.
+     */
+    @Inject
+    public Jenkins jenkins;
+
+    /**
      * This field receives a valid web driver object you can use to talk to Jenkins.
      */
     @Inject

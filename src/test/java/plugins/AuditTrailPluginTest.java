@@ -19,9 +19,6 @@ import static org.jenkinsci.test.acceptance.po.PageObject.*;
  */
 @WithPlugins("audit-trail")
 public class AuditTrailPluginTest extends AbstractJUnitTest {
-    @Inject
-    Jenkins jenkins;
-
     JenkinsLogger auditTrail;
 
     @Before
