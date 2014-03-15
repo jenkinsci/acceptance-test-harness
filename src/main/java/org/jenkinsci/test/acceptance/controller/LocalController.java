@@ -1,5 +1,6 @@
 package org.jenkinsci.test.acceptance.controller;
 
+import org.apache.commons.io.input.TeeInputStream;
 import org.codehaus.plexus.util.FileUtils;
 import org.jenkinsci.utils.process.ProcessInputStream;
 
@@ -204,7 +205,7 @@ public abstract class LocalController extends JenkinsController {
         this.process = startProcess();
         Runtime.getRuntime().addShutdownHook(shutdownHook);
 
-        this.logWatcher = new LogWatcher(this.process, new FileWriter(logFile), options);
+        this.logWatcher = new LogWatcher(new TeeInputStream(this.process,new FileOutputStream(logFile)), options);
         try {
             this.logWatcher.waitTillReady(true);
         } catch (InterruptedException e) {

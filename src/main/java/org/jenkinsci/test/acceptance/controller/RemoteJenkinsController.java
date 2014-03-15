@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.controller;
 
 import jnr.ffi.LibraryLoader;
+import org.apache.commons.io.input.TeeInputStream;
 import org.jenkinsci.test.acceptance.utils.GNUCLibrary;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.jenkinsci.utils.process.ProcessInputStream;
@@ -10,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.MalformedURLException;
@@ -58,7 +58,7 @@ public class RemoteJenkinsController extends JenkinsController {
          **/
         System.out.println(String.format("[[ATTACHMENT|%s]]", logFile.getAbsolutePath()));
 
-        this.logWatcher = new LogWatcher(process, new FileWriter(logFile), Collections.EMPTY_MAP);
+        this.logWatcher = new LogWatcher(new TeeInputStream(process, new FileOutputStream(logFile)), Collections.EMPTY_MAP);
         try {
             this.logWatcher.waitTillReady(true);
         } catch (InterruptedException e) {
