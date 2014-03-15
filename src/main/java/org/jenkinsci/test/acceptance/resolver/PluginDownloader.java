@@ -31,7 +31,7 @@ public class PluginDownloader implements JenkinsResolver{
         Ssh ssh = machine.connect();
         if(!JenkinsDownloader.remoteFileExists(ssh.getConnection(),path,null)){
             ssh.executeRemoteCommand("mkdir -p "+ FileUtils.dirname(path));
-            ssh.executeRemoteCommand(String.format("wget -O %s %s",path, pluginPath));
+            ssh.executeRemoteCommand(String.format("wget -q -O %s %s",path, pluginPath));
         }
     }
 

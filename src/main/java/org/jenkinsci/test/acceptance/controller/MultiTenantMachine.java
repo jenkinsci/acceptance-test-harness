@@ -11,13 +11,23 @@ public class MultiTenantMachine implements Machine{
 
     private final Machine base;
     private final String dir;
+    private final String id;
+    private final MultitenancyMachineProvider provider;
 
     @Inject
-    public MultiTenantMachine(Machine machine) {
+    public MultiTenantMachine(MultitenancyMachineProvider provider, Machine machine) {
         this.base = machine;
-        this.dir = String.format("%smt_%s/",machine.dir(), JcloudsMachine.newDirSuffix());
+        this.provider = provider;
+        String mtSuffix = String.format("mt_%s",JcloudsMachine.newDirSuffix());
+        this.dir = String.format("%s%s/",machine.dir(), mtSuffix);
         Ssh ssh = connect();
         ssh.executeRemoteCommand("mkdir -p "+this.dir);
+        this.id = String.format("%s/%s",machine.getId(), mtSuffix);
+    }
+
+    @Override
+    public String getId() {
+        return id;
     }
 
     @Override
@@ -54,14 +64,7 @@ public class MultiTenantMachine implements Machine{
         Ssh ssh = connect();
         //cleanup all directories for the next reuse
         ssh.executeRemoteCommand("rm -rf "+dir());
+        provider.offer(this);
     }
 
-    @Override
-    public void reset(){
-        try {
-            close();
-        } catch (IOException e) {
-            throw new AssertionError(e);
-        }
-    }
 }

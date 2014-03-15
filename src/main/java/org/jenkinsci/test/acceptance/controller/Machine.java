@@ -13,6 +13,12 @@ import java.io.IOException;
  */
 @ProvidedBy(MachineProvider.class)
 public interface Machine extends Closeable {
+
+    /**
+     * Unique machine identified
+     */
+    String getId();
+
     /**
      * Connects to this computer over SSH so that we can do stuff
      *
@@ -49,8 +55,4 @@ public interface Machine extends Closeable {
      */
     void close() throws IOException;
 
-    /**
-     * Reset a machine for re-use
-     */
-    void reset();
 }

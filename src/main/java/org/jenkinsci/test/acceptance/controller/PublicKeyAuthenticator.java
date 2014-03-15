@@ -6,7 +6,6 @@ import com.google.inject.name.Named;
 import com.trilead.ssh2.Connection;
 import org.jclouds.domain.LoginCredentials;
 
-import java.io.File;
 import java.io.IOException;
 
 /**
@@ -24,6 +23,8 @@ public class PublicKeyAuthenticator implements Authenticator {
 
     @Override
     public void authenticate(Connection connection) throws IOException {
-        connection.authenticateWithPublicKey(credentials.getUser(), credentials.getPrivateKey().toCharArray(), credentials.getPassword());
+        if(!connection.authenticateWithPublicKey(credentials.getUser(), credentials.getPrivateKey().toCharArray(), credentials.getPassword())){
+            throw new RuntimeException("Public key authentication failed.");
+        }
     }
 }

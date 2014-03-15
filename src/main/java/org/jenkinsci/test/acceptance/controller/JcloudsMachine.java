@@ -41,6 +41,11 @@ public class JcloudsMachine implements Machine {
     }
 
     @Override
+    public String getId() {
+        return nodeMetadata.getId();
+    }
+
+    @Override
     public Ssh connect() {
         try {
             Ssh ssh = new Ssh(getUser(),getPublicIpAddress());
@@ -78,22 +83,15 @@ public class JcloudsMachine implements Machine {
     @Override
     public void close() throws IOException {
         logger.info("Destroying node: " + nodeMetadata);
-        machineProvider.destroy(nodeMetadata.getId());
-    }
-
-    @Override
-    public void reset(){
-        logger.info("Resetting node: "+nodeMetadata);
         Ssh ssh = connect();
-        ssh.executeRemoteCommand("rm -rd machine*");
-        try{
-            ssh.executeRemoteCommand("killall java");
-        }catch (Exception e){
-            //ignore errors, if no java process is running, it gives error
-            logger.error("Failed to kill java processes: "+e.getMessage());
+        try {
+            ssh.getConnection().exec(String.format("pkill -u $(id -u %s)", getUser()), System.out);
+        } catch (InterruptedException e) {
+            //ignore
+            logger.error(e.getMessage());
         }
+        machineProvider.offer(this);
     }
-
 
     public static long newDirSuffix(){
         SecureRandom secureRandom = new SecureRandom();
