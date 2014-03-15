@@ -14,12 +14,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
+ *
  * @author: Vivek Pandey
  */
 public class LogWatcher {
     private final String pattern;
     private final AtomicReference<String> logPattern = new AtomicReference<>(null);
-    private final AtomicReference<InputStream> jenkinsPipe = new AtomicReference<>();
+    private InputStream jenkinsPipe;
+
+    /**
+     * Log output from Jenkins under test is also sent to this stream.
+     */
     private final OutputStream log;
     private final AtomicBoolean ready = new AtomicBoolean(false);
 
@@ -31,6 +36,10 @@ public class LogWatcher {
     private static final int TIMEOUT = System.getenv("STARTUP_TIME") != null && Integer.parseInt(System.getenv("STARTUP_TIME")) > 0
             ? Integer.parseInt(System.getenv("STARTUP_TIME")) : DEFAULT_TIMEOUT;
 
+    /**
+     * @param pipe
+     *      Output from Jenkins is expected to come here.
+     */
     public LogWatcher(final InputStream pipe, final OutputStream log, Map<String,String> opts) {
         if(opts.get("pattern") == null){
             this.pattern = " Completed initialization";
@@ -41,9 +50,8 @@ public class LogWatcher {
             this.logPattern.set(opts.get("log_pattern"));
         }
 
-        this.jenkinsPipe.set(pipe);
+        this.jenkinsPipe = pipe;
         this.log = log;
-
 
 
         Runnable r = new Runnable(){
@@ -52,7 +60,7 @@ public class LogWatcher {
             public void run() {
                 String line = null;
                 try {
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(jenkinsPipe.get()));
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(jenkinsPipe));
                     while((line = reader.readLine()) != null){
                         logLine(line+"\n");
                         if(ready.get()){
@@ -142,8 +150,8 @@ public class LogWatcher {
 
     public void close() throws IOException {
         if(jenkinsPipe != null){
-            jenkinsPipe.get().close();
-            jenkinsPipe.set(null);
+            jenkinsPipe.close();
+            jenkinsPipe = null;
         }
     }
 
