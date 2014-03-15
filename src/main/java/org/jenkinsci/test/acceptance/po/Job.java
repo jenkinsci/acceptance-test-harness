@@ -2,8 +2,8 @@ package org.jenkinsci.test.acceptance.po;
 
 import com.google.inject.Injector;
 import cucumber.api.DataTable;
-import net.schmizz.sshj.common.Base64;
 import org.apache.commons.io.IOUtils;
+import org.codehaus.plexus.util.Base64;
 import org.jenkinsci.test.acceptance.junit.Resource;
 
 import java.io.ByteArrayOutputStream;
@@ -73,7 +73,7 @@ public class Job extends ContainerPageObject {
             gz.close();
 
             addShellStep(String.format("base64 -d | gunzip > %s << ENDOFFILE\n%s\nENDOFFILE",
-                    fileName, Base64.encodeBytes(out.toByteArray())));
+                    fileName, new String(Base64.encodeBase64Chunked(out.toByteArray()))));
         } catch (IOException e) {
             throw new AssertionError(e);
         }
