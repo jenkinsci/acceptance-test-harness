@@ -4,13 +4,15 @@ import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.JenkinsLogger;
+import org.jenkinsci.test.acceptance.slave.LocalSlaveController;
+import org.jenkinsci.test.acceptance.slave.SlaveProvider;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.inject.Inject;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.jenkinsci.test.acceptance.po.PageObject.*;
 
 /**
  * Test audit_trail plugin
@@ -46,7 +48,10 @@ public class AuditTrailPluginTest extends AbstractJUnitTest {
     @Test
     public void trail_should_contain_logged_events() {
         jenkins.jobs.create(FreeStyleJob.class);
-        jenkins.createDumbSlave(createRandomName());
+
+        // purpose of this is to just go through the motion of creating a new slave,
+        // so this one can bypass SlaveController.
+        new LocalSlaveController().install(jenkins);
 
         List<String> events = auditTrail.getEvents();
         assertThat(events, hasItem("/createItem"));

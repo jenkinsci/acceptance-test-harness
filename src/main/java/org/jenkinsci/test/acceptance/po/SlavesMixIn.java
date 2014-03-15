@@ -30,6 +30,11 @@ public class SlavesMixIn extends MixIn {
 
         try {
             S s = type.getConstructor(Jenkins.class, String.class).newInstance(jenkins, name);
+
+            // reasonable starting point values
+            s.setExecutors(1);
+            s.setRemoteFs("/tmp/"+name);
+
             return s;
         } catch (ReflectiveOperationException e) {
             throw new AssertionError(e);

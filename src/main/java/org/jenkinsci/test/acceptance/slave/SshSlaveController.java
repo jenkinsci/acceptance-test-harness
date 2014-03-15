@@ -3,10 +3,11 @@ package org.jenkinsci.test.acceptance.slave;
 import com.google.inject.Inject;
 import org.jenkinsci.test.acceptance.controller.Machine;
 import org.jenkinsci.test.acceptance.controller.SshKeyPair;
+import org.jenkinsci.test.acceptance.po.CapybaraPortingLayer;
+import org.jenkinsci.test.acceptance.po.DumbSlave;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.po.SshPrivateKeyCredential;
-import org.jenkinsci.test.acceptance.po.SshSlave;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,13 +53,15 @@ public class SshSlaveController extends SlaveController {
         executor.shutdownNow();
     }
 
-    private class SlaveInstaller implements Callable<Slave>{
+    private class SlaveInstaller extends CapybaraPortingLayer implements Callable<Slave> {
 
         private final Jenkins j;
 
         private SlaveInstaller(Jenkins j) {
+            super(j.injector);
             this.j = j;
         }
+
         @Override
         public Slave call() throws Exception {
             SshPrivateKeyCredential credential = new SshPrivateKeyCredential(j);
@@ -69,7 +72,26 @@ public class SshSlaveController extends SlaveController {
                 throw new AssertionError(e);
             }
 
-            return SshSlave.create(j, machine.getPublicIpAddress());
+            return create(machine.getPublicIpAddress());
+        }
+
+        public Slave create(String host) {
+            // Just to make sure the dumb slave is set up properly, we should seed it
+            // with a FS root and executors
+            final DumbSlave s = j.slaves.create(DumbSlave.class);
+
+            find(by.input("_.host")).sendKeys(host);
+            s.save();
+
+            // Fire the slave up before we move on
+            waitForCond(new Callable<Boolean>() {
+                public Boolean call() throws Exception {
+                    return s.isOnline();
+                }
+            }, 300);
+
+            return s;
+
         }
     }
 

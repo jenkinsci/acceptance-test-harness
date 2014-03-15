@@ -1,9 +1,13 @@
 package org.jenkinsci.test.acceptance.po;
 
+import org.jenkinsci.test.acceptance.slave.SlaveController;
+
 import java.io.File;
 
 /**
- * A slave object
+ * A slave page object.
+ *
+ * To create a new slave into a test, use {@link SlaveController}.
  *
  * @author Kohsuke Kawaguchi
  * @see Jenkins#slaves

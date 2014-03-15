@@ -28,7 +28,7 @@ public class CapybaraPortingLayer extends Assert {
      * Access to the rest of the world.
      */
     @Inject
-    protected Injector injector;
+    public Injector injector;
 
     public static final ByFactory by = new ByFactory();
 
