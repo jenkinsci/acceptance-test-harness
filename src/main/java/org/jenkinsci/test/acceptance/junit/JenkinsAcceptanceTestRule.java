@@ -46,7 +46,7 @@ public class JenkinsAcceptanceTestRule implements MethodRule {
                         installPlugins(target.getClass().getAnnotation(WithPlugins.class));
 
                     base.evaluate();
-                } catch (Exception e) {
+                } catch (Exception|AssertionError e) { // Errors and failures
                     controller.diagnose(e);
                     throw e;
                 } finally {
