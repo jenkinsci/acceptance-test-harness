@@ -7,6 +7,7 @@ import org.jenkinsci.test.acceptance.guice.TestScope;
 import org.openqa.selenium.By;
 
 import javax.inject.Inject;
+import java.io.IOException;
 import java.net.URL;
 import java.util.Map;
 import java.util.logging.Level;
@@ -32,8 +33,18 @@ public class Jenkins extends ContainerPageObject {
 
     @Inject
     public Jenkins(Injector injector, JenkinsController controller) {
-        this(injector, controller.getUrl());
-    } 
+        this(injector, startAndGetUrl(controller));
+    }
+
+    private static URL startAndGetUrl(JenkinsController controller) {
+        try {
+            controller.start();
+            return controller.getUrl();
+        } catch (IOException e) {
+            throw new AssertionError("Failed to start JenkinsController",e);
+        }
+    }
+
     /**
      * Get the version of Jenkins under test.
      */
