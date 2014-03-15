@@ -34,6 +34,6 @@ public class BuildTimeout extends PageArea {
 
     public void ensureActive() {
         job.ensureConfigPage();
-        enable.click();
+        enable.check();
     }
 }
