@@ -40,16 +40,18 @@ it's own sandboxed workspace.
 * [Selecting how to launch Jenkins under test (JUT)](docs/CONTROLLER.md)
 * [Running one test](docs/SINGLE-TEST.md)
 * [Prelaunch JUT](docs/PRELAUNCH.md)
-* Selecting tests based on plugins they cover
+* Selecting tests based on plugins they cover (TODO)
 
 ### Writing tests
 * [Docker fixtures](docs/FIXTURES.md)
 * [Page objects](docs/PAGE-OBJECTS.md)
+    * Mix-ins (TODO)
+    * Controls (TODO)
 * [Guice is our glue](docs/GUICE.md)
 * Writing tests
     * [Writing JUnit test](docs/JUNIT.md)
-    * Writing Cucumber test
-* Testing slaves
-* explain how cucumber hooks into Guice
-* hamcrest matchers
-* how to use this from your own module
+    * Writing Cucumber test (TODO)
+* Testing slaves (TODO)
+* explain how cucumber hooks into Guice (TODO)
+* hamcrest matchers (TODO)
+* how to use this from your own module (TODO)
