@@ -26,9 +26,12 @@ import java.util.regex.Pattern;
 public class Jenkins extends ContainerPageObject {
     private VersionNumber version;
 
+    public final JobsMixIn jobs;
+
     public Jenkins(Injector injector, URL url) {
         super(injector,url);
         getVersion();
+        jobs = new JobsMixIn(this);
     }
 
     @Inject
@@ -62,44 +65,20 @@ public class Jenkins extends ContainerPageObject {
             throw new AssertionError("Unexpected version string: "+text);
     }
 
-    public <T extends Job> T createJob(Class<T> type, String name) {
-        String sut_type = type.getAnnotation(JobPageObject.class).value();
+    public <T extends View> T createView(Class<T> type, String name) {
+        String sut_type = type.getAnnotation(ViewPageObject.class).value();
 
-        visit("newJob");
-        fillIn("name", name);
-        find(By.xpath("//input[starts-with(@value, '"+sut_type+"')]")).click();
+        visit("newView");
+        fillIn("name",name);
+        check(find(by.radioButton(sut_type)));
         clickButton("OK");
 
-        return getJob(type, name);
-    }
-
-    public <T extends Job> T getJob(Class<T> type, String name) {
         try {
-            return type.getConstructor(Injector.class,URL.class,String.class)
-                    .newInstance(injector, url("job/%s/", name), name);
+            return type.getConstructor(Injector.class,URL.class)
+                    .newInstance(injector, url("view/%s/", name));
         } catch (ReflectiveOperationException e) {
             throw new AssertionError(e);
         }
-    }
-
-    public FreeStyleJob createJob() {
-        return createJob(FreeStyleJob.class);
-    }
-
-    public <T extends Job> T createJob(Class<T> type) {
-        return createJob(type, createRandomName());
-    }
-
-    public void copyJob(Job from, String to) {
-        copyJob(from.name,to);
-    }
-
-    public void copyJob(String from, String to) {
-        visit("newJob");
-        fillIn("name",to);
-        check(find(by.radioButton("copy")));
-        fillIn("from",from);
-        clickButton("OK");
     }
 
     /**

@@ -3,12 +3,10 @@ package plugins;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
-import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.JenkinsLogger;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.inject.Inject;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -47,7 +45,7 @@ public class AuditTrailPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void trail_should_contain_logged_events() {
-        jenkins.createJob(FreeStyleJob.class);
+        jenkins.jobs.create(FreeStyleJob.class);
         jenkins.createDumbSlave(createRandomName());
 
         List<String> events = auditTrail.getEvents();

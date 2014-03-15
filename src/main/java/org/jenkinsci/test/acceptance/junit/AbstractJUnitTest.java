@@ -1,14 +1,12 @@
 package org.jenkinsci.test.acceptance.junit;
 
-import java.net.URL;
-
-import org.jenkinsci.test.acceptance.ByFactory;
+import org.jenkinsci.test.acceptance.po.CapybaraPortingLayer;
 import org.jenkinsci.test.acceptance.po.Jenkins;
-import org.junit.Assert;
 import org.junit.Rule;
 import org.openqa.selenium.WebDriver;
 
 import javax.inject.Inject;
+import java.net.URL;
 
 /**
  * Convenience base class to derive your plain-old JUnit tests from.
@@ -18,7 +16,7 @@ import javax.inject.Inject;
  *
  * @author Kohsuke Kawaguchi
  */
-public class AbstractJUnitTest extends Assert {
+public class AbstractJUnitTest extends CapybaraPortingLayer {
     @Rule
     public JenkinsAcceptanceTestRule env = new JenkinsAcceptanceTestRule();
 
@@ -34,6 +32,10 @@ public class AbstractJUnitTest extends Assert {
     @Inject
     public WebDriver driver;
 
+    public AbstractJUnitTest() {
+        super(null);
+    }
+
     /**
      * Obtains a resource in a wrapper.
      */
@@ -41,7 +43,4 @@ public class AbstractJUnitTest extends Assert {
         final URL resource = getClass().getResource(path);
         if (resource == null) throw new AssertionError("No such resource " + path + " for " + getClass().getName());
         return new Resource(resource);
-    }
-
-    public static final ByFactory by = new ByFactory();
-}
+    }}

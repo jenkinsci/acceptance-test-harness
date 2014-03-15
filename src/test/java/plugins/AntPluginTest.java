@@ -6,12 +6,10 @@ import org.jenkinsci.test.acceptance.plugins.ant.AntBuildStep;
 import org.jenkinsci.test.acceptance.plugins.ant.AntGlobalConfig;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
-import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.inject.Inject;
 import java.util.concurrent.Callable;
 
 /**
@@ -28,7 +26,7 @@ public class AntPluginTest extends AbstractJUnitTest {
     @Before
     public void setUp() {
         antgc = new AntGlobalConfig(jenkins);
-        job = jenkins.createJob(FreeStyleJob.class);
+        job = jenkins.jobs.create(FreeStyleJob.class);
     }
 
     /**

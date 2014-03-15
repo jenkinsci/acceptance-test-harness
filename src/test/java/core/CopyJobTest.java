@@ -21,11 +21,11 @@ public class CopyJobTest extends AbstractJUnitTest {
      */
     @Test
     public void copy_a_simple_job() {
-        FreeStyleJob j = jenkins.createJob(FreeStyleJob.class, "simple-job");
-        jenkins.copyJob(j, "simple-job-copy");
+        FreeStyleJob j = jenkins.jobs.create(FreeStyleJob.class, "simple-job");
+        jenkins.jobs.copy(j, "simple-job-copy");
         assertThat(driver, hasContent("simple-job-copy"));
 
-        FreeStyleJob k = jenkins.getJob(FreeStyleJob.class, "simple-job-copy");
+        FreeStyleJob k = jenkins.jobs.get(FreeStyleJob.class, "simple-job-copy");
 
         j.visit("config.xml");
         String jxml = driver.getPageSource();

@@ -3,11 +3,7 @@ package core;
 import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
-import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.junit.Test;
-import org.openqa.selenium.WebDriver;
-
-import javax.inject.Inject;
 
 /**
  * Feature: Display build history
@@ -25,7 +21,7 @@ public class BuildHistoryTest extends AbstractJUnitTest {
      */
     @Test
     public void view_global_build_history() {
-        FreeStyleJob job = jenkins.createJob();
+        FreeStyleJob job = jenkins.jobs.create();
         job.queueBuild().waitUntilFinished();
 
         jenkins.visit("view/All/builds");

@@ -33,7 +33,7 @@ public class BuildTimeoutPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void fail_build_with_absolute_time() {
-        FreeStyleJob j = jenkins.createJob();
+        FreeStyleJob j = jenkins.jobs.create();
         j.configure();
         {
             j.addShellStep("sleep 300");
@@ -68,7 +68,7 @@ public class BuildTimeoutPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void fail_build_if_likely_stuck() {
-        FreeStyleJob j = jenkins.createJob();
+        FreeStyleJob j = jenkins.jobs.create();
         j.configure();
         j.addShellStep("sleep 1");
         j.save();

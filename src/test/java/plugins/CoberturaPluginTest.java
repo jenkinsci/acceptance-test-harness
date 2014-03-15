@@ -1,7 +1,5 @@
 package plugins;
 
-import org.hamcrest.CoreMatchers;
-import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.cobertura.CoberturaAction;
@@ -44,7 +42,7 @@ public class CoberturaPluginTest extends AbstractJUnitTest {
     }
 
     private FreeStyleJob setupJob() {
-        FreeStyleJob j = jenkins.createJob();
+        FreeStyleJob j = jenkins.jobs.create();
         j.configure();
         {
             j.copyResource(resource("/cobertura_plugin/coverage.xml"));

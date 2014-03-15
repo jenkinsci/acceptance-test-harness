@@ -6,10 +6,7 @@ import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleAction;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstylePublisher;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
-import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.junit.Test;
-
-import javax.inject.Inject;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
@@ -78,7 +75,7 @@ public class CheckstylePluginTest extends AbstractJUnitTest {
     }
 
     private FreeStyleJob setupJob() {
-        FreeStyleJob job = jenkins.createJob();
+        FreeStyleJob job = jenkins.jobs.create();
         job.configure();
         job.copyResource(resource("/checkstyle_plugin/checkstyle-result.xml"));
         job.addPublisher(CheckstylePublisher.class)

@@ -20,17 +20,17 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
 public class JobSteps extends AbstractSteps {
     @When("^I create a job named \"([^\"]*)\"$")
     public void I_create_a_job_named(String name) throws Throwable {
-        my.job = jenkins.createJob(FreeStyleJob.class, name);
+        my.job = jenkins.jobs.create(FreeStyleJob.class, name);
     }
 
     @Given("^a job$")
     public void a_job() throws Throwable {
-        my.job = jenkins.createJob(FreeStyleJob.class);
+        my.job = jenkins.jobs.create(FreeStyleJob.class);
     }
 
     @Given("^a simple job$")
     public void a_simple_job() throws Throwable {
-        my.job = jenkins.createJob(FreeStyleJob.class);
+        my.job = jenkins.jobs.create(FreeStyleJob.class);
         my.job.configure();
         my.job.addShellStep("ls");
         my.job.save();

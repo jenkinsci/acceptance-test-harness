@@ -6,13 +6,10 @@ import org.jenkinsci.test.acceptance.plugins.batch_task.BatchTask;
 import org.jenkinsci.test.acceptance.plugins.batch_task.BatchTaskDeclaration;
 import org.jenkinsci.test.acceptance.plugins.batch_task.BatchTaskTrigger;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
-import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.ShellBuildStep;
 import org.junit.Before;
 import org.junit.Test;
-
-import javax.inject.Inject;
 
 /**
  * Batch-task plugin test.
@@ -23,7 +20,7 @@ public class BatchTaskPluginTest extends AbstractJUnitTest {
 
     @Before
     public void setUp() {
-        job = jenkins.createJob();
+        job = jenkins.jobs.create();
     }
 
     /**
@@ -107,7 +104,7 @@ public class BatchTaskPluginTest extends AbstractJUnitTest {
         job.save();
         job.queueBuild().shouldSucceed();
 
-        FreeStyleJob trigger = jenkins.createJob();
+        FreeStyleJob trigger = jenkins.jobs.create();
         trigger.configure();
         configureBatchTrigger(trigger,task("runit"));
         trigger.save();
