@@ -106,7 +106,7 @@ public abstract class ContainerPageObject extends PageObject {
         URL url = getJsonApiUrl();
         try {
             if (queryString!=null)
-                url = new URL(url,"?"+queryString);
+                url = new URL(url+"?"+queryString);
             return jsonParser.readTree(url);
         } catch (IOException e) {
             throw new RuntimeException("Failed to read from "+ url,e);
