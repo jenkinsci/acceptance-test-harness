@@ -41,7 +41,7 @@ public class Control extends CapybaraPortingLayer {
     }
 
     public void check() {
-        check(resolve(),false);
+        check(resolve(),true);
     }
 
     public void check(boolean state) {
