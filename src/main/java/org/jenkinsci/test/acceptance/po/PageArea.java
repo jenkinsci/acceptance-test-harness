@@ -4,7 +4,13 @@ import com.google.inject.Injector;
 import org.openqa.selenium.By;
 
 /**
- * @author Kohsuke Kawaguchi
+ * Special kind of page object that maps to a portion of a page with multiple INPUT controls.
+ *
+ * <p>
+ * Typically we use this to map a set of controls in the configuration page, which is generated
+ * by composing various config.jelly files from different extension points.
+ *
+ * @author Oliver Gondza
  */
 public abstract class PageArea extends CapybaraPortingLayer {
     /**
