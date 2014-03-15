@@ -121,8 +121,11 @@ public abstract class JenkinsController implements Closeable, AutoCleaned {
      */
     public abstract URL getUrl();
 
-    public abstract void diagnose();
-
+    /**
+     * Perform controller specific diagnostics for test failure. Defaults to no-op.
+     * @param cause Failure cause
+     */
+    public void diagnose(Throwable cause) {}
 
     /**
      * Downloads the latest version of the form-element-path plugin that we use for testing.

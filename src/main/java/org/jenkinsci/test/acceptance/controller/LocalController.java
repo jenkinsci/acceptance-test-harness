@@ -4,9 +4,11 @@ import org.apache.commons.io.input.TeeInputStream;
 import org.codehaus.plexus.util.FileUtils;
 import org.jenkinsci.utils.process.ProcessInputStream;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.util.HashMap;
 import java.util.Map;
@@ -147,7 +149,8 @@ public abstract class LocalController extends JenkinsController {
     }
 
     @Override
-    public void diagnose() {
+    public void diagnose(Throwable cause) {
+        cause.printStackTrace(out);
         if(getenv("INTERACTIVE") != null && getenv("INTERACTIVE").equals("true")){
             out.println("Commencing interactive debugging. Browser session was kept open.");
             out.println("Press return to proceed.");
