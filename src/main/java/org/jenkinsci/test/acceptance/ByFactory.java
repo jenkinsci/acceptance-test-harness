@@ -77,7 +77,7 @@ public class ByFactory {
      *      Text, id, title.
      */
     public By input(String locator) {
-        return xpath(fieldXPath("(input|textarea|select)",locator));
+        return xpath(fieldXPath("*[name()='INPUT' or name()='TEXTAREA' or name()='SELECT']",locator));
     }
 
     private static String fieldXPath(String base, String locator) {
