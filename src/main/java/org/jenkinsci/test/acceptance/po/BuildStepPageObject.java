@@ -8,7 +8,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * Marks the {@link BuildStep} subtype to associate its display name in the UI
+ * to the {@link PageArea} implementation.
+ *
  * @author Kohsuke Kawaguchi
+ * @see Job#addBuildStep(Class)
+ * @see Job#addPublisher(Class)
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

@@ -6,6 +6,8 @@ import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Job;
 
 /**
+ * Ant job configuration UI.
+ *
  * @author Kohsuke Kawaguchi
  */
 @BuildStepPageObject("Invoke Ant")

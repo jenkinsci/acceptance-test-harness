@@ -18,6 +18,9 @@ import java.util.concurrent.TimeUnit;
  */
 @SuppressWarnings("CdiManagedBeanInconsistencyInspection")
 public class CapybaraPortingLayer extends Assert {
+    /**
+     * {@link WebDriver} that subtypes use to talk to the server.
+     */
     @Inject
     protected WebDriver driver;
 

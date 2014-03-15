@@ -44,8 +44,6 @@ it's own sandboxed workspace.
 ### Writing tests
 * [Docker fixtures](docs/FIXTURES.md)
 * [Page objects](docs/PAGE-OBJECTS.md)
-* how to add page objects?
-  * convention of exception handling
 * explain two ways: cucumber and junit
  * junit: rule and annotations
 * explain guice world that's common to both

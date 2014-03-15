@@ -16,8 +16,41 @@ The top-level page object is `Jenkins`, and from there you'll see page objects t
 concepts like `Job` and `Build`.
 
 
+## Implementing Page Objects
+See [CapybaraPortingLayer.java](../src/main/java/org/jenkinsci/test/acceptance/po/CapybaraPortingLayer.java)
+for various helper methods and instance fields you can use to write page objects.
+
+This class defines a number of convenience methods that wraps WebDriver, such as this:
+
+    // find a button whose text/ID/etc is "Start" and click it
+    find(by.button("Start")).click()
+
+The 'by' field defines a number of selector factory methods that simplify the code that selects
+a specific element.
+
+
 ## Page Area
-There's a subtype of `PageObject` called `PageArea`, which is a micro page object
+There's a `PageObject`-like class called `PageArea`, which is a micro page object
 that maps to a section of a page that contains a series of INPUT controls.
 
-A typical usage of this is to map a single <tt>config.jelly</tt> of a builder/publisher/etc
+A typical usage of this is to map a single <tt>config.jelly</tt> of a builder/publisher/etc.
+
+Page area object uses [Form element path plugin](https://wiki.jenkins-ci.org/display/JENKINS/Form+Element+Path+Plugin)
+to refer to input controls relative to its location in the hierarchy of controls.
+Controls are mapped to `Control` instances by their relative path name, which maps to the "field" attribute
+of the &lt;f:entry> tag on the sever side:
+
+    @BuildStepPageObject("Invoke Ant")
+    public class AntBuildStep extends BuildStep {
+        public final Control targets = control("targets");
+        public final Control antName = control("antName");
+
+        public AntBuildStep(Job parent, String path) {
+            super(parent, path);
+        }
+    }
+
+    // how to use this
+    Job job = ...
+    AntBuildStep ant = job.addBuildStep(AntBuildStep.class);
+    ant.antName.sendKeys(name);
