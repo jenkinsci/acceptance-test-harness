@@ -28,6 +28,7 @@ import java.util.concurrent.SynchronousQueue;
  * During development of tests, a test VM would come and go quickly. This design helps them maintain efficiency
  * in such a situation.
  *
+ * @see docs/PRELAUNCH.md
  * @author Kohsuke Kawaguchi
  */
 public class JenkinsControllerPoolProcess {
