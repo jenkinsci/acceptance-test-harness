@@ -9,7 +9,6 @@ import org.jenkinsci.test.acceptance.docker.fixtures.SshdContainer;
 import org.jenkinsci.utils.process.CommandBuilder;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,7 +41,7 @@ public class DockerSteps extends AbstractSteps {
     public void cleanUp() throws IOException, InterruptedException {
         for (Entry<String, DockerContainer> e : containers.entrySet()) {
             System.out.println("Shutting down: "+e.getKey());
-            e.getValue().clean();
+            e.getValue().close();
         }
     }
 

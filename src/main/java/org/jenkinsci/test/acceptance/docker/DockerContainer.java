@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.utils.process.ProcessUtils;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 
@@ -15,15 +16,24 @@ import static java.lang.String.*;
  *
  * @author Kohsuke Kawaguchi
  */
-public class DockerContainer {
+public class DockerContainer implements Closeable {
     private String cid;
     private Process p;
     private File logfile;
+    private Thread shutdownHook;
 
     /*package*/ void init(String cid, Process p, File logfile) {
         this.cid = cid;
         this.p = p;
         this.logfile = logfile;
+        shutdownHook = new Thread() {
+            @Override
+            public void run() {
+                shutdownHook = null;
+                close();
+            }
+        };
+        Runtime.getRuntime().addShutdownHook(shutdownHook);
     }
 
     /**
@@ -64,12 +74,19 @@ public class DockerContainer {
     /**
      * Stops and remove any trace of the container
      */
-    public void clean() throws IOException, InterruptedException {
-        p.destroy();
-        Docker.cmd("kill").add(cid)
-                .popen().verifyOrDieWith("Failed to kill " + cid);
-        Docker.cmd("rm").add(cid)
-                .popen().verifyOrDieWith("Failed to rm " + cid);
+    public void close() {
+        try {
+            p.destroy();
+            Docker.cmd("kill").add(cid)
+                    .popen().verifyOrDieWith("Failed to kill " + cid);
+            Docker.cmd("rm").add(cid)
+                    .popen().verifyOrDieWith("Failed to rm " + cid);
+            if (shutdownHook!=null) {
+                Runtime.getRuntime().removeShutdownHook(shutdownHook);
+            }
+        } catch (IOException|InterruptedException e) {
+            throw new AssertionError("Failed to close down docker container "+cid,e);
+        }
     }
 
     /**

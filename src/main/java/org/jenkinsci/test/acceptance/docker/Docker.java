@@ -2,10 +2,12 @@ package org.jenkinsci.test.acceptance.docker;
 
 import com.google.inject.Inject;
 import org.apache.commons.io.FileUtils;
+import org.jenkinsci.test.acceptance.guice.TestCleaner;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.jvnet.hudson.annotation_indexer.Index;
 
 import javax.inject.Named;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
