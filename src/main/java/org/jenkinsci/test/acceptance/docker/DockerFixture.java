@@ -26,6 +26,11 @@ public @interface DockerFixture {
 
     /**
      * Ports that are exposed from this fixture.
+     *
+     * <p>
+     * When a container is started, these ports from the container are mapped to
+     * random ephemeral ports on the host. The actual ephemeral port number can
+     * be retried at runtime via {@link DockerContainer#port(int)}.
      */
     int[] ports() default {};
 }
