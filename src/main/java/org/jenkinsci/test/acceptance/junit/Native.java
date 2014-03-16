@@ -1,5 +1,12 @@
 package org.jenkinsci.test.acceptance.junit;
 
+import org.jenkinsci.utils.process.CommandBuilder;
+import org.junit.internal.AssumptionViolatedException;
+import org.junit.rules.TestRule;
+import org.junit.runner.Description;
+import org.junit.runners.model.Statement;
+
+import java.io.IOException;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
@@ -20,6 +27,31 @@ import static java.lang.annotation.RetentionPolicy.*;
 @Target({METHOD, TYPE})
 @Inherited
 @Documented
+@RuleAnnotation(Native.RuleImpl.class)
 public @interface Native {
     String[] value();
+
+    public class RuleImpl implements TestRule {
+        @Override
+        public Statement apply(final Statement base, final Description d) {
+            return new Statement() {
+                @Override
+                public void evaluate() throws Throwable {
+                    verifyNativeCommandPresent(d.getAnnotation(Native.class));
+                    verifyNativeCommandPresent(d.getTestClass().getAnnotation(Native.class));
+
+                    base.evaluate();
+                }
+
+                private void verifyNativeCommandPresent(Native n) throws IOException, InterruptedException {
+                    if (n==null)        return;
+                    for (String cmd : n.value()) {
+                        if (new CommandBuilder("which",cmd).system()!=0) {
+                            throw new AssumptionViolatedException(cmd + " is needed for the test but doesn't exist in the system");
+                        }
+                    }
+                }
+            };
+        }
+    }
 }
