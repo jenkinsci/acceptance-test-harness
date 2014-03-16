@@ -13,3 +13,8 @@ temp_dir_*
 chromedriver.log
 .buildpath
 .project
+target
+.classpath
+.settings/
+jenkins*home/
+jenkins*home.log

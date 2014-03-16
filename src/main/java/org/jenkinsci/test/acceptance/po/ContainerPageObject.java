@@ -5,6 +5,7 @@ import com.google.inject.Injector;
 import groovy.lang.Closure;
 
 import java.io.IOException;
+import java.lang.reflect.ParameterizedType;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.Callable;
@@ -110,6 +111,32 @@ public abstract class ContainerPageObject extends PageObject {
             return jsonParser.readTree(url);
         } catch (IOException e) {
             throw new RuntimeException("Failed to read from "+ url,e);
+        }
+    }
+
+    /**
+     * Create action of this page object.
+     *
+     * @param type Action type to create.
+     * @see {@link Action}, {@link ActionPageObject}
+     */
+    public <T extends Action<?>> T action(Class<T> type) {
+        final String path = type.getAnnotation(ActionPageObject.class).value();
+
+        ParameterizedType actionType = (ParameterizedType) type.getGenericSuperclass();
+        Class<? extends ContainerPageObject> scope = (Class<? extends ContainerPageObject>) actionType.getActualTypeArguments()[0];
+
+        if (!getClass().isAssignableFrom(scope)) {
+            throw new AssertionError(String.format(
+                    "%s is scoped to %s. Not a superclass of %s.",
+                    type.getName(), scope, getClass().getName()
+            ));
+        }
+
+        try {
+            return type.getConstructor(scope, String.class).newInstance(this, path);
+        } catch (ReflectiveOperationException ex) {
+            throw new Error(ex);
         }
     }
 }
