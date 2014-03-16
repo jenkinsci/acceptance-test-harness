@@ -2,6 +2,7 @@ package plugins;
 
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.test.acceptance.docker.Docker;
+import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.Tomcat7Container;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
@@ -26,7 +27,7 @@ import static org.hamcrest.CoreMatchers.*;
 @WithPlugins("deploy")
 public class DeployPluginTest extends AbstractJUnitTest {
     @Inject
-    Docker docker;
+    DockerContainerHolder<Tomcat7Container> tomcat7;
 
     /**
      @native(docker)
@@ -58,35 +59,35 @@ public class DeployPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void deploy_sample_webapp_to_tomcat7() throws IOException {
-        try (Tomcat7Container f = docker.start(Tomcat7Container.class)) {
-            FreeStyleJob j = jenkins.jobs.create();
-            j.configure();
-            ShellBuildStep s;
-            {
-                s = j.addShellStep(resource("/deploy_plugin/build-war.sh"));
-                DeployPublisher d = j.addPublisher(DeployPublisher.class);
-                d.war.set("my-webapp/target/*.war");
-                d.contextPath.set("test");
-                d.container.select("Tomcat 7.x");
-                d.user.set("admin");
-                d.password.set("tomcat");
-                d.url.set(f.getUrl().toExternalForm());
-            }
-            j.save();
+        Tomcat7Container f = tomcat7.get();
 
-            Build b = j.queueBuild().shouldSucceed();
-            b.shouldContainsConsoleOutput("to container Tomcat 7.x Remote");
-
-            assertThat(readText(f), containsString("Hello World!"));
-
-            j.configure();
-            s.command.set("cd my-webapp && echo '<html><body>Hello Jenkins</body></html>' > src/main/webapp/index.jsp && mvn install");
-            j.save();
-
-            b = j.queueBuild().shouldSucceed();
-            b.shouldContainsConsoleOutput("Redeploying");
-            assertThat(readText(f), containsString("Hello Jenkins"));
+        FreeStyleJob j = jenkins.jobs.create();
+        j.configure();
+        ShellBuildStep s;
+        {
+            s = j.addShellStep(resource("/deploy_plugin/build-war.sh"));
+            DeployPublisher d = j.addPublisher(DeployPublisher.class);
+            d.war.set("my-webapp/target/*.war");
+            d.contextPath.set("test");
+            d.container.select("Tomcat 7.x");
+            d.user.set("admin");
+            d.password.set("tomcat");
+            d.url.set(f.getUrl().toExternalForm());
         }
+        j.save();
+
+        Build b = j.queueBuild().shouldSucceed();
+        b.shouldContainsConsoleOutput("to container Tomcat 7.x Remote");
+
+        assertThat(readText(f), containsString("Hello World!"));
+
+        j.configure();
+        s.command.set("cd my-webapp && echo '<html><body>Hello Jenkins</body></html>' > src/main/webapp/index.jsp && mvn install");
+        j.save();
+
+        b = j.queueBuild().shouldSucceed();
+        b.shouldContainsConsoleOutput("Redeploying");
+        assertThat(readText(f), containsString("Hello Jenkins"));
     }
 
     private String readText(Tomcat7Container f) throws IOException {

@@ -9,26 +9,42 @@ defined in `./fixtures/*`
 
 
 ## Running/skipping Docker tests
-Tests that require docker fixtures are marked with `@docker` annotation. If docker is not installed
-when you run tests, these tests are automatically skipped.
+JUnit Tests that require docker fixtures are marked with `@Native("docker")` annotation.
+Cucumber tests are likewise annotated with `@native(docker)` annotation.
+
+If docker is not installed when you run tests, these tests are automatically skipped.
+
+
+## Writing a JUnit test that relies on Docker fixtures
+Every fixture has a subtype of `DockerContainer` defined for it (see
+[existing examples](../src/main/java/org/jenkinsci/test/acceptance/docker/fixtures/))
+
+Pick the fixture type you want to use, then insert `DockerContainerHolder` for it:
+
+    @Inject
+    DockerContainerHolder<Tomcat7Container> tomcat7;
+
+    @Test
+    public void myTomcat7Test() {
+        Tomcat7Container c = tomcat7.get();
+        // interact with 'c' during test
+    }
+
+`DockerContainerHolder` starts a container, and it'll automatically clean-up the container at the end of the test.
 
 
 ## Writing a cucumber test that relies on Docker fixtures
-`docker_steps.rb` defines steps that get the fixtures running, such as this:
+`DockerSteps` defines steps that get the fixtures running, such as this:
 
     Given a docker fixture "tomcat7"
 
-The instantiated fixture object is assigned to `@docker["tomcat7"]` so that your step definitions can access them.
-See `deploy_steps.rb` for an example of interacting with running containers.
-
+In Cucumber we refer to docker fixtures by their IDs, which is specified via `@DockerFixture` on the fixture type.
+The containers are automatically terminated and cleaned up at the end of test.
 
 ## Defining a fixture
-Each fixture is defined in a directory named after its ID. A fixture minimally consists
-of `Dockerfile` that defines how to build the image, and it also must accompany `ID.rb` file
-that defines a fixture wrapper class that encapsulates interactions to the container.
+Each fixture is defined in terms of a `DockerContainer` subtype with `@DockerFixture` annotation. This type
+exposes various methods needed to interact with the running fixture.
 
-The fixture wrapper class extends from `Fixture` class, and it needs to call `register` class method
-to make the wrapper class discoverable to the runtime.
+A fixture also needs to define `Dockerfile` in the resources directory. If a fixture class is
+`org/acme/FooContainer.java`, then the docker file must be located at `org/acme/FooContainer/Dockerfile`.
 
-`Jenkins::Fixtures::Fixture.search_path` is a string array that lists directories that contain fixtures.
-This allows you to define your local fixtures elsewhere, for example if you have your own in-house acceptance testing.

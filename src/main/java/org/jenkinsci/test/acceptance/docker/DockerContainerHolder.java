@@ -25,6 +25,9 @@ public class DockerContainerHolder<T extends DockerContainer> implements Provide
 
     T container;
 
+    /**
+     * Lazily starts a container and returns the instance.
+     */
     public synchronized T get() {
         if (container==null)
             container = docker.start((Class<T>)type.getRawType());
