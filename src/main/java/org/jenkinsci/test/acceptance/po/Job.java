@@ -1,15 +1,20 @@
 package org.jenkinsci.test.acceptance.po;
 
 import com.google.inject.Injector;
+
 import cucumber.api.DataTable;
+
 import org.apache.commons.io.IOUtils;
 import org.codehaus.plexus.util.Base64;
 import org.jenkinsci.test.acceptance.junit.Resource;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,6 +35,21 @@ public class Job extends ContainerPageObject {
     public Job(Injector injector, URL url, String name) {
         super(injector,url);
         this.name = name;
+    }
+
+    public <T extends Scm> T useScm(Class<T> type) {
+        ensureConfigPage();
+
+        String caption = type.getAnnotation(ScmPageObject.class).value();
+
+        WebElement radio = find(by.radioButton(caption));
+        check(radio);
+
+        try {
+            return type.getConstructor(Job.class, String.class).newInstance(this, radio.getAttribute("path"));
+        } catch (ReflectiveOperationException e) {
+            throw new Error(e);
+        }
     }
 
     public <T extends BuildStep> T addBuildStep(Class<T> type) {
