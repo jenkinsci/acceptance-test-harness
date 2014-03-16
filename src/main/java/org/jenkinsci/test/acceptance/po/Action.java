@@ -21,23 +21,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.test.acceptance.plugins.envinject;
+package org.jenkinsci.test.acceptance.po;
 
-import org.jenkinsci.test.acceptance.po.Build;
-import org.jenkinsci.test.acceptance.po.PageObject;
+import org.openqa.selenium.WebDriver;
 
-import com.google.inject.Injector;
+/**
+ * Page object action.
+ *
+ * @param <Scope> Page object action is scoped to.
+ *
+ * Every action must be scoped to certain {@link ContainerPageObject}. Action
+ * instance is then created as <tt>pageObject.getAction(MyActionType.class)</tt>
+ * (<tt>pageObject</tt> must be an instance of <tt>MyActualType</tt>'s parameter).
+ * Actions are registered using {@link ActionPageObject} annotation.
+ *
+ * @author ogondza
+ */
+public class Action<Scope extends ContainerPageObject> extends PageObject {
 
-// TODO: Register actions using annotations to support factories `build.getAction(EnvInjectBuildAction.class).open()`
-public class EnvInjectBuildAction extends PageObject {
+    protected final ContainerPageObject parent;
 
-    public EnvInjectBuildAction(Injector injector, Build build) {
-        super(injector, build.url("injectedEnvVars"));
+    public Action(Scope parent, String relative) {
+        super(parent.injector, parent.url(relative));
+        this.parent = parent;
     }
 
-    public EnvInjectBuildAction shouldContain(String key, String value) {
-        open();
-        find(by.xpath("//td[. = '%s']/../td[. = '%s']", key, value));
-        return this;
+    @Override
+    public WebDriver open() {
+        WebDriver wd = super.open();
+
+        if (!wd.getCurrentUrl().startsWith(url.toString())) {
+            throw new AssertionError("Action " + url + " does not exist. Redirected to " + wd.getCurrentUrl());
+        }
+
+        return wd;
     }
 }

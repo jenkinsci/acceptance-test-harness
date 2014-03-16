@@ -25,7 +25,7 @@ package plugins;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.plugins.envinject.EnvInjectBuildAction;
+import org.jenkinsci.test.acceptance.plugins.envinject.EnvInjectAction;
 import org.jenkinsci.test.acceptance.plugins.envinject.EnvInjectConfig;
 import org.jenkinsci.test.acceptance.plugins.envinject.EnvInjectStep;
 import org.jenkinsci.test.acceptance.po.Build;
@@ -75,6 +75,6 @@ public class EnvInjectPluginTest extends AbstractJUnitTest {
         build.shouldSucceed();
         build.shouldContainsConsoleOutput("ENV_VAR_TEST=injected variable test");
         build.shouldContainsConsoleOutput("value=injected variable test");
-        new EnvInjectBuildAction(injector, build).shouldContain("ENV_VAR_TEST", "injected variable test");
+        build.action(EnvInjectAction.class).shouldContain("ENV_VAR_TEST", "injected variable test");
     }
 }
