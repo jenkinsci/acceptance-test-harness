@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.po;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
@@ -77,7 +78,11 @@ public class Control extends CapybaraPortingLayer {
      * Select an option.
      */
     public void select(String option) {
-        find(by.option(option)).click();
+        WebElement e = resolve();
+        e.findElement(by.option(option)).click();
+
+        // move the focus away from the select control to fire onchange event
+        e.sendKeys(Keys.TAB);
     }
 
     public interface Owner {
