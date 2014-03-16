@@ -46,7 +46,6 @@ it's own sandboxed workspace.
 * [Docker fixtures](docs/FIXTURES.md)
 * [Page objects](docs/PAGE-OBJECTS.md)
     * [Mix-ins](docs/MIXIN.md)
-    * Controls (TODO)
 * [Guice is our glue](docs/GUICE.md)
 * Writing tests
     * [Writing JUnit test](docs/JUNIT.md)

@@ -59,3 +59,12 @@ of the &lt;f:entry> tag on the sever side:
     Job job = ...
     AntBuildStep ant = job.addBuildStep(AntBuildStep.class);
     ant.antName.sendKeys(name);
+
+## Control
+Controls are like `WebElement`s, but they are late-binding. That is, a `Control` instance gets created
+long before the actual element may appear in HTML. This allows page objects to define form fields as public
+final instance variables on the `PageObject` subtype, and hide the details of how to select those elements.
+
+This pattern can be seen most often in `PageArea` subtypes, as they are used in the form-heavy configuration pages.
+
+`Control` also offers a richer set of methods to interact with form elements, making it easier to write correct code.

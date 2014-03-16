@@ -6,8 +6,18 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
 /**
- * Wraps a specific control in {@link PageArea} to provide operations.
- * This makes it easier to write {@link PageArea}s.
+ * Wraps a specific form element in {@link PageArea} to provide operations.
+ *
+ * {@link Control} is like a {@link WebElement}, but with the following key differences:
+ *
+ * <ul>
+ * <li>{@link Control} is late binding, and the underlying {@link WebElement} is resolved only when
+ *     an interaction with control happens. This allows {@link Control}s to be instantiated earlier
+ *     (typically when a {@link PageObject} subtype is instantiated.)
+ * <li>{@link Control} offers richer methods to interact with a form element, making the right code easier to write.
+ * </ul>
+ *
+ * See {@link PageArea} subtypes for typical usage.
  *
  * @author Kohsuke Kawaguchi
  * @see PageArea#control(String...)
