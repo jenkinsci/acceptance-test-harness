@@ -117,6 +117,10 @@ public class CapybaraPortingLayer extends Assert {
 
     /**
      * Returns the first visible element that matches the selector.
+     *
+     * @throws NoSuchElementException
+     *      if the element is not found.
+     * @see #getElement(By)         if you don't want to see an exception
      */
     public WebElement find(By selector) {
         try {
@@ -130,6 +134,7 @@ public class CapybaraPortingLayer extends Assert {
             }
             return e;   // hmm, not sure what to return here!
         } catch (NoSuchElementException x) {
+            // this is often the best place to set a breakpoint
             throw new NoSuchElementException("Unable to locate "+selector+" in "+driver.getCurrentUrl(),x);
         }
     }
@@ -139,11 +144,10 @@ public class CapybaraPortingLayer extends Assert {
      * this method returns null.
      */
     public WebElement getElement(By selector) {
-        try {
-            return find(selector);
-        } catch (NoSuchElementException e) {
-            return null;
-        }
+        // use all so that the breakpoint in find() method stays useful
+        List<WebElement> all = all(selector);
+        if (all.isEmpty())  return null;
+        return all.get(0);
     }
 
     public void fillIn(String formFieldName, Object value) {

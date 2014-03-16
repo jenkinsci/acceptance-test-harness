@@ -2,7 +2,6 @@ package org.jenkinsci.test.acceptance.po;
 
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.UpdateCenter.InstallationFailedException;
-import org.openqa.selenium.NoSuchElementException;
 
 /**
  * Page object for plugin manager.
@@ -36,14 +35,11 @@ public class PluginManager extends ContainerPageObject {
 
     public boolean isInstalled(String... shortNames) {
         visit("installed");
-        try {
-            for (String n : shortNames) {
-                find(by.xpath("//input[@url='plugin/%s']", n));
-            }
-            return true;
-        } catch (NoSuchElementException e) {
-            return false;
+        for (String n : shortNames) {
+            if (getElement(by.xpath("//input[@url='plugin/%s']", n))==null)
+                return false;
         }
+        return true;
     }
 
     /**
