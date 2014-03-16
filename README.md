@@ -45,7 +45,7 @@ it's own sandboxed workspace.
 ### Writing tests
 * [Docker fixtures](docs/FIXTURES.md)
 * [Page objects](docs/PAGE-OBJECTS.md)
-    * Mix-ins (TODO)
+    * [Mix-ins](docs/MIXIN.md)
     * Controls (TODO)
 * [Guice is our glue](docs/GUICE.md)
 * Writing tests
