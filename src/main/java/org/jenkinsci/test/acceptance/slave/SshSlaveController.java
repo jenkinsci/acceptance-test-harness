@@ -37,16 +37,6 @@ public class SshSlaveController extends SlaveController {
     }
 
     @Override
-    public void start() {
-        // no-op
-    }
-
-    @Override
-    public void stop() {
-        // no-op
-    }
-
-    @Override
     public void close() throws IOException {
         executor.shutdown();
         executor.shutdownNow();

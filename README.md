@@ -50,7 +50,7 @@ it's own sandboxed workspace.
 * Writing tests
     * [Writing JUnit test](docs/JUNIT.md)
     * Writing Cucumber test (TODO)
-* Testing slaves (TODO)
+* [Testing slaves](docs/SLAVE.md)
 * explain how cucumber hooks into Guice (TODO)
 * hamcrest matchers (TODO)
 * how to use this from your own module (TODO)

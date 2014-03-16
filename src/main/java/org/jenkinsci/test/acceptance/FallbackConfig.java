@@ -36,7 +36,6 @@ public class FallbackConfig extends AbstractModule {
     protected void configure() {
         // default in case nothing is specified
         bind(SlaveProvider.class).to(LocalSlaveProvider.class);
-        bind(SlaveController.class).toProvider(SlaveProvider.class).in(TestScope.class);
     }
 
     private WebDriver createWebDriver() {

@@ -6,9 +6,9 @@ import javax.inject.Singleton;
  * @author Kohsuke Kawaguchi
  */
 @Singleton
-public class LocalSlaveProvider implements SlaveProvider {
+public class LocalSlaveProvider extends SlaveProvider {
     @Override
-    public SlaveController get() {
+    public SlaveController create() {
         return new LocalSlaveController();
     }
 }

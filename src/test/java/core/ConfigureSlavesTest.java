@@ -38,7 +38,6 @@ public class ConfigureSlavesTest extends AbstractJUnitTest {
         FreeStyleJob j = jenkins.jobs.create();
 
         Slave s = slave1.install(jenkins).get();
-        slave1.start();
 
         s.configure();
         s.setLabels("test");
