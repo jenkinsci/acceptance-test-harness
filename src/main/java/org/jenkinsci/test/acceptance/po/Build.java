@@ -66,6 +66,11 @@ public class Build extends ContainerPageObject {
 
     public Build waitUntilFinished(int timeout) {
         waitUntilStarted();
+
+        // while waiting, hit the console page, so that during the interactive development
+        // one can see what the build is doing
+        visit("console");
+
         waitForCond(new Callable<Boolean>() {
             public Boolean call() {
                 return !isInProgress();
