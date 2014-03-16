@@ -19,13 +19,13 @@ import java.util.regex.Pattern;
  */
 public class Matchers {
     /**
-     * Asserts that {@link WebDriver#getPageSource()} contains the given string.
+     * Asserts that given text is shown on page.
      */
     public static Matcher<WebDriver> hasContent(final String content) {
       return new TypeSafeMatcher<WebDriver>() {
           @Override
           protected boolean matchesSafely(WebDriver item) {
-              return item.getPageSource().contains(content);
+              return pageText(item).contains(content);
           }
 
           @Override
@@ -38,7 +38,11 @@ public class Matchers {
               mismatchDescription.appendText("was ")
                       .appendValue(item.getCurrentUrl())
                       .appendText("\n")
-                      .appendValue(item.getPageSource());
+                      .appendValue(pageText(item));
+          }
+
+          private String pageText(WebDriver item) {
+              return item.findElement(by.xpath("/html")).getText();
           }
       };
     }
