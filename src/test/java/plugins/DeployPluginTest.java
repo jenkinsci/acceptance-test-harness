@@ -57,29 +57,27 @@ public class DeployPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void deploy_sample_webapp_to_tomcat7() throws IOException {
-        Tomcat7Container f = docker.start(Tomcat7Container.class);
+        try (Tomcat7Container f = docker.start(Tomcat7Container.class)) {
+            FreeStyleJob j = jenkins.jobs.create();
+            j.configure();
+            {
+                j.addShellStep(resource("/deploy_plugin/build-war.sh"));
+                DeployPublisher d = j.addPublisher(DeployPublisher.class);
+                d.war.set("my-webapp/target/*.war");
+                d.contextPath.set("test");
+                d.container.select("Tomcat 7.x");
+                d.user.set("admin");
+                d.password.set("admin");
+                d.url.set(f.getUrl().toExternalForm());
+            }
+            j.save();
 
-        FreeStyleJob j = jenkins.jobs.create();
-        j.configure();
-        {
-            j.addShellStep(resource("/deploy_plugin/build-war.sh"));
-            DeployPublisher d = j.addPublisher(DeployPublisher.class);
-            d.war.set("my-webapp/target/*.war");
-            d.contextPath.set("test");
-            d.container.select("Tomcat 7.x");
-            d.user.set("admin");
-            d.password.set("admin");
-            d.url.set(f.getUrl().toExternalForm());
+            Build b = j.queueBuild().shouldSucceed();
+            b.shouldContainsConsoleOutput("to container Tomcat 7.x Remote");
+
+            URL url = new URL(f.getUrl(),"/test/");
+            assertThat(IOUtils.toString(url.openStream()), is("Hello World!"));
         }
-        j.save();
-
-        Build b = j.queueBuild().shouldSucceed();
-        b.shouldContainsConsoleOutput("to container Tomcat 7.x Remote");
-
-        URL url = new URL(f.getUrl(),"/test/");
-        assertThat(IOUtils.toString(url.openStream()), is("Hello World!"));
-
-
     }
 
 }
