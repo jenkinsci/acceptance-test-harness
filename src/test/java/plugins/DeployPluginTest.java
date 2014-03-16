@@ -1,10 +1,10 @@
 package plugins;
 
 import org.apache.commons.io.IOUtils;
-import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.Tomcat7Container;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.Native;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.deploy.DeployPublisher;
 import org.jenkinsci.test.acceptance.po.Build;
@@ -24,7 +24,7 @@ import static org.hamcrest.CoreMatchers.*;
    As a Jenkins user
    I want to automate the delivery of web applications
  */
-@WithPlugins("deploy")
+@WithPlugins("deploy") @Native("docker")
 public class DeployPluginTest extends AbstractJUnitTest {
     @Inject
     DockerContainerHolder<Tomcat7Container> tomcat7;
