@@ -4,6 +4,7 @@ import com.google.inject.Injector;
 import org.openqa.selenium.By;
 
 import java.net.URL;
+import java.util.concurrent.Callable;
 
 /**
  * Mix-in for {@link PageObject}s that own a group of jobs, like
@@ -24,7 +25,23 @@ public class JobsMixIn extends MixIn {
         find(By.xpath("//input[starts-with(@value, '" + sut_type + "')]")).click();
         clickButton("OK");
 
-        return get(type, name);
+        final T j = get(type, name);
+
+        // I'm seeing occasional 404 when trying to access the page right after a job is created.
+        // so I'm giving it a big of time before the job properly appears.
+        j.waitForCond(new Callable<Object>() {
+            @Override
+            public Object call() throws Exception {
+                try {
+                    j.getJson();
+                    return true;
+                } catch (Exception e) {
+                    return false;
+                }
+            }
+        },3);
+
+        return j;
     }
 
     public <T extends Job> T get(Class<T> type, String name) {
