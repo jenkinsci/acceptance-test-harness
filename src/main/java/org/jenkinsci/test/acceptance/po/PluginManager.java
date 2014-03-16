@@ -1,5 +1,7 @@
 package org.jenkinsci.test.acceptance.po;
 
+import java.util.regex.Pattern;
+
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.UpdateCenter.InstallationFailedException;
 
@@ -28,9 +30,19 @@ public class PluginManager extends ContainerPageObject {
         visit("checkUpdates");
         waitFor(by.xpath("//span[@id='completionMarker' and text()='Done']"));
         updated = true;
-        // This is totally arbitrary, it seems that the Available page doesn't
-        // update properly if you don't sleep a bit
-        sleep(5000);
+
+        waitForUpdates();
+    }
+
+    public void waitForUpdates() {
+        JenkinsLogger l = jenkins.getLogger("all");
+
+        Pattern ant = Pattern.compile(".*hudson.tasks.Ant.AntInstaller");
+        Pattern maven = Pattern.compile(".*hudson.tasks.Maven.MavenInstaller");
+        Pattern jdk = Pattern.compile(".*hudson.tools.JDKInstaller");
+        do {
+            sleep(5000);
+        } while (!(l.hasLogged(ant) && l.hasLogged(maven) && l.hasLogged(jdk)));
     }
 
     public boolean isInstalled(String... shortNames) {

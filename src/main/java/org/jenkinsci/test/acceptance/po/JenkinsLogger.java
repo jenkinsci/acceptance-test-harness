@@ -14,10 +14,10 @@ import java.util.regex.Pattern;
 /**
  * @author Kohsuke Kawaguchi
  */
-public class JenkinsLogger extends ContainerPageObject {
+public class JenkinsLogger extends PageObject {
     public final String name;
     public JenkinsLogger(Jenkins jenkins, String name) {
-        super(jenkins, jenkins.url("log/" + name + "/"));
+        super(jenkins.injector, jenkins.url("log/" + name));
         this.name = name;
     }
 
@@ -55,6 +55,20 @@ public class JenkinsLogger extends ContainerPageObject {
         }
     }
 
+    public boolean isEmpty() {
+        open();
+        return getElement(by.css("#main-panel pre"))==null;
+    }
+
+    public boolean hasLogged(Pattern pattern) {
+        open();
+        for (WebElement e : all(by.css("#main-panel pre"))) {
+            if (pattern.matcher(e.getText()).matches()) return true;
+        }
+
+        return false;
+    }
+
     /**
      * TODO: this is audit-trail specific
      */
@@ -67,11 +81,6 @@ public class JenkinsLogger extends ContainerPageObject {
             events.add(m.group(1));
         }
         return events;
-    }
-
-    public boolean isEmpty() {
-        open();
-        return getElement(by.css("#main-panel pre"))==null;
     }
 
     private static final Pattern LOG_PATTERN = Pattern.compile("((?:\\/\\w+)+.*?) by (.*)");

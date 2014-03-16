@@ -34,7 +34,7 @@ public abstract class JenkinsController implements Closeable, AutoCleaned {
 
     private boolean isRunning;
 
-    protected final  OutputStream logger;
+    protected final OutputStream logger;
 
     protected JenkinsController() {
         if(FileUtils.fileExists(JENKINS_DEBUG_LOG)){
@@ -148,10 +148,5 @@ public abstract class JenkinsController implements Closeable, AutoCleaned {
             }
         }
         return target;
-    }
-
-
-    public void waitForUpdates() {
-        // TODO
     }
 }

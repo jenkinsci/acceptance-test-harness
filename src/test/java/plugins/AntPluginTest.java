@@ -72,7 +72,6 @@ public class AntPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void autoInstallAnt() {
-        // auto-installation requires metadata
         jenkins.getPluginManager().checkForUpdates();
 
         JenkinsConfig c = jenkins.getConfigPage();
