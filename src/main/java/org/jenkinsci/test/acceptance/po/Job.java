@@ -55,6 +55,10 @@ public class Job extends ContainerPageObject {
         }
     }
 
+    public ShellBuildStep addShellStep(Resource res) {
+        return addShellStep(res.asText());
+    }
+
     public ShellBuildStep addShellStep(String shell) {
         ShellBuildStep step = addBuildStep(ShellBuildStep.class);
         step.setCommand(shell);

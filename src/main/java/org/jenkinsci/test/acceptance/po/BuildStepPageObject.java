@@ -20,7 +20,7 @@ import java.lang.annotation.Target;
 @Indexed
 public @interface BuildStepPageObject {
     /**
-     * Display name of this build step.
+     * Display name of this build step. Corresponds to {@code BuildStepDescriptor.getDisplayName()} on the server.
      */
     String value();
 }

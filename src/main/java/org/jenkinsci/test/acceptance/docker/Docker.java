@@ -15,6 +15,9 @@ import java.util.List;
 /**
  * Entry point to the docker support.
  *
+ * <p>
+ * Use this subsystem by injecting this class into your test.
+ *
  * @author Kohsuke Kawaguchi
  */
 @Singleton
@@ -61,26 +64,30 @@ public class Docker {
      * Starts a container of the specific fixture type.
      * This builds an image if need be.
      */
-    public <T extends DockerContainer> T start(Class<T> fixture, CommandBuilder options, CommandBuilder cmd) throws IOException, InterruptedException {
-        DockerFixture f = fixture.getAnnotation(DockerFixture.class);
-        if (f==null)
-            throw new AssertionError(fixture+" is missing @DockerFixture");
-
-        File dir = File.createTempFile("Dockerfile", "dir");
-        dir.delete();
-        dir.mkdirs();
-
+    public <T extends DockerContainer> T start(Class<T> fixture, CommandBuilder options, CommandBuilder cmd) {
         try {
-            FileUtils.copyURLToFile(classLoader.getResource(fixture.getName().replace('.', '/') + "/Dockerfile"),new File(dir,"Dockerfile"));
-            DockerImage img = build("jenkins/" + f.id(), dir);
+            DockerFixture f = fixture.getAnnotation(DockerFixture.class);
+            if (f==null)
+                throw new AssertionError(fixture+" is missing @DockerFixture");
 
-            return img.start(fixture, f.ports(), options, cmd);
-        } finally {
-            FileUtils.deleteDirectory(dir);
+            File dir = File.createTempFile("Dockerfile", "dir");
+            dir.delete();
+            dir.mkdirs();
+
+            try {
+                FileUtils.copyURLToFile(classLoader.getResource(fixture.getName().replace('.', '/') + "/Dockerfile"),new File(dir,"Dockerfile"));
+                DockerImage img = build("jenkins/" + f.id(), dir);
+
+                return img.start(fixture, f.ports(), options, cmd);
+            } finally {
+                FileUtils.deleteDirectory(dir);
+            }
+        } catch (InterruptedException|IOException e) {
+            throw new AssertionError("Failed to start container "+fixture, e);
         }
     }
 
-    public <T extends DockerContainer> T start(Class<T> fixture) throws IOException, InterruptedException {
+    public <T extends DockerContainer> T start(Class<T> fixture) {
         return start(fixture,null,null);
     }
 

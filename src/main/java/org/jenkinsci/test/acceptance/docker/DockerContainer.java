@@ -49,12 +49,16 @@ public class DockerContainer {
     /**
      * Finds the ephemeral port that the given container port is mapped to.
      */
-    public int port(int n) throws IOException, InterruptedException {
-        String out = Docker.cmd("port").add(cid, n).popen().verifyOrDieWith("docker port command failed").trim();
-        if (out.isEmpty())  // expected to return single line like "0.0.0.0:55326"
-            throw new IllegalStateException(format("Port %d is not mapped for container %s", n, cid));
+    public int port(int n) {
+        try {
+            String out = Docker.cmd("port").add(cid, n).popen().verifyOrDieWith("docker port command failed").trim();
+            if (out.isEmpty())  // expected to return single line like "0.0.0.0:55326"
+                throw new IllegalStateException(format("Port %d is not mapped for container %s", n, cid));
 
-        return Integer.parseInt(out.split(":")[1]);
+            return Integer.parseInt(out.split(":")[1]);
+        } catch (IOException|InterruptedException e) {
+            throw new AssertionError("Failed to figure out port map "+n,e);
+        }
     }
 
     /**
