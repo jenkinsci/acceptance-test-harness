@@ -10,6 +10,7 @@ import org.jenkinsci.test.acceptance.guice.TestScope;
 import org.jenkinsci.test.acceptance.server.JenkinsControllerPoolProcess;
 import org.jenkinsci.test.acceptance.server.PooledJenkinsController;
 import org.jenkinsci.test.acceptance.slave.LocalSlaveProvider;
+import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.jenkinsci.test.acceptance.slave.SlaveProvider;
 import org.junit.runners.model.Statement;
 import org.openqa.selenium.WebDriver;
@@ -35,6 +36,7 @@ public class FallbackConfig extends AbstractModule {
     protected void configure() {
         // default in case nothing is specified
         bind(SlaveProvider.class).to(LocalSlaveProvider.class);
+        bind(SlaveController.class).toProvider(SlaveProvider.class).in(TestScope.class);
     }
 
     private WebDriver createWebDriver() {
