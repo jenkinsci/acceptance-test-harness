@@ -124,15 +124,21 @@ public class CapybaraPortingLayer extends Assert {
      */
     public WebElement find(By selector) {
         try {
-            WebElement e = driver.findElement(selector);
-            if (e.isDisplayed())
-                return e;
+            for (int i=0; i<10; i++) {
+                WebElement e = driver.findElement(selector);
+                if (e.isDisplayed())
+                    return e;
 
-            for (WebElement f : driver.findElements(selector)) {
-                if (f.isDisplayed())
-                    return f;
+                for (WebElement f : driver.findElements(selector)) {
+                    if (f.isDisplayed())
+                        return f;
+                }
+
+                // give a bit more chance for the element to become visible
+                sleep(100);
             }
-            return e;   // hmm, not sure what to return here!
+
+            throw new NoSuchElementException("Unable to locate visible "+selector+" in "+driver.getCurrentUrl());
         } catch (NoSuchElementException x) {
             // this is often the best place to set a breakpoint
             throw new NoSuchElementException("Unable to locate "+selector+" in "+driver.getCurrentUrl(),x);
