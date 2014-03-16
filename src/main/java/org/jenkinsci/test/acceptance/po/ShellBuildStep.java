@@ -10,9 +10,4 @@ public class ShellBuildStep extends BuildStep {
     public ShellBuildStep(Job parent, String path) {
         super(parent, path);
     }
-
-    public ShellBuildStep setCommand(String text) {
-        command.set(text);
-        return this;
-    }
 }

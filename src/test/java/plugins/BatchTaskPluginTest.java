@@ -130,7 +130,7 @@ public class BatchTaskPluginTest extends AbstractJUnitTest {
     public void do_not_trigger_for_failed_build() {
         job.configure();
         addBatchTask("dontrunit");
-        job.addBuildStep(ShellBuildStep.class).setCommand("false");
+        job.addBuildStep(ShellBuildStep.class).command.set("false");
         configureBatchTrigger(job,task("dontrunit"));
         job.save();
         job.queueBuild().waitUntilFinished();

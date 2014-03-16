@@ -61,7 +61,7 @@ public class Job extends ContainerPageObject {
 
     public ShellBuildStep addShellStep(String shell) {
         ShellBuildStep step = addBuildStep(ShellBuildStep.class);
-        step.setCommand(shell);
+        step.command.set(shell);
         return step;
     }
 
