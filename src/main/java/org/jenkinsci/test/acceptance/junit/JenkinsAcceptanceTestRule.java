@@ -4,7 +4,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.guice.World;
-import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.junit.rules.MethodRule;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
@@ -35,7 +34,6 @@ public class JenkinsAcceptanceTestRule implements MethodRule {
     @Override
     public Statement apply(final Statement base, final FrameworkMethod method, final Object target) {
         return new Statement() {
-            @Inject Jenkins jenkins;
             @Inject JenkinsController controller;
             @Inject Injector injector;
 
