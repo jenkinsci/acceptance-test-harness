@@ -5,12 +5,14 @@ package org.jenkinsci.test.acceptance.po;
  */
 @BuildStepPageObject("Execute shell")
 public class ShellBuildStep extends BuildStep {
+    public final Control command = control("command");
+
     public ShellBuildStep(Job parent, String path) {
         super(parent, path);
     }
 
     public ShellBuildStep setCommand(String text) {
-        control("command").set(text);
+        command.set(text);
         return this;
     }
 }

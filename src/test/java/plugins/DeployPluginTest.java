@@ -8,6 +8,7 @@ import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.deploy.DeployPublisher;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.ShellBuildStep;
 import org.junit.Test;
 
 import javax.inject.Inject;
@@ -60,14 +61,15 @@ public class DeployPluginTest extends AbstractJUnitTest {
         try (Tomcat7Container f = docker.start(Tomcat7Container.class)) {
             FreeStyleJob j = jenkins.jobs.create();
             j.configure();
+            ShellBuildStep s;
             {
-                j.addShellStep(resource("/deploy_plugin/build-war.sh"));
+                s = j.addShellStep(resource("/deploy_plugin/build-war.sh"));
                 DeployPublisher d = j.addPublisher(DeployPublisher.class);
                 d.war.set("my-webapp/target/*.war");
                 d.contextPath.set("test");
                 d.container.select("Tomcat 7.x");
                 d.user.set("admin");
-                d.password.set("admin");
+                d.password.set("tomcat");
                 d.url.set(f.getUrl().toExternalForm());
             }
             j.save();
@@ -75,9 +77,21 @@ public class DeployPluginTest extends AbstractJUnitTest {
             Build b = j.queueBuild().shouldSucceed();
             b.shouldContainsConsoleOutput("to container Tomcat 7.x Remote");
 
-            URL url = new URL(f.getUrl(),"/test/");
-            assertThat(IOUtils.toString(url.openStream()), is("Hello World!"));
+            assertThat(readText(f), containsString("Hello World!"));
+
+            j.configure();
+            s.command.set("cd my-webapp && echo '<html><body>Hello Jenkins</body></html>' > src/main/webapp/index.jsp && mvn install");
+            j.save();
+
+            b = j.queueBuild().shouldSucceed();
+            b.shouldContainsConsoleOutput("Redeploying");
+            assertThat(readText(f), containsString("Hello Jenkins"));
         }
+    }
+
+    private String readText(Tomcat7Container f) throws IOException {
+        URL url = new URL(f.getUrl(),"/test/");
+        return IOUtils.toString(url.openStream());
     }
 
 }
