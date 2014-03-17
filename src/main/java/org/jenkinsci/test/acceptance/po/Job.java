@@ -1,28 +1,21 @@
 package org.jenkinsci.test.acceptance.po;
 
-import com.google.inject.Injector;
-
-import cucumber.api.DataTable;
-
-import org.apache.commons.io.IOUtils;
-import org.codehaus.plexus.util.Base64;
-import org.jenkinsci.test.acceptance.junit.Resource;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.zip.GZIPOutputStream;
 
+import org.apache.commons.io.IOUtils;
+import org.codehaus.plexus.util.Base64;
+import org.jenkinsci.test.acceptance.junit.Resource;
+import org.openqa.selenium.WebElement;
+
+import com.google.inject.Injector;
+
+import cucumber.api.DataTable;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 
 /**
@@ -106,7 +99,7 @@ public class Job extends ContainerPageObject {
                 IOUtils.copy(in, gz);
             }
 
-            addShellStep(String.format("base64 -d << ENDOFFILE | gunzip > %s \n%s\nENDOFFILE",
+            addShellStep(String.format("base64 --decode << ENDOFFILE | gunzip > %s \n%s\nENDOFFILE",
                     fileName, new String(Base64.encodeBase64Chunked(out.toByteArray()))));
         } catch (IOException e) {
             throw new AssertionError(e);
