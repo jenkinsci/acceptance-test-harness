@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -102,6 +103,8 @@ public class LogWatcher {
         }
 
         String msg = expected ? "Could not bring up a Jenkins server" : "Shut down of Jenkins server had timed out";
+        msg += "\nprocess is still alive? "+reader.isAlive();
+        msg += "\nnow = " + new Date();
         msg += "\n" + fullLog();
         throw new AssertionError(msg);
     }
