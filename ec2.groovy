@@ -7,7 +7,6 @@ import org.jenkinsci.test.acceptance.slave.SshSlaveProvider
 def localWar = new File("/Users/vivek/Downloads/jenkins.war")
 
 def common = module {
-    max_mt_machines=10
     privateKeyFile = new File(".jenkins_test/.ssh/id_rsa")
     publicKeyFile = new File(".jenkins_test/.ssh/id_rsa.pub")
     bind(Authenticator).named("publicKeyAuthenticator").to(PublicKeyAuthenticator)
@@ -18,6 +17,8 @@ def common = module {
 }
 
 slaves = subworld {
+    maxMtMachines=300
+    maxNumOfMachines=4
     install(common)
 
     user="ubuntu"
@@ -28,6 +29,8 @@ slaves = subworld {
 }
 
 masters = subworld {
+    maxMtMachines=3
+    maxNumOfMachines=1
     install(common)
 
     user="ubuntu"

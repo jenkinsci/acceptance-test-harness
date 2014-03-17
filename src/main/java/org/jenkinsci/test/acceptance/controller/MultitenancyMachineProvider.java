@@ -23,7 +23,7 @@ public class MultitenancyMachineProvider implements MachineProvider{
     private final MachineProvider base;
 
     @Inject(optional = true)
-    @Named("max_mt_machines")
+    @Named("maxMtMachines")
     private int max = 10;
 
     private int cur = 0;
