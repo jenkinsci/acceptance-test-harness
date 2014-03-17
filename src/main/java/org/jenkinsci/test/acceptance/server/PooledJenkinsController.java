@@ -1,5 +1,9 @@
 package org.jenkinsci.test.acceptance.server;
 
+import static java.lang.System.getenv;
+import static java.lang.System.in;
+import static java.lang.System.out;
+
 import com.cloudbees.sdk.extensibility.Extension;
 import jnr.unixsocket.UnixSocketAddress;
 import jnr.unixsocket.UnixSocketChannel;
@@ -70,6 +74,21 @@ public class PooledJenkinsController extends JenkinsController {
         r.close();
         channel.close();
         channel = null;
+    }
+
+    @Override
+    public void diagnose(Throwable cause) {
+        // TODO: Report jenkins log
+        cause.printStackTrace(out);
+        if(getenv("INTERACTIVE") != null && getenv("INTERACTIVE").equals("true")){
+            out.println("Commencing interactive debugging. Browser session was kept open.");
+            out.println("Press return to proceed.");
+            try {
+                in.read();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     @Extension
