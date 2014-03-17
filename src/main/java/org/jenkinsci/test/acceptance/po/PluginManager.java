@@ -5,11 +5,11 @@ import java.util.Arrays;
 import java.util.regex.Pattern;
 
 import com.google.inject.Inject;
+import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.UpdateCenter.InstallationFailedException;
 import org.jenkinsci.test.acceptance.update_center.PluginMetadata;
 import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata;
-import org.sonatype.aether.resolution.ArtifactResolutionException;
 
 import javax.inject.Provider;
 

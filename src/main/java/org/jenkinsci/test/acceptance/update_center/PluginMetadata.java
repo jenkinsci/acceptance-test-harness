@@ -1,7 +1,5 @@
 package org.jenkinsci.test.acceptance.update_center;
 
-import com.cloudbees.sdk.GAV;
-import com.cloudbees.sdk.maven.RepositoryService;
 import com.google.inject.Injector;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
@@ -9,14 +7,19 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.eclipse.aether.RepositorySystem;
+import org.eclipse.aether.RepositorySystemSession;
+import org.eclipse.aether.artifact.DefaultArtifact;
+import org.eclipse.aether.repository.RemoteRepository;
+import org.eclipse.aether.resolution.ArtifactRequest;
+import org.eclipse.aether.resolution.ArtifactResolutionException;
+import org.eclipse.aether.resolution.ArtifactResult;
 import org.jenkinsci.test.acceptance.po.Jenkins;
-import org.sonatype.aether.resolution.ArtifactResolutionException;
-import org.sonatype.aether.resolution.ArtifactResult;
-import org.sonatype.aether.util.artifact.DefaultArtifact;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.apache.http.entity.ContentType.*;
@@ -37,16 +40,16 @@ public class PluginMetadata {
         }
     }
 
-    public GAV getGAV() {
-        String[] t = gav.split(":");
-        return new GAV(t[0], t[1], t[2]);
-    }
-
     public void uploadTo(Jenkins jenkins, Injector i) throws ArtifactResolutionException, IOException {
-        RepositoryService rs = i.getInstance(RepositoryService.class);
-        ArtifactResult r = rs.resolveArtifact(makeArtifact());
+        RepositorySystem rs = i.getInstance(RepositorySystem.class);
+        RepositorySystemSession rss = i.getInstance(RepositorySystemSession.class);
 
-        HttpClient httpclient = HttpClientBuilder.create().build();
+        ArtifactResult r = rs.resolveArtifact(rss,new ArtifactRequest(
+                makeArtifact(),
+                Arrays.asList(new RemoteRepository.Builder( "repo.jenkins-ci.org", "default", "http://repo.jenkins-ci.org/public/" ).build()),
+                null));
+
+        HttpClient httpclient = new DefaultHttpClient();
 
         HttpPost post = new HttpPost(jenkins.url("pluginManager/uploadPlugin").toExternalForm());
         HttpEntity e = MultipartEntityBuilder.create()
