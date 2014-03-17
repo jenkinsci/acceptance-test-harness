@@ -1,9 +1,5 @@
 package org.jenkinsci.test.acceptance.po;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.regex.Pattern;
-
 import com.google.inject.Inject;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
@@ -11,9 +7,12 @@ import org.jenkinsci.test.acceptance.po.UpdateCenter.InstallationFailedException
 import org.jenkinsci.test.acceptance.update_center.PluginMetadata;
 import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata;
 
+import javax.inject.Named;
 import javax.inject.Provider;
+import java.io.IOException;
+import java.util.regex.Pattern;
 
-import static java.util.Arrays.asList;
+import static java.util.Arrays.*;
 
 /**
  * Page object for plugin manager.
@@ -29,7 +28,15 @@ public class PluginManager extends ContainerPageObject {
     public final Jenkins jenkins;
 
     @Inject
-    Provider<UpdateCenterMetadata> ucmd;
+    private Provider<UpdateCenterMetadata> ucmd;
+
+    /**
+     * Optional configuration value that selects whether to resolve plugins locally and upload to Jenkins
+     * (better performing when Jenkins is closer to the test execution), or install plugins from within Jenkins
+     * (more accurate testing.)
+     */
+    @Inject(optional=true) @Named("uploadPlugins")
+    public boolean uploadPlugins = true;
 
     public PluginManager(Jenkins jenkins) {
         super(jenkins.injector, jenkins.url("pluginManager/"));
@@ -82,7 +89,7 @@ public class PluginManager extends ContainerPageObject {
         if (isInstalled(shortNames))
             return;
 
-        if (UPLOAD) {
+        if (uploadPlugins) {
             for (PluginMetadata p : ucmd.get().transitiveDependenciesOf(asList(shortNames))) {
                 try {
                     p.uploadTo(jenkins,injector);
@@ -117,7 +124,4 @@ public class PluginManager extends ContainerPageObject {
             }
         }
     }
-
-    // TODO: make this properly configurable
-    private static boolean UPLOAD = Boolean.getBoolean("UPLOAD");
 }
