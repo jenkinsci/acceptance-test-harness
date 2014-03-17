@@ -60,9 +60,9 @@ public class PluginManager extends ContainerPageObject {
         Pattern ant = Pattern.compile(".*hudson.tasks.Ant.AntInstaller");
         Pattern maven = Pattern.compile(".*hudson.tasks.Maven.MavenInstaller");
         Pattern jdk = Pattern.compile(".*hudson.tools.JDKInstaller");
-        do {
-            sleep(5000);
-        } while (!(l.hasLogged(ant) && l.hasLogged(maven) && l.hasLogged(jdk)));
+        l.waitForLogged(ant);
+        l.waitForLogged(maven);
+        l.waitForLogged(jdk);
     }
 
     public boolean isInstalled(String... shortNames) {

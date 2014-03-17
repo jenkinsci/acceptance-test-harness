@@ -69,6 +69,18 @@ public class JenkinsLogger extends PageObject {
         return false;
     }
 
+    public void waitForLogged(final Pattern pattern) {
+        waitForCond(new Callable<Boolean>() {
+            @Override public Boolean call() throws Exception {
+                return hasLogged(pattern);
+            }
+
+            @Override public String toString() {
+                return pattern.toString() + " to be logged";
+            }
+        });
+    }
+
     /**
      * TODO: this is audit-trail specific
      */
