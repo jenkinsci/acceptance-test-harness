@@ -1,9 +1,19 @@
 package org.jenkinsci.test.acceptance.po;
 
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.regex.Pattern;
 
+import com.google.inject.Inject;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.UpdateCenter.InstallationFailedException;
+import org.jenkinsci.test.acceptance.update_center.PluginMetadata;
+import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata;
+import org.sonatype.aether.resolution.ArtifactResolutionException;
+
+import javax.inject.Provider;
+
+import static java.util.Arrays.asList;
 
 /**
  * Page object for plugin manager.
@@ -17,6 +27,9 @@ public class PluginManager extends ContainerPageObject {
     private boolean updated;
 
     public final Jenkins jenkins;
+
+    @Inject
+    Provider<UpdateCenterMetadata> ucmd;
 
     public PluginManager(Jenkins jenkins) {
         super(jenkins.injector, jenkins.url("pluginManager/"));
@@ -69,29 +82,42 @@ public class PluginManager extends ContainerPageObject {
         if (isInstalled(shortNames))
             return;
 
-        if (!updated)
-            checkForUpdates();
-
-        OUTER:
-        for (final String n : shortNames) {
-            for (int attempt=0; attempt<2; attempt++) {// # of installations attempted, considering retries
-                visit("available");
-                check(find(by.xpath("//input[starts-with(@name,'plugin.%s.')]", n)));
-
-                clickButton("Install");
-
-                sleep(1000);
-
+        if (UPLOAD) {
+            for (PluginMetadata p : ucmd.get().transitiveDependenciesOf(asList(shortNames))) {
                 try {
-                    new UpdateCenter(jenkins).waitForInstallationToComplete(n);
-                } catch (InstallationFailedException e) {
-                    if (e.getMessage().contains("Failed to download from")) {
-                        continue;   // retry
-                    }
+                    p.uploadTo(jenkins,injector);
+                } catch (IOException|ArtifactResolutionException e) {
+                    throw new AssertionError("Failed to upload plugin: "+p,e);
                 }
+            }
+        } else {
+            if (!updated)
+                checkForUpdates();
 
-                continue OUTER;  // installation completed
+            OUTER:
+            for (final String n : shortNames) {
+                for (int attempt=0; attempt<2; attempt++) {// # of installations attempted, considering retries
+                    visit("available");
+                    check(find(by.xpath("//input[starts-with(@name,'plugin.%s.')]", n)));
+
+                    clickButton("Install");
+
+                    sleep(1000);
+
+                    try {
+                        new UpdateCenter(jenkins).waitForInstallationToComplete(n);
+                    } catch (InstallationFailedException e) {
+                        if (e.getMessage().contains("Failed to download from")) {
+                            continue;   // retry
+                        }
+                    }
+
+                    continue OUTER;  // installation completed
+                }
             }
         }
     }
+
+    // TODO: make this properly configurable
+    private static boolean UPLOAD = Boolean.getBoolean("UPLOAD");
 }

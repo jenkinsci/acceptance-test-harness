@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.junit;
 
 import com.google.inject.Inject;
+import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
@@ -35,6 +36,9 @@ public @interface WithPlugins {
     public class RuleImpl implements TestRule {
         @Inject
         Jenkins jenkins;
+
+        @Inject
+        JenkinsController controller;
 
         @Override
         public Statement apply(final Statement base, final Description d) {
