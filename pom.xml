@@ -99,21 +99,27 @@
       <version>${maven.version}</version>
     </dependency>
 
+    <!-- Conflicting dependencies that need explicit arbitration -->
     <dependency><!-- to align the version of Guava that we use between jclouds and Aether -->
       <groupId>org.sonatype.sisu</groupId>
       <artifactId>sisu-guice</artifactId>
       <version>3.2.0</version>
       <classifier>no_aop</classifier>
     </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>16.0.1</version>
+    </dependency>
     <dependency><!-- to align the version of ASM we use -->
-        <groupId>org.eclipse.sisu</groupId>
-        <artifactId>org.eclipse.sisu.plexus</artifactId>
-        <version>0.2.0</version>
+      <groupId>org.eclipse.sisu</groupId>
+      <artifactId>org.eclipse.sisu.plexus</artifactId>
+      <version>0.2.0</version>
     </dependency>
     <dependency><!-- to align the version of Apache HttpClient between jclouds and Aether -->
-        <groupId>org.apache.httpcomponents</groupId>
-        <artifactId>httpclient</artifactId>
-        <version>4.3.3</version>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <version>4.3.3</version>
     </dependency>
 
     <!-- Cucumber -->
