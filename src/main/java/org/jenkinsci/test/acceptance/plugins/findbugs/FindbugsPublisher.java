@@ -21,39 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.test.acceptance.po;
+package org.jenkinsci.test.acceptance.plugins.findbugs;
 
-import org.openqa.selenium.WebDriver;
+import org.jenkinsci.test.acceptance.po.BuildStepPageObject;
+import org.jenkinsci.test.acceptance.po.Control;
+import org.jenkinsci.test.acceptance.po.Job;
+import org.jenkinsci.test.acceptance.po.PostBuildStep;
 
-/**
- * Page object action.
- *
- * @param <Scope> Page object action is scoped to.
- *
- * Every action must be scoped to certain {@link ContainerPageObject}. Action
- * instance is then created as <tt>pageObject.getAction(MyActionType.class)</tt>
- * (<tt>pageObject</tt> must be an instance of <tt>MyActualType</tt>'s parameter).
- * Actions are registered using {@link ActionPageObject} annotation.
- *
- * @author ogondza
- */
-public class Action<Scope extends ContainerPageObject> extends PageObject {
+@BuildStepPageObject("Publish FindBugs analysis results")
+public class FindbugsPublisher extends PostBuildStep {
+    public final Control pattern = control("pattern");
 
-    protected final ContainerPageObject parent;
-
-    public Action(Scope parent, String relative) {
-        super(parent.injector, parent.url(relative + "/"));
-        this.parent = parent;
-    }
-
-    @Override
-    public WebDriver open() {
-        WebDriver wd = super.open();
-
-        if (!wd.getCurrentUrl().startsWith(url.toString())) {
-            throw new AssertionError("Action " + url + " does not exist. Redirected to " + wd.getCurrentUrl());
-        }
-
-        return wd;
+    public FindbugsPublisher(Job parent, String path) {
+        super(parent, path);
     }
 }

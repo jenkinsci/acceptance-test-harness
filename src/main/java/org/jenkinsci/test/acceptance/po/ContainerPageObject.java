@@ -29,28 +29,6 @@ public abstract class ContainerPageObject extends PageObject {
         this(context.injector,url);
     }
 
-    /**
-     * Given the path relative to {@link #url}, visit that page
-     */
-    public void visit(String relativePath) {
-        visit(url(relativePath));
-    }
-
-    /**
-     * Resolves relative path against {@link #url} and treats any exception a a fatal problem.
-     */
-    public URL url(String rel) {
-        try {
-            return new URL(url,rel);
-        } catch (MalformedURLException e) {
-            throw new AssertionError(e);
-        }
-    }
-
-    public URL url(String format, Object... args) {
-        return url(String.format(format,args));
-    }
-
     public void configure(Closure body) {
         configure();
         body.call(this);
@@ -122,11 +100,15 @@ public abstract class ContainerPageObject extends PageObject {
      */
     public <T extends Action<?>> T action(Class<T> type) {
         final String path = type.getAnnotation(ActionPageObject.class).value();
+        return action(type, path);
+    }
+
+    public <T extends Action<?>> T action(Class<T> type, String path) {
 
         ParameterizedType actionType = (ParameterizedType) type.getGenericSuperclass();
         Class<? extends ContainerPageObject> scope = (Class<? extends ContainerPageObject>) actionType.getActualTypeArguments()[0];
 
-        if (!getClass().isAssignableFrom(scope)) {
+        if (!scope.isAssignableFrom(getClass())) {
             throw new AssertionError(String.format(
                     "%s is scoped to %s. Not a superclass of %s.",
                     type.getName(), scope, getClass().getName()

@@ -23,29 +23,31 @@
  */
 package plugins;
 
-import static org.jenkinsci.test.acceptance.Matchers.*;
-
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsPublisher;
-import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.plugins.html_publisher.HtmlPublisher;
+import org.jenkinsci.test.acceptance.plugins.html_publisher.HtmlReport;
+import org.jenkinsci.test.acceptance.plugins.html_publisher.HtmlPublisher.Report;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
 
-@WithPlugins("findbugs")
-public class FindbugsPluginTest extends AbstractJUnitTest {
+@WithPlugins("htmlpublisher")
+public class HtmlPublisherPluginTest extends AbstractJUnitTest {
 
     @Test
-    public void record_analysis() {
-        final FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class);
+    public void publish_whole_directory() {
+        FreeStyleJob job = jenkins.jobs.create();
         job.configure();
-        job.copyResource(resource("/findbugs_plugin/findbugsXml.xml"));
-        job.addPublisher(FindbugsPublisher.class).pattern.sendKeys("findbugsXml.xml");
+        job.addShellStep("echo 'root' > root.html && mkdir dir && echo 'indir' > dir/indir.html");
+        Report report = job.addPublisher(HtmlPublisher.class).addDir(".");
+        report.index.set("root.html");
+        report.name.set("MyReport");
         job.save();
 
-        Build build = job.queueBuild().waitUntilFinished();
-        assertThat(build, hasAction("FindBugs Warnings"));
-        assertThat(job, hasAction("FindBugs Warnings"));
-        assertThat(build.open(), hasContent("FindBugs: 2 warnings from one analysis."));
+        job.queueBuild().shouldSucceed();
+        job.action(HtmlReport.class, "MyReport")
+                .fileShouldMatch("root.html", "root")
+                .fileShouldMatch("dir/indir.html", "indir")
+        ;
     }
 }

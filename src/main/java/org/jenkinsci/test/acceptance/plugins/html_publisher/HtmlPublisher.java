@@ -21,18 +21,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.test.acceptance.plugins;
+package org.jenkinsci.test.acceptance.plugins.html_publisher;
 
 import org.jenkinsci.test.acceptance.po.BuildStepPageObject;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Job;
+import org.jenkinsci.test.acceptance.po.PageArea;
+import org.jenkinsci.test.acceptance.po.PageObject;
 import org.jenkinsci.test.acceptance.po.PostBuildStep;
 
-@BuildStepPageObject("Publish FindBugs analysis results")
-public class FindbugsPublisher extends PostBuildStep {
-    public final Control pattern = control("pattern");
-
-    public FindbugsPublisher(Job parent, String path) {
+@BuildStepPageObject("Publish HTML reports")
+public class HtmlPublisher  extends PostBuildStep {
+    public HtmlPublisher(Job parent, String path) {
         super(parent, path);
+    }
+
+    public Report addDir(String dir) {
+        control("repeatable-add").click();
+        sleep(1000);
+
+        String path = last(by.input("_.reportDir")).getAttribute("path");
+        Report report = new Report(parent, path.substring(0, path.length() - 10));
+        report.dir.set(dir);
+        return report;
+    }
+
+    public static class Report extends PageArea {
+        public final Control dir = control("reportDir");
+        public final Control index = control("reportFiles");
+        public final Control name = control("reportName");
+
+        public Report(PageObject context, String path) {
+            super(context, path);
+        }
     }
 }

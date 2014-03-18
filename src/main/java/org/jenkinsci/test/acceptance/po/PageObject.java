@@ -5,6 +5,7 @@ import com.google.inject.Injector;
 import org.openqa.selenium.WebDriver;
 
 import javax.inject.Inject;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -48,5 +49,27 @@ public abstract class PageObject extends CapybaraPortingLayer {
      */
     public WebDriver open() {
         return visit(url);
+    }
+
+    /**
+     * Given the path relative to {@link #url}, visit that page
+     */
+    public void visit(String relativePath) {
+        visit(url(relativePath));
+    }
+
+    /**
+     * Resolves relative path against {@link #url} and treats any exception a a fatal problem.
+     */
+    public URL url(String rel) {
+        try {
+            return new URL(url,rel);
+        } catch (MalformedURLException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    public URL url(String format, Object... args) {
+        return url(String.format(format,args));
     }
 }
