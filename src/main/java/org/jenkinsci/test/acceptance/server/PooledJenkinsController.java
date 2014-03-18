@@ -70,9 +70,12 @@ public class PooledJenkinsController extends JenkinsController {
 
     @Override
     public void tearDown() throws IOException {
-        w.close();
-        r.close();
-        channel.close();
+        if (w!=null)
+            w.close();
+        if (r!=null)
+            r.close();
+        if (channel!=null)
+            channel.close();
         channel = null;
     }
 
