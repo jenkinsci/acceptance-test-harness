@@ -39,6 +39,29 @@ public class JenkinsConfig extends PageObject {
         clickButton(name);
     }
 
+    public <T extends ToolInstallation> T addTool(Class<T> type) {
+        jenkins.ensureConfigPage();
+        String name = type.getAnnotation(ToolInstallationPageObject.class).value();
+
+        clickButton("Add " + name);
+        sleep(100);
+        String path = find(by.button("Delete " + name)).getAttribute("path");
+        String prefix = path.substring(0, path.length() - 18);
+
+        try {
+            T tool = type.getConstructor(JenkinsConfig.class, String.class).newInstance(this, prefix);
+            {// TODO do not leave the page
+                jenkins.getLogger("all").waitForLogged(tool.updatesPattern());
+                configure();
+                clickButton("Add " + name);
+                sleep(100);
+            }
+            return tool;
+        } catch (ReflectiveOperationException e) {
+            throw new Error(e);
+        }
+    }
+
     public void addJdkAutoInstallation(String name, String version) {
         jenkins.ensureConfigPage();
         find(by.path("/hudson-model-JDK/tool/name")).sendKeys(name);
