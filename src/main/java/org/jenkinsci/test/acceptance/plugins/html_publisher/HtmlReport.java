@@ -21,39 +21,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.test.acceptance.po;
+package org.jenkinsci.test.acceptance.plugins.html_publisher;
 
-import org.openqa.selenium.WebDriver;
+import static org.jenkinsci.test.acceptance.Matchers.*;
 
-/**
- * Page object action.
- *
- * @param <Scope> Page object action is scoped to.
- *
- * Every action must be scoped to certain {@link ContainerPageObject}. Action
- * instance is then created as <tt>pageObject.getAction(MyActionType.class)</tt>
- * (<tt>pageObject</tt> must be an instance of <tt>MyActualType</tt>'s parameter).
- * Actions are registered using {@link ActionPageObject} annotation.
- *
- * @author ogondza
- */
-public class Action<Scope extends ContainerPageObject> extends PageObject {
+import org.jenkinsci.test.acceptance.po.Action;
+import org.jenkinsci.test.acceptance.po.ActionPageObject;
+import org.jenkinsci.test.acceptance.po.Job;
 
-    protected final ContainerPageObject parent;
-
-    public Action(Scope parent, String relative) {
-        super(parent.injector, parent.url(relative + "/"));
-        this.parent = parent;
+@ActionPageObject("HTML_Report")
+public class HtmlReport extends Action<Job> {
+    public HtmlReport(Job parent, String relative) {
+        super(parent, relative);
     }
 
-    @Override
-    public WebDriver open() {
-        WebDriver wd = super.open();
-
-        if (!wd.getCurrentUrl().startsWith(url.toString())) {
-            throw new AssertionError("Action " + url + " does not exist. Redirected to " + wd.getCurrentUrl());
-        }
-
-        return wd;
+    public HtmlReport fileShouldMatch(String path, String content) {
+        visit(path);
+        assertThat(driver, hasContent(content));
+        return this;
     }
 }
