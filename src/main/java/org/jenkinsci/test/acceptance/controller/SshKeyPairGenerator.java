@@ -35,7 +35,7 @@ public class SshKeyPairGenerator implements Provider<SshKeyPair>, com.google.inj
             try {
                 generateKey(publicKey, privateKey);
             } catch (IOException|GeneralSecurityException e) {
-                throw new AssertionError("Failed to generate a key");
+                throw new AssertionError("Failed to generate a key", e);
             }
         }
 
