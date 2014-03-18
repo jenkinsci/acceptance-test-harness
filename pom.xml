@@ -99,7 +99,6 @@
       <version>${maven.version}</version>
     </dependency>
 
-    <!-- Conflicting dependencies that need explicit arbitration -->
     <dependency><!-- to align the version of Guava that we use between jclouds and Aether -->
       <groupId>org.sonatype.sisu</groupId>
       <artifactId>sisu-guice</artifactId>
@@ -109,7 +108,7 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>16.0.1</version>
+      <version>14.0.1</version>
     </dependency>
     <dependency><!-- to align the version of ASM we use -->
       <groupId>org.eclipse.sisu</groupId>
