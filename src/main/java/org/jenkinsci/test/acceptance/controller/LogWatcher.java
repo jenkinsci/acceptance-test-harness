@@ -31,7 +31,7 @@ public class LogWatcher {
      */
     private final Thread reader;
 
-    private static final int DEFAULT_TIMEOUT = 100;//100 sec
+    private static final int DEFAULT_TIMEOUT = 300;//100 sec
     private static final long DEFAULT_SLEEP_TIME = 500;//0.5 sec
     private static final int TIMEOUT = System.getenv("STARTUP_TIME") != null && Integer.parseInt(System.getenv("STARTUP_TIME")) > 0
             ? Integer.parseInt(System.getenv("STARTUP_TIME")) : DEFAULT_TIMEOUT;
