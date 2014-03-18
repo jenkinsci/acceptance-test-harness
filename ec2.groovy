@@ -5,7 +5,7 @@ import org.jenkinsci.test.acceptance.resolver.JenkinsResolver
 import org.jenkinsci.test.acceptance.slave.SlaveProvider
 import org.jenkinsci.test.acceptance.slave.SshSlaveProvider
 
-def localWar = new File("/Users/vivek/Downloads/jenkins.war")
+def localWar = new File("jenkins.war")
 
 def common = module {
     privateKeyFile = new File(".jenkins_test/.ssh/id_rsa")
