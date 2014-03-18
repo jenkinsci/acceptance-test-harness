@@ -22,7 +22,9 @@ public class TestCleaner extends Cleaner {
                 try {
                     ((AutoCleaned)o).close();
                 } catch (Throwable t) {
-                    throw new AssertionError(o+" cleanup failed",t);
+                    // just log and move on so that other cleaners can run
+                    System.out.println(o+" clean up failed");
+                    t.printStackTrace();
                 }
             }
         }
