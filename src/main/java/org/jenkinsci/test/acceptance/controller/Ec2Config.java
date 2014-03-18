@@ -7,9 +7,10 @@ import org.ini4j.Wini;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.List;
-import java.util.Properties;
 
 /**
  * @author: Vivek Pandey
@@ -50,7 +51,7 @@ public class Ec2Config {
 
     @Inject(optional = true)
     @Named("keyPairName") //default jenkins-test
-    private String keyPairName="jenkins-test";
+    private String keyPairName="jenkins-test-"+System.getProperty("user.name")+getHostName();
 
     @Inject(optional = true)
     @Named("imageId")
@@ -140,5 +141,13 @@ public class Ec2Config {
 
     public String getImageId() {
         return imageId;
+    }
+
+    private String getHostName() {
+        try {
+            return InetAddress.getLocalHost().getHostName();
+        } catch (UnknownHostException e) {
+            return "unknown";
+        }
     }
 }
