@@ -15,16 +15,20 @@ import java.io.IOException;
 public class PublicKeyAuthenticator implements Authenticator {
 
     private final LoginCredentials credentials;
+    private final SshKeyPair keyPair;
 
     @Inject
     public PublicKeyAuthenticator(@Named("user") String user, SshKeyPair keyPair) {
+        this.keyPair = keyPair;
         this.credentials = Ssh.getLoginForCommandExecution(user, keyPair.privateKey);
     }
 
     @Override
     public void authenticate(Connection connection) throws IOException {
-        if(!connection.authenticateWithPublicKey(credentials.getUser(), credentials.getPrivateKey().toCharArray(), credentials.getPassword())){
-            throw new RuntimeException("Public key authentication failed.");
+        String u = credentials.getUser();
+        if(!connection.authenticateWithPublicKey(u, credentials.getPrivateKey().toCharArray(), credentials.getPassword())){
+            throw new IOException(String.format("Public key authentication failed: trying to login as %s@%s with %s",
+                    u, connection.getHostname(), keyPair.privateKey));
         }
     }
 }
