@@ -29,8 +29,6 @@ public class MultitenancyMachineProvider implements MachineProvider{
     private int cur = 0;
 
 
-    private int currRawMachineCount=0;
-
     private final Map<String,AtomicInteger> machineReferences = new ConcurrentHashMap<>();
     private final Map<String,Machine> machineMap = new ConcurrentHashMap<>();
 
@@ -46,8 +44,8 @@ public class MultitenancyMachineProvider implements MachineProvider{
 
     @Override
     public synchronized Machine get() {
-        if (++cur==max) {
-
+        logger.info(String.format("Base machine: %s, MT capacity: %s, taken: %s",machine.getPublicIpAddress(),max,cur));
+        if (cur++==max) {
             boolean foundExisting = false;
             //Lets look for available machine, if other machine has available counts, lets use that
             for(String id : machineReferences.keySet()){

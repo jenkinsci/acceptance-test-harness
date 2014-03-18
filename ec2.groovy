@@ -1,4 +1,5 @@
 import org.jenkinsci.test.acceptance.controller.*
+import org.jenkinsci.test.acceptance.guice.TestScope
 import org.jenkinsci.test.acceptance.resolver.JenkinsDownloader
 import org.jenkinsci.test.acceptance.resolver.JenkinsResolver
 import org.jenkinsci.test.acceptance.slave.SlaveProvider
@@ -17,8 +18,8 @@ def common = module {
 }
 
 slaves = subworld {
-    maxMtMachines=300
-    maxNumOfMachines=4
+    maxMtMachines=30
+    maxNumOfMachines=1
     install(common)
 
     user="ubuntu"
@@ -29,7 +30,7 @@ slaves = subworld {
 }
 
 masters = subworld {
-    maxMtMachines=3
+    maxMtMachines=2
     maxNumOfMachines=1
     install(common)
 
@@ -44,6 +45,6 @@ joc = subworld {
 }
 
 bind SlaveProvider toProvider slaves[SshSlaveProvider]
-bind JenkinsProvider named "masters" toProvider masters[JenkinsProvider]
-bind JenkinsController named "joc" toProvider joc[JenkinsController]
+bind(JenkinsProvider).named("masters").toProvider(masters[JenkinsProvider])
+bind(JenkinsController).named("joc").toProvider(joc[JenkinsController]).in(TestScope)
 

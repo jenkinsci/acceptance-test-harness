@@ -29,18 +29,18 @@ public class Ec2Provider extends JcloudsMachineProvider {
 
     private final Ec2Config config;
 
-    private final  Authenticator authenticator;
+    @Inject
+    @Named("publicKeyAuthenticator")
+    private  Authenticator authenticator;
 
+    @Inject
     private SshKeyPair keyPair;
 
     @Inject
-    public Ec2Provider(Ec2Config config, WorldCleaner cleaner, SshKeyPair keyPair,@Named("publicKeyAuthenticator") Authenticator authenticator){
+    public Ec2Provider(Ec2Config config, WorldCleaner cleaner){
         super("aws-ec2", config.getKey(), config.getSecret());
         this.config = config;
-        this.keyPair = keyPair;
-        this.authenticator = authenticator;
         cleaner.addTask(this);
-        build();
     }
 
     @Override

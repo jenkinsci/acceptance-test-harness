@@ -57,7 +57,7 @@ public abstract class JcloudsMachineProvider implements MachineProvider,Closeabl
 
     private final String groupName="jenkins-test";
     private final String provider;
-    private final BlockingQueue<Machine> queue;
+    private volatile BlockingQueue<Machine> queue=null;
     private final AtomicInteger provisionedMachineCount = new AtomicInteger();
 
     @Inject(optional = true)
@@ -79,29 +79,51 @@ public abstract class JcloudsMachineProvider implements MachineProvider,Closeabl
 
         this.provider = provider;
 
-        this.queue = new LinkedBlockingDeque(maxNumOfMachines);
         this.contextBuilder = initComputeService(provider, identity, credential);
         this.computeService =  contextBuilder.buildView(ComputeServiceContext.class).getComputeService();
     }
 
-    protected void build(){
+    @Override
+    public Machine get() {
+        if(provisionedMachineCount.get() == 0){
+            initializeMachines();
+        }
+        if(queue.peek() != null){
+            return queue.poll();
+        }else{
+            throw new AssertionError(String.format("All %s machine instances are in use", provisionedMachineCount.get()));
+        }
+    }
+
+    private void initializeMachines(){
+        BlockingQueue bq = queue;
+        if(bq == null){
+            synchronized (this){
+                bq = queue;
+                if(bq == null){
+                    logger.info(String.format("Setting up %s  %s machines...", maxNumOfMachines, provider));
+                    queue = bq =  new LinkedBlockingQueue<>(maxNumOfMachines);
+                }
+            }
+        }
+
         Set<? extends NodeMetadata> nodes = createNewNodes(minNumOfMachines, maxNumOfMachines);
 
-        final CyclicBarrier gate = new CyclicBarrier(nodes.size());
+        //TODO make it configurable
+        ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
         //setup new machines
         for(NodeMetadata node:nodes){
-            new MachineSanitizer(node,gate).run();
+            executorService.submit(new MachineSanitizer(node));
         }
 
+
         try {
-            gate.await(5, TimeUnit.MINUTES); //wait till all other threads complete
-        } catch (InterruptedException | BrokenBarrierException e) {
+            executorService.shutdown();
+            executorService.awaitTermination(2, TimeUnit.MINUTES);
+        } catch (InterruptedException e) {
             terminateAllNodes();
             throw new RuntimeException("Failed to setup machines. ",e);
-        } catch (TimeoutException te) {
-            terminateAllNodes();
-            throw new RuntimeException(String.format("Could not finish machine setup within %s min", 5));
         }
         provisionedMachineCount.set(nodes.size());
         for(NodeMetadata node:nodes){
@@ -110,35 +132,6 @@ public abstract class JcloudsMachineProvider implements MachineProvider,Closeabl
             machines.put(node.getId(),m);
         }
     }
-
-    private class MachineSanitizer implements Runnable{
-        private final NodeMetadata node;
-        private CyclicBarrier gate;
-        private MachineSanitizer(NodeMetadata node, CyclicBarrier gate) {
-            this.node = node;
-            this.gate = gate;
-        }
-
-        @Override
-        public void run() {
-            try{
-                postStartupSetup(node);
-                waitForSsh(node.getCredentials().getUser(), node.getPublicAddresses().iterator().next()); //wait for ssh to be ready
-            }catch (Exception e){
-                String msg = String.format("There was problem in setting up machine: %s, this node will be destroyed.",node.getId());
-                logger.error(msg ,e);
-                computeService.destroyNode(node.getId());
-                throw new RuntimeException(msg,e);
-            }
-            try {
-                //notify barrier that this thread is done
-                gate.await();
-            } catch (InterruptedException | BrokenBarrierException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-
 
 
     /**
@@ -157,25 +150,6 @@ public abstract class JcloudsMachineProvider implements MachineProvider,Closeabl
      * Gives all available inbound ports
      */
     public abstract int[] getAvailableInboundPorts();
-
-    @Override
-    public Machine get() {
-        if(provisionedMachineCount.get() == 0){
-            build();
-        }
-        if(queue.peek() != null){
-            return queue.poll();
-        }else{
-            throw new AssertionError(String.format("All %s machine instances are in use", provisionedMachineCount.get()));
-        }
-    }
-
-    public Machine get(String id){
-        if(machines.get(id) != null){
-            return machines.get(id);
-        }
-        return get();
-    }
 
     public void offer(Machine m){
         logger.info(String.format("%s machine %s offered, will be recycled", provider, m.getId()));
@@ -204,7 +178,6 @@ public abstract class JcloudsMachineProvider implements MachineProvider,Closeabl
     }
 
     private Set<? extends NodeMetadata> createNewNodes(int minNumOfMachines, int maxNumOfMachines){
-        logger.info(String.format("Instantiating new %s machine ...",provider));
         Template template;
         try {
             template = getTemplate();
@@ -252,13 +225,14 @@ public abstract class JcloudsMachineProvider implements MachineProvider,Closeabl
         int timeout = 120000; //2 minute
         long startTime = System.currentTimeMillis();
         while(true){
-            logger.info("Making sure sshd is up...");
+            logger.info(String.format("Making sure sshd is up on host: %s...",host));
             try {
                 if(System.currentTimeMillis() - startTime > timeout){
                     throw new RuntimeException(String.format("ssh failed to work within %s seconds.",timeout/1000));
                 }
                 Ssh ssh = new Ssh(user, host);
                 authenticator().authenticate(ssh.getConnection());
+                logger.info("sshd is ready on host: "+host);
                 ssh.destroy();
                 return;
             } catch (IOException e) {
@@ -271,5 +245,26 @@ public abstract class JcloudsMachineProvider implements MachineProvider,Closeabl
             }
         }
     }
+
+    private class MachineSanitizer implements Runnable{
+        private final NodeMetadata node;
+        private MachineSanitizer(NodeMetadata node) {
+            this.node = node;
+        }
+
+        @Override
+        public void run() {
+            try{
+                postStartupSetup(node);
+                waitForSsh(node.getCredentials().getUser(), node.getPublicAddresses().iterator().next()); //wait for ssh to be ready
+            }catch (Exception e){
+                String msg = String.format("There was problem in setting up machine: %s, this node will be destroyed.",node.getId());
+                logger.error(msg ,e);
+                computeService.destroyNode(node.getId());
+                throw new RuntimeException(msg,e);
+            }
+        }
+    }
+
     private static final Logger logger = LoggerFactory.getLogger(MachineProvider.class);
 }

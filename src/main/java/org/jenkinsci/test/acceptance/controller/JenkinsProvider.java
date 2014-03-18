@@ -2,6 +2,7 @@ package org.jenkinsci.test.acceptance.controller;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import org.jenkinsci.test.acceptance.guice.TestScope;
 import org.jenkinsci.test.acceptance.resolver.JenkinsResolver;
 import org.jenkinsci.test.acceptance.resolver.PluginDownloader;
 import org.slf4j.Logger;
@@ -15,6 +16,7 @@ import java.io.IOException;
  *
  * @author Vivek Pandey
  */
+@TestScope
 public class JenkinsProvider implements Provider<JenkinsController> {
 
     private static final Logger logger = LoggerFactory.getLogger(JenkinsProvider.class);

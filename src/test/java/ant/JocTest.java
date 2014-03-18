@@ -3,21 +3,22 @@ package ant;
 import com.google.inject.Injector;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.JenkinsProvider;
-import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.JenkinsAcceptanceTestRule;
 import org.jenkinsci.test.acceptance.po.Jenkins;
+import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.jenkinsci.test.acceptance.slave.SlaveProvider;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.openqa.selenium.WebDriver;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 /**
  */
@@ -73,19 +74,31 @@ public class JocTest {
 
         System.out.println(joc.getVersion());
 
-        SlaveController s = slave.get();
-        s.install(joc);
+        final SlaveController s = slave.get();
+        handleSlave(s.install(joc));
         s.start();
 
-        for (Jenkins je : armyOfJEs) {
-            System.out.println(je.getVersion());
-            s = slave.get();
-            s.install(je);
-            s.start();
+        for (final Jenkins je : armyOfJEs) {
+            for(int i=0;i<10;i++){
+                System.out.println(je.getVersion());
+                final SlaveController slaveController = slave.get();
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        slaveController.install(je);
+                        s.start();
+                    }
+                }).start();
+            }
         }
 
-
         assert true; // end of test
+    }
+
+
+    private void handleSlave(Future<Slave> slaveFuture) throws ExecutionException, InterruptedException {
+        Slave s = slaveFuture.get();
+        System.out.println("slave is online? "+s.isOnline());
     }
 
 //    public static class ModuleImpl extends AbstractModule {

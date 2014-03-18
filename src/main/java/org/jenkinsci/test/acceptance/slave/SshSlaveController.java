@@ -68,7 +68,7 @@ public class SshSlaveController extends SlaveController {
             // with a FS root and executors
             final DumbSlave s = j.slaves.create(DumbSlave.class);
 
-            find(by.input("_.host")).sendKeys(host);
+            s.find(by.input("_.host")).sendKeys(host);
             s.save();
 
             // Fire the slave up before we move on
