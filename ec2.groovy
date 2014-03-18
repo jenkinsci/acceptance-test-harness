@@ -8,8 +8,6 @@ import org.jenkinsci.test.acceptance.slave.SshSlaveProvider
 def localWar = new File("jenkins.war")
 
 def common = module {
-    privateKeyFile = new File(".jenkins_test/.ssh/id_rsa")
-    publicKeyFile = new File(".jenkins_test/.ssh/id_rsa.pub")
     bind(Authenticator).named("publicKeyAuthenticator").to(PublicKeyAuthenticator)
 
     jenkins_md5_sum="b6aacb5f25a323120f8c791fe2d947b9"

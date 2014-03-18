@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import org.ini4j.Wini;
+import org.jclouds.ec2.compute.options.EC2TemplateOptions;
 
 import java.io.File;
 import java.io.IOException;
@@ -49,9 +50,20 @@ public class Ec2Config {
     @Named("securityGroup") //default jenkins-test
     private List<String> securityGroups= Collections.singletonList("jenkins-test");
 
+    /**
+     * EC2 key name.
+     *
+     * By default we generate the key name from the fingerprint of the public key, so that the same public key maps
+     * to the same key pair name, and different ones to different names. Otherwise it's too easy to end up
+     * in the situation where you have one key pair locally but the key name exists on the server for a different key
+     * (and all you get is the authentication error when you try to login to the box.)
+     *
+     * Jclouds seems to offer the ability to launch an instance without a key pair {@link EC2TemplateOptions#noKeyPair()}, but it didn't work.
+     * so we opt for generating our own unique name.
+     */
     @Inject(optional = true)
-    @Named("keyPairName") //default jenkins-test
-    private String keyPairName="jenkins-test-"+System.getProperty("user.name")+getHostName();
+    @Named("keyPairName")
+    private String keyPairName=null ; // "jenkins-test-"+System.getProperty("user.name")+getHostName();
 
     @Inject(optional = true)
     @Named("imageId")

@@ -54,10 +54,10 @@ public class SshKeyPair {
      */
     public String getFingerprint() throws IOException, GeneralSecurityException {
         Security.addProvider(new BouncyCastleProvider());
-         Reader r = new BufferedReader(new StringReader(FileUtils.readFileToString(privateKey)));
-         PEMReader pem = new PEMReader(r);
+        Reader r = new BufferedReader(new StringReader(FileUtils.readFileToString(privateKey)));
+        PEMReader pem = new PEMReader(r);
 
-         KeyPair pair = (KeyPair) pem.readObject();
+        KeyPair pair = (KeyPair) pem.readObject();
         return RSAPublicKeyUtil.getEC2FingerPrint(pair.getPublic());
-     }
+    }
  }

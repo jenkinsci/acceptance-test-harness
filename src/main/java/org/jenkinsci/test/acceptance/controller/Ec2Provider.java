@@ -14,12 +14,13 @@ import org.slf4j.LoggerFactory;
 
 import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Collections;
 
-import static com.google.common.base.Charsets.UTF_8;
+import static com.google.common.base.Charsets.*;
 
 /**
  * @author Vivek Pandey
@@ -87,11 +88,15 @@ public class Ec2Provider extends JcloudsMachineProvider {
                 .securityGroups(config.getSecurityGroups())
                 .inboundPorts(config.getInboundPorts())
                 .overrideLoginUser(config.getUser());
-        if(config.getKeyPairName() == null){
-            options.noKeyPair();
-        }else{
-            options.keyPair(config.getKeyPairName());
-        }
+
+        String kn = config.getKeyPairName();
+        if (kn==null)
+            try {
+                kn = "jenkins-test-"+keyPair.getFingerprint().substring(0,11);
+            } catch (GeneralSecurityException e) {
+                throw new IOException("Failed to compute keye fingerprint of",e);
+            }
+        options.keyPair(kn);
 
         //tag
         //Tag the provisioned instance with md5(CWD+HOST_IP_ADDRESS)
