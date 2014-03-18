@@ -10,6 +10,7 @@ import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata;
 import javax.inject.Named;
 import javax.inject.Provider;
 import java.io.IOException;
+import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 
 import static java.util.Arrays.*;
@@ -74,6 +75,14 @@ public class PluginManager extends ContainerPageObject {
         return true;
     }
 
+    private void waitForIsInstalled(final String... shortNames) {
+        waitForCond(new Callable<Boolean>() {
+            @Override public Boolean call() throws Exception {
+                return isInstalled(shortNames);
+            }
+        }, 180);
+    }
+
     /**
      * Installs specified plugins.
      *
@@ -97,6 +106,8 @@ public class PluginManager extends ContainerPageObject {
                     throw new AssertionError("Failed to upload plugin: "+p,e);
                 }
             }
+
+            waitForIsInstalled(shortNames);
         } else {
             if (!updated)
                 checkForUpdates();
