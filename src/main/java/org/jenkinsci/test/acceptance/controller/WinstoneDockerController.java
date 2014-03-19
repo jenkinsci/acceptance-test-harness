@@ -39,6 +39,9 @@ public class WinstoneDockerController extends LocalController {
     @Override
     public ProcessInputStream startProcess() throws IOException {
         try {
+            // can't mount symlink very well, so we need to resolve it
+            File war = this.war.getCanonicalFile();
+
             CommandBuilder opts = new CommandBuilder();
             opts.add("-v", getJenkinsHome()+":/work");
             opts.add("-v", war.getParent()+":/war");
@@ -46,7 +49,7 @@ public class WinstoneDockerController extends LocalController {
             container = docker.start(fixtureType, opts, null);
 
             CommandBuilder cmds = new CommandBuilder();
-            cmds.add("java","-jar","/war/"+war.getName());
+            cmds.add("java", "-jar", "/war/" + war.getName());
             cmds.add("--ajp13Port=-1","--controlPort=8081","--httpPort=8080");
             return container.popen(cmds);
         } catch (InterruptedException e) {
