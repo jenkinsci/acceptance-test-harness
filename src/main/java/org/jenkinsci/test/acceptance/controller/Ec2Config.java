@@ -60,6 +60,8 @@ public class Ec2Config {
      *
      * Jclouds seems to offer the ability to launch an instance without a key pair {@link EC2TemplateOptions#noKeyPair()}, but it didn't work.
      * so we opt for generating our own unique name.
+     *
+     * @deprecated doesn't work
      */
     @Inject(optional = true)
     @Named("keyPairName")
@@ -131,6 +133,10 @@ public class Ec2Config {
         return securityGroups;
     }
 
+    /**
+     * @deprecated
+     *      doesn't work with EC2. See Ec2Provider.
+     */
     public String getKeyPairName() {
         return keyPairName;
     }

@@ -89,12 +89,17 @@ public class Ec2Provider extends JcloudsMachineProvider {
                 .inboundPorts(config.getInboundPorts())
                 .overrideLoginUser(config.getUser());
 
+        // FIXME: the key pair name we set here just doesn't get used at all. as of 1.6.0
+        // in CreateKeyPairPlacementAndSecurityGroupsAsNeededAndReturnRunOptions#createNewKeyPairUnlessUserSpecifiedOtherwise
+        // it goes through "and(hasPublicKeyMaterial, or(doesntNeedSshAfterImportingPublicKey, hasLoginCredential))"
+        // check, which evaluates to true (because doesntNeedSshAfterImportingPublicKey is true), and it ends up going
+        // through importExistingKeyPair.apply(...) that doesn't look at the key pair name we prefer.
         String kn = config.getKeyPairName();
         if (kn==null)
             try {
                 kn = "jenkins-test-"+keyPair.getFingerprint().substring(0,11);
             } catch (GeneralSecurityException e) {
-                throw new IOException("Failed to compute keye fingerprint of",e);
+                throw new IOException("Failed to compute key fingerprint of",e);
             }
         options.keyPair(kn);
 
