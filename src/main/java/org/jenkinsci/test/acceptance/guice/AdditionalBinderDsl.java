@@ -5,7 +5,6 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
 import com.google.inject.CreationException;
 import com.google.inject.Guice;
-import com.google.inject.Injector;
 import com.google.inject.util.Modules;
 import groovy.lang.Binding;
 import groovy.lang.Closure;
@@ -33,8 +32,10 @@ public abstract class AdditionalBinderDsl extends BinderClosureScript {
         final Binder binder = getBinder();
 //        final SubWorldBuilder sub = new SubWorldBuilder(name);
         try {
+            final SubWorld sw = new SubWorld();
+
             World w = World.get();
-            Injector i = Guice.createInjector(
+            sw.injector = Guice.createInjector(
                     Modules.override(
                             new ExtensionFinder(w.getClassLoader())
                     ).with(new AbstractModule() {
@@ -43,10 +44,11 @@ public abstract class AdditionalBinderDsl extends BinderClosureScript {
                             AdditionalBinderDsl.this.setBinder(binder());
                             config.setDelegate(AdditionalBinderDsl.this);
                             config.run();
+                            bind(SubWorld.class).toInstance(sw);
                         }
                     }));
 
-            return new SubWorld(i);
+            return sw;
         } catch (CreationException e) {
             throw new RuntimeException("Failed to create a sub-world",e);
         } finally {
@@ -57,7 +59,7 @@ public abstract class AdditionalBinderDsl extends BinderClosureScript {
     @Override
     public void setProperty(String property, Object value) {
         if (value instanceof SubWorld) {
-            ((SubWorld)value).setName(property);
+            ((SubWorld)value).name = property;
         }
         super.setProperty(property, value);
     }

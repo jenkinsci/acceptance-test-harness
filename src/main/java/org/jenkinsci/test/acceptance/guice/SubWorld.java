@@ -18,19 +18,17 @@ import org.jenkinsci.test.acceptance.controller.MachineProvider;
  * @author Kohsuke Kawaguchi
  */
 public class SubWorld {
-    public final Injector injector;
-    private String name;
+    /*package*/ Injector injector;
+    /*package*/ String name;
 
-    /*package*/ SubWorld(Injector injector) {
-        this.injector = injector;
+    /*package*/ SubWorld() {
     }
 
     public String getName() {
         return name;
     }
-
-    /*package*/ void setName(String name) {
-        this.name = name;
+    public Injector getInjector() {
+        return injector;
     }
 
     /**
