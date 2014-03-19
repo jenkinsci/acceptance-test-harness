@@ -8,6 +8,7 @@ import org.jclouds.compute.domain.Template;
 import org.jclouds.ec2.EC2Client;
 import org.jclouds.ec2.compute.options.EC2TemplateOptions;
 import org.jclouds.ec2.domain.IpProtocol;
+import org.jenkinsci.test.acceptance.guice.SubWorld;
 import org.jenkinsci.test.acceptance.guice.WorldCleaner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +37,9 @@ public class Ec2Provider extends JcloudsMachineProvider {
 
     @Inject
     private SshKeyPair keyPair;
+
+    @Inject(optional=true)
+    SubWorld subworld;
 
     @Inject
     public Ec2Provider(Ec2Config config, WorldCleaner cleaner){

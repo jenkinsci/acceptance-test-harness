@@ -53,4 +53,12 @@ public abstract class AdditionalBinderDsl extends BinderClosureScript {
             setBinder(binder);
         }
     }
+
+    @Override
+    public void setProperty(String property, Object value) {
+        if (value instanceof SubWorld) {
+            ((SubWorld)value).setName(property);
+        }
+        super.setProperty(property, value);
+    }
 }
