@@ -87,6 +87,8 @@ public abstract class LocalController extends JenkinsController {
      */
     protected LocalController(File war) {
         this.war = war;
+        if (!war.exists())
+            throw new RuntimeException("Invalid path to jenkins.war specified: "+war);
 
         this.tempDir = FileUtils.createTempFile("jenkins", "home",new File(WORKSPACE));
 
