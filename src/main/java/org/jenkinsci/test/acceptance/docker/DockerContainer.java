@@ -8,6 +8,7 @@ import org.jenkinsci.utils.process.ProcessUtils;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 
 import static java.lang.String.*;
 
@@ -41,7 +42,12 @@ public class DockerContainer implements Closeable {
      * the class name.
      */
     public Resource resource(String relativePath) {
-        return new Resource(getClass().getResource(getClass().getSimpleName()+"/"+relativePath));
+        for (Class c = getClass(); c!=null; c=c.getSuperclass()) {
+            URL res = c.getResource(c.getSimpleName() + "/" + relativePath);
+            if (res!=null)
+                return new Resource(res);
+        }
+        throw new IllegalArgumentException("No such resource "+relativePath+" in "+getClass());
     }
 
     public String getCid() {
