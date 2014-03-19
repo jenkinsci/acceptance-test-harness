@@ -12,6 +12,7 @@ import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import static java.lang.System.*;
 
@@ -211,6 +212,7 @@ public abstract class LocalController extends JenkinsController {
 
         this.logWatcher = new LogWatcher(new TeeInputStream(this.process,new FileOutputStream(logFile)), options);
         try {
+            LOGGER.info("Waiting for Jenkins to become running in "+this);
             this.logWatcher.waitTillReady(true);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
@@ -226,4 +228,6 @@ public abstract class LocalController extends JenkinsController {
             return false;
         }
     }
+
+    private static final Logger LOGGER = Logger.getLogger(LocalController.class.getName());
 }
