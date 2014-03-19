@@ -70,20 +70,29 @@ public class World extends AbstractModule {
         install(new Config());
     }
 
+    /**
+     * Runs at the end of JVM session to clean up.
+     */
+    private final Thread cleaner = new Thread() {
+        public void run() {
+            Injector i = INSTANCE.getInjector();
+
+            TestCleaner tc = i.getInstance(TestCleaner.class);
+            if (tc!=null)   tc.performCleanUp();
+            i.getInstance(WorldCleaner.class).performCleanUp();
+
+            for (SubWorld sw : subworlds.list(i)) {
+                sw.injector.getInstance(WorldCleaner.class).performCleanUp();
+            }
+        }
+    };
+
     private static World INSTANCE;
 
     public static World get() {
         if (INSTANCE==null) {
             INSTANCE = new World(Thread.currentThread().getContextClassLoader());
-            Runtime.getRuntime().addShutdownHook(new Thread() {
-                public void run() {
-                    Injector i = INSTANCE.getInjector();
-
-                    TestCleaner tc = i.getInstance(TestCleaner.class);
-                    if (tc!=null)   tc.performCleanUp();
-                    i.getInstance(WorldCleaner.class).performCleanUp();
-                }
-            });
+            Runtime.getRuntime().addShutdownHook(INSTANCE.cleaner);
         }
         return INSTANCE;
     }
