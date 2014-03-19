@@ -23,6 +23,14 @@ The behaviour of this controller can be customized through the following environ
 
 This is the default controller.
 
+## Winstone Docker controller (type=winstone_docker)
+This controller runs Jenkins via `java -jar jenkins.war` much like the Winstone controller, except
+that it launches Winstone inside a docker container. This allows users to better control the environment
+in which Jenkins runs in, without incurring the overhead of Vagrant.
+
+* `JENKINS_WAR` the path to `jenkins.war` to be tested.
+* `DOCKER_IMAGE` the docker container image name (or image ID) to run Jenkins in.
+
 ## 'Existing Jenkins' controller (type=existing)
 This controller assumes that you already have a Jenkins instance somewhere that you want the tests to run in.
 Note that tests mutate this Jenkins instance, so this is not meant to be used with your production Jenkins instance.
