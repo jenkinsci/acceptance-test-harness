@@ -214,6 +214,7 @@ public abstract class LocalController extends JenkinsController {
         try {
             LOGGER.info("Waiting for Jenkins to become running in "+this);
             this.logWatcher.waitTillReady(true);
+            LOGGER.info("Jenkins is running in "+this);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
