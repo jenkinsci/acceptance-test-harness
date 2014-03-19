@@ -108,7 +108,7 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>14.0.1</version>
+      <version>15.0</version>
     </dependency>
     <dependency><!-- to align the version of ASM we use -->
       <groupId>org.eclipse.sisu</groupId>
@@ -167,24 +167,9 @@
 
     <!-- jclouds -->
     <dependency>
-      <groupId>org.jclouds</groupId>
-      <artifactId>jclouds-compute</artifactId>
-      <version>1.6.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.jclouds</groupId>
-      <artifactId>jclouds-allcompute</artifactId>
-      <version>1.6.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.jclouds</groupId>
-      <artifactId>jclouds-enterprise</artifactId>
-      <version>1.0-beta-8</version>
-    </dependency>
-    <dependency>
-      <groupId>org.jclouds.driver</groupId>
-      <artifactId>jclouds-sshj</artifactId>
-      <version>1.6.0</version>
+      <groupId>org.apache.jclouds</groupId>
+      <artifactId>jclouds-all</artifactId>
+      <version>1.7.1</version>
     </dependency>
 
     <!-- other random stuff -->

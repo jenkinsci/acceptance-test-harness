@@ -21,7 +21,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Collections;
 
-import static com.google.common.base.Charsets.*;
+import static com.google.common.base.Charsets.UTF_8;
 
 /**
  * @author Vivek Pandey
@@ -39,7 +39,7 @@ public class Ec2Provider extends JcloudsMachineProvider {
     private SshKeyPair keyPair;
 
     @Inject(optional=true)
-    SubWorld subworld;
+    private SubWorld subworld;
 
     @Inject
     public Ec2Provider(Ec2Config config, WorldCleaner cleaner){
@@ -50,7 +50,17 @@ public class Ec2Provider extends JcloudsMachineProvider {
 
     @Override
     public void postStartupSetup(NodeMetadata node) {
-        //noop
+        Ssh ssh=null;
+        try {
+            ssh = new Ssh(config.getUser(),node.getPublicAddresses().iterator().next());
+            ssh.getConnection().exec(String.format("pkill -u $(id -u %s)", config.getUser()), System.out);
+        } catch (IOException | InterruptedException e) {
+            logger.error(e.getMessage());
+        }finally {
+            if(ssh != null){
+                ssh.destroy();
+            }
+        }
     }
 
     @Override
@@ -61,6 +71,12 @@ public class Ec2Provider extends JcloudsMachineProvider {
     @Override
     public Authenticator authenticator() {
         return authenticator;
+    }
+
+    @Override
+    protected String getGroupName() {
+        String name = (subworld != null)?subworld.getName() : null;
+        return getGroupName(name);
     }
 
     @Override

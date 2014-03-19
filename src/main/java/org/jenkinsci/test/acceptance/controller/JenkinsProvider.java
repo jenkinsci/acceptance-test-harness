@@ -2,6 +2,7 @@ package org.jenkinsci.test.acceptance.controller;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import org.jenkinsci.test.acceptance.guice.TestCleaner;
 import org.jenkinsci.test.acceptance.guice.TestScope;
 import org.jenkinsci.test.acceptance.resolver.JenkinsResolver;
 import org.jenkinsci.test.acceptance.resolver.PluginDownloader;
@@ -32,6 +33,9 @@ public class JenkinsProvider implements Provider<JenkinsController> {
     private final File privateKeyFile;
 
     @Inject
+    private TestCleaner cleaner;
+
+    @Inject
     public JenkinsProvider(Machine machine, JenkinsResolver jenkinsResolver, SshKeyPair keyPair) {
         this.machine = machine;
         this.jenkinsResolver = jenkinsResolver;
@@ -52,6 +56,7 @@ public class JenkinsProvider implements Provider<JenkinsController> {
         logger.info("Creating new RemoteJenkinsController...");
         JenkinsController jenkinsController = createNewJenkinsController();
         try {
+            cleaner.addTask(jenkinsController);
             jenkinsController.start();
         } catch (IOException e) {
             throw new AssertionError("Failed to start Jenkins: "+e.getMessage(),e);

@@ -5,11 +5,10 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import org.ini4j.Wini;
 import org.jclouds.ec2.compute.options.EC2TemplateOptions;
+import org.jenkinsci.test.acceptance.guice.SubWorld;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.List;
 
@@ -18,6 +17,9 @@ import java.util.List;
  */
 @Singleton
 public class Ec2Config {
+
+    @Inject(optional=true)
+    private SubWorld subWorld;
 
     /**
      * This is the file we read credentials from. We reuse AWS CLI format.
@@ -65,7 +67,7 @@ public class Ec2Config {
      */
     @Inject(optional = true)
     @Named("keyPairName")
-    private String keyPairName=null ; // "jenkins-test-"+System.getProperty("user.name")+getHostName();
+    private String keyPairName=null ; // "jenkins-test-"+System.getProperty("user.name")+getLocalHostName();
 
     @Inject(optional = true)
     @Named("imageId")
@@ -161,11 +163,4 @@ public class Ec2Config {
         return imageId;
     }
 
-    private String getHostName() {
-        try {
-            return InetAddress.getLocalHost().getHostName();
-        } catch (UnknownHostException e) {
-            return "unknown";
-        }
-    }
 }

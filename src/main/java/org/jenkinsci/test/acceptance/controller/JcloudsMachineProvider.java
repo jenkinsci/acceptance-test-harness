@@ -1,5 +1,6 @@
 package org.jenkinsci.test.acceptance.controller;
 
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
@@ -7,12 +8,15 @@ import com.google.inject.Inject;
 import com.google.inject.Module;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import org.codehaus.plexus.util.FileUtils;
+import org.codehaus.plexus.util.IOUtil;
 import org.jclouds.ContextBuilder;
 import org.jclouds.apis.ApiMetadata;
 import org.jclouds.apis.Apis;
 import org.jclouds.compute.ComputeService;
 import org.jclouds.compute.ComputeServiceContext;
 import org.jclouds.compute.RunNodesException;
+import org.jclouds.compute.domain.ComputeMetadata;
 import org.jclouds.compute.domain.NodeMetadata;
 import org.jclouds.compute.domain.Template;
 import org.jclouds.enterprise.config.EnterpriseConfigurationModule;
@@ -20,11 +24,20 @@ import org.jclouds.logging.slf4j.config.SLF4JLoggingModule;
 import org.jclouds.providers.ProviderMetadata;
 import org.jclouds.providers.Providers;
 import org.jclouds.sshj.config.SshjSshClientModule;
+import org.jenkinsci.test.acceptance.guice.SubWorld;
+import org.jenkinsci.utils.process.CommandBuilder;
+import org.jenkinsci.utils.process.ProcessInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.xml.bind.DatatypeConverter;
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -52,10 +65,12 @@ public abstract class JcloudsMachineProvider implements MachineProvider,Closeabl
 
     protected final ContextBuilder contextBuilder;
 
-    private final String groupName="jenkins-test";
     private final String provider;
     private volatile BlockingQueue<Machine> queue=null;
     private final AtomicInteger provisionedMachineCount = new AtomicInteger();
+
+    @Inject(optional = true)
+    private SubWorld subworld;
 
     @Inject(optional = true)
     @Named("maxNumOfMachines")
@@ -73,7 +88,6 @@ public abstract class JcloudsMachineProvider implements MachineProvider,Closeabl
         if(!contains(supportedProviders, provider)){
             throw new RuntimeException(String.format("Provider %s is not supported. Supported providers: %s",provider, Arrays.toString(supportedProviders.toArray())));
         }
-
         this.provider = provider;
 
         this.contextBuilder = initComputeService(provider, identity, credential);
@@ -99,7 +113,7 @@ public abstract class JcloudsMachineProvider implements MachineProvider,Closeabl
             synchronized (this){
                 bq = queue;
                 if(bq == null){
-                    queue = bq =  new LinkedBlockingQueue<>(maxNumOfMachines);
+                    queue = bq =  new LinkedBlockingQueue<>();
                 }
             }
         }
@@ -109,6 +123,11 @@ public abstract class JcloudsMachineProvider implements MachineProvider,Closeabl
         }
     }
 
+
+    /**
+     * Every provider should provide a group name under which the machines need to be created
+     */
+    protected abstract String getGroupName();
 
 
     /**
@@ -157,9 +176,6 @@ public abstract class JcloudsMachineProvider implements MachineProvider,Closeabl
     private Set<Machine> createNewMachines(int minNumOfMachines, int maxNumOfMachines){
         logger.info(String.format("Setting up %s  %s machines...", maxNumOfMachines, provider));
 
-        //check if there are already machines in this security group
-        logger.info(String.format("Check if ther are running machines in the security group: %s... ", groupName));
-
         Template template;
         try {
             template = getTemplate();
@@ -168,7 +184,10 @@ public abstract class JcloudsMachineProvider implements MachineProvider,Closeabl
         }
         Set<? extends NodeMetadata> nodes;
         try {
-            nodes = computeService.createNodesInGroup(groupName, maxNumOfMachines, template);
+            nodes = getRunningInstances();
+            if(nodes.isEmpty()) { //get new ones
+                nodes = computeService.createNodesInGroup(getGroupName(), maxNumOfMachines, template);
+            }
         } catch (RunNodesException e) {
             logger.error(String.format("%s out of %s machines provisioned.",e.getSuccessfulNodes().size()));
             int numSuccessfulMachines = e.getSuccessfulNodes().size();
@@ -209,8 +228,27 @@ public abstract class JcloudsMachineProvider implements MachineProvider,Closeabl
         return newMachines;
     }
 
+    private Set<NodeMetadata> getRunningInstances(){
+        logger.info(String.format("Check if we already got running machines in the security group: %s... ", getGroupName()));
+        Set<? extends NodeMetadata> nodeMetadatas = computeService.listNodesDetailsMatching(new Predicate<ComputeMetadata>() {
+            @Override
+            public boolean apply(ComputeMetadata computeMetadata) {
+                return true;
+            }
+        });
+
+        Set<NodeMetadata> filteredNodes = new HashSet<>();
+        for(NodeMetadata nm:nodeMetadatas){
+            if(nm.getGroup().equals(getGroupName()) && nm.getStatus() == NodeMetadata.Status.RUNNING){
+                logger.info(String.format("Found running machine: %s",getGroupName()));
+                filteredNodes.add(nm);
+            }
+        }
+        return filteredNodes;
+    }
+
     private void terminateAllNodes(){
-        computeService.destroyNodesMatching(inGroup(groupName));
+        computeService.destroyNodesMatching(inGroup(getGroupName()));
     }
 
 
@@ -263,7 +301,7 @@ public abstract class JcloudsMachineProvider implements MachineProvider,Closeabl
         @Override
         public void run() {
             try{
-                waitForSsh(node.getCredentials().getUser(), node.getPublicAddresses().iterator().next()); //wait for ssh to be ready
+                waitForSsh(getUserName(node), node.getPublicAddresses().iterator().next()); //wait for ssh to be ready
                 postStartupSetup(node);
             }catch (Exception e){
                 String msg = String.format("There was problem in setting up machine: %s, this node will be destroyed.",node.getId());
@@ -273,6 +311,66 @@ public abstract class JcloudsMachineProvider implements MachineProvider,Closeabl
             }
         }
     }
+
+    public static String getGroupName(String seed){
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            String username = System.getProperty("user.name").toLowerCase();
+            String localHost = getLocalHostName().toLowerCase();
+            StringBuilder sb = new StringBuilder(username);
+            sb.append(localHost).append(getConfigFileContent());
+            if(seed != null){
+                sb.append(seed);
+            }
+            md.update(sb.toString().getBytes("UTF-8"));
+            byte[] digest = md.digest();
+            if(seed != null){
+                return String.format("jat-%s-%s-%s-%s",username,localHost,seed,DatatypeConverter.printHexBinary(digest).substring(0,7).toLowerCase());
+            }else{
+                return String.format("jat-%s-%s-%s",username,localHost,DatatypeConverter.printHexBinary(digest).substring(0,7).toLowerCase());
+            }
+
+        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static String getLocalHostName() {
+        try {
+            return InetAddress.getLocalHost().getHostName();
+        } catch (UnknownHostException e) {
+            //On MacOS this happens, so get it by forking 'hostname'
+            CommandBuilder cb = new CommandBuilder("hostname");
+            try {
+                ProcessInputStream pis = cb.popen();
+
+                return IOUtil.toString(pis.getInputStream()).trim();
+
+            } catch (IOException e1) {
+                throw new RuntimeException(e1);
+            }
+        }
+    }
+
+
+    private static String getConfigFileContent(){
+        String configFile = System.getProperty("CONFIG");
+        if(configFile != null){
+            try {
+                return FileUtils.fileRead(configFile);
+            } catch (IOException e) {
+                return "config";
+            }
+        }else{
+            return "config";
+        }
+    }
+
+    private String getUserName(NodeMetadata node){
+        return (node.getCredentials() == null) ? "ubuntu" : node.getCredentials().getUser();
+    }
+
+//    private static final String EC2_INSTANCE_LOG=System.getProperty("user.home")
 
     private static final Logger logger = LoggerFactory.getLogger(MachineProvider.class);
 }
