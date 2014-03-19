@@ -19,7 +19,6 @@ The behaviour of this controller can be customized through the following environ
 * `JENKINS_WAR` the path to `jenkins.war` to be tested.
 * `INTERACTIVE` keep browser session opened after failed scenario for interactive investigation.
 * `PLUGINS_DIR` a directory of plugins to be loaded on Jenkins startup
-* `PRELAUNCH` when set, Jenkins will launch multiple Jenkins instances in advance to speed up test execution.
 
 This is the default controller.
 
