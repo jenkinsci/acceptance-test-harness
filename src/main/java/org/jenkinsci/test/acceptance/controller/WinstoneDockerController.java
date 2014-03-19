@@ -49,7 +49,9 @@ public class WinstoneDockerController extends LocalController {
             container = docker.start(fixtureType, opts, null);
 
             CommandBuilder cmds = new CommandBuilder();
-            cmds.add("java", "-jar", "/war/" + war.getName());
+            cmds.add("java");
+            cmds.add("-DJENKINS_HOME=/work");
+            cmds.add("-jar", "/war/" + war.getName());
             cmds.add("--ajp13Port=-1","--controlPort=8081","--httpPort=8080");
             return container.popen(cmds);
         } catch (InterruptedException e) {
