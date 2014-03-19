@@ -25,10 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -91,7 +88,8 @@ public abstract class JcloudsMachineProvider implements MachineProvider,Closeabl
         if(queue.peek() != null){
             return queue.poll();
         }else{
-            throw new AssertionError(String.format("All %s machine instances are in use", provisionedMachineCount.get()));
+            //get a new machine
+            return createNewMachines(1, 1).iterator().next();
         }
     }
 
@@ -101,37 +99,16 @@ public abstract class JcloudsMachineProvider implements MachineProvider,Closeabl
             synchronized (this){
                 bq = queue;
                 if(bq == null){
-                    logger.info(String.format("Setting up %s  %s machines...", maxNumOfMachines, provider));
                     queue = bq =  new LinkedBlockingQueue<>(maxNumOfMachines);
                 }
             }
         }
-
-        Set<? extends NodeMetadata> nodes = createNewNodes(minNumOfMachines, maxNumOfMachines);
-
-        //TODO make it configurable
-        ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-
-        //setup new machines
-        for(NodeMetadata node:nodes){
-            executorService.submit(new MachineSanitizer(node));
-        }
-
-
-        try {
-            executorService.shutdown();
-            executorService.awaitTermination(2, TimeUnit.MINUTES);
-        } catch (InterruptedException e) {
-            terminateAllNodes();
-            throw new RuntimeException("Failed to setup machines. ",e);
-        }
-        provisionedMachineCount.set(nodes.size());
-        for(NodeMetadata node:nodes){
-            Machine m = new JcloudsMachine(this,node);
+        Set<Machine> machines = createNewMachines(minNumOfMachines, maxNumOfMachines);
+        for(Machine m:machines){
             queue.add(m);
-            machines.put(node.getId(),m);
         }
     }
+
 
 
     /**
@@ -177,7 +154,12 @@ public abstract class JcloudsMachineProvider implements MachineProvider,Closeabl
         return properties;
     }
 
-    private Set<? extends NodeMetadata> createNewNodes(int minNumOfMachines, int maxNumOfMachines){
+    private Set<Machine> createNewMachines(int minNumOfMachines, int maxNumOfMachines){
+        logger.info(String.format("Setting up %s  %s machines...", maxNumOfMachines, provider));
+
+        //check if there are already machines in this security group
+        logger.info(String.format("Check if ther are running machines in the security group: %s... ", groupName));
+
         Template template;
         try {
             template = getTemplate();
@@ -198,7 +180,33 @@ public abstract class JcloudsMachineProvider implements MachineProvider,Closeabl
             nodes = e.getSuccessfulNodes();
         }
 
-        return nodes;
+        /** Now, wait till machine is up with sshd and  {@link MachineProvider}s have finished any post boot up steps
+         *  TODO make it configurable
+         */
+        ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
+        for(NodeMetadata node:nodes){
+            executorService.submit(new MachineSanitizer(node));
+        }
+
+        try {
+            executorService.shutdown();
+            executorService.awaitTermination(2, TimeUnit.MINUTES);
+        } catch (InterruptedException e) {
+            terminateAllNodes();
+            throw new RuntimeException("Failed to setup machines. ",e);
+        }
+
+        provisionedMachineCount.set(provisionedMachineCount.get()+nodes.size());
+
+        Set<Machine> newMachines = new HashSet<>();
+        for(NodeMetadata node:nodes){
+            Machine m = new JcloudsMachine(this,node);
+            machines.put(node.getId(),m);
+            newMachines.add(m);
+        }
+
+        return newMachines;
     }
 
     private void terminateAllNodes(){
@@ -255,8 +263,8 @@ public abstract class JcloudsMachineProvider implements MachineProvider,Closeabl
         @Override
         public void run() {
             try{
-                postStartupSetup(node);
                 waitForSsh(node.getCredentials().getUser(), node.getPublicAddresses().iterator().next()); //wait for ssh to be ready
+                postStartupSetup(node);
             }catch (Exception e){
                 String msg = String.format("There was problem in setting up machine: %s, this node will be destroyed.",node.getId());
                 logger.error(msg ,e);
