@@ -1,8 +1,6 @@
 #
 # Container for running jenkins.war
 #
-# See winstone_docker_controller.rb
-#
 
 FROM jenkins/sshd
 
