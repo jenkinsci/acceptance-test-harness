@@ -5,9 +5,9 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import org.jclouds.compute.domain.NodeMetadata;
 import org.jclouds.compute.domain.Template;
-import org.jclouds.ec2.EC2Client;
+import org.jclouds.ec2.EC2Api;
 import org.jclouds.ec2.compute.options.EC2TemplateOptions;
-import org.jclouds.ec2.domain.IpProtocol;
+import org.jclouds.net.domain.IpProtocol;
 import org.jenkinsci.test.acceptance.guice.SubWorld;
 import org.jenkinsci.test.acceptance.guice.WorldCleaner;
 import org.slf4j.Logger;
@@ -82,13 +82,13 @@ public class Ec2Provider extends JcloudsMachineProvider {
     @Override
     public Template getTemplate() throws IOException {
         if(config.getSecurityGroups().size() > 0){
-            EC2Client client = contextBuilder.buildApi(EC2Client.class);
+            EC2Api client = contextBuilder.buildApi(EC2Api.class);
             for(String sg : config.getSecurityGroups()){
                 try{
-                client.getSecurityGroupServices().createSecurityGroupInRegion(config.getRegion(),sg,sg);
-                client.getSecurityGroupServices().authorizeSecurityGroupIngressInRegion(config.getRegion(), sg,
-                        IpProtocol.TCP, config.getInboundPorts()[0],config.getInboundPorts()[config.getInboundPorts().length - 1],"0.0.0.0/0");
-                client.getSecurityGroupServices().authorizeSecurityGroupIngressInRegion(config.getRegion(), sg,
+                client.getSecurityGroupApi().get().createSecurityGroupInRegion(config.getRegion(), sg, sg);
+                client.getSecurityGroupApi().get().authorizeSecurityGroupIngressInRegion(config.getRegion(), sg,
+                        IpProtocol.TCP, config.getInboundPorts()[0], config.getInboundPorts()[config.getInboundPorts().length - 1], "0.0.0.0/0");
+                client.getSecurityGroupApi().get().authorizeSecurityGroupIngressInRegion(config.getRegion(), sg,
                         IpProtocol.TCP, 22,22,"0.0.0.0/0");
                 }catch(IllegalStateException e){
                     // Lets ignore it, most likely its due to existing security roles, it might fail
