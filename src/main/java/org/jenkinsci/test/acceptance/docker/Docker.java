@@ -2,12 +2,10 @@ package org.jenkinsci.test.acceptance.docker;
 
 import com.google.inject.Inject;
 import org.apache.commons.io.FileUtils;
-import org.jenkinsci.test.acceptance.guice.TestCleaner;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.jvnet.hudson.annotation_indexer.Index;
 
 import javax.inject.Named;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
@@ -62,11 +60,10 @@ public class Docker {
         return new DockerImage(tag);
     }
 
-    /**
-     * Starts a container of the specific fixture type.
-     * This builds an image if need be.
-     */
-    public <T extends DockerContainer> T start(Class<T> fixture, CommandBuilder options, CommandBuilder cmd) {
+    public DockerImage build(Class<? extends DockerContainer> fixture) throws IOException, InterruptedException {
+        if (fixture.getSuperclass()!=DockerContainer.class)
+            build((Class)fixture.getSuperclass()); // build the base image first
+
         try {
             DockerFixture f = fixture.getAnnotation(DockerFixture.class);
             if (f==null)
@@ -80,10 +77,23 @@ public class Docker {
                 FileUtils.copyURLToFile(classLoader.getResource(fixture.getName().replace('.', '/') + "/Dockerfile"),new File(dir,"Dockerfile"));
                 DockerImage img = build("jenkins/" + f.id(), dir);
 
-                return img.start(fixture, f.ports(), options, cmd);
+                return img;
             } finally {
                 FileUtils.deleteDirectory(dir);
             }
+        } catch (InterruptedException|IOException e) {
+            throw new IOException("Failed to build image: "+fixture,e);
+        }
+    }
+
+    /**
+     * Starts a container of the specific fixture type.
+     * This builds an image if need be.
+     */
+    public <T extends DockerContainer> T start(Class<T> fixture, CommandBuilder options, CommandBuilder cmd) {
+        try {
+            DockerFixture f = fixture.getAnnotation(DockerFixture.class);
+            return build(fixture).start(fixture, f.ports(), options, cmd);
         } catch (InterruptedException|IOException e) {
             throw new AssertionError("Failed to start container "+fixture, e);
         }
