@@ -55,6 +55,10 @@ public class Docker {
      *      Directory that contains Dockerfile
      */
     public DockerImage build(String tag, File dir) throws IOException, InterruptedException {
+        // check if the image already exists
+        if (cmd("images").add("-q",tag).popen().verifyOrDieWith("failed to query the status of the image").trim().length()>0)
+            return new DockerImage(tag);
+
         if (cmd("build").add("-t", tag, dir).system()!=0)
             throw new Error("Failed to build image: "+tag);
         return new DockerImage(tag);
@@ -75,9 +79,8 @@ public class Docker {
 
             try {
                 FileUtils.copyURLToFile(classLoader.getResource(fixture.getName().replace('.', '/') + "/Dockerfile"),new File(dir,"Dockerfile"));
-                DockerImage img = build("jenkins/" + f.id(), dir);
 
-                return img;
+                return build("jenkins/" + f.id(), dir);
             } finally {
                 FileUtils.deleteDirectory(dir);
             }
