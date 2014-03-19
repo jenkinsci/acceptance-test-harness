@@ -31,6 +31,9 @@ in which Jenkins runs in, without incurring the overhead of Vagrant.
 * `JENKINS_WAR` the path to `jenkins.war` to be tested.
 * `DOCKER_IMAGE` the docker container image name (or image ID) to run Jenkins in.
 
+The ability to specify the docker image is particularly useful to ensure that tests are run against
+the consistent version of JDK and build tools.
+
 ## 'Existing Jenkins' controller (type=existing)
 This controller assumes that you already have a Jenkins instance somewhere that you want the tests to run in.
 Note that tests mutate this Jenkins instance, so this is not meant to be used with your production Jenkins instance.
