@@ -53,6 +53,7 @@ public class Ec2Provider extends JcloudsMachineProvider {
         Ssh ssh=null;
         try {
             ssh = new Ssh(config.getUser(),node.getPublicAddresses().iterator().next());
+            authenticator().authenticate(ssh.getConnection());
             ssh.getConnection().exec(String.format("pkill -u $(id -u %s)", config.getUser()), System.out);
         } catch (IOException | InterruptedException e) {
             logger.error(e.getMessage());

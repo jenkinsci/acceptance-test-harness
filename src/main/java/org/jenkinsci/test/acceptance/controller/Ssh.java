@@ -6,7 +6,6 @@ import com.trilead.ssh2.SCPClient;
 import com.trilead.ssh2.Session;
 import org.jclouds.domain.LoginCredentials;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -48,20 +47,7 @@ public class Ssh{
         }
     }
 
-    public static void main(String[] args) throws IOException {
-        Ssh ssh = new Ssh("user","ec2-54-197-156-232.compute-1.amazonaws.com");
-        String jenkinsHome = "jenkins_home";
 
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-
-        ssh.executeRemoteCommand("mkdir "+jenkinsHome, os);
-
-        ssh.copyTo("/Users/vivek/Downloads/jenkins.war","jenkins.war", ".");
-
-        ssh.executeRemoteCommand(String.format("java -jar jenkins.war -DJENKINS_HOME=%s --ajp13Port=-1 --controlPort=%s --httpPort=%s", jenkinsHome, 8080, 8081), os);
-
-        System.out.println(new String(os.toByteArray()));
-    }
 
     public int executeRemoteCommand(String cmd,OutputStream os){
         Session session=null;
