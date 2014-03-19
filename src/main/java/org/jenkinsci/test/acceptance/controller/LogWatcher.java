@@ -102,7 +102,7 @@ public class LogWatcher {
             throw new RuntimeException("Port conflict detected");
         }
 
-        String msg = expected ? "Could not bring up a Jenkins server" : "Shut down of Jenkins server had timed out";
+        String msg = getClass()+": "+ (expected ? "Could not bring up a Jenkins server" : "Shut down of Jenkins server had timed out");
         msg += "\nprocess is still alive? "+reader.isAlive();
         msg += "\nnow = " + new Date();
         msg += "\n" + fullLog();
