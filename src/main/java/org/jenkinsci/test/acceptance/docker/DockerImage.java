@@ -18,6 +18,11 @@ public class DockerImage {
         this.tag = tag;
     }
 
+    public <T extends DockerContainer> T start(Class<T> type, CommandBuilder options, CommandBuilder cmd) throws InterruptedException, IOException {
+        DockerFixture f = type.getAnnotation(DockerFixture.class);
+        return start(type,f.ports(),options,cmd);
+    }
+
     /**
      * Starts a container from this image.
      */

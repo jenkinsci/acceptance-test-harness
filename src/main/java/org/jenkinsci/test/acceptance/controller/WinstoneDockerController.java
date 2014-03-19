@@ -4,6 +4,7 @@ import com.cloudbees.sdk.extensibility.Extension;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import org.jenkinsci.test.acceptance.docker.Docker;
+import org.jenkinsci.test.acceptance.docker.DockerImage;
 import org.jenkinsci.test.acceptance.docker.fixtures.WinstoneContainer;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.jenkinsci.utils.process.ProcessInputStream;
@@ -26,6 +27,8 @@ public class WinstoneDockerController extends LocalController {
     Docker docker;
 
     private Class<? extends WinstoneContainer> fixtureType = WinstoneContainer.class;
+    private String dockerImage;
+
     private WinstoneContainer container;
 
     public WinstoneDockerController(File war) {
@@ -34,6 +37,10 @@ public class WinstoneDockerController extends LocalController {
 
     public void setFixture(Class<? extends WinstoneContainer> fixtureType) {
         this.fixtureType = fixtureType;
+    }
+
+    public void setDockerImage(String img) {
+        this.dockerImage = img;
     }
 
     @Override
@@ -46,7 +53,14 @@ public class WinstoneDockerController extends LocalController {
             opts.add("-v", getJenkinsHome()+":/work");
             opts.add("-v", war.getParent()+":/war");
 
-            container = docker.start(fixtureType, opts, null);
+            // TODO: unify ID and fixture
+            DockerImage img;
+            if (dockerImage!=null)
+                img = new DockerImage(dockerImage);
+            else
+                img = docker.build(fixtureType);
+
+            container = img.start(fixtureType, opts, null);
 
             CommandBuilder cmds = new CommandBuilder();
             cmds.add("java");
@@ -96,6 +110,9 @@ public class WinstoneDockerController extends LocalController {
         public WinstoneDockerController create() {
             WinstoneDockerController c = new WinstoneDockerController(getWarFile());
             injector.injectMembers(c);
+            String img = System.getenv("DOCKER_IMAGE");
+            if (img!=null)
+                c.setDockerImage(img);
             return c;
         }
     }

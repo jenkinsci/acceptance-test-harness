@@ -95,8 +95,7 @@ public class Docker {
      */
     public <T extends DockerContainer> T start(Class<T> fixture, CommandBuilder options, CommandBuilder cmd) {
         try {
-            DockerFixture f = fixture.getAnnotation(DockerFixture.class);
-            return build(fixture).start(fixture, f.ports(), options, cmd);
+            return build(fixture).start(fixture, options, cmd);
         } catch (InterruptedException|IOException e) {
             throw new AssertionError("Failed to start container "+fixture, e);
         }
