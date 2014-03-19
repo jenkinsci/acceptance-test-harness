@@ -80,6 +80,10 @@ public abstract class JcloudsMachineProvider implements MachineProvider,Closeabl
     @Named("minNumOfMachines")
     private int minNumOfMachines=1;
 
+    @Inject(optional = true)
+    @Named("terminateNodesOnExit")
+    private boolean terminateNodesOnExit=false;
+
 
     private final Map<String, Machine> machines = new ConcurrentHashMap<>();
 
@@ -160,7 +164,9 @@ public abstract class JcloudsMachineProvider implements MachineProvider,Closeabl
 
     @Override
     public void close() throws IOException {
-        terminateAllNodes();
+        if(terminateNodesOnExit) {
+            terminateAllNodes();
+        }
     }
 
     /**

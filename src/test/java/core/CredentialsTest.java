@@ -1,8 +1,6 @@
 package core;
 
-import com.google.inject.Inject;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.SshPrivateKeyCredential;
 import org.junit.Assert;
 import org.junit.Test;
@@ -20,6 +18,7 @@ public class CredentialsTest extends AbstractJUnitTest {
         c.create("GLOBAL", username, privKey);
         //now verify
         jenkins.visit("credentials");
-        Assert.assertEquals(jenkins.find(by.input("_.username")).getAttribute("value"), "xyz");
+        Assert.assertEquals(jenkins.find(by.input("_.username")).getAttribute("value"), username);
+        Assert.assertEquals(jenkins.find(by.input("_.privateKey")).getText(), privKey);
     }
 }

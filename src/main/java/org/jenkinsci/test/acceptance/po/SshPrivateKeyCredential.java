@@ -17,11 +17,23 @@ public class SshPrivateKeyCredential extends Credential {
             throw new AssertionError("Credential scope must be either of GLOBAL or SYSTEM");
         }
         visit(url);
+        if(exists(username,privateKey)){
+            return;
+        }
         selectDropdownMenu("SSH Username with private key", find(by.path("/domainCredentials/hetero-list-add[credentials]")));
         find(by.input("_.description")).sendKeys("SSH Key setup");
         find(by.input("_.username")).clear(); //it's always pre-filled with system default user
         find(by.input("_.username")).sendKeys(username);
         find(by.input("_.privateKey")).sendKeys(privateKey);
         clickButton("Save");
+    }
+
+    private boolean exists(String username, String privatekey){
+        selectDropdownMenu("SSH Username with private key", find(by.path("/domainCredentials/hetero-list-add[credentials]")));
+        String foundUsername = find(by.input("_.username")).getAttribute("value");
+        String foundPrivateKey = find(by.input("_.privateKey")).getText();
+        return foundUsername != null && foundUsername.equals(username)
+                && foundPrivateKey != null && foundPrivateKey.equals(privatekey);
+
     }
 }

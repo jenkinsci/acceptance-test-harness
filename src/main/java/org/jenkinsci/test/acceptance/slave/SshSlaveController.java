@@ -33,7 +33,27 @@ public class SshSlaveController extends SlaveController {
 
     @Override
     public Future<Slave> install(Jenkins j) {
-        return executor.submit(new SlaveInstaller(j));
+        SshPrivateKeyCredential credential = new SshPrivateKeyCredential(j);
+
+        try {
+            credential.create("GLOBAL",machine.getUser(),keyPair.readPrivateKey());
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
+        final Slave s = create(machine.getPublicIpAddress(), j);
+
+        //Slave is configured, now wait till its online
+        return executor.submit(new Callable<Slave>() {
+            @Override
+            public Slave call() throws Exception {
+                waitForCond(new Callable<Boolean>() {
+                    public Boolean call() throws Exception {
+                        return s.isOnline();
+                    }
+                }, 300);
+                return s;
+            }
+        });
     }
 
     @Override
@@ -42,45 +62,15 @@ public class SshSlaveController extends SlaveController {
         executor.shutdownNow();
     }
 
-    private class SlaveInstaller implements Callable<Slave> {
+    private Slave create(String host, Jenkins j) {
+        // Just to make sure the dumb slave is set up properly, we should seed it
+        // with a FS root and executors
+        final DumbSlave s = j.slaves.create(DumbSlave.class);
 
-        private final Jenkins j;
+        s.find(by.input("_.host")).sendKeys(host);
+        s.save();
+        return s;
 
-        private SlaveInstaller(Jenkins j) {
-            this.j = j;
-        }
-
-        @Override
-        public Slave call() throws Exception {
-            SshPrivateKeyCredential credential = new SshPrivateKeyCredential(j);
-
-            try {
-                credential.create("GLOBAL",machine.getUser(),keyPair.readPrivateKey());
-            } catch (IOException e) {
-                throw new AssertionError(e);
-            }
-
-            return create(machine.getPublicIpAddress());
-        }
-
-        public Slave create(String host) {
-            // Just to make sure the dumb slave is set up properly, we should seed it
-            // with a FS root and executors
-            final DumbSlave s = j.slaves.create(DumbSlave.class);
-
-            s.find(by.input("_.host")).sendKeys(host);
-            s.save();
-
-            // Fire the slave up before we move on
-            waitForCond(new Callable<Boolean>() {
-                public Boolean call() throws Exception {
-                    return s.isOnline();
-                }
-            }, 300);
-
-            return s;
-
-        }
     }
 
     private static final Logger logger = LoggerFactory.getLogger(SshSlaveController.class);
