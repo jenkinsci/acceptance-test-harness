@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.slave;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import org.jenkinsci.test.acceptance.controller.Machine;
 import org.jenkinsci.test.acceptance.controller.SshKeyPair;
 import org.jenkinsci.test.acceptance.po.DumbSlave;
@@ -23,12 +24,14 @@ import java.util.concurrent.Future;
 public class SshSlaveController extends SlaveController {
     private final Machine machine;
     private final SshKeyPair keyPair;
+    private final int slaveReadyTimeOutInSec;
     private final ExecutorService executor = Executors.newFixedThreadPool(1);
 
     @Inject
-    public SshSlaveController(Machine machine, SshKeyPair keyPair) {
+    public SshSlaveController(Machine machine, SshKeyPair keyPair, @Named("slaveReadyTimeOutInSec") int slaveReadyTimeOutInSec) {
         this.machine = machine;
         this.keyPair = keyPair;
+        this.slaveReadyTimeOutInSec = slaveReadyTimeOutInSec;
     }
 
     @Override
@@ -46,11 +49,12 @@ public class SshSlaveController extends SlaveController {
         return executor.submit(new Callable<Slave>() {
             @Override
             public Slave call() throws Exception {
+                logger.info(String.format("Wait for the new slave %s to come online in %s seconds",machine.getId(), slaveReadyTimeOutInSec));
                 waitForCond(new Callable<Boolean>() {
                     public Boolean call() throws Exception {
                         return s.isOnline();
                     }
-                }, 300);
+                }, slaveReadyTimeOutInSec);
                 return s;
             }
         });

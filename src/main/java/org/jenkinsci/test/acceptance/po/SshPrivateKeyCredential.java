@@ -20,7 +20,6 @@ public class SshPrivateKeyCredential extends Credential {
         if(exists(username,privateKey)){
             return;
         }
-        selectDropdownMenu("SSH Username with private key", find(by.path("/domainCredentials/hetero-list-add[credentials]")));
         find(by.input("_.description")).sendKeys("SSH Key setup");
         find(by.input("_.username")).clear(); //it's always pre-filled with system default user
         find(by.input("_.username")).sendKeys(username);
@@ -33,7 +32,7 @@ public class SshPrivateKeyCredential extends Credential {
         String foundUsername = find(by.input("_.username")).getAttribute("value");
         String foundPrivateKey = find(by.input("_.privateKey")).getText();
         return foundUsername != null && foundUsername.equals(username)
-                && foundPrivateKey != null && foundPrivateKey.equals(privatekey);
+                && foundPrivateKey != null && foundPrivateKey.equals(privatekey.replace('\n',' ').trim());
 
     }
 }

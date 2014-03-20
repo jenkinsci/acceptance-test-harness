@@ -45,7 +45,7 @@ public class CreateSlaveTest extends AbstractJUnitTest {
         s.find(by.input("_.username")).clear(); //it's always pre-filled with system default user
         s.find(by.input("_.username")).sendKeys(username);
         s.find(by.input("_.privateKey")).sendKeys(privateKey);
-        find(by.xpath("//button[@id='credentials-add-submit-button']")).click();
+        s.find(by.xpath("//button[@id='credentials-add-submit-button']")).click();
 
 
         keyItem = credentialSelect.findElement(by.option(String.format("%s (%s)", username, description)));
