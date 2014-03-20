@@ -2,8 +2,8 @@ package org.jenkinsci.test.acceptance.resolver;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import org.jenkinsci.test.acceptance.controller.Machine;
-import org.jenkinsci.test.acceptance.controller.Ssh;
+import org.jenkinsci.test.acceptance.machines.Machine;
+import org.jenkinsci.test.acceptance.Ssh;
 
 import java.io.File;
 import java.io.IOException;

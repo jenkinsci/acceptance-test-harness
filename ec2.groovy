@@ -1,5 +1,10 @@
+import org.jenkinsci.test.acceptance.PublicKeyAuthenticator
 import org.jenkinsci.test.acceptance.controller.*
 import org.jenkinsci.test.acceptance.guice.TestScope
+import org.jenkinsci.test.acceptance.machines.Ec2Provider
+import org.jenkinsci.test.acceptance.machines.JenkinsProvider
+import org.jenkinsci.test.acceptance.machines.MachineProvider
+import org.jenkinsci.test.acceptance.machines.MultitenancyMachineProvider
 import org.jenkinsci.test.acceptance.resolver.JenkinsDownloader
 import org.jenkinsci.test.acceptance.resolver.JenkinsResolver
 import org.jenkinsci.test.acceptance.slave.SlaveProvider
@@ -8,7 +13,7 @@ import org.jenkinsci.test.acceptance.slave.SshSlaveProvider
 def localWar = new File("jenkins.war")
 
 def common = module {
-    bind(Authenticator).named("publicKeyAuthenticator").to(PublicKeyAuthenticator)
+    bind(org.jenkinsci.test.acceptance.Authenticator).named("publicKeyAuthenticator").to(PublicKeyAuthenticator)
 
     jenkins_md5_sum="b6aacb5f25a323120f8c791fe2d947b9"
     bind JenkinsResolver toInstance new JenkinsDownloader("http://mirrors.jenkins-ci.org/war/latest/jenkins.war")

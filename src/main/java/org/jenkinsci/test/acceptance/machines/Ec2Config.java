@@ -1,4 +1,4 @@
-package org.jenkinsci.test.acceptance.controller;
+package org.jenkinsci.test.acceptance.machines;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;

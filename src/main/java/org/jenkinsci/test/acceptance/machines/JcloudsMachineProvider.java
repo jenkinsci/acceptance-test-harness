@@ -1,4 +1,4 @@
-package org.jenkinsci.test.acceptance.controller;
+package org.jenkinsci.test.acceptance.machines;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
@@ -24,6 +24,7 @@ import org.jclouds.logging.slf4j.config.SLF4JLoggingModule;
 import org.jclouds.providers.ProviderMetadata;
 import org.jclouds.providers.Providers;
 import org.jclouds.sshj.config.SshjSshClientModule;
+import org.jenkinsci.test.acceptance.Ssh;
 import org.jenkinsci.test.acceptance.guice.SubWorld;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.jenkinsci.utils.process.ProcessInputStream;
@@ -192,6 +193,7 @@ public abstract class JcloudsMachineProvider implements MachineProvider,Closeabl
         try {
             nodes = getRunningInstances();
             if(nodes.isEmpty()) { //get new ones
+                logger.info(String.format("No running instances found, create %s new machines",maxNumOfMachines));
                 nodes = computeService.createNodesInGroup(getGroupName(), maxNumOfMachines, template);
             }
         } catch (RunNodesException e) {
@@ -277,12 +279,12 @@ public abstract class JcloudsMachineProvider implements MachineProvider,Closeabl
         int timeout = 120000; //2 minute
         long startTime = System.currentTimeMillis();
         while(true){
-            logger.info(String.format("Making sure sshd is up on host: %s...",host));
+            logger.info(String.format("Making sure sshd is up on host: %s ",host));
             try {
                 if(System.currentTimeMillis() - startTime > timeout){
                     throw new RuntimeException(String.format("ssh failed to work within %s seconds.",timeout/1000));
                 }
-                Ssh ssh = new Ssh(user, host);
+                Ssh ssh = new Ssh(host);
                 authenticator().authenticate(ssh.getConnection());
                 logger.info("sshd is ready on host: "+host);
                 ssh.destroy();

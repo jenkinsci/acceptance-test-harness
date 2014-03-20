@@ -1,10 +1,10 @@
 package org.jenkinsci.test.acceptance.resolver;
 
-import org.jenkinsci.test.acceptance.controller.Machine;
-import org.jenkinsci.test.acceptance.controller.Ssh;
+import org.jenkinsci.test.acceptance.machines.Machine;
+import org.jenkinsci.test.acceptance.Ssh;
 
 /**
- * Creates a soft link on the file system. To be used only with {@link org.jenkinsci.test.acceptance.controller.MultitenancyMachineProvider}
+ * Creates a soft link on the file system. To be used only with {@link org.jenkinsci.test.acceptance.machines.MultitenancyMachineProvider}
  *
  * @author Vivek Pandey
  */

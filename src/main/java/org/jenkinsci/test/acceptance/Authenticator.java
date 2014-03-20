@@ -1,4 +1,4 @@
-package org.jenkinsci.test.acceptance.controller;
+package org.jenkinsci.test.acceptance;
 
 import com.trilead.ssh2.Connection;
 

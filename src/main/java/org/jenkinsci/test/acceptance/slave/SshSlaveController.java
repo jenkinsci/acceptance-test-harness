@@ -2,8 +2,8 @@ package org.jenkinsci.test.acceptance.slave;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import org.jenkinsci.test.acceptance.controller.Machine;
-import org.jenkinsci.test.acceptance.controller.SshKeyPair;
+import org.jenkinsci.test.acceptance.machines.Machine;
+import org.jenkinsci.test.acceptance.SshKeyPair;
 import org.jenkinsci.test.acceptance.po.DumbSlave;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.Slave;

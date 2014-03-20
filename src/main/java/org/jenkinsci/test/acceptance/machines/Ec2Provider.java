@@ -1,4 +1,4 @@
-package org.jenkinsci.test.acceptance.controller;
+package org.jenkinsci.test.acceptance.machines;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -8,6 +8,9 @@ import org.jclouds.compute.domain.Template;
 import org.jclouds.ec2.EC2Api;
 import org.jclouds.ec2.compute.options.EC2TemplateOptions;
 import org.jclouds.net.domain.IpProtocol;
+import org.jenkinsci.test.acceptance.Authenticator;
+import org.jenkinsci.test.acceptance.Ssh;
+import org.jenkinsci.test.acceptance.SshKeyPair;
 import org.jenkinsci.test.acceptance.guice.SubWorld;
 import org.jenkinsci.test.acceptance.guice.WorldCleaner;
 import org.slf4j.Logger;
@@ -33,7 +36,7 @@ public class Ec2Provider extends JcloudsMachineProvider {
 
     @Inject
     @Named("publicKeyAuthenticator")
-    private  Authenticator authenticator;
+    private Authenticator authenticator;
 
     @Inject
     private SshKeyPair keyPair;
@@ -52,7 +55,7 @@ public class Ec2Provider extends JcloudsMachineProvider {
     public void postStartupSetup(NodeMetadata node) {
         Ssh ssh=null;
         try {
-            ssh = new Ssh(config.getUser(),node.getPublicAddresses().iterator().next());
+            ssh = new Ssh(node.getPublicAddresses().iterator().next());
             authenticator().authenticate(ssh.getConnection());
             ssh.getConnection().exec(String.format("pkill -u $(id -u %s)", config.getUser()), System.out);
         } catch (IOException | InterruptedException e) {

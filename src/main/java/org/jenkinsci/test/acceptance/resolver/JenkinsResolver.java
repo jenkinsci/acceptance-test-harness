@@ -1,6 +1,6 @@
 package org.jenkinsci.test.acceptance.resolver;
 
-import org.jenkinsci.test.acceptance.controller.Machine;
+import org.jenkinsci.test.acceptance.machines.Machine;
 
 /**
  * Make Jenkins war or other plugins (subject under test) available on {@link Machine}.

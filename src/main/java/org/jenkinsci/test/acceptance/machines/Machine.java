@@ -1,6 +1,7 @@
-package org.jenkinsci.test.acceptance.controller;
+package org.jenkinsci.test.acceptance.machines;
 
 import com.google.inject.ProvidedBy;
+import org.jenkinsci.test.acceptance.Ssh;
 
 import java.io.Closeable;
 import java.io.IOException;

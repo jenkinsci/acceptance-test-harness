@@ -1,6 +1,7 @@
-package org.jenkinsci.test.acceptance.controller;
+package org.jenkinsci.test.acceptance.machines;
 
 import org.jclouds.compute.domain.NodeMetadata;
+import org.jenkinsci.test.acceptance.Ssh;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +49,7 @@ public class JcloudsMachine implements Machine {
     @Override
     public Ssh connect() {
         try {
-            Ssh ssh = new Ssh(getUser(),getPublicIpAddress());
+            Ssh ssh = new Ssh(getPublicIpAddress());
             machineProvider.authenticator().authenticate(ssh.getConnection());
             return ssh;
         } catch (IOException e) {

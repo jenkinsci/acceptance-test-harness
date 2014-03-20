@@ -1,7 +1,11 @@
-package org.jenkinsci.test.acceptance.controller;
+package org.jenkinsci.test.acceptance.machines;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import org.jenkinsci.test.acceptance.controller.JenkinsController;
+import org.jenkinsci.test.acceptance.controller.RemoteJenkinsController;
+import org.jenkinsci.test.acceptance.Ssh;
+import org.jenkinsci.test.acceptance.SshKeyPair;
 import org.jenkinsci.test.acceptance.guice.TestCleaner;
 import org.jenkinsci.test.acceptance.guice.TestScope;
 import org.jenkinsci.test.acceptance.resolver.JenkinsResolver;
@@ -13,7 +17,7 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * Creates {@link JenkinsController} that launches Jenkins on a {@link Machine}.
+ * Creates {@link org.jenkinsci.test.acceptance.controller.JenkinsController} that launches Jenkins on a {@link org.jenkinsci.test.acceptance.machines.Machine}.
  *
  * @author Vivek Pandey
  */

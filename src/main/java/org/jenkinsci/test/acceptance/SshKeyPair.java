@@ -1,4 +1,4 @@
-package org.jenkinsci.test.acceptance.controller;
+package org.jenkinsci.test.acceptance;
 
 import com.google.inject.ProvidedBy;
 import org.apache.commons.io.FileUtils;

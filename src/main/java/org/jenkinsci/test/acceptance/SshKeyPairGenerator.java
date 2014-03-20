@@ -1,4 +1,4 @@
-package org.jenkinsci.test.acceptance.controller;
+package org.jenkinsci.test.acceptance;
 
 import org.apache.xerces.impl.dv.util.Base64;
 import org.bouncycastle.openssl.PEMWriter;

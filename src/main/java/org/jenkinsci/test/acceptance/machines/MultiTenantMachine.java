@@ -1,13 +1,14 @@
-package org.jenkinsci.test.acceptance.controller;
+package org.jenkinsci.test.acceptance.machines;
 
 import com.google.inject.Inject;
+import org.jenkinsci.test.acceptance.Ssh;
 
 import java.io.IOException;
 
 /**
  * @author Vivek Pandey
  */
-public class MultiTenantMachine implements Machine{
+public class MultiTenantMachine implements Machine {
 
     private final Machine base;
     private final String dir;
@@ -18,7 +19,7 @@ public class MultiTenantMachine implements Machine{
     public MultiTenantMachine(MultitenancyMachineProvider provider, Machine machine) {
         this.base = machine;
         this.provider = provider;
-        String mtSuffix = String.format("mt_%s",JcloudsMachine.newDirSuffix());
+        String mtSuffix = String.format("mt_%s", JcloudsMachine.newDirSuffix());
         this.dir = String.format("%s%s/",machine.dir(), mtSuffix);
         Ssh ssh = connect();
         ssh.executeRemoteCommand("mkdir -p "+this.dir);

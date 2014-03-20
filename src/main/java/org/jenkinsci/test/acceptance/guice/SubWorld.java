@@ -2,7 +2,7 @@ package org.jenkinsci.test.acceptance.guice;
 
 import com.google.inject.Injector;
 import com.google.inject.Provider;
-import org.jenkinsci.test.acceptance.controller.MachineProvider;
+import org.jenkinsci.test.acceptance.machines.MachineProvider;
 
 /**
  * Represents a parallel Guice {@link Injector} inside {@link World}

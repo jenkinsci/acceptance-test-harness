@@ -1,6 +1,7 @@
-package org.jenkinsci.test.acceptance.controller;
+package org.jenkinsci.test.acceptance.machines;
 
 import com.google.inject.Provider;
+import org.jenkinsci.test.acceptance.Authenticator;
 import org.jenkinsci.test.acceptance.slave.SlaveProvider;
 
 /**
@@ -20,7 +21,7 @@ public interface MachineProvider extends Provider<Machine> {
 
     /**
      * A MachineProvider should encapsulates how authentication is done via
-     * {@link Authenticator} contract.
+     * {@link org.jenkinsci.test.acceptance.Authenticator} contract.
      */
     public Authenticator authenticator();
 }

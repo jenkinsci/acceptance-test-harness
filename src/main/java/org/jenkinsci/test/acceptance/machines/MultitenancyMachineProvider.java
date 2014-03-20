@@ -1,8 +1,9 @@
-package org.jenkinsci.test.acceptance.controller;
+package org.jenkinsci.test.acceptance.machines;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import org.jenkinsci.test.acceptance.Authenticator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Vivek Pandey
  */
 @Singleton
-public class MultitenancyMachineProvider implements MachineProvider{
+public class MultitenancyMachineProvider implements MachineProvider {
 
     private final MachineProvider base;
 
