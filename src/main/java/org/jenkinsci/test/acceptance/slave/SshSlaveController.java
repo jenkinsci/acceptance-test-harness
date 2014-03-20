@@ -2,8 +2,8 @@ package org.jenkinsci.test.acceptance.slave;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import org.jenkinsci.test.acceptance.machine.Machine;
 import org.jenkinsci.test.acceptance.SshKeyPair;
+import org.jenkinsci.test.acceptance.machine.Machine;
 import org.jenkinsci.test.acceptance.po.DumbSlave;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.Slave;
@@ -12,10 +12,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -25,7 +26,7 @@ public class SshSlaveController extends SlaveController {
     private final Machine machine;
     private final SshKeyPair keyPair;
     private final int slaveReadyTimeOutInSec;
-    private final ExecutorService executor = Executors.newFixedThreadPool(1);
+    final AtomicBoolean slaveWaitComplete = new AtomicBoolean(false);
 
     @Inject
     public SshSlaveController(Machine machine, SshKeyPair keyPair, @Named("slaveReadyTimeOutInSec") int slaveReadyTimeOutInSec) {
@@ -46,24 +47,63 @@ public class SshSlaveController extends SlaveController {
         final Slave s = create(machine.getPublicIpAddress(), j);
 
         //Slave is configured, now wait till its online
-        return executor.submit(new Callable<Slave>() {
+        return new Future<Slave>(){
+
             @Override
-            public Slave call() throws Exception {
-                logger.info(String.format("Wait for the new slave %s to come online in %s seconds",machine.getId(), slaveReadyTimeOutInSec));
-                waitForCond(new Callable<Boolean>() {
-                    public Boolean call() throws Exception {
-                        return s.isOnline();
-                    }
-                }, slaveReadyTimeOutInSec);
+            public boolean cancel(boolean mayInterruptIfRunning) {
+                return false;
+            }
+
+            @Override
+            public boolean isCancelled() {
+                return slaveWaitComplete.get();
+            }
+
+            @Override
+            public boolean isDone() {
+                return slaveWaitComplete.get() || s.isOnline();
+            }
+
+            @Override
+            public Slave get() throws InterruptedException, ExecutionException {
+                waitForOnLineSlave(s, slaveReadyTimeOutInSec);
                 return s;
             }
-        });
+
+            @Override
+            public Slave get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+                if(unit != TimeUnit.SECONDS){
+                    timeout = unit.toSeconds(timeout);
+                }
+                waitForOnLineSlave(s, (int) timeout);
+                return s;
+
+            }
+        };
     }
 
     @Override
     public void close() throws IOException {
-        executor.shutdown();
-        executor.shutdownNow();
+
+    }
+
+    private void waitForOnLineSlave(final Slave s, int timeout){
+        logger.info(String.format("Wait for the new slave %s to come online in %s seconds",machine.getId(), timeout));
+        try {
+            long endTime = System.currentTimeMillis()+ TimeUnit.SECONDS.toMillis(timeout);
+            while (System.currentTimeMillis()<endTime) {
+                if(s.isOnline()){
+                    slaveWaitComplete.set(true);
+                    return;
+                }
+                sleep(1000);
+            }
+            throw new org.openqa.selenium.TimeoutException(String.format("Slave could not be online in %s seconds",timeout));
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new Error(String.format("An exception occurred while waiting for slave to be online in %s seconds",timeout),e);
+        }
     }
 
     private Slave create(String host, Jenkins j) {

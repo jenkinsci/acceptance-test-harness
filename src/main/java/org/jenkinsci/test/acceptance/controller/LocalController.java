@@ -4,11 +4,9 @@ import org.apache.commons.io.input.TeeInputStream;
 import org.codehaus.plexus.util.FileUtils;
 import org.jenkinsci.utils.process.ProcessInputStream;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.util.HashMap;
 import java.util.Map;
@@ -178,7 +176,14 @@ public abstract class LocalController extends JenkinsController {
 
             FileUtils.forceDelete(tempDir);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            //maybe process is shutting down, wait for a sec then try again
+            try {
+                Thread.sleep(1000);
+                FileUtils.forceDelete(tempDir);
+            } catch (InterruptedException | IOException e1) {
+                throw new RuntimeException(e);
+            }
+
         }
     }
 

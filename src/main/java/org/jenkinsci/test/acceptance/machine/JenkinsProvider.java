@@ -26,9 +26,7 @@ public class JenkinsProvider implements Provider<JenkinsController> {
 
     private static final Logger logger = LoggerFactory.getLogger(JenkinsProvider.class);
 
-    private final Machine machine;
-
-
+    private final MachineProvider machineProvider;
 
     private final JenkinsResolver jenkinsResolver;
 
@@ -40,19 +38,12 @@ public class JenkinsProvider implements Provider<JenkinsController> {
     private TestCleaner cleaner;
 
     @Inject
-    public JenkinsProvider(Machine machine, JenkinsResolver jenkinsResolver, SshKeyPair keyPair) {
-        this.machine = machine;
+    public JenkinsProvider(MachineProvider provider, JenkinsResolver jenkinsResolver, SshKeyPair keyPair) {
+        this.machineProvider = provider;
         this.jenkinsResolver = jenkinsResolver;
+        this.privateKeyFile = keyPair.privateKey;
         logger.info("New Jenkins Provider created");
-        try{
-            //install jenkins WAR
-            this.jenkinsWar = JenkinsResolver.JENKINS_TEMP_DIR+"jenkins.war";
-            jenkinsResolver.materialize(machine, jenkinsWar);
-            this.privateKeyFile = keyPair.privateKey;
-        }catch(Exception e){
-            logger.error("Error during setting up Jenkins: "+e.getMessage(),e);
-            throw new AssertionError(e);
-        }
+        this.jenkinsWar = JenkinsResolver.JENKINS_TEMP_DIR+"jenkins.war";
     }
 
     @Override
@@ -69,6 +60,15 @@ public class JenkinsProvider implements Provider<JenkinsController> {
     }
 
     private JenkinsController createNewJenkinsController(){
+        Machine machine = machineProvider.get();
+        try{
+            //install jenkins WAR
+            jenkinsResolver.materialize(machine, jenkinsWar);
+        }catch(Exception e){
+            logger.error("Error during setting up Jenkins: "+e.getMessage(),e);
+            throw new AssertionError(e);
+        }
+
         String jenkinsHome = machine.dir()+newJenkinsHome()+"/";
         String pluginDir = jenkinsHome +"plugins/";
         String path = JenkinsResolver.JENKINS_TEMP_DIR+"form-element-path.hpi";

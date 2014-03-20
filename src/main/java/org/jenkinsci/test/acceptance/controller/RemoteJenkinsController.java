@@ -18,6 +18,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
 
+import static java.lang.System.out;
+
 /**
  * A {@link JenkinsController} that runs on a remote machine. It can be injected in tests using
  *
@@ -110,7 +112,11 @@ public class RemoteJenkinsController extends JenkinsController {
 
     @Override
     public void diagnose(Throwable cause) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        out.println("Error: "+cause.getMessage());
+        cause.printStackTrace();
+        out.println("It looks like there was an error, here's the console from Jenkins:");
+        out.println("--------------------------------------------------------------------------");
+        out.println(logWatcher.fullLog());
     }
 
     @Override
