@@ -83,7 +83,7 @@ public class ByFactory {
     private static String fieldXPath(String base, String locator) {
         // TODO: there's actually a lot more
         return String.format(
-                "  .//%2$s[./@id = '%1$s' or ./@name = '%1$s' or ./@placeholder = '%1$s' or ./@id = //label[contains(normalize-space(string(.)), '%1$s')]/@for]"+
+                "  .//%2$s[./@id = '%1$s' or ./@name = '%1$s' or ./@value = '%1$s' or ./@placeholder = '%1$s' or ./@id = //label[contains(normalize-space(string(.)), '%1$s')]/@for]"+
                 "| .//label[contains(normalize-space(string(.)), '%1$s')]//%2$s"+
                 "| .//label[contains(normalize-space(string(.)), '%1$s')][@class='attach-previous']/preceding-sibling::%2$s",locator, base);
     }
