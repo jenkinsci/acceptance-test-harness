@@ -3,6 +3,10 @@ Feature: Configure/build freestyle jobs
   As a user
   I want to configure and run a series of different freestyle-based jobs
 
+  **********************************************************************************
+     THIS TEST IS ALREADY PORTED OVER TO JAVA AS-IS. NO NEED TO PORT TO JUNIT
+  **********************************************************************************
+
   Scenario: Create a simple job
     When I create a job named "MAGICJOB"
     And I visit the home page
