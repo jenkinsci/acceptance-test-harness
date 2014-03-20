@@ -2,7 +2,7 @@ package org.jenkinsci.test.acceptance.resolver;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import org.jenkinsci.test.acceptance.machines.Machine;
+import org.jenkinsci.test.acceptance.machine.Machine;
 import org.jenkinsci.test.acceptance.Ssh;
 
 import java.io.File;

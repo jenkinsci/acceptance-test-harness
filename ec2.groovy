@@ -1,10 +1,10 @@
 import org.jenkinsci.test.acceptance.PublicKeyAuthenticator
 import org.jenkinsci.test.acceptance.controller.*
 import org.jenkinsci.test.acceptance.guice.TestScope
-import org.jenkinsci.test.acceptance.machines.Ec2Provider
-import org.jenkinsci.test.acceptance.machines.JenkinsProvider
-import org.jenkinsci.test.acceptance.machines.MachineProvider
-import org.jenkinsci.test.acceptance.machines.MultitenancyMachineProvider
+import org.jenkinsci.test.acceptance.machine.Ec2Provider
+import org.jenkinsci.test.acceptance.machine.JenkinsProvider
+import org.jenkinsci.test.acceptance.machine.MachineProvider
+import org.jenkinsci.test.acceptance.machine.MultitenancyMachineProvider
 import org.jenkinsci.test.acceptance.resolver.JenkinsDownloader
 import org.jenkinsci.test.acceptance.resolver.JenkinsResolver
 import org.jenkinsci.test.acceptance.slave.SlaveProvider

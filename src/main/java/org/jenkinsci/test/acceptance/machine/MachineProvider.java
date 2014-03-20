@@ -1,4 +1,4 @@
-package org.jenkinsci.test.acceptance.machines;
+package org.jenkinsci.test.acceptance.machine;
 
 import com.google.inject.Provider;
 import org.jenkinsci.test.acceptance.Authenticator;

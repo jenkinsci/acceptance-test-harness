@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.trilead.ssh2.Connection;
 import org.codehaus.plexus.util.FileUtils;
-import org.jenkinsci.test.acceptance.machines.Machine;
+import org.jenkinsci.test.acceptance.machine.Machine;
 import org.jenkinsci.test.acceptance.Ssh;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

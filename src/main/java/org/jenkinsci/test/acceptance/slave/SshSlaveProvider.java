@@ -1,8 +1,8 @@
 package org.jenkinsci.test.acceptance.slave;
 
 import com.google.inject.name.Named;
-import org.jenkinsci.test.acceptance.machines.Machine;
-import org.jenkinsci.test.acceptance.machines.MachineProvider;
+import org.jenkinsci.test.acceptance.machine.Machine;
+import org.jenkinsci.test.acceptance.machine.MachineProvider;
 import org.jenkinsci.test.acceptance.SshKeyPair;
 
 import javax.inject.Inject;

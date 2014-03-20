@@ -1,4 +1,4 @@
-package org.jenkinsci.test.acceptance.machines;
+package org.jenkinsci.test.acceptance.machine;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -17,7 +17,7 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * Creates {@link org.jenkinsci.test.acceptance.controller.JenkinsController} that launches Jenkins on a {@link org.jenkinsci.test.acceptance.machines.Machine}.
+ * Creates {@link org.jenkinsci.test.acceptance.controller.JenkinsController} that launches Jenkins on a {@link org.jenkinsci.test.acceptance.machine.Machine}.
  *
  * @author Vivek Pandey
  */

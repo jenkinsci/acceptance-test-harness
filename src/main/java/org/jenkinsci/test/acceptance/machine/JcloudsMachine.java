@@ -1,4 +1,4 @@
-package org.jenkinsci.test.acceptance.machines;
+package org.jenkinsci.test.acceptance.machine;
 
 import org.jclouds.compute.domain.NodeMetadata;
 import org.jenkinsci.test.acceptance.Ssh;

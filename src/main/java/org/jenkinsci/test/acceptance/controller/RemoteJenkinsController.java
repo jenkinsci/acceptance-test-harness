@@ -2,7 +2,7 @@ package org.jenkinsci.test.acceptance.controller;
 
 import jnr.ffi.LibraryLoader;
 import org.apache.commons.io.input.TeeInputStream;
-import org.jenkinsci.test.acceptance.machines.Machine;
+import org.jenkinsci.test.acceptance.machine.Machine;
 import org.jenkinsci.test.acceptance.utils.GNUCLibrary;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.jenkinsci.utils.process.ProcessInputStream;
@@ -32,7 +32,7 @@ import java.util.Collections;
  * </pre>
  *
  * It resolves Jenkins and plugin installation using {@link org.jenkinsci.test.acceptance.resolver.JenkinsResolver}.
- * {@link #close()} also calls {@link org.jenkinsci.test.acceptance.machines.Machine#close()}.
+ * {@link #close()} also calls {@link org.jenkinsci.test.acceptance.machine.Machine#close()}.
  *
  * @author Vivek Pandey
  */

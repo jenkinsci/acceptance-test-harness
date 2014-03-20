@@ -1,7 +1,7 @@
 package org.jenkinsci.test.acceptance.resolver;
 
 import org.codehaus.plexus.util.FileUtils;
-import org.jenkinsci.test.acceptance.machines.Machine;
+import org.jenkinsci.test.acceptance.machine.Machine;
 import org.jenkinsci.test.acceptance.Ssh;
 
 /**
