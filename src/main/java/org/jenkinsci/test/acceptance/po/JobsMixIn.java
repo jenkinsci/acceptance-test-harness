@@ -22,7 +22,7 @@ public class JobsMixIn extends MixIn {
 
         visit("newJob");
         fillIn("name", name);
-        find(By.xpath("//input[starts-with(@value, '" + sut_type + "')]")).click();
+        find(by.radioButton(sut_type)).click();
         clickButton("OK");
 
         final T j = get(type, name);
