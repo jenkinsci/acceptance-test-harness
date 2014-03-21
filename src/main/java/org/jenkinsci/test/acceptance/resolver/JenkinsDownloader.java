@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.trilead.ssh2.Connection;
 import org.codehaus.plexus.util.FileUtils;
+import org.codehaus.plexus.util.StringUtils;
 import org.jenkinsci.test.acceptance.machine.Machine;
 import org.jenkinsci.test.acceptance.Ssh;
 import org.slf4j.Logger;
@@ -21,7 +22,7 @@ public class JenkinsDownloader implements JenkinsResolver {
 
     private final String jenkinsWarLocation;
 
-    @Inject
+    @Inject(optional = true)
     @Named("jenkins_md5_sum")
     private String jenkinsMd5Sum;
 
@@ -32,16 +33,17 @@ public class JenkinsDownloader implements JenkinsResolver {
 
     @Override
     public void materialize(Machine machine, String path) {
-        String jenkinsMd5Sum = this.jenkinsMd5Sum;
-        try {
-        URL url = new URL(jenkinsWarLocation+".md5");
-            String content = url.getContent().toString().trim();
-            if (content.matches("[a-zA-Z0-9]{32}")) {
-                jenkinsMd5Sum = content;
-                logger.info("Remote MD5 sum of jenkins.war is {}", jenkinsMd5Sum);
+        if (StringUtils.isBlank(jenkinsMd5Sum)) {
+            try {
+                URL url = new URL(jenkinsWarLocation + ".md5");
+                String content = url.getContent().toString().trim();
+                if (content.matches("[a-zA-Z0-9]{32}")) {
+                    jenkinsMd5Sum = content;
+                    logger.info("Remote MD5 sum of jenkins.war is {}", jenkinsMd5Sum);
+                }
+            } catch (IOException e) {
+                // forget it!
             }
-        } catch (IOException e) {
-            // forget it!
         }
         Ssh ssh = machine.connect();
         if(!remoteFileExists(ssh.getConnection(),path,jenkinsMd5Sum)){
