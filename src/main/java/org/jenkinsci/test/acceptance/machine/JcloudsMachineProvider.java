@@ -324,7 +324,7 @@ public abstract class JcloudsMachineProvider implements MachineProvider,Closeabl
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
             String username = System.getProperty("user.name").toLowerCase();
-            String localHost = getLocalHostName().toLowerCase();
+            String localHost = getLocalHostName().toLowerCase().replace(".","");
             StringBuilder sb = new StringBuilder(username);
             sb.append(localHost).append(getConfigFileContent());
             if(seed != null){
