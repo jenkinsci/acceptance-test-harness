@@ -3,10 +3,12 @@ package org.jenkinsci.test.acceptance.machine;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import org.codehaus.plexus.util.FileUtils;
 import org.jclouds.compute.domain.NodeMetadata;
 import org.jclouds.compute.domain.Template;
 import org.jclouds.ec2.EC2Api;
 import org.jclouds.ec2.compute.options.EC2TemplateOptions;
+import org.jclouds.ec2.domain.Volume;
 import org.jclouds.net.domain.IpProtocol;
 import org.jenkinsci.test.acceptance.Authenticator;
 import org.jenkinsci.test.acceptance.Ssh;
@@ -16,15 +18,10 @@ import org.jenkinsci.test.acceptance.guice.WorldCleaner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.xml.bind.DatatypeConverter;
+import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.security.GeneralSecurityException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.util.Collections;
-
-import static com.google.common.base.Charsets.UTF_8;
 
 /**
  * @author Vivek Pandey
@@ -55,11 +52,20 @@ public class Ec2Provider extends JcloudsMachineProvider {
     public void postStartupSetup(NodeMetadata node) {
         Ssh ssh=null;
         try {
-            ssh = new Ssh(node.getPublicAddresses().iterator().next());
+            String host = node.getPublicAddresses().iterator().next();
+            ssh = new Ssh(host);
             authenticator().authenticate(ssh.getConnection());
             ssh.getConnection().exec(String.format("pkill -u $(id -u %s)", config.getUser()), System.out);
+
+            //set instance initiated shutdown behavior to terminate. This means any shutdown will result in to instance
+            // termination
+            EC2Api client = contextBuilder.buildApi(EC2Api.class);
+            client.getInstanceApi().get().setInstanceInitiatedShutdownBehaviorForInstanceInRegion(config.getRegion(),
+                    node.getProviderId(), Volume.InstanceInitiatedShutdownBehavior.TERMINATE);
+            copyAutoterminateScript(host);
         } catch (IOException | InterruptedException e) {
             logger.error(e.getMessage());
+            throw new RuntimeException(e);
         }finally {
             if(ssh != null){
                 ssh.destroy();
@@ -127,18 +133,23 @@ public class Ec2Provider extends JcloudsMachineProvider {
             }
         options.keyPair(kn);
 
-        //tag
-        //Tag the provisioned instance with md5(CWD+HOST_IP_ADDRESS)
-        try {
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            md.update(String.format("%s%s%s",System.getProperty("user.dir"),System.currentTimeMillis(), new SecureRandom().nextLong()).getBytes(UTF_8));
-            byte[] digest = md.digest();
-            String tag = DatatypeConverter.printHexBinary(digest);
-            options.tags(Collections.singletonList(tag));
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
         return template;
+    }
+
+    private void  copyAutoterminateScript(String host) throws IOException, InterruptedException {
+        //run terminate script
+        URL script = this.getClass().getClassLoader().getResource("org/jenkinsci/test/acceptance/machine/autoterminate.sh");
+        File tempScriptFile = new File("autoterminate.sh");
+        FileUtils.copyURLToFile(script, tempScriptFile);
+
+        logger.info(String.format("Executing auto-terminate script on remote machine: %s, it will terminate after 180 minutes of inactivity.",host));
+        Ssh ssh = new Ssh(host);
+        authenticator().authenticate(ssh.getConnection());
+        ssh.copyTo(tempScriptFile.getAbsolutePath(), "autoterminate.sh", ".");
+        ssh.executeRemoteCommand("chmod +x ./autoterminate.sh ; touch nohup.out");
+
+        //wait for 3 hours before termination
+        ssh.getConnection().exec(String.format("nohup ./autoterminate.sh %s %s `</dev/null` >nohup.out 2>&1 &", config.getUser(), 180), System.out);
     }
 
 
