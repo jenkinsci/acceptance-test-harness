@@ -55,7 +55,4 @@ it's own sandboxed workspace.
 * hamcrest matchers (TODO)
 * how to use this from your own module (TODO)
 
-* EC2 provider doc (notes. to be reorganized by Vivek)
-    * location of the key file and where [this format came from](http://aws.amazon.com/cli/)
-    * or run aws cli to interactively [et up the key](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html)
-    * try it out with 'aws ec2 describe-instances' to make sure credential is legit
+* [EC2 provider configuration](docs/EC2-CONFIG.md)
