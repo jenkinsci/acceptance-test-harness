@@ -2,11 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <properties>
-    <selenium.version>2.40.0</selenium.version>
-    <aether.version>0.9.0.v20140226</aether.version>
-    <maven.version>3.1.0</maven.version>
-  </properties>
+
   <parent>
     <groupId>org.jenkins-ci</groupId>
     <artifactId>jenkins</artifactId>
@@ -15,47 +11,32 @@
 
   <artifactId>acceptance-test-harness</artifactId>
   <version>1.0-SNAPSHOT</version>
-  <name>Acceptance Test Harness</name>
 
-  <build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>1.7</source>
-          <target>1.7</target>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>1.2.1</version>
-        <executions>
-          <execution>
-            <id>cucumber</id>
-            <phase>test</phase>
-            <goals>
-              <goal>java</goal>
-            </goals>
-            <configuration>
-              <mainClass>org.jenkinsci.test.acceptance.cucumber.Main</mainClass>
-              <arguments>
-                <argument>--format</argument>
-                <argument>junit:target/cucumber.xml</argument>
-                <argument>--format</argument>
-                <argument>pretty</argument>
-                <argument>--format</argument>
-                <argument>html:target/cucumber-html-report</argument>
-                <argument>--tags</argument>
-                <argument>~@wip</argument>
-                <argument>${project.basedir}/features</argument>
-              </arguments>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
+  <name>Acceptance Test Harness</name>
+  <licenses>
+    <license>
+      <name>MIT License</name>
+      <url>http://jenkins-ci.org/mit-license</url>
+    </license>
+  </licenses>
+
+  <scm>
+    <connection>scm:git:git://github.com/jenkinsci/${project.artifactId}.git</connection>
+    <developerConnection>scm:git:git@github.com:jenkinsci/${project.artifactId}.git</developerConnection>
+  </scm>
+
+  <properties>
+    <selenium.version>2.40.0</selenium.version>
+    <aether.version>0.9.0.v20140226</aether.version>
+    <maven.version>3.1.0</maven.version>
+  </properties>
+
+  <repositories>
+    <repository>
+      <id>repo.jenkins-ci.org</id>
+      <url>http://repo.jenkins-ci.org/public/</url>
+    </repository>
+  </repositories>
 
   <dependencies>
     <!-- Aether -->
@@ -266,24 +247,55 @@
     </dependency>
   </dependencies>
 
-  <scm>
-    <connection>scm:git:git://github.com/jenkinsci/${project.artifactId}.git</connection>
-    <developerConnection>scm:git:git@github.com:jenkinsci/${project.artifactId}.git</developerConnection>
-  </scm>
-
-  <repositories>
-    <repository>
-      <id>repo.jenkins-ci.org</id>
-      <url>http://repo.jenkins-ci.org/public/</url>
-    </repository>
-  </repositories>
-
-  <licenses>
-    <license>
-      <name>MIT License</name>
-      <url>http://jenkins-ci.org/mit-license</url>
-    </license>
-  </licenses>
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-source-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.7</source>
+          <target>1.7</target>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.2.1</version>
+        <executions>
+          <execution>
+            <id>cucumber</id>
+            <phase>test</phase>
+            <goals>
+              <goal>java</goal>
+            </goals>
+            <configuration>
+              <mainClass>org.jenkinsci.test.acceptance.cucumber.Main</mainClass>
+              <arguments>
+                <argument>--format</argument>
+                <argument>junit:target/cucumber.xml</argument>
+                <argument>--format</argument>
+                <argument>pretty</argument>
+                <argument>--format</argument>
+                <argument>html:target/cucumber-html-report</argument>
+                <argument>--tags</argument>
+                <argument>~@wip</argument>
+                <argument>${project.basedir}/features</argument>
+              </arguments>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 
   <profiles>
     <profile>
