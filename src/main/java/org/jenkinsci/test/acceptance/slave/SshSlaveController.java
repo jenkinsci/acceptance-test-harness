@@ -84,7 +84,13 @@ public class SshSlaveController extends SlaveController {
 
     @Override
     public void close() throws IOException {
-
+        //exit from wait if any
+        if(!slaveWaitComplete.get()){
+            slaveWaitComplete.set(true);
+            sleep(1000);
+        }
+        stop();
+        machine.close();
     }
 
     private void waitForOnLineSlave(final Slave s, int timeout){
@@ -112,6 +118,9 @@ public class SshSlaveController extends SlaveController {
         final DumbSlave s = j.slaves.create(DumbSlave.class);
 
         s.find(by.input("_.host")).sendKeys(host);
+
+        s.waitFor(s.by.option(String.format("%s (%s)", machine.getUser(), "SSH Key setup")));
+
         s.save();
         return s;
 
