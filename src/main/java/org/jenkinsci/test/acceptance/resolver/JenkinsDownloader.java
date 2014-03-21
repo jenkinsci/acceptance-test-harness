@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.URL;
 
 /**
  *
@@ -31,6 +32,17 @@ public class JenkinsDownloader implements JenkinsResolver {
 
     @Override
     public void materialize(Machine machine, String path) {
+        String jenkinsMd5Sum = this.jenkinsMd5Sum;
+        try {
+        URL url = new URL(jenkinsWarLocation+".md5");
+            String content = url.getContent().toString().trim();
+            if (content.matches("[a-zA-Z0-9]{32}")) {
+                jenkinsMd5Sum = content;
+                logger.info("Remote MD5 sum of jenkins.war is {}", jenkinsMd5Sum);
+            }
+        } catch (IOException e) {
+            // forget it!
+        }
         Ssh ssh = machine.connect();
         if(!remoteFileExists(ssh.getConnection(),path,jenkinsMd5Sum)){
             ssh.executeRemoteCommand("mkdir -p "+ FileUtils.dirname(path));
