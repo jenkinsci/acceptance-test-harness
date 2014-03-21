@@ -23,6 +23,9 @@
  */
 package plugins;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Native;
@@ -30,6 +33,7 @@ import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.groovy.GroovyInstallation;
 import org.jenkinsci.test.acceptance.plugins.groovy.GroovyStep;
 import org.jenkinsci.test.acceptance.plugins.groovy.SystemGroovyStep;
+import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
 
@@ -98,6 +102,34 @@ public class GroovyPluginTest extends AbstractJUnitTest {
         );
 
         shouldReport("version: 2.2.1");
+    }
+
+    @Test @Native("groovy")
+    public void use_native_groovy() {
+        jenkins.configure();
+        GroovyInstallation groovy = jenkins.getConfigPage().addTool(GroovyInstallation.class);
+        groovy.name.set("local-groovy");
+        groovy.useNative();
+        jenkins.save();
+
+        configureJob();
+
+        job.addShellStep("groovy --version"); // Get local groovy version
+
+        final GroovyStep step = job.addBuildStep(GroovyStep.class);
+        step.version.select("local-groovy");
+        step.script(
+                "println 'version: ' + groovy.lang.GroovySystem.getVersion()"
+        );
+
+        job.save();
+        Build build = job.queueBuild().shouldSucceed();
+
+        Matcher matcher = Pattern.compile("Groovy Version: (.+) JVM:").matcher(build.getConsole());
+        matcher.find();
+        String expectedVersion = matcher.group(1);
+
+        build.shouldContainsConsoleOutput("version: " + expectedVersion);
     }
 
     private void configureJob() {

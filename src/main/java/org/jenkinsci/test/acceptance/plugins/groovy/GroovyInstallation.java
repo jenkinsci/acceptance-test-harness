@@ -23,8 +23,11 @@
  */
 package org.jenkinsci.test.acceptance.plugins.groovy;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.FileUtils;
 import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.jenkinsci.test.acceptance.po.ToolInstallation;
 import org.jenkinsci.test.acceptance.po.ToolInstallationPageObject;
@@ -42,9 +45,31 @@ public class GroovyInstallation extends ToolInstallation {
     }
 
     public void useNative() {
+        installedIn(fakeHome("groovy", "GROOVY_HOME"));
+    }
+
+    private String fakeHome(String binary, String homeEnvName) {
         try {
-            System.out.println(new CommandBuilder("which", "groovy").popen().asText());
-        } catch (Exception ex) {
+            final File home = File.createTempFile("toolhome", binary);
+
+            home.delete();
+            new File(home, "bin").mkdirs();
+            home.deleteOnExit();
+
+            final String path = new CommandBuilder("which", "groovy").popen().asText().trim();
+            final String code = String.format(
+                    "#!/bin/sh\nexport %s=\nexec %s \"$@\"\n",
+                    homeEnvName, path
+            );
+
+            final File command = new File(home, "bin/" + binary);
+            FileUtils.writeStringToFile(command, code);
+            command.setExecutable(true);
+
+            return home.getAbsolutePath();
+        } catch (IOException ex) {
+            throw new Error(ex);
+        } catch (InterruptedException ex) {
             throw new Error(ex);
         }
     }
