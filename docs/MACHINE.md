@@ -89,6 +89,9 @@ machine instances will be created.
 We install an auto-terminate script that monitors inactivity for for a given time and if no activity found, it initiates
 termination. Inactivity is determined by max up to 1 ssh connection to machine for 3 hours.
 
+**Note** According to Amazon [doc on instance initiated shutdown behavior], it works as long as the instance is EBS based.
+Default AMI image is EBS based. If you are using a different AMI make sure its EBS based for this feature to work.
+
 
 # Machine configuration
 [See here](MACHINE-CONFIG.md)
