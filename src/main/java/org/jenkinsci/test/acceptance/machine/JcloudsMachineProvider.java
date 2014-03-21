@@ -247,7 +247,7 @@ public abstract class JcloudsMachineProvider implements MachineProvider,Closeabl
 
         Set<NodeMetadata> filteredNodes = new HashSet<>();
         for(NodeMetadata nm:nodeMetadatas){
-            if(nm.getGroup().equals(getGroupName()) && nm.getStatus() == NodeMetadata.Status.RUNNING){
+            if(getGroupName().equals(nm.getGroup()) && nm.getStatus() == NodeMetadata.Status.RUNNING){
                 logger.info(String.format("Found running machine: %s",getGroupName()));
                 filteredNodes.add(nm);
             }
