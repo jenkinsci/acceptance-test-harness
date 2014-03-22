@@ -23,10 +23,10 @@ public class CreateSlaveTest extends AbstractJUnitTest {
         String privateKey = "1212122112";
         String description = "Ssh key";
 
-        s.find(by.input("_.host")).sendKeys("127.0.0.1");
+        find(by.input("_.host")).sendKeys("127.0.0.1");
 
-        WebElement credentialSelect = s.find(by.input("_.credentialsId"));
-        Assert.assertNotNull(credentialSelect);
+        WebElement credentialSelect = find(by.input("_.credentialsId"));
+        assertNotNull(credentialSelect);
 
         WebElement keyItem=null;
         try{
@@ -34,24 +34,24 @@ public class CreateSlaveTest extends AbstractJUnitTest {
         }catch (NoSuchElementException e){
             //ignore
         }
-        Assert.assertNull(keyItem);
+        assertNull(keyItem);
 
-        s.clickButton("Add");
+        clickButton("Add");
 
         WebElement select = find(by.xpath(".//form[@id='credentials-dialog-form']//select[@class='setting-input dropdownList']"))
                 .findElement(by.option("SSH Username with private key"));
         select.click();
-        s.find(by.input("_.description")).sendKeys(description);
-        s.find(by.input("_.username")).clear(); //it's always pre-filled with system default user
-        s.find(by.input("_.username")).sendKeys(username);
-        s.find(by.input("_.privateKey")).sendKeys(privateKey);
-        s.find(by.xpath("//button[@id='credentials-add-submit-button']")).click();
+        find(by.input("_.description")).sendKeys(description);
+        find(by.input("_.username")).clear(); //it's always pre-filled with system default user
+        find(by.input("_.username")).sendKeys(username);
+        find(by.input("_.privateKey")).sendKeys(privateKey);
+        find(by.xpath("//button[@id='credentials-add-submit-button']")).click();
 
 
         keyItem = credentialSelect.findElement(by.option(String.format("%s (%s)", username, description)));
-        Assert.assertNotNull(keyItem);
+        assertNotNull(keyItem);
 
-        s.clickButton("Save");
+        clickButton("Save");
 
     }
 
@@ -67,22 +67,22 @@ public class CreateSlaveTest extends AbstractJUnitTest {
 
         //now verify
         jenkins.visit("credentials");
-        Assert.assertEquals(jenkins.find(by.input("_.username")).getAttribute("value"), username);
-        Assert.assertEquals(jenkins.find(by.input("_.privateKey")).getText(), privateKey);
+        assertEquals(jenkins.find(by.input("_.username")).getAttribute("value"), username);
+        assertEquals(jenkins.find(by.input("_.privateKey")).getText(), privateKey);
 
         // Just to make sure the dumb slave is set up properly, we should seed it
         // with a FS root and executors
         final DumbSlave s = jenkins.slaves.create(DumbSlave.class);
 
-        s.find(by.input("_.host")).sendKeys("127.0.0.1");
+        find(by.input("_.host")).sendKeys("127.0.0.1");
 
         WebElement credentialSelect = s.find(by.input("_.credentialsId"));
-        Assert.assertNotNull(credentialSelect);
+        assertNotNull(credentialSelect);
 
         WebElement keyItem = credentialSelect.findElement(by.option(String.format("%s (%s)", username, description)));
-        Assert.assertNotNull(keyItem);
+        assertNotNull(keyItem);
 
-        s.clickButton("Save");
+        clickButton("Save");
     }
 
 }
