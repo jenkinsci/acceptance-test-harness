@@ -1,5 +1,6 @@
 package core;
 
+import hudson.util.VersionNumber;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.plugins.credentials.ManagedCredentials;
 import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshCredentialDialog;
@@ -9,12 +10,19 @@ import org.jenkinsci.test.acceptance.po.DumbSlave;
 import org.junit.Test;
 import org.openqa.selenium.NoSuchElementException;
 
+import static org.junit.Assume.*;
+
 /**
  * @author Vivek Pandey
  */
 public class CreateSlaveTest extends AbstractJUnitTest {
     @Test
     public void newSlave() {
+        // this test requires a newer version of credentials plugin that has inline "Add" button
+        // I'm not sure exactly which version it is, but 1.532 LTS doesn't have it, and 1.555 has it,
+        // so it's somewhere in between
+        assumeTrue(jenkins.getVersion().compareTo(new VersionNumber("1.550")) > 0);
+
         // Just to make sure the dumb slave is set up properly, we should seed it
         // with a FS root and executors
         final DumbSlave s = jenkins.slaves.create(DumbSlave.class);
