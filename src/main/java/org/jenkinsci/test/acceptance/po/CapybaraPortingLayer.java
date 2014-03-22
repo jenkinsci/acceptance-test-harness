@@ -64,8 +64,10 @@ public class CapybaraPortingLayer extends Assert {
     /**
      * Select radio button by its name, id, or label text.
      */
-    public void choose(String locator) {
-        find(by.radioButton(locator)).click();
+    public WebElement choose(String locator) {
+        WebElement e = find(by.radioButton(locator));
+        e.click();
+        return e;
     }
 
     /**
