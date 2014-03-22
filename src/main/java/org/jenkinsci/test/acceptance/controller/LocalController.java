@@ -66,7 +66,7 @@ public abstract class LocalController extends JenkinsController {
          * Determines the location of the war file.
          */
         protected File getWarFile() {
-            String war = defaultsTo(getenv("JENKINS_WAR"), WORKSPACE + "/jenkins.war");
+            String war = defaultsTo(getenv("JENKINS_WAR"), "jenkins.war");
 
             File warfile = new File(war);
             if (!warfile.exists())
