@@ -110,4 +110,8 @@ public class ByFactory {
             ".//option[contains(normalize-space(string(.)), '%1$s') or @value='%1$s']", name
         );
     }
+
+    public By id(String s) {
+        return css("#"+s);
+    }
 }

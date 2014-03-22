@@ -49,7 +49,7 @@ public class Control extends CapybaraPortingLayer {
 
     public Control(Injector injector, final By selector) {
         super(injector);
-        this.relativePaths = new String[0];
+        this.relativePaths = new String[1];
         this.parent = new Owner() {
             @Override
             public By path(String rel) {

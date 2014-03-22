@@ -1,9 +1,10 @@
 package core;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshCredentialDialog;
+import org.jenkinsci.test.acceptance.plugins.ssh_slaves.SshSlaveLauncher;
 import org.jenkinsci.test.acceptance.po.DumbSlave;
 import org.jenkinsci.test.acceptance.po.SshPrivateKeyCredential;
-import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
@@ -19,40 +20,32 @@ public class CreateSlaveTest extends AbstractJUnitTest {
         // with a FS root and executors
         final DumbSlave s = jenkins.slaves.create(DumbSlave.class);
 
+        SshSlaveLauncher l = s.setLauncher(SshSlaveLauncher.class);
+
         String username = "user1";
         String privateKey = "1212122112";
         String description = "Ssh key";
 
-        find(by.input("_.host")).sendKeys("127.0.0.1");
+        l.host.set("127.0.0.1");
+        l.credentialsId.resolve();  // make sure this exists
 
-        WebElement credentialSelect = find(by.input("_.credentialsId"));
-        assertNotNull(credentialSelect);
-
-        WebElement keyItem=null;
         try{
-            keyItem = credentialSelect.findElement(by.option(String.format("%s (%s)", username, description)));
+            l.credentialsId.select(String.format("%s (%s)", username, description));
         }catch (NoSuchElementException e){
             //ignore
         }
-        assertNull(keyItem);
 
-        clickButton("Add");
+        SshCredentialDialog f = l.addCredential();
 
-        WebElement select = find(by.xpath(".//form[@id='credentials-dialog-form']//select[@class='setting-input dropdownList']"))
-                .findElement(by.option("SSH Username with private key"));
-        select.click();
-        find(by.input("_.description")).sendKeys(description);
-        find(by.input("_.username")).clear(); //it's always pre-filled with system default user
-        find(by.input("_.username")).sendKeys(username);
-        find(by.input("_.privateKey")).sendKeys(privateKey);
-        find(by.xpath("//button[@id='credentials-add-submit-button']")).click();
+        f.kind.select("SSH Username with private key");
+        f.description.set(description);
+        f.username.set(username);
+        f.selectEnterDirectly().privateKey.set(privateKey);
+        f.add();
 
-
-        keyItem = credentialSelect.findElement(by.option(String.format("%s (%s)", username, description)));
-        assertNotNull(keyItem);
+        l.credentialsId.select(String.format("%s (%s)", username, description));
 
         clickButton("Save");
-
     }
 
     @Test

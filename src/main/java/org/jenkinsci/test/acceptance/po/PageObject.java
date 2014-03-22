@@ -72,4 +72,17 @@ public abstract class PageObject extends CapybaraPortingLayer {
     public URL url(String format, Object... args) {
         return url(String.format(format,args));
     }
+
+    /**
+     * Create a control object that wraps access to the specific INPUT element in this page area.
+     *
+     * The {@link Control} object itself can be created early as the actual element resolution happens
+     * lazily. This means {@link PageArea} implementations can put these in their fields.
+     *
+     * Several paths can be provided to find the first matching element. Useful
+     * when element path changed between versions.
+     */
+    public Control control(String... relativePaths) {
+        return new Control(this,relativePaths);
+    }
 }
