@@ -19,33 +19,34 @@ public class CreateSlaveTest extends AbstractJUnitTest {
         // Just to make sure the dumb slave is set up properly, we should seed it
         // with a FS root and executors
         final DumbSlave s = jenkins.slaves.create(DumbSlave.class);
+        {
+            SshSlaveLauncher l = s.setLauncher(SshSlaveLauncher.class);
 
-        SshSlaveLauncher l = s.setLauncher(SshSlaveLauncher.class);
+            String username = "user1";
+            String privateKey = "1212122112";
+            String description = "Ssh key";
 
-        String username = "user1";
-        String privateKey = "1212122112";
-        String description = "Ssh key";
+            l.host.set("127.0.0.1");
+            l.credentialsId.resolve();  // make sure this exists
 
-        l.host.set("127.0.0.1");
-        l.credentialsId.resolve();  // make sure this exists
+            try {
+                l.credentialsId.select(String.format("%s (%s)", username, description));
+            } catch (NoSuchElementException e) {
+                //ignore
+            }
 
-        try{
+            SshCredentialDialog f = l.addCredential();
+            {
+                f.kind.select("SSH Username with private key");
+                f.description.set(description);
+                f.username.set(username);
+                f.selectEnterDirectly().privateKey.set(privateKey);
+            }
+            f.add();
+
             l.credentialsId.select(String.format("%s (%s)", username, description));
-        }catch (NoSuchElementException e){
-            //ignore
         }
-
-        SshCredentialDialog f = l.addCredential();
-
-        f.kind.select("SSH Username with private key");
-        f.description.set(description);
-        f.username.set(username);
-        f.selectEnterDirectly().privateKey.set(privateKey);
-        f.add();
-
-        l.credentialsId.select(String.format("%s (%s)", username, description));
-
-        clickButton("Save");
+        s.save();
     }
 
     @Test
