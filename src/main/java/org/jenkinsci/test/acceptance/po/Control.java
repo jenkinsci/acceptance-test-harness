@@ -1,5 +1,6 @@
 package org.jenkinsci.test.acceptance.po;
 
+import com.google.inject.Injector;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
@@ -44,6 +45,17 @@ public class Control extends CapybaraPortingLayer {
             }
         };
         this.relativePaths = paths;
+    }
+
+    public Control(Injector injector, final By selector) {
+        super(injector);
+        this.relativePaths = new String[0];
+        this.parent = new Owner() {
+            @Override
+            public By path(String rel) {
+                return selector;
+            }
+        };
     }
 
     public WebElement resolve() {
