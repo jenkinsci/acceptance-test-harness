@@ -21,6 +21,7 @@ public class CreateSlaveTest extends AbstractJUnitTest {
         // this test requires a newer version of credentials plugin that has inline "Add" button
         // I'm not sure exactly which version it is, but 1.532 LTS doesn't have it, and 1.555 has it,
         // so it's somewhere in between
+        // TODO: this should be converted to "@WithPlugin("ssh-credentials") with specific version tag
         assumeTrue(jenkins.getVersion().compareTo(new VersionNumber("1.550")) > 0);
 
         // Just to make sure the dumb slave is set up properly, we should seed it

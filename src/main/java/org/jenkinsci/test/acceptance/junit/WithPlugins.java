@@ -24,6 +24,8 @@ import static java.lang.annotation.RetentionPolicy.*;
  *
  * We also want to use this to filter tests, especially for non-destructive tests.
  *
+ * TODO: add a version constraint
+ *
  * @author Kohsuke Kawaguchi
  */
 @Retention(RUNTIME)
