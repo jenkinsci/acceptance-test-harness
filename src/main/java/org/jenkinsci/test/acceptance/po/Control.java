@@ -6,6 +6,8 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
+import java.security.acl.Owner;
+
 /**
  * Wraps a specific form element in {@link PageArea} to provide operations.
  *
@@ -94,6 +96,10 @@ public class Control extends CapybaraPortingLayer {
         WebElement e = resolve();
         e.clear();
         e.sendKeys(text);
+    }
+
+    public void set(Object text) {
+        set(text.toString());
     }
 
     /**
