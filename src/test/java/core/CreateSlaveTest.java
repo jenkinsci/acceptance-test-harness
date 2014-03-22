@@ -1,21 +1,20 @@
 package core;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.plugins.credentials.ManagedCredentials;
 import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshCredentialDialog;
+import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshPrivateKeyCredential;
 import org.jenkinsci.test.acceptance.plugins.ssh_slaves.SshSlaveLauncher;
 import org.jenkinsci.test.acceptance.po.DumbSlave;
-import org.jenkinsci.test.acceptance.po.SshPrivateKeyCredential;
 import org.junit.Test;
 import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.WebElement;
 
 /**
  * @author Vivek Pandey
  */
 public class CreateSlaveTest extends AbstractJUnitTest {
     @Test
-    public void newSlave(){
-
+    public void newSlave() {
         // Just to make sure the dumb slave is set up properly, we should seed it
         // with a FS root and executors
         final DumbSlave s = jenkins.slaves.create(DumbSlave.class);
@@ -31,16 +30,17 @@ public class CreateSlaveTest extends AbstractJUnitTest {
 
             try {
                 l.credentialsId.select(String.format("%s (%s)", username, description));
+                fail();
             } catch (NoSuchElementException e) {
                 //ignore
             }
 
             SshCredentialDialog f = l.addCredential();
             {
-                f.kind.select("SSH Username with private key");
-                f.description.set(description);
-                f.username.set(username);
-                f.selectEnterDirectly().privateKey.set(privateKey);
+                SshPrivateKeyCredential sc = f.select(SshPrivateKeyCredential.class);
+                sc.description.set(description);
+                sc.username.set(username);
+                sc.selectEnterDirectly().privateKey.set(privateKey);
             }
             f.add();
 
@@ -52,31 +52,32 @@ public class CreateSlaveTest extends AbstractJUnitTest {
     @Test
     public void newSlaveWithExistingCredential(){
 
-        SshPrivateKeyCredential c = new SshPrivateKeyCredential(jenkins);
-
         String username = "xyz";
         String description = "SSH Key setup";
         String privateKey = "1212121122121212";
-        c.create("GLOBAL", username, privateKey);
+
+        ManagedCredentials c = new ManagedCredentials(jenkins);
+        c.open();
+        {
+            SshPrivateKeyCredential sc = c.add(SshPrivateKeyCredential.class);
+            sc.username.set(username);
+            sc.description.set(description);
+            sc.selectEnterDirectly().privateKey.set(privateKey);
+        }
+        c.save();
 
         //now verify
-        jenkins.visit("credentials");
-        assertEquals(jenkins.find(by.input("_.username")).getAttribute("value"), username);
-        assertEquals(jenkins.find(by.input("_.privateKey")).getText(), privateKey);
+        c.open();
+        assertEquals(find(by.input("_.username")).getAttribute("value"), username);
+        assertEquals(find(by.input("_.privateKey")).getText(), privateKey);
 
         // Just to make sure the dumb slave is set up properly, we should seed it
         // with a FS root and executors
         final DumbSlave s = jenkins.slaves.create(DumbSlave.class);
+        SshSlaveLauncher l = s.setLauncher(SshSlaveLauncher.class);
+        l.host.set("127.0.0.1");
 
-        find(by.input("_.host")).sendKeys("127.0.0.1");
-
-        WebElement credentialSelect = s.find(by.input("_.credentialsId"));
-        assertNotNull(credentialSelect);
-
-        WebElement keyItem = credentialSelect.findElement(by.option(String.format("%s (%s)", username, description)));
-        assertNotNull(keyItem);
-
-        clickButton("Save");
+        l.credentialsId.select(String.format("%s (%s)", username, description));
     }
 
 }

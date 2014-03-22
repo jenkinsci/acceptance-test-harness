@@ -1,10 +1,11 @@
 package org.jenkinsci.test.acceptance.plugins.ssh_credentials;
 
 import com.google.inject.Injector;
+import org.jenkinsci.test.acceptance.plugins.credentials.Credential;
+import org.jenkinsci.test.acceptance.plugins.credentials.CredentialPageObject;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.PageArea;
 import org.jenkinsci.test.acceptance.po.PageObject;
-import org.openqa.selenium.WebElement;
 
 /**
  * Modal dialog to enter a credential.
@@ -14,9 +15,6 @@ import org.openqa.selenium.WebElement;
 public class SshCredentialDialog extends PageArea {
     public final Control kind = new Control(injector,by.xpath("//*[@id='credentials-dialog-form']//*[@path='/']"));
 
-    public final Control username = control("username");
-    public final Control description = control("description");
-
     public SshCredentialDialog(Injector injector, String path) {
         super(injector, path);
     }
@@ -25,21 +23,23 @@ public class SshCredentialDialog extends PageArea {
         super(context, path);
     }
 
-    public Direct selectEnterDirectly() {
-        WebElement e = choose("Enter directly");
-        return new Direct(injector, e.getAttribute("path"));
-    }
+    /**
+     * Selects the credential type and bind the controls to the page area.
+     */
+    public <T extends Credential> T select(Class<T> type) {
+        String sut_type = type.getAnnotation(CredentialPageObject.class).value();
 
-    public static class Direct extends PageArea {
-        public final Control privateKey = control("privateKey");
+        kind.select(sut_type);
 
-        public Direct(Injector injector, String path) {
-            super(injector, path);
+        try {
+            return type.getConstructor(Injector.class,String.class).newInstance(injector, path);
+        } catch (ReflectiveOperationException e) {
+            throw new AssertionError(e);
         }
     }
 
     /**
-     * Adds this credential and close the dialog.
+     * Adds this credential and close the modal dialog.
      */
     public void add() {
         find(by.id("credentials-add-submit-button")).click();

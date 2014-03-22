@@ -4,10 +4,11 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import org.jenkinsci.test.acceptance.SshKeyPair;
 import org.jenkinsci.test.acceptance.machine.Machine;
+import org.jenkinsci.test.acceptance.plugins.credentials.ManagedCredentials;
+import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshPrivateKeyCredential;
 import org.jenkinsci.test.acceptance.po.DumbSlave;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.Slave;
-import org.jenkinsci.test.acceptance.po.SshPrivateKeyCredential;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,13 +38,16 @@ public class SshSlaveController extends SlaveController {
 
     @Override
     public Future<Slave> install(Jenkins j) {
-        SshPrivateKeyCredential credential = new SshPrivateKeyCredential(j);
+        ManagedCredentials credential = new ManagedCredentials(j);
 
         try {
-            credential.create("GLOBAL",machine.getUser(),keyPair.readPrivateKey());
+            SshPrivateKeyCredential sc = credential.add(SshPrivateKeyCredential.class);
+            sc.username.set(machine.getUser());
+            sc.selectEnterDirectly().privateKey.set(keyPair.readPrivateKey());
         } catch (IOException e) {
             throw new AssertionError(e);
         }
+
         final Slave s = create(machine.getPublicIpAddress(), j);
 
         //Slave is configured, now wait till its online
