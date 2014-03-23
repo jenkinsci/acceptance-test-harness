@@ -7,15 +7,6 @@ Feature: Use multi configuration job
   *****************************************************
 
 
-  Scenario: Run a matrix job
-    Given a matrix job
-    When I configure the job
-    And I configure user axis "user_axis" with values "axis1 axis2 axis3"
-    And I add a shell build step "ls"
-    And I save the job
-    And I build the job
-    Then I console output of configurations should match "+ ls"
-
   Scenario: Run touchstone builds first with resul stable
     Given a matrix job
     When I configure the job
