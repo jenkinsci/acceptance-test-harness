@@ -41,9 +41,11 @@ public class Build extends ContainerPageObject {
     }
 
     /**
-     * "Casts" this object into a subtype by creating the specified
+     * "Casts" this object into a subtype by creating the specified type
      */
     public <T extends Build> T as(Class<T> type) {
+        if (type.isInstance(this))
+            return type.cast(this);
         return newInstance(type, job, url);
     }
 

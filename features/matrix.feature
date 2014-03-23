@@ -2,16 +2,6 @@ Feature: Use multi configuration job
   As a Jenkins user
   I want to configure and run multi configuration jobs
 
-  Scenario: Run configurations sequentially
-    Given a matrix job
-    When I configure the job
-    And I configure user axis "user_axis" with values "axis1 axis2 axis3"
-    And I configure to run configurations sequentially
-    And I add a shell build step "sleep 5"
-    And I save the job
-    And I build the job
-    Then the configurations should run sequentially
-
   Scenario: Run a matrix job
     Given a matrix job
     When I configure the job

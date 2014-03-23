@@ -33,6 +33,15 @@ public class Job extends ContainerPageObject {
         this.name = name;
     }
 
+    /**
+     * "Casts" this object into a subtype by creating the specified type.
+     */
+    public <T extends Job> T as(Class<T> type) {
+        if (type.isInstance(this))
+            return type.cast(this);
+        return newInstance(type, injector, url, name);
+    }
+
     public <T extends Scm> T useScm(Class<T> type) {
         ensureConfigPage();
 

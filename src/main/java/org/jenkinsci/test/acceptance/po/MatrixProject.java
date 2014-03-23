@@ -1,8 +1,11 @@
 package org.jenkinsci.test.acceptance.po;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Injector;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -11,7 +14,7 @@ import java.net.URL;
 public class MatrixProject extends Job {
     // config page objects
     public final Control addAxis = control(by.button("Add axis"));
-    public final Control runSequentially = control("executionStrategy/runSequentially");
+    public final Control runSequentially = control("/executionStrategy/runSequentially");
 
     public MatrixProject(Injector injector, URL url, String name) {
         super(injector, url, name);
@@ -42,5 +45,17 @@ public class MatrixProject extends Job {
     @Override
     public MatrixBuild build(int buildNumber) {
         return super.build(buildNumber).as(MatrixBuild.class);
+    }
+
+    public List<MatrixConfiguration> getConfigurations() {
+        List<MatrixConfiguration> r = new ArrayList<>();
+        for (JsonNode n : getJson().get("activeConfigurations")) {
+            r.add(getConfiguration(n.get("name").asText()));
+        }
+        return r;
+    }
+
+    private MatrixConfiguration getConfiguration(String name) {
+        return new MatrixConfiguration(injector, url(name+'/'), name);
     }
 }
