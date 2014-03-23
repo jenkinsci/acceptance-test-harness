@@ -161,9 +161,10 @@ public class Ec2Provider extends JcloudsMachineProvider {
         ssh.executeRemoteCommand("chmod +x ./autoterminate.sh ; touch nohup.out");
 
         //wait for 3 hours before termination
-        ssh.getConnection().exec(String.format("nohup ./autoterminate.sh %s %s `</dev/null` >nohup.out 2>&1 &", config.getUser(), 2), System.out);
+        ssh.getConnection().exec(String.format("nohup ./autoterminate.sh %s %s `</dev/null` >nohup.out 2>&1 &", config.getUser(), AUTO_TERMINATE_TIMEOUT), System.out);
     }
 
+    private static final int AUTO_TERMINATE_TIMEOUT=180;
 
     private static final Logger logger = LoggerFactory.getLogger(Ec2Provider.class);
 }
