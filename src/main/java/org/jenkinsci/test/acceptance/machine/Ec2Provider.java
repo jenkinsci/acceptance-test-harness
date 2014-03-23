@@ -136,6 +136,18 @@ public class Ec2Provider extends JcloudsMachineProvider {
         return template;
     }
 
+    @Override
+    public void offer(Machine m) {
+        //install autoterminate script at the end, Machine.close() might terminate all processes
+        try {
+            copyAutoterminateScript(m.getPublicIpAddress());
+        } catch (IOException | InterruptedException e) {
+            logger.error("Failed to install autoterminate script");
+            throw new RuntimeException(e);
+        }
+        super.offer(m);
+    }
+
     private void  copyAutoterminateScript(String host) throws IOException, InterruptedException {
         //run terminate script
         URL script = this.getClass().getClassLoader().getResource("org/jenkinsci/test/acceptance/machine/autoterminate.sh");
@@ -149,7 +161,7 @@ public class Ec2Provider extends JcloudsMachineProvider {
         ssh.executeRemoteCommand("chmod +x ./autoterminate.sh ; touch nohup.out");
 
         //wait for 3 hours before termination
-        ssh.getConnection().exec(String.format("nohup ./autoterminate.sh %s %s `</dev/null` >nohup.out 2>&1 &", config.getUser(), 180), System.out);
+        ssh.getConnection().exec(String.format("nohup ./autoterminate.sh %s %s `</dev/null` >nohup.out 2>&1 &", config.getUser(), 2), System.out);
     }
 
 

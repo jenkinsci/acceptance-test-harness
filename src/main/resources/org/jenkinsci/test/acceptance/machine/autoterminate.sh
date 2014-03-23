@@ -38,7 +38,7 @@ touch $FILE
 
 while(true)
 do
-  num_of_sshd=$(pgrep -u $1 ssh |wc -l)
+  num_of_sshd=$(pgrep -u $1 sshd |wc -l)
   if [ -z "$num_of_sshd" ]
     then
       num_of_sshd=0
@@ -46,7 +46,7 @@ do
 
   echo Number of sshd processes: $num_of_sshd
 
-  if [ $num_of_sshd -gt 1 ]
+  if [ $num_of_sshd -gt 0 ]
   then
     echo "Touching file..."
     touch $FILE
