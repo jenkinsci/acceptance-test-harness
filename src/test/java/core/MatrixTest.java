@@ -1,21 +1,23 @@
 package core;
 
+import com.google.inject.Inject;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Bug;
 import org.jenkinsci.test.acceptance.junit.Since;
-import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.po.LabelAxis;
 import org.jenkinsci.test.acceptance.po.MatrixBuild;
 import org.jenkinsci.test.acceptance.po.MatrixConfiguration;
 import org.jenkinsci.test.acceptance.po.MatrixProject;
 import org.jenkinsci.test.acceptance.po.MatrixRun;
+import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.po.StringParameter;
+import org.jenkinsci.test.acceptance.slave.SlaveProvider;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Collections;
 import java.util.List;
 
-import static java.util.Collections.singletonMap;
+import static java.util.Collections.*;
 
 /**
  Feature: Use multi configuration job
@@ -24,6 +26,9 @@ import static java.util.Collections.singletonMap;
  */
 public class MatrixTest extends AbstractJUnitTest {
     MatrixProject job;
+
+    @Inject
+    SlaveProvider slaves;
 
     @Before
     public void setUp() {
@@ -159,16 +164,46 @@ public class MatrixTest extends AbstractJUnitTest {
         job.addParameter(StringParameter.class).setName("condition");
         job.save();
 
-        MatrixBuild b = job.queueBuild(singletonMap("condition", "false")).as(MatrixBuild.class);
+        MatrixBuild b = job.queueBuild(singletonMap("condition", "false")).waitUntilFinished().as(MatrixBuild.class);
         b.getConfiguration("run=yes").shouldExist();
         b.getConfiguration("run=maybe").shouldNotExist();
         b.getConfiguration("run=no").shouldNotExist();
 
-        b = job.queueBuild(singletonMap("condition", "true")).as(MatrixBuild.class);
+        b = job.queueBuild(singletonMap("condition", "true")).waitUntilFinished().as(MatrixBuild.class);
         b.getConfiguration("run=yes").shouldExist();
         b.getConfiguration("run=maybe").shouldExist();
         b.getConfiguration("run=no").shouldNotExist();
+    }
 
+    /**
+     Scenario: Run configurations on with a given label
+       Given a matrix job
+       When I create dumb slave named "slave"
+       And I add the label "label1" to the slave
+       And I configure the job
+       And I configure slaves axis with value "master"
+       And I configure slaves axis with value "label1"
+       And I save the job
+       And I build the job
+       Then the configuration "label=master" should be built on "master"
+       And the configuration "label=label1" should be built on "slave"
+     */
+    @Test
+    public void run_configurations_on_with_a_given_label() throws Exception {
+        Slave s = slaves.get().install(jenkins).get();
+        s.configure();
+        s.setLabels("label1");
+        s.save();
+
+        job.configure();
+        LabelAxis a = job.addAxis(LabelAxis.class);
+        a.select("master");
+        a.select("label1");
+        job.save();
+
+        MatrixBuild b = job.queueBuild().waitUntilFinished().as(MatrixBuild.class);
+        b.getConfiguration("label=master").shouldContainsConsoleOutput("(Building|Building remotely) on master");
+        b.getConfiguration("label=label1").shouldContainsConsoleOutput("(Building|Building remotely) on "+s.getName());
     }
 
     private void assertThatBuildHasRunSequentially(MatrixBuild b) {
