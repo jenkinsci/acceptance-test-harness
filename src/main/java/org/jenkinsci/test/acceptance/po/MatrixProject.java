@@ -28,12 +28,12 @@ public class MatrixProject extends Job {
     }
 
     public void addUserAxis(String name, String value) {
-        TextAxis a = addUserAxis(TextAxis.class);
+        TextAxis a = addAxis(TextAxis.class);
         a.name.set(name);
         a.valueString.set(value);
     }
 
-    public <T extends Axis> T addUserAxis(Class<T> type) {
+    public <T extends Axis> T addAxis(Class<T> type) {
         AxisPageObjecct a = type.getAnnotation(AxisPageObjecct.class);
 
         ensureConfigPage();
