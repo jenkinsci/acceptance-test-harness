@@ -23,7 +23,12 @@
  */
 package org.jenkinsci.test.acceptance.po;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.regex.Pattern;
+
+import org.apache.commons.io.FileUtils;
+import org.jenkinsci.utils.process.CommandBuilder;
 
 public abstract class ToolInstallation extends PageArea {
     public final Control name = control("name");
@@ -51,4 +56,30 @@ public abstract class ToolInstallation extends PageArea {
      * Clients should not interact with this ToolInstalltion before updates was loaded.
      */
     abstract public Pattern updatesPattern();
+
+    protected String fakeHome(String binary, String homeEnvName) {
+        try {
+            final File home = File.createTempFile("toolhome", binary);
+
+            home.delete();
+            new File(home, "bin").mkdirs();
+            home.deleteOnExit();
+
+            final String path = new CommandBuilder("which", binary).popen().asText().trim();
+            final String code = String.format(
+                    "#!/bin/sh\nexport %s=\nexec %s \"$@\"\n",
+                    homeEnvName, path
+            );
+
+            final File command = new File(home, "bin/" + binary);
+            FileUtils.writeStringToFile(command, code);
+            command.setExecutable(true);
+
+            return home.getAbsolutePath();
+        } catch (IOException ex) {
+            throw new Error(ex);
+        } catch (InterruptedException ex) {
+            throw new Error(ex);
+        }
+    }
 }

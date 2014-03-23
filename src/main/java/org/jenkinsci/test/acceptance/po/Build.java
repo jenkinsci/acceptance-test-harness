@@ -102,7 +102,7 @@ public class Build extends ContainerPageObject {
     }
 
     public URL getConsoleUrl() {
-        return url("console");
+        return url("consoleFull");
     }
 
     public String getConsole() {

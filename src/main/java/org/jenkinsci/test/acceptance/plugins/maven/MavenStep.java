@@ -21,26 +21,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.test.acceptance.plugins.groovy;
+package org.jenkinsci.test.acceptance.plugins.maven;
 
-import java.util.regex.Pattern;
+import org.jenkinsci.test.acceptance.po.BuildStep;
+import org.jenkinsci.test.acceptance.po.BuildStepPageObject;
+import org.jenkinsci.test.acceptance.po.Control;
+import org.jenkinsci.test.acceptance.po.Job;
 
-import org.jenkinsci.test.acceptance.po.JenkinsConfig;
-import org.jenkinsci.test.acceptance.po.ToolInstallation;
-import org.jenkinsci.test.acceptance.po.ToolInstallationPageObject;
+@BuildStepPageObject("Invoke top-level Maven targets")
+public class MavenStep extends BuildStep {
+    public final Control version = control("name");
+    public final Control targets = control("targets");
 
-@ToolInstallationPageObject("Groovy")
-public class GroovyInstallation extends ToolInstallation {
-    public GroovyInstallation(JenkinsConfig context, String path) {
-        super(context, path);
+    private Control advancedButton = control("advanced-button");
+
+    public MavenStep(Job parent, String path) {
+        super(parent, path);
     }
 
-    @Override
-    public Pattern updatesPattern() {
-        return Pattern.compile("Obtained the updated data file for hudson.plugins.groovy.GroovyInstaller");
+    public MavenStep useLocalRepository() {
+        ensureAdvanced();
+        control("usePrivateRepository").check();
+        return this;
     }
 
-    public void useNative() {
-        installedIn(fakeHome("groovy", "GROOVY_HOME"));
+    private void ensureAdvanced() {
+        if (advancedButton == null) return;
+
+        advancedButton.click();
+        advancedButton = null;
     }
 }
