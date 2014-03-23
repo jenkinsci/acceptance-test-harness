@@ -263,7 +263,7 @@ public class CapybaraPortingLayer extends Assert {
                 Class<?>[] pts = c.getParameterTypes();
                 if (pts.length!=args.length)    continue;
                 for (int i=0; i<pts.length; i++) {
-                    if (!pts[i].isInstance(args[i]))
+                    if (args[i]!=null && !pts[i].isInstance(args[i]))
                         continue OUTER;
                 }
 
