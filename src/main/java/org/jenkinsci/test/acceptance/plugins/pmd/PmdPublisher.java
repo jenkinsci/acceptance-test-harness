@@ -12,6 +12,7 @@ import org.jenkinsci.test.acceptance.po.PostBuildStep;
 public class PmdPublisher extends PostBuildStep  {
     public final Control advanced = control("advanced-button");
     public final Control pattern = control("pattern");
+    public final Control canRunOnFailed = control("canRunOnFailed");
 
     public PmdPublisher(Job parent, String path) {
         super(parent, path);
