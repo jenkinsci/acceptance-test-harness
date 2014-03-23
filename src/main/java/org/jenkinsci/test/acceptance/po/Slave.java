@@ -50,6 +50,7 @@ public abstract class Slave extends ContainerPageObject {
     }
 
     public void setLabels(String l) {
+        ensureConfigPage();
         find(by.input("_.labelString")).sendKeys(l);
     }
 
