@@ -15,9 +15,13 @@ public class MatrixProject extends Job {
     // config page objects
     public final Control addAxis = control(by.button("Add axis"));
     public final Control runSequentially = control("/executionStrategy/runSequentially");
+
     public final Control hasTouchStoneCombinationFilter = control("/executionStrategy/hasTouchStoneCombinationFilter");
     public final Control touchStoneCombinationFilter = control("/executionStrategy/touchStoneCombinationFilter");
     public final Control touchStoneResultCondition = control("/executionStrategy/touchStoneResultCondition");
+
+    public final Control hasCombinationFilter = control("/hasCombinationFilter");
+    public final Control combinationFilter = control("/hasCombinationFilter/combinationFilter");
 
     public MatrixProject(Injector injector, URL url, String name) {
         super(injector, url, name);
@@ -67,5 +71,11 @@ public class MatrixProject extends Job {
         hasTouchStoneCombinationFilter.check();
         touchStoneCombinationFilter.set(filter);
         touchStoneResultCondition.select(result);
+    }
+
+    public void setCombinationFilter(String filter) {
+        ensureConfigPage();
+        hasCombinationFilter.check();
+        combinationFilter.set(filter);
     }
 }

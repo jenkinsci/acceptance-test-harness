@@ -6,20 +6,6 @@ Feature: Use multi configuration job
     BEING PORTED TO MatrixTest.java
   *****************************************************
 
-
-
-  Scenario: Run build with combination filter
-    Given a matrix job
-    When I configure the job
-    And I configure user axis "user_axis" with values "axis1 axis2 axis3"
-    And I set combination filter to "user_axis=='axis2'"
-    And I add a shell build step "echo hello"
-    And I save the job
-    And I build the job
-    Then combination "user_axis=axis2" should be built
-    And combination "user_axis=axis1" should not be built
-    And combination "user_axis=axis3" should not be built
-
   @since(1.515)
   @bug(7285)
   Scenario: Use Job parameters in combination filters

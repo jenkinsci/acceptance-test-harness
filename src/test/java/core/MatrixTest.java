@@ -95,6 +95,34 @@ public class MatrixTest extends AbstractJUnitTest {
         b.getConfiguration("user_axis=axis3").shouldExist();
     }
 
+    /**
+     Scenario: Run build with combination filter
+       Given a matrix job
+       When I configure the job
+       And I configure user axis "user_axis" with values "axis1 axis2 axis3"
+       And I set combination filter to "user_axis=='axis2'"
+       And I add a shell build step "echo hello"
+       And I save the job
+       And I build the job
+       Then combination "user_axis=axis2" should be built
+       And combination "user_axis=axis1" should not be built
+       And combination "user_axis=axis3" should not be built
+     */
+    @Test
+    public void run_build_with_combination_filter() {
+        job.configure();
+        job.addUserAxis("user_axis","axis1 axis2 axis3");
+        job.setCombinationFilter("user_axis=='axis2'");
+        job.addShellStep("echo hello");
+        job.save();
+
+        MatrixBuild b = job.queueBuild().waitUntilFinished().as(MatrixBuild.class);
+
+        b.getConfiguration("user_axis=axis1").shouldNotExist();
+        b.getConfiguration("user_axis=axis2").shouldExist();
+        b.getConfiguration("user_axis=axis3").shouldNotExist();
+    }
+
     private void assertThatBuildHasRunSequentially(MatrixBuild b) {
         List<MatrixRun> builds = b.getConfigurations();
 
