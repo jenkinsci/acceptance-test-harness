@@ -143,7 +143,9 @@ public class Build extends ContainerPageObject {
     }
 
     public Build shouldSucceed() {
-        assertThat(getResult(), is("SUCCESS"));
+        String r = getResult();
+        if (!r.equals("SUCCESS"))
+            fail("Expected successful build but it was "+r+". Console output: " + getConsole());
         return this;
     }
 
