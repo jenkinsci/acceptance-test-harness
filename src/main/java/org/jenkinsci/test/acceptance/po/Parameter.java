@@ -43,7 +43,7 @@ public abstract class Parameter extends PageArea {
         if (driver.getCurrentUrl().endsWith("/configure"))
             return super.path(rel);
 
-        String np = find(by.xpath("//input[@name='name' and @value='%s']", name)).getAttribute("path");
+        String np = driver.findElement(by.xpath("//input[@name='name' and @value='%s']", name)).getAttribute("path");
         String path = np.replaceAll("/name$", "") + "/" + rel;
         return by.path(path);
     }
