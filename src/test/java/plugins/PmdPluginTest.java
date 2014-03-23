@@ -41,7 +41,7 @@ public class PmdPluginTest extends AbstractJUnitTest {
         j.configure();
         j.copyResource(resource("/pmd_plugin/pmd.xml"));
         PmdPublisher pmd = j.addPublisher(PmdPublisher.class);
-        pmd.pattern.set("pom.xml");
+        pmd.pattern.set("pmd.xml");
         j.save();
 
         Build b = j.queueBuild().waitUntilFinished().shouldSucceed();
@@ -70,7 +70,7 @@ public class PmdPluginTest extends AbstractJUnitTest {
         j.copyResource(resource("/pmd_plugin/pmd.xml"));
         j.addShellStep("false");
         PmdPublisher pmd = j.addPublisher(PmdPublisher.class);
-        pmd.pattern.set("pom.xml");
+        pmd.pattern.set("pmd.xml");
         pmd.advanced.click();
         pmd.canRunOnFailed.check();
         j.save();
@@ -78,5 +78,33 @@ public class PmdPluginTest extends AbstractJUnitTest {
         Build b = j.queueBuild().waitUntilFinished().shouldFail();
 
         assertThat(b.open(), hasContent("0 warnings"));
+    }
+
+    /**
+     Scenario: Configure a job with PMD post-build steps which display some warnings
+       Given I have installed the "pmd" plugin
+       And a job
+       When I configure the job
+       And I add "Publish PMD analysis results" post-build action
+       And I copy resource "pmd_plugin/pmd-warnings.xml" into workspace
+       And I set path to the pmd result "pmd-warnings.xml"
+       And I save the job
+       And I build the job
+       Then the build should succeed
+       And the build should have "PMD Warnings" action
+       And build page should has pmd summary "9 warnings"
+     */
+    @Test
+    public void configure_a_job_with_PMD_post_build_steps_which_display_some_warnings() {
+        j.configure();
+        j.copyResource(resource("/pmd_plugin/pmd-warnings.xml"));
+        PmdPublisher pmd = j.addPublisher(PmdPublisher.class);
+        pmd.pattern.set("pmd-warnings.xml");
+        j.save();
+
+        Build b = j.queueBuild().waitUntilFinished().shouldSucceed();
+
+        assertThat(b, hasAction("PMD Warnings"));
+        assertThat(b.open(), hasContent("9 warnings"));
     }
 }
