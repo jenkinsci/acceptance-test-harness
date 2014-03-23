@@ -1,21 +1,24 @@
 package org.jenkinsci.test.acceptance.po;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URL;
-import java.util.*;
-import java.util.zip.GZIPOutputStream;
-
+import com.google.inject.Injector;
+import cucumber.api.DataTable;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.plexus.util.Base64;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.openqa.selenium.WebElement;
 
-import com.google.inject.Injector;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.zip.GZIPOutputStream;
 
-import cucumber.api.DataTable;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 
 /**
@@ -38,11 +41,7 @@ public class Job extends ContainerPageObject {
         WebElement radio = find(by.radioButton(caption));
         check(radio);
 
-        try {
-            return type.getConstructor(Job.class, String.class).newInstance(this, radio.getAttribute("path"));
-        } catch (ReflectiveOperationException e) {
-            throw new Error(e);
-        }
+        return newInstance(type, this, radio.getAttribute("path"));
     }
 
     public <T extends BuildStep> T addBuildStep(Class<T> type) {
@@ -61,11 +60,7 @@ public class Job extends ContainerPageObject {
         selectDropdownMenu(caption, find(by.path("/hetero-list-add[%s]",section)));
         String path = last(by.xpath("//div[@name='%s']", section)).getAttribute("path");
 
-        try {
-            return type.getConstructor(Job.class,String.class).newInstance(this,path);
-        } catch (ReflectiveOperationException e) {
-            throw new Error(e);
-        }
+        return newInstance(type, this,path);
     }
 
     public ShellBuildStep addShellStep(Resource res) {
@@ -164,13 +159,9 @@ public class Job extends ContainerPageObject {
 
         String path = last(by.xpath("//div[@name='parameter']")).getAttribute("path");
 
-        try {
-            T p = type.getConstructor(Job.class,String.class).newInstance(this,path);
-            parameters.add(p);
-            return p;
-        } catch (ReflectiveOperationException e) {
-            throw new Error(e);
-        }
+        T p = newInstance(type, this, path);
+        parameters.add(p);
+        return p;
     }
 
     public void disable() {

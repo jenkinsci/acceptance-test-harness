@@ -6,7 +6,6 @@ import groovy.lang.Closure;
 
 import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.Callable;
 
@@ -115,10 +114,6 @@ public abstract class ContainerPageObject extends PageObject {
             ));
         }
 
-        try {
-            return type.getConstructor(scope, String.class).newInstance(this, path);
-        } catch (ReflectiveOperationException ex) {
-            throw new Error(ex);
-        }
+        return newInstance(type, this, path);
     }
 }

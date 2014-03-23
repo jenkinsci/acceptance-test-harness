@@ -28,16 +28,12 @@ public class SlavesMixIn extends MixIn {
         clickButton("OK");
         // This form submission will drop us on the configure page
 
-        try {
-            S s = type.getConstructor(Jenkins.class, String.class).newInstance(jenkins, name);
+        S s = newInstance(type, jenkins, name);
 
-            // reasonable starting point values
-            s.setExecutors(1);
-            s.setRemoteFs("/tmp/"+name);
+        // reasonable starting point values
+        s.setExecutors(1);
+        s.setRemoteFs("/tmp/"+name);
 
-            return s;
-        } catch (ReflectiveOperationException e) {
-            throw new AssertionError(e);
-        }
+        return s;
     }
 }

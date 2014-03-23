@@ -1,9 +1,5 @@
 package org.jenkinsci.test.acceptance.po;
 
-import com.google.inject.Injector;
-import org.openqa.selenium.By;
-
-import java.net.URL;
 import java.util.concurrent.Callable;
 
 /**
@@ -45,12 +41,7 @@ public class JobsMixIn extends MixIn {
     }
 
     public <T extends Job> T get(Class<T> type, String name) {
-        try {
-            return type.getConstructor(Injector.class,URL.class,String.class)
-                    .newInstance(injector, url("job/%s/", name), name);
-        } catch (ReflectiveOperationException e) {
-            throw new AssertionError(e);
-        }
+        return newInstance(type, injector, url("job/%s/", name), name);
     }
 
     public FreeStyleJob create() {

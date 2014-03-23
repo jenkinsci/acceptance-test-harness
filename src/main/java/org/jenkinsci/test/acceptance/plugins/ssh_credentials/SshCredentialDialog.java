@@ -31,11 +31,7 @@ public class SshCredentialDialog extends PageArea {
 
         kind.select(sut_type);
 
-        try {
-            return type.getConstructor(Injector.class,String.class).newInstance(injector, path);
-        } catch (ReflectiveOperationException e) {
-            throw new AssertionError(e);
-        }
+        return newInstance(type, injector, path);
     }
 
     /**

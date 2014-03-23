@@ -6,9 +6,14 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
 import javax.inject.Inject;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
+
+import static java.util.Arrays.asList;
 
 /**
  * Encapsulates a model in Jenkins and wraps interactions with it.

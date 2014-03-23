@@ -6,10 +6,13 @@ import org.junit.Assert;
 import org.openqa.selenium.*;
 
 import javax.inject.Inject;
+import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
+
+import static java.util.Arrays.asList;
 
 /**
  * For assisting porting from Capybara.
@@ -238,11 +241,38 @@ public class CapybaraPortingLayer extends Assert {
         check(find(by.checkbox(locator)));
     }
 
+    /**
+     * Thread.sleep that masks exception.
+     */
     public void sleep(int ms) {
         try {
             Thread.sleep(ms);
         } catch (InterruptedException e) {
             throw new Error(e);
+        }
+    }
+
+
+    /**
+     * Finds matching constructor and invoke it.
+     */
+    protected <T> T newInstance(Class<T> type, Object... args) {
+        try {
+            OUTER:
+            for (Constructor<?> c : type.getConstructors()) {
+                Class<?>[] pts = c.getParameterTypes();
+                if (pts.length!=args.length)    continue;
+                for (int i=0; i<pts.length; i++) {
+                    if (!pts[i].isInstance(args[i]))
+                        continue OUTER;
+                }
+
+                return type.cast(c.newInstance(args));
+            }
+
+            throw new AssertionError("No matching constructor found in "+type+": "+ asList(args));
+        } catch (ReflectiveOperationException e) {
+            throw new AssertionError("Failed to invoke a constructor of "+type, e);
         }
     }
 }

@@ -1,10 +1,6 @@
 package org.jenkinsci.test.acceptance.po;
 
-import com.google.inject.Injector;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
-
-import java.net.URL;
-import java.util.concurrent.Callable;
 
 /**
  * Built-in standard slave type.
@@ -32,12 +28,6 @@ public class DumbSlave extends Slave {
         String sut_type = type.getAnnotation(ComputerLauncherPageObject.class).value();
 
         launchMethod.select(sut_type);
-
-        try {
-            return type.getConstructor(PageObject.class,String.class)
-                    .newInstance(this,"/launcher");
-        } catch (ReflectiveOperationException e) {
-            throw new AssertionError(e);
-        }
+        return newInstance(type, this,"/launcher");
     }
 }

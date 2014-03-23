@@ -69,11 +69,7 @@ public class GitScm extends Scm {
 
     public <T extends Behaviour> T addBehaviour(Class<T> type) {
         control("hetero-list-add[extensions]").click();
-        try {
-            return type.getConstructor(GitScm.class, String.class).newInstance(this, path + "/extensions");
-        } catch (ReflectiveOperationException e) {
-            throw new Error(e);
-        }
+        return newInstance(type, this, path + "/extensions");   // FIXME: find the last extension added
     }
 
     private void advanced() {

@@ -1,9 +1,5 @@
 package org.jenkinsci.test.acceptance.po;
 
-import com.google.inject.Injector;
-
-import java.net.URL;
-
 /**
  * Mix-in for {@link PageObject}s that own a group of views, like
  * {@link Jenkins}.
@@ -23,12 +19,6 @@ public class ViewsMixIn extends MixIn {
         check(find(by.radioButton(sut_type)));
         clickButton("OK");
 
-        try {
-            return type.getConstructor(Injector.class,URL.class)
-                    .newInstance(injector, url("view/%s/", name));
-        } catch (ReflectiveOperationException e) {
-            throw new AssertionError(e);
-        }
+        return newInstance(type, injector, url("view/%s/", name));
     }
-
 }

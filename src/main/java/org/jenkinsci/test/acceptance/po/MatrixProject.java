@@ -31,10 +31,6 @@ public class MatrixProject extends Job {
 
         String path = last(by.xpath("//div[@name='axis']")).getAttribute("path");
 
-        try {
-            return type.getConstructor(PageObject.class,String.class).newInstance(this,path);
-        } catch (ReflectiveOperationException e) {
-            throw new Error(e);
-        }
+        return newInstance(type,this,path);
     }
 }

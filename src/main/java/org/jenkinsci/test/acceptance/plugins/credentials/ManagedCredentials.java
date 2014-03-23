@@ -2,7 +2,6 @@ package org.jenkinsci.test.acceptance.plugins.credentials;
 
 import org.jenkinsci.test.acceptance.po.ContainerPageObject;
 import org.jenkinsci.test.acceptance.po.Jenkins;
-import org.jenkinsci.test.acceptance.po.PageObject;
 
 /**
  * "Manage Credentials" page.
@@ -26,10 +25,6 @@ public class ManagedCredentials extends ContainerPageObject {
 
         String path = last(by.xpath("//div[@name='credentials']")).getAttribute("path");
 
-        try {
-            return type.getConstructor(PageObject.class,String.class).newInstance(this, path);
-        } catch (ReflectiveOperationException e) {
-            throw new AssertionError(e);
-        }
+        return newInstance(type, this, path);
     }
 }
