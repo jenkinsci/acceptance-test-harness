@@ -101,7 +101,9 @@ public class PluginManager extends ContainerPageObject {
         if (uploadPlugins) {
             for (PluginMetadata p : ucmd.get().transitiveDependenciesOf(asList(shortNames))) {
                 try {
-                    p.uploadTo(jenkins,injector);
+                    if (!isInstalled(p.name)) {
+                        p.uploadTo(jenkins,injector);
+                    }
                 } catch (IOException|ArtifactResolutionException e) {
                     throw new AssertionError("Failed to upload plugin: "+p,e);
                 }
