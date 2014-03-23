@@ -1,14 +1,21 @@
 package core;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.Bug;
+import org.jenkinsci.test.acceptance.junit.Since;
+import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.MatrixBuild;
 import org.jenkinsci.test.acceptance.po.MatrixConfiguration;
 import org.jenkinsci.test.acceptance.po.MatrixProject;
 import org.jenkinsci.test.acceptance.po.MatrixRun;
+import org.jenkinsci.test.acceptance.po.StringParameter;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Collections;
 import java.util.List;
+
+import static java.util.Collections.singletonMap;
 
 /**
  Feature: Use multi configuration job
@@ -111,7 +118,7 @@ public class MatrixTest extends AbstractJUnitTest {
     @Test
     public void run_build_with_combination_filter() {
         job.configure();
-        job.addUserAxis("user_axis","axis1 axis2 axis3");
+        job.addUserAxis("user_axis", "axis1 axis2 axis3");
         job.setCombinationFilter("user_axis=='axis2'");
         job.addShellStep("echo hello");
         job.save();
@@ -121,6 +128,47 @@ public class MatrixTest extends AbstractJUnitTest {
         b.getConfiguration("user_axis=axis1").shouldNotExist();
         b.getConfiguration("user_axis=axis2").shouldExist();
         b.getConfiguration("user_axis=axis3").shouldNotExist();
+    }
+
+    /**
+     @since(1.515)
+     @bug(7285)
+     Scenario: Use Job parameters in combination filters
+       Given a matrix job
+       When I configure the job
+       And I configure user axis "run" with values "yes maybe no"
+       And I set combination filter to "run=='yes' || (run=='maybe' && condition=='true')"
+       And I add a string parameter "condition"
+       And I save the job
+       And I build the job with parameter
+           | condition | false |
+       And I build the job with parameter
+           | condition | true |
+       Then combination "run=yes" should be built in build 1
+       Then combination "run=yes" should be built in build 2
+       Then combination "run=maybe" should not be built in build 1
+       Then combination "run=maybe" should be built in build 2
+       Then combination "run=no" should not be built in build 1
+       Then combination "run=no" should not be built in build 2
+     */
+    @Test @Bug("JENKINS-7285") @Since("1.515")
+    public void use_job_parameters_in_combination_filters() {
+        job.configure();
+        job.addUserAxis("run", "yes maybe no");
+        job.setCombinationFilter("run=='yes' || (run=='maybe' && condition=='true')");
+        job.addParameter(StringParameter.class).setName("condition");
+        job.save();
+
+        MatrixBuild b = job.queueBuild(singletonMap("condition", "false")).as(MatrixBuild.class);
+        b.getConfiguration("run=yes").shouldExist();
+        b.getConfiguration("run=maybe").shouldNotExist();
+        b.getConfiguration("run=no").shouldNotExist();
+
+        b = job.queueBuild(singletonMap("condition", "true")).as(MatrixBuild.class);
+        b.getConfiguration("run=yes").shouldExist();
+        b.getConfiguration("run=maybe").shouldExist();
+        b.getConfiguration("run=no").shouldNotExist();
+
     }
 
     private void assertThatBuildHasRunSequentially(MatrixBuild b) {
