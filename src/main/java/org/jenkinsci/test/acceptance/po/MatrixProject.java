@@ -33,4 +33,14 @@ public class MatrixProject extends Job {
 
         return newInstance(type,this,path);
     }
+
+    @Override
+    public MatrixBuild getLastBuild() {
+        return super.getLastBuild().as(MatrixBuild.class);
+    }
+
+    @Override
+    public MatrixBuild build(int buildNumber) {
+        return super.build(buildNumber).as(MatrixBuild.class);
+    }
 }

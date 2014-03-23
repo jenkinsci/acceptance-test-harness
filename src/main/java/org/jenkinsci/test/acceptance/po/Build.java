@@ -15,7 +15,6 @@ import static org.hamcrest.CoreMatchers.*;
  * @author Kohsuke Kawaguchi
  */
 public class Build extends ContainerPageObject {
-    public final int buildNumber;
     public final Job job;
 
     private String result;
@@ -28,14 +27,24 @@ public class Build extends ContainerPageObject {
 
     public Build(Job job, int buildNumber) {
         super(job.injector,job.url("%d/",buildNumber));
-        this.buildNumber = buildNumber;
         this.job = job;
     }
 
     public Build(Job job, String permalink) {
         super(job.injector,job.url(permalink+"/"));
-        this.buildNumber = -1;  // HACK
         this.job = job;
+    }
+
+    public Build(Job job, URL url) {
+        super(job.injector, url);
+        this.job = job;
+    }
+
+    /**
+     * "Casts" this object into a subtype by creating the specified
+     */
+    public <T extends Build> T as(Class<T> type) {
+        return newInstance(type, job, url);
     }
 
     public Build waitUntilStarted() {
