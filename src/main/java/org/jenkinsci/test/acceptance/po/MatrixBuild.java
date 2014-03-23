@@ -23,4 +23,8 @@ public class MatrixBuild extends Build {
         }
         return builds;
     }
+
+    public MatrixRun getConfiguration(String name) {
+        return new MatrixRun(getJob().getConfiguration(name),url(name+"/"));
+    }
 }

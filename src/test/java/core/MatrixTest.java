@@ -68,6 +68,33 @@ public class MatrixTest extends AbstractJUnitTest {
         }
     }
 
+    /**
+     Scenario: Run touchstone builds first with resul stable
+       Given a matrix job
+       When I configure the job
+       And I configure user axis "user_axis" with values "axis1 axis2 axis3"
+       And I add always fail build step
+       And I configure to execute touchstone builds first with filter "user_axis=='axis3'" and required result "UNSTABLE"
+       And I save the job
+       And I build the job
+       Then combination "user_axis=axis2" should not be built
+       And combination "user_axis=axis1" should not be built
+       And combination "user_axis=axis3" should be built
+     */
+    @Test
+    public void run_touchstone_builds_first_with_result_stable() {
+        job.configure();
+        job.addUserAxis("user_axis","axis1 axis2 axis3");
+        job.addShellStep("false");
+        job.setTouchStoneBuild("user_axis=='axis3'","UNSTABLE");
+        job.save();
+        MatrixBuild b = job.queueBuild().waitUntilFinished().as(MatrixBuild.class);
+
+        b.getConfiguration("user_axis=axis1").shouldNotExist();
+        b.getConfiguration("user_axis=axis2").shouldNotExist();
+        b.getConfiguration("user_axis=axis3").shouldExist();
+    }
+
     private void assertThatBuildHasRunSequentially(MatrixBuild b) {
         List<MatrixRun> builds = b.getConfigurations();
 

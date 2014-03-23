@@ -1,9 +1,12 @@
 package org.jenkinsci.test.acceptance.po;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.apache.commons.io.IOUtils;
 import org.jenkinsci.test.acceptance.Matchers;
 import org.openqa.selenium.WebElement;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -163,5 +166,25 @@ public class Build extends ContainerPageObject {
         String n = getJson().get("builtOn").asText();
         if (n.length()==0)  return "master";
         return n;
+    }
+
+    /**
+     * Does this object exist?
+     */
+    public void shouldExist() {
+        try {
+            IOUtils.toByteArray(url.openStream());
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    public void shouldNotExist() {
+        try {
+            HttpURLConnection con = (HttpURLConnection)url.openConnection();
+            assertThat(con.getResponseCode(), is(404));
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
     }
 }

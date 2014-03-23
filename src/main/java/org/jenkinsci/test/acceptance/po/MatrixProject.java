@@ -15,6 +15,9 @@ public class MatrixProject extends Job {
     // config page objects
     public final Control addAxis = control(by.button("Add axis"));
     public final Control runSequentially = control("/executionStrategy/runSequentially");
+    public final Control hasTouchStoneCombinationFilter = control("/executionStrategy/hasTouchStoneCombinationFilter");
+    public final Control touchStoneCombinationFilter = control("/executionStrategy/touchStoneCombinationFilter");
+    public final Control touchStoneResultCondition = control("/executionStrategy/touchStoneResultCondition");
 
     public MatrixProject(Injector injector, URL url, String name) {
         super(injector, url, name);
@@ -55,7 +58,14 @@ public class MatrixProject extends Job {
         return r;
     }
 
-    private MatrixConfiguration getConfiguration(String name) {
+    public MatrixConfiguration getConfiguration(String name) {
         return new MatrixConfiguration(injector, url(name+'/'), name);
+    }
+
+    public void setTouchStoneBuild(String filter, String result) {
+        ensureConfigPage();
+        hasTouchStoneCombinationFilter.check();
+        touchStoneCombinationFilter.set(filter);
+        touchStoneResultCondition.select(result);
     }
 }
