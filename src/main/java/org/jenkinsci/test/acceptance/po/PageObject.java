@@ -2,6 +2,7 @@ package org.jenkinsci.test.acceptance.po;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Injector;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
 import javax.inject.Inject;
@@ -84,5 +85,9 @@ public abstract class PageObject extends CapybaraPortingLayer {
      */
     public Control control(String... relativePaths) {
         return new Control(this,relativePaths);
+    }
+
+    public Control control(By selector) {
+        return new Control(injector,selector);
     }
 }

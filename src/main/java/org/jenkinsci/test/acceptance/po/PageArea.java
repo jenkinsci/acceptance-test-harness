@@ -50,4 +50,8 @@ public abstract class PageArea extends CapybaraPortingLayer implements Control.O
     public Control control(String... relativePaths) {
         return new Control(this,relativePaths);
     }
+
+    public Control control(By selector) {
+        return new Control(injector,selector);
+    }
 }

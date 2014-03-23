@@ -13,7 +13,7 @@ import org.jenkinsci.test.acceptance.po.PageObject;
  * @author Kohsuke Kawaguchi
  */
 public class SshCredentialDialog extends PageArea {
-    public final Control kind = new Control(injector,by.xpath("//*[@id='credentials-dialog-form']//*[@path='/']"));
+    public final Control kind = control(by.xpath("//*[@id='credentials-dialog-form']//*[@path='/']"));
 
     public SshCredentialDialog(Injector injector, String path) {
         super(injector, path);
