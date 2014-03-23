@@ -1,9 +1,8 @@
 package core;
 
 import com.google.inject.Inject;
-import org.hamcrest.Matcher;
+
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.po.CodeMirror;
 import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.junit.Test;
@@ -29,9 +28,8 @@ public class ScriptTest extends AbstractJUnitTest {
      */
     @Test
     public void execute_system_script() {
-        jenkins.visit("script");
-        runScript("println Jenkins.instance.displayName;");
-        assertOutput(is("Jenkins"));
+        String output = jenkins.runScript("println Jenkins.instance.displayName;");
+        assertThat(output, is("Jenkins"));
     }
 
     /**
@@ -46,19 +44,7 @@ public class ScriptTest extends AbstractJUnitTest {
     @Test
     public void execute_system_script_on_slave() throws ExecutionException, InterruptedException {
         Slave s = slave.install(jenkins).get();
-        s.visit("script");
-        runScript("println 6 * 7");
-        assertOutput(is("42"));
-    }
-
-    private void runScript(String script) {
-        sleep(500);
-        CodeMirror cm = new CodeMirror(jenkins,"/script");
-        cm.set(script);
-        clickButton("Run");
-    }
-
-    private void assertOutput(Matcher<String> matcher) {
-        assertThat(find(by.css("h2 + pre")).getText(), matcher);
+        String output = s.runScript("println 6 * 7");
+        assertThat(output, is("42"));
     }
 }

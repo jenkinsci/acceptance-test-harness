@@ -12,7 +12,7 @@ import java.io.File;
  * @author Kohsuke Kawaguchi
  * @see Jenkins#slaves
  */
-public abstract class Slave extends ContainerPageObject {
+public abstract class Slave extends Node {
     private final String name;
 
     protected Slave(Jenkins j, String name) {
