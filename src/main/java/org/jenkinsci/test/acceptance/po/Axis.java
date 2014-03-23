@@ -9,6 +9,8 @@ import com.google.inject.Injector;
  * @see MatrixProject#addAxis(Class)
  */
 public abstract class Axis extends PageArea {
+    public final Control name = control("name");
+
     protected Axis(Injector injector, String path) {
         super(injector, path);
     }
