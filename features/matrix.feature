@@ -2,6 +2,11 @@ Feature: Use multi configuration job
   As a Jenkins user
   I want to configure and run multi configuration jobs
 
+  *****************************************************
+    BEING PORTED TO MatrixTest.java
+  *****************************************************
+
+
   Scenario: Run a matrix job
     Given a matrix job
     When I configure the job
