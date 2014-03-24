@@ -133,7 +133,7 @@ public class Build extends ContainerPageObject {
         return getResult().equals("SUCCESS");
     }
 
-    private String getResult() {
+    public String getResult() {
         if (result!=null)   return result;
 
         waitUntilFinished();
