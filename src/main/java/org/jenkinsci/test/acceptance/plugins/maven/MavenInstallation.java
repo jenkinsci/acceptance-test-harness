@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.test.acceptance.plugins.groovy;
+package org.jenkinsci.test.acceptance.plugins.maven;
 
 import java.util.regex.Pattern;
 
@@ -29,18 +29,19 @@ import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.jenkinsci.test.acceptance.po.ToolInstallation;
 import org.jenkinsci.test.acceptance.po.ToolInstallationPageObject;
 
-@ToolInstallationPageObject("Groovy")
-public class GroovyInstallation extends ToolInstallation {
-    public GroovyInstallation(JenkinsConfig context, String path) {
+@ToolInstallationPageObject("Maven")
+public class MavenInstallation extends ToolInstallation {
+
+    public MavenInstallation(JenkinsConfig context, String path) {
         super(context, path);
     }
 
     @Override
     public Pattern updatesPattern() {
-        return Pattern.compile("Obtained the updated data file for hudson.plugins.groovy.GroovyInstaller");
+        return Pattern.compile("Obtained the updated data file for hudson.tasks.Maven.MavenInstaller");
     }
 
     public void useNative() {
-        installedIn(fakeHome("groovy", "GROOVY_HOME"));
+        installedIn(fakeHome("mvn", "M2_HOME"));
     }
 }

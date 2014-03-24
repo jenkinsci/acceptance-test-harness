@@ -41,9 +41,11 @@ public class SshSlaveController extends SlaveController {
         ManagedCredentials credential = new ManagedCredentials(j);
 
         try {
+            credential.open();
             SshPrivateKeyCredential sc = credential.add(SshPrivateKeyCredential.class);
             sc.username.set(machine.getUser());
             sc.selectEnterDirectly().privateKey.set(keyPair.readPrivateKey());
+            credential.save();
         } catch (IOException e) {
             throw new AssertionError(e);
         }
@@ -123,7 +125,7 @@ public class SshSlaveController extends SlaveController {
 
         s.find(by.input("_.host")).sendKeys(host);
 
-        s.waitFor(s.by.option(String.format("%s (%s)", machine.getUser(), "SSH Key setup")));
+        s.waitFor(s.by.option(String.format("%s", machine.getUser())));
 
         s.save();
         return s;

@@ -21,26 +21,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.test.acceptance.plugins.groovy;
+package org.jenkinsci.test.acceptance.po;
 
-import java.util.regex.Pattern;
+import java.net.URL;
 
-import org.jenkinsci.test.acceptance.po.JenkinsConfig;
-import org.jenkinsci.test.acceptance.po.ToolInstallation;
-import org.jenkinsci.test.acceptance.po.ToolInstallationPageObject;
+import com.google.inject.Injector;
 
-@ToolInstallationPageObject("Groovy")
-public class GroovyInstallation extends ToolInstallation {
-    public GroovyInstallation(JenkinsConfig context, String path) {
-        super(context, path);
+/**
+ * Common base for Jenkins and Slave.
+ *
+ * @author ogondza
+ */
+public class Node extends ContainerPageObject {
+
+    protected Node(Jenkins j, URL url) {
+        super(j, url);
     }
 
-    @Override
-    public Pattern updatesPattern() {
-        return Pattern.compile("Obtained the updated data file for hudson.plugins.groovy.GroovyInstaller");
+    protected Node(Injector i, URL url) {
+        super(i, url);
     }
 
-    public void useNative() {
-        installedIn(fakeHome("groovy", "GROOVY_HOME"));
+    public String runScript(String script) {
+        visit("script");
+        sleep(500);
+        CodeMirror cm = new CodeMirror(this, "/script");
+        cm.set(script);
+        clickButton("Run");
+
+        return find(by.css("h2 + pre")).getText();
     }
 }

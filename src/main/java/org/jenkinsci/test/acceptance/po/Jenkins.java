@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
  * @author Kohsuke Kawaguchi
  */
 @TestScope
-public class Jenkins extends ContainerPageObject {
+public class Jenkins extends Node {
     private VersionNumber version;
 
     public final JobsMixIn jobs;

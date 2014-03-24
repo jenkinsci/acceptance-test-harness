@@ -113,21 +113,15 @@ public class GroovyPluginTest extends AbstractJUnitTest {
         jenkins.save();
 
         configureJob();
-
-        job.addShellStep("groovy --version"); // Get local groovy version
-
         final GroovyStep step = job.addBuildStep(GroovyStep.class);
         step.version.select("local-groovy");
         step.script(
                 "println 'version: ' + groovy.lang.GroovySystem.getVersion()"
         );
-
         job.save();
         Build build = job.queueBuild().shouldSucceed();
 
-        Matcher matcher = Pattern.compile("Groovy Version: (.+) JVM:").matcher(build.getConsole());
-        matcher.find();
-        String expectedVersion = matcher.group(1);
+        String expectedVersion = localGroovyVersion();
 
         build.shouldContainsConsoleOutput("version: " + expectedVersion);
     }
@@ -140,5 +134,12 @@ public class GroovyPluginTest extends AbstractJUnitTest {
     private void shouldReport(String out) {
         job.save();
         job.queueBuild().shouldSucceed().shouldContainsConsoleOutput(out);
+    }
+
+    private String localGroovyVersion() {
+        final Pattern pattern = Pattern.compile("Groovy Version: (.+) JVM:");
+        final Matcher matcher = pattern.matcher(jenkins.runScript("'groovy --version'.execute().text"));
+        matcher.find();
+        return matcher.group(1);
     }
 }
