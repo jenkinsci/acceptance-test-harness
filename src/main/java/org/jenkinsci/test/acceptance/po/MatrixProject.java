@@ -6,6 +6,7 @@ import com.google.inject.Injector;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -39,7 +40,12 @@ public class MatrixProject extends Job {
         ensureConfigPage();
         selectDropdownMenu(a.value(), addAxis.resolve());
 
-        String path = last(by.xpath("//div[@name='axis']")).getAttribute("path");
+        String path = waitForCond(new Callable<String>() {
+            @Override
+            public String call() throws Exception {
+                return last(by.xpath("//div[@name='axis']")).getAttribute("path");
+            }
+        });
 
         return newInstance(type,this,path);
     }
