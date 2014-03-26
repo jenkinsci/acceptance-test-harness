@@ -70,6 +70,10 @@ public class JenkinsLogger extends PageObject {
     }
 
     public void waitForLogged(final Pattern pattern) {
+        waitForLogged(pattern, 30);
+    }
+
+    public void waitForLogged(final Pattern pattern, final int timeout) {
         waitForCond(new Callable<Boolean>() {
             @Override public Boolean call() throws Exception {
                 return hasLogged(pattern);
@@ -78,7 +82,7 @@ public class JenkinsLogger extends PageObject {
             @Override public String toString() {
                 return pattern.toString() + " to be logged";
             }
-        });
+        }, timeout);
     }
 
     /**

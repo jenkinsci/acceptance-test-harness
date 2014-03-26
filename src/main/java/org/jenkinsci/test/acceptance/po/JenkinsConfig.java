@@ -50,7 +50,7 @@ public class JenkinsConfig extends PageObject {
 
         T tool = newInstance(type, this, prefix);
         {// TODO do not leave the page
-            jenkins.getLogger("all").waitForLogged(tool.updatesPattern());
+            jenkins.getLogger("all").waitForLogged(tool.updatesPattern(), 60);
             configure();
             clickButton("Add " + name);
             sleep(100);
