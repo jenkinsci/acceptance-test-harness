@@ -98,12 +98,16 @@ public abstract class LocalController extends JenkinsController {
         pluginDir.mkdirs();
 
         if(getenv("PLUGINS_DIR") != null){
-            String givenPluginDir = getenv("PLUGINS_DIR");
-
+            File givenPluginDir = new File(getenv("PLUGINS_DIR"));
             try {
-                FileUtils.copyDirectory(new File(givenPluginDir), pluginDir,"/*.[hj]pi",null);
+                File[] plugins = givenPluginDir.listFiles();
+                if (plugins == null) throw new IOException("Plugin dir not readable");
+                for (File plugin: plugins) {
+                    FileUtils.copyFileToDirectory(plugin, pluginDir);
+                }
             } catch (IOException e) {
-                throw new RuntimeException(String.format("Failed to copy plugins from %s to %s", pluginDir, givenPluginDir));
+                String msg = String.format("Failed to copy plugins from %s to %s", givenPluginDir, pluginDir);
+                throw new RuntimeException(msg, e);
             }
         }
 
