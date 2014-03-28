@@ -98,7 +98,7 @@ public class JBossController extends LocalController {
                     new File(getWarFile().getParentFile(), "jboss").getAbsolutePath(), "./jboss");
             if (home == null || !home.isDirectory()) {
                 if (StringUtils.isBlank(jbossHome)) {
-                    throw new AssertionError("Cannot fine JBoss home, maybe you forgot to set JBOSS_HOME env var? ");
+                    throw new AssertionError("Cannot find JBoss home, maybe you forgot to set JBOSS_HOME env var? ");
                 }
                 throw new AssertionError(jbossHome + " doesn't exist, maybe you forgot to set JBOSS_HOME env var? ");
             }

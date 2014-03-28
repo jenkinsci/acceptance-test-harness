@@ -101,7 +101,7 @@ public class TomcatController extends LocalController {
             if (home == null || !home.isDirectory()) {
                 if (StringUtils.isBlank(catalinaHome)) {
                     throw new AssertionError(
-                            "Cannot fine Tomcat home, maybe you forgot to set CATALINA_HOME env var? ");
+                            "Cannot find Tomcat home, maybe you forgot to set CATALINA_HOME env var? ");
                 }
                 throw new AssertionError(
                         catalinaHome + " doesn't exist, maybe you forgot to set CATALINA_HOME env var? ");
