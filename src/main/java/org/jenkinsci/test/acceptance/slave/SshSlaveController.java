@@ -9,10 +9,12 @@ import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshPrivateKeyCreden
 import org.jenkinsci.test.acceptance.po.DumbSlave;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.Slave;
+import org.openqa.selenium.By;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -28,11 +30,21 @@ public class SshSlaveController extends SlaveController {
     private final SshKeyPair keyPair;
     private final int slaveReadyTimeOutInSec;
     final AtomicBoolean slaveWaitComplete = new AtomicBoolean(false);
+    private final String fingerprint;
 
     @Inject
     public SshSlaveController(Machine machine, SshKeyPair keyPair, @Named("slaveReadyTimeOutInSec") int slaveReadyTimeOutInSec) {
         this.machine = machine;
         this.keyPair = keyPair;
+        String fingerprint;
+        try {
+            fingerprint = keyPair.getFingerprint();
+        } catch (IOException e) {
+            fingerprint = null;
+        } catch (GeneralSecurityException e) {
+            fingerprint = null;
+        }
+        this.fingerprint = fingerprint;
         this.slaveReadyTimeOutInSec = slaveReadyTimeOutInSec;
     }
 
@@ -42,10 +54,14 @@ public class SshSlaveController extends SlaveController {
 
         try {
             credential.open();
-            SshPrivateKeyCredential sc = credential.add(SshPrivateKeyCredential.class);
-            sc.username.set(machine.getUser());
-            sc.selectEnterDirectly().privateKey.set(keyPair.readPrivateKey());
-            credential.save();
+            if (credential.getElement(By.xpath(String.format("//input[@name='_.username'][@value='%s']"
+                    +"/../../..//input[@name='_.description'][@value='%s']", machine.getUser(), fingerprint))) == null) {
+                SshPrivateKeyCredential sc = credential.add(SshPrivateKeyCredential.class);
+                sc.username.set(machine.getUser());
+                sc.description.set(fingerprint);
+                sc.selectEnterDirectly().privateKey.set(keyPair.readPrivateKey());
+                credential.save();
+            }
         } catch (IOException e) {
             throw new AssertionError(e);
         }
@@ -125,7 +141,7 @@ public class SshSlaveController extends SlaveController {
 
         s.find(by.input("_.host")).sendKeys(host);
 
-        s.waitFor(s.by.option(String.format("%s", machine.getUser())));
+        s.waitFor(s.by.option(String.format("%s (%s)", machine.getUser(), fingerprint)));
 
         s.save();
         return s;
