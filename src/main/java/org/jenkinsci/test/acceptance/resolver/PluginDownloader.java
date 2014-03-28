@@ -7,7 +7,7 @@ import org.jenkinsci.test.acceptance.Ssh;
 /**
  * @author Vivek Pandey
  */
-public class PluginDownloader implements JenkinsResolver{
+public class PluginDownloader implements JenkinsResolver {
 
     private final String pluginPath;
 
@@ -30,8 +30,8 @@ public class PluginDownloader implements JenkinsResolver{
     public void materialize(Machine machine, String path) {
         Ssh ssh = machine.connect();
         if(!JenkinsDownloader.remoteFileExists(ssh.getConnection(),path,null)){
-            ssh.executeRemoteCommand("mkdir -p "+ FileUtils.dirname(path));
-            ssh.executeRemoteCommand(String.format("wget -q -O %s %s",path, pluginPath));
+            ssh.executeRemoteCommand("mkdir -p "+ JenkinsDownloader.escapeForSsh(FileUtils.dirname(path)));
+            ssh.executeRemoteCommand(String.format("wget -q -O %s %s",JenkinsDownloader.escapeForSsh(path), JenkinsDownloader.escapeForSsh(pluginPath)));
         }
     }
 
