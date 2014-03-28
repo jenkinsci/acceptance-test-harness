@@ -412,7 +412,7 @@
     </profile>
 
     <profile>
-      <id>test-property</id>
+      <id>cucumber.test-property</id>
       <activation>
         <property>
           <name>cucumber.test</name>
