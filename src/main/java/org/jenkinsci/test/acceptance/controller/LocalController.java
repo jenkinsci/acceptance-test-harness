@@ -106,7 +106,7 @@ public abstract class LocalController extends JenkinsController {
 
         this.tempDir = FileUtils.createTempFile("jenkins", "home",new File(WORKSPACE));
 
-        this.logFile = new File(this.tempDir.getName()+".log");
+        this.logFile = new File(this.tempDir.getParentFile(), this.tempDir.getName()+".log");
 
         File formPathElement = downloadPathElement();
         File pluginDir = new File(tempDir,"plugins");
