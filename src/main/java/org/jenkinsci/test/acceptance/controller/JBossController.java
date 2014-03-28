@@ -54,6 +54,10 @@ public class JBossController extends LocalController {
 
         CommandBuilder cb = new CommandBuilder(jbossHome+"/bin/standalone.sh");
         cb.env.put("JAVA_OPTS", "-DJENKINS_HOME="+getJenkinsHome());
+        File javaHome = getJavaHome();
+        if (javaHome != null) {
+            cb.env.put("JAVA_HOME", javaHome.getAbsolutePath());
+        }
         return cb.popen();
     }
 

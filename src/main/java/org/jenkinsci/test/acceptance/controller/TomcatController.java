@@ -48,6 +48,10 @@ public class TomcatController extends LocalController {
 
             CommandBuilder cb = new CommandBuilder(catalinaHome+"/bin/startup.sh");
             cb.env.put("JAVA_OPTS", "-DJENKINS_HOME="+getJenkinsHome());
+            File javaHome = getJavaHome();
+            if (javaHome != null) {
+                cb.env.put("JAVA_HOME", javaHome.getAbsolutePath());
+            }
             int status = cb.system();
             if(status != 0){
                 throw new RuntimeException("Failed during Tomcat startup: "+cb.toString());

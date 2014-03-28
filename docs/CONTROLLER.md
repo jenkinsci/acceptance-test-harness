@@ -16,6 +16,8 @@ For more sophisticated customization, see [WIRING.md](WIRING.md).
 This controller runs Jenkins via `java -jar jenkins.war` on the same host where the test is run.
 The behaviour of this controller can be customized through the following environment variables.
 
+* `JENKINS_JAVA_HOME` the JVM home to use for running Jenkins. If not specified, the first of `JAVA_HOME`, or the JVM
+   used to launch the tests will be used.
 * `JENKINS_WAR` the path to `jenkins.war` to be tested. If not specified, the first of `WORKSPACE/jenkins.war` followed
     by `$(pwd)/jenkins.war` that is a file will be selected.
 * `INTERACTIVE` keep browser session opened after failed scenario for interactive investigation.
@@ -53,6 +55,7 @@ This controller deploys Jenkins inside Tomcat and run the test with it. This con
 
 The behaviour of this controller can be customized through the following environment variables.
 
+* `JENKINS_JAVA_HOME` see above
 * `JENKINS_WAR` see above
 * `INTERACTIVE` see above
 * `PLUGINS_DIR` see above
@@ -65,6 +68,7 @@ Similar to the above Tomcat controller except it uses JBoss.
 
 The behaviour of this controller can be customized through the following environment variables.
 
+* `JENKINS_JAVA_HOME` see above
 * `JENKINS_WAR` see above
 * `INTERACTIVE` see above
 * `PLUGINS_DIR` see above

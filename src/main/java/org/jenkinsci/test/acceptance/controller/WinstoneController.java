@@ -31,7 +31,8 @@ public class WinstoneController extends LocalController {
 
     @Override
     public ProcessInputStream startProcess() throws IOException{
-        String java = System.getenv("JAVA_HOME") == null ? "java" : String.format("%s/bin/java",System.getenv("JAVA_HOME"));
+        File javaHome = getJavaHome();
+        String java = javaHome == null ? "java" : String.format("%s/bin/java",javaHome.getAbsolutePath());
         CommandBuilder cb = new CommandBuilder(java).add(
                 "-DJENKINS_HOME=" + getJenkinsHome(),
                 "-jar", war,

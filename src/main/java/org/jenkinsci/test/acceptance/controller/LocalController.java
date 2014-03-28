@@ -166,6 +166,25 @@ public abstract class LocalController extends JenkinsController {
         return tempDir;
     }
 
+    public File getJavaHome() {
+        String javaHome = getenv("JENKINS_JAVA_HOME");
+        File home = StringUtils.isBlank(javaHome) ? null : new File(javaHome);
+        if (home != null && home.isDirectory()) {
+            return home;
+        }
+        javaHome = getenv("JAVA_HOME");
+        home = StringUtils.isBlank(javaHome) ? null : new File(javaHome);
+        if (home != null && home.isDirectory()) {
+            return home;
+        }
+        javaHome = System.getProperty("java.home");
+        home = StringUtils.isBlank(javaHome) ? null : new File(javaHome);
+        if (home != null && home.isDirectory()) {
+            return home;
+        }
+        return null;
+    }
+
     public abstract ProcessInputStream startProcess() throws IOException;
 
     @Override
