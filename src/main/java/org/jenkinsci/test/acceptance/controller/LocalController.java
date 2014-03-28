@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -66,18 +67,25 @@ public abstract class LocalController extends JenkinsController {
          * Determines the location of the war file.
          */
         protected File getWarFile() {
-            String war = defaultsTo(getenv("JENKINS_WAR"), "jenkins.war");
-
-            File warfile = new File(war);
-            if (!warfile.exists())
-                throw new RuntimeException("jenkins.war doesn't exist in " + war + ", maybe you forgot to set JENKINS_WAR env var?");
-            return warfile;
+            File warFile = null;
+            String war = null;
+            for (String w : Arrays.asList(getenv("JENKINS_WAR"), WORKSPACE + "/jenkins.war", "jenkins.war")) {
+                if (w == null) {
+                    continue;
+                }
+                war = w;
+                warFile = new File(war);
+                if (warFile.isFile()) {
+                    break;
+                }
+            }
+            if (warFile == null || !warFile.isFile()) {
+                throw new RuntimeException(
+                        "jenkins.war doesn't exist in " + war + ", maybe you forgot to set JENKINS_WAR env var?");
+            }
+            return warFile;
         }
 
-        protected final String defaultsTo(String v, String w) {
-            if (v==null)    v = w;
-            return v;
-        }
     }
 
     /**
@@ -97,12 +105,28 @@ public abstract class LocalController extends JenkinsController {
         File pluginDir = new File(tempDir,"plugins");
         pluginDir.mkdirs();
 
-        if(getenv("PLUGINS_DIR") != null){
-            File givenPluginDir = new File(getenv("PLUGINS_DIR"));
+        File givenPluginDir = null;
+        for (String d : Arrays.asList(
+                getenv("PLUGINS_DIR"),
+                new File(war.getParentFile(), "plugins").getAbsolutePath(),
+                WORKSPACE + "/plugins",
+                "plugins")) {
+            if (d == null) {
+                continue;
+            }
+            givenPluginDir = new File(d);
+            if (givenPluginDir.isDirectory()) {
+                break;
+            }
+        }
+
+        if (givenPluginDir != null && givenPluginDir.isDirectory()) {
             try {
                 File[] plugins = givenPluginDir.listFiles();
-                if (plugins == null) throw new IOException("Plugin dir not readable");
-                for (File plugin: plugins) {
+                if (plugins == null) {
+                    throw new IOException("Plugin dir not readable");
+                }
+                for (File plugin : plugins) {
                     FileUtils.copyFileToDirectory(plugin, pluginDir);
                 }
             } catch (IOException e) {

@@ -16,9 +16,12 @@ For more sophisticated customization, see [WIRING.md](WIRING.md).
 This controller runs Jenkins via `java -jar jenkins.war` on the same host where the test is run.
 The behaviour of this controller can be customized through the following environment variables.
 
-* `JENKINS_WAR` the path to `jenkins.war` to be tested.
+* `JENKINS_WAR` the path to `jenkins.war` to be tested. If not specified, the first of `WORKSPACE/jenkins.war` followed
+    by `$(pwd)/jenkins.war` that is a file will be selected.
 * `INTERACTIVE` keep browser session opened after failed scenario for interactive investigation.
-* `PLUGINS_DIR` a directory of plugins to be loaded on Jenkins startup
+* `PLUGINS_DIR` a directory of plugins to be loaded on Jenkins startup. If this is not specified, the first existing
+    directory from the following list will be used: a `plugins` directory as a sibling to the resolved `jenkins.war`,
+    `WORKSPACE/plugins` and `$(pwd)/plugins`.
 
 This is the default controller.
 
