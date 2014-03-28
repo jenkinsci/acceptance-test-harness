@@ -2,6 +2,7 @@ package org.jenkinsci.test.acceptance.controller;
 
 import com.cloudbees.sdk.extensibility.Extension;
 import org.codehaus.plexus.util.FileUtils;
+import org.codehaus.plexus.util.StringUtils;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.jenkinsci.utils.process.ProcessInputStream;
 
@@ -92,9 +93,15 @@ public class JBossController extends LocalController {
         }
 
         protected File getJBossHome() {
-            File home = new File(defaultsTo(System.getenv("JBOSS_HOME"), "./jboss"));
-            if (!home.isDirectory())
-                throw new AssertionError(home+" doesn't exist, maybe you forgot to set JBOSS_HOME env var? ");
+            String jbossHome = System.getenv("JBOSS_HOME");
+            File home = firstExisting(true, jbossHome,
+                    new File(getWarFile().getParentFile(), "jboss").getAbsolutePath(), "./jboss");
+            if (home == null || !home.isDirectory()) {
+                if (StringUtils.isBlank(jbossHome)) {
+                    throw new AssertionError("Cannot fine JBoss home, maybe you forgot to set JBOSS_HOME env var? ");
+                }
+                throw new AssertionError(jbossHome + " doesn't exist, maybe you forgot to set JBOSS_HOME env var? ");
+            }
             return home;
         }
     }

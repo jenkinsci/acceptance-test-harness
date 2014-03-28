@@ -2,6 +2,7 @@ package org.jenkinsci.test.acceptance.controller;
 
 import com.cloudbees.sdk.extensibility.Extension;
 import org.codehaus.plexus.util.FileUtils;
+import org.codehaus.plexus.util.StringUtils;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.jenkinsci.utils.process.ProcessInputStream;
 
@@ -94,9 +95,17 @@ public class TomcatController extends LocalController {
         }
 
         protected File getTomcatHome() {
-            File home = new File(defaultsTo(System.getenv("CATALINA_HOME"), "./tomcat"));
-            if (!home.isDirectory())
-                throw new AssertionError(home+" doesn't exist, maybe you forgot to set CATALINA_HOME env var? ");
+            String catalinaHome = System.getenv("CATALINA_HOME");
+            File home = firstExisting(true, catalinaHome,
+                    new File(getWarFile().getParentFile(), "tomcat").getAbsolutePath(), "./tomcat");
+            if (home == null || !home.isDirectory()) {
+                if (StringUtils.isBlank(catalinaHome)) {
+                    throw new AssertionError(
+                            "Cannot fine Tomcat home, maybe you forgot to set CATALINA_HOME env var? ");
+                }
+                throw new AssertionError(
+                        catalinaHome + " doesn't exist, maybe you forgot to set CATALINA_HOME env var? ");
+            }
             return home;
         }
     }

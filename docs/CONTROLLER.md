@@ -56,7 +56,9 @@ The behaviour of this controller can be customized through the following environ
 * `JENKINS_WAR` see above
 * `INTERACTIVE` see above
 * `PLUGINS_DIR` see above
-* `CATALINA_HOME` The directory in which Tomcat is already installed.
+* `CATALINA_HOME` The directory in which Tomcat is already installed. If this is not specified, the first existing
+    directory from the following list will be used: a `tomcat` directory as a sibling to the resolved `jenkins.war`,
+    `WORKSPACE/tomcat` and `$(pwd)/tomcat`.
 
 ## JBoss controller (type=jboss)
 Similar to the above Tomcat controller except it uses JBoss.
@@ -66,7 +68,9 @@ The behaviour of this controller can be customized through the following environ
 * `JENKINS_WAR` see above
 * `INTERACTIVE` see above
 * `PLUGINS_DIR` see above
-* `JBOSS_HOME` The directory in which JBoss is already installed.
+* `JBOSS_HOME` The directory in which JBoss is already installed.  If this is not specified, the first existing
+    directory from the following list will be used: a `jboss` directory as a sibling to the resolved `jenkins.war`,
+    `WORKSPACE/jboss` and `$(pwd)/jboss`.
 
 ## Vagrant family of controllers
 There's a family of controllers who uses Vagrant to launch a virtual machine, then launch jenkins.war inside.

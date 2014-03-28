@@ -2,6 +2,7 @@ package org.jenkinsci.test.acceptance.controller;
 
 import org.apache.commons.io.input.TeeInputStream;
 import org.codehaus.plexus.util.FileUtils;
+import org.codehaus.plexus.util.StringUtils;
 import org.jenkinsci.utils.process.ProcessInputStream;
 
 import java.io.File;
@@ -67,29 +68,31 @@ public abstract class LocalController extends JenkinsController {
          * Determines the location of the war file.
          */
         protected File getWarFile() {
-            File warFile = null;
-            String war = null;
-            for (String w : Arrays.asList(getenv("JENKINS_WAR"), WORKSPACE + "/jenkins.war", "jenkins.war")) {
-                if (w == null) {
-                    continue;
-                }
-                war = w;
-                warFile = new File(war);
-                if (warFile.isFile()) {
-                    break;
-                }
-            }
+            String jenkinsWar = getenv("JENKINS_WAR");
+            File warFile = firstExisting(false, jenkinsWar, WORKSPACE + "/jenkins.war", "./jenkins.war");
             if (warFile == null || !warFile.isFile()) {
+                if (StringUtils.isBlank(jenkinsWar)) {
+                    throw new RuntimeException(
+                            "Could not find jenkins.war, maybe you forgot to set JENKINS_WAR env var?");
+                }
                 throw new RuntimeException(
-                        "jenkins.war doesn't exist in " + war + ", maybe you forgot to set JENKINS_WAR env var?");
+                        "jenkins.war doesn't exist in " + jenkinsWar
+                                + ", maybe you forgot to set JENKINS_WAR env var?");
             }
             return warFile;
         }
 
-        protected final String defaultsTo(String v, String w) {
-            if (v==null)    v = w;
-            return v;
+        protected final File firstExisting(boolean directory, String... candidatePaths) {
+            for (String path: candidatePaths) {
+                if (path == null) continue;
+                File f = new File(path);
+                if (directory ? f.isDirectory() : f.isFile()) {
+                    return f;
+                }
+            }
+            return null;
         }
+
     }
 
     /**
