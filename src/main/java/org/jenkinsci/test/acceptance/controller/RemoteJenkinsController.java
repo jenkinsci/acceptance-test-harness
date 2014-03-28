@@ -54,7 +54,7 @@ public class RemoteJenkinsController extends JenkinsController {
         this.machine = machine;
         this.jenkinsHome = jenkinsHome;
         this.jenkinsWarLocation = jenkinsWar;
-        this.logFile = new File(new File(jenkinsHome).getName()+"_log.log");
+        this.logFile = new File(WORKSPACE, new File(jenkinsHome).getName()+"_log.log");
         this.httpPort = machine.getNextAvailablePort();
         this.controlPort = machine.getNextAvailablePort();
         this.privateKeyLocation = privateKeyLocation;
