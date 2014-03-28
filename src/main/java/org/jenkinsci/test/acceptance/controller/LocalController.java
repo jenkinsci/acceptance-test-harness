@@ -86,6 +86,10 @@ public abstract class LocalController extends JenkinsController {
             return warFile;
         }
 
+        protected final String defaultsTo(String v, String w) {
+            if (v==null)    v = w;
+            return v;
+        }
     }
 
     /**
