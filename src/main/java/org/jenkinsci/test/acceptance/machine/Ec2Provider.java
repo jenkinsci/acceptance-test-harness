@@ -148,20 +148,32 @@ public class Ec2Provider extends JcloudsMachineProvider {
         super.offer(m);
     }
 
-    private void  copyAutoterminateScript(String host) throws IOException, InterruptedException {
+    private void copyAutoterminateScript(String host) throws IOException, InterruptedException {
         //run terminate script
-        URL script = this.getClass().getClassLoader().getResource("org/jenkinsci/test/acceptance/machine/autoterminate.sh");
-        File tempScriptFile = new File("autoterminate.sh");
-        FileUtils.copyURLToFile(script, tempScriptFile);
+        URL script =
+                this.getClass().getClassLoader().getResource("org/jenkinsci/test/acceptance/machine/autoterminate.sh");
+        File tempScriptFile = File.createTempFile("autoterminate", ".sh");
+        try {
+            FileUtils.copyURLToFile(script, tempScriptFile);
 
-        logger.info(String.format("Executing auto-terminate script on remote machine: %s, it will terminate after 180 minutes of inactivity.",host));
-        Ssh ssh = new Ssh(host);
-        authenticator().authenticate(ssh.getConnection());
-        ssh.copyTo(tempScriptFile.getAbsolutePath(), "autoterminate.sh", ".");
-        ssh.executeRemoteCommand("chmod +x ./autoterminate.sh ; touch nohup.out");
+            logger.info(String.format(
+                    "Executing auto-terminate script on remote machine: %s, it will terminate after 180 minutes of "
+                            + "inactivity.",
+                    host));
+            Ssh ssh = new Ssh(host);
+            authenticator().authenticate(ssh.getConnection());
+            ssh.copyTo(tempScriptFile.getAbsolutePath(), "autoterminate.sh", ".");
+            ssh.executeRemoteCommand("chmod +x ./autoterminate.sh ; touch nohup.out");
 
-        //wait for 3 hours before termination
-        ssh.getConnection().exec(String.format("nohup ./autoterminate.sh %s %s `</dev/null` >nohup.out 2>&1 &", config.getUser(), AUTO_TERMINATE_TIMEOUT), System.out);
+            //wait for 3 hours before termination
+            ssh.getConnection().exec(String
+                    .format("nohup ./autoterminate.sh %s %s `</dev/null` >nohup.out 2>&1 &", config.getUser(),
+                            AUTO_TERMINATE_TIMEOUT), System.out);
+        } finally {
+            if (!tempScriptFile.delete()) {
+                tempScriptFile.deleteOnExit();
+            }
+        }
     }
 
     private static final int AUTO_TERMINATE_TIMEOUT=180;
