@@ -31,8 +31,8 @@ public class Ssh{
         try {
             session = connection.openSession();
             int status = connection.exec(cmd, os);
-            if(status != 0){
-                throw new RuntimeException("Failed to execute command: "+cmd);
+            if (status != 0) {
+                throw new RuntimeException("Failed to execute command: " + cmd + ", exit code = " + status);
             }
             return status;
         } catch (InterruptedException | IOException e) {
