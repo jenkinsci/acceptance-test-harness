@@ -10,11 +10,15 @@ import org.jenkinsci.test.acceptance.po.DumbSlave;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.Slave;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.Select;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -141,7 +145,25 @@ public class SshSlaveController extends SlaveController {
 
         s.find(by.input("_.host")).sendKeys(host);
 
-        s.waitFor(s.by.option(String.format("%s (%s)", machine.getUser(), fingerprint)));
+        try {
+            Thread.sleep(25);
+        } catch (InterruptedException e) {
+            // ignore
+        }
+
+        final Select cId = new Select(s.find(by.input("_.credentialsId")));
+        final String credentialName = String.format("%s (%s)", machine.getUser(), fingerprint);
+        s.waitForCond(new Callable<Object>() {
+            @Override
+            public Object call() throws Exception {
+                List<WebElement> options = cId.getOptions();
+                for (WebElement e: options) {
+                    if (credentialName.equals(e.getText())) return true;
+                }
+                return false;
+            }
+        }, 30);
+        cId.selectByVisibleText(credentialName);
 
         s.save();
         return s;
