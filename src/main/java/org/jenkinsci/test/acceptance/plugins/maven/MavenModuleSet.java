@@ -23,25 +23,28 @@
  */
 package org.jenkinsci.test.acceptance.plugins.maven;
 
-import org.jenkinsci.test.acceptance.po.BuildStep;
-import org.jenkinsci.test.acceptance.po.BuildStepPageObject;
+import java.net.URL;
+
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Job;
+import org.jenkinsci.test.acceptance.po.JobPageObject;
 
-@BuildStepPageObject("Invoke top-level Maven targets")
-public class MavenStep extends BuildStep {
-    public final Control version = control("name");
-    public final Control targets = control("targets");
+import com.google.inject.Injector;
 
-    private Control advancedButton = control("advanced-button");
+@JobPageObject("hudson.maven.MavenModuleSet")
+public class MavenModuleSet extends Job {
+    public final Control version = control("/name");
+    public final Control goals = control("/goals");
 
-    public MavenStep(Job parent, String path) {
-        super(parent, path);
+    private Control advancedButton = control("/advanced-button[1]");
+
+    public MavenModuleSet(Injector injector, URL url, String name) {
+        super(injector, url, name);
     }
 
-    public MavenStep useLocalRepository() {
+    public MavenModuleSet options(String options) {
         ensureAdvanced();
-        control("usePrivateRepository").check();
+        control("/mavenOpts").set(options);
         return this;
     }
 
