@@ -55,7 +55,7 @@ public class JenkinsDownloader implements JenkinsResolver {
     public static String escapeForSsh(String path) {
         int index = path.indexOf('\'');
         if (index == -1) {
-            if (path.matches("$[a-zA-Z0-9_/:-]*^")) {
+            if (path.matches("^[a-zA-Z0-9_/:-]*$")) {
                 return path;
             }
             return "'" + path + "'";
