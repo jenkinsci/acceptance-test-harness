@@ -34,8 +34,6 @@ import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Bug;
 import org.jenkinsci.test.acceptance.junit.Native;
 import org.jenkinsci.test.acceptance.junit.Since;
-import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.plugins.git.GitScm;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenBuild;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenBuildStep;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation;
@@ -43,7 +41,6 @@ import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenProjectConfig;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
-import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.StringParameter;
 import org.junit.Test;
 
@@ -59,7 +56,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
         job.configure();
         MavenBuildStep step = job.addBuildStep(MavenBuildStep.class);
         step.version.select("maven_3.0.4");
-        step.targets.set(GENERATE);
+        step.targets.set("-version");
         job.save();
 
         job.queueBuild().shouldSucceed()
@@ -76,7 +73,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
         job.configure();
         MavenBuildStep step = job.addBuildStep(MavenBuildStep.class);
         step.version.select("maven_2.2.1");
-        step.targets.set(GENERATE);
+        step.targets.set("-version");
         job.save();
 
         job.queueBuild().shouldSucceed()
@@ -128,22 +125,21 @@ public class MavenPluginTest extends AbstractJUnitTest {
         job.queueBuild().shouldSucceed().shouldContainsConsoleOutput("-Dmaven.repo.local=([^\\n]*)/.repository");
     }
 
-    @Test @WithPlugins("git")
+    @Test
     public void set_maven_options() {
         installSomeMaven();
 
         MavenModuleSet job = jenkins.jobs.create(MavenModuleSet.class);
         job.configure();
-        checkoutSomeMavenProject(job);
+        job.copyDir(resource("/maven_plugin/multimodule/"));
         job.goals.set("clean");
         job.options("-verbose");
         job.save();
 
-        Build build = job.queueBuild().waitUntilFinished(300);
-        build.shouldSucceed().shouldContainsConsoleOutput("\\[Loaded java.lang.Object");
+        job.queueBuild().shouldContainsConsoleOutput("\\[Loaded java.lang.Object");
     }
 
-    @Test @WithPlugins("git")
+    @Test
     public void set_global_maven_options() {
         installSomeMaven();
 
@@ -153,12 +149,11 @@ public class MavenPluginTest extends AbstractJUnitTest {
 
         MavenModuleSet job = jenkins.jobs.create(MavenModuleSet.class);
         job.configure();
-        checkoutSomeMavenProject(job);
+        job.copyDir(resource("/maven_plugin/multimodule/"));
         job.goals.set("clean");
         job.save();
 
-        Build build = job.queueBuild().waitUntilFinished(300);
-        build.shouldSucceed().shouldContainsConsoleOutput("\\[Loaded java.lang.Object");
+        job.queueBuild().shouldSucceed().shouldContainsConsoleOutput("\\[Loaded java.lang.Object");
     }
 
     @Test @Bug("JENKINS-10539") @Since("1.527")
@@ -230,12 +225,5 @@ public class MavenPluginTest extends AbstractJUnitTest {
         maven.name.set(name);
         maven.installVersion(version);
         jenkins.save();
-    }
-
-    private void checkoutSomeMavenProject(Job job) {
-        job.useScm(GitScm.class)
-                .url("https://github.com/jenkinsci/acceptance-test-harness.git")
-                .branch.set("master");
-        ;
     }
 }
