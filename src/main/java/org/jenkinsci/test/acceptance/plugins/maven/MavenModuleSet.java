@@ -25,9 +25,12 @@ package org.jenkinsci.test.acceptance.plugins.maven;
 
 import java.net.URL;
 
+import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.po.BuildStep;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.JobPageObject;
+import org.jenkinsci.test.acceptance.po.ShellBuildStep;
 
 import com.google.inject.Injector;
 
@@ -53,5 +56,31 @@ public class MavenModuleSet extends Job {
 
         advancedButton.click();
         advancedButton = null;
+    }
+
+    @Override
+    public <T extends BuildStep> T addBuildStep(Class<T> type) {
+        throw new UnsupportedOperationException("There are no build steps in maven projects");
+    }
+
+    @Override
+    public ShellBuildStep addShellStep(String shell) {
+        ShellBuildStep step = addPreBuildStep(ShellBuildStep.class);
+        step.command.set(shell);
+        return step;
+    }
+
+    public MavenModule module(String name) {
+        return new MavenModule(this, name);
+    }
+
+    @Override
+    public MavenBuild build(int buildNumber) {
+        return new MavenBuild(this,buildNumber);
+    }
+
+    @Override
+    public MavenBuild getLastBuild() {
+        return new MavenBuild(this,"lastBuild");
     }
 }

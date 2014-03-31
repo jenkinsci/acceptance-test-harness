@@ -2,11 +2,13 @@ package org.jenkinsci.test.acceptance.junit;
 
 import org.apache.commons.io.IOUtils;
 
+import java.io.File;
 import java.io.IOError;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.URISyntaxException;
 import java.net.URL;
 
 /**
@@ -56,6 +58,14 @@ public class Resource {
     public byte[] asByteArray() throws IOException {
         try (InputStream is = asInputStream()) {
             return IOUtils.toByteArray(is);
+        }
+    }
+
+    public File asFile() {
+        try {
+            return new File(url.toURI());
+        } catch (URISyntaxException e) {
+            throw new IOError(e);
         }
     }
 }

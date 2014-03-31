@@ -250,6 +250,11 @@
       <artifactId>bcprov-jdk16</artifactId>
       <version>1.46</version>
     </dependency>
+    <dependency>
+      <groupId>org.zeroturnaround</groupId>
+      <artifactId>zt-zip</artifactId>
+      <version>1.7</version>
+    </dependency>
   </dependencies>
 
   <build>

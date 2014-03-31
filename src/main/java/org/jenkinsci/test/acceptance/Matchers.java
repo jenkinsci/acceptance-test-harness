@@ -3,8 +3,7 @@ package org.jenkinsci.test.acceptance;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
-import org.jenkinsci.test.acceptance.po.FreeStyleJob;
-import org.jenkinsci.test.acceptance.po.Job;
+import org.jenkinsci.test.acceptance.po.ContainerPageObject;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -124,6 +123,27 @@ public class Matchers {
         };
     }
 
-    public static final ByFactory by = new ByFactory();
+    public static Matcher<ContainerPageObject> pageObjectExists(){
+        return new TypeSafeMatcher<ContainerPageObject>() {
+            @Override public void describeTo(Description description) {
+                description.appendText("Page object exists");
+            }
 
+            @Override
+            protected void describeMismatchSafely(ContainerPageObject item, Description desc) {
+                desc.appendText(item.url.toString()).appendText(" does not exist");
+            }
+
+            @Override protected boolean matchesSafely(ContainerPageObject item) {
+                try {
+                    item.getJson();
+                    return true;
+                } catch (RuntimeException ex) {
+                    return false;
+                }
+            }
+        };
+    }
+
+    public static final ByFactory by = new ByFactory();
 }

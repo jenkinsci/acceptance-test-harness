@@ -27,12 +27,16 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.hamcrest.CoreMatchers.*;
+
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Bug;
 import org.jenkinsci.test.acceptance.junit.Native;
 import org.jenkinsci.test.acceptance.junit.Since;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.git.GitScm;
+import org.jenkinsci.test.acceptance.plugins.maven.MavenBuild;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenBuildStep;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
@@ -178,6 +182,42 @@ public class MavenPluginTest extends AbstractJUnitTest {
                 .shouldContainsConsoleOutput("cmdline.property=C:\\\\System")
                 .shouldContainsConsoleOutput("property.property=C:\\\\Windows")
         ;
+    }
+
+    @Test
+    public void build_multimodule() {
+        installSomeMaven();
+
+        MavenModuleSet job = jenkins.jobs.create(MavenModuleSet.class);
+        job.configure();
+        job.copyDir(resource("/maven_plugin/multimodule/"));
+        job.goals.set("package");
+        job.save();
+
+        job.queueBuild().shouldSucceed()
+                .shouldContainsConsoleOutput("Building root 1.0")
+                .shouldContainsConsoleOutput("Building module_a 2.0")
+                .shouldContainsConsoleOutput("Building module_b 3.0")
+        ;
+
+        assertHasModule(job, "gid$root");
+        assertHasModule(job, "gid$module_a");
+        assertHasModule(job, "gid$module_b");
+    }
+
+    private void assertHasModule(MavenModuleSet job, String name) {
+        assertThat(job.module(name), pageObjectExists());
+
+        MavenBuild build = job.getLastBuild();
+        assertThat(build.module(name), pageObjectExists());
+
+        job.visit("modules");
+        find(by.xpath("//a[@href='%s/']", name)).click();
+        assertThat(driver.getCurrentUrl(), equalTo(job.module(name).url.toExternalForm()));
+
+        build.open();
+        find(by.xpath("//a[@href='%s/']", name)).click();
+        assertThat(driver.getCurrentUrl(), equalTo(build.module(name).url.toExternalForm()));
     }
 
     private void installSomeMaven() {

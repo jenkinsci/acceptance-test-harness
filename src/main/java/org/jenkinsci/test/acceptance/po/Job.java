@@ -6,8 +6,11 @@ import org.apache.commons.io.IOUtils;
 import org.codehaus.plexus.util.Base64;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.openqa.selenium.WebElement;
+import org.zeroturnaround.zip.ZipUtil;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -51,6 +54,10 @@ public class Job extends ContainerPageObject {
         check(radio);
 
         return newInstance(type, this, radio.getAttribute("path"));
+    }
+
+    public <T extends BuildStep> T addPreBuildStep(Class<T> type) {
+        return addStep(type,"prebuilder");
     }
 
     public <T extends BuildStep> T addBuildStep(Class<T> type) {
@@ -112,6 +119,24 @@ public class Job extends ContainerPageObject {
 
     public void copyResource(Resource resource) {
         copyResource(resource,resource.getName());
+    }
+
+    public void copyDir(Resource dir) {
+        File tmp = null;
+        try {
+            tmp = File.createTempFile("jenkins-acceptance-tests", "dir");
+            ZipUtil.pack(dir.asFile(), tmp);
+            byte[] archive = IOUtils.toByteArray(new FileInputStream(tmp));
+
+            addShellStep(String.format(
+                    "base64 --decode << ENDOFFILE > archive.zip && unzip archive.zip \n%s\nENDOFFILE",
+                    new String(Base64.encodeBase64Chunked(archive))
+            ));
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        } finally {
+            if (tmp != null) tmp.delete();
+        }
     }
 
     public URL getBuildUrl() {
