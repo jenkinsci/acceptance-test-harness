@@ -136,7 +136,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
         job.options("-verbose");
         job.save();
 
-        job.queueBuild().shouldContainsConsoleOutput("\\[Loaded java.lang.Object");
+        job.queueBuild().waitUntilFinished().shouldContainsConsoleOutput("\\[Loaded java.lang.Object");
     }
 
     @Test
