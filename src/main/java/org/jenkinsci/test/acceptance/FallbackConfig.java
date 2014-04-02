@@ -1,11 +1,8 @@
 package org.jenkinsci.test.acceptance;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
+import com.cloudbees.sdk.extensibility.ExtensionList;
+import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.JenkinsControllerFactory;
 import org.jenkinsci.test.acceptance.guice.TestCleaner;
@@ -22,21 +19,26 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxProfile;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
+import org.openqa.selenium.phantomjs.PhantomJSDriver;
 import org.openqa.selenium.safari.SafariDriver;
 
-import com.cloudbees.sdk.extensibility.ExtensionList;
-import com.google.inject.AbstractModule;
-import com.google.inject.Provides;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The default configuration for running tests.
- *
+ * <p/>
  * See {@link Config} for how to override it.
  *
  * @author Kohsuke Kawaguchi
  */
 public class FallbackConfig extends AbstractModule {
-    /** Browser property to set the default locale. */
+    /**
+     * Browser property to set the default locale.
+     */
     private static final String LANGUAGE_SELECTOR = "intl.accept_languages";
 
     @Override
@@ -47,40 +49,43 @@ public class FallbackConfig extends AbstractModule {
 
     private WebDriver createWebDriver() {
         String browser = System.getenv("BROWSER");
-        if (browser==null)  browser="firefox";
+        if (browser == null) browser = "firefox";
         browser = browser.toLowerCase(Locale.ENGLISH);
 
 
         switch (browser) {
-        case "firefox":
-            FirefoxProfile profile = new FirefoxProfile();
-            profile.setPreference(LANGUAGE_SELECTOR, "en");
+            case "firefox":
+                FirefoxProfile profile = new FirefoxProfile();
+                profile.setPreference(LANGUAGE_SELECTOR, "en");
 
-            return new FirefoxDriver(profile);
-        case "ie":
-        case "iexplore":
-        case "iexplorer":
-            return new InternetExplorerDriver();
-        case "chrome":
-            Map<String, String> prefs = new HashMap<String, String>();
-            prefs.put(LANGUAGE_SELECTOR, "en");
-            ChromeOptions options = new ChromeOptions();
-            options.setExperimentalOption("prefs", prefs);
+                return new FirefoxDriver(profile);
+            case "ie":
+            case "iexplore":
+            case "iexplorer":
+                return new InternetExplorerDriver();
+            case "chrome":
+                Map<String, String> prefs = new HashMap<String, String>();
+                prefs.put(LANGUAGE_SELECTOR, "en");
+                ChromeOptions options = new ChromeOptions();
+                options.setExperimentalOption("prefs", prefs);
 
-            return new ChromeDriver(options);
-        case "safari":
-            return new SafariDriver();
-        case "htmlunit":
-            return new HtmlUnitDriver();
-        default:
-            throw new Error("Unrecognized browser type: "+browser);
+                return new ChromeDriver(options);
+            case "safari":
+                return new SafariDriver();
+            case "htmlunit":
+                return new HtmlUnitDriver();
+            case "phantomjs":
+                return new PhantomJSDriver();
+            default:
+                throw new Error("Unrecognized browser type: " + browser);
         }
     }
 
     /**
      * Creates a {@link WebDriver} for each test, then make sure to clean it up at the end.
      */
-    @Provides @TestScope
+    @Provides
+    @TestScope
     public WebDriver createWebDriver(TestCleaner cleaner) {
         final WebDriver d = createWebDriver();
         d.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
@@ -96,12 +101,13 @@ public class FallbackConfig extends AbstractModule {
     /**
      * Instantiates a controller through the "TYPE" attribute and {@link JenkinsControllerFactory}.
      */
-    @Provides @TestScope
+    @Provides
+    @TestScope
     public JenkinsController createController(ExtensionList<JenkinsControllerFactory> factories) throws IOException {
         String type = System.getenv("type");  // this is lower case for backward compatibility
-        if (type==null)
+        if (type == null)
             type = System.getenv("TYPE");
-        if (type==null) {
+        if (type == null) {
             if (JenkinsControllerPoolProcess.SOCKET.exists() && !JenkinsControllerPoolProcess.MAIN)
                 return new PooledJenkinsController(JenkinsControllerPoolProcess.SOCKET);
             else
@@ -117,6 +123,6 @@ public class FallbackConfig extends AbstractModule {
             }
         }
 
-        throw new AssertionError("Invalid controller type: "+type);
+        throw new AssertionError("Invalid controller type: " + type);
     }
 }
