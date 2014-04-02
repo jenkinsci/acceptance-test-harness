@@ -20,13 +20,20 @@ public abstract class Parameter extends PageArea {
         return name;
     }
 
-    public void setName(String name) {
+    public Parameter setName(String name) {
         this.name = name;
         control("name").set(name);
+        return this;
     }
 
-    public void setDescription(String v) {
+    public Parameter setDescription(String v) {
         control("description").set(v);
+        return this;
+    }
+
+    public Parameter setDefault(String value) {
+        control("defaultValue").set(value);
+        return this;
     }
 
     /**
