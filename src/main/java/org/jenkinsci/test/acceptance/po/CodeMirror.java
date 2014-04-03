@@ -40,6 +40,8 @@ public class CodeMirror extends PageArea {
         );
 
         JavascriptExecutor js = (JavascriptExecutor) driver;
+
+        find(by.xpath("//*[@path='%s']", path));    // wait until the element in question appears
         js.executeScript(script, String.format("//*[@path='%s']", path), content);
     }
 

@@ -23,9 +23,9 @@
  */
 package org.jenkinsci.test.acceptance.po;
 
-import java.net.URL;
-
 import com.google.inject.Injector;
+
+import java.net.URL;
 
 /**
  * Common base for Jenkins and Slave.
@@ -44,7 +44,6 @@ public class Node extends ContainerPageObject {
 
     public String runScript(String script) {
         visit("script");
-        sleep(500);
         CodeMirror cm = new CodeMirror(this, "/script");
         cm.set(script);
         clickButton("Run");
