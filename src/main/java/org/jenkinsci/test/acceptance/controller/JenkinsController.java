@@ -28,7 +28,9 @@ public abstract class JenkinsController implements Closeable, AutoCleaned {
      * Note that this directory might not exist on the Jenkins master, since it can be
      * running on a separate computer.
      */
-    protected static final String WORKSPACE = System.getenv("WORKSPACE") != null? System.getenv("WORKSPACE") : new File(System.getProperty("user.dir"), "target").getPath();
+    protected static final String WORKSPACE = System.getenv("WORKSPACE") != null
+            ? System.getenv("WORKSPACE")
+            : new File(System.getProperty("user.dir"), "target").getPath();
 
     protected static final String JENKINS_DEBUG_LOG = WORKSPACE + "/last_test.log";
 
