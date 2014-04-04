@@ -164,6 +164,7 @@ public class SshSlaveController extends SlaveController {
             }
         }, 30);
         cId.selectByVisibleText(credentialName);
+        s.setExecutors(1);
 
         s.save();
         return s;
