@@ -75,11 +75,11 @@ public class JenkinsProvider implements Provider<JenkinsController> {
 
         //install form-path-element plugin
         new PluginDownloader("form-element-path").materialize(machine, path);
-        Ssh ssh = machine.connect();
-        ssh.executeRemoteCommand("mkdir -p " + pluginDir);
+        try (Ssh ssh = machine.connect()) {
+            ssh.executeRemoteCommand("mkdir -p " + pluginDir);
 
-        ssh.executeRemoteCommand(String.format("cp %s %s", path, pluginDir));
-
+            ssh.executeRemoteCommand(String.format("cp %s %s", path, pluginDir));
+        }
         return new RemoteJenkinsController(machine, jenkinsHome,jenkinsWar,privateKeyFile);
     }
 
