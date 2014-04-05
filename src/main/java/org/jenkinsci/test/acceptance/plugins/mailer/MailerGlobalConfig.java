@@ -2,6 +2,7 @@ package org.jenkinsci.test.acceptance.plugins.mailer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.io.IOUtils;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.PageArea;
@@ -13,7 +14,6 @@ import javax.mail.Address;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -53,7 +53,7 @@ public class MailerGlobalConfig extends PageArea {
         advancedButton.click();
         useSMTPAuth.check();
         smtpAuthUserName.set(MAILBOX);
-        smtpAuthPassword.set("72a80a49ae5ab81d");
+        smtpAuthPassword.set(PASSWORD);
         smtpPort.set("2525");
 
         // Fingerprint to identify message sent from this test run
@@ -75,8 +75,8 @@ public class MailerGlobalConfig extends PageArea {
         List<MimeMessage> match = new ArrayList<>();
 
         for (JsonNode msg : fetchMessages()) {
-            if (subject.matcher(msg.get("message").get("title").asText()).matches()) {
-                MimeMessage m = fetchMessage(msg.get("message").get("id").asText());
+            if (subject.matcher(msg.get("subject").asText()).find()) {
+                MimeMessage m = fetchMessage(msg.get("id").asText());
                 if (isOurs(m)) {
                     match.add(m);
                 }
@@ -91,7 +91,7 @@ public class MailerGlobalConfig extends PageArea {
         List<MimeMessage> match = new ArrayList<>();
 
         for (JsonNode msg : fetchMessages()) {
-            MimeMessage m = fetchMessage(msg.get("message").get("id").asText());
+            MimeMessage m = fetchMessage(msg.get("id").asText());
             if (isOurs(m))
                 match.add(m);
         }
@@ -117,24 +117,26 @@ public class MailerGlobalConfig extends PageArea {
     }
 
     public JsonNode fetchJson(String fmt, Object... args) throws IOException {
-        return new ObjectMapper().readTree(new URL(String.format(fmt,args)));
+        String s = IOUtils.toString(new URL(String.format(fmt, args)).openStream());
+        return new ObjectMapper().readTree(s);
     }
 
     public JsonNode fetchMessages() throws IOException {
-        return fetchJson("http://mailtrap.io/api/v1/inboxes/%s/messages?page=1&token=%s", MAILBOX, TOKEN);
+        return fetchJson("https://mailtrap.io/api/v1/inboxes/%s/messages?page=1&api_token=%s", INBOX_ID, TOKEN);
     }
 
     public MimeMessage fetchMessage(String id) throws IOException {
-        JsonNode s = fetchJson("http://mailtrap.io/api/v1/inboxes/%s/messages/%s?token=%s", MAILBOX, id, TOKEN)
-                .get("message").get("source");
+        URL raw = new URL(String.format("https://mailtrap.io/api/v1/inboxes/%s/messages/%s/body.eml?api_token=%s", INBOX_ID, id, TOKEN));
 
         try {
-            return new MimeMessage(Session.getDefaultInstance(System.getProperties()), new ByteArrayInputStream(s.asText().getBytes("UTF-8")));
+            return new MimeMessage(Session.getDefaultInstance(System.getProperties()), raw.openStream());
         } catch (MessagingException e) {
             throw new IOException(e);
         }
     }
 
-    public static final String MAILBOX = "selenium-tests-69507a9ef0aa7fa5";
-    public static final String TOKEN = "wvpGO0F4gT8DTZJIHzkpmQ";
+    public static final String MAILBOX = "19251ad93afaab19b";
+    public static final String PASSWORD = "c9039d1f090624";
+    public static final String TOKEN = "2c04434bd66dfc37c130171f9d061af2";
+    public static final String INBOX_ID = "23170";
 }
