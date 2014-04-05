@@ -14,11 +14,16 @@ import javax.mail.Address;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
+
+import static javax.mail.Message.RecipientType.TO;
+import static org.hamcrest.CoreMatchers.is;
 
 /**
  * Global config page for the mailer plugin.
@@ -66,7 +71,7 @@ public class MailerGlobalConfig extends PageArea {
     }
 
     public void sendTestMail(String recipient) {
-        control("").check();
+        control(by.path(path + '/')).check();
         control("/sendTestMailTo").set(recipient);
         control("/validate-button").click();
     }
@@ -133,6 +138,27 @@ public class MailerGlobalConfig extends PageArea {
         } catch (MessagingException e) {
             throw new IOException(e);
         }
+    }
+
+    /**
+     * Checks that the mail has arrived.
+     */
+    public void assertMail(final Pattern subject, String recipient, Pattern body) throws MessagingException, IOException {
+        MimeMessage msg = waitForCond(new Callable<MimeMessage>() {
+            @Override
+            public MimeMessage call() throws Exception {
+                return getMail(subject);
+            }
+        });
+
+        assertThat(msg.getRecipients(TO)[0].toString(), is(recipient));
+        Object c = msg.getContent();
+        if (c instanceof MimeMultipart) {
+            MimeMultipart content = (MimeMultipart) c;
+            c = content.getBodyPart(0).getContent();
+        }
+
+        assertTrue(body.matcher(c.toString()).find());
     }
 
     public static final String MAILBOX = "19251ad93afaab19b";

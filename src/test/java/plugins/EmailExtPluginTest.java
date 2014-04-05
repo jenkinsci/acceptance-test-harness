@@ -10,14 +10,8 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
 
 import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
 import java.io.IOException;
-import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
-
-import static javax.mail.Message.RecipientType.TO;
-import static org.hamcrest.CoreMatchers.is;
 
 /**
  Feature: Adds support for editable email configuration
@@ -66,15 +60,8 @@ public class EmailExtPluginTest extends AbstractJUnitTest {
 
         Build b = job.queueBuild().shouldFail();
 
-        MimeMessage msg = jenkins.waitForCond(new Callable<MimeMessage>() {
-            @Override
-            public MimeMessage call() throws Exception {
-                return mailer.getMail(Pattern.compile("^Modified "));
-            }
-        });
-
-        assertThat(msg.getRecipients(TO)[0].toString(), is("dev@example.com"));
-        MimeMultipart content = (MimeMultipart)msg.getContent();
-        assertTrue(content.getBodyPart(0).getContent().toString().endsWith("\nwith amendment"));
+        mailer.assertMail(Pattern.compile("^Modified "),
+                "dev@example.com",
+                Pattern.compile("\nwith amendment$"));
     }
 }
