@@ -62,6 +62,7 @@ public class MailerPluginTest extends AbstractJUnitTest {
            failure
            """
      */
+    @Test
     public void send_mail_for_failed_build() throws IOException, MessagingException {
         FreeStyleJob job = jenkins.jobs.create();
         job.configure();
