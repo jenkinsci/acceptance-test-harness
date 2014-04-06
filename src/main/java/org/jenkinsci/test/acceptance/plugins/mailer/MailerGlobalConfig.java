@@ -2,6 +2,8 @@ package org.jenkinsci.test.acceptance.plugins.mailer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Joiner;
+
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Jenkins;
@@ -15,6 +17,8 @@ import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -76,6 +80,9 @@ public class MailerGlobalConfig extends PageArea {
         control("/validate-button").click();
     }
 
+    /**
+     * @return null if nothing found.
+     */
     public MimeMessage getMail(Pattern subject) throws IOException {
         List<MimeMessage> match = new ArrayList<>();
 
@@ -88,8 +95,11 @@ public class MailerGlobalConfig extends PageArea {
             }
         }
 
-        assertEquals(1, match.size());  // More than one matching message
-        return match.get(0);
+        switch (match.size()) {
+            case 0: return null;
+            case 1: return match.get(0);
+            default: throw new AssertionError("More than one matching message found");
+        }
     }
 
     public List<MimeMessage> getAllMails() throws IOException {
@@ -151,14 +161,25 @@ public class MailerGlobalConfig extends PageArea {
             }
         });
 
-        assertThat(msg.getRecipients(TO)[0].toString(), is(recipient));
+        String actualRecipients = Joiner.on(' ').join(msg.getRecipients(TO));
+        assertThat("recipient", actualRecipients, is(recipient));
         Object c = msg.getContent();
         if (c instanceof MimeMultipart) {
             MimeMultipart content = (MimeMultipart) c;
             c = content.getBodyPart(0).getContent();
         }
 
-        assertTrue(body.matcher(c.toString()).find());
+        assertTrue("body metches", body.matcher(c.toString()).find());
+    }
+
+    public String textMessage(MimeMessage msg) {
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        try {
+            msg.writeTo(os);
+        } catch (IOException | MessagingException ex) {
+            throw new AssertionError(ex);
+        }
+        return os.toString();
     }
 
     public static final String MAILBOX = "19251ad93afaab19b";
