@@ -1,7 +1,6 @@
 package plugins;
 
 import org.hamcrest.Matcher;
-import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsPublisher;
@@ -11,7 +10,7 @@ import org.jenkinsci.test.acceptance.po.PageObject;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 
 /**
@@ -72,14 +71,70 @@ public class WarningsPluginTest extends AbstractJUnitTest {
     @Test
     public void detect_errors_in_console_log() {
         job.configure();
-        WarningsPublisher pub = job.addPublisher(WarningsPublisher.class);
-        pub.addConsoleScanner("Maven");
+        job.addPublisher(WarningsPublisher.class)
+                .addConsoleScanner("Maven");
         job.addShellStep("mvn clean install || true");
         job.save();
 
         Build b = job.queueBuild().shouldSucceed();
 
         assertThatBuildHasWarnings(b,1,"Maven");
+    }
+
+    /**
+     Scenario: Detect errors in workspace
+       Given I have installed the "warnings" plugin
+       And a job
+       When I configure the job
+       And I add "Scan for compiler warnings" post-build action
+       And I add workspace parser for "Java Compiler (javac)" applied at "** /*"
+       And I add a shell build step
+           """
+               echo '@Deprecated class a {} class b extends a {}' > a.java
+               javac -Xlint a.java 2> out.log || true
+           """
+       And I save the job
+       And I build the job
+       Then build should have 1 "Java" warning
+     */
+    @Test
+    public void detect_errors_in_workspace() {
+        job.configure();
+        job.addPublisher(WarningsPublisher.class)
+                .addWorkspaceFileScanner("Java Compiler (javac)", "**/*");
+        job.addShellStep(
+                "echo '@Deprecated class a {} class b extends a {}' > a.java\n"+
+                "javac -Xlint a.java 2> out.log || true");
+        job.save();
+
+        Build b = job.queueBuild().shouldSucceed();
+
+        assertThatBuildHasWarnings(b,1,"Java");
+    }
+
+    /**
+     Scenario: Do not detect errors in ignored parts of the workspace
+       Given I have installed the "warnings" plugin
+       And a job
+       When I configure the job
+       And I add "Scan for compiler warnings" post-build action
+       And I add workspace parser for "Maven" applied at "no_errors_here.log"
+       And I add a shell build step "mvn clean install > errors.log || true"
+       And I save the job
+       And I build the job
+       Then build should have 0 "Maven" warning
+     */
+    @Test
+    public void do_not_detect_errors_in_ignored_parts_of_the_workspace() {
+        job.configure();
+        job.addPublisher(WarningsPublisher.class)
+                .addWorkspaceFileScanner("Maven", "no_errors_here.log");
+        job.addShellStep("mvn clean install > errors.log || true");
+        job.save();
+
+        Build b = job.queueBuild().shouldSucceed();
+
+        assertThatBuildHasWarnings(b,0,"Maven");
     }
 
     private void assertThatBuildHasWarnings(Build b, int i, String kind) {
