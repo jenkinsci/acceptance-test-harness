@@ -57,6 +57,31 @@ public class WarningsPluginTest extends AbstractJUnitTest {
         assertThatBuildHasWarnings(b, 0, "Maven");
     }
 
+    /**
+     Scenario: Detect errors in console log
+       Given I have installed the "warnings" plugin
+       And a job
+       When I configure the job
+       And I add "Scan for compiler warnings" post-build action
+       And I add console parser for "Maven"
+       And I add a shell build step "mvn clean install || true"
+       And I save the job
+       And I build the job
+       Then build should have 1 "Maven" warning
+     */
+    @Test
+    public void detect_errors_in_console_log() {
+        job.configure();
+        WarningsPublisher pub = job.addPublisher(WarningsPublisher.class);
+        pub.addConsoleScanner("Maven");
+        job.addShellStep("mvn clean install || true");
+        job.save();
+
+        Build b = job.queueBuild().shouldSucceed();
+
+        assertThatBuildHasWarnings(b,1,"Maven");
+    }
+
     private void assertThatBuildHasWarnings(Build b, int i, String kind) {
 
 //        job.open();
