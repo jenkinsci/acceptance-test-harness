@@ -41,7 +41,9 @@ public class CodeMirror extends PageArea {
 
         JavascriptExecutor js = (JavascriptExecutor) driver;
 
-        find(by.xpath("//*[@path='%s']", path));    // wait until the element in question appears
+        // can't use find() because it wants a visible element
+        driver.findElement(by.xpath("//*[@path='%s']", path));    // wait until the element in question appears in DOM
+
         js.executeScript(script, String.format("//*[@path='%s']", path), content);
     }
 
