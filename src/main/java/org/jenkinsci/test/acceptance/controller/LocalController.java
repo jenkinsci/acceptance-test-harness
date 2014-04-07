@@ -1,18 +1,27 @@
 package org.jenkinsci.test.acceptance.controller;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.TeeInputStream;
+import org.codehaus.plexus.util.Expand;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.StringUtils;
 import org.jenkinsci.utils.process.ProcessInputStream;
+import org.openqa.selenium.io.Zip;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import static java.lang.System.*;
 
@@ -164,6 +173,35 @@ public abstract class LocalController extends JenkinsController {
 
     public File getJenkinsHome(){
         return tempDir;
+    }
+
+    @Override
+    public void populateJenkinsHome(File template, boolean clean) throws IOException {
+        boolean running = isRunning();
+        try {
+            stop();
+            if (clean && tempDir.isDirectory()) {
+                FileUtils.cleanDirectory(tempDir);
+            }
+            if (!tempDir.isDirectory() && ! tempDir.mkdirs()) {
+                throw new IOException("Could not create directory: " + tempDir);
+            }
+            if (template.isDirectory()) {
+                FileUtils.copyDirectory(template, tempDir);
+            } else if (template.isFile()) {
+                Expand expand = new Expand();
+                expand.setSrc(template);
+                expand.setOverwrite(true);
+                expand.setDest(tempDir);
+                expand.execute();
+            }
+        } catch (Exception e) {
+            throw new IOException(e.getMessage(), e);
+        } finally {
+            if (running && !isRunning()) {
+                start();
+            }
+        }
     }
 
     public File getJavaHome() {
