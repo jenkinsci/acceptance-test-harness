@@ -45,10 +45,12 @@ public class JenkinsDownloader implements JenkinsResolver {
                 // forget it!
             }
         }
-        Ssh ssh = machine.connect();
-        if(!remoteFileExists(ssh.getConnection(),path,jenkinsMd5Sum)){
-            ssh.executeRemoteCommand("mkdir -p "+ escapeForSsh(FileUtils.dirname(path)));
-            ssh.executeRemoteCommand(String.format("wget -q -O %s %s",escapeForSsh(path), escapeForSsh(jenkinsWarLocation)));
+        try (Ssh ssh = machine.connect()) {
+            if (!remoteFileExists(ssh.getConnection(), path, jenkinsMd5Sum)) {
+                ssh.executeRemoteCommand("mkdir -p " + escapeForSsh(FileUtils.dirname(path)));
+                ssh.executeRemoteCommand(
+                        String.format("wget -q -O %s %s", escapeForSsh(path), escapeForSsh(jenkinsWarLocation)));
+            }
         }
     }
 

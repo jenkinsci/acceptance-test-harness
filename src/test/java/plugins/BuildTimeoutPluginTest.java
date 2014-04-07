@@ -40,7 +40,7 @@ public class BuildTimeoutPluginTest extends AbstractJUnitTest {
 
             BuildTimeout t = new BuildTimeout(j);
             t.abortAfter(3);
-            t.writingDescription.check();
+            t.writeDescription();
         }
         j.save();
 
@@ -82,7 +82,7 @@ public class BuildTimeoutPluginTest extends AbstractJUnitTest {
 
             BuildTimeout t = new BuildTimeout(j);
             t.abortWhenStuck();
-            t.writingDescription.check();
+            t.writeDescription();
         }
         j.save();
 

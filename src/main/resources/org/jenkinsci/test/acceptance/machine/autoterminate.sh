@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ##
-## Touches $HOME/terminate.txt file if there is more than 1 sshd process
+## Touches $HOME/terminate.txt file if there is at least 1 sshd process
 ## is found running by the user owning this process. It would wait for $2
 ##
 ## $1 username

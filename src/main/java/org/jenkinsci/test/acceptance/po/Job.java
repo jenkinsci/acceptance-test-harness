@@ -110,7 +110,8 @@ public class Job extends ContainerPageObject {
                 IOUtils.copy(in, gz);
             }
 
-            addShellStep(String.format("mkdir -p %1$s && rm -r %1$s && base64 --decode << ENDOFFILE | gunzip > %1$s \n%2$s\nENDOFFILE",
+            // fileName can include path portion like foo/bar/zot
+            addShellStep(String.format("(mkdir -p %1$s || true) && rm -r %1$s && base64 --decode << ENDOFFILE | gunzip > %1$s \n%2$s\nENDOFFILE",
                     fileName, new String(Base64.encodeBase64Chunked(out.toByteArray()))));
         } catch (IOException e) {
             throw new AssertionError(e);

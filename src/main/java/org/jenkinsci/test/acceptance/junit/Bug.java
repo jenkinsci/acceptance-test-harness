@@ -9,5 +9,5 @@ import java.lang.annotation.Documented;
  */
 @Documented
 public @interface Bug {
-    String value();
+    String[] value();
 }
