@@ -14,7 +14,9 @@ import org.jenkinsci.test.acceptance.server.JenkinsControllerPoolProcess;
 import org.jenkinsci.test.acceptance.server.PooledJenkinsController;
 import org.jenkinsci.test.acceptance.slave.LocalSlaveProvider;
 import org.jenkinsci.test.acceptance.slave.SlaveProvider;
+import org.jenkinsci.test.acceptance.utils.SauceLabsConnection;
 import org.junit.runners.model.Statement;
+import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -22,6 +24,7 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxProfile;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
+import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.safari.SafariDriver;
 
 import com.cloudbees.sdk.extensibility.ExtensionList;
@@ -45,7 +48,7 @@ public class FallbackConfig extends AbstractModule {
         bind(SlaveProvider.class).to(LocalSlaveProvider.class);
     }
 
-    private WebDriver createWebDriver() {
+    private WebDriver createWebDriver() throws IOException {
         String browser = System.getenv("BROWSER");
         if (browser==null)  browser="firefox";
         browser = browser.toLowerCase(Locale.ENGLISH);
@@ -72,6 +75,14 @@ public class FallbackConfig extends AbstractModule {
             return new SafariDriver();
         case "htmlunit":
             return new HtmlUnitDriver();
+        case "saucelabs":
+        case "saucelabs-firefox":
+            DesiredCapabilities caps = DesiredCapabilities.firefox();
+            caps.setCapability("version", "5");
+            caps.setCapability("platform", Platform.WINDOWS);
+
+            return new SauceLabsConnection().createWebDriver(caps);
+
         default:
             throw new Error("Unrecognized browser type: "+browser);
         }
@@ -81,7 +92,7 @@ public class FallbackConfig extends AbstractModule {
      * Creates a {@link WebDriver} for each test, then make sure to clean it up at the end.
      */
     @Provides @TestScope
-    public WebDriver createWebDriver(TestCleaner cleaner) {
+    public WebDriver createWebDriver(TestCleaner cleaner) throws IOException {
         final WebDriver d = createWebDriver();
         d.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
         cleaner.addTask(new Statement() {
