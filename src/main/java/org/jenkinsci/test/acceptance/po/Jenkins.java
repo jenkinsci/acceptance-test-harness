@@ -90,6 +90,10 @@ public class Jenkins extends Node {
         return JenkinsLogger.create(this,name,levels);
     }
 
+    @Override
+    public String getName() {
+        return "(master)";
+    }
 
     private static final Pattern VERSION = Pattern.compile("^About Jenkins ([^-]*)");
 }

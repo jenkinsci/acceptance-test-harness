@@ -21,38 +21,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.test.acceptance.po;
+package org.jenkinsci.test.acceptance.plugins.scriptler;
 
-import com.google.inject.Injector;
+import org.jenkinsci.test.acceptance.junit.Resource;
+import org.jenkinsci.test.acceptance.po.Action;
+import org.jenkinsci.test.acceptance.po.ActionPageObject;
+import org.jenkinsci.test.acceptance.po.Control;
+import org.jenkinsci.test.acceptance.po.Jenkins;
 
-import java.net.URL;
+@ActionPageObject("scriptler")
+public class Scriptler extends Action<Jenkins> {
 
-/**
- * Common base for Jenkins and Slave.
- *
- * @author ogondza
- */
-public abstract class Node extends ContainerPageObject {
-    protected Node(Jenkins j, URL url) {
-        super(j, url);
+    public Scriptler(Jenkins parent, String relative) {
+        super(parent, relative);
     }
 
-    protected Node(Injector i, URL url) {
-        super(i, url);
-    }
+    public Script upload(Resource script) {
+        visit(url("scriptsettings"));
+        new Control(injector, by.name("file")).upload(script);
+        clickButton("Upload");
 
-    public abstract String getName();
-
-    public String runScript(String script) {
-        visit("script");
-        CodeMirror cm = new CodeMirror(this, "/script");
-        cm.set(script);
-        clickButton("Run");
-
-        return find(by.css("h2 + pre")).getText();
-    }
-
-    public BuildHistory getBuildHistory() {
-        return new BuildHistory(this);
+        return new Script(this, script.getName());
     }
 }
