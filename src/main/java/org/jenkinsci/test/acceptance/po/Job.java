@@ -183,7 +183,7 @@ public class Job extends ContainerPageObject {
     public <T extends Parameter> T addParameter(Class<T> type) {
         ensureConfigPage();
 
-        String displayName = type.getAnnotation(ParameterPageObject.class).value();
+        String displayName = type.getAnnotation(Describable.class).value();
 
         check(find(by.xpath("//input[@name='parameterized']")));
         selectDropdownMenu(displayName, find(by.xpath("//button[text()='Add Parameter']")));
