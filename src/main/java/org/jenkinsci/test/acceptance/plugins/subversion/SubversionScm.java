@@ -1,14 +1,14 @@
 package org.jenkinsci.test.acceptance.plugins.subversion;
 
 import org.jenkinsci.test.acceptance.po.Control;
+import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.Scm;
-import org.jenkinsci.test.acceptance.po.ScmPageObject;
 
 /**
  * @author Kohsuke Kawaguchi
  */
-@ScmPageObject("Subversion")
+@Describable("Subversion")
 public class SubversionScm extends Scm {
     public final Control url = control("locations/remote");
     public final Control local = control("locations/local");

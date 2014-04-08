@@ -5,7 +5,7 @@ import org.openqa.selenium.WebElement;
 /**
  * @author Kohsuke Kawaguchi
  */
-@AxisPageObjecct("Slaves")
+@Describable("Slaves")
 public class LabelAxis extends Axis {
     public LabelAxis(PageObject context, String path) {
         super(context, path);

@@ -21,21 +21,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.test.acceptance.po;
+package org.jenkinsci.test.acceptance.plugins.scriptler;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import org.jvnet.hudson.annotation_indexer.Indexed;
+import org.jenkinsci.test.acceptance.po.Node;
 
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-@Indexed
-public @interface ScmPageObject {
-    /**
-     * Scm name.
-     */
-    String value();
+public class ScriptResult {
+    private final String result;
+
+    public ScriptResult(String result) {
+        this.result = result;
+    }
+
+    public String output(Node node) {
+        return output(node.getName());
+    }
+
+    private String output(String node) {
+       Pattern pattern = Pattern.compile(
+               "^_+\\n\\[" + Pattern.quote(node) + "\\]:\\n(.*?)\\n_+$",
+               Pattern.DOTALL | Pattern.MULTILINE
+       );
+
+       Matcher matcher = pattern.matcher(result);
+
+       assert matcher.find();
+
+       return matcher.group(1);
+    }
 }

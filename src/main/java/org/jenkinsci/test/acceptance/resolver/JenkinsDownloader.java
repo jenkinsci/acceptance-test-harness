@@ -47,45 +47,16 @@ public class JenkinsDownloader implements JenkinsResolver {
         }
         try (Ssh ssh = machine.connect()) {
             if (!remoteFileExists(ssh.getConnection(), path, jenkinsMd5Sum)) {
-                ssh.executeRemoteCommand("mkdir -p " + escapeForSsh(FileUtils.dirname(path)));
+                ssh.executeRemoteCommand("mkdir -p " + Ssh.escape(FileUtils.dirname(path)));
                 ssh.executeRemoteCommand(
-                        String.format("wget -q -O %s %s", escapeForSsh(path), escapeForSsh(jenkinsWarLocation)));
+                        String.format("wget -q -O %s %s", Ssh.escape(path), Ssh.escape(jenkinsWarLocation)));
             }
         }
-    }
-
-    public static String escapeForSsh(String path) {
-        int index = path.indexOf('\'');
-        if (index == -1) {
-            if (path.matches("^[a-zA-Z0-9_/:-]*$")) {
-                return path;
-            }
-            return "'" + path + "'";
-        }
-        StringBuilder buf = new StringBuilder(path.length() + 16);
-        int start = 0;
-        do {
-            if (index > 0) {
-                buf.append('\'');
-                buf.append(path.substring(start, index));
-                buf.append("'\\'");
-            } else {
-                buf.append("\\'");
-            }
-            start = index + 1;
-            index = path.indexOf('\'', start);
-        } while (index != -1);
-        if (start < path.length()) {
-            buf.append('\'');
-            buf.append(path.substring(start));
-            buf.append('\'');
-        }
-        return buf.toString();
     }
 
     public static  boolean remoteFileExists(Connection connection, String target, String expectedMd5Sum){
         try {
-            int status  = connection.exec(String.format("stat %s > /dev/null 2>&1", escapeForSsh(target)), System.out);
+            int status  = connection.exec(String.format("stat %s > /dev/null 2>&1", Ssh.escape(target)), System.out);
             if(status == 0){
                 return expectedMd5Sum == null || validateMd5Sum(connection, target, expectedMd5Sum);
             }
@@ -100,7 +71,7 @@ public class JenkinsDownloader implements JenkinsResolver {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         int status  = 0;
         try {
-            status = connection.exec(String.format("md5sum %s",escapeForSsh(target)), baos);
+            status = connection.exec(String.format("md5sum %s", Ssh.escape(target)), baos);
             if(status == 0){
                 String[] values = baos.toString("UTF-8").split(" ");
                 return (values.length > 1 && values[0].equals(expectedMd5Sum));

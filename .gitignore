@@ -1,3 +1,4 @@
+.jenkins_test/
 jenkins*.war
 *.swp
 *.swn

@@ -30,9 +30,9 @@ public class PluginDownloader implements JenkinsResolver {
     public void materialize(Machine machine, String path) {
         try (Ssh ssh = machine.connect()) {
             if (!JenkinsDownloader.remoteFileExists(ssh.getConnection(), path, null)) {
-                ssh.executeRemoteCommand("mkdir -p " + JenkinsDownloader.escapeForSsh(FileUtils.dirname(path)));
-                ssh.executeRemoteCommand(String.format("wget -q -O %s %s", JenkinsDownloader.escapeForSsh(path),
-                        JenkinsDownloader.escapeForSsh(pluginPath)));
+                ssh.executeRemoteCommand("mkdir -p " + Ssh.escape(FileUtils.dirname(path)));
+                ssh.executeRemoteCommand(String.format("wget -q -O %s %s", Ssh.escape(path),
+                        Ssh.escape(pluginPath)));
             }
         }
     }

@@ -24,11 +24,11 @@
 package org.jenkinsci.test.acceptance.plugins.multiple_scms;
 
 import org.jenkinsci.test.acceptance.po.Control;
+import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.Scm;
-import org.jenkinsci.test.acceptance.po.ScmPageObject;
 
-@ScmPageObject("Multiple SCMs")
+@Describable("Multiple SCMs")
 public class MutlipleScms extends Scm {
     private final Control addButton = control("hetero-list-add[scmList]");
 
@@ -41,7 +41,7 @@ public class MutlipleScms extends Scm {
 
     public <T extends Scm> T addScm(Class<T> type) {
 
-        String caption = type.getAnnotation(ScmPageObject.class).value();
+        String caption = type.getAnnotation(Describable.class).value();
         addButton.click();
         clickLink(caption);
 

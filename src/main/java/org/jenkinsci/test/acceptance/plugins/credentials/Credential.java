@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.plugins.credentials;
 
 import com.google.inject.Injector;
+import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.PageArea;
 import org.jenkinsci.test.acceptance.po.PageObject;
 
@@ -8,7 +9,7 @@ import org.jenkinsci.test.acceptance.po.PageObject;
  * Page area base type for credentials
  *
  * @author Kohsuke Kawaguchi
- * @see CredentialPageObject
+ * @see Describable
  */
 public abstract class Credential extends PageArea {
     protected Credential(Injector injector, String path) {

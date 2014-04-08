@@ -14,7 +14,7 @@ import org.openqa.selenium.NoSuchElementException;
  * @author Vivek Pandey
  */
 public class CreateSlaveTest extends AbstractJUnitTest {
-    @Test @Since("1.550")
+    @Test @Since("1.544")
     public void newSlave() {
         // this test requires a newer version of credentials plugin that has inline "Add" button
         // I'm not sure exactly which version it is, but 1.532 LTS doesn't have it, and 1.555 has it,

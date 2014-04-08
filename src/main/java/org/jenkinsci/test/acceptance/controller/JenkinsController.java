@@ -130,6 +130,26 @@ public abstract class JenkinsController implements Closeable, AutoCleaned {
     public void diagnose(Throwable cause) {}
 
     /**
+     * Populates the Jenkins Home with the specified template (which can be either a ZIP file or a directory). If
+     * Jenkins is already running then it will be restarted.
+     *
+     * @param template The template (either a ZIP file or a directory).
+     */
+    public void populateJenkinsHome(File template) throws IOException {
+        populateJenkinsHome(template, true);
+    }
+
+    /**
+     * Populates the Jenkins Home with the specified template (which can be either a ZIP file or a directory). If
+     * Jenkins is already running then it will be restarted.
+     *
+     * @param template The template (either a ZIP file or a directory).
+     * @param clean    if {@code true} then the home will be wiped clean before the template is applied. If false then
+     *                 the template will simply overwrite the existing (if any) home.
+     */
+    public abstract void populateJenkinsHome(File template, boolean clean) throws IOException;
+
+    /**
      * Downloads the latest version of the form-element-path plugin that we use for testing.
      */
     public static File downloadPathElement() {

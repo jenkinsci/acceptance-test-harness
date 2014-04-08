@@ -1,7 +1,7 @@
 package org.jenkinsci.test.acceptance.plugins.warnings;
 
-import org.jenkinsci.test.acceptance.po.BuildStepPageObject;
 import org.jenkinsci.test.acceptance.po.Control;
+import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.PageArea;
 import org.jenkinsci.test.acceptance.po.PostBuildStep;
@@ -9,7 +9,7 @@ import org.jenkinsci.test.acceptance.po.PostBuildStep;
 /**
  * @author Kohsuke Kawaguchi
  */
-@BuildStepPageObject("Scan for compiler warnings")
+@Describable("Scan for compiler warnings")
 public class WarningsPublisher extends PostBuildStep {
     private Control addConsoleLogScanner = control("repeatable-add");
     private Control addWorkspaceFileScanner = control("repeatable-add[1]");

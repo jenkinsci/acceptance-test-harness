@@ -21,18 +21,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.test.acceptance.po;
+package org.jenkinsci.test.acceptance.plugins.scriptler;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.jenkinsci.test.acceptance.junit.Resource;
+import org.jenkinsci.test.acceptance.po.Action;
+import org.jenkinsci.test.acceptance.po.ActionPageObject;
+import org.jenkinsci.test.acceptance.po.Control;
+import org.jenkinsci.test.acceptance.po.Jenkins;
 
-import org.jvnet.hudson.annotation_indexer.Indexed;
+@ActionPageObject("scriptler")
+public class Scriptler extends Action<Jenkins> {
 
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-@Indexed
-public @interface ToolInstallationPageObject {
-    String value();
+    public Scriptler(Jenkins parent, String relative) {
+        super(parent, relative);
+    }
+
+    public Script upload(Resource script) {
+        visit(url("scriptsettings"));
+        new Control(injector, by.name("file")).upload(script);
+        clickButton("Upload");
+
+        return new Script(this, script.getName());
+    }
 }

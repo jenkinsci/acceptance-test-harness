@@ -23,13 +23,13 @@
  */
 package org.jenkinsci.test.acceptance.plugins.groovy;
 
-import java.util.regex.Pattern;
-
+import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.jenkinsci.test.acceptance.po.ToolInstallation;
-import org.jenkinsci.test.acceptance.po.ToolInstallationPageObject;
 
-@ToolInstallationPageObject("Groovy")
+import java.util.regex.Pattern;
+
+@Describable("Groovy")
 public class GroovyInstallation extends ToolInstallation {
     public GroovyInstallation(JenkinsConfig context, String path) {
         super(context, path);

@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.plugins.credentials;
 
 import org.jenkinsci.test.acceptance.po.ContainerPageObject;
+import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 
 /**
@@ -18,7 +19,7 @@ public class ManagedCredentials extends ContainerPageObject {
      * Adds a new credential and bind it to the page ae object.
      */
     public <T extends Credential> T add(Class<T> type) {
-        String sut_type = type.getAnnotation(CredentialPageObject.class).value();
+        String sut_type = type.getAnnotation(Describable.class).value();
 
         selectDropdownMenu(sut_type,
             find(by.path("/domainCredentials/hetero-list-add[credentials]")));

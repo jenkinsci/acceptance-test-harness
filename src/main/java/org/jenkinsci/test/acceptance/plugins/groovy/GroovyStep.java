@@ -23,11 +23,11 @@
  */
 package org.jenkinsci.test.acceptance.plugins.groovy;
 
-import org.jenkinsci.test.acceptance.po.BuildStepPageObject;
 import org.jenkinsci.test.acceptance.po.Control;
+import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Job;
 
-@BuildStepPageObject("Execute Groovy script")
+@Describable("Execute Groovy script")
 public class GroovyStep extends SystemGroovyStep {
     public final Control version = control("groovyName");
 

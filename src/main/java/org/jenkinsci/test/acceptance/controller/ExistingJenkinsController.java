@@ -2,6 +2,7 @@ package org.jenkinsci.test.acceptance.controller;
 
 import com.cloudbees.sdk.extensibility.Extension;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 
@@ -26,6 +27,11 @@ public class ExistingJenkinsController extends JenkinsController {
     @Override
     public void stopNow() {
         // noop
+    }
+
+    @Override
+    public void populateJenkinsHome(File template, boolean clean) throws IOException {
+        throw new UnsupportedOperationException("unsupported");
     }
 
     @Override

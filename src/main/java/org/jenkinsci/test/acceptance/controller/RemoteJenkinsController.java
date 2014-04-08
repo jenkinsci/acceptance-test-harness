@@ -2,7 +2,11 @@ package org.jenkinsci.test.acceptance.controller;
 
 import jnr.ffi.LibraryLoader;
 import org.apache.commons.io.input.TeeInputStream;
+import org.codehaus.plexus.util.Expand;
+import org.codehaus.plexus.util.FileUtils;
+import org.jenkinsci.test.acceptance.Ssh;
 import org.jenkinsci.test.acceptance.machine.Machine;
+import org.jenkinsci.test.acceptance.resolver.JenkinsDownloader;
 import org.jenkinsci.test.acceptance.utils.GNUCLibrary;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.jenkinsci.utils.process.ProcessInputStream;
@@ -107,6 +111,40 @@ public class RemoteJenkinsController extends JenkinsController {
             return new URL(String.format("http://%s:%s/", machine.getPublicIpAddress(), httpPort));
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void populateJenkinsHome(File template, boolean clean) throws IOException {
+        boolean running = isRunning();
+        try (Ssh connection = machine.connect()) {
+            stop();
+            if (clean) {
+                connection.executeRemoteCommand("rm -rf "+ Ssh.escape(jenkinsHome) + "; mkdir -p " + Ssh.escape(jenkinsHome));
+            }
+            if (template.isDirectory()) {
+                File archive = File.createTempFile("home", "template.zip", new File(WORKSPACE));
+                try {
+                connection.copyTo(archive.getAbsolutePath(), ".home-template.zip", jenkinsHome);
+                } finally {
+                    FileUtils.forceDelete(archive);
+                }
+            } else if (template.isFile()) {
+                connection.copyTo(template.getAbsolutePath(), ".home-template.zip", jenkinsHome);
+            }
+            if (template.exists()) {
+                String templateArchive =
+                        Ssh.escape(jenkinsHome + (jenkinsHome.endsWith("/") ? "" : "/") + ".home-template.zip");
+                connection.executeRemoteCommand(
+                        "unzip -o " + templateArchive + " -d " + Ssh.escape(jenkinsHome) + " && rm -f "
+                                + templateArchive);
+            }
+        } catch (Exception e) {
+            throw new IOException(e.getMessage(), e);
+        } finally {
+            if (running && !isRunning()) {
+                start();
+            }
         }
     }
 

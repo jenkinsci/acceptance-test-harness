@@ -3,7 +3,7 @@ package org.jenkinsci.test.acceptance.po;
 /**
  * @author Kohsuke Kawaguchi
  */
-@BuildStepPageObject("Execute shell")
+@Describable("Execute shell")
 public class ShellBuildStep extends BuildStep {
     public final Control command = control("command");
 

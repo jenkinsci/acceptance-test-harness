@@ -43,6 +43,10 @@ public class ByFactory {
         return xpath(".//*[@path='%s']", String.format(path, args));
     }
 
+    public By name(String name) {
+        return xpath(".//*[@name='%s']", name);
+    }
+
     /**
      * Capybara's :link selector.
      *

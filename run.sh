@@ -3,22 +3,21 @@
 
 if [ $# -lt 2 ]; then
 	cat <<USAGE
-Usage: $0 BROWSER JENKINS [FEATURE]
+Usage: $0 BROWSER JENKINS [ARGS]
 
 The script runs dryrun tests first to discover trivial problems immediately.
 It can use jenkins.war from local maven repository or download it when missing.
 
 BROWSER: Value for BROWSER variable
 JENKINS: Path to the jenkins.war, Jenkins version of one of "latest", "latest-rc", "lts" and "lts-rc"
-FEATURE: Cucumber feature specification (run everything when not specified)
 
 Examples:
 
 # Run full suite in FF against ./jenkins.war.
 $ ./run firefox ./jenkins.war
 
-# Run Ant feature in chrome against Jenkins 1.512.
-$ ./run chrome 1.512 features/ant_plugin.feature
+# Run Ant plugin test in chrome against Jenkins 1.512.
+$ ./run chrome 1.512 -Dtest=AntPluginTest
 
 # Run full suite in FF against LTS release candidate
 $ ./run firefox lts-rc
@@ -26,19 +25,7 @@ USAGE
   exit -2
 fi
 
-feature=""
-if [ $# -eq 3 ]; then
-    feature="FEATURE=$3"
-fi
-
-dryrunOut=`bundle exec rake cucumber:dryrun`
-dryrunRet=$?
-if [ $dryrunRet -ne 0 ]; then
-    echo -e "$dryrunOut"
-    echo "Dry run failed"
-    exit $dryrunRet
-fi
-
+browser=$1
 war=$2
 if [ ! -f $war ]; then
     mirrors=http://mirrors.jenkins-ci.org
@@ -94,6 +81,8 @@ if [ ! -f $war ]; then
     fi
 fi
 
+shift 2
+
 set -x
 
-BROWSER=$1 JENKINS_WAR=$war bundle exec rake $feature
+BROWSER=$browser JENKINS_WAR=$war mvn test $*
