@@ -48,7 +48,7 @@ public class Job extends ContainerPageObject {
     public <T extends Scm> T useScm(Class<T> type) {
         ensureConfigPage();
 
-        String caption = type.getAnnotation(ScmPageObject.class).value();
+        String caption = type.getAnnotation(Describable.class).value();
 
         WebElement radio = find(by.radioButton(caption));
         check(radio);
