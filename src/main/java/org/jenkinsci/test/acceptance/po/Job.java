@@ -31,6 +31,8 @@ public class Job extends ContainerPageObject {
     public final String name;
     private List<Parameter> parameters = new ArrayList<>();
 
+    public final Control concurrentBuild = control("/concurrentBuild");
+
     public Job(Injector injector, URL url, String name) {
         super(injector,url);
         this.name = name;
@@ -225,5 +227,17 @@ public class Job extends ContainerPageObject {
         visit("/label/" + label); // TODO: this doesn't work correctly if the URL has non-empty context path
         assertThat(driver, hasContent(name));
         return this;
+    }
+
+    /**
+     * Verify that the job contains some builds on the given slave.
+     */
+    public void shouldHaveBuiltOn(Jenkins j, String nodeName) {
+        Node n;
+        if (nodeName.equals("master"))
+            n=j;
+        else
+            n=j.slaves.get(DumbSlave.class, nodeName);
+        n.getBuildHistory().shouldInclude(this.name);
     }
 }

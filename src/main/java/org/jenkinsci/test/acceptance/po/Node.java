@@ -33,7 +33,6 @@ import java.net.URL;
  * @author ogondza
  */
 public class Node extends ContainerPageObject {
-
     protected Node(Jenkins j, URL url) {
         super(j, url);
     }
@@ -49,5 +48,9 @@ public class Node extends ContainerPageObject {
         clickButton("Run");
 
         return find(by.css("h2 + pre")).getText();
+    }
+
+    public BuildHistory getBuildHistory() {
+        return new BuildHistory(this);
     }
 }
