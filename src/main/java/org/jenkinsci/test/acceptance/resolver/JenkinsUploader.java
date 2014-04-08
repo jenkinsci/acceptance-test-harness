@@ -32,8 +32,7 @@ public class JenkinsUploader implements JenkinsResolver {
 
     @Override
     public void materialize(Machine machine, String path) {
-        try {
-            Ssh ssh = machine.connect();
+        try (Ssh ssh = machine.connect()){
             File target = new File(path);
             if(!JenkinsDownloader.remoteFileExists(ssh.getConnection(),path,jenkinsMd5Sum)){
                 ssh.copyTo(war.getPath(), target.getName(), target.getParent());

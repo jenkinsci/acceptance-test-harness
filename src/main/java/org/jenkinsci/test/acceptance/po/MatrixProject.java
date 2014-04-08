@@ -11,7 +11,7 @@ import java.util.concurrent.Callable;
 /**
  * @author Kohsuke Kawaguchi
  */
-@JobPageObject("hudson.matrix.MatrixProject")
+@Describable("hudson.matrix.MatrixProject")
 public class MatrixProject extends Job {
     // config page objects
     public final Control addAxis = control(by.button("Add axis"));
@@ -35,7 +35,7 @@ public class MatrixProject extends Job {
     }
 
     public <T extends Axis> T addAxis(Class<T> type) {
-        AxisPageObjecct a = type.getAnnotation(AxisPageObjecct.class);
+        Describable a = type.getAnnotation(Describable.class);
 
         ensureConfigPage();
         selectDropdownMenu(a.value(), addAxis.resolve());

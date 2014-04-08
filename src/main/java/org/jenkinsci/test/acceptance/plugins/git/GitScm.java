@@ -24,13 +24,13 @@
 package org.jenkinsci.test.acceptance.plugins.git;
 
 import org.jenkinsci.test.acceptance.po.Control;
+import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.PageArea;
 import org.jenkinsci.test.acceptance.po.Scm;
-import org.jenkinsci.test.acceptance.po.ScmPageObject;
 import org.openqa.selenium.NoSuchElementException;
 
-@ScmPageObject("Git")
+@Describable("Git")
 public class GitScm extends Scm {
     private final Control url = control("userRemoteConfigs/url");
     public final Control branch = control("branches/name");

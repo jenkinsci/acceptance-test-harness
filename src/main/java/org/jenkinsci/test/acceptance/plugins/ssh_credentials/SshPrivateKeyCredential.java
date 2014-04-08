@@ -2,8 +2,8 @@ package org.jenkinsci.test.acceptance.plugins.ssh_credentials;
 
 import com.google.inject.Injector;
 import org.jenkinsci.test.acceptance.plugins.credentials.Credential;
-import org.jenkinsci.test.acceptance.plugins.credentials.CredentialPageObject;
 import org.jenkinsci.test.acceptance.po.Control;
+import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.PageArea;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.openqa.selenium.WebElement;
@@ -11,7 +11,7 @@ import org.openqa.selenium.WebElement;
 /**
  * @author Kohsuke Kawaguchi
  */
-@CredentialPageObject("SSH Username with private key")
+@Describable("SSH Username with private key")
 public class SshPrivateKeyCredential extends Credential {
     public final Control username = control("username");
     public final Control description = control("description");

@@ -19,12 +19,12 @@ public class MatrixBuild extends Build {
     public List<MatrixRun> getConfigurations() {
         List<MatrixRun> builds = new ArrayList<>();
         for (MatrixConfiguration c : getJob().getConfigurations()) {
-            builds.add(new MatrixRun(c,url(c.name+'/')));
+            builds.add(new MatrixRun(c, this));
         }
         return builds;
     }
 
     public MatrixRun getConfiguration(String name) {
-        return new MatrixRun(getJob().getConfiguration(name),url(name+"/"));
+        return new MatrixRun(getJob().getConfiguration(name), this);
     }
 }

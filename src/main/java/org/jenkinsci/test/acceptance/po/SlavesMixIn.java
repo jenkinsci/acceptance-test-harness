@@ -13,6 +13,10 @@ public class SlavesMixIn extends MixIn {
         this.jenkins = jenkins;
     }
 
+    public <S extends Slave> S get(Class<S> type, String name) {
+        return  newInstance(type,jenkins,name);
+    }
+
     public <S extends Slave> S create(Class<S> type) {
         return create(type,createRandomName());
     }

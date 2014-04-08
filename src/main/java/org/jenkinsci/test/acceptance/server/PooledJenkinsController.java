@@ -62,6 +62,11 @@ public class PooledJenkinsController extends JenkinsController {
     }
 
     @Override
+    public void populateJenkinsHome(File template, boolean clean) throws IOException {
+        throw new UnsupportedOperationException("unsupported");
+    }
+
+    @Override
     public URL getUrl() {
         if (url==null)
             throw new IllegalStateException("This controller has not been started");

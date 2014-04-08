@@ -31,6 +31,8 @@ public class Job extends ContainerPageObject {
     public final String name;
     private List<Parameter> parameters = new ArrayList<>();
 
+    public final Control concurrentBuild = control("/concurrentBuild");
+
     public Job(Injector injector, URL url, String name) {
         super(injector,url);
         this.name = name;
@@ -48,7 +50,7 @@ public class Job extends ContainerPageObject {
     public <T extends Scm> T useScm(Class<T> type) {
         ensureConfigPage();
 
-        String caption = type.getAnnotation(ScmPageObject.class).value();
+        String caption = type.getAnnotation(Describable.class).value();
 
         WebElement radio = find(by.radioButton(caption));
         check(radio);
@@ -71,7 +73,7 @@ public class Job extends ContainerPageObject {
     private <T extends Step> T addStep(Class<T> type, String section) {
         ensureConfigPage();
 
-        String caption = type.getAnnotation(BuildStepPageObject.class).value();
+        String caption = type.getAnnotation(Describable.class).value();
 
         selectDropdownMenu(caption, find(by.path("/hetero-list-add[%s]",section)));
         String path = last(by.xpath("//div[@name='%s']", section)).getAttribute("path");
@@ -110,7 +112,8 @@ public class Job extends ContainerPageObject {
                 IOUtils.copy(in, gz);
             }
 
-            addShellStep(String.format("mkdir -p %1$s && rm -r %1$s && base64 --decode << ENDOFFILE | gunzip > %1$s \n%2$s\nENDOFFILE",
+            // fileName can include path portion like foo/bar/zot
+            addShellStep(String.format("(mkdir -p %1$s || true) && rm -r %1$s && base64 --decode << ENDOFFILE | gunzip > %1$s \n%2$s\nENDOFFILE",
                     fileName, new String(Base64.encodeBase64Chunked(out.toByteArray()))));
         } catch (IOException e) {
             throw new AssertionError(e);
@@ -182,7 +185,7 @@ public class Job extends ContainerPageObject {
     public <T extends Parameter> T addParameter(Class<T> type) {
         ensureConfigPage();
 
-        String displayName = type.getAnnotation(ParameterPageObject.class).value();
+        String displayName = type.getAnnotation(Describable.class).value();
 
         check(find(by.xpath("//input[@name='parameterized']")));
         selectDropdownMenu(displayName, find(by.xpath("//button[text()='Add Parameter']")));
@@ -224,5 +227,17 @@ public class Job extends ContainerPageObject {
         visit("/label/" + label); // TODO: this doesn't work correctly if the URL has non-empty context path
         assertThat(driver, hasContent(name));
         return this;
+    }
+
+    /**
+     * Verify that the job contains some builds on the given slave.
+     */
+    public void shouldHaveBuiltOn(Jenkins j, String nodeName) {
+        Node n;
+        if (nodeName.equals("master"))
+            n=j;
+        else
+            n=j.slaves.get(DumbSlave.class, nodeName);
+        n.getBuildHistory().shouldInclude(this.name);
     }
 }

@@ -3,7 +3,7 @@ package org.jenkinsci.test.acceptance.po;
 /**
  * @author Kohsuke Kawaguchi
  */
-@BuildStepPageObject("Publish JUnit test result report")
+@Describable("Publish JUnit test result report")
 public class JUnitPublisher extends PostBuildStep {
     public final Control testResults = control("testResults");
 

@@ -8,6 +8,8 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 /**
+ * Page object for view, which is a collection of jobs rendered in the UI.
+ *
  * @author Kohsuke Kawaguchi
  */
 public class View extends ContainerPageObject {

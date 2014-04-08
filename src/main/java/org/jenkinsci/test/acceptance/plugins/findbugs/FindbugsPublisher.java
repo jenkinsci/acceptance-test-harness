@@ -23,12 +23,12 @@
  */
 package org.jenkinsci.test.acceptance.plugins.findbugs;
 
-import org.jenkinsci.test.acceptance.po.BuildStepPageObject;
 import org.jenkinsci.test.acceptance.po.Control;
+import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.PostBuildStep;
 
-@BuildStepPageObject("Publish FindBugs analysis results")
+@Describable("Publish FindBugs analysis results")
 public class FindbugsPublisher extends PostBuildStep {
     public final Control pattern = control("pattern");
 

@@ -23,13 +23,13 @@
  */
 package org.jenkinsci.test.acceptance.plugins.maven;
 
-import java.util.regex.Pattern;
-
+import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.jenkinsci.test.acceptance.po.ToolInstallation;
-import org.jenkinsci.test.acceptance.po.ToolInstallationPageObject;
 
-@ToolInstallationPageObject("Maven")
+import java.util.regex.Pattern;
+
+@Describable("Maven")
 public class MavenInstallation extends ToolInstallation {
 
     public MavenInstallation(JenkinsConfig context, String path) {

@@ -41,7 +41,7 @@ public class JenkinsConfig extends PageObject {
 
     public <T extends ToolInstallation> T addTool(Class<T> type) {
         jenkins.ensureConfigPage();
-        String name = type.getAnnotation(ToolInstallationPageObject.class).value();
+        String name = type.getAnnotation(Describable.class).value();
 
         clickButton("Add " + name);
         sleep(100);

@@ -21,8 +21,9 @@ public class MultiTenantMachine implements Machine {
         this.provider = provider;
         String mtSuffix = String.format("mt_%s", JcloudsMachine.newDirSuffix());
         this.dir = String.format("%s%s/",machine.dir(), mtSuffix);
-        Ssh ssh = connect();
-        ssh.executeRemoteCommand("mkdir -p "+this.dir);
+        try (Ssh ssh = connect()) {
+            ssh.executeRemoteCommand("mkdir -p " + this.dir);
+        }
         this.id = String.format("%s/%s",machine.getId(), mtSuffix);
     }
 
@@ -62,9 +63,10 @@ public class MultiTenantMachine implements Machine {
 
     @Override
     public void close() throws IOException {
-        Ssh ssh = connect();
-        //cleanup all directories for the next reuse
-        ssh.executeRemoteCommand("rm -rf "+dir());
+        try (Ssh ssh = connect()) {
+            //cleanup all directories for the next reuse
+            ssh.executeRemoteCommand("rm -rf " + dir());
+        }
         provider.offer(this);
     }
 

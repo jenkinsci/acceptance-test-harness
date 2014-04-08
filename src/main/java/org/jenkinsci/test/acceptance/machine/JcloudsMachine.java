@@ -28,17 +28,18 @@ public class JcloudsMachine implements Machine {
     public JcloudsMachine(JcloudsMachineProvider machineProvider, NodeMetadata nodeMetadata) {
         this.nodeMetadata = nodeMetadata;
         this.machineProvider = machineProvider;
-        for(int port:machineProvider.getAvailableInboundPorts()){
+        for (int port : machineProvider.getAvailableInboundPorts()) {
             availablePorts.push(port);
         }
 
-        Ssh ssh = connect();
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ssh.executeRemoteCommand("echo `pwd`/machine_home_"+newDirSuffix()+"/",baos);
+        try (Ssh ssh = connect()) {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ssh.executeRemoteCommand("echo `pwd`/machine_home_" + newDirSuffix() + "/", baos);
 
-        this.dir = new String(baos.toByteArray()).trim();
+            this.dir = new String(baos.toByteArray()).trim();
 
-        ssh.executeRemoteCommand("mkdir -p "+this.dir);
+            ssh.executeRemoteCommand("mkdir -p " + this.dir);
+        }
     }
 
     @Override
@@ -48,22 +49,26 @@ public class JcloudsMachine implements Machine {
 
     @Override
     public Ssh connect() {
+        Ssh ssh = null;
         try {
-            Ssh ssh = new Ssh(getPublicIpAddress());
+            ssh = new Ssh(getPublicIpAddress());
             machineProvider.authenticator().authenticate(ssh.getConnection());
             return ssh;
         } catch (IOException e) {
-            throw new AssertionError("Failed to create ssh connection",e);
+            if (ssh != null) {
+                ssh.close();
+            }
+            throw new AssertionError("Failed to create ssh connection", e);
         }
     }
 
     @Override
-    public String getPublicIpAddress(){
+    public String getPublicIpAddress() {
         return nodeMetadata.getPublicAddresses().iterator().next();
     }
 
     @Override
-    public String getUser(){
+    public String getUser() {
         return (nodeMetadata.getCredentials() == null) ? "ubuntu" : nodeMetadata.getCredentials().getUser();
     }
 
@@ -73,19 +78,19 @@ public class JcloudsMachine implements Machine {
     }
 
     @Override
-    public int getNextAvailablePort(){
-        try{
+    public int getNextAvailablePort() {
+        try {
             return availablePorts.pop();
-        }catch (EmptyStackException e){
-            throw new AssertionError("No more free inbound ports",e);
+        } catch (EmptyStackException e) {
+            throw new AssertionError("No more free inbound ports", e);
         }
     }
 
     @Override
     public void close() throws IOException {
         logger.info("Destroying node: " + nodeMetadata);
-        Ssh ssh = connect();
-        try {
+
+        try (Ssh ssh = connect()) {
             ssh.getConnection().exec(String.format("pkill -u $(id -u %s)", getUser()), System.out);
         } catch (InterruptedException e) {
             //ignore
@@ -94,10 +99,10 @@ public class JcloudsMachine implements Machine {
         machineProvider.offer(this);
     }
 
-    public static long newDirSuffix(){
+    public static long newDirSuffix() {
         SecureRandom secureRandom = new SecureRandom();
         long secureInitializer = secureRandom.nextLong();
-        return Math.abs(new Random( secureInitializer + Runtime.getRuntime().freeMemory()).nextInt());
+        return Math.abs(new Random(secureInitializer + Runtime.getRuntime().freeMemory()).nextInt());
     }
 
     private static final Logger logger = LoggerFactory.getLogger(JcloudsMachine.class);

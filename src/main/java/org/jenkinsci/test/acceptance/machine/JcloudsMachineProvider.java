@@ -284,10 +284,10 @@ public abstract class JcloudsMachineProvider implements MachineProvider,Closeabl
                 if(System.currentTimeMillis() - startTime > timeout){
                     throw new RuntimeException(String.format("ssh failed to work within %s seconds.",timeout/1000));
                 }
-                Ssh ssh = new Ssh(host);
-                authenticator().authenticate(ssh.getConnection());
-                logger.info("sshd is ready on host: "+host);
-                ssh.destroy();
+                try (Ssh ssh = new Ssh(host)) {
+                    authenticator().authenticate(ssh.getConnection());
+                    logger.info("sshd is ready on host: " + host);
+                }
                 return;
             } catch (IOException e) {
                 try {

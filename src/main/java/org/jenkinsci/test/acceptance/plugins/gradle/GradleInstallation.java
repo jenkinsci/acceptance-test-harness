@@ -23,13 +23,13 @@
  */
 package org.jenkinsci.test.acceptance.plugins.gradle;
 
-import java.util.regex.Pattern;
-
+import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.jenkinsci.test.acceptance.po.ToolInstallation;
-import org.jenkinsci.test.acceptance.po.ToolInstallationPageObject;
 
-@ToolInstallationPageObject("Gradle")
+import java.util.regex.Pattern;
+
+@Describable("Gradle")
 public class GradleInstallation extends ToolInstallation {
     public GradleInstallation(JenkinsConfig context, String path) {
         super(context, path);

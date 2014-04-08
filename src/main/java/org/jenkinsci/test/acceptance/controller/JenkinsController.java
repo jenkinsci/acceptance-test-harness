@@ -28,7 +28,9 @@ public abstract class JenkinsController implements Closeable, AutoCleaned {
      * Note that this directory might not exist on the Jenkins master, since it can be
      * running on a separate computer.
      */
-    protected static final String WORKSPACE = System.getenv("WORKSPACE") != null? System.getenv("WORKSPACE") : new File(System.getProperty("user.dir"), "target").getPath();
+    protected static final String WORKSPACE = System.getenv("WORKSPACE") != null
+            ? System.getenv("WORKSPACE")
+            : new File(System.getProperty("user.dir"), "target").getPath();
 
     protected static final String JENKINS_DEBUG_LOG = WORKSPACE + "/last_test.log";
 
@@ -126,6 +128,26 @@ public abstract class JenkinsController implements Closeable, AutoCleaned {
      * @param cause Failure cause
      */
     public void diagnose(Throwable cause) {}
+
+    /**
+     * Populates the Jenkins Home with the specified template (which can be either a ZIP file or a directory). If
+     * Jenkins is already running then it will be restarted.
+     *
+     * @param template The template (either a ZIP file or a directory).
+     */
+    public void populateJenkinsHome(File template) throws IOException {
+        populateJenkinsHome(template, true);
+    }
+
+    /**
+     * Populates the Jenkins Home with the specified template (which can be either a ZIP file or a directory). If
+     * Jenkins is already running then it will be restarted.
+     *
+     * @param template The template (either a ZIP file or a directory).
+     * @param clean    if {@code true} then the home will be wiped clean before the template is applied. If false then
+     *                 the template will simply overwrite the existing (if any) home.
+     */
+    public abstract void populateJenkinsHome(File template, boolean clean) throws IOException;
 
     /**
      * Downloads the latest version of the form-element-path plugin that we use for testing.
