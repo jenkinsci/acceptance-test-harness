@@ -35,7 +35,7 @@ public class MatrixProject extends Job {
     }
 
     public <T extends Axis> T addAxis(Class<T> type) {
-        AxisPageObjecct a = type.getAnnotation(AxisPageObjecct.class);
+        Describable a = type.getAnnotation(Describable.class);
 
         ensureConfigPage();
         selectDropdownMenu(a.value(), addAxis.resolve());

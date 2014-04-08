@@ -25,7 +25,7 @@ public class DumbSlave extends Slave {
      * Selects the specified launcher, and return the page object to bind to it.
      */
     public <T extends ComputerLauncher> T setLauncher(Class<T> type) {
-        String sut_type = type.getAnnotation(ComputerLauncherPageObject.class).value();
+        String sut_type = type.getAnnotation(Describable.class).value();
 
         launchMethod.select(sut_type);
         return newInstance(type, this,"/launcher");

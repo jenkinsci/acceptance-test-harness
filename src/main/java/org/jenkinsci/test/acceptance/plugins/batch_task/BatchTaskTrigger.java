@@ -1,14 +1,14 @@
 package org.jenkinsci.test.acceptance.plugins.batch_task;
 
-import org.jenkinsci.test.acceptance.po.BuildStepPageObject;
 import org.jenkinsci.test.acceptance.po.Control;
+import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.PostBuildStep;
 
 /**
  * @author Kohsuke Kawaguchi
  */
-@BuildStepPageObject("Invoke batch tasks")
+@Describable("Invoke batch tasks")
 public class BatchTaskTrigger extends PostBuildStep {
     public final Control allowUnstable = control("evenIfUnstable");
     public final Control project = control("configs/project");

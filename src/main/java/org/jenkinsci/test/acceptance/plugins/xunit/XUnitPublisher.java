@@ -1,12 +1,16 @@
 package org.jenkinsci.test.acceptance.plugins.xunit;
 
 import com.google.inject.Injector;
-import org.jenkinsci.test.acceptance.po.*;
+import org.jenkinsci.test.acceptance.po.Control;
+import org.jenkinsci.test.acceptance.po.Describable;
+import org.jenkinsci.test.acceptance.po.Job;
+import org.jenkinsci.test.acceptance.po.PageArea;
+import org.jenkinsci.test.acceptance.po.PostBuildStep;
 
 /**
  * @author Kohsuke Kawaguchi
  */
-@BuildStepPageObject("Publish xUnit test result report")
+@Describable("Publish xUnit test result report")
 public class XUnitPublisher extends PostBuildStep {
     public final Control addButton = control("hetero-list-add[tools]");
 

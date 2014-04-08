@@ -71,7 +71,7 @@ public class Job extends ContainerPageObject {
     private <T extends Step> T addStep(Class<T> type, String section) {
         ensureConfigPage();
 
-        String caption = type.getAnnotation(BuildStepPageObject.class).value();
+        String caption = type.getAnnotation(Describable.class).value();
 
         selectDropdownMenu(caption, find(by.path("/hetero-list-add[%s]",section)));
         String path = last(by.xpath("//div[@name='%s']", section)).getAttribute("path");
