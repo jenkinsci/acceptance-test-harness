@@ -29,7 +29,9 @@ import org.jenkinsci.test.acceptance.po.CapybaraPortingLayer;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Node;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 
 // Can not be a PageObject due to plugin url scheme
 public class Script extends CapybaraPortingLayer {
@@ -72,19 +74,16 @@ public class Script extends CapybaraPortingLayer {
         visitAction("runScript");
 
         if (slave != null) {
-            control("/node").select(slave);
-        }
-
-        if (params != null && !params.isEmpty()) {
-            control("/defineParams").check();
-
-            for (Map.Entry<String, String> pair: params.entrySet()) {
-                control("/defineParams/parameters/name").set(pair.getKey());
-                control("/defineParams/parameters/value").set(pair.getValue());
+            try {
+                control("/node").select(slave);
+            } catch (NoSuchElementException ex) {
+                sleep(1000);
+                visitAction("runScript");
+                control("/node").select(slave);
             }
-
-            sleep(1000);
         }
+
+        fillParams(params);
 
         clickButton("Run");
         waitFor(by.xpath("//h2[text()='Result']"));
@@ -103,5 +102,48 @@ public class Script extends CapybaraPortingLayer {
 
     private Control control(String path) {
         return new Control(injector, by.path(path));
+    }
+
+    public void configureParams(Map<String, String> params) {
+        visitAction("editScript");
+        setParams(params);
+        clickButton("Submit");
+    }
+
+    private void fillParams(Map<String, String> params) {
+        if (params == null || params.isEmpty()) return;
+
+        control("/defineParams").check();
+
+        for (Map.Entry<String, String> pair: params.entrySet()) {
+
+            WebElement elem = getElement(by.xpath("//input[@name='name' and @value='%s']", pair.getKey()));
+            if (elem == null) {
+                elem = getElement(by.xpath("//input[@name='name' and not(@value)]"));
+                elem.sendKeys(pair.getKey());
+            }
+
+            String path = elem.getAttribute("path").replace("/name", "/value");
+            control(path).set(pair.getValue());
+        }
+    }
+
+    private void setParams(Map<String, String> params) {
+        control("/defineParams").check();
+
+        String prefix = "/defineParams/parameters/";
+        for (Map.Entry<String, String> pair: params.entrySet()) {
+
+            control(prefix + "name").set(pair.getKey());
+            control(prefix + "value").set(pair.getValue());
+
+            WebElement addButton = find(by.button("Add Parameter"));
+            if (addButton != null) {
+                addButton.click();
+
+                String path = find(by.button("Add Parameter")).getAttribute("path");
+                prefix = path.substring(0, path.length() - 25);
+            }
+        }
     }
 }

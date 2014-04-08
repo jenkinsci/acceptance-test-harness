@@ -127,4 +127,29 @@ public class ScriptlerPluginTest extends AbstractJUnitTest {
         assertThat(output.output(slaveA), equalTo("Hello world!"));
         assertThat(output.output(slaveB), equalTo("Hello world!"));
     }
+
+    @Test
+    public void create_and_run_parameterized_script() {
+        HashMap<String, String> params = new HashMap<>();
+        params.put("lhs", "7");
+        params.put("rhs", "11");
+
+        Script script = scriptler.create("script1", "println lhs + ' + ' + rhs;", params);
+
+        assertThat(script.run().output(jenkins), equalTo("7 + 11"));
+    }
+
+    @Test
+    public void override_default_parameters() {
+        HashMap<String, String> params = new HashMap<>();
+        params.put("lhs", "7");
+        params.put("rhs", "11");
+
+        Script script = scriptler.create("script1", "println lhs + ' + ' + rhs;", params);
+
+        params = new HashMap<>();
+        params.put("rhs", "9");
+
+        assertThat(script.run(params).output(jenkins), equalTo("7 + 9"));
+    }
 }

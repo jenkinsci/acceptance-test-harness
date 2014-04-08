@@ -21,35 +21,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.test.acceptance.plugins.scriptler;
+package org.jenkinsci.test.acceptance;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.List;
 
-import org.jenkinsci.test.acceptance.po.Node;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.events.AbstractWebDriverEventListener;
 
-public class ScriptResult {
-    private final String result;
+/**
+ * Make sure there are no exceptions shown after user interaction.
+ *
+ * @author ogondza
+ */
+public class SanityChecker extends AbstractWebDriverEventListener {
 
-    public ScriptResult(String result) {
-        this.result = result;
+    @Override public void afterNavigateTo(String url, WebDriver driver) {
+        checkSanity(driver);
     }
 
-    public String output(Node node) {
-        return output(node.getName());
+    @Override public void afterClickOn(WebElement element, WebDriver driver) {
+        checkSanity(driver);
     }
 
-    private String output(String node) {
-        Pattern pattern = Pattern.compile(
-                "^_+\\n\\[" + Pattern.quote(node) + "\\]:\\n(.*?)\\n_+$",
-                Pattern.DOTALL | Pattern.MULTILINE
+    private void checkSanity(WebDriver driver) {
+        List<WebElement> stacktrace = driver.findElements(By.cssSelector("div#error-description pre"));
+
+        if (!stacktrace.isEmpty()) throw new AssertionError(
+                "Jenkins error detected:\n" + stacktrace.get(0).getText()
         );
-
-        Matcher matcher = pattern.matcher(result);
-
-        return matcher.find()
-                ? matcher.group(1)
-                : null
-        ;
     }
 }

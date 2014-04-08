@@ -26,6 +26,7 @@ import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.safari.SafariDriver;
+import org.openqa.selenium.support.events.EventFiringWebDriver;
 
 import com.cloudbees.sdk.extensibility.ExtensionList;
 import com.google.inject.AbstractModule;
@@ -93,7 +94,9 @@ public class FallbackConfig extends AbstractModule {
      */
     @Provides @TestScope
     public WebDriver createWebDriver(TestCleaner cleaner) throws IOException {
-        final WebDriver d = createWebDriver();
+        final EventFiringWebDriver d = new EventFiringWebDriver(createWebDriver());
+        d.register(new SanityChecker());
+
         d.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
         cleaner.addTask(new Statement() {
             @Override

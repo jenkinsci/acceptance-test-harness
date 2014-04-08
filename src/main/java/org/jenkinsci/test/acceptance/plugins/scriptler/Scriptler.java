@@ -23,9 +23,12 @@
  */
 package org.jenkinsci.test.acceptance.plugins.scriptler;
 
+import java.util.Map;
+
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.po.Action;
 import org.jenkinsci.test.acceptance.po.ActionPageObject;
+import org.jenkinsci.test.acceptance.po.CodeMirror;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 
@@ -42,5 +45,22 @@ public class Scriptler extends Action<Jenkins> {
         clickButton("Upload");
 
         return new Script(this, script.getName());
+    }
+
+    public Script create(String name, String text, Map<String, String> params) {
+        visit(url("scriptsettings"));
+        name += ".groovy";
+        control("/id").set(name);
+        control("/name").set(name);
+        new CodeMirror(this, "/script").set(text);
+        clickButton("Submit");
+
+        Script script = new Script(this, name);
+
+        if (params != null && !params.isEmpty()) {
+            script.configureParams(params);
+        }
+
+        return script;
     }
 }
