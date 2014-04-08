@@ -12,7 +12,7 @@ public class ViewsMixIn extends MixIn {
     }
 
     public <T extends View> T create(Class<T> type, String name) {
-        String sut_type = type.getAnnotation(ViewPageObject.class).value();
+        String sut_type = type.getAnnotation(Describable.class).value();
 
         visit("newView");
         fillIn("name",name);
