@@ -11,7 +11,7 @@ import java.util.concurrent.Callable;
 /**
  * @author Kohsuke Kawaguchi
  */
-@JobPageObject("hudson.matrix.MatrixProject")
+@Describable("hudson.matrix.MatrixProject")
 public class MatrixProject extends Job {
     // config page objects
     public final Control addAxis = control(by.button("Add axis"));

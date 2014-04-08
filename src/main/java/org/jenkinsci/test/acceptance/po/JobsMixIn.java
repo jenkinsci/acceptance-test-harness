@@ -14,7 +14,7 @@ public class JobsMixIn extends MixIn {
     }
 
     public <T extends Job> T create(Class<T> type, String name) {
-        String sut_type = type.getAnnotation(JobPageObject.class).value();
+        String sut_type = type.getAnnotation(Describable.class).value();
 
         visit("newJob");
         fillIn("name", name);
