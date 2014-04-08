@@ -40,15 +40,16 @@ public class ScriptResult {
     }
 
     private String output(String node) {
-       Pattern pattern = Pattern.compile(
-               "^_+\\n\\[" + Pattern.quote(node) + "\\]:\\n(.*?)\\n_+$",
-               Pattern.DOTALL | Pattern.MULTILINE
-       );
+        Pattern pattern = Pattern.compile(
+                "^_+\\n\\[" + Pattern.quote(node) + "\\]:\\n(.*?)\\n_+$",
+                Pattern.DOTALL | Pattern.MULTILINE
+        );
 
-       Matcher matcher = pattern.matcher(result);
+        Matcher matcher = pattern.matcher(result);
 
-       assert matcher.find();
-
-       return matcher.group(1);
+        return matcher.find()
+                ? matcher.group(1)
+                : null
+        ;
     }
 }
