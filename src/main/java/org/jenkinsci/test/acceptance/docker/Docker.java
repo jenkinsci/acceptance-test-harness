@@ -3,6 +3,7 @@ package org.jenkinsci.test.acceptance.docker;
 import com.google.inject.Inject;
 import org.apache.commons.io.FileUtils;
 import org.jenkinsci.utils.process.CommandBuilder;
+import org.junit.internal.AssumptionViolatedException;
 import org.jvnet.hudson.annotation_indexer.Index;
 
 import javax.inject.Named;
@@ -11,6 +12,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+
+import static java.lang.System.getenv;
 
 /**
  * Entry point to the docker support.
@@ -22,14 +25,33 @@ import java.util.List;
  */
 @Singleton
 public class Docker {
+
     /**
      * Command to invoke docker.
      */
     @Inject(optional=true) @Named("docker")
-    public static List<String> dockerCmd = Arrays.asList("sudo","docker");
+    private static List<String> dockerCmd = Arrays.asList("docker");
+
 
     @Inject(optional=true)
     public ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+
+    public Docker()
+    {   //If env is available
+        String dockerCommand = getenv("DOCKER");
+        if(dockerCommand==null)
+        {
+            dockerCmd = Arrays.asList("docker");
+        }
+        else
+        {
+            dockerCmd = Arrays.asList(dockerCommand);
+        }
+        if(!isAvailable())
+        {
+            throw new AssumptionViolatedException(dockerCmd + " is needed for Docker but doesn't exist in the system");
+        }
+    }
 
     public static CommandBuilder cmd(String cmd) {
         return new CommandBuilder(dockerCmd).add(cmd);

@@ -42,7 +42,7 @@ public class ScpPluginTest extends AbstractJUnitTest {
        And SCP plugin should have published "pmd.xml" on docker fixture
      */
     @Test
-    @Native("docker")
+
     public void configure_job_with_scp_publishing() throws IOException, InterruptedException {
         SshdContainer sshd = docker.start(SshdContainer.class);
         Resource pmd_xml = resource("/pmd_plugin/pmd.xml");
