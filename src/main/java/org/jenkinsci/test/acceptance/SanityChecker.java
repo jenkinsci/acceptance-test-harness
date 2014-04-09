@@ -53,6 +53,12 @@ public class SanityChecker extends AbstractWebDriverEventListener {
 
         if (!elements.isEmpty()) {
             String trace = elements.get(0).getText();
+
+            if (trace.contains("<j:forEach> java.util.ConcurrentModificationException")) {
+                // Do not report JENKINS-22553 as it is recoverable and fails dozens of tests
+                return;
+            }
+
             throw new AssertionError("Jenkins error detected:\n" + trace);
         }
     }
