@@ -40,16 +40,7 @@ public class Docker {
     public ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
     public Docker()
-    {   //If env is available
-/*        String dockerCommand = getenv("DOCKER");
-        if(dockerCommand==null)
-        {
-            dockerCmd = Arrays.asList("docker");
-        }
-        else
-        {
-            dockerCmd = Arrays.asList(dockerCommand);
-        }*/
+    {
         dockerCmd = Arrays.asList(stringDockerCmd);
         if(!isAvailable())
         {
