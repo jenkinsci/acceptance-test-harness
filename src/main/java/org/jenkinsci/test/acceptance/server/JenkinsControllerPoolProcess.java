@@ -133,11 +133,16 @@ public class JenkinsControllerPoolProcess {
                     PrintWriter out = new PrintWriter(Channels.newOutputStream(c),true)) {
 
                     out.println(j.getUrl());
-                    while (true) {
-                        String cmd = in.readLine();
-                        if (cmd==null)  return;
-
-                        // TODO: implement restart
+                    String cmd;
+                    while (null != (cmd = in.readLine())) {
+                        switch (cmd.trim().toLowerCase()) {
+                            case "start":
+                                j.start();
+                                break;
+                            case "stop":
+                                j.stop();
+                                break;
+                        }
                     }
                 }
             } finally {

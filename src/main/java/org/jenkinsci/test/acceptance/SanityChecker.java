@@ -21,38 +21,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.test.acceptance.po;
+package org.jenkinsci.test.acceptance;
 
-import com.google.inject.Injector;
+import java.util.List;
 
-import java.net.URL;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.events.AbstractWebDriverEventListener;
 
 /**
- * Common base for Jenkins and Slave.
+ * Make sure there are no exceptions shown after user interaction.
  *
  * @author ogondza
  */
-public abstract class Node extends ContainerPageObject {
-    protected Node(Jenkins j, URL url) {
-        super(j, url);
+public class SanityChecker extends AbstractWebDriverEventListener {
+
+    @Override public void afterNavigateTo(String url, WebDriver driver) {
+        checkSanity(driver);
     }
 
-    protected Node(Injector i, URL url) {
-        super(i, url);
+    @Override public void afterClickOn(WebElement element, WebDriver driver) {
+        checkSanity(driver);
     }
 
-    public abstract String getName();
+    private void checkSanity(WebDriver driver) {
+        List<WebElement> stacktrace = driver.findElements(By.cssSelector("div#error-description pre"));
 
-    public String runScript(String script) {
-        visit("script");
-        CodeMirror cm = new CodeMirror(this, "/script");
-        cm.set(script);
-        clickButton("Run");
-
-        return find(by.css("h2 + pre")).getText();
-    }
-
-    public BuildHistory getBuildHistory() {
-        return new BuildHistory(this);
+        if (!stacktrace.isEmpty()) throw new AssertionError(
+                "Jenkins error detected:\n" + stacktrace.get(0).getText()
+        );
     }
 }

@@ -21,38 +21,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.test.acceptance.po;
+package org.jenkinsci.test.acceptance.plugins.scriptler;
 
-import com.google.inject.Injector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import java.net.URL;
+import org.jenkinsci.test.acceptance.po.Node;
 
-/**
- * Common base for Jenkins and Slave.
- *
- * @author ogondza
- */
-public abstract class Node extends ContainerPageObject {
-    protected Node(Jenkins j, URL url) {
-        super(j, url);
+public class ScriptResult {
+    private final String result;
+
+    public ScriptResult(String result) {
+        this.result = result;
     }
 
-    protected Node(Injector i, URL url) {
-        super(i, url);
+    public String output(Node node) {
+        return output(node.getName());
     }
 
-    public abstract String getName();
+    private String output(String node) {
+        Pattern pattern = Pattern.compile(
+                "^_+\\n\\[" + Pattern.quote(node) + "\\]:\\n(.*?)\\n_+$",
+                Pattern.DOTALL | Pattern.MULTILINE
+        );
 
-    public String runScript(String script) {
-        visit("script");
-        CodeMirror cm = new CodeMirror(this, "/script");
-        cm.set(script);
-        clickButton("Run");
+        Matcher matcher = pattern.matcher(result);
 
-        return find(by.css("h2 + pre")).getText();
-    }
-
-    public BuildHistory getBuildHistory() {
-        return new BuildHistory(this);
+        return matcher.find()
+                ? matcher.group(1)
+                : null
+        ;
     }
 }

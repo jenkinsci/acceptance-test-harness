@@ -20,6 +20,7 @@ public abstract class Slave extends Node {
         this.name = name;
     }
 
+    @Override
     public String getName() {
         return name;
     }
