@@ -29,9 +29,9 @@ public class Docker {
     /**
      * Command to invoke docker.
      */
-    @Inject
+    @Inject(optional=true)
     @Named("docker")
-    private static String stringDockerCmd;
+    private static String stringDockerCmd="docker";
 
     private static List<String> dockerCmd;// = Arrays.asList("docker");
 
