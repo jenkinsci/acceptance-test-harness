@@ -29,8 +29,11 @@ public class Docker {
     /**
      * Command to invoke docker.
      */
-    @Inject(optional=true) @Named("docker")
-    private static List<String> dockerCmd = Arrays.asList("docker");
+    @Inject
+    @Named("docker")
+    private static String stringDockerCmd;
+
+    private static List<String> dockerCmd;// = Arrays.asList("docker");
 
 
     @Inject(optional=true)
@@ -38,7 +41,7 @@ public class Docker {
 
     public Docker()
     {   //If env is available
-        String dockerCommand = getenv("DOCKER");
+/*        String dockerCommand = getenv("DOCKER");
         if(dockerCommand==null)
         {
             dockerCmd = Arrays.asList("docker");
@@ -46,7 +49,8 @@ public class Docker {
         else
         {
             dockerCmd = Arrays.asList(dockerCommand);
-        }
+        }*/
+        dockerCmd = Arrays.asList(stringDockerCmd);
         if(!isAvailable())
         {
             throw new AssumptionViolatedException(dockerCmd + " is needed for Docker but doesn't exist in the system");
