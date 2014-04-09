@@ -36,7 +36,9 @@ import org.openqa.selenium.support.events.AbstractWebDriverEventListener;
  * @author ogondza
  */
 public class SanityChecker extends AbstractWebDriverEventListener {
-    private final static By ELEM = By.xpath("//h1/span[contains(., 'Oops!')]/../following-sibling::div/h2[text()='Stack trace']/following-sibling::pre");
+    private final static By SPECIFIER = By.xpath(
+            "//h1/span[contains(., 'Oops!')]/../following-sibling::div/h2[text()='Stack trace']/following-sibling::pre"
+    );
 
     @Override public void afterNavigateTo(String url, WebDriver driver) {
         checkSanity(driver);
@@ -47,10 +49,11 @@ public class SanityChecker extends AbstractWebDriverEventListener {
     }
 
     private void checkSanity(WebDriver driver) {
-        List<WebElement> stacktrace = driver.findElements(ELEM);
+        List<WebElement> elements = driver.findElements(SPECIFIER);
 
-        if (!stacktrace.isEmpty()) throw new AssertionError(
-                "Jenkins error detected:\n" + stacktrace.get(0).getText()
-        );
+        if (!elements.isEmpty()) {
+            String trace = elements.get(0).getText();
+            throw new AssertionError("Jenkins error detected:\n" + trace);
+        }
     }
 }
