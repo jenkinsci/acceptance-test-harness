@@ -1,19 +1,26 @@
 package plugins;
 
+import com.google.inject.Inject;
+import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
+import org.jenkinsci.test.acceptance.docker.fixtures.SvnContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.Native;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.subversion.SubversionScm;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
+
+import java.io.IOException;
 
 /**
  Feature: Subversion support
    As a user
    I want to be able to check out source code from Subversion
  */
-@WithPlugins("subversion")
+@WithPlugins("subversion") @Native("docker")
 public class SubversionPluginTest extends AbstractJUnitTest {
-
+    @Inject
+    DockerContainerHolder<SvnContainer> svn;
     /**
      Scenario: Run basic Subversion build
        Given I have installed the "subversion" plugin
@@ -26,10 +33,11 @@ public class SubversionPluginTest extends AbstractJUnitTest {
        And console output should contain "test -d .svn"
      */
     @Test
-    public void run_basic_subversion_build() {
+    public void run_basic_subversion_build() throws IOException {
+        SvnContainer svnContainer = svn.get();
         FreeStyleJob f = jenkins.jobs.create();
         f.configure();
-        f.useScm(SubversionScm.class).url.set("https://svn.jenkins-ci.org/trunk/jenkins/test-projects/model-ant-project/");
+        f.useScm(SubversionScm.class).url.set(svnContainer.getUrl());
         f.addShellStep("test -d .svn");
         f.save();
 
