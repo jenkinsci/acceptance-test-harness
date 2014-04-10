@@ -19,7 +19,8 @@ target
 .settings/
 jenkins*home/
 jenkins*home.log
-.idea/
+.idea/*
+!.idea/codeStyleSettings.xml
 *.iml
 *.iws
 *.ipr
