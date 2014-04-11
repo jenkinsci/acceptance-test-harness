@@ -13,24 +13,26 @@ import org.junit.Test;
 import java.io.IOException;
 
 /**
- Feature: Subversion support
-   As a user
-   I want to be able to check out source code from Subversion
+ * Feature: Subversion support
+ * As a user
+ * I want to be able to check out source code from Subversion
  */
-@WithPlugins("subversion") @Native("docker")
+@WithPlugins("subversion")
+@Native("docker")
 public class SubversionPluginTest extends AbstractJUnitTest {
     @Inject
     DockerContainerHolder<SvnContainer> svn;
+
     /**
-     Scenario: Run basic Subversion build
-       Given I have installed the "subversion" plugin
-       And a job
-       When I check out code from Subversion repository "https://svn.jenkins-ci.org/trunk/jenkins/test-projects/model-ant-project/"
-       And I add a shell build step "test -d .svn"
-       And I save the job
-       And I build the job
-       Then the build should succeed
-       And console output should contain "test -d .svn"
+     * Scenario: Run basic Subversion build
+     * Given I have installed the "subversion" plugin
+     * And a job
+     * When I check out code from Subversion repository "<svnContainerUrl>/svn"
+     * And I add a shell build step "test -d .svn"
+     * And I save the job
+     * And I build the job
+     * Then the build should succeed
+     * And console output should contain "test -d .svn"
      */
     @Test
     public void run_basic_subversion_build() throws IOException {
@@ -45,48 +47,51 @@ public class SubversionPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     Scenario: Check out specified Subversion revision
-       Given I have installed the "subversion" plugin
-       And a job
-       When I check out code from Subversion repository "https://svn.jenkins-ci.org/trunk/jenkins/test-projects/model-ant-project@40156"
-       And I save the job
-       And I build the job
-       Then the build should succeed
-       And console output should contain "At revision 40156"
+     * Scenario: Check out specified Subversion revision
+     * Given I have installed the "subversion" plugin
+     * And a job
+     * When I check out code from Subversion repository "<svnContainerUrl>/svn" @ revision 0
+     * And I save the job
+     * And I build the job
+     * Then the build should succeed
+     * And console output should contain "At revision 0"
      */
     @Test
-    public void checkout_specific_revision() {
+    public void checkout_specific_revision() throws IOException {
+        final String revision = "0";
+        SvnContainer svnContainer = svn.get();
         FreeStyleJob f = jenkins.jobs.create();
         f.configure();
-        f.useScm(SubversionScm.class).url.set("https://svn.jenkins-ci.org/trunk/jenkins/test-projects/model-ant-project@40156");
+        f.useScm(SubversionScm.class).url.set(svnContainer.getUrl() + "@" + revision);
         f.save();
 
-        f.queueBuild().shouldSucceed().shouldContainsConsoleOutput("At revision 40156");
+        f.queueBuild().shouldSucceed().shouldContainsConsoleOutput("At revision " + revision);
     }
 
     /**
-     Scenario: Always check out fresh copy
-       Given I have installed the "subversion" plugin
-       And a job
-       When I check out code from Subversion repository "https://svn.jenkins-ci.org/trunk/jenkins/test-projects/model-ant-project"
-       And I select "Always check out a fresh copy" as a "Check-out Strategy"
-       And I save the job
-       And I build 2 jobs
-       Then the build should succeed
-       And console output should contain "Checking out https://svn.jenkins-ci.org/trunk/jenkins/test-projects/model-ant-project"
+     * Scenario: Always check out fresh copy
+     * Given I have installed the "subversion" plugin
+     * And a job
+     * When I check out code from Subversion repository "<svnContainerUrl>/svn"
+     * And I select "Always check out a fresh copy" as a "Check-out Strategy"
+     * And I save the job
+     * And I build 2 jobs
+     * Then the build should succeed
+     * And console output should contain "Checking out <svnContainerUrl>"
      */
     @Test
-    public void always_checkout_fresh_copy() {
+    public void always_checkout_fresh_copy() throws IOException {
+        SvnContainer svnContainer = svn.get();
         FreeStyleJob f = jenkins.jobs.create();
         f.configure();
-        f.useScm(SubversionScm.class).url.set("https://svn.jenkins-ci.org/trunk/jenkins/test-projects/model-ant-project");
-        f.find(by.xpath("//td[@class='setting-name' and text()='%s']/../td[@class='setting-main']/select","Check-out Strategy"))
+        f.useScm(SubversionScm.class).url.set(svnContainer.getUrl());
+        f.find(by.xpath("//td[@class='setting-name' and text()='%s']/../td[@class='setting-main']/select", "Check-out Strategy"))
                 .findElement(by.option("Always check out a fresh copy")).click();
         f.save();
 
         f.queueBuild().shouldSucceed();
 
         f.queueBuild().shouldSucceed()
-            .shouldContainsConsoleOutput("Checking out https://svn.jenkins-ci.org/trunk/jenkins/test-projects/model-ant-project");
+                .shouldContainsConsoleOutput("Checking out " + svnContainer.getUrl());
     }
 }

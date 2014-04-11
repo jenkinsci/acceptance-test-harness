@@ -41,6 +41,12 @@ ENV APACHE_LOCK_DIR    /var/lock/apache2
 ENV APACHE_LOG_DIR     /var/log/apache2
 
 
+#upload SVN data
+RUN mkdir -p /svnRepo
+ADD ./svnRepo /svnRepo
+RUN /usr/sbin/apache2 && svn checkout http://127.0.0.1/svn /svnRepo && svn add /svnRepo/* && svn commit -m 'init' /svnRepo/*
+
+
 #Start supervisor --> starts apache2
 CMD ["/usr/bin/supervisord"]
 
