@@ -23,8 +23,6 @@
  */
 package org.jenkinsci.test.acceptance;
 
-import java.util.List;
-
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -49,17 +47,20 @@ public class SanityChecker extends AbstractWebDriverEventListener {
     }
 
     private void checkSanity(WebDriver driver) {
-        List<WebElement> elements = driver.findElements(SPECIFIER);
-
-        if (!elements.isEmpty()) {
-            String trace = elements.get(0).getText();
-
-            if (trace.contains("<j:forEach> java.util.ConcurrentModificationException")) {
-                // Do not report JENKINS-22553 as it is recoverable and fails dozens of tests
-                return;
-            }
-
-            throw new AssertionError("Jenkins error detected:\n" + trace);
-        }
+// Suppressing to see what performance impact AbstractWebDriverEventListener
+// actually have.
+//
+//        List<WebElement> elements = driver.findElements(SPECIFIER);
+//
+//        if (!elements.isEmpty()) {
+//            String trace = elements.get(0).getText();
+//
+//            if (trace.contains("<j:forEach> java.util.ConcurrentModificationException")) {
+//                // Do not report JENKINS-22553 as it is recoverable and fails dozens of tests
+//                return;
+//            }
+//
+//            throw new AssertionError("Jenkins error detected:\n" + trace);
+//        }
     }
 }
