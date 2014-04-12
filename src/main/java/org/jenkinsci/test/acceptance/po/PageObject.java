@@ -45,6 +45,10 @@ public abstract class PageObject extends CapybaraPortingLayer {
         return RND.next();
     }
 
+    public Jenkins getJenkins() {
+        return injector.getInstance(Jenkins.class);
+    }
+
     /**
      * Visits the top page of this object.
      */

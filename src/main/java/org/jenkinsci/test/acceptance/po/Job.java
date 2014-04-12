@@ -240,4 +240,11 @@ public class Job extends ContainerPageObject {
             n=j.slaves.get(DumbSlave.class, nodeName);
         n.getBuildHistory().shouldInclude(this.name);
     }
+
+    public void wipeOutWorkspace() {
+        open();
+        clickLink("Workspace");
+        clickLink("Wipe Out Current Workspace");
+        driver.switchTo().alert().accept();
+    }
 }

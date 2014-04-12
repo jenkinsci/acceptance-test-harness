@@ -1,5 +1,7 @@
 package org.jenkinsci.test.acceptance;
 
+import java.util.regex.Pattern;
+
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
@@ -8,8 +10,6 @@ import org.jenkinsci.test.acceptance.po.PageObject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
-
-import java.util.regex.Pattern;
 
 /**
  * Hamcrest matchers.
@@ -21,15 +21,19 @@ public class Matchers {
      * Asserts that given text is shown on page.
      */
     public static Matcher<WebDriver> hasContent(final String content) {
+        return hasContent(Pattern.compile(Pattern.quote(content)));
+    }
+
+    public static Matcher<WebDriver> hasContent(final Pattern pattern) {
       return new TypeSafeMatcher<WebDriver>() {
           @Override
           protected boolean matchesSafely(WebDriver item) {
-              return pageText(item).contains(content);
+              return pattern.matcher(pageText(item)).find();
           }
 
           @Override
           public void describeTo(Description description) {
-              description.appendText("Text containing "+content);
+              description.appendText("Text matching " + pattern);
           }
 
           @Override
@@ -99,7 +103,7 @@ public class Matchers {
                 d.appendValue(po.url).appendText(" does not have action: ").appendValue(displayName);
             }
         };
-    } 
+    }
     public static Matcher<String> containsRegexp(String regexp) {
         return containsRegexp(regexp,0);
     }
