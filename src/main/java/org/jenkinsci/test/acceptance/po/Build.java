@@ -1,9 +1,7 @@
 package org.jenkinsci.test.acceptance.po;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import org.apache.commons.io.IOUtils;
-import org.jenkinsci.test.acceptance.Matchers;
-import org.openqa.selenium.WebElement;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -12,7 +10,13 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 
-import static org.hamcrest.CoreMatchers.*;
+import org.apache.commons.io.IOUtils;
+import org.hamcrest.Description;
+import org.hamcrest.TypeSafeMatcher;
+import org.jenkinsci.test.acceptance.Matchers;
+import org.openqa.selenium.WebElement;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -54,6 +58,7 @@ public class Build extends ContainerPageObject {
 
     public Build waitUntilStarted() {
         waitForCond(new Callable<Boolean>() {
+            @Override
             public Boolean call() {
                 return hasStarted();
             }
@@ -86,6 +91,7 @@ public class Build extends ContainerPageObject {
         visit("console");
 
         waitForCond(new Callable<Boolean>() {
+            @Override
             public Boolean call() {
                 return !isInProgress();
             }
@@ -146,20 +152,36 @@ public class Build extends ContainerPageObject {
     }
 
     public Build shouldSucceed() {
-        String r = getResult();
-        if (!r.equals("SUCCESS"))
-            fail("Expected successful build but it was "+r+". Console output: " + getConsole());
+        assertThat(this, resultIs("SUCCESS"));
         return this;
     }
 
     public Build shouldFail() {
-        assertThat(getResult(), is("FAILURE"));
+        assertThat(this, resultIs("FAILURE"));
         return this;
     }
 
     public Build shouldAbort() {
-        assertThat(getResult(), is("ABORTED"));
+        assertThat(this, resultIs("ABORTED"));
         return this;
+    }
+
+    private TypeSafeMatcher<Build> resultIs(final String expected) {
+        return new TypeSafeMatcher<Build>() {
+            @Override public void describeTo(Description dsc) {
+                dsc.appendText("Build result " + expected);
+            }
+
+            @Override protected boolean matchesSafely(Build item) {
+                return item.getResult().equals(expected);
+            }
+
+            @Override protected void describeMismatchSafely(Build item, Description dsc) {
+                dsc.appendText("was ").appendText(item.getResult())
+                        .appendText(". Console output:\n").appendText(getConsole())
+                ;
+            }
+        };
     }
 
     public String getNode() {
