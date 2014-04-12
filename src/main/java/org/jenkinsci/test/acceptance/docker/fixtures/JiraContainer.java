@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.docker.fixtures;
 
 import hudson.plugins.jira.soap.JiraSoapService;
+import hudson.plugins.jira.soap.RemoteComment;
 import hudson.plugins.jira.soap.RemoteIssue;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.jira.JIRA;
@@ -13,9 +14,11 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.Callable;
 
-import static org.jenkinsci.test.acceptance.po.PageObject.createRandomName;
+import static org.jenkinsci.test.acceptance.po.PageObject.*;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -86,5 +89,18 @@ public class JiraContainer extends DockerContainer {
             svc = JIRA.connect(getURL());
             token = svc.login("admin", "admin");
         }
+    }
+
+    public List<RemoteComment> getComments(String ticket) throws IOException, ServiceException {
+        connect();
+        return Arrays.asList(svc.getComments(token, ticket));
+    }
+
+    public JiraSoapService getSvc() {
+        return svc;
+    }
+
+    public String getToken() {
+        return token;
     }
 }

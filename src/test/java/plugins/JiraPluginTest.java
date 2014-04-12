@@ -1,10 +1,20 @@
 package plugins;
 
 import com.google.inject.Inject;
+import hudson.plugins.jira.soap.RemoteComment;
 import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.docker.fixtures.JiraContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Native;
+import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.plugins.git.GitRepo;
+import org.jenkinsci.test.acceptance.plugins.git.GitScm;
+import org.jenkinsci.test.acceptance.plugins.jira.JiraGlobalConfig;
+import org.jenkinsci.test.acceptance.plugins.jira.JiraUpdater;
+import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -13,9 +23,22 @@ import org.junit.Test;
    As a Jenkins developer
    I want JIRA issues to be updated when a new build is made
  */
+@WithPlugins({"jira","git"})
 public class JiraPluginTest extends AbstractJUnitTest {
     @Inject
     Docker docker;
+
+    GitRepo git;
+
+    @Before
+    public void setUp() throws Exception {
+        git = new GitRepo();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        git.close();
+    }
 
     /**
      @native(docker)
@@ -56,6 +79,36 @@ public class JiraPluginTest extends AbstractJUnitTest {
         jira.createProject("ABC");
         jira.createIssue("ABC");
         jira.createIssue("ABC");
+
+        jenkins.configure(); {
+            new JiraGlobalConfig(jenkins).addSite(jira.getURL(), "admin", "admin");
+        }
+        jenkins.save();
+
+        FreeStyleJob job = jenkins.jobs.create();
+        job.configure(); {
+            job.useScm(GitScm.class).url(git.dir.toString());
+            job.addPublisher(JiraUpdater.class);
+        }
+        job.save();
+
+        git.commit("initial commit");
+        job.queueBuild().shouldSucceed();
+
+        git.commit("[ABC-1] fixed");
+        git.commit("[ABC-2] fixed");
+        Build b = job.queueBuild().shouldSucceed();
+
+        b.open();
+        find(by.link("ABC-1"));
+        find(by.link("ABC-2"));
+
+        String buildUrl = job.build(b.getNumber()).url.toString();
+        for (RemoteComment c : jira.getComments("ABC-1")) {
+            if (c.getBody().contains(buildUrl))
+                return;
+        }
+        fail("Comment back to Jenkins not found");
     }
 
 }
