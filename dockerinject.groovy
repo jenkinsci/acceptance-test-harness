@@ -2,9 +2,14 @@ import org.jenkinsci.test.acceptance.docker.Docker
 
 import static junit.framework.TestCase.fail
 
-//docker = "docker.io"
-//bind Docker named "docker" to "docker.io"
 
+/*
+##################################################################
+### If you want to use this groovy guice injection script,     ###
+### then define a System Environment Variable called "CONFIG", ###
+### with the path to this file as the argument!                ###
+##################################################################
+ */
 
 String os = System.getProperty("os.name").toLowerCase();
 String version = System.getProperty("os.version").toLowerCase();
@@ -19,13 +24,25 @@ String version = System.getProperty("os.version").toLowerCase();
 // Fallback if lsb_release is not available
 File issue = new File("/etc/issue");
 
+/**
+ * sets the named docker variable for Guice to "docker"
+ */
 private def dockerCmd(){
     docker = "docker"
 }
 
+/**
+ * sets the named docker variable for Guice to "docker.io"
+ */
 private def dockerDotIoCmd(){
     docker = "docker.io"
 }
+
+/**
+ * Use the lsb_release command to figure out the distribution you are using.
+ *
+ * @return StringBuffer Array with first index is Standard Output and second index is Standard ERROR
+ */
 private def StringBuffer[] getLSB_release(){
     def sout = new StringBuffer(), serr = new StringBuffer()
     def proc = 'lsb_release -a'.execute()
@@ -37,7 +54,11 @@ private def StringBuffer[] getLSB_release(){
     stdOutNErr[1] = serr
     return stdOutNErr
 }
-
+/**
+ * Use the /etc/issue file to figure out the distribution you are using.
+ *
+ * @return StringBuffer Array with first index is Standard Output and second index is Standard ERROR
+ */
 private def StringBuffer[] getUname(){
     def sout = new StringBuffer(), serr = new StringBuffer()
     def proc = 'uname -a'.execute()
@@ -50,8 +71,39 @@ private def StringBuffer[] getUname(){
     return stdOutNErr
 }
 
+/**
+ * Use this Funtions to handle MAC specific injection stuff for Guice
+ */
 private def macInjectStuff(){
     // add special mac stuff if needed
+}
+
+/**
+ * This function tries to figure out what distribution you are running if you feed it with a all lower case string
+ * that you gather via command or by reading a file
+ *
+ * @param toCheck String that should be all lower case and that gets checked
+ * @return true if we were successful, false if we failed
+ */
+private def Boolean linuxDistributionStuff(String toCheck){
+    Boolean boolFlag = false
+
+    if (toCheck.indexOf("solydxk") >= 0 ||
+            toCheck.indexOf("arch linux") >= 0 ||
+            toCheck.indexOf("ubuntu") >= 0 ||
+            toCheck.indexOf("fedora") >= 0 ||
+            toCheck.indexOf("opensuse") >= 0
+    ) {
+        dockerCmd()
+        boolFlag = true
+    } else if(toCheck.indexOf("debian") >=0 ){
+        dockerDotIoCmd()
+        boolFlag = true
+    } else {
+        boolFlag = false
+    }
+
+    return boolFlag
 }
 
 //MAC
@@ -70,38 +122,20 @@ if ( os.indexOf("mac") >= 0) {
     stdErr = outErrStrings[1]
     if (!stdOut.empty) {
         String lowerCaseStdOut = stdOut.toLowerCase()
-        if (lowerCaseStdOut.indexOf("solydxk") >= 0 ||
-                lowerCaseStdOut.indexOf("arch linux") >= 0 ||
-                lowerCaseStdOut.indexOf("ubuntu") >= 0 ||
-                lowerCaseStdOut.indexOf("fedora") >= 0 ||
-                lowerCaseStdOut.indexOf("opensuse") >= 0
-        ) {
-            dockerCmd()
-        } else if(lowerCaseStdOut.indexOf("debian") >=0 ){
-            dockerDotIoCmd()
-        } else {
+        Boolean success = linuxDistributionStuff(lowerCaseStdOut)
+        if (!success){
             fail("Sry, you seem to be running Linux, the lsb_release command returned this:" +
                     stdOut + "but your distribution is not known to us! Don't know what to inject!")
         }
-    // backup if lsb_release is not available by default centOS, redhat, arch linux, ...
+        // backup if lsb_release is not available by default centOS, redhat, arch linux, ...
     } else if (issue.exists()) {
         String content = "";
         issue.eachLine { line ->
             //println line //Debugging
             content = content + line.toLowerCase()
         }
-
-        if (content.indexOf("solydxk") >= 0 ||
-                content.indexOf("arch linux") >= 0 ||
-                content.indexOf("ubuntu") >= 0 ||
-                content.indexOf("fedora") >= 0 ||
-                content.indexOf("opensuse") >= 0){
-            dockerCmd()
-        //Debian Stable
-        }else if (content.indexOf("debian") >=0 ){
-            dockerDotIoCmd()
-        //default
-        }else{
+        Boolean success = linuxDistributionStuff(content)
+        if (!success){
             fail("Sry, you seem to be running Linux but your distribution is not known!" +
                     " Don't know what to inject!")
         }
