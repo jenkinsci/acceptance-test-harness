@@ -44,7 +44,7 @@ public class JiraContainer extends DockerContainer {
                     return null;
                 }
             }
-        });
+        },120);
     }
 
     /**
@@ -73,6 +73,7 @@ public class JiraContainer extends DockerContainer {
         issue.setProject(key);
         issue.setSummary(summary);
         issue.setDescription(description);
+        issue.setType("1");
         svc.createIssue(token, issue);
     }
 
