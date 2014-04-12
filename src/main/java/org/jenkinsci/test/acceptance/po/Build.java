@@ -1,7 +1,11 @@
 package org.jenkinsci.test.acceptance.po;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
+import com.fasterxml.jackson.databind.JsonNode;
+import org.apache.commons.io.IOUtils;
+import org.hamcrest.Description;
+import org.hamcrest.TypeSafeMatcher;
+import org.jenkinsci.test.acceptance.Matchers;
+import org.openqa.selenium.WebElement;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -10,13 +14,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 
-import org.apache.commons.io.IOUtils;
-import org.hamcrest.Description;
-import org.hamcrest.TypeSafeMatcher;
-import org.jenkinsci.test.acceptance.Matchers;
-import org.openqa.selenium.WebElement;
-
-import com.fasterxml.jackson.databind.JsonNode;
+import static org.hamcrest.CoreMatchers.*;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -105,6 +103,10 @@ public class Build extends ContainerPageObject {
 
         JsonNode d = getJson();
         return d.get("building").booleanValue() || d.get("result")==null;
+    }
+
+    public int getNumber() {
+        return getJson().get("number").asInt();
     }
 
     public URL getConsoleUrl() {
