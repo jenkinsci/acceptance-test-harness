@@ -35,6 +35,18 @@ public class Docker {
 
     private static List<String> dockerCmd;// = Arrays.asList("docker");
 
+    /**
+     * Injecting a portOffset will force the binding of dockerPorts to local Ports with an offset
+     * (e.g. bind docker 22 to localhost port 40022,
+     */
+    @Inject(optional=true)
+    @Named("dockerPortOffset")
+    private static int portOffset= 0;
+
+    public int getPortOffset()
+    {
+        return portOffset;
+    }
 
     @Inject(optional=true)
     public ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
@@ -112,7 +124,7 @@ public class Docker {
      */
     public <T extends DockerContainer> T start(Class<T> fixture, CommandBuilder options, CommandBuilder cmd) {
         try {
-            return build(fixture).start(fixture, options, cmd);
+            return build(fixture).start(fixture, options, cmd,portOffset);
         } catch (InterruptedException|IOException e) {
             throw new AssertionError("Failed to start container "+fixture, e);
         }

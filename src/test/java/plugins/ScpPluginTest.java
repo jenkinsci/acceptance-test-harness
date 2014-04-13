@@ -48,10 +48,10 @@ public class ScpPluginTest extends AbstractJUnitTest {
         Resource pmd_xml = resource("/pmd_plugin/pmd.xml");
 
         FreeStyleJob j = jenkins.jobs.create();
-
+        
         jenkins.configure();
         Site s = new ScpGlobalConfig(jenkins).addSite(); {
-            s.hostname.set("localhost");
+            s.hostname.set("127.0.0.5");
             s.port.set(sshd.port(22));
             s.username.set("test");
             s.password.set("test");
