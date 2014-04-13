@@ -29,7 +29,7 @@ public class DockerImage {
     public <T extends DockerContainer> T start(Class<T> type, int[] ports, CommandBuilder options, CommandBuilder cmd) throws InterruptedException, IOException {
         CommandBuilder docker = Docker.cmd("run");
         for (int p : ports) {
-            docker.add("-p","127.0.0.1::"+p);
+            docker.add("-p","127.0.0.1::"+p); //Guice ??
         }
 
         File cid = File.createTempFile("docker", "cid");
