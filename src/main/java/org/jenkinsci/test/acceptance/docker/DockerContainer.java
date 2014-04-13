@@ -63,7 +63,7 @@ public class DockerContainer implements Closeable {
     }
 
     /**
-     * Finds the ephemeral ip that the given container port is bound to.
+     * Finds the ephemeral ip that the given container port is bind to.
      */
     public String ipBound(int n) {
         try {
