@@ -78,7 +78,7 @@ public class CapybaraPortingLayer extends Assert {
      */
     public WebElement waitFor(final By selector) {
         return waitForCond(new Callable<WebElement>() {
-            public WebElement call() {
+            @Override public WebElement call() {
                 try {
                     return find(selector);
                 } catch (NoSuchElementException e) {
@@ -131,11 +131,11 @@ public class CapybaraPortingLayer extends Assert {
         try {
             for (int i=0; i<10; i++) {
                 WebElement e = driver.findElement(selector);
-                if (e.isDisplayed())
+                if (isDisplayed(e))
                     return e;
 
                 for (WebElement f : driver.findElements(selector)) {
-                    if (f.isDisplayed())
+                    if (isDisplayed(f))
                         return f;
                 }
 
@@ -147,6 +147,17 @@ public class CapybaraPortingLayer extends Assert {
         } catch (NoSuchElementException x) {
             // this is often the best place to set a breakpoint
             throw new NoSuchElementException("Unable to locate "+selector+" in "+driver.getCurrentUrl(),x);
+        }
+    }
+
+    /**
+     * Consider stale elements not displayed.
+     */
+    private boolean isDisplayed(WebElement e) {
+        try {
+            return e.isDisplayed();
+        } catch (StaleElementReferenceException _) {
+            return false;
         }
     }
 
