@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectCodeStyleSettingsManager">
+    <option name="PER_PROJECT_SETTINGS">
+      <value>
+        <option name="GENERATE_FINAL_PARAMETERS" value="true"/>
+        <option name="INSERT_INNER_CLASS_IMPORTS" value="true"/>
+        <option name="NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND" value="1"/>
+        <option name="PACKAGES_TO_USE_IMPORT_ON_DEMAND">
+          <value>
+            <package name="org.mockito.Mockito" withSubpackages="false" static="true"/>
+            <package name="org.mockito.Matchers" withSubpackages="false" static="true"/>
+            <package name="org.junit.Assert" withSubpackages="false" static="true"/>
+            <package name="javax.swing" withSubpackages="false" static="false"/>
+          </value>
+        </option>
+        <option name="IMPORT_LAYOUT_TABLE">
+          <value>
+            <package name="javax" withSubpackages="true" static="false"/>
+            <package name="java" withSubpackages="true" static="false"/>
+            <emptyLine/>
+            <package name="org" withSubpackages="true" static="false"/>
+            <emptyLine/>
+            <package name="com" withSubpackages="true" static="false"/>
+            <emptyLine/>
+            <package name="" withSubpackages="true" static="false"/>
+            <package name="" withSubpackages="true" static="true"/>
+            <emptyLine/>
+            <package name="hudson" withSubpackages="true" static="false"/>
+          </value>
+        </option>
+        <option name="JD_DO_NOT_WRAP_ONE_LINE_COMMENTS" value="true"/>
+        <option name="WRAP_COMMENTS" value="true"/>
+        <XML>
+          <option name="XML_LEGACY_SETTINGS_IMPORTED" value="true"/>
+        </XML>
+        <codeStyleSettings language="JAVA">
+          <option name="ELSE_ON_NEW_LINE" value="true"/>
+          <option name="CATCH_ON_NEW_LINE" value="true"/>
+          <option name="FINALLY_ON_NEW_LINE" value="true"/>
+          <option name="IF_BRACE_FORCE" value="3"/>
+          <option name="DOWHILE_BRACE_FORCE" value="3"/>
+          <option name="WHILE_BRACE_FORCE" value="3"/>
+          <option name="FOR_BRACE_FORCE" value="3"/>
+        </codeStyleSettings>
+        <codeStyleSettings language="XML">
+          <indentOptions>
+            <option name="INDENT_SIZE" value="2"/>
+            <option name="CONTINUATION_INDENT_SIZE" value="4"/>
+            <option name="TAB_SIZE" value="2"/>
+          </indentOptions>
+        </codeStyleSettings>
+      </value>
+    </option>
+    <option name="USE_PER_PROJECT_SETTINGS" value="true"/>
+  </component>
+</project>
+
