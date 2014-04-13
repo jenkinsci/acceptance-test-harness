@@ -78,7 +78,7 @@ public class DiskUsagePluginTest extends AbstractJUnitTest {
 
         assertReports(job, "Workspace [1-9]\\d*,");
 
-        job.wipeOutWorkspace();
+        job.getWorkspace().wipeOut();
         du.reload();
 
         assertReports(job, "Workspace 0,");

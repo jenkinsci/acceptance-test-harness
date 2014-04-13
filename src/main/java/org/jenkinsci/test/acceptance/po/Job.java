@@ -1,7 +1,9 @@
 package org.jenkinsci.test.acceptance.po;
 
 import com.google.inject.Injector;
+
 import cucumber.api.DataTable;
+
 import org.apache.commons.io.IOUtils;
 import org.codehaus.plexus.util.Base64;
 import org.jenkinsci.test.acceptance.junit.Resource;
@@ -209,6 +211,10 @@ public class Job extends ContainerPageObject {
         return getJson().get("nextBuildNumber").intValue();
     }
 
+    public Workspace getWorkspace() {
+        return new Workspace(this);
+    }
+
     public void useCustomWorkspace(String ws) {
         ensureConfigPage();
         clickButton("Advanced...");
@@ -239,12 +245,5 @@ public class Job extends ContainerPageObject {
         else
             n=j.slaves.get(DumbSlave.class, nodeName);
         n.getBuildHistory().shouldInclude(this.name);
-    }
-
-    public void wipeOutWorkspace() {
-        open();
-        clickLink("Workspace");
-        clickLink("Wipe Out Current Workspace");
-        driver.switchTo().alert().accept();
     }
 }
