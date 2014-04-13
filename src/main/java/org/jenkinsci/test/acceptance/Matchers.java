@@ -3,8 +3,6 @@ package org.jenkinsci.test.acceptance;
 import java.util.regex.Pattern;
 
 import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-import org.hamcrest.TypeSafeMatcher;
 import org.jenkinsci.test.acceptance.po.ContainerPageObject;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.openqa.selenium.By;
@@ -25,15 +23,10 @@ public class Matchers {
     }
 
     public static Matcher<WebDriver> hasContent(final Pattern pattern) {
-      return new TypeSafeMatcher<WebDriver>() {
+      return new Matcher<WebDriver>("Text matching %s", pattern) {
           @Override
           protected boolean matchesSafely(WebDriver item) {
               return pattern.matcher(pageText(item)).find();
-          }
-
-          @Override
-          public void describeTo(Description description) {
-              description.appendText("Text matching " + pattern);
           }
 
           @Override
@@ -54,7 +47,7 @@ public class Matchers {
      * Matches that matches {@link WebDriver} when it has an element that matches to the given selector.
      */
     public static Matcher<WebDriver> hasElement(final By selector) {
-        return new TypeSafeMatcher<WebDriver>() {
+        return new Matcher<WebDriver>("contains element that matches %s", selector) {
             @Override
             protected boolean matchesSafely(WebDriver item) {
                 try {
@@ -63,11 +56,6 @@ public class Matchers {
                 } catch (NoSuchElementException _) {
                     return false;
                 }
-            }
-
-            @Override
-            public void describeTo(Description d) {
-                d.appendText("contains element that matches ").appendValue(selector);
             }
 
             @Override
@@ -81,7 +69,7 @@ public class Matchers {
      * For asserting that a {@link PageObject}'s top page has an action of the given name.
      */
     public static Matcher<PageObject> hasAction(final String displayName) {
-        return new TypeSafeMatcher<PageObject>() {
+        return new Matcher<PageObject>("contains action titled %s", displayName) {
             @Override
             protected boolean matchesSafely(PageObject po) {
                 try {
@@ -91,11 +79,6 @@ public class Matchers {
                 } catch (NoSuchElementException _) {
                     return false;
                 }
-            }
-
-            @Override
-            public void describeTo(Description d) {
-                d.appendText("contains action titled ").appendValue(displayName);
             }
 
             @Override
@@ -114,25 +97,16 @@ public class Matchers {
     public static Matcher<String> containsRegexp(final String regexp, int opts) {
         final Pattern re = Pattern.compile(regexp, opts);
 
-        return new TypeSafeMatcher<String>() {
+        return new Matcher<String>("Matches regexp %s", regexp) {
             @Override
             protected boolean matchesSafely(String item) {
                 return re.matcher(item).find();
-            }
-
-            @Override
-            public void describeTo(Description description) {
-                description.appendText("Matches regexp "+regexp);
             }
         };
     }
 
     public static Matcher<ContainerPageObject> pageObjectExists(){
-        return new TypeSafeMatcher<ContainerPageObject>() {
-            @Override public void describeTo(Description description) {
-                description.appendText("Page object exists");
-            }
-
+        return new Matcher<ContainerPageObject>("Page object exists") {
             @Override
             protected void describeMismatchSafely(ContainerPageObject item, Description desc) {
                 desc.appendText(item.url.toString()).appendText(" does not exist");

@@ -27,7 +27,7 @@ import java.net.URL;
 import java.util.regex.Pattern;
 
 import org.hamcrest.Description;
-import org.hamcrest.TypeSafeMatcher;
+import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.po.JenkinsLogger;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.jenkinsci.test.acceptance.po.PluginPageObject;
@@ -54,14 +54,9 @@ public class DiskUsage extends PageObject {
         }
     }
 
-    public static TypeSafeMatcher<DiskUsage> reloaded() {
-        return new TypeSafeMatcher<DiskUsage>() {
+    public static Matcher<DiskUsage> reloaded() {
+        return new Matcher<DiskUsage>("disk usage reloaded") {
             private Exception cause;
-
-            @Override public void describeTo(Description description) {
-                description.appendText("disk usage reloaded");
-            }
-
             @Override protected boolean matchesSafely(DiskUsage item) {
                 JenkinsLogger logger = item.getJenkins().getLogger("all");
                 try {

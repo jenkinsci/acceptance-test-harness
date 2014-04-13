@@ -34,9 +34,13 @@ public class Artifact extends PageObject {
      * Asserts that this artifact should or shouldn't exist.
      */
     public void assertThatExists(Should should) {
+        assertThatExists(should.value);
+    }
+
+    public void assertThatExists(Boolean should) {
         try {
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
-            assertThat(con.getResponseCode(), is(should.value ? 200 : 404));
+            assertThat(con.getResponseCode(), is(should ? 200 : 404));
         } catch (IOException e) {
             throw new AssertionError("Failed to check status of "+url,e);
         }

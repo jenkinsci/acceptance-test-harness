@@ -1,9 +1,10 @@
 package org.jenkinsci.test.acceptance.po;
 
 import com.fasterxml.jackson.databind.JsonNode;
+
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.Description;
-import org.hamcrest.TypeSafeMatcher;
+import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.Matchers;
 import org.openqa.selenium.WebElement;
 
@@ -168,12 +169,8 @@ public class Build extends ContainerPageObject {
         return this;
     }
 
-    private TypeSafeMatcher<Build> resultIs(final String expected) {
-        return new TypeSafeMatcher<Build>() {
-            @Override public void describeTo(Description dsc) {
-                dsc.appendText("Build result " + expected);
-            }
-
+    private Matcher<Build> resultIs(final String expected) {
+        return new Matcher<Build>("Build result %s", expected) {
             @Override protected boolean matchesSafely(Build item) {
                 return item.getResult().equals(expected);
             }
