@@ -1,11 +1,13 @@
 package org.jenkinsci.test.acceptance.po;
 
 import com.google.inject.Injector;
+
 import org.jenkinsci.test.acceptance.ByFactory;
 import org.junit.Assert;
 import org.openqa.selenium.*;
 
 import javax.inject.Inject;
+
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.util.List;
@@ -285,5 +287,35 @@ public class CapybaraPortingLayer extends Assert {
         } catch (ReflectiveOperationException e) {
             throw new AssertionError("Failed to invoke a constructor of "+type, e);
         }
+    }
+
+    protected <T> T findCaption(Class<?> type, Finder<T> call) {
+        String[] captions = type.getAnnotation(Describable.class).value();
+
+        RuntimeException cause = new NoSuchElementException("None of the captions exists");
+        for (String caption: captions) {
+            try {
+                T out = call.find(caption);
+                if (out != null) return out;
+            } catch (RuntimeException ex) {
+                cause = ex;
+            }
+        }
+
+        throw cause;
+    }
+
+    protected abstract class Finder<R> {
+        protected final CapybaraPortingLayer outer = CapybaraPortingLayer.this;
+        protected abstract R find(String caption);
+    }
+
+    protected abstract class Resolver extends Finder<Object> {
+        @Override protected final Object find(String caption) {
+            resolve(caption);
+            return this;
+        }
+
+        protected abstract void resolve(String caption);
     }
 }

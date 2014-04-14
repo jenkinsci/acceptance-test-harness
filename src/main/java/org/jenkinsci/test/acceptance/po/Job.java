@@ -52,9 +52,12 @@ public class Job extends ContainerPageObject {
     public <T extends Scm> T useScm(Class<T> type) {
         ensureConfigPage();
 
-        String caption = type.getAnnotation(Describable.class).value();
+        WebElement radio = findCaption(type, new Finder<WebElement>() {
+            @Override protected WebElement find(String caption) {
+                return outer.find(by.radioButton(caption));
+            }
+        });
 
-        WebElement radio = find(by.radioButton(caption));
         check(radio);
 
         return newInstance(type, this, radio.getAttribute("path"));
@@ -75,12 +78,16 @@ public class Job extends ContainerPageObject {
     private <T extends Step> T addStep(Class<T> type, String section) {
         ensureConfigPage();
 
-        String caption = type.getAnnotation(Describable.class).value();
+        final WebElement dropDown = find(by.path("/hetero-list-add[%s]",section));
+        findCaption(type, new Resolver() {
+            @Override protected void resolve(String caption) {
+                selectDropdownMenu(caption, dropDown);
+            }
+        });
 
-        selectDropdownMenu(caption, find(by.path("/hetero-list-add[%s]",section)));
         String path = last(by.xpath("//div[@name='%s']", section)).getAttribute("path");
 
-        return newInstance(type, this,path);
+        return newInstance(type, this, path);
     }
 
     public ShellBuildStep addShellStep(Resource res) {
@@ -187,10 +194,15 @@ public class Job extends ContainerPageObject {
     public <T extends Parameter> T addParameter(Class<T> type) {
         ensureConfigPage();
 
-        String displayName = type.getAnnotation(Describable.class).value();
-
         check(find(by.xpath("//input[@name='parameterized']")));
-        selectDropdownMenu(displayName, find(by.xpath("//button[text()='Add Parameter']")));
+
+        final WebElement dropDown = find(by.xpath("//button[text()='Add Parameter']"));
+        findCaption(type, new Resolver() {
+            @Override protected void resolve(String caption) {
+                selectDropdownMenu(caption, dropDown);
+            }
+        });
+
 //        find(xpath("//button[text()='Add Parameter']")).click();
 //        find(xpath("//a[text()='%s']",displayName)).click();
 
