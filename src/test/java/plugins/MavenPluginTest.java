@@ -28,6 +28,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation.*;
 import static org.hamcrest.CoreMatchers.*;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
@@ -50,7 +51,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
 
     @Test
     public void autoinstall_maven_for_freestyle_job() {
-        installMaven("maven_3.0.4", "3.0.4");
+        installMaven(jenkins, "maven_3.0.4", "3.0.4");
 
         FreeStyleJob job = jenkins.jobs.create();
         job.configure();
@@ -67,7 +68,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
 
     @Test
     public void autoinstall_maven2_for_freestyle_job() {
-        installMaven("maven_2.2.1", "2.2.1");
+        installMaven(jenkins, "maven_2.2.1", "2.2.1");
 
         FreeStyleJob job = jenkins.jobs.create();
         job.configure();
@@ -113,7 +114,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
 
     @Test
     public void use_local_maven_repo() {
-        installSomeMaven();
+        installSomeMaven(jenkins);
 
         FreeStyleJob job = jenkins.jobs.create();
         job.configure();
@@ -127,7 +128,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
 
     @Test
     public void set_maven_options() {
-        installSomeMaven();
+        installSomeMaven(jenkins);
 
         MavenModuleSet job = jenkins.jobs.create(MavenModuleSet.class);
         job.configure();
@@ -141,7 +142,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
 
     @Test
     public void set_global_maven_options() {
-        installSomeMaven();
+        installSomeMaven(jenkins);
 
         jenkins.configure();
         new MavenProjectConfig(jenkins.getConfigPage()).opts.set("-verbose");;
@@ -158,7 +159,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
 
     @Test @Bug("JENKINS-10539") @Since("1.527")
     public void preserve_backslash_in_property() {
-        installSomeMaven();
+        installSomeMaven(jenkins);
 
         FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class);
         job.configure();
@@ -181,7 +182,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
 
     @Test
     public void build_multimodule() {
-        installSomeMaven();
+        installSomeMaven(jenkins);
 
         MavenModuleSet job = jenkins.jobs.create(MavenModuleSet.class);
         job.configure();
@@ -213,17 +214,5 @@ public class MavenPluginTest extends AbstractJUnitTest {
         build.open();
         find(by.xpath("//a[@href='%s/']", name)).click();
         assertThat(driver.getCurrentUrl(), equalTo(build.module(name).url.toExternalForm()));
-    }
-
-    private void installSomeMaven() {
-        installMaven("default_maven", "3.0.5");
-    }
-
-    private void installMaven(String name, String version) {
-        jenkins.configure();
-        MavenInstallation maven = jenkins.getConfigPage().addTool(MavenInstallation.class);
-        maven.name.set(name);
-        maven.installVersion(version);
-        jenkins.save();
     }
 }
