@@ -36,8 +36,8 @@ public class SubversionPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void run_basic_subversion_build() throws IOException {
-        SvnContainer svnContainer = svn.get();
-        FreeStyleJob f = jenkins.jobs.create();
+        final SvnContainer svnContainer = svn.get();
+        final FreeStyleJob f = jenkins.jobs.create();
         f.configure();
         f.useScm(SubversionScm.class).url.set(svnContainer.getUrl());
         f.addShellStep("test -d .svn");
@@ -59,8 +59,8 @@ public class SubversionPluginTest extends AbstractJUnitTest {
     @Test
     public void checkout_specific_revision() throws IOException {
         final String revision = "0";
-        SvnContainer svnContainer = svn.get();
-        FreeStyleJob f = jenkins.jobs.create();
+        final SvnContainer svnContainer = svn.get();
+        final FreeStyleJob f = jenkins.jobs.create();
         f.configure();
         f.useScm(SubversionScm.class).url.set(svnContainer.getUrl() + "@" + revision);
         f.save();
@@ -81,12 +81,13 @@ public class SubversionPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void always_checkout_fresh_copy() throws IOException {
-        SvnContainer svnContainer = svn.get();
-        FreeStyleJob f = jenkins.jobs.create();
+        final SvnContainer svnContainer = svn.get();
+        final FreeStyleJob f = jenkins.jobs.create();
         f.configure();
-        f.useScm(SubversionScm.class).url.set(svnContainer.getUrl());
-        f.find(by.xpath("//td[@class='setting-name' and text()='%s']/../td[@class='setting-main']/select", "Check-out Strategy"))
-                .findElement(by.option("Always check out a fresh copy")).click();
+
+        final SubversionScm subversionScm = f.useScm(SubversionScm.class);
+        subversionScm.url.set(svnContainer.getUrl());
+        subversionScm.checkoutStrategy.select("Always check out a fresh copy");
         f.save();
 
         f.queueBuild().shouldSucceed();
