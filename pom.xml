@@ -29,6 +29,7 @@
     <selenium.version>2.40.0</selenium.version>
     <aether.version>0.9.0.v20140226</aether.version>
     <maven.version>3.1.0</maven.version>
+    <cucumber.options></cucumber.options>
   </properties>
 
   <repositories>
@@ -292,6 +293,21 @@
         </configuration>
       </plugin>
       <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.17</version>
+        <configuration>
+          <includes>
+            <include>**/CucumberTests.java</include>
+            <include>**/Test*.java</include>
+            <include>**/*Test.java</include>
+            <include>**/*TestCase.java</include>
+          </includes>
+          <systemPropertyVariables>
+            <cucumber.options>${cucumber.options}</cucumber.options>
+          </systemPropertyVariables>
+        </configuration>
+      </plugin>
+      <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>appassembler-maven-plugin</artifactId>
         <version>1.8</version>
@@ -312,65 +328,24 @@
           </programs>
         </configuration>
       </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>1.2.1</version>
-        <executions>
-          <execution>
-            <id>cucumber</id>
-            <phase>test</phase>
-            <goals>
-              <goal>java</goal>
-            </goals>
-            <configuration>
-              <mainClass>org.jenkinsci.test.acceptance.cucumber.Main</mainClass>
-              <arguments>
-                <argument>--format</argument>
-                <argument>junit:target/cucumber.xml</argument>
-                <argument>--format</argument>
-                <argument>pretty</argument>
-                <argument>--format</argument>
-                <argument>html:target/cucumber-html-report</argument>
-                <argument>--tags</argument>
-                <argument>~@wip</argument>
-                <argument>${project.basedir}/features</argument>
-              </arguments>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
   </build>
 
   <profiles>
     <profile>
-      <id>skipTests-property</id>
+      <id>cucumber.test</id>
       <activation>
         <property>
-          <name>skipTests</name>
+          <name>cucumber.test</name>
         </property>
       </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>exec-maven-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>cucumber</id>
-                <configuration>
-                  <skip>${skipTests}</skip>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
+      <properties>
+        <test>CucumberTests</test>
+        <cucumber.options>${cucumber.test}</cucumber.options>
+      </properties>
     </profile>
-
     <profile>
-      <id>skipCucumberTests-property</id>
+      <id>skipCucumberTests</id>
       <activation>
         <property>
           <name>skipCucumberTests</name>
@@ -379,79 +354,12 @@
       <build>
         <plugins>
           <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>exec-maven-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>cucumber</id>
-                <configuration>
-                  <skip>${skipCucumberTests}</skip>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-
-    <profile>
-      <id>test-property</id>
-      <activation>
-        <property>
-          <name>test</name>
-        </property>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>exec-maven-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>cucumber</id>
-                <configuration>
-                  <skip>true</skip>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-
-    <profile>
-      <id>cucumber.test-property</id>
-      <activation>
-        <property>
-          <name>cucumber.test</name>
-        </property>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-plugin</artifactId>
             <configuration>
-              <skipTests>true</skipTests>
+              <excludes>
+                <exclude>**/CucumberTests.java</exclude>
+              </excludes>
             </configuration>
-          </plugin>
-          <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>exec-maven-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>cucumber</id>
-                <configuration>
-                  <skip>false</skip>
-                  <systemProperties>
-                    <systemProperty>
-                      <key>test</key>
-                      <value>${cucumber.test}</value>
-                    </systemProperty>
-                  </systemProperties>
-                </configuration>
-              </execution>
-            </executions>
           </plugin>
         </plugins>
       </build>
