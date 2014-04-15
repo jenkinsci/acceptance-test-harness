@@ -6,6 +6,7 @@ import org.jenkinsci.test.acceptance.docker.fixtures.SvnContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Native;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.plugins.subversion.SubversionCredentialUserPwd;
 import org.jenkinsci.test.acceptance.plugins.subversion.SubversionScm;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
@@ -87,12 +88,30 @@ public class SubversionPluginTest extends AbstractJUnitTest {
 
         final SubversionScm subversionScm = f.useScm(SubversionScm.class);
         subversionScm.url.set(svnContainer.getUrl());
-        subversionScm.checkoutStrategy.select("Always check out a fresh copy");
+        subversionScm.checkoutStrategy.select(SubversionScm.ALWAYS_FRESH_COPY);
         f.save();
 
         f.queueBuild().shouldSucceed();
 
         f.queueBuild().shouldSucceed()
                 .shouldContainsConsoleOutput("Checking out " + svnContainer.getUrl());
+    }
+
+
+    @Test
+    public void run_basic_subversion_build_http_pwd() throws Exception {
+        final SvnContainer svnContainer = svn.get();
+        final FreeStyleJob f = jenkins.jobs.create();
+        f.configure();
+
+        final SubversionScm subversionScm = f.useScm(SubversionScm.class);
+        subversionScm.url.set(svnContainer.getUrl() + "_pwd");
+        final SubversionCredentialUserPwd credentialPage = subversionScm.getCredentialPage(SubversionCredentialUserPwd.class);
+        credentialPage.setUsername("user");
+        credentialPage.setPassword("test");
+        credentialPage.confirmDialog();
+        f.save();
+
+        f.queueBuild().shouldSucceed();
     }
 }
