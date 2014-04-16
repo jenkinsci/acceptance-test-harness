@@ -1,0 +1,24 @@
+# AUTO-GENERATED FILE - DO NOT EDIT!! Use ldapmodify.
+dn: olcDatabase={1}mdb
+objectClass: olcDatabaseConfig
+objectClass: olcMdbConfig
+olcDatabase: {1}mdb
+olcDbDirectory: /var/lib/ldap
+olcSuffix: ___sub_domain_here___
+olcAccess: {0}to attrs=userPassword,shadowLastChange by self write by anonymou
+ s auth by dn="cn=admin,___sub_domain_here___" write by * none
+olcAccess: {1}to dn.base="" by * read
+olcAccess: {2}to * by self write by dn="cn=admin,___sub_domain_here___" write by * r
+ ead
+olcLastMod: TRUE
+olcRootDN: cn=admin,___sub_domain_here___
+olcRootPW:: ___sub_root_passwd_here___
+olcDbCheckpoint: 512 30
+olcDbIndex: objectClass eq
+structuralObjectClass: olcMdbConfig
+entryUUID: 00dd0804-5042-1033-9a3f-ff1e70d71313
+creatorsName: cn=config
+createTimestamp: 20140404124009Z
+entryCSN: 20140404124009.979256Z#000000#000#000000
+modifiersName: cn=config
+modifyTimestamp: 20140404124009Z

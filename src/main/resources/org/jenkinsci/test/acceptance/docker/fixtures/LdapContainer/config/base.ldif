@@ -1,0 +1,25 @@
+dn: ___sub_domain_here___
+objectClass: top
+objectClass: dcObject
+objectClass: organization
+o: ___sub_organization_here___
+dc: ___sub_dcone_here___
+
+dn: ou=People,___sub_domain_here___
+objectClass: top
+objectClass: organizationalUnit
+ou: People
+
+dn: ou=Groups,___sub_domain_here___
+objectClass: top
+objectClass: organizationalUnit
+ou: Groups
+
+dn: ou=Applications,___sub_domain_here___
+objectClass: top
+objectClass: organizationalUnit
+ou: Applications
+
+
+
+

@@ -1,0 +1,21 @@
+# LDAP Users
+# generate passwords with slappasswd
+dn: uid=jenkins,dc=jenkins-ci,dc=org
+objectClass: inetOrgPerson
+objectClass: top
+cn: Jenkins the Butler
+sn: Jenkins
+uid: jenkins
+mail: jenkins@jenkins-ci.org
+userPassword: {SSHA}Z4cXOqwiALeW3mVd87gdBaejZjOQAJlm
+
+# peter, pw root
+dn: uid=peter,dc=jenkins-ci,dc=org
+objectClass: inetOrgPerson
+objectClass: top
+cn: Peter Lustig
+sn: Lustig
+uid: peter
+mail: peter@lustig.com
+userPassword: {SSHA}cyMRP9VIG82CXvuXzCZwpmKF4m8E/4zC
+
