@@ -1,4 +1,4 @@
-dn: ___sub_domain_here___
+dn: dc=jenkins-ci,dc=org
 objectClass: top
 objectClass: dcObject
 objectClass: organization
@@ -19,6 +19,37 @@ dn: ou=Applications,___sub_domain_here___
 objectClass: top
 objectClass: organizationalUnit
 ou: Applications
+
+# jenkins, password is root
+dn: uid=jenkins,___sub_domain_here___
+objectClass: inetOrgPerson
+objectClass: top
+cn: Jenkins the Butler
+sn: Jenkins
+uid: jenkins
+mail: jenkins@jenkins-ci.org
+userPassword: {SSHA}cyMRP9VIG82CXvuXzCZwpmKF4m8E/4zC
+
+# hudson, password is root
+dn: uid=hudson,ou=People,___sub_domain_here___
+objectClass: inetOrgPerson
+objectClass: top
+cn: Hudson Hornet
+sn: Hudson
+uid: hudson
+mail: hudson@jenkins-ci.org
+userPassword: {SSHA}cyMRP9VIG82CXvuXzCZwpmKF4m8E/4zC
+
+# homer, password is cisco
+dn: uid=homer,ou=People,___sub_domain_here___
+objectClass: inetOrgPerson
+objectClass: top
+cn: Homer Simpson
+sn: Simpson
+uid: homer
+mail: homer@springfield.com
+userPassword: {SSHA}Z4cXOqwiALeW3mVd87gdBaejZjOQAJlm
+
 
 
 

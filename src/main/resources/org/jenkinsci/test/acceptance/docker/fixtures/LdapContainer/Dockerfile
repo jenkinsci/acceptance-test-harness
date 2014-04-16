@@ -1,5 +1,8 @@
 #
-# Docker container running openLDAP (slapd)
+# Dockerfile for openLDAP (slapd)
+# Manager-DN (for bind): cn=admin,dc=jenkins-ci,dc=org
+# Manager-Password: jenkins
+# See config/base.ldif for user directory entries
 #
 FROM phusion/baseimage:0.9.8
 
@@ -23,6 +26,7 @@ ENV LDAP_ROOTPASS jenkins
 ENV LDAP_ORGANISATION Jenkins CI
 ENV LDAP_DOMAIN jenkins-ci.org
 
+# Expose ports
 EXPOSE 389 636
 
 RUN mkdir /etc/service/slapd /etc/slapd-config
@@ -30,8 +34,4 @@ RUN mkdir /etc/service/slapd /etc/slapd-config
 ADD config /etc/slapd-config
 RUN cp /etc/slapd-config/slapd.sh /etc/service/slapd/run && chmod 755 /etc/service/slapd/run && chown root:root /etc/service/slapd/run
 
-# To store the data outside the container, mount /var/lib/ldap as a data volume
-
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-# vim:ts=8:noet:

@@ -28,7 +28,6 @@ if [ ! -e /var/lib/ldap/docker_bootstrapped ]; then
      -e "s|___sub_domain_here___|${enc_domain}|g" \
      /etc/slapd-config/base.ldif
   slapadd -b ${enc_domain} -c -F /etc/ldap/slapd.d -l /etc/slapd-config/base.ldif
-  slapadd -b ${enc_domain} -c -F /etc/ldap/slapd.d -l /etc/slapd-config/users.ldif
   chown -R openldap:openldap /var/lib/ldap
   touch /var/lib/ldap/docker_bootstrapped
 else
