@@ -2,6 +2,8 @@ package org.jenkinsci.test.acceptance.po;
 
 import java.util.concurrent.Callable;
 
+import org.openqa.selenium.WebElement;
+
 /**
  * Mix-in for {@link PageObject}s that own a group of jobs, like
  * {@link Jenkins}, {@link View}, etc.
@@ -14,11 +16,15 @@ public class JobsMixIn extends MixIn {
     }
 
     public <T extends Job> T create(Class<T> type, String name) {
-        String sut_type = type.getAnnotation(Describable.class).value();
-
         visit("newJob");
         fillIn("name", name);
-        find(by.radioButton(sut_type)).click();
+
+        findCaption(type, new Finder<WebElement>() {
+            @Override protected WebElement find(String caption) {
+                return outer.find(by.radioButton(caption));
+            }
+        }).click();
+
         clickButton("OK");
 
         final T j = get(type, name);

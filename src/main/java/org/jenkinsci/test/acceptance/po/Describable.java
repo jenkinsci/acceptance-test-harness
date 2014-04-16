@@ -17,5 +17,5 @@ public @interface Describable {
     /**
      * Display name of this build step. Corresponds to {@code BuildStepDescriptor.getDisplayName()} on the server.
      */
-    String value();
+    String[] value();
 }
