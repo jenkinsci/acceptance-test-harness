@@ -1,17 +1,20 @@
 package org.jenkinsci.test.acceptance.po;
 
-import com.google.inject.Injector;
 import hudson.util.VersionNumber;
-import org.jenkinsci.test.acceptance.controller.JenkinsController;
-import org.jenkinsci.test.acceptance.guice.TestScope;
 
-import javax.inject.Inject;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.inject.Inject;
+
+import org.jenkinsci.test.acceptance.controller.JenkinsController;
+import org.jenkinsci.test.acceptance.guice.TestScope;
+
+import com.google.inject.Injector;
 
 /**
  * Top-level object that acts as an entry point to various systems.
@@ -88,6 +91,12 @@ public class Jenkins extends Node {
 
     public JenkinsLogger createLogger(String name, Map<String,Level> levels) {
         return JenkinsLogger.create(this,name,levels);
+    }
+
+    public <T extends PageObject> T getPluginPage(Class<T> type) {
+        String urlChunk = type.getAnnotation(PluginPageObject.class).value();
+
+        return newInstance(type, injector, url("plugin/%s/", urlChunk));
     }
 
     @Override

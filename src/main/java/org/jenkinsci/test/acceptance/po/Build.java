@@ -1,7 +1,10 @@
 package org.jenkinsci.test.acceptance.po;
 
 import com.fasterxml.jackson.databind.JsonNode;
+
 import org.apache.commons.io.IOUtils;
+import org.hamcrest.Description;
+import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.Matchers;
 import org.openqa.selenium.WebElement;
 
@@ -54,6 +57,7 @@ public class Build extends ContainerPageObject {
 
     public Build waitUntilStarted() {
         waitForCond(new Callable<Boolean>() {
+            @Override
             public Boolean call() {
                 return hasStarted();
             }
@@ -86,6 +90,7 @@ public class Build extends ContainerPageObject {
         visit("console");
 
         waitForCond(new Callable<Boolean>() {
+            @Override
             public Boolean call() {
                 return !isInProgress();
             }
@@ -99,6 +104,10 @@ public class Build extends ContainerPageObject {
 
         JsonNode d = getJson();
         return d.get("building").booleanValue() || d.get("result")==null;
+    }
+
+    public int getNumber() {
+        return getJson().get("number").asInt();
     }
 
     public URL getConsoleUrl() {
@@ -146,20 +155,32 @@ public class Build extends ContainerPageObject {
     }
 
     public Build shouldSucceed() {
-        String r = getResult();
-        if (!r.equals("SUCCESS"))
-            fail("Expected successful build but it was "+r+". Console output: " + getConsole());
+        assertThat(this, resultIs("SUCCESS"));
         return this;
     }
 
     public Build shouldFail() {
-        assertThat(getResult(), is("FAILURE"));
+        assertThat(this, resultIs("FAILURE"));
         return this;
     }
 
     public Build shouldAbort() {
-        assertThat(getResult(), is("ABORTED"));
+        assertThat(this, resultIs("ABORTED"));
         return this;
+    }
+
+    private Matcher<Build> resultIs(final String expected) {
+        return new Matcher<Build>("Build result %s", expected) {
+            @Override protected boolean matchesSafely(Build item) {
+                return item.getResult().equals(expected);
+            }
+
+            @Override protected void describeMismatchSafely(Build item, Description dsc) {
+                dsc.appendText("was ").appendText(item.getResult())
+                        .appendText(". Console output:\n").appendText(getConsole())
+                ;
+            }
+        };
     }
 
     public String getNode() {

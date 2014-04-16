@@ -23,6 +23,11 @@
  */
 package org.jenkinsci.test.acceptance.po;
 
+/**
+ * Base type for {@link PageArea} for SCM configuration.
+ *
+ * @see Job#useScm(Class)
+ */
 public class Scm extends PageArea {
 
     public Scm(Job job, String path) {

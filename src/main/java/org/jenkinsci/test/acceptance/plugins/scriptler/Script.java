@@ -141,6 +141,7 @@ public class Script extends CapybaraPortingLayer {
             if (addButton != null) {
                 addButton.click();
 
+                sleep(1000); // wait for new parameter to appear
                 String path = find(by.button("Add Parameter")).getAttribute("path");
                 prefix = path.substring(0, path.length() - 25);
             }
