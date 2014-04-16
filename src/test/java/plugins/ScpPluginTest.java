@@ -51,7 +51,7 @@ public class ScpPluginTest extends AbstractJUnitTest {
 
         jenkins.configure();
         Site s = new ScpGlobalConfig(jenkins).addSite(); {
-            s.hostname.set("localhost");
+            s.hostname.set(sshd.ipBound(22));
             s.port.set(sshd.port(22));
             s.username.set("test");
             s.password.set("test");

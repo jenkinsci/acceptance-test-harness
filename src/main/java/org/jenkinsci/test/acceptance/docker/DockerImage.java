@@ -18,18 +18,28 @@ public class DockerImage {
         this.tag = tag;
     }
 
+    public <T extends DockerContainer> T start(Class<T> type, CommandBuilder options, CommandBuilder cmd,int portOffset) throws InterruptedException, IOException {
+        DockerFixture f = type.getAnnotation(DockerFixture.class);
+        return start(type,f.ports(),portOffset,f.bindIp(),options,cmd);
+    }
+
     public <T extends DockerContainer> T start(Class<T> type, CommandBuilder options, CommandBuilder cmd) throws InterruptedException, IOException {
         DockerFixture f = type.getAnnotation(DockerFixture.class);
         return start(type,f.ports(),options,cmd);
     }
 
+    public <T extends DockerContainer> T start(Class<T> type, int[] ports, CommandBuilder options, CommandBuilder cmd) throws InterruptedException, IOException {
+        return start(type,ports,0,"127.0.0.1",options,cmd);
+    }
     /**
      * Starts a container from this image.
      */
-    public <T extends DockerContainer> T start(Class<T> type, int[] ports, CommandBuilder options, CommandBuilder cmd) throws InterruptedException, IOException {
+    public <T extends DockerContainer> T start(Class<T> type, int[] ports,int localPortOffset, String ipAddress, CommandBuilder options, CommandBuilder cmd) throws InterruptedException, IOException {
         CommandBuilder docker = Docker.cmd("run");
-        for (int p : ports) {
-            docker.add("-p","127.0.0.1::"+p);
+        for (int p : ports)
+        {
+            int localPort =localPortOffset+p;
+            docker.add("-p",ipAddress+":"+localPort+":"+p); //Guice ??
         }
 
         File cid = File.createTempFile("docker", "cid");
