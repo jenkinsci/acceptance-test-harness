@@ -6,6 +6,7 @@ import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleAction;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstylePublisher;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.ShellBuildStep;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -70,6 +71,26 @@ public class CheckstylePluginTest extends AbstractJUnitTest {
         assertThat(ca.getNewWarningNumber(), is(776));
         assertThat(ca.getFixedWarningNumber(), is(0));
         assertThat(ca.getHighWarningNumber(), is(776));
+        assertThat(ca.getNormalWarningNumber(), is(0));
+        assertThat(ca.getLowWarningNumber(), is(0));
+    }
+
+    @Test
+    public void view_checkstyle_report_two_runs_and_changed_results() {
+        FreeStyleJob job = setupJob();
+        Build b1 = job.queueBuild().waitUntilFinished().shouldSucceed();
+
+        job.configure();
+        job.removeFirstBuildStep();
+        job.copyResource(resource("/checkstyle_plugin/checkstyle-result-2.xml"), "checkstyle-result.xml");
+        job.save();
+        Build b2 = job.queueBuild().waitUntilFinished().shouldSucceed();
+
+        CheckstyleAction ca = new CheckstyleAction(job);
+        assertThat(ca.getWarningNumber(), is(679));
+        assertThat(ca.getNewWarningNumber(), is(3));
+        assertThat(ca.getFixedWarningNumber(), is(100));
+        assertThat(ca.getHighWarningNumber(), is(679));
         assertThat(ca.getNormalWarningNumber(), is(0));
         assertThat(ca.getLowWarningNumber(), is(0));
     }

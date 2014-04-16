@@ -12,12 +12,6 @@ Line with 113 characters exceeds limit of 100
 </file>
 
 <file name="/sample-project/ChannelContentAPIClient.m">
-<violation begincolumn="1" beginline="32" priority="5" rule="long line">
-Line with 127 characters exceeds limit of 100
-</violation>
-</file>
-
-<file name="/sample-project/ChannelContentAPIClient.m">
 <violation begincolumn="1" beginline="36" priority="5" rule="long line">
 Line with 213 characters exceeds limit of 100
 </violation>
@@ -41,15 +35,15 @@ Line with 128 characters exceeds limit of 100
 </violation>
 </file>
 
-<file name="/sample-project/ChannelContentAPIClient.m">
-<violation begincolumn="158" beginline="28" priority="3" rule="unused method parameter">
-
-</violation>
-</file>
-
 <file name="/sample-project/ViewAllHoldingsAPIClient.m">
 <violation begincolumn="1" beginline="23" priority="5" rule="long line">
 Line with 225 characters exceeds limit of 100
+</violation>
+</file>
+
+<file name="/sample-project/New.m">
+<violation begincolumn="1" beginline="10" priority="5" rule="long line">
+Line with 111 characters exceeds limit of 100
 </violation>
 </file>
 

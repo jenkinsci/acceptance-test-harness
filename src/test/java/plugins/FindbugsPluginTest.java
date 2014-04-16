@@ -37,15 +37,44 @@ public class FindbugsPluginTest extends AbstractJUnitTest {
 
     @Test
     public void record_analysis() {
-        final FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class);
+        final FreeStyleJob job = setupJob();
+
+        Build build = job.queueBuild().waitUntilFinished();
+
+        assertThat(build, hasAction("FindBugs Warnings"));
+        assertThat(job, hasAction("FindBugs Warnings"));
+        assertThat(build.open(), hasContent("FindBugs: 2 warnings from one analysis."));
+    }
+
+    @Test
+    public void record_analysis_two_runs() {
+        final FreeStyleJob job = setupJob();
+        Build b1 = job.queueBuild().waitUntilFinished();
+
+        job.configure();
+        job.removeFirstBuildStep();
+        job.copyResource(resource("/findbugs_plugin/findbugsXml-2.xml"), "findbugsXml.xml");
+        job.save();
+        Build b2 = job.queueBuild().waitUntilFinished();
+
+        try {
+            System.out.println("Sleeping!");
+            Thread.sleep(6000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        assertThat(b2, hasAction("FindBugs Warnings"));
+        assertThat(job, hasAction("FindBugs Warnings"));
+        assertThat(b2.open(), hasContent("FindBugs: 2 warnings from one analysis."));   // TODO MK
+    }
+
+    private FreeStyleJob setupJob() {
+        FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class);
         job.configure();
         job.copyResource(resource("/findbugs_plugin/findbugsXml.xml"));
         job.addPublisher(FindbugsPublisher.class).pattern.sendKeys("findbugsXml.xml");
         job.save();
-
-        Build build = job.queueBuild().waitUntilFinished();
-        assertThat(build, hasAction("FindBugs Warnings"));
-        assertThat(job, hasAction("FindBugs Warnings"));
-        assertThat(build.open(), hasContent("FindBugs: 2 warnings from one analysis."));
+        return job;
     }
 }
