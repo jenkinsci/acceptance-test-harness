@@ -1,5 +1,11 @@
 package plugins;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+
+import org.apache.xerces.jaxp.DocumentBuilderFactoryImpl;
+import org.custommonkey.xmlunit.XMLAssert;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleAction;
@@ -7,6 +13,8 @@ import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstylePublisher;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
@@ -72,6 +80,18 @@ public class CheckstylePluginTest extends AbstractJUnitTest {
         assertThat(ca.getHighWarningNumber(), is(776));
         assertThat(ca.getNormalWarningNumber(), is(0));
         assertThat(ca.getLowWarningNumber(), is(0));
+    }
+
+    @Test
+    public void xml_api_report_depth_0() throws IOException, SAXException, ParserConfigurationException {
+        final FreeStyleJob job = setupJob();
+        final Build build = job.queueBuild().waitUntilFinished().shouldSucceed();
+        final String xmlUrl = build.url("checkstyleResult/api/xml?depth=0").toString();
+        final DocumentBuilder documentBuilder = DocumentBuilderFactoryImpl.newInstance().newDocumentBuilder();
+        final Document result = documentBuilder.parse(xmlUrl);
+
+        final Document expected = documentBuilder.parse(resource("/checkstyle_plugin/api_depth_0.xml").asFile());
+        XMLAssert.assertXMLEqual(result, expected);
     }
 
     private FreeStyleJob setupJob() {
