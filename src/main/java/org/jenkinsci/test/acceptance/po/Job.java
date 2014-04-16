@@ -155,19 +155,27 @@ public class Job extends ContainerPageObject {
         return url("build?delay=0sec");
     }
 
-    public Build queueBuild(DataTable table) {
+    public Build startBuild(DataTable table) {
         Map<String,String> params = new HashMap<>();
         for (List<String> row : table.raw()) {
             params.put(row.get(0), row.get(1));
         }
-        return queueBuild(params);
+        return startBuild(params);
     }
 
-    public Build queueBuild() {
-        return queueBuild(Collections.<String,Object>emptyMap());
+    public Build startBuild() {
+        return scheduleBuild().waitUntilStarted();
     }
 
-    public Build queueBuild(Map<String,?> params) {
+    public Build startBuild(Map<String,?> params) {
+        return scheduleBuild(params).waitUntilStarted();
+    }
+
+    public Build scheduleBuild() {
+        return scheduleBuild(Collections.<String,Object>emptyMap());
+    }
+
+    public Build scheduleBuild(Map<String,?> params) {
         int nb = getJson().get("nextBuildNumber").intValue();
         visit(getBuildUrl());
 
@@ -180,7 +188,7 @@ public class Job extends ContainerPageObject {
             clickButton("Build");
         }
 
-        return build(nb).waitUntilStarted();
+        return build(nb);
     }
 
     public Build build(int buildNumber) {

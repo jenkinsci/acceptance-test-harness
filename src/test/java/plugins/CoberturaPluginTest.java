@@ -36,7 +36,7 @@ public class CoberturaPluginTest extends AbstractJUnitTest {
     public void record_covertura_coverage_report() {
         FreeStyleJob j = setupJob();
 
-        Build b = j.queueBuild().waitUntilFinished();
+        Build b = j.startBuild().waitUntilFinished();
         assertThat(b, hasAction("Coverage Report"));
         assertThat(j, hasAction("Coverage Report"));
     }
@@ -76,7 +76,7 @@ public class CoberturaPluginTest extends AbstractJUnitTest {
     public void view_cobertura_coverage_report() {
         FreeStyleJob j = setupJob();
 
-        Build b = j.queueBuild().waitUntilFinished();
+        Build b = j.startBuild().waitUntilFinished();
         CoberturaAction a = new CoberturaAction(b);
 
         assertThat(a.getPackageCoverage(),      is(100));

@@ -60,7 +60,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
         step.targets.set("-version");
         job.save();
 
-        job.queueBuild().shouldSucceed()
+        job.startBuild().shouldSucceed()
                 .shouldContainsConsoleOutput("Apache Maven 3.0.4")
                 .shouldContainsConsoleOutput("Unpacking http://archive.apache.org/dist/maven/binaries/apache-maven-3.0.4-bin.zip")
         ;
@@ -77,7 +77,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
         step.targets.set("-version");
         job.save();
 
-        job.queueBuild().shouldSucceed()
+        job.startBuild().shouldSucceed()
                 .shouldContainsConsoleOutput("Apache Maven 2.2.1")
                 .shouldContainsConsoleOutput("Unpacking http://archive.apache.org/dist/maven/binaries/apache-maven-2.2.1-bin.zip")
         ;
@@ -100,7 +100,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
         step.targets.set("--version");
         job.save();
 
-        Build build = job.queueBuild().shouldSucceed();
+        Build build = job.startBuild().shouldSucceed();
 
         build.shouldContainsConsoleOutput(Pattern.quote(expectedVersion));
     }
@@ -123,7 +123,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
         step.useLocalRepository();
         job.save();
 
-        job.queueBuild().shouldSucceed().shouldContainsConsoleOutput("-Dmaven.repo.local=([^\\n]*)/.repository");
+        job.startBuild().shouldSucceed().shouldContainsConsoleOutput("-Dmaven.repo.local=([^\\n]*)/.repository");
     }
 
     @Test
@@ -137,7 +137,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
         job.options("-verbose");
         job.save();
 
-        job.queueBuild().waitUntilFinished().shouldContainsConsoleOutput("\\[Loaded java.lang.Object");
+        job.startBuild().waitUntilFinished().shouldContainsConsoleOutput("\\[Loaded java.lang.Object");
     }
 
     @Test
@@ -154,7 +154,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
         job.goals.set("clean");
         job.save();
 
-        job.queueBuild().shouldSucceed().shouldContainsConsoleOutput("\\[Loaded java.lang.Object");
+        job.startBuild().shouldSucceed().shouldContainsConsoleOutput("\\[Loaded java.lang.Object");
     }
 
     @Test @Bug("JENKINS-10539") @Since("1.527")
@@ -174,7 +174,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
         HashMap<String, String> params = new HashMap<String, String>();
         params.put("CMD", "\"C:\\\\System\"");
         params.put("PROPERTY", "C:\\Windows");
-        job.queueBuild(params).shouldSucceed()
+        job.startBuild(params).shouldSucceed()
                 .shouldContainsConsoleOutput("cmdline.property=C:\\\\System")
                 .shouldContainsConsoleOutput("property.property=C:\\\\Windows")
         ;
@@ -190,7 +190,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
         job.goals.set("package");
         job.save();
 
-        job.queueBuild().shouldSucceed()
+        job.startBuild().shouldSucceed()
                 .shouldContainsConsoleOutput("Building root 1.0")
                 .shouldContainsConsoleOutput("Building module_a 2.0")
                 .shouldContainsConsoleOutput("Building module_b 3.0")

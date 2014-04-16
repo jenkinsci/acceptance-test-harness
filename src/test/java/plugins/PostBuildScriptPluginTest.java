@@ -28,7 +28,7 @@ public class PostBuildScriptPluginTest extends AbstractJUnitTest {
         addMarkerPostBuildStep();
         j.save();
 
-        Build build = j.queueBuild().shouldSucceed();
+        Build build = j.startBuild().shouldSucceed();
 
         assertThat(build, runPostBuildStep());
     }
@@ -39,7 +39,7 @@ public class PostBuildScriptPluginTest extends AbstractJUnitTest {
         addMarkerPostBuildStep().runWhenFailed();
         j.save();
 
-        Build build = j.queueBuild().shouldSucceed();
+        Build build = j.startBuild().shouldSucceed();
 
         assertThat(build, not(runPostBuildStep()));
     }
@@ -51,7 +51,7 @@ public class PostBuildScriptPluginTest extends AbstractJUnitTest {
         addMarkerPostBuildStep().runWhenSucceeded();
         j.save();
 
-        Build build = j.queueBuild().shouldFail();
+        Build build = j.startBuild().shouldFail();
 
         assertThat(build, not(runPostBuildStep()));
     }

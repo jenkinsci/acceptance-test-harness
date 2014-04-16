@@ -50,7 +50,7 @@ public class MatrixReloadedPluginTest extends AbstractJUnitTest {
         y.name.set("BBB");
         y.valueString.set("333 444");
         job.save();
-        job.queueBuild().waitUntilFinished();
+        job.startBuild().waitUntilFinished();
 
         MatrixReloadedAction action = job.getLastBuild().action(MatrixReloadedAction.class);
         action.open();

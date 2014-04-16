@@ -54,7 +54,7 @@ public class MatrixTest extends AbstractJUnitTest {
         job.addShellStep("sleep 5");
         job.save();
 
-        MatrixBuild b = job.queueBuild().waitUntilStarted().as(MatrixBuild.class);
+        MatrixBuild b = job.startBuild().waitUntilStarted().as(MatrixBuild.class);
         assertThatBuildHasRunSequentially(b);
     }
 
@@ -74,7 +74,7 @@ public class MatrixTest extends AbstractJUnitTest {
         job.addUserAxis("user_axis","axis1 axis2 axis3");
         job.addShellStep("ls");
         job.save();
-        job.queueBuild().shouldSucceed();
+        job.startBuild().shouldSucceed();
         for (MatrixConfiguration c : job.getConfigurations()) {
             c.getLastBuild().shouldContainsConsoleOutput("\\+ ls");
         }
@@ -100,7 +100,7 @@ public class MatrixTest extends AbstractJUnitTest {
         job.addShellStep("false");
         job.setTouchStoneBuild("user_axis=='axis3'","UNSTABLE");
         job.save();
-        MatrixBuild b = job.queueBuild().waitUntilFinished().as(MatrixBuild.class);
+        MatrixBuild b = job.startBuild().waitUntilFinished().as(MatrixBuild.class);
 
         b.getConfiguration("user_axis=axis1").shouldNotExist();
         b.getConfiguration("user_axis=axis2").shouldNotExist();
@@ -128,7 +128,7 @@ public class MatrixTest extends AbstractJUnitTest {
         job.addShellStep("echo hello");
         job.save();
 
-        MatrixBuild b = job.queueBuild().waitUntilFinished().as(MatrixBuild.class);
+        MatrixBuild b = job.startBuild().waitUntilFinished().as(MatrixBuild.class);
 
         b.getConfiguration("user_axis=axis1").shouldNotExist();
         b.getConfiguration("user_axis=axis2").shouldExist();
@@ -164,12 +164,12 @@ public class MatrixTest extends AbstractJUnitTest {
         job.addParameter(StringParameter.class).setName("condition");
         job.save();
 
-        MatrixBuild b = job.queueBuild(singletonMap("condition", "false")).waitUntilFinished().as(MatrixBuild.class);
+        MatrixBuild b = job.startBuild(singletonMap("condition", "false")).waitUntilFinished().as(MatrixBuild.class);
         b.getConfiguration("run=yes").shouldExist();
         b.getConfiguration("run=maybe").shouldNotExist();
         b.getConfiguration("run=no").shouldNotExist();
 
-        b = job.queueBuild(singletonMap("condition", "true")).waitUntilFinished().as(MatrixBuild.class);
+        b = job.startBuild(singletonMap("condition", "true")).waitUntilFinished().as(MatrixBuild.class);
         b.getConfiguration("run=yes").shouldExist();
         b.getConfiguration("run=maybe").shouldExist();
         b.getConfiguration("run=no").shouldNotExist();
@@ -201,7 +201,7 @@ public class MatrixTest extends AbstractJUnitTest {
         a.select("label1");
         job.save();
 
-        MatrixBuild b = job.queueBuild().waitUntilFinished().as(MatrixBuild.class);
+        MatrixBuild b = job.startBuild().waitUntilFinished().as(MatrixBuild.class);
         b.getConfiguration("label=master").shouldContainsConsoleOutput("(Building|Building remotely) on master");
         b.getConfiguration("label=label1").shouldContainsConsoleOutput("(Building|Building remotely) on "+s.getName());
     }

@@ -48,7 +48,7 @@ public class JobSteps extends AbstractSteps {
 
     @And("^I build the job$")
     public void I_build_the_job() {
-        my.job.queueBuild();
+        my.job.startBuild();
     }
 
     @Then("^console output should contain \"([^\"]*)\"$")
@@ -65,7 +65,7 @@ public class JobSteps extends AbstractSteps {
     @And("^I build (\\d+) jobs$")
     public void I_build_jobs(int n) {
         for (int i=0; i<n; i++)
-            my.job.queueBuild();
+            my.job.startBuild();
     }
 
     @Then("^the (\\d+) builds should run concurrently$")
@@ -81,7 +81,7 @@ public class JobSteps extends AbstractSteps {
 
     @And("^I build the job with parameters?$")
     public void I_build_the_job_with_parameters(DataTable table) {
-        my.job.queueBuild(table);
+        my.job.startBuild(table);
     }
 
     @Then("^the build should (succeed|fail)$")
@@ -107,7 +107,7 @@ public class JobSteps extends AbstractSteps {
     @And("^I build (\\d+) jobs sequentially$")
     public void I_build_jobs_sequentially(int n) throws Throwable {
         for (int i=0; i<n; i++) {
-            my.job.queueBuild().waitUntilFinished();
+            my.job.startBuild().waitUntilFinished();
         }
     }
 
