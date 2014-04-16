@@ -27,10 +27,11 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
 
 import org.jenkinsci.test.acceptance.po.Action;
 import org.jenkinsci.test.acceptance.po.ActionPageObject;
+import org.jenkinsci.test.acceptance.po.ContainerPageObject;
 import org.jenkinsci.test.acceptance.po.Job;
 
 @ActionPageObject("HTML_Report")
-public class HtmlReport extends Action<Job> {
+public class HtmlReport extends Action {
     public HtmlReport(Job parent, String relative) {
         super(parent, relative);
     }
@@ -39,5 +40,10 @@ public class HtmlReport extends Action<Job> {
         visit(path);
         assertThat(driver, hasContent(content));
         return this;
+    }
+
+    @Override
+    public boolean isApplicable(ContainerPageObject po) {
+        return po instanceof Job;
     }
 }

@@ -2,11 +2,13 @@ package org.jenkinsci.test.acceptance.po;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Injector;
+
 import org.kohsuke.randname.RandomNameGenerator;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
 import javax.inject.Inject;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -41,8 +43,16 @@ public abstract class PageObject extends CapybaraPortingLayer {
         this.url = url;
     }
 
+    protected PageObject(PageObject context, URL url) {
+        this(context.injector, url);
+    }
+
     public static String createRandomName() {
         return RND.next();
+    }
+
+    public Jenkins getJenkins() {
+        return injector.getInstance(Jenkins.class);
     }
 
     /**

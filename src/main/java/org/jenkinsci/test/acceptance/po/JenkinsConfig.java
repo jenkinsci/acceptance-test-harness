@@ -41,7 +41,13 @@ public class JenkinsConfig extends PageObject {
 
     public <T extends ToolInstallation> T addTool(Class<T> type) {
         jenkins.ensureConfigPage();
-        String name = type.getAnnotation(Describable.class).value();
+
+        String name = findCaption(type, new Finder<String>() {
+            @Override protected String find(String caption) {
+                outer.find(by.button("Add " + caption));
+                return caption;
+            }
+        });
 
         clickButton("Add " + name);
         sleep(100);

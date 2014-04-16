@@ -25,10 +25,11 @@ package org.jenkinsci.test.acceptance.plugins.job_config_history;
 
 import org.jenkinsci.test.acceptance.po.Action;
 import org.jenkinsci.test.acceptance.po.ActionPageObject;
+import org.jenkinsci.test.acceptance.po.ContainerPageObject;
 import org.jenkinsci.test.acceptance.po.Job;
 
 @ActionPageObject("jobConfigHistory")
-public class JobConfigHistory extends Action<Job> {
+public class JobConfigHistory extends Action {
 
     public JobConfigHistory(Job parent, String relative) {
         super(parent, relative);
@@ -37,5 +38,10 @@ public class JobConfigHistory extends Action<Job> {
     public void showLastChange() {
         open();
         clickButton("Show Diffs");
+    }
+
+    @Override
+    public boolean isApplicable(ContainerPageObject po) {
+        return po instanceof Job;
     }
 }

@@ -6,6 +6,7 @@
 FROM ubuntu
 
 # base package installation
+RUN apt-get update -y
 RUN apt-get install -y apt-transport-https && echo "deb https://sdkrepo.atlassian.com/debian/ stable contrib" >> /etc/apt/sources.list && apt-get update
 RUN apt-get install -y --allow-unauthenticated openjdk-6-jdk atlassian-plugin-sdk netcat
 
