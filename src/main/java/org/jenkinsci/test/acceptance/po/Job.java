@@ -266,4 +266,9 @@ public class Job extends ContainerPageObject {
             n=j.slaves.get(DumbSlave.class, nodeName);
         n.getBuildHistory().shouldInclude(this.name);
     }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }
