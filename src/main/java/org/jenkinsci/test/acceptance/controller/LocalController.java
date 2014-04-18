@@ -151,7 +151,7 @@ public abstract class LocalController extends JenkinsController {
         try {
             FileUtils.copyFile(formPathElement, new File(pluginDir,"path-element.hpi"));
         } catch (IOException e) {
-            throw new RuntimeException(String.format("Failed to copy form path element file %s to plugin dir %s.", formPathElement, pluginDir));
+            throw new RuntimeException(String.format("Failed to copy form path element file %s to plugin dir %s.", formPathElement, pluginDir),e);
         }
     }
 
