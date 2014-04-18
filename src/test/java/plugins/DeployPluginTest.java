@@ -82,7 +82,7 @@ public class DeployPluginTest extends AbstractJUnitTest {
         assertThat(readText(f), containsString("Hello World!"));
 
         j.configure();
-        s.command.set("cd my-webapp && echo '<html><body>Hello Jenkins</body></html>' > src/main/webapp/index.jsp && mvn install");
+        s.command("cd my-webapp && echo '<html><body>Hello Jenkins</body></html>' > src/main/webapp/index.jsp && mvn install");
         j.save();
 
         b = j.startBuild().shouldSucceed();
