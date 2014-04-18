@@ -127,7 +127,7 @@ public abstract class JenkinsController implements Closeable, AutoCleaned {
      * Perform controller specific diagnostics for test failure. Defaults to no-op.
      * @param cause Failure cause
      */
-    public void diagnose(Throwable cause) {}
+    public void diagnose(Throwable cause) throws IOException {}
 
     /**
      * Populates the Jenkins Home with the specified template (which can be either a ZIP file or a directory). If

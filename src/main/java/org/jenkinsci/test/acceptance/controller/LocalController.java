@@ -1,9 +1,9 @@
 package org.jenkinsci.test.acceptance.controller;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.TeeInputStream;
 import org.codehaus.plexus.util.Expand;
-import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.StringUtils;
 import org.jenkinsci.utils.process.ProcessInputStream;
 
@@ -39,7 +39,7 @@ public abstract class LocalController extends JenkinsController {
 
     protected ProcessInputStream process;
 
-    protected LogWatcher logWatcher;
+    protected JenkinsLogWatcher logWatcher;
 
     private static final Map<String,String> options = new HashMap<>();
 
@@ -108,7 +108,11 @@ public abstract class LocalController extends JenkinsController {
         if (!war.exists())
             throw new RuntimeException("Invalid path to jenkins.war specified: "+war);
 
-        this.tempDir = FileUtils.createTempFile("jenkins", "home",new File(WORKSPACE));
+        try {
+            this.tempDir = File.createTempFile("jenkins", "home", new File(WORKSPACE));
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to create a temp file",e);
+        }
 
         this.logFile = new File(this.tempDir.getParentFile(), this.tempDir.getName()+".log");
 
@@ -239,19 +243,19 @@ public abstract class LocalController extends JenkinsController {
 
     @Override
     public void diagnose(Throwable cause) {
-        cause.printStackTrace(out);
-        if(getenv("INTERACTIVE") != null && getenv("INTERACTIVE").equals("true")){
-            out.println("Commencing interactive debugging. Browser session was kept open.");
-            out.println("Press return to proceed.");
-            try {
+        try {
+            cause.printStackTrace(out);
+            if(getenv("INTERACTIVE") != null && getenv("INTERACTIVE").equals("true")){
+                out.println("Commencing interactive debugging. Browser session was kept open.");
+                out.println("Press return to proceed.");
                 in.read();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+            }else{
+                out.println("It looks like the test failed/errored, so here's the console from Jenkins:");
+                out.println("--------------------------------------------------------------------------");
+                out.println(FileUtils.readFileToString(logFile));
             }
-        }else{
-            out.println("It looks like the test failed/errored, so here's the console from Jenkins:");
-            out.println("--------------------------------------------------------------------------");
-            out.println(logWatcher.fullLog());
+        } catch (IOException e) {
+            throw new Error(e);
         }
     }
 
@@ -303,19 +307,17 @@ public abstract class LocalController extends JenkinsController {
         this.process = startProcess();
         Runtime.getRuntime().addShutdownHook(shutdownHook);
 
-        this.logWatcher = new LogWatcher(new TeeInputStream(this.process,new FileOutputStream(logFile)), options);
+        this.logWatcher = new JenkinsLogWatcher(process,logFile);
         try {
             LOGGER.info("Waiting for Jenkins to become running in "+this);
             this.logWatcher.waitTillReady(true);
             LOGGER.info("Jenkins is running in "+this);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             diagnoseFailedLoad(e);
         }
     }
 
-    private void diagnoseFailedLoad(RuntimeException cause) {
+    private void diagnoseFailedLoad(Exception cause) {
         Process proc = process.getProcess();
 
         try {
@@ -362,7 +364,7 @@ public abstract class LocalController extends JenkinsController {
             }
         }
 
-        throw cause;
+        throw new Error(cause);
     }
 
     private boolean  isFreePort(int port){
