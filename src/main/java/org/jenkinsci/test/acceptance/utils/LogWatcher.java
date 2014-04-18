@@ -3,6 +3,7 @@ package org.jenkinsci.test.acceptance.utils;
 import org.apache.http.concurrent.BasicFuture;
 
 import java.io.BufferedReader;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -19,7 +20,7 @@ import java.util.regex.Pattern;
  * @author Vivek Pandey
  * @author Kohsuke Kawaguchi
  */
-public class LogWatcher {
+public class LogWatcher implements Closeable {
     private InputStream pipe;
 
     /**
