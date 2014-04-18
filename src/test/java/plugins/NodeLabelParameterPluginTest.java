@@ -126,4 +126,9 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         j.shouldHaveBuiltOn(jenkins, "master");
         j.shouldHaveBuiltOn(jenkins,s.getName());
     }
+
+    @Test
+    public void run_on_a_particular_offline_slave() throws Exception {
+        
+    }
 }
