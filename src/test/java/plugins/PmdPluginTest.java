@@ -44,7 +44,7 @@ public class PmdPluginTest extends AbstractJUnitTest {
         pmd.pattern.set("pmd.xml");
         j.save();
 
-        Build b = j.queueBuild().waitUntilFinished().shouldSucceed();
+        Build b = j.startBuild().waitUntilFinished().shouldSucceed();
 
         assertThat(b.open(), hasContent("0 warnings"));
     }
@@ -75,7 +75,7 @@ public class PmdPluginTest extends AbstractJUnitTest {
         pmd.canRunOnFailed.check();
         j.save();
 
-        Build b = j.queueBuild().waitUntilFinished().shouldFail();
+        Build b = j.startBuild().waitUntilFinished().shouldFail();
 
         assertThat(b.open(), hasContent("0 warnings"));
     }
@@ -102,7 +102,7 @@ public class PmdPluginTest extends AbstractJUnitTest {
         pmd.pattern.set("pmd-warnings.xml");
         j.save();
 
-        Build b = j.queueBuild().waitUntilFinished().shouldSucceed();
+        Build b = j.startBuild().waitUntilFinished().shouldSucceed();
 
         assertThat(b, hasAction("PMD Warnings"));
         assertThat(b.open(), hasContent("9 warnings"));

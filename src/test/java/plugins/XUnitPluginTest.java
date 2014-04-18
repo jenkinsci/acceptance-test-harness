@@ -41,8 +41,8 @@ public class XUnitPluginTest extends AbstractJUnitTest {
         }
         job.save();
 
-        job.queueBuild().shouldSucceed();
-        Build b = job.queueBuild().shouldSucceed();
+        job.startBuild().shouldSucceed();
+        Build b = job.startBuild().shouldSucceed();
 
         b.open();
         clickLink("Test Result");

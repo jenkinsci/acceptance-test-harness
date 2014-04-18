@@ -116,7 +116,7 @@ public class GroovyPluginTest extends AbstractJUnitTest {
                 "println 'version: ' + groovy.lang.GroovySystem.getVersion()"
         );
         job.save();
-        Build build = job.queueBuild().shouldSucceed();
+        Build build = job.startBuild().shouldSucceed();
 
         String expectedVersion = localGroovyVersion();
 
@@ -130,7 +130,7 @@ public class GroovyPluginTest extends AbstractJUnitTest {
 
     private void shouldReport(String out) {
         job.save();
-        job.queueBuild().shouldSucceed().shouldContainsConsoleOutput(out);
+        job.startBuild().shouldSucceed().shouldContainsConsoleOutput(out);
     }
 
     private String localGroovyVersion() {

@@ -76,7 +76,7 @@ public class DeployPluginTest extends AbstractJUnitTest {
         }
         j.save();
 
-        Build b = j.queueBuild().shouldSucceed();
+        Build b = j.startBuild().shouldSucceed();
         b.shouldContainsConsoleOutput("to container Tomcat 7.x Remote");
 
         assertThat(readText(f), containsString("Hello World!"));
@@ -85,7 +85,7 @@ public class DeployPluginTest extends AbstractJUnitTest {
         s.command.set("cd my-webapp && echo '<html><body>Hello Jenkins</body></html>' > src/main/webapp/index.jsp && mvn install");
         j.save();
 
-        b = j.queueBuild().shouldSucceed();
+        b = j.startBuild().shouldSucceed();
         b.shouldContainsConsoleOutput("Redeploying");
         assertThat(readText(f), containsString("Hello Jenkins"));
     }

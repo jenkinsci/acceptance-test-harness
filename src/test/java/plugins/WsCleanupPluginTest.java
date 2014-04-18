@@ -25,7 +25,7 @@ public class WsCleanupPluginTest extends AbstractJUnitTest {
         job.addShellStep("touch ws_file");
         job.save();
 
-        job.queueBuild().shouldSucceed();
+        job.startBuild().shouldSucceed();
         assertThat(job, workspaceContains("ws_file"));
     }
 
@@ -36,7 +36,7 @@ public class WsCleanupPluginTest extends AbstractJUnitTest {
         job.addPublisher(WsCleanup.PostBuild.class);
         job.save();
 
-        job.queueBuild().shouldSucceed();
+        job.startBuild().shouldSucceed();
         assertThat(job, not(workspaceContains("ws_file")));
     }
 
@@ -47,8 +47,8 @@ public class WsCleanupPluginTest extends AbstractJUnitTest {
         new WsCleanup.PreBuild(job);
         job.save();
 
-        job.queueBuild().shouldSucceed();
-        job.queueBuild().shouldSucceed();
+        job.startBuild().shouldSucceed();
+        job.startBuild().shouldSucceed();
 
         assertThat(job, workspaceContains("ws_dir"));
     }
