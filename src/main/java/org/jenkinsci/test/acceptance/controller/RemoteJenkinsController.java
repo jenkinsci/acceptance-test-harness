@@ -75,7 +75,8 @@ public class RemoteJenkinsController extends JenkinsController {
          **/
         System.out.println(String.format("[[ATTACHMENT|%s]]", logFile.getAbsolutePath()));
 
-        this.logWatcher = new JenkinsLogWatcher(process, logFile);
+        logWatcher = new JenkinsLogWatcher(process, logFile);
+        logWatcher.start();
         try {
             this.logWatcher.waitTillReady();
         } catch (Exception e) {
