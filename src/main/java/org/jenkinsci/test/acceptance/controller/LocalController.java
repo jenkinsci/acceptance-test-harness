@@ -6,22 +6,17 @@ import org.codehaus.plexus.util.Expand;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.StringUtils;
 import org.jenkinsci.utils.process.ProcessInputStream;
-import org.openqa.selenium.io.Zip;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.StringWriter;
+import java.lang.reflect.Field;
 import java.net.ServerSocket;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 import static java.lang.System.*;
 
@@ -162,6 +157,7 @@ public abstract class LocalController extends JenkinsController {
      * @deprecated
      *      Use {@link #getJenkinsHome()}, which explains the nature of the directory better.
      */
+    @Deprecated
     public File getTempDir() {
         return tempDir;
     }
@@ -314,7 +310,59 @@ public abstract class LocalController extends JenkinsController {
             LOGGER.info("Jenkins is running in "+this);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
+        } catch (RuntimeException e) {
+            diagnoseFailedLoad(e);
         }
+    }
+
+    private void diagnoseFailedLoad(RuntimeException cause) {
+        Process proc = process.getProcess();
+
+        try {
+            int val = proc.exitValue();
+            new RuntimeException("Jenkins died loading. Exit code " + val, cause);
+        } catch (IllegalThreadStateException _) {
+            // Process alive
+        }
+
+        // Try to get stacktrace
+        Class<?> clazz;
+        Field pidField;
+        try {
+            clazz = Class.forName("java.lang.UNIXProcess");
+            pidField = clazz.getDeclaredField("pid");
+            pidField.setAccessible(true);
+        } catch (Exception e) {
+            LinkageError x = new LinkageError();
+            x.initCause(e);
+            throw x;
+        }
+
+        if (clazz.isAssignableFrom(proc.getClass())) {
+            int pid;
+            try {
+                pid = (int) pidField.get(proc);
+            } catch (IllegalArgumentException | IllegalAccessException e) {
+                throw new AssertionError(e);
+            }
+
+            try {
+                Process jstack = new ProcessBuilder("jstack", String.valueOf(pid)).start();
+                if (jstack.waitFor() == 0) {
+                    StringWriter writer = new StringWriter();
+                    IOUtils.copy(jstack.getInputStream(), writer);
+                    RuntimeException ex = new RuntimeException(
+                            cause.getMessage() + "\n\n" + writer.toString()
+                    );
+                    ex.setStackTrace(cause.getStackTrace());
+                    throw ex;
+                }
+            } catch (IOException | InterruptedException e) {
+                throw new AssertionError(e);
+            }
+        }
+
+        throw cause;
     }
 
     private boolean  isFreePort(int port){

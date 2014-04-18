@@ -103,10 +103,10 @@ public class LogWatcher {
         }
 
         String msg = getClass()+": "+ (expected ? "Could not bring up a Jenkins server" : "Shut down of Jenkins server had timed out");
-        msg += "\nprocess is still alive? "+reader.isAlive();
+        msg += "\nprocess is " + (reader.isAlive() ? "alive" : "dead");
         msg += "\nnow = " + new Date();
         msg += "\n" + fullLog();
-        throw new AssertionError(msg);
+        throw new RuntimeException(msg);
     }
 
     /**
