@@ -77,7 +77,7 @@ public class RemoteJenkinsController extends JenkinsController {
 
         this.logWatcher = new JenkinsLogWatcher(process, logFile);
         try {
-            this.logWatcher.waitTillReady(true);
+            this.logWatcher.waitTillReady();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

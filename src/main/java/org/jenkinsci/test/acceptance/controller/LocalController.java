@@ -2,13 +2,11 @@ package org.jenkinsci.test.acceptance.controller;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.input.TeeInputStream;
 import org.codehaus.plexus.util.Expand;
 import org.codehaus.plexus.util.StringUtils;
 import org.jenkinsci.utils.process.ProcessInputStream;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
@@ -310,7 +308,7 @@ public abstract class LocalController extends JenkinsController {
         this.logWatcher = new JenkinsLogWatcher(process,logFile);
         try {
             LOGGER.info("Waiting for Jenkins to become running in "+this);
-            this.logWatcher.waitTillReady(true);
+            this.logWatcher.waitTillReady();
             LOGGER.info("Jenkins is running in "+this);
         } catch (Exception e) {
             diagnoseFailedLoad(e);
