@@ -127,8 +127,20 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         j.shouldHaveBuiltOn(jenkins,s.getName());
     }
 
+    /**
+     * This test is intended to check that an offline slave is not ignored
+     * when selected for a job and the job is configured with "Node eligibility" setting
+     * is set to "All Nodes"
+     *
+     * It is expected that the job is pending due to the offline status of the slave.
+     * But it will be reactivated as soon as the slave status becomes online.
+     */
+
     @Test
     public void run_on_a_particular_offline_slave() throws Exception {
-        
+        FreeStyleJob j = jenkins.jobs.create();
+
+        Slave s = slave.install(jenkins).get();
+       
     }
 }
