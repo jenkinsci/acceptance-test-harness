@@ -29,11 +29,12 @@ import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.po.Action;
 import org.jenkinsci.test.acceptance.po.ActionPageObject;
 import org.jenkinsci.test.acceptance.po.CodeMirror;
+import org.jenkinsci.test.acceptance.po.ContainerPageObject;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 
 @ActionPageObject("scriptler")
-public class Scriptler extends Action<Jenkins> {
+public class Scriptler extends Action {
 
     public Scriptler(Jenkins parent, String relative) {
         super(parent, relative);
@@ -62,5 +63,10 @@ public class Scriptler extends Action<Jenkins> {
         }
 
         return script;
+    }
+
+    @Override
+    public boolean isApplicable(ContainerPageObject po) {
+        return po instanceof Jenkins;
     }
 }

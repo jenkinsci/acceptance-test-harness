@@ -71,7 +71,7 @@ public class MailerPluginTest extends AbstractJUnitTest {
         m.recipients.set("dev@example.com mngmnt@example.com");
         job.save();
 
-        job.queueBuild().shouldFail();
+        job.startBuild().shouldFail();
         mailer.assertMail(
                 Pattern.compile("Build failed in Jenkins: .* #1"),
                 "dev@example.com mngmnt@example.com",

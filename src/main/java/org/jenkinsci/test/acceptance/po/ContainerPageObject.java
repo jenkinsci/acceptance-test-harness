@@ -2,10 +2,10 @@ package org.jenkinsci.test.acceptance.po;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Injector;
+
 import groovy.lang.Closure;
 
 import java.io.IOException;
-import java.lang.reflect.ParameterizedType;
 import java.net.URL;
 import java.util.concurrent.Callable;
 
@@ -97,23 +97,19 @@ public abstract class ContainerPageObject extends PageObject {
      * @param type Action type to create.
      * @see {@link Action}, {@link ActionPageObject}
      */
-    public <T extends Action<?>> T action(Class<T> type) {
+    public <T extends Action> T action(Class<T> type) {
         final String path = type.getAnnotation(ActionPageObject.class).value();
         return action(type, path);
     }
 
-    public <T extends Action<?>> T action(Class<T> type, String path) {
+    public <T extends Action> T action(Class<T> type, String path) {
 
-        ParameterizedType actionType = (ParameterizedType) type.getGenericSuperclass();
-        Class<? extends ContainerPageObject> scope = (Class<? extends ContainerPageObject>) actionType.getActualTypeArguments()[0];
+        T instance = newInstance(type, this, path);
 
-        if (!scope.isAssignableFrom(getClass())) {
-            throw new AssertionError(String.format(
-                    "%s is scoped to %s. Not a superclass of %s.",
-                    type.getName(), scope, getClass().getName()
-            ));
-        }
+        if (!instance.isApplicable(this)) throw new AssertionError(
+                "Action can not be attached to " + getClass().getCanonicalName()
+        );
 
-        return newInstance(type, this, path);
+        return instance;
     }
 }

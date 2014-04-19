@@ -54,7 +54,7 @@ public class JobConfigHistoryPluginTest extends AbstractJUnitTest {
         ShellBuildStep step = job.addShellStep("ls");
         job.save();
         job.configure();
-        step.command.set("ls -lh");
+        step.command("ls -lh");
         job.save();
 
         JobConfigHistory action = job.action(JobConfigHistory.class);

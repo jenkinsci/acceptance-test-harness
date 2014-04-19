@@ -26,11 +26,12 @@ package org.jenkinsci.test.acceptance.plugins.matrix_reloaded;
 import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.po.Action;
 import org.jenkinsci.test.acceptance.po.ActionPageObject;
+import org.jenkinsci.test.acceptance.po.ContainerPageObject;
 import org.jenkinsci.test.acceptance.po.MatrixBuild;
 import org.openqa.selenium.By;
 
 @ActionPageObject("matrix-reloaded")
-public class MatrixReloadedAction extends Action<MatrixBuild> {
+public class MatrixReloadedAction extends Action {
 
     public MatrixReloadedAction(MatrixBuild parent, String relative) {
         super(parent, relative);
@@ -52,5 +53,10 @@ public class MatrixReloadedAction extends Action<MatrixBuild> {
             control(checkbox(c)).check();
         }
         clickButton("Rebuild Matrix");
+    }
+
+    @Override
+    public boolean isApplicable(ContainerPageObject po) {
+        return po instanceof MatrixBuild;
     }
 }

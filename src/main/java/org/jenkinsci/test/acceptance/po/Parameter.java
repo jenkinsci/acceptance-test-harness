@@ -12,7 +12,7 @@ public abstract class Parameter extends PageArea {
     private String name;
 
     public Parameter(Job job, String path) {
-        super(job.injector,path);
+        super(job, path);
         this.job = job;
     }
 

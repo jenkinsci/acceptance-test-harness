@@ -12,7 +12,7 @@ import static org.jenkinsci.test.acceptance.Matchers.hasContent;
  *
  * @author Kohsuke Kawaguchi
  */
-public class View extends ContainerPageObject {
+public abstract class View extends ContainerPageObject {
     public final JobsMixIn jobs;
 
     public View(Injector injector, URL url) {

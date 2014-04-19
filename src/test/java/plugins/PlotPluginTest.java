@@ -47,7 +47,7 @@ public class PlotPluginTest extends AbstractJUnitTest {
         pub.source("csv", "plot.csv");
         job.save();
 
-        job.queueBuild().shouldSucceed();
+        job.startBuild().shouldSucceed();
         assertThatBuildHasPlot("My plot","My group");
     }
 
@@ -77,7 +77,7 @@ public class PlotPluginTest extends AbstractJUnitTest {
         pub.source("csv", "plot.csv");
         job.save();
 
-        job.queueBuild().shouldSucceed();
+        job.startBuild().shouldSucceed();
         assertThatBuildHasPlot("Some plot","Plots");
     }
 
