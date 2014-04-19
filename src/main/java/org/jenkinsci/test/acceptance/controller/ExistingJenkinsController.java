@@ -48,11 +48,11 @@ public class ExistingJenkinsController extends JenkinsController {
             HttpClient httpclient = new DefaultHttpClient();
             HttpPost post = new HttpPost(uploadUrl.toExternalForm());
 
-            List<NameValuePair> formparams = new ArrayList<NameValuePair>();
-            formparams.add(new BasicNameValuePair("depth", "1"));
-            formparams.add(new BasicNameValuePair("xpath", "/*/*/shortName|/*/*/version"));
-            formparams.add(new BasicNameValuePair("wrapper", "plugins"));
-            UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formparams, "UTF-8");
+            List<NameValuePair> parameters = new ArrayList<NameValuePair>();
+            parameters.add(new BasicNameValuePair("depth", "1"));
+            parameters.add(new BasicNameValuePair("xpath", "/*/*/shortName|/*/*/version"));
+            parameters.add(new BasicNameValuePair("wrapper", "plugins"));
+            UrlEncodedFormEntity entity = new UrlEncodedFormEntity(parameters, "UTF-8");
             post.setEntity(entity);
 
             HttpResponse response = httpclient.execute(post);
