@@ -19,6 +19,10 @@ public class SshPrivateKeyCredential extends Credential {
         super(context, path);
     }
 
+    public SshPrivateKeyCredential(PageArea area, String relativePath) {
+        super(area, relativePath);
+    }
+
     public Direct selectEnterDirectly() {
         WebElement e = choose("Enter directly");
         return new Direct(page, e.getAttribute("path"));
