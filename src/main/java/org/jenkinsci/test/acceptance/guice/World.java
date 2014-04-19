@@ -5,6 +5,7 @@ import com.cloudbees.sdk.extensibility.ExtensionList;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.util.Modules;
 import org.jenkinsci.test.acceptance.Config;
 
 import javax.inject.Singleton;
@@ -66,8 +67,7 @@ public class World extends AbstractModule {
 
     @Override
     protected void configure() {
-        install(new ExtensionFinder(cl));
-        install(new Config());
+        install(Modules.override(new ExtensionFinder(cl)).with(new Config()));
     }
 
     /**
