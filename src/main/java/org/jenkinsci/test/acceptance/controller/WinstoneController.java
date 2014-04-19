@@ -1,13 +1,14 @@
 package org.jenkinsci.test.acceptance.controller;
 
-import com.cloudbees.sdk.extensibility.Extension;
-import org.jenkinsci.utils.process.CommandBuilder;
-import org.jenkinsci.utils.process.ProcessInputStream;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+
+import org.jenkinsci.utils.process.CommandBuilder;
+import org.jenkinsci.utils.process.ProcessInputStream;
+
+import com.cloudbees.sdk.extensibility.Extension;
 
 /**
  * Launches Jenkins via "java -jar jenkins.war" on the local machine.
@@ -19,12 +20,9 @@ public class WinstoneController extends LocalController {
     private final int httpPort;
     private final int controlPort;
 
-    public WinstoneController(String war) {
-        this(new File(war));
-    }
+    public WinstoneController(final File warFile, File formElementHpi) {
+        super(warFile, formElementHpi);
 
-    public WinstoneController(File war) {
-        super(war);
         httpPort = randomLocalPort();
         controlPort = randomLocalPort();
     }
@@ -35,10 +33,11 @@ public class WinstoneController extends LocalController {
         String java = javaHome == null ? "java" : String.format("%s/bin/java",javaHome.getAbsolutePath());
         CommandBuilder cb = new CommandBuilder(java).add(
                 "-DJENKINS_HOME=" + getJenkinsHome(),
+                "-Duser.language=en",
                 "-jar", war,
                 "--ajp13Port=-1",
-                "--controlPort=" + controlPort,
                 "--httpPort=" + httpPort);
+        System.out.println("Starting Jenkins: " + cb.toString());
         return cb.popen();
     }
 
@@ -60,7 +59,7 @@ public class WinstoneController extends LocalController {
 
         @Override
         public JenkinsController create() {
-            return new WinstoneController(getWarFile());
+            return new WinstoneController(getWarFile(), getFormElementsPathFile());
         }
     }
 }

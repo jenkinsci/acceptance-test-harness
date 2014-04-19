@@ -64,7 +64,7 @@ public class MavenModuleSet extends Job {
     @Override
     public ShellBuildStep addShellStep(String shell) {
         ShellBuildStep step = addPreBuildStep(ShellBuildStep.class);
-        step.command.set(shell);
+        step.command(shell);
         return step;
     }
 
