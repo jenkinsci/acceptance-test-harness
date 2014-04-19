@@ -20,12 +20,9 @@ public class WinstoneController extends LocalController {
     private final int httpPort;
     private final int controlPort;
 
-    public WinstoneController(String war) {
-        this(new File(war));
-    }
+    public WinstoneController(final File warFile, File formElementHpi) {
+        super(warFile, formElementHpi);
 
-    public WinstoneController(File war) {
-        super(war);
         httpPort = randomLocalPort();
         controlPort = randomLocalPort();
     }
@@ -62,7 +59,7 @@ public class WinstoneController extends LocalController {
 
         @Override
         public JenkinsController create() {
-            return new WinstoneController(getWarFile());
+            return new WinstoneController(getWarFile(), getFormElementsPathFile());
         }
     }
 }

@@ -1,14 +1,16 @@
 package org.jenkinsci.test.acceptance.controller;
 
-import com.cloudbees.sdk.extensibility.ExtensionPoint;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.GetMethod;
+import java.io.Closeable;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URL;
+
 import org.codehaus.plexus.util.FileUtils;
-import org.codehaus.plexus.util.IOUtil;
 import org.jenkinsci.test.acceptance.guice.AutoCleaned;
 
-import java.io.*;
-import java.net.URL;
+import com.cloudbees.sdk.extensibility.ExtensionPoint;
 
 /**
  * Starts/stops Jenkins and exposes where it is running.
@@ -148,27 +150,4 @@ public abstract class JenkinsController implements Closeable, AutoCleaned {
      *                 the template will simply overwrite the existing (if any) home.
      */
     public abstract void populateJenkinsHome(File template, boolean clean) throws IOException;
-
-    /**
-     * Downloads the latest version of the form-element-path plugin that we use for testing.
-     */
-    public static File downloadPathElement() {
-        String source = "http://updates.jenkins-ci.org/latest/form-element-path.hpi";
-        File target =  new File(WORKSPACE,"path-element.hpi");
-        if (!target.exists()) {
-            try(FileOutputStream fos = new FileOutputStream(target)) {
-                HttpClient client = new HttpClient();
-                GetMethod get = new GetMethod(source);
-                get.setFollowRedirects(true);
-                int status = client.executeMethod(get);
-                if (status != 200) {
-                    throw new RuntimeException("Failed to get form-element-path.hpi: " + get.getResponseBodyAsString());
-                }
-                IOUtil.copy(get.getResponseBodyAsStream(), fos);
-            } catch (IOException e) {
-                throw new RuntimeException(String.format("Failed to open %s for write operation", target), e);
-            }
-        }
-        return target;
-    }
 }

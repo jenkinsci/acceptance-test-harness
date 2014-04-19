@@ -1,11 +1,5 @@
 package org.jenkinsci.test.acceptance.controller;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.codehaus.plexus.util.Expand;
-import org.codehaus.plexus.util.StringUtils;
-import org.jenkinsci.utils.process.ProcessInputStream;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -15,6 +9,21 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.codehaus.plexus.util.Expand;
+import org.codehaus.plexus.util.StringUtils;
+import org.eclipse.aether.RepositorySystem;
+import org.eclipse.aether.RepositorySystemSession;
+import org.eclipse.aether.artifact.DefaultArtifact;
+import org.eclipse.aether.repository.RemoteRepository;
+import org.eclipse.aether.resolution.ArtifactRequest;
+import org.eclipse.aether.resolution.ArtifactResolutionException;
+import org.eclipse.aether.resolution.ArtifactResult;
+import org.jenkinsci.utils.process.ProcessInputStream;
+
+import com.google.inject.Inject;
 
 import static java.lang.System.*;
 
@@ -66,6 +75,11 @@ public abstract class LocalController extends JenkinsController {
      * Partial implementation of {@link JenkinsControllerFactory} for subtypes.
      */
     public static abstract class LocalFactoryImpl implements JenkinsControllerFactory {
+        @Inject
+        private RepositorySystem repositorySystem;
+        @Inject
+        private RepositorySystemSession repositorySystemSession;
+
         /**
          * Determines the location of the war file.
          */
@@ -95,13 +109,32 @@ public abstract class LocalController extends JenkinsController {
             return null;
         }
 
+        /**
+         * Returns the path to the form elements plug-in. Uses the Maven repository to obtain the plugin.
+         *
+         * @return the path to the form elements plug-in
+         */
+        protected File getFormElementsPathFile() {
+            try {
+                ArtifactResult resolvedArtifact = repositorySystem.resolveArtifact(repositorySystemSession,
+                        new ArtifactRequest(new DefaultArtifact("org.jenkins-ci.plugins", "form-element-path", "hpi", "1.4"),
+                                Arrays.asList(new RemoteRepository.Builder("repo.jenkins-ci.org", "default", "http://repo.jenkins-ci.org/public/").build()),
+                                null));
+                return resolvedArtifact.getArtifact().getFile();
+            }
+            catch (ArtifactResolutionException e) {
+                throw new RuntimeException("Could not resolve form-element-path.hpi from Maven repository repo.jenkins-ci.org.", e);
+            }
+        }
     }
 
     /**
      * @param war
      *      Where is the jenkins.war file to be tested?
+     * @param formElementPlugin
+     *      Where is the required form-element-path.hpi file stored?
      */
-    protected LocalController(File war) {
+    protected LocalController(File war, final File formElementPlugin) {
         this.war = war;
         if (!war.exists())
             throw new RuntimeException("Invalid path to jenkins.war specified: "+war);
@@ -116,7 +149,6 @@ public abstract class LocalController extends JenkinsController {
 
         this.logFile = new File(this.tempDir.getParentFile(), this.tempDir.getName()+".log");
 
-        File formPathElement = downloadPathElement();
         File pluginDir = new File(tempDir,"plugins");
         pluginDir.mkdirs();
 
@@ -151,9 +183,10 @@ public abstract class LocalController extends JenkinsController {
         }
 
         try {
-            FileUtils.copyFile(formPathElement, new File(pluginDir,"path-element.hpi"));
+            FileUtils.copyFile(formElementPlugin, new File(pluginDir, "path-element.hpi"));
         } catch (IOException e) {
-            throw new RuntimeException(String.format("Failed to copy form path element file %s to plugin dir %s.", formPathElement, pluginDir),e);
+            throw new RuntimeException(String.format("Failed to copy form path element file %s to plugin dir %s.",
+                    formElementPlugin, pluginDir),e);
         }
     }
 

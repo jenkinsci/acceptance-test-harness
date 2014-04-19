@@ -1,15 +1,16 @@
 package org.jenkinsci.test.acceptance.controller;
 
-import com.cloudbees.sdk.extensibility.Extension;
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.StringUtils;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.jenkinsci.utils.process.ProcessInputStream;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
+import com.cloudbees.sdk.extensibility.Extension;
 
 /**
  * @author: Vivek Pandey
@@ -18,8 +19,8 @@ public class TomcatController extends LocalController {
 
     protected final File catalinaHome;
 
-    public TomcatController(File war, File catalinaHome) {
-        super(war);
+    public TomcatController(File war, File catalinaHome, final File formElementsPathFile) {
+        super(war, formElementsPathFile);
         if (!catalinaHome.isDirectory()) {
             throw new RuntimeException("Invalid CATALINA_HOME: " + catalinaHome.getAbsolutePath());
         }
@@ -95,7 +96,7 @@ public class TomcatController extends LocalController {
 
         @Override
         public TomcatController create() {
-            return new TomcatController(getWarFile(), getTomcatHome());
+            return new TomcatController(getWarFile(), getTomcatHome(), getFormElementsPathFile());
         }
 
         protected File getTomcatHome() {
