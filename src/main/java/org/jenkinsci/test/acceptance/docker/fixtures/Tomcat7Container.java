@@ -17,6 +17,6 @@ public class Tomcat7Container extends DockerContainer {
      * URL of Tomcat.
      */
     public URL getUrl() throws IOException {
-        return new URL("http://localhost:"+port(8080));
+        return new URL("http://"+ipBound(8080)+":"+port(8080));
     }
 }

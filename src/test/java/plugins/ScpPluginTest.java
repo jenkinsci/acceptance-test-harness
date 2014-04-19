@@ -25,7 +25,7 @@ import java.io.IOException;
 public class ScpPluginTest extends AbstractJUnitTest {
     @Inject
     Docker docker;
-
+    @Native("docker")
     /**
      @native(docker)
      Scenario: Configure a job with SCP publishing
@@ -43,9 +43,9 @@ public class ScpPluginTest extends AbstractJUnitTest {
      */
     @Test
 
-    public void configure_job_with_scp_publishing() throws IOException, InterruptedException {
+    public void configure_job_with_scp_password_publishing() throws IOException, InterruptedException {
         SshdContainer sshd = docker.start(SshdContainer.class);
-        Resource pmd_xml = resource("/pmd_plugin/pmd.xml");
+        Resource cp_file = resource("/scp_plugin/lorem-ipsum-scp.txt");
 
         FreeStyleJob j = jenkins.jobs.create();
 
@@ -60,18 +60,69 @@ public class ScpPluginTest extends AbstractJUnitTest {
         jenkins.save();
 
         j.configure(); {
-            j.copyResource(pmd_xml);
+            j.copyResource(cp_file);
             ScpPublisher sp = j.addPublisher(ScpPublisher.class);
             ScpPublisher.Site sps = sp.add();
-            sps.sourceFile.set("pmd.xml");
+            sps.sourceFile.set("lorem-ipsum-scp.txt");
             sps.filePath.set("abc");
         }
         j.save();
 
         j.startBuild().shouldSucceed();
 
-        sshd.cp("/tmp/abc/pmd.xml", new File("/tmp"));
-        assertThat(FileUtils.readFileToString(new File("/tmp/pmd.xml")), CoreMatchers.is(pmd_xml.asText()));
+        sshd.cp("/tmp/abc/lorem-ipsum-scp.txt", new File("/tmp"));
+        assertThat(FileUtils.readFileToString(new File("/tmp/lorem-ipsum-scp.txt")), CoreMatchers.is(cp_file.asText()));
+        sshd.close();
+    }
 
+
+    @Native("docker")
+    /**
+     @native(docker)
+     Scenario: Configure a job with SCP publishing
+     Given I have installed the "scp" plugin
+     And a docker fixture "sshd"
+     And a job
+     When I configure docker fixture as SCP site
+     And I configure the job
+     And I copy resource "pmd_plugin/pmd.xml" into workspace
+     And I publish "pmd.xml" with SCP plugin
+     And I save the job
+     And I build the job
+     Then the build should succeed
+     And SCP plugin should have published "pmd.xml" on docker fixture
+     */
+    @Test
+
+    public void configure_job_with_scp_key_publishing() throws IOException, InterruptedException {
+        SshdContainer sshd = docker.start(SshdContainer.class);
+        Resource cp_file = resource("/scp_plugin/lorem-ipsum-scp.txt");
+
+        FreeStyleJob j = jenkins.jobs.create();
+
+        jenkins.configure();
+        Site s = new ScpGlobalConfig(jenkins).addSite(); {
+            s.hostname.set(sshd.ipBound(22));
+            s.port.set(sshd.port(22));
+            s.username.set("test");
+            s.keyfile.set(resource("/ssh_keys/unsafe").asFile().getAbsolutePath());
+            s.rootRepositoryPath.set("/tmp");
+        }
+        jenkins.save();
+
+        j.configure(); {
+            j.copyResource(cp_file);
+            ScpPublisher sp = j.addPublisher(ScpPublisher.class);
+            ScpPublisher.Site sps = sp.add();
+            sps.sourceFile.set("lorem-ipsum-scp.txt");
+            sps.filePath.set("abc");
+        }
+        j.save();
+
+        j.startBuild().shouldSucceed();
+
+        sshd.cp("/tmp/abc/lorem-ipsum-scp.txt", new File("/tmp"));
+        assertThat(FileUtils.readFileToString(new File("/tmp/lorem-ipsum-scp.txt")), CoreMatchers.is(cp_file.asText()));
+        sshd.close();
     }
 }

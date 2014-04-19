@@ -1,24 +1,24 @@
 package org.jenkinsci.test.acceptance.docker;
 
-
 import com.google.inject.Inject;
 import org.apache.commons.io.FileUtils;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.junit.internal.AssumptionViolatedException;
 import org.jvnet.hudson.annotation_indexer.Index;
+
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
+
+import static java.lang.System.getenv;
 
 
 /**
  * Entry point to the docker support.
- * <p/>
+ *
  * Use this subsystem by injecting this class into your test.
  *
  * @author Kohsuke Kawaguchi
@@ -54,10 +54,6 @@ public class Docker {
     public Docker()
     {
         dockerCmd = Arrays.asList(stringDockerCmd);
-        if(!isAvailable())
-        {
-            throw new AssumptionViolatedException(dockerCmd + " is needed for Docker but doesn't exist in the system");
-        }
     }
 
     public static CommandBuilder cmd(String cmd) {
@@ -107,14 +103,8 @@ public class Docker {
             dir.mkdirs();
 
             try {
-                URL resourceDir = classLoader.getResource(fixture.getName().replace('.', '/'));
-                File dockerFileDir;
-                try {
-                    dockerFileDir = new File(resourceDir.toURI());
-                } catch(URISyntaxException e) {
-                    dockerFileDir = new File(resourceDir.getPath());
-                }
-                FileUtils.copyDirectory(dockerFileDir, dir);
+                FileUtils.copyURLToFile(classLoader.getResource(fixture.getName().replace('.', '/') + "/Dockerfile"),new File(dir,"Dockerfile"));
+
                 return build("jenkins/" + f.id(), dir);
             } finally {
                 FileUtils.deleteDirectory(dir);
@@ -137,7 +127,7 @@ public class Docker {
     }
 
     public <T extends DockerContainer> T start(Class<T> fixture) {
-        return start(fixture, null, null);
+        return start(fixture,null,null);
     }
 
     /**
