@@ -25,14 +25,11 @@ public class Config extends AbstractModule {
     @Override
     protected void configure() {
         try {
-            FallbackConfig base = new FallbackConfig();
-
             String loc = System.getProperty("CONFIG");
             if (loc==null)
                 loc = System.getenv("CONFIG");
             if (loc==null) {
-                // none specified. fallback.
-                install(base);
+                // none specified.
                 return;
             }
 
@@ -53,7 +50,7 @@ public class Config extends AbstractModule {
             m.addImports(TestScope.class);
 
             // install the config
-            install(Modules.override(base).with(m));
+            install(m);
         } catch (IOException e) {
             throw new Error("Failed to load configuration script",e);
         }

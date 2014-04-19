@@ -1,5 +1,5 @@
-#!/bin/sh
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+#!/bin/bash
+DIR="$( cd "$( dirname "$0" )" && pwd )"
 if [ ! -d "$DIR/target" ]
 then
   mvn package -DskipTests -f "$DIR/pom.xml"

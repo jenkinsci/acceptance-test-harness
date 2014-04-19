@@ -35,7 +35,7 @@ public class CheckstylePluginTest extends AbstractJUnitTest {
     @Test
     public void record_checkstyle_report() {
         FreeStyleJob job = setupJob();
-        Build b = job.queueBuild().waitUntilFinished().shouldSucceed();
+        Build b = job.startBuild().waitUntilFinished().shouldSucceed();
 
         assertThat(b, hasAction("Checkstyle Warnings"));
         assertThat(job, hasAction("Checkstyle Warnings"));
@@ -63,7 +63,7 @@ public class CheckstylePluginTest extends AbstractJUnitTest {
     @Test
     public void view_checkstyle_report() {
         FreeStyleJob job = setupJob();
-        Build b = job.queueBuild().waitUntilFinished().shouldSucceed();
+        Build b = job.startBuild().waitUntilFinished().shouldSucceed();
 
         CheckstyleAction ca = new CheckstyleAction(job);
         assertThat(ca.getWarningNumber(), is(776));

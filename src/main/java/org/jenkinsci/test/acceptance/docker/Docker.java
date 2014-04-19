@@ -54,10 +54,6 @@ public class Docker {
     public Docker()
     {
         dockerCmd = Arrays.asList(stringDockerCmd);
-        if(!isAvailable())
-        {
-            throw new AssumptionViolatedException(dockerCmd + " is needed for Docker but doesn't exist in the system");
-        }
     }
 
     public static CommandBuilder cmd(String cmd) {

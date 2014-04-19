@@ -50,6 +50,6 @@ public class MultipleScmsPluginTest extends AbstractJUnitTest {
         job.addShellStep("test -d svn-project/.svn && test -f git-project/pom.xml");
         job.save();
 
-        job.queueBuild().shouldSucceed();
+        job.startBuild().shouldSucceed();
     }
 }

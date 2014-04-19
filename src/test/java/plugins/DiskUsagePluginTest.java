@@ -57,7 +57,7 @@ public class DiskUsagePluginTest extends AbstractJUnitTest {
     @Test
     public void show_graph_on_project_page() {
         FreeStyleJob job = jenkins.jobs.create();
-        job.queueBuild().waitUntilFinished();
+        job.startBuild().waitUntilFinished();
 
         showGraphOnProjectPage();
 
@@ -74,7 +74,7 @@ public class DiskUsagePluginTest extends AbstractJUnitTest {
         job.configure();
         job.addShellStep("echo 'asdf' > file");
         job.save();
-        job.queueBuild().waitUntilFinished();
+        job.startBuild().waitUntilFinished();
 
         assertReports(job, "Workspace [1-9]\\d*,");
 

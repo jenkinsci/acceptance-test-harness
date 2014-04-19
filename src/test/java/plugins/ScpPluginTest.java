@@ -25,7 +25,7 @@ import java.io.IOException;
 public class ScpPluginTest extends AbstractJUnitTest {
     @Inject
     Docker docker;
-
+    @Native("docker")
     /**
      @native(docker)
      Scenario: Configure a job with SCP publishing
@@ -68,7 +68,7 @@ public class ScpPluginTest extends AbstractJUnitTest {
         }
         j.save();
 
-        j.queueBuild().shouldSucceed();
+        j.startBuild().shouldSucceed();
 
         sshd.cp("/tmp/abc/pmd.xml", new File("/tmp"));
         assertThat(FileUtils.readFileToString(new File("/tmp/pmd.xml")), CoreMatchers.is(pmd_xml.asText()));
