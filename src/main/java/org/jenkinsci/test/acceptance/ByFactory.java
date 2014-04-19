@@ -43,8 +43,8 @@ public class ByFactory {
         return xpath(".//*[@path='%s']", String.format(path, args));
     }
 
-    public By name(String name) {
-        return xpath(".//*[@name='%s']", name);
+    public By name(String name, Object... args) {
+        return xpath(".//*[@name='%s']", String.format(name, args));
     }
 
     /**
@@ -81,7 +81,7 @@ public class ByFactory {
      *      Text, id, title.
      */
     public By input(String locator) {
-        return xpath(fieldXPath("*[name()='INPUT' or name()='TEXTAREA' or name()='SELECT']",locator));
+        return xpath(fieldXPath("*[name()='INPUT' or name()='input' or name()='textarea' or name()='TEXTAREA' or name()='select' or name()='SELECT']",locator));
     }
 
     private static String fieldXPath(String base, String locator) {

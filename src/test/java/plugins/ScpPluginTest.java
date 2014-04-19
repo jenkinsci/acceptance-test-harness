@@ -51,7 +51,7 @@ public class ScpPluginTest extends AbstractJUnitTest {
 
         jenkins.configure();
         Site s = new ScpGlobalConfig(jenkins).addSite(); {
-            s.hostname.set("localhost");
+            s.hostname.set(sshd.ipBound(22));
             s.port.set(sshd.port(22));
             s.username.set("test");
             s.password.set("test");
@@ -68,7 +68,7 @@ public class ScpPluginTest extends AbstractJUnitTest {
         }
         j.save();
 
-        j.queueBuild().shouldSucceed();
+        j.startBuild().shouldSucceed();
 
         sshd.cp("/tmp/abc/pmd.xml", new File("/tmp"));
         assertThat(FileUtils.readFileToString(new File("/tmp/pmd.xml")), CoreMatchers.is(pmd_xml.asText()));

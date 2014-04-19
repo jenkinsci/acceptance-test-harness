@@ -9,7 +9,7 @@ public abstract class Step extends PageArea {
     public final Job parent;
 
     public Step(Job parent, String path) {
-        super(parent.injector,path);
+        super(parent, path);
         this.parent = parent;
     }
 }

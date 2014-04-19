@@ -43,6 +43,10 @@ public class JenkinsControllerPoolProcess {
     @Option(name="-n",usage="Number of instances to pool. >=1.")
     public int n = Integer.getInteger("count",1);
 
+    @Option(name="-socket",usage="Unix domain socket file to communicate with client")
+    public File socket = SOCKET;
+
+
     public static void main(String[] args) throws Exception {
         MAIN = true;
         JenkinsControllerPoolProcess proc = new JenkinsControllerPoolProcess();
@@ -97,12 +101,12 @@ public class JenkinsControllerPoolProcess {
      * Acccepts connection to Unix domain socket and hand it off to a connection handling thread.
      */
     private void processServerSocket() throws IOException, InterruptedException {
-        SOCKET.deleteOnExit();
-        SOCKET.delete();
+        socket.deleteOnExit();
+        socket.delete();
 
         try (UnixServerSocketChannel channel = UnixServerSocketChannel.open()) {
             channel.configureBlocking(true);
-            channel.socket().bind(new UnixSocketAddress(SOCKET));
+            channel.socket().bind(new UnixSocketAddress(socket));
 
             System.out.println("JUT Server is ready");
 

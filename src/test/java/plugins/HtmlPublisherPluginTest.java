@@ -44,7 +44,7 @@ public class HtmlPublisherPluginTest extends AbstractJUnitTest {
         report.name.set("MyReport");
         job.save();
 
-        job.queueBuild().shouldSucceed();
+        job.startBuild().shouldSucceed();
         job.action(HtmlReport.class, "MyReport")
                 .fileShouldMatch("root.html", "root")
                 .fileShouldMatch("dir/indir.html", "indir")

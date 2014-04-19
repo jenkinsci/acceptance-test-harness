@@ -34,6 +34,10 @@ public class CodeMirror extends PageArea {
         super(context, path);
     }
 
+    public CodeMirror(PageArea area, String relativePath) {
+        super(area, relativePath);
+    }
+
     public void set(String content) {
         if (!(driver instanceof JavascriptExecutor)) throw new AssertionError(
                 "JavaScript execution not supported"

@@ -7,12 +7,14 @@ To allow us to define such fixtures in a portable and reusable manner, this test
 a mechanism and convention to define/use fixtures inside [Docker](http://docker.io/). They are
 defined in `./fixtures/*`
 
+##Docker injections
 
-## Running/skipping Docker tests
-JUnit Tests that require docker fixtures are marked with `@Native("docker")` annotation.
-Cucumber tests are likewise annotated with `@native(docker)` annotation.
+To control docker 2 injections are available.
 
-If docker is not installed when you run tests, these tests are automatically skipped.
+    Docker = "docker";  // Name of the docker command
+    dockerPortOffset = 40000; // Offset for binding the docker ports to an host ip address
+
+Compare the dockerinject.groovy for a more advanced Docker injection.
 
 
 ## Writing a JUnit test that relies on Docker fixtures
@@ -32,6 +34,8 @@ Pick the fixture type you want to use, then insert `DockerContainerHolder` for i
 
 `DockerContainerHolder` starts a container, and it'll automatically clean-up the container at the end of the test.
 
+The public function ipBound(n) and port(n) allow easily to find out to which host ip address and port a docker container
+ip address is bound to.
 
 ## Writing a cucumber test that relies on Docker fixtures
 `DockerSteps` defines steps that get the fixtures running, such as this:
@@ -45,6 +49,9 @@ The containers are automatically terminated and cleaned up at the end of test.
 Each fixture is defined in terms of a `DockerContainer` subtype with `@DockerFixture` annotation. This type
 exposes various methods needed to interact with the running fixture.
 
+The `@DockerFixture` bindIp allows you to bind the accessible ports of the docker container to a local ip address.
+
 A fixture also needs to define `Dockerfile` in the resources directory. If a fixture class is
 `org/acme/FooContainer.java`, then the docker file must be located at `org/acme/FooContainer/Dockerfile`.
+
 
