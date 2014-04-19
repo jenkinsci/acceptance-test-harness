@@ -37,5 +37,5 @@ public @interface DockerFixture {
     /**
      * Ip address to bind to
      */
-    String bindIp() default "127.0.0.0.1";
+    String bindIp() default "127.0.0.1";
 }
