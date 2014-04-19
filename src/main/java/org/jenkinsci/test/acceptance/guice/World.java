@@ -5,8 +5,10 @@ import com.cloudbees.sdk.extensibility.ExtensionList;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Module;
 import com.google.inject.util.Modules;
 import org.jenkinsci.test.acceptance.Config;
+import org.jenkinsci.test.acceptance.FallbackConfig;
 
 import javax.inject.Singleton;
 
@@ -67,7 +69,16 @@ public class World extends AbstractModule {
 
     @Override
     protected void configure() {
-        install(Modules.override(new ExtensionFinder(cl)).with(new Config()));
+        // lowest priority is our default binding
+        Module m = new FallbackConfig();
+
+        // let extensions override the fallback config
+        m = Modules.override(m).with(new ExtensionFinder(cl));
+
+        // user config trumps everything
+        m = Modules.override(m).with(new Config());
+
+        install(m);
     }
 
     /**
