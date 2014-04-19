@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.http.HttpEntity;
@@ -16,16 +15,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
-import org.eclipse.aether.RepositorySystem;
-import org.eclipse.aether.RepositorySystemSession;
-import org.eclipse.aether.artifact.DefaultArtifact;
-import org.eclipse.aether.repository.RemoteRepository;
-import org.eclipse.aether.resolution.ArtifactRequest;
-import org.eclipse.aether.resolution.ArtifactResolutionException;
-import org.eclipse.aether.resolution.ArtifactResult;
 
 import com.cloudbees.sdk.extensibility.Extension;
-import com.google.inject.Inject;
 
 /**
  * Run test against existing Jenkins instance.
@@ -101,12 +92,7 @@ public class ExistingJenkinsController extends JenkinsController {
     }
 
     @Extension
-    public static class FactoryImpl implements JenkinsControllerFactory {
-        @Inject
-        private RepositorySystem repositorySystem;
-        @Inject
-        private RepositorySystemSession repositorySystemSession;
-
+    public static class FactoryImpl extends AbstractJenkinsControllerFactory {
         @Override
         public String getId() {
             return "existing";
@@ -118,24 +104,6 @@ public class ExistingJenkinsController extends JenkinsController {
             if (url==null)  url = "http://localhost:8080/";
 
             return new ExistingJenkinsController(url, getFormElementsPathFile());
-        }
-
-        /**
-         * Returns the path to the form elements plug-in. Uses the Maven repository to obtain the plugin.
-         *
-         * @return the path to the form elements plug-in
-         */
-        protected File getFormElementsPathFile() {
-            try {
-                ArtifactResult resolvedArtifact = repositorySystem.resolveArtifact(repositorySystemSession,
-                        new ArtifactRequest(new DefaultArtifact("org.jenkins-ci.plugins", "form-element-path", "hpi", "1.4"),
-                                Arrays.asList(new RemoteRepository.Builder("repo.jenkins-ci.org", "default", "http://repo.jenkins-ci.org/public/").build()),
-                                null));
-                return resolvedArtifact.getArtifact().getFile();
-            }
-            catch (ArtifactResolutionException e) {
-                throw new RuntimeException("Could not resolve form-element-path.hpi from Maven repository repo.jenkins-ci.org.", e);
-            }
         }
     }
 }
