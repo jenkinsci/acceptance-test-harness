@@ -25,7 +25,7 @@ import java.io.IOException;
 public class ScpPluginTest extends AbstractJUnitTest {
     @Inject
     Docker docker;
-
+    @Native("docker")
     /**
      @native(docker)
      Scenario: Configure a job with SCP publishing
