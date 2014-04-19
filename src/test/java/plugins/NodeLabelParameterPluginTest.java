@@ -50,7 +50,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         j.addParameter(NodeParameter.class).setName("slavename");
         j.save();
 
-        Build b = j.queueBuild(singletonMap("slavename", s.getName())).shouldSucceed();
+        Build b = j.startBuild(singletonMap("slavename", s.getName())).shouldSucceed();
         assertThat(b.getNode(), is(s.getName()));
     }
 
@@ -81,10 +81,10 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         j.addParameter(LabelParameter.class).setName("slavelabel");
         j.save();
 
-        Build b = j.queueBuild(singletonMap("slavelabel", s1.getName())).shouldSucceed();
+        Build b = j.startBuild(singletonMap("slavelabel", s1.getName())).shouldSucceed();
         assertThat(b.getNode(), is(s1.getName()));
 
-        b = j.queueBuild(singletonMap("slavelabel", String.format("!%s && !%s",s1.getName(), s2.getName()))).shouldSucceed();
+        b = j.startBuild(singletonMap("slavelabel", String.format("!%s && !%s",s1.getName(), s2.getName()))).shouldSucceed();
         assertThat(b.getNode(), is("master"));
     }
 
@@ -117,7 +117,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         j.concurrentBuild.check();
         j.save();
 
-        Build b = j.queueBuild(singletonMap("slavename", s.getName()+",master")).shouldSucceed();
+        Build b = j.startBuild(singletonMap("slavename", s.getName()+",master")).shouldSucceed();
 
         assertThat(j.getNextBuildNumber(), is(3));
 

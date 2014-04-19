@@ -43,7 +43,7 @@ public class FindbugsPluginTest extends AbstractJUnitTest {
         job.addPublisher(FindbugsPublisher.class).pattern.sendKeys("findbugsXml.xml");
         job.save();
 
-        Build build = job.queueBuild().waitUntilFinished();
+        Build build = job.startBuild().waitUntilFinished();
         assertThat(build, hasAction("FindBugs Warnings"));
         assertThat(job, hasAction("FindBugs Warnings"));
         assertThat(build.open(), hasContent("FindBugs: 2 warnings from one analysis."));

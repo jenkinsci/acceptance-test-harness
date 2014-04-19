@@ -44,7 +44,7 @@ public class GitPluginTest extends AbstractJUnitTest {
         job.addShellStep("test -f pom.xml");
         job.save();
 
-        job.queueBuild().shouldSucceed();
+        job.startBuild().shouldSucceed();
     }
 
     @Test
@@ -55,7 +55,7 @@ public class GitPluginTest extends AbstractJUnitTest {
         job.addShellStep("test `git rev-parse origin/svn` = `git rev-parse HEAD`");
         job.save();
 
-        job.queueBuild().shouldSucceed();
+        job.startBuild().shouldSucceed();
     }
 
     @Test
@@ -66,7 +66,7 @@ public class GitPluginTest extends AbstractJUnitTest {
         job.addShellStep("test -f pom.xml && git remote -v");
         job.save();
 
-        job.queueBuild().shouldSucceed().shouldContainsConsoleOutput("custom_origin\\s+" + REPO_URL);
+        job.startBuild().shouldSucceed().shouldContainsConsoleOutput("custom_origin\\s+" + REPO_URL);
     }
 
     @Test
@@ -77,7 +77,7 @@ public class GitPluginTest extends AbstractJUnitTest {
         job.addShellStep("test `git rev-parse selenium_test_branch` = `git rev-parse HEAD`");
         job.save();
 
-        job.queueBuild().shouldSucceed();
+        job.startBuild().shouldSucceed();
     }
 
     @Test
@@ -88,6 +88,6 @@ public class GitPluginTest extends AbstractJUnitTest {
         job.addShellStep("cd local_dir && test -f pom.xml");
         job.save();
 
-        job.queueBuild().shouldSucceed();
+        job.startBuild().shouldSucceed();
     }
 }

@@ -24,7 +24,7 @@ public class ViolationsPluginTest extends AbstractJUnitTest {
         job.addPublisher(Violations.class).config("fxcop").pattern("fxcop/*");
         job.save();
 
-        Build build = job.queueBuild().shouldSucceed();
+        Build build = job.startBuild().shouldSucceed();
 
         assertThat(job.action(ViolationsAction.class), hasViolations("fxcop", "2", "2"));
         assertThat(build.action(ViolationsAction.class), hasViolations("fxcop", "2", "2"));
@@ -40,7 +40,7 @@ public class ViolationsPluginTest extends AbstractJUnitTest {
         new Violations(job).config("fxcop").pattern("fxcop/*");
         job.save();
 
-        job.queueBuild().shouldSucceed();
+        job.startBuild().shouldSucceed();
 
         MavenModule module = job.module("gid$example");
         MavenModuleBuild moduleBuild = module.getLastBuild();

@@ -22,6 +22,6 @@ public class SshSlaveLauncher extends ComputerLauncher {
         // TODO: this needs to be more reliable
         clickButton("Add");
 
-        return new SshCredentialDialog(injector,"/credentials");
+        return new SshCredentialDialog(page, "/credentials");
     }
 }
