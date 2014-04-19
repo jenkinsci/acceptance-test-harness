@@ -1,7 +1,9 @@
 package org.jenkinsci.test.acceptance.po;
 
 import com.google.inject.Injector;
+
 import cucumber.api.DataTable;
+
 import org.apache.commons.io.IOUtils;
 import org.codehaus.plexus.util.Base64;
 import org.jenkinsci.test.acceptance.junit.Resource;
@@ -50,9 +52,12 @@ public class Job extends ContainerPageObject {
     public <T extends Scm> T useScm(Class<T> type) {
         ensureConfigPage();
 
-        String caption = type.getAnnotation(Describable.class).value();
+        WebElement radio = findCaption(type, new Finder<WebElement>() {
+            @Override protected WebElement find(String caption) {
+                return outer.find(by.radioButton(caption));
+            }
+        });
 
-        WebElement radio = find(by.radioButton(caption));
         check(radio);
 
         return newInstance(type, this, radio.getAttribute("path"));
@@ -73,12 +78,16 @@ public class Job extends ContainerPageObject {
     private <T extends Step> T addStep(Class<T> type, String section) {
         ensureConfigPage();
 
-        String caption = type.getAnnotation(Describable.class).value();
+        final WebElement dropDown = find(by.path("/hetero-list-add[%s]",section));
+        findCaption(type, new Resolver() {
+            @Override protected void resolve(String caption) {
+                selectDropdownMenu(caption, dropDown);
+            }
+        });
 
-        selectDropdownMenu(caption, find(by.path("/hetero-list-add[%s]",section)));
         String path = last(by.xpath("//div[@name='%s']", section)).getAttribute("path");
 
-        return newInstance(type, this,path);
+        return newInstance(type, this, path);
     }
 
     public ShellBuildStep addShellStep(Resource res) {
@@ -87,7 +96,7 @@ public class Job extends ContainerPageObject {
 
     public ShellBuildStep addShellStep(String shell) {
         ShellBuildStep step = addBuildStep(ShellBuildStep.class);
-        step.command.set(shell);
+        step.command(shell);
         return step;
     }
 
@@ -146,19 +155,27 @@ public class Job extends ContainerPageObject {
         return url("build?delay=0sec");
     }
 
-    public Build queueBuild(DataTable table) {
+    public Build startBuild(DataTable table) {
         Map<String,String> params = new HashMap<>();
         for (List<String> row : table.raw()) {
             params.put(row.get(0), row.get(1));
         }
-        return queueBuild(params);
+        return startBuild(params);
     }
 
-    public Build queueBuild() {
-        return queueBuild(Collections.<String,Object>emptyMap());
+    public Build startBuild() {
+        return scheduleBuild().waitUntilStarted();
     }
 
-    public Build queueBuild(Map<String,?> params) {
+    public Build startBuild(Map<String,?> params) {
+        return scheduleBuild(params).waitUntilStarted();
+    }
+
+    public Build scheduleBuild() {
+        return scheduleBuild(Collections.<String,Object>emptyMap());
+    }
+
+    public Build scheduleBuild(Map<String,?> params) {
         int nb = getJson().get("nextBuildNumber").intValue();
         visit(getBuildUrl());
 
@@ -171,7 +188,7 @@ public class Job extends ContainerPageObject {
             clickButton("Build");
         }
 
-        return build(nb).waitUntilStarted();
+        return build(nb);
     }
 
     public Build build(int buildNumber) {
@@ -185,10 +202,15 @@ public class Job extends ContainerPageObject {
     public <T extends Parameter> T addParameter(Class<T> type) {
         ensureConfigPage();
 
-        String displayName = type.getAnnotation(Describable.class).value();
-
         check(find(by.xpath("//input[@name='parameterized']")));
-        selectDropdownMenu(displayName, find(by.xpath("//button[text()='Add Parameter']")));
+
+        final WebElement dropDown = find(by.xpath("//button[text()='Add Parameter']"));
+        findCaption(type, new Resolver() {
+            @Override protected void resolve(String caption) {
+                selectDropdownMenu(caption, dropDown);
+            }
+        });
+
 //        find(xpath("//button[text()='Add Parameter']")).click();
 //        find(xpath("//a[text()='%s']",displayName)).click();
 
@@ -207,6 +229,10 @@ public class Job extends ContainerPageObject {
 
     public int getNextBuildNumber() {
         return getJson().get("nextBuildNumber").intValue();
+    }
+
+    public Workspace getWorkspace() {
+        return new Workspace(this);
     }
 
     public void useCustomWorkspace(String ws) {
@@ -239,5 +265,10 @@ public class Job extends ContainerPageObject {
         else
             n=j.slaves.get(DumbSlave.class, nodeName);
         n.getBuildHistory().shouldInclude(this.name);
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }

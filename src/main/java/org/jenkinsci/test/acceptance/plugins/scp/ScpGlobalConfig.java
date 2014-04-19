@@ -1,6 +1,5 @@
 package org.jenkinsci.test.acceptance.plugins.scp;
 
-import com.google.inject.Injector;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Jenkins;
@@ -26,12 +25,12 @@ public class ScpGlobalConfig extends PageArea {
     public Site addSite() {
         add.click();
         String p = last(by.xpath(".//div[@name='site'][starts-with(@path,'/be-certipost-hudson-plugin-SCPRepositoryPublisher/')]")).getAttribute("path");
-        return new Site(injector,p);
+        return new Site(page, p);
     }
 
     public static class Site extends PageArea {
-        public Site(Injector injector, String path) {
-            super(injector, path);
+        public Site(PageObject parent, String path) {
+            super(parent, path);
         }
 
         public final Control hostname = control("hostname");

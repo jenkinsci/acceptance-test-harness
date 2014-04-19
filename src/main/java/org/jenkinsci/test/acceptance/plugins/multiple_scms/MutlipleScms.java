@@ -27,6 +27,7 @@ import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.Scm;
+import org.openqa.selenium.WebElement;
 
 @Describable("Multiple SCMs")
 public class MutlipleScms extends Scm {
@@ -40,10 +41,13 @@ public class MutlipleScms extends Scm {
     }
 
     public <T extends Scm> T addScm(Class<T> type) {
-
-        String caption = type.getAnnotation(Describable.class).value();
         addButton.click();
-        clickLink(caption);
+
+        findCaption(type, new Finder<WebElement>() {
+            @Override protected WebElement find(String caption) {
+                return outer.find(by.link(caption));
+            }
+        }).click();
 
         sleep(100);
         String path = last(by.button("Delete SCM")).getAttribute("path");

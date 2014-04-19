@@ -50,7 +50,7 @@ public class WarningsPluginTest extends AbstractJUnitTest {
         pub.addWorkspaceFileScanner("Java Compiler (javac)", "**/*");
         job.save();
 
-        Build b = job.queueBuild().shouldSucceed();
+        Build b = job.startBuild().shouldSucceed();
 
         assertThatBuildHasWarnings(b, 0,"Java");
         assertThatBuildHasWarnings(b, 0, "Maven");
@@ -76,7 +76,7 @@ public class WarningsPluginTest extends AbstractJUnitTest {
         job.addShellStep("mvn clean install || true");
         job.save();
 
-        Build b = job.queueBuild().shouldSucceed();
+        Build b = job.startBuild().shouldSucceed();
 
         assertThatBuildHasWarnings(b,1,"Maven");
     }
@@ -107,7 +107,7 @@ public class WarningsPluginTest extends AbstractJUnitTest {
                 "javac -Xlint a.java 2> out.log || true");
         job.save();
 
-        Build b = job.queueBuild().shouldSucceed();
+        Build b = job.startBuild().shouldSucceed();
 
         assertThatBuildHasWarnings(b,1,"Java");
     }
@@ -132,7 +132,7 @@ public class WarningsPluginTest extends AbstractJUnitTest {
         job.addShellStep("mvn clean install > errors.log || true");
         job.save();
 
-        Build b = job.queueBuild().shouldSucceed();
+        Build b = job.startBuild().shouldSucceed();
 
         assertThatBuildHasWarnings(b,0,"Maven");
     }

@@ -13,6 +13,8 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
 public class JenkinsConfig extends PageObject {
     public final Jenkins jenkins;
 
+    public final Control numExecutors = control("/jenkins-model-MasterBuildConfiguration/numExecutors");
+
     public JenkinsConfig(Jenkins jenkins) {
         super(jenkins.injector, jenkins.url("configure"));
         this.jenkins = jenkins;
@@ -41,7 +43,13 @@ public class JenkinsConfig extends PageObject {
 
     public <T extends ToolInstallation> T addTool(Class<T> type) {
         jenkins.ensureConfigPage();
-        String name = type.getAnnotation(Describable.class).value();
+
+        String name = findCaption(type, new Finder<String>() {
+            @Override protected String find(String caption) {
+                outer.find(by.button("Add " + caption));
+                return caption;
+            }
+        });
 
         clickButton("Add " + name);
         sleep(100);

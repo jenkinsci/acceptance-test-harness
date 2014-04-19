@@ -37,7 +37,7 @@ public class ProjectDescriptionSetterPluginTest extends AbstractJUnitTest {
         w.filename.set("desc.txt");
         j.save();
 
-        j.queueBuild().shouldSucceed();
+        j.startBuild().shouldSucceed();
         j.open();
         String t = find(by.xpath("//div[@id=\"description\"]/div")).getText();
         assertThat(t, containsString("Project description setter test"));

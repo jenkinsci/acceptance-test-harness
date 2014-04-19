@@ -28,20 +28,13 @@ import org.openqa.selenium.WebDriver;
 /**
  * Page object action.
  *
- * @param <Scope> Page object action is scoped to.
- *
- * Every action must be scoped to certain {@link ContainerPageObject}. Action
- * instance is then created as <tt>pageObject.getAction(MyActionType.class)</tt>
- * (<tt>pageObject</tt> must be an instance of <tt>MyActualType</tt>'s parameter).
- * Actions are registered using {@link ActionPageObject} annotation.
- *
  * @author ogondza
  */
-public class Action<Scope extends ContainerPageObject> extends PageObject {
+public abstract class Action extends PageObject {
 
     protected final ContainerPageObject parent;
 
-    public Action(Scope parent, String relative) {
+    public Action(ContainerPageObject parent, String relative) {
         super(parent.injector, parent.url(relative + "/"));
         this.parent = parent;
     }
@@ -56,4 +49,9 @@ public class Action<Scope extends ContainerPageObject> extends PageObject {
 
         return wd;
     }
+
+    /**
+     * @return true if and action can be attached to given page object.
+     */
+    public abstract boolean isApplicable(ContainerPageObject po);
 }

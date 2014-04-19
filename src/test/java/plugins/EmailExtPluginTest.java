@@ -58,7 +58,7 @@ public class EmailExtPluginTest extends AbstractJUnitTest {
         pub.body.set("$DEFAULT_CONTENT\nwith amendment");
         job.save();
 
-        Build b = job.queueBuild().shouldFail();
+        Build b = job.startBuild().shouldFail();
 
         mailer.assertMail(Pattern.compile("^Modified "),
                 "dev@example.com",

@@ -24,6 +24,7 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxProfile;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
+import org.openqa.selenium.phantomjs.PhantomJSDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.safari.SafariDriver;
 import org.openqa.selenium.support.events.EventFiringWebDriver;
@@ -34,7 +35,7 @@ import com.google.inject.Provides;
 
 /**
  * The default configuration for running tests.
- *
+ * <p/>
  * See {@link Config} for how to override it.
  *
  * @author Kohsuke Kawaguchi
@@ -51,9 +52,8 @@ public class FallbackConfig extends AbstractModule {
 
     private WebDriver createWebDriver() throws IOException {
         String browser = System.getenv("BROWSER");
-        if (browser==null)  browser="firefox";
+        if (browser==null) browser = "firefox";
         browser = browser.toLowerCase(Locale.ENGLISH);
-
 
         switch (browser) {
         case "firefox":
@@ -83,6 +83,8 @@ public class FallbackConfig extends AbstractModule {
             caps.setCapability("platform", Platform.WINDOWS);
 
             return new SauceLabsConnection().createWebDriver(caps);
+        case "phantomjs":
+            return new PhantomJSDriver();
 
         default:
             throw new Error("Unrecognized browser type: "+browser);
@@ -134,3 +136,4 @@ public class FallbackConfig extends AbstractModule {
         throw new AssertionError("Invalid controller type: "+type);
     }
 }
+
