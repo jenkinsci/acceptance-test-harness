@@ -20,6 +20,7 @@ import com.google.inject.Inject;
 
 /**
  Feature: Tests for SCP plugin
+ @author Tobias Meyer
  */
 @WithPlugins("scp")
 public class FtpPublishPluginTest extends AbstractJUnitTest {
@@ -33,9 +34,9 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
        And a docker fixture "ftpd"
        And a job
        When I configure docker fixture as FTP site
-       And I configure the job
-       And I copy resource "pmd_plugin/pmd.xml" into workspace
-       And I publish "pmd.xml" with FTP plugin
+       And I configure the job with remote directory myfolder/
+       And I copy resource "myresource" into workspace
+       And I publish "myresource" with FTP plugin
        And I save the job
        And I build the job
        Then the build should succeed
@@ -57,6 +58,30 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      And a job
      When I configure docker fixture as FTP site
      And I configure the job
+     And I configure ftp publish with remove prefix
+     And I copy resource "mytestfile" into workspace/prefix
+     And I publish "prefix/mytestfile" with FTP plugin
+     And I save the job
+     And I build the job
+     Then the build should succeed
+     And FTP plugin should have published "pmd.xml" on docker fixture
+     */
+    @Test
+
+    public void configure_job_with_remove_prefix_ftp_publishing() throws IOException, InterruptedException
+    {
+
+
+    }
+    //advanced
+    /**
+     @native(docker)
+     Scenario: Configure a job with FTP publishing
+     Given I have installed the "ftp" plugin
+     And a docker fixture "ftpd"
+     And a job
+     When I configure docker fixture as FTP site
+     And I configure the job
      And I copy resources ...  into workspace
      And I publish a set of files but exclude ...
      And I save the job
@@ -66,12 +91,12 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      */
     @Test
 
-    public void configure_job_with_advanced_ftp_publishing() throws IOException, InterruptedException
+    public void configure_job_with_exclude_ftp_publishing() throws IOException, InterruptedException
     {
 
 
     }
-
+    //more transfer set
     /**
      @native(docker)
      Scenario: Configure a job with FTP publishing
@@ -97,6 +122,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
 
     }
 
+//Multiple Server
     /**
      @native(docker)
      Scenario: Configure a job with FTP publishing
