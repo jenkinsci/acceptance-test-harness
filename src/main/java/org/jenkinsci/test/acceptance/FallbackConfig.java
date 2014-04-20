@@ -20,6 +20,7 @@ import org.openqa.selenium.firefox.FirefoxProfile;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.phantomjs.PhantomJSDriver;
+import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.safari.SafariDriver;
 
 import java.io.IOException;
@@ -41,6 +42,11 @@ public class FallbackConfig extends AbstractModule {
      */
     private static final String LANGUAGE_SELECTOR = "intl.accept_languages";
 
+    /**
+     * PhantomJS browser property to set the default locale.
+     */
+    private static final String LANGUAGE_SELECTOR_PHANTOMJS = "phantomjs.page.customHeaders.Accept-Language";
+
     @Override
     protected void configure() {
         // default in case nothing is specified
@@ -52,7 +58,7 @@ public class FallbackConfig extends AbstractModule {
         if (browser == null) browser = "firefox";
         browser = browser.toLowerCase(Locale.ENGLISH);
 
-
+        Map<String, String> prefs;
         switch (browser) {
             case "firefox":
                 FirefoxProfile profile = new FirefoxProfile();
@@ -64,7 +70,7 @@ public class FallbackConfig extends AbstractModule {
             case "iexplorer":
                 return new InternetExplorerDriver();
             case "chrome":
-                Map<String, String> prefs = new HashMap<String, String>();
+                prefs = new HashMap<String, String>();
                 prefs.put(LANGUAGE_SELECTOR, "en");
                 ChromeOptions options = new ChromeOptions();
                 options.setExperimentalOption("prefs", prefs);
@@ -75,7 +81,10 @@ public class FallbackConfig extends AbstractModule {
             case "htmlunit":
                 return new HtmlUnitDriver();
             case "phantomjs":
-                return new PhantomJSDriver();
+                prefs = new HashMap<String, String>();
+                prefs.put(LANGUAGE_SELECTOR, "en");
+                prefs.put(LANGUAGE_SELECTOR_PHANTOMJS, "en");
+                return new PhantomJSDriver(new DesiredCapabilities(prefs));
             default:
                 throw new Error("Unrecognized browser type: " + browser);
         }
