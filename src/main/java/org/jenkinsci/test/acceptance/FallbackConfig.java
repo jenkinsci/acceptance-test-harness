@@ -58,7 +58,6 @@ public class FallbackConfig extends AbstractModule {
         if (browser == null) browser = "firefox";
         browser = browser.toLowerCase(Locale.ENGLISH);
 
-        Map<String, String> prefs;
         switch (browser) {
             case "firefox":
                 FirefoxProfile profile = new FirefoxProfile();
@@ -70,7 +69,7 @@ public class FallbackConfig extends AbstractModule {
             case "iexplorer":
                 return new InternetExplorerDriver();
             case "chrome":
-                prefs = new HashMap<String, String>();
+                Map<String, String> prefs = new HashMap<String, String>();
                 prefs.put(LANGUAGE_SELECTOR, "en");
                 ChromeOptions options = new ChromeOptions();
                 options.setExperimentalOption("prefs", prefs);
@@ -81,10 +80,10 @@ public class FallbackConfig extends AbstractModule {
             case "htmlunit":
                 return new HtmlUnitDriver();
             case "phantomjs":
-                prefs = new HashMap<String, String>();
-                prefs.put(LANGUAGE_SELECTOR, "en");
-                prefs.put(LANGUAGE_SELECTOR_PHANTOMJS, "en");
-                return new PhantomJSDriver(new DesiredCapabilities(prefs));
+                DesiredCapabilities capabilities = DesiredCapabilities.phantomjs();
+                capabilities.setCapability(LANGUAGE_SELECTOR, "en");
+                capabilities.setCapability(LANGUAGE_SELECTOR_PHANTOMJS, "en");
+                return new PhantomJSDriver(capabilities);
             default:
                 throw new Error("Unrecognized browser type: " + browser);
         }
