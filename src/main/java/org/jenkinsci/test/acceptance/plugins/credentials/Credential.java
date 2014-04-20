@@ -14,4 +14,8 @@ public abstract class Credential extends PageArea {
     protected Credential(PageObject context, String path) {
         super(context, path);
     }
+
+    protected Credential(PageArea area, String relativePath) {
+        super(area, relativePath);
+    }
 }

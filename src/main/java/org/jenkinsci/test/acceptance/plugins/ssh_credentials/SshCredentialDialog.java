@@ -28,7 +28,7 @@ public class SshCredentialDialog extends PageArea {
             }
         });
 
-        return newInstance(type, injector, path);
+        return newInstance(type, this, path);
     }
 
     /**
