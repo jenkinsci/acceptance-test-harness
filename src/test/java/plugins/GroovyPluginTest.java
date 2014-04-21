@@ -46,7 +46,7 @@ public class GroovyPluginTest extends AbstractJUnitTest {
         GroovyInstallation.installSomeGroovy(jenkins);
         configureJob();
 
-        job.addBuildStep(GroovyStep.class).script(
+        createDefaultGroovyBuildStep().script(
                 "println 'running groovy script';"
         );
 
@@ -59,9 +59,15 @@ public class GroovyPluginTest extends AbstractJUnitTest {
         configureJob();
 
         job.addShellStep("echo println \\'running groovy file\\' > script.groovy");
-        job.addBuildStep(GroovyStep.class).file("script.groovy");
+        createDefaultGroovyBuildStep().file("script.groovy");
 
         shouldReport("running groovy file");
+    }
+
+    private GroovyStep createDefaultGroovyBuildStep() {
+        GroovyStep groovyStep = job.addBuildStep(GroovyStep.class);
+        groovyStep.version.select(GroovyInstallation.DEFAULT_GROOVY_ID);
+        return groovyStep;
     }
 
     @Test
@@ -116,7 +122,7 @@ public class GroovyPluginTest extends AbstractJUnitTest {
                 "println 'version: ' + groovy.lang.GroovySystem.getVersion()"
         );
         job.save();
-        Build build = job.queueBuild().shouldSucceed();
+        Build build = job.startBuild().shouldSucceed();
 
         String expectedVersion = localGroovyVersion();
 
@@ -130,7 +136,7 @@ public class GroovyPluginTest extends AbstractJUnitTest {
 
     private void shouldReport(String out) {
         job.save();
-        job.queueBuild().shouldSucceed().shouldContainsConsoleOutput(out);
+        job.startBuild().shouldSucceed().shouldContainsConsoleOutput(out);
     }
 
     private String localGroovyVersion() {

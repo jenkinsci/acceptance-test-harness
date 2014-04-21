@@ -110,6 +110,15 @@ public class Jenkins extends Node {
         return new PluginManager(this);
     }
 
+    public void restart() {
+        visit("restart");
+        clickButton("Yes");
+
+        do {
+            sleep(1000);
+        } while (driver.getPageSource().contains("Please wait"));
+    }
+
     public JenkinsLogger getLogger(String name) {
         return new JenkinsLogger(this,name);
     }

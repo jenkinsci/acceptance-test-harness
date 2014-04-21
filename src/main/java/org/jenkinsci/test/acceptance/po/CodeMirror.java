@@ -34,17 +34,19 @@ public class CodeMirror extends PageArea {
         super(context, path);
     }
 
+    public CodeMirror(PageArea area, String relativePath) {
+        super(area, relativePath);
+    }
+
     public void set(String content) {
         if (!(driver instanceof JavascriptExecutor)) throw new AssertionError(
                 "JavaScript execution not supported"
         );
 
-        JavascriptExecutor js = (JavascriptExecutor) driver;
-
         // can't use find() because it wants a visible element
         driver.findElement(by.xpath("//*[@path='%s']", path));    // wait until the element in question appears in DOM
 
-        js.executeScript(script, String.format("//*[@path='%s']", path), content);
+        executeScript(script, String.format("//*[@path='%s']", path), content);
     }
 
     private static final String script =

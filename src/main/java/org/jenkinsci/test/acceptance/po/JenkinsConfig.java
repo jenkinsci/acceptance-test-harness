@@ -13,6 +13,8 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
 public class JenkinsConfig extends PageObject {
     public final Jenkins jenkins;
 
+    public final Control numExecutors = control("/jenkins-model-MasterBuildConfiguration/numExecutors");
+
     public JenkinsConfig(Jenkins jenkins) {
         super(jenkins.injector, jenkins.url("configure"));
         this.jenkins = jenkins;

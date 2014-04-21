@@ -1,14 +1,19 @@
 package org.jenkinsci.test.acceptance.controller;
 
-import com.cloudbees.sdk.extensibility.ExtensionPoint;
+import java.io.Closeable;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URL;
+
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.jenkinsci.test.acceptance.guice.AutoCleaned;
 
-import java.io.*;
-import java.net.URL;
+import com.cloudbees.sdk.extensibility.ExtensionPoint;
 
 /**
  * Starts/stops Jenkins and exposes where it is running.
@@ -127,7 +132,7 @@ public abstract class JenkinsController implements Closeable, AutoCleaned {
      * Perform controller specific diagnostics for test failure. Defaults to no-op.
      * @param cause Failure cause
      */
-    public void diagnose(Throwable cause) {}
+    public void diagnose(Throwable cause) throws IOException {}
 
     /**
      * Populates the Jenkins Home with the specified template (which can be either a ZIP file or a directory). If
@@ -151,10 +156,13 @@ public abstract class JenkinsController implements Closeable, AutoCleaned {
 
     /**
      * Downloads the latest version of the form-element-path plugin that we use for testing.
+     *
+     * @deprecated is automatically resolved for each {@link JenkinsController}.
      */
+    @Deprecated
     public static File downloadPathElement() {
         String source = "http://updates.jenkins-ci.org/latest/form-element-path.hpi";
-        File target =  new File(WORKSPACE,"path-element.hpi");
+        File target = new File(WORKSPACE,"path-element.hpi");
         if (!target.exists()) {
             try(FileOutputStream fos = new FileOutputStream(target)) {
                 HttpClient client = new HttpClient();
