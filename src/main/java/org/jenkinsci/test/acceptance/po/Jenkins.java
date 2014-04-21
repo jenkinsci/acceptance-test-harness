@@ -79,6 +79,22 @@ public class Jenkins extends Node {
     }
 
     /**
+     * Get global security configuration page.
+     */
+    public SecurityConfig getSecurityConfigPage() {
+        return new SecurityConfig(this);
+    }
+
+    /**
+     * Visits global security configuration page.
+     */
+    public SecurityConfig configureSecurity(){
+        SecurityConfig sc = getSecurityConfigPage();
+        visit(sc.url);
+        return sc;
+    }
+
+    /**
      * Access the plugin manager page object
      */
     public PluginManager getPluginManager() {
