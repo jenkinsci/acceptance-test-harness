@@ -44,6 +44,11 @@ public class FallbackConfig extends AbstractModule {
     /** Browser property to set the default locale. */
     private static final String LANGUAGE_SELECTOR = "intl.accept_languages";
 
+    /**
+     * PhantomJS browser property to set the default locale.
+     */
+    private static final String LANGUAGE_SELECTOR_PHANTOMJS = "phantomjs.page.customHeaders.Accept-Language";
+
     @Override
     protected void configure() {
         // default in case nothing is specified
@@ -84,7 +89,10 @@ public class FallbackConfig extends AbstractModule {
 
             return new SauceLabsConnection().createWebDriver(caps);
         case "phantomjs":
-            return new PhantomJSDriver();
+            DesiredCapabilities capabilities = DesiredCapabilities.phantomjs();
+            capabilities.setCapability(LANGUAGE_SELECTOR, "en");
+            capabilities.setCapability(LANGUAGE_SELECTOR_PHANTOMJS, "en");
+            return new PhantomJSDriver(capabilities);
 
         default:
             throw new Error("Unrecognized browser type: "+browser);
