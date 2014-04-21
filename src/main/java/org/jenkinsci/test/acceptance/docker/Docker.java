@@ -10,6 +10,8 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 
@@ -43,16 +45,14 @@ public class Docker {
     @Named("dockerPortOffset")
     private static int portOffset= 0;
 
-    public int getPortOffset()
-    {
+    public int getPortOffset() {
         return portOffset;
     }
 
     @Inject(optional=true)
     public ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
-    public Docker()
-    {
+    public Docker() {
         dockerCmd = Arrays.asList(stringDockerCmd);
     }
 
@@ -103,7 +103,21 @@ public class Docker {
             dir.mkdirs();
 
             try {
-                FileUtils.copyURLToFile(classLoader.getResource(fixture.getName().replace('.', '/') + "/Dockerfile"),new File(dir,"Dockerfile"));
+                URL resourceDir = classLoader.getResource(fixture.getName().replace('.', '/'));
+
+                File dockerFileDir;
+
+                try {
+
+                    dockerFileDir = new File(resourceDir.toURI());
+
+                } catch(URISyntaxException e) {
+
+                    dockerFileDir = new File(resourceDir.getPath());
+
+                }
+
+                FileUtils.copyDirectory(dockerFileDir, dir);
 
                 return build("jenkins/" + f.id(), dir);
             } finally {
