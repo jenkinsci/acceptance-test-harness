@@ -104,21 +104,13 @@ public class Docker {
 
             try {
                 URL resourceDir = classLoader.getResource(fixture.getName().replace('.', '/'));
-
                 File dockerFileDir;
-
                 try {
-
                     dockerFileDir = new File(resourceDir.toURI());
-
                 } catch(URISyntaxException e) {
-
                     dockerFileDir = new File(resourceDir.getPath());
-
                 }
-
                 FileUtils.copyDirectory(dockerFileDir, dir);
-
                 return build("jenkins/" + f.id(), dir);
             } finally {
                 FileUtils.deleteDirectory(dir);

@@ -82,9 +82,9 @@ public class ScpPluginTest extends AbstractJUnitTest {
      Given I have installed the "scp" plugin
      And a docker fixture "sshd"
      And a job
-     When I configure docker fixture as SCP site
+     When I configure docker fixture as SCP site with key authentication
      And I configure the job
-     And I copy resource "scp_plugin/lorem-ipsum-scp.txt" into workspace with key authentication
+     And I copy resource "scp_plugin/lorem-ipsum-scp.txt" into workspace
      And I publish "pmd.xml" with SCP plugin
      And I save the job
      And I build the job

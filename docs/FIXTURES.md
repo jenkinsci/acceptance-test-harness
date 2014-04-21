@@ -7,7 +7,13 @@ To allow us to define such fixtures in a portable and reusable manner, this test
 a mechanism and convention to define/use fixtures inside [Docker](http://docker.io/). They are
 defined in `./fixtures/*`
 
+## Running/skipping Docker tests
+
+JUnit Tests that require docker fixtures are marked with `@Native("docker")` annotation.
+If docker is not installed when you run tests, these tests are automatically skipped.
+
 ##Docker injections
+
 
 To control docker 2 injections are available.
 
