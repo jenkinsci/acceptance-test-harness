@@ -46,7 +46,7 @@ public class GroovyPluginTest extends AbstractJUnitTest {
         GroovyInstallation.installSomeGroovy(jenkins);
         configureJob();
 
-        job.addBuildStep(GroovyStep.class).script(
+        createDefaultGroovyBuildStep().script(
                 "println 'running groovy script';"
         );
 
@@ -59,9 +59,15 @@ public class GroovyPluginTest extends AbstractJUnitTest {
         configureJob();
 
         job.addShellStep("echo println \\'running groovy file\\' > script.groovy");
-        job.addBuildStep(GroovyStep.class).file("script.groovy");
+        createDefaultGroovyBuildStep().file("script.groovy");
 
         shouldReport("running groovy file");
+    }
+
+    private GroovyStep createDefaultGroovyBuildStep() {
+        GroovyStep groovyStep = job.addBuildStep(GroovyStep.class);
+        groovyStep.version.select(GroovyInstallation.DEFAULT_GROOVY_ID);
+        return groovyStep;
     }
 
     @Test
