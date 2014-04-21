@@ -44,26 +44,14 @@ public class JenkinsConfig extends PageObject {
     public <T extends ToolInstallation> T addTool(Class<T> type) {
         jenkins.ensureConfigPage();
 
-        String name = findCaption(type, new Finder<String>() {
-            @Override protected String find(String caption) {
-                outer.find(by.button("Add " + caption));
-                return caption;
-            }
-        });
+        String name = type.getAnnotation(ToolInstallationPageObject.class).name();
 
         clickButton("Add " + name);
         sleep(100);
         String path = find(by.button("Delete " + name)).getAttribute("path");
         String prefix = path.substring(0, path.length() - 18);
 
-        T tool = newInstance(type, this, prefix);
-        {// TODO do not leave the page
-            jenkins.getLogger("all").waitForLogged(tool.updatesPattern(), 60);
-            configure();
-            clickButton("Add " + name);
-            sleep(100);
-        }
-        return tool;
+        return newInstance(type, this, prefix);
     }
 
     public void addJdkAutoInstallation(String name, String version) {

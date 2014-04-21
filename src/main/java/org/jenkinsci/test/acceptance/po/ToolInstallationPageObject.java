@@ -21,15 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.test.acceptance.plugins.gradle;
+package org.jenkinsci.test.acceptance.po;
 
-import org.jenkinsci.test.acceptance.po.JenkinsConfig;
-import org.jenkinsci.test.acceptance.po.ToolInstallation;
-import org.jenkinsci.test.acceptance.po.ToolInstallationPageObject;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-@ToolInstallationPageObject(name="Gradle", installer="hudson.plugins.gradle.GradleInstaller")
-public class GradleInstallation extends ToolInstallation {
-    public GradleInstallation(JenkinsConfig context, String path) {
-        super(context, path);
-    }
+import org.jvnet.hudson.annotation_indexer.Indexed;
+
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+@Indexed
+public @interface ToolInstallationPageObject {
+    /**
+     * Tool installer name used for global configuration.
+     */
+    String name();
+
+    /**
+     * Pattern to be logged once updates arrive.
+     *
+     * Clients should not interact with this ToolInstalltion before updates was loaded.
+     */
+    String installer();
 }
