@@ -95,6 +95,15 @@ public class Jenkins extends Node {
     }
 
     /**
+     * Visit login page.
+     */
+    public Login login(){
+        Login login = new Login(this);
+        visit(login.url);
+        return login;
+    }
+
+    /**
      * Access the plugin manager page object
      */
     public PluginManager getPluginManager() {
