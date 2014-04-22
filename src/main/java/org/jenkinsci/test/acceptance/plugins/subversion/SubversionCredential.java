@@ -67,11 +67,11 @@ public class SubversionCredential extends PageObject {
     }
 
     protected void switchToParentHandle() {
-        switchHandle(getWindowHandle());
+        switchHandle(getParentWindowHandle());
     }
 
     protected void switchToPopupHandle() {
-        switchHandle(getParentWindowHandle());
+        switchHandle(getWindowHandle());
     }
 
     private void switchHandle(String handle) {

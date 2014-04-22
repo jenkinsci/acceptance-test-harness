@@ -19,7 +19,7 @@ public class SvnContainer extends DockerContainer {
 
     private static final String LOCALHOST = "http://localhost:";
     private static final String UNSAVE_REPO = "/svn";
-    private static final String User_PWD_SAVE_REPO = "/svn_pw";
+    private static final String User_PWD_SAVE_REPO = "/svn_pwd";
 
     /**
      * BaseUrl of the Dockercontainer
