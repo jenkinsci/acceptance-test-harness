@@ -6,7 +6,9 @@ import org.jenkinsci.test.acceptance.po.Control;
 import java.net.URL;
 
 /**
- * Created by karl on 4/15/14.
+ * Class for the authentication method username/password in the SVN credential page.
+ *
+ * @author Matthias Karl
  */
 public class SubversionCredentialUserPwd extends SubversionCredential {
     private static final String RADIO_BUTTON_NAME = "password";
@@ -17,26 +19,26 @@ public class SubversionCredentialUserPwd extends SubversionCredential {
     public SubversionCredentialUserPwd(Injector injector, URL url, String parentWindowHandle) throws Exception {
         super(injector, url, parentWindowHandle);
 
-        super.switchHandle(super.getWindowHandle());
+        super.switchToPopupHandle();
         find(by.radioButton(RADIO_BUTTON_NAME)).click();
-        super.switchHandle(super.getParentWindowHandle());
+        super.switchToParentHandle();
     }
 
     public void setPassword(String password) {
-        super.switchHandle(super.getWindowHandle());
+        super.switchToPopupHandle();
 
         Control pwdField = control(by.input(INPUT_PASSWORD));
         pwdField.set(password);
 
-        super.switchHandle(super.getParentWindowHandle());
+        super.switchToParentHandle();
     }
 
     public void setUsername(String username) {
-        super.switchHandle(super.getWindowHandle());
+        super.switchToPopupHandle();
 
         Control userField = control(by.input(INPUT_USERNAME));
         userField.set(username);
 
-        super.switchHandle(super.getParentWindowHandle());
+        super.switchToParentHandle();
     }
 }

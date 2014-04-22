@@ -7,16 +7,17 @@ import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Native;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.subversion.SubversionCredentialUserPwd;
+import org.jenkinsci.test.acceptance.plugins.subversion.SubversionPluginTestException;
 import org.jenkinsci.test.acceptance.plugins.subversion.SubversionScm;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
-
-import java.io.IOException;
 
 /**
  * Feature: Subversion support
  * As a user
  * I want to be able to check out source code from Subversion
+ *
+ * @author Matthias Karl
  */
 @WithPlugins("subversion")
 @Native("docker")
@@ -28,7 +29,7 @@ public class SubversionPluginTest extends AbstractJUnitTest {
      * Scenario: Run basic Subversion build
      * Given I have installed the "subversion" plugin
      * And a job
-     * When I check out code from Subversion repository "<svnContainerUrl>/svn"
+     * When I check out code from Subversion repository "<UrlUnsaveRepo>"
      * And I add a shell build step "test -d .svn"
      * And I save the job
      * And I build the job
@@ -36,82 +37,96 @@ public class SubversionPluginTest extends AbstractJUnitTest {
      * And console output should contain "test -d .svn"
      */
     @Test
-    public void run_basic_subversion_build() throws IOException {
+    public void run_basic_subversion_build() throws SubversionPluginTestException {
         final SvnContainer svnContainer = svn.get();
         final FreeStyleJob f = jenkins.jobs.create();
         f.configure();
-        f.useScm(SubversionScm.class).url.set(svnContainer.getUrl());
+        f.useScm(SubversionScm.class).url.set(svnContainer.getUrlUnsaveRepo());
         f.addShellStep("test -d .svn");
         f.save();
 
-        f.queueBuild().shouldSucceed().shouldContainsConsoleOutput("test -d .svn");
+        f.startBuild().shouldSucceed().shouldContainsConsoleOutput("test -d .svn");
     }
 
     /**
      * Scenario: Check out specified Subversion revision
      * Given I have installed the "subversion" plugin
      * And a job
-     * When I check out code from Subversion repository "<svnContainerUrl>/svn" @ revision 0
+     * When I check out code from Subversion repository "<UnsaveRepoAtRevision> 0
      * And I save the job
      * And I build the job
      * Then the build should succeed
      * And console output should contain "At revision 0"
      */
     @Test
-    public void checkout_specific_revision() throws IOException {
-        final String revision = "0";
+    public void checkout_specific_revision() throws SubversionPluginTestException {
+        final int revision = 0;
         final SvnContainer svnContainer = svn.get();
         final FreeStyleJob f = jenkins.jobs.create();
         f.configure();
-        f.useScm(SubversionScm.class).url.set(svnContainer.getUrl() + "@" + revision);
+        f.useScm(SubversionScm.class).url.set(svnContainer.getUrlUnsaveRepoAtRevision(revision));
         f.save();
 
-        f.queueBuild().shouldSucceed().shouldContainsConsoleOutput("At revision " + revision);
+        f.startBuild().shouldSucceed().shouldContainsConsoleOutput("At revision " + revision);
     }
 
     /**
      * Scenario: Always check out fresh copy
      * Given I have installed the "subversion" plugin
      * And a job
-     * When I check out code from Subversion repository "<svnContainerUrl>/svn"
+     * When I check out code from Subversion repository "<UrlUnsaveRepo>"
      * And I select "Always check out a fresh copy" as a "Check-out Strategy"
      * And I save the job
      * And I build 2 jobs
      * Then the build should succeed
-     * And console output should contain "Checking out <svnContainerUrl>"
+     * And console output should contain "Checking out <UrlUnsaveRepo>"
      */
     @Test
-    public void always_checkout_fresh_copy() throws IOException {
+    public void always_checkout_fresh_copy() throws SubversionPluginTestException {
         final SvnContainer svnContainer = svn.get();
         final FreeStyleJob f = jenkins.jobs.create();
         f.configure();
 
         final SubversionScm subversionScm = f.useScm(SubversionScm.class);
-        subversionScm.url.set(svnContainer.getUrl());
+        subversionScm.url.set(svnContainer.getUrlUnsaveRepo());
         subversionScm.checkoutStrategy.select(SubversionScm.ALWAYS_FRESH_COPY);
         f.save();
 
-        f.queueBuild().shouldSucceed();
+        f.startBuild().shouldSucceed();
 
-        f.queueBuild().shouldSucceed()
-                .shouldContainsConsoleOutput("Checking out " + svnContainer.getUrl());
+        f.startBuild().shouldSucceed()
+                .shouldContainsConsoleOutput("Checking out " + svnContainer.getUrlUnsaveRepo());
     }
 
-
+    /**
+     * Scenario: Always check out fresh copy
+     * Given I have installed the "subversion" plugin
+     * And a job
+     * When I check out code from protected Subversion repository "<UrlUserPwdSaveRepo>"
+     * And I click the link to enter credentials
+     * And I enter the right username and the right password
+     * And I save the credentials
+     * And I save the job
+     * And I build the job
+     * Then the build should succeed
+     */
     @Test
-    public void run_basic_subversion_build_http_pwd() throws Exception {
+    public void run_basic_subversion_build_http_pwd() throws SubversionPluginTestException {
         final SvnContainer svnContainer = svn.get();
+
         final FreeStyleJob f = jenkins.jobs.create();
         f.configure();
 
         final SubversionScm subversionScm = f.useScm(SubversionScm.class);
-        subversionScm.url.set(svnContainer.getUrl() + "_pwd");
+        subversionScm.url.set(svnContainer.getUrlUserPwdSaveRepo());
+
         final SubversionCredentialUserPwd credentialPage = subversionScm.getCredentialPage(SubversionCredentialUserPwd.class);
-        credentialPage.setUsername("user");
-        credentialPage.setPassword("test");
+        credentialPage.setUsername(SvnContainer.USER);
+        credentialPage.setPassword(SvnContainer.PWD);
         credentialPage.confirmDialog();
         f.save();
 
-        f.queueBuild().shouldSucceed();
+        f.startBuild().shouldSucceed();
+
     }
 }
