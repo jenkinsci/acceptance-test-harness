@@ -59,7 +59,7 @@ public class TimestamperPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void display_no_timestamp() {
-        job.queueBuild().waitUntilFinished();
+        job.startBuild().waitUntilFinished();
         setTimestamp("timestamper-none");
         assertThatTimeStampMatchesRegexp("^$");
     }
@@ -72,7 +72,7 @@ public class TimestamperPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void display_system_time_timestamp() {
-        job.queueBuild().waitUntilFinished();
+        job.startBuild().waitUntilFinished();
         setTimestamp("timestamper-systemTime");
         assertThatTimeStampMatchesRegexp("^\\d\\d:\\d\\d:\\d\\d$");
     }
@@ -85,7 +85,7 @@ public class TimestamperPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void display_elapsed_time_timestamp() {
-        job.queueBuild().waitUntilFinished();
+        job.startBuild().waitUntilFinished();
         setTimestamp("timestamper-elapsedTime");
         assertThatTimeStampMatchesRegexp("^\\d\\d:\\d\\d:\\d\\d.\\d\\d\\d$");
     }
@@ -102,7 +102,7 @@ public class TimestamperPluginTest extends AbstractJUnitTest {
         jenkins.configure();
         new TimstamperGlobalConfig(jenkins).systemTimeFormat.set("'At 'HH:mm:ss' system time'");
         jenkins.save();
-        job.queueBuild().waitUntilFinished();
+        job.startBuild().waitUntilFinished();
 
         setTimestamp("timestamper-systemTime");
         assertThatTimeStampMatchesRegexp("^At \\d\\d:\\d\\d:\\d\\d system time$");
@@ -120,7 +120,7 @@ public class TimestamperPluginTest extends AbstractJUnitTest {
         jenkins.configure();
         new TimstamperGlobalConfig(jenkins).elapsedTimeFormat.set("'Exactly 'HH:mm:ss.S' after launch");
         jenkins.save();
-        job.queueBuild().waitUntilFinished();
+        job.startBuild().waitUntilFinished();
 
         setTimestamp("timestamper-elapsedTime");
         assertThatTimeStampMatchesRegexp("^Exactly \\d\\d:\\d\\d:\\d\\d.\\d\\d\\d after launch$");

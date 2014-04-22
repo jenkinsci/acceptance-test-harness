@@ -39,7 +39,7 @@ public class JUnitTestPublisherTest extends AbstractJUnitTest {
         j.addPublisher(JUnitPublisher.class).testResults.set("*.xml");
         j.save();
 
-        j.queueBuild().shouldSucceed().open();
+        j.startBuild().shouldSucceed().open();
 
         clickLink("Test Result");
         assertThat(driver, hasContent("0 failures"));
@@ -66,7 +66,7 @@ public class JUnitTestPublisherTest extends AbstractJUnitTest {
         j.addPublisher(JUnitPublisher.class).testResults.set("*.xml");
         j.save();
 
-        Build b = j.queueBuild();
+        Build b = j.startBuild();
         assertThat(b.getResult(), is("UNSTABLE"));
 
         b.open();
@@ -100,7 +100,7 @@ public class JUnitTestPublisherTest extends AbstractJUnitTest {
         j.addPublisher(JUnitPublisher.class).testResults.set("*.xml");
         j.save();
 
-        Build b = j.queueBuild();
+        Build b = j.startBuild();
         assertThat(b.getResult(), is("UNSTABLE"));
 
         b.open();

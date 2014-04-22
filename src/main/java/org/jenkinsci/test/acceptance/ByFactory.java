@@ -43,8 +43,8 @@ public class ByFactory {
         return xpath(".//*[@path='%s']", String.format(path, args));
     }
 
-    public By name(String name) {
-        return xpath(".//*[@name='%s']", name);
+    public By name(String name, Object... args) {
+        return xpath(".//*[@name='%s']", String.format(name, args));
     }
 
     /**

@@ -23,14 +23,30 @@
  */
 package org.jenkinsci.test.acceptance.plugins.groovy;
 
+import java.util.regex.Pattern;
+
 import org.jenkinsci.test.acceptance.po.Describable;
+import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.jenkinsci.test.acceptance.po.ToolInstallation;
 
-import java.util.regex.Pattern;
-
 @Describable("Groovy")
 public class GroovyInstallation extends ToolInstallation {
+
+    public static final String DEFAULT_GROOVY_ID = "default_Groovy";
+
+    public static void installSomeGroovy(Jenkins jenkins) {
+        installGroovy(jenkins, DEFAULT_GROOVY_ID, "2.2.1");
+    }
+
+    public static void installGroovy(Jenkins jenkins, String name, String version) {
+        jenkins.configure();
+        GroovyInstallation groovy = jenkins.getConfigPage().addTool(GroovyInstallation.class);
+        groovy.name.set(name);
+        groovy.installVersion(version);
+        jenkins.save();
+    }
+
     public GroovyInstallation(JenkinsConfig context, String path) {
         super(context, path);
     }

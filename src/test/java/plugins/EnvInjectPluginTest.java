@@ -42,7 +42,7 @@ public class EnvInjectPluginTest extends AbstractJUnitTest {
         job.addShellStep("echo value=$ENV_VAR_TEST");
         job.save();
 
-        assertVariableUsed(job.queueBuild());
+        assertVariableUsed(job.startBuild());
     }
 
     @Test
@@ -52,7 +52,7 @@ public class EnvInjectPluginTest extends AbstractJUnitTest {
         job.addShellStep("echo value=$ENV_VAR_TEST");
         job.save();
 
-        assertVariableUsed(job.queueBuild());
+        assertVariableUsed(job.startBuild());
     }
 
     @Test
@@ -62,7 +62,7 @@ public class EnvInjectPluginTest extends AbstractJUnitTest {
         job.addShellStep("echo value=$ENV_VAR_TEST");
         job.save();
 
-        assertVariableUsed(job.queueBuild());
+        assertVariableUsed(job.startBuild());
     }
 
     private FreeStyleJob getJob() {

@@ -26,7 +26,6 @@ package plugins;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Native;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
@@ -44,9 +43,10 @@ public class GroovyPluginTest extends AbstractJUnitTest {
 
     @Test
     public void run_groovy() {
+        GroovyInstallation.installSomeGroovy(jenkins);
         configureJob();
 
-        job.addBuildStep(GroovyStep.class).script(
+        createDefaultGroovyBuildStep().script(
                 "println 'running groovy script';"
         );
 
@@ -55,12 +55,19 @@ public class GroovyPluginTest extends AbstractJUnitTest {
 
     @Test
     public void run_groovy_from_file() {
+        GroovyInstallation.installSomeGroovy(jenkins);
         configureJob();
 
         job.addShellStep("echo println \\'running groovy file\\' > script.groovy");
-        job.addBuildStep(GroovyStep.class).file("script.groovy");
+        createDefaultGroovyBuildStep().file("script.groovy");
 
         shouldReport("running groovy file");
+    }
+
+    private GroovyStep createDefaultGroovyBuildStep() {
+        GroovyStep groovyStep = job.addBuildStep(GroovyStep.class);
+        groovyStep.version.select(GroovyInstallation.DEFAULT_GROOVY_ID);
+        return groovyStep;
     }
 
     @Test
@@ -87,11 +94,7 @@ public class GroovyPluginTest extends AbstractJUnitTest {
 
     @Test
     public void use_custom_groovy_version() {
-        jenkins.configure();
-        GroovyInstallation groovy = jenkins.getConfigPage().addTool(GroovyInstallation.class);
-        groovy.name.set("groovy-2.2.1");
-        groovy.installVersion("Groovy 2.2.1");
-        jenkins.save();
+        GroovyInstallation.installGroovy(jenkins, "groovy-2.2.1", "Groovy 2.2.1");
 
         configureJob();
 
@@ -119,7 +122,7 @@ public class GroovyPluginTest extends AbstractJUnitTest {
                 "println 'version: ' + groovy.lang.GroovySystem.getVersion()"
         );
         job.save();
-        Build build = job.queueBuild().shouldSucceed();
+        Build build = job.startBuild().shouldSucceed();
 
         String expectedVersion = localGroovyVersion();
 
@@ -133,7 +136,7 @@ public class GroovyPluginTest extends AbstractJUnitTest {
 
     private void shouldReport(String out) {
         job.save();
-        job.queueBuild().shouldSucceed().shouldContainsConsoleOutput(out);
+        job.startBuild().shouldSucceed().shouldContainsConsoleOutput(out);
     }
 
     private String localGroovyVersion() {
