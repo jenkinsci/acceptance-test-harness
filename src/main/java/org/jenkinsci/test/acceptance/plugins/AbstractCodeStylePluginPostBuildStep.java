@@ -1,7 +1,13 @@
 package org.jenkinsci.test.acceptance.plugins;
 
-/**
- * Created by martin on 19.04.14.
- */
-public class AbstractCodeStylePluginPostBuildStep {
+import org.jenkinsci.test.acceptance.po.Control;
+import org.jenkinsci.test.acceptance.po.Job;
+import org.jenkinsci.test.acceptance.po.PostBuildStep;
+
+public abstract class AbstractCodeStylePluginPostBuildStep extends PostBuildStep {
+    public final Control pattern = control("pattern");
+
+    public AbstractCodeStylePluginPostBuildStep(Job parent, String path) {
+        super(parent, path);
+    }
 }

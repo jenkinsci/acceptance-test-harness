@@ -27,7 +27,7 @@ public class CheckstyleAction extends ContainerPageObject {
 
     public int getNewWarningNumber() {
         open();
-        return asInt(find(by.xpath("//table[@id='summary']/tbody/tr/td[@class='pane'][2]/a")));
+        return asInt(find(by.xpath("//table[@id='summary']/tbody/tr/td[@class='pane'][2]")));
     }
 
     public int getFixedWarningNumber() {
@@ -37,7 +37,7 @@ public class CheckstyleAction extends ContainerPageObject {
 
     public int getHighWarningNumber() {
         open();
-        return asInt(find(by.xpath("//table[@id='analysis.summary']/tbody/tr/td[@class='pane'][2]/a")));
+        return asInt(find(by.xpath("//table[@id='analysis.summary']/tbody/tr/td[@class='pane'][2]")));
     }
 
     public int getNormalWarningNumber() {

@@ -27,54 +27,52 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsAction;
 import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsPublisher;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
 
+import static org.hamcrest.CoreMatchers.*;
+
 @WithPlugins("findbugs")
-public class FindbugsPluginTest extends AbstractJUnitTest {
+public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
 
     @Test
     public void record_analysis() {
-        final FreeStyleJob job = setupJob();
+        FreeStyleJob job = setupJobAndRunOnceShouldSucceed("/findbugs_plugin/findbugsXml.xml", FindbugsPublisher.class, "findbugsXml.xml");
 
-        Build build = job.queueBuild().waitUntilFinished();
+        Build lastBuild = job.getLastBuild();
 
-        assertThat(build, hasAction("FindBugs Warnings"));
+        assertThat(lastBuild, hasAction("FindBugs Warnings"));
         assertThat(job, hasAction("FindBugs Warnings"));
-        assertThat(build.open(), hasContent("FindBugs: 2 warnings from one analysis."));
+        assertThat(lastBuild.open(), hasContent("FindBugs: 6 warnings from one analysis."));
+
+        FindbugsAction fa = new FindbugsAction(job);
+        assertThat(fa.getWarningNumber(), is(6));
+        assertThat(fa.getNewWarningNumber(), is(6));
+        assertThat(fa.getFixedWarningNumber(), is(0));
+        assertThat(fa.getHighWarningNumber(), is(2));
+        assertThat(fa.getNormalWarningNumber(), is(4));
+        assertThat(fa.getLowWarningNumber(), is(0));
     }
 
     @Test
     public void record_analysis_two_runs() {
-        final FreeStyleJob job = setupJob();
-        Build b1 = job.queueBuild().waitUntilFinished();
+        final FreeStyleJob job = setupJobAndRunTwiceShouldSucceed("/findbugs_plugin/findbugsXml.xml", FindbugsPublisher.class, "findbugsXml.xml", "/findbugs_plugin/findbugsXml-2.xml");
 
-        job.configure();
-        job.removeFirstBuildStep();
-        job.copyResource(resource("/findbugs_plugin/findbugsXml-2.xml"), "findbugsXml.xml");
-        job.save();
-        Build b2 = job.queueBuild().waitUntilFinished();
+        Build lastBuild = job.getLastBuild();
 
-        try {
-            System.out.println("Sleeping!");
-            Thread.sleep(6000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        assertThat(b2, hasAction("FindBugs Warnings"));
+        assertThat(lastBuild, hasAction("FindBugs Warnings"));
         assertThat(job, hasAction("FindBugs Warnings"));
-        assertThat(b2.open(), hasContent("FindBugs: 2 warnings from one analysis."));   // TODO MK
-    }
+        assertThat(lastBuild.open(), hasContent("FindBugs: 5 warnings from one analysis."));
 
-    private FreeStyleJob setupJob() {
-        FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class);
-        job.configure();
-        job.copyResource(resource("/findbugs_plugin/findbugsXml.xml"));
-        job.addPublisher(FindbugsPublisher.class).pattern.sendKeys("findbugsXml.xml");
-        job.save();
-        return job;
+        FindbugsAction fa = new FindbugsAction(job);
+        assertThat(fa.getWarningNumber(), is(5));
+        assertThat(fa.getNewWarningNumber(), is(1));
+        assertThat(fa.getFixedWarningNumber(), is(2));
+        assertThat(fa.getHighWarningNumber(), is(3));
+        assertThat(fa.getNormalWarningNumber(), is(2));
+        assertThat(fa.getLowWarningNumber(), is(0));
     }
 }

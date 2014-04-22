@@ -19,7 +19,7 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
    I want to be able to publish Checkstyle report
  */
 @WithPlugins("checkstyle")
-public class CheckstylePluginTest extends AbstractJUnitTest {
+public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
     /**
      * Scenario: Record Checkstyle report
          Given I have installed the "checkstyle" plugin
@@ -35,10 +35,9 @@ public class CheckstylePluginTest extends AbstractJUnitTest {
      */
     @Test
     public void record_checkstyle_report() {
-        FreeStyleJob job = setupJob();
-        Build b = job.queueBuild().waitUntilFinished().shouldSucceed();
+        FreeStyleJob job = setupJobAndRunOnceShouldSucceed("/checkstyle_plugin/checkstyle-result.xml", CheckstylePublisher.class, "checkstyle-result.xml");
 
-        assertThat(b, hasAction("Checkstyle Warnings"));
+        assertThat(job.getLastBuild(), hasAction("Checkstyle Warnings"));
         assertThat(job, hasAction("Checkstyle Warnings"));
     }
 
@@ -63,8 +62,7 @@ public class CheckstylePluginTest extends AbstractJUnitTest {
      */
     @Test
     public void view_checkstyle_report() {
-        FreeStyleJob job = setupJob();
-        Build b = job.queueBuild().waitUntilFinished().shouldSucceed();
+        FreeStyleJob job = setupJobAndRunOnceShouldSucceed("/checkstyle_plugin/checkstyle-result.xml", CheckstylePublisher.class, "checkstyle-result.xml");
 
         CheckstyleAction ca = new CheckstyleAction(job);
         assertThat(ca.getWarningNumber(), is(776));
@@ -77,14 +75,7 @@ public class CheckstylePluginTest extends AbstractJUnitTest {
 
     @Test
     public void view_checkstyle_report_two_runs_and_changed_results() {
-        FreeStyleJob job = setupJob();
-        Build b1 = job.queueBuild().waitUntilFinished().shouldSucceed();
-
-        job.configure();
-        job.removeFirstBuildStep();
-        job.copyResource(resource("/checkstyle_plugin/checkstyle-result-2.xml"), "checkstyle-result.xml");
-        job.save();
-        Build b2 = job.queueBuild().waitUntilFinished().shouldSucceed();
+        FreeStyleJob job = setupJobAndRunTwiceShouldSucceed("/checkstyle_plugin/checkstyle-result.xml", CheckstylePublisher.class, "checkstyle-result.xml", "/checkstyle_plugin/checkstyle-result-2.xml");
 
         CheckstyleAction ca = new CheckstyleAction(job);
         assertThat(ca.getWarningNumber(), is(679));
@@ -95,13 +86,4 @@ public class CheckstylePluginTest extends AbstractJUnitTest {
         assertThat(ca.getLowWarningNumber(), is(0));
     }
 
-    private FreeStyleJob setupJob() {
-        FreeStyleJob job = jenkins.jobs.create();
-        job.configure();
-        job.copyResource(resource("/checkstyle_plugin/checkstyle-result.xml"));
-        job.addPublisher(CheckstylePublisher.class)
-            .pattern.set("checkstyle-result.xml");
-        job.save();
-        return job;
-    }
 }
