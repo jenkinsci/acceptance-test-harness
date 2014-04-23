@@ -10,11 +10,13 @@ Jenkins exposes different domain objects at different URLs, and so our page obje
 server-side domain model structure, including inheritance and class name.
 
 `ContainerPageObject` is a subtype of `PageObject` for domain models that spans several URLs, not just a single URL.
-Most Jenkins domain objects fit in this category.
+Most Jenkins domain objects fit in this category. This abstraction provides support for actions, configuration, api, etc.
 
 The top-level page object is `Jenkins`, and from there you'll see page objects that map to familiar
 concepts like `Job` and `Build`.
 
+Core page objects are located in `org.jenkinsci.test.acceptance.po` package,
+plugin specific page object should be placed in `org.jenkinsci.test.acceptance.plugins.ARTIFACT_ID`.
 
 ## Implementing Page Objects
 See [CapybaraPortingLayer.java](../src/main/java/org/jenkinsci/test/acceptance/po/CapybaraPortingLayer.java)
@@ -58,7 +60,7 @@ of the &lt;f:entry> tag on the sever side:
     // how to use this
     Job job = ...
     AntBuildStep ant = job.addBuildStep(AntBuildStep.class);
-    ant.antName.sendKeys(name);
+    ant.antName.set(name);
 
 ## Control
 Controls are like `WebElement`s, but they are late-binding. That is, a `Control` instance gets created
