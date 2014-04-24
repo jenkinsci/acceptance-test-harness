@@ -271,4 +271,8 @@ public class Job extends ContainerPageObject {
     public String toString() {
         return name;
     }
+
+    public ScmPolling pollScm() {
+        return new ScmPolling(this);
+    }
 }

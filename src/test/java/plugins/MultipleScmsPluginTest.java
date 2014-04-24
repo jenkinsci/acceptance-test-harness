@@ -52,4 +52,22 @@ public class MultipleScmsPluginTest extends AbstractJUnitTest {
 
         job.startBuild().shouldSucceed();
     }
+
+    @Test
+    public void poll_for_changes() {
+        FreeStyleJob job = jenkins.jobs.create();
+        job.configure();
+        MutlipleScms scms = job.useScm(MutlipleScms.class);
+        GitScm git = scms.addScm(GitScm.class);
+        git.url("git://github.com/jenkinsci/acceptance-test-harness.git");
+        git.localDir("git-project");
+        job.pollScm().schedule("* * * * *");
+        job.addShellStep("test -f git-project/pom.xml");
+        job.save();
+
+        sleep(700);
+
+        // We should have some build after 70 seconds
+        job.getLastBuild().shouldSucceed().shouldExist();
+    }
 }
