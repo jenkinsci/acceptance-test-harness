@@ -1,8 +1,8 @@
 package org.jenkinsci.test.acceptance.plugins;
 
+import org.jenkinsci.test.acceptance.po.PostBuildStep;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.PostBuildStep;
 
 public abstract class AbstractCodeStylePluginPostBuildStep extends PostBuildStep {
     public final Control pattern = control("pattern");
