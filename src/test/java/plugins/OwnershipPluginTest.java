@@ -19,6 +19,5 @@ public class OwnershipPluginTest extends AbstractJUnitTest {
         Slave slave = slaves.install(jenkins).get();
         jenkins.jobs.create();
 
-        throw new RuntimeException();
     }
 }
