@@ -26,7 +26,7 @@ package plugins;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.git.GitScm;
-import org.jenkinsci.test.acceptance.plugins.multiple_scms.MutlipleScms;
+import org.jenkinsci.test.acceptance.plugins.multiple_scms.MultipleScms;
 import org.jenkinsci.test.acceptance.plugins.subversion.SubversionScm;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
@@ -38,7 +38,7 @@ public class MultipleScmsPluginTest extends AbstractJUnitTest {
     public void checkout_several_scms() {
         FreeStyleJob job = jenkins.jobs.create();
         job.configure();
-        MutlipleScms scms = job.useScm(MutlipleScms.class);
+        MultipleScms scms = job.useScm(MultipleScms.class);
         GitScm git = scms.addScm(GitScm.class);
         git.url("git://github.com/jenkinsci/acceptance-test-harness.git");
         git.localDir("git-project");
@@ -57,7 +57,7 @@ public class MultipleScmsPluginTest extends AbstractJUnitTest {
     public void poll_for_changes() {
         FreeStyleJob job = jenkins.jobs.create();
         job.configure();
-        MutlipleScms scms = job.useScm(MutlipleScms.class);
+        MultipleScms scms = job.useScm(MultipleScms.class);
         GitScm git = scms.addScm(GitScm.class);
         git.url("git://github.com/jenkinsci/acceptance-test-harness.git");
         git.localDir("git-project");

@@ -30,12 +30,12 @@ import org.jenkinsci.test.acceptance.po.Scm;
 import org.openqa.selenium.WebElement;
 
 @Describable("Multiple SCMs")
-public class MutlipleScms extends Scm {
+public class MultipleScms extends Scm {
     private final Control addButton = control("hetero-list-add[scmList]");
 
     private final Job job;
 
-    public MutlipleScms(Job job, String path) {
+    public MultipleScms(Job job, String path) {
         super(job, path);
         this.job = job;
     }
