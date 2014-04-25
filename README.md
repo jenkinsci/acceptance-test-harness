@@ -11,7 +11,7 @@ Right now the following parts are working:
 
  * Drive Cucumber to run tests
  * Many key page object types are ported, even though they are still missing many methods
- * Some step definitions are ported, but more needs to be poreted
+ * Some step definitions are ported, but more needs to be ported
  * Docker support
 
 Following areas are still worked on:

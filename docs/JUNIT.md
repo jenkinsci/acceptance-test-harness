@@ -1,6 +1,6 @@
 # Writing JUnit tests
 
-Test classes should be located to either `code` or `plugin` package.
+Test classes should be located to either `core` or `plugins` package.
 
 `JenkinsAcceptanceTestRule` defines a [JUnit rule](https://github.com/junit-team/junit/wiki/Rules) that sets
 up a test environment by instantiating a specified [JenkinsController](CONTROLLER.md), [WebDriver](BROWSER.md),
