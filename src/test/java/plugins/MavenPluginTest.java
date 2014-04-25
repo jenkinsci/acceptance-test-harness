@@ -23,26 +23,22 @@
  */
 package plugins;
 
-import java.util.HashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import static org.jenkinsci.test.acceptance.Matchers.*;
-import static org.hamcrest.CoreMatchers.*;
-
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Bug;
 import org.jenkinsci.test.acceptance.junit.Native;
 import org.jenkinsci.test.acceptance.junit.Since;
-import org.jenkinsci.test.acceptance.plugins.maven.MavenBuild;
-import org.jenkinsci.test.acceptance.plugins.maven.MavenBuildStep;
-import org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation;
-import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
-import org.jenkinsci.test.acceptance.plugins.maven.MavenProjectConfig;
+import org.jenkinsci.test.acceptance.plugins.maven.*;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.StringParameter;
 import org.junit.Test;
+
+import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.jenkinsci.test.acceptance.Matchers.pageObjectExists;
 
 public class MavenPluginTest extends AbstractJUnitTest {
 

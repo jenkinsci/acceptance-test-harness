@@ -23,7 +23,6 @@
  */
 package plugins;
 
-import static org.hamcrest.CoreMatchers.not;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
@@ -35,6 +34,8 @@ import org.jenkinsci.test.acceptance.po.MatrixProject;
 import org.jenkinsci.test.acceptance.po.MatrixRun;
 import org.jenkinsci.test.acceptance.po.TextAxis;
 import org.junit.Test;
+
+import static org.hamcrest.CoreMatchers.not;
 
 @WithPlugins("matrix-reloaded")
 public class MatrixReloadedPluginTest extends AbstractJUnitTest {

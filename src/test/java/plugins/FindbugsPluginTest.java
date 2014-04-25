@@ -23,9 +23,6 @@
  */
 package plugins;
 
-import static org.jenkinsci.test.acceptance.Matchers.*;
-
-import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsAction;
 import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsPublisher;
@@ -33,16 +30,21 @@ import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.jenkinsci.test.acceptance.Matchers.hasAction;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 @WithPlugins("findbugs")
 public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
 
+    /**
+     * Runs test and check if warnings of Findbugs are displayed.
+     */
     @Test
     public void record_analysis() {
-        FreeStyleJob job = setupJobAndRunOnceShouldSucceed("/findbugs_plugin/findbugsXml.xml", FindbugsPublisher.class, "findbugsXml.xml");
+        FreeStyleJob job = setupJob("/findbugs_plugin/findbugsXml.xml", FindbugsPublisher.class, "findbugsXml.xml");
 
-        Build lastBuild = job.getLastBuild();
+        Build lastBuild = buildJobWithSuccess(job);
 
         assertThat(lastBuild, hasAction("FindBugs Warnings"));
         assertThat(job, hasAction("FindBugs Warnings"));
@@ -57,11 +59,15 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
         assertThat(fa.getLowWarningNumber(), is(0));
     }
 
+    /**
+     * Runs job two times to check if new and fixed warnings are displayed.
+     */
     @Test
     public void record_analysis_two_runs() {
-        final FreeStyleJob job = setupJobAndRunTwiceShouldSucceed("/findbugs_plugin/findbugsXml.xml", FindbugsPublisher.class, "findbugsXml.xml", "/findbugs_plugin/findbugsXml-2.xml");
+        final FreeStyleJob job = setupJob("/findbugs_plugin/findbugsXml.xml", FindbugsPublisher.class, "findbugsXml.xml");
+        editJobAndDelLastResource(job, "/findbugs_plugin/findbugsXml-2.xml", "findbugsXml.xml");
 
-        Build lastBuild = job.getLastBuild();
+        Build lastBuild = buildJobWithSuccess(job);
 
         assertThat(lastBuild, hasAction("FindBugs Warnings"));
         assertThat(job, hasAction("FindBugs Warnings"));

@@ -1,6 +1,5 @@
 package plugins;
 
-import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.pmd.PmdAction;
 import org.jenkinsci.test.acceptance.plugins.pmd.PmdPublisher;
@@ -9,8 +8,9 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
 
-import static org.jenkinsci.test.acceptance.Matchers.*;
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.jenkinsci.test.acceptance.Matchers.hasAction;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 /**
  Feature: Tests for PMD plugin
@@ -33,9 +33,9 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
      */
     @Test
     public void configure_a_job_with_PMD_post_build_steps() {
-        FreeStyleJob job = setupJobAndRunOnceShouldSucceed("/pmd_plugin/pmd.xml", PmdPublisher.class, "pmd.xml");
+        FreeStyleJob job = setupJob("/pmd_plugin/pmd.xml", PmdPublisher.class, "pmd.xml");
+        Build lastBuild = buildJobWithSuccess(job);
 
-        Build lastBuild = job.getLastBuild();
         lastBuild.shouldSucceed();
 
         assertThat(lastBuild.open(), hasContent("0 warnings"));
@@ -89,10 +89,9 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
      */
     @Test
     public void configure_a_job_with_PMD_post_build_steps_which_display_some_warnings() {
-        FreeStyleJob job = setupJobAndRunOnceShouldSucceed("/pmd_plugin/pmd-warnings.xml", PmdPublisher.class, "pmd-warnings.xml");
+        FreeStyleJob job = setupJob("/pmd_plugin/pmd-warnings.xml", PmdPublisher.class, "pmd-warnings.xml");
 
-        Build lastBuild = job.getLastBuild();
-        lastBuild.shouldSucceed();
+        Build lastBuild = buildJobWithSuccess(job);
         assertThat(lastBuild, hasAction("PMD Warnings"));
         assertThat(lastBuild.open(), hasContent("9 warnings"));
 
@@ -106,32 +105,15 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
     }
 
     /**
-     Scenario: Configure a job with PMD post-build steps which display some warnings
-     Given I have installed the "pmd" plugin
-     And a job
-     When I configure the job
-     And I add "Publish PMD analysis results" post-build action
-     And I copy resource "pmd_plugin/pmd-warnings.xml" into workspace
-     And I set path to the pmd result "pmd-warnings.xml"
-     And I save the job
-     And I build the job
-     Then the build should succeed
-     When I configure the job
-     And I remove the First Bild Step
-     And I copy resource "pmd_plugin/pmd-warnings-2.xml" into workspace
-     And I save the job
-     And I build the job
-     Then the build should succeed
-     And the build should have "PMD Warnings" action
-     And build page should has pmd summary "8 warnings"
-     And build page should has pmd summary "1 new warning"
-     And build page should has pmd summary "2 fixed warnings"
+     * Runs job two times to check if new and fixed warnings are displayed.
      */
     @Test
     public void configure_a_job_with_PMD_post_build_steps_which_display_some_warnings_two_runs() {
-        FreeStyleJob job = setupJobAndRunTwiceShouldSucceed("/pmd_plugin/pmd-warnings.xml", PmdPublisher.class, "pmd-warnings.xml", "/pmd_plugin/pmd-warnings-2.xml");
+        FreeStyleJob job = setupJob("/pmd_plugin/pmd-warnings.xml", PmdPublisher.class, "pmd-warnings.xml");
+        buildJobAndWait(job);
+        editJobAndDelLastResource(job, "/pmd_plugin/pmd-warnings-2.xml", "pmd-warnings.xml");
 
-        Build lastBuild = job.getLastBuild();
+        Build lastBuild = buildJobWithSuccess(job);
         assertThat(lastBuild, hasAction("PMD Warnings"));
         WebDriver lastBuildOpened = lastBuild.open();
         assertThat(lastBuildOpened, hasContent("8 warnings"));

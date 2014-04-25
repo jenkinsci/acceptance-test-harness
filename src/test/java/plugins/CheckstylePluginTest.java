@@ -1,16 +1,13 @@
 package plugins;
 
-import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleAction;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstylePublisher;
-import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
-import org.jenkinsci.test.acceptance.po.ShellBuildStep;
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.jenkinsci.test.acceptance.Matchers.hasAction;
 
 /**
  * Feature: Allow publishing of Checkstyle report
@@ -35,7 +32,8 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
      */
     @Test
     public void record_checkstyle_report() {
-        FreeStyleJob job = setupJobAndRunOnceShouldSucceed("/checkstyle_plugin/checkstyle-result.xml", CheckstylePublisher.class, "checkstyle-result.xml");
+        FreeStyleJob job = setupJob("/checkstyle_plugin/checkstyle-result.xml", CheckstylePublisher.class, "checkstyle-result.xml");
+        buildJobWithSuccess(job);
 
         assertThat(job.getLastBuild(), hasAction("Checkstyle Warnings"));
         assertThat(job, hasAction("Checkstyle Warnings"));
@@ -62,7 +60,8 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
      */
     @Test
     public void view_checkstyle_report() {
-        FreeStyleJob job = setupJobAndRunOnceShouldSucceed("/checkstyle_plugin/checkstyle-result.xml", CheckstylePublisher.class, "checkstyle-result.xml");
+        FreeStyleJob job = setupJob("/checkstyle_plugin/checkstyle-result.xml", CheckstylePublisher.class, "checkstyle-result.xml");
+        buildJobWithSuccess(job);
 
         CheckstyleAction ca = new CheckstyleAction(job);
         assertThat(ca.getWarningNumber(), is(776));
@@ -73,9 +72,15 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
         assertThat(ca.getLowWarningNumber(), is(0));
     }
 
+    /**
+     * Runs job two times to check if new and fixed warnings are displayed.
+     */
     @Test
     public void view_checkstyle_report_two_runs_and_changed_results() {
-        FreeStyleJob job = setupJobAndRunTwiceShouldSucceed("/checkstyle_plugin/checkstyle-result.xml", CheckstylePublisher.class, "checkstyle-result.xml", "/checkstyle_plugin/checkstyle-result-2.xml");
+        FreeStyleJob job = setupJob("/checkstyle_plugin/checkstyle-result.xml", CheckstylePublisher.class, "checkstyle-result.xml");
+        buildJobAndWait(job);
+        editJobAndDelLastResource(job, "/checkstyle_plugin/checkstyle-result-2.xml", "checkstyle-result.xml");
+        buildJobWithSuccess(job);
 
         CheckstyleAction ca = new CheckstyleAction(job);
         assertThat(ca.getWarningNumber(), is(679));
