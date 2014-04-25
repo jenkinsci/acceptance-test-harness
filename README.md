@@ -52,7 +52,7 @@ it's own sandboxed workspace.
     * Writing Cucumber test (TODO)
 * [Testing slaves](docs/SLAVE.md)
 * explain how cucumber hooks into Guice (TODO)
-* hamcrest matchers (TODO)
+* [Hamcrest matchers](docs/MATCHERS.md) (TODO)
 * how to use this from your own module (TODO)
 
 * [EC2 provider configuration](docs/EC2-CONFIG.md)
