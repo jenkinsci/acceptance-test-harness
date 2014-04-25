@@ -65,7 +65,7 @@ public class MultipleScmsPluginTest extends AbstractJUnitTest {
         job.addShellStep("test -f git-project/pom.xml");
         job.save();
 
-        sleep(700);
+        sleep(70000);
 
         // We should have some build after 70 seconds
         job.getLastBuild().shouldSucceed().shouldExist();
