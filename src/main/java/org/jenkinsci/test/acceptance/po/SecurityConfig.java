@@ -12,19 +12,32 @@ public class SecurityConfig extends PageObject {
 
     private final Control cUseSecurity = control("/useSecurity");
     private final Control cSave = control("/Submit");
+    private final Control cApply = control("/Apply");
 
 
     public SecurityConfig(Jenkins jenkins) {
         super(jenkins.injector, jenkins.url("configureSecurity/"));
     }
 
-    /**
-     * Configures global security to use the specified ldap server for access control.
-     */
-    public void configureLdap(LdapDetails ldapDetails){
+    private void configureLdap(LdapDetails ldapDetails) {
         cUseSecurity.check(true);
         LdapConfig l = new LdapConfig(this);
         l.enterLdapDetails(ldapDetails);
+    }
+
+    /**
+     * Configures global security to use the specified ldap server for access control and saves the changes.
+     */
+    public void configureLdapAndSave(LdapDetails ldapDetails) {
+        this.configureLdap(ldapDetails);
         cSave.click();
+    }
+
+    /**
+     * Configures global security to use the specified ldap server for access control and applies the changes.
+     */
+    public void configureLdapAndApply(LdapDetails ldapDetails) {
+        this.configureLdap(ldapDetails);
+        cApply.click();
     }
 }
