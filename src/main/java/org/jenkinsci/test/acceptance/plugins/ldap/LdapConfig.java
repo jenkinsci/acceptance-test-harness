@@ -17,6 +17,8 @@ public class LdapConfig extends PageArea {
     private final Control cRootDn = control("realm[2]/rootDN");
     private final Control cManagerDn = control("realm[2]/managerDN");
     private final Control cManagerPassword = control("realm[2]/managerPassword");
+    private final Control cUserSearchBase = control("realm[2]/userSearchBase");
+    private final Control cUserSearchFilter = control("realm[2]/userSearch");
 
     public LdapConfig(SecurityConfig securityConfig) {
         super(securityConfig, "/useSecurity");
@@ -25,12 +27,18 @@ public class LdapConfig extends PageArea {
     /**
      * Fills the input fields for ldap access control.
      */
-    public void enterLdapDetails(LdapDetails ldapDetails){
+    public void enterLdapDetails(LdapDetails ldapDetails) {
         cRealm.check(true);
         cLdapServer.set(ldapDetails.getHostWithPort());
         cAdvanced.click();
         cRootDn.set(ldapDetails.getRootDn());
         cManagerDn.set(ldapDetails.getManagerDn());
         cManagerPassword.set(ldapDetails.getManagerPassword());
+        if (ldapDetails.getUserSearchBase() != null) {
+            cUserSearchBase.set(ldapDetails.getUserSearchBase());
+        }
+        if (ldapDetails.getUserSearchFilter() != null) {
+            cUserSearchFilter.set(ldapDetails.getUserSearchFilter());
+        }
     }
 }
