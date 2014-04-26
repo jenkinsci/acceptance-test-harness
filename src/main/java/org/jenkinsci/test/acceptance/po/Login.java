@@ -1,7 +1,5 @@
 package org.jenkinsci.test.acceptance.po;
 
-import org.openqa.selenium.NoSuchElementException;
-
 /**
  * Page object for login page.
  *
@@ -23,15 +21,5 @@ public class Login extends PageObject {
         cLogin.click();
         return this;
     }
-
-    public boolean isLoginSuccessful(){
-        try {
-            find(by.href("/logout"));
-            return true;
-        } catch (NoSuchElementException e){
-            return false;
-        }
-    }
-
 
 }
