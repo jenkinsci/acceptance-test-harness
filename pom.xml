@@ -152,11 +152,11 @@
       <artifactId>selenium-htmlunit-driver</artifactId>
       <version>${selenium.version}</version>
     </dependency>
-      <dependency>
-          <groupId>com.github.detro.ghostdriver</groupId>
-          <artifactId>phantomjsdriver</artifactId>
-          <version>1.1.0</version>
-      </dependency>
+    <dependency>
+      <groupId>com.github.detro.ghostdriver</groupId>
+      <artifactId>phantomjsdriver</artifactId>
+      <version>1.1.0</version>
+    </dependency>
 
     <!-- jclouds -->
     <dependency>
@@ -186,6 +186,32 @@
       <artifactId>groovy</artifactId>
       <version>2.1.7</version>
     </dependency>
+    <dependency>
+      <groupId>org.gebish</groupId>
+      <artifactId>geb-spock</artifactId>
+      <version>0.9.2</version>
+    </dependency>
+    <dependency>
+      <groupId>org.spockframework</groupId>
+      <artifactId>spock-core</artifactId>
+      <version>0.7-groovy-2.0</version>
+      <exclusions>
+        <exclusion>
+          <groupId>junit</groupId>
+          <artifactId>junit-dep</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.codehaus.groovy</groupId>
+          <artifactId>groovy-all</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.spockframework</groupId>
+      <artifactId>spock-guice</artifactId>
+      <version>0.7-groovy-2.0</version>
+    </dependency>
+
     <dependency>
       <groupId>javax.inject</groupId>
       <artifactId>javax.inject</artifactId>
