@@ -137,13 +137,7 @@ public abstract class LocalController extends JenkinsController {
 
         if (givenPluginDir != null && givenPluginDir.isDirectory()) {
             try {
-                File[] plugins = givenPluginDir.listFiles();
-                if (plugins == null) {
-                    throw new IOException("Plugin dir not readable");
-                }
-                for (File plugin : plugins) {
-                    FileUtils.copyFileToDirectory(plugin, pluginDir);
-                }
+                FileUtils.copyDirectory(givenPluginDir, pluginDir);
             } catch (IOException e) {
                 String msg = String.format("Failed to copy plugins from %s to %s", givenPluginDir, pluginDir);
                 throw new RuntimeException(msg, e);

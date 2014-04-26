@@ -18,23 +18,40 @@ public class DockerImage {
         this.tag = tag;
     }
 
+    public <T extends DockerContainer> T start(Class<T> type, CommandBuilder options, CommandBuilder cmd,int portOffset) throws InterruptedException, IOException {
+        DockerFixture f = type.getAnnotation(DockerFixture.class);
+        return start(type,f.ports(),portOffset,f.bindIp(),options,cmd);
+    }
+
     public <T extends DockerContainer> T start(Class<T> type, CommandBuilder options, CommandBuilder cmd) throws InterruptedException, IOException {
         DockerFixture f = type.getAnnotation(DockerFixture.class);
         return start(type,f.ports(),options,cmd);
     }
 
+    public <T extends DockerContainer> T start(Class<T> type, int[] ports, CommandBuilder options, CommandBuilder cmd) throws InterruptedException, IOException {
+        return start(type,ports,0,"127.0.0.1",options,cmd);
+    }
     /**
      * Starts a container from this image.
      */
-    public <T extends DockerContainer> T start(Class<T> type, int[] ports, CommandBuilder options, CommandBuilder cmd) throws InterruptedException, IOException {
+    public <T extends DockerContainer> T start(Class<T> type, int[] ports,int localPortOffset, String ipAddress, CommandBuilder options, CommandBuilder cmd) throws InterruptedException, IOException {
         CommandBuilder docker = Docker.cmd("run");
-        for (int p : ports) {
-            docker.add("-p","127.0.0.1::"+p);
-        }
-
         File cid = File.createTempFile("docker", "cid");
         cid.delete();
-        docker.add("--cidfile="+cid);
+        docker.add("--cidfile="+cid);//strange behaviour in some docker version cidfile needs to come before
+
+        for (int p : ports)
+        {
+            if(localPortOffset==0)//No manual offset, let docker figure out the best port for itself
+            {
+                docker.add("-p", ipAddress + "::" + p);
+            }
+            else {
+                int localPort = localPortOffset + p;
+                docker.add("-p", ipAddress + ":" + localPort + ":" + p);
+            }
+        }
+
 
         docker.add(options);
         docker.add(tag);
@@ -52,6 +69,14 @@ public class DockerImage {
         Thread.sleep(1000);
 
         if (cid.exists()) {
+            try
+            {
+                p.exitValue();
+                throw new IOException("docker died unexpectedly: "+docker+"\n"+FileUtils.readFileToString(tmplog));
+            } catch (IllegalThreadStateException e)
+            {
+                //Docker is still running okay.
+            }
             String id;
             do {
                 Thread.sleep(500);
@@ -71,6 +96,7 @@ public class DockerImage {
             } catch (ReflectiveOperationException e) {
                 throw new AssertionError(e);
             }
+
         } else {
             try {
                 p.exitValue();
