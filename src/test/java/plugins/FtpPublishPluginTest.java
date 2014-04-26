@@ -26,22 +26,24 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
 
     /**
      @native(docker)
-     Scenario: Configure a job with FTP publishing
-       Given I have installed the "ftp" plugin
-       And a docker fixture "ftpd"
-       And a job
-       When I configure docker fixture as FTP host
-       And I configure the job with remote directory myfolder/
-       And I copy resource "myresources" into workspace
-       And I publish "myresources" with FTP plugin
-       And I save the job
-       And I build the job
-       Then the build should succeed
-       And FTP plugin should have published "myresources" on docker fixture
+    Scenario: Configure a job with FTP publishing
+    Given I have installed the "ftp" plugin
+    And a docker fixture "ftpd"
+    And a job
+    When I configure docker fixture as FTP host
+    And I configure the job with one FTP Transfer Set
+    And I configure the Transfer Set
+        With Source Files "myresources"
+        And With Remote Directory myfolder/
+    And I copy resource "myresources" into workspace
+    And I save the job
+    And I build the job
+    Then the build should succeed
+    And FTP plugin should have published "myresources" on docker fixture
      */
     @Native("docker")
     @Test
-    public void configure_job_with_ftp_publishing() throws IOException, InterruptedException {
+    public void publish_resources() throws IOException, InterruptedException {
 
 
     }
@@ -53,10 +55,11 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      And a docker fixture "ftpd"
      And a job
      When I configure docker fixture as FTP site
-     And I configure the job
-     And I copy resource "myresources" into workspace with  prefix
-     And I publish "prefix/myresources"" with FTP plugin
-     And I configure FTP publish plugin with remove prefix
+     And I configure the job with one FTP Transfer Set
+     And I configure the Transfer Set
+         With Source Files "prefix_myresources"
+         And With Remote Directory myfolder/
+         And With remove prefix
      And I save the job
      And I build the job
      Then the build should succeed
@@ -64,7 +67,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      */
     @Test
 
-    public void configure_job_with_remove_prefix_ftp_publishing() throws IOException, InterruptedException {
+    public void publish_resources_and_remove_prefix() throws IOException, InterruptedException {
 
 
     }
@@ -73,13 +76,16 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      @native(docker)
      Scenario: Configure a job with FTP publishing
      Given I have installed the "ftp" plugin
+     And a resources Directory "myresources"
+        With the file ".exclude"
      And a docker fixture "ftpd"
      And a job
      When I configure docker fixture as FTP site
-     And I configure the job
-     And I copy resources "myresources" and ".exclude"  into workspace
-     And I publish"myresources" and ".exclude"  FTP plugin
-     And I configure FTP publish plugin with exclude ".exclude"
+     And I configure the job with one FTP Transfer Set
+     And I configure the Transfer Set
+        With Source Files  "myresources/"
+        And With exclude ".exclude"
+     And I copy resources "myresources/" into workspace
      And I save the job
      And I build the job
      Then the build should succeed
@@ -87,7 +93,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      */
     @Test
 
-    public void configure_job_with_exclude_ftp_publishing() throws IOException, InterruptedException {
+    public void publish_resources_with_excludes() throws IOException, InterruptedException {
 
 
     }
@@ -99,21 +105,20 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      And a docker fixture "ftpd"
      And a job
      When I configure docker fixture as FTP site
-     And I configure the job
-     And I copy resources "myresources"  into workspace
-     And I publish "myresources" with FTP plugin
-     And I configure FTP publish plugin with ';' as pattern separator
+     And I configure the job with one FTP Transfer Set
+     And I configure the Transfer Set
+        With Source Files "myresource1,myresource2"
+     And I copy resources "myresource1,myresource2"  into workspace
      And I save the job
      And I build the job
      Then the build should succeed
-     And FTP plugin should have published "myresources" without the ".exclude" on docker fixture
+     And FTP plugin should have published "myresources1" and "myresource2"
      */
     @Test
-    public void configure_job_with_different_pattern_ftp_publishing() throws IOException, InterruptedException {
+    public void publish_with_default_pattern() throws IOException, InterruptedException {
 
 
     }
-
     /**
      @native(docker)
      Scenario: Configure a job with FTP publishing
@@ -121,17 +126,61 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      And a docker fixture "ftpd"
      And a job
      When I configure docker fixture as FTP site
-     And I configure the job
+     And I configure the job with one FTP Transfer Set
+     And I configure the Transfer Set
+        With Source Files "my,resource;myresource2"
+        And With Pattern separator [;]+
+     And I copy resources "my,resource,myresource2"  into workspace
+     And I save the job
+     And I build the job
+     Then the build should succeed
+     And FTP plugin should have published "my,resource" and "myresource2"
+     */
+    @Test
+    public void publish_with_own_pattern() throws IOException, InterruptedException {
+
+
+    }
+    /**
+     @native(docker)
+     Scenario: Configure a job with FTP publishing
+     Given I have installed the "ftp" plugin
+     And a docker fixture "ftpd"
+     And a job
+     When I configure docker fixture as FTP site
+     And I configure the job with one FTP Transfer Set
+     And I configure the Transfer Set
+         With Source Files ".svn/,.git"  with FTP plugin
      And I copy resources ".svn/,.git" into workspace
-     And I publish ".svn/,.git"  with FTP plugin
-     And I configure FTP publish plugin with No default excludes
+     And I save the job
+     And I build the job
+     Then the build should succeed
+     And FTP plugin should have not published  .svn/,.git"
+     */
+    @Test
+    public void publish_with_default_exclude() throws IOException, InterruptedException {
+
+
+    }
+    /**
+     @native(docker)
+     Scenario: Configure a job with FTP publishing
+     Given I have installed the "ftp" plugin
+     And a docker fixture "ftpd"
+     And a job
+     When I configure docker fixture as FTP site
+     And I configure the job with one FTP Transfer Set
+     And I configure the Transfer Set
+        With Source Files ".svn/,.git"  with FTP plugin
+        And With No default excludes checked
+     And I copy resources ".svn/,.git" into workspace
      And I save the job
      And I build the job
      Then the build should succeed
      And FTP plugin should have published  .svn/,.git"
      */
     @Test
-    public void configure_job_no_default_exclude_ftp_publishing() throws IOException, InterruptedException {
+    public void publish_with_no_default_exclude() throws IOException, InterruptedException {
 
 
     }
@@ -142,20 +191,21 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      And a docker fixture "ftpd"
      And a job
      When I configure docker fixture as FTP site
-     And I configure the job
+     And I configure the job with one FTP Transfer Set
+     And I configure the Transfer Set
+        With Source Files "emptydir" with FTP plugin
+        And With Make empty dirs  Checked
      And I create the directory "emptydir" into workspace
-     And I publish "emptydir" with FTP plugin
-     And I configure FTP publish plugin with Make empty dirs
      And I save the job
      And I build the job
-     Then the build should fail
+     Then the build should succeed
+     And FTP plugin should have published  "emptydir"
      */
     @Test
-    public void configure_job_emtpy_dirs_ftp_publishing() throws IOException, InterruptedException {
+    public void publish_with_empty_directory() throws IOException, InterruptedException {
 
 
     }
-
     /**
      @native(docker)
      Scenario: Configure a job with FTP publishing
@@ -163,17 +213,39 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      And a docker fixture "ftpd"
      And a job
      When I configure docker fixture as FTP site
-     And I configure the job
+     And I configure the job with one FTP Transfer Set
+     And I configure the Transfer Set
+        With Source Files "emptydir" with FTP plugin
+     And I create the directory "emptydir" into workspace
+     And I save the job
+     And I build the job
+     Then the build should succeed
+     And FTP plugin should have not published  "emptydir"
+     */
+    @Test
+    public void publish_without_empty_directory() throws IOException, InterruptedException {
+
+
+    }
+    /**
+     @native(docker)
+     Scenario: Configure a job with FTP publishing
+     Given I have installed the "ftp" plugin
+     And a docker fixture "ftpd"
+     And a job
+     When I configure docker fixture as FTP site
+     And I configure the job with one FTP Transfer Set
+     And I configure the Transfer Set
+        With SourceFiles "myresources" and "subdir\myresources" with FTP plugin
      And I copy resources "myresources" into workspace
      And I copy resources "myresources" into workspace\subdir
-     And I publish "myresources" and "subdir\myresources" with FTP plugin
-     And I configure FTP publish plugin with Flatten files
      And I save the job
      And I build the job
-     Then the build should fail
+     Then the build should succeed
+     And FTP plugin should have published "myresources" and "subdir\myresources"
      */
     @Test
-    public void configure_job_flatten_files_ftp_publishing() throws IOException, InterruptedException {
+    public void publish_without_flatten_files() throws IOException, InterruptedException {
 
 
     }
@@ -185,17 +257,41 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      And a docker fixture "ftpd"
      And a job
      When I configure docker fixture as FTP site
-     And I configure the job
+     And I configure the job with one FTP Transfer Set
+     And I configure the Transfer Set
+        With SourceFiles "myresources" and "subdir\myresources" with FTP plugin
+        And With Flatten files Checked
      And I copy resources "myresources" into workspace
-     And I publish "myresources" with FTP plugin
-     And I configure FTP publish plugin with Remote directory  is a date format
+     And I copy resources "myresources" into workspace\subdir
+     And I save the job
+     And I build the job
+     Then the build should fail
+     */
+    @Test
+    public void publish_with_flatten_files() throws IOException, InterruptedException {
+
+
+    }
+
+    /**
+     @native(docker)
+     Scenario: Configure a job with FTP publishing
+     Given I have installed the "ftp" plugin
+     And a docker fixture "ftpd"
+     And a job
+     When I configure docker fixture as FTP site
+     And I configure the job with one FTP Transfer Set
+     And I configure the Transfer Set
+         With SourceFiles "myresources" with FTP plugin
+         And With Remote directory  is a date format Checked
+     And I copy resources "myresources" into workspace
      And I save the job
      And I build the job
      Then the build should succeed
      And FTP plugin should have published "myresources" under 'yyyy/MM/dd/'build-${BUILD_NUMBER}'
      */
     @Test
-    public void configure_job_date_format_ftp_publishing() throws IOException, InterruptedException {
+    public void publish_with_date_format() throws IOException, InterruptedException {
 
 
     }
@@ -205,13 +301,13 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      Scenario: Configure a job with FTP publishing
      Given I have installed the "ftp" plugin
      And a docker fixture "ftpd"
+        And I Upload "oldfile.txt" to the ftp Server
      And a job
-     When I configure docker fixture as FTP site
-     And I upload "oldfile.txt" into workspace
-     And I configure the job
+     And I configure the job with one FTP Transfer Set
+     And I configure the Transfer Set
+        With SourceFiles "myresources" with FTP plugin
+        And With Clean remote
      And I copy resources "myresources" into workspace
-     And I publish "myresources" with FTP plugin
-     And I configure FTP publish plugin with Clean remote
      And I save the job
      And I build the job
      Then the build should succeed
@@ -219,7 +315,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      And the RemoteDIR should not contain "old.txt"
      */
     @Test
-    public void configure_job_clean_remote_ftp_publishing() throws IOException, InterruptedException {
+    public void publish_with_clean_remote() throws IOException, InterruptedException {
 
 
     }
@@ -232,17 +328,18 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      And a docker fixture "ftpd"
      And a job
      When I configure docker fixture as FTP site
-     And I configure the job
-     And I copy resources "ascitext" into workspace
-     And I publish "ascitext" with FTP plugin
-     And I configure FTP publish plugin with ASCII mode
+     And I configure the job with one FTP Transfer Set
+     And I configure the Transfer Set
+         With SourceFiles "mac-ascii.txt,windows-ascii.txt,linux-ascii.txt" with FTP plugin
+         And With ASCII mode
+     And I copy resources "mac-ascii.txt,windows-ascii.txt,linux-ascii.txt" into workspace
      And I save the job
      And I build the job
      Then the build should succeed
-     And FTP plugin should have published "ascitext" with correct lining
+     And FTP plugin should have published "mac-ascii.txt,windows-ascii.txt,linux-ascii.txt" with correct lining
      */
     @Test
-    public void configure_job_asci_text_ftp_publishing() throws IOException, InterruptedException {
+    public void publish_asci_text() throws IOException, InterruptedException {
 
 
     }
@@ -255,13 +352,14 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      And a docker fixture "ftpd"
      And a job
      When I configure docker fixture as FTP site
-     And I configure the job
+     And I configure the job with three FTP Transfer Sets
+     And I configure the Transfer Set 1
+        With SourceFiles  myresourcesSet1
+     And I configure the Transfer Set 2
+        With SourceFiles  myresourcesSet2
+     And I configure the Transfer Set 3
+        With SourceFiles  myresourcesSet3
      And I copy resources myresources into workspace
-     And I publish myresourcesSet1 with FTP plugin
-     And I add a Transferset
-     And I publish myresourcesSet2 with FTP plugin
-     And I add a Transferset
-     And I publish myresourcesSet3 a with FTP plugin
      And I save the job
      And I build the job
      Then the build should succeed
@@ -269,7 +367,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      */
     @Test
 
-    public void configure_job_with_multiple_transfer_set_ftp_publishing() throws IOException, InterruptedException {
+    public void publish_multiple_sets() throws IOException, InterruptedException {
 
 
     }
@@ -283,11 +381,15 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      And a job
      When I configure docker fixture 1 as FTP site
      And I configure docker fixture 2 as FTP site
-     And I configure the job
+     And I configure the job with fixture1 Server
+     And one FTP Transfer Set
+     And I configure the Transfer Set
+        With SourceFiles myresources
+     And I Add Server fixture2
+     And one FTP Transfer Set
+         And I configure the Transfer Set
+         With SourceFiles myresources
      And I copy resources myresources  into workspace
-     And I publish myresources  with FTP plugin
-     And I Add Server
-     And I publish myresources  with FTP plugin
      And I save the job
      And I build the job
      Then the build should succeed
@@ -295,7 +397,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      */
     @Test
 
-    public void configure_job_with_multiple_server_ftp_publishing() throws IOException, InterruptedException {
+    public void publish_multiple_servers() throws IOException, InterruptedException {
 
 
     }
