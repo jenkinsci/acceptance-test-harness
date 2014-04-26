@@ -23,16 +23,25 @@
  */
 package org.jenkinsci.test.acceptance.po;
 
-/**
- * Base type for {@link PageArea} for SCM configuration.
- *
- * Use {@link Describable} annotation to register an implementation.
- *
- * @see Job#useScm(Class)
- */
-public class Scm extends PageArea {
+@ToolInstallationPageObject(installer = "hudson.tools.JDKInstaller", name = "JDK")
+public class JdkInstallation extends ToolInstallation {
 
-    public Scm(Job job, String path) {
-        super(job, path);
+    public JdkInstallation(JenkinsConfig context, String path) {
+        super(context, path);
+    }
+
+    @Override
+    public ToolInstallation installVersion(String version) {
+        super.installVersion(version);
+        control("properties/hudson-tools-InstallSourceProperty/installers/acceptLicense").check();
+        return this;
+    }
+
+    public void setCredentials(String login, String password) {
+        page.visit("descriptorByName/hudson.tools.JDKInstaller/enterCredential");
+        find(by.input("username")).sendKeys(login);
+        find(by.input("password")).sendKeys(password);
+        clickButton("OK");
+        clickButton("Close");
     }
 }
