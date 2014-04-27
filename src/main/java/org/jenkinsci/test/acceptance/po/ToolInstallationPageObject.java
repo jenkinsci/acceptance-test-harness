@@ -23,16 +23,26 @@
  */
 package org.jenkinsci.test.acceptance.po;
 
-/**
- * Base type for {@link PageArea} for SCM configuration.
- *
- * Use {@link Describable} annotation to register an implementation.
- *
- * @see Job#useScm(Class)
- */
-public class Scm extends PageArea {
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-    public Scm(Job job, String path) {
-        super(job, path);
-    }
+import org.jvnet.hudson.annotation_indexer.Indexed;
+
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+@Indexed
+public @interface ToolInstallationPageObject {
+    /**
+     * Tool installer name used for global configuration.
+     */
+    String name();
+
+    /**
+     * Pattern to be logged once updates arrive.
+     *
+     * Clients should not interact with this ToolInstalltion before updates was loaded.
+     */
+    String installer();
 }

@@ -21,18 +21,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.test.acceptance.po;
+package org.jenkinsci.test.acceptance.plugins.multiple_scms;
 
-/**
- * Base type for {@link PageArea} for SCM configuration.
- *
- * Use {@link Describable} annotation to register an implementation.
- *
- * @see Job#useScm(Class)
- */
-public class Scm extends PageArea {
+import org.jenkinsci.test.acceptance.po.Control;
+import org.jenkinsci.test.acceptance.po.Describable;
+import org.jenkinsci.test.acceptance.po.Job;
+import org.jenkinsci.test.acceptance.po.Scm;
+import org.openqa.selenium.WebElement;
 
-    public Scm(Job job, String path) {
+@Describable("Multiple SCMs")
+public class MultipleScms extends Scm {
+    private final Control addButton = control("hetero-list-add[scmList]");
+
+    private final Job job;
+
+    public MultipleScms(Job job, String path) {
         super(job, path);
+        this.job = job;
+    }
+
+    public <T extends Scm> T addScm(Class<T> type) {
+        addButton.click();
+
+        findCaption(type, new Finder<WebElement>() {
+            @Override protected WebElement find(String caption) {
+                return outer.find(by.link(caption));
+            }
+        }).click();
+
+        sleep(100);
+        String path = last(by.button("Delete SCM")).getAttribute("path");
+
+        return newInstance(type, job, path.substring(0, path.length() - 18));
     }
 }
