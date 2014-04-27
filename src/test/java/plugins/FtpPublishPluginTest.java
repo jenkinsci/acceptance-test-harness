@@ -62,6 +62,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
             s.username.set("test");
             s.password.set("test");
             s.remoteDir.set("/tmp");
+            s.disableRemoteVerification.check(true);
         }
         jenkins.save();
         j.configure();

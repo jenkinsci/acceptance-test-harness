@@ -45,6 +45,6 @@ public class FtpGlobalConfig extends PageArea {
         public final Control useActiveData = control("useActiveData");
         public final Control disableMakeNestedDirs = control("disableMakeNestedDirs");
         public final Control controlEncoding = control("controlEncoding");
-
+        public final Control disableRemoteVerification = control("disableRemoteVerification");
     }
 }
