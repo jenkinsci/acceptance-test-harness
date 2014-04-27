@@ -1,5 +1,6 @@
 package org.jenkinsci.test.acceptance.junit;
 
+import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.junit.internal.AssumptionViolatedException;
 import org.junit.rules.TestRule;
@@ -11,6 +12,8 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+
+import com.google.inject.Inject;
 
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
@@ -32,6 +35,8 @@ public @interface Native {
     String[] value();
 
     public class RuleImpl implements TestRule {
+        @Inject
+        Docker docker;
         @Override
         public Statement apply(final Statement base, final Description d) {
             return new Statement() {
@@ -46,7 +51,14 @@ public @interface Native {
                 private void verifyNativeCommandPresent(Native n) throws IOException, InterruptedException {
                     if (n==null)        return;
                     for (String cmd : n.value()) {
-                        if (new CommandBuilder("which",cmd).system()!=0) {
+                        //!workaround for docker
+                        if(cmd.contains("docker")){
+                            if(!docker.isAvailable()){
+                                throw new AssumptionViolatedException(cmd + " is needed for the test but doesn't exist in the system");
+                            }
+
+                        }
+                        else if (new CommandBuilder("which",cmd).system()!=0) {
                             throw new AssumptionViolatedException(cmd + " is needed for the test but doesn't exist in the system");
                         }
                     }

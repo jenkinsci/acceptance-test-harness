@@ -1,7 +1,8 @@
 #!/bin/bash
 DIR="$( cd "$( dirname "$0" )" && pwd )"
-if [ ! -d "$DIR/target" ]
+CMD="$DIR/target/appassembler/bin/jut-server"
+if [ ! -s $CMD ]
 then
   mvn package -DskipTests -f "$DIR/pom.xml"
 fi
-sh "$DIR/target/appassembler/bin/jut-server" "$@"
+sh "$CMD" "$@"

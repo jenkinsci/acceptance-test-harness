@@ -33,4 +33,9 @@ public @interface DockerFixture {
      * be retried at runtime via {@link DockerContainer#port(int)}.
      */
     int[] ports() default {};
+
+    /**
+     * Ip address to bind to
+     */
+    String bindIp() default "127.0.0.1";
 }

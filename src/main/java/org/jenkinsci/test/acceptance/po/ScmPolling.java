@@ -21,37 +21,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.test.acceptance.plugins.multiple_scms;
+package org.jenkinsci.test.acceptance.po;
 
-import org.jenkinsci.test.acceptance.po.Control;
-import org.jenkinsci.test.acceptance.po.Describable;
-import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.Scm;
-import org.openqa.selenium.WebElement;
+public class ScmPolling extends PageArea {
 
-@Describable("Multiple SCMs")
-public class MutlipleScms extends Scm {
-    private final Control addButton = control("hetero-list-add[scmList]");
-
-    private final Job job;
-
-    public MutlipleScms(Job job, String path) {
-        super(job, path);
-        this.job = job;
+    public ScmPolling(Job job) {
+        super(job, "/hudson-triggers-SCMTrigger");
+        control("").check();
     }
 
-    public <T extends Scm> T addScm(Class<T> type) {
-        addButton.click();
+    public ScmPolling ignorePostCommitHooks(boolean ignore) {
+        control("ignorePostCommitHooks").check(ignore);
+        return this;
+    }
 
-        findCaption(type, new Finder<WebElement>() {
-            @Override protected WebElement find(String caption) {
-                return outer.find(by.link(caption));
-            }
-        }).click();
-
-        sleep(100);
-        String path = last(by.button("Delete SCM")).getAttribute("path");
-
-        return newInstance(type, job, path.substring(0, path.length() - 18));
+    public ScmPolling schedule(String schedule) {
+        control("scmpoll_spec").set(schedule);
+        return this;
     }
 }

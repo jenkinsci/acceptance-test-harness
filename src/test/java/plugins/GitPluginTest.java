@@ -90,4 +90,19 @@ public class GitPluginTest extends AbstractJUnitTest {
 
         job.startBuild().shouldSucceed();
     }
+
+    @Test
+    public void poll_for_changes() {
+        job = jenkins.jobs.create();
+        job.configure();
+        job.useScm(GitScm.class).url(REPO_URL);
+        job.pollScm().schedule("* * * * *");
+        job.addShellStep("test -f pom.xml");
+        job.save();
+
+        sleep(70000);
+
+        // We should have some build after 70 seconds
+        job.getLastBuild().shouldSucceed().shouldExist();
+    }
 }
