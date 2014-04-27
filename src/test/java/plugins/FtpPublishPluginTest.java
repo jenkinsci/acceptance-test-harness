@@ -6,10 +6,14 @@ import java.io.IOException;
 import org.apache.commons.io.FileUtils;
 import org.hamcrest.CoreMatchers;
 import org.jenkinsci.test.acceptance.docker.Docker;
+import org.jenkinsci.test.acceptance.docker.fixtures.FtpdContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Native;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.plugins.ftp.FtpGlobalConfig;
+import org.jenkinsci.test.acceptance.plugins.ftp.FtpGlobalConfig.Site;
+import org.jenkinsci.test.acceptance.plugins.ftp.FtpPublisher;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
 
@@ -33,19 +37,46 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
     When I configure docker fixture as FTP host
     And I configure the job with one FTP Transfer Set
     And I configure the Transfer Set
-        With Source Files "myresources"
+        With Source Files "odes.txt"
         And With Remote Directory myfolder/
-    And I copy resource "myresources" into workspace
+    And I copy resource "odes.txt" into workspace
     And I save the job
     And I build the job
     Then the build should succeed
-    And FTP plugin should have published "myresources" on docker fixture
+    And FTP plugin should have published "odes.txt" on docker fixture
      */
     @Native("docker")
     @Test
     public void publish_resources() throws IOException, InterruptedException {
+        FtpdContainer ftpd = docker.start(FtpdContainer.class);
+        Resource cp_file = resource("/ftp_plugin/odes.txt");
 
+        FreeStyleJob j = jenkins.jobs.create();
 
+        jenkins.configure();
+        Site s = new FtpGlobalConfig(jenkins).addSite();
+        {
+            s.name.set(ftpd.ipBound(21));
+            s.hostname.set(ftpd.ipBound(21));
+            s.port.set(ftpd.port(21));
+            s.username.set("test");
+            s.password.set("test");
+            s.remoteDir.set("/tmp");
+        }
+        jenkins.save();
+        j.configure();
+        {
+            j.copyResource(cp_file);
+            FtpPublisher fp = j.addPublisher(FtpPublisher.class);
+            FtpPublisher.Site fps = fp.getDefault();
+            fps.getDefaultTransfer().sourceFile.set("odes.txt");
+        }
+        j.save();
+
+        //Publish Over ftp fails, cause we are using pasive mode compare with: http://www.coderanch.com/t/207085/sockets/java/FTP-connection-Proxy
+        j.startBuild().shouldSucceed();
+        ftpd.cp("/tmp/odes.txt", new File("/tmp"));
+        assertThat(FileUtils.readFileToString(new File("/tmp/odes.txt")), CoreMatchers.is(cp_file.asText()));
     }
 
     /**
