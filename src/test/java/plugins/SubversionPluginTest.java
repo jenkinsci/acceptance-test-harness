@@ -6,6 +6,8 @@ import org.jenkinsci.test.acceptance.docker.fixtures.SvnContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Native;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.plugins.credentials.ManagedCredentials;
+import org.jenkinsci.test.acceptance.plugins.credentials.UserPwdCredential;
 import org.jenkinsci.test.acceptance.plugins.subversion.SubversionCredentialUserPwd;
 import org.jenkinsci.test.acceptance.plugins.subversion.SubversionPluginTestException;
 import org.jenkinsci.test.acceptance.plugins.subversion.SubversionScm;
@@ -111,7 +113,7 @@ public class SubversionPluginTest extends AbstractJUnitTest {
      * Then the build should succeed
      */
     @Test
-    public void run_basic_subversion_build_http_pwd() throws SubversionPluginTestException {
+    public void run_basic_subversion_build_userPwd() throws SubversionPluginTestException {
         final SvnContainer svnContainer = svn.get();
 
         final FreeStyleJob f = jenkins.jobs.create();
@@ -124,6 +126,46 @@ public class SubversionPluginTest extends AbstractJUnitTest {
         credentialPage.setUsername(SvnContainer.USER);
         credentialPage.setPassword(SvnContainer.PWD);
         credentialPage.confirmDialog();
+        f.save();
+
+        f.startBuild().shouldSucceed();
+
+    }
+
+
+    /**
+     * Scenario: Always check out fresh copy
+     * Given I have installed the "subversion" plugin
+     * And a job
+     * When I check out code from protected Subversion repository "<UrlUserPwdSaveRepo>"
+     * And I click the link to enter credentials
+     * And I enter the right username and the right password
+     * And I save the credentials
+     * And I save the job
+     * And I build the job
+     * Then the build should succeed
+     */
+    @Test
+    public void run_basic_subversion_build_userPwd_credentials_already_added() throws SubversionPluginTestException {
+        final SvnContainer svnContainer = svn.get();
+
+        //preconfigure credentials
+        final ManagedCredentials c = new ManagedCredentials(jenkins);
+        c.open();
+        final UserPwdCredential upc = c.add(UserPwdCredential.class);
+        upc.username.set(svnContainer.USER);
+        upc.password.set(svnContainer.PWD);
+        c.save();
+        jenkins.visit("credentials");
+
+        //add Job
+        final FreeStyleJob f = jenkins.jobs.create();
+        f.configure();
+
+        final SubversionScm subversionScm = f.useScm(SubversionScm.class);
+        subversionScm.url.set(svnContainer.getUrlUserPwdSaveRepo());
+
+
         f.save();
 
         f.startBuild().shouldSucceed();
