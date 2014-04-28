@@ -101,7 +101,7 @@ public class SubversionPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     * Scenario: Always check out fresh copy
+     * Scenario: http:// user/pwd basic Checkout
      * Given I have installed the "subversion" plugin
      * And a job
      * When I check out code from protected Subversion repository "<UrlUserPwdSaveRepo>"
@@ -132,18 +132,43 @@ public class SubversionPluginTest extends AbstractJUnitTest {
 
     }
 
-
     /**
-     * Scenario: Always check out fresh copy
+     * Scenario:basic Checkout with svn protocol
      * Given I have installed the "subversion" plugin
      * And a job
-     * When I check out code from protected Subversion repository "<UrlUserPwdSaveRepo>"
+     * When I check out code from protected Subversion repository "<SvnUrl>"
      * And I click the link to enter credentials
      * And I enter the right username and the right password
      * And I save the credentials
      * And I save the job
      * And I build the job
      * Then the build should succeed
+     */
+    @Test
+    public void run_basic_subversion_build_svn_userPwd() throws SubversionPluginTestException {
+        final SvnContainer svnContainer = svn.get();
+
+        final FreeStyleJob f = jenkins.jobs.create();
+        f.configure();
+
+        final SubversionScm subversionScm = f.useScm(SubversionScm.class);
+        subversionScm.url.set(svnContainer.getSvnUrl());
+
+        final SubversionCredentialUserPwd credentialPage = subversionScm.getCredentialPage(SubversionCredentialUserPwd.class);
+        credentialPage.setUsername(SvnContainer.USER);
+        credentialPage.setPassword(SvnContainer.PWD);
+        credentialPage.confirmDialog();
+        f.save();
+
+        f.startBuild().shouldSucceed();
+
+    }
+
+
+
+    /**
+     * Test not running atm. Plugin does not seem to work wit credentials plugin
+     * @throws SubversionPluginTestException
      */
     @Test
     public void run_basic_subversion_build_userPwd_credentials_already_added() throws SubversionPluginTestException {
@@ -153,8 +178,8 @@ public class SubversionPluginTest extends AbstractJUnitTest {
         final ManagedCredentials c = new ManagedCredentials(jenkins);
         c.open();
         final UserPwdCredential upc = c.add(UserPwdCredential.class);
-        upc.username.set(svnContainer.USER);
-        upc.password.set(svnContainer.PWD);
+        upc.username.set(SvnContainer.USER);
+        upc.password.set(SvnContainer.PWD);
         c.save();
         jenkins.visit("credentials");
 

@@ -5,6 +5,8 @@ import org.jenkinsci.test.acceptance.docker.DockerFixture;
 import org.jenkinsci.test.acceptance.plugins.subversion.SubversionPluginTestException;
 
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 
 /**
@@ -12,23 +14,25 @@ import java.net.URL;
  *
  * @author Matthias Karl
  */
-@DockerFixture(id = "svn", ports = 80)
+@DockerFixture(id = "svn", ports = {80, 3690, 22})
 public class SvnContainer extends DockerContainer {
     public static final String USER = "user";
     public static final String PWD = "test";
 
-    private static final String LOCALHOST = "http://localhost:";
+    private static final String PROTOCOL_HTTP = "http://";
+    private static final String PROTOCOL_SVN = "svn://";
+    private static final String LOCALHOST = "localhost:";
     private static final String UNSAVE_REPO = "/svn";
     private static final String User_PWD_SAVE_REPO = "/svn_pwd";
 
     /**
-     * BaseUrl of the Dockercontainer
+     * BaseHttpUrl of the Dockercontainer. Uses http protocol
      *
      * @return URL
      * @throws SubversionPluginTestException e
      */
-    public URL getUrl() throws SubversionPluginTestException {
-        String url = LOCALHOST + port(80);
+    public URL getHttpUrl() throws SubversionPluginTestException {
+        String url = PROTOCOL_HTTP + LOCALHOST + port(80);
         URL returnUrl = null;
         try {
             returnUrl = new URL(url);
@@ -39,13 +43,30 @@ public class SvnContainer extends DockerContainer {
     }
 
     /**
-     * Url to an unsave SVN repo
+     * BaseSVNUrl of the Dockercontainer. Users svn Protocol.
+     *
+     * @return URL
+     * @throws SubversionPluginTestException e
+     */
+    public URI getSvnUrl() throws SubversionPluginTestException {
+        String url = PROTOCOL_SVN + LOCALHOST + port(3690);
+        URI returnUri = null;
+        try {
+            returnUri = new URI(url);
+        } catch (URISyntaxException e) {
+            SubversionPluginTestException.throwMalformedURL(e, url);
+        }
+        return returnUri;
+    }
+
+    /**
+     * Http Url to an unsave SVN repo
      *
      * @return URL
      * @throws SubversionPluginTestException e
      */
     public URL getUrlUnsaveRepo() throws SubversionPluginTestException {
-        String url = getUrl().toString() + UNSAVE_REPO;
+        String url = getHttpUrl().toString() + UNSAVE_REPO;
         URL returnUrl = null;
         try {
             returnUrl = new URL(url);
@@ -56,7 +77,7 @@ public class SvnContainer extends DockerContainer {
     }
 
     /**
-     * Url to an unsave SVN repo at a special revision
+     * Http Url to an unsave SVN repo at a special revision
      *
      * @return URL
      * @throws SubversionPluginTestException e
@@ -73,13 +94,13 @@ public class SvnContainer extends DockerContainer {
     }
 
     /**
-     * Url to an username/password save Repo
+     * Http Url to an username/password save Repo
      *
      * @return URL
      * @throws SubversionPluginTestException e
      */
     public URL getUrlUserPwdSaveRepo() throws SubversionPluginTestException {
-        String url = getUrl().toString() + User_PWD_SAVE_REPO;
+        String url = getHttpUrl().toString() + User_PWD_SAVE_REPO;
         URL returnUrl = null;
         try {
             returnUrl = new URL(url);
