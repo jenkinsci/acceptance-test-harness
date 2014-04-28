@@ -7,8 +7,9 @@ import org.jenkinsci.test.acceptance.po.PageObject;
 /**
  * Page area base type for credentials
  *
+ * Use {@link Describable} annotation to register an implementation.
+ *
  * @author Kohsuke Kawaguchi
- * @see Describable
  */
 public abstract class Credential extends PageArea {
     protected Credential(PageObject context, String path) {
