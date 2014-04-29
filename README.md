@@ -20,7 +20,9 @@ Following areas are still worked on:
  * Either more steps need to be written to make existing cucumber tests work,
    or they need to be ported over to JUnit.
 
-[![Build Status](https://jenkins.ci.cloudbees.com/buildStatus/icon?job=core/acceptance-test-harness)](https://jenkins.ci.cloudbees.com/job/core/job/acceptance-test-harness/)
+master | stable
+------ | ------
+[![Build Status](https://jenkins.ci.cloudbees.com/buildStatus/icon?job=core/acceptance-test-harness)](https://jenkins.ci.cloudbees.com/job/core/job/acceptance-test-harness/) | [![Build Status](https://jenkins.ci.cloudbees.com/buildStatus/icon?job=core/acceptance-test-harness-stable)](https://jenkins.ci.cloudbees.com/job/core/job/acceptance-test-harness-stable/)
 
 ## Getting Started
 
