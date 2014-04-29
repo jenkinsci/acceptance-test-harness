@@ -21,33 +21,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package plugins;
+package org.jenkinsci.test.acceptance.plugins.gerrit_trigger;
 
-import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.plugins.gerrit_trigger.GerritTriggerNewServer;
-import org.junit.Test;
+import org.jenkinsci.test.acceptance.po.Control;
+import org.jenkinsci.test.acceptance.po.Jenkins;
+import org.jenkinsci.test.acceptance.po.PageObject;
 
 /**
- * @author Marco.Miller@ericsson.com
+ * Page Object for Gerrit Trigger newServer (configuration) page.
+ *
+ * @author Marco Miller
  */
-@WithPlugins("gerrit-trigger")
-public class GerritTriggerTest extends AbstractJUnitTest {
+public class GerritTriggerNewServer extends PageObject {
+
+    public final Jenkins jenkins;
+    public final Control name = control("/name");
+    public final Control modeDefault = control("/mode[com.sonyericsson.hudson.plugins.gerrit.trigger.GerritServer]");
+    public final Control modeCopy = control("/mode[copy]");
+
+    public GerritTriggerNewServer(Jenkins jenkins) {
+        super(jenkins.injector, jenkins.url("gerrit-trigger/newServer"));
+        this.jenkins = jenkins;
+    }
 
     /**
-     * Scenario: Gerrit has its Change review flags checked after Jenkins set them
-     * Given a Jenkins instance that is either test-default or type=existing
-     *  And a gerrit-trigger plugin that is either test-default or pre-installed
-     *  And an existing Gerrit instance configured in that Jenkins
-     * When I push a Change that builds successfully for review
-     * Then Jenkins does build it successfully indeed
-     *  And Jenkins sets the Change review flags accordingly towards Gerrit
-     *  And Gerrit then consider these flags as checked
+     * Saves harness' gerrit-trigger server if none already configured.
      */
-    @Test
-    public void gerrit_has_review_flags_checked_after_jenkins_set_them() {
-        GerritTriggerNewServer page = new GerritTriggerNewServer(jenkins);
-        page.saveNewTestServerConfig();
+    public void saveNewTestServerConfig() {
+        open();
+        if(getElement(by.path(modeCopy.toString())) == null) {
+            name.set(this.getClass().getName());
+            modeDefault.click();
+            clickButton("OK");
+        }
         //TODO work in progress
     }
 }
