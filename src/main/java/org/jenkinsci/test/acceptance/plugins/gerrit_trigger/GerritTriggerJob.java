@@ -23,49 +23,31 @@
  */
 package org.jenkinsci.test.acceptance.plugins.gerrit_trigger;
 
-import static org.junit.Assume.assumeNotNull;
-
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.PageObject;
 
 /**
- * Page Object for Gerrit Trigger server (configuration) page.
+ * Page Object for Gerrit Trigger test-job (configuration) page.
  * @author Marco Miller
  */
-public class GerritTriggerServer extends PageObject {
+public class GerritTriggerJob extends PageObject {
 
     public final Jenkins jenkins;
-    public final Control hostName = control("/gerritHostName");
-    public final Control feUrl = control("/gerritFrontEndUrl");
-    public final Control userName = control("/gerritUserName");
-    public final Control keyFile = control("/gerritAuthKeyFile");
+    public final Control event = control("/com-sonyericsson-hudson-plugins-gerrit-trigger-hudsontrigger-GerritTrigger");
 
-    public GerritTriggerServer(Jenkins jenkins) {
-        super(jenkins.injector,jenkins.url("gerrit-trigger/server/"+GerritTriggerServer.class.getPackage().getName()));
+    public GerritTriggerJob(Jenkins jenkins,String jobName) {
+        super(jenkins.injector,jenkins.url("job/"+jobName+"/configure"));
         this.jenkins = jenkins;
     }
 
     /**
-     * Saves harness' gerrit-trigger server configuration.<br>
-     * Set these (data) at mvn-test command line to use this test:<br>
-     * - gtHostname=gerrit.company.com<br>
-     * - gtUsername=companion<br>
-     * - gtKeypath=/home/companion/.ssh/id_rsa<br>
-     * (We might change this approach to a better one.)
+     * Saves harness' gerrit-trigger test-job configuration.
      */
-    public void saveTestServerConfig() {
-        String hostNameEnv = System.getenv("gtHostname");
-        assumeNotNull(hostNameEnv);
-        String userNameEnv = System.getenv("gtUsername");
-        assumeNotNull(userNameEnv);
-        String keyFileEnv = System.getenv("gtKeypath");
-        assumeNotNull(keyFileEnv);
+    public void saveTestJobConfig() {
         open();
-        hostName.set(hostNameEnv);
-        feUrl.set("https://"+hostNameEnv);
-        userName.set(userNameEnv);
-        keyFile.set(keyFileEnv);
+        event.click();
+        //TODO work in progress
         clickButton("Save");
     }
 }

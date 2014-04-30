@@ -25,8 +25,10 @@ package plugins;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.plugins.gerrit_trigger.GerritTriggerJob;
 import org.jenkinsci.test.acceptance.plugins.gerrit_trigger.GerritTriggerNewServer;
 import org.jenkinsci.test.acceptance.plugins.gerrit_trigger.GerritTriggerServer;
+import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
 
 /**
@@ -51,6 +53,11 @@ public class GerritTriggerTest extends AbstractJUnitTest {
         newServer.saveNewTestServerConfigIfNone();
         GerritTriggerServer server = new GerritTriggerServer(jenkins);
         server.saveTestServerConfig();
+
+        String jobName = this.getClass().getCanonicalName();
+        jenkins.jobs.create(FreeStyleJob.class,jobName);
+        GerritTriggerJob job = new GerritTriggerJob(jenkins,jobName);
+        job.saveTestJobConfig();
         //TODO work in progress
     }
 }
