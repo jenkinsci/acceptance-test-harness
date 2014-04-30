@@ -5,6 +5,8 @@ import org.jenkinsci.test.acceptance.docker.DockerFixture;
 
 /**
  * openLDAP (slapd) Container with a small user directory.
+ * The configuration of this ldap is located next to its Dockerfile.
+ * To edit/add users or groups just add them to config/base.ldif and rebuild the image.
  *
  * @author Michael Prankl
  */

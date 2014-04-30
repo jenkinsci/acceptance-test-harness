@@ -1,3 +1,10 @@
+#
+# Base ldif for directory entries
+#
+# Make sure to rebuild the docker image to reflect changes in this file!
+#
+# To generate crypted passwords use "slappasswd"
+#
 dn: dc=jenkins-ci,dc=org
 objectClass: top
 objectClass: dcObject
