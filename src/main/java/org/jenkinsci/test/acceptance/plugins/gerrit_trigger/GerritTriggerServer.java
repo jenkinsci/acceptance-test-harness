@@ -26,30 +26,46 @@ package org.jenkinsci.test.acceptance.plugins.gerrit_trigger;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.PageObject;
+import org.junit.Test;
 
 /**
- * Page Object for Gerrit Trigger newServer (configuration) page.
+ * Page Object for Gerrit Trigger server (configuration) page.
  * @author Marco Miller
  */
-public class GerritTriggerNewServer extends PageObject {
+public class GerritTriggerServer extends PageObject {
 
     public final Jenkins jenkins;
-    public final Control name = control("/name");
-    public final Control modeDefault = control("/mode[com.sonyericsson.hudson.plugins.gerrit.trigger.GerritServer]");
+    public final Control hostName = control("/gerritHostName");
+    public final Control feUrl = control("/gerritFrontEndUrl");
+    public final Control userName = control("/gerritUserName");
+    public final Control keyFile = control("/gerritAuthKeyFile");
 
-    public GerritTriggerNewServer(Jenkins jenkins) {
-        super(jenkins.injector, jenkins.url("gerrit-trigger/newServer"));
+    public GerritTriggerServer(Jenkins jenkins) {
+        super(jenkins.injector, jenkins.url("gerrit-trigger/server/"+GerritTriggerServer.class.getPackage().getName()));
         this.jenkins = jenkins;
     }
 
     /**
-     * Saves harness' gerrit-trigger server if none already configured.<br>
-     * Does not matter if already configured; no-op with harmless error then.
+     * Saves harness' gerrit-trigger server configuration.<br>
+     * Set these (data) at mvn-test command line to use this test:<br>
+     * - gtHostname=gerrit.company.com<br>
+     * - gtUsername=companion<br>
+     * - gtKeypath=/home/companion/.ssh/id_rsa<br>
+     * (We might change this approach to a better one.)
      */
-    public void saveNewTestServerConfigIfNone() {
+    @Test
+    public void saveTestServerConfig() {
+        String hostNameEnv = System.getenv("gtHostname");
+        if(hostNameEnv == null) return;
+        String userNameEnv = System.getenv("gtUsername");
+        if(userNameEnv == null) return;
+        String keyFileEnv = System.getenv("gtKeypath");
+        if(keyFileEnv == null) return;
         open();
-        name.set(this.getClass().getPackage().getName());
-        modeDefault.click();
-        clickButton("OK");
+        hostName.set(hostNameEnv);
+        feUrl.set("https://"+hostNameEnv);
+        userName.set(userNameEnv);
+        keyFile.set(keyFileEnv);
+        clickButton("Save");
     }
 }

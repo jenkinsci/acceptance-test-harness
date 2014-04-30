@@ -26,6 +26,7 @@ package plugins;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.gerrit_trigger.GerritTriggerNewServer;
+import org.jenkinsci.test.acceptance.plugins.gerrit_trigger.GerritTriggerServer;
 import org.junit.Test;
 
 /**
@@ -35,19 +36,21 @@ import org.junit.Test;
 public class GerritTriggerTest extends AbstractJUnitTest {
 
     /**
-     * Scenario: Gerrit has its Change review flags checked after Jenkins set them
-     * Given a Jenkins instance that is either test-default or type=existing
-     *  And a gerrit-trigger plugin that is either test-default or pre-installed
-     *  And an existing Gerrit instance configured in that Jenkins
-     * When I push a Change that builds successfully for review
-     * Then Jenkins does build it successfully indeed
-     *  And Jenkins sets the Change review flags accordingly towards Gerrit
-     *  And Gerrit then consider these flags as checked
+     * Scenario: Gerrit has its Change review flags checked after Jenkins set them-<br>
+     * Given a Jenkins instance that is either test-default or type=existing<br>
+     *  And a gerrit-trigger plugin that is either test-default or pre-installed<br>
+     *  And an existing Gerrit instance configured in that Jenkins<br>
+     * When I push a Change that builds successfully for review<br>
+     * Then Jenkins does build it successfully indeed<br>
+     *  And Jenkins sets the Change review flags accordingly towards Gerrit<br>
+     *  And Gerrit then consider these flags as checked.
      */
     @Test
     public void gerrit_has_review_flags_checked_after_jenkins_set_them() {
-        GerritTriggerNewServer page = new GerritTriggerNewServer(jenkins);
-        page.saveNewTestServerConfig();
+        GerritTriggerNewServer newServer = new GerritTriggerNewServer(jenkins);
+        newServer.saveNewTestServerConfigIfNone();
+        GerritTriggerServer server = new GerritTriggerServer(jenkins);
+        server.saveTestServerConfig();
         //TODO work in progress
     }
 }
