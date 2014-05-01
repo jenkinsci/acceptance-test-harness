@@ -75,6 +75,10 @@ public class Job extends ContainerPageObject {
         return addStep(type,"builder");
     }
 
+    public void removeFirstBuildStep() {
+        removeFirstStep("builder");
+    }
+
     public <T extends PostBuildStep> T addPublisher(Class<T> type) {
         return addStep(type,"publisher");
     }
@@ -92,6 +96,16 @@ public class Job extends ContainerPageObject {
         String path = last(by.xpath("//div[@name='%s']", section)).getAttribute("path");
 
         return newInstance(type, this, path);
+    }
+
+    private void removeFirstStep(String section) {
+        ensureConfigPage();
+
+        String sectionWithStep = String.format("/%s" , section);
+
+        WebElement step = find(by.path(sectionWithStep));
+
+        step.findElement(by.path(String.format("%s/repeatable-delete", sectionWithStep))).click();
     }
 
     public ShellBuildStep addShellStep(Resource res) {
