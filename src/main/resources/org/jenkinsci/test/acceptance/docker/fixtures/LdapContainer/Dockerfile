@@ -2,7 +2,7 @@
 # Dockerfile for openLDAP (slapd)
 # Manager-DN (for bind): cn=admin,dc=jenkins-ci,dc=org
 # Manager-Password: jenkins
-# See config/base.ldif for user directory entries
+# See config/base.ldif for user/groups directory entries
 #
 FROM phusion/baseimage:0.9.8
 

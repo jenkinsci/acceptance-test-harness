@@ -27,6 +27,7 @@ objectClass: top
 objectClass: organizationalUnit
 ou: Applications
 
+## Users
 # jenkins, password is root
 dn: uid=jenkins,___sub_domain_here___
 objectClass: inetOrgPerson
@@ -56,6 +57,26 @@ sn: Simpson
 uid: homer
 mail: homer@springfield.com
 userPassword: {SSHA}Z4cXOqwiALeW3mVd87gdBaejZjOQAJlm
+
+## Groups
+# ldap1, members: jenkins, hudson
+dn: cn=ldap1,ou=Groups,___sub_domain_here___
+objectClass: top
+objectClass: posixGroup
+cn: ldap1
+gidNumber: 3000
+memberUid: jenkins
+memberUid: hudson
+
+# ldap2, members: jenkins, homer
+dn: cn=ldap2,ou=Groups,___sub_domain_here___
+objectClass: top
+objectClass: posixGroup
+cn: ldap2
+gidNumber: 4000
+memberUid: jenkins
+memberUid: homer
+
 
 
 
