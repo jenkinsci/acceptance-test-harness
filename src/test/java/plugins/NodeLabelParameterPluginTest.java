@@ -141,6 +141,23 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         FreeStyleJob j = jenkins.jobs.create();
 
         Slave s = slave.install(jenkins).get();
-       
+
+        j.configure();
+        j.addParameter(NodeParameter.class).setName("slavename");
+        j.save();
+
+        //as the slave has been started after creation, we have to take it down again
+        s.markOffline();
+        assertTrue(s.isOffline());
+
+        //use scheduleBuild instead of startBuild to avoid a timeout waiting for Build being started
+        Build b = j.scheduleBuild(singletonMap("slavename", s.getName()));
+
+        String pendingBuildText = find(by.xpath("//img[@alt='pending']/../..")).getText();
+        String refText=String.format("(pending—%s is offline) [NodeParameterValue: slavename=%s]",s.getName(),s.getName());
+
+        assertTrue(pendingBuildText.contains(refText));
+        assertTrue(!b.hasStarted());
+
     }
 }
