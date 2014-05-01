@@ -1,5 +1,6 @@
 package plugins;
 
+import javax.annotation.CheckForNull;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -37,11 +38,11 @@ public class LdapPluginTest extends AbstractJUnitTest {
      * "Jenkins is using ldap as security realm" (with user search base %s) (with user search filter %s)
      *
      * @param userSearchBase
-     *              optional: user search base (e.g. "People")
+     *              optional: user search base (e.g. "ou=People")
      * @param userSearchFilter
      *              optional: user search filter (e.g. "mail={0}")
      */
-    private void useLdapAsSecurityRealm(@Nullable String userSearchBase, @Nullable String userSearchFilter) {
+    private void useLdapAsSecurityRealm(@CheckForNull String userSearchBase, @CheckForNull String userSearchFilter) {
         LdapContainer l = ldap.get();
         LdapDetails ldapDetails = new LdapDetails(l.getHost(), l.getPort(), l.getManagerDn(), l.getManagerPassword(), l.getRootDn());
         if (userSearchBase != null) {
