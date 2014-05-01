@@ -1,6 +1,7 @@
 package plugins;
 
 import org.apache.commons.io.IOUtils;
+import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.Tomcat7Container;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
@@ -26,9 +27,9 @@ import static org.hamcrest.CoreMatchers.*;
  */
 @WithPlugins("deploy") @Native("docker")
 public class DeployPluginTest extends AbstractJUnitTest {
-    @Inject
-    DockerContainerHolder<Tomcat7Container> tomcat7;
 
+    @Inject
+    Docker docker;
     /**
      @native(docker)
      Scenario: Deploy sample webapp to Tomcat7
@@ -59,7 +60,8 @@ public class DeployPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void deploy_sample_webapp_to_tomcat7() throws IOException {
-        Tomcat7Container f = tomcat7.get();
+
+        Tomcat7Container f = docker.start(Tomcat7Container.class);
 
         FreeStyleJob j = jenkins.jobs.create();
         j.configure();
