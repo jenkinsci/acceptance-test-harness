@@ -24,6 +24,7 @@
 package org.jenkinsci.test.acceptance.plugins.maven;
 
 import org.jenkinsci.test.acceptance.po.Describable;
+import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.jenkinsci.test.acceptance.po.ToolInstallation;
 
@@ -31,6 +32,18 @@ import java.util.regex.Pattern;
 
 @Describable("Maven")
 public class MavenInstallation extends ToolInstallation {
+
+    public static void installSomeMaven(Jenkins jenkins) {
+        installMaven(jenkins, "default_maven", "3.0.5");
+    }
+
+    public static void installMaven(Jenkins jenkins, String name, String version) {
+        jenkins.configure();
+        MavenInstallation maven = jenkins.getConfigPage().addTool(MavenInstallation.class);
+        maven.name.set(name);
+        maven.installVersion(version);
+        jenkins.save();
+    }
 
     public MavenInstallation(JenkinsConfig context, String path) {
         super(context, path);

@@ -24,9 +24,8 @@
 package plugins;
 
 import static org.hamcrest.CoreMatchers.not;
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-import org.hamcrest.TypeSafeMatcher;
+
+import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.matrix_reloaded.MatrixReloadedAction;
@@ -51,7 +50,7 @@ public class MatrixReloadedPluginTest extends AbstractJUnitTest {
         y.name.set("BBB");
         y.valueString.set("333 444");
         job.save();
-        job.queueBuild().waitUntilFinished();
+        job.startBuild().waitUntilFinished();
 
         MatrixReloadedAction action = job.getLastBuild().action(MatrixReloadedAction.class);
         action.open();
@@ -72,15 +71,10 @@ public class MatrixReloadedPluginTest extends AbstractJUnitTest {
     }
 
     private Matcher<? super MatrixRun> exists() {
-        return new TypeSafeMatcher<MatrixRun>() {
+        return new Matcher<MatrixRun>("Matrix run exists") {
             @Override
             protected boolean matchesSafely(MatrixRun item) {
                 return item.exists();
-            }
-
-            @Override
-            public void describeTo(Description d) {
-                d.appendText("Matrix run exists");
             }
         };
     }

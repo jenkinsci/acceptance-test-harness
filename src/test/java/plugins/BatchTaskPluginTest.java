@@ -42,7 +42,7 @@ public class BatchTaskPluginTest extends AbstractJUnitTest {
         addBatchTask("manual");
         addBatchTask("useless");
         job.save();
-        job.queueBuild().waitUntilFinished();
+        job.startBuild().waitUntilFinished();
         task("manual").build();
 
         task("manual").shouldExist();
@@ -71,7 +71,7 @@ public class BatchTaskPluginTest extends AbstractJUnitTest {
         configureBatchTrigger(job,task("runit"));
         job.save();
 
-        job.queueBuild().waitUntilFinished().shouldSucceed();
+        job.startBuild().waitUntilFinished().shouldSucceed();
         task("runit").shouldExist();
         task("dontrunit").shouldNotExist();
     }
@@ -102,13 +102,13 @@ public class BatchTaskPluginTest extends AbstractJUnitTest {
         addBatchTask("runit");
         addBatchTask("dontrunit");
         job.save();
-        job.queueBuild().shouldSucceed();
+        job.startBuild().shouldSucceed();
 
         FreeStyleJob trigger = jenkins.jobs.create();
         trigger.configure();
         configureBatchTrigger(trigger,task("runit"));
         trigger.save();
-        trigger.queueBuild().shouldSucceed();
+        trigger.startBuild().shouldSucceed();
 
         task("runit").shouldExist();
         task("dontrunit").shouldNotExist();
@@ -130,10 +130,10 @@ public class BatchTaskPluginTest extends AbstractJUnitTest {
     public void do_not_trigger_for_failed_build() {
         job.configure();
         addBatchTask("dontrunit");
-        job.addBuildStep(ShellBuildStep.class).command.set("false");
+        job.addBuildStep(ShellBuildStep.class).command("false");
         configureBatchTrigger(job,task("dontrunit"));
         job.save();
-        job.queueBuild().waitUntilFinished();
+        job.startBuild().waitUntilFinished();
         task("dontrunit").shouldNotExist();
     }
 

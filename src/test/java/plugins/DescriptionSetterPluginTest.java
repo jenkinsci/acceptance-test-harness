@@ -43,7 +43,7 @@ public class DescriptionSetterPluginTest extends AbstractJUnitTest {
         }
         j.save();
 
-        Build b = j.queueBuild().shouldSucceed();
+        Build b = j.startBuild().shouldSucceed();
 
         b.open();
         assertEquals(find(by.xpath("//div[@id='description']/div")).getText(),msg);

@@ -26,6 +26,7 @@ package org.jenkinsci.test.acceptance;
 import java.util.List;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.events.AbstractWebDriverEventListener;
@@ -36,20 +37,39 @@ import org.openqa.selenium.support.events.AbstractWebDriverEventListener;
  * @author ogondza
  */
 public class SanityChecker extends AbstractWebDriverEventListener {
+    private final static By SPECIFIER = By.xpath(
+            "//h1/span[contains(., 'Oops!')]/../following-sibling::div/h2[text()='Stack trace']/following-sibling::pre"
+    );
 
     @Override public void afterNavigateTo(String url, WebDriver driver) {
         checkSanity(driver);
     }
 
     @Override public void afterClickOn(WebElement element, WebDriver driver) {
+        // Skip checking in case there is a dialog present
+        try {
+            driver.switchTo().alert();
+            return;
+        } catch (NoAlertPresentException _) {}
+
         checkSanity(driver);
     }
 
     private void checkSanity(WebDriver driver) {
-        List<WebElement> stacktrace = driver.findElements(By.cssSelector("div#error-description pre"));
+        // Performance optimalization
+        if (!driver.getPageSource().contains("Oops!")) return;
 
-        if (!stacktrace.isEmpty()) throw new AssertionError(
-                "Jenkins error detected:\n" + stacktrace.get(0).getText()
-        );
+        List<WebElement> elements = driver.findElements(SPECIFIER);
+
+        if (!elements.isEmpty()) {
+            String trace = elements.get(0).getText();
+
+            if (trace.contains("<j:forEach> java.util.ConcurrentModificationException")) {
+                // Do not report JENKINS-22553 as it is recoverable and fails dozens of tests
+                return;
+            }
+
+            throw new AssertionError("Jenkins error detected:\n" + trace);
+        }
     }
 }

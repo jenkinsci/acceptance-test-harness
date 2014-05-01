@@ -1,0 +1,103 @@
+package plugins;
+
+import com.google.inject.Inject;
+
+import static org.jenkinsci.test.acceptance.po.Slave.runBuildsInOrder;
+
+import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.plugins.priority_sorter.PriorityConfig;
+import org.jenkinsci.test.acceptance.plugins.priority_sorter.PriorityConfig.Group;
+import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.ListView;
+import org.jenkinsci.test.acceptance.po.Slave;
+import org.jenkinsci.test.acceptance.slave.SlaveController;
+import org.junit.Before;
+import org.junit.Test;
+
+/**
+ * @author Kohsuke Kawaguchi
+ */
+@WithPlugins("PrioritySorter")
+public class PrioritySorterPluginTest extends AbstractJUnitTest {
+    private static final String LABEL = "slave";
+
+    @Inject
+    private SlaveController slaves;
+
+    private Slave slave;
+
+    @Before
+    public void setUp() throws Exception {
+        jenkins.restart(); // Priority sorter plugin needs this
+        slave = slaves.install(jenkins).get();
+    }
+
+    @Test
+    public void match_jobs_by_name() {
+        PriorityConfig priority = jenkins.action(PriorityConfig.class);
+        priority.configure();
+        Group low = priority.addGroup();
+        low.priority.select("5");
+        low.pattern("low_priority");
+        Group high = priority.addGroup();
+        high.priority.select("1");
+        high.pattern("high_priority");
+        priority.save();
+
+        FreeStyleJob lowPriority = jenkins.jobs.create(FreeStyleJob.class, "low_priority");
+        tieToLabel(lowPriority, LABEL);
+        Build plBuild = lowPriority.scheduleBuild();
+
+        FreeStyleJob highPriority = jenkins.jobs.create(FreeStyleJob.class, "high_priority");
+        tieToLabel(highPriority, LABEL);
+        Build hpBuild = highPriority.scheduleBuild();
+
+        slave.configure();
+        slave.setLabels(LABEL);
+        slave.save();
+
+        hpBuild.shouldSucceed();
+        plBuild.shouldSucceed();
+
+        assertThat(slave, runBuildsInOrder(highPriority, lowPriority));
+    }
+
+    @Test
+    public void match_jobs_by_view() {
+        FreeStyleJob p2 = jenkins.views.create(ListView.class, "normal").jobs.create(FreeStyleJob.class, "P2");
+        tieToLabel(p2, LABEL);
+
+        FreeStyleJob p1 = jenkins.views.create(ListView.class, "prioritized").jobs.create(FreeStyleJob.class, "P1");
+        tieToLabel(p1, LABEL);
+
+        slave.configure();
+        slave.setLabels(LABEL);
+        slave.save();
+
+        PriorityConfig priority = jenkins.action(PriorityConfig.class);
+        priority.configure();
+        Group low = priority.addGroup();
+        low.priority.select("1");
+        low.view.select("prioritized");
+        Group high = priority.addGroup();
+        high.priority.select("5");
+        high.view.select("normal");
+        priority.save();
+
+        Build p1b = p1.scheduleBuild();
+        Build p2b = p2.scheduleBuild();
+
+        p1b.shouldSucceed();
+        p2b.shouldSucceed();
+
+        assertThat(slave, runBuildsInOrder(p1, p2));
+    }
+
+    private void tieToLabel(FreeStyleJob job, String label) {
+        job.configure();
+        job.setLabelExpression(label);
+        job.save();
+    }
+}

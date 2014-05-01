@@ -26,9 +26,10 @@ package org.jenkinsci.test.acceptance.plugins.envinject;
 import org.jenkinsci.test.acceptance.po.Action;
 import org.jenkinsci.test.acceptance.po.ActionPageObject;
 import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.po.ContainerPageObject;
 
 @ActionPageObject("injectedEnvVars")
-public class EnvInjectAction extends Action<Build> {
+public class EnvInjectAction extends Action {
 
     public EnvInjectAction(Build build, String path) {
         super(build, path);
@@ -38,5 +39,10 @@ public class EnvInjectAction extends Action<Build> {
         open();
         find(by.xpath("//td[. = '%s']/../td[. = '%s']", key, value));
         return this;
+    }
+
+    @Override
+    public boolean isApplicable(ContainerPageObject po) {
+        return po instanceof Build;
     }
 }
