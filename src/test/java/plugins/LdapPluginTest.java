@@ -190,10 +190,40 @@ public class LdapPluginTest extends AbstractJUnitTest {
         assertThat(jenkins, hasLoggedInUser("jenkins@jenkins-ci.org"));
     }
 
+    /**
+     * Scenario: fallback to alternate server
+     * Given I have a docker fixture "ldap"
+     * And Jenkins is using a not running ldap server as primary and "ldap" as fallback security realm
+     * When I login with "jenkins" and password "root"
+     * Then I will be successfully logged in as user "jenkins"
+     */
+    @Test
+    public void login_use_fallback_server(){
+        // Given
+        LdapContainer ldapContainer = ldap.get();
+        GlobalSecurityConfig securityConfig = new GlobalSecurityConfig(jenkins);
+        securityConfig.configure();
+        LdapSecurityRealm realm = securityConfig.useRealm(LdapSecurityRealm.class);
+        int freePort = this.findAvailablePort();
+        LdapDetails ldapDetails = new LdapDetails("", 0, ldapContainer.getManagerDn(), ldapContainer.getManagerPassword(), ldapContainer.getRootDn());
+        // Fallback-Config: primary server is not running, alternative server is running docker fixture
+        ldapDetails.setHostWithPort("localhost:" + freePort + " localhost:" + ldapContainer.getPort());
+        realm.configure(ldapDetails);
+        securityConfig.save();
+
+        // When
+        Login login = jenkins.login();
+        login.doLogin("jenkins", "root");
+
+        // Then
+        assertThat(jenkins, hasLoggedInUser("jenkins"));
+
+    }
+
     private int findAvailablePort() {
         // use ldap port 389 as fallback (but maybe there is a ldap server running)
         int port = 389;
-        try (ServerSocket s = new ServerSocket(0)){
+        try (ServerSocket s = new ServerSocket(0)) {
             port = s.getLocalPort();
         }
         catch (IOException e) {
