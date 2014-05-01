@@ -11,9 +11,7 @@ import org.jenkinsci.test.acceptance.docker.fixtures.LdapContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Native;
 import org.jenkinsci.test.acceptance.plugins.ldap.LdapDetails;
-import org.jenkinsci.test.acceptance.po.Jenkins;
-import org.jenkinsci.test.acceptance.po.Login;
-import org.jenkinsci.test.acceptance.po.SecurityConfig;
+import org.jenkinsci.test.acceptance.po.*;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -51,8 +49,11 @@ public class LdapPluginTest extends AbstractJUnitTest {
         if (userSearchFilter != null) {
             ldapDetails.setUserSearchFilter(userSearchFilter);
         }
-        SecurityConfig sc = jenkins.configureSecurity();
-        sc.configureLdapAndSave(ldapDetails);
+        GlobalSecurityConfig security = new GlobalSecurityConfig(jenkins);
+        security.configure();
+        LdapSecurityRealm realm = security.useRealm(LdapSecurityRealm.class);
+        realm.configure(ldapDetails);
+        security.save();
     }
 
     /**
@@ -121,12 +122,15 @@ public class LdapPluginTest extends AbstractJUnitTest {
         // Given
         // don't start docker fixture here
         // When
-        SecurityConfig securityConfig = jenkins.configureSecurity();
+        GlobalSecurityConfig security = new GlobalSecurityConfig(jenkins);
+        security.configure();
+        LdapSecurityRealm realm = security.useRealm(LdapSecurityRealm.class);
         int freePort = findAvailablePort();
         LdapDetails notRunningLdap = new LdapDetails("localhost", freePort, "cn=admin,dc=jenkins-ci,dc=org", "root", "dc=jenkins-ci,dc=org");
-        securityConfig.configureLdapAndApply(notRunningLdap);
+        realm.configure(notRunningLdap);
+        security.save();
         // Then
-        assertThat(securityConfig.open(), hasContent("Unable to connect to localhost:" + freePort));
+        assertThat(security.open(), hasContent("Unable to connect to localhost:" + freePort));
         Login login = jenkins.login();
         login.doLogin("jenkins", "root");
         assertThat(jenkins, not(hasLoggedInUser("jenkins")));

@@ -128,7 +128,7 @@ public class Matchers {
     public static Matcher<Jenkins> hasLoggedInUser(final String user){
         return new Matcher<Jenkins>("has logged in user %s", user) {
             @Override
-            protected boolean matchesSafely(final Jenkins jenkins) {
+            public boolean matchesSafely(final Jenkins jenkins) {
                 try {
                     jenkins.find(by.href("/user/" + user));
                     return true;
@@ -138,7 +138,7 @@ public class Matchers {
             }
 
             @Override
-            protected void describeMismatchSafely(final Jenkins item, final Description desc) {
+            public void describeMismatchSafely(final Jenkins item, final Description desc) {
                 desc.appendText(user + " is not logged in.");
             }
         };

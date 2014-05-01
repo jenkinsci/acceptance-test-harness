@@ -1,7 +1,7 @@
 package org.jenkinsci.test.acceptance.plugins.ldap;
 
 /**
- * Wrapper for LDAP server connection and credential details.
+ * POJO for LDAP server connection, credential and configuration details.
  *
  * @author Michael Prankl
  */
@@ -18,10 +18,13 @@ public class LdapDetails {
     private String groupSearchBase;
     private String groupSearchFilter;
     private String groupMembershipFilter;
-    private boolean enableLdapEmailResolver = true;
+    private boolean disableLdapEmailResolver = false;
     private boolean enableCache = false;
+    private int cacheSize = 20;
+    private int cacheTTL = 300;
 
-    public LdapDetails(String host, int port, String managerDn, String managerPassword, String rootDn){
+
+    public LdapDetails(String host, int port, String managerDn, String managerPassword, String rootDn) {
         this.setHost(host);
         this.setPort(port);
         this.setManagerDn(managerDn);
@@ -115,17 +118,13 @@ public class LdapDetails {
         return groupMembershipFilter;
     }
 
-    public void setGroupMembershipFilter(final String groupMembershipFilter) {
-        this.groupMembershipFilter = groupMembershipFilter;
+    public void setGroupMembershipFilter(final String groupMembershipFilter) { this.groupMembershipFilter = groupMembershipFilter; }
+
+    public boolean isDisableLdapEmailResolver() {
+        return disableLdapEmailResolver;
     }
 
-    public boolean isEnableLdapEmailResolver() {
-        return enableLdapEmailResolver;
-    }
-
-    public void setEnableLdapEmailResolver(final boolean enableLdapEmailResolver) {
-        this.enableLdapEmailResolver = enableLdapEmailResolver;
-    }
+    public void setDisableLdapEmailResolver(final boolean disableLdapEmailResolver) { this.disableLdapEmailResolver = disableLdapEmailResolver; }
 
     public boolean isEnableCache() {
         return enableCache;
@@ -134,4 +133,12 @@ public class LdapDetails {
     public void setEnableCache(final boolean enableCache) {
         this.enableCache = enableCache;
     }
+
+    public int getCacheSize() { return cacheSize; }
+
+    public void setCacheSize(int cacheSize) { this.cacheSize = cacheSize; }
+
+    public int getCacheTTL() { return cacheTTL; }
+
+    public void setCacheTTL(int cacheTTL) { this.cacheTTL = cacheTTL; }
 }
