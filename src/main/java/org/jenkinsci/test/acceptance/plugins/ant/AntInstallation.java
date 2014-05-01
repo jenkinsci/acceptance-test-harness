@@ -21,38 +21,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.test.acceptance.po;
+package org.jenkinsci.test.acceptance.plugins.ant;
 
-import com.google.inject.Injector;
+import org.jenkinsci.test.acceptance.po.Jenkins;
+import org.jenkinsci.test.acceptance.po.JenkinsConfig;
+import org.jenkinsci.test.acceptance.po.ToolInstallation;
+import org.jenkinsci.test.acceptance.po.ToolInstallationPageObject;
 
-import java.net.URL;
+@ToolInstallationPageObject(name="Ant", installer="hudson.tasks.Ant.AntInstaller")
+public class AntInstallation extends ToolInstallation {
 
-/**
- * Common base for Jenkins and Slave.
- *
- * @author ogondza
- */
-public abstract class Node extends ContainerPageObject {
-    protected Node(Jenkins j, URL url) {
-        super(j, url);
+    public static void install(Jenkins jenkins, String name, String version) {
+        waitForUpdates(jenkins, AntInstallation.class);
+        jenkins.configure();
+        AntInstallation maven = jenkins.getConfigPage().addTool(AntInstallation.class);
+        maven.name.set(name);
+        maven.installVersion(version);
+        jenkins.save();
     }
 
-    protected Node(Injector i, URL url) {
-        super(i, url);
+    public AntInstallation(JenkinsConfig context, String path) {
+        super(context, path);
     }
 
-    public abstract String getName();
-
-    public String runScript(String script) {
-        visit("script");
-        CodeMirror cm = new CodeMirror(this, "/script");
-        cm.set(script);
-        clickButton("Run");
-
-        return find(by.css("h2 + pre")).getText().replaceAll("^Result: ", "");
-    }
-
-    public BuildHistory getBuildHistory() {
-        return new BuildHistory(this);
+    public void useNative() {
+        installedIn(fakeHome("ant", "ANT_HOME"));
     }
 }

@@ -105,13 +105,6 @@ public class Job extends ContainerPageObject {
     }
 
     /**
-     * Adds a shell step that creates a file of the given name in the workspace that has the specified content.
-     */
-    public void addCreateFileStep(String name, String content) {
-        addShellStep(String.format("cat > %s << ENDOFFILE\n%s\nENDOFFILE",name,content));
-    }
-
-    /**
      * Adds a shell step that copies a resource inside the test project into a file on the build machine.
      *
      * Because there's no direct file system access to Jenkins master, we do this by packing file content in
