@@ -14,20 +14,28 @@ public abstract class AbstractCodeStylePluginAction extends ContainerPageObject 
 	protected final ContainerPageObject parent;
 
     /**
+     * Holds the current plugin.
+     */
+    private final String plugin;
+
+    /**
      * Constructor for a action.
      * @param parent Parent container page object
-     * @param plugin Path to plugin
+     * @param plugin Path to plugin without / at the end
      */
     public AbstractCodeStylePluginAction(ContainerPageObject parent, String plugin) {
-        super(parent, parent.url(plugin));
+        super(parent, parent.url(plugin + '/'));
         this.parent = parent;
+        this.plugin = plugin;
     }
 
     /**
      * Getter of the url for high prio Warnings.
      * @return Url for high prio Warnings
      */
-	public abstract URL getHighPrioUrl();
+	public URL getHighPrioUrl() {
+        return parent.url(plugin + "Result/HIGH");
+    }
 
     /**
      * Getter of all warnings.

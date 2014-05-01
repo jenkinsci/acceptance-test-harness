@@ -29,6 +29,7 @@ import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsPublisher;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
+import org.openqa.selenium.WebDriver;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.jenkinsci.test.acceptance.Matchers.hasAction;
@@ -48,7 +49,7 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
 
         assertThat(lastBuild, hasAction("FindBugs Warnings"));
         assertThat(job, hasAction("FindBugs Warnings"));
-        assertThat(lastBuild.open(), hasContent("FindBugs: 6 warnings from one analysis."));
+        assertThat(lastBuild.open(), hasContent("6 warnings"));
 
         FindbugsAction fa = new FindbugsAction(job);
         assertThat(fa.getWarningNumber(), is(6));
@@ -65,13 +66,16 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
     @Test
     public void record_analysis_two_runs() {
         final FreeStyleJob job = setupJob("/findbugs_plugin/findbugsXml.xml", FindbugsPublisher.class, "findbugsXml.xml");
-        editJobAndDelLastResource(job, "/findbugs_plugin/findbugsXml-2.xml", "findbugsXml.xml");
+        buildJobAndWait(job);
+        editJobAndChangeLastRessource(job, "/findbugs_plugin/findbugsXml-2.xml", "findbugsXml.xml");
 
         Build lastBuild = buildJobWithSuccess(job);
 
         assertThat(lastBuild, hasAction("FindBugs Warnings"));
-        assertThat(job, hasAction("FindBugs Warnings"));
-        assertThat(lastBuild.open(), hasContent("FindBugs: 5 warnings from one analysis."));
+        WebDriver lastBuildOpened = lastBuild.open();
+        assertThat(lastBuildOpened, hasContent("5 warnings"));
+        assertThat(lastBuildOpened, hasContent("1 new warning"));
+        assertThat(lastBuildOpened, hasContent("2 fixed warnings"));
 
         FindbugsAction fa = new FindbugsAction(job);
         assertThat(fa.getWarningNumber(), is(5));

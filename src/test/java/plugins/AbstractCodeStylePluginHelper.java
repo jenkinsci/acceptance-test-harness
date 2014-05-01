@@ -32,7 +32,7 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
      * @param <T> Type of the publisher
      * @return The made job
      */
-    public <T extends AbstractCodeStylePluginPostBuildStep> FreeStyleJob editJobAndDelLastResource(FreeStyleJob job, String newResourceToCopy, String publisherPattern) {
+    public <T extends AbstractCodeStylePluginPostBuildStep> FreeStyleJob editJobAndChangeLastRessource(FreeStyleJob job, String newResourceToCopy, String publisherPattern) {
         job.configure();
         job.removeFirstBuildStep();
         job.copyResource(resource(newResourceToCopy), publisherPattern);

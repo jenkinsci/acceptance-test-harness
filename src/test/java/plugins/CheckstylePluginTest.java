@@ -3,11 +3,14 @@ package plugins;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleAction;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstylePublisher;
+import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
+import org.openqa.selenium.WebDriver;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.jenkinsci.test.acceptance.Matchers.hasAction;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 /**
  * Feature: Allow publishing of Checkstyle report
@@ -61,7 +64,11 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
     @Test
     public void view_checkstyle_report() {
         FreeStyleJob job = setupJob("/checkstyle_plugin/checkstyle-result.xml", CheckstylePublisher.class, "checkstyle-result.xml");
-        buildJobWithSuccess(job);
+
+        Build lastBuild = buildJobWithSuccess(job);
+        assertThat(lastBuild, hasAction("Checkstyle Warnings"));
+        WebDriver lastBuildOpened = lastBuild.open();
+        assertThat(lastBuildOpened, hasContent("776 warnings"));
 
         CheckstyleAction ca = new CheckstyleAction(job);
         assertThat(ca.getWarningNumber(), is(776));
@@ -79,8 +86,12 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
     public void view_checkstyle_report_two_runs_and_changed_results() {
         FreeStyleJob job = setupJob("/checkstyle_plugin/checkstyle-result.xml", CheckstylePublisher.class, "checkstyle-result.xml");
         buildJobAndWait(job);
-        editJobAndDelLastResource(job, "/checkstyle_plugin/checkstyle-result-2.xml", "checkstyle-result.xml");
-        buildJobWithSuccess(job);
+        editJobAndChangeLastRessource(job, "/checkstyle_plugin/checkstyle-result-2.xml", "checkstyle-result.xml");
+
+        Build lastBuild = buildJobWithSuccess(job);
+        assertThat(lastBuild, hasAction("Checkstyle Warnings"));
+        WebDriver lastBuildOpened = lastBuild.open();
+        assertThat(lastBuildOpened, hasContent("679 warnings"));
 
         CheckstyleAction ca = new CheckstyleAction(job);
         assertThat(ca.getWarningNumber(), is(679));

@@ -10,11 +10,7 @@ import java.net.URL;
 public class FindbugsAction extends AbstractCodeStylePluginAction {
     
     public FindbugsAction(ContainerPageObject parent) {
-        super(parent, "findbugs/");
-    }
-
-    public URL getHighPrioUrl() {
-        return parent.url("findbugsResult/HIGH");
+        super(parent, "findbugs");
     }
 
 }

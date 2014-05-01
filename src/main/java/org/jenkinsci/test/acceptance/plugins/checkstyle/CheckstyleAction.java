@@ -11,11 +11,7 @@ import java.net.URL;
 public class CheckstyleAction extends AbstractCodeStylePluginAction {
 
     public CheckstyleAction(ContainerPageObject parent) {
-        super(parent, "checkstyle/");
+        super(parent, "checkstyle");
     }
 
-    public URL getHighPrioUrl() {
-        return parent.url("checkstyleResult/HIGH");
-    }
-	
 }

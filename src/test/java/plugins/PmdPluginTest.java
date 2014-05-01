@@ -111,7 +111,7 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
     public void configure_a_job_with_PMD_post_build_steps_which_display_some_warnings_two_runs() {
         FreeStyleJob job = setupJob("/pmd_plugin/pmd-warnings.xml", PmdPublisher.class, "pmd-warnings.xml");
         buildJobAndWait(job);
-        editJobAndDelLastResource(job, "/pmd_plugin/pmd-warnings-2.xml", "pmd-warnings.xml");
+        editJobAndChangeLastRessource(job, "/pmd_plugin/pmd-warnings-2.xml", "pmd-warnings.xml");
 
         Build lastBuild = buildJobWithSuccess(job);
         assertThat(lastBuild, hasAction("PMD Warnings"));

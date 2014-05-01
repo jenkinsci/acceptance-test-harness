@@ -11,11 +11,7 @@ import java.net.URL;
 public class PmdAction extends AbstractCodeStylePluginAction {
 
     public PmdAction(ContainerPageObject parent) {
-        super(parent, "pmd/");
-    }
-
-    public URL getHighPrioUrl() {
-        return parent.url("pmdResult/HIGH");
+        super(parent, "pmd");
     }
 
 }
