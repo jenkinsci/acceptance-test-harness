@@ -27,6 +27,10 @@ import java.util.zip.GZIPOutputStream;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 
 /**
+ * Job Page object superclass.
+ *
+ * Use {@link Describable} annotation to register an implementation.
+ *
  * @author Kohsuke Kawaguchi
  */
 public class Job extends ContainerPageObject {
@@ -96,7 +100,7 @@ public class Job extends ContainerPageObject {
 
     public ShellBuildStep addShellStep(String shell) {
         ShellBuildStep step = addBuildStep(ShellBuildStep.class);
-        step.command.set(shell);
+        step.command(shell);
         return step;
     }
 
@@ -270,5 +274,9 @@ public class Job extends ContainerPageObject {
     @Override
     public String toString() {
         return name;
+    }
+
+    public ScmPolling pollScm() {
+        return new ScmPolling(this);
     }
 }

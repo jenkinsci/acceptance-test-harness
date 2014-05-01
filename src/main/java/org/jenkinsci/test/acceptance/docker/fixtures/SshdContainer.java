@@ -18,7 +18,7 @@ import static java.nio.file.attribute.PosixFilePermission.*;
  *
  * @author Kohsuke Kawaguchi
  */
-@DockerFixture(id="sshd",ports=22)
+@DockerFixture(id="sshd",ports=22,bindIp="127.0.0.5")
 public class SshdContainer extends DockerContainer {
     File privateKey;
 

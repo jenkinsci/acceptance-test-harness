@@ -5,6 +5,8 @@ import org.openqa.selenium.By;
 /**
  * Parameter for builds.
  *
+ * Use {@link Describable} annotation to register an implementation.
+ *
  * @author Kohsuke Kawaguchi
  */
 public abstract class Parameter extends PageArea {
@@ -12,7 +14,7 @@ public abstract class Parameter extends PageArea {
     private String name;
 
     public Parameter(Job job, String path) {
-        super(job.injector,path);
+        super(job, path);
         this.job = job;
     }
 
