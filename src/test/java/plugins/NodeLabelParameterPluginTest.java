@@ -159,5 +159,6 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         assertTrue(pendingBuildText.contains(refText));
         assertTrue(!b.hasStarted());
 
+        //TODO: reactivate slave and verify that the build is started
     }
 }
