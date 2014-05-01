@@ -68,7 +68,7 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
         pmd.canRunOnFailed.check();
         job.save();
 
-        Build b = job.queueBuild().waitUntilFinished().shouldFail();
+        Build b = job.startBuild().waitUntilFinished().shouldFail();
 
         assertThat(b.open(), hasContent("0 warnings"));
     }

@@ -46,7 +46,7 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
      *  @return The made build
      */
     public Build buildJobAndWait(FreeStyleJob job) {
-        return job.queueBuild().waitUntilFinished();
+        return job.startBuild().waitUntilFinished();
     }
 
     /**
