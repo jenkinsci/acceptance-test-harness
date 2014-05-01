@@ -23,14 +23,12 @@
  */
 package org.jenkinsci.test.acceptance.plugins.groovy;
 
-import java.util.regex.Pattern;
-
-import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.jenkinsci.test.acceptance.po.ToolInstallation;
+import org.jenkinsci.test.acceptance.po.ToolInstallationPageObject;
 
-@Describable("Groovy")
+@ToolInstallationPageObject(name="Groovy", installer="hudson.plugins.groovy.GroovyInstaller")
 public class GroovyInstallation extends ToolInstallation {
 
     public static final String DEFAULT_GROOVY_ID = "default_Groovy";
@@ -40,6 +38,7 @@ public class GroovyInstallation extends ToolInstallation {
     }
 
     public static void installGroovy(Jenkins jenkins, String name, String version) {
+        waitForUpdates(jenkins, GroovyInstallation.class);
         jenkins.configure();
         GroovyInstallation groovy = jenkins.getConfigPage().addTool(GroovyInstallation.class);
         groovy.name.set(name);
@@ -49,11 +48,6 @@ public class GroovyInstallation extends ToolInstallation {
 
     public GroovyInstallation(JenkinsConfig context, String path) {
         super(context, path);
-    }
-
-    @Override
-    public Pattern updatesPattern() {
-        return Pattern.compile("Obtained the updated data file for hudson.plugins.groovy.GroovyInstaller");
     }
 
     public void useNative() {

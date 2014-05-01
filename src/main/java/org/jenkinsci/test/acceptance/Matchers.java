@@ -26,12 +26,12 @@ public class Matchers {
     public static Matcher<WebDriver> hasContent(final Pattern pattern) {
       return new Matcher<WebDriver>("Text matching %s", pattern) {
           @Override
-          protected boolean matchesSafely(WebDriver item) {
+          public boolean matchesSafely(WebDriver item) {
               return pattern.matcher(pageText(item)).find();
           }
 
           @Override
-          protected void describeMismatchSafely(WebDriver item, Description mismatchDescription) {
+          public void describeMismatchSafely(WebDriver item, Description mismatchDescription) {
               mismatchDescription.appendText("was ")
                       .appendValue(item.getCurrentUrl())
                       .appendText("\n")
@@ -50,7 +50,7 @@ public class Matchers {
     public static Matcher<WebDriver> hasElement(final By selector) {
         return new Matcher<WebDriver>("contains element that matches %s", selector) {
             @Override
-            protected boolean matchesSafely(WebDriver item) {
+            public boolean matchesSafely(WebDriver item) {
                 try {
                     item.findElements(selector);
                     return true;
@@ -60,7 +60,7 @@ public class Matchers {
             }
 
             @Override
-            protected void describeMismatchSafely(WebDriver item, Description d) {
+            public void describeMismatchSafely(WebDriver item, Description d) {
                 d.appendText("was at ").appendValue(item.getCurrentUrl());
             }
         };
@@ -72,7 +72,7 @@ public class Matchers {
     public static Matcher<PageObject> hasAction(final String displayName) {
         return new Matcher<PageObject>("contains action titled %s", displayName) {
             @Override
-            protected boolean matchesSafely(PageObject po) {
+            public boolean matchesSafely(PageObject po) {
                 try {
                     po.open();
                     po.find(by.xpath("//div[@id='tasks']/div/a[text()='%s']", displayName));
@@ -83,7 +83,7 @@ public class Matchers {
             }
 
             @Override
-            protected void describeMismatchSafely(PageObject po, Description d) {
+            public void describeMismatchSafely(PageObject po, Description d) {
                 d.appendValue(po.url).appendText(" does not have action: ").appendValue(displayName);
             }
         };
@@ -100,7 +100,7 @@ public class Matchers {
 
         return new Matcher<String>("Matches regexp %s", regexp) {
             @Override
-            protected boolean matchesSafely(String item) {
+            public boolean matchesSafely(String item) {
                 return re.matcher(item).find();
             }
         };
@@ -109,11 +109,12 @@ public class Matchers {
     public static Matcher<ContainerPageObject> pageObjectExists(){
         return new Matcher<ContainerPageObject>("Page object exists") {
             @Override
-            protected void describeMismatchSafely(ContainerPageObject item, Description desc) {
+            public void describeMismatchSafely(ContainerPageObject item, Description desc) {
                 desc.appendText(item.url.toString()).appendText(" does not exist");
             }
 
-            @Override protected boolean matchesSafely(ContainerPageObject item) {
+            @Override
+            public boolean matchesSafely(ContainerPageObject item) {
                 try {
                     item.getJson();
                     return true;

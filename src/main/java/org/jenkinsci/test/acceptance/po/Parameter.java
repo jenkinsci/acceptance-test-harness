@@ -5,6 +5,8 @@ import org.openqa.selenium.By;
 /**
  * Parameter for builds.
  *
+ * Use {@link Describable} annotation to register an implementation.
+ *
  * @author Kohsuke Kawaguchi
  */
 public abstract class Parameter extends PageArea {

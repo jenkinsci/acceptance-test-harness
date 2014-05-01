@@ -70,6 +70,7 @@ public class GradlePluginTest extends AbstractJUnitTest {
     }
 
     private void install(String name, String version) {
+        ToolInstallation.waitForUpdates(jenkins, GradleInstallation.class);
         JenkinsConfig global = jenkins.getConfigPage();
         global.configure();
         ToolInstallation tool = global.addTool(GradleInstallation.class);
