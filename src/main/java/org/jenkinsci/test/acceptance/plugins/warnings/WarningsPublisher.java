@@ -23,7 +23,7 @@ public class WarningsPublisher extends PostBuildStep {
         sleep(1000);
         String path = last(by.xpath("//div[@name='consoleParsers']")).getAttribute("path");
 
-        PageArea a = new PageArea(injector,path) {};
+        PageArea a = new PageArea(page,path) {};
         a.control("parserName").select(caption);
     }
 
@@ -32,7 +32,7 @@ public class WarningsPublisher extends PostBuildStep {
         sleep(1000);
         String path = last(by.xpath("//div[@name='parserConfigurations']")).getAttribute("path");
 
-        PageArea a = new PageArea(injector,path) {};
+        PageArea a = new PageArea(page,path) {};
         a.control("pattern").set(pattern);
         a.control("parserName").select(caption);
     }

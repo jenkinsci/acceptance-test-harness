@@ -1,27 +1,20 @@
 package org.jenkinsci.test.acceptance.controller;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.input.TeeInputStream;
-import org.codehaus.plexus.util.Expand;
-import org.codehaus.plexus.util.FileUtils;
-import org.codehaus.plexus.util.StringUtils;
-import org.jenkinsci.utils.process.ProcessInputStream;
-import org.openqa.selenium.io.Zip;
-
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.StringWriter;
+import java.lang.reflect.Field;
 import java.net.ServerSocket;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.codehaus.plexus.util.Expand;
+import org.codehaus.plexus.util.StringUtils;
+import org.jenkinsci.utils.process.ProcessInputStream;
 
 import static java.lang.System.*;
 
@@ -44,7 +37,7 @@ public abstract class LocalController extends JenkinsController {
 
     protected ProcessInputStream process;
 
-    protected LogWatcher logWatcher;
+    protected JenkinsLogWatcher logWatcher;
 
     private static final Map<String,String> options = new HashMap<>();
 
@@ -72,7 +65,7 @@ public abstract class LocalController extends JenkinsController {
     /**
      * Partial implementation of {@link JenkinsControllerFactory} for subtypes.
      */
-    public static abstract class LocalFactoryImpl implements JenkinsControllerFactory {
+    public static abstract class LocalFactoryImpl extends AbstractJenkinsControllerFactory {
         /**
          * Determines the location of the war file.
          */
@@ -101,23 +94,29 @@ public abstract class LocalController extends JenkinsController {
             }
             return null;
         }
-
     }
 
     /**
      * @param war
      *      Where is the jenkins.war file to be tested?
+     * @param formElementPlugin
+     *      Where is the required form-element-path.hpi file stored?
      */
-    protected LocalController(File war) {
+    protected LocalController(File war, final File formElementPlugin) {
         this.war = war;
         if (!war.exists())
             throw new RuntimeException("Invalid path to jenkins.war specified: "+war);
 
-        this.tempDir = FileUtils.createTempFile("jenkins", "home",new File(WORKSPACE));
+        try {
+            tempDir = File.createTempFile("jenkins", "home", new File(WORKSPACE));
+            tempDir.delete();
+            tempDir.mkdirs();
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to create a temp file",e);
+        }
 
         this.logFile = new File(this.tempDir.getParentFile(), this.tempDir.getName()+".log");
 
-        File formPathElement = downloadPathElement();
         File pluginDir = new File(tempDir,"plugins");
         pluginDir.mkdirs();
 
@@ -138,13 +137,7 @@ public abstract class LocalController extends JenkinsController {
 
         if (givenPluginDir != null && givenPluginDir.isDirectory()) {
             try {
-                File[] plugins = givenPluginDir.listFiles();
-                if (plugins == null) {
-                    throw new IOException("Plugin dir not readable");
-                }
-                for (File plugin : plugins) {
-                    FileUtils.copyFileToDirectory(plugin, pluginDir);
-                }
+                FileUtils.copyDirectory(givenPluginDir, pluginDir);
             } catch (IOException e) {
                 String msg = String.format("Failed to copy plugins from %s to %s", givenPluginDir, pluginDir);
                 throw new RuntimeException(msg, e);
@@ -152,9 +145,10 @@ public abstract class LocalController extends JenkinsController {
         }
 
         try {
-            FileUtils.copyFile(formPathElement, new File(pluginDir,"path-element.hpi"));
+            FileUtils.copyFile(formElementPlugin, new File(pluginDir, "path-element.hpi"));
         } catch (IOException e) {
-            throw new RuntimeException(String.format("Failed to copy form path element file %s to plugin dir %s.", formPathElement, pluginDir));
+            throw new RuntimeException(String.format("Failed to copy form path element file %s to plugin dir %s.",
+                    formElementPlugin, pluginDir),e);
         }
     }
 
@@ -162,6 +156,7 @@ public abstract class LocalController extends JenkinsController {
      * @deprecated
      *      Use {@link #getJenkinsHome()}, which explains the nature of the directory better.
      */
+    @Deprecated
     public File getTempDir() {
         return tempDir;
     }
@@ -243,19 +238,19 @@ public abstract class LocalController extends JenkinsController {
 
     @Override
     public void diagnose(Throwable cause) {
-        cause.printStackTrace(out);
-        if(getenv("INTERACTIVE") != null && getenv("INTERACTIVE").equals("true")){
-            out.println("Commencing interactive debugging. Browser session was kept open.");
-            out.println("Press return to proceed.");
-            try {
+        try {
+            cause.printStackTrace(out);
+            if(getenv("INTERACTIVE") != null && getenv("INTERACTIVE").equals("true")){
+                out.println("Commencing interactive debugging. Browser session was kept open.");
+                out.println("Press return to proceed.");
                 in.read();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+            }else{
+                out.println("It looks like the test failed/errored, so here's the console from Jenkins:");
+                out.println("--------------------------------------------------------------------------");
+                out.println(FileUtils.readFileToString(logFile));
             }
-        }else{
-            out.println("It looks like the test failed/errored, so here's the console from Jenkins:");
-            out.println("--------------------------------------------------------------------------");
-            out.println(logWatcher.fullLog());
+        } catch (IOException e) {
+            throw new Error(e);
         }
     }
 
@@ -307,14 +302,65 @@ public abstract class LocalController extends JenkinsController {
         this.process = startProcess();
         Runtime.getRuntime().addShutdownHook(shutdownHook);
 
-        this.logWatcher = new LogWatcher(new TeeInputStream(this.process,new FileOutputStream(logFile)), options);
+        logWatcher = new JenkinsLogWatcher(process,logFile);
+        logWatcher.start();
         try {
             LOGGER.info("Waiting for Jenkins to become running in "+this);
-            this.logWatcher.waitTillReady(true);
+            this.logWatcher.waitTillReady();
             LOGGER.info("Jenkins is running in "+this);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            diagnoseFailedLoad(e);
         }
+    }
+
+    private void diagnoseFailedLoad(Exception cause) {
+        Process proc = process.getProcess();
+
+        try {
+            int val = proc.exitValue();
+            new RuntimeException("Jenkins died loading. Exit code " + val, cause);
+        } catch (IllegalThreadStateException _) {
+            // Process alive
+        }
+
+        // Try to get stacktrace
+        Class<?> clazz;
+        Field pidField;
+        try {
+            clazz = Class.forName("java.lang.UNIXProcess");
+            pidField = clazz.getDeclaredField("pid");
+            pidField.setAccessible(true);
+        } catch (Exception e) {
+            LinkageError x = new LinkageError();
+            x.initCause(e);
+            throw x;
+        }
+
+        if (clazz.isAssignableFrom(proc.getClass())) {
+            int pid;
+            try {
+                pid = (int) pidField.get(proc);
+            } catch (IllegalArgumentException | IllegalAccessException e) {
+                throw new AssertionError(e);
+            }
+
+            try {
+                Process jstack = new ProcessBuilder("jstack", String.valueOf(pid)).start();
+                if (jstack.waitFor() == 0) {
+                    StringWriter writer = new StringWriter();
+                    IOUtils.copy(jstack.getInputStream(), writer);
+                    RuntimeException ex = new RuntimeException(
+                            cause.getMessage() + "\n\n" + writer.toString()
+                    );
+                    ex.setStackTrace(cause.getStackTrace());
+                    throw ex;
+                }
+            } catch (IOException | InterruptedException e) {
+                throw new AssertionError(e);
+            }
+        }
+
+        throw new Error(cause);
     }
 
     private boolean  isFreePort(int port){

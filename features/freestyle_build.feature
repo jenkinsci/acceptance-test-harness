@@ -147,16 +147,6 @@ Feature: Configure/build freestyle jobs
     And the build #2 should have archived "test.txt" artifact
     And the build #3 should have archived "test.txt" artifact
 
-  Scenario: Add Auto-Installed Java
-    Given I add Java version "jdk-7u11-oth-JPR" with name "jdk_1.7.0" installed automatically to Jenkins config page
-    And a job
-    When I add a shell build step "java -version"
-    And I save the job
-    And I build the job
-    Then console output should contain "Installing JDK jdk-7u11-oth-JPR"
-    Then console output should contain "Downloading JDK from http://download.oracle.com"
-    # Then console output should contain "java version "1.7.0_11""
-
   Scenario: Schedule build periodically
     Given a job
     When I configure the job

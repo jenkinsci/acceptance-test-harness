@@ -3,33 +3,58 @@ package org.jenkinsci.test.acceptance.docker;
 import com.google.inject.Inject;
 import org.apache.commons.io.FileUtils;
 import org.jenkinsci.utils.process.CommandBuilder;
+import org.junit.internal.AssumptionViolatedException;
 import org.jvnet.hudson.annotation_indexer.Index;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
+
+import static java.lang.System.getenv;
+
 
 /**
  * Entry point to the docker support.
  *
- * <p>
  * Use this subsystem by injecting this class into your test.
  *
  * @author Kohsuke Kawaguchi
  */
 @Singleton
 public class Docker {
+
     /**
      * Command to invoke docker.
      */
-    @Inject(optional=true) @Named("docker")
-    public static List<String> dockerCmd = Arrays.asList("sudo","docker");
+    @Inject(optional=true)
+    @Named("docker")
+    private static String stringDockerCmd="docker";
+
+    private static List<String> dockerCmd;// = Arrays.asList("docker");
+
+    /**
+     * Injecting a portOffset will force the binding of dockerPorts to local Ports with an offset
+     * (e.g. bind docker 22 to localhost port 40022,
+     */
+    @Inject(optional=true)
+    @Named("dockerPortOffset")
+    private static int portOffset= 0;
+
+    public int getPortOffset() {
+        return portOffset;
+    }
 
     @Inject(optional=true)
     public ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+
+    public Docker() {
+        dockerCmd = Arrays.asList(stringDockerCmd);
+    }
 
     public static CommandBuilder cmd(String cmd) {
         return new CommandBuilder(dockerCmd).add(cmd);
@@ -78,8 +103,14 @@ public class Docker {
             dir.mkdirs();
 
             try {
-                FileUtils.copyURLToFile(classLoader.getResource(fixture.getName().replace('.', '/') + "/Dockerfile"),new File(dir,"Dockerfile"));
-
+                URL resourceDir = classLoader.getResource(fixture.getName().replace('.', '/'));
+                File dockerFileDir;
+                try {
+                    dockerFileDir = new File(resourceDir.toURI());
+                } catch(URISyntaxException e) {
+                    dockerFileDir = new File(resourceDir.getPath());
+                }
+                FileUtils.copyDirectory(dockerFileDir, dir);
                 return build("jenkins/" + f.id(), dir);
             } finally {
                 FileUtils.deleteDirectory(dir);
@@ -95,7 +126,7 @@ public class Docker {
      */
     public <T extends DockerContainer> T start(Class<T> fixture, CommandBuilder options, CommandBuilder cmd) {
         try {
-            return build(fixture).start(fixture, options, cmd);
+            return build(fixture).start(fixture, options, cmd,portOffset);
         } catch (InterruptedException|IOException e) {
             throw new AssertionError("Failed to start container "+fixture, e);
         }

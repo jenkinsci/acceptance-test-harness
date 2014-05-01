@@ -1,18 +1,19 @@
 package org.jenkinsci.test.acceptance.controller;
 
-import com.cloudbees.sdk.extensibility.Extension;
-import com.google.inject.Inject;
-import com.google.inject.Injector;
+import java.io.File;
+import java.io.IOException;
+import java.io.InterruptedIOException;
+import java.net.URL;
+
 import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.docker.DockerImage;
 import org.jenkinsci.test.acceptance.docker.fixtures.WinstoneContainer;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.jenkinsci.utils.process.ProcessInputStream;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InterruptedIOException;
-import java.net.URL;
+import com.cloudbees.sdk.extensibility.Extension;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
 
 /**
  * Runs jenkins.war inside docker so that it gets a different IP address even though it's run on the same host.
@@ -31,8 +32,8 @@ public class WinstoneDockerController extends LocalController {
 
     private WinstoneContainer container;
 
-    public WinstoneDockerController(File war) {
-        super(war);
+    public WinstoneDockerController(File war, File formElementHpi) {
+        super(war, formElementHpi);
     }
 
     public void setFixture(Class<? extends WinstoneContainer> fixtureType) {
@@ -108,7 +109,7 @@ public class WinstoneDockerController extends LocalController {
 
         @Override
         public WinstoneDockerController create() {
-            WinstoneDockerController c = new WinstoneDockerController(getWarFile());
+            WinstoneDockerController c = new WinstoneDockerController(getWarFile(), getFormElementsPathFile());
             injector.injectMembers(c);
             String img = System.getenv("DOCKER_IMAGE");
             if (img!=null)

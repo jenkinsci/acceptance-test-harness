@@ -27,7 +27,7 @@ public class XvncPluginTest extends AbstractJUnitTest {
         new XvncJobConfig(job).useXvnc();
         job.save();
 
-        Build build = job.queueBuild().shouldSucceed();
+        Build build = job.startBuild().shouldSucceed();
         assertThat(build, runXvnc());
     }
 
@@ -37,7 +37,7 @@ public class XvncPluginTest extends AbstractJUnitTest {
         new XvncJobConfig(job).useXvnc().takeScreenshot();
         job.save();
 
-        Build build = job.queueBuild().shouldSucceed();
+        Build build = job.startBuild().shouldSucceed();
         assertThat(build, runXvnc());
         assertThat(build, tookScreenshot());
         build.getArtifact("screenshot.jpg").assertThatExists(true);
@@ -53,7 +53,7 @@ public class XvncPluginTest extends AbstractJUnitTest {
         new XvncJobConfig(job).useXvnc();
         job.save();
 
-        Build build = job.queueBuild().shouldSucceed();
+        Build build = job.startBuild().shouldSucceed();
         assertThat(build, runXvnc());
         assertThat(build, usedDisplayNumber(42));
     }

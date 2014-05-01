@@ -1,7 +1,5 @@
 package org.jenkinsci.test.acceptance.plugins.ssh_credentials;
 
-import com.google.inject.Injector;
-
 import org.jenkinsci.test.acceptance.plugins.credentials.Credential;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.PageArea;
@@ -14,10 +12,6 @@ import org.jenkinsci.test.acceptance.po.PageObject;
  */
 public class SshCredentialDialog extends PageArea {
     public final Control kind = control(by.xpath("//*[@id='credentials-dialog-form']//*[@path='/']"));
-
-    public SshCredentialDialog(Injector injector, String path) {
-        super(injector, path);
-    }
 
     public SshCredentialDialog(PageObject context, String path) {
         super(context, path);
@@ -34,7 +28,7 @@ public class SshCredentialDialog extends PageArea {
             }
         });
 
-        return newInstance(type, injector, path);
+        return newInstance(type, page, path);
     }
 
     /**

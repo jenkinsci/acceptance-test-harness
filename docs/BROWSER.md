@@ -8,6 +8,7 @@ by using the `BROWSER` environment variable. The following values are available:
  * `chrome`
  * `safari`
  * `htmlunit`
+ * `phantomjs`
 
 Therefore, to run tests with Safari, you'd execute:
 

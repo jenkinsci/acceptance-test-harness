@@ -22,7 +22,7 @@ public class BuildHistoryTest extends AbstractJUnitTest {
     @Test
     public void view_global_build_history() {
         FreeStyleJob job = jenkins.jobs.create();
-        job.queueBuild().waitUntilFinished();
+        job.startBuild().waitUntilFinished();
 
         jenkins.visit("view/All/builds");
         assertThat(driver, Matchers.hasContent(String.format("%s #1", job.name)));
