@@ -21,18 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.test.acceptance.plugins.findbugs;
+package org.jenkinsci.test.acceptance.po;
 
-import org.jenkinsci.test.acceptance.po.Control;
-import org.jenkinsci.test.acceptance.po.Describable;
-import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.PostBuildStep;
-import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginPostBuildStep;
+/**
+ * Base type for {@link PageArea} for Security Realm.
+ *
+ * Use {@link Describable} annotation to register an implementation.
+ *
+ * @see GlobalSecurityConfig#useRealm(Class)
+ */
+public class SecurityRealm extends PageArea {
 
-@Describable("Publish FindBugs analysis results")
-public class FindbugsPublisher extends AbstractCodeStylePluginPostBuildStep {
-
-    public FindbugsPublisher(Job parent, String path) {
-        super(parent, path);
+    protected SecurityRealm(GlobalSecurityConfig context, String path) {
+        super(context, path);
     }
 }

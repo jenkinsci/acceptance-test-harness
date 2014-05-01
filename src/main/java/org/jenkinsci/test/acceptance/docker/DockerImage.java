@@ -36,9 +36,9 @@ public class DockerImage {
      */
     public <T extends DockerContainer> T start(Class<T> type, int[] ports,int localPortOffset, String ipAddress, CommandBuilder options, CommandBuilder cmd) throws InterruptedException, IOException {
         CommandBuilder docker = Docker.cmd("run");
-        File cid = File.createTempFile("docker", "cid");
-        cid.delete();
-        docker.add("--cidfile="+cid);//strange behaviour in some docker version cidfile needs to come before
+        File cidFile = File.createTempFile("docker", "cid");
+        cidFile.delete();
+        docker.add("--cidfile="+cidFile);//strange behaviour in some docker version cidfile needs to come before
 
         for (int p : ports)
         {
@@ -68,7 +68,7 @@ public class DockerImage {
         // TODO: properly wait for either cidfile to appear or process to exit
         Thread.sleep(1000);
 
-        if (cid.exists()) {
+        if (cidFile.exists()) {
             try
             {
                 p.exitValue();
@@ -77,21 +77,21 @@ public class DockerImage {
             {
                 //Docker is still running okay.
             }
-            String id;
+            String cid;
             do {
                 Thread.sleep(500);
-                id = FileUtils.readFileToString(cid);
-            } while (id==null || id.length()==0);
+                cid = FileUtils.readFileToString(cidFile);
+            } while (cid==null || cid.length()==0);
 
             // rename the log file to match the container name
-            File logfile = new File("/tmp/"+cid+".log");
+            File logfile = new File("/tmp/"+cidFile+".log");
             tmplog.renameTo(logfile);
 
             System.out.printf("Launching Docker container %s: logfile is at %s\n", cid, logfile);
 
             try {
                 T t = type.newInstance();
-                t.init(id,p,logfile);
+                t.init(cid,p,logfile);
                 return t;
             } catch (ReflectiveOperationException e) {
                 throw new AssertionError(e);

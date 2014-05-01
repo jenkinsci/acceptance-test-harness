@@ -21,18 +21,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.test.acceptance.plugins.findbugs;
+package org.jenkinsci.test.acceptance.po;
 
-import org.jenkinsci.test.acceptance.po.Control;
-import org.jenkinsci.test.acceptance.po.Describable;
-import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.PostBuildStep;
-import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginPostBuildStep;
+import com.fasterxml.jackson.databind.JsonNode;
 
-@Describable("Publish FindBugs analysis results")
-public class FindbugsPublisher extends AbstractCodeStylePluginPostBuildStep {
+public class User extends ContainerPageObject {
 
-    public FindbugsPublisher(Job parent, String path) {
-        super(parent, path);
+    private String id;
+    private String fullName;
+
+    public User(Jenkins context, String name) {
+        super(context, context.url("user/%s/", name));
+
+        JsonNode json = getJson();
+        id = json.get("id").asText();
+        fullName = json.get("fullName").asText();
+    }
+
+    public String id() {
+        return id;
+    }
+
+    public String fullName() {
+        return fullName;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s (%s)", id, fullName);
     }
 }

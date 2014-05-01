@@ -21,18 +21,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.test.acceptance.plugins.findbugs;
+package org.jenkinsci.test.acceptance.po;
 
-import org.jenkinsci.test.acceptance.po.Control;
-import org.jenkinsci.test.acceptance.po.Describable;
-import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.PostBuildStep;
-import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginPostBuildStep;
+import java.net.URL;
 
-@Describable("Publish FindBugs analysis results")
-public class FindbugsPublisher extends AbstractCodeStylePluginPostBuildStep {
+import org.openqa.selenium.WebElement;
 
-    public FindbugsPublisher(Job parent, String path) {
-        super(parent, path);
+public class GlobalSecurityConfig extends ContainerPageObject {
+
+    public GlobalSecurityConfig(Jenkins context) {
+        super(context, context.url("configureSecurity/"));
+    }
+
+    @Override
+    public URL getConfigUrl() {
+        return url;
+    }
+
+    public <T extends SecurityRealm> T useRealm(Class<T> type) {
+        control("/useSecurity").check();
+
+        WebElement radio = findCaption(type, new Finder<WebElement>() {
+            @Override protected WebElement find(String caption) {
+                return getElement(by.radioButton(caption));
+            }
+        });
+
+        radio.click();
+
+        return newInstance(type, this, radio.getAttribute("path"));
     }
 }

@@ -21,18 +21,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.test.acceptance.plugins.findbugs;
+package org.jenkinsci.test.acceptance.plugins.ant;
 
-import org.jenkinsci.test.acceptance.po.Control;
-import org.jenkinsci.test.acceptance.po.Describable;
-import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.PostBuildStep;
-import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginPostBuildStep;
+import org.jenkinsci.test.acceptance.po.Jenkins;
+import org.jenkinsci.test.acceptance.po.JenkinsConfig;
+import org.jenkinsci.test.acceptance.po.ToolInstallation;
+import org.jenkinsci.test.acceptance.po.ToolInstallationPageObject;
 
-@Describable("Publish FindBugs analysis results")
-public class FindbugsPublisher extends AbstractCodeStylePluginPostBuildStep {
+@ToolInstallationPageObject(name="Ant", installer="hudson.tasks.Ant.AntInstaller")
+public class AntInstallation extends ToolInstallation {
 
-    public FindbugsPublisher(Job parent, String path) {
-        super(parent, path);
+    public static void install(Jenkins jenkins, String name, String version) {
+        waitForUpdates(jenkins, AntInstallation.class);
+        jenkins.configure();
+        AntInstallation maven = jenkins.getConfigPage().addTool(AntInstallation.class);
+        maven.name.set(name);
+        maven.installVersion(version);
+        jenkins.save();
+    }
+
+    public AntInstallation(JenkinsConfig context, String path) {
+        super(context, path);
+    }
+
+    public void useNative() {
+        installedIn(fakeHome("ant", "ANT_HOME"));
     }
 }

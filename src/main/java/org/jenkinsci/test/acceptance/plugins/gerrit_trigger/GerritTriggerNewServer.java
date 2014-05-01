@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright (c) 2014 Red Hat, Inc.
+ * Copyright (c) 2014 Ericsson
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,18 +21,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.test.acceptance.plugins.findbugs;
+package org.jenkinsci.test.acceptance.plugins.gerrit_trigger;
 
 import org.jenkinsci.test.acceptance.po.Control;
-import org.jenkinsci.test.acceptance.po.Describable;
-import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.PostBuildStep;
-import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginPostBuildStep;
+import org.jenkinsci.test.acceptance.po.Jenkins;
+import org.jenkinsci.test.acceptance.po.PageObject;
 
-@Describable("Publish FindBugs analysis results")
-public class FindbugsPublisher extends AbstractCodeStylePluginPostBuildStep {
+/**
+ * Page Object for Gerrit Trigger newServer (configuration) page.
+ * @author Marco Miller
+ */
+public class GerritTriggerNewServer extends PageObject {
 
-    public FindbugsPublisher(Job parent, String path) {
-        super(parent, path);
+    public final Jenkins jenkins;
+    public final Control name = control("/name");
+    public final Control modeDefault = control("/mode[com.sonyericsson.hudson.plugins.gerrit.trigger.GerritServer]");
+
+    public GerritTriggerNewServer(Jenkins jenkins) {
+        super(jenkins.injector,jenkins.url("gerrit-trigger/newServer"));
+        this.jenkins = jenkins;
+    }
+
+    /**
+     * Saves harness' gerrit-trigger server if none already configured.<br>
+     * Does not matter if already configured; no-op with harmless error then.
+     */
+    public void saveNewTestServerConfigIfNone() {
+        open();
+        name.set(this.getClass().getPackage().getName());
+        modeDefault.click();
+        clickButton("OK");
     }
 }

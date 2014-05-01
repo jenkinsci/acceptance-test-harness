@@ -21,18 +21,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.test.acceptance.plugins.findbugs;
+package org.jenkinsci.test.acceptance.plugins.ownership;
 
-import org.jenkinsci.test.acceptance.po.Control;
-import org.jenkinsci.test.acceptance.po.Describable;
+import org.jenkinsci.test.acceptance.po.Action;
+import org.jenkinsci.test.acceptance.po.ActionPageObject;
+import org.jenkinsci.test.acceptance.po.ContainerPageObject;
 import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.PostBuildStep;
-import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginPostBuildStep;
+import org.jenkinsci.test.acceptance.po.Node;
+import org.jenkinsci.test.acceptance.po.User;
 
-@Describable("Publish FindBugs analysis results")
-public class FindbugsPublisher extends AbstractCodeStylePluginPostBuildStep {
+@ActionPageObject("ownership")
+public class OwnershipAction extends Action {
 
-    public FindbugsPublisher(Job parent, String path) {
-        super(parent, path);
+    public OwnershipAction(ContainerPageObject parent, String relative) {
+        super(parent, relative);
+    }
+
+    @Override
+    public boolean isApplicable(ContainerPageObject po) {
+        return po instanceof Job || po instanceof Node;
+    }
+
+    public void setPrimaryOwner(User user) {
+        visit("manage-owners");
+        control("/owners/primaryOwner").select(String.format("%s (%s)", user.id(), user.fullName()));
+        clickButton("Save");
     }
 }

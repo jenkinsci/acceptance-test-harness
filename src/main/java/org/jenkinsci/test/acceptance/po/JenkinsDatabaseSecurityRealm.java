@@ -21,18 +21,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.test.acceptance.plugins.findbugs;
+package org.jenkinsci.test.acceptance.po;
 
-import org.jenkinsci.test.acceptance.po.Control;
-import org.jenkinsci.test.acceptance.po.Describable;
-import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.PostBuildStep;
-import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginPostBuildStep;
+@Describable("Jenkins’ own user database")
+public class JenkinsDatabaseSecurityRealm extends SecurityRealm {
 
-@Describable("Publish FindBugs analysis results")
-public class FindbugsPublisher extends AbstractCodeStylePluginPostBuildStep {
+    public JenkinsDatabaseSecurityRealm(GlobalSecurityConfig context, String path) {
+        super(context, path);
+    }
 
-    public FindbugsPublisher(Job parent, String path) {
-        super(parent, path);
+    public void allowUsersToSignUp(boolean allow) {
+        control("allowSignup").check(allow);
+    }
+
+    public User signup(String name) {
+        page.getJenkins().visit("signup");
+        control(by.input("username")).set(name);
+        control(by.input("password1")).set(name);
+        control(by.input("password2")).set(name);
+        control(by.input("fullname")).set(name);
+        control(by.input("email")).set(name + "@mailinator.com");
+
+        return new User(page.getJenkins(), name);
     }
 }
