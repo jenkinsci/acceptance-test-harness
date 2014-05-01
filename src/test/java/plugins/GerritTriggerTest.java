@@ -32,6 +32,13 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
 
 /**
+ * Set these (data) at mvn-test command line to use this test:<br>
+ * - gtHostname=gerrit.company.com<br>
+ * - gtUsername=companion<br>
+ * - gtKeypath=/home/companion/.ssh/id_rsa<br>
+ * - gtProject=changed/by/this/test<br>
+ * (We might change this approach to a better one.)
+ *
  * @author Marco.Miller@ericsson.com
  */
 @WithPlugins("gerrit-trigger")
@@ -55,7 +62,7 @@ public class GerritTriggerTest extends AbstractJUnitTest {
         server.saveTestServerConfig();
 
         String jobName = this.getClass().getCanonicalName();
-        jenkins.jobs.create(FreeStyleJob.class,jobName);
+        jenkins.jobs.create(FreeStyleJob.class,jobName);//no harm if existing
         GerritTriggerJob job = new GerritTriggerJob(jenkins,jobName);
         job.saveTestJobConfig();
         //TODO work in progress

@@ -23,11 +23,11 @@
  */
 package org.jenkinsci.test.acceptance.plugins.gerrit_trigger;
 
-import static org.junit.Assume.assumeNotNull;
-
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.PageObject;
+
+import static org.junit.Assume.assumeNotNull;
 
 /**
  * Page Object for Gerrit Trigger server (configuration) page.
@@ -47,12 +47,7 @@ public class GerritTriggerServer extends PageObject {
     }
 
     /**
-     * Saves harness' gerrit-trigger server configuration.<br>
-     * Set these (data) at mvn-test command line to use this test:<br>
-     * - gtHostname=gerrit.company.com<br>
-     * - gtUsername=companion<br>
-     * - gtKeypath=/home/companion/.ssh/id_rsa<br>
-     * (We might change this approach to a better one.)
+     * Saves harness' gerrit-trigger server configuration.
      */
     public void saveTestServerConfig() {
         String hostNameEnv = System.getenv("gtHostname");
