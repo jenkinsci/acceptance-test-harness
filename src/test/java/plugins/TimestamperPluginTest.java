@@ -10,7 +10,7 @@ import org.openqa.selenium.WebElement;
 
 import java.util.List;
 
-import static org.jenkinsci.test.acceptance.Matchers.containsRegexp;
+import static org.jenkinsci.test.acceptance.Matchers.*;
 
 /**
  Feature: Timestamper support

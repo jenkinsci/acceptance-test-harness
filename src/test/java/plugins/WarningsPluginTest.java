@@ -10,9 +10,8 @@ import org.jenkinsci.test.acceptance.po.PageObject;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.not;
-import static org.jenkinsci.test.acceptance.Matchers.hasAction;
-import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+import static org.hamcrest.CoreMatchers.*;
+import static org.jenkinsci.test.acceptance.Matchers.*;
 
 /**
  Feature: Adds Warnings collection support

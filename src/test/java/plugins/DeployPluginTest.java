@@ -16,7 +16,7 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.net.URL;
 
-import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.*;
 
 /**
  Feature: Auto-deployment to application server via deploy plugin

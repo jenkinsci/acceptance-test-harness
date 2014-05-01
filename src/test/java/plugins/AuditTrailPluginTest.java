@@ -5,13 +5,14 @@ import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.JenkinsLogger;
 import org.jenkinsci.test.acceptance.slave.LocalSlaveController;
+import org.jenkinsci.test.acceptance.slave.SlaveProvider;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.inject.Inject;
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.hasItem;
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.*;
 
 /**
  * Test audit_trail plugin

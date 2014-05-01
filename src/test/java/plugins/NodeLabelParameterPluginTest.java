@@ -11,8 +11,8 @@ import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.junit.Test;
 
-import static java.util.Collections.singletonMap;
-import static org.hamcrest.CoreMatchers.is;
+import static java.util.Collections.*;
+import static org.hamcrest.CoreMatchers.*;
 
 /**
  Feature: Use node name and label as parameter

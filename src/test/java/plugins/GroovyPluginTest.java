@@ -23,6 +23,10 @@
  */
 package plugins;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Native;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
@@ -32,9 +36,6 @@ import org.jenkinsci.test.acceptance.plugins.groovy.SystemGroovyStep;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @WithPlugins("groovy")
 public class GroovyPluginTest extends AbstractJUnitTest {
