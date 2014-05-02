@@ -21,7 +21,7 @@ public class FtpPublisher extends PostBuildStep {
         return defaultSite;
     }
 
-    public Site add() {
+    public Site addServer() {
         add.click();
         String p = last(by.xpath(".//div[@name='publishers'][starts-with(@path,'%s/publishers')]", path)).getAttribute("path");
         return new Site(page, p);
@@ -35,6 +35,7 @@ public class FtpPublisher extends PostBuildStep {
         }
 
         public final Control add = control("repeatable-add");
+        public final Control configName = control("configName");
 
         private TransferArea defaultTransfer;
         public TransferArea getDefaultTransfer() {
@@ -43,6 +44,7 @@ public class FtpPublisher extends PostBuildStep {
 
         public TransferArea addTransferSet()
         {
+            add.click();
             String p = last(by.xpath(".//div[@name='transfers'][starts-with(@path,'%s/transfers')]", path)).getAttribute("path");
             return new TransferArea(page, p);
         }
