@@ -27,6 +27,8 @@ import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.PageObject;
 
+import static org.junit.Assume.assumeNotNull;
+
 /**
  * Page Object for Gerrit Trigger test-job (configuration) page.
  * @author Marco Miller
@@ -35,6 +37,9 @@ public class GerritTriggerJob extends PageObject {
 
     public final Jenkins jenkins;
     public final Control event = control("/com-sonyericsson-hudson-plugins-gerrit-trigger-hudsontrigger-GerritTrigger");
+    public final Control server = control("/com-sonyericsson-hudson-plugins-gerrit-trigger-hudsontrigger-GerritTrigger/serverName");
+    public final Control project = control("/com-sonyericsson-hudson-plugins-gerrit-trigger-hudsontrigger-GerritTrigger/gerritProjects/pattern");
+    public final Control branch = control("/com-sonyericsson-hudson-plugins-gerrit-trigger-hudsontrigger-GerritTrigger/gerritProjects/branches/pattern");
 
     public GerritTriggerJob(Jenkins jenkins,String jobName) {
         super(jenkins.injector,jenkins.url("job/"+jobName+"/configure"));
@@ -45,9 +50,13 @@ public class GerritTriggerJob extends PageObject {
      * Saves harness' gerrit-trigger test-job configuration.
      */
     public void saveTestJobConfig() {
+        String projectEnv = System.getenv("gtProject");
+        assumeNotNull(projectEnv);
         open();
-        event.click();
-        //TODO work in progress
+        if(!event.resolve().isSelected()) event.click();
+        server.select(this.getClass().getPackage().getName());
+        project.set(projectEnv);
+        branch.set("master");
         clickButton("Save");
     }
 }

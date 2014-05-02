@@ -4,6 +4,7 @@ import java.util.regex.Pattern;
 
 import org.hamcrest.Description;
 import org.jenkinsci.test.acceptance.po.ContainerPageObject;
+import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -120,6 +121,25 @@ public class Matchers {
                 } catch (RuntimeException ex) {
                     return false;
                 }
+            }
+        };
+    }
+
+    public static Matcher<Jenkins> hasLoggedInUser(final String user){
+        return new Matcher<Jenkins>("has logged in user %s", user) {
+            @Override
+            public boolean matchesSafely(final Jenkins jenkins) {
+                try {
+                    jenkins.find(by.href("/user/" + user));
+                    return true;
+                } catch (NoSuchElementException e){
+                    return false;
+                }
+            }
+
+            @Override
+            public void describeMismatchSafely(final Jenkins item, final Description desc) {
+                desc.appendText(user + " is not logged in.");
             }
         };
     }

@@ -58,6 +58,16 @@ public class ByFactory {
     }
 
     /**
+     * Link href selector.
+     *
+     * @param locator
+     *      href of the link
+     */
+    public By href(String locator){
+        return xpath(".//A[@href='%1$s']", locator);
+    }
+
+    /**
      * Finds checkbox.
      *
      * @param locator

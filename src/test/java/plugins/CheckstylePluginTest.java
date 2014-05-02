@@ -1,15 +1,16 @@
 package plugins;
 
-import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleAction;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstylePublisher;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
+import org.openqa.selenium.WebDriver;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.jenkinsci.test.acceptance.Matchers.hasAction;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 /**
  * Feature: Allow publishing of Checkstyle report
@@ -18,7 +19,7 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
    I want to be able to publish Checkstyle report
  */
 @WithPlugins("checkstyle")
-public class CheckstylePluginTest extends AbstractJUnitTest {
+public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
     /**
      * Scenario: Record Checkstyle report
          Given I have installed the "checkstyle" plugin
@@ -34,10 +35,10 @@ public class CheckstylePluginTest extends AbstractJUnitTest {
      */
     @Test
     public void record_checkstyle_report() {
-        FreeStyleJob job = setupJob();
-        Build b = job.startBuild().waitUntilFinished().shouldSucceed();
+        FreeStyleJob job = setupJob("/checkstyle_plugin/checkstyle-result.xml", CheckstylePublisher.class, "checkstyle-result.xml");
+        buildJobWithSuccess(job);
 
-        assertThat(b, hasAction("Checkstyle Warnings"));
+        assertThat(job.getLastBuild(), hasAction("Checkstyle Warnings"));
         assertThat(job, hasAction("Checkstyle Warnings"));
     }
 
@@ -62,8 +63,12 @@ public class CheckstylePluginTest extends AbstractJUnitTest {
      */
     @Test
     public void view_checkstyle_report() {
-        FreeStyleJob job = setupJob();
-        Build b = job.startBuild().waitUntilFinished().shouldSucceed();
+        FreeStyleJob job = setupJob("/checkstyle_plugin/checkstyle-result.xml", CheckstylePublisher.class, "checkstyle-result.xml");
+
+        Build lastBuild = buildJobWithSuccess(job);
+        assertThat(lastBuild, hasAction("Checkstyle Warnings"));
+        WebDriver lastBuildOpened = lastBuild.open();
+        assertThat(lastBuildOpened, hasContent("776 warnings"));
 
         CheckstyleAction ca = new CheckstyleAction(job);
         assertThat(ca.getWarningNumber(), is(776));
@@ -74,13 +79,27 @@ public class CheckstylePluginTest extends AbstractJUnitTest {
         assertThat(ca.getLowWarningNumber(), is(0));
     }
 
-    private FreeStyleJob setupJob() {
-        FreeStyleJob job = jenkins.jobs.create();
-        job.configure();
-        job.copyResource(resource("/checkstyle_plugin/checkstyle-result.xml"));
-        job.addPublisher(CheckstylePublisher.class)
-            .pattern.set("checkstyle-result.xml");
-        job.save();
-        return job;
+    /**
+     * Runs job two times to check if new and fixed warnings are displayed.
+     */
+    @Test
+    public void view_checkstyle_report_two_runs_and_changed_results() {
+        FreeStyleJob job = setupJob("/checkstyle_plugin/checkstyle-result.xml", CheckstylePublisher.class, "checkstyle-result.xml");
+        buildJobAndWait(job);
+        editJobAndChangeLastRessource(job, "/checkstyle_plugin/checkstyle-result-2.xml", "checkstyle-result.xml");
+
+        Build lastBuild = buildJobWithSuccess(job);
+        assertThat(lastBuild, hasAction("Checkstyle Warnings"));
+        WebDriver lastBuildOpened = lastBuild.open();
+        assertThat(lastBuildOpened, hasContent("679 warnings"));
+
+        CheckstyleAction ca = new CheckstyleAction(job);
+        assertThat(ca.getWarningNumber(), is(679));
+        assertThat(ca.getNewWarningNumber(), is(3));
+        assertThat(ca.getFixedWarningNumber(), is(100));
+        assertThat(ca.getHighWarningNumber(), is(679));
+        assertThat(ca.getNormalWarningNumber(), is(0));
+        assertThat(ca.getLowWarningNumber(), is(0));
     }
+
 }
