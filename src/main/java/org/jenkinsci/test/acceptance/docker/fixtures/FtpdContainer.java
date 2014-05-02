@@ -6,7 +6,7 @@ import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPListParseEngine;
 import org.jenkinsci.test.acceptance.docker.DockerContainer;
 import org.jenkinsci.test.acceptance.docker.DockerFixture;
-
+import java.io.FileInputStream;
 
 import java.io.File;
 import java.io.IOException;
@@ -68,6 +68,23 @@ public class FtpdContainer extends DockerContainer {
     }
 
     private final String password = "test";
+
+    public void UploadBinary(String localPath, String remotePath) throws IOException{
+        FileInputStream fis = null;
+        if(!FtpConnect())
+            throw new IOException("Connection to ftp Failed!");
+        try {
+            ftpClient.setFileType(FTP.BINARY_FILE_TYPE, FTP.BINARY_FILE_TYPE);
+            ftpClient.setFileTransferMode(FTP.BINARY_FILE_TYPE);
+            fis = new FileInputStream(localPath);
+            ftpClient.storeFile(remotePath, fis);
+        }
+        finally {
+            if(fis!=null)
+                fis.close();
+            FtpDisconnect();
+        }
+    }
 
     public Boolean PathExist(String Path) throws IOException{
         if(!FtpConnect())

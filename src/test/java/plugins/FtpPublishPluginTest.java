@@ -17,6 +17,9 @@ import org.jenkinsci.test.acceptance.plugins.ftp.FtpPublisher;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Before;
 import org.junit.Test;
+import java.util.Date;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 import com.google.inject.Inject;
 
@@ -445,19 +448,32 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      When I configure docker fixture as FTP site
      And I configure the job with one FTP Transfer Set
      And I configure the Transfer Set
-        With SourceFiles "myresources" and "subdir\myresources" with FTP plugin
-     And I copy resources "myresources" into workspace
-     And I copy resources "myresources" into workspace\subdir
+        With SourceFiles "odes.txt" and "flat\odes.txt" with FTP plugin
+     And I copy resources "ftp_plugin/"
      And I save the job
      And I build the job
      Then the build should succeed
-     And FTP plugin should have published "myresources" and "subdir\myresources"
+     And FTP plugin should have published "odes.txt" and "flat/odes.txt"
      */
     @Native("docker")
     @Test
     public void publish_without_flatten_files() throws IOException, InterruptedException {
+        FtpdContainer ftpd = docker.start(FtpdContainer.class);
+        Resource cp_dir = resource("/ftp_plugin/");
 
-
+        FreeStyleJob j = jenkins.jobs.create();
+        jenkinsFtpConfigure("asd",ftpd);
+        j.configure();
+        {
+            j.copyDir(cp_dir);
+            FtpPublisher fp = j.addPublisher(FtpPublisher.class);
+            FtpPublisher.Site fps = fp.getDefault();
+            fps.getDefaultTransfer().sourceFile.set("flat/odes.txt,odes.txt");
+        }
+        j.save();
+        j.startBuild().shouldSucceed();
+        assertTrue(ftpd.PathExist("/tmp/flat/odes.txt"));
+        assertTrue(ftpd.PathExist("/tmp/odes.txt"));
     }
 
     /**
@@ -469,10 +485,9 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      When I configure docker fixture as FTP site
      And I configure the job with one FTP Transfer Set
      And I configure the Transfer Set
-        With SourceFiles "myresources" and "subdir\myresources" with FTP plugin
+        With SourceFiles "odes.txt" and "flat\odes.txt" with FTP plugin
         And With Flatten files Checked
-     And I copy resources "myresources" into workspace
-     And I copy resources "myresources" into workspace\subdir
+     And I copy resources "ftp_plugin/"
      And I save the job
      And I build the job
      Then the build should fail
@@ -480,8 +495,21 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
     @Native("docker")
     @Test
     public void publish_with_flatten_files() throws IOException, InterruptedException {
+        FtpdContainer ftpd = docker.start(FtpdContainer.class);
+        Resource cp_dir = resource("/ftp_plugin/");
 
-
+        FreeStyleJob j = jenkins.jobs.create();
+        jenkinsFtpConfigure("asd",ftpd);
+        j.configure();
+        {
+            j.copyDir(cp_dir);
+            FtpPublisher fp = j.addPublisher(FtpPublisher.class);
+            FtpPublisher.Site fps = fp.getDefault();
+            fps.getDefaultTransfer().flatten.check();
+            fps.getDefaultTransfer().sourceFile.set("flat/odes.txt,odes.txt");
+        }
+        j.save();
+        j.startBuild().shouldUnstable();
     }
 
     /**
@@ -493,19 +521,36 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      When I configure docker fixture as FTP site
      And I configure the job with one FTP Transfer Set
      And I configure the Transfer Set
-         With SourceFiles "myresources" with FTP plugin
-         And With Remote directory  is a date format Checked
-     And I copy resources "myresources" into workspace
+         With SourceFiles "odes.txt" with FTP plugin
+         And With Remote directory  is a date format Checked "yyyyMMddHH"
+     And I copy resources "odes.txt" into workspace
      And I save the job
      And I build the job
      Then the build should succeed
-     And FTP plugin should have published "myresources" under 'yyyy/MM/dd/'build-${BUILD_NUMBER}'
+     And FTP plugin should have published "odes.txt" under 'yyyyMMddHH'
      */
     @Native("docker")
     @Test
     public void publish_with_date_format() throws IOException, InterruptedException {
+        FtpdContainer ftpd = docker.start(FtpdContainer.class);
+        Resource cp_txt = resource("/ftp_plugin/odes.txt");
 
-
+        FreeStyleJob j = jenkins.jobs.create();
+        jenkinsFtpConfigure("asd",ftpd);
+        j.configure();
+        {
+            j.copyResource(cp_txt);
+            FtpPublisher fp = j.addPublisher(FtpPublisher.class);
+            FtpPublisher.Site fps = fp.getDefault();
+            fps.getDefaultTransfer().remoteDirectorySDF.check();
+            fps.getDefaultTransfer().remoteDirectory.set("yyyyMMddHH");
+            fps.getDefaultTransfer().sourceFile.set("odes.txt");
+        }
+        DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHH");
+        Date date = new Date();
+        j.save();
+        j.startBuild().shouldSucceed();
+        assertTrue(ftpd.PathExist("/tmp/"+dateFormat.format(date)+"/odes.txt"));
     }
 
     /**
@@ -529,8 +574,25 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
     @Native("docker")
     @Test
     public void publish_with_clean_remote() throws IOException, InterruptedException {
+        FtpdContainer ftpd = docker.start(FtpdContainer.class);
+        Resource cp_txt = resource("/ftp_plugin/odes.txt");
+        Resource old_txt=resource("/ftp_plugin/old.txt");
+        ftpd.UploadBinary(old_txt.asFile().getAbsolutePath(),"/tmp/old.txt");
 
-
+        FreeStyleJob j = jenkins.jobs.create();
+        jenkinsFtpConfigure("asd",ftpd);
+        j.configure();
+        {
+            j.copyResource(cp_txt);
+            FtpPublisher fp = j.addPublisher(FtpPublisher.class);
+            FtpPublisher.Site fps = fp.getDefault();
+            fps.getDefaultTransfer().cleanRemote.check();
+            fps.getDefaultTransfer().sourceFile.set("odes.txt");
+        }
+        j.save();
+        j.startBuild().shouldSucceed();
+        assertTrue(ftpd.PathExist("/tmp/odes.txt"));
+        assertTrue(!ftpd.PathExist("/tmp/old.txt"));
     }
 
     //This test will probably only make sense if we use *nix and a windows system for example!
@@ -553,7 +615,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      */
     @Native("docker")
     @Test
-    public void publish_asci_text() throws IOException, InterruptedException {
+    public void publish_ascii_text() throws IOException, InterruptedException {
 
 
     }
@@ -568,22 +630,41 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      When I configure docker fixture as FTP site
      And I configure the job with three FTP Transfer Sets
      And I configure the Transfer Set 1
-        With SourceFiles  myresourcesSet1
+        With SourceFiles  odes.txt
      And I configure the Transfer Set 2
-        With SourceFiles  myresourcesSet2
+        With SourceFiles  odes2.txt
      And I configure the Transfer Set 3
-        With SourceFiles  myresourcesSet3
-     And I copy resources myresources into workspace
+        With SourceFiles  odes3.txt
+     And I copy resources odes.txt,odes2.txt,odes3.txt into workspace
      And I save the job
      And I build the job
      Then the build should succeed
-     And FTP plugin should have published myresources on docker fixture
+     And FTP plugin should have published odes.txt,odes2.txt,odes3.txt on docker fixture
      */
     @Native("docker")
     @Test
     public void publish_multiple_sets() throws IOException, InterruptedException {
+        FtpdContainer ftpd = docker.start(FtpdContainer.class);
+        Resource cp_txt=resource("/ftp_plugin/odes.txt");
 
-
+        FreeStyleJob j = jenkins.jobs.create();
+        jenkinsFtpConfigure("asd",ftpd);
+        j.configure();
+        {
+            j.copyResource(cp_txt);
+            j.copyResource(cp_txt,"odes2.txt");
+            j.copyResource(cp_txt,"odes3.txt");
+            FtpPublisher fp = j.addPublisher(FtpPublisher.class);
+            FtpPublisher.Site fps = fp.getDefault();
+            fps.getDefaultTransfer().sourceFile.set("odes.txt");
+            fps.addTransferSet().sourceFile.set("odes2.txt");
+            fps.addTransferSet().sourceFile.set("odes3.txt");
+        }
+        j.save();
+        j.startBuild().shouldSucceed();
+        assertTrue(ftpd.PathExist("/tmp/odes.txt"));
+        assertTrue(ftpd.PathExist("/tmp/odes2.txt"));
+        assertTrue(ftpd.PathExist("/tmp/odes3.txt"));
     }
 
 //Multiple Server
@@ -593,17 +674,17 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      Given I have installed the "ftp" plugin
      And 2 docker fixtures "ftpd"
      And a job
-     When I configure docker fixture 1 as FTP site
-     And I configure docker fixture 2 as FTP site
-     And I configure the job with fixture1 Server
+     When I configure docker docker1 as FTP site
+     And I configure docker  docker2 as FTP site
+     And I configure the job with docker1 Server
      And one FTP Transfer Set
      And I configure the Transfer Set
-        With SourceFiles myresources
-     And I Add Server fixture2
+        With SourceFiles odes.txt
+     And I Add Server docker2
      And one FTP Transfer Set
          And I configure the Transfer Set
-         With SourceFiles myresources
-     And I copy resources myresources  into workspace
+         With SourceFiles odes.txt
+     And I copy resources odes.txt  into workspace
      And I save the job
      And I build the job
      Then the build should succeed
@@ -612,7 +693,28 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
     @Native("docker")
     @Test
     public void publish_multiple_servers() throws IOException, InterruptedException {
+        FtpdContainer ftpd = docker.start(FtpdContainer.class);
+        FtpdContainer ftpd2 = docker.start(FtpdContainer.class);
+        Resource cp_txt=resource("/ftp_plugin/odes.txt");
 
+        FreeStyleJob j = jenkins.jobs.create();
+        jenkinsFtpConfigure("docker1",ftpd);
+        jenkinsFtpConfigure("docker2",ftpd2);
+        j.configure();
+        {
+            j.copyResource(cp_txt);
+            FtpPublisher fp = j.addPublisher(FtpPublisher.class);
+            FtpPublisher.Site fps = fp.getDefault();
+            fps.configName.select("docker1");
+            fps.getDefaultTransfer().sourceFile.set("odes.txt");
+            FtpPublisher.Site fps2 = fp.addServer();
+            fps2.configName.select("docker2");
+            fps2.getDefaultTransfer().sourceFile.set("odes.txt");
+        }
+        j.save();
+        j.startBuild().shouldSucceed();
+        assertTrue(ftpd.PathExist("/tmp/odes.txt"));
+        assertTrue(ftpd2.PathExist("/tmp/odes.txt"));
 
     }
 }
