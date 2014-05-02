@@ -159,5 +159,14 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         assertTrue(pendingBuildText.contains(refText));
         assertTrue(!b.hasStarted());
 
+        //bring the slave up again, the Build should start immediately
+        s.markOnline();
+        assertTrue(s.isOnline());
+
+        b.waitUntilStarted();
+        assertTrue(b.hasStarted());
+
+        b.waitUntilStarted();
+        j.shouldHaveBuiltOn(jenkins,s.getName());
     }
 }
