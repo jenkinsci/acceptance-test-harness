@@ -35,4 +35,10 @@ public abstract class Matcher<T> extends TypeSafeMatcher<T> {
     @Override public final void describeTo(Description description) {
         description.appendText(this.description);
     }
+
+    @Override public abstract boolean matchesSafely(T item);
+
+    @Override public void describeMismatchSafely(T item, Description mismatchDescription) {
+        super.describeMismatchSafely(item, mismatchDescription);
+    }
 }

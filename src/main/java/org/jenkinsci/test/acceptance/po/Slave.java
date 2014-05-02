@@ -75,7 +75,7 @@ public abstract class Slave extends Node {
 
     public static Matcher<Slave> runBuildsInOrder(final Job... jobs) {
         return new Matcher<Slave>("slave run build in order: %s", Joiner.on(' ').join(jobs)) {
-            @Override protected boolean matchesSafely(Slave slave) {
+            @Override public boolean matchesSafely(Slave slave) {
                 slave.visit("builds");
                 String list = slave.find(by.id("projectStatus")).getText();
 

@@ -44,4 +44,8 @@ public class JdkInstallation extends ToolInstallation {
         clickButton("OK");
         clickButton("Close");
     }
+
+    public void useNative() {
+        installedIn(fakeHome("java", "JAVA_HOME"));
+    }
 }
