@@ -25,11 +25,17 @@ package plugins;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.plugins.gerrit_trigger.GerritTriggerEnv;
 import org.jenkinsci.test.acceptance.plugins.gerrit_trigger.GerritTriggerJob;
 import org.jenkinsci.test.acceptance.plugins.gerrit_trigger.GerritTriggerNewServer;
 import org.jenkinsci.test.acceptance.plugins.gerrit_trigger.GerritTriggerServer;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 /**
  * Set these (data) at mvn-test command line to use this test:<br>
@@ -65,6 +71,37 @@ public class GerritTriggerTest extends AbstractJUnitTest {
         jenkins.jobs.create(FreeStyleJob.class,jobName);//no harm if existing
         GerritTriggerJob job = new GerritTriggerJob(jenkins,jobName);
         job.saveTestJobConfig();
-        //TODO work in progress
+
+        try {
+            pushChangeForReview(jobName);
+        }
+        catch(InterruptedException|IOException e) {
+            fail(e.getMessage());
+        }
+        //TODO gerrit-trigger server start
+        //TODO gerrit flags checking to pass/fail
+    }
+
+    private void pushChangeForReview(String jobName) throws InterruptedException,IOException {
+        File dir = File.createTempFile("jenkins","git");
+        dir.delete();
+        assertTrue(dir.mkdir());
+        String userName = GerritTriggerEnv.getInstance().getUserName();
+        String hostName = GerritTriggerEnv.getInstance().getHostName();
+        String project = GerritTriggerEnv.getInstance().getProject();
+
+        assertEquals(0,new ProcessBuilder("git","clone","ssh://"+userName+"@"+hostName+":29418/"+project,jobName).directory(dir).start().waitFor());
+
+        File file = new File(dir+"/"+jobName,jobName);
+        file.delete();
+        BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+        writer.write(String.valueOf(System.currentTimeMillis()));
+        writer.close();
+        dir = file.getParentFile();
+
+        assertEquals(0,new ProcessBuilder("git","add",jobName).directory(dir).start().waitFor());
+        assertEquals(0,new ProcessBuilder("scp","-p","-P","29418",userName+"@"+hostName+":hooks/commit-msg",".git/hooks/").directory(dir).start().waitFor());
+        assertEquals(0,new ProcessBuilder("git","commit","-m",jobName).directory(dir).start().waitFor());
+        assertEquals(0,new ProcessBuilder("git","push","origin","HEAD:refs/for/master").directory(dir).start().waitFor());
     }
 }

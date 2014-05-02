@@ -26,8 +26,7 @@ package org.jenkinsci.test.acceptance.plugins.gerrit_trigger;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.PageObject;
-
-import static org.junit.Assume.assumeNotNull;
+import org.openqa.selenium.NoSuchElementException;
 
 /**
  * Page Object for Gerrit Trigger server (configuration) page.
@@ -40,6 +39,12 @@ public class GerritTriggerServer extends PageObject {
     public final Control feUrl = control("/gerritFrontEndUrl");
     public final Control userName = control("/gerritUserName");
     public final Control keyFile = control("/gerritAuthKeyFile");
+    public final Control advanced = control("/advanced-button");
+    public final Control add = control("/repeatable-add");
+    public final Control codeReview = control("/verdictCategories[2]/verdictValue");
+    public final Control codeReviewD = control("/verdictCategories[2]/verdictDescription");
+    public final Control verified = control("/verdictCategories[3]/verdictValue");
+    public final Control verifiedD = control("/verdictCategories[3]/verdictDescription");
 
     public GerritTriggerServer(Jenkins jenkins) {
         super(jenkins.injector,jenkins.url("gerrit-trigger/server/"+GerritTriggerServer.class.getPackage().getName()));
@@ -50,17 +55,23 @@ public class GerritTriggerServer extends PageObject {
      * Saves harness' gerrit-trigger server configuration.
      */
     public void saveTestServerConfig() {
-        String hostNameEnv = System.getenv("gtHostname");
-        assumeNotNull(hostNameEnv);
-        String userNameEnv = System.getenv("gtUsername");
-        assumeNotNull(userNameEnv);
-        String keyFileEnv = System.getenv("gtKeypath");
-        assumeNotNull(keyFileEnv);
         open();
-        hostName.set(hostNameEnv);
-        feUrl.set("https://"+hostNameEnv);
-        userName.set(userNameEnv);
-        keyFile.set(keyFileEnv);
+        hostName.set(GerritTriggerEnv.getInstance().getHostName());
+        feUrl.set("https://"+GerritTriggerEnv.getInstance().getHostName());
+        userName.set(GerritTriggerEnv.getInstance().getUserName());
+        keyFile.set(GerritTriggerEnv.getInstance().getKeyPath());
+        advanced.click();
+        try {
+            codeReview.resolve();
+        }
+        catch(NoSuchElementException e) {
+            add.click();
+            codeReview.set("Code-Review");
+            codeReviewD.set("Code Review");
+            add.click();
+            verified.set("Verified");
+            verifiedD.set("Verified");
+        }
         clickButton("Save");
     }
 }
