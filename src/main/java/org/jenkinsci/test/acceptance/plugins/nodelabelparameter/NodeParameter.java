@@ -5,10 +5,6 @@ import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.Parameter;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.htmlunit.HtmlUnitWebElement;
-import org.w3c.dom.html.HTMLSelectElement;
-
-import com.gargoylesoftware.htmlunit.javascript.host.Selection;
 
 /**
  * @author Kohsuke Kawaguchi
