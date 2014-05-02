@@ -32,6 +32,31 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
     Docker docker;
 
     /**
+     * Helper Function to create a temporary empty directory
+     * @return File Descriptor for empty Directory
+     * @throws IOException
+     */
+    public static File createTempDirectory()
+            throws IOException
+    {
+        File temp;
+
+        temp = File.createTempFile("temp", Long.toString(System.nanoTime()));
+
+        if(!(temp.delete()))
+        {
+            throw new IOException("Could not delete temp file: " + temp.getAbsolutePath());
+        }
+        temp = new File (temp.getPath() + "d");
+
+        if(!(temp.mkdir()))
+        {
+            throw new IOException("Could not create temp directory: " + temp.getAbsolutePath());
+        }
+        temp.deleteOnExit();
+        return (temp);
+    }
+    /**
      * Helper Class to configure Jenkins.
      * It adds the DockerContainer as FTP Server with the name
      * @param servername Name to Access Instance
@@ -271,7 +296,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         jenkinsFtpConfigure("asd",ftpd);
         j.configure();
         {
-            j.copyResource(cp_txt,".svn");
+            j.copyResource(cp_txt, ".svn");
             j.copyResource(cp_txt,"CVS");
             j.copyResource(cp_txt);
             FtpPublisher fp = j.addPublisher(FtpPublisher.class);
@@ -312,13 +337,13 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         jenkinsFtpConfigure("asd",ftpd);
         j.configure();
         {
-            j.copyResource(cp_txt,".svn");
-            j.copyResource(cp_txt,"CVS");
+            j.copyResource(cp_txt, ".svn");
+            j.copyResource(cp_txt, "CVS");
             j.copyResource(cp_txt);
             FtpPublisher fp = j.addPublisher(FtpPublisher.class);
             FtpPublisher.Site fps = fp.getDefault();
             fps.getDefaultTransfer().sourceFile.set(".svn,CVS,odes.txt");
-            fps.getDefaultTransfer().noDefaultExcludes.check(true);
+            fps.getDefaultTransfer().noDefaultExcludes.check();
         }
         j.save();
         j.startBuild().shouldSucceed();
@@ -335,19 +360,39 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      When I configure docker fixture as FTP site
      And I configure the job with one FTP Transfer Set
      And I configure the Transfer Set
-        With Source Files "emptydir" with FTP plugin
+        With Source Files "empty/,odes.txt" with FTP plugin
         And With Make empty dirs  Checked
-     And I create the directory "emptydir" into workspace
+     And I create the directory "empty/" into workspace
      And I save the job
      And I build the job
      Then the build should succeed
-     And FTP plugin should have published  "emptydir"
+     And FTP plugin should have published  "empty/" and "odes.txt"
      */
     @Native("docker")
     @Test
     public void publish_with_empty_directory() throws IOException, InterruptedException {
+        FtpdContainer ftpd = docker.start(FtpdContainer.class);
+        Resource cp_txt = resource("/ftp_plugin/odes.txt");
+        File tmpDir=createTempDirectory();
+        File nestedEmptyDir = new File(tmpDir + "/empty");
+        nestedEmptyDir.mkdir();
 
+        FreeStyleJob j = jenkins.jobs.create();
+        jenkinsFtpConfigure("asd",ftpd);
+        j.configure();
+        {
+            j.copyResource(cp_txt);
+            j.copyFile(tmpDir);
+            FtpPublisher fp = j.addPublisher(FtpPublisher.class);
+            FtpPublisher.Site fps = fp.getDefault();
+            fps.getDefaultTransfer().sourceFile.set("empty/,odes.txt");
+            fps.getDefaultTransfer().makeEmptyDirs.check();
+        }
 
+        j.save();
+        j.startBuild().shouldSucceed();
+        assertTrue(ftpd.PathExist("odes.txt"));
+        assertTrue(ftpd.PathExist("/tmp/odes.txt"));
     }
     /**
      @native(docker)
@@ -358,18 +403,38 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      When I configure docker fixture as FTP site
      And I configure the job with one FTP Transfer Set
      And I configure the Transfer Set
-        With Source Files "emptydir" with FTP plugin
-     And I create the directory "emptydir" into workspace
+     With Source Files "empty/,odes.txt" with FTP plugin
+     And I create the directory "empty/" into workspace
      And I save the job
      And I build the job
      Then the build should succeed
-     And FTP plugin should have not published  "emptydir"
+     And FTP plugin should have not published "empty/" and "odes.txt"
      */
     @Native("docker")
     @Test
     public void publish_without_empty_directory() throws IOException, InterruptedException {
+        FtpdContainer ftpd = docker.start(FtpdContainer.class);
+        Resource cp_txt = resource("/ftp_plugin/odes.txt");
+        File tmpDir=createTempDirectory();
+        File nestedEmptyDir = new File(tmpDir + "/empty");
+        nestedEmptyDir.mkdir();
 
+        FreeStyleJob j = jenkins.jobs.create();
+        jenkinsFtpConfigure("asd",ftpd);
+        j.configure();
+        {
+            j.copyResource(cp_txt);
+            j.copyFile(tmpDir);
+            FtpPublisher fp = j.addPublisher(FtpPublisher.class);
+            FtpPublisher.Site fps = fp.getDefault();
+            fps.getDefaultTransfer().sourceFile.set("empty/,odes.txt");
 
+        }
+
+        j.save();
+        j.startBuild().shouldSucceed();
+        assertTrue(ftpd.PathExist("/tmp/odes.txt"));
+        assertTrue(!ftpd.PathExist("/tmp/empty"));
     }
     /**
      @native(docker)

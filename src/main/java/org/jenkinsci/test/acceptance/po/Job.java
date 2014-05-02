@@ -137,6 +137,28 @@ public class Job extends ContainerPageObject {
         copyResource(resource,resource.getName());
     }
 
+    /**
+     * "Copy" any file from the System into the Workspace using a zipFIle.
+     * @param file
+     */
+    public void copyFile(File file) {
+        File tmp = null;
+        try {
+            tmp = File.createTempFile("jenkins-acceptance-tests", "dir");
+            ZipUtil.pack(file, tmp);
+            byte[] archive = IOUtils.toByteArray(new FileInputStream(tmp));
+
+            addShellStep(String.format(
+                    "base64 --decode << ENDOFFILE > archive.zip && unzip archive.zip \n%s\nENDOFFILE",
+                    new String(Base64.encodeBase64Chunked(archive))
+            ));
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        } finally {
+            if (tmp != null) tmp.delete();
+        }
+    }
+
     public void copyDir(Resource dir) {
         File tmp = null;
         try {
