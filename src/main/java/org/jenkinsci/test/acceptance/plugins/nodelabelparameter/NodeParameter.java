@@ -4,6 +4,11 @@ import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.Parameter;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.htmlunit.HtmlUnitWebElement;
+import org.w3c.dom.html.HTMLSelectElement;
+
+import com.gargoylesoftware.htmlunit.javascript.host.Selection;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -11,6 +16,9 @@ import org.jenkinsci.test.acceptance.po.Parameter;
 @Describable("Node")
 public class NodeParameter extends Parameter {
     public final Control allowMultiple = control("triggerIfResult[allowMultiSelectionForConcurrentBuilds]");
+
+    public final WebElement allNodes = find(by.xpath("//option[text()[normalize-space(.)='All Nodes']]"));
+    public final WebElement ignoreOffline = find(by.xpath("//option[text()[normalize-space(.)='Ignore Offline Nodes']]"));
 
     public NodeParameter(Job job, String path) {
         super(job, path);
