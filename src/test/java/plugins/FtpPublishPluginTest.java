@@ -241,8 +241,8 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         }
         j.save();
         j.startBuild().shouldSucceed();
-        assertTrue(ftpd.PathExist("/tmp/te,st.txt"));
-        assertTrue(ftpd.PathExist("/tmp/odes.txt"));
+        assertTrue(!ftpd.PathExist("/tmp/te,st.txt"));
+        assertTrue(!ftpd.PathExist("/tmp/odes.txt"));
     }
     /**
      @native(docker)
@@ -253,17 +253,36 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      When I configure docker fixture as FTP site
      And I configure the job with one FTP Transfer Set
      And I configure the Transfer Set
-         With Source Files ".svn/,.git"  with FTP plugin
-     And I copy resources ".svn/,.git" into workspace
+         With Source Files ".svn,.git,odes.txt"  with FTP plugin
+     And I copy resources "odes.txt" as "odes.txt,.svn,.git" into workspace
      And I save the job
      And I build the job
      Then the build should succeed
-     And FTP plugin should have not published  .svn/,.git"
+     And FTP plugin should have published "odes.txt"
+     And FTP plugin should have not published  ".svn,.git"
      */
     @Native("docker")
     @Test
     public void publish_with_default_exclude() throws IOException, InterruptedException {
+        FtpdContainer ftpd = docker.start(FtpdContainer.class);
+        Resource cp_txt = resource("/ftp_plugin/odes.txt");
 
+        FreeStyleJob j = jenkins.jobs.create();
+        jenkinsFtpConfigure("asd",ftpd);
+        j.configure();
+        {
+            j.copyResource(cp_txt,".svn");
+            j.copyResource(cp_txt,"CVS");
+            j.copyResource(cp_txt);
+            FtpPublisher fp = j.addPublisher(FtpPublisher.class);
+            FtpPublisher.Site fps = fp.getDefault();
+            fps.getDefaultTransfer().sourceFile.set(".svn,CVS,odes.txt");
+        }
+        j.save();
+        j.startBuild().shouldSucceed();
+        assertTrue(ftpd.PathExist("/tmp/odes.txt"));
+        assertTrue(!ftpd.PathExist("/tmp/.svn"));
+        assertTrue(!ftpd.PathExist("/tmp/CVS"));
 
     }
     /**
@@ -275,9 +294,9 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      When I configure docker fixture as FTP site
      And I configure the job with one FTP Transfer Set
      And I configure the Transfer Set
-        With Source Files ".svn/,.git"  with FTP plugin
+        With Source Files ".svn,.git,odes.txt"  with FTP plugin
         And With No default excludes checked
-     And I copy resources ".svn/,.git" into workspace
+     And I copy resources "odes.txt" as "odes.txt,.svn,.git" into workspace
      And I save the job
      And I build the job
      Then the build should succeed
@@ -286,8 +305,26 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
     @Native("docker")
     @Test
     public void publish_with_no_default_exclude() throws IOException, InterruptedException {
+        FtpdContainer ftpd = docker.start(FtpdContainer.class);
+        Resource cp_txt = resource("/ftp_plugin/odes.txt");
 
-
+        FreeStyleJob j = jenkins.jobs.create();
+        jenkinsFtpConfigure("asd",ftpd);
+        j.configure();
+        {
+            j.copyResource(cp_txt,".svn");
+            j.copyResource(cp_txt,"CVS");
+            j.copyResource(cp_txt);
+            FtpPublisher fp = j.addPublisher(FtpPublisher.class);
+            FtpPublisher.Site fps = fp.getDefault();
+            fps.getDefaultTransfer().sourceFile.set(".svn,CVS,odes.txt");
+            fps.getDefaultTransfer().noDefaultExcludes.check(true);
+        }
+        j.save();
+        j.startBuild().shouldSucceed();
+        assertTrue(ftpd.PathExist("/tmp/odes.txt"));
+        assertTrue(ftpd.PathExist("/tmp/.svn"));
+        assertTrue(ftpd.PathExist("/tmp/CVS"));
     }
     /**
      @native(docker)
