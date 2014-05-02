@@ -49,7 +49,7 @@ public abstract class Node extends ContainerPageObject {
         cm.set(script);
         clickButton("Run");
 
-        return find(by.css("h2 + pre")).getText();
+        return find(by.css("h2 + pre")).getText().replaceAll("^Result: ", "");
     }
 
     public BuildHistory getBuildHistory() {

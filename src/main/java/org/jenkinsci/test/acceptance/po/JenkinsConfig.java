@@ -27,10 +27,6 @@ public class JenkinsConfig extends PageObject {
         assertThat(driver, not(hasContent("This page expects a form submission")));
     }
 
-    public void addTool(String name) {
-        clickButton(name);
-    }
-
     public <T extends ToolInstallation> T addTool(Class<T> type) {
         jenkins.ensureConfigPage();
 
