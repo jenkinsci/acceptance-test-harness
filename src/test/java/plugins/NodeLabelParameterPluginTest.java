@@ -161,4 +161,39 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
 
         //TODO: reactivate slave and verify that the build is started
     }
+
+    /**
+     * This test is intended to check that an offline slave is not ignored
+     * when selected for a job and the job is configured with "Node eligibility" setting
+     * is set to "All Nodes"
+     *
+     * It is expected that the job is pending due to the offline status of the slave.
+     * But it will be reactivated as soon as the slave status becomes online.
+     */
+    @Test
+    public void run_on_a_particular_offline_slave_with_ignore() throws Exception {
+        FreeStyleJob j = jenkins.jobs.create();
+
+        Slave s = slave.install(jenkins).get();
+        j.configure();
+        NodeParameter p = j.addParameter(NodeParameter.class);
+        p.setName("slavename");
+        p.ignoreOffline.click();
+
+        j.save();
+
+        //as the slave has been started after creation, we have to take it down again
+        s.markOffline();
+        assertTrue(s.isOffline());
+
+        //use scheduleBuild instead of startBuild to avoid a timeout waiting for Build being started
+        Build b = j.scheduleBuild(singletonMap("slavename", s.getName()));
+
+        String pendingBuildText = find(by.xpath("//img[@alt='pending']/../..")).getText();
+        String refText=String.format("(pending—All nodes of label ‘Job triggered without a valid online node, given where: %s’ are offline)",s.getName());
+
+        assertTrue(pendingBuildText.contains(refText));
+        assertTrue(!b.hasStarted());
+    }
+
 }
