@@ -43,8 +43,8 @@ public class ByFactory {
         return xpath(".//*[@path='%s']", String.format(path, args));
     }
 
-    public By name(String name) {
-        return xpath(".//*[@name='%s']", name);
+    public By name(String name, Object... args) {
+        return xpath(".//*[@name='%s']", String.format(name, args));
     }
 
     /**
@@ -55,6 +55,16 @@ public class ByFactory {
      */
     public By link(String locator) {
         return xpath(".//A[@href][@id='%1$s' or text()='%1$s' or @title='%1$s' or .//img[@alt='%1$s']]",locator);
+    }
+
+    /**
+     * Link href selector.
+     *
+     * @param locator
+     *      href of the link
+     */
+    public By href(String locator){
+        return xpath(".//A[@href='%1$s']", locator);
     }
 
     /**

@@ -1,25 +1,26 @@
 package plugins;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
 import org.apache.xerces.jaxp.DocumentBuilderFactoryImpl;
 import org.custommonkey.xmlunit.XMLAssert;
-import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleAction;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstylePublisher;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
+import org.openqa.selenium.WebDriver;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.jenkinsci.test.acceptance.Matchers.*;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.jenkinsci.test.acceptance.Matchers.hasAction;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 /**
  * Feature: Allow publishing of Checkstyle report
@@ -28,7 +29,7 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
    I want to be able to publish Checkstyle report
  */
 @WithPlugins("checkstyle")
-public class CheckstylePluginTest extends AbstractJUnitTest {
+public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
     /**
      * Scenario: Record Checkstyle report
          Given I have installed the "checkstyle" plugin
@@ -44,10 +45,10 @@ public class CheckstylePluginTest extends AbstractJUnitTest {
      */
     @Test
     public void record_checkstyle_report() {
-        FreeStyleJob job = setupJob();
-        Build b = job.queueBuild().waitUntilFinished().shouldSucceed();
+        FreeStyleJob job = setupJob("/checkstyle_plugin/checkstyle-result.xml", CheckstylePublisher.class, "checkstyle-result.xml");
+        buildJobWithSuccess(job);
 
-        assertThat(b, hasAction("Checkstyle Warnings"));
+        assertThat(job.getLastBuild(), hasAction("Checkstyle Warnings"));
         assertThat(job, hasAction("Checkstyle Warnings"));
     }
 
@@ -72,8 +73,8 @@ public class CheckstylePluginTest extends AbstractJUnitTest {
      */
     @Test
     public void view_checkstyle_report() {
-        final FreeStyleJob job = setupJob();
-        final Build b = job.queueBuild().waitUntilFinished().shouldSucceed();
+        FreeStyleJob job = setupJob("/checkstyle_plugin/checkstyle-result.xml", CheckstylePublisher.class, "checkstyle-result.xml");
+        final Build lastBuild = buildJobWithSuccess(job);
         final CheckstyleAction ca = new CheckstyleAction(job);
 
         assertWarningsTrendAndSummary(ca);
@@ -151,8 +152,8 @@ public class CheckstylePluginTest extends AbstractJUnitTest {
 
     @Test
     public void xml_api_report_depth_0() throws IOException, SAXException, ParserConfigurationException {
-        final FreeStyleJob job = setupJob();
-        final Build build = job.queueBuild().waitUntilFinished().shouldSucceed();
+        final FreeStyleJob job = setupJob("/checkstyle_plugin/checkstyle-result.xml", CheckstylePublisher.class, "checkstyle-result.xml");
+        final Build build = buildJobWithSuccess(job);
         final String xmlUrl = build.url("checkstyleResult/api/xml?depth=0").toString();
         final DocumentBuilder documentBuilder = DocumentBuilderFactoryImpl.newInstance().newDocumentBuilder();
         final Document result = documentBuilder.parse(xmlUrl);
@@ -161,13 +162,27 @@ public class CheckstylePluginTest extends AbstractJUnitTest {
         XMLAssert.assertXMLEqual(result, expected);
     }
 
-    private FreeStyleJob setupJob() {
-        FreeStyleJob job = jenkins.jobs.create();
-        job.configure();
-        job.copyResource(resource("/checkstyle_plugin/checkstyle-result.xml"));
-        job.addPublisher(CheckstylePublisher.class)
-            .pattern.set("checkstyle-result.xml");
-        job.save();
-        return job;
+    /**
+     * Runs job two times to check if new and fixed warnings are displayed.
+     */
+    @Test
+    public void view_checkstyle_report_two_runs_and_changed_results() {
+        FreeStyleJob job = setupJob("/checkstyle_plugin/checkstyle-result.xml", CheckstylePublisher.class, "checkstyle-result.xml");
+        buildJobAndWait(job);
+        editJobAndChangeLastRessource(job, "/checkstyle_plugin/checkstyle-result-2.xml", "checkstyle-result.xml");
+
+        Build lastBuild = buildJobWithSuccess(job);
+        assertThat(lastBuild, hasAction("Checkstyle Warnings"));
+        WebDriver lastBuildOpened = lastBuild.open();
+        assertThat(lastBuildOpened, hasContent("679 warnings"));
+
+        CheckstyleAction ca = new CheckstyleAction(job);
+        assertThat(ca.getWarningNumber(), is(679));
+        assertThat(ca.getNewWarningNumber(), is(3));
+        assertThat(ca.getFixedWarningNumber(), is(100));
+        assertThat(ca.getHighWarningNumber(), is(679));
+        assertThat(ca.getNormalWarningNumber(), is(0));
+        assertThat(ca.getLowWarningNumber(), is(0));
     }
+
 }

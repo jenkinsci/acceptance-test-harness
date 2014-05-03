@@ -18,23 +18,40 @@ public class DockerImage {
         this.tag = tag;
     }
 
+    public <T extends DockerContainer> T start(Class<T> type, CommandBuilder options, CommandBuilder cmd,int portOffset) throws InterruptedException, IOException {
+        DockerFixture f = type.getAnnotation(DockerFixture.class);
+        return start(type,f.ports(),portOffset,f.bindIp(),options,cmd);
+    }
+
     public <T extends DockerContainer> T start(Class<T> type, CommandBuilder options, CommandBuilder cmd) throws InterruptedException, IOException {
         DockerFixture f = type.getAnnotation(DockerFixture.class);
         return start(type,f.ports(),options,cmd);
     }
 
+    public <T extends DockerContainer> T start(Class<T> type, int[] ports, CommandBuilder options, CommandBuilder cmd) throws InterruptedException, IOException {
+        return start(type,ports,0,"127.0.0.1",options,cmd);
+    }
     /**
      * Starts a container from this image.
      */
-    public <T extends DockerContainer> T start(Class<T> type, int[] ports, CommandBuilder options, CommandBuilder cmd) throws InterruptedException, IOException {
+    public <T extends DockerContainer> T start(Class<T> type, int[] ports,int localPortOffset, String ipAddress, CommandBuilder options, CommandBuilder cmd) throws InterruptedException, IOException {
         CommandBuilder docker = Docker.cmd("run");
-        for (int p : ports) {
-            docker.add("-p","127.0.0.1::"+p);
+        File cidFile = File.createTempFile("docker", "cid");
+        cidFile.delete();
+        docker.add("--cidfile="+cidFile);//strange behaviour in some docker version cidfile needs to come before
+
+        for (int p : ports)
+        {
+            if(localPortOffset==0)//No manual offset, let docker figure out the best port for itself
+            {
+                docker.add("-p", ipAddress + "::" + p);
+            }
+            else {
+                int localPort = localPortOffset + p;
+                docker.add("-p", ipAddress + ":" + localPort + ":" + p);
+            }
         }
 
-        File cid = File.createTempFile("docker", "cid");
-        cid.delete();
-        docker.add("--cidfile="+cid);
 
         docker.add(options);
         docker.add(tag);
@@ -51,26 +68,35 @@ public class DockerImage {
         // TODO: properly wait for either cidfile to appear or process to exit
         Thread.sleep(1000);
 
-        if (cid.exists()) {
-            String id;
+        if (cidFile.exists()) {
+            try
+            {
+                p.exitValue();
+                throw new IOException("docker died unexpectedly: "+docker+"\n"+FileUtils.readFileToString(tmplog));
+            } catch (IllegalThreadStateException e)
+            {
+                //Docker is still running okay.
+            }
+            String cid;
             do {
                 Thread.sleep(500);
-                id = FileUtils.readFileToString(cid);
-            } while (id==null || id.length()==0);
+                cid = FileUtils.readFileToString(cidFile);
+            } while (cid==null || cid.length()==0);
 
             // rename the log file to match the container name
-            File logfile = new File("/tmp/"+cid+".log");
+            File logfile = new File("/tmp/"+cidFile+".log");
             tmplog.renameTo(logfile);
 
             System.out.printf("Launching Docker container %s: logfile is at %s\n", cid, logfile);
 
             try {
                 T t = type.newInstance();
-                t.init(id,p,logfile);
+                t.init(cid,p,logfile);
                 return t;
             } catch (ReflectiveOperationException e) {
                 throw new AssertionError(e);
             }
+
         } else {
             try {
                 p.exitValue();

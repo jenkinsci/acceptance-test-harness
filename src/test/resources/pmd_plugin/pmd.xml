@@ -5,3 +5,4 @@
 <suppressedviolation filename="/home/lucinka/jira/kveten/jbqa-7941/selenium-tests/temp_dir_26827_26830_oeszs/workspace/rand_name_4756080.672297921/src/main/java/hudson/plugins/pmd/PmdReporter.java" suppressiontype="annotation" msg="Avoid really long parameter lists." usermsg=""/>
 <suppressedviolation filename="/home/lucinka/jira/kveten/jbqa-7941/selenium-tests/temp_dir_26827_26830_oeszs/workspace/rand_name_4756080.672297921/src/main/java/hudson/plugins/pmd/PmdReporter.java" suppressiontype="annotation" msg="Avoid unused private fields such as 'pattern'." usermsg=""/>
 <suppressedviolation filename="/home/lucinka/jira/kveten/jbqa-7941/selenium-tests/temp_dir_26827_26830_oeszs/workspace/rand_name_4756080.672297921/src/main/java/hudson/plugins/pmd/parser/Bug.java" suppressiontype="annotation" msg="Avoid unused private fields such as 'tooltip'." usermsg=""/>
+</pmd>

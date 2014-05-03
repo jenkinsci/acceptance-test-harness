@@ -33,7 +33,7 @@ public class SubversionPluginTest extends AbstractJUnitTest {
         f.addShellStep("test -d .svn");
         f.save();
 
-        f.queueBuild().shouldSucceed().shouldContainsConsoleOutput("test -d .svn");
+        f.startBuild().shouldSucceed().shouldContainsConsoleOutput("test -d .svn");
     }
 
     /**
@@ -53,7 +53,7 @@ public class SubversionPluginTest extends AbstractJUnitTest {
         f.useScm(SubversionScm.class).url.set("https://svn.jenkins-ci.org/trunk/jenkins/test-projects/model-ant-project@40156");
         f.save();
 
-        f.queueBuild().shouldSucceed().shouldContainsConsoleOutput("At revision 40156");
+        f.startBuild().shouldSucceed().shouldContainsConsoleOutput("At revision 40156");
     }
 
     /**
@@ -76,9 +76,9 @@ public class SubversionPluginTest extends AbstractJUnitTest {
                 .findElement(by.option("Always check out a fresh copy")).click();
         f.save();
 
-        f.queueBuild().shouldSucceed();
+        f.startBuild().shouldSucceed();
 
-        f.queueBuild().shouldSucceed()
+        f.startBuild().shouldSucceed()
             .shouldContainsConsoleOutput("Checking out https://svn.jenkins-ci.org/trunk/jenkins/test-projects/model-ant-project");
     }
 }

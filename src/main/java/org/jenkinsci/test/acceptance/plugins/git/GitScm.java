@@ -69,7 +69,7 @@ public class GitScm extends Scm {
 
     public <T extends Behaviour> T addBehaviour(Class<T> type) {
         control("hetero-list-add[extensions]").click();
-        return newInstance(type, this, path + "/extensions");   // FIXME: find the last extension added
+        return newInstance(type, this, "extensions");   // FIXME: find the last extension added
     }
 
     private void advanced() {
@@ -82,7 +82,7 @@ public class GitScm extends Scm {
 
     public static class Behaviour extends PageArea {
         public Behaviour(GitScm git, String path) {
-            super(git.injector, path);
+            super(git, path);
         }
     }
 

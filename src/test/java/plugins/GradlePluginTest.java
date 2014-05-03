@@ -47,7 +47,7 @@ public class GradlePluginTest extends AbstractJUnitTest {
         step.switches.set("--quiet");
         job.save();
 
-        job.queueBuild().waitUntilFinished(60).shouldSucceed()
+        job.startBuild().waitUntilFinished(60).shouldSucceed()
                 .shouldContainsConsoleOutput("Hello world!")
                 .shouldContainsConsoleOutput("gradle --quiet")
         ;
@@ -66,10 +66,11 @@ public class GradlePluginTest extends AbstractJUnitTest {
         step.dir.set("gradle");
         job.save();
 
-        job.queueBuild().waitUntilFinished(60).shouldSucceed().shouldContainsConsoleOutput("Hello world!");
+        job.startBuild().waitUntilFinished(60).shouldSucceed().shouldContainsConsoleOutput("Hello world!");
     }
 
     private void install(String name, String version) {
+        ToolInstallation.waitForUpdates(jenkins, GradleInstallation.class);
         JenkinsConfig global = jenkins.getConfigPage();
         global.configure();
         ToolInstallation tool = global.addTool(GradleInstallation.class);

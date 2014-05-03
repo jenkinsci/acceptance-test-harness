@@ -1,15 +1,14 @@
 package org.jenkinsci.test.acceptance;
 
+import java.util.regex.Pattern;
+
 import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-import org.hamcrest.TypeSafeMatcher;
 import org.jenkinsci.test.acceptance.po.ContainerPageObject;
+import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
-
-import java.util.regex.Pattern;
 
 /**
  * Hamcrest matchers.
@@ -21,19 +20,18 @@ public class Matchers {
      * Asserts that given text is shown on page.
      */
     public static Matcher<WebDriver> hasContent(final String content) {
-      return new TypeSafeMatcher<WebDriver>() {
+        return hasContent(Pattern.compile(Pattern.quote(content)));
+    }
+
+    public static Matcher<WebDriver> hasContent(final Pattern pattern) {
+      return new Matcher<WebDriver>("Text matching %s", pattern) {
           @Override
-          protected boolean matchesSafely(WebDriver item) {
-              return pageText(item).contains(content);
+          public boolean matchesSafely(WebDriver item) {
+              return pattern.matcher(pageText(item)).find();
           }
 
           @Override
-          public void describeTo(Description description) {
-              description.appendText("Text containing "+content);
-          }
-
-          @Override
-          protected void describeMismatchSafely(WebDriver item, Description mismatchDescription) {
+          public void describeMismatchSafely(WebDriver item, Description mismatchDescription) {
               mismatchDescription.appendText("was ")
                       .appendValue(item.getCurrentUrl())
                       .appendText("\n")
@@ -50,9 +48,9 @@ public class Matchers {
      * Matches that matches {@link WebDriver} when it has an element that matches to the given selector.
      */
     public static Matcher<WebDriver> hasElement(final By selector) {
-        return new TypeSafeMatcher<WebDriver>() {
+        return new Matcher<WebDriver>("contains element that matches %s", selector) {
             @Override
-            protected boolean matchesSafely(WebDriver item) {
+            public boolean matchesSafely(WebDriver item) {
                 try {
                     item.findElements(selector);
                     return true;
@@ -62,12 +60,7 @@ public class Matchers {
             }
 
             @Override
-            public void describeTo(Description d) {
-                d.appendText("contains element that matches ").appendValue(selector);
-            }
-
-            @Override
-            protected void describeMismatchSafely(WebDriver item, Description d) {
+            public void describeMismatchSafely(WebDriver item, Description d) {
                 d.appendText("was at ").appendValue(item.getCurrentUrl());
             }
         };
@@ -77,9 +70,9 @@ public class Matchers {
      * For asserting that a {@link PageObject}'s top page has an action of the given name.
      */
     public static Matcher<PageObject> hasAction(final String displayName) {
-        return new TypeSafeMatcher<PageObject>() {
+        return new Matcher<PageObject>("contains action titled %s", displayName) {
             @Override
-            protected boolean matchesSafely(PageObject po) {
+            public boolean matchesSafely(PageObject po) {
                 try {
                     po.open();
                     po.find(by.xpath("//div[@id='tasks']/div/a[text()='%s']", displayName));
@@ -90,16 +83,11 @@ public class Matchers {
             }
 
             @Override
-            public void describeTo(Description d) {
-                d.appendText("contains action titled ").appendValue(displayName);
-            }
-
-            @Override
-            protected void describeMismatchSafely(PageObject po, Description d) {
+            public void describeMismatchSafely(PageObject po, Description d) {
                 d.appendValue(po.url).appendText(" does not have action: ").appendValue(displayName);
             }
         };
-    } 
+    }
     public static Matcher<String> containsRegexp(String regexp) {
         return containsRegexp(regexp,0);
     }
@@ -110,37 +98,48 @@ public class Matchers {
     public static Matcher<String> containsRegexp(final String regexp, int opts) {
         final Pattern re = Pattern.compile(regexp, opts);
 
-        return new TypeSafeMatcher<String>() {
+        return new Matcher<String>("Matches regexp %s", regexp) {
             @Override
-            protected boolean matchesSafely(String item) {
+            public boolean matchesSafely(String item) {
                 return re.matcher(item).find();
-            }
-
-            @Override
-            public void describeTo(Description description) {
-                description.appendText("Matches regexp "+regexp);
             }
         };
     }
 
     public static Matcher<ContainerPageObject> pageObjectExists(){
-        return new TypeSafeMatcher<ContainerPageObject>() {
-            @Override public void describeTo(Description description) {
-                description.appendText("Page object exists");
-            }
-
+        return new Matcher<ContainerPageObject>("Page object exists") {
             @Override
-            protected void describeMismatchSafely(ContainerPageObject item, Description desc) {
+            public void describeMismatchSafely(ContainerPageObject item, Description desc) {
                 desc.appendText(item.url.toString()).appendText(" does not exist");
             }
 
-            @Override protected boolean matchesSafely(ContainerPageObject item) {
+            @Override
+            public boolean matchesSafely(ContainerPageObject item) {
                 try {
                     item.getJson();
                     return true;
                 } catch (RuntimeException ex) {
                     return false;
                 }
+            }
+        };
+    }
+
+    public static Matcher<Jenkins> hasLoggedInUser(final String user){
+        return new Matcher<Jenkins>("has logged in user %s", user) {
+            @Override
+            public boolean matchesSafely(final Jenkins jenkins) {
+                try {
+                    jenkins.find(by.href("/user/" + user));
+                    return true;
+                } catch (NoSuchElementException e){
+                    return false;
+                }
+            }
+
+            @Override
+            public void describeMismatchSafely(final Jenkins item, final Description desc) {
+                desc.appendText(user + " is not logged in.");
             }
         };
     }

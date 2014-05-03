@@ -23,22 +23,29 @@
  */
 package org.jenkinsci.test.acceptance.plugins.maven;
 
-import org.jenkinsci.test.acceptance.po.Describable;
+import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.jenkinsci.test.acceptance.po.ToolInstallation;
+import org.jenkinsci.test.acceptance.po.ToolInstallationPageObject;
 
-import java.util.regex.Pattern;
-
-@Describable("Maven")
+@ToolInstallationPageObject(name="Maven", installer="hudson.tasks.Maven.MavenInstaller")
 public class MavenInstallation extends ToolInstallation {
+
+    public static void installSomeMaven(Jenkins jenkins) {
+        installMaven(jenkins, "default_maven", "3.0.5");
+    }
+
+    public static void installMaven(Jenkins jenkins, String name, String version) {
+        waitForUpdates(jenkins, MavenInstallation.class);
+        jenkins.configure();
+        MavenInstallation maven = jenkins.getConfigPage().addTool(MavenInstallation.class);
+        maven.name.set(name);
+        maven.installVersion(version);
+        jenkins.save();
+    }
 
     public MavenInstallation(JenkinsConfig context, String path) {
         super(context, path);
-    }
-
-    @Override
-    public Pattern updatesPattern() {
-        return Pattern.compile("Obtained the updated data file for hudson.tasks.Maven.MavenInstaller");
     }
 
     public void useNative() {

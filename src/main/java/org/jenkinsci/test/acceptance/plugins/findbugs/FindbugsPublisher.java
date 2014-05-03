@@ -27,10 +27,10 @@ import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.PostBuildStep;
+import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginPostBuildStep;
 
 @Describable("Publish FindBugs analysis results")
-public class FindbugsPublisher extends PostBuildStep {
-    public final Control pattern = control("pattern");
+public class FindbugsPublisher extends AbstractCodeStylePluginPostBuildStep {
 
     public FindbugsPublisher(Job parent, String path) {
         super(parent, path);

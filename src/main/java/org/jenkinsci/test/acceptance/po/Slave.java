@@ -1,8 +1,12 @@
 package org.jenkinsci.test.acceptance.po;
 
+import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 
+import com.google.common.base.Joiner;
+
 import java.io.File;
+import java.util.regex.Pattern;
 
 /**
  * A slave page object.
@@ -67,5 +71,25 @@ public abstract class Slave extends Node {
                 jar, url("../../")
         ));
 
+    }
+
+    public static Matcher<Slave> runBuildsInOrder(final Job... jobs) {
+        return new Matcher<Slave>("slave run build in order: %s", Joiner.on(' ').join(jobs)) {
+            @Override public boolean matchesSafely(Slave slave) {
+                slave.visit("builds");
+                String list = slave.find(by.id("projectStatus")).getText();
+
+                StringBuilder sb = new StringBuilder(".*");
+                for (Job j: jobs) {
+                    sb.insert(0, j.name);
+                    sb.insert(0, ".*");
+                }
+
+                return Pattern.compile(sb.toString(), Pattern.DOTALL)
+                        .matcher(list)
+                        .matches()
+                ;
+            }
+        };
     }
 }

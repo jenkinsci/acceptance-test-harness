@@ -1,6 +1,5 @@
 package org.jenkinsci.test.acceptance.po;
 
-import com.google.inject.Injector;
 import org.openqa.selenium.By;
 
 /**
@@ -18,14 +17,20 @@ public abstract class PageArea extends CapybaraPortingLayer implements Control.O
      */
     public final String path;
 
-    protected PageArea(Injector injector, String path) {
-        super(injector);
-        this.path = path;
-    }
+    public final PageObject page;
 
     protected PageArea(PageObject context, String path) {
         super(context.injector);
         this.path = path;
+        this.page = context;
+    }
+
+    protected PageArea(PageArea area, String relativePath) {
+        this(area.page, area.path + "/" + relativePath);
+
+        if (relativePath.startsWith("/")) throw new IllegalArgumentException(
+                "Path is supposed to be relative to page area. Given: " + relativePath
+        );
     }
 
     /**
@@ -33,6 +38,7 @@ public abstract class PageArea extends CapybaraPortingLayer implements Control.O
      *
      * https://wiki.jenkins-ci.org/display/JENKINS/Form+Element+Path+Plugin
      */
+    @Override
     public By path(String rel) {
         if (rel.length()==0)    return by.path(path);
         return by.path(path + '/' + rel);
