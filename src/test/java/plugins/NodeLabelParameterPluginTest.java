@@ -143,7 +143,9 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         Slave s = slave.install(jenkins).get();
 
         j.configure();
-        j.addParameter(NodeParameter.class).setName("slavename");
+        NodeParameter p = j.addParameter(NodeParameter.class);
+        p.setName("slavename");
+        p.allNodes.click();
         j.save();
 
         //as the slave has been started after creation, we have to take it down again
