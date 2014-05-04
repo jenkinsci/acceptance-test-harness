@@ -171,12 +171,11 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     * This test is intended to check that an offline slave is not ignored
+     * This test is intended to check that an offline slave is ignored
      * when selected for a job and the job is configured with "Node eligibility" setting
-     * is set to "All Nodes"
+     * is set to "Ignore Offline Nodes"
      *
-     * It is expected that the job is pending due to the offline status of the slave.
-     * But it will be reactivated as soon as the slave status becomes online.
+     * It is expected that the job is pending due no valid slave is available.
      */
     @Test
     public void run_on_a_particular_offline_slave_with_ignore() throws Exception {
