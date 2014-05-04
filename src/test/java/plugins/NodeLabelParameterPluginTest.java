@@ -204,4 +204,21 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         assertTrue(!b.hasStarted());
     }
 
+    /**
+     * This test is intended to check that an offline slave is not ignored
+     * when selected for a job and the job is configured with "Node eligibility" setting
+     * is set to "All Nodes" in combination with "Allow multiple nodes" option.
+     *
+     * The job shall run on a mixed configuration of online and offline slaves.
+     * It is expected that a number of builds is created equivalent to the number of
+     * slaves selected. The build shall be pending for the offline slaves and executed
+     * successfully for the online slaves.
+     * Pending builds will be reactivated as soon as the particular slave becomes online.
+     */
+
+    @Test
+    public void run_on_several_online_and_offline_slaves() throws Exception {
+
+    }
+
 }
