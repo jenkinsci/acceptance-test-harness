@@ -1,7 +1,5 @@
 package plugins;
 
-import org.apache.xerces.jaxp.DocumentBuilderFactoryImpl;
-import org.custommonkey.xmlunit.XMLAssert;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleAction;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstylePublisher;
@@ -9,10 +7,8 @@ import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
-import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.util.SortedMap;
@@ -73,8 +69,8 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
      */
     @Test
     public void view_checkstyle_report() {
-        FreeStyleJob job = setupJob("/checkstyle_plugin/checkstyle-result.xml", CheckstylePublisher.class, "checkstyle-result.xml");
-        final Build lastBuild = buildJobWithSuccess(job);
+        final FreeStyleJob job = setupJob("/checkstyle_plugin/checkstyle-result.xml", CheckstylePublisher.class, "checkstyle-result.xml");
+        buildJobWithSuccess(job);
         final CheckstyleAction ca = new CheckstyleAction(job);
 
         assertWarningsTrendAndSummary(ca);
@@ -90,6 +86,33 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
         assertThat(ca.getHighWarningNumber(), is(776));
         assertThat(ca.getNormalWarningNumber(), is(0));
         assertThat(ca.getLowWarningNumber(), is(0));
+    }
+
+    private void assertFileTab(final CheckstyleAction ca) {
+        final SortedMap<String, Integer> expectedFileDetails = new TreeMap<String, Integer>();
+        expectedFileDetails.put("JavaProvider.java", 18);
+        expectedFileDetails.put("PluginImpl.java", 8);
+        expectedFileDetails.put("RemoteLauncher.java", 63);
+        expectedFileDetails.put("SFTPClient.java", 76);
+        expectedFileDetails.put("SFTPFileSystem.java", 34);
+        expectedFileDetails.put("SSHConnector.java", 96);
+        expectedFileDetails.put("SSHLauncher.java", 481);
+        assertThat(ca.getFileTabContents(), is(expectedFileDetails));
+    }
+
+    private void assertCategoryTab(final CheckstyleAction ca) {
+        final SortedMap<String, Integer> expectedCategories = new TreeMap<String, Integer>();
+        expectedCategories.put("Blocks", 28);
+        expectedCategories.put("Checks", 123);
+        expectedCategories.put("Coding", 61);
+        expectedCategories.put("Design", 47);
+        expectedCategories.put("Imports", 3);
+        expectedCategories.put("Javadoc", 104);
+        expectedCategories.put("Naming", 4);
+        expectedCategories.put("Regexp", 23);
+        expectedCategories.put("Sizes", 164);
+        expectedCategories.put("Whitespace", 219);
+        assertThat(ca.getCategoriesTabContents(), is(expectedCategories));
     }
 
     private void assertTypeTab(final CheckstyleAction ca) {
@@ -120,46 +143,16 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
         expectedTypes.put("VisibilityModifierCheck", 12);
         expectedTypes.put("WhitespaceAfterCheck", 66);
         expectedTypes.put("WhitespaceAroundCheck", 106);
-        assertThat(ca.getTypesAndNumberOfWarnings(), is(expectedTypes));
-    }
-
-    private void assertCategoryTab(final CheckstyleAction ca) {
-        final SortedMap<String, Integer> expectedCategories = new TreeMap<String, Integer>();
-        expectedCategories.put("Blocks", 28);
-        expectedCategories.put("Checks", 123);
-        expectedCategories.put("Coding", 61);
-        expectedCategories.put("Design", 47);
-        expectedCategories.put("Imports", 3);
-        expectedCategories.put("Javadoc", 104);
-        expectedCategories.put("Naming", 4);
-        expectedCategories.put("Regexp", 23);
-        expectedCategories.put("Sizes", 164);
-        expectedCategories.put("Whitespace", 219);
-        assertThat(ca.getCategoriesAndNumberOfWarnings(), is(expectedCategories));
-    }
-
-    private void assertFileTab(final CheckstyleAction ca) {
-        final SortedMap<String, Integer> expectedFileDetails = new TreeMap<String, Integer>();
-        expectedFileDetails.put("JavaProvider.java", 18);
-        expectedFileDetails.put("PluginImpl.java", 8);
-        expectedFileDetails.put("RemoteLauncher.java", 63);
-        expectedFileDetails.put("SFTPClient.java", 76);
-        expectedFileDetails.put("SFTPFileSystem.java", 34);
-        expectedFileDetails.put("SSHConnector.java", 96);
-        expectedFileDetails.put("SSHLauncher.java", 481);
-        assertThat(ca.getFileNamesAndNumberOfWarnings(), is(expectedFileDetails));
+        assertThat(ca.getTypesTabContents(), is(expectedTypes));
     }
 
     @Test
     public void xml_api_report_depth_0() throws IOException, SAXException, ParserConfigurationException {
         final FreeStyleJob job = setupJob("/checkstyle_plugin/checkstyle-result.xml", CheckstylePublisher.class, "checkstyle-result.xml");
         final Build build = buildJobWithSuccess(job);
-        final String xmlUrl = build.url("checkstyleResult/api/xml?depth=0").toString();
-        final DocumentBuilder documentBuilder = DocumentBuilderFactoryImpl.newInstance().newDocumentBuilder();
-        final Document result = documentBuilder.parse(xmlUrl);
-
-        final Document expected = documentBuilder.parse(resource("/checkstyle_plugin/api_depth_0.xml").asFile());
-        XMLAssert.assertXMLEqual(result, expected);
+        final String apiUrl = "checkstyleResult/api/xml?depth=0";
+        final String expectedXmlPath = "/checkstyle_plugin/api_depth_0.xml";
+        assertXmlApiMatchesExpected(build, apiUrl, expectedXmlPath);
     }
 
     /**
