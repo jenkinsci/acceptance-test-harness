@@ -27,6 +27,10 @@ import java.util.zip.GZIPOutputStream;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 
 /**
+ * Job Page object superclass.
+ *
+ * Use {@link Describable} annotation to register an implementation.
+ *
  * @author Kohsuke Kawaguchi
  */
 public class Job extends ContainerPageObject {
@@ -71,6 +75,10 @@ public class Job extends ContainerPageObject {
         return addStep(type,"builder");
     }
 
+    public void removeFirstBuildStep() {
+        removeFirstStep("builder");
+    }
+
     public <T extends PostBuildStep> T addPublisher(Class<T> type) {
         return addStep(type,"publisher");
     }
@@ -90,6 +98,16 @@ public class Job extends ContainerPageObject {
         return newInstance(type, this, path);
     }
 
+    private void removeFirstStep(String section) {
+        ensureConfigPage();
+
+        String sectionWithStep = String.format("/%s" , section);
+
+        WebElement step = find(by.path(sectionWithStep));
+
+        step.findElement(by.path(String.format("%s/repeatable-delete", sectionWithStep))).click();
+    }
+
     public ShellBuildStep addShellStep(Resource res) {
         return addShellStep(res.asText());
     }
@@ -98,13 +116,6 @@ public class Job extends ContainerPageObject {
         ShellBuildStep step = addBuildStep(ShellBuildStep.class);
         step.command(shell);
         return step;
-    }
-
-    /**
-     * Adds a shell step that creates a file of the given name in the workspace that has the specified content.
-     */
-    public void addCreateFileStep(String name, String content) {
-        addShellStep(String.format("cat > %s << ENDOFFILE\n%s\nENDOFFILE",name,content));
     }
 
     /**
@@ -270,5 +281,9 @@ public class Job extends ContainerPageObject {
     @Override
     public String toString() {
         return name;
+    }
+
+    public ScmPolling pollScm() {
+        return new ScmPolling(this);
     }
 }

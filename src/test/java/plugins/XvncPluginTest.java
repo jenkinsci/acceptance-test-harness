@@ -21,7 +21,7 @@ public class XvncPluginTest extends AbstractJUnitTest {
         job = jenkins.jobs.create(FreeStyleJob.class);
     }
 
-    @Test @Native("xvnc")
+    @Test @Native("vncserver")
     public void run_xvnc_during_the_build() {
         job.configure();
         new XvncJobConfig(job).useXvnc();
@@ -31,7 +31,7 @@ public class XvncPluginTest extends AbstractJUnitTest {
         assertThat(build, runXvnc());
     }
 
-    @Test @Native({"xvnc", "import"})
+    @Test @Native({"vncserver", "import"})
     public void take_screenshot_at_the_end_of_the_build() {
         job.configure();
         new XvncJobConfig(job).useXvnc().takeScreenshot();
@@ -43,7 +43,7 @@ public class XvncPluginTest extends AbstractJUnitTest {
         build.getArtifact("screenshot.jpg").assertThatExists(true);
     }
 
-    @Test @Native("xvnc")
+    @Test @Native("vncserver")
     public void use_specific_display_number() {
         jenkins.configure();
         new XvncGlobalJobConfig(jenkins.getConfigPage()).useDisplayNumber(42);

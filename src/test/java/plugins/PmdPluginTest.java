@@ -1,27 +1,22 @@
 package plugins;
 
-import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.plugins.pmd.PmdAction;
 import org.jenkinsci.test.acceptance.plugins.pmd.PmdPublisher;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
-import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.WebDriver;
 
-import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.jenkinsci.test.acceptance.Matchers.hasAction;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 /**
  Feature: Tests for PMD plugin
  */
 @WithPlugins("pmd")
-public class PmdPluginTest extends AbstractJUnitTest {
-
-    private FreeStyleJob j;
-
-    @Before
-    public void setUp() {
-        j = jenkins.jobs.create();
-    }
+public class PmdPluginTest extends AbstractCodeStylePluginHelper {
 
     /**
      Scenario: Configure a job with PMD post-build steps
@@ -38,15 +33,12 @@ public class PmdPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void configure_a_job_with_PMD_post_build_steps() {
-        j.configure();
-        j.copyResource(resource("/pmd_plugin/pmd.xml"));
-        PmdPublisher pmd = j.addPublisher(PmdPublisher.class);
-        pmd.pattern.set("pmd.xml");
-        j.save();
+        FreeStyleJob job = setupJob("/pmd_plugin/pmd.xml", PmdPublisher.class, "pmd.xml");
+        Build lastBuild = buildJobWithSuccess(job);
 
-        Build b = j.startBuild().waitUntilFinished().shouldSucceed();
+        lastBuild.shouldSucceed();
 
-        assertThat(b.open(), hasContent("0 warnings"));
+        assertThat(lastBuild.open(), hasContent("0 warnings"));
     }
 
     /**
@@ -66,16 +58,17 @@ public class PmdPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void configure_a_job_with_PMD_post_build_steps_run_always() {
-        j.configure();
-        j.copyResource(resource("/pmd_plugin/pmd.xml"));
-        j.addShellStep("false");
-        PmdPublisher pmd = j.addPublisher(PmdPublisher.class);
+        FreeStyleJob job = jenkins.jobs.create();
+        job.configure();
+        job.copyResource(resource("/pmd_plugin/pmd.xml"));
+        job.addShellStep("false");
+        PmdPublisher pmd = job.addPublisher(PmdPublisher.class);
         pmd.pattern.set("pmd.xml");
         pmd.advanced.click();
         pmd.canRunOnFailed.check();
-        j.save();
+        job.save();
 
-        Build b = j.startBuild().waitUntilFinished().shouldFail();
+        Build b = job.startBuild().waitUntilFinished().shouldFail();
 
         assertThat(b.open(), hasContent("0 warnings"));
     }
@@ -96,15 +89,43 @@ public class PmdPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void configure_a_job_with_PMD_post_build_steps_which_display_some_warnings() {
-        j.configure();
-        j.copyResource(resource("/pmd_plugin/pmd-warnings.xml"));
-        PmdPublisher pmd = j.addPublisher(PmdPublisher.class);
-        pmd.pattern.set("pmd-warnings.xml");
-        j.save();
+        FreeStyleJob job = setupJob("/pmd_plugin/pmd-warnings.xml", PmdPublisher.class, "pmd-warnings.xml");
 
-        Build b = j.startBuild().waitUntilFinished().shouldSucceed();
+        Build lastBuild = buildJobWithSuccess(job);
+        assertThat(lastBuild, hasAction("PMD Warnings"));
+        assertThat(lastBuild.open(), hasContent("9 warnings"));
 
-        assertThat(b, hasAction("PMD Warnings"));
-        assertThat(b.open(), hasContent("9 warnings"));
+        PmdAction pa = new PmdAction(job);
+        assertThat(pa.getWarningNumber(), is(9));
+        assertThat(pa.getNewWarningNumber(), is(9));
+        assertThat(pa.getFixedWarningNumber(), is(0));
+        assertThat(pa.getHighWarningNumber(), is(0));
+        assertThat(pa.getNormalWarningNumber(), is(3));
+        assertThat(pa.getLowWarningNumber(), is(6));
+    }
+
+    /**
+     * Runs job two times to check if new and fixed warnings are displayed.
+     */
+    @Test
+    public void configure_a_job_with_PMD_post_build_steps_which_display_some_warnings_two_runs() {
+        FreeStyleJob job = setupJob("/pmd_plugin/pmd-warnings.xml", PmdPublisher.class, "pmd-warnings.xml");
+        buildJobAndWait(job);
+        editJobAndChangeLastRessource(job, "/pmd_plugin/pmd-warnings-2.xml", "pmd-warnings.xml");
+
+        Build lastBuild = buildJobWithSuccess(job);
+        assertThat(lastBuild, hasAction("PMD Warnings"));
+        WebDriver lastBuildOpened = lastBuild.open();
+        assertThat(lastBuildOpened, hasContent("8 warnings"));
+        assertThat(lastBuildOpened, hasContent("1 new warning"));
+        assertThat(lastBuildOpened, hasContent("2 fixed warnings"));
+
+        PmdAction pa = new PmdAction(job);
+        assertThat(pa.getWarningNumber(), is(8));
+        assertThat(pa.getNewWarningNumber(), is(1));
+        assertThat(pa.getFixedWarningNumber(), is(2));
+        assertThat(pa.getHighWarningNumber(), is(0));
+        assertThat(pa.getNormalWarningNumber(), is(2));
+        assertThat(pa.getLowWarningNumber(), is(6));
     }
 }

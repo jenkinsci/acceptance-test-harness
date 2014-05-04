@@ -47,9 +47,6 @@ public abstract class ContainerPageObject extends PageObject {
 
     public void configure() {
         visit(getConfigUrl());
-
-        // Turn off leave page confirmation
-        executeScript("window.onbeforeunload = null");
     }
 
     /**

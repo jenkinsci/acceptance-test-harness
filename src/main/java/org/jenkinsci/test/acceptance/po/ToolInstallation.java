@@ -30,9 +30,20 @@ import java.util.regex.Pattern;
 import org.apache.commons.io.FileUtils;
 import org.jenkinsci.utils.process.CommandBuilder;
 
+/**
+ * @author ogondza
+ * @see ToolInstallationPageObject
+ */
 public abstract class ToolInstallation extends PageArea {
     public final Control name = control("name");
     private final Control autoInstall = control("properties/hudson-tools-InstallSourceProperty");
+
+    public static void waitForUpdates(Jenkins jenkins, Class<? extends ToolInstallation> type) {
+        final ToolInstallationPageObject annotation = type.getAnnotation(ToolInstallationPageObject.class);
+
+        final Pattern pattern = Pattern.compile("Obtained the updated data file for " + Pattern.quote(annotation.installer()));
+        jenkins.getLogger("all").waitForLogged(pattern, 60);
+    }
 
     public ToolInstallation(JenkinsConfig context, String path) {
         super(context, path);
@@ -49,13 +60,6 @@ public abstract class ToolInstallation extends PageArea {
         control("home").set(home);
         return this;
     }
-
-    /**
-     * Pattern to be logged once updates arrive.
-     *
-     * Clients should not interact with this ToolInstalltion before updates was loaded.
-     */
-    abstract public Pattern updatesPattern();
 
     protected String fakeHome(String binary, String homeEnvName) {
         try {

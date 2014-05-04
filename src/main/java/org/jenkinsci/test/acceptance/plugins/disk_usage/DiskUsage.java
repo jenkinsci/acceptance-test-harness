@@ -57,7 +57,7 @@ public class DiskUsage extends PageObject {
     public static Matcher<DiskUsage> reloaded() {
         return new Matcher<DiskUsage>("disk usage reloaded") {
             private Exception cause;
-            @Override protected boolean matchesSafely(DiskUsage item) {
+            @Override public boolean matchesSafely(DiskUsage item) {
                 JenkinsLogger logger = item.getJenkins().getLogger("all");
                 try {
                     logger.waitForLogged(Pattern.compile("Finished Project disk usage. \\d+ ms"));
@@ -78,7 +78,7 @@ public class DiskUsage extends PageObject {
                 }
             }
 
-            @Override protected void describeMismatchSafely(DiskUsage item, Description dsc) {
+            @Override public void describeMismatchSafely(DiskUsage item, Description dsc) {
                 dsc.appendText(cause.getMessage());
             }
         };

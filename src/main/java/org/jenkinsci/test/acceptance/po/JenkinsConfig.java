@@ -1,7 +1,5 @@
 package org.jenkinsci.test.acceptance.po;
 
-import org.openqa.selenium.WebElement;
-
 import static org.hamcrest.CoreMatchers.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 
@@ -20,14 +18,6 @@ public class JenkinsConfig extends PageObject {
         this.jenkins = jenkins;
     }
 
-    public void enterOracleCredential(String login, String password) {
-        jenkins.visit("descriptorByName/hudson.tools.JDKInstaller/enterCredential");
-        find(by.input("username")).sendKeys(login);
-        find(by.input("password")).sendKeys(password);
-        clickButton("OK");
-        clickButton("Close");
-    }
-
     public void configure() {
         jenkins.configure();
     }
@@ -37,41 +27,16 @@ public class JenkinsConfig extends PageObject {
         assertThat(driver, not(hasContent("This page expects a form submission")));
     }
 
-    public void addTool(String name) {
-        clickButton(name);
-    }
-
     public <T extends ToolInstallation> T addTool(Class<T> type) {
         jenkins.ensureConfigPage();
 
-        String name = findCaption(type, new Finder<String>() {
-            @Override protected String find(String caption) {
-                outer.find(by.button("Add " + caption));
-                return caption;
-            }
-        });
+        String name = type.getAnnotation(ToolInstallationPageObject.class).name();
 
         clickButton("Add " + name);
         sleep(100);
         String path = find(by.button("Delete " + name)).getAttribute("path");
         String prefix = path.substring(0, path.length() - 18);
 
-        T tool = newInstance(type, this, prefix);
-        {// TODO do not leave the page
-            jenkins.getLogger("all").waitForLogged(tool.updatesPattern(), 60);
-            configure();
-            clickButton("Add " + name);
-            sleep(100);
-        }
-        return tool;
-    }
-
-    public void addJdkAutoInstallation(String name, String version) {
-        jenkins.ensureConfigPage();
-        find(by.path("/hudson-model-JDK/tool/name")).sendKeys(name);
-        // by default Install automatically is checked
-        WebElement select = find(by.path("/hudson-model-JDK/tool/properties/hudson-tools-InstallSourceProperty/installers/id"));
-        select.findElement(by.xpath("//option[@value='%s']",version)).click();
-        find(by.path("/hudson-model-JDK/tool/properties/hudson-tools-InstallSourceProperty/installers/acceptLicense")).click();
+        return newInstance(type, this, prefix);
     }
 }

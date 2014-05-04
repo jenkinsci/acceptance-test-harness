@@ -23,20 +23,13 @@
  */
 package org.jenkinsci.test.acceptance.plugins.gradle;
 
-import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.jenkinsci.test.acceptance.po.ToolInstallation;
+import org.jenkinsci.test.acceptance.po.ToolInstallationPageObject;
 
-import java.util.regex.Pattern;
-
-@Describable("Gradle")
+@ToolInstallationPageObject(name="Gradle", installer="hudson.plugins.gradle.GradleInstaller")
 public class GradleInstallation extends ToolInstallation {
     public GradleInstallation(JenkinsConfig context, String path) {
         super(context, path);
-    }
-
-    @Override
-    public Pattern updatesPattern() {
-        return Pattern.compile("Obtained the updated data file for hudson.plugins.gradle.GradleInstaller");
     }
 }

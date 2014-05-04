@@ -47,7 +47,7 @@ public class JiraContainer extends DockerContainer {
                     return null;
                 }
             }
-        },120);
+        },1500); // [INFO] jira started successfully in 1064s
     }
 
     /**
