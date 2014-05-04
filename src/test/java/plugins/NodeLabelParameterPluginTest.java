@@ -218,6 +218,34 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
 
     @Test
     public void run_on_several_online_and_offline_slaves() throws Exception {
+        FreeStyleJob j = jenkins.jobs.create();
+
+        Slave s1 = slave.install(jenkins).get();
+        Slave s2 = slave.install(jenkins).get();
+
+        j.configure();
+        NodeParameter p = j.addParameter(NodeParameter.class);
+        p.setName("slavename");
+        p.allNodes.click();
+        p.allowMultiple.check();
+        j.concurrentBuild.check();
+
+        j.save();
+
+        //as both slaves have been started after creation, we have to take one of them down
+        s2.markOffline();
+        assertTrue(s2.isOffline());
+        assertTrue(s1.isOnline());
+
+        //select both slaves for this build
+        Build b = j.scheduleBuild(singletonMap("slavename", s1.getName()+","+s2.getName()));
+
+        //2 builds shall be created
+        assertThat(j.getNextBuildNumber(), is(3));
+
+        //ensure the build on the offline slave is pending
+        String pendingBuildText = find(by.xpath("//img[@alt='pending']/../..")).getText();
+        String refText=String.format("(pending—%s is offline) [NodeParameterValue: slavename=%s]",s2.getName(),s2.getName());
 
     }
 
