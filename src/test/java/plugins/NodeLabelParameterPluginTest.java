@@ -247,6 +247,8 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         String pendingBuildText = find(by.xpath("//img[@alt='pending']/../..")).getText();
         String refText=String.format("(pending—%s is offline) [NodeParameterValue: slavename=%s]",s2.getName(),s2.getName());
 
+        assertTrue(pendingBuildText.contains(refText));
+
     }
 
 }
