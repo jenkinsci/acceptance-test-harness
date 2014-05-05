@@ -171,11 +171,11 @@ public class Build extends ContainerPageObject {
 
     private Matcher<Build> resultIs(final String expected) {
         return new Matcher<Build>("Build result %s", expected) {
-            @Override protected boolean matchesSafely(Build item) {
+            @Override public boolean matchesSafely(Build item) {
                 return item.getResult().equals(expected);
             }
 
-            @Override protected void describeMismatchSafely(Build item, Description dsc) {
+            @Override public void describeMismatchSafely(Build item, Description dsc) {
                 dsc.appendText("was ").appendText(item.getResult())
                         .appendText(". Console output:\n").appendText(getConsole())
                 ;
