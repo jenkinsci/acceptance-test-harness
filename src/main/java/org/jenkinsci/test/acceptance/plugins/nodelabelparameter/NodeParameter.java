@@ -25,7 +25,7 @@ public class NodeParameter extends Parameter {
 
     public final WebElement allNodes = find(by.xpath("//option[text()[normalize-space(.)='All Nodes']]"));
     public final WebElement ignoreOffline = find(by.xpath("//option[text()[normalize-space(.)='Ignore Offline Nodes']]"));
-    public final WebElement ignoreTempffline = find(by.xpath("//option[text()[normalize-space(.)='Ignore Temp Offline Nodes']]"));
+    public final WebElement ignoreTempOffline = find(by.xpath("//option[text()[normalize-space(.)='Ignore Temp Offline Nodes']]"));
 
     public NodeParameter(Job job, String path) {
         super(job, path);
