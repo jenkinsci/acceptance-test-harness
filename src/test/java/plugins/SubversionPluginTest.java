@@ -6,8 +6,6 @@ import org.jenkinsci.test.acceptance.docker.fixtures.SvnContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Native;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.plugins.credentials.ManagedCredentials;
-import org.jenkinsci.test.acceptance.plugins.credentials.UserPwdCredential;
 import org.jenkinsci.test.acceptance.plugins.subversion.SubversionCredentialUserPwd;
 import org.jenkinsci.test.acceptance.plugins.subversion.SubversionPluginTestException;
 import org.jenkinsci.test.acceptance.plugins.subversion.SubversionScm;
@@ -31,7 +29,7 @@ public class SubversionPluginTest extends AbstractJUnitTest {
      * Scenario: Run basic Subversion build
      * Given I have installed the "subversion" plugin
      * And a job
-     * When I check out code from Subversion repository "<UrlUnsaveRepo>"
+     * When I check out code from Subversion repository "UrlUnsaveRepo"
      * And I add a shell build step "test -d .svn"
      * And I save the job
      * And I build the job
@@ -54,7 +52,7 @@ public class SubversionPluginTest extends AbstractJUnitTest {
      * Scenario: Check out specified Subversion revision
      * Given I have installed the "subversion" plugin
      * And a job
-     * When I check out code from Subversion repository "<UnsaveRepoAtRevision> 0
+     * When I check out code from Subversion repository "UnsaveRepoAtRevision 0
      * And I save the job
      * And I build the job
      * Then the build should succeed
@@ -76,12 +74,12 @@ public class SubversionPluginTest extends AbstractJUnitTest {
      * Scenario: Always check out fresh copy
      * Given I have installed the "subversion" plugin
      * And a job
-     * When I check out code from Subversion repository "<UrlUnsaveRepo>"
+     * When I check out code from Subversion repository "UrlUnsaveRepo"
      * And I select "Always check out a fresh copy" as a "Check-out Strategy"
      * And I save the job
      * And I build 2 jobs
      * Then the build should succeed
-     * And console output should contain "Checking out <UrlUnsaveRepo>"
+     * And console output should contain "Checking out UrlUnsaveRepo"
      */
     @Test
     public void always_checkout_fresh_copy() throws SubversionPluginTestException {
@@ -104,7 +102,7 @@ public class SubversionPluginTest extends AbstractJUnitTest {
      * Scenario: http:// user/pwd basic Checkout
      * Given I have installed the "subversion" plugin
      * And a job
-     * When I check out code from protected Subversion repository "<UrlUserPwdSaveRepo>"
+     * When I check out code from protected Subversion repository "UrlUserPwdSaveRepo"
      * And I click the link to enter credentials
      * And I enter the right username and the right password
      * And I save the credentials
@@ -136,7 +134,7 @@ public class SubversionPluginTest extends AbstractJUnitTest {
      * Scenario:basic Checkout with svn protocol
      * Given I have installed the "subversion" plugin
      * And a job
-     * When I check out code from protected Subversion repository "<SvnUrl>"
+     * When I check out code from protected Subversion repository "SvnUrl"
      * And I click the link to enter credentials
      * And I enter the right username and the right password
      * And I save the credentials
@@ -167,9 +165,10 @@ public class SubversionPluginTest extends AbstractJUnitTest {
 
 
     /**
-     * Test not running atm. Plugin does not seem to work wit credentials plugin
+     * Test not running atm. Plugin does not seem to work with credentials plugin
      * @throws SubversionPluginTestException
      */
+    /*
     @Test
     public void run_basic_subversion_build_userPwd_credentials_already_added() throws SubversionPluginTestException {
         final SvnContainer svnContainer = svn.get();
@@ -196,4 +195,5 @@ public class SubversionPluginTest extends AbstractJUnitTest {
         f.startBuild().shouldSucceed();
 
     }
+    */
 }

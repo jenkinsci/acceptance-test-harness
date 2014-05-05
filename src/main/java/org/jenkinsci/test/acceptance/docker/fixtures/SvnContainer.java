@@ -10,8 +10,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 
 /**
- * Runs stock svn container.
- *
+ * Runs stock svn  container.
+ *SVN -version 1.8
  * @author Matthias Karl
  */
 @DockerFixture(id = "svn", ports = {80, 3690, 22})
@@ -33,13 +33,7 @@ public class SvnContainer extends DockerContainer {
      */
     public URL getHttpUrl() throws SubversionPluginTestException {
         String url = PROTOCOL_HTTP + LOCALHOST + port(80);
-        URL returnUrl = null;
-        try {
-            returnUrl = new URL(url);
-        } catch (MalformedURLException e) {
-            SubversionPluginTestException.throwMalformedURL(e, url);
-        }
-        return returnUrl;
+        return createUrl(url);
     }
 
     /**
@@ -50,13 +44,7 @@ public class SvnContainer extends DockerContainer {
      */
     public URI getSvnUrl() throws SubversionPluginTestException {
         String url = PROTOCOL_SVN + LOCALHOST + port(3690);
-        URI returnUri = null;
-        try {
-            returnUri = new URI(url);
-        } catch (URISyntaxException e) {
-            SubversionPluginTestException.throwMalformedURL(e, url);
-        }
-        return returnUri;
+        return createUri(url);
     }
 
     /**
@@ -67,13 +55,7 @@ public class SvnContainer extends DockerContainer {
      */
     public URL getUrlUnsaveRepo() throws SubversionPluginTestException {
         String url = getHttpUrl().toString() + UNSAVE_REPO;
-        URL returnUrl = null;
-        try {
-            returnUrl = new URL(url);
-        } catch (MalformedURLException e) {
-            SubversionPluginTestException.throwMalformedURL(e, url);
-        }
-        return returnUrl;
+        return createUrl(url);
     }
 
     /**
@@ -84,13 +66,7 @@ public class SvnContainer extends DockerContainer {
      */
     public URL getUrlUnsaveRepoAtRevision(int revision) throws SubversionPluginTestException {
         String url = getUrlUnsaveRepo().toString() + "@" + revision;
-        URL returnUrl = null;
-        try {
-            returnUrl = new URL(url);
-        } catch (MalformedURLException e) {
-            SubversionPluginTestException.throwMalformedURL(e, url);
-        }
-        return returnUrl;
+        return createUrl(url);
     }
 
     /**
@@ -101,6 +77,10 @@ public class SvnContainer extends DockerContainer {
      */
     public URL getUrlUserPwdSaveRepo() throws SubversionPluginTestException {
         String url = getHttpUrl().toString() + User_PWD_SAVE_REPO;
+        return createUrl(url);
+    }
+
+    private URL createUrl(String url) throws SubversionPluginTestException {
         URL returnUrl = null;
         try {
             returnUrl = new URL(url);
@@ -108,5 +88,15 @@ public class SvnContainer extends DockerContainer {
             SubversionPluginTestException.throwMalformedURL(e, url);
         }
         return returnUrl;
+    }
+
+    private URI createUri(String url) throws SubversionPluginTestException {
+        URI returnUri = null;
+        try {
+            returnUri = new URI(url);
+        } catch (URISyntaxException e) {
+            SubversionPluginTestException.throwMalformedURL(e, url);
+        }
+        return returnUri;
     }
 }
