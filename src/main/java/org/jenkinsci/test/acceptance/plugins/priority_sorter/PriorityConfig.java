@@ -23,12 +23,7 @@
  */
 package org.jenkinsci.test.acceptance.plugins.priority_sorter;
 
-import org.jenkinsci.test.acceptance.po.Action;
-import org.jenkinsci.test.acceptance.po.ActionPageObject;
-import org.jenkinsci.test.acceptance.po.ContainerPageObject;
-import org.jenkinsci.test.acceptance.po.Control;
-import org.jenkinsci.test.acceptance.po.Jenkins;
-import org.jenkinsci.test.acceptance.po.PageArea;
+import org.jenkinsci.test.acceptance.po.*;
 
 @ActionPageObject("advanced-build-queue")
 public class PriorityConfig extends Action {
@@ -57,7 +52,7 @@ public class PriorityConfig extends Action {
         open();
     }
 
-    public static class Group extends PageArea {
+    public static class Group extends PageAreaImpl {
         public final Control view = control("view");
         public final Control priority = control("priority");
 

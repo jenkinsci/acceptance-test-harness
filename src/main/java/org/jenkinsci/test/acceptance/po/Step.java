@@ -5,7 +5,7 @@ package org.jenkinsci.test.acceptance.po;
  *
  * @author Kohsuke Kawaguchi
  */
-public abstract class Step extends PageArea {
+public abstract class Step extends PageAreaImpl {
     public final Job parent;
 
     public Step(Job parent, String path) {

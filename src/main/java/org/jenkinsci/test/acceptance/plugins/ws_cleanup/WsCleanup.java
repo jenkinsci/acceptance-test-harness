@@ -25,10 +25,10 @@ package org.jenkinsci.test.acceptance.plugins.ws_cleanup;
 
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.PageArea;
+import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.PostBuildStep;
 
-public class WsCleanup extends PageArea {
+public class WsCleanup extends PageAreaImpl {
 
     public WsCleanup(Job context, String path) {
         super(context, path);

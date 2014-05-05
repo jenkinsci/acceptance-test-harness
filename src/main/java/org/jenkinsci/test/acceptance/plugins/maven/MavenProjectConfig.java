@@ -25,9 +25,9 @@ package org.jenkinsci.test.acceptance.plugins.maven;
 
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.JenkinsConfig;
-import org.jenkinsci.test.acceptance.po.PageArea;
+import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 
-public class MavenProjectConfig extends PageArea {
+public class MavenProjectConfig extends PageAreaImpl {
     public final Control opts = control("globalMavenOpts");
 
     public MavenProjectConfig(JenkinsConfig context) {

@@ -1,23 +1,11 @@
 package org.jenkinsci.test.acceptance.plugins.mailer;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Joiner;
-
-import org.apache.commons.io.IOUtils;
-import org.jenkinsci.test.acceptance.po.Control;
-import org.jenkinsci.test.acceptance.po.Jenkins;
-import org.jenkinsci.test.acceptance.po.PageArea;
-import org.jenkinsci.test.acceptance.po.PageObject;
-import org.openqa.selenium.WebElement;
-
 import javax.inject.Inject;
 import javax.mail.Address;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URL;
@@ -26,15 +14,26 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 
-import static javax.mail.Message.RecipientType.TO;
-import static org.hamcrest.CoreMatchers.is;
+import org.apache.commons.io.IOUtils;
+import org.jenkinsci.test.acceptance.po.Control;
+import org.jenkinsci.test.acceptance.po.Jenkins;
+import org.jenkinsci.test.acceptance.po.PageAreaImpl;
+import org.jenkinsci.test.acceptance.po.PageObject;
+import org.openqa.selenium.WebElement;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Joiner;
+
+import static javax.mail.Message.RecipientType.*;
+import static org.hamcrest.CoreMatchers.*;
 
 /**
  * Global config page for the mailer plugin.
  *
  * @author Kohsuke Kawaguchi
  */
-public class MailerGlobalConfig extends PageArea {
+public class MailerGlobalConfig extends PageAreaImpl {
     public final Control smtpServer = control("smtpServer");
     public final Control advancedButton = control("advanced-button");
     public final Control useSMTPAuth = control("useSMTPAuth");
@@ -70,8 +69,9 @@ public class MailerGlobalConfig extends PageArea {
 
         // Set for email-ext plugin as well if available
         WebElement e = getElement(by.path("/hudson-plugins-emailext-ExtendedEmailPublisher/ext_mailer_default_replyto"));
-        if (e!=null)
+        if (e != null) {
             e.sendKeys(fingerprint);
+        }
     }
 
     public void sendTestMail(String recipient) {
@@ -96,9 +96,12 @@ public class MailerGlobalConfig extends PageArea {
         }
 
         switch (match.size()) {
-            case 0: return null;
-            case 1: return match.get(0);
-            default: throw new AssertionError("More than one matching message found");
+            case 0:
+                return null;
+            case 1:
+                return match.get(0);
+            default:
+                throw new AssertionError("More than one matching message found");
         }
     }
 
@@ -107,8 +110,9 @@ public class MailerGlobalConfig extends PageArea {
 
         for (JsonNode msg : fetchMessages()) {
             MimeMessage m = fetchMessage(msg.get("id").asText());
-            if (isOurs(m))
+            if (isOurs(m)) {
                 match.add(m);
+            }
         }
 
         return match;
@@ -120,13 +124,17 @@ public class MailerGlobalConfig extends PageArea {
     private boolean isOurs(MimeMessage m) {
         try {
             Address[] r = m.getReplyTo();
-            if (r==null)    return false;
+            if (r == null) {
+                return false;
+            }
             for (Address a : r) {
-                if (a.toString().contains(fingerprint))
+                if (a.toString().contains(fingerprint)) {
                     return true;
+                }
             }
             return false;
-        } catch (MessagingException e) {
+        }
+        catch (MessagingException e) {
             throw new AssertionError(e);
         }
     }
@@ -145,7 +153,8 @@ public class MailerGlobalConfig extends PageArea {
 
         try {
             return new MimeMessage(Session.getDefaultInstance(System.getProperties()), raw.openStream());
-        } catch (MessagingException e) {
+        }
+        catch (MessagingException e) {
             throw new IOException(e);
         }
     }
@@ -176,7 +185,8 @@ public class MailerGlobalConfig extends PageArea {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         try {
             msg.writeTo(os);
-        } catch (IOException | MessagingException ex) {
+        }
+        catch (IOException | MessagingException ex) {
             throw new AssertionError(ex);
         }
         return os.toString();

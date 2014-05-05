@@ -86,7 +86,7 @@ public abstract class PageObject extends CapybaraPortingLayerImpl {
      * Create a control object that wraps access to the specific INPUT element in this page area.
      * <p/>
      * The {@link Control} object itself can be created early as the actual element resolution happens lazily. This
-     * means {@link PageArea} implementations can put these in their fields.
+     * means {@link PageAreaImpl} implementations can put these in their fields.
      * <p/>
      * Several paths can be provided to find the first matching element. Useful when element path changed between
      * versions.

@@ -33,6 +33,7 @@ import org.apache.commons.io.IOUtils;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.JenkinsLogger;
 import org.jenkinsci.test.acceptance.po.PageArea;
+import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 
@@ -51,7 +52,9 @@ abstract public class AuditTrailLogger extends JenkinsLogger {
         try {
             logger.waitFor(by.xpath("//h1[text()='%s']", logger.name));
             return logger;
-        } catch (TimeoutException ex) {} // TODO: Using plugin version would be faster
+        }
+        catch (TimeoutException ex) {
+        } // TODO: Using plugin version would be faster
 
         return new ExposedFile(jenkins);
     }
@@ -73,7 +76,9 @@ abstract public class AuditTrailLogger extends JenkinsLogger {
             List<String> events = new ArrayList<>();
             for (WebElement e : all(by.css("#main-panel pre"))) {
                 Matcher m = LOG_PATTERN.matcher(e.getText());
-                if (!m.matches())    continue; // Earlier versions used one element per log entry newer use two
+                if (!m.matches()) {
+                    continue; // Earlier versions used one element per log entry newer use two
+                }
                 events.add(m.group(1));
             }
             return events;
@@ -82,7 +87,7 @@ abstract public class AuditTrailLogger extends JenkinsLogger {
 
     /**
      * Expose file through /userContent/ and wrap in Logger.
-     *
+     * <p/>
      * Traditional logger in no longer created after Audit Trail 2.0
      */
     private static class ExposedFile extends AuditTrailLogger {
@@ -92,12 +97,13 @@ abstract public class AuditTrailLogger extends JenkinsLogger {
 
             String logfile = jenkins.runScript(
                     "def log = new File(Jenkins.instance.rootDir, 'userContent/audit-trail.log');" +
-                    "log.createNewFile();" +
-                    "println log.absolutePath;"
+                            "log.createNewFile();" +
+                            "println log.absolutePath;"
             );
 
             jenkins.configure();
-            PageArea area = new PageArea(jenkins.getConfigPage(), "/jenkins-model-GlobalPluginConfiguration/plugin") {};
+            PageArea area = new PageAreaImpl(jenkins.getConfigPage(), "/jenkins-model-GlobalPluginConfiguration/plugin") {
+            };
             area.selectDropdownMenu("Log file", area.control("hetero-list-add[loggers]").resolve());
 
             area.control("loggers/log").set(logfile);
@@ -120,14 +126,15 @@ abstract public class AuditTrailLogger extends JenkinsLogger {
         public List<String> getEvents() {
             try {
                 List<String> events = new ArrayList<>();
-                for (String line: (List<String>) IOUtils.readLines(url.openStream())) {
+                for (String line : (List<String>) IOUtils.readLines(url.openStream())) {
                     Matcher m = LOG_PATTERN.matcher(line);
                     m.find();
                     events.add(m.group(1));
                 }
 
                 return events;
-            } catch (IOException ex) {
+            }
+            catch (IOException ex) {
                 throw new AssertionError("Audit trail log not exposed", ex);
             }
         }
@@ -135,7 +142,8 @@ abstract public class AuditTrailLogger extends JenkinsLogger {
         private String getContent() {
             try {
                 return IOUtils.toString(url.openStream());
-            } catch (IOException ex) {
+            }
+            catch (IOException ex) {
                 throw new AssertionError("Audit trail log not exposed", ex);
             }
         }

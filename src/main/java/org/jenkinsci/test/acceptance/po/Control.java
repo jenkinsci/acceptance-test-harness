@@ -9,7 +9,7 @@ import org.openqa.selenium.WebElement;
 import com.google.inject.Injector;
 
 /**
- * Wraps a specific form element in {@link PageArea} to provide operations.
+ * Wraps a specific form element in {@link PageAreaImpl} to provide operations.
  * <p/>
  * {@link Control} is like a {@link WebElement}, but with the following key differences:
  * <p/>
@@ -18,16 +18,16 @@ import com.google.inject.Injector;
  * subtype is instantiated.) <li>{@link Control} offers richer methods to interact with a form element, making the right
  * code easier to write. </ul>
  * <p/>
- * See {@link PageArea} subtypes for typical usage.
+ * See {@link PageAreaImpl} subtypes for typical usage.
  *
  * @author Kohsuke Kawaguchi
- * @see PageArea#control(String...)
+ * @see PageAreaImpl#control(String...)
  */
 public class Control extends CapybaraPortingLayerImpl {
     private final Owner parent;
     private final String[] relativePaths;
 
-    public Control(PageArea parent, String... relativePaths) {
+    public Control(PageAreaImpl parent, String... relativePaths) {
         super(parent.injector);
         this.parent = parent;
         this.relativePaths = relativePaths;

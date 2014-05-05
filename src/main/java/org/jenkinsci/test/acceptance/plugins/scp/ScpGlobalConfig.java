@@ -1,17 +1,17 @@
 package org.jenkinsci.test.acceptance.plugins.scp;
 
+import javax.inject.Inject;
+
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Jenkins;
-import org.jenkinsci.test.acceptance.po.PageArea;
+import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.PageObject;
-
-import javax.inject.Inject;
 
 /**
  * @author Kohsuke Kawaguchi
  */
-public class ScpGlobalConfig extends PageArea {
+public class ScpGlobalConfig extends PageAreaImpl {
     @Inject
     JenkinsController controller;
 
@@ -28,7 +28,7 @@ public class ScpGlobalConfig extends PageArea {
         return new Site(page, p);
     }
 
-    public static class Site extends PageArea {
+    public static class Site extends PageAreaImpl {
         public Site(PageObject parent, String path) {
             super(parent, path);
         }

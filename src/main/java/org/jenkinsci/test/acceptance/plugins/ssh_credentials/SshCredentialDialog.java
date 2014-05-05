@@ -2,7 +2,7 @@ package org.jenkinsci.test.acceptance.plugins.ssh_credentials;
 
 import org.jenkinsci.test.acceptance.plugins.credentials.Credential;
 import org.jenkinsci.test.acceptance.po.Control;
-import org.jenkinsci.test.acceptance.po.PageArea;
+import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.PageObject;
 
 /**
@@ -10,7 +10,7 @@ import org.jenkinsci.test.acceptance.po.PageObject;
  *
  * @author Kohsuke Kawaguchi
  */
-public class SshCredentialDialog extends PageArea {
+public class SshCredentialDialog extends PageAreaImpl {
     public final Control kind = control(by.xpath("//*[@id='credentials-dialog-form']//*[@path='/']"));
 
     public SshCredentialDialog(PageObject context, String path) {
@@ -23,7 +23,8 @@ public class SshCredentialDialog extends PageArea {
     public <T extends Credential> T select(Class<T> type) {
 
         findCaption(type, new Resolver() {
-            @Override protected void resolve(String caption) {
+            @Override
+            protected void resolve(String caption) {
                 kind.select(caption);
             }
         });

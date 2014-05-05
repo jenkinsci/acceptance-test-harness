@@ -1,11 +1,6 @@
 package org.jenkinsci.test.acceptance.plugins.scp;
 
-import org.jenkinsci.test.acceptance.po.Control;
-import org.jenkinsci.test.acceptance.po.Describable;
-import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.PageArea;
-import org.jenkinsci.test.acceptance.po.PageObject;
-import org.jenkinsci.test.acceptance.po.PostBuildStep;
+import org.jenkinsci.test.acceptance.po.*;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -24,7 +19,7 @@ public class ScpPublisher extends PostBuildStep {
         return new Site(page, p);
     }
 
-    public static class Site extends PageArea {
+    public static class Site extends PageAreaImpl {
         public Site(PageObject parent, String path) {
             super(parent, path);
         }

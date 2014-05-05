@@ -23,15 +23,10 @@
  */
 package org.jenkinsci.test.acceptance.plugins.html_publisher;
 
-import org.jenkinsci.test.acceptance.po.Control;
-import org.jenkinsci.test.acceptance.po.Describable;
-import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.PageArea;
-import org.jenkinsci.test.acceptance.po.PageObject;
-import org.jenkinsci.test.acceptance.po.PostBuildStep;
+import org.jenkinsci.test.acceptance.po.*;
 
 @Describable("Publish HTML reports")
-public class HtmlPublisher  extends PostBuildStep {
+public class HtmlPublisher extends PostBuildStep {
     public HtmlPublisher(Job parent, String path) {
         super(parent, path);
     }
@@ -46,7 +41,7 @@ public class HtmlPublisher  extends PostBuildStep {
         return report;
     }
 
-    public static class Report extends PageArea {
+    public static class Report extends PageAreaImpl {
         public final Control dir = control("reportDir");
         public final Control index = control("reportFiles");
         public final Control name = control("reportName");

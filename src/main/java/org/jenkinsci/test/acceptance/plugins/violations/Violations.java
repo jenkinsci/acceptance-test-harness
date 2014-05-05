@@ -24,11 +24,7 @@
 package org.jenkinsci.test.acceptance.plugins.violations;
 
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
-import org.jenkinsci.test.acceptance.po.Control;
-import org.jenkinsci.test.acceptance.po.Describable;
-import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.PageArea;
-import org.jenkinsci.test.acceptance.po.PostBuildStep;
+import org.jenkinsci.test.acceptance.po.*;
 
 @Describable("Report Violations")
 public class Violations extends PostBuildStep {
@@ -47,7 +43,7 @@ public class Violations extends PostBuildStep {
         return new Config(parent, name);
     }
 
-    public class Config extends PageArea {
+    public class Config extends PageAreaImpl {
         private final String name;
 
         // Config controls does not reside of shared path prefix!

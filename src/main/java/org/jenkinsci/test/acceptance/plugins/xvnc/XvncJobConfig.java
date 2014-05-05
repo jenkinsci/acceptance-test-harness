@@ -26,9 +26,9 @@ package org.jenkinsci.test.acceptance.plugins.xvnc;
 import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.PageArea;
+import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 
-public class XvncJobConfig extends PageArea {
+public class XvncJobConfig extends PageAreaImpl {
 
     public XvncJobConfig(Job context) {
         super(context, "/hudson-plugins-xvnc-Xvnc");
@@ -46,7 +46,8 @@ public class XvncJobConfig extends PageArea {
 
     public static Matcher<Build> runXvnc() {
         return new Matcher<Build>("xvnc run durring the build") {
-            @Override public boolean matchesSafely(Build item) {
+            @Override
+            public boolean matchesSafely(Build item) {
                 String out = item.getConsole();
                 return out.contains("Starting xvnc") && out.contains("Killing Xvnc process ID");
             }
@@ -55,7 +56,8 @@ public class XvncJobConfig extends PageArea {
 
     public static Matcher<Build> tookScreenshot() {
         return new Matcher<Build>("screenshot was taken") {
-            @Override public boolean matchesSafely(Build item) {
+            @Override
+            public boolean matchesSafely(Build item) {
                 String out = item.getConsole();
                 return out.contains("Taking screenshot");
             }
@@ -64,7 +66,8 @@ public class XvncJobConfig extends PageArea {
 
     public static Matcher<Build> usedDisplayNumber(final int number) {
         return new Matcher<Build>("build bumber %d was used", number) {
-            @Override public boolean matchesSafely(Build item) {
+            @Override
+            public boolean matchesSafely(Build item) {
                 return item.getConsole().contains(String.format(" :%s ", number));
             }
         };

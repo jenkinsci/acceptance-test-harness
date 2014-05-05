@@ -24,13 +24,13 @@
 package org.jenkinsci.test.acceptance.po;
 
 /**
- * Base type for {@link PageArea} for SCM configuration.
- *
+ * Base type for {@link PageAreaImpl} for SCM configuration.
+ * <p/>
  * Use {@link Describable} annotation to register an implementation.
  *
  * @see Job#useScm(Class)
  */
-public class Scm extends PageArea {
+public class Scm extends PageAreaImpl {
 
     public Scm(Job job, String path) {
         super(job, path);
