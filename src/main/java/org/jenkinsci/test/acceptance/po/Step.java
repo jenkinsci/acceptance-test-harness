@@ -1,15 +1,7 @@
 package org.jenkinsci.test.acceptance.po;
 
 /**
- * Common part of {@link BuildStep} and {@link PostBuildStep}
- *
- * @author Kohsuke Kawaguchi
+ * @author christian.fritz
  */
-public abstract class Step extends PageAreaImpl {
-    public final Job parent;
-
-    public Step(Job parent, String path) {
-        super(parent, path);
-        this.parent = parent;
-    }
+public interface Step extends CapybaraPortingLayer, PageArea {
 }

@@ -23,11 +23,7 @@
  */
 package org.jenkinsci.test.acceptance.plugins.post_build_script;
 
-import org.jenkinsci.test.acceptance.po.Control;
-import org.jenkinsci.test.acceptance.po.Describable;
-import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.PostBuildStep;
-import org.jenkinsci.test.acceptance.po.Step;
+import org.jenkinsci.test.acceptance.po.*;
 import org.openqa.selenium.WebElement;
 
 @Describable({"Execute a set of scripts", "[PostBuildScript] - Execute a set of scripts"})
@@ -43,7 +39,8 @@ public class PostBuildScript extends PostBuildStep {
 
         final WebElement dropDown = control("hetero-list-add[buildStep]").resolve();
         findCaption(type, new Resolver() {
-            @Override protected void resolve(String caption) {
+            @Override
+            protected void resolve(String caption) {
                 selectDropdownMenu(caption, dropDown);
             }
         });

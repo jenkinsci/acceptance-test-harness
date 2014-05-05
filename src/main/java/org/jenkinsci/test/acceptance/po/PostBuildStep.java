@@ -7,7 +7,7 @@ package org.jenkinsci.test.acceptance.po;
  *
  * @author Kohsuke Kawaguchi
  */
-public class PostBuildStep extends Step {
+public class PostBuildStep extends AbstractStep {
     public PostBuildStep(Job parent, String path) {
         super(parent, path);
     }
