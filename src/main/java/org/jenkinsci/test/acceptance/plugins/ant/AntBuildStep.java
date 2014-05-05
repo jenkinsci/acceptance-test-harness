@@ -1,6 +1,6 @@
 package org.jenkinsci.test.acceptance.plugins.ant;
 
-import org.jenkinsci.test.acceptance.po.BuildStep;
+import org.jenkinsci.test.acceptance.po.BuildStepImpl;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Job;
@@ -11,7 +11,7 @@ import org.jenkinsci.test.acceptance.po.Job;
  * @author Kohsuke Kawaguchi
  */
 @Describable("Invoke Ant")
-public class AntBuildStep extends BuildStep {
+public class AntBuildStep extends BuildStepImpl {
     public final Control targets = control("targets");
     public final Control antName = control("antName");
 

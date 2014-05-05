@@ -5,10 +5,7 @@ package org.jenkinsci.test.acceptance.po;
  * <p/>
  * Use {@link Describable} annotation to register an implementation.
  *
- * @author Kohsuke Kawaguchi
+ * @author christian.fritz
  */
-public class BuildStep extends AbstractStep {
-    public BuildStep(Job parent, String path) {
-        super(parent, path);
-    }
+public interface BuildStep extends Step {
 }

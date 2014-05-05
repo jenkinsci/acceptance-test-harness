@@ -23,13 +23,13 @@
  */
 package org.jenkinsci.test.acceptance.plugins.envinject;
 
-import org.jenkinsci.test.acceptance.po.BuildStep;
+import org.jenkinsci.test.acceptance.po.BuildStepImpl;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Job;
 
 @Describable("Inject environment variables")
-public class EnvInjectStep extends BuildStep {
+public class EnvInjectStep extends BuildStepImpl {
     public final Control properties = control("propertiesContent");
 
     public EnvInjectStep(Job parent, String path) {

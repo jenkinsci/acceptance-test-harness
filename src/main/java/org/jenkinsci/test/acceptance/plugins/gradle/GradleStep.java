@@ -23,13 +23,13 @@
  */
 package org.jenkinsci.test.acceptance.plugins.gradle;
 
-import org.jenkinsci.test.acceptance.po.BuildStep;
+import org.jenkinsci.test.acceptance.po.BuildStepImpl;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Job;
 
 @Describable("Invoke Gradle script")
-public class GradleStep extends BuildStep {
+public class GradleStep extends BuildStepImpl {
     public final Control file = control("buildFile");
     public final Control dir = control("rootBuildScriptDir");
     public final Control switches = control("switches");
