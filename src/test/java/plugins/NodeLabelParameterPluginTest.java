@@ -239,23 +239,33 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
 
         //select both slaves for this build
         Build b = j.startBuild(singletonMap("slavename", s1.getName()+","+s2.getName()));
-        //FIXME: wait somehow until both jobs are set up, otherwise the build number assertion fails
 
-        //2 builds shall be created
-        //assertThat(j.getNextBuildNumber(), is(3));
+        // wait for the build on slave 1 to finish
+        b.waitUntilFinished();
+
+        //get back to the job's page otherwise we do not have the build history summary to evaluate their content
+        j.visit(""); //equivalent to: jenkins.visit("jobs/"+j.name);
 
         //ensure the build on the offline slave is pending
         String pendingBuildText = find(by.xpath("//img[@alt='pending']/../..")).getText();
         String refText=String.format("(pending—%s is offline) [NodeParameterValue: slavename=%s]",s2.getName(),s2.getName());
-
         //fails at the moment due to the pending build text says: LabelParameterValue
-        //TODO: clarify whether this is an error and uncomment the evaluation
-        //assertTrue(pendingBuildText.contains(refText));
-        //assertTrue(!b.hasStarted());
+        //TODO: clarify whether this is an error or adapt the refText otherwise
+        assertTrue(pendingBuildText.contains(refText));
 
-        b.waitUntilFinished();
         //ensure that the build on the online slave has been done
         j.shouldHaveBuiltOn(jenkins,s1.getName());
+
+        //bring second slave online again
+        s2.markOnline();
+        assertTrue(s2.isOnline());
+
+        b.waitUntilFinished();
+        j.shouldHaveBuiltOn(jenkins, s2.getName());
+
+        //check that 2 builds have been created in total
+        assertThat(j.getNextBuildNumber(), is(3));
+
     }
 
 }
