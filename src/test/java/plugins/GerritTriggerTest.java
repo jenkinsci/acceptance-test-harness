@@ -71,15 +71,14 @@ public class GerritTriggerTest extends AbstractJUnitTest {
         jenkins.jobs.create(FreeStyleJob.class,jobName);//no harm if existing
         GerritTriggerJob job = new GerritTriggerJob(jenkins,jobName);
         job.saveTestJobConfig();
-
         try {
             pushChangeForReview(jobName);
+            sleep(10000);
         }
         catch(InterruptedException|IOException e) {
             fail(e.getMessage());
         }
-        //TODO gerrit-trigger server start
-        //TODO gerrit flags checking to pass/fail
+        //TODO gerrit flags checking to pass/fail; work in progress..
     }
 
     private void pushChangeForReview(String jobName) throws InterruptedException,IOException {

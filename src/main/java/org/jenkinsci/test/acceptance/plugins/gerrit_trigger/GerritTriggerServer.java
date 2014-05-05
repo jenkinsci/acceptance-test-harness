@@ -28,6 +28,10 @@ import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.openqa.selenium.NoSuchElementException;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 /**
  * Page Object for Gerrit Trigger server (configuration) page.
  * @author Marco Miller
@@ -45,9 +49,12 @@ public class GerritTriggerServer extends PageObject {
     public final Control codeReviewD = control("/verdictCategories[2]/verdictDescription");
     public final Control verified = control("/verdictCategories[3]/verdictValue");
     public final Control verifiedD = control("/verdictCategories[3]/verdictDescription");
+    public final Control start = control("/button");
+
+    private static final String serverUrl = "gerrit-trigger/server/"+GerritTriggerServer.class.getPackage().getName();
 
     public GerritTriggerServer(Jenkins jenkins) {
-        super(jenkins.injector,jenkins.url("gerrit-trigger/server/"+GerritTriggerServer.class.getPackage().getName()));
+        super(jenkins.injector,jenkins.url(serverUrl));
         this.jenkins = jenkins;
     }
 
@@ -73,5 +80,20 @@ public class GerritTriggerServer extends PageObject {
             verifiedD.set("Verified");
         }
         clickButton("Save");
+        try {
+            start.click();
+        }
+        catch(NoSuchElementException e) {
+            try {
+                HttpURLConnection c = (HttpURLConnection)new URL(url+"/wakeup").openConnection();
+                c.setRequestMethod("GET");
+                c.setConnectTimeout(3000);
+                c.setReadTimeout(3000);
+                assertEquals(200,c.getResponseCode());
+            }
+            catch(IOException ioe) {
+                fail(ioe.getMessage());
+            }
+        }
     }
 }
