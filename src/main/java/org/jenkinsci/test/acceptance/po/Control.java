@@ -1,33 +1,29 @@
 package org.jenkinsci.test.acceptance.po;
 
-import com.google.inject.Injector;
-
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
-import java.security.acl.Owner;
+import com.google.inject.Injector;
 
 /**
  * Wraps a specific form element in {@link PageArea} to provide operations.
- *
+ * <p/>
  * {@link Control} is like a {@link WebElement}, but with the following key differences:
- *
- * <ul>
- * <li>{@link Control} is late binding, and the underlying {@link WebElement} is resolved only when
- *     an interaction with control happens. This allows {@link Control}s to be instantiated earlier
- *     (typically when a {@link PageObject} subtype is instantiated.)
- * <li>{@link Control} offers richer methods to interact with a form element, making the right code easier to write.
- * </ul>
- *
+ * <p/>
+ * <ul> <li>{@link Control} is late binding, and the underlying {@link WebElement} is resolved only when an interaction
+ * with control happens. This allows {@link Control}s to be instantiated earlier (typically when a {@link PageObject}
+ * subtype is instantiated.) <li>{@link Control} offers richer methods to interact with a form element, making the right
+ * code easier to write. </ul>
+ * <p/>
  * See {@link PageArea} subtypes for typical usage.
  *
  * @author Kohsuke Kawaguchi
  * @see PageArea#control(String...)
  */
-public class Control extends CapybaraPortingLayer {
+public class Control extends CapybaraPortingLayerImpl {
     private final Owner parent;
     private final String[] relativePaths;
 
@@ -64,10 +60,11 @@ public class Control extends CapybaraPortingLayer {
 
     public WebElement resolve() {
         NoSuchElementException problem = new NoSuchElementException("No relative path specified!");
-        for(String p : relativePaths) {
+        for (String p : relativePaths) {
             try {
                 return find(parent.path(p));
-            } catch (NoSuchElementException e) {
+            }
+            catch (NoSuchElementException e) {
                 problem = e;
             }
         }
@@ -83,11 +80,11 @@ public class Control extends CapybaraPortingLayer {
     }
 
     public void check() {
-        check(resolve(),true);
+        check(resolve(), true);
     }
 
     public void check(boolean state) {
-        check(resolve(),state);
+        check(resolve(), state);
     }
 
     public void click() {
