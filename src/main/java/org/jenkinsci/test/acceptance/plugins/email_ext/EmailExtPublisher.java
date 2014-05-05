@@ -1,15 +1,12 @@
 package org.jenkinsci.test.acceptance.plugins.email_ext;
 
-import org.jenkinsci.test.acceptance.po.Control;
-import org.jenkinsci.test.acceptance.po.Describable;
-import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.PostBuildStepImpl;
+import org.jenkinsci.test.acceptance.po.*;
 
 /**
  * @author Kohsuke Kawaguchi
  */
 @Describable("Editable Email Notification")
-public class EmailExtPublisher extends PostBuildStepImpl {
+public class EmailExtPublisher extends AbstractStep implements PostBuildStep {
     public final Control subject = control("project_default_subject");
     private final Control recipient = control("project_recipient_list", "recipientlist_recipients");
     public final Control body = control("project_default_content");

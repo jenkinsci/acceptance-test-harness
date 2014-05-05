@@ -1,15 +1,12 @@
 package org.jenkinsci.test.acceptance.plugins.javadoc;
 
-import org.jenkinsci.test.acceptance.po.Control;
-import org.jenkinsci.test.acceptance.po.Describable;
-import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.PostBuildStepImpl;
+import org.jenkinsci.test.acceptance.po.*;
 
 /**
  * @author Kohsuke Kawaguchi
  */
 @Describable("Publish Javadoc")
-public class JavadocPublisher extends PostBuildStepImpl {
+public class JavadocPublisher extends AbstractStep implements PostBuildStep {
     public final Control javadocDir = control("javadocDir");
 
     public JavadocPublisher(Job parent, String path) {

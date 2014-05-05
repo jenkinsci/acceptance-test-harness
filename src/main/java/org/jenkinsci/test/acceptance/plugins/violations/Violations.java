@@ -27,7 +27,7 @@ import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.po.*;
 
 @Describable("Report Violations")
-public class Violations extends PostBuildStepImpl {
+public class Violations extends AbstractStep implements PostBuildStep {
 
     // This is an abuse as it is not a publisher in maven project.
     public Violations(MavenModuleSet parent) {

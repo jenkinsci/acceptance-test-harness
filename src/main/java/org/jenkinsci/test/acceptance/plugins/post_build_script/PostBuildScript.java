@@ -27,7 +27,7 @@ import org.jenkinsci.test.acceptance.po.*;
 import org.openqa.selenium.WebElement;
 
 @Describable({"Execute a set of scripts", "[PostBuildScript] - Execute a set of scripts"})
-public class PostBuildScript extends PostBuildStepImpl {
+public class PostBuildScript extends AbstractStep implements PostBuildStep {
     private final Control whenSucceeded = control("scriptOnlyIfSuccess");
     private final Control whenFailed = control("scriptOnlyIfFailure");
 

@@ -1,15 +1,12 @@
 package org.jenkinsci.test.acceptance.plugins.plot;
 
-import org.jenkinsci.test.acceptance.po.Control;
-import org.jenkinsci.test.acceptance.po.Describable;
-import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.PostBuildStepImpl;
+import org.jenkinsci.test.acceptance.po.*;
 
 /**
  * @author Kohsuke Kawaguchi
  */
 @Describable("Plot build data")
-public class PlotPublisher extends PostBuildStepImpl {
+public class PlotPublisher extends AbstractStep implements PostBuildStep {
     public final Control group = control("plots/group");
     public final Control title = control("plots/title");
 
