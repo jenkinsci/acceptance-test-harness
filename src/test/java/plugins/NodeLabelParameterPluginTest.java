@@ -165,10 +165,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         s.markOnline();
         assertTrue(s.isOnline());
 
-        b.waitUntilStarted();
-        assertTrue(b.hasStarted());
-
-        b.waitUntilStarted();
+        b.waitUntilFinished();
         j.shouldHaveBuiltOn(jenkins,s.getName());
     }
 
