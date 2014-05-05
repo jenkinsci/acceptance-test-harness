@@ -5,10 +5,7 @@ package org.jenkinsci.test.acceptance.po;
  * <p/>
  * Subtypes should have {@link Describable} annotation on it.
  *
- * @author Kohsuke Kawaguchi
+ * @author christian.fritz
  */
-public class PostBuildStep extends AbstractStep {
-    public PostBuildStep(Job parent, String path) {
-        super(parent, path);
-    }
+public interface PostBuildStep extends Step {
 }

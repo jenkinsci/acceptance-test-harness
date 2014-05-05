@@ -26,7 +26,7 @@ package org.jenkinsci.test.acceptance.plugins.ws_cleanup;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
-import org.jenkinsci.test.acceptance.po.PostBuildStep;
+import org.jenkinsci.test.acceptance.po.PostBuildStepImpl;
 
 public class WsCleanup extends PageAreaImpl {
 
@@ -42,7 +42,7 @@ public class WsCleanup extends PageAreaImpl {
     }
 
     @Describable("Delete workspace when build is done")
-    public static class PostBuild extends PostBuildStep {
+    public static class PostBuild extends PostBuildStepImpl {
         public PostBuild(Job context, String path) {
             super(context, path);
         }

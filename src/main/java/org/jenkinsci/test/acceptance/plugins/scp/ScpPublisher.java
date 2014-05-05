@@ -6,7 +6,7 @@ import org.jenkinsci.test.acceptance.po.*;
  * @author Kohsuke Kawaguchi
  */
 @Describable("Publish artifacts to SCP Repository")
-public class ScpPublisher extends PostBuildStep {
+public class ScpPublisher extends PostBuildStepImpl {
     public ScpPublisher(Job parent, String path) {
         super(parent, path);
     }

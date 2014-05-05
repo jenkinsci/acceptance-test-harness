@@ -26,7 +26,7 @@ package org.jenkinsci.test.acceptance.plugins.html_publisher;
 import org.jenkinsci.test.acceptance.po.*;
 
 @Describable("Publish HTML reports")
-public class HtmlPublisher extends PostBuildStep {
+public class HtmlPublisher extends PostBuildStepImpl {
     public HtmlPublisher(Job parent, String path) {
         super(parent, path);
     }

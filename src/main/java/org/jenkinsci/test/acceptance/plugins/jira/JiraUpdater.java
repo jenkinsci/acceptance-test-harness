@@ -2,13 +2,13 @@ package org.jenkinsci.test.acceptance.plugins.jira;
 
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.PostBuildStep;
+import org.jenkinsci.test.acceptance.po.PostBuildStepImpl;
 
 /**
  * @author Kohsuke Kawaguchi
  */
 @Describable("Update relevant JIRA issues")
-public class JiraUpdater extends PostBuildStep {
+public class JiraUpdater extends PostBuildStepImpl {
     public JiraUpdater(Job parent, String path) {
         super(parent, path);
     }

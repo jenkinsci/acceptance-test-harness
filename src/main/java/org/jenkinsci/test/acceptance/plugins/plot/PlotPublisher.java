@@ -3,13 +3,13 @@ package org.jenkinsci.test.acceptance.plugins.plot;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.PostBuildStep;
+import org.jenkinsci.test.acceptance.po.PostBuildStepImpl;
 
 /**
  * @author Kohsuke Kawaguchi
  */
 @Describable("Plot build data")
-public class PlotPublisher extends PostBuildStep {
+public class PlotPublisher extends PostBuildStepImpl {
     public final Control group = control("plots/group");
     public final Control title = control("plots/title");
 
@@ -18,7 +18,7 @@ public class PlotPublisher extends PostBuildStep {
     }
 
     public void source(String type, String path) {
-        control("plots/series/fileType["+type+"]").check();
+        control("plots/series/fileType[" + type + "]").check();
         control("plots/series/file").set(path);
     }
 }

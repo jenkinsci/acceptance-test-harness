@@ -6,7 +6,7 @@ import org.jenkinsci.test.acceptance.po.*;
  * @author Kohsuke Kawaguchi
  */
 @Describable("Publish xUnit test result report")
-public class XUnitPublisher extends PostBuildStep {
+public class XUnitPublisher extends PostBuildStepImpl {
     public final Control addButton = control("hetero-list-add[tools]");
 
     public XUnitPublisher(Job parent, String path) {
