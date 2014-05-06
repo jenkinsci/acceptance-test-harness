@@ -21,7 +21,13 @@ import static java.nio.file.attribute.PosixFilePermission.*;
 @DockerFixture(id="sshd",ports=22,bindIp="127.0.0.5")
 public class SshdContainer extends DockerContainer {
     File privateKey;
+    File privateKeyEnc;
 
+    /**
+     * Get plaintext Private Key
+     * @return
+     * @throws IOException
+     */
     public File getPrivateKey() throws IOException {
         if (privateKey==null) {
             privateKey = File.createTempFile("ssh", "key");
@@ -33,12 +39,38 @@ public class SshdContainer extends DockerContainer {
     }
 
     /**
-     * Gets the SSH command line.
+     * Get encrypted Private Key
+     * @return
+     * @throws IOException
+     */
+    public File getEncryptedPrivateKey() throws IOException {
+        if (privateKeyEnc==null) {
+            privateKeyEnc = File.createTempFile("ssh_enc", "key");
+            privateKeyEnc.deleteOnExit();
+            FileUtils.copyURLToFile(resource("unsafe_enc_key").url,privateKeyEnc);
+            Files.setPosixFilePermissions(privateKeyEnc.toPath(), EnumSet.of(OWNER_READ));
+        }
+        return privateKeyEnc;
+    }
+
+    /**
+     * Gets the SSH command line via <b>unencrypted</b> key.
      */
     public CommandBuilder ssh() throws IOException, InterruptedException {
         return new CommandBuilder("ssh")
                 .add("-p",port(22),"-o","StrictHostKeyChecking=no","-i",getPrivateKey(),"test@localhost");
     }
+
+
+//    /**
+//     * Gets the SSH command line via <b>encrypted</b> key.
+//     * FIXME additonal script or tool needed like sshpass ("sshpass -fpassword.txt ssh -p 22 -o ... -i ... test@localhost")
+//     * ssh does not allow passing a password as a parameter!
+//     */
+//    public CommandBuilder ssh_enc() throws IOException, InterruptedException {
+//        return new CommandBuilder("ssh")
+//                .add("-p",port(22),"-o","StrictHostKeyChecking=no","-i",getPrivateKey(),"test@localhost");
+//    }
 
     /**
      * Login with SSH public key and run some command.

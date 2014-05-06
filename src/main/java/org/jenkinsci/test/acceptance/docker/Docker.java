@@ -80,6 +80,7 @@ public class Docker {
      *      Directory that contains Dockerfile
      */
     public DockerImage build(String tag, File dir) throws IOException, InterruptedException {
+        // FIXME VERY VERY BAD IDEA!!! changing dockerfile does not result in a rebuild!!!!
         // check if the image already exists
         if (cmd("images").add("-q",tag).popen().verifyOrDieWith("failed to query the status of the image").trim().length()>0)
             return new DockerImage(tag);
