@@ -65,8 +65,8 @@ public class GerritTriggerServer extends PageObject {
         open();
         hostName.set(GerritTriggerEnv.getInstance().getHostName());
         feUrl.set("https://"+GerritTriggerEnv.getInstance().getHostName());
-        userName.set(GerritTriggerEnv.getInstance().getUserName());
-        keyFile.set(GerritTriggerEnv.getInstance().getKeyPath());
+        userName.set(GerritTriggerEnv.getInstance().getGerritUser());
+        keyFile.set(GerritTriggerEnv.getInstance().getUserHome()+"/.ssh/id_rsa");
         advanced.click();
         try {
             codeReview.resolve();
