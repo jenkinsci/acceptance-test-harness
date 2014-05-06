@@ -1,26 +1,15 @@
 # Acceptance tests for Jenkins
 
-This is an attempted Java-ported version of [selenium-tests](https://github.com/jenkinsci/selenium-tests),
-which is a project to flesh out some of the [manual test cases for Jenkins
-LTS](https://wiki.jenkins-ci.org/display/JENKINS/LTS+RC+Testing) in
-an automated fashion. The intent is to retire the selenium-tests module when this project achieves
-parity.
-
-### Porting status
-Right now the following parts are working:
-
- * Drive Cucumber to run tests
- * Many key page object types are ported, even though they are still missing many methods
- * Some step definitions are ported, but more needs to be ported
- * Docker support
+A project to flesh out some of the [manual test cases for Jenkins
+LTS](https://wiki.jenkins-ci.org/display/JENKINS/LTS+RC+Testing) in an automated fashion.
 
 Following areas are still worked on:
 
  * Vagrant-based `JenkinsController` implementations
- * Either more steps need to be written to make existing cucumber tests work,
-   or they need to be ported over to JUnit.
 
-[![Build Status](https://jenkins.ci.cloudbees.com/buildStatus/icon?job=core/acceptance-test-harness)](https://jenkins.ci.cloudbees.com/job/core/job/acceptance-test-harness/)
+master | stable
+------ | ------
+[![Build Status](https://jenkins.ci.cloudbees.com/buildStatus/icon?job=core/acceptance-test-harness)](https://jenkins.ci.cloudbees.com/job/core/job/acceptance-test-harness/) | [![Build Status](https://jenkins.ci.cloudbees.com/buildStatus/icon?job=core/acceptance-test-harness-stable)](https://jenkins.ci.cloudbees.com/job/core/job/acceptance-test-harness-stable/)
 
 ## Getting Started
 
@@ -52,7 +41,7 @@ it's own sandboxed workspace.
     * Writing Cucumber test (TODO)
 * [Testing slaves](docs/SLAVE.md)
 * explain how cucumber hooks into Guice (TODO)
-* [Hamcrest matchers](docs/MATCHERS.md) (TODO)
+* [Hamcrest matchers](docs/MATCHERS.md)
 * how to use this from your own module (TODO)
 
 * [EC2 provider configuration](docs/EC2-CONFIG.md)

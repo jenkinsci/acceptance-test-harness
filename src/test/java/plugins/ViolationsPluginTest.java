@@ -56,7 +56,7 @@ public class ViolationsPluginTest extends AbstractJUnitTest {
             private final String pattern = "//td//a[@href='#%1$s' and text()='%1$s']/../../td[%2$d]";
 
             @Override
-            protected boolean matchesSafely(ViolationsAction item) {
+            public boolean matchesSafely(ViolationsAction item) {
                 item.open();
 
                 String actualViolations = find(by.xpath(pattern, kind, 2)).getText();
