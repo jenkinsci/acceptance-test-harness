@@ -15,7 +15,6 @@ import org.jenkinsci.test.acceptance.plugins.ftp.FtpGlobalConfig;
 import org.jenkinsci.test.acceptance.plugins.ftp.FtpGlobalConfig.Site;
 import org.jenkinsci.test.acceptance.plugins.ftp.FtpPublisher;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
-import org.junit.Before;
 import org.junit.Test;
 import java.util.Date;
 import java.text.DateFormat;
@@ -154,7 +153,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         }
         j.save();
         j.startBuild().shouldSucceed();
-        assertTrue(ftpd.PathExist("/tmp/test.txt"));
+        assertTrue(ftpd.pathExist("/tmp/test.txt"));
     }
 
     /**
@@ -194,8 +193,8 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         }
         j.save();
         j.startBuild().shouldSucceed();
-        assertTrue(ftpd.PathExist("/tmp/prefix/"));
-        assertTrue(!ftpd.PathExist("/tmp/prefix/.exclude"));
+        assertTrue(ftpd.pathExist("/tmp/prefix/"));
+        assertTrue(!ftpd.pathExist("/tmp/prefix/.exclude"));
     }
 
     /**
@@ -231,8 +230,8 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         }
         j.save();
         j.startBuild().shouldSucceed();
-        assertTrue(ftpd.PathExist("/tmp/prefix_/test.txt"));
-        assertTrue(ftpd.PathExist("/tmp/odes.txt"));
+        assertTrue(ftpd.pathExist("/tmp/prefix_/test.txt"));
+        assertTrue(ftpd.pathExist("/tmp/odes.txt"));
     }
     /**
      @native(docker)
@@ -269,8 +268,8 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         }
         j.save();
         j.startBuild().shouldSucceed();
-        assertTrue(!ftpd.PathExist("/tmp/te,st.txt"));
-        assertTrue(!ftpd.PathExist("/tmp/odes.txt"));
+        assertTrue(!ftpd.pathExist("/tmp/te,st.txt"));
+        assertTrue(!ftpd.pathExist("/tmp/odes.txt"));
     }
     /**
      @native(docker)
@@ -308,9 +307,9 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         }
         j.save();
         j.startBuild().shouldSucceed();
-        assertTrue(ftpd.PathExist("/tmp/odes.txt"));
-        assertTrue(!ftpd.PathExist("/tmp/.svn"));
-        assertTrue(!ftpd.PathExist("/tmp/CVS"));
+        assertTrue(ftpd.pathExist("/tmp/odes.txt"));
+        assertTrue(!ftpd.pathExist("/tmp/.svn"));
+        assertTrue(!ftpd.pathExist("/tmp/CVS"));
 
     }
     /**
@@ -350,9 +349,9 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         }
         j.save();
         j.startBuild().shouldSucceed();
-        assertTrue(ftpd.PathExist("/tmp/odes.txt"));
-        assertTrue(ftpd.PathExist("/tmp/.svn"));
-        assertTrue(ftpd.PathExist("/tmp/CVS"));
+        assertTrue(ftpd.pathExist("/tmp/odes.txt"));
+        assertTrue(ftpd.pathExist("/tmp/.svn"));
+        assertTrue(ftpd.pathExist("/tmp/CVS"));
     }
     /**
      @native(docker)
@@ -394,8 +393,8 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
 
         j.save();
         j.startBuild().shouldSucceed();
-        assertTrue(ftpd.PathExist("odes.txt"));
-        assertTrue(ftpd.PathExist("/tmp/odes.txt"));
+        assertTrue(ftpd.pathExist("odes.txt"));
+        assertTrue(ftpd.pathExist("/tmp/odes.txt"));
     }
     /**
      @native(docker)
@@ -436,8 +435,8 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
 
         j.save();
         j.startBuild().shouldSucceed();
-        assertTrue(ftpd.PathExist("/tmp/odes.txt"));
-        assertTrue(!ftpd.PathExist("/tmp/empty"));
+        assertTrue(ftpd.pathExist("/tmp/odes.txt"));
+        assertTrue(!ftpd.pathExist("/tmp/empty"));
     }
     /**
      @native(docker)
@@ -472,8 +471,8 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         }
         j.save();
         j.startBuild().shouldSucceed();
-        assertTrue(ftpd.PathExist("/tmp/flat/odes.txt"));
-        assertTrue(ftpd.PathExist("/tmp/odes.txt"));
+        assertTrue(ftpd.pathExist("/tmp/flat/odes.txt"));
+        assertTrue(ftpd.pathExist("/tmp/odes.txt"));
     }
 
     /**
@@ -550,7 +549,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         Date date = new Date();
         j.save();
         j.startBuild().shouldSucceed();
-        assertTrue(ftpd.PathExist("/tmp/"+dateFormat.format(date)+"/odes.txt"));
+        assertTrue(ftpd.pathExist("/tmp/" + dateFormat.format(date) + "/odes.txt"));
     }
 
     /**
@@ -577,7 +576,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         FtpdContainer ftpd = docker.start(FtpdContainer.class);
         Resource cp_txt = resource("/ftp_plugin/odes.txt");
         Resource old_txt=resource("/ftp_plugin/old.txt");
-        ftpd.UploadBinary(old_txt.asFile().getAbsolutePath(),"/tmp/old.txt");
+        ftpd.uploadBinary(old_txt.asFile().getAbsolutePath(), "/tmp/old.txt");
 
         FreeStyleJob j = jenkins.jobs.create();
         jenkinsFtpConfigure("asd",ftpd);
@@ -591,8 +590,8 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         }
         j.save();
         j.startBuild().shouldSucceed();
-        assertTrue(ftpd.PathExist("/tmp/odes.txt"));
-        assertTrue(!ftpd.PathExist("/tmp/old.txt"));
+        assertTrue(ftpd.pathExist("/tmp/odes.txt"));
+        assertTrue(!ftpd.pathExist("/tmp/old.txt"));
     }
 
     //This test will probably only make sense if we use *nix and a windows system for example!
@@ -662,9 +661,9 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         }
         j.save();
         j.startBuild().shouldSucceed();
-        assertTrue(ftpd.PathExist("/tmp/odes.txt"));
-        assertTrue(ftpd.PathExist("/tmp/odes2.txt"));
-        assertTrue(ftpd.PathExist("/tmp/odes3.txt"));
+        assertTrue(ftpd.pathExist("/tmp/odes.txt"));
+        assertTrue(ftpd.pathExist("/tmp/odes2.txt"));
+        assertTrue(ftpd.pathExist("/tmp/odes3.txt"));
     }
 
 //Multiple Server
@@ -713,8 +712,8 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         }
         j.save();
         j.startBuild().shouldSucceed();
-        assertTrue(ftpd.PathExist("/tmp/odes.txt"));
-        assertTrue(ftpd2.PathExist("/tmp/odes.txt"));
+        assertTrue(ftpd.pathExist("/tmp/odes.txt"));
+        assertTrue(ftpd2.pathExist("/tmp/odes.txt"));
 
     }
 }
