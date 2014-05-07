@@ -145,6 +145,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         j.configure();
         NodeParameter p = j.addParameter(NodeParameter.class);
         p.setName("slavename");
+        p.disallowMultiple.check();
         p.allNodes.click();
         j.save();
 
