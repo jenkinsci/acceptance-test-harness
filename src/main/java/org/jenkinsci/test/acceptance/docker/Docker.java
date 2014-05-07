@@ -153,7 +153,7 @@ public class Docker {
     /**
      * Finds a fixture class that has the specified ID.
      *
-     * @see DockerFixture#id()
+     * @see org.jenkinsci.test.acceptance.docker.DockerFixture#id()
      */
     public Class<? extends DockerContainer> findFixture(String id) throws IOException {
         for (Class<?> t : Index.list(DockerFixture.class, classLoader, Class.class)) {

@@ -30,6 +30,12 @@ import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.jenkinsci.test.acceptance.Matchers.hasAction;
@@ -39,12 +45,12 @@ import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
 
     /**
-     * Runs test and check if warnings of Findbugs are displayed.
+     * Builds a job and checks if warnings of Findbugs are displayed. Checks as well, if the content of the tabs is
+     * the one we expect.
      */
     @Test
     public void record_analysis() {
         FreeStyleJob job = setupJob("/findbugs_plugin/findbugsXml.xml", FindbugsPublisher.class, "findbugsXml.xml");
-
         Build lastBuild = buildJobWithSuccess(job);
 
         assertThat(lastBuild, hasAction("FindBugs Warnings"));
@@ -58,6 +64,59 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
         assertThat(fa.getHighWarningNumber(), is(2));
         assertThat(fa.getNormalWarningNumber(), is(4));
         assertThat(fa.getLowWarningNumber(), is(0));
+
+        assertFilesTab(fa);
+        assertCategoriesTab(fa);
+        assertTypesTab(fa);
+        assertWarningsTab(fa);
+    }
+
+    private void assertFilesTab(FindbugsAction fa) {
+        SortedMap<String, Integer> expectedContent = new TreeMap<String, Integer>();
+        expectedContent.put("SSHConnector.java", 1);
+        expectedContent.put("SSHLauncher.java", 5);
+        assertThat(fa.getFileTabContents(), is(expectedContent));
+    }
+
+    private void assertCategoriesTab(FindbugsAction fa) {
+        SortedMap<String, Integer> expectedContent = new TreeMap<String, Integer>();
+        expectedContent.put("BAD_PRACTICE", 1);
+        expectedContent.put("CORRECTNESS", 3);
+        expectedContent.put("STYLE", 2);
+        assertThat(fa.getCategoriesTabContents(), is(expectedContent));
+    }
+
+    private void assertTypesTab(FindbugsAction fa) {
+        SortedMap<String, Integer> expectedContent = new TreeMap<String, Integer>();
+        expectedContent.put("DE_MIGHT_IGNORE", 1);
+        expectedContent.put("NP_NULL_ON_SOME_PATH", 1);
+        expectedContent.put("NP_NULL_PARAM_DEREF", 2);
+        expectedContent.put("REC_CATCH_EXCEPTION", 2);
+        assertThat(fa.getTypesTabContents(), is(expectedContent));
+    }
+
+    private void assertWarningsTab(FindbugsAction fa) {
+        SortedMap<String, Integer> expectedContent = new TreeMap<String, Integer>();
+        expectedContent.put("SSHConnector.java:138", 138);
+        expectedContent.put("SSHLauncher.java:437", 437);
+        expectedContent.put("SSHLauncher.java:679", 679);
+        expectedContent.put("SSHLauncher.java:960", 960);
+        expectedContent.put("SSHLauncher.java:960", 960);
+        expectedContent.put("SSHLauncher.java:971", 971);
+        assertThat(fa.getWarningsTabContents(), is(expectedContent));
+    }
+
+    /**
+     * Builds a job and tests if the findbugs api (with depth=0 parameter set) responds with the expected output.
+     * Difference in whitespaces are ok.
+     */
+    @Test
+    public void xml_api_report_depth_0() throws IOException, SAXException, ParserConfigurationException {
+        final FreeStyleJob job = setupJob("/findbugs_plugin/findbugsXml.xml", FindbugsPublisher.class, "findbugsXml.xml");
+        final Build build = buildJobWithSuccess(job);
+        final String apiUrl = "findbugsResult/api/xml?depth=0";
+        final String expectedXmlPath = "/findbugs_plugin/api_depth_0.xml";
+        assertXmlApiMatchesExpected(build, apiUrl, expectedXmlPath);
     }
 
     /**
