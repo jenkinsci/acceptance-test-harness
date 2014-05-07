@@ -37,12 +37,16 @@ public class GerritTriggerEnv {
     private String hostName;
     private String project;
     private String userHome;
+    //
+    private boolean noProxy;
 
     private GerritTriggerEnv() {
         gerritUser = getEnv("gtGerrituser");
         hostName = getEnv("gtHostname");
         project = getEnv("gtProject");
         userHome = getEnv("gtUserhome");
+        //then,
+        noProxy = getEnvNP("gtNoProxyForHost");
     }
 
     public static GerritTriggerEnv getInstance() {
@@ -60,6 +64,10 @@ public class GerritTriggerEnv {
         return hostName;
     }
 
+    public boolean getNoProxy() {
+        return noProxy;
+    }
+
     public String getProject() {
         return project;
     }
@@ -72,5 +80,9 @@ public class GerritTriggerEnv {
         String env = System.getenv(name);
         assumeNotNull(env);
         return env;
+    }
+
+    private boolean getEnvNP(String name) {
+        return System.getenv(name) != null;
     }
 }
