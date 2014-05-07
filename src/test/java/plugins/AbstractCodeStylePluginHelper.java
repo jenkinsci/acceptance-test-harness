@@ -2,6 +2,7 @@ package plugins;
 
 import org.apache.xerces.jaxp.DocumentBuilderFactoryImpl;
 import org.custommonkey.xmlunit.XMLAssert;
+import org.custommonkey.xmlunit.XMLUnit;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginPostBuildStep;
 import org.jenkinsci.test.acceptance.po.Build;
@@ -66,7 +67,15 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
         return buildJobAndWait(job).shouldSucceed();
     }
 
+    /**
+     * When Given a finished build, an API-Url and a reference XML-File, this method compares if the api call to the
+     * build matches the expected XML-File. Whitespace differences are ignored.
+     * @param build The build, whose api shall be called.
+     * @param apiUrl The API-Url, declares which build API shall be called.
+     * @param expectedXmlPath The Resource-Path to a file, which contains the expected XML
+     */
     protected void assertXmlApiMatchesExpected(Build build, String apiUrl, String expectedXmlPath) throws ParserConfigurationException, SAXException, IOException {
+        XMLUnit.setIgnoreWhitespace(true);
         final String xmlUrl = build.url(apiUrl).toString();
         final DocumentBuilder documentBuilder = DocumentBuilderFactoryImpl.newInstance().newDocumentBuilder();
         final Document result = documentBuilder.parse(xmlUrl);
