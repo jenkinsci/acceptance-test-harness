@@ -1,8 +1,6 @@
 package plugins;
 
-import java.io.File;
-import java.io.IOException;
-
+import com.google.inject.Inject;
 import org.apache.commons.io.FileUtils;
 import org.hamcrest.CoreMatchers;
 import org.jenkinsci.test.acceptance.docker.Docker;
@@ -16,17 +14,19 @@ import org.jenkinsci.test.acceptance.plugins.ftp.FtpGlobalConfig.Site;
 import org.jenkinsci.test.acceptance.plugins.ftp.FtpPublisher;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
-import java.util.Date;
+
+import java.io.File;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-
-import com.google.inject.Inject;
+import java.util.Date;
 
 /**
- Feature: Tests for FTP plugin
- Warning for a working Test of FTP with docker, we need to disable
- RemoteVerification in the FTPClient of Java!
- @author Tobias Meyer
+ * Feature: Tests for FTP plugin
+ * Warning for a working Test of FTP with docker, we need to disable
+ * RemoteVerification in the FTPClient of Java!
+ *
+ * @author Tobias Meyer
  */
 @WithPlugins("scp")
 public class FtpPublishPluginTest extends AbstractJUnitTest {
@@ -35,36 +35,36 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
 
     /**
      * Helper Function to create a temporary empty directory
+     *
      * @return File Descriptor for empty Directory
      * @throws IOException
      */
     public static File createTempDirectory()
-            throws IOException
-    {
+            throws IOException {
         File temp;
 
         temp = File.createTempFile("temp", Long.toString(System.nanoTime()));
 
-        if(!(temp.delete()))
-        {
+        if (!(temp.delete())) {
             throw new IOException("Could not delete temp file: " + temp.getAbsolutePath());
         }
-        temp = new File (temp.getPath() + "d");
+        temp = new File(temp.getPath() + "d");
 
-        if(!(temp.mkdir()))
-        {
+        if (!(temp.mkdir())) {
             throw new IOException("Could not create temp directory: " + temp.getAbsolutePath());
         }
         temp.deleteOnExit();
         return (temp);
     }
+
     /**
      * Helper Class to configure Jenkins.
      * It adds the DockerContainer as FTP Server with the name
+     *
      * @param servername Name to Access Instance
-     * @param ftpd  Docker Instance of the Server
+     * @param ftpd       Docker Instance of the Server
      */
-    public void jenkinsFtpConfigure(String servername,FtpdContainer ftpd) {
+    public void jenkinsFtpConfigure(String servername, FtpdContainer ftpd) {
         jenkins.configure();
         Site s = new FtpGlobalConfig(jenkins).addSite();
         {
@@ -80,21 +80,20 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     @native(docker)
-    Scenario: Configure a job with FTP publishing
-    Given I have installed the "ftp" plugin
-    And a docker fixture "ftpd"
-    And a job
-    When I configure docker fixture as FTP host
-    And I configure the job with one FTP Transfer Set
-    And I configure the Transfer Set
-        With Source Files "odes.txt"
-        And With Remote Directory myfolder/
-    And I copy resource "odes.txt" into workspace
-    And I save the job
-    And I build the job
-    Then the build should succeed
-    And FTP plugin should have published "odes.txt" on docker fixture
+     * @native(docker) Scenario: Configure a job with FTP publishing
+     * Given I have installed the "ftp" plugin
+     * And a docker fixture "ftpd"
+     * And a job
+     * When I configure docker fixture as FTP host
+     * And I configure the job with one FTP Transfer Set
+     *  And I configure the Transfer Set
+     *  With Source Files "odes.txt"
+     * And With Remote Directory myfolder/
+     * And I copy resource "odes.txt" into workspace
+     * And I save the job
+     * And I build the job
+     * Then the build should succeed
+     * And FTP plugin should have published "odes.txt" on docker fixture
      */
     @Native("docker")
     @Test
@@ -103,7 +102,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         Resource cp_file = resource("/ftp_plugin/odes.txt");
 
         FreeStyleJob j = jenkins.jobs.create();
-        jenkinsFtpConfigure("asd",ftpd);
+        jenkinsFtpConfigure("asd", ftpd);
         j.configure();
         {
             j.copyResource(cp_file);
@@ -119,21 +118,20 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     @native(docker)
-     Scenario: Configure a job with FTP publishing
-     Given I have installed the "ftp" plugin
-     And a docker fixture "ftpd"
-     And a job
-     When I configure docker fixture as FTP site
-     And I configure the job with one FTP Transfer Set
-     And I configure the Transfer Set
-         With Source Files "prefix_/test.txt"
-         And With Remote Directory /tmp/
-         And With remove prefix
-     And I save the job
-     And I build the job
-     Then the build should succeed
-     And FTP plugin should have published "test.txt" on docker fixture
+     * @native(docker) Scenario: Configure a job with FTP publishing
+     * Given I have installed the "ftp" plugin
+     * And a docker fixture "ftpd"
+     * And a job
+     * When I configure docker fixture as FTP site
+     * And I configure the job with one FTP Transfer Set
+     * And I configure the Transfer Set
+     *  With Source Files "prefix_/test.txt"
+     *  And With Remote Directory /tmp/
+     * And With remove prefix
+     * And I save the job
+     * And I build the job
+     * Then the build should succeed
+     * And FTP plugin should have published "test.txt" on docker fixture
      */
     @Native("docker")
     @Test
@@ -142,7 +140,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         Resource cp_dir = resource("/ftp_plugin/");
         Resource test = resource("/ftp_plugin/prefix_/test.txt");
         FreeStyleJob j = jenkins.jobs.create();
-        jenkinsFtpConfigure("asd",ftpd);
+        jenkinsFtpConfigure("asd", ftpd);
         j.configure();
         {
             j.copyDir(cp_dir);
@@ -157,23 +155,22 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     @native(docker)
-     Scenario: Configure a job with FTP publishing
-     Given I have installed the "ftp" plugin
-     And a resources Directory "prefix_/"
-        With the file ".exclude"
-     And a docker fixture "ftpd"
-     And a job
-     When I configure docker fixture as FTP site
-     And I configure the job with one FTP Transfer Set
-     And I configure the Transfer Set
-        With Source Files  "prefix_/"
-        And With exclude ".exclude"
-     And I copy resources "prefix_/" into workspace
-     And I save the job
-     And I build the job
-     Then the build should succeed
-     And FTP plugin should have published "prefix_/" without the ".exclude" on docker fixture
+     * @native(docker) Scenario: Configure a job with FTP publishing
+     * Given I have installed the "ftp" plugin
+     * And a resources Directory "prefix_/"
+     * With the file ".exclude"
+     * And a docker fixture "ftpd"
+     * And a job
+     * When I configure docker fixture as FTP site
+     * And I configure the job with one FTP Transfer Set
+     * And I configure the Transfer Set
+     *  With Source Files  "prefix_/"
+     *  And With exclude ".exclude"
+     * And I copy resources "prefix_/" into workspace
+     * And I save the job
+     * And I build the job
+     * Then the build should succeed
+     * And FTP plugin should have published "prefix_/" without the ".exclude" on docker fixture
      */
     @Native("docker")
     @Test
@@ -182,7 +179,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         Resource cp_dir = resource("/ftp_plugin/");
 
         FreeStyleJob j = jenkins.jobs.create();
-        jenkinsFtpConfigure("asd",ftpd);
+        jenkinsFtpConfigure("asd", ftpd);
         j.configure();
         {
             j.copyDir(cp_dir);
@@ -198,20 +195,19 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     @native(docker)
-     Scenario: Configure a job with FTP publishing
-     Given I have installed the "ftp" plugin
-     And a docker fixture "ftpd"
-     And a job
-     When I configure docker fixture as FTP site
-     And I configure the job with one FTP Transfer Set
-     And I configure the Transfer Set
-        With Source Files "prefix_/test.txt,odes.txt"
-     And I copy resources "prefix_/test.txt,odes.txt"  into workspace
-     And I save the job
-     And I build the job
-     Then the build should succeed
-     And FTP plugin should have published "prefix_/test.txt" and "odes.txt"
+     * @native(docker) Scenario: Configure a job with FTP publishing
+     * Given I have installed the "ftp" plugin
+     * And a docker fixture "ftpd"
+     * And a job
+     * When I configure docker fixture as FTP site
+     * And I configure the job with one FTP Transfer Set
+     * And I configure the Transfer Set
+     *  With Source Files "prefix_/test.txt,odes.txt"
+     *  And I copy resources "prefix_/test.txt,odes.txt"  into workspace
+     * And I save the job
+     * And I build the job
+     * Then the build should succeed
+     * And FTP plugin should have published "prefix_/test.txt" and "odes.txt"
      */
     @Native("docker")
     @Test
@@ -220,7 +216,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         Resource cp_dir = resource("/ftp_plugin/");
 
         FreeStyleJob j = jenkins.jobs.create();
-        jenkinsFtpConfigure("asd",ftpd);
+        jenkinsFtpConfigure("asd", ftpd);
         j.configure();
         {
             j.copyDir(cp_dir);
@@ -233,22 +229,22 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         assertTrue(ftpd.pathExist("/tmp/prefix_/test.txt"));
         assertTrue(ftpd.pathExist("/tmp/odes.txt"));
     }
+
     /**
-     @native(docker)
-     Scenario: Configure a job with FTP publishing
-     Given I have installed the "ftp" plugin
-     And a docker fixture "ftpd"
-     And a job
-     When I configure docker fixture as FTP site
-     And I configure the job with one FTP Transfer Set
-     And I configure the Transfer Set
-        With Source Files "te,st.txt;odes.txt"
-        And With Pattern separator [;]+
-     And I copy resources "te,st.txt,odes.txt"  into workspace
-     And I save the job
-     And I build the job
-     Then the build should succeed
-     And FTP plugin should have published "te,st.txt" and "odes.txt"
+     * @native(docker) Scenario: Configure a job with FTP publishing
+     * Given I have installed the "ftp" plugin
+     * And a docker fixture "ftpd"
+     * And a job
+     * When I configure docker fixture as FTP site
+     * And I configure the job with one FTP Transfer Set
+     * And I configure the Transfer Set
+     *  With Source Files "te,st.txt;odes.txt"
+     *  And With Pattern separator [;]+
+     * And I copy resources "te,st.txt,odes.txt"  into workspace
+     * And I save the job
+     * And I build the job
+     * Then the build should succeed
+     * And FTP plugin should have published "te,st.txt" and "odes.txt"
      */
     @Native("docker")
     @Test
@@ -257,7 +253,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         Resource cp_dir = resource("/ftp_plugin/");
 
         FreeStyleJob j = jenkins.jobs.create();
-        jenkinsFtpConfigure("asd",ftpd);
+        jenkinsFtpConfigure("asd", ftpd);
         j.configure();
         {
             j.copyDir(cp_dir);
@@ -271,22 +267,22 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         assertTrue(!ftpd.pathExist("/tmp/te,st.txt"));
         assertTrue(!ftpd.pathExist("/tmp/odes.txt"));
     }
+
     /**
-     @native(docker)
-     Scenario: Configure a job with FTP publishing
-     Given I have installed the "ftp" plugin
-     And a docker fixture "ftpd"
-     And a job
-     When I configure docker fixture as FTP site
-     And I configure the job with one FTP Transfer Set
-     And I configure the Transfer Set
-         With Source Files ".svn,.git,odes.txt"  with FTP plugin
-     And I copy resources "odes.txt" as "odes.txt,.svn,.git" into workspace
-     And I save the job
-     And I build the job
-     Then the build should succeed
-     And FTP plugin should have published "odes.txt"
-     And FTP plugin should have not published  ".svn,.git"
+     * @native(docker) Scenario: Configure a job with FTP publishing
+     * Given I have installed the "ftp" plugin
+     * And a docker fixture "ftpd"
+     * And a job
+     * When I configure docker fixture as FTP site
+     * And I configure the job with one FTP Transfer Set
+     * And I configure the Transfer Set
+     *  With Source Files ".svn,.git,odes.txt"  with FTP plugin
+     *  And I copy resources "odes.txt" as "odes.txt,.svn,.git" into workspace
+     * And I save the job
+     * And I build the job
+     * Then the build should succeed
+     * And FTP plugin should have published "odes.txt"
+     * And FTP plugin should have not published  ".svn,.git"
      */
     @Native("docker")
     @Test
@@ -295,11 +291,11 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         Resource cp_txt = resource("/ftp_plugin/odes.txt");
 
         FreeStyleJob j = jenkins.jobs.create();
-        jenkinsFtpConfigure("asd",ftpd);
+        jenkinsFtpConfigure("asd", ftpd);
         j.configure();
         {
             j.copyResource(cp_txt, ".svn");
-            j.copyResource(cp_txt,"CVS");
+            j.copyResource(cp_txt, "CVS");
             j.copyResource(cp_txt);
             FtpPublisher fp = j.addPublisher(FtpPublisher.class);
             FtpPublisher.Site fps = fp.getDefault();
@@ -312,22 +308,22 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         assertTrue(!ftpd.pathExist("/tmp/CVS"));
 
     }
+
     /**
-     @native(docker)
-     Scenario: Configure a job with FTP publishing
-     Given I have installed the "ftp" plugin
-     And a docker fixture "ftpd"
-     And a job
-     When I configure docker fixture as FTP site
-     And I configure the job with one FTP Transfer Set
-     And I configure the Transfer Set
-        With Source Files ".svn,.git,odes.txt"  with FTP plugin
-        And With No default excludes checked
-     And I copy resources "odes.txt" as "odes.txt,.svn,.git" into workspace
-     And I save the job
-     And I build the job
-     Then the build should succeed
-     And FTP plugin should have published  .svn/,.git"
+     * @native(docker) Scenario: Configure a job with FTP publishing
+     * Given I have installed the "ftp" plugin
+     * And a docker fixture "ftpd"
+     * And a job
+     * When I configure docker fixture as FTP site
+     *  And I configure the job with one FTP Transfer Set
+     *  And I configure the Transfer Set
+     * With Source Files ".svn,.git,odes.txt"  with FTP plugin
+     * And With No default excludes checked
+     * And I copy resources "odes.txt" as "odes.txt,.svn,.git" into workspace
+     * And I save the job
+     * And I build the job
+     * Then the build should succeed
+     * And FTP plugin should have published  .svn/,.git"
      */
     @Native("docker")
     @Test
@@ -336,7 +332,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         Resource cp_txt = resource("/ftp_plugin/odes.txt");
 
         FreeStyleJob j = jenkins.jobs.create();
-        jenkinsFtpConfigure("asd",ftpd);
+        jenkinsFtpConfigure("asd", ftpd);
         j.configure();
         {
             j.copyResource(cp_txt, ".svn");
@@ -353,34 +349,34 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         assertTrue(ftpd.pathExist("/tmp/.svn"));
         assertTrue(ftpd.pathExist("/tmp/CVS"));
     }
+
     /**
-     @native(docker)
-     Scenario: Configure a job with FTP publishing
-     Given I have installed the "ftp" plugin
-     And a docker fixture "ftpd"
-     And a job
-     When I configure docker fixture as FTP site
-     And I configure the job with one FTP Transfer Set
-     And I configure the Transfer Set
-        With Source Files "empty/,odes.txt" with FTP plugin
-        And With Make empty dirs  Checked
-     And I create the directory "empty/" into workspace
-     And I save the job
-     And I build the job
-     Then the build should succeed
-     And FTP plugin should have published  "empty/" and "odes.txt"
+     * @native(docker) Scenario: Configure a job with FTP publishing
+     * Given I have installed the "ftp" plugin
+     * And a docker fixture "ftpd"
+     * And a job
+     * When I configure docker fixture as FTP site
+     * And I configure the job with one FTP Transfer Set
+     * And I configure the Transfer Set
+     *  With Source Files "empty/,odes.txt" with FTP plugin
+     *  And With Make empty dirs  Checked
+     * And I create the directory "empty/" into workspace
+     * And I save the job
+     * And I build the job
+     * Then the build should succeed
+     * And FTP plugin should have published  "empty/" and "odes.txt"
      */
     @Native("docker")
     @Test
     public void publish_with_empty_directory() throws IOException, InterruptedException {
         FtpdContainer ftpd = docker.start(FtpdContainer.class);
         Resource cp_txt = resource("/ftp_plugin/odes.txt");
-        File tmpDir=createTempDirectory();
+        File tmpDir = createTempDirectory();
         File nestedEmptyDir = new File(tmpDir + "/empty");
         nestedEmptyDir.mkdir();
 
         FreeStyleJob j = jenkins.jobs.create();
-        jenkinsFtpConfigure("asd",ftpd);
+        jenkinsFtpConfigure("asd", ftpd);
         j.configure();
         {
             j.copyResource(cp_txt);
@@ -396,33 +392,33 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         assertTrue(ftpd.pathExist("odes.txt"));
         assertTrue(ftpd.pathExist("/tmp/odes.txt"));
     }
+
     /**
-     @native(docker)
-     Scenario: Configure a job with FTP publishing
-     Given I have installed the "ftp" plugin
-     And a docker fixture "ftpd"
-     And a job
-     When I configure docker fixture as FTP site
-     And I configure the job with one FTP Transfer Set
-     And I configure the Transfer Set
-     With Source Files "empty/,odes.txt" with FTP plugin
-     And I create the directory "empty/" into workspace
-     And I save the job
-     And I build the job
-     Then the build should succeed
-     And FTP plugin should have not published "empty/" and "odes.txt"
+     * @native(docker) Scenario: Configure a job with FTP publishing
+     * Given I have installed the "ftp" plugin
+     * And a docker fixture "ftpd"
+     * And a job
+     * When I configure docker fixture as FTP site
+     * And I configure the job with one FTP Transfer Set
+     *  And I configure the Transfer Set
+     *  With Source Files "empty/,odes.txt" with FTP plugin
+     * And I create the directory "empty/" into workspace
+     * And I save the job
+     * And I build the job
+     * Then the build should succeed
+     * And FTP plugin should have not published "empty/" and "odes.txt"
      */
     @Native("docker")
     @Test
     public void publish_without_empty_directory() throws IOException, InterruptedException {
         FtpdContainer ftpd = docker.start(FtpdContainer.class);
         Resource cp_txt = resource("/ftp_plugin/odes.txt");
-        File tmpDir=createTempDirectory();
+        File tmpDir = createTempDirectory();
         File nestedEmptyDir = new File(tmpDir + "/empty");
         nestedEmptyDir.mkdir();
 
         FreeStyleJob j = jenkins.jobs.create();
-        jenkinsFtpConfigure("asd",ftpd);
+        jenkinsFtpConfigure("asd", ftpd);
         j.configure();
         {
             j.copyResource(cp_txt);
@@ -438,21 +434,21 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         assertTrue(ftpd.pathExist("/tmp/odes.txt"));
         assertTrue(!ftpd.pathExist("/tmp/empty"));
     }
+
     /**
-     @native(docker)
-     Scenario: Configure a job with FTP publishing
-     Given I have installed the "ftp" plugin
-     And a docker fixture "ftpd"
-     And a job
-     When I configure docker fixture as FTP site
-     And I configure the job with one FTP Transfer Set
-     And I configure the Transfer Set
-        With SourceFiles "odes.txt" and "flat\odes.txt" with FTP plugin
-     And I copy resources "ftp_plugin/"
-     And I save the job
-     And I build the job
-     Then the build should succeed
-     And FTP plugin should have published "odes.txt" and "flat/odes.txt"
+     * @native(docker) Scenario: Configure a job with FTP publishing
+     * Given I have installed the "ftp" plugin
+     * And a docker fixture "ftpd"
+     * And a job
+     * When I configure docker fixture as FTP site
+     * And I configure the job with one FTP Transfer Set
+     * And I configure the Transfer Set
+     *  With SourceFiles "odes.txt" and "flat\odes.txt" with FTP plugin
+     *  And I copy resources "ftp_plugin/"
+     * And I save the job
+     * And I build the job
+     * Then the build should succeed
+     * And FTP plugin should have published "odes.txt" and "flat/odes.txt"
      */
     @Native("docker")
     @Test
@@ -461,7 +457,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         Resource cp_dir = resource("/ftp_plugin/");
 
         FreeStyleJob j = jenkins.jobs.create();
-        jenkinsFtpConfigure("asd",ftpd);
+        jenkinsFtpConfigure("asd", ftpd);
         j.configure();
         {
             j.copyDir(cp_dir);
@@ -476,20 +472,19 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     @native(docker)
-     Scenario: Configure a job with FTP publishing
-     Given I have installed the "ftp" plugin
-     And a docker fixture "ftpd"
-     And a job
-     When I configure docker fixture as FTP site
-     And I configure the job with one FTP Transfer Set
-     And I configure the Transfer Set
-        With SourceFiles "odes.txt" and "flat\odes.txt" with FTP plugin
-        And With Flatten files Checked
-     And I copy resources "ftp_plugin/"
-     And I save the job
-     And I build the job
-     Then the build should fail
+     * @native(docker) Scenario: Configure a job with FTP publishing
+     * Given I have installed the "ftp" plugin
+     * And a docker fixture "ftpd"
+     * And a job
+     * When I configure docker fixture as FTP site
+     * And I configure the job with one FTP Transfer Set
+     * And I configure the Transfer Set
+     *  With SourceFiles "odes.txt" and "flat\odes.txt" with FTP plugin
+     *  And With Flatten files Checked
+     * And I copy resources "ftp_plugin/"
+     * And I save the job
+     * And I build the job
+     * Then the build should fail
      */
     @Native("docker")
     @Test
@@ -498,7 +493,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         Resource cp_dir = resource("/ftp_plugin/");
 
         FreeStyleJob j = jenkins.jobs.create();
-        jenkinsFtpConfigure("asd",ftpd);
+        jenkinsFtpConfigure("asd", ftpd);
         j.configure();
         {
             j.copyDir(cp_dir);
@@ -512,21 +507,20 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     @native(docker)
-     Scenario: Configure a job with FTP publishing
-     Given I have installed the "ftp" plugin
-     And a docker fixture "ftpd"
-     And a job
-     When I configure docker fixture as FTP site
-     And I configure the job with one FTP Transfer Set
-     And I configure the Transfer Set
-         With SourceFiles "odes.txt" with FTP plugin
-         And With Remote directory  is a date format Checked "yyyyMMddHH"
-     And I copy resources "odes.txt" into workspace
-     And I save the job
-     And I build the job
-     Then the build should succeed
-     And FTP plugin should have published "odes.txt" under 'yyyyMMddHH'
+     * @native(docker) Scenario: Configure a job with FTP publishing
+     * Given I have installed the "ftp" plugin
+     * And a docker fixture "ftpd"
+     * And a job
+     * When I configure docker fixture as FTP site
+     * And I configure the job with one FTP Transfer Set
+     * And I configure the Transfer Set
+     *  With SourceFiles "odes.txt" with FTP plugin
+     *  And With Remote directory  is a date format Checked "yyyyMMddHH"
+     * And I copy resources "odes.txt" into workspace
+     * And I save the job
+     * And I build the job
+     * Then the build should succeed
+     * And FTP plugin should have published "odes.txt" under 'yyyyMMddHH'
      */
     @Native("docker")
     @Test
@@ -535,7 +529,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         Resource cp_txt = resource("/ftp_plugin/odes.txt");
 
         FreeStyleJob j = jenkins.jobs.create();
-        jenkinsFtpConfigure("asd",ftpd);
+        jenkinsFtpConfigure("asd", ftpd);
         j.configure();
         {
             j.copyResource(cp_txt);
@@ -553,33 +547,32 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     @native(docker)
-     Scenario: Configure a job with FTP publishing
-     Given I have installed the "ftp" plugin
-     And a docker fixture "ftpd"
-        And I Upload "oldfile.txt" to the ftp Server
-     And a job
-     And I configure the job with one FTP Transfer Set
-     And I configure the Transfer Set
-        With SourceFiles "myresources" with FTP plugin
-        And With Clean remote
-     And I copy resources "myresources" into workspace
-     And I save the job
-     And I build the job
-     Then the build should succeed
-     And FTP plugin should have published "myresources"
-     And the RemoteDIR should not contain "old.txt"
+     * @native(docker) Scenario: Configure a job with FTP publishing
+     * Given I have installed the "ftp" plugin
+     * And a docker fixture "ftpd"
+     * And I Upload "oldfile.txt" to the ftp Server
+     * And a job
+     * And I configure the job with one FTP Transfer Set
+     * And I configure the Transfer Set
+     *  With SourceFiles "myresources" with FTP plugin
+     *  And With Clean remote
+     * And I copy resources "myresources" into workspace
+     * And I save the job
+     * And I build the job
+     * Then the build should succeed
+     * And FTP plugin should have published "myresources"
+     * And the RemoteDIR should not contain "old.txt"
      */
     @Native("docker")
     @Test
     public void publish_with_clean_remote() throws IOException, InterruptedException {
         FtpdContainer ftpd = docker.start(FtpdContainer.class);
         Resource cp_txt = resource("/ftp_plugin/odes.txt");
-        Resource old_txt=resource("/ftp_plugin/old.txt");
+        Resource old_txt = resource("/ftp_plugin/old.txt");
         ftpd.uploadBinary(old_txt.asFile().getAbsolutePath(), "/tmp/old.txt");
 
         FreeStyleJob j = jenkins.jobs.create();
-        jenkinsFtpConfigure("asd",ftpd);
+        jenkinsFtpConfigure("asd", ftpd);
         j.configure();
         {
             j.copyResource(cp_txt);
@@ -595,22 +588,22 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
     }
 
     //This test will probably only make sense if we use *nix and a windows system for example!
+
     /**
-     @native(docker)
-     Scenario: Configure a job with FTP publishing
-     Given I have installed the "ftp" plugin
-     And a docker fixture "ftpd"
-     And a job
-     When I configure docker fixture as FTP site
-     And I configure the job with one FTP Transfer Set
-     And I configure the Transfer Set
-         With SourceFiles "mac-ascii.txt,windows-ascii.txt,linux-ascii.txt" with FTP plugin
-         And With ASCII mode
-     And I copy resources "mac-ascii.txt,windows-ascii.txt,linux-ascii.txt" into workspace
-     And I save the job
-     And I build the job
-     Then the build should succeed
-     And FTP plugin should have published "mac-ascii.txt,windows-ascii.txt,linux-ascii.txt" with correct lining
+     * @native(docker) Scenario: Configure a job with FTP publishing
+     * Given I have installed the "ftp" plugin
+     * And a docker fixture "ftpd"
+     * And a job
+     * When I configure docker fixture as FTP site
+     * And I configure the job with one FTP Transfer Set
+     * And I configure the Transfer Set
+     *  With SourceFiles "mac-ascii.txt,windows-ascii.txt,linux-ascii.txt" with FTP plugin
+     *  And With ASCII mode
+     * And I copy resources "mac-ascii.txt,windows-ascii.txt,linux-ascii.txt" into workspace
+     * And I save the job
+     * And I build the job
+     * Then the build should succeed
+     * And FTP plugin should have published "mac-ascii.txt,windows-ascii.txt,linux-ascii.txt" with correct lining
      */
     @Native("docker")
     @Test
@@ -619,40 +612,38 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
 
     }
 
-    //more transfer set
     /**
-     @native(docker)
-     Scenario: Configure a job with FTP publishing
-     Given I have installed the "ftp" plugin
-     And a docker fixture "ftpd"
-     And a job
-     When I configure docker fixture as FTP site
-     And I configure the job with three FTP Transfer Sets
-     And I configure the Transfer Set 1
-        With SourceFiles  odes.txt
-     And I configure the Transfer Set 2
-        With SourceFiles  odes2.txt
-     And I configure the Transfer Set 3
-        With SourceFiles  odes3.txt
-     And I copy resources odes.txt,odes2.txt,odes3.txt into workspace
-     And I save the job
-     And I build the job
-     Then the build should succeed
-     And FTP plugin should have published odes.txt,odes2.txt,odes3.txt on docker fixture
+     * @native(docker) Scenario: Configure a job with FTP publishing
+     * Given I have installed the "ftp" plugin
+     * And a docker fixture "ftpd"
+     * And a job
+     * When I configure docker fixture as FTP site
+     * And I configure the job with three FTP Transfer Sets
+     * And I configure the Transfer Set 1
+     *  With SourceFiles  odes.txt
+     * And I configure the Transfer Set 2
+     *  With SourceFiles  odes2.txt
+     * And I configure the Transfer Set 3
+     *  With SourceFiles  odes3.txt
+     * And I copy resources odes.txt,odes2.txt,odes3.txt into workspace
+     * And I save the job
+     * And I build the job
+     * Then the build should succeed
+     * And FTP plugin should have published odes.txt,odes2.txt,odes3.txt on docker fixture
      */
     @Native("docker")
     @Test
     public void publish_multiple_sets() throws IOException, InterruptedException {
         FtpdContainer ftpd = docker.start(FtpdContainer.class);
-        Resource cp_txt=resource("/ftp_plugin/odes.txt");
+        Resource cp_txt = resource("/ftp_plugin/odes.txt");
 
         FreeStyleJob j = jenkins.jobs.create();
-        jenkinsFtpConfigure("asd",ftpd);
+        jenkinsFtpConfigure("asd", ftpd);
         j.configure();
         {
             j.copyResource(cp_txt);
-            j.copyResource(cp_txt,"odes2.txt");
-            j.copyResource(cp_txt,"odes3.txt");
+            j.copyResource(cp_txt, "odes2.txt");
+            j.copyResource(cp_txt, "odes3.txt");
             FtpPublisher fp = j.addPublisher(FtpPublisher.class);
             FtpPublisher.Site fps = fp.getDefault();
             fps.getDefaultTransfer().sourceFile.set("odes.txt");
@@ -666,39 +657,37 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         assertTrue(ftpd.pathExist("/tmp/odes3.txt"));
     }
 
-//Multiple Server
     /**
-     @native(docker)
-     Scenario: Configure a job with FTP publishing
-     Given I have installed the "ftp" plugin
-     And 2 docker fixtures "ftpd"
-     And a job
-     When I configure docker docker1 as FTP site
-     And I configure docker  docker2 as FTP site
-     And I configure the job with docker1 Server
-     And one FTP Transfer Set
-     And I configure the Transfer Set
-        With SourceFiles odes.txt
-     And I Add Server docker2
-     And one FTP Transfer Set
-         And I configure the Transfer Set
-         With SourceFiles odes.txt
-     And I copy resources odes.txt  into workspace
-     And I save the job
-     And I build the job
-     Then the build should succeed
-     And FTP plugin should have published my set of files at all docker fixtures
+     * @native(docker) Scenario: Configure a job with FTP publishing
+     * Given I have installed the "ftp" plugin
+     * And 2 docker fixtures "ftpd"
+     * And a job
+     * When I configure docker docker1 as FTP site
+     * And I configure docker  docker2 as FTP site
+     * And I configure the job with docker1 Server
+     * And one FTP Transfer Set
+     * And I configure the Transfer Set
+     *  With SourceFiles odes.txt
+     * And I Add Server docker2
+     * And one FTP Transfer Set
+     * And I configure the Transfer Set
+     *  With SourceFiles odes.txt
+     * And I copy resources odes.txt  into workspace
+     * And I save the job
+     * And I build the job
+     * Then the build should succeed
+     * And FTP plugin should have published my set of files at all docker fixtures
      */
     @Native("docker")
     @Test
     public void publish_multiple_servers() throws IOException, InterruptedException {
         FtpdContainer ftpd = docker.start(FtpdContainer.class);
         FtpdContainer ftpd2 = docker.start(FtpdContainer.class);
-        Resource cp_txt=resource("/ftp_plugin/odes.txt");
+        Resource cp_txt = resource("/ftp_plugin/odes.txt");
 
         FreeStyleJob j = jenkins.jobs.create();
-        jenkinsFtpConfigure("docker1",ftpd);
-        jenkinsFtpConfigure("docker2",ftpd2);
+        jenkinsFtpConfigure("docker1", ftpd);
+        jenkinsFtpConfigure("docker2", ftpd2);
         j.configure();
         {
             j.copyResource(cp_txt);
