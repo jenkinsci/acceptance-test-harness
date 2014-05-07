@@ -27,7 +27,8 @@ import java.io.FileReader;
 import java.io.IOException;
 
 /**
- Feature: Tests for SSH plugin
+ * Feature: Tests for SSH plugin
+ *
  */
 @WithPlugins("publish-over-ssh")
 public class PublishOverSSHPluginTest extends AbstractJUnitTest {
