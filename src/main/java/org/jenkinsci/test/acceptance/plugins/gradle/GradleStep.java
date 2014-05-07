@@ -24,11 +24,11 @@
 package org.jenkinsci.test.acceptance.plugins.gradle;
 
 import org.jenkinsci.test.acceptance.po.BuildStep;
-import org.jenkinsci.test.acceptance.po.BuildStepPageObject;
 import org.jenkinsci.test.acceptance.po.Control;
+import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Job;
 
-@BuildStepPageObject("Invoke Gradle script")
+@Describable("Invoke Gradle script")
 public class GradleStep extends BuildStep {
     public final Control file = control("buildFile");
     public final Control dir = control("rootBuildScriptDir");

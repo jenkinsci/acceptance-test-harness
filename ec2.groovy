@@ -3,6 +3,7 @@ import org.jenkinsci.test.acceptance.controller.*
 import org.jenkinsci.test.acceptance.guice.TestScope
 import org.jenkinsci.test.acceptance.machine.Ec2Provider
 import org.jenkinsci.test.acceptance.machine.JenkinsProvider
+import org.jenkinsci.test.acceptance.machine.RemoteJenkinsProvider
 import org.jenkinsci.test.acceptance.machine.MachineProvider
 import org.jenkinsci.test.acceptance.machine.MultitenancyMachineProvider
 import org.jenkinsci.test.acceptance.resolver.JenkinsDownloader
@@ -44,10 +45,10 @@ masters = subworld {
 }
 
 joc = subworld {
-    bind JenkinsController toInstance new WinstoneController(localWar)
+    bind JenkinsController toInstance new WinstoneController(localWar, JenkinsController.downloadPathElement())
 }
 
 bind SlaveProvider toProvider slaves[SshSlaveProvider]
-bind(JenkinsProvider).named("masters").toProvider(masters[JenkinsProvider])
+bind(JenkinsProvider).named("masters").toProvider(masters[RemoteJenkinsProvider])
 bind(JenkinsController).named("joc").toProvider(joc[JenkinsController]).in(TestScope)
 

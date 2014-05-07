@@ -1,6 +1,8 @@
 package org.jenkinsci.test.acceptance.po;
 
 import com.google.inject.Injector;
+
+import org.jenkinsci.test.acceptance.junit.Resource;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
@@ -111,6 +113,10 @@ public class Control extends CapybaraPortingLayer {
 
         // move the focus away from the select control to fire onchange event
         e.sendKeys(Keys.TAB);
+    }
+
+    public void upload(Resource res) {
+        resolve().sendKeys(res.asFile().getAbsolutePath());
     }
 
     public interface Owner {

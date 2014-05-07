@@ -7,7 +7,7 @@ import org.jenkinsci.test.acceptance.slave.SlaveProvider;
 /**
  * Provider for {@link Machine}.
  *
- * {@link JenkinsProvider} and {@link SlaveProvider}s rely on {@link MachineProvider}
+ * {@link RemoteJenkinsProvider} and {@link SlaveProvider}s rely on {@link MachineProvider}
  * to acquire computers/VMs/containers to run Jenkins-under-test and slaves in.
  *
  * @author Vivek Pandey

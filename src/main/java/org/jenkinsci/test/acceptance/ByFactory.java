@@ -43,6 +43,10 @@ public class ByFactory {
         return xpath(".//*[@path='%s']", String.format(path, args));
     }
 
+    public By name(String name, Object... args) {
+        return xpath(".//*[@name='%s']", String.format(name, args));
+    }
+
     /**
      * Capybara's :link selector.
      *
@@ -51,6 +55,16 @@ public class ByFactory {
      */
     public By link(String locator) {
         return xpath(".//A[@href][@id='%1$s' or text()='%1$s' or @title='%1$s' or .//img[@alt='%1$s']]",locator);
+    }
+
+    /**
+     * Link href selector.
+     *
+     * @param locator
+     *      href of the link
+     */
+    public By href(String locator){
+        return xpath(".//A[@href='%1$s']", locator);
     }
 
     /**
@@ -77,7 +91,7 @@ public class ByFactory {
      *      Text, id, title.
      */
     public By input(String locator) {
-        return xpath(fieldXPath("*[name()='INPUT' or name()='TEXTAREA' or name()='SELECT']",locator));
+        return xpath(fieldXPath("*[name()='INPUT' or name()='input' or name()='textarea' or name()='TEXTAREA' or name()='select' or name()='SELECT']",locator));
     }
 
     private static String fieldXPath(String base, String locator) {
@@ -93,7 +107,7 @@ public class ByFactory {
      */
     public By button(String locator) {
         return xpath(
-                ".//input[./@type = 'submit' or ./@type = 'reset' or ./@type = 'image' or ./@type = 'button'][((./@id = '%1$s' or contains(./@value, '%1$s')) or contains(./@title, '%1$s'))] | .//input[./@type = 'image'][contains(./@alt, '%1$s')] | .//button[(((./@id = '%1$s' or contains(./@value, '%1$s')) or contains(normalize-space(string(.)), '%1$s')) or contains(./@title, '%1$s'))] | .//input[./@type = 'image'][contains(./@alt, '%1$s')]"
+                ".//input[./@type = 'submit' or ./@type = 'reset' or ./@type = 'image' or ./@type = 'button'][((./@id = '%1$s' or ./@name = '%1$s' or contains(./@value, '%1$s')) or contains(./@title, '%1$s'))] | .//input[./@type = 'image'][contains(./@alt, '%1$s')] | .//button[(((./@id = '%1$s' or contains(./@value, '%1$s')) or contains(normalize-space(string(.)), '%1$s')) or contains(./@title, '%1$s'))] | .//input[./@type = 'image'][contains(./@alt, '%1$s')]"
                 ,locator);
     }
 

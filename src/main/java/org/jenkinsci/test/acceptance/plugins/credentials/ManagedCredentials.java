@@ -2,6 +2,7 @@ package org.jenkinsci.test.acceptance.plugins.credentials;
 
 import org.jenkinsci.test.acceptance.po.ContainerPageObject;
 import org.jenkinsci.test.acceptance.po.Jenkins;
+import org.openqa.selenium.WebElement;
 
 /**
  * "Manage Credentials" page.
@@ -18,10 +19,13 @@ public class ManagedCredentials extends ContainerPageObject {
      * Adds a new credential and bind it to the page ae object.
      */
     public <T extends Credential> T add(Class<T> type) {
-        String sut_type = type.getAnnotation(CredentialPageObject.class).value();
+        final WebElement dropDown = find(by.path("/domainCredentials/hetero-list-add[credentials]"));
 
-        selectDropdownMenu(sut_type,
-            find(by.path("/domainCredentials/hetero-list-add[credentials]")));
+        findCaption(type, new Resolver() {
+            @Override protected void resolve(String caption) {
+                selectDropdownMenu(caption, dropDown);
+            }
+        });
 
         String path = last(by.xpath("//div[@name='credentials']")).getAttribute("path");
 

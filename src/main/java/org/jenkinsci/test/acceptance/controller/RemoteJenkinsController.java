@@ -1,7 +1,8 @@
 package org.jenkinsci.test.acceptance.controller;
 
 import jnr.ffi.LibraryLoader;
-import org.apache.commons.io.input.TeeInputStream;
+import org.codehaus.plexus.util.FileUtils;
+import org.jenkinsci.test.acceptance.Ssh;
 import org.jenkinsci.test.acceptance.machine.Machine;
 import org.jenkinsci.test.acceptance.utils.GNUCLibrary;
 import org.jenkinsci.utils.process.CommandBuilder;
@@ -11,14 +12,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Collections;
 
-import static java.lang.System.out;
+import static java.lang.System.*;
 
 /**
  * A {@link JenkinsController} that runs on a remote machine. It can be injected in tests using
@@ -44,7 +43,7 @@ public class RemoteJenkinsController extends JenkinsController {
     private final String jenkinsHome;
     private final int httpPort;
     private final int controlPort;
-    private LogWatcher logWatcher;
+    private JenkinsLogWatcher logWatcher;
     private final String jenkinsWarLocation;
     protected ProcessInputStream process;
     private final File logFile;
@@ -76,10 +75,11 @@ public class RemoteJenkinsController extends JenkinsController {
          **/
         System.out.println(String.format("[[ATTACHMENT|%s]]", logFile.getAbsolutePath()));
 
-        this.logWatcher = new LogWatcher(new TeeInputStream(process, new FileOutputStream(logFile)), Collections.EMPTY_MAP);
+        logWatcher = new JenkinsLogWatcher(process, logFile);
+        logWatcher.start();
         try {
-            this.logWatcher.waitTillReady(true);
-        } catch (InterruptedException e) {
+            this.logWatcher.waitTillReady();
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -111,12 +111,46 @@ public class RemoteJenkinsController extends JenkinsController {
     }
 
     @Override
-    public void diagnose(Throwable cause) {
+    public void populateJenkinsHome(File template, boolean clean) throws IOException {
+        boolean running = isRunning();
+        try (Ssh connection = machine.connect()) {
+            stop();
+            if (clean) {
+                connection.executeRemoteCommand("rm -rf "+ Ssh.escape(jenkinsHome) + "; mkdir -p " + Ssh.escape(jenkinsHome));
+            }
+            if (template.isDirectory()) {
+                File archive = File.createTempFile("home", "template.zip", new File(WORKSPACE));
+                try {
+                connection.copyTo(archive.getAbsolutePath(), ".home-template.zip", jenkinsHome);
+                } finally {
+                    FileUtils.forceDelete(archive);
+                }
+            } else if (template.isFile()) {
+                connection.copyTo(template.getAbsolutePath(), ".home-template.zip", jenkinsHome);
+            }
+            if (template.exists()) {
+                String templateArchive =
+                        Ssh.escape(jenkinsHome + (jenkinsHome.endsWith("/") ? "" : "/") + ".home-template.zip");
+                connection.executeRemoteCommand(
+                        "unzip -o " + templateArchive + " -d " + Ssh.escape(jenkinsHome) + " && rm -f "
+                                + templateArchive);
+            }
+        } catch (Exception e) {
+            throw new IOException(e.getMessage(), e);
+        } finally {
+            if (running && !isRunning()) {
+                start();
+            }
+        }
+    }
+
+    @Override
+    public void diagnose(Throwable cause) throws IOException {
         out.println("Error: "+cause.getMessage());
         cause.printStackTrace();
         out.println("It looks like there was an error, here's the console from Jenkins:");
         out.println("--------------------------------------------------------------------------");
-        out.println(logWatcher.fullLog());
+        out.println(FileUtils.fileRead(logFile));
     }
 
     @Override

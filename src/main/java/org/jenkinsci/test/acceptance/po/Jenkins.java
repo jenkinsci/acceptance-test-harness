@@ -1,17 +1,20 @@
 package org.jenkinsci.test.acceptance.po;
 
-import com.google.inject.Injector;
 import hudson.util.VersionNumber;
-import org.jenkinsci.test.acceptance.controller.JenkinsController;
-import org.jenkinsci.test.acceptance.guice.TestScope;
 
-import javax.inject.Inject;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.inject.Inject;
+
+import org.jenkinsci.test.acceptance.controller.JenkinsController;
+import org.jenkinsci.test.acceptance.guice.TestScope;
+
+import com.google.inject.Injector;
 
 /**
  * Top-level object that acts as an entry point to various systems.
@@ -76,10 +79,28 @@ public class Jenkins extends Node {
     }
 
     /**
+     * Visit login page.
+     */
+    public Login login(){
+        Login login = new Login(this);
+        visit(login.url);
+        return login;
+    }
+
+    /**
      * Access the plugin manager page object
      */
     public PluginManager getPluginManager() {
         return new PluginManager(this);
+    }
+
+    public void restart() {
+        visit("restart");
+        clickButton("Yes");
+
+        do {
+            sleep(1000);
+        } while (driver.getPageSource().contains("Please wait"));
     }
 
     public JenkinsLogger getLogger(String name) {
@@ -90,6 +111,16 @@ public class Jenkins extends Node {
         return JenkinsLogger.create(this,name,levels);
     }
 
+    public <T extends PageObject> T getPluginPage(Class<T> type) {
+        String urlChunk = type.getAnnotation(PluginPageObject.class).value();
+
+        return newInstance(type, injector, url("plugin/%s/", urlChunk));
+    }
+
+    @Override
+    public String getName() {
+        return "(master)";
+    }
 
     private static final Pattern VERSION = Pattern.compile("^About Jenkins ([^-]*)");
 }

@@ -24,11 +24,11 @@
 package org.jenkinsci.test.acceptance.plugins.envinject;
 
 import org.jenkinsci.test.acceptance.po.BuildStep;
-import org.jenkinsci.test.acceptance.po.BuildStepPageObject;
 import org.jenkinsci.test.acceptance.po.Control;
+import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Job;
 
-@BuildStepPageObject("Inject environment variables")
+@Describable("Inject environment variables")
 public class EnvInjectStep extends BuildStep {
     public final Control properties = control("propertiesContent");
 

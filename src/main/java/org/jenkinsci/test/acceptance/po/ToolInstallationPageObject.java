@@ -34,5 +34,15 @@ import org.jvnet.hudson.annotation_indexer.Indexed;
 @Target(ElementType.TYPE)
 @Indexed
 public @interface ToolInstallationPageObject {
-    String value();
+    /**
+     * Tool installer name used for global configuration.
+     */
+    String name();
+
+    /**
+     * Pattern to be logged once updates arrive.
+     *
+     * Clients should not interact with this ToolInstalltion before updates was loaded.
+     */
+    String installer();
 }

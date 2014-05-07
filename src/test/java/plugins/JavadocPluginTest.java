@@ -35,7 +35,7 @@ public class JavadocPluginTest extends AbstractJUnitTest {
         FreeStyleJob job = jenkins.jobs.create();
         setup(job);
 
-        job.queueBuild().shouldSucceed();
+        job.startBuild().shouldSucceed();
         assertThat(job, hasAction("Javadoc"));
 
         assertJavadoc(job);
@@ -57,7 +57,7 @@ public class JavadocPluginTest extends AbstractJUnitTest {
         MatrixProject job = jenkins.jobs.create(MatrixProject.class);
         setup(job);
 
-        job.queueBuild().shouldSucceed();
+        job.startBuild().shouldSucceed();
         MatrixConfiguration def = job.getConfiguration("default");
         assertThat(def, hasAction("Javadoc"));
 

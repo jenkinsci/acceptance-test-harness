@@ -1,16 +1,17 @@
 package plugins;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.Native;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.ant.AntBuildStep;
-import org.jenkinsci.test.acceptance.plugins.ant.AntGlobalConfig;
+import org.jenkinsci.test.acceptance.plugins.ant.AntInstallation;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
-import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.concurrent.Callable;
+import java.util.regex.Pattern;
 
 /**
  * Plugin test for Ant.
@@ -20,12 +21,10 @@ import java.util.concurrent.Callable;
 @SuppressWarnings("CdiInjectionPointsInspection")
 @WithPlugins("ant")
 public class AntPluginTest extends AbstractJUnitTest {
-    AntGlobalConfig antgc;
     FreeStyleJob job;
 
     @Before
     public void setUp() {
-        antgc = new AntGlobalConfig(jenkins);
         job = jenkins.jobs.create(FreeStyleJob.class);
     }
 
@@ -74,11 +73,7 @@ public class AntPluginTest extends AbstractJUnitTest {
     public void autoInstallAnt() {
         jenkins.getPluginManager().checkForUpdates();
 
-        JenkinsConfig c = jenkins.getConfigPage();
-        c.configure();
-        c.addTool("Add Ant");
-        antgc.addAutoInstallation("ant_1.8.4", "1.8.4");
-        c.save();
+        AntInstallation.install(jenkins, "ant_1.8.4", "1.8.4");
 
         buildHelloWorld("ant_1.8.4").shouldContainsConsoleOutput(
                 "Unpacking http://archive.apache.org/dist/ant/binaries/apache-ant-1.8.4-bin.zip"
@@ -103,23 +98,30 @@ public class AntPluginTest extends AbstractJUnitTest {
        Then console output should contain "fake ant at /tmp/fake-ant/bin/ant"
        And the build should succeed
      */
-    @Test
+    @Test @Native("ant")
     public void locallyInstalledAnt() {
-        JenkinsConfig c = jenkins.getConfigPage();
-        c.configure();
-        c.addTool("Add Ant");
-        antgc.addFakeInstallation("local_ant_1.8.4", "/tmp/fake-ant");
-        c.save();
+        String expectedVersion = localAntVersion();
 
-        buildHelloWorld("local_ant_1.8.4").shouldContainsConsoleOutput(
-            "fake ant at /tmp/fake-ant/bin/ant"
-        );
+        jenkins.configure();
+        AntInstallation ant = jenkins.getConfigPage().addTool(AntInstallation.class);
+        ant.name.set("native_ant");
+        ant.useNative();
+        jenkins.save();
+
+        job.configure();
+        job.copyResource(resource("ant/echo-helloworld.xml"), "build.xml");
+        AntBuildStep step = job.addBuildStep(AntBuildStep.class);
+        step.antName.select("native_ant");
+        step.targets.set("-version");
+        job.save();
+
+        job.startBuild().shouldSucceed().shouldContainsConsoleOutput(Pattern.quote(expectedVersion));
     }
 
     private Build buildHelloWorld(final String name) {
         job.configure(new Callable<Object>() {
-            public Object call() {
-                job.addCreateFileStep("build.xml", resource("ant/echo-helloworld.xml").asText());
+            @Override public Object call() {
+                job.copyResource(resource("ant/echo-helloworld.xml"), "build.xml");
                 AntBuildStep ant = job.addBuildStep(AntBuildStep.class);
                 if (name!=null)
                     ant.antName.select(name);
@@ -128,6 +130,10 @@ public class AntPluginTest extends AbstractJUnitTest {
             }
         });
 
-        return job.queueBuild().shouldSucceed().shouldContainsConsoleOutput("Hello World");
+        return job.startBuild().shouldSucceed().shouldContainsConsoleOutput("Hello World");
+    }
+
+    private String localAntVersion() {
+        return jenkins.runScript("'ant -version'.execute().text");
     }
 }

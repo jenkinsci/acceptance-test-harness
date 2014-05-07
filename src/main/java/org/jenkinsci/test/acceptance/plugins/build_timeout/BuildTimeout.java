@@ -3,6 +3,7 @@ package org.jenkinsci.test.acceptance.plugins.build_timeout;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.PageArea;
+import org.openqa.selenium.NoSuchElementException;
 
 /**
  * Build timeout plugin setting in the job config page.
@@ -10,11 +11,9 @@ import org.jenkinsci.test.acceptance.po.PageArea;
 public class BuildTimeout extends PageArea {
     private final Job job;
 
-    public final Control enable = control("");
-
-    public final Control writingDescription = control("writingDescription");
-
     public final Control failBuild = control("failBuild");
+
+    private final Control addAction = control("hetero-list-add[operationList]");
 
     public BuildTimeout(Job job) {
         super(job, "/hudson-plugins-build_timeout-BuildTimeoutWrapper");
@@ -25,15 +24,33 @@ public class BuildTimeout extends PageArea {
         ensureActive();
         choose("Absolute");
         fillIn("_.timeoutMinutes",timeout);
+        abortBuild();
     }
 
     public void abortWhenStuck() {
         ensureActive();
         choose("Likely stuck");
+        abortBuild();
     }
 
-    public void ensureActive() {
+    private void ensureActive() {
         job.ensureConfigPage();
-        enable.check();
+        control("").check();
+    }
+
+    public void abortBuild() {
+        if (addAction != null) {
+            addAction.click();
+            clickLink("Abort the build");
+        }
+    }
+
+    public void writeDescription() {
+        try {
+            control("writingDescription").check();
+        } catch (NoSuchElementException ex) {
+            addAction.click();
+            clickLink("Writing the build description");
+        }
     }
 }

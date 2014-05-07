@@ -1,10 +1,10 @@
 package core;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.Bug;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.JUnitPublisher;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.WebElement;
 
@@ -39,7 +39,7 @@ public class JUnitTestPublisherTest extends AbstractJUnitTest {
         j.addPublisher(JUnitPublisher.class).testResults.set("*.xml");
         j.save();
 
-        j.queueBuild().shouldSucceed().open();
+        j.startBuild().shouldSucceed().open();
 
         clickLink("Test Result");
         assertThat(driver, hasContent("0 failures"));
@@ -66,7 +66,7 @@ public class JUnitTestPublisherTest extends AbstractJUnitTest {
         j.addPublisher(JUnitPublisher.class).testResults.set("*.xml");
         j.save();
 
-        Build b = j.queueBuild();
+        Build b = j.startBuild();
         assertThat(b.getResult(), is("UNSTABLE"));
 
         b.open();
@@ -91,7 +91,7 @@ public class JUnitTestPublisherTest extends AbstractJUnitTest {
        And "TestNG.testScore" error summary should match "expected:<42> but was:<1>"
        And "TestNG.testScore" error summary should match "expected:<42> but was:<2>"
      */
-    @Test @Ignore("doesn't seem to work with 1.532.2")
+    @Test @Bug("22833")
     public void publish_rest_of_parameterized_tests() {
         FreeStyleJob j = jenkins.jobs.create();
         j.configure();
@@ -100,7 +100,7 @@ public class JUnitTestPublisherTest extends AbstractJUnitTest {
         j.addPublisher(JUnitPublisher.class).testResults.set("*.xml");
         j.save();
 
-        Build b = j.queueBuild();
+        Build b = j.startBuild();
         assertThat(b.getResult(), is("UNSTABLE"));
 
         b.open();

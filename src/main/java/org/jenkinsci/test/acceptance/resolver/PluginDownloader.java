@@ -28,10 +28,12 @@ public class PluginDownloader implements JenkinsResolver {
 
     @Override
     public void materialize(Machine machine, String path) {
-        Ssh ssh = machine.connect();
-        if(!JenkinsDownloader.remoteFileExists(ssh.getConnection(),path,null)){
-            ssh.executeRemoteCommand("mkdir -p "+ JenkinsDownloader.escapeForSsh(FileUtils.dirname(path)));
-            ssh.executeRemoteCommand(String.format("wget -q -O %s %s",JenkinsDownloader.escapeForSsh(path), JenkinsDownloader.escapeForSsh(pluginPath)));
+        try (Ssh ssh = machine.connect()) {
+            if (!JenkinsDownloader.remoteFileExists(ssh.getConnection(), path, null)) {
+                ssh.executeRemoteCommand("mkdir -p " + Ssh.escape(FileUtils.dirname(path)));
+                ssh.executeRemoteCommand(String.format("wget -q -O %s %s", Ssh.escape(path),
+                        Ssh.escape(pluginPath)));
+            }
         }
     }
 

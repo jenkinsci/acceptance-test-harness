@@ -2,13 +2,15 @@ package org.jenkinsci.test.acceptance.po;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Injector;
+
+import org.kohsuke.randname.RandomNameGenerator;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
 import javax.inject.Inject;
+
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Encapsulates a model in Jenkins and wraps interactions with it.
@@ -34,15 +36,23 @@ public abstract class PageObject extends CapybaraPortingLayer {
      */
     public final URL url;
 
-    private static final AtomicLong IOTA = new AtomicLong(System.currentTimeMillis());
+    private static final RandomNameGenerator RND = new RandomNameGenerator();
 
     public PageObject(Injector injector, URL url) {
         super(injector);
         this.url = url;
     }
 
+    protected PageObject(PageObject context, URL url) {
+        this(context.injector, url);
+    }
+
     public static String createRandomName() {
-        return "rand_name_"+IOTA.incrementAndGet();
+        return RND.next();
+    }
+
+    public Jenkins getJenkins() {
+        return injector.getInstance(Jenkins.class);
     }
 
     /**

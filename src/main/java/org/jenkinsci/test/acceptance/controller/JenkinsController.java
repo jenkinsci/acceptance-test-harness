@@ -1,14 +1,19 @@
 package org.jenkinsci.test.acceptance.controller;
 
-import com.cloudbees.sdk.extensibility.ExtensionPoint;
+import java.io.Closeable;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URL;
+
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.jenkinsci.test.acceptance.guice.AutoCleaned;
 
-import java.io.*;
-import java.net.URL;
+import com.cloudbees.sdk.extensibility.ExtensionPoint;
 
 /**
  * Starts/stops Jenkins and exposes where it is running.
@@ -28,7 +33,9 @@ public abstract class JenkinsController implements Closeable, AutoCleaned {
      * Note that this directory might not exist on the Jenkins master, since it can be
      * running on a separate computer.
      */
-    protected static final String WORKSPACE = System.getenv("WORKSPACE") != null? System.getenv("WORKSPACE") : new File(System.getProperty("user.dir"), "target").getPath();
+    protected static final String WORKSPACE = System.getenv("WORKSPACE") != null
+            ? System.getenv("WORKSPACE")
+            : new File(System.getProperty("user.dir"), "target").getPath();
 
     protected static final String JENKINS_DEBUG_LOG = WORKSPACE + "/last_test.log";
 
@@ -125,14 +132,37 @@ public abstract class JenkinsController implements Closeable, AutoCleaned {
      * Perform controller specific diagnostics for test failure. Defaults to no-op.
      * @param cause Failure cause
      */
-    public void diagnose(Throwable cause) {}
+    public void diagnose(Throwable cause) throws IOException {}
+
+    /**
+     * Populates the Jenkins Home with the specified template (which can be either a ZIP file or a directory). If
+     * Jenkins is already running then it will be restarted.
+     *
+     * @param template The template (either a ZIP file or a directory).
+     */
+    public void populateJenkinsHome(File template) throws IOException {
+        populateJenkinsHome(template, true);
+    }
+
+    /**
+     * Populates the Jenkins Home with the specified template (which can be either a ZIP file or a directory). If
+     * Jenkins is already running then it will be restarted.
+     *
+     * @param template The template (either a ZIP file or a directory).
+     * @param clean    if {@code true} then the home will be wiped clean before the template is applied. If false then
+     *                 the template will simply overwrite the existing (if any) home.
+     */
+    public abstract void populateJenkinsHome(File template, boolean clean) throws IOException;
 
     /**
      * Downloads the latest version of the form-element-path plugin that we use for testing.
+     *
+     * @deprecated is automatically resolved for each {@link JenkinsController}.
      */
+    @Deprecated
     public static File downloadPathElement() {
         String source = "http://updates.jenkins-ci.org/latest/form-element-path.hpi";
-        File target =  new File(WORKSPACE,"path-element.hpi");
+        File target = new File(WORKSPACE,"path-element.hpi");
         if (!target.exists()) {
             try(FileOutputStream fos = new FileOutputStream(target)) {
                 HttpClient client = new HttpClient();

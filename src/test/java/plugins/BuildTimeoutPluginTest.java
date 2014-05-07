@@ -40,11 +40,11 @@ public class BuildTimeoutPluginTest extends AbstractJUnitTest {
 
             BuildTimeout t = new BuildTimeout(j);
             t.abortAfter(3);
-            t.writingDescription.check();
+            t.writeDescription();
         }
         j.save();
 
-        j.queueBuild().waitUntilFinished(300).shouldAbort();
+        j.startBuild().waitUntilFinished(300).shouldAbort();
     }
 
     /**
@@ -74,7 +74,7 @@ public class BuildTimeoutPluginTest extends AbstractJUnitTest {
         j.save();
 
         for (int i=0; i<3; i++)
-            j.queueBuild().shouldSucceed();
+            j.startBuild().shouldSucceed();
 
         j.configure();
         {
@@ -82,11 +82,11 @@ public class BuildTimeoutPluginTest extends AbstractJUnitTest {
 
             BuildTimeout t = new BuildTimeout(j);
             t.abortWhenStuck();
-            t.writingDescription.check();
+            t.writeDescription();
         }
         j.save();
 
-        j.queueBuild().waitUntilFinished(300).shouldAbort();
+        j.startBuild().waitUntilFinished(300).shouldAbort();
     }
 
 }

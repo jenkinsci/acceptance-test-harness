@@ -1,11 +1,13 @@
 package org.jenkinsci.test.acceptance.po;
 
 import com.google.inject.Injector;
+
 import org.jenkinsci.test.acceptance.ByFactory;
 import org.junit.Assert;
 import org.openqa.selenium.*;
 
 import javax.inject.Inject;
+
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.util.List;
@@ -78,7 +80,7 @@ public class CapybaraPortingLayer extends Assert {
      */
     public WebElement waitFor(final By selector) {
         return waitForCond(new Callable<WebElement>() {
-            public WebElement call() {
+            @Override public WebElement call() {
                 try {
                     return find(selector);
                 } catch (NoSuchElementException e) {
@@ -131,11 +133,11 @@ public class CapybaraPortingLayer extends Assert {
         try {
             for (int i=0; i<10; i++) {
                 WebElement e = driver.findElement(selector);
-                if (e.isDisplayed())
+                if (isDisplayed(e))
                     return e;
 
                 for (WebElement f : driver.findElements(selector)) {
-                    if (f.isDisplayed())
+                    if (isDisplayed(f))
                         return f;
                 }
 
@@ -147,6 +149,17 @@ public class CapybaraPortingLayer extends Assert {
         } catch (NoSuchElementException x) {
             // this is often the best place to set a breakpoint
             throw new NoSuchElementException("Unable to locate "+selector+" in "+driver.getCurrentUrl(),x);
+        }
+    }
+
+    /**
+     * Consider stale elements not displayed.
+     */
+    private boolean isDisplayed(WebElement e) {
+        try {
+            return e.isDisplayed();
+        } catch (StaleElementReferenceException _) {
+            return false;
         }
     }
 
@@ -274,5 +287,35 @@ public class CapybaraPortingLayer extends Assert {
         } catch (ReflectiveOperationException e) {
             throw new AssertionError("Failed to invoke a constructor of "+type, e);
         }
+    }
+
+    protected <T> T findCaption(Class<?> type, Finder<T> call) {
+        String[] captions = type.getAnnotation(Describable.class).value();
+
+        RuntimeException cause = new NoSuchElementException("None of the captions exists");
+        for (String caption: captions) {
+            try {
+                T out = call.find(caption);
+                if (out != null) return out;
+            } catch (RuntimeException ex) {
+                cause = ex;
+            }
+        }
+
+        throw cause;
+    }
+
+    protected abstract class Finder<R> {
+        protected final CapybaraPortingLayer outer = CapybaraPortingLayer.this;
+        protected abstract R find(String caption);
+    }
+
+    protected abstract class Resolver extends Finder<Object> {
+        @Override protected final Object find(String caption) {
+            resolve(caption);
+            return this;
+        }
+
+        protected abstract void resolve(String caption);
     }
 }

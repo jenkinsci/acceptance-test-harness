@@ -1,4 +1,4 @@
-.jenkins_test
+.jenkins_test/
 jenkins*.war
 *.swp
 *.swn
@@ -19,3 +19,8 @@ target
 .settings/
 jenkins*home/
 jenkins*home.log
+.idea/
+*.iml
+*.iws
+*.ipr
+jenkins-plugins/

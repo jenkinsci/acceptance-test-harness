@@ -24,11 +24,11 @@
 package org.jenkinsci.test.acceptance.plugins.groovy;
 
 import org.jenkinsci.test.acceptance.po.BuildStep;
-import org.jenkinsci.test.acceptance.po.BuildStepPageObject;
 import org.jenkinsci.test.acceptance.po.CodeMirror;
+import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Job;
 
-@BuildStepPageObject("Execute system Groovy script")
+@Describable("Execute system Groovy script")
 public class SystemGroovyStep extends BuildStep {
 
     public SystemGroovyStep(Job parent, String path) {

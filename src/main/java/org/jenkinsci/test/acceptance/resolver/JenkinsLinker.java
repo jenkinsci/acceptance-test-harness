@@ -18,7 +18,8 @@ public class JenkinsLinker implements JenkinsResolver{
 
     @Override
     public void materialize(Machine machine, String path) {
-        Ssh ssh = machine.connect();
-        ssh.executeRemoteCommand(String.format("ln -s `pwd`/%s %s", jenkinsWarLocation, path));
+        try (Ssh ssh = machine.connect()) {
+            ssh.executeRemoteCommand(String.format("ln -s `pwd`/%s %s", jenkinsWarLocation, path));
+        }
     }
 }

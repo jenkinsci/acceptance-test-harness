@@ -24,13 +24,13 @@
 package org.jenkinsci.test.acceptance.plugins.git;
 
 import org.jenkinsci.test.acceptance.po.Control;
+import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.PageArea;
 import org.jenkinsci.test.acceptance.po.Scm;
-import org.jenkinsci.test.acceptance.po.ScmPageObject;
 import org.openqa.selenium.NoSuchElementException;
 
-@ScmPageObject("Git")
+@Describable("Git")
 public class GitScm extends Scm {
     private final Control url = control("userRemoteConfigs/url");
     public final Control branch = control("branches/name");
@@ -69,7 +69,7 @@ public class GitScm extends Scm {
 
     public <T extends Behaviour> T addBehaviour(Class<T> type) {
         control("hetero-list-add[extensions]").click();
-        return newInstance(type, this, path + "/extensions");   // FIXME: find the last extension added
+        return newInstance(type, this, "extensions");   // FIXME: find the last extension added
     }
 
     private void advanced() {
@@ -82,7 +82,7 @@ public class GitScm extends Scm {
 
     public static class Behaviour extends PageArea {
         public Behaviour(GitScm git, String path) {
-            super(git.injector, path);
+            super(git, path);
         }
     }
 

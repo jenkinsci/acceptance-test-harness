@@ -28,6 +28,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation.*;
 import static org.hamcrest.CoreMatchers.*;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
@@ -50,7 +51,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
 
     @Test
     public void autoinstall_maven_for_freestyle_job() {
-        installMaven("maven_3.0.4", "3.0.4");
+        installMaven(jenkins, "maven_3.0.4", "3.0.4");
 
         FreeStyleJob job = jenkins.jobs.create();
         job.configure();
@@ -59,7 +60,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
         step.targets.set("-version");
         job.save();
 
-        job.queueBuild().shouldSucceed()
+        job.startBuild().shouldSucceed()
                 .shouldContainsConsoleOutput("Apache Maven 3.0.4")
                 .shouldContainsConsoleOutput("Unpacking http://archive.apache.org/dist/maven/binaries/apache-maven-3.0.4-bin.zip")
         ;
@@ -67,7 +68,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
 
     @Test
     public void autoinstall_maven2_for_freestyle_job() {
-        installMaven("maven_2.2.1", "2.2.1");
+        installMaven(jenkins, "maven_2.2.1", "2.2.1");
 
         FreeStyleJob job = jenkins.jobs.create();
         job.configure();
@@ -76,7 +77,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
         step.targets.set("-version");
         job.save();
 
-        job.queueBuild().shouldSucceed()
+        job.startBuild().shouldSucceed()
                 .shouldContainsConsoleOutput("Apache Maven 2.2.1")
                 .shouldContainsConsoleOutput("Unpacking http://archive.apache.org/dist/maven/binaries/apache-maven-2.2.1-bin.zip")
         ;
@@ -99,7 +100,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
         step.targets.set("--version");
         job.save();
 
-        Build build = job.queueBuild().shouldSucceed();
+        Build build = job.startBuild().shouldSucceed();
 
         build.shouldContainsConsoleOutput(Pattern.quote(expectedVersion));
     }
@@ -113,7 +114,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
 
     @Test
     public void use_local_maven_repo() {
-        installSomeMaven();
+        installSomeMaven(jenkins);
 
         FreeStyleJob job = jenkins.jobs.create();
         job.configure();
@@ -122,12 +123,12 @@ public class MavenPluginTest extends AbstractJUnitTest {
         step.useLocalRepository();
         job.save();
 
-        job.queueBuild().shouldSucceed().shouldContainsConsoleOutput("-Dmaven.repo.local=([^\\n]*)/.repository");
+        job.startBuild().shouldSucceed().shouldContainsConsoleOutput("-Dmaven.repo.local=([^\\n]*)/.repository");
     }
 
     @Test
     public void set_maven_options() {
-        installSomeMaven();
+        installSomeMaven(jenkins);
 
         MavenModuleSet job = jenkins.jobs.create(MavenModuleSet.class);
         job.configure();
@@ -136,12 +137,12 @@ public class MavenPluginTest extends AbstractJUnitTest {
         job.options("-verbose");
         job.save();
 
-        job.queueBuild().shouldContainsConsoleOutput("\\[Loaded java.lang.Object");
+        job.startBuild().waitUntilFinished().shouldContainsConsoleOutput("\\[Loaded java.lang.Object");
     }
 
     @Test
     public void set_global_maven_options() {
-        installSomeMaven();
+        installSomeMaven(jenkins);
 
         jenkins.configure();
         new MavenProjectConfig(jenkins.getConfigPage()).opts.set("-verbose");;
@@ -153,12 +154,12 @@ public class MavenPluginTest extends AbstractJUnitTest {
         job.goals.set("clean");
         job.save();
 
-        job.queueBuild().shouldSucceed().shouldContainsConsoleOutput("\\[Loaded java.lang.Object");
+        job.startBuild().shouldSucceed().shouldContainsConsoleOutput("\\[Loaded java.lang.Object");
     }
 
     @Test @Bug("JENKINS-10539") @Since("1.527")
     public void preserve_backslash_in_property() {
-        installSomeMaven();
+        installSomeMaven(jenkins);
 
         FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class);
         job.configure();
@@ -173,7 +174,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
         HashMap<String, String> params = new HashMap<String, String>();
         params.put("CMD", "\"C:\\\\System\"");
         params.put("PROPERTY", "C:\\Windows");
-        job.queueBuild(params).shouldSucceed()
+        job.startBuild(params).shouldSucceed()
                 .shouldContainsConsoleOutput("cmdline.property=C:\\\\System")
                 .shouldContainsConsoleOutput("property.property=C:\\\\Windows")
         ;
@@ -181,7 +182,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
 
     @Test
     public void build_multimodule() {
-        installSomeMaven();
+        installSomeMaven(jenkins);
 
         MavenModuleSet job = jenkins.jobs.create(MavenModuleSet.class);
         job.configure();
@@ -189,7 +190,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
         job.goals.set("package");
         job.save();
 
-        job.queueBuild().shouldSucceed()
+        job.startBuild().shouldSucceed()
                 .shouldContainsConsoleOutput("Building root 1.0")
                 .shouldContainsConsoleOutput("Building module_a 2.0")
                 .shouldContainsConsoleOutput("Building module_b 3.0")
@@ -213,17 +214,5 @@ public class MavenPluginTest extends AbstractJUnitTest {
         build.open();
         find(by.xpath("//a[@href='%s/']", name)).click();
         assertThat(driver.getCurrentUrl(), equalTo(build.module(name).url.toExternalForm()));
-    }
-
-    private void installSomeMaven() {
-        installMaven("default_maven", "3.0.5");
-    }
-
-    private void installMaven(String name, String version) {
-        jenkins.configure();
-        MavenInstallation maven = jenkins.getConfigPage().addTool(MavenInstallation.class);
-        maven.name.set(name);
-        maven.installVersion(version);
-        jenkins.save();
     }
 }

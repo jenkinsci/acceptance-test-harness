@@ -1,0 +1,84 @@
+#
+# Base ldif for directory entries
+#
+# Make sure to rebuild the docker image to reflect changes in this file!
+#
+# To generate crypted passwords use "slappasswd"
+#
+dn: dc=jenkins-ci,dc=org
+objectClass: top
+objectClass: dcObject
+objectClass: organization
+o: ___sub_organization_here___
+dc: ___sub_dcone_here___
+
+dn: ou=People,___sub_domain_here___
+objectClass: top
+objectClass: organizationalUnit
+ou: People
+
+dn: ou=Groups,___sub_domain_here___
+objectClass: top
+objectClass: organizationalUnit
+ou: Groups
+
+dn: ou=Applications,___sub_domain_here___
+objectClass: top
+objectClass: organizationalUnit
+ou: Applications
+
+## Users
+# jenkins, password is root
+dn: uid=jenkins,___sub_domain_here___
+objectClass: inetOrgPerson
+objectClass: top
+cn: Jenkins the Butler
+sn: Jenkins
+uid: jenkins
+mail: jenkins@jenkins-ci.org
+userPassword: {SSHA}cyMRP9VIG82CXvuXzCZwpmKF4m8E/4zC
+
+# hudson, password is root
+dn: uid=hudson,ou=People,___sub_domain_here___
+objectClass: inetOrgPerson
+objectClass: top
+cn: Hudson Hornet
+sn: Hudson
+uid: hudson
+mail: hudson@jenkins-ci.org
+userPassword: {SSHA}cyMRP9VIG82CXvuXzCZwpmKF4m8E/4zC
+
+# homer, password is cisco
+dn: uid=homer,ou=People,___sub_domain_here___
+objectClass: inetOrgPerson
+objectClass: top
+cn: Homer Simpson
+sn: Simpson
+uid: homer
+mail: homer@springfield.com
+userPassword: {SSHA}Z4cXOqwiALeW3mVd87gdBaejZjOQAJlm
+
+## Groups
+# ldap1, members: jenkins, hudson
+dn: cn=ldap1,ou=Groups,___sub_domain_here___
+objectClass: top
+objectClass: posixGroup
+cn: ldap1
+gidNumber: 3000
+memberUid: jenkins
+memberUid: hudson
+
+# ldap2, members: jenkins, homer
+dn: cn=ldap2,ou=Groups,___sub_domain_here___
+objectClass: top
+objectClass: posixGroup
+cn: ldap2
+gidNumber: 4000
+memberUid: jenkins
+memberUid: homer
+
+
+
+
+
+

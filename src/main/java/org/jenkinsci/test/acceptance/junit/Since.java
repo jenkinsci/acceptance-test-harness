@@ -46,7 +46,10 @@ public @interface Since {
 
                 private void check(Since s) {
                     if (s!=null) {
-                        Assume.assumeTrue("Requires "+s.value(), jenkins.getVersion().compareTo(new VersionNumber(s.value()))>=0);
+                        VersionNumber actual = jenkins.getVersion();
+                        VersionNumber expected = new VersionNumber(s.value());
+                        System.out.printf("Version check: actual=%s, expected=%s\n",actual,expected);
+                        Assume.assumeTrue("Requires "+s.value(), actual.compareTo(expected)>=0);
                     }
                 }
             };

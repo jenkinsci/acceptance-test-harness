@@ -23,17 +23,16 @@
  */
 package org.jenkinsci.test.acceptance.po;
 
-import java.net.URL;
-
 import com.google.inject.Injector;
+
+import java.net.URL;
 
 /**
  * Common base for Jenkins and Slave.
  *
  * @author ogondza
  */
-public class Node extends ContainerPageObject {
-
+public abstract class Node extends ContainerPageObject {
     protected Node(Jenkins j, URL url) {
         super(j, url);
     }
@@ -42,13 +41,18 @@ public class Node extends ContainerPageObject {
         super(i, url);
     }
 
+    public abstract String getName();
+
     public String runScript(String script) {
         visit("script");
-        sleep(500);
         CodeMirror cm = new CodeMirror(this, "/script");
         cm.set(script);
         clickButton("Run");
 
-        return find(by.css("h2 + pre")).getText();
+        return find(by.css("h2 + pre")).getText().replaceAll("^Result: ", "");
+    }
+
+    public BuildHistory getBuildHistory() {
+        return new BuildHistory(this);
     }
 }
