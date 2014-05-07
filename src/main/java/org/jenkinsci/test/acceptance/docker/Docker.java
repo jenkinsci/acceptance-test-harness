@@ -2,19 +2,23 @@ package org.jenkinsci.test.acceptance.docker;
 
 import com.google.inject.Inject;
 import org.apache.commons.io.FileUtils;
+import org.jenkinsci.test.acceptance.utils.SHA1Sum;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.junit.internal.AssumptionViolatedException;
 import org.jvnet.hudson.annotation_indexer.Index;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.Formatter;
 import java.util.List;
 
+import sun.security.provider.SHA;
 import static java.lang.System.getenv;
 
 
@@ -111,13 +115,23 @@ public class Docker {
                     dockerFileDir = new File(resourceDir.getPath());
                 }
                 FileUtils.copyDirectory(dockerFileDir, dir);
-                return build("jenkins/" + f.id(), dir);
+
+                String dockerFileHash = getDockerFileHash(dockerFileDir);
+                String shortedDockerFileHash = dockerFileHash.substring(0,12);
+
+                return build("jenkins/" + f.id() + "_" +  shortedDockerFileHash, dir);
             } finally {
                 FileUtils.deleteDirectory(dir);
             }
         } catch (InterruptedException|IOException e) {
             throw new IOException("Failed to build image: "+fixture,e);
         }
+    }
+
+    private String getDockerFileHash(File dockerFileDir) {
+        File dockerFile = new File (dockerFileDir.getAbsolutePath()+"/Dockerfile");
+        SHA1Sum dockerFileHash = new SHA1Sum(dockerFile);
+        return dockerFileHash.getSha1String();
     }
 
     /**
@@ -139,7 +153,7 @@ public class Docker {
     /**
      * Finds a fixture class that has the specified ID.
      *
-     * @see DockerFixture#id()
+     * @see org.jenkinsci.test.acceptance.docker.DockerFixture#id()
      */
     public Class<? extends DockerContainer> findFixture(String id) throws IOException {
         for (Class<?> t : Index.list(DockerFixture.class, classLoader, Class.class)) {
@@ -148,4 +162,6 @@ public class Docker {
         }
         throw new IllegalArgumentException("No such docker fixture found: "+id);
     }
+
+
 }
