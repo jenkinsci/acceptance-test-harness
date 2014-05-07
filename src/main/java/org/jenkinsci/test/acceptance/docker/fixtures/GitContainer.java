@@ -12,7 +12,7 @@ import org.jenkinsci.test.acceptance.docker.DockerFixture;
 @DockerFixture(id = "git", ports = 22)
 public class GitContainer extends DockerContainer {
 
-    private static final String REPO_DIR = "/home/git/git-plugin.git";
+    private static final String REPO_DIR = "/home/git/gitRepo.git";
 
     public URL getUrl() throws IOException {
         return new URL("http://localhost:" + port(22));

@@ -33,6 +33,19 @@ CMD /usr/sbin/sshd -D -e
 RUN git config --global user.email "git@gitplugin.com" && \
     git config --global user.name "Mister Git"
 
-# add git repository
-ADD /repository/git-plugin.git /home/git/git-plugin.git
+# create folder for git repository data and add files
+RUN mkdir /home/git/repoData
+ADD repoData /home/git/repoData
 
+# create git repository and add all files
+RUN cd /home/git/repoData && \
+    git init && \
+    git add -A && \
+    git commit -am "Initial commit"
+
+# create branch svn for checkout_branch() test
+RUN cd /home/git/repoData && \
+    git branch svn
+
+# clone git repository so that the tests can access it
+RUN git clone --bare /home/git/repoData /home/git/gitRepo.git

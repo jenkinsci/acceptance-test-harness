@@ -70,7 +70,7 @@ public class GitPluginTest extends AbstractJUnitTest {
         job.useScm(GitScm.class)
                 .url(repoUrl)
                 .credentials(USERNAME);
-        job.addShellStep("test -f pom.xml");
+        job.addShellStep("test -f init.txt");
         job.save();
 
         job.startBuild().shouldSucceed();
@@ -94,7 +94,7 @@ public class GitPluginTest extends AbstractJUnitTest {
                 .url(repoUrl)
                 .credentials(USERNAME)
                 .remoteName("custom_origin");
-        job.addShellStep("test -f pom.xml && git remote -v");
+        job.addShellStep("test -f init.txt && git remote -v");
         job.save();
 
         job.startBuild().shouldSucceed().shouldContainsConsoleOutput("custom_origin\\s+" + repoUrl);
@@ -118,7 +118,7 @@ public class GitPluginTest extends AbstractJUnitTest {
                 .url(repoUrl)
                 .credentials(USERNAME)
                 .localDir("local_dir");
-        job.addShellStep("cd local_dir && test -f pom.xml");
+        job.addShellStep("cd local_dir && test -f init.txt");
         job.save();
 
         job.startBuild().shouldSucceed();
@@ -130,7 +130,7 @@ public class GitPluginTest extends AbstractJUnitTest {
                 .url(container.getRepoUrl())
                 .credentials(USERNAME);
         job.pollScm().schedule("* * * * *");
-        job.addShellStep("test -f pom.xml");
+        job.addShellStep("test -f init.txt");
         job.save();
 
         sleep(70000);
