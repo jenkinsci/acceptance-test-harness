@@ -1,5 +1,7 @@
 package org.jenkinsci.test.acceptance.po;
 
+import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
@@ -10,10 +12,12 @@ import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata;
 import javax.inject.Named;
 import javax.inject.Provider;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 
-import static java.util.Arrays.*;
+import static java.util.Arrays.asList;
 
 /**
  * Page object for plugin manager.
@@ -36,7 +40,8 @@ public class PluginManager extends ContainerPageObject {
      * (better performing when Jenkins is closer to the test execution), or install plugins from within Jenkins
      * (more accurate testing.)
      */
-    @Inject(optional=true) @Named("uploadPlugins")
+    @Inject(optional = true)
+    @Named("uploadPlugins")
     public boolean uploadPlugins = true;
 
     public PluginManager(Jenkins jenkins) {
@@ -69,7 +74,7 @@ public class PluginManager extends ContainerPageObject {
     public boolean isInstalled(String... shortNames) {
         visit("installed");
         for (String n : shortNames) {
-            if (getElement(by.xpath("//input[@url='plugin/%s']", n))==null)
+            if (getElement(by.xpath("//input[@url='plugin/%s']", n)) == null)
                 return false;
         }
         return true;
@@ -77,7 +82,8 @@ public class PluginManager extends ContainerPageObject {
 
     private void waitForIsInstalled(final String... shortNames) {
         waitForCond(new Callable<Boolean>() {
-            @Override public Boolean call() throws Exception {
+            @Override
+            public Boolean call() throws Exception {
                 return isInstalled(shortNames);
             }
         }, 180);
@@ -86,37 +92,39 @@ public class PluginManager extends ContainerPageObject {
     /**
      * Installs specified plugins.
      *
-     * @deprecated
-     *      Please be encouraged to use {@link WithPlugins} annotations to statically declare
-     *      the required plugins you need. If you really do need to install plugins in the middle
-     *      of a test, as opposed to be in the beginning, then this is the right method.
-     *
-     *      The deprecation marker is to call attention to {@link WithPlugins}. This method
-     *      is not really deprecated.
+     * @deprecated Please be encouraged to use {@link WithPlugins} annotations to statically declare
+     * the required plugins you need. If you really do need to install plugins in the middle
+     * of a test, as opposed to be in the beginning, then this is the right method.
+     * <p/>
+     * The deprecation marker is to call attention to {@link WithPlugins}. This method
+     * is not really deprecated.
      */
     public void installPlugin(String... shortNames) {
-        if (isInstalled(shortNames))
-            return;
+        final Map<String, String> mapShortNamesVersion = getMapShortNamesVersion(shortNames);
+        //shortNames without a version annotation
+        final String[] shortNameValues = mapShortNamesVersion.keySet().toArray(new String[0]);
 
+        if (isInstalled(shortNameValues))
+            return;
         if (uploadPlugins) {
-            for (PluginMetadata p : ucmd.get().transitiveDependenciesOf(asList(shortNames))) {
+            for (PluginMetadata p : ucmd.get().transitiveDependenciesOf(asList(shortNameValues))) {
                 try {
                     if (!isInstalled(p.name)) {
-                        p.uploadTo(jenkins,injector);
+                        p.uploadTo(jenkins, injector, mapShortNamesVersion.get(p.name));
                     }
-                } catch (IOException|ArtifactResolutionException e) {
-                    throw new AssertionError("Failed to upload plugin: "+p,e);
+                } catch (IOException | ArtifactResolutionException e) {
+                    throw new AssertionError("Failed to upload plugin: " + p, e);
                 }
             }
 
-            waitForIsInstalled(shortNames);
+            waitForIsInstalled(shortNameValues);
         } else {
             if (!updated)
                 checkForUpdates();
 
             OUTER:
-            for (final String n : shortNames) {
-                for (int attempt=0; attempt<2; attempt++) {// # of installations attempted, considering retries
+            for (final String n : shortNameValues) {
+                for (int attempt = 0; attempt < 2; attempt++) {// # of installations attempted, considering retries
                     visit("available");
                     check(find(by.xpath("//input[starts-with(@name,'plugin.%s.')]", n)));
 
@@ -137,4 +145,48 @@ public class PluginManager extends ContainerPageObject {
             }
         }
     }
+
+    /**
+     * Parses the Version from a wpValue.
+     * Versions can be added to the shotName via "@"
+     * If no version is added, method returnes null
+     *
+     * @param wpValue Value of the WithPlugin annotation
+     * @return version or null
+     */
+    private String getVersionFromWpValue(String wpValue) {
+        final Iterable<String> split = Splitter.on("@").split(wpValue);
+        if (Iterables.size(split) == 1) {
+            return null;
+        } else {
+            return Iterables.getLast(split);
+        }
+    }
+
+    /**
+     * Parses the shortName from a wpValue.
+     *
+     * @param wpValue Value of the WithPlugin annotation
+     * @return shortName
+     */
+    private String getShortNameFromWpValue(String wpValue) {
+        final Iterable<String> split = Splitter.on("@").split(wpValue);
+        return split.iterator().next();
+    }
+
+    /**
+     * Generates a map with shortNames and version.
+     * Version is null if not declared.
+     *
+     * @param wpValues Values of the WithPlugin annotation
+     * @return Map with Key:shortName Value:Version
+     */
+    private Map<String, String> getMapShortNamesVersion(String... wpValues) {
+        Map<String, String> shortNamesVersion = new HashMap<>();
+        for (String wpValue : wpValues) {
+            shortNamesVersion.put(getShortNameFromWpValue(wpValue), getVersionFromWpValue(wpValue));
+        }
+        return shortNamesVersion;
+    }
+
 }
