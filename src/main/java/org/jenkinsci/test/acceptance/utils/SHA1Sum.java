@@ -13,27 +13,29 @@ public class SHA1Sum {
     private String sha1String = null;
     private File inFile = null;
 
-    private SHA1Sum(){}
-
     public SHA1Sum(File inFile) {
         if (inFile.isFile()) {
-            if(inFile.canRead()) {
+            if (inFile.canRead()) {
                 this.inFile = inFile;
-                this.sha1 = this.createSha1(this.inFile);
+                try {
+                    this.sha1 = this.createSha1(this.inFile);
+                } catch (NoSuchAlgorithmException | IOException e) {
+                    throw new IllegalStateException(e);
+                }
                 this.sha1String = this.convertByteToString(this.sha1);
             } else {
                 throw new RuntimeException("You are trying to make a sha1sum of a read protected file!");
             }
-        }else{
+        } else {
             throw new RuntimeException("You are trying to make a sha1sum a directory!");
         }
     }
 
-    public String getSha1String(){
+    public String getSha1String() {
         return this.sha1String;
     }
 
-    public byte[] getSha1ByteArray(){
+    public byte[] getSha1ByteArray() {
         return this.sha1;
     }
 
@@ -46,37 +48,21 @@ public class SHA1Sum {
         return formatter.toString();
     }
 
-    private byte[] createSha1(File file) {
-        MessageDigest digest = null;
-        InputStream fis = null;
-
+    private byte[] createSha1(File file) throws NoSuchAlgorithmException, IOException {
         int n = 0;
         byte[] buffer = new byte[8192];
 
-        try {
-            digest = MessageDigest.getInstance("SHA-1");
-            fis = new FileInputStream(file);
-
+        MessageDigest digest = MessageDigest.getInstance("SHA-1");
+        try (InputStream fis = new FileInputStream(file)) {
             while (n != -1) {
                 n = fis.read(buffer);
                 if (n > 0) {
                     digest.update(buffer, 0, n);
                 }
             }
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }finally {
-            try {
-                fis.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            return digest.digest();
         }
-        return digest.digest();
+
     }
 
 }
