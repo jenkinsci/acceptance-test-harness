@@ -26,18 +26,9 @@ import static org.jenkinsci.test.acceptance.Matchers.hasContent;
  */
 @WithPlugins("checkstyle")
 public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
+
     /**
-     * Scenario: Record Checkstyle report
-         Given I have installed the "checkstyle" plugin
-         And a job
-         When I configure the job
-         And I copy resource "checkstyle_plugin/checkstyle-result.xml" into workspace
-         And I add "Publish Checkstyle analysis results" post-build action
-         And I set up "checkstyle-result.xml" as the Checkstyle results
-         And I save the job
-         And I build the job
-         Then the build should have "Checkstyle Warnings" action
-         And the job should have "Checkstyle Warnings" action
+     * Builds a job with checkstyle enabled and verifies that checkstyle details are displayed in the build overview.
      */
     @Test
     public void record_checkstyle_report() {
@@ -49,23 +40,8 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
     }
 
     /**
-     *   Scenario: View Checkstyle report
-         Given I have installed the "checkstyle" plugin
-         And a job
-         When I configure the job
-         And I copy resource "checkstyle_plugin/checkstyle-result.xml" into workspace
-         And I add "Publish Checkstyle analysis results" post-build action
-         And I set up "checkstyle-result.xml" as the Checkstyle results
-         And I save the job
-         And I build the job
-         Then the build should succeed
-         When I visit Checkstyle report
-         Then I should see there are 776 warnings
-         And I should see there are 776 new warnings
-         And I should see there are 0 fixed warnings
-         And I should see there are 776 high priority warnings
-         And I should see there are 0 normal priority warnings
-         And I should see there are 0 low priority warnings
+     * Builds a job with checkstyle and verifies that the information checkstyle provides in the tabs about the build
+     * are the information we expect.
      */
     @Test
     public void view_checkstyle_report() {
@@ -146,6 +122,10 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
         assertThat(ca.getTypesTabContents(), is(expectedTypes));
     }
 
+    /**
+     * Builds a job and tests if the checkstyle api (with depth=0 parameter set) responds with the expected output.
+     * Difference in whitespaces are ok.
+     */
     @Test
     public void xml_api_report_depth_0() throws IOException, SAXException, ParserConfigurationException {
         final FreeStyleJob job = setupJob("/checkstyle_plugin/checkstyle-result.xml", CheckstylePublisher.class, "checkstyle-result.xml");

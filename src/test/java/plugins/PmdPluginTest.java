@@ -146,6 +146,10 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
         assertThat(pa.getWarningsTabContents(), is(expectedContent));
     }
 
+    /*
+     * Builds a job and tests if the PMD api (with depth=0 parameter set) responds with the expected output.
+     * Difference in whitespaces are ok.
+     */
     @Test
     public void xml_api_report_depth_0() throws IOException, SAXException, ParserConfigurationException {
         final FreeStyleJob job = setupJob("/pmd_plugin/pmd-warnings.xml", PmdPublisher.class, "pmd-warnings.xml");

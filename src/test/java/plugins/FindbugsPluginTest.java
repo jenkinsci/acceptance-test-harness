@@ -45,7 +45,8 @@ import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
 
     /**
-     * Runs test and check if warnings of Findbugs are displayed.
+     * Builds a job and checks if warnings of Findbugs are displayed. Checks as well, if the content of the tabs is
+     * the one we expect.
      */
     @Test
     public void record_analysis() {
@@ -105,6 +106,10 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
         assertThat(fa.getWarningsTabContents(), is(expectedContent));
     }
 
+    /**
+     * Builds a job and tests if the findbugs api (with depth=0 parameter set) responds with the expected output.
+     * Difference in whitespaces are ok.
+     */
     @Test
     public void xml_api_report_depth_0() throws IOException, SAXException, ParserConfigurationException {
         final FreeStyleJob job = setupJob("/findbugs_plugin/findbugsXml.xml", FindbugsPublisher.class, "findbugsXml.xml");

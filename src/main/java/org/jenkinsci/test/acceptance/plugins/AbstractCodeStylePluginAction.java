@@ -117,24 +117,40 @@ public abstract class AbstractCodeStylePluginAction extends ContainerPageObject 
         return webElement.getText().trim();
     }
 
+    /**
+     * Returns the first two columns of the "Categories"-tab as key => value pairs, skipping the header and footer rows.
+     * @return a map of the first two columns. (first column => second column)
+     */
     public SortedMap<String, Integer> getFileTabContents() {
         open();
         find(by.xpath(".//A[@href]/em[text() = 'Files']")).click();
         return getContentsOfVisibleTable(true, true);
     }
 
+    /**
+     * Returns the first two columns of the "Categories"-tab as key => value pairs, skipping the header and footer rows.
+     * @return a map of the first two columns. (first column => second column)
+     */
     public SortedMap<String, Integer> getCategoriesTabContents() {
         open();
         find(by.xpath(".//A[@href]/em[text() = 'Categories']")).click();
         return getContentsOfVisibleTable(true, true);
     }
 
+    /**
+     * Returns the first two columns of the "Types"-tab as key => value pairs, skipping the header and footer rows.
+     * @return a map of the first two columns. (first column => second column)
+     */
     public SortedMap<String, Integer> getTypesTabContents() {
         open();
         find(by.xpath(".//A[@href]/em[text() = 'Types']")).click();
         return getContentsOfVisibleTable(true, true);
     }
 
+    /**
+     * Returns the first two columns of the "Warnings"-tab as key => value pairs, skipping the header row.
+     * @return a map of the first two columns. (first column => second column)
+     */
     public SortedMap<String, Integer> getWarningsTabContents() {
         open();
         find(by.xpath(".//A[@href]/em[text() = 'Warnings']")).click();
@@ -147,7 +163,6 @@ public abstract class AbstractCodeStylePluginAction extends ContainerPageObject 
             if(table.isDisplayed()) {
                 final List<WebElement> immediateChildRows = table.findElements(by.xpath("./tbody/tr"));
 
-                // remove footer and header
                 if(removeHeader) {
                     immediateChildRows.remove(0);
                 }
