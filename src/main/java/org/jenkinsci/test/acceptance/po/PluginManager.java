@@ -25,6 +25,7 @@ import static java.util.Arrays.asList;
  * @author Kohsuke Kawaguchi
  */
 public class PluginManager extends ContainerPageObject {
+    private static final String VERSION_SEPARATOR = "@";
     /**
      * Did we fetch the update center metadata?
      */
@@ -74,7 +75,8 @@ public class PluginManager extends ContainerPageObject {
     public boolean isInstalled(String... shortNames) {
         visit("installed");
         for (String n : shortNames) {
-            if (getElement(by.xpath("//input[@url='plugin/%s']", n)) == null)
+            String version = getVersionFromWpValue(n) != null ? getVersionFromWpValue(n) : ucmd.get().plugins.get(n).version;
+            if (getElement(by.xpath("//input[@url='plugin/%s']", getShortNameFromWpValue(n))) == null || getElement(by.xpath("//input[@url='plugin/%s']/../../td/a[text()='%s']", getShortNameFromWpValue(n), version)) == null)
                 return false;
         }
         return true;
@@ -104,20 +106,21 @@ public class PluginManager extends ContainerPageObject {
         //shortNames without a version annotation
         final String[] shortNameValues = mapShortNamesVersion.keySet().toArray(new String[0]);
 
-        if (isInstalled(shortNameValues))
+        if (isInstalled(shortNames))
             return;
         if (uploadPlugins) {
             for (PluginMetadata p : ucmd.get().transitiveDependenciesOf(asList(shortNameValues))) {
                 try {
-                    if (!isInstalled(p.name)) {
-                        p.uploadTo(jenkins, injector, mapShortNamesVersion.get(p.name));
+                    final String claimedVersion = mapShortNamesVersion.get(p.name) != null ? mapShortNamesVersion.get(p.name) : p.version;
+                    if (!isInstalled(p.name + VERSION_SEPARATOR + claimedVersion)) {
+                        p.uploadTo(jenkins, injector, claimedVersion);
                     }
                 } catch (IOException | ArtifactResolutionException e) {
                     throw new AssertionError("Failed to upload plugin: " + p, e);
                 }
             }
-
-            waitForIsInstalled(shortNameValues);
+            jenkins.restart();
+            waitForIsInstalled(shortNames);
         } else {
             if (!updated)
                 checkForUpdates();
@@ -147,15 +150,15 @@ public class PluginManager extends ContainerPageObject {
     }
 
     /**
-     * Parses the Version from a wpValue.
+     * Parses the version from a wpValue.
      * Versions can be added to the shotName via "@"
-     * If no version is added, method returnes null
+     * If no version is added, method returns null
      *
      * @param wpValue Value of the WithPlugin annotation
      * @return version or null
      */
     private String getVersionFromWpValue(String wpValue) {
-        final Iterable<String> split = Splitter.on("@").split(wpValue);
+        final Iterable<String> split = Splitter.on(VERSION_SEPARATOR).split(wpValue);
         if (Iterables.size(split) == 1) {
             return null;
         } else {
@@ -170,7 +173,7 @@ public class PluginManager extends ContainerPageObject {
      * @return shortName
      */
     private String getShortNameFromWpValue(String wpValue) {
-        final Iterable<String> split = Splitter.on("@").split(wpValue);
+        final Iterable<String> split = Splitter.on(VERSION_SEPARATOR).split(wpValue);
         return split.iterator().next();
     }
 

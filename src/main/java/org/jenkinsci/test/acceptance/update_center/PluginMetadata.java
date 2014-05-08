@@ -16,13 +16,15 @@ import org.eclipse.aether.resolution.ArtifactRequest;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.eclipse.aether.resolution.ArtifactResult;
 import org.jenkinsci.test.acceptance.po.Jenkins;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.apache.http.entity.ContentType.*;
+import static org.apache.http.entity.ContentType.APPLICATION_OCTET_STREAM;
 
 /**
  * Databinding for installable plugin in UC.
@@ -30,6 +32,7 @@ import static org.apache.http.entity.ContentType.*;
  * @author Kohsuke Kawaguchi
  */
 public class PluginMetadata {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PluginMetadata.class);
     public String name, version, gav;
     public List<Dependency> dependencies;
     public URL url;
@@ -41,7 +44,6 @@ public class PluginMetadata {
     }
 
     /**
-     *
      * @param jenkins
      * @param i
      * @param version to upload an specific Version. Can be null.
@@ -56,7 +58,7 @@ public class PluginMetadata {
                 makeArtifact(version),
                 Arrays.asList(new RemoteRepository.Builder("repo.jenkins-ci.org", "default", "http://repo.jenkins-ci.org/public/").build()),
                 null));
-
+        LOGGER.info("Installing plugin: [{}]",r.getArtifact());
         HttpClient httpclient = new DefaultHttpClient();
 
         HttpPost post = new HttpPost(jenkins.url("pluginManager/uploadPlugin").toExternalForm());
@@ -73,11 +75,13 @@ public class PluginMetadata {
 
     private DefaultArtifact makeArtifact(String version) {
         String[] t = gav.split(":");
-        return new DefaultArtifact(t[0], t[1], "hpi", version == null ? t[2] : version);
+        return new DefaultArtifact(t[0], t[1], "hpi", version);
     }
 
     @Override
     public String toString() {
         return super.toString() + "[" + name + "," + version + "]";
     }
+
+
 }
