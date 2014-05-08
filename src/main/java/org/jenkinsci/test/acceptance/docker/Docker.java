@@ -1,25 +1,20 @@
 package org.jenkinsci.test.acceptance.docker;
 
-import com.google.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
+
 import org.apache.commons.io.FileUtils;
 import org.jenkinsci.test.acceptance.utils.SHA1Sum;
 import org.jenkinsci.utils.process.CommandBuilder;
-import org.junit.internal.AssumptionViolatedException;
 import org.jvnet.hudson.annotation_indexer.Index;
 
-import javax.inject.Named;
-import javax.inject.Singleton;
-import java.io.*;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-import java.util.Formatter;
-import java.util.List;
-
-import sun.security.provider.SHA;
-import static java.lang.System.getenv;
+import com.google.inject.Inject;
 
 
 /**
