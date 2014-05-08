@@ -48,10 +48,12 @@ import static org.junit.Assume.assumeTrue;
  * <br>
  * - gtGerrituser=companion<br>
  * - gtHostname=gerrit.company.com<br>
+ * - gtNoProxyForHost=set (optional)<br>
  * - gtProject=changed/by/this/test<br>
  * - gtUserhome=/home/companion<br>
- * <br>
- * - gtUserhome/.netrc shall point to that gtHostname with gtGerrituser/pwd.
+ * Plus,<br>
+ * - gtUserhome/.netrc shall point to that gtHostname with gtGerrituser/pwd<br>
+ * - http_proxy might need to be set, if no gerrit-trigger plugin pre-installed.
  *
  * @author Marco.Miller@ericsson.com
  */
@@ -84,9 +86,7 @@ public class GerritTriggerTest extends AbstractJUnitTest {
         try {
             String changeId = pushChangeForReview(jobName);
             sleep(10000);
-            String hN = GerritTriggerEnv.getInstance().getHostName();
-            Process curl = new ProcessBuilder("curl","-n","https://"+hN+"/a/changes/"+changeId+"/revisions/current/review").start();
-            String rev = stringFrom(curl);
+            String rev = stringFrom(curl(changeId));
             assertEquals(1,Integer.parseInt(valueFrom(rev,".+Verified\":\\{\"all\":\\[\\{\"value\":(\\d).+")));
             assertEquals(1,Integer.parseInt(valueFrom(rev,".+Code-Review\":\\{\"all\":\\[\\{\"value\":(\\d).+")));
         }
@@ -119,6 +119,14 @@ public class GerritTriggerTest extends AbstractJUnitTest {
 
         Process gitLog1 = new ProcessBuilder("git","log","-1").directory(dir).start();
         return valueFrom(stringFrom(gitLog1),".+Change-Id:(.+)");
+    }
+
+    private Process curl(String changeId) throws IOException {
+        String hN = GerritTriggerEnv.getInstance().getHostName();
+        if(GerritTriggerEnv.getInstance().getNoProxy()) {
+            return new ProcessBuilder("curl","--noproxy",hN,"-n","https://"+hN+"/a/changes/"+changeId+"/revisions/current/review").start();
+        }
+        return new ProcessBuilder("curl","-n","https://"+hN+"/a/changes/"+changeId+"/revisions/current/review").start();
     }
 
     private String stringFrom(Process curl) throws InterruptedException,IOException {
