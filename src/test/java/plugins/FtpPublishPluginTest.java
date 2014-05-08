@@ -86,8 +86,8 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      * And a job
      * When I configure docker fixture as FTP host
      * And I configure the job with one FTP Transfer Set
-     *  And I configure the Transfer Set
-     *  With Source Files "odes.txt"
+     * And I configure the Transfer Set
+     * With Source Files "odes.txt"
      * And With Remote Directory myfolder/
      * And I copy resource "odes.txt" into workspace
      * And I save the job
@@ -122,11 +122,52 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      * Given I have installed the "ftp" plugin
      * And a docker fixture "ftpd"
      * And a job
+     * When I configure docker fixture as FTP host
+     * And I configure the job with one FTP Transfer Set
+     * And I configure the Transfer Set
+     * With Source Files "odes.txt"
+     * And With Remote Directory "/tmp/${JOB_NAME}"
+     * And I copy resource "odes.txt" into workspace
+     * And I save the job
+     * And I build the job
+     * Then the build should succeed
+     * And FTP plugin should have published "odes.txt" on docker fixture
+     */
+    @Native("docker")
+    @Test
+    public void publish_jenkins_variables() throws IOException, InterruptedException {
+        FtpdContainer ftpd = docker.start(FtpdContainer.class);
+        Resource cp_file = resource("/ftp_plugin/odes.txt");
+        String randomName = jenkins.jobs.createRandomName();
+        String randomPath = "/tmp/" + randomName + "/";
+        FreeStyleJob j = jenkins.jobs.create(FreeStyleJob.class, randomName);
+
+        jenkinsFtpConfigure("asd", ftpd);
+        j.configure();
+        {
+            j.copyResource(cp_file);
+            FtpPublisher fp = j.addPublisher(FtpPublisher.class);
+            FtpPublisher.Site fps = fp.getDefault();
+            fps.getDefaultTransfer().remoteDirectory.set("${JOB_NAME}/");
+            fps.getDefaultTransfer().sourceFile.set("odes.txt");
+        }
+        j.save();
+
+        j.startBuild().shouldSucceed();
+        ftpd.cp(randomPath + "odes.txt", new File("/tmp"));
+        assertThat(FileUtils.readFileToString(new File("/tmp/odes.txt")), CoreMatchers.is(cp_file.asText()));
+    }
+
+    /**
+     * @native(docker) Scenario: Configure a job with FTP publishing
+     * Given I have installed the "ftp" plugin
+     * And a docker fixture "ftpd"
+     * And a job
      * When I configure docker fixture as FTP site
      * And I configure the job with one FTP Transfer Set
      * And I configure the Transfer Set
-     *  With Source Files "prefix_/test.txt"
-     *  And With Remote Directory /tmp/
+     * With Source Files "prefix_/test.txt"
+     * And With Remote Directory /tmp/
      * And With remove prefix
      * And I save the job
      * And I build the job
@@ -164,8 +205,8 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      * When I configure docker fixture as FTP site
      * And I configure the job with one FTP Transfer Set
      * And I configure the Transfer Set
-     *  With Source Files  "prefix_/"
-     *  And With exclude ".exclude"
+     * With Source Files  "prefix_/"
+     * And With exclude ".exclude"
      * And I copy resources "prefix_/" into workspace
      * And I save the job
      * And I build the job
@@ -202,8 +243,8 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      * When I configure docker fixture as FTP site
      * And I configure the job with one FTP Transfer Set
      * And I configure the Transfer Set
-     *  With Source Files "prefix_/test.txt,odes.txt"
-     *  And I copy resources "prefix_/test.txt,odes.txt"  into workspace
+     * With Source Files "prefix_/test.txt,odes.txt"
+     * And I copy resources "prefix_/test.txt,odes.txt"  into workspace
      * And I save the job
      * And I build the job
      * Then the build should succeed
@@ -238,8 +279,8 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      * When I configure docker fixture as FTP site
      * And I configure the job with one FTP Transfer Set
      * And I configure the Transfer Set
-     *  With Source Files "te,st.txt;odes.txt"
-     *  And With Pattern separator [;]+
+     * With Source Files "te,st.txt;odes.txt"
+     * And With Pattern separator [;]+
      * And I copy resources "te,st.txt,odes.txt"  into workspace
      * And I save the job
      * And I build the job
@@ -276,8 +317,8 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      * When I configure docker fixture as FTP site
      * And I configure the job with one FTP Transfer Set
      * And I configure the Transfer Set
-     *  With Source Files ".svn,.git,odes.txt"  with FTP plugin
-     *  And I copy resources "odes.txt" as "odes.txt,.svn,.git" into workspace
+     * With Source Files ".svn,.git,odes.txt"  with FTP plugin
+     * And I copy resources "odes.txt" as "odes.txt,.svn,.git" into workspace
      * And I save the job
      * And I build the job
      * Then the build should succeed
@@ -315,8 +356,8 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      * And a docker fixture "ftpd"
      * And a job
      * When I configure docker fixture as FTP site
-     *  And I configure the job with one FTP Transfer Set
-     *  And I configure the Transfer Set
+     * And I configure the job with one FTP Transfer Set
+     * And I configure the Transfer Set
      * With Source Files ".svn,.git,odes.txt"  with FTP plugin
      * And With No default excludes checked
      * And I copy resources "odes.txt" as "odes.txt,.svn,.git" into workspace
@@ -358,8 +399,8 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      * When I configure docker fixture as FTP site
      * And I configure the job with one FTP Transfer Set
      * And I configure the Transfer Set
-     *  With Source Files "empty/,odes.txt" with FTP plugin
-     *  And With Make empty dirs  Checked
+     * With Source Files "empty/,odes.txt" with FTP plugin
+     * And With Make empty dirs  Checked
      * And I create the directory "empty/" into workspace
      * And I save the job
      * And I build the job
@@ -400,8 +441,8 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      * And a job
      * When I configure docker fixture as FTP site
      * And I configure the job with one FTP Transfer Set
-     *  And I configure the Transfer Set
-     *  With Source Files "empty/,odes.txt" with FTP plugin
+     * And I configure the Transfer Set
+     * With Source Files "empty/,odes.txt" with FTP plugin
      * And I create the directory "empty/" into workspace
      * And I save the job
      * And I build the job
@@ -443,8 +484,8 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      * When I configure docker fixture as FTP site
      * And I configure the job with one FTP Transfer Set
      * And I configure the Transfer Set
-     *  With SourceFiles "odes.txt" and "flat\odes.txt" with FTP plugin
-     *  And I copy resources "ftp_plugin/"
+     * With SourceFiles "odes.txt" and "flat\odes.txt" with FTP plugin
+     * And I copy resources "ftp_plugin/"
      * And I save the job
      * And I build the job
      * Then the build should succeed
@@ -479,8 +520,8 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      * When I configure docker fixture as FTP site
      * And I configure the job with one FTP Transfer Set
      * And I configure the Transfer Set
-     *  With SourceFiles "odes.txt" and "flat\odes.txt" with FTP plugin
-     *  And With Flatten files Checked
+     * With SourceFiles "odes.txt" and "flat\odes.txt" with FTP plugin
+     * And With Flatten files Checked
      * And I copy resources "ftp_plugin/"
      * And I save the job
      * And I build the job
@@ -514,8 +555,8 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      * When I configure docker fixture as FTP site
      * And I configure the job with one FTP Transfer Set
      * And I configure the Transfer Set
-     *  With SourceFiles "odes.txt" with FTP plugin
-     *  And With Remote directory  is a date format Checked "yyyyMMddHH"
+     * With SourceFiles "odes.txt" with FTP plugin
+     * And With Remote directory  is a date format Checked "yyyyMMddHH"
      * And I copy resources "odes.txt" into workspace
      * And I save the job
      * And I build the job
@@ -554,8 +595,8 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      * And a job
      * And I configure the job with one FTP Transfer Set
      * And I configure the Transfer Set
-     *  With SourceFiles "myresources" with FTP plugin
-     *  And With Clean remote
+     * With SourceFiles "myresources" with FTP plugin
+     * And With Clean remote
      * And I copy resources "myresources" into workspace
      * And I save the job
      * And I build the job
@@ -595,11 +636,11 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      * When I configure docker fixture as FTP site
      * And I configure the job with three FTP Transfer Sets
      * And I configure the Transfer Set 1
-     *  With SourceFiles  odes.txt
+     * With SourceFiles  odes.txt
      * And I configure the Transfer Set 2
-     *  With SourceFiles  odes2.txt
+     * With SourceFiles  odes2.txt
      * And I configure the Transfer Set 3
-     *  With SourceFiles  odes3.txt
+     * With SourceFiles  odes3.txt
      * And I copy resources odes.txt,odes2.txt,odes3.txt into workspace
      * And I save the job
      * And I build the job
@@ -642,11 +683,11 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      * And I configure the job with docker1 Server
      * And one FTP Transfer Set
      * And I configure the Transfer Set
-     *  With SourceFiles odes.txt
+     * With SourceFiles odes.txt
      * And I Add Server docker2
      * And one FTP Transfer Set
      * And I configure the Transfer Set
-     *  With SourceFiles odes.txt
+     * With SourceFiles odes.txt
      * And I copy resources odes.txt  into workspace
      * And I save the job
      * And I build the job
