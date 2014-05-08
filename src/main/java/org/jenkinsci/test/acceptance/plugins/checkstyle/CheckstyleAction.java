@@ -1,9 +1,7 @@
 package org.jenkinsci.test.acceptance.plugins.checkstyle;
 
-import org.jenkinsci.test.acceptance.po.ContainerPageObject;
 import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginAction;
-
-import java.net.URL;
+import org.jenkinsci.test.acceptance.po.ContainerPageObject;
 
 /**
  * Page object for Checkstyle action.
