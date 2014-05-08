@@ -608,8 +608,33 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
     @Native("docker")
     @Test
     public void publish_ascii_text() throws IOException, InterruptedException {
+        FtpdContainer ftpd = docker.start(FtpdContainer.class);
+        Resource cp_dos = resource("/ftp_plugin/asci_dos.txt");
+        Resource cp_linux = resource("/ftp_plugin/asci_linux.txt");
+        Resource cp_macos = resource("/ftp_plugin/asci_macos.txt");
 
+        FreeStyleJob j = jenkins.jobs.create();
+        jenkinsFtpConfigure("asd", ftpd);
+        j.configure();
+        {
+            j.copyResource(cp_dos);
+            j.copyResource(cp_linux);
+            j.copyResource(cp_macos);
+            FtpPublisher fp = j.addPublisher(FtpPublisher.class);
+            FtpPublisher.Site fps = fp.getDefault();
+            fps.getDefaultTransfer().sourceFile.set("asci_dos.txt,asci_linux.txt,asci_macos.txt");
+            fps.getDefaultTransfer().asciiMode.check();
+        }
+        j.save();
 
+        j.startBuild().shouldSucceed();
+        ftpd.cp("/tmp/asci_dos.txt", new File("/tmp"));
+        ftpd.cp("/tmp/asci_linux.txt", new File("/tmp"));
+        ftpd.cp("/tmp/asci_macos.txt", new File("/tmp"));
+
+        assertThat(FileUtils.readFileToString(new File("/tmp/asci_dos.txt")), CoreMatchers.is(cp_linux.asText()));
+        assertThat(FileUtils.readFileToString(new File("/tmp/asci_linux.txt")), CoreMatchers.is(cp_linux.asText()));
+        assertThat(FileUtils.readFileToString(new File("/tmp/asci_macos.txt")), CoreMatchers.is(cp_linux.asText()));
     }
 
     /**

@@ -20,7 +20,8 @@ RUN echo "rsa_cert_file=/etc/ssl/private/vsftpd.pem" >> /etc/myftp.conf
 RUN echo "pasv_enable=YES" >> /etc/myftp.conf
 RUN echo "pasv_min_port=7050" >> /etc/myftp.conf
 RUN echo "pasv_max_port=7055" >> /etc/myftp.conf
-
+RUN echo "ascii_upload_enable=YES" >> /etc/myftp.conf
+RUN echo "ascii_download_enable=YES" >> /etc/myftp.conf
 RUN mkdir -p /var/run/vsftpd/empty
 
 # create a test user
