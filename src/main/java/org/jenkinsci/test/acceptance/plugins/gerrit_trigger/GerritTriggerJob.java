@@ -27,8 +27,6 @@ import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.PageObject;
 
-import static org.junit.Assume.assumeNotNull;
-
 /**
  * Page Object for Gerrit Trigger test-job (configuration) page.
  * @author Marco Miller
@@ -38,6 +36,11 @@ public class GerritTriggerJob extends PageObject {
     public final Jenkins jenkins;
     public final Control event = control("/com-sonyericsson-hudson-plugins-gerrit-trigger-hudsontrigger-GerritTrigger");
     public final Control server = control("/com-sonyericsson-hudson-plugins-gerrit-trigger-hudsontrigger-GerritTrigger/serverName");
+    public final Control advanced = control("/com-sonyericsson-hudson-plugins-gerrit-trigger-hudsontrigger-GerritTrigger/advanced-button");
+    public final Control passVerif = control("/com-sonyericsson-hudson-plugins-gerrit-trigger-hudsontrigger-GerritTrigger/gerritBuildSuccessfulVerifiedValue");
+    public final Control failVerif = control("/com-sonyericsson-hudson-plugins-gerrit-trigger-hudsontrigger-GerritTrigger/gerritBuildFailedVerifiedValue");
+    public final Control passRev = control("/com-sonyericsson-hudson-plugins-gerrit-trigger-hudsontrigger-GerritTrigger/gerritBuildSuccessfulCodeReviewValue");
+    public final Control failRev = control("/com-sonyericsson-hudson-plugins-gerrit-trigger-hudsontrigger-GerritTrigger/gerritBuildFailedCodeReviewValue");
     public final Control project = control("/com-sonyericsson-hudson-plugins-gerrit-trigger-hudsontrigger-GerritTrigger/gerritProjects/pattern");
     public final Control branch = control("/com-sonyericsson-hudson-plugins-gerrit-trigger-hudsontrigger-GerritTrigger/gerritProjects/branches/pattern");
 
@@ -50,12 +53,15 @@ public class GerritTriggerJob extends PageObject {
      * Saves harness' gerrit-trigger test-job configuration.
      */
     public void saveTestJobConfig() {
-        String projectEnv = System.getenv("gtProject");
-        assumeNotNull(projectEnv);
         open();
         if(!event.resolve().isSelected()) event.click();
         server.select(this.getClass().getPackage().getName());
-        project.set(projectEnv);
+        advanced.click();
+        passVerif.set("1");
+        failVerif.set("-1");
+        passRev.set("1");
+        failRev.set("-1");
+        project.set(GerritTriggerEnv.getInstance().getProject());
         branch.set("master");
         clickButton("Save");
     }

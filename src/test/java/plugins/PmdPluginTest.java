@@ -7,6 +7,12 @@ import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.jenkinsci.test.acceptance.Matchers.hasAction;
@@ -96,12 +102,61 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
         assertThat(lastBuild.open(), hasContent("9 warnings"));
 
         PmdAction pa = new PmdAction(job);
+        assertWarningsTrendAndSummary(pa);
+        assertFileTab(pa);
+        assertTypeTab(pa);
+        assertWarningsTab(pa);
+    }
+
+    private void assertWarningsTrendAndSummary(PmdAction pa) {
         assertThat(pa.getWarningNumber(), is(9));
         assertThat(pa.getNewWarningNumber(), is(9));
         assertThat(pa.getFixedWarningNumber(), is(0));
         assertThat(pa.getHighWarningNumber(), is(0));
         assertThat(pa.getNormalWarningNumber(), is(3));
         assertThat(pa.getLowWarningNumber(), is(6));
+    }
+
+    private void assertFileTab(PmdAction pa) {
+        final SortedMap<String, Integer> expectedContent = new TreeMap<String, Integer>();
+        expectedContent.put("ChannelContentAPIClient.m", 6);
+        expectedContent.put("ProductDetailAPIClient.m", 2);
+        expectedContent.put("ViewAllHoldingsAPIClient.m", 1);
+        assertThat(pa.getFileTabContents(), is(expectedContent));
+    }
+
+    private void assertTypeTab(PmdAction pa) {
+        final SortedMap<String, Integer> expectedContent = new TreeMap<String, Integer>();
+        expectedContent.put("long line", 6);
+        expectedContent.put("unused method parameter", 3);
+        assertThat(pa.getTypesTabContents(), is(expectedContent));
+    }
+
+    private void assertWarningsTab(PmdAction pa) {
+        final SortedMap<String, Integer> expectedContent = new TreeMap<String, Integer>();
+        expectedContent.put("ChannelContentAPIClient.m:28", 28);
+        expectedContent.put("ChannelContentAPIClient.m:28", 28);
+        expectedContent.put("ChannelContentAPIClient.m:28", 28);
+        expectedContent.put("ChannelContentAPIClient.m:32", 32);
+        expectedContent.put("ChannelContentAPIClient.m:36", 36);
+        expectedContent.put("ChannelContentAPIClient.m:40", 40);
+        expectedContent.put("ProductDetailAPIClient.m:37", 37);
+        expectedContent.put("ProductDetailAPIClient.m:38", 38);
+        expectedContent.put("ViewAllHoldingsAPIClient.m:23", 23);
+        assertThat(pa.getWarningsTabContents(), is(expectedContent));
+    }
+
+    /*
+     * Builds a job and tests if the PMD api (with depth=0 parameter set) responds with the expected output.
+     * Difference in whitespaces are ok.
+     */
+    @Test
+    public void xml_api_report_depth_0() throws IOException, SAXException, ParserConfigurationException {
+        final FreeStyleJob job = setupJob("/pmd_plugin/pmd-warnings.xml", PmdPublisher.class, "pmd-warnings.xml");
+        final Build build = buildJobWithSuccess(job);
+        final String apiUrl = "pmdResult/api/xml?depth=0";
+        final String expectedXmlPath = "/pmd_plugin/api_depth_0.xml";
+        assertXmlApiMatchesExpected(build, apiUrl, expectedXmlPath);
     }
 
     /**
