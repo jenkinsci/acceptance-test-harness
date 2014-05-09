@@ -46,7 +46,7 @@ public class PluginMetadata {
     /**
      * @param jenkins
      * @param i
-     * @param version to upload an specific Version. Can be null.
+     * @param version The version of the plugin you want to upload
      * @throws ArtifactResolutionException
      * @throws IOException
      */
