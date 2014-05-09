@@ -23,17 +23,14 @@
  */
 package org.jenkinsci.test.acceptance.plugins.git;
 
-import org.jenkinsci.test.acceptance.po.Control;
-import org.jenkinsci.test.acceptance.po.Describable;
-import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.PageArea;
-import org.jenkinsci.test.acceptance.po.Scm;
+import org.jenkinsci.test.acceptance.po.*;
+import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 
 @Describable("Git")
 public class GitScm extends Scm {
-    private final Control url = control("userRemoteConfigs/url");
     public final Control branch = control("branches/name");
+    private final Control url = control("userRemoteConfigs/url");
 
     public GitScm(Job job, String path) {
         super(job, path);
@@ -41,6 +38,11 @@ public class GitScm extends Scm {
 
     public GitScm url(String url) {
         this.url.set(url);
+        return this;
+    }
+
+    public GitScm credentials(String name) {
+        control(By.xpath("//option[.='" + name + "' and not(ancestor::tr[contains(@style,'display:none')]) and not(ancestor::tr[contains(@style,'display: none')])]")).click();
         return this;
     }
 
@@ -57,7 +59,8 @@ public class GitScm extends Scm {
         try {
             advanced();
             control("relativeTargetDir").set(dir);
-        } catch(NoSuchElementException ex) { // Git 2.0
+        }
+        catch (NoSuchElementException ex) { // Git 2.0
             addBehaviour(CheckoutToLocalDir.class).name.set(dir);
         }
     }
