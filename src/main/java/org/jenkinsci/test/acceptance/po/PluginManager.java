@@ -76,7 +76,7 @@ public class PluginManager extends ContainerPageObject {
         visit("installed");
         for (String n : shortNames) {
             String version = getVersionFromWpValue(n) != null ? getVersionFromWpValue(n) : ucmd.get().plugins.get(n).version;
-            if (getElement(by.xpath("//input[@url='plugin/%s']", getShortNameFromWpValue(n))) == null || getElement(by.xpath("//input[@url='plugin/%s']/../../td/a[text()='%s']", getShortNameFromWpValue(n), version)) == null)
+            if (getElement(by.xpath("//input[@url='plugin/%s']/../../td/a[text()='%s']", getShortNameFromWpValue(n), version)) == null)
                 return false;
         }
         return true;
@@ -119,6 +119,7 @@ public class PluginManager extends ContainerPageObject {
                     throw new AssertionError("Failed to upload plugin: " + p, e);
                 }
             }
+            //to enable updated plugins/corePlugins
             jenkins.restart();
             waitForIsInstalled(shortNames);
         } else {
