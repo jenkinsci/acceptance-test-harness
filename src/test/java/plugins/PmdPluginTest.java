@@ -6,7 +6,6 @@ import org.jenkinsci.test.acceptance.plugins.pmd.PmdPublisher;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
-import org.openqa.selenium.WebDriver;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -99,22 +98,19 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
 
         Build lastBuild = buildJobWithSuccess(job);
         assertThat(lastBuild, hasAction("PMD Warnings"));
-        assertThat(lastBuild.open(), hasContent("9 warnings"));
-
+        lastBuild.open();
         PmdAction pa = new PmdAction(job);
-        assertWarningsTrendAndSummary(pa);
-        assertFileTab(pa);
-        assertTypeTab(pa);
-        assertWarningsTab(pa);
-    }
-
-    private void assertWarningsTrendAndSummary(PmdAction pa) {
+        assertThat(pa.getResultLinkByXPathText("9 warnings"), is("pmdResult"));
+        assertThat(pa.getResultLinkByXPathText("9 new warnings"), is("pmdResult/new"));
         assertThat(pa.getWarningNumber(), is(9));
         assertThat(pa.getNewWarningNumber(), is(9));
         assertThat(pa.getFixedWarningNumber(), is(0));
         assertThat(pa.getHighWarningNumber(), is(0));
         assertThat(pa.getNormalWarningNumber(), is(3));
         assertThat(pa.getLowWarningNumber(), is(6));
+        assertFileTab(pa);
+        assertTypeTab(pa);
+        assertWarningsTab(pa);
     }
 
     private void assertFileTab(PmdAction pa) {
@@ -170,17 +166,30 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
 
         Build lastBuild = buildJobWithSuccess(job);
         assertThat(lastBuild, hasAction("PMD Warnings"));
-        WebDriver lastBuildOpened = lastBuild.open();
-        assertThat(lastBuildOpened, hasContent("8 warnings"));
-        assertThat(lastBuildOpened, hasContent("1 new warning"));
-        assertThat(lastBuildOpened, hasContent("2 fixed warnings"));
-
+        lastBuild.open();
         PmdAction pa = new PmdAction(job);
+        assertThat(pa.getResultLinkByXPathText("8 warnings"), is("pmdResult"));
+        assertThat(pa.getResultLinkByXPathText("1 new warning"), is("pmdResult/new"));
+        assertThat(pa.getResultLinkByXPathText("2 fixed warnings"), is("pmdResult/fixed"));
         assertThat(pa.getWarningNumber(), is(8));
         assertThat(pa.getNewWarningNumber(), is(1));
         assertThat(pa.getFixedWarningNumber(), is(2));
         assertThat(pa.getHighWarningNumber(), is(0));
         assertThat(pa.getNormalWarningNumber(), is(2));
         assertThat(pa.getLowWarningNumber(), is(6));
+    }
+
+    /**
+     * Runs job two times to check if the links of the graph are relative.
+     * (Issue: 21723)
+     */
+    @Test
+    public void view_pmd_report_job_graph_links() {
+        FreeStyleJob job = setupJob("/pmd_plugin/pmd-warnings.xml", PmdPublisher.class, "pmd-warnings.xml");
+        buildJobAndWait(job);
+        editJobAndChangeLastRessource(job, "/pmd_plugin/pmd-warnings-2.xml", "pmd-warnings.xml");
+        buildJobWithSuccess(job);
+
+        assertAllAreaLinksAreRelative(job);
     }
 }

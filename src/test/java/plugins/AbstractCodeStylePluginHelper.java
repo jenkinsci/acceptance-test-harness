@@ -7,6 +7,7 @@ import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginPostBuildStep;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.Job;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -83,4 +84,14 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
         final Document expected = documentBuilder.parse(resource(expectedXmlPath).asFile());
         XMLAssert.assertXMLEqual(result, expected);
     }
+
+    /**
+     * Asserts that all area links are not absolute.
+     */
+    public void assertAllAreaLinksAreRelative(Job job) {
+        for(String currentLink: job.getAreaLinks()) {
+            assertFalse("Link should be relative", currentLink.startsWith("http://"));
+        }
+    }
+
 }
