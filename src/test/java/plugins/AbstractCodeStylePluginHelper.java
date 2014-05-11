@@ -22,16 +22,45 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
     /**
      * Setup a job with the given resource and publisher.
      * @param resourceToCopy Resource to copy to to build
-     * @param publisher Publisher to add
+     * @param publisherClass Publisher to add
      * @param publisherPattern Publisher pattern to set
      * @param <T> Type of the publisher
      * @return The made job
      */
-    public <T extends AbstractCodeStylePluginPostBuildStep> FreeStyleJob setupJob(String resourceToCopy, Class<T> publisher, String publisherPattern) {
-        FreeStyleJob job = jenkins.jobs.create();
+    public <T extends AbstractCodeStylePluginPostBuildStep> FreeStyleJob setupJob(String resourceToCopy, Class<T> publisherClass, String publisherPattern) {
+        return setupJob(resourceToCopy, publisherClass, publisherPattern, null, null);
+    }
+
+    /**
+     * Setup a job with the given resource and publisher.
+     * @param resourceToCopy Resource to copy to to build
+     * @param publisherClass Publisher to add
+     * @param publisherPattern Publisher pattern to set
+     * @param thresholdFailedNewWarnings number of new warnings needed to mark the build as failure
+     * @param warningThresholdUnstable number of warnings needed to mark the build as unstable
+     * @param <T> Type of the publisher
+     * @return The made job
+     */
+    public <T extends AbstractCodeStylePluginPostBuildStep> FreeStyleJob setupJob(String resourceToCopy, Class<T> publisherClass, String publisherPattern, String warningThresholdUnstable, String thresholdFailedNewWarnings) {
+        final FreeStyleJob job = jenkins.jobs.create();
         job.configure();
         job.copyResource(resource(resourceToCopy));
-        job.addPublisher(publisher).pattern.set(publisherPattern);
+        final T publisher = job.addPublisher(publisherClass);
+        publisher.pattern.set(publisherPattern);
+
+        if (warningThresholdUnstable != null || thresholdFailedNewWarnings != null) {
+            publisher.advanced.click();
+
+            if (warningThresholdUnstable != null) {
+                publisher.warningThresholdUnstable.set(warningThresholdUnstable);
+            }
+
+            if (thresholdFailedNewWarnings != null) {
+                publisher.computeNewWarningsComparedWithReferenceBuild.check();
+                publisher.newWarningsThresholdFailed.set(thresholdFailedNewWarnings);
+            }
+        }
+
         job.save();
         return job;
     }
