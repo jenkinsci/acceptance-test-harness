@@ -48,7 +48,7 @@ public class Violations extends AbstractStep implements PostBuildStep {
 
         // Config controls does not reside of shared path prefix!
         private Config(Job context, String name) {
-            super(context, Violations.this.path);
+            super(context, Violations.this.getPath());
             this.name = name;
         }
 

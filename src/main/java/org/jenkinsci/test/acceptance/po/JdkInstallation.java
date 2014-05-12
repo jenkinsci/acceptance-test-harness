@@ -38,7 +38,7 @@ public class JdkInstallation extends ToolInstallation {
     }
 
     public void setCredentials(String login, String password) {
-        page.visit("descriptorByName/hudson.tools.JDKInstaller/enterCredential");
+        getPage().visit("descriptorByName/hudson.tools.JDKInstaller/enterCredential");
         find(by.input("username")).sendKeys(login);
         find(by.input("password")).sendKeys(password);
         clickButton("OK");

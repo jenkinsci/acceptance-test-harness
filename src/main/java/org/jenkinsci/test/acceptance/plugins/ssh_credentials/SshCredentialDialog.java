@@ -29,7 +29,7 @@ public class SshCredentialDialog extends PageAreaImpl {
             }
         });
 
-        return newInstance(type, page, path);
+        return newInstance(type, getPage(), getPath());
     }
 
     /**

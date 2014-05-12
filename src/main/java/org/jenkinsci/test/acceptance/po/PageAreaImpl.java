@@ -15,9 +15,9 @@ public abstract class PageAreaImpl extends CapybaraPortingLayerImpl implements P
     /**
      * Element path that points to this page area.
      */
-    public final String path;
+    private final String path;
 
-    public final PageObject page;
+    private final PageObject page;
 
     protected PageAreaImpl(PageObject context, String path) {
         super(context.injector);
@@ -25,14 +25,24 @@ public abstract class PageAreaImpl extends CapybaraPortingLayerImpl implements P
         this.page = context;
     }
 
-    protected PageAreaImpl(PageAreaImpl area, String relativePath) {
-        this(area.page, area.path + "/" + relativePath);
+    protected PageAreaImpl(PageArea area, String relativePath) {
+        this(area.getPage(), area.getPath() + "/" + relativePath);
 
         if (relativePath.startsWith("/")) {
             throw new IllegalArgumentException(
                     "Path is supposed to be relative to page area. Given: " + relativePath
             );
         }
+    }
+
+    @Override
+    public String getPath() {
+        return path;
+    }
+
+    @Override
+    public PageObject getPage() {
+        return page;
     }
 
     /**

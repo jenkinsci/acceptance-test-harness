@@ -27,4 +27,8 @@ public interface PageArea extends CapybaraPortingLayer, Control.Owner {
     Control control(String... relativePaths);
 
     Control control(By selector);
+
+    String getPath();
+
+    PageObject getPage();
 }

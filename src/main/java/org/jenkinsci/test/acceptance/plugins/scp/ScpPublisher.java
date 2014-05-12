@@ -15,8 +15,8 @@ public class ScpPublisher extends AbstractStep implements PostBuildStep {
 
     public Site add() {
         add.click();
-        String p = last(by.xpath(".//div[@name='entries'][starts-with(@path,'%s/entries')]", path)).getAttribute("path");
-        return new Site(page, p);
+        String p = last(by.xpath(".//div[@name='entries'][starts-with(@path,'%s/entries')]", getPath())).getAttribute("path");
+        return new Site(getPage(), p);
     }
 
     public static class Site extends PageAreaImpl {

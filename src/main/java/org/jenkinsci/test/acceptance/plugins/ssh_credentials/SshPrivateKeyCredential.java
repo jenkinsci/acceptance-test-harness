@@ -25,7 +25,7 @@ public class SshPrivateKeyCredential extends Credential {
 
     public Direct selectEnterDirectly() {
         WebElement e = choose("Enter directly");
-        return new Direct(page, e.getAttribute("path"));
+        return new Direct(getPage(), e.getAttribute("path"));
     }
 
     public static class Direct extends PageAreaImpl {

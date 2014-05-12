@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.plugins.credentials;
 
 import org.jenkinsci.test.acceptance.po.Describable;
+import org.jenkinsci.test.acceptance.po.PageArea;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.PageObject;
 
@@ -16,7 +17,7 @@ public abstract class Credential extends PageAreaImpl {
         super(context, path);
     }
 
-    protected Credential(PageAreaImpl area, String relativePath) {
+    protected Credential(PageArea area, String relativePath) {
         super(area, relativePath);
     }
 }

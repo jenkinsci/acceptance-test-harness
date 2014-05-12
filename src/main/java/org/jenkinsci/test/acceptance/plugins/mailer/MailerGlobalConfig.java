@@ -75,7 +75,7 @@ public class MailerGlobalConfig extends PageAreaImpl {
     }
 
     public void sendTestMail(String recipient) {
-        control(by.path(path + '/')).check();
+        control(by.path(getPath() + '/')).check();
         control("/sendTestMailTo").set(recipient);
         control("/validate-button").click();
     }

@@ -19,7 +19,7 @@ public class WarningsPublisher extends AbstractStep implements PostBuildStep {
         sleep(1000);
         String path = last(by.xpath("//div[@name='consoleParsers']")).getAttribute("path");
 
-        PageArea a = new PageAreaImpl(page, path) {
+        PageArea a = new PageAreaImpl(getPage(), path) {
         };
         a.control("parserName").select(caption);
     }
@@ -29,7 +29,7 @@ public class WarningsPublisher extends AbstractStep implements PostBuildStep {
         sleep(1000);
         String path = last(by.xpath("//div[@name='parserConfigurations']")).getAttribute("path");
 
-        PageArea a = new PageAreaImpl(page, path) {
+        PageArea a = new PageAreaImpl(getPage(), path) {
         };
         a.control("pattern").set(pattern);
         a.control("parserName").select(caption);

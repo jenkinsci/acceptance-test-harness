@@ -37,7 +37,7 @@ public class SystemGroovyStep extends BuildStepImpl {
 
     public SystemGroovyStep script(String script) {
         control("scriptSource[0]").check();
-        new CodeMirror(parent, path + "/scriptSource[0]/command").set(script);
+        new CodeMirror(parent, getPath() + "/scriptSource[0]/command").set(script);
         control("scriptSource[0]/validate-button").click();
         return this;
     }
