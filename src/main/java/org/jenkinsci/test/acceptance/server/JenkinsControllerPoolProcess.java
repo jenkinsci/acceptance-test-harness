@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.server;
 
 import com.cloudbees.sdk.extensibility.ExtensionList;
+import com.google.inject.Injector;
 import jnr.unixsocket.UnixServerSocketChannel;
 import jnr.unixsocket.UnixSocketAddress;
 import jnr.unixsocket.UnixSocketChannel;
@@ -37,6 +38,9 @@ import java.util.concurrent.SynchronousQueue;
 public class JenkinsControllerPoolProcess {
     @Inject
     ExtensionList<JenkinsControllerFactory> factories;
+
+    @Inject
+    Injector injector;
 
     private BlockingQueue<JenkinsController> queue;
 
@@ -82,7 +86,7 @@ public class JenkinsControllerPoolProcess {
                 try {
                     FallbackConfig f = new FallbackConfig();
                     while (true) {
-                        JenkinsController c = f.createController(factories);
+                        JenkinsController c = f.createController(injector,factories);
                         queue.put(c);
                     }
                 } catch (Throwable e) {

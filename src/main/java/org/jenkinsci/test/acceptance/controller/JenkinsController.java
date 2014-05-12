@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
 
+import com.google.inject.Injector;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.codehaus.plexus.util.FileUtils;
@@ -54,6 +55,13 @@ public abstract class JenkinsController implements Closeable, AutoCleaned {
         } catch (IOException e) {
             throw new RuntimeException("Failed to create log file "+ JENKINS_DEBUG_LOG);
         }
+    }
+
+    /**
+     * Called when {@link JenkinsController} is pulled into a world prior to {@link #start()}
+     */
+    public void postConstruct(Injector injector) {
+        injector.injectMembers(this);
     }
 
     /**

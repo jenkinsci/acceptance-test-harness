@@ -13,15 +13,15 @@ import com.cloudbees.sdk.extensibility.Extension;
 /**
  * Launches Jenkins via "java -jar jenkins.war" on the local machine.
  *
- * @author: Vivek Pandey
+ * @author Vivek Pandey
  */
 public class WinstoneController extends LocalController {
 
     private final int httpPort;
     private final int controlPort;
 
-    public WinstoneController(final File warFile, File formElementHpi) {
-        super(warFile, formElementHpi);
+    public WinstoneController(final File warFile) {
+        super(warFile);
 
         httpPort = randomLocalPort();
         controlPort = randomLocalPort();
@@ -59,7 +59,7 @@ public class WinstoneController extends LocalController {
 
         @Override
         public JenkinsController create() {
-            return new WinstoneController(getWarFile(), getFormElementsPathFile());
+            return new WinstoneController(getWarFile());
         }
     }
 }
