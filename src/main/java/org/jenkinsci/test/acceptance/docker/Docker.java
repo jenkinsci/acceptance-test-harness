@@ -4,11 +4,16 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
+import hudson.remoting.Which;
 import org.apache.commons.io.FileUtils;
 import org.jenkinsci.test.acceptance.utils.SHA1Sum;
 import org.jenkinsci.utils.process.CommandBuilder;
@@ -102,16 +107,45 @@ public class Docker {
             dir.mkdirs();
 
             try {
-                URL resourceDir = classLoader.getResource(fixture.getName().replace('.', '/'));
-                File dockerFileDir;
+                File jar = null;
                 try {
-                    dockerFileDir = new File(resourceDir.toURI());
-                } catch(URISyntaxException e) {
-                    dockerFileDir = new File(resourceDir.getPath());
+                    jar = Which.jarFile(fixture);
+                } catch (IllegalArgumentException e) {
+                    // fall through
                 }
-                FileUtils.copyDirectory(dockerFileDir, dir);
 
-                String dockerFileHash = getDockerFileHash(dockerFileDir);
+                if (jar!=null) {
+                    // files are packaged into a war. extract them
+                    String prefix = fixture.getName().replace('.', '/')+"/";
+                    try (JarFile j = new JarFile(jar)) {
+                        Enumeration<JarEntry> e = j.entries();
+                        while (e.hasMoreElements()) {
+                            JarEntry je = e.nextElement();
+                            if (je.getName().startsWith(prefix)) {
+                                File dst = new File(dir, je.getName().substring(prefix.length()));
+                                if (je.isDirectory()) {
+                                    dst.mkdirs();
+                                } else {
+                                    try (InputStream in = j.getInputStream(je)) {
+                                        FileUtils.copyInputStreamToFile(in, dst);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    // Dockerfile is not packaged into a jar file, so copy locally
+                    URL resourceDir = classLoader.getResource(fixture.getName().replace('.', '/'));
+                    File dockerFileDir;
+                    try {
+                        dockerFileDir = new File(resourceDir.toURI());
+                    } catch(URISyntaxException e) {
+                        dockerFileDir = new File(resourceDir.getPath());
+                    }
+                    FileUtils.copyDirectory(dockerFileDir, dir);
+                }
+
+                String dockerFileHash = getDockerFileHash(dir);
                 String shortedDockerFileHash = dockerFileHash.substring(0,12);
 
                 return build("jenkins/" + f.id() + "_" +  shortedDockerFileHash, dir);
