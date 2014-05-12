@@ -103,13 +103,11 @@ public class PluginManager extends ContainerPageObject {
      */
     public void installPlugin(String... shortNames) {
         final Map<String, String> mapShortNamesVersion = getMapShortNamesVersion(shortNames);
-        //shortNames without a version annotation
-        final String[] shortNameValues = mapShortNamesVersion.keySet().toArray(new String[0]);
 
         if (isInstalled(shortNames))
             return;
         if (uploadPlugins) {
-            for (PluginMetadata p : ucmd.get().transitiveDependenciesOf(asList(shortNameValues))) {
+            for (PluginMetadata p : ucmd.get().transitiveDependenciesOf(mapShortNamesVersion.keySet())) {
                 try {
                     final String claimedVersion = mapShortNamesVersion.get(p.name) != null ? mapShortNamesVersion.get(p.name) : p.version;
                     if (!isInstalled(p.name + VERSION_SEPARATOR + claimedVersion)) {
@@ -127,7 +125,7 @@ public class PluginManager extends ContainerPageObject {
                 checkForUpdates();
 
             OUTER:
-            for (final String n : shortNameValues) {
+            for (final String n : mapShortNamesVersion.keySet()) {
                 for (int attempt = 0; attempt < 2; attempt++) {// # of installations attempted, considering retries
                     visit("available");
                     check(find(by.xpath("//input[starts-with(@name,'plugin.%s.')]", n)));
@@ -152,7 +150,7 @@ public class PluginManager extends ContainerPageObject {
 
     /**
      * Parses the version from a wpValue.
-     * Versions can be added to the shotName via "@"
+     * Versions can be added to the shortName via "@"
      * If no version is added, method returns null
      *
      * @param wpValue Value of the WithPlugin annotation
