@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
@@ -159,7 +160,7 @@ public class Docker {
     }
 
     private String getDockerFileHash(File dockerFileDir) {
-        File dockerFile = new File (dockerFileDir.getAbsolutePath()+"/Dockerfile");
+        File dockerFile = new File (dockerFileDir,"Dockerfile");
         SHA1Sum dockerFileHash = new SHA1Sum(dockerFile);
         return dockerFileHash.getSha1String().substring(0,12);
     }
