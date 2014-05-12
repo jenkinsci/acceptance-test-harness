@@ -23,7 +23,7 @@ import com.cloudbees.sdk.extensibility.ExtensionPoint;
  * which is determined at runtime by the user who runs the tests, not by the author
  * of tests.
  *
- * @author: Vivek Pandey
+ * @author Vivek Pandey
  */
 @ExtensionPoint
 public abstract class JenkinsController implements Closeable, AutoCleaned {
