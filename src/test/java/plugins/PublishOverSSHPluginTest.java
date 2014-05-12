@@ -28,7 +28,7 @@ import java.io.IOException;
 
 /**
  * Feature: Tests for SSH plugin
- * @author somebody ;-)
+ * @author jenky-hm
  *
  */
 @WithPlugins("publish-over-ssh")
