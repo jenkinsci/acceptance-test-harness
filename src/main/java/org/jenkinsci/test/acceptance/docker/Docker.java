@@ -78,19 +78,23 @@ public class Docker {
     /**
      * Builds a docker image.
      *
-     * @param tag
+     * @param image
      *      Name of the image to be built.
      * @param dir
      *      Directory that contains Dockerfile
      */
-    public DockerImage build(String tag, File dir) throws IOException, InterruptedException {
-        // check if the image already exists
-        if (cmd("images").add("-q",tag).popen().verifyOrDieWith("failed to query the status of the image").trim().length()>0)
-            return new DockerImage(tag);
+    public DockerImage build(String image, File dir) throws IOException, InterruptedException {
+        // compute tag from the content of Dockerfile
+        String tag = getDockerFileHash(dir);
+        String full = image + ":" + tag;
 
-        if (cmd("build").add("-t", tag, dir).system()!=0)
+        // check if the image already exists
+        if (cmd("images").add("-q",image).popen().verifyOrDieWith("failed to query the status of the image").trim().contains(" "+tag+" "))
+            return new DockerImage(full);
+
+        if (cmd("build").add("-t", full, dir).system()!=0)
             throw new Error("Failed to build image: "+tag);
-        return new DockerImage(tag);
+        return new DockerImage(full);
     }
 
     public DockerImage build(Class<? extends DockerContainer> fixture) throws IOException, InterruptedException {
@@ -145,10 +149,7 @@ public class Docker {
                     FileUtils.copyDirectory(dockerFileDir, dir);
                 }
 
-                String dockerFileHash = getDockerFileHash(dir);
-                String shortedDockerFileHash = dockerFileHash.substring(0,12);
-
-                return build("jenkins/" + f.id() + "_" +  shortedDockerFileHash, dir);
+                return build("jenkins/" + f.id(), dir);
             } finally {
                 FileUtils.deleteDirectory(dir);
             }
@@ -160,7 +161,7 @@ public class Docker {
     private String getDockerFileHash(File dockerFileDir) {
         File dockerFile = new File (dockerFileDir.getAbsolutePath()+"/Dockerfile");
         SHA1Sum dockerFileHash = new SHA1Sum(dockerFile);
-        return dockerFileHash.getSha1String();
+        return dockerFileHash.getSha1String().substring(0,12);
     }
 
     /**
