@@ -17,20 +17,26 @@ import static java.lang.annotation.RetentionPolicy.*;
 
 /**
  * Indicates that a test requires the presence of the specified plugins.
- *
- * <p>
+ * <p/>
+ * Example: @WithPlugin("subversion")
+ * <p/>
+ * One can specify a specific version after the plugin name with a suffixed '@'
+ * Example: @WithPlugin("subversion@1.54")
+ * <p/>
+ * If no version is specified, the latest version is taken.
+ * If the plugin is already installed in a different version it will be replaced by the new version.
+ * <p/>
  * When running tests, this annotation triggers {@link JenkinsAcceptanceTestRule}
  * to install all the plugins.
- *
+ * <p/>
  * We also want to use this to filter tests, especially for non-destructive tests.
- *
- * TODO: add a version constraint
  *
  * @author Kohsuke Kawaguchi
  */
 @Retention(RUNTIME)
 @Target({METHOD, TYPE})
-@Inherited @Documented
+@Inherited
+@Documented
 @RuleAnnotation(WithPlugins.RuleImpl.class)
 public @interface WithPlugins {
     String[] value();
@@ -54,9 +60,9 @@ public @interface WithPlugins {
                 }
 
                 private boolean installPlugins(WithPlugins wp) {
-                    if (wp!=null)
+                    if (wp != null)
                         jenkins.getPluginManager().installPlugin(wp.value());
-                    return wp!=null;
+                    return wp != null;
                 }
             };
         }
