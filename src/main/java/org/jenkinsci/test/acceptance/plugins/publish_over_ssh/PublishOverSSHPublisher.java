@@ -4,7 +4,7 @@ import com.google.inject.Injector;
 import org.jenkinsci.test.acceptance.po.*;
 
 /**
- * @author Christoph Ponikwar
+ * @author somebody ;-)
  */
 @Describable("Send build artifacts over SSH")
 public class PublishOverSSHPublisher extends PostBuildStep {

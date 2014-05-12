@@ -9,7 +9,7 @@ import org.jenkinsci.test.acceptance.po.PageObject;
 import javax.inject.Inject;
 
 /**
- *
+ * @author somebody ;-)
  */
 public class PublishOverSSHGlobalConfig extends PageArea {
     @Inject

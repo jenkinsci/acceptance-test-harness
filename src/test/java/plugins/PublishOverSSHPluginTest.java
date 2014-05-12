@@ -28,14 +28,15 @@ import java.io.IOException;
 
 /**
  * Feature: Tests for SSH plugin
+ * @author somebody ;-)
  *
  */
 @WithPlugins("publish-over-ssh")
+@Native("docker")
 public class PublishOverSSHPluginTest extends AbstractJUnitTest {
     @Inject
     Docker docker;
 
-    @Native("docker")
     /**
      @native(docker)
      Scenario: Configure a job with over ssh publishing
@@ -107,6 +108,7 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
 
         jenkins.save();
 
+        // FIXME extract Method?
         j.configure(); {
             j.copyResource(cp_file);
             PublishOverSSHPublisher popsp = j.addPublisher(PublishOverSSHPublisher.class);
@@ -131,9 +133,8 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
         assertThat(FileUtils.readFileToString(new File("/tmp/lorem-ipsum-scp.txt")), CoreMatchers.is(cp_file.asText()));
     }
 
-    @Native("docker")
     /**
-     @native(docker)
+     @native(docker) FIXME Javadoc
      Scenario: Configure a job with over ssh publishing
      Given I have installed the "publish-over-ssh" plugin
      And a docker fixture "sshd"
@@ -190,6 +191,7 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
 
         jenkins.save();
 
+        // FIXME extract Method?
         j.configure(); {
             j.copyResource(cp_file);
             PublishOverSSHPublisher popsp = j.addPublisher(PublishOverSSHPublisher.class);
@@ -209,6 +211,7 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
         assertThat(FileUtils.readFileToString(new File("/tmp/lorem-ipsum-scp.txt")), CoreMatchers.is(cp_file.asText()));
     }
 
+    // FIXME Tests
     // public void configure_job_with_ssh_key_file_and_key_password_publishing() throws IOException, InterruptedException {
     // public void configure_job_with_ssh_key_file_and_no_password_publishing() throws IOException, InterruptedException {
     // public void configure_job_with_ssh_key_text_and_key_password_publishing() throws IOException, InterruptedException {
