@@ -343,6 +343,16 @@
           </programs>
         </configuration>
       </plugin>
+      <plugin>
+        <artifactId>maven-release-plugin</artifactId>
+        <configuration>
+          <!--
+            tests are used to test Jenkins, not the acceptance test harness,
+            so there's no point in running tests during a release of the harness
+          -->
+          <arguments>-DskipTests</arguments>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 
