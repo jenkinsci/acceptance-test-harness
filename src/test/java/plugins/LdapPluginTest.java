@@ -1,11 +1,5 @@
 package plugins;
 
-import javax.annotation.CheckForNull;
-import javax.inject.Inject;
-import java.io.IOException;
-import java.net.ServerSocket;
-
-import org.jclouds.javax.annotation.Nullable;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.LdapContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
@@ -14,7 +8,11 @@ import org.jenkinsci.test.acceptance.plugins.ldap.LdapDetails;
 import org.jenkinsci.test.acceptance.po.*;
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.*;
+import javax.inject.Inject;
+import java.io.IOException;
+import java.net.ServerSocket;
+
+import static org.hamcrest.CoreMatchers.not;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 
 
@@ -33,27 +31,25 @@ public class LdapPluginTest extends AbstractJUnitTest {
     Jenkins jenkins;
 
     /**
-     * "Jenkins is using ldap as security realm" (with user search base %s) (with user search filter %s)
-     *
-     * @param userSearchBase
-     *              optional: user search base (e.g. "ou=People")
-     * @param userSearchFilter
-     *              optional: user search filter (e.g. "mail={0}")
+     * "Jenkins is using ldap as security realm"
      */
-    private void useLdapAsSecurityRealm(@CheckForNull String userSearchBase, @CheckForNull String userSearchFilter) {
-        LdapContainer l = ldap.get();
-        LdapDetails ldapDetails = new LdapDetails(l.getHost(), l.getPort(), l.getManagerDn(), l.getManagerPassword(), l.getRootDn());
-        if (userSearchBase != null) {
-            ldapDetails.setUserSearchBase(userSearchBase);
-        }
-        if (userSearchFilter != null) {
-            ldapDetails.setUserSearchFilter(userSearchFilter);
-        }
+    private void useLdapAsSecurityRealm(LdapDetails ldapDetails) {
         GlobalSecurityConfig security = new GlobalSecurityConfig(jenkins);
         security.configure();
         LdapSecurityRealm realm = security.useRealm(LdapSecurityRealm.class);
         realm.configure(ldapDetails);
         security.save();
+    }
+
+    /**
+     * Creates default ldap connection details from a running docker LdapContainer.
+     *
+     * @param ldapContainer a docker LdapContainer
+     * @return default ldap connection details
+     */
+    private LdapDetails createDefaults(LdapContainer ldapContainer) {
+        LdapDetails details = new LdapDetails(ldapContainer.getHost(), ldapContainer.getPort(), ldapContainer.getManagerDn(), ldapContainer.getManagerPassword(), ldapContainer.getRootDn());
+        return details;
     }
 
     /**
@@ -66,7 +62,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
     @Test
     public void login_ok() {
         // Given
-        useLdapAsSecurityRealm(null, null);
+        useLdapAsSecurityRealm(createDefaults(ldap.get()));
         // When
         Login login = jenkins.login();
         login.doLogin("jenkins", "root");
@@ -84,7 +80,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
     @Test
     public void login_wrong_password() {
         // Given
-        useLdapAsSecurityRealm(null, null);
+        useLdapAsSecurityRealm(createDefaults(ldap.get()));
         // When
         Login login = jenkins.login();
         login.doLogin("jenkins", "thisisawrongpassword");
@@ -102,7 +98,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
     @Test
     public void login_no_such_user() {
         // Given
-        useLdapAsSecurityRealm(null, null);
+        useLdapAsSecurityRealm(createDefaults(ldap.get()));
         // When
         Login login = jenkins.login();
         login.doLogin("maggie", "simpson");
@@ -146,7 +142,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
     @Test
     public void login_search_base_people_ok() {
         // Given
-        useLdapAsSecurityRealm("ou=People", null);
+        useLdapAsSecurityRealm(createDefaults(ldap.get()).userSearchBase("ou=People"));
         // When
         Login login = jenkins.login();
         login.doLogin("homer", "cisco");
@@ -164,7 +160,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
     @Test
     public void login_search_base_people_not_found() {
         // Given
-        useLdapAsSecurityRealm("ou=People", null);
+        useLdapAsSecurityRealm(createDefaults(ldap.get()).userSearchBase("ou=People"));
         // When
         Login login = jenkins.login();
         login.doLogin("jenkins", "root");
@@ -182,7 +178,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
     @Test
     public void login_email_ok() {
         // Given
-        useLdapAsSecurityRealm(null, "mail={0}");
+        useLdapAsSecurityRealm(createDefaults(ldap.get()).userSearchFilter("mail={0}"));
         // When
         Login login = jenkins.login();
         login.doLogin("jenkins@jenkins-ci.org", "root");
@@ -198,7 +194,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
      * Then I will be successfully logged in as user "jenkins"
      */
     @Test
-    public void login_use_fallback_server(){
+    public void login_use_fallback_server() {
         // Given
         LdapContainer ldapContainer = ldap.get();
         GlobalSecurityConfig securityConfig = new GlobalSecurityConfig(jenkins);
@@ -220,13 +216,94 @@ public class LdapPluginTest extends AbstractJUnitTest {
 
     }
 
+    /**
+     * Scenario: resolve email address
+     * Given I have a docker fixture "ldap"
+     * And Jenkins is using ldap as security realm
+     * When I login with user "jenkins" and password "root"
+     * Then I will be logged on as user "jenkins"
+     * And the resolved mail address is "jenkins@jenkins-ci.org"
+     */
+    @Test
+    public void resolve_email() {
+        // Given
+        useLdapAsSecurityRealm(createDefaults(ldap.get()));
+        // When
+        Login login = jenkins.login();
+        login.doLogin("jenkins", "root");
+        // Then
+        assertThat(jenkins, hasLoggedInUser("jenkins"));
+        User u = new User(jenkins, "jenkins");
+        assertEquals("jenkins@jenkins-ci.org", u.mail());
+    }
+
+    /**
+     * Scenario: resolve group memberships of user with default configuration
+     * Given I have a docker fixture "ldap"
+     * And Jenkins is using ldap as security realm
+     * When I login with user "jenkins" and password "root"
+     * Then "jenkins" will be member of following groups: "ldap1", "ldap2"
+     */
+    @Test
+    public void resolve_group_memberships_with_defaults() {
+        // Given
+        useLdapAsSecurityRealm(createDefaults(ldap.get()));
+        // When
+        Login login = jenkins.login();
+        login.doLogin("jenkins", "root");
+        User userJenkins = new User(jenkins, "jenkins");
+        // Then
+        assertThat(userJenkins, isMemberOf("ldap1"));
+        assertThat(userJenkins, isMemberOf("ldap2"));
+    }
+
+    /**
+     * Scenario: resolve group memberships of user with default configuration
+     * Given I have a docker fixture "ldap"
+     * And Jenkins is using ldap as security realm
+     * When I login with user "homer" and password "cisco"
+     * Then "homer" will be member of group "ldap2"
+     * And "homer" will not be member of group "ldap1"
+     */
+    @Test
+    public void resolve_group_memberships_with_defaults_negative() {
+        // Given
+        useLdapAsSecurityRealm(createDefaults(ldap.get()));
+        // When
+        Login login = jenkins.login();
+        login.doLogin("homer", "cisco");
+        User homer = new User(jenkins, "homer");
+        // Then
+        assertThat(homer, isMemberOf("ldap2"));
+        assertThat(homer, not(isMemberOf("ldap1")));
+    }
+
+    /**
+     * Scenario: using custom group search base "ou=Applications" (contains no groups)
+     * Given I have a docker fixture "ldap"
+     * And Jenkins is using ldap as security realm with group search base "ou=Applications"
+     * When I login with user "jenkins" and password "root"
+     * Then "jenkins" will not be member of groups "ldap1" and "ldap2"
+     */
+    @Test
+    public void custom_group_search_base() {
+        // Given
+        useLdapAsSecurityRealm(createDefaults(ldap.get()).groupSearchBase("ou=Applications"));
+        // When
+        Login login = jenkins.login();
+        login.doLogin("jenkins", "root");
+        User userJenkins = new User(jenkins, "jenkins");
+        // Then
+        assertThat(userJenkins, not(isMemberOf("ldap1")));
+        assertThat(userJenkins, not(isMemberOf("ldap2")));
+    }
+
     private int findAvailablePort() {
         // use ldap port 389 as fallback (but maybe there is a ldap server running)
         int port = 389;
         try (ServerSocket s = new ServerSocket(0)) {
             port = s.getLocalPort();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return port;
