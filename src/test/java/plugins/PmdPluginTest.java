@@ -1,21 +1,22 @@
 package plugins;
 
-import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.plugins.pmd.PmdAction;
-import org.jenkinsci.test.acceptance.plugins.pmd.PmdPublisher;
-import org.jenkinsci.test.acceptance.po.Build;
-import org.jenkinsci.test.acceptance.po.FreeStyleJob;
-import org.junit.Test;
-import org.xml.sax.SAXException;
-
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.jenkinsci.test.acceptance.Matchers.hasAction;
-import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+import org.jenkinsci.test.acceptance.junit.Bug;
+import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.plugins.pmd.PmdAction;
+import org.jenkinsci.test.acceptance.plugins.pmd.PmdPublisher;
+import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.xml.sax.SAXException;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.jenkinsci.test.acceptance.Matchers.*;
 
 /**
  Feature: Tests for PMD plugin
@@ -114,7 +115,7 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
     }
 
     private void assertFileTab(PmdAction pa) {
-        final SortedMap<String, Integer> expectedContent = new TreeMap<String, Integer>();
+        final SortedMap<String, Integer> expectedContent = new TreeMap<>();
         expectedContent.put("ChannelContentAPIClient.m", 6);
         expectedContent.put("ProductDetailAPIClient.m", 2);
         expectedContent.put("ViewAllHoldingsAPIClient.m", 1);
@@ -122,14 +123,14 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
     }
 
     private void assertTypeTab(PmdAction pa) {
-        final SortedMap<String, Integer> expectedContent = new TreeMap<String, Integer>();
+        final SortedMap<String, Integer> expectedContent = new TreeMap<>();
         expectedContent.put("long line", 6);
         expectedContent.put("unused method parameter", 3);
         assertThat(pa.getTypesTabContents(), is(expectedContent));
     }
 
     private void assertWarningsTab(PmdAction pa) {
-        final SortedMap<String, Integer> expectedContent = new TreeMap<String, Integer>();
+        final SortedMap<String, Integer> expectedContent = new TreeMap<>();
         expectedContent.put("ChannelContentAPIClient.m:28", 28);
         expectedContent.put("ChannelContentAPIClient.m:28", 28);
         expectedContent.put("ChannelContentAPIClient.m:28", 28);
@@ -181,9 +182,8 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
 
     /**
      * Runs job two times to check if the links of the graph are relative.
-     * @Bug("21723")
      */
-    @Test
+    @Test @Bug("21723") @Ignore("Until JENKINS-21723 is fixed")
     public void view_pmd_report_job_graph_links() {
         FreeStyleJob job = setupJob("/pmd_plugin/pmd-warnings.xml", PmdPublisher.class, "pmd-warnings.xml");
         buildJobAndWait(job);

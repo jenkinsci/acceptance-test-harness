@@ -1,21 +1,22 @@
 package plugins;
 
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
+import org.jenkinsci.test.acceptance.junit.Bug;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleAction;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstylePublisher;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import java.util.regex.Pattern;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.jenkinsci.test.acceptance.Matchers.hasAction;
+import static org.hamcrest.CoreMatchers.*;
+import static org.jenkinsci.test.acceptance.Matchers.*;
 
 /**
  * Feature: Allow publishing of Checkstyle report
@@ -62,7 +63,7 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
     }
 
     private void assertFileTab(final CheckstyleAction ca) {
-        final SortedMap<String, Integer> expectedFileDetails = new TreeMap<String, Integer>();
+        final SortedMap<String, Integer> expectedFileDetails = new TreeMap<>();
         expectedFileDetails.put("JavaProvider.java", 18);
         expectedFileDetails.put("PluginImpl.java", 8);
         expectedFileDetails.put("RemoteLauncher.java", 63);
@@ -74,7 +75,7 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
     }
 
     private void assertCategoryTab(final CheckstyleAction ca) {
-        final SortedMap<String, Integer> expectedCategories = new TreeMap<String, Integer>();
+        final SortedMap<String, Integer> expectedCategories = new TreeMap<>();
         expectedCategories.put("Blocks", 28);
         expectedCategories.put("Checks", 123);
         expectedCategories.put("Coding", 61);
@@ -89,7 +90,7 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
     }
 
     private void assertTypeTab(final CheckstyleAction ca) {
-        final SortedMap<String, Integer> expectedTypes = new TreeMap<String, Integer>();
+        final SortedMap<String, Integer> expectedTypes = new TreeMap<>();
         expectedTypes.put("AvoidInlineConditionalsCheck", 9);
         expectedTypes.put("AvoidStarImportCheck", 1);
         expectedTypes.put("ConstantNameCheck", 1);
@@ -158,9 +159,8 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
 
     /**
      * Runs job two times to check if the links of the graph are relative.
-     * @Bug("21723")
      */
-    @Test
+    @Test @Bug("21723")  @Ignore("Until JENKINS-21723 is fixed")
     public void view_checkstyle_report_job_graph_links() throws Exception {
         FreeStyleJob job = setupJob("/checkstyle_plugin/checkstyle-result.xml", CheckstylePublisher.class, "checkstyle-result.xml");
         buildJobAndWait(job);
