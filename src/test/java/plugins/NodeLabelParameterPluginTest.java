@@ -234,8 +234,8 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
 
         //as both slaves have been started after creation, we have to take one of them down
         s2.markOffline();
-        assertTrue(s2.isOffline());
-        assertTrue(s1.isOnline());
+        assertThat(s2.isOnline(), is(false));
+        assertThat(s1.isOnline(), is(true));
 
         //select both slaves for this build
         Build b = j.startBuild(singletonMap("slavename", s1.getName()+","+s2.getName()));
@@ -251,14 +251,14 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         String refText=String.format("(pending—%s is offline) [NodeParameterValue: slavename=%s]",s2.getName(),s2.getName());
         //fails at the moment due to the pending build text says: LabelParameterValue
         //TODO: clarify whether this is an error or adapt the refText otherwise
-        assertTrue(pendingBuildText.contains(refText));
+        assertThat(pendingBuildText, containsString(refText));
 
         //ensure that the build on the online slave has been done
         j.shouldHaveBuiltOn(jenkins,s1.getName());
 
         //bring second slave online again
         s2.markOnline();
-        assertTrue(s2.isOnline());
+        assertThat(s2.isOnline(), is(true));
 
         b.waitUntilFinished();
         j.shouldHaveBuiltOn(jenkins, s2.getName());
