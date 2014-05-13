@@ -23,7 +23,7 @@ public class DockerContainer implements Closeable {
     private File logfile;
     private Thread shutdownHook;
 
-    protected void init(String cid, Process p, File logfile) {
+    /* package */ void init(String cid, Process p, File logfile) {
         this.cid = cid;
         this.p = p;
         this.logfile = logfile;
