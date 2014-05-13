@@ -8,6 +8,7 @@ import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.UpdateCenter.InstallationFailedException;
 import org.jenkinsci.test.acceptance.update_center.PluginMetadata;
 import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata;
+import org.openqa.selenium.WebElement;
 
 import javax.inject.Named;
 import javax.inject.Provider;
@@ -16,8 +17,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
-
-import static java.util.Arrays.asList;
 
 /**
  * Page object for plugin manager.
@@ -75,8 +74,28 @@ public class PluginManager extends ContainerPageObject {
     public boolean isInstalled(String... shortNames) {
         visit("installed");
         for (String n : shortNames) {
-            String version = getVersionFromWpValue(n) != null ? getVersionFromWpValue(n) : ucmd.get().plugins.get(n).version;
-            if (getElement(by.xpath("//input[@url='plugin/%s']/../../td/a[text()='%s']", getShortNameFromWpValue(n), version)) == null)
+            // prefer the explicitly specified version in the name
+            String version = getVersionFromWpValue(n);
+            if (version==null) {
+                // otherwise fall back to the latest version from update center
+                // TODO: allow the test runner to specify the version from config
+                PluginMetadata metadata = ucmd.get().plugins.get(n);
+                if (metadata!=null)
+                    version = metadata.version;
+            }
+
+            // allow the test author/runner to say "I want some version of this plugin but it doesn't have to be the latest"
+            // this is useful to test a bundled plugin as it is bundled.
+            // I wonder if this should be the default behaviour, as opposed to implicit "latest"
+            if ("any".equals(version))
+                version = null;
+
+            WebElement tr = getElement(by.xpath("//tr[td/input[@url='plugin/%s']]", getShortNameFromWpValue(n)));
+            if (tr==null)
+                return false;
+
+            // if the version is explicitly specified, check if we've got that version
+            if (version!=null && tr.findElements(by.xpath("./td/a[text()='%s']",version)).isEmpty())
                 return false;
         }
         return true;
