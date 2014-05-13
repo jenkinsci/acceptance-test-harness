@@ -1,14 +1,17 @@
 package org.jenkinsci.test.acceptance;
 
+import java.util.List;
 import java.util.regex.Pattern;
 
 import org.hamcrest.Description;
 import org.jenkinsci.test.acceptance.po.ContainerPageObject;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.PageObject;
+import org.jenkinsci.test.acceptance.po.User;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 
 /**
  * Hamcrest matchers.
@@ -24,24 +27,24 @@ public class Matchers {
     }
 
     public static Matcher<WebDriver> hasContent(final Pattern pattern) {
-      return new Matcher<WebDriver>("Text matching %s", pattern) {
-          @Override
-          public boolean matchesSafely(WebDriver item) {
-              return pattern.matcher(pageText(item)).find();
-          }
+        return new Matcher<WebDriver>("Text matching %s", pattern) {
+            @Override
+            public boolean matchesSafely(WebDriver item) {
+                return pattern.matcher(pageText(item)).find();
+            }
 
-          @Override
-          public void describeMismatchSafely(WebDriver item, Description mismatchDescription) {
-              mismatchDescription.appendText("was ")
-                      .appendValue(item.getCurrentUrl())
-                      .appendText("\n")
-                      .appendValue(pageText(item));
-          }
+            @Override
+            public void describeMismatchSafely(WebDriver item, Description mismatchDescription) {
+                mismatchDescription.appendText("was ")
+                        .appendValue(item.getCurrentUrl())
+                        .appendText("\n")
+                        .appendValue(pageText(item));
+            }
 
-          private String pageText(WebDriver item) {
-              return item.findElement(by.xpath("/html")).getText();
-          }
-      };
+            private String pageText(WebDriver item) {
+                return item.findElement(by.xpath("/html")).getText();
+            }
+        };
     }
 
     /**
@@ -88,8 +91,9 @@ public class Matchers {
             }
         };
     }
+
     public static Matcher<String> containsRegexp(String regexp) {
-        return containsRegexp(regexp,0);
+        return containsRegexp(regexp, 0);
     }
 
     /**
@@ -106,7 +110,7 @@ public class Matchers {
         };
     }
 
-    public static Matcher<ContainerPageObject> pageObjectExists(){
+    public static Matcher<ContainerPageObject> pageObjectExists() {
         return new Matcher<ContainerPageObject>("Page object exists") {
             @Override
             public void describeMismatchSafely(ContainerPageObject item, Description desc) {
@@ -125,14 +129,14 @@ public class Matchers {
         };
     }
 
-    public static Matcher<Jenkins> hasLoggedInUser(final String user){
+    public static Matcher<Jenkins> hasLoggedInUser(final String user) {
         return new Matcher<Jenkins>("has logged in user %s", user) {
             @Override
             public boolean matchesSafely(final Jenkins jenkins) {
                 try {
                     jenkins.find(by.href("/user/" + user));
                     return true;
-                } catch (NoSuchElementException e){
+                } catch (NoSuchElementException e) {
                     return false;
                 }
             }
@@ -140,6 +144,31 @@ public class Matchers {
             @Override
             public void describeMismatchSafely(final Jenkins item, final Description desc) {
                 desc.appendText(user + " is not logged in.");
+            }
+        };
+    }
+
+    public static Matcher<User> isMemberOf(final String group) {
+        return new Matcher<User>(" is member of group %s", group) {
+            @Override
+            public boolean matchesSafely(final User user) {
+                user.open();
+                try {
+                    List<WebElement> webElements = user.all(by.xpath("//ul/li"));
+                    for (WebElement webElement : webElements) {
+                        if (webElement.getText().equals(group)) {
+                            return true;
+                        }
+                    }
+                } catch (NoSuchElementException e) {
+                    return false;
+                }
+                return false;
+            }
+
+            @Override
+            public void describeMismatchSafely(final User item, final Description desc) {
+                desc.appendText(item + " is not member of group " + group + ".");
             }
         };
     }

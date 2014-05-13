@@ -1,27 +1,26 @@
 package org.jenkinsci.test.acceptance.controller;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-
+import com.cloudbees.sdk.extensibility.Extension;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.StringUtils;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.jenkinsci.utils.process.ProcessInputStream;
 
-import com.cloudbees.sdk.extensibility.Extension;
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
  * Launches Jenkins in JBoss.
  *
- * @author: Vivek Pandey
+ * @author Vivek Pandey
  */
 public class JBossController extends LocalController {
     private final File jbossHome;
 
-    public JBossController(File war, File jbossHome, final File formElementsPathFile) {
-        super(war, formElementsPathFile);
+    public JBossController(File war, File jbossHome) {
+        super(war);
         if(!jbossHome.isDirectory()){
             throw new RuntimeException("Invalid JBoss Home: "+jbossHome.getAbsolutePath());
         }
@@ -94,7 +93,7 @@ public class JBossController extends LocalController {
 
         @Override
         public JBossController create() {
-            return new JBossController(getWarFile(), getJBossHome(), getFormElementsPathFile());
+            return new JBossController(getWarFile(), getJBossHome());
         }
 
         protected File getJBossHome() {
