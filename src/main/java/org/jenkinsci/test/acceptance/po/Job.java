@@ -35,6 +35,11 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
  */
 public class Job extends ContainerPageObject {
     public final String name;
+
+    public List<Parameter> getParameters() {
+        return parameters;
+    }
+
     private List<Parameter> parameters = new ArrayList<>();
 
     public final Control concurrentBuild = control("/concurrentBuild");

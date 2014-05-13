@@ -154,13 +154,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         assertThat(s.isOffline(), is(true));
 
         //use scheduleBuild instead of startBuild to avoid a timeout waiting for Build being started
-        Build b = j.scheduleBuild(singletonMap("slavename", s.getName()));
-
-        String pendingBuildText = find(by.xpath("//img[@alt='pending']/../..")).getText();
-        String refText=String.format("(pending—%s is offline) [NodeParameterValue: slavename=%s]",s.getName(),s.getName());
-
-        assertThat(pendingBuildText, containsString(refText));
-        assertThat(b.hasStarted(), is(false));
+        Build b = j.scheduleBuild(singletonMap("slavename", s.getName())).shouldBePendingForNodeParameter(s.getName());
 
         //bring the slave up again, the Build should start immediately
         s.markOnline();
@@ -195,13 +189,9 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         assertThat(s.isOffline(), is(true));
 
         //use scheduleBuild instead of startBuild to avoid a timeout waiting for Build being started
-        Build b = j.scheduleBuild(singletonMap("slavename", s.getName()));
+        Build b = j.scheduleBuild(singletonMap("slavename", s.getName())).
+                shouldBeTriggeredWithoutValidOnlineNode(s.getName());
 
-        String pendingBuildText = find(by.xpath("//img[@alt='pending']/../..")).getText();
-        String refText=String.format("(pending—All nodes of label ‘Job triggered without a valid online node, given where: %s’ are offline)",s.getName());
-
-        assertThat(pendingBuildText, containsString(refText));
-        assertThat(b.hasStarted(), is(false));
     }
 
     /**
@@ -237,21 +227,14 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         assertThat(s2.isOnline(), is(false));
         assertThat(s1.isOnline(), is(true));
 
-        //select both slaves for this build
-        Build b = j.startBuild(singletonMap("slavename", s1.getName()+","+s2.getName()));
+        //select both slaves for this build, it should succeed due the online slave
+        Build b = j.startBuild(singletonMap("slavename", s1.getName()+","+s2.getName())).shouldSucceed();
 
         // wait for the build on slave 1 to finish
-        b.waitUntilFinished();
+        //b.waitUntilFinished();
 
-        //get back to the job's page otherwise we do not have the build history summary to evaluate their content
-        j.visit(""); //equivalent to: jenkins.visit("jobs/"+j.name);
-
-        //ensure the build on the offline slave is pending
-        String pendingBuildText = find(by.xpath("//img[@alt='pending']/../..")).getText();
-        String refText=String.format("(pending—%s is offline) [NodeParameterValue: slavename=%s]",s2.getName(),s2.getName());
-        //fails at the moment due to the pending build text says: LabelParameterValue
-        //TODO: clarify whether this is an error or adapt the refText otherwise
-        assertThat(pendingBuildText, containsString(refText));
+        // check that the build is also pending for the other slave
+        b.shouldBePendingForNodeParameter(s2.getName());
 
         //ensure that the build on the online slave has been done
         j.shouldHaveBuiltOn(jenkins,s1.getName());
