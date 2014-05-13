@@ -12,6 +12,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.jenkinsci.test.acceptance.Matchers.hasAction;
@@ -157,16 +158,16 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
 
     /**
      * Runs job two times to check if the links of the graph are relative.
-     * (Issue: 21723)
+     * @Bug("21723")
      */
     @Test
-    public void view_checkstyle_report_job_graph_links() {
+    public void view_checkstyle_report_job_graph_links() throws Exception {
         FreeStyleJob job = setupJob("/checkstyle_plugin/checkstyle-result.xml", CheckstylePublisher.class, "checkstyle-result.xml");
         buildJobAndWait(job);
         editJobAndChangeLastRessource(job, "/checkstyle_plugin/checkstyle-result-2.xml", "checkstyle-result.xml");
         buildJobWithSuccess(job);
 
-        assertAllAreaLinksAreRelative(job);
+        assertAreaLinksOfJobAreLike(job, "^\\d+/checkstyleResult");
     }
 
 }

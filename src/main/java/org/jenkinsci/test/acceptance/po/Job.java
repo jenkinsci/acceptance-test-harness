@@ -277,20 +277,20 @@ public class Job extends ContainerPageObject {
     public ScmPolling pollScm() {
         return new ScmPolling(this);
     }
-	
-	/**
+
+    /**
      * Getter for all area links.
+     *
      * @return All found area links found
      */
-    public List<String> getAreaLinks(){
-		open();
+    public List<String> getAreaLinks() {
+        open();
         final List<String> links = new ArrayList();
         final Collection<WebElement> areas = all(by.xpath(".//div/map/area"));
         final Pattern pattern = Pattern.compile("href=\"(.*?)\"");
-        for(WebElement area : areas) {
+        for (WebElement area : areas) {
             final Matcher matcher = pattern.matcher(area.getAttribute("outerHTML"));
-            if (matcher.find())
-            {
+            if (matcher.find()) {
                 links.add(matcher.group(1));
             }
         }

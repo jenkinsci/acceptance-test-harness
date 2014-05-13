@@ -144,7 +144,7 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
 
     /**
      * Runs job two times to check if the links of the graph are relative.
-     * (Issue: 21723)
+     * @Bug("21723")
      */
     @Test
     public void view_findbugs_report_job_graph_links() {
@@ -153,6 +153,6 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
         editJobAndChangeLastRessource(job, "/findbugs_plugin/findbugsXml-2.xml", "findbugsXml.xml");
         buildJobWithSuccess(job);
 
-        assertAllAreaLinksAreRelative(job);
+        assertAreaLinksOfJobAreLike(job, "^\\d+/findbugsResult");
     }
 }

@@ -181,7 +181,7 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
 
     /**
      * Runs job two times to check if the links of the graph are relative.
-     * (Issue: 21723)
+     * @Bug("21723")
      */
     @Test
     public void view_pmd_report_job_graph_links() {
@@ -190,6 +190,6 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
         editJobAndChangeLastRessource(job, "/pmd_plugin/pmd-warnings-2.xml", "pmd-warnings.xml");
         buildJobWithSuccess(job);
 
-        assertAllAreaLinksAreRelative(job);
+        assertAreaLinksOfJobAreLike(job, "^\\d+/pmdResult");
     }
 }

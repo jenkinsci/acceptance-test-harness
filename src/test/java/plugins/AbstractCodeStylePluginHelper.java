@@ -14,6 +14,8 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
+import java.util.List;
+import java.util.regex.Pattern;
 
 public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
 
@@ -86,11 +88,14 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
     }
 
     /**
-     * Asserts that all area links are not absolute.
+     * Checks if the area links of jobs matches the regular expression.
+     * @param job Job to check the area links
+     * @param regularExpression Expression should match
      */
-    public void assertAllAreaLinksAreRelative(Job job) {
-        for(String currentLink: job.getAreaLinks()) {
-            assertFalse("Link should be relative", currentLink.startsWith("http://"));
+    public void assertAreaLinksOfJobAreLike(Job job, String regularExpression) {
+        Pattern pattern = Pattern.compile(regularExpression);
+        for (String currentLink : job.getAreaLinks()) {
+            assertTrue("Link should be relative", pattern.matcher(currentLink).matches());
         }
     }
 
