@@ -167,21 +167,7 @@ public class Job extends ContainerPageObject {
     }
 
     public void copyDir(Resource dir) {
-        File tmp = null;
-        try {
-            tmp = File.createTempFile("jenkins-acceptance-tests", "dir");
-            ZipUtil.pack(dir.asFile(), tmp);
-            byte[] archive = IOUtils.toByteArray(new FileInputStream(tmp));
-
-            addShellStep(String.format(
-                    "base64 --decode << ENDOFFILE > archive.zip && unzip archive.zip \n%s\nENDOFFILE",
-                    new String(Base64.encodeBase64Chunked(archive))
-            ));
-        } catch (IOException e) {
-            throw new AssertionError(e);
-        } finally {
-            if (tmp != null) tmp.delete();
-        }
+        copyFile(dir.asFile());
     }
 
     public URL getBuildUrl() {

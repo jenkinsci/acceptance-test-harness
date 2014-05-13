@@ -28,18 +28,19 @@ import java.util.Date;
  *
  * @author Tobias Meyer
  */
-@WithPlugins("scp")
+@Native("docker")
+@WithPlugins("publish-over-ftp")
 public class FtpPublishPluginTest extends AbstractJUnitTest {
     @Inject
     Docker docker;
 
     /**
-     * Helper Function to create a temporary empty directory
+     * Helper method to create a temporary empty directory
      *
      * @return File Descriptor for empty Directory
      * @throws IOException
      */
-    public static File createTempDirectory()
+    private static File createTempDirectory()
             throws IOException {
         File temp;
 
@@ -58,13 +59,13 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     * Helper Class to configure Jenkins.
+     * Helper method to configure Jenkins.
      * It adds the DockerContainer as FTP Server with the name
      *
      * @param servername Name to Access Instance
      * @param ftpd       Docker Instance of the Server
      */
-    public void jenkinsFtpConfigure(String servername, FtpdContainer ftpd) {
+    private void jenkinsFtpConfigure(String servername, FtpdContainer ftpd) {
         jenkins.configure();
         Site s = new FtpGlobalConfig(jenkins).addSite();
         {
@@ -95,7 +96,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      * Then the build should succeed
      * And FTP plugin should have published "odes.txt" on docker fixture
      */
-    @Native("docker")
+
     @Test
     public void publish_resources() throws IOException, InterruptedException {
         FtpdContainer ftpd = docker.start(FtpdContainer.class);
@@ -133,7 +134,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      * Then the build should succeed
      * And FTP plugin should have published "odes.txt" on docker fixture
      */
-    @Native("docker")
+
     @Test
     public void publish_jenkins_variables() throws IOException, InterruptedException {
         FtpdContainer ftpd = docker.start(FtpdContainer.class);
@@ -174,7 +175,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      * Then the build should succeed
      * And FTP plugin should have published "test.txt" on docker fixture
      */
-    @Native("docker")
+
     @Test
     public void publish_resources_and_remove_prefix() throws IOException, InterruptedException {
         FtpdContainer ftpd = docker.start(FtpdContainer.class);
@@ -213,7 +214,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      * Then the build should succeed
      * And FTP plugin should have published "prefix_/" without the ".exclude" on docker fixture
      */
-    @Native("docker")
+
     @Test
     public void publish_resources_with_excludes() throws IOException, InterruptedException {
         FtpdContainer ftpd = docker.start(FtpdContainer.class);
@@ -250,7 +251,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      * Then the build should succeed
      * And FTP plugin should have published "prefix_/test.txt" and "odes.txt"
      */
-    @Native("docker")
+
     @Test
     public void publish_with_default_pattern() throws IOException, InterruptedException {
         FtpdContainer ftpd = docker.start(FtpdContainer.class);
@@ -287,7 +288,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      * Then the build should succeed
      * And FTP plugin should have published "te,st.txt" and "odes.txt"
      */
-    @Native("docker")
+
     @Test
     public void publish_with_own_pattern() throws IOException, InterruptedException {
         FtpdContainer ftpd = docker.start(FtpdContainer.class);
@@ -325,7 +326,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      * And FTP plugin should have published "odes.txt"
      * And FTP plugin should have not published  ".svn,.git"
      */
-    @Native("docker")
+
     @Test
     public void publish_with_default_exclude() throws IOException, InterruptedException {
         FtpdContainer ftpd = docker.start(FtpdContainer.class);
@@ -366,7 +367,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      * Then the build should succeed
      * And FTP plugin should have published  .svn/,.git"
      */
-    @Native("docker")
+
     @Test
     public void publish_with_no_default_exclude() throws IOException, InterruptedException {
         FtpdContainer ftpd = docker.start(FtpdContainer.class);
@@ -407,7 +408,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      * Then the build should succeed
      * And FTP plugin should have published  "empty/" and "odes.txt"
      */
-    @Native("docker")
+
     @Test
     public void publish_with_empty_directory() throws IOException, InterruptedException {
         FtpdContainer ftpd = docker.start(FtpdContainer.class);
@@ -449,7 +450,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      * Then the build should succeed
      * And FTP plugin should have not published "empty/" and "odes.txt"
      */
-    @Native("docker")
+
     @Test
     public void publish_without_empty_directory() throws IOException, InterruptedException {
         FtpdContainer ftpd = docker.start(FtpdContainer.class);
@@ -491,7 +492,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      * Then the build should succeed
      * And FTP plugin should have published "odes.txt" and "flat/odes.txt"
      */
-    @Native("docker")
+
     @Test
     public void publish_without_flatten_files() throws IOException, InterruptedException {
         FtpdContainer ftpd = docker.start(FtpdContainer.class);
@@ -527,7 +528,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      * And I build the job
      * Then the build should fail
      */
-    @Native("docker")
+
     @Test
     public void publish_with_flatten_files() throws IOException, InterruptedException {
         FtpdContainer ftpd = docker.start(FtpdContainer.class);
@@ -563,7 +564,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      * Then the build should succeed
      * And FTP plugin should have published "odes.txt" under 'yyyyMMddHH'
      */
-    @Native("docker")
+
     @Test
     public void publish_with_date_format() throws IOException, InterruptedException {
         FtpdContainer ftpd = docker.start(FtpdContainer.class);
@@ -604,7 +605,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      * And FTP plugin should have published "myresources"
      * And the RemoteDIR should not contain "old.txt"
      */
-    @Native("docker")
+
     @Test
     public void publish_with_clean_remote() throws IOException, InterruptedException {
         FtpdContainer ftpd = docker.start(FtpdContainer.class);
@@ -647,7 +648,6 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      * Then the build should succeed
      * And FTP plugin should have published odes.txt,odes2.txt,odes3.txt on docker fixture
      */
-    @Native("docker")
     @Test
     public void publish_multiple_sets() throws IOException, InterruptedException {
         FtpdContainer ftpd = docker.start(FtpdContainer.class);
@@ -694,7 +694,6 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      * Then the build should succeed
      * And FTP plugin should have published my set of files at all docker fixtures
      */
-    @Native("docker")
     @Test
     public void publish_multiple_servers() throws IOException, InterruptedException {
         FtpdContainer ftpd = docker.start(FtpdContainer.class);
