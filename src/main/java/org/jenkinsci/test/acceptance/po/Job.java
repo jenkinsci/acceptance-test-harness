@@ -1,30 +1,21 @@
 package org.jenkinsci.test.acceptance.po;
 
 import com.google.inject.Injector;
-
 import cucumber.api.DataTable;
-
 import org.apache.commons.io.IOUtils;
 import org.codehaus.plexus.util.Base64;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.openqa.selenium.WebElement;
 import org.zeroturnaround.zip.ZipUtil;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
 
-import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 /**
  * Job Page object superclass.
@@ -285,5 +276,24 @@ public class Job extends ContainerPageObject {
 
     public ScmPolling pollScm() {
         return new ScmPolling(this);
+    }
+
+    /**
+     * Getter for all area links.
+     *
+     * @return All found area links found
+     */
+    public List<String> getAreaLinks() {
+        open();
+        final List<String> links = new ArrayList();
+        final Collection<WebElement> areas = all(by.xpath(".//div/map/area"));
+        final Pattern pattern = Pattern.compile("href=\"(.*?)\"");
+        for (WebElement area : areas) {
+            final Matcher matcher = pattern.matcher(area.getAttribute("outerHTML"));
+            if (matcher.find()) {
+                links.add(matcher.group(1));
+            }
+        }
+        return links;
     }
 }

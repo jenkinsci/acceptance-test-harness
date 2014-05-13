@@ -6,17 +6,16 @@ import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstylePublisher;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
-import org.openqa.selenium.WebDriver;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.jenkinsci.test.acceptance.Matchers.hasAction;
-import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 /**
  * Feature: Allow publishing of Checkstyle report
@@ -46,22 +45,20 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
     @Test
     public void view_checkstyle_report() {
         final FreeStyleJob job = setupJob("/checkstyle_plugin/checkstyle-result.xml", CheckstylePublisher.class, "checkstyle-result.xml");
-        buildJobWithSuccess(job);
+        buildJobWithSuccess(job).open();
+
         final CheckstyleAction ca = new CheckstyleAction(job);
-
-        assertWarningsTrendAndSummary(ca);
-        assertFileTab(ca);
-        assertCategoryTab(ca);
-        assertTypeTab(ca);
-    }
-
-    private void assertWarningsTrendAndSummary(final CheckstyleAction ca) {
+        assertThat(ca.getResultLinkByXPathText("776 warnings"), is("checkstyleResult"));
+        assertThat(ca.getResultLinkByXPathText("776 new warnings"), is("checkstyleResult/new"));
         assertThat(ca.getWarningNumber(), is(776));
         assertThat(ca.getNewWarningNumber(), is(776));
         assertThat(ca.getFixedWarningNumber(), is(0));
         assertThat(ca.getHighWarningNumber(), is(776));
         assertThat(ca.getNormalWarningNumber(), is(0));
         assertThat(ca.getLowWarningNumber(), is(0));
+        assertFileTab(ca);
+        assertCategoryTab(ca);
+        assertTypeTab(ca);
     }
 
     private void assertFileTab(final CheckstyleAction ca) {
@@ -146,16 +143,31 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
 
         Build lastBuild = buildJobWithSuccess(job);
         assertThat(lastBuild, hasAction("Checkstyle Warnings"));
-        WebDriver lastBuildOpened = lastBuild.open();
-        assertThat(lastBuildOpened, hasContent("679 warnings"));
-
+        lastBuild.open();
         CheckstyleAction ca = new CheckstyleAction(job);
+        assertThat(ca.getResultLinkByXPathText("679 warnings"), is("checkstyleResult"));
+        assertThat(ca.getResultLinkByXPathText("3 new warnings"), is("checkstyleResult/new"));
+        assertThat(ca.getResultLinkByXPathText("100 fixed warnings"), is("checkstyleResult/fixed"));
         assertThat(ca.getWarningNumber(), is(679));
         assertThat(ca.getNewWarningNumber(), is(3));
         assertThat(ca.getFixedWarningNumber(), is(100));
         assertThat(ca.getHighWarningNumber(), is(679));
         assertThat(ca.getNormalWarningNumber(), is(0));
         assertThat(ca.getLowWarningNumber(), is(0));
+    }
+
+    /**
+     * Runs job two times to check if the links of the graph are relative.
+     * @Bug("21723")
+     */
+    @Test
+    public void view_checkstyle_report_job_graph_links() throws Exception {
+        FreeStyleJob job = setupJob("/checkstyle_plugin/checkstyle-result.xml", CheckstylePublisher.class, "checkstyle-result.xml");
+        buildJobAndWait(job);
+        editJobAndChangeLastRessource(job, "/checkstyle_plugin/checkstyle-result-2.xml", "checkstyle-result.xml");
+        buildJobWithSuccess(job);
+
+        assertAreaLinksOfJobAreLike(job, "^\\d+/checkstyleResult");
     }
 
 }
