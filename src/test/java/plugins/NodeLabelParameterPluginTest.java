@@ -192,7 +192,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
 
         //as the slave has been started after creation, we have to take it down again
         s.markOffline();
-        assertTrue(s.isOffline());
+        assertThat(s.isOffline(), is(true));
 
         //use scheduleBuild instead of startBuild to avoid a timeout waiting for Build being started
         Build b = j.scheduleBuild(singletonMap("slavename", s.getName()));
@@ -200,8 +200,8 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         String pendingBuildText = find(by.xpath("//img[@alt='pending']/../..")).getText();
         String refText=String.format("(pending—All nodes of label ‘Job triggered without a valid online node, given where: %s’ are offline)",s.getName());
 
-        assertTrue(pendingBuildText.contains(refText));
-        assertTrue(!b.hasStarted());
+        assertThat(pendingBuildText, containsString(refText));
+        assertThat(b.hasStarted(), is(false));
     }
 
     /**
