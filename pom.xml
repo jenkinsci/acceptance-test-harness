@@ -324,6 +324,7 @@
           <systemPropertyVariables>
             <cucumber.options>${cucumber.options}</cucumber.options>
           </systemPropertyVariables>
+          <redirectTestOutputToFile>true</redirectTestOutputToFile>
         </configuration>
       </plugin>
       <plugin>
