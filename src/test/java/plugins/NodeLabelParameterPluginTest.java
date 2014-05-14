@@ -1,7 +1,7 @@
 package plugins;
 
-import com.google.inject.Inject;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.Bug;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.nodelabelparameter.LabelParameter;
 import org.jenkinsci.test.acceptance.plugins.nodelabelparameter.NodeParameter;
@@ -9,7 +9,10 @@ import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
+import org.junit.Ignore;
 import org.junit.Test;
+
+import com.google.inject.Inject;
 
 import static java.util.Collections.*;
 import static org.hamcrest.CoreMatchers.*;
@@ -117,7 +120,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         j.concurrentBuild.check();
         j.save();
 
-        Build b = j.startBuild(singletonMap("slavename", s.getName()+",master")).shouldSucceed();
+        j.startBuild(singletonMap("slavename", s.getName()+",master")).shouldSucceed();
 
         assertThat(j.getNextBuildNumber(), is(3));
 
@@ -189,7 +192,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         assertThat(s.isOffline(), is(true));
 
         //use scheduleBuild instead of startBuild to avoid a timeout waiting for Build being started
-        Build b = j.scheduleBuild(singletonMap("slavename", s.getName())).
+        j.scheduleBuild(singletonMap("slavename", s.getName())).
                 shouldBeTriggeredWithoutValidOnlineNode(s.getName());
 
     }
@@ -206,7 +209,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
      * Pending builds will be reactivated as soon as the particular slave becomes online.
      */
 
-    @Test
+    @Test @Bug("23014") @Ignore("Until JENKINS-23014 is fixed")
     public void run_on_several_online_and_offline_slaves() throws Exception {
         FreeStyleJob j = jenkins.jobs.create();
 
