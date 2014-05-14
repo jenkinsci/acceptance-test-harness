@@ -1,8 +1,10 @@
 package org.jenkinsci.test.acceptance.po;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
+
 import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.UpdateCenter.InstallationFailedException;
@@ -12,6 +14,7 @@ import org.openqa.selenium.WebElement;
 
 import javax.inject.Named;
 import javax.inject.Provider;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -107,6 +110,11 @@ public class PluginManager extends ContainerPageObject {
             public Boolean call() throws Exception {
                 return isInstalled(shortNames);
             }
+
+            @Override
+            public String toString() {
+                return "Plugins installed: " + Joiner.on(", ").join(shortNames);
+            }
         }, 180);
     }
 
@@ -120,6 +128,7 @@ public class PluginManager extends ContainerPageObject {
      * The deprecation marker is to call attention to {@link WithPlugins}. This method
      * is not really deprecated.
      */
+    @Deprecated
     public void installPlugin(String... shortNames) {
         final Map<String, String> mapShortNamesVersion = getMapShortNamesVersion(shortNames);
 
