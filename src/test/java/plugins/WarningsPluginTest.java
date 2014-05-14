@@ -10,14 +10,16 @@ import org.jenkinsci.test.acceptance.po.PageObject;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.jenkinsci.test.acceptance.Matchers.hasAction;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 /**
- Feature: Adds Warnings collection support
-   In order to be able to collect and analyze warnings
-   As a Jenkins user
-   I want to install and configure Warnings plugin
+ * Feature: Adds Warnings collection support
+ * In order to be able to collect and analyze warnings
+ * As a Jenkins user
+ * I want to install and configure Warnings plugin
  */
 @WithPlugins("warnings")
 public class WarningsPluginTest extends AbstractJUnitTest {
@@ -30,17 +32,17 @@ public class WarningsPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     Scenario: Detect no errors in console log and workspace when there are none
-       Given I have installed the "warnings" plugin
-       And a job
-       When I configure the job
-       And I add "Scan for compiler warnings" post-build action
-       And I add console parser for "Maven"
-       And I add workspace parser for "Java Compiler (javac)" applied at "** / *"
-       And I save the job
-       And I build the job
-       Then build should have 0 "Java" warnings
-       Then build should have 0 "Maven" warnings
+     * Scenario: Detect no errors in console log and workspace when there are none
+     * Given I have installed the "warnings" plugin
+     * And a job
+     * When I configure the job
+     * And I add "Scan for compiler warnings" post-build action
+     * And I add console parser for "Maven"
+     * And I add workspace parser for "Java Compiler (javac)" applied at "** / *"
+     * And I save the job
+     * And I build the job
+     * Then build should have 0 "Java" warnings
+     * Then build should have 0 "Maven" warnings
      */
     @Test
     public void detect_no_errors_in_console_log_and_workspace_when_there_are_none() {
@@ -52,21 +54,21 @@ public class WarningsPluginTest extends AbstractJUnitTest {
 
         Build b = job.startBuild().shouldSucceed();
 
-        assertThatBuildHasWarnings(b, 0,"Java");
+        assertThatBuildHasWarnings(b, 0, "Java");
         assertThatBuildHasWarnings(b, 0, "Maven");
     }
 
     /**
-     Scenario: Detect errors in console log
-       Given I have installed the "warnings" plugin
-       And a job
-       When I configure the job
-       And I add "Scan for compiler warnings" post-build action
-       And I add console parser for "Maven"
-       And I add a shell build step "mvn clean install || true"
-       And I save the job
-       And I build the job
-       Then build should have 1 "Maven" warning
+     * Scenario: Detect errors in console log
+     * Given I have installed the "warnings" plugin
+     * And a job
+     * When I configure the job
+     * And I add "Scan for compiler warnings" post-build action
+     * And I add console parser for "Maven"
+     * And I add a shell build step "mvn clean install || true"
+     * And I save the job
+     * And I build the job
+     * Then build should have 1 "Maven" warning
      */
     @Test
     public void detect_errors_in_console_log() {
@@ -78,24 +80,24 @@ public class WarningsPluginTest extends AbstractJUnitTest {
 
         Build b = job.startBuild().shouldSucceed();
 
-        assertThatBuildHasWarnings(b,1,"Maven");
+        assertThatBuildHasWarnings(b, 1, "Maven");
     }
 
     /**
-     Scenario: Detect errors in workspace
-       Given I have installed the "warnings" plugin
-       And a job
-       When I configure the job
-       And I add "Scan for compiler warnings" post-build action
-       And I add workspace parser for "Java Compiler (javac)" applied at "** /*"
-       And I add a shell build step
-           """
-               echo '@Deprecated class a {} class b extends a {}' > a.java
-               javac -Xlint a.java 2> out.log || true
-           """
-       And I save the job
-       And I build the job
-       Then build should have 1 "Java" warning
+     * Scenario: Detect errors in workspace
+     * Given I have installed the "warnings" plugin
+     * And a job
+     * When I configure the job
+     * And I add "Scan for compiler warnings" post-build action
+     * And I add workspace parser for "Java Compiler (javac)" applied at "** /*"
+     * And I add a shell build step
+     * """
+     * echo '@Deprecated class a {} class b extends a {}' > a.java
+     * javac -Xlint a.java 2> out.log || true
+     * """
+     * And I save the job
+     * And I build the job
+     * Then build should have 1 "Java" warning
      */
     @Test
     public void detect_errors_in_workspace() {
@@ -103,26 +105,27 @@ public class WarningsPluginTest extends AbstractJUnitTest {
         job.addPublisher(WarningsPublisher.class)
                 .addWorkspaceFileScanner("Java Compiler (javac)", "**/*");
         job.addShellStep(
-                "echo '@Deprecated class a {} class b extends a {}' > a.java\n"+
-                "javac -Xlint a.java 2> out.log || true");
+                "echo '@Deprecated class a {} class b extends a {}' > a.java\n" +
+                        "javac -Xlint a.java 2> out.log || true"
+        );
         job.save();
 
         Build b = job.startBuild().shouldSucceed();
 
-        assertThatBuildHasWarnings(b,1,"Java");
+        assertThatBuildHasWarnings(b, 1, "Java");
     }
 
     /**
-     Scenario: Do not detect errors in ignored parts of the workspace
-       Given I have installed the "warnings" plugin
-       And a job
-       When I configure the job
-       And I add "Scan for compiler warnings" post-build action
-       And I add workspace parser for "Maven" applied at "no_errors_here.log"
-       And I add a shell build step "mvn clean install > errors.log || true"
-       And I save the job
-       And I build the job
-       Then build should have 0 "Maven" warning
+     * Scenario: Do not detect errors in ignored parts of the workspace
+     * Given I have installed the "warnings" plugin
+     * And a job
+     * When I configure the job
+     * And I add "Scan for compiler warnings" post-build action
+     * And I add workspace parser for "Maven" applied at "no_errors_here.log"
+     * And I add a shell build step "mvn clean install > errors.log || true"
+     * And I save the job
+     * And I build the job
+     * Then build should have 0 "Maven" warning
      */
     @Test
     public void do_not_detect_errors_in_ignored_parts_of_the_workspace() {
@@ -134,7 +137,7 @@ public class WarningsPluginTest extends AbstractJUnitTest {
 
         Build b = job.startBuild().shouldSucceed();
 
-        assertThatBuildHasWarnings(b,0,"Maven");
+        assertThatBuildHasWarnings(b, 0, "Maven");
     }
 
     private void assertThatBuildHasWarnings(Build b, int i, String kind) {
@@ -143,11 +146,13 @@ public class WarningsPluginTest extends AbstractJUnitTest {
 //        find(by.xpath("div[@class='test-trend-caption'][text()='%s Warnings Trend']",kind));
 
         Matcher<PageObject> m = hasAction(String.format("%s Warnings", kind));
-        if (i==0)   m = not(m);
+        if (i == 0) {
+            m = not(m);
+        }
 
         assertThat(job, m);
         assertThat(b, m);
         b.open();
-        assertThat(driver, hasContent(String.format("%s Warnings: %d",kind,i)));
+        assertThat(driver, hasContent(String.format("%s Warnings: %d", kind, i)));
     }
 }

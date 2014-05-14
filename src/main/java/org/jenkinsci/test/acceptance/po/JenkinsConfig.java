@@ -1,7 +1,8 @@
 package org.jenkinsci.test.acceptance.po;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 /**
  * Page object for the system configuration page.

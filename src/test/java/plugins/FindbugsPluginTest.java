@@ -38,6 +38,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.jenkinsci.test.acceptance.Matchers.hasAction;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 

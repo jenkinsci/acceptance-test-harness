@@ -23,27 +23,25 @@
  */
 package plugins;
 
-import java.util.HashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import static org.jenkinsci.test.acceptance.Matchers.*;
-import static org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation.*;
-import static org.hamcrest.CoreMatchers.*;
-
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Bug;
 import org.jenkinsci.test.acceptance.junit.Native;
 import org.jenkinsci.test.acceptance.junit.Since;
-import org.jenkinsci.test.acceptance.plugins.maven.MavenBuild;
-import org.jenkinsci.test.acceptance.plugins.maven.MavenBuildStep;
-import org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation;
-import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
-import org.jenkinsci.test.acceptance.plugins.maven.MavenProjectConfig;
+import org.jenkinsci.test.acceptance.plugins.maven.*;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.StringParameter;
 import org.junit.Test;
+
+import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.jenkinsci.test.acceptance.Matchers.pageObjectExists;
+import static org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation.installMaven;
+import static org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation.installSomeMaven;
 
 public class MavenPluginTest extends AbstractJUnitTest {
 
@@ -83,7 +81,8 @@ public class MavenPluginTest extends AbstractJUnitTest {
         ;
     }
 
-    @Test @Native("mvn")
+    @Test
+    @Native("mvn")
     public void use_native_maven() {
         jenkins.configure();
         MavenInstallation maven = jenkins.getConfigPage().addTool(MavenInstallation.class);
@@ -145,7 +144,8 @@ public class MavenPluginTest extends AbstractJUnitTest {
         installSomeMaven(jenkins);
 
         jenkins.configure();
-        new MavenProjectConfig(jenkins.getConfigPage()).opts.set("-verbose");;
+        new MavenProjectConfig(jenkins.getConfigPage()).opts.set("-verbose");
+        ;
         jenkins.save();
 
         MavenModuleSet job = jenkins.jobs.create(MavenModuleSet.class);
@@ -157,7 +157,9 @@ public class MavenPluginTest extends AbstractJUnitTest {
         job.startBuild().shouldSucceed().shouldContainsConsoleOutput("\\[Loaded java.lang.Object");
     }
 
-    @Test @Bug("JENKINS-10539") @Since("1.527")
+    @Test
+    @Bug("JENKINS-10539")
+    @Since("1.527")
     public void preserve_backslash_in_property() {
         installSomeMaven(jenkins);
 

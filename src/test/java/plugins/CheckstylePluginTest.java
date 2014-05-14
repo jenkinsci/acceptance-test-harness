@@ -15,14 +15,15 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.jenkinsci.test.acceptance.Matchers.hasAction;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 /**
  * Feature: Allow publishing of Checkstyle report
-   In order to be able to check code style of my project
-   As a Jenkins user
-   I want to be able to publish Checkstyle report
+ * In order to be able to check code style of my project
+ * As a Jenkins user
+ * I want to be able to publish Checkstyle report
  */
 @WithPlugins("checkstyle")
 public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {

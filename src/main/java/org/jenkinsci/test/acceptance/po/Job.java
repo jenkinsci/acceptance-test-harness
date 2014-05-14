@@ -1,34 +1,24 @@
 package org.jenkinsci.test.acceptance.po;
 
 import com.google.inject.Injector;
-
 import cucumber.api.DataTable;
-
 import org.apache.commons.io.IOUtils;
 import org.codehaus.plexus.util.Base64;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.openqa.selenium.WebElement;
 import org.zeroturnaround.zip.ZipUtil;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.zip.GZIPOutputStream;
 
-import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 /**
  * Job Page object superclass.
- *
+ * <p/>
  * Use {@link Describable} annotation to register an implementation.
  *
  * @author Kohsuke Kawaguchi
@@ -40,7 +30,7 @@ public class Job extends ContainerPageObject {
     public final Control concurrentBuild = control("/concurrentBuild");
 
     public Job(Injector injector, URL url, String name) {
-        super(injector,url);
+        super(injector, url);
         this.name = name;
     }
 
@@ -48,8 +38,9 @@ public class Job extends ContainerPageObject {
      * "Casts" this object into a subtype by creating the specified type.
      */
     public <T extends Job> T as(Class<T> type) {
-        if (type.isInstance(this))
+        if (type.isInstance(this)) {
             return type.cast(this);
+        }
         return newInstance(type, injector, url, name);
     }
 
@@ -57,7 +48,8 @@ public class Job extends ContainerPageObject {
         ensureConfigPage();
 
         WebElement radio = findCaption(type, new Finder<WebElement>() {
-            @Override protected WebElement find(String caption) {
+            @Override
+            protected WebElement find(String caption) {
                 return outer.find(by.radioButton(caption));
             }
         });
@@ -68,11 +60,11 @@ public class Job extends ContainerPageObject {
     }
 
     public <T extends BuildStep> T addPreBuildStep(Class<T> type) {
-        return addStep(type,"prebuilder");
+        return addStep(type, "prebuilder");
     }
 
     public <T extends BuildStep> T addBuildStep(Class<T> type) {
-        return addStep(type,"builder");
+        return addStep(type, "builder");
     }
 
     public void removeFirstBuildStep() {
@@ -80,15 +72,16 @@ public class Job extends ContainerPageObject {
     }
 
     public <T extends PostBuildStep> T addPublisher(Class<T> type) {
-        return addStep(type,"publisher");
+        return addStep(type, "publisher");
     }
 
     private <T extends Step> T addStep(Class<T> type, String section) {
         ensureConfigPage();
 
-        final WebElement dropDown = find(by.path("/hetero-list-add[%s]",section));
+        final WebElement dropDown = find(by.path("/hetero-list-add[%s]", section));
         findCaption(type, new Resolver() {
-            @Override protected void resolve(String caption) {
+            @Override
+            protected void resolve(String caption) {
                 selectDropdownMenu(caption, dropDown);
             }
         });
@@ -101,7 +94,7 @@ public class Job extends ContainerPageObject {
     private void removeFirstStep(String section) {
         ensureConfigPage();
 
-        String sectionWithStep = String.format("/%s" , section);
+        String sectionWithStep = String.format("/%s", section);
 
         WebElement step = find(by.path(sectionWithStep));
 
@@ -120,12 +113,12 @@ public class Job extends ContainerPageObject {
 
     /**
      * Adds a shell step that copies a resource inside the test project into a file on the build machine.
-     *
+     * <p/>
      * Because there's no direct file system access to Jenkins master, we do this by packing file content in
      * base64 and put it as a heredoc in the shell script.
      */
     public void copyResource(Resource resource, String fileName) {
-        try (InputStream in=resource.asInputStream()) {
+        try (InputStream in = resource.asInputStream()) {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
 
             try (OutputStream gz = new GZIPOutputStream(out)) {
@@ -141,7 +134,7 @@ public class Job extends ContainerPageObject {
     }
 
     public void copyResource(Resource resource) {
-        copyResource(resource,resource.getName());
+        copyResource(resource, resource.getName());
     }
 
     public void copyDir(Resource dir) {
@@ -158,7 +151,9 @@ public class Job extends ContainerPageObject {
         } catch (IOException e) {
             throw new AssertionError(e);
         } finally {
-            if (tmp != null) tmp.delete();
+            if (tmp != null) {
+                tmp.delete();
+            }
         }
     }
 
@@ -167,7 +162,7 @@ public class Job extends ContainerPageObject {
     }
 
     public Build startBuild(DataTable table) {
-        Map<String,String> params = new HashMap<>();
+        Map<String, String> params = new HashMap<>();
         for (List<String> row : table.raw()) {
             params.put(row.get(0), row.get(1));
         }
@@ -178,23 +173,24 @@ public class Job extends ContainerPageObject {
         return scheduleBuild().waitUntilStarted();
     }
 
-    public Build startBuild(Map<String,?> params) {
+    public Build startBuild(Map<String, ?> params) {
         return scheduleBuild(params).waitUntilStarted();
     }
 
     public Build scheduleBuild() {
-        return scheduleBuild(Collections.<String,Object>emptyMap());
+        return scheduleBuild(Collections.<String, Object>emptyMap());
     }
 
-    public Build scheduleBuild(Map<String,?> params) {
+    public Build scheduleBuild(Map<String, ?> params) {
         int nb = getJson().get("nextBuildNumber").intValue();
         visit(getBuildUrl());
 
         if (!parameters.isEmpty()) {
             for (Parameter def : parameters) {
                 Object v = params.get(def.getName());
-                if (v!=null)
+                if (v != null) {
                     def.fillWith(v);
+                }
             }
             clickButton("Build");
         }
@@ -203,11 +199,11 @@ public class Job extends ContainerPageObject {
     }
 
     public Build build(int buildNumber) {
-        return new Build(this,buildNumber);
+        return new Build(this, buildNumber);
     }
 
     public Build getLastBuild() {
-        return new Build(this,"lastBuild");
+        return new Build(this, "lastBuild");
     }
 
     public <T extends Parameter> T addParameter(Class<T> type) {
@@ -217,7 +213,8 @@ public class Job extends ContainerPageObject {
 
         final WebElement dropDown = find(by.xpath("//button[text()='Add Parameter']"));
         findCaption(type, new Resolver() {
-            @Override protected void resolve(String caption) {
+            @Override
+            protected void resolve(String caption) {
                 selectDropdownMenu(caption, dropDown);
             }
         });
@@ -271,10 +268,11 @@ public class Job extends ContainerPageObject {
      */
     public void shouldHaveBuiltOn(Jenkins j, String nodeName) {
         Node n;
-        if (nodeName.equals("master"))
-            n=j;
-        else
-            n=j.slaves.get(DumbSlave.class, nodeName);
+        if (nodeName.equals("master")) {
+            n = j;
+        } else {
+            n = j.slaves.get(DumbSlave.class, nodeName);
+        }
         n.getBuildHistory().shouldInclude(this.name);
     }
 

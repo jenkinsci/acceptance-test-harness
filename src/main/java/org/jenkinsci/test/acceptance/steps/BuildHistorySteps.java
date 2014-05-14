@@ -4,6 +4,8 @@ import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 import org.jenkinsci.test.acceptance.cucumber.Should;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+
 /**
  * @author Kohsuke Kawaguchi
  */

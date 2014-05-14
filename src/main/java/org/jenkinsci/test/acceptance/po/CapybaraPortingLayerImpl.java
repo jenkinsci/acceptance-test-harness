@@ -1,5 +1,8 @@
 package org.jenkinsci.test.acceptance.po;
 
+import com.google.inject.Injector;
+import org.openqa.selenium.*;
+
 import javax.inject.Inject;
 import java.lang.reflect.Constructor;
 import java.net.URL;
@@ -7,12 +10,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Assert;
-import org.openqa.selenium.*;
-
-import com.google.inject.Injector;
-
-import static java.util.Arrays.*;
+import static java.util.Arrays.asList;
 
 /**
  * For assisting porting from Capybara.
@@ -20,7 +18,7 @@ import static java.util.Arrays.*;
  * @author Kohsuke Kawaguchi
  */
 @SuppressWarnings("CdiManagedBeanInconsistencyInspection")
-public class CapybaraPortingLayerImpl extends Assert implements CapybaraPortingLayer {
+public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     /**
      * {@link WebDriver} that subtypes use to talk to the server.
      */
@@ -82,8 +80,7 @@ public class CapybaraPortingLayerImpl extends Assert implements CapybaraPortingL
             public WebElement call() {
                 try {
                     return find(selector);
-                }
-                catch (NoSuchElementException e) {
+                } catch (NoSuchElementException e) {
                     return null;
                 }
             }
@@ -107,11 +104,9 @@ public class CapybaraPortingLayerImpl extends Assert implements CapybaraPortingL
                 sleep(1000);
             }
             throw new TimeoutException("Failed to wait for condition " + block);
-        }
-        catch (RuntimeException e) {
+        } catch (RuntimeException e) {
             throw e;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new Error("Failed to wait for condition " + block, e);
         }
     }
@@ -155,8 +150,7 @@ public class CapybaraPortingLayerImpl extends Assert implements CapybaraPortingL
             }
 
             throw new NoSuchElementException("Unable to locate visible " + selector + " in " + driver.getCurrentUrl());
-        }
-        catch (NoSuchElementException x) {
+        } catch (NoSuchElementException x) {
             // this is often the best place to set a breakpoint
             throw new NoSuchElementException("Unable to locate " + selector + " in " + driver.getCurrentUrl(), x);
         }
@@ -168,8 +162,7 @@ public class CapybaraPortingLayerImpl extends Assert implements CapybaraPortingL
     private boolean isDisplayed(WebElement e) {
         try {
             return e.isDisplayed();
-        }
-        catch (StaleElementReferenceException _) {
+        } catch (StaleElementReferenceException _) {
             return false;
         }
     }
@@ -284,8 +277,7 @@ public class CapybaraPortingLayerImpl extends Assert implements CapybaraPortingL
     public void sleep(int ms) {
         try {
             Thread.sleep(ms);
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             throw new Error(e);
         }
     }
@@ -312,8 +304,7 @@ public class CapybaraPortingLayerImpl extends Assert implements CapybaraPortingL
             }
 
             throw new AssertionError("No matching constructor found in " + type + ": " + asList(args));
-        }
-        catch (ReflectiveOperationException e) {
+        } catch (ReflectiveOperationException e) {
             throw new AssertionError("Failed to invoke a constructor of " + type, e);
         }
     }
@@ -328,8 +319,7 @@ public class CapybaraPortingLayerImpl extends Assert implements CapybaraPortingL
                 if (out != null) {
                     return out;
                 }
-            }
-            catch (RuntimeException ex) {
+            } catch (RuntimeException ex) {
                 cause = ex;
             }
         }

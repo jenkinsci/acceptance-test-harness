@@ -1,5 +1,15 @@
 package org.jenkinsci.test.acceptance.plugins.mailer;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Joiner;
+import org.apache.commons.io.IOUtils;
+import org.jenkinsci.test.acceptance.po.Control;
+import org.jenkinsci.test.acceptance.po.Jenkins;
+import org.jenkinsci.test.acceptance.po.PageAreaImpl;
+import org.jenkinsci.test.acceptance.po.PageObject;
+import org.openqa.selenium.WebElement;
+
 import javax.inject.Inject;
 import javax.mail.Address;
 import javax.mail.MessagingException;
@@ -14,19 +24,9 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 
-import org.apache.commons.io.IOUtils;
-import org.jenkinsci.test.acceptance.po.Control;
-import org.jenkinsci.test.acceptance.po.Jenkins;
-import org.jenkinsci.test.acceptance.po.PageAreaImpl;
-import org.jenkinsci.test.acceptance.po.PageObject;
-import org.openqa.selenium.WebElement;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Joiner;
-
-import static javax.mail.Message.RecipientType.*;
-import static org.hamcrest.CoreMatchers.*;
+import static javax.mail.Message.RecipientType.TO;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * Global config page for the mailer plugin.
@@ -133,8 +133,7 @@ public class MailerGlobalConfig extends PageAreaImpl {
                 }
             }
             return false;
-        }
-        catch (MessagingException e) {
+        } catch (MessagingException e) {
             throw new AssertionError(e);
         }
     }
@@ -153,8 +152,7 @@ public class MailerGlobalConfig extends PageAreaImpl {
 
         try {
             return new MimeMessage(Session.getDefaultInstance(System.getProperties()), raw.openStream());
-        }
-        catch (MessagingException e) {
+        } catch (MessagingException e) {
             throw new IOException(e);
         }
     }
@@ -178,15 +176,14 @@ public class MailerGlobalConfig extends PageAreaImpl {
             c = content.getBodyPart(0).getContent();
         }
 
-        assertTrue("body metches", body.matcher(c.toString()).find());
+        assertThat("body metches", body.matcher(c.toString()).find(), is(true));
     }
 
     public String textMessage(MimeMessage msg) {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         try {
             msg.writeTo(os);
-        }
-        catch (IOException | MessagingException ex) {
+        } catch (IOException | MessagingException ex) {
             throw new AssertionError(ex);
         }
         return os.toString();

@@ -23,12 +23,6 @@
  */
 package plugins;
 
-import static org.jenkinsci.test.acceptance.Matchers.hasContent;
-import static org.jenkinsci.test.acceptance.Matchers.hasElement;
-import static org.jenkinsci.test.acceptance.plugins.disk_usage.DiskUsage.reloaded;
-
-import java.util.regex.Pattern;
-
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.disk_usage.DiskUsage;
@@ -37,6 +31,13 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.regex.Pattern;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+import static org.jenkinsci.test.acceptance.Matchers.hasElement;
+import static org.jenkinsci.test.acceptance.plugins.disk_usage.DiskUsage.reloaded;
 
 @WithPlugins("disk-usage")
 public class DiskUsagePluginTest extends AbstractJUnitTest {

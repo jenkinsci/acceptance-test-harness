@@ -1,7 +1,6 @@
 package org.jenkinsci.test.acceptance.po;
 
 import com.fasterxml.jackson.databind.JsonNode;
-
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.Description;
 import org.jenkinsci.test.acceptance.Matcher;
@@ -15,7 +14,9 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -32,12 +33,12 @@ public class Build extends ContainerPageObject {
     private boolean success;
 
     public Build(Job job, int buildNumber) {
-        super(job.injector,job.url("%d/",buildNumber));
+        super(job.injector, job.url("%d/", buildNumber));
         this.job = job;
     }
 
     public Build(Job job, String permalink) {
-        super(job.injector,job.url(permalink+"/"));
+        super(job.injector, job.url(permalink + "/"));
         this.job = job;
     }
 
@@ -50,8 +51,9 @@ public class Build extends ContainerPageObject {
      * "Casts" this object into a subtype by creating the specified type
      */
     public <T extends Build> T as(Class<T> type) {
-        if (type.isInstance(this))
+        if (type.isInstance(this)) {
             return type.cast(this);
+        }
         return newInstance(type, job, url);
     }
 
@@ -66,8 +68,9 @@ public class Build extends ContainerPageObject {
     }
 
     public boolean hasStarted() {
-        if (result!=null)
+        if (result != null) {
             return true;
+        }
 
         try {
             getJson();
@@ -94,16 +97,20 @@ public class Build extends ContainerPageObject {
             public Boolean call() {
                 return !isInProgress();
             }
-        },timeout);
+        }, timeout);
         return this;
     }
 
     public boolean isInProgress() {
-        if (result!=null)   return false;
-        if (!hasStarted())  return false;
+        if (result != null) {
+            return false;
+        }
+        if (!hasStarted()) {
+            return false;
+        }
 
         JsonNode d = getJson();
-        return d.get("building").booleanValue() || d.get("result")==null;
+        return d.get("building").booleanValue() || d.get("result") == null;
     }
 
     public int getNumber() {
@@ -115,15 +122,18 @@ public class Build extends ContainerPageObject {
     }
 
     public String getConsole() {
-        if (console!=null)  return console;
+        if (console != null) {
+            return console;
+        }
 
         visit(getConsoleUrl());
 
         List<WebElement> a = all(by.xpath("//pre"));
-        if (a.size()>1)
+        if (a.size() > 1) {
             console = find(by.xpath("//pre[@id='out']")).getText();
-        else
+        } else {
             console = a.get(0).getText();
+        }
 
         return console;
     }
@@ -143,7 +153,9 @@ public class Build extends ContainerPageObject {
     }
 
     public String getResult() {
-        if (result!=null)   return result;
+        if (result != null) {
+            return result;
+        }
 
         waitUntilFinished();
         result = getJson().get("result").asText();
@@ -151,7 +163,7 @@ public class Build extends ContainerPageObject {
     }
 
     public Artifact getArtifact(String artifact) {
-        return new Artifact(this,url("artifact/%s",artifact));
+        return new Artifact(this, url("artifact/%s", artifact));
     }
 
     public Build shouldSucceed() {
@@ -171,11 +183,13 @@ public class Build extends ContainerPageObject {
 
     private Matcher<Build> resultIs(final String expected) {
         return new Matcher<Build>("Build result %s", expected) {
-            @Override public boolean matchesSafely(Build item) {
+            @Override
+            public boolean matchesSafely(Build item) {
                 return item.getResult().equals(expected);
             }
 
-            @Override public void describeMismatchSafely(Build item, Description dsc) {
+            @Override
+            public void describeMismatchSafely(Build item, Description dsc) {
                 dsc.appendText("was ").appendText(item.getResult())
                         .appendText(". Console output:\n").appendText(getConsole())
                 ;
@@ -185,7 +199,9 @@ public class Build extends ContainerPageObject {
 
     public String getNode() {
         String n = getJson().get("builtOn").asText();
-        if (n.length()==0)  return "master";
+        if (n.length() == 0) {
+            return "master";
+        }
         return n;
     }
 
@@ -202,7 +218,7 @@ public class Build extends ContainerPageObject {
 
     public void shouldNotExist() {
         try {
-            HttpURLConnection con = (HttpURLConnection)url.openConnection();
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
             assertThat(con.getResponseCode(), is(404));
         } catch (IOException e) {
             throw new AssertionError(e);

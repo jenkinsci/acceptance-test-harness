@@ -1,21 +1,25 @@
 package plugins;
 
-import javax.annotation.CheckForNull;
-import javax.inject.Inject;
-import java.io.IOException;
-import java.net.ServerSocket;
-
-import org.jclouds.javax.annotation.Nullable;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.LdapContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Native;
 import org.jenkinsci.test.acceptance.plugins.ldap.LdapDetails;
-import org.jenkinsci.test.acceptance.po.*;
+import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
+import org.jenkinsci.test.acceptance.po.Jenkins;
+import org.jenkinsci.test.acceptance.po.LdapSecurityRealm;
+import org.jenkinsci.test.acceptance.po.Login;
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.jenkinsci.test.acceptance.Matchers.*;
+import javax.annotation.CheckForNull;
+import javax.inject.Inject;
+import java.io.IOException;
+import java.net.ServerSocket;
+
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+import static org.jenkinsci.test.acceptance.Matchers.hasLoggedInUser;
 
 
 /**
@@ -35,10 +39,8 @@ public class LdapPluginTest extends AbstractJUnitTest {
     /**
      * "Jenkins is using ldap as security realm" (with user search base %s) (with user search filter %s)
      *
-     * @param userSearchBase
-     *              optional: user search base (e.g. "ou=People")
-     * @param userSearchFilter
-     *              optional: user search filter (e.g. "mail={0}")
+     * @param userSearchBase   optional: user search base (e.g. "ou=People")
+     * @param userSearchFilter optional: user search filter (e.g. "mail={0}")
      */
     private void useLdapAsSecurityRealm(@CheckForNull String userSearchBase, @CheckForNull String userSearchFilter) {
         LdapContainer l = ldap.get();
@@ -198,7 +200,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
      * Then I will be successfully logged in as user "jenkins"
      */
     @Test
-    public void login_use_fallback_server(){
+    public void login_use_fallback_server() {
         // Given
         LdapContainer ldapContainer = ldap.get();
         GlobalSecurityConfig securityConfig = new GlobalSecurityConfig(jenkins);
@@ -225,8 +227,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
         int port = 389;
         try (ServerSocket s = new ServerSocket(0)) {
             port = s.getLocalPort();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return port;

@@ -2,15 +2,16 @@ package org.jenkinsci.test.acceptance.po;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Injector;
-
 import groovy.lang.Closure;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.concurrent.Callable;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 /**
  * {@link PageObject} that represents a model that has multiple views underneath.
@@ -20,12 +21,13 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
 public abstract class ContainerPageObject extends PageObject {
     protected ContainerPageObject(Injector injector, URL url) {
         super(injector, url);
-        if (!url.toExternalForm().endsWith("/"))
-            throw new IllegalArgumentException("URL should end with '/': "+url);
+        if (!url.toExternalForm().endsWith("/")) {
+            throw new IllegalArgumentException("URL should end with '/': " + url);
+        }
     }
 
     protected ContainerPageObject(PageObject context, URL url) {
-        this(context.injector,url);
+        this(context.injector, url);
     }
 
     public void configure(Closure body) {
@@ -77,17 +79,17 @@ public abstract class ContainerPageObject extends PageObject {
     }
 
     /**
-     * @param queryString
-     *      Additional query string to narrow down the data retrieval, like "tree=..." or "depth=..."
+     * @param queryString Additional query string to narrow down the data retrieval, like "tree=..." or "depth=..."
      */
     public JsonNode getJson(String queryString) {
         URL url = getJsonApiUrl();
         try {
-            if (queryString!=null)
-                url = new URL(url+"?"+queryString);
+            if (queryString != null) {
+                url = new URL(url + "?" + queryString);
+            }
             return jsonParser.readTree(url);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to read from "+ url,e);
+            throw new RuntimeException("Failed to read from " + url, e);
         }
     }
 
@@ -106,9 +108,11 @@ public abstract class ContainerPageObject extends PageObject {
 
         T instance = newInstance(type, this, path);
 
-        if (!instance.isApplicable(this)) throw new AssertionError(
-                "Action can not be attached to " + getClass().getCanonicalName()
-        );
+        if (!instance.isApplicable(this)) {
+            throw new AssertionError(
+                    "Action can not be attached to " + getClass().getCanonicalName()
+            );
+        }
 
         return instance;
     }
