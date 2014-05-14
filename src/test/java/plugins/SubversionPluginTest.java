@@ -19,7 +19,7 @@ import org.junit.Test;
  *
  * @author Matthias Karl
  */
-@WithPlugins("subversion")
+@WithPlugins("subversion@1.54")
 @Native("docker")
 public class SubversionPluginTest extends AbstractJUnitTest {
     @Inject
@@ -161,7 +161,6 @@ public class SubversionPluginTest extends AbstractJUnitTest {
         f.startBuild().shouldSucceed();
 
     }
-
 
 
     /**

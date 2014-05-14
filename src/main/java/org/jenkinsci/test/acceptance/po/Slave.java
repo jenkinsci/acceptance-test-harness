@@ -92,4 +92,32 @@ public abstract class Slave extends Node {
             }
         };
     }
+
+    /**
+     * If the slave is online, this method will mark it offline for testing purpose.
+     */
+
+    public void markOffline(){
+
+        if(isOnline()) {
+            visit("markOffline");
+
+            find(by.input("offlineMessage")).clear();
+            find(by.input("offlineMessage")).sendKeys("Just for testing... be right back...");
+
+            find(by.id("yui-gen1-button")).click();
+        }
+    }
+
+    /**
+     * If the slave has been marked offline, this method will bring it up again
+     */
+
+    public void markOnline(){
+
+        if(isOffline()) {
+            visit("");
+            find(by.id("yui-gen1-button")).click();
+        }
+    }
 }

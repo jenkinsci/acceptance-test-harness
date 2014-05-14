@@ -1,19 +1,25 @@
 package org.jenkinsci.test.acceptance.po;
 
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
+
 import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.UpdateCenter.InstallationFailedException;
 import org.jenkinsci.test.acceptance.update_center.PluginMetadata;
 import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata;
+import org.openqa.selenium.WebElement;
 
 import javax.inject.Named;
 import javax.inject.Provider;
+
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
-
-import static java.util.Arrays.*;
 
 /**
  * Page object for plugin manager.
@@ -21,6 +27,7 @@ import static java.util.Arrays.*;
  * @author Kohsuke Kawaguchi
  */
 public class PluginManager extends ContainerPageObject {
+    private static final String VERSION_SEPARATOR = "@";
     /**
      * Did we fetch the update center metadata?
      */
@@ -36,7 +43,8 @@ public class PluginManager extends ContainerPageObject {
      * (better performing when Jenkins is closer to the test execution), or install plugins from within Jenkins
      * (more accurate testing.)
      */
-    @Inject(optional=true) @Named("uploadPlugins")
+    @Inject(optional = true)
+    @Named("uploadPlugins")
     public boolean uploadPlugins = true;
 
     public PluginManager(Jenkins jenkins) {
@@ -69,7 +77,28 @@ public class PluginManager extends ContainerPageObject {
     public boolean isInstalled(String... shortNames) {
         visit("installed");
         for (String n : shortNames) {
-            if (getElement(by.xpath("//input[@url='plugin/%s']", n))==null)
+            // prefer the explicitly specified version in the name
+            String version = getVersionFromWpValue(n);
+            if (version==null) {
+                // otherwise fall back to the latest version from update center
+                // TODO: allow the test runner to specify the version from config
+                PluginMetadata metadata = ucmd.get().plugins.get(n);
+                if (metadata!=null)
+                    version = metadata.version;
+            }
+
+            // allow the test author/runner to say "I want some version of this plugin but it doesn't have to be the latest"
+            // this is useful to test a bundled plugin as it is bundled.
+            // I wonder if this should be the default behaviour, as opposed to implicit "latest"
+            if ("any".equals(version))
+                version = null;
+
+            WebElement tr = getElement(by.xpath("//tr[td/input[@url='plugin/%s']]", getShortNameFromWpValue(n)));
+            if (tr==null)
+                return false;
+
+            // if the version is explicitly specified, check if we've got that version
+            if (version!=null && tr.findElements(by.xpath("./td/a[text()='%s']",version)).isEmpty())
                 return false;
         }
         return true;
@@ -77,8 +106,14 @@ public class PluginManager extends ContainerPageObject {
 
     private void waitForIsInstalled(final String... shortNames) {
         waitForCond(new Callable<Boolean>() {
-            @Override public Boolean call() throws Exception {
+            @Override
+            public Boolean call() throws Exception {
                 return isInstalled(shortNames);
+            }
+
+            @Override
+            public String toString() {
+                return "Plugins installed: " + Joiner.on(", ").join(shortNames);
             }
         }, 180);
     }
@@ -86,37 +121,40 @@ public class PluginManager extends ContainerPageObject {
     /**
      * Installs specified plugins.
      *
-     * @deprecated
-     *      Please be encouraged to use {@link WithPlugins} annotations to statically declare
-     *      the required plugins you need. If you really do need to install plugins in the middle
-     *      of a test, as opposed to be in the beginning, then this is the right method.
-     *
-     *      The deprecation marker is to call attention to {@link WithPlugins}. This method
-     *      is not really deprecated.
+     * @deprecated Please be encouraged to use {@link WithPlugins} annotations to statically declare
+     * the required plugins you need. If you really do need to install plugins in the middle
+     * of a test, as opposed to be in the beginning, then this is the right method.
+     * <p/>
+     * The deprecation marker is to call attention to {@link WithPlugins}. This method
+     * is not really deprecated.
      */
+    @Deprecated
     public void installPlugin(String... shortNames) {
+        final Map<String, String> mapShortNamesVersion = getMapShortNamesVersion(shortNames);
+
         if (isInstalled(shortNames))
             return;
-
         if (uploadPlugins) {
-            for (PluginMetadata p : ucmd.get().transitiveDependenciesOf(asList(shortNames))) {
+            for (PluginMetadata p : ucmd.get().transitiveDependenciesOf(mapShortNamesVersion.keySet())) {
                 try {
-                    if (!isInstalled(p.name)) {
-                        p.uploadTo(jenkins,injector);
+                    final String claimedVersion = mapShortNamesVersion.get(p.name) != null ? mapShortNamesVersion.get(p.name) : p.version;
+                    if (!isInstalled(p.name + VERSION_SEPARATOR + claimedVersion)) {
+                        p.uploadTo(jenkins, injector, claimedVersion);
                     }
-                } catch (IOException|ArtifactResolutionException e) {
-                    throw new AssertionError("Failed to upload plugin: "+p,e);
+                } catch (IOException | ArtifactResolutionException e) {
+                    throw new AssertionError("Failed to upload plugin: " + p, e);
                 }
             }
-
+            //to enable updated plugins/corePlugins
+            jenkins.restart();
             waitForIsInstalled(shortNames);
         } else {
             if (!updated)
                 checkForUpdates();
 
             OUTER:
-            for (final String n : shortNames) {
-                for (int attempt=0; attempt<2; attempt++) {// # of installations attempted, considering retries
+            for (final String n : mapShortNamesVersion.keySet()) {
+                for (int attempt = 0; attempt < 2; attempt++) {// # of installations attempted, considering retries
                     visit("available");
                     check(find(by.xpath("//input[starts-with(@name,'plugin.%s.')]", n)));
 
@@ -137,4 +175,48 @@ public class PluginManager extends ContainerPageObject {
             }
         }
     }
+
+    /**
+     * Parses the version from a wpValue.
+     * Versions can be added to the shortName via "@"
+     * If no version is added, method returns null
+     *
+     * @param wpValue Value of the WithPlugin annotation
+     * @return version or null
+     */
+    private String getVersionFromWpValue(String wpValue) {
+        final Iterable<String> split = Splitter.on(VERSION_SEPARATOR).split(wpValue);
+        if (Iterables.size(split) == 1) {
+            return null;
+        } else {
+            return Iterables.getLast(split);
+        }
+    }
+
+    /**
+     * Parses the shortName from a wpValue.
+     *
+     * @param wpValue Value of the WithPlugin annotation
+     * @return shortName
+     */
+    private String getShortNameFromWpValue(String wpValue) {
+        final Iterable<String> split = Splitter.on(VERSION_SEPARATOR).split(wpValue);
+        return split.iterator().next();
+    }
+
+    /**
+     * Generates a map with shortNames and version.
+     * Version is null if not declared.
+     *
+     * @param wpValues Values of the WithPlugin annotation
+     * @return Map with Key:shortName Value:Version
+     */
+    private Map<String, String> getMapShortNamesVersion(String... wpValues) {
+        Map<String, String> shortNamesVersion = new HashMap<>();
+        for (String wpValue : wpValues) {
+            shortNamesVersion.put(getShortNameFromWpValue(wpValue), getVersionFromWpValue(wpValue));
+        }
+        return shortNamesVersion;
+    }
+
 }

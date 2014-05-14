@@ -1,25 +1,26 @@
 package org.jenkinsci.test.acceptance.docker;
 
-import com.google.inject.Inject;
-import org.apache.commons.io.FileUtils;
-import org.jenkinsci.test.acceptance.utils.SHA1Sum;
-import org.jenkinsci.utils.process.CommandBuilder;
-import org.junit.internal.AssumptionViolatedException;
-import org.jvnet.hudson.annotation_indexer.Index;
-
 import javax.inject.Named;
 import javax.inject.Singleton;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import java.util.Formatter;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
-import sun.security.provider.SHA;
-import static java.lang.System.getenv;
+import hudson.remoting.Which;
+import org.apache.commons.io.FileUtils;
+import org.jenkinsci.test.acceptance.utils.SHA1Sum;
+import org.jenkinsci.utils.process.CommandBuilder;
+import org.jvnet.hudson.annotation_indexer.Index;
+
+import com.google.inject.Inject;
 
 
 /**
@@ -78,19 +79,23 @@ public class Docker {
     /**
      * Builds a docker image.
      *
-     * @param tag
+     * @param image
      *      Name of the image to be built.
      * @param dir
      *      Directory that contains Dockerfile
      */
-    public DockerImage build(String tag, File dir) throws IOException, InterruptedException {
-        // check if the image already exists
-        if (cmd("images").add("-q",tag).popen().verifyOrDieWith("failed to query the status of the image").trim().length()>0)
-            return new DockerImage(tag);
+    public DockerImage build(String image, File dir) throws IOException, InterruptedException {
+        // compute tag from the content of Dockerfile
+        String tag = getDockerFileHash(dir);
+        String full = image + ":" + tag;
 
-        if (cmd("build").add("-t", tag, dir).system()!=0)
+        // check if the image already exists
+        if (cmd("images").add("-q",image).popen().verifyOrDieWith("failed to query the status of the image").trim().contains(" "+tag+" "))
+            return new DockerImage(full);
+
+        if (cmd("build").add("-t", full, dir).system()!=0)
             throw new Error("Failed to build image: "+tag);
-        return new DockerImage(tag);
+        return new DockerImage(full);
     }
 
     public DockerImage build(Class<? extends DockerContainer> fixture) throws IOException, InterruptedException {
@@ -107,19 +112,45 @@ public class Docker {
             dir.mkdirs();
 
             try {
-                URL resourceDir = classLoader.getResource(fixture.getName().replace('.', '/'));
-                File dockerFileDir;
+                File jar = null;
                 try {
-                    dockerFileDir = new File(resourceDir.toURI());
-                } catch(URISyntaxException e) {
-                    dockerFileDir = new File(resourceDir.getPath());
+                    jar = Which.jarFile(fixture);
+                } catch (IllegalArgumentException e) {
+                    // fall through
                 }
-                FileUtils.copyDirectory(dockerFileDir, dir);
 
-                String dockerFileHash = getDockerFileHash(dockerFileDir);
-                String shortedDockerFileHash = dockerFileHash.substring(0,12);
+                if (jar!=null) {
+                    // files are packaged into a war. extract them
+                    String prefix = fixture.getName().replace('.', '/')+"/";
+                    try (JarFile j = new JarFile(jar)) {
+                        Enumeration<JarEntry> e = j.entries();
+                        while (e.hasMoreElements()) {
+                            JarEntry je = e.nextElement();
+                            if (je.getName().startsWith(prefix)) {
+                                File dst = new File(dir, je.getName().substring(prefix.length()));
+                                if (je.isDirectory()) {
+                                    dst.mkdirs();
+                                } else {
+                                    try (InputStream in = j.getInputStream(je)) {
+                                        FileUtils.copyInputStreamToFile(in, dst);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    // Dockerfile is not packaged into a jar file, so copy locally
+                    URL resourceDir = classLoader.getResource(fixture.getName().replace('.', '/'));
+                    File dockerFileDir;
+                    try {
+                        dockerFileDir = new File(resourceDir.toURI());
+                    } catch(URISyntaxException e) {
+                        dockerFileDir = new File(resourceDir.getPath());
+                    }
+                    FileUtils.copyDirectory(dockerFileDir, dir);
+                }
 
-                return build("jenkins/" + f.id() + "_" +  shortedDockerFileHash, dir);
+                return build("jenkins/" + f.id(), dir);
             } finally {
                 FileUtils.deleteDirectory(dir);
             }
@@ -129,9 +160,9 @@ public class Docker {
     }
 
     private String getDockerFileHash(File dockerFileDir) {
-        File dockerFile = new File (dockerFileDir.getAbsolutePath()+"/Dockerfile");
+        File dockerFile = new File (dockerFileDir,"Dockerfile");
         SHA1Sum dockerFileHash = new SHA1Sum(dockerFile);
-        return dockerFileHash.getSha1String();
+        return dockerFileHash.getSha1String().substring(0,12);
     }
 
     /**
