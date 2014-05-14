@@ -11,9 +11,11 @@ import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.openqa.selenium.WebElement;
 
 import com.google.inject.Inject;
 
+import java.util.List;
 import static java.util.Collections.*;
 import static org.hamcrest.CoreMatchers.*;
 
@@ -53,6 +55,41 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         j.addParameter(NodeParameter.class).setName("slavename");
         j.save();
 
+        Build b = j.startBuild(singletonMap("slavename", s.getName())).shouldSucceed();
+        assertThat(b.getNode(), is(s.getName()));
+    }
+
+    /**
+     * This test is intended to check that an online slave is ignored
+     * when selected for a job and the job is configured with "Node eligibility" setting
+     * is set to "Ignore Offline Nodes"
+     *
+     * It is expected that all nodes are available for the build job.
+     * The default node shall be preselected and the job shall be built on the available slave.
+     */
+
+    @Test
+    public void build_with_preselected_node() throws Exception {
+        FreeStyleJob j = jenkins.jobs.create();
+
+        Slave s = slave.install(jenkins).get();
+        j.configure();
+        NodeParameter p = j.addParameter(NodeParameter.class);
+        p.setName("slavename");
+        p.defaultNodesSelection.findElement(by.option(s.getName())).click();
+        p.possibleNodesSelection.findElement(by.option("ALL (no restriction)")).click();
+        p.disallowMultiple.check();
+        p.allNodes.click();
+        j.save();
+
+        visit(j.getBuildUrl());
+        assertThat("Default node is selected",find(by.option(s.getName())).isSelected(), is(true));
+
+        WebElement wbElement = find(by.xpath("//select[@name='labels']"));
+        List<WebElement> availableNodes = wbElement.findElements(by.tagName("option"));
+
+        assertThat("master", is(availableNodes.get(0).getText()));
+        assertThat(s.getName(), is(availableNodes.get(1).getText()));
         Build b = j.startBuild(singletonMap("slavename", s.getName())).shouldSucceed();
         assertThat(b.getNode(), is(s.getName()));
     }
@@ -254,4 +291,57 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
 
     }
 
+    /**
+     * This test is intended to check that an offline slave is ignored
+     * when selected for a job and the job is configured with "Node eligibility" setting
+     * is set to "Ignore offline Nodes" in combination with "Allow multiple nodes" option.
+     *
+     * The job shall run on a mixed configuration of online slaves.
+     * It is expected that a number of builds is created equivalent to the number of
+     * slaves selected. The build shall be pending as there is no valid online slave.
+     * Pending builds will be reactivated as soon as the particular slave becomes online.
+     */
+
+    @Test
+    public void pending_build_with_no_valid_node() throws Exception {
+        FreeStyleJob j = jenkins.jobs.create();
+
+        Slave s1 = slave.install(jenkins).get();
+        Slave s2 = slave.install(jenkins).get();
+
+        j.configure();
+        NodeParameter p = j.addParameter(NodeParameter.class);
+        p.setName("slavename");
+        p.allowMultiple.check();
+        j.concurrentBuild.check();
+        p.ignoreOffline.click();
+
+        j.save();
+
+        //as both slaves have been started after creation, we have to take one of them down
+        s2.markOffline();
+        assertTrue(s2.isOffline());
+        assertTrue(s1.isOnline());
+
+        //select both slaves for this build
+        Build b = j.startBuild(singletonMap("slavename", s1.getName()));
+
+        // wait for the build on slave 1 to finish
+        b.waitUntilFinished();
+
+        //get back to the job's page otherwise we do not have the build history summary to evaluate their content
+        j.visit(""); //equivalent to: jenkins.visit("jobs/"+j.name);
+
+        //ensure that the build on the online slave has been done
+        j.shouldHaveBuiltOn(jenkins, s1.getName());
+
+        //use scheduleBuild instead of startBuild to avoid a timeout waiting for Build being started
+        b = j.scheduleBuild(singletonMap("slavename", s2.getName()));
+
+        String pendingBuildText = find(by.xpath("//img[@alt='pending']/../..")).getText();
+        String refText=String.format("(pending—All nodes of label ‘Job triggered without a valid online node, given where: %s’ are offline)",s2.getName());
+
+        assertThat(pendingBuildText.contains(refText),is(true));
+        assertThat(!b.hasStarted(),is(true));
+    }
 }
