@@ -26,7 +26,6 @@ package org.jenkinsci.test.acceptance;
 import java.util.List;
 
 import org.openqa.selenium.By;
-import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.events.AbstractWebDriverEventListener;
@@ -41,18 +40,21 @@ public class SanityChecker extends AbstractWebDriverEventListener {
             "//h1/span[contains(., 'Oops!')]/../following-sibling::div/h2[text()='Stack trace']/following-sibling::pre"
     );
 
-    @Override public void afterNavigateTo(String url, WebDriver driver) {
+    @Override
+    public void afterNavigateTo(String url, WebDriver driver) {
         checkSanity(driver);
     }
 
-    @Override public void afterClickOn(WebElement element, WebDriver driver) {
-        // Skip checking in case there is a dialog present
+    @Override
+    public void afterClickOn(WebElement element, WebDriver driver) {
         try {
             driver.switchTo().alert();
-            return;
-        } catch (NoAlertPresentException _) {}
 
-        checkSanity(driver);
+            return; // Skip checking in case there is a dialog present
+        }
+        catch (Exception e) {
+            checkSanity(driver);
+        }
     }
 
     private void checkSanity(WebDriver driver) {

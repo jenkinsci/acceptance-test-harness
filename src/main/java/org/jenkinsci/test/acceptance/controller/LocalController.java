@@ -232,11 +232,17 @@ public abstract class LocalController extends JenkinsController {
 
     @Override
     public void startNow() throws IOException{
-        bringItUp();
+        this.process = startProcess();
+        Runtime.getRuntime().addShutdownHook(shutdownHook);
+
+        logWatcher = new JenkinsLogWatcher(process,logFile);
+        logWatcher.start();
         try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            LOGGER.info("Waiting for Jenkins to become running in "+ this);
+            this.logWatcher.waitTillReady();
+            LOGGER.info("Jenkins is running in " + this);
+        } catch (Exception e) {
+            diagnoseFailedLoad(e);
         }
     }
 
@@ -306,21 +312,6 @@ public abstract class LocalController extends JenkinsController {
 
     protected int randomLocalPort(){
         return randomLocalPort(-1,-1);
-    }
-
-    private void bringItUp() throws IOException{
-        this.process = startProcess();
-        Runtime.getRuntime().addShutdownHook(shutdownHook);
-
-        logWatcher = new JenkinsLogWatcher(process,logFile);
-        logWatcher.start();
-        try {
-            LOGGER.info("Waiting for Jenkins to become running in "+this);
-            this.logWatcher.waitTillReady();
-            LOGGER.info("Jenkins is running in "+this);
-        } catch (Exception e) {
-            diagnoseFailedLoad(e);
-        }
     }
 
     private void diagnoseFailedLoad(Exception cause) {
