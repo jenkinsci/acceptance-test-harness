@@ -1,15 +1,12 @@
 package org.jenkinsci.test.acceptance.plugins.maven;
 
-import org.jenkinsci.test.acceptance.po.BuildStepImpl;
-import org.jenkinsci.test.acceptance.po.Control;
-import org.jenkinsci.test.acceptance.po.Describable;
-import org.jenkinsci.test.acceptance.po.Job;
+import org.jenkinsci.test.acceptance.po.*;
 
 /**
  * @author Kohsuke Kawaguchi
  */
 @Describable("Invoke top-level Maven targets")
-public class MavenBuildStep extends BuildStepImpl {
+public class MavenBuildStep extends AbstractStep implements BuildStep {
     public final Control version = control("name");
     public final Control targets = control("targets");
 
