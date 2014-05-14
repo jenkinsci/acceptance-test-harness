@@ -320,8 +320,8 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
 
         //as both slaves have been started after creation, we have to take one of them down
         s2.markOffline();
-        assertTrue(s2.isOffline());
-        assertTrue(s1.isOnline());
+        assertThat(s2.isOffline(), is(true));
+        assertThat(s1.isOnline(), is(true));
 
         //select both slaves for this build
         Build b = j.startBuild(singletonMap("slavename", s1.getName()));
