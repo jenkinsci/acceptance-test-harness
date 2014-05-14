@@ -92,7 +92,7 @@ public class FallbackConfig extends AbstractModule {
         case "safari":
             return new SafariDriver();
         case "htmlunit":
-            return new HtmlUnitDriver();
+            return new HtmlUnitDriver(true);
         case "saucelabs":
         case "saucelabs-firefox":
             DesiredCapabilities caps = DesiredCapabilities.firefox();

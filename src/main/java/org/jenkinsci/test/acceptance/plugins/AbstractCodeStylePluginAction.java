@@ -1,5 +1,6 @@
 package org.jenkinsci.test.acceptance.plugins;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.test.acceptance.po.ContainerPageObject;
 import org.openqa.selenium.WebElement;
 
@@ -87,6 +88,16 @@ public abstract class AbstractCodeStylePluginAction extends ContainerPageObject 
      */
     public int getLowWarningNumber() {
         return getIntByXPath("//table[@id='analysis.summary']/tbody/tr/td[@class='pane'][4]");
+    }
+
+    /**
+     * Getter for the href-value with the supplied text of a link.
+     * @param linkText Link text with href to get
+     * @return Href-value of link with given text
+     */
+    public String getResultLinkByXPathText(final String linkText) {
+        final String htmlElement = find(by.xpath(".//A[text() = '" + linkText + "']")).getAttribute("outerHTML");
+        return StringUtils.substringBetween(htmlElement, "\"");
     }
 
     /**
