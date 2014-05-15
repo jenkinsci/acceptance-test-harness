@@ -21,6 +21,8 @@ import org.jenkinsci.test.acceptance.server.PooledJenkinsController;
 import org.jenkinsci.test.acceptance.slave.LocalSlaveProvider;
 import org.jenkinsci.test.acceptance.slave.SlaveProvider;
 import org.jenkinsci.test.acceptance.utils.SauceLabsConnection;
+import org.jenkinsci.test.acceptance.utils.mail.MailService;
+import org.jenkinsci.test.acceptance.utils.mail.Mailtrap;
 import org.junit.runners.model.Statement;
 import org.openqa.selenium.UnsupportedCommandException;
 import org.openqa.selenium.WebDriver;
@@ -64,6 +66,9 @@ public class FallbackConfig extends AbstractModule {
     protected void configure() {
         // default in case nothing is specified
         bind(SlaveProvider.class).to(LocalSlaveProvider.class);
+
+        // default email service provider
+        bind(MailService.class).to(Mailtrap.class);
     }
 
     private WebDriver createWebDriver(TestName testName) throws IOException {
