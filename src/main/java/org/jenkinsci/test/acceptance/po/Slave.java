@@ -55,7 +55,6 @@ public abstract class Slave extends Node {
     }
 
     public void setLabels(String l) {
-        ensureConfigPage();
         find(by.path("/labelString")).sendKeys(l);
     }
 
