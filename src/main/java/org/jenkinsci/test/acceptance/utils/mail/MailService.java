@@ -58,6 +58,11 @@ public abstract class MailService extends Assert {
             public MimeMessage call() throws Exception {
                 return getMail(subject);
             }
+
+            @Override
+            public String toString() {
+                return "Email whose subject matches "+subject;
+            }
         });
 
         String actualRecipients = Joiner.on(' ').join(msg.getRecipients(TO));
