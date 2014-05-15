@@ -45,6 +45,7 @@ public abstract class ContainerPageObject extends PageObject {
         }
     }
 
+    /** Visits configuration screen of some object. */
     public void configure() {
         visit(getConfigUrl());
     }
