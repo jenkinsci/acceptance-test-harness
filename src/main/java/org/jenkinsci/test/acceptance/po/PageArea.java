@@ -41,6 +41,9 @@ public abstract class PageArea extends CapybaraPortingLayer implements Control.O
     @Override
     public By path(String rel) {
         if (rel.length()==0)    return by.path(path);
+
+        // this allows path("") and path("/") to both work
+        if (rel.startsWith("/"))    rel=rel.substring(1);
         return by.path(path + '/' + rel);
     }
 
