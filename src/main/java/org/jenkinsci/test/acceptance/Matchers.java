@@ -1,8 +1,5 @@
 package org.jenkinsci.test.acceptance;
 
-import java.util.List;
-import java.util.regex.Pattern;
-
 import org.hamcrest.Description;
 import org.jenkinsci.test.acceptance.po.ContainerPageObject;
 import org.jenkinsci.test.acceptance.po.Jenkins;
@@ -12,6 +9,9 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+
+import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * Hamcrest matchers.
@@ -169,6 +169,44 @@ public class Matchers {
             @Override
             public void describeMismatchSafely(final User item, final Description desc) {
                 desc.appendText(item + " is not member of group " + group + ".");
+            }
+        };
+    }
+
+    public static Matcher<User> fullNameIs(final String fullName) {
+        return new Matcher<User>(" full name is %s", fullName) {
+            @Override
+            public boolean matchesSafely(final User user) {
+                if (user.fullName() != null) {
+                    if (user.fullName().equals(fullName)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            @Override
+            public void describeMismatchSafely(final User item, final Description desc) {
+                desc.appendText(item + " full name is not " + fullName + ".");
+            }
+        };
+    }
+
+    public static Matcher<User> mailAddressIs(final String mail) {
+        return new Matcher<User>(" mail address is %s", mail) {
+            @Override
+            public boolean matchesSafely(final User user) {
+                if (user.mail() != null) {
+                    if (user.mail().equals(mail)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            @Override
+            public void describeMismatchSafely(final User item, final Description desc) {
+                desc.appendText("mail address of " + item + " is not " + mail + ".");
             }
         };
     }
