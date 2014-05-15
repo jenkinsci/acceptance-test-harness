@@ -29,6 +29,6 @@ public class MatrixAuthorizationStrategy extends AuthorizationStrategy {
      * Picks up the existing user in the table.
      */
     public MatrixRow getUser(String name) {
-        return new MatrixRow(this,path+"/data/"+name);
+        return new MatrixRow(this,"data/"+name);
     }
 }
