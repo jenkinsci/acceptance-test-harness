@@ -96,8 +96,8 @@ public class FallbackConfig extends AbstractModule {
         case "saucelabs":
         case "saucelabs-firefox":
             DesiredCapabilities caps = DesiredCapabilities.firefox();
-            caps.setCapability("version", "5");
-            caps.setCapability("platform", Platform.WINDOWS);
+            caps.setCapability("version", "29");
+            caps.setCapability("platform", "Windows 7");
             caps.setCapability("name", testName.get());
 
             // if running inside Jenkins, expose build ID
