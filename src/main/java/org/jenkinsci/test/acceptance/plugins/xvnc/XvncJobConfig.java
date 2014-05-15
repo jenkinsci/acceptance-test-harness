@@ -49,7 +49,7 @@ public class XvncJobConfig extends PageArea {
         return new BuildMatcher("xvnc run during the build") {
             @Override public boolean matchesSafely(Build item) {
                 String out = item.getConsole();
-                return out.contains("Starting xvnc") && out.contains("Killing Xvnc process ID");
+                return out.contains("Starting xvnc") && out.contains("Terminating xvnc");
             }
         };
     }
