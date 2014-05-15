@@ -25,8 +25,6 @@ package plugins;
 
 import javax.inject.Inject;
 
-import java.net.URL;
-
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
@@ -38,9 +36,6 @@ import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshPrivateKeyCreden
 import org.jenkinsci.test.acceptance.po.Job;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.google.common.base.Charsets;
-import com.google.common.io.Resources;
 
 @Native("docker")
 @WithPlugins("git")
