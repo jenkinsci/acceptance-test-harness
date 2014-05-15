@@ -58,7 +58,7 @@ public class SanityChecker extends AbstractWebDriverEventListener {
     }
 
     private void checkSanity(WebDriver driver) {
-        // Performance optimalization
+        // Performance optimization
         if (!driver.getPageSource().contains("Oops!")) return;
 
         List<WebElement> elements = driver.findElements(SPECIFIER);
