@@ -22,7 +22,6 @@ import org.jenkinsci.test.acceptance.slave.LocalSlaveProvider;
 import org.jenkinsci.test.acceptance.slave.SlaveProvider;
 import org.jenkinsci.test.acceptance.utils.SauceLabsConnection;
 import org.junit.runners.model.Statement;
-import org.openqa.selenium.Platform;
 import org.openqa.selenium.UnsupportedCommandException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -135,7 +134,7 @@ public class FallbackConfig extends AbstractModule {
         cleaner.addTask(new Statement() {
             @Override
             public void evaluate() throws Throwable {
-                d.close();
+                d.quit();
             }
         });
         return d;
