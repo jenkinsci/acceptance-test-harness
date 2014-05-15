@@ -17,6 +17,7 @@ import org.jenkinsci.test.acceptance.guice.TestCleaner;
 import org.jenkinsci.test.acceptance.guice.TestName;
 import org.jenkinsci.test.acceptance.guice.TestScope;
 import org.jenkinsci.test.acceptance.selenium.SanityChecker;
+import org.jenkinsci.test.acceptance.selenium.Scroller;
 import org.jenkinsci.test.acceptance.server.JenkinsControllerPoolProcess;
 import org.jenkinsci.test.acceptance.server.PooledJenkinsController;
 import org.jenkinsci.test.acceptance.slave.LocalSlaveProvider;
@@ -130,6 +131,7 @@ public class FallbackConfig extends AbstractModule {
         WebDriver base = createWebDriver(testName);
         final EventFiringWebDriver d = new EventFiringWebDriver(base);
         d.register(new SanityChecker());
+        d.register(new Scroller());
 
         try {
             d.manage().timeouts().pageLoadTimeout(30, TimeUnit.SECONDS);
