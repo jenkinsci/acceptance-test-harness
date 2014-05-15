@@ -268,6 +268,8 @@ public class CapybaraPortingLayer extends Assert {
 
     /**
      * Finds matching constructor and invoke it.
+     *
+     * This is often useful for binding {@link PageArea} by taking the concrete type as a parameter.
      */
     protected <T> T newInstance(Class<T> type, Object... args) {
         try {

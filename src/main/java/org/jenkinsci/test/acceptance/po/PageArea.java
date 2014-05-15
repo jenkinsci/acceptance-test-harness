@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.po;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 /**
  * Special kind of page object that maps to a portion of a page with multiple INPUT controls.
@@ -31,6 +32,14 @@ public abstract class PageArea extends CapybaraPortingLayer implements Control.O
         if (relativePath.startsWith("/")) throw new IllegalArgumentException(
                 "Path is supposed to be relative to page area. Given: " + relativePath
         );
+    }
+
+    /**
+     * Returns {@link WebElement} that corresponds to the element that sits at the root
+     * of the area this object represents.
+     */
+    public WebElement self() {
+        return find(path(""));
     }
 
     /**
