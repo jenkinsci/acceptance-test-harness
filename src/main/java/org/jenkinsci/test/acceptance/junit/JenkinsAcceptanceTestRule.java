@@ -42,7 +42,7 @@ public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should us
                 World world = World.get();
                 Injector injector = world.getInjector();
 
-                world.startTestScope();
+                world.startTestScope(description.getDisplayName());
 
                 injector.injectMembers(target);
                 injector.injectMembers(this);

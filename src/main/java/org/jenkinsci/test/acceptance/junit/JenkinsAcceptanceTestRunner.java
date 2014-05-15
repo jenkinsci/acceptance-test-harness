@@ -29,18 +29,22 @@ public class JenkinsAcceptanceTestRunner extends BlockJUnit4ClassRunner {
         return World.get().getInjector().getInstance(getTestClass().getJavaClass());
     }
 
-    protected Statement methodBlock(FrameworkMethod method) {
+    protected Statement methodBlock(final FrameworkMethod method) {
         final Statement base = super.methodBlock(method);
         return new Statement() {
             @Override
             public void evaluate() throws Throwable {
                 World world = World.get();
-                world.startTestScope();
+                world.startTestScope(getTestName());
                 try {
                     base.evaluate();
                 } finally {
                     world.endTestScope();
                 }
+            }
+
+            private String getTestName() {
+                return method.getMethod().getDeclaringClass().getName()+"."+method.getName();
             }
         };
     }

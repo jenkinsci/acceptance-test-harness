@@ -98,7 +98,6 @@ public class FallbackConfig extends AbstractModule {
             DesiredCapabilities caps = DesiredCapabilities.firefox();
             caps.setCapability("version", "5");
             caps.setCapability("platform", Platform.WINDOWS);
-
             return new SauceLabsConnection().createWebDriver(caps);
         case "phantomjs":
             DesiredCapabilities capabilities = DesiredCapabilities.phantomjs();
