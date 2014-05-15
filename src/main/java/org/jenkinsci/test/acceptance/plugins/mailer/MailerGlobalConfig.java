@@ -45,6 +45,9 @@ public class MailerGlobalConfig extends PageArea {
 
     /**
      * Unique ID for this test run.
+     *
+     * This is also the email address that emails should be sent to, if you want
+     * to test emails.
      */
     public final String fingerprint;
 
