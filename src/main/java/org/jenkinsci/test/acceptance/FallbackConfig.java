@@ -1,14 +1,9 @@
 package org.jenkinsci.test.acceptance;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
+import com.cloudbees.sdk.extensibility.ExtensionList;
+import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
+import com.google.inject.Provides;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.artifact.DefaultArtifact;
@@ -19,6 +14,7 @@ import org.eclipse.aether.resolution.ArtifactResult;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.JenkinsControllerFactory;
 import org.jenkinsci.test.acceptance.guice.TestCleaner;
+import org.jenkinsci.test.acceptance.guice.TestName;
 import org.jenkinsci.test.acceptance.guice.TestScope;
 import org.jenkinsci.test.acceptance.server.JenkinsControllerPoolProcess;
 import org.jenkinsci.test.acceptance.server.PooledJenkinsController;
@@ -39,11 +35,14 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.safari.SafariDriver;
 import org.openqa.selenium.support.events.EventFiringWebDriver;
 
-import com.cloudbees.sdk.extensibility.ExtensionList;
-import com.google.inject.AbstractModule;
-import com.google.inject.Provides;
-
 import javax.inject.Named;
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The default configuration for running tests.
@@ -67,7 +66,7 @@ public class FallbackConfig extends AbstractModule {
         bind(SlaveProvider.class).to(LocalSlaveProvider.class);
     }
 
-    private WebDriver createWebDriver() throws IOException {
+    private WebDriver createWebDriver(TestName testName) throws IOException {
         String browser = System.getenv("BROWSER");
         if (browser==null) browser = "firefox";
         browser = browser.toLowerCase(Locale.ENGLISH);
@@ -98,6 +97,8 @@ public class FallbackConfig extends AbstractModule {
             DesiredCapabilities caps = DesiredCapabilities.firefox();
             caps.setCapability("version", "5");
             caps.setCapability("platform", Platform.WINDOWS);
+            caps.setCapability("name", testName.get());
+
             return new SauceLabsConnection().createWebDriver(caps);
         case "phantomjs":
             DesiredCapabilities capabilities = DesiredCapabilities.phantomjs();
@@ -114,8 +115,8 @@ public class FallbackConfig extends AbstractModule {
      * Creates a {@link WebDriver} for each test, then make sure to clean it up at the end.
      */
     @Provides @TestScope
-    public WebDriver createWebDriver(TestCleaner cleaner) throws IOException {
-        final EventFiringWebDriver d = new EventFiringWebDriver(createWebDriver());
+    public WebDriver createWebDriver(TestCleaner cleaner, TestName testName) throws IOException {
+        final EventFiringWebDriver d = new EventFiringWebDriver(createWebDriver(testName));
         d.register(new SanityChecker());
 
         d.manage().timeouts().pageLoadTimeout(30, TimeUnit.SECONDS);
