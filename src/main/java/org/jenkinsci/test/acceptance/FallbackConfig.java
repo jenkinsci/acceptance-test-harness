@@ -23,6 +23,7 @@ import org.jenkinsci.test.acceptance.slave.SlaveProvider;
 import org.jenkinsci.test.acceptance.utils.SauceLabsConnection;
 import org.junit.runners.model.Statement;
 import org.openqa.selenium.Platform;
+import org.openqa.selenium.UnsupportedCommandException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -99,6 +100,11 @@ public class FallbackConfig extends AbstractModule {
             caps.setCapability("platform", Platform.WINDOWS);
             caps.setCapability("name", testName.get());
 
+            // if running inside Jenkins, expose build ID
+            String tag = System.getenv("BUILD_TAG");
+            if (tag!=null)
+                caps.setCapability("build", tag);
+
             return new SauceLabsConnection().createWebDriver(caps);
         case "phantomjs":
             DesiredCapabilities capabilities = DesiredCapabilities.phantomjs();
@@ -116,10 +122,16 @@ public class FallbackConfig extends AbstractModule {
      */
     @Provides @TestScope
     public WebDriver createWebDriver(TestCleaner cleaner, TestName testName) throws IOException {
-        final EventFiringWebDriver d = new EventFiringWebDriver(createWebDriver(testName));
+        WebDriver base = createWebDriver(testName);
+        final EventFiringWebDriver d = new EventFiringWebDriver(base);
         d.register(new SanityChecker());
 
-        d.manage().timeouts().pageLoadTimeout(30, TimeUnit.SECONDS);
+        try {
+            d.manage().timeouts().pageLoadTimeout(30, TimeUnit.SECONDS);
+        } catch (UnsupportedCommandException e) {
+            // sauce labs RemoteWebDriver doesn't support this
+            System.out.println(base + " doesn't support page load timeout");
+        }
         cleaner.addTask(new Statement() {
             @Override
             public void evaluate() throws Throwable {
