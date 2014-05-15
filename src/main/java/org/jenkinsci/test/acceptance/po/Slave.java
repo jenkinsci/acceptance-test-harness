@@ -6,6 +6,7 @@ import org.jenkinsci.test.acceptance.slave.SlaveController;
 import com.google.common.base.Joiner;
 
 import java.io.File;
+import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 
 /**
@@ -31,6 +32,19 @@ public abstract class Slave extends Node {
 
     public boolean isOnline() {
         return !isOffline();
+    }
+
+    /**
+     * Waits for a slave to come online before proceeding.
+     * @see #isOnline
+     */
+    public Slave waitUntilOnline() {
+        waitForCond(new Callable<Boolean>() {
+            @Override public Boolean call() throws Exception {
+                return isOnline();
+            }
+        });
+        return this;
     }
 
     public boolean isOffline() {
