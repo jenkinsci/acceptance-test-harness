@@ -14,7 +14,6 @@ import java.util.List;
 
 import static java.lang.ProcessBuilder.Redirect.*;
 import static java.nio.file.attribute.PosixFilePermission.*;
-import static java.util.Arrays.*;
 import static java.util.Collections.*;
 
 /**
@@ -68,10 +67,13 @@ public class GitRepo implements Closeable {
         return dir;
     }
 
-    public void git(String... args) throws IOException, InterruptedException {
+    public void git(Object... args) throws IOException, InterruptedException {
         List<String> cmds = new ArrayList<>();
         cmds.add("git");
-        cmds.addAll(asList(args));
+        for (Object a : args) {
+            if (a!=null)
+                cmds.add(a.toString());
+        }
         ProcessBuilder pb = new ProcessBuilder(cmds);
         pb.environment().put("GIT_SSH",ssh.getAbsolutePath());
 
@@ -92,6 +94,17 @@ public class GitRepo implements Closeable {
         }
         git("add","foo");
         git("commit","-m",msg);
+    }
+
+    public void touch(String name) throws IOException {
+        FileUtils.writeStringToFile(path(name),"");
+    }
+
+    /**
+     * Refers to a path relative to the workspace directory.
+     */
+    public File path(String name) {
+        return new File(dir,name);
     }
 
     @Override
