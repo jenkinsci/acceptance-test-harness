@@ -119,7 +119,7 @@ public class Docker {
                     // fall through
                 }
 
-                if (jar!=null && jar.getName().contains(".war")) {
+                if (jar!=null && jar.isFile()) {
                     // files are packaged into a war. extract them
                     String prefix = fixture.getName().replace('.', '/')+"/";
                     try (JarFile j = new JarFile(jar)) {
