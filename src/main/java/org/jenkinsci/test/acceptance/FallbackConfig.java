@@ -119,7 +119,7 @@ public class FallbackConfig extends AbstractModule {
         final EventFiringWebDriver d = new EventFiringWebDriver(createWebDriver());
         d.register(new SanityChecker());
 
-        d.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
+        d.manage().timeouts().pageLoadTimeout(30, TimeUnit.SECONDS);
         cleaner.addTask(new Statement() {
             @Override
             public void evaluate() throws Throwable {
