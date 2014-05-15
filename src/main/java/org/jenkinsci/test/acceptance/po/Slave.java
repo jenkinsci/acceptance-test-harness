@@ -96,16 +96,20 @@ public abstract class Slave extends Node {
     /**
      * If the slave is online, this method will mark it offline for testing purpose.
      */
+    public void markOffline() {
+        markOffline("Just for testing... be right back...");
+    }
 
-    public void markOffline(){
+    public void markOffline(String message) {
 
         if(isOnline()) {
-            visit("markOffline");
+            visit("");
+            clickButton("Mark this node temporarily offline");
 
             find(by.input("offlineMessage")).clear();
-            find(by.input("offlineMessage")).sendKeys("Just for testing... be right back...");
+            find(by.input("offlineMessage")).sendKeys(message);
 
-            find(by.id("yui-gen1-button")).click();
+            clickButton("Mark this node temporarily offline");
         }
     }
 
@@ -117,7 +121,7 @@ public abstract class Slave extends Node {
 
         if(isOffline()) {
             visit("");
-            find(by.id("yui-gen1-button")).click();
+            clickButton("Bring this node back online");
         }
     }
 }
