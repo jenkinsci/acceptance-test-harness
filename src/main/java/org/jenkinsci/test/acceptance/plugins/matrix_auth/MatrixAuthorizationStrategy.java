@@ -21,7 +21,7 @@ public class MatrixAuthorizationStrategy extends AuthorizationStrategy {
      */
     public MatrixRow addUser(String name) {
         this.name.set(name);
-        self().findElement(by.button("Add")).click();
+        this.name.resolve().findElement(by.parent()).findElement(by.button("Add")).click();
         return getUser(name);
     }
 
