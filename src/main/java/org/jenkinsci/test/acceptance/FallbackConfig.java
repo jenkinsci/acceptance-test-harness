@@ -16,6 +16,7 @@ import org.jenkinsci.test.acceptance.controller.JenkinsControllerFactory;
 import org.jenkinsci.test.acceptance.guice.TestCleaner;
 import org.jenkinsci.test.acceptance.guice.TestName;
 import org.jenkinsci.test.acceptance.guice.TestScope;
+import org.jenkinsci.test.acceptance.selenium.SanityChecker;
 import org.jenkinsci.test.acceptance.server.JenkinsControllerPoolProcess;
 import org.jenkinsci.test.acceptance.server.PooledJenkinsController;
 import org.jenkinsci.test.acceptance.slave.LocalSlaveProvider;
