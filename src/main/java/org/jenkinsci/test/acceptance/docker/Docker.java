@@ -90,7 +90,7 @@ public class Docker {
         String full = image + ":" + tag;
 
         // check if the image already exists
-        if (cmd("images").add("-q",image).popen().verifyOrDieWith("failed to query the status of the image").trim().contains(" "+tag+" "))
+        if (cmd("images").add(image).popen().verifyOrDieWith("failed to query the status of the image").trim().contains(" "+tag+" "))
             return new DockerImage(full);
 
         if (cmd("build").add("-t", full, dir).system()!=0)
