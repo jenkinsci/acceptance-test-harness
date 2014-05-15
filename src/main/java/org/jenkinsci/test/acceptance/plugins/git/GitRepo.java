@@ -23,10 +23,23 @@ public class GitRepo implements Closeable {
     public final File dir;
 
     public GitRepo() throws IOException, InterruptedException {
-        dir = File.createTempFile("jenkins","git");
+        dir = initDir();
+        git("init");
+    }
+
+    /**
+     * Creates a new repo by cloning the given URL
+     */
+    public GitRepo(String url) throws IOException, InterruptedException {
+        dir = initDir();
+        git("clone",url,".");
+    }
+
+    private File initDir() throws IOException {
+        File dir = File.createTempFile("jenkins", "git");
         dir.delete();
         dir.mkdir();
-        git("init");
+        return dir;
     }
 
     public void git(String... args) throws IOException, InterruptedException {
