@@ -37,63 +37,40 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
     @Inject
     Docker docker;
 
-    /*helper method for creating a common config*/
-    private void commonConfigKeyFileAllowExec(File sshFile){
+    /*helper method for creating a common config with key file but no password and a noExec Flag*/
+    private void commonConfigKeyFile(File sshFile, boolean bool){
         CommonConfig cc = new PublishOverSSHGlobalConfig(jenkins).setCommonConfig(); {
             cc.keyPath.set(sshFile.getAbsolutePath());
+            if(bool){
+                // for disabling exec global
+                cc.disableAllExecGlobal.check();
+            }
 
         }
     }
 
-    /*helper method for creating a common config no exec*/
-    private void commonConfigKeyFileNoExec(File sshFile){
-        CommonConfig cc = new PublishOverSSHGlobalConfig(jenkins).setCommonConfig(); {
-            cc.keyPath.set(sshFile.getAbsolutePath());
-
-            // for disabling exec global
-            cc.disableAllExecGlobal.check();
-
-        }
-    }
-
-    /*helper method for creating a common config no exec*/
-    private void commonConfigKeyFileAndPasswordNoExec(File sshFile){
+    /*helper method for creating a common config with key file and password and a noExec Flag*/
+    private void commonConfigKeyFileAndPassword(File sshFile, boolean bool){
         CommonConfig cc = new PublishOverSSHGlobalConfig(jenkins).setCommonConfig(); {
             cc.encryptedPassphrase.set("jenkins-ci");
             cc.keyPath.set(sshFile.getAbsolutePath());
-
-            // for disabling exec global
-            cc.disableAllExecGlobal.check();
-
-        }
-    }
-
-    /*helper method for creating a common config allow exec*/
-    private void commonConfigKeyFileAndPasswordAllowExec(File sshFile){
-        CommonConfig cc = new PublishOverSSHGlobalConfig(jenkins).setCommonConfig(); {
-            cc.encryptedPassphrase.set("jenkins-ci");
-            cc.keyPath.set(sshFile.getAbsolutePath());
+            if(bool){
+                // for disabling exec global
+                cc.disableAllExecGlobal.check();
+            }
 
         }
     }
 
-    /*helper method for creating */
-    private void commonConfigKeyTextAllowExec(File sshFile) throws IOException {
+    /*helper method for creating a common config with key as text and a noExec Flag*/
+    private void commonConfigKeyText(File sshFile, boolean bool) throws IOException {
         CommonConfig cc = new PublishOverSSHGlobalConfig(jenkins).setCommonConfig(); {
             String ssh_priv_key_string = FileUtils.readFileToString(sshFile);
             cc.key.set(ssh_priv_key_string);
-
-        }
-    }
-
-    /*helper method for creating */
-    private void commonConfigKeyTextNoExec(File sshFile) throws IOException {
-        CommonConfig cc = new PublishOverSSHGlobalConfig(jenkins).setCommonConfig(); {
-            String ssh_priv_key_string = FileUtils.readFileToString(sshFile);
-            cc.keyPath.set(ssh_priv_key_string);
-
-            // for disabling exec global
-            cc.disableAllExecGlobal.check();
+            if(bool){
+                // for disabling exec global
+                cc.disableAllExecGlobal.check();
+            }
 
         }
     }
@@ -175,7 +152,7 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
 
         FreeStyleJob j = jenkins.jobs.create();
         jenkins.configure();
-        this.commonConfigKeyFileAllowExec(sshFile);
+        this.commonConfigKeyFile(sshFile, false);
         InstanceSite is = this.instanceConfig(sshd);
         this.advancedConfigAllowExec(is,sshd);
         // delete button
@@ -217,7 +194,7 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
         FreeStyleJob j = jenkins.jobs.create();
 
         jenkins.configure();
-        this.commonConfigKeyFileAndPasswordAllowExec(sshFile);
+        this.commonConfigKeyFileAndPassword(sshFile, false);
         InstanceSite is = this.instanceConfig(sshd);
         this.advancedConfigAllowExec(is,sshd);
         jenkins.save();
@@ -254,7 +231,7 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
         FreeStyleJob j = jenkins.jobs.create();
 
         jenkins.configure();
-        this.commonConfigKeyTextAllowExec(sshFile);
+        this.commonConfigKeyText(sshFile,false);
         InstanceSite is = this.instanceConfig(sshd);
         this.advancedConfigAllowExec(is,sshd);
         jenkins.save();
