@@ -16,11 +16,15 @@ import org.jenkinsci.test.acceptance.controller.JenkinsControllerFactory;
 import org.jenkinsci.test.acceptance.guice.TestCleaner;
 import org.jenkinsci.test.acceptance.guice.TestName;
 import org.jenkinsci.test.acceptance.guice.TestScope;
+import org.jenkinsci.test.acceptance.selenium.SanityChecker;
+import org.jenkinsci.test.acceptance.selenium.Scroller;
 import org.jenkinsci.test.acceptance.server.JenkinsControllerPoolProcess;
 import org.jenkinsci.test.acceptance.server.PooledJenkinsController;
 import org.jenkinsci.test.acceptance.slave.LocalSlaveProvider;
 import org.jenkinsci.test.acceptance.slave.SlaveProvider;
 import org.jenkinsci.test.acceptance.utils.SauceLabsConnection;
+import org.jenkinsci.test.acceptance.utils.mail.MailService;
+import org.jenkinsci.test.acceptance.utils.mail.Mailtrap;
 import org.junit.runners.model.Statement;
 import org.openqa.selenium.UnsupportedCommandException;
 import org.openqa.selenium.WebDriver;
@@ -64,6 +68,9 @@ public class FallbackConfig extends AbstractModule {
     protected void configure() {
         // default in case nothing is specified
         bind(SlaveProvider.class).to(LocalSlaveProvider.class);
+
+        // default email service provider
+        bind(MailService.class).to(Mailtrap.class);
     }
 
     private WebDriver createWebDriver(TestName testName) throws IOException {
@@ -124,6 +131,7 @@ public class FallbackConfig extends AbstractModule {
         WebDriver base = createWebDriver(testName);
         final EventFiringWebDriver d = new EventFiringWebDriver(base);
         d.register(new SanityChecker());
+        d.register(new Scroller());
 
         try {
             d.manage().timeouts().pageLoadTimeout(30, TimeUnit.SECONDS);

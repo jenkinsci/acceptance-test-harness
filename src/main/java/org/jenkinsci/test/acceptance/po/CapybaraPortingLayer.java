@@ -220,31 +220,22 @@ public class CapybaraPortingLayer extends Assert {
      * to insert the said build step.
      */
     public void selectDropdownMenu(String displayName, WebElement menuButton) {
-        // ChromeDriver complains that if the element target of the menu item we want to click is behind
-        // another element, it cannot click that. So as a hack, temporarily hide the bottom sticker
-        // that gets in the way.
-        executeScript("var s=document.getElementById('bottom-sticker'); if (s) s.style.display = 'none';");
+        menuButton.click();
 
-        try {
-            menuButton.click();
+        // With enough implementations registered the one we are looking for might
+        // require scrolling in menu to become visible. This dirty hack stretch
+        // yui menu so that all the items are visible.
+        executeScript(""+
+            "YAHOO.util.Dom.batch("+
+            "    document.querySelector('.yui-menu-body-scrolled'),"+
+            "    function (el) {"+
+            "        el.style.height = 'auto';"+
+            "        YAHOO.util.Dom.removeClass(el, 'yui-menu-body-scrolled');"+
+            "    }"+
+            ");"
+        );
 
-            // With enough implementations registered the one we are looking for might
-            // require scrolling in menu to become visible. This dirty hack stretch
-            // yui menu so that all the items are visible.
-            executeScript(""+
-                "YAHOO.util.Dom.batch("+
-                "    document.querySelector('.yui-menu-body-scrolled'),"+
-                "    function (el) {"+
-                "        el.style.height = 'auto';"+
-                "        YAHOO.util.Dom.removeClass(el, 'yui-menu-body-scrolled');"+
-                "    }"+
-                ");"
-            );
-
-            clickLink(displayName);
-        } finally {
-            executeScript("var s=document.getElementById('bottom-sticker'); if (s) s.style.display = '';");
-        }
+        clickLink(displayName);
         sleep(1000);
     }
 
