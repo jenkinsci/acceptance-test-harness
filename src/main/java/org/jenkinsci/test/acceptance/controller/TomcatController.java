@@ -19,8 +19,8 @@ public class TomcatController extends LocalController {
 
     protected final File catalinaHome;
 
-    public TomcatController(File war, File catalinaHome, final File formElementsPathFile) {
-        super(war, formElementsPathFile);
+    public TomcatController(File war, File catalinaHome) {
+        super(war);
         if (!catalinaHome.isDirectory()) {
             throw new RuntimeException("Invalid CATALINA_HOME: " + catalinaHome.getAbsolutePath());
         }
@@ -96,7 +96,7 @@ public class TomcatController extends LocalController {
 
         @Override
         public TomcatController create() {
-            return new TomcatController(getWarFile(), getTomcatHome(), getFormElementsPathFile());
+            return new TomcatController(getWarFile(), getTomcatHome());
         }
 
         protected File getTomcatHome() {

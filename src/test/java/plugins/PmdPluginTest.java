@@ -1,22 +1,22 @@
 package plugins;
 
-import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.plugins.pmd.PmdAction;
-import org.jenkinsci.test.acceptance.plugins.pmd.PmdPublisher;
-import org.jenkinsci.test.acceptance.po.Build;
-import org.jenkinsci.test.acceptance.po.FreeStyleJob;
-import org.junit.Test;
-import org.openqa.selenium.WebDriver;
-import org.xml.sax.SAXException;
-
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.jenkinsci.test.acceptance.Matchers.hasAction;
-import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+import org.jenkinsci.test.acceptance.junit.Bug;
+import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.plugins.pmd.PmdAction;
+import org.jenkinsci.test.acceptance.plugins.pmd.PmdPublisher;
+import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.xml.sax.SAXException;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.jenkinsci.test.acceptance.Matchers.*;
 
 /**
  Feature: Tests for PMD plugin
@@ -99,26 +99,23 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
 
         Build lastBuild = buildJobWithSuccess(job);
         assertThat(lastBuild, hasAction("PMD Warnings"));
-        assertThat(lastBuild.open(), hasContent("9 warnings"));
-
+        lastBuild.open();
         PmdAction pa = new PmdAction(job);
-        assertWarningsTrendAndSummary(pa);
-        assertFileTab(pa);
-        assertTypeTab(pa);
-        assertWarningsTab(pa);
-    }
-
-    private void assertWarningsTrendAndSummary(PmdAction pa) {
+        assertThat(pa.getResultLinkByXPathText("9 warnings"), is("pmdResult"));
+        assertThat(pa.getResultLinkByXPathText("9 new warnings"), is("pmdResult/new"));
         assertThat(pa.getWarningNumber(), is(9));
         assertThat(pa.getNewWarningNumber(), is(9));
         assertThat(pa.getFixedWarningNumber(), is(0));
         assertThat(pa.getHighWarningNumber(), is(0));
         assertThat(pa.getNormalWarningNumber(), is(3));
         assertThat(pa.getLowWarningNumber(), is(6));
+        assertFileTab(pa);
+        assertTypeTab(pa);
+        assertWarningsTab(pa);
     }
 
     private void assertFileTab(PmdAction pa) {
-        final SortedMap<String, Integer> expectedContent = new TreeMap<String, Integer>();
+        final SortedMap<String, Integer> expectedContent = new TreeMap<>();
         expectedContent.put("ChannelContentAPIClient.m", 6);
         expectedContent.put("ProductDetailAPIClient.m", 2);
         expectedContent.put("ViewAllHoldingsAPIClient.m", 1);
@@ -126,14 +123,14 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
     }
 
     private void assertTypeTab(PmdAction pa) {
-        final SortedMap<String, Integer> expectedContent = new TreeMap<String, Integer>();
+        final SortedMap<String, Integer> expectedContent = new TreeMap<>();
         expectedContent.put("long line", 6);
         expectedContent.put("unused method parameter", 3);
         assertThat(pa.getTypesTabContents(), is(expectedContent));
     }
 
     private void assertWarningsTab(PmdAction pa) {
-        final SortedMap<String, Integer> expectedContent = new TreeMap<String, Integer>();
+        final SortedMap<String, Integer> expectedContent = new TreeMap<>();
         expectedContent.put("ChannelContentAPIClient.m:28", 28);
         expectedContent.put("ChannelContentAPIClient.m:28", 28);
         expectedContent.put("ChannelContentAPIClient.m:28", 28);
@@ -170,17 +167,29 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
 
         Build lastBuild = buildJobWithSuccess(job);
         assertThat(lastBuild, hasAction("PMD Warnings"));
-        WebDriver lastBuildOpened = lastBuild.open();
-        assertThat(lastBuildOpened, hasContent("8 warnings"));
-        assertThat(lastBuildOpened, hasContent("1 new warning"));
-        assertThat(lastBuildOpened, hasContent("2 fixed warnings"));
-
+        lastBuild.open();
         PmdAction pa = new PmdAction(job);
+        assertThat(pa.getResultLinkByXPathText("8 warnings"), is("pmdResult"));
+        assertThat(pa.getResultLinkByXPathText("1 new warning"), is("pmdResult/new"));
+        assertThat(pa.getResultLinkByXPathText("2 fixed warnings"), is("pmdResult/fixed"));
         assertThat(pa.getWarningNumber(), is(8));
         assertThat(pa.getNewWarningNumber(), is(1));
         assertThat(pa.getFixedWarningNumber(), is(2));
         assertThat(pa.getHighWarningNumber(), is(0));
         assertThat(pa.getNormalWarningNumber(), is(2));
         assertThat(pa.getLowWarningNumber(), is(6));
+    }
+
+    /**
+     * Runs job two times to check if the links of the graph are relative.
+     */
+    @Test @Bug("21723") @Ignore("Until JENKINS-21723 is fixed")
+    public void view_pmd_report_job_graph_links() {
+        FreeStyleJob job = setupJob("/pmd_plugin/pmd-warnings.xml", PmdPublisher.class, "pmd-warnings.xml");
+        buildJobAndWait(job);
+        editJobAndChangeLastRessource(job, "/pmd_plugin/pmd-warnings-2.xml", "pmd-warnings.xml");
+        buildJobWithSuccess(job);
+
+        assertAreaLinksOfJobAreLike(job, "^\\d+/pmdResult");
     }
 }
