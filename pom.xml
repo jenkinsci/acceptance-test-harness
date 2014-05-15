@@ -293,6 +293,7 @@
   </dependencies>
 
   <build>
+    <defaultGoal>test</defaultGoal>
     <plugins>
       <plugin>
         <artifactId>maven-source-plugin</artifactId>
@@ -388,6 +389,31 @@
               <excludes>
                 <exclude>**/CucumberTests.java</exclude>
               </excludes>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <!--
+        Since the overall test suite runs a couple of hours you can use the predefined
+        set of "Smoke Tests" to get a first impression if everything is still running as expected.
+      -->
+      <id>runSmokeTests</id>
+      <activation>
+        <property>
+          <name>runSmokeTests</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <excludes>
+                <exclude>**/CucumberTests.java</exclude>
+              </excludes>
+              <groups>org.jenkinsci.test.acceptance.junit.SmokeTest</groups>
             </configuration>
           </plugin>
         </plugins>
