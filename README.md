@@ -28,6 +28,7 @@ it's own sandboxed workspace.
 * [Selecting browser](docs/BROWSER.md)
 * [Selecting how to launch Jenkins under test (JUT)](docs/CONTROLLER.md)
 * [Running one test](docs/SINGLE-TEST.md)
+* [Using a http proxy](docs/USING-A-HTTP-PROXY.md)
 * [Prelaunch JUT](docs/PRELAUNCH.md)
 * Selecting tests based on plugins they cover (TODO)
 
