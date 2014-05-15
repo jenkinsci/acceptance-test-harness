@@ -324,7 +324,6 @@
           <systemPropertyVariables>
             <cucumber.options>${cucumber.options}</cucumber.options>
           </systemPropertyVariables>
-          <redirectTestOutputToFile>true</redirectTestOutputToFile>
         </configuration>
       </plugin>
       <plugin>
@@ -393,6 +392,17 @@
           </plugin>
         </plugins>
       </build>
+    </profile>
+    <profile>
+      <id>all-tests</id>
+      <activation>
+        <property>
+          <name>!test</name>
+        </property>
+      </activation>
+      <properties>
+        <maven.test.redirectTestOutputToFile>true</maven.test.redirectTestOutputToFile>
+      </properties>
     </profile>
   </profiles>
 </project>
