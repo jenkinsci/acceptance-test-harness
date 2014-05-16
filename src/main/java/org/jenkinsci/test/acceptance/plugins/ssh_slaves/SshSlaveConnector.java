@@ -18,8 +18,7 @@ public class SshSlaveConnector extends ComputerConnector {
     }
 
     public SshCredentialDialog addCredential() {
-        // TODO: this needs to be more reliable
-        clickButton("Add");
+        self().findElement(by.button("Add")).click();
 
         return new SshCredentialDialog(page, "/credentials");
     }
