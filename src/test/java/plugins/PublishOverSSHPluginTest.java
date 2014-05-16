@@ -75,6 +75,18 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
         }
     }
 
+    /*helper method for creating a common config with key as text and a noExec Flag*/
+    private void commonConfigPassword(String password, boolean bool) throws IOException {
+        CommonConfig cc = new PublishOverSSHGlobalConfig(jenkins).setCommonConfig(); {
+            cc.encryptedPassphrase.set(password);
+            if(bool){
+                // for disabling exec global
+                cc.disableAllExecGlobal.check();
+            }
+
+        }
+    }
+
     /*helper method for creating a ssh server config*/
     private InstanceSite instanceConfig(SshdContainer sshd){
         InstanceSite is = new PublishOverSSHGlobalConfig(jenkins).addInstanceSite(); {
@@ -144,7 +156,6 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
      And SCP plugin should have published "lorem-ipsum-scp.txt" on docker fixture
      */
     @Test
-
     public void configure_job_with_ssh_key_path_and_no_password_publishing() throws IOException, InterruptedException {
         SshdContainer sshd = docker.start(SshdContainer.class);
         Resource cp_file = resource("/scp_plugin/lorem-ipsum-scp.txt");
@@ -185,7 +196,6 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
      And SCP plugin should have published "lorem-ipsum-scp.txt" on docker fixture
      */
     @Test
-
     public void configure_job_with_ssh_key_path_and_key_password_publishing() throws IOException, InterruptedException {
         SshdContainer sshd = docker.start(SshdContainer.class);
         Resource cp_file = resource("/scp_plugin/lorem-ipsum-scp.txt");
@@ -222,8 +232,43 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
      And SCP plugin should have published "lorem-ipsum-scp.txt" on docker fixture
      */
     @Test
-
     public void configure_job_with_ssh_key_text_and_no_password_publishing() throws IOException, InterruptedException {
+        SshdContainer sshd = docker.start(SshdContainer.class);
+        Resource cp_file = resource("/scp_plugin/lorem-ipsum-scp.txt");
+
+        FreeStyleJob j = jenkins.jobs.create();
+
+        jenkins.configure();
+        this.commonConfigPassword("test",false);
+        InstanceSite is = this.instanceConfig(sshd);
+        this.advancedConfigAllowExec(is,sshd);
+        jenkins.save();
+        this.configureJob(j,cp_file);
+        j.save();
+        j.startBuild().shouldSucceed();
+
+        sshd.cp("/tmp/lorem-ipsum-scp.txt", new File("/tmp"));
+        assertThat(FileUtils.readFileToString(new File("/tmp/lorem-ipsum-scp.txt")), CoreMatchers.is(cp_file.asText()));
+    }
+
+
+    /**
+     @native(docker)
+     Scenario: Configure a job with over ssh publishing
+     Given I have installed the "publish-over-ssh" plugin
+     And a docker fixture "sshd"
+     And a job
+     When I configure docker fixture as SSH site
+     And I configure the job to use a password
+     And I copy resource "scp_plugin/lorem-ipsum-scp.txt" into workspace
+     And I publish "lorem-ipsum-scp.txt" with SSH plugin
+     And I save the job
+     And I build the job
+     Then the build should succeed
+     And SCP plugin should have published "lorem-ipsum-scp.txt" on docker fixture
+     */
+    @Test
+    public void configure_job_with_ssh_password_publishing() throws IOException, InterruptedException {
         SshdContainer sshd = docker.start(SshdContainer.class);
         Resource cp_file = resource("/scp_plugin/lorem-ipsum-scp.txt");
         File sshFile = sshd.getPrivateKey();
@@ -244,7 +289,6 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
     }
 
     // FIXME Tests
-    // public void configure_job_with_ssh_key_file_and_key_password_publishing() throws IOException, InterruptedException {
     // public void configure_job_with_ssh_key_file_and_no_password_publishing() throws IOException, InterruptedException {
     // public void configure_job_with_ssh_key_text_and_key_password_publishing() throws IOException, InterruptedException {
 
