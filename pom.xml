@@ -9,7 +9,7 @@
   </parent>
 
   <artifactId>acceptance-test-harness</artifactId>
-  <version>1.3-SNAPSHOT</version>
+  <version>1.3</version>
 
   <name>Acceptance Test Harness</name>
   <licenses>
