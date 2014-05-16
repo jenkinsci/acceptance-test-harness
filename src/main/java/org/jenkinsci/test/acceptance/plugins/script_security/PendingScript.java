@@ -16,10 +16,10 @@ public class PendingScript extends CapybaraPortingLayer {
     }
 
     public void approve() {
-        block.findElement(by.button("Approve"));
+        block.findElement(by.button("Approve")).click();
     }
 
     public void deny() {
-        block.findElement(by.button("Deny"));
+        block.findElement(by.button("Deny")).click();
     }
 }
