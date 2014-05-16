@@ -186,6 +186,11 @@ public class Job extends ContainerPageObject {
         int nb = getJson().get("nextBuildNumber").intValue();
         visit(getBuildUrl());
 
+        // if the security is enabled, GET request above will fail
+        if (driver.getTitle().contains("Form post required")) {
+            find(by.button("Proceed")).click();
+        }
+
         if (!parameters.isEmpty()) {
             for (Parameter def : parameters) {
                 Object v = params.get(def.getName());
