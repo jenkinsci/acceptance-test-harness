@@ -8,6 +8,7 @@ import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.nodelabelparameter.LabelParameter;
 import org.jenkinsci.test.acceptance.plugins.nodelabelparameter.NodeParameter;
+import org.jenkinsci.test.acceptance.plugins.textfinder.TextFinderPublisher;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Slave;
@@ -346,5 +347,33 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
 
         assertThat(pendingBuildText.contains(refText),is(true));
         assertThat(!b.hasStarted(),is(true));
+    }
+
+    @Test @WithPlugins("text-finder")
+    public void run_on_slaves_only_when_build_succeeds() throws Exception {
+        FreeStyleJob j = jenkins.jobs.create();
+
+        Slave s = slave.install(jenkins).get();
+
+        j.configure();
+
+        // set up the node parameter
+        NodeParameter p = j.addParameter(NodeParameter.class);
+        p.setName("slavename");
+        p.allNodes.click();
+        p.runIfSuccess.check();
+
+        // copy the file to mark the status
+        j.copyResource(resource("/textfinder_plugin/textfinder-result_success.log"));
+
+        // set up the post build action
+        TextFinderPublisher tf = j.addPublisher(TextFinderPublisher.class);
+        tf.filePath.sendKeys("textfinder-result_success.log");
+        tf.regEx.sendKeys("^RESULT=SUCCESS$");
+        tf.succeedIfFound.click();
+
+        j.save();
+
+
     }
 }
