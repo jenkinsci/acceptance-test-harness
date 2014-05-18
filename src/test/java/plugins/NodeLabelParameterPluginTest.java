@@ -350,10 +350,11 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
     }
 
     @Test @WithPlugins("text-finder")
-    public void run_on_slaves_only_when_build_succeeds() throws Exception {
+    public void trigger_if_succeeds_with_failed_build() throws Exception {
         FreeStyleJob j = jenkins.jobs.create();
 
-        Slave s = slave.install(jenkins).get();
+        Slave s1 = slave.install(jenkins).get();
+        Slave s2 = slave.install(jenkins).get();
 
         j.configure();
 
@@ -364,16 +365,23 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         p.runIfSuccess.check();
 
         // copy the file to mark the status
-        j.copyResource(resource("/textfinder_plugin/textfinder-result_success.log"));
+        j.copyResource(resource("/textfinder_plugin/textfinder-result_failed.log"));
 
         // set up the post build action
         TextFinderPublisher tf = j.addPublisher(TextFinderPublisher.class);
-        tf.filePath.sendKeys("textfinder-result_success.log");
+        tf.filePath.sendKeys("textfinder-result_failed.log");
         tf.regEx.sendKeys("^RESULT=SUCCESS$");
         tf.succeedIfFound.click();
 
         j.save();
 
+
+        // select both slaves for this build, it should fail due to textfinder will
+        // not be able to match the expression
+        j.startBuild(singletonMap("slavename", s1.getName()+","+s2.getName())).shouldFail();
+
+        j.shouldHaveBuiltOn(jenkins,s1.getName());
+        j.shouldNotHaveBuiltOn(jenkins,s2.getName());
 
     }
 }
