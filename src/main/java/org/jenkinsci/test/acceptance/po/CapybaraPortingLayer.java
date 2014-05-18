@@ -78,7 +78,7 @@ public class CapybaraPortingLayer extends Assert {
     /**
      * Wait until the element that matches the given selector appears.
      */
-    public WebElement waitFor(final By selector) {
+    public WebElement waitFor(final By selector, final int timeoutSec) {
         return waitForCond(new Callable<WebElement>() {
             @Override public WebElement call() {
                 try {
@@ -87,7 +87,11 @@ public class CapybaraPortingLayer extends Assert {
                     return null;
                 }
             }
-        });
+        }, timeoutSec);
+    }
+
+    public WebElement waitFor(final By selector) {
+        return waitFor(selector, 30);
     }
 
     /**

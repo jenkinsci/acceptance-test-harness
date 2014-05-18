@@ -111,6 +111,10 @@ public class Jenkins extends Node {
         return JenkinsLogger.create(this,name,levels);
     }
 
+    public Plugin getPlugin(String name) {
+        return new Plugin(getPluginManager(), name);
+    }
+
     public <T extends PageObject> T getPluginPage(Class<T> type) {
         String urlChunk = type.getAnnotation(PluginPageObject.class).value();
 
