@@ -8,6 +8,8 @@ import org.jenkinsci.test.acceptance.junit.Resource;
 import org.openqa.selenium.WebElement;
 import org.zeroturnaround.zip.ZipUtil;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
+
 import java.io.*;
 import java.net.URL;
 import java.util.*;
@@ -272,6 +274,21 @@ public class Job extends ContainerPageObject {
         else
             n=j.slaves.get(DumbSlave.class, nodeName);
         n.getBuildHistory().shouldInclude(this.name);
+    }
+
+    /**
+     * Verify that the job does not contain some builds on the given slave.
+     */
+    public void shouldNotHaveBuiltOn(Jenkins j, String nodeName) {
+        //use the existing shouldHaveBuiltOn function this method throws a NoSuchElementException
+        try{
+            shouldHaveBuiltOn(j, nodeName);
+            fail("Job has been illegally built on node: "+nodeName);
+        }
+        catch (Exception e){
+            assertThat(e, instanceOf(NoSuchElementException.class));
+        }
+
     }
 
     @Override
