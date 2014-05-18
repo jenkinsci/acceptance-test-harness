@@ -55,7 +55,7 @@ public class PluginMetadata {
         RepositorySystemSession rss = i.getInstance(RepositorySystemSession.class);
 
         ArtifactResult r = rs.resolveArtifact(rss, new ArtifactRequest(
-                makeArtifact(version),
+                makeArtifact(version == null ? this.version : version),
                 Arrays.asList(new RemoteRepository.Builder("repo.jenkins-ci.org", "default", "http://repo.jenkins-ci.org/public/").build()),
                 null));
         LOGGER.info("Installing plugin: [{}]",r.getArtifact());
