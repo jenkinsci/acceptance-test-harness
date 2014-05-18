@@ -5,6 +5,7 @@ import org.apache.commons.io.FileUtils;
 import org.hamcrest.CoreMatchers;
 import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.docker.fixtures.FtpdContainer;
+import org.jenkinsci.test.acceptance.docker.fixtures.WinstoneContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Native;
 import org.jenkinsci.test.acceptance.junit.Resource;
@@ -12,7 +13,13 @@ import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.ftp.FtpGlobalConfig;
 import org.jenkinsci.test.acceptance.plugins.ftp.FtpGlobalConfig.Site;
 import org.jenkinsci.test.acceptance.plugins.ftp.FtpPublisher;
+import org.jenkinsci.test.acceptance.plugins.nodelabelparameter.LabelParameter;
+import org.jenkinsci.test.acceptance.plugins.nodelabelparameter.NodeParameter;
+import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.LabelAxis;
+import org.jenkinsci.test.acceptance.po.Slave;
+import org.jenkinsci.test.acceptance.slave.SlaveProvider;
 import org.junit.Test;
 
 import java.io.File;
@@ -20,6 +27,9 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.ExecutionException;
+
+import static java.util.Collections.singletonMap;
 
 /**
  * Feature: Tests for FTP plugin
@@ -33,7 +43,8 @@ import java.util.Date;
 public class FtpPublishPluginTest extends AbstractJUnitTest {
     @Inject
     Docker docker;
-
+    @Inject
+    SlaveProvider slaves;
     /**
      * Helper method to create a temporary empty directory
      *
@@ -719,5 +730,47 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         assertTrue(ftpd.pathExist("/tmp/odes.txt"));
         assertTrue(ftpd2.pathExist("/tmp/odes.txt"));
 
+    }
+
+    /**
+     * @native(docker) Scenario: Configure a job with FTP publishing
+     * Given I have installed the "ftp" plugin
+     * And a docker fixture "ftpd"
+     * And a ssh slave
+     * And a job
+     * When I configure docker fixture as FTP host
+     * And I configure the job with one FTP Transfer Set
+     * And I configure the Transfer Set
+     * With Source Files "odes.txt"
+     * And With Remote Directory myfolder/
+     * And I copy resource "odes.txt" into workspace
+     * And I save the job
+     * And I build the job
+     * Then the build should succeed
+     * And FTP plugin should have published "odes.txt" on docker fixture
+     */
+
+    @Test
+    public void publish_slave_resourses() throws IOException, InterruptedException,ExecutionException {
+        FtpdContainer ftpd = docker.start(FtpdContainer.class);
+        Resource cp_file = resource("/ftp_plugin/odes.txt");
+
+        Slave s = slaves.get().install(jenkins).get();
+        s.configure();
+        s.save();
+
+        FreeStyleJob j = jenkins.jobs.create();
+        jenkinsFtpConfigure("asd", ftpd);
+        j.configure();
+        {
+            j.copyResource(cp_file);
+            FtpPublisher fp = j.addPublisher(FtpPublisher.class);
+            FtpPublisher.Site fps = fp.getDefault();
+            fps.getDefaultTransfer().sourceFile.set("odes.txt");
+        }
+        j.save();
+        j.startBuild().shouldSucceed();
+        ftpd.cp("/tmp/odes.txt", new File("/tmp"));
+        assertThat(FileUtils.readFileToString(new File("/tmp/odes.txt")), CoreMatchers.is(cp_file.asText()));
     }
 }
