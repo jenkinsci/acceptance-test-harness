@@ -37,6 +37,13 @@ to indicate that dependency.
 This is preferable over installing plugins via UpdateCenter/PluginManager page objects, because it'll
 allow filtering of tests based on plugins.
 
+## Marking tests to be member of the smoke test group
+
+Since the overall test suite runs a couple of hours you can use the predefined
+set of "Smoke Tests" to get a first impression if everything is still running as expected.
+You can run the smoke tests with `mvn -DrunSmokeTests`. If you want to add a test to the set of smoke tests
+annotate the test method with the category `@Category(SmokeTest.class)`. Please make sure that the overall number
+of smoke tests is small, e.g. not more than 10 tests.
 
 ## Marking tests for immutablility
 TODO

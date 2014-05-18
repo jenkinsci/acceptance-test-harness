@@ -30,9 +30,10 @@ import java.util.Set;
  *
  * @author Kohsuke Kawaguchi
  */
-public class JenkinsAcceptanceTestRule implements MethodRule {
+public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should use TestRule instead
     @Override
     public Statement apply(final Statement base, final FrameworkMethod method, final Object target) {
+        final Description description = Description.createTestDescription(method.getMethod().getDeclaringClass(), method.getName(), method.getAnnotations());
         return new Statement() {
             @Inject JenkinsController controller;
             @Inject Injector injector;
@@ -41,11 +42,12 @@ public class JenkinsAcceptanceTestRule implements MethodRule {
                 World world = World.get();
                 Injector injector = world.getInjector();
 
-                world.startTestScope();
+                world.startTestScope(description.getDisplayName());
 
                 injector.injectMembers(target);
                 injector.injectMembers(this);
 
+                System.out.println("=== Starting " + description.getDisplayName());
                 try {
                     decorateWithRules(base).evaluate();
                 } catch (Exception|AssertionError e) { // Errors and failures

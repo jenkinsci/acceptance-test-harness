@@ -16,14 +16,14 @@ ADD ./svnserve.conf /home/svn/conf/svnserve.conf
 ADD ./passwd /home/svn/conf/passwd
 
 # Set permissions
-RUN addgroup subversion
-RUN usermod -a -G subversion www-data
-RUN chown -R www-data:subversion /home/svn
-RUN chmod -R g+rws /home/svn
+RUN addgroup subversion && \
+    usermod -a -G subversion www-data && \
+    chown -R www-data:subversion /home/svn && \
+    chmod -R g+rws /home/svn
 
 # Configure Apache to serve up Subversion
-RUN /usr/sbin/a2enmod auth_digest
-RUN rm /etc/apache2/mods-available/dav_svn.conf
+RUN /usr/sbin/a2enmod auth_digest && \
+    rm /etc/apache2/mods-available/dav_svn.conf
 ADD ./dav_svn.conf /etc/apache2/mods-available/dav_svn.conf
 
 # Create password files. Pre-created with "user"/"test" username and password.

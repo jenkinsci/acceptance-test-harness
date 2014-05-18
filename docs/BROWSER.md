@@ -37,3 +37,16 @@ For example,
     } as Provider _in TestScope
 
 See [WIRING.md](WIRING.md) for details of where to put this.
+
+## Avoid focus steal with Xvnc on Linux
+If you select a real GUI browser, such as Firefox, browser window will pop up left and right during tests,
+making it practically unusable for you to use your computer.
+
+To prevent this, you can use [Xvnc](http://www.hep.phy.cam.ac.uk/vnc_docs/xvnc.html), so that the browser under the test
+will go to a separate display. For example, on Ubuntu you can run `vncserver`, then run tests like the following:
+
+    $ vncserver    
+    ...
+    New 'X' desktop is elf:1
+    $ DISPLAY=elf:1 mvn test 
+

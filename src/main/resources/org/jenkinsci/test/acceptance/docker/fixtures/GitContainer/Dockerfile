@@ -19,7 +19,6 @@ RUN apt-get install -y git
 # create a git user and create .ssh dir
 RUN useradd git -d /home/git && \
     mkdir -p /home/git/.ssh && \
-    chown git /home/git && \
     echo "git:git" | chpasswd
 
 # adding public key to authorized keys
@@ -49,3 +48,6 @@ RUN cd /home/git/repoData && \
 
 # clone git repository so that the tests can access it
 RUN git clone --bare /home/git/repoData /home/git/gitRepo.git
+
+# give the whole /home/git back to the git user
+RUN chown -R git /home/git

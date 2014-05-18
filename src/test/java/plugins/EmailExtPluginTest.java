@@ -7,6 +7,7 @@ import org.jenkinsci.test.acceptance.plugins.email_ext.EmailExtPublisher;
 import org.jenkinsci.test.acceptance.plugins.mailer.MailerGlobalConfig;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.utils.mail.MailService;
 import org.junit.Test;
 
 import javax.mail.MessagingException;
@@ -23,6 +24,9 @@ import java.util.regex.Pattern;
 public class EmailExtPluginTest extends AbstractJUnitTest {
     @Inject
     private MailerGlobalConfig mailer;
+
+    @Inject
+    private MailService mail;
 
     /**
      Scenario: Build
@@ -60,7 +64,7 @@ public class EmailExtPluginTest extends AbstractJUnitTest {
 
         Build b = job.startBuild().shouldFail();
 
-        mailer.assertMail(Pattern.compile("^Modified "),
+        mail.assertMail(Pattern.compile("^Modified "),
                 "dev@example.com",
                 Pattern.compile("\nwith amendment$"));
     }

@@ -27,7 +27,7 @@ public class ObjectFactoryImpl implements ObjectFactory {
     }
 
     public void start() {
-        world.startTestScope();
+        world.startTestScope("unknown");
     }
 
     public void stop() {

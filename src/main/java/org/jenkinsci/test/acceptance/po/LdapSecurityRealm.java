@@ -12,7 +12,7 @@ public class LdapSecurityRealm extends SecurityRealm {
     private final Control advanced = control("advanced-button");
     private final Control rootDn = control("rootDN");
     private final Control managerDn = control("managerDN");
-    private final Control managerPassword = control("managerPassword");
+    private final Control managerPassword = control("managerPasswordSecret"/* >= 1.9*/,"managerPassword");
     private final Control userSearchBase = control("userSearchBase");
     private final Control userSearchFilter = control("userSearch");
     private final Control groupSearchBase = control("groupSearchBase");
