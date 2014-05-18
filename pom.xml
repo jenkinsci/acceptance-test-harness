@@ -298,6 +298,7 @@
   </dependencies>
 
   <build>
+    <defaultGoal>test</defaultGoal>
     <plugins>
       <plugin>
         <artifactId>maven-source-plugin</artifactId>
@@ -398,5 +399,82 @@
         </plugins>
       </build>
     </profile>
+    <profile>
+      <!--
+        Since the overall test suite runs a couple of hours you can use the predefined
+        set of "Smoke Tests" to get a first impression if everything is still running as expected.
+      -->
+      <id>runSmokeTests</id>
+      <activation>
+        <property>
+          <name>runSmokeTests</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <excludes>
+                <exclude>**/CucumberTests.java</exclude>
+              </excludes>
+              <groups>org.jenkinsci.test.acceptance.junit.SmokeTest</groups>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>all-tests</id>
+      <activation>
+        <property>
+          <name>!test</name>
+        </property>
+      </activation>
+      <properties>
+        <maven.test.redirectTestOutputToFile>true</maven.test.redirectTestOutputToFile>
+      </properties>
+    </profile>
+    <profile>
+      <id>BROWSER</id>
+      <activation>
+        <property>
+          <name>BROWSER</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <environmentVariables>
+                <BROWSER>${BROWSER}</BROWSER>
+              </environmentVariables>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>JENKINS_WAR</id>
+      <activation>
+        <property>
+          <name>JENKINS_WAR</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <environmentVariables>
+                <JENKINS_WAR>${JENKINS_WAR}</JENKINS_WAR>
+              </environmentVariables>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <!-- TODO could be laboriously repeated for $TYPE, etc. (seems Maven provides no generic way to do this) -->
   </profiles>
 </project>

@@ -25,12 +25,11 @@ package plugins;
 
 import javax.inject.Inject;
 
-import java.net.URL;
-
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Native;
+import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.credentials.ManagedCredentials;
 import org.jenkinsci.test.acceptance.plugins.git.GitScm;
@@ -38,9 +37,7 @@ import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshPrivateKeyCreden
 import org.jenkinsci.test.acceptance.po.Job;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.google.common.base.Charsets;
-import com.google.common.io.Resources;
+import org.junit.experimental.categories.Category;
 
 @Native("docker")
 @WithPlugins("git")
@@ -65,7 +62,7 @@ public class GitPluginTest extends AbstractJUnitTest {
         job.configure();
     }
 
-    @Test
+    @Test @Category(SmokeTest.class)
     public void simple_checkout() {
         job.useScm(GitScm.class)
                 .url(repoUrl)

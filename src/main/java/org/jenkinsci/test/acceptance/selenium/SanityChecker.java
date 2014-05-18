@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.test.acceptance;
+package org.jenkinsci.test.acceptance.selenium;
 
 import java.util.List;
 
@@ -58,7 +58,7 @@ public class SanityChecker extends AbstractWebDriverEventListener {
     }
 
     private void checkSanity(WebDriver driver) {
-        // Performance optimalization
+        // Performance optimization
         if (!driver.getPageSource().contains("Oops!")) return;
 
         List<WebElement> elements = driver.findElements(SPECIFIER);
