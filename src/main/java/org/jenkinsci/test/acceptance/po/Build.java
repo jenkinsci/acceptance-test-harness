@@ -57,6 +57,7 @@ public class Build extends ContainerPageObject {
     }
 
     public Build waitUntilStarted() {
+        job.getJenkins().visit("");
         waitForCond(new Callable<Boolean>() {
             @Override
             public Boolean call() {

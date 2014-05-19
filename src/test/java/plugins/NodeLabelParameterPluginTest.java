@@ -1,7 +1,10 @@
 package plugins;
 
+import java.util.List;
+
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Bug;
+import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.nodelabelparameter.LabelParameter;
 import org.jenkinsci.test.acceptance.plugins.nodelabelparameter.NodeParameter;
@@ -11,11 +14,11 @@ import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.openqa.selenium.WebElement;
 
 import com.google.inject.Inject;
 
-import java.util.List;
 import static java.util.Collections.*;
 import static org.hamcrest.CoreMatchers.*;
 
@@ -46,7 +49,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
            | slavename | slave42 |
        Then the build should run on "slave42"
      */
-    @Test
+    @Test @Category(SmokeTest.class)
     public void build_on_a_particular_slave() throws Exception {
         FreeStyleJob j = jenkins.jobs.create();
 
