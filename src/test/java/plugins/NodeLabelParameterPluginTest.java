@@ -11,6 +11,7 @@ import org.jenkinsci.test.acceptance.plugins.nodelabelparameter.NodeParameter;
 import org.jenkinsci.test.acceptance.plugins.textfinder.TextFinderPublisher;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.JUnitPublisher;
 import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.junit.Ignore;
@@ -168,7 +169,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         j.getLastBuild().waitUntilFinished();
 
         j.shouldHaveBuiltOn(jenkins, "master");
-        j.shouldHaveBuiltOn(jenkins,s.getName());
+        j.shouldHaveBuiltOn(jenkins, s.getName());
     }
 
     /**
@@ -345,12 +346,65 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         String pendingBuildText = find(by.xpath("//img[@alt='pending']/../..")).getText();
         String refText=String.format("(pending—All nodes of label ‘Job triggered without a valid online node, given where: %s’ are offline)",s2.getName());
 
-        assertThat(pendingBuildText.contains(refText),is(true));
+        assertThat(pendingBuildText.contains(refText), is(true));
         assertThat(!b.hasStarted(),is(true));
     }
 
+    /**
+     * This test is intended to verify that the second build is not started when the
+     * build already failed on the first slave in combination with the
+     * "run next build only if build succeeds" setting of the node parameter.
+     *
+     * As a build can fail in different stages this test simulates a FAILED result
+     * during the main build action.
+     */
+
+    @Test
+    public void trigger_if_succeeds_with_failed_main_build() throws Exception {
+        FreeStyleJob j = jenkins.jobs.create();
+
+        Slave s1 = slave.install(jenkins).get();
+        Slave s2 = slave.install(jenkins).get();
+
+        j.configure();
+
+        // set up the node parameter
+        NodeParameter p = j.addParameter(NodeParameter.class);
+        p.setName("slavename");
+        p.allNodes.click();
+        p.runIfSuccess.check();
+
+        //ensure the main build fails by using a shell exit command
+        j.addShellStep("exit 1");
+
+        j.save();
+
+        // select both slaves for this build
+        j.startBuild(singletonMap("slavename", s1.getName()+","+s2.getName())).shouldFail();
+
+        // verify the job has not been built on the second slave due to the failed result
+        j.shouldHaveBuiltOn(jenkins,s1.getName());
+        j.shouldNotHaveBuiltOn(jenkins,s2.getName());
+
+        assertThat(j.getNextBuildNumber(), is(2));
+
+    }
+
+    /**
+     * This test is intended to verify that the second build is not started when the
+     * build already failed on the first slave in combination with the
+     * "run next build only if build succeeds" setting of the node parameter.
+     *
+     * As a build can fail in different stages this test simulates a FAILED result
+     * during the post build step. Therefore the text-finder plugin is used to
+     * fail the build based on a simple pattern matching with a text file copied to
+     * the slave's workspace.
+     *
+     * Note that in this case the main build action is completed with status SUCCESS.
+     */
+
     @Test @WithPlugins("text-finder")
-    public void trigger_if_succeeds_with_failed_build() throws Exception {
+    public void trigger_if_succeeds_with_failed_post_build_step() throws Exception {
         FreeStyleJob j = jenkins.jobs.create();
 
         Slave s1 = slave.install(jenkins).get();
@@ -375,13 +429,60 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
 
         j.save();
 
-
-        // select both slaves for this build, it should fail due to textfinder will
-        // not be able to match the expression
+        // select both slaves for this build, it should fail during the post build step
+        // due to textfinder will not be able to match the expression
         j.startBuild(singletonMap("slavename", s1.getName()+","+s2.getName())).shouldFail();
 
         j.shouldHaveBuiltOn(jenkins,s1.getName());
         j.shouldNotHaveBuiltOn(jenkins,s2.getName());
 
+        assertThat(j.getNextBuildNumber(), is(2));
+
+    }
+
+    /**
+     * This test is intended to verify that the second build is not started when the
+     * build already deemed unstable on the first slave in combination with the
+     * "run next build only if build succeeds" setting of the node parameter.
+     *
+     * The JUnit test publisher is used to create an unstable build during the post
+     * build step.
+     *
+     * Note that in this case the main build action is completed with status SUCCESS.
+     */
+
+    @Test
+    public void trigger_if_succeeds_with_unstable_post_build_step() throws Exception {
+        FreeStyleJob j = jenkins.jobs.create();
+
+        Slave s1 = slave.install(jenkins).get();
+        Slave s2 = slave.install(jenkins).get();
+
+        j.configure();
+
+        // set up the node parameter
+        NodeParameter p = j.addParameter(NodeParameter.class);
+        p.setName("slavename");
+        p.allNodes.click();
+        p.runIfSuccess.check();
+
+        // copy the unit test results
+        j.copyResource(resource("/junit/failure/com.simple.project.AppTest.txt"));
+        j.copyResource(resource("/junit/failure/TEST-com.simple.project.AppTest.xml"));
+
+        // add the post build step
+        j.addPublisher(JUnitPublisher.class).testResults.set("*.xml");
+        j.save();
+
+        // select both slaves for this build, it should be deemed unstable during the post build step
+        // due to the unit test results
+        Build b = j.startBuild(singletonMap("slavename", s1.getName()+","+s2.getName()));
+
+        assertThat(b.getResult(), is("UNSTABLE"));
+
+        j.shouldHaveBuiltOn(jenkins,s1.getName());
+        j.shouldNotHaveBuiltOn(jenkins,s2.getName());
+
+        assertThat(j.getNextBuildNumber(), is(2));
     }
 }
