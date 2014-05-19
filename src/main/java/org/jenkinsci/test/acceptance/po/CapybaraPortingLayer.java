@@ -100,6 +100,9 @@ public class CapybaraPortingLayer extends Assert {
      * If it times out, an exception will be thrown.
      */
     public <T> T waitForCond(Callable<T> block, int timeoutSec) {
+        // Stretch timeout in case we are using several cores
+        timeoutSec *= Integer.parseInt(System.getProperty("forkCount", "1"));
+
         try {
             long endTime = System.currentTimeMillis()+ TimeUnit.SECONDS.toMillis(timeoutSec);
             while (System.currentTimeMillis()<endTime) {
