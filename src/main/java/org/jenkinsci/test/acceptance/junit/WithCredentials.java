@@ -8,8 +8,6 @@ import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Inherited;
@@ -54,7 +52,6 @@ public @interface WithCredentials {
     String[] values();
 
     public class RuleImpl implements TestRule {
-        private static final Logger LOGGER = LoggerFactory.getLogger(WithCredentials.class);
 
         @Inject
         Jenkins jenkins;
@@ -77,19 +74,18 @@ public @interface WithCredentials {
                                 if (wp.values().length == 2) {
                                     addUsernamePasswordCredentials(wp.values()[0], wp.values()[1]);
                                 } else {
-                                    LOGGER.warn("Skipping @WithCredentials: Wrong amount of values. Expected username,password. ");
+                                    throw new RuntimeException("@WithCredentials: Wrong amount of values. Expected username,password. ");
                                 }
                                 break;
                             case SSH_USERNAME_PRIVATE_KEY:
                                 if (wp.values().length == 2) {
                                     addSshUsernamePrivateKeyCredentials(wp.values()[0], wp.values()[1]);
                                 } else {
-                                    LOGGER.warn("Skipping @WithCredentials: Wrong amount of values. Expected username,sshKeyPath.");
+                                    throw new RuntimeException("@WithCredentials: Wrong amount of values. Expected username,sshKeyPath.");
                                 }
                                 break;
                             default:
-                                LOGGER.warn("Skipping @WithCredentials: Option '{}' not supported.", wp.credentialType());
-                                break;
+                                throw new RuntimeException(String.format("@WithCredentials: Option '%s' not supported.", wp.credentialType()));
                         }
                     }
                     return wp != null;
