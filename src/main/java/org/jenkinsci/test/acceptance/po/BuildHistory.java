@@ -12,12 +12,16 @@ public class BuildHistory extends PageObject {
         super(parent.injector, parent.url("builds"));
     }
 
-    public void shouldInclude(String jobName) {
+    public boolean shouldInclude(String jobName) {
+        boolean isIncluded = false;
+
         open();
         for (WebElement e : all(by.xpath("//a[@href]"))) {
-            if (e.getAttribute("href").endsWith("job/"+jobName+"/"))
-                return;
+            if (e.getAttribute("href").endsWith("job/"+jobName+"/")){
+                isIncluded = true;
+                break;
+            }
         }
-        throw new NoSuchElementException();
+        return isIncluded;
     }
 }

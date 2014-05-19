@@ -267,28 +267,13 @@ public class Job extends ContainerPageObject {
     /**
      * Verify that the job contains some builds on the given slave.
      */
-    public void shouldHaveBuiltOn(Jenkins j, String nodeName) {
+    public boolean shouldHaveBuiltOn(Jenkins j, String nodeName) {
         Node n;
         if (nodeName.equals("master"))
             n=j;
         else
             n=j.slaves.get(DumbSlave.class, nodeName);
-        n.getBuildHistory().shouldInclude(this.name);
-    }
-
-    /**
-     * Verify that the job does not contain some builds on the given slave.
-     */
-    public void shouldNotHaveBuiltOn(Jenkins j, String nodeName) {
-        //use the existing shouldHaveBuiltOn function this method throws a NoSuchElementException
-        try{
-            shouldHaveBuiltOn(j, nodeName);
-            fail("Job has been illegally built on node: "+nodeName);
-        }
-        catch (Exception e){
-            assertThat(e, instanceOf(NoSuchElementException.class));
-        }
-
+        return n.getBuildHistory().shouldInclude(this.name);
     }
 
     @Override
