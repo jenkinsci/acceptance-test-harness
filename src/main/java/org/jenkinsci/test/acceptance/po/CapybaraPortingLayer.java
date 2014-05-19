@@ -3,6 +3,7 @@ package org.jenkinsci.test.acceptance.po;
 import com.google.inject.Injector;
 
 import org.jenkinsci.test.acceptance.ByFactory;
+import org.jenkinsci.test.acceptance.utils.ElasticTime;
 import org.junit.Assert;
 import org.openqa.selenium.*;
 
@@ -12,8 +13,6 @@ import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
-
 import static java.util.Arrays.asList;
 
 /**
@@ -34,6 +33,8 @@ public class CapybaraPortingLayer extends Assert {
      */
     @Inject
     public Injector injector;
+
+    protected static final ElasticTime time = new ElasticTime();
 
     public static final ByFactory by = new ByFactory();
 
@@ -100,11 +101,8 @@ public class CapybaraPortingLayer extends Assert {
      * If it times out, an exception will be thrown.
      */
     public <T> T waitForCond(Callable<T> block, int timeoutSec) {
-        // Stretch timeout in case we are using several cores
-        timeoutSec *= Integer.parseInt(System.getProperty("forkCount", "1"));
-
         try {
-            long endTime = System.currentTimeMillis()+ TimeUnit.SECONDS.toMillis(timeoutSec);
+            long endTime = System.currentTimeMillis() + time.seconds(timeoutSec);
             while (System.currentTimeMillis()<endTime) {
                 T v = block.call();
                 if (isTrueish(v))
@@ -264,9 +262,9 @@ public class CapybaraPortingLayer extends Assert {
     /**
      * Thread.sleep that masks exception.
      */
-    public void sleep(int ms) {
+    public static void sleep(long ms) {
         try {
-            Thread.sleep(ms);
+            Thread.sleep(time.miliseconds(ms));
         } catch (InterruptedException e) {
             throw new Error(e);
         }
