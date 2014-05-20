@@ -89,7 +89,7 @@ public @interface WithPlugins {
                                                 "Test requires %s plugin in version %s", name, requiredVersion));
                                     }
                                     else {
-                                        pm.installPlugins(name);
+                                        pm.installPlugins(c);
                                     }
                                 }
                             }
