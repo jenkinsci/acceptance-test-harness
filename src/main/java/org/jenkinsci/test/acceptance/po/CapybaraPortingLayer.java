@@ -1,20 +1,25 @@
 package org.jenkinsci.test.acceptance.po;
 
-import com.google.inject.Injector;
-
-import org.jenkinsci.test.acceptance.ByFactory;
-import org.junit.Assert;
-import org.openqa.selenium.*;
-
 import javax.inject.Inject;
-
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
-import static java.util.Arrays.asList;
+import org.jenkinsci.test.acceptance.ByFactory;
+import org.jenkinsci.test.acceptance.utils.ElasticTime;
+import org.junit.Assert;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+
+import com.google.inject.Injector;
+
+import static java.util.Arrays.*;
 
 /**
  * For assisting porting from Capybara.
@@ -34,6 +39,8 @@ public class CapybaraPortingLayer extends Assert {
      */
     @Inject
     public Injector injector;
+
+    protected static final ElasticTime time = new ElasticTime();
 
     public static final ByFactory by = new ByFactory();
 
@@ -78,7 +85,7 @@ public class CapybaraPortingLayer extends Assert {
     /**
      * Wait until the element that matches the given selector appears.
      */
-    public WebElement waitFor(final By selector) {
+    public WebElement waitFor(final By selector, final int timeoutSec) {
         return waitForCond(new Callable<WebElement>() {
             @Override public WebElement call() {
                 try {
@@ -87,7 +94,11 @@ public class CapybaraPortingLayer extends Assert {
                     return null;
                 }
             }
-        });
+        }, timeoutSec);
+    }
+
+    public WebElement waitFor(final By selector) {
+        return waitFor(selector, 30);
     }
 
     /**
@@ -97,7 +108,7 @@ public class CapybaraPortingLayer extends Assert {
      */
     public <T> T waitForCond(Callable<T> block, int timeoutSec) {
         try {
-            long endTime = System.currentTimeMillis()+ TimeUnit.SECONDS.toMillis(timeoutSec);
+            long endTime = System.currentTimeMillis() + time.seconds(timeoutSec);
             while (System.currentTimeMillis()<endTime) {
                 T v = block.call();
                 if (isTrueish(v))
@@ -131,7 +142,8 @@ public class CapybaraPortingLayer extends Assert {
      */
     public WebElement find(By selector) {
         try {
-            for (int i=0; i<10; i++) {
+            long endTime = System.currentTimeMillis() + time.seconds(1);
+            while (System.currentTimeMillis() <= endTime) {
                 WebElement e = driver.findElement(selector);
                 if (isDisplayed(e))
                     return e;
@@ -257,9 +269,9 @@ public class CapybaraPortingLayer extends Assert {
     /**
      * Thread.sleep that masks exception.
      */
-    public void sleep(int ms) {
+    public static void sleep(long ms) {
         try {
-            Thread.sleep(ms);
+            Thread.sleep(time.milliseconds(ms));
         } catch (InterruptedException e) {
             throw new Error(e);
         }

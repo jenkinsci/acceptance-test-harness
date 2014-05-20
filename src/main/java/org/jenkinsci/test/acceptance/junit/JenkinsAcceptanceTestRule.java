@@ -2,8 +2,10 @@ package org.jenkinsci.test.acceptance.junit;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.guice.World;
+import org.junit.internal.AssumptionViolatedException;
 import org.junit.rules.MethodRule;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
@@ -38,6 +40,7 @@ public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should us
             @Inject JenkinsController controller;
             @Inject Injector injector;
 
+            @Override
             public void evaluate() throws Throwable {
                 World world = World.get();
                 Injector injector = world.getInjector();
@@ -50,6 +53,8 @@ public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should us
                 System.out.println("=== Starting " + description.getDisplayName());
                 try {
                     decorateWithRules(base).evaluate();
+                } catch (AssumptionViolatedException e) {
+                    throw e;
                 } catch (Exception|AssertionError e) { // Errors and failures
                     controller.diagnose(e);
                     throw e;

@@ -3,7 +3,9 @@ package plugins;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.LdapContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.Bug;
 import org.jenkinsci.test.acceptance.junit.Native;
+import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.ldap.LdapDetails;
 import org.jenkinsci.test.acceptance.po.*;
 import org.junit.Test;
@@ -234,7 +236,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
         // Then
         assertThat(jenkins, hasLoggedInUser("jenkins"));
         User u = new User(jenkins, "jenkins");
-        assertEquals("jenkins@jenkins-ci.org", u.mail());
+        assertThat(u, mailAddressIs("jenkins@jenkins-ci.org"));
     }
 
     /**
@@ -296,6 +298,95 @@ public class LdapPluginTest extends AbstractJUnitTest {
         // Then
         assertThat(userJenkins, not(isMemberOf("ldap1")));
         assertThat(userJenkins, not(isMemberOf("ldap2")));
+    }
+
+    /**
+     * Scenario: resolve display name of ldap user with default display name attribute
+     * Given I have a docker fixture "ldap"
+     * And Jenkins is using ldap as security realm
+     * When I login with user "jenkins" and password "root"
+     * Then the display name of "jenkins" will be "Jenkins displayname"
+     * <p/>
+     * working since ldap plugin version: 1.8
+     */
+    @Test
+    @Bug("JENKINS-18355")
+    @WithPlugins("ldap")
+    public void resolve_display_name_with_defaults() {
+        // Given
+        useLdapAsSecurityRealm(createDefaults(ldap.get()));
+        // When
+        Login login = jenkins.login();
+        login.doLogin("jenkins", "root");
+        User userJenkins = new User(jenkins, "jenkins");
+        // Then
+        assertThat(userJenkins, fullNameIs("Jenkins displayname"));
+    }
+
+    /**
+     * Scenario: using custom display name attribute (cn instead of display name)
+     * Given I have a docker fixture "ldap"
+     * And Jenkins is using ldap as security realm and display name attribute is "cn"
+     * When I login with user "jenkins" and password "root"
+     * Then the display name of "jenkins" will be "Jenkins the Butler"
+     * <p/>
+     * working since ldap plugin version: 1.8
+     */
+    @Test
+    @Bug("JENKINS-18355")
+    @WithPlugins("ldap")
+    public void custom_display_name() {
+        // Given
+        useLdapAsSecurityRealm(createDefaults(ldap.get()).displayNameAttributeName("cn"));
+        // When
+        Login login = jenkins.login();
+        login.doLogin("jenkins", "root");
+        User userJenkins = new User(jenkins, "jenkins");
+        // Then
+        assertThat(userJenkins, fullNameIs("Jenkins the Butler"));
+    }
+
+    /**
+     * Scenario: using custom group membership filter which leads to no user belongs to a group
+     * Given I have a docker fixture "ldap"
+     * And Jenkins is using ldap as security realm with group membership filter "(member={0})"
+     * When I login with user "jenkins" and password "root"
+     * Then "jenkins" will not be member of groups "ldap1" and "ldap2"
+     */
+    @Test
+    @WithPlugins("ldap")
+    public void custom_group_membership_filter() {
+        // Given
+        useLdapAsSecurityRealm(createDefaults(ldap.get()).groupMembershipFilter("(member={0})"));
+        // When
+        Login login = jenkins.login();
+        login.doLogin("jenkins", "root");
+        User userJenkins = new User(jenkins, "jenkins");
+        // Then
+        assertThat(userJenkins, not(isMemberOf("ldap1")));
+        assertThat(userJenkins, not(isMemberOf("ldap2")));
+    }
+
+    /**
+     * Scenario: use a custom mail filter (gn instead of mail)
+     * Given I have a docker fixture "ldap"
+     * And Jenkins is using ldap as security realm and mail address attribute is "dn"
+     * When I login with user "jenkins" and password "root"
+     * Then the mail address of "jenkins" will be "givenname@mailaddress.com"
+     * <p/>
+     * since ldap plugin version 1.8
+     */
+    @Test
+    @WithPlugins("ldap")
+    public void custom_mail_filter() {
+        // Given
+        useLdapAsSecurityRealm(createDefaults(ldap.get()).mailAdressAttributeName("gn"));
+        // When
+        Login login = jenkins.login();
+        login.doLogin("jenkins", "root");
+        User userJenkins = new User(jenkins, "jenkins");
+        // Then
+        assertThat(userJenkins, mailAddressIs("givenname@mailaddress.com"));
     }
 
     private int findAvailablePort() {
