@@ -66,7 +66,7 @@ public class Job extends ContainerPageObject {
     }
 
     public <T extends BuildStep> T addPreBuildStep(Class<T> type) {
-        return addStep(type,"prebuilder");
+        return addStep(type, "prebuilder");
     }
 
     public <T extends BuildStep> T addBuildStep(Class<T> type) {
@@ -78,13 +78,13 @@ public class Job extends ContainerPageObject {
     }
 
     public <T extends PostBuildStep> T addPublisher(Class<T> type) {
-        return addStep(type,"publisher");
+        return addStep(type, "publisher");
     }
 
     private <T extends Step> T addStep(Class<T> type, String section) {
         ensureConfigPage();
 
-        final WebElement dropDown = find(by.path("/hetero-list-add[%s]",section));
+        final WebElement dropDown = find(by.path("/hetero-list-add[%s]", section));
         findCaption(type, new Resolver() {
             @Override protected void resolve(String caption) {
                 selectDropdownMenu(caption, dropDown);
@@ -181,7 +181,7 @@ public class Job extends ContainerPageObject {
     }
 
     public Build scheduleBuild() {
-        return scheduleBuild(Collections.<String,Object>emptyMap());
+        return scheduleBuild(Collections.<String, Object>emptyMap());
     }
 
     public Build scheduleBuild(Map<String,?> params) {
@@ -274,6 +274,20 @@ public class Job extends ContainerPageObject {
         else
             n=j.slaves.get(DumbSlave.class, nodeName);
         return n.getBuildHistory().shouldInclude(this.name);
+    }
+
+    /**
+     * Verify that the job contains some builds on exact one of the given list of slaves.
+     */
+    public boolean shouldHaveBuiltOnOneOfNNodes(Jenkins j, List<String> nodeNames) {
+        int noOfNodes = 0;
+
+        for (String n : nodeNames) {
+            if (shouldHaveBuiltOn(j,n))
+                noOfNodes++;
+        }
+
+        return (noOfNodes == 1);
     }
 
     @Override

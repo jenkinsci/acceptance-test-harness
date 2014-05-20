@@ -1,5 +1,6 @@
 package plugins;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
@@ -168,8 +169,8 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
 
         j.getLastBuild().waitUntilFinished();
 
-        assertThat(j.shouldHaveBuiltOn(jenkins,"master"), is(true));
-        assertThat(j.shouldHaveBuiltOn(jenkins,s.getName()), is(true));
+        assertThat(j.shouldHaveBuiltOn(jenkins, "master"), is(true));
+        assertThat(j.shouldHaveBuiltOn(jenkins, s.getName()), is(true));
     }
 
     /**
@@ -206,7 +207,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         assertThat(s.isOnline(), is(true));
 
         b.waitUntilFinished();
-        assertThat(j.shouldHaveBuiltOn(jenkins,s.getName()), is(true));
+        assertThat(j.shouldHaveBuiltOn(jenkins, s.getName()), is(true));
     }
 
     /**
@@ -282,14 +283,14 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         b.shouldBePendingForNodeParameter(s2.getName());
 
         //ensure that the build on the online slave has been done
-        assertThat(j.shouldHaveBuiltOn(jenkins,s1.getName()), is(true));
+        assertThat(j.shouldHaveBuiltOn(jenkins, s1.getName()), is(true));
 
         //bring second slave online again
         s2.markOnline();
         assertThat(s2.isOnline(), is(true));
 
         b.waitUntilFinished();
-        assertThat(j.shouldHaveBuiltOn(jenkins,s2.getName()), is(true));
+        assertThat(j.shouldHaveBuiltOn(jenkins, s2.getName()), is(true));
 
         //check that 2 builds have been created in total
         assertThat(j.getNextBuildNumber(), is(3));
@@ -338,7 +339,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         j.visit(""); //equivalent to: jenkins.visit("jobs/"+j.name);
 
         //ensure that the build on the online slave has been done
-        assertThat(j.shouldHaveBuiltOn(jenkins,s1.getName()), is(true));
+        assertThat(j.shouldHaveBuiltOn(jenkins, s1.getName()), is(true));
 
         //use scheduleBuild instead of startBuild to avoid a timeout waiting for Build being started
         b = j.scheduleBuild(singletonMap("slavename", s2.getName()));
@@ -382,12 +383,12 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         // select both slaves for this build
         j.startBuild(singletonMap("slavename", s1.getName()+","+s2.getName())).shouldFail();
 
-        // verify the job has not been built on the second slave due to the failed result
-        //FIXME do a more robust evaluation (some kind of XOR)
-        //further info: the first node in alphabetical order of the names will be chosen
-        //              for the build, which is not necessarily s1)
-        assertThat(j.shouldHaveBuiltOn(jenkins,s1.getName()), is(true));
-        assertThat(j.shouldHaveBuiltOn(jenkins,s2.getName()), is(false));
+        // verify failed result prevents the job to be built on further nodes.
+        // As the nodes get random names and the selected nodes are utilized in alphabetical order
+        // of their names, the first build will not necessarily be done on s1. Thus, it can only
+        // be verified that the job has been built on one of the slaves.
+        assertThat(j.shouldHaveBuiltOnOneOfNNodes(jenkins,
+                        Arrays.asList((s1.getName()+","+s2.getName()).split(","))), is(true));
 
         assertThat(j.getNextBuildNumber(), is(2));
 
@@ -432,12 +433,15 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
 
         j.save();
 
-        // select both slaves for this build, it should fail during the post build step
-        // due to textfinder will not be able to match the expression
+        // select both slaves for this build
         j.startBuild(singletonMap("slavename", s1.getName()+","+s2.getName())).shouldFail();
 
-        assertThat(j.shouldHaveBuiltOn(jenkins,s1.getName()), is(true));
-        assertThat(j.shouldHaveBuiltOn(jenkins,s2.getName()), is(false));
+        // verify failed result prevents the job to be built on further nodes.
+        // As the nodes get random names and the selected nodes are utilized in alphabetical order
+        // of their names, the first build will not necessarily be done on s1. Thus, it can only
+        // be verified that the job has been built on one of the slaves.
+        assertThat(j.shouldHaveBuiltOnOneOfNNodes(jenkins,
+                Arrays.asList((s1.getName()+","+s2.getName()).split(","))), is(true));
 
         assertThat(j.getNextBuildNumber(), is(2));
 
@@ -477,14 +481,15 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         j.addPublisher(JUnitPublisher.class).testResults.set("*.xml");
         j.save();
 
-        // select both slaves for this build, it should be deemed unstable during the post build step
-        // due to the unit test results
-        Build b = j.startBuild(singletonMap("slavename", s1.getName()+","+s2.getName()));
+        // select both slaves for this build
+        j.startBuild(singletonMap("slavename", s1.getName()+","+s2.getName())).shouldBeUnstable();
 
-        assertThat(b.getResult(), is("UNSTABLE"));
-
-        assertThat(j.shouldHaveBuiltOn(jenkins,s1.getName()), is(true));
-        assertThat(j.shouldHaveBuiltOn(jenkins,s2.getName()), is(false));
+        // verify unstable result prevents the job to be built on further nodes.
+        // As the nodes get random names and the selected nodes are utilized in alphabetical order
+        // of their names, the first build will not necessarily be done on s1. Thus, it can only
+        // be verified that the job has been built on one of the slaves.
+        assertThat(j.shouldHaveBuiltOnOneOfNNodes(jenkins,
+                Arrays.asList((s1.getName()+","+s2.getName()).split(","))), is(true));
 
         assertThat(j.getNextBuildNumber(), is(2));
     }
