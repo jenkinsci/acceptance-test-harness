@@ -30,10 +30,10 @@ public class ElasticTime {
     private final long concurrency = Integer.parseInt(System.getProperty("forkCount", "1"));
 
     public long seconds(long secs) {
-        return miliseconds(TimeUnit.SECONDS.toMillis(secs));
+        return milliseconds(TimeUnit.SECONDS.toMillis(secs));
     }
 
-    public long miliseconds(long ms) {
+    public long milliseconds(long ms) {
         return ms * concurrency;
     }
 }

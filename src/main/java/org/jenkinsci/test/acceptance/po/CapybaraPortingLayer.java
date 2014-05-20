@@ -1,19 +1,25 @@
 package org.jenkinsci.test.acceptance.po;
 
-import com.google.inject.Injector;
-
-import org.jenkinsci.test.acceptance.ByFactory;
-import org.jenkinsci.test.acceptance.utils.ElasticTime;
-import org.junit.Assert;
-import org.openqa.selenium.*;
-
 import javax.inject.Inject;
-
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.util.List;
 import java.util.concurrent.Callable;
-import static java.util.Arrays.asList;
+
+import org.jenkinsci.test.acceptance.ByFactory;
+import org.jenkinsci.test.acceptance.utils.ElasticTime;
+import org.junit.Assert;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+
+import com.google.inject.Injector;
+
+import static java.util.Arrays.*;
 
 /**
  * For assisting porting from Capybara.
@@ -264,7 +270,7 @@ public class CapybaraPortingLayer extends Assert {
      */
     public static void sleep(long ms) {
         try {
-            Thread.sleep(time.miliseconds(ms));
+            Thread.sleep(time.milliseconds(ms));
         } catch (InterruptedException e) {
             throw new Error(e);
         }
