@@ -1,7 +1,13 @@
 package org.jenkinsci.test.acceptance.po;
 
-import com.google.common.base.Splitter;
-import com.google.inject.Inject;
+import javax.annotation.Nonnull;
+import javax.inject.Named;
+import javax.inject.Provider;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
@@ -9,15 +15,8 @@ import org.jenkinsci.test.acceptance.po.UpdateCenter.InstallationFailedException
 import org.jenkinsci.test.acceptance.update_center.PluginMetadata;
 import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata;
 
-import javax.annotation.Nonnull;
-import javax.inject.Named;
-import javax.inject.Provider;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.regex.Pattern;
+import com.google.common.base.Splitter;
+import com.google.inject.Inject;
 
 /**
  * Page object for plugin manager.
@@ -98,8 +97,6 @@ public class PluginManager extends ContainerPageObject {
     public void installPlugins(String... shortNames) {
         final Map<String, String> candidates = getMapShortNamesVersion(shortNames);
 
-        if (isInstalled(shortNames))
-            return;
         if (uploadPlugins) {
             for (PluginMetadata newPlugin : ucmd.get().transitiveDependenciesOf(candidates.keySet())) {
                 final String name = newPlugin.name;
