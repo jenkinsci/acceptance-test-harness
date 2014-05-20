@@ -171,6 +171,11 @@ public class Build extends ContainerPageObject {
         return this;
     }
 
+    public Build shouldBeUnstable() {
+        assertThat(this, resultIs("UNSTABLE"));
+        return this;
+    }
+
     /**
      * This function tries to assert that the current build is pending for a certain
      * node using a NodeParameter. The node's name has to be specified when calling this method.
