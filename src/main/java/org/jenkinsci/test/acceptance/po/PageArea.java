@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.po;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 /**
  * @author christian.fritz
@@ -27,6 +28,12 @@ public interface PageArea extends CapybaraPortingLayer, Control.Owner {
     Control control(String... relativePaths);
 
     Control control(By selector);
+
+    /**
+     * Returns {@link WebElement} that corresponds to the element that sits at the root
+     * of the area this object represents.
+     */
+    WebElement self();
 
     String getPath();
 

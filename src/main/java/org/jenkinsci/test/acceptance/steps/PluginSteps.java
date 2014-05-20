@@ -10,7 +10,7 @@ public class PluginSteps extends AbstractSteps {
 
     @Given("^I have installed the \"([^\"]*)\" plugin( from the update center)?$")
     public void I_have_installed_the_plugin(String name) throws Throwable {
-        my.jenkins.getPluginManager().installPlugin(name);
+        my.jenkins.getPluginManager().installPlugins(name);
     }
 
     @Then("^plugin page \"([^\"]*)\" should exist$")

@@ -21,12 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.test.acceptance;
+package org.jenkinsci.test.acceptance.selenium;
 
 import java.util.List;
 
 import org.openqa.selenium.By;
-import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.events.AbstractWebDriverEventListener;
@@ -41,23 +40,28 @@ public class SanityChecker extends AbstractWebDriverEventListener {
             "//h1/span[contains(., 'Oops!')]/../following-sibling::div/h2[text()='Stack trace']/following-sibling::pre"
     );
 
-    @Override public void afterNavigateTo(String url, WebDriver driver) {
+    @Override
+    public void afterNavigateTo(String url, WebDriver driver) {
         checkSanity(driver);
     }
 
-    @Override public void afterClickOn(WebElement element, WebDriver driver) {
-        // Skip checking in case there is a dialog present
+    @Override
+    public void afterClickOn(WebElement element, WebDriver driver) {
         try {
-            driver.switchTo().alert();
-            return;
-        } catch (NoAlertPresentException _) {}
+            if (isFastPath(driver)) return;
 
-        checkSanity(driver);
+            // driver.switchTo().alert() is slow (~1sec) on Firefox,
+            // so try to avoid it when we can.
+            driver.switchTo().alert();
+
+            return; // Skip checking in case there is a dialog present
+        } catch (Exception e) {
+            checkSanity(driver);
+        }
     }
 
     private void checkSanity(WebDriver driver) {
-        // Performance optimalization
-        if (!driver.getPageSource().contains("Oops!")) return;
+        if (isFastPath(driver)) return;
 
         List<WebElement> elements = driver.findElements(SPECIFIER);
 
@@ -71,5 +75,16 @@ public class SanityChecker extends AbstractWebDriverEventListener {
 
             throw new AssertionError("Jenkins error detected:\n" + trace);
         }
+    }
+
+    /**
+     * Quickly determine if the driver is definitely in the safe state.
+     *
+     * <p>
+     * The expectation is that the most of the time this would return true,
+     * and reduces the overhead of {@link SanityChecker}.
+     */
+    private boolean isFastPath(WebDriver driver) {
+        return !driver.getPageSource().contains("Oops!");
     }
 }

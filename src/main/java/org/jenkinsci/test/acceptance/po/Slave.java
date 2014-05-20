@@ -6,6 +6,7 @@ import org.jenkinsci.test.acceptance.slave.SlaveController;
 import com.google.common.base.Joiner;
 
 import java.io.File;
+import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 
 /**
@@ -33,6 +34,19 @@ public abstract class Slave extends Node {
         return !isOffline();
     }
 
+    /**
+     * Waits for a slave to come online before proceeding.
+     * @see #isOnline
+     */
+    public Slave waitUntilOnline() {
+        waitForCond(new Callable<Boolean>() {
+            @Override public Boolean call() throws Exception {
+                return isOnline();
+            }
+        });
+        return this;
+    }
+
     public boolean isOffline() {
         return getJson().get("offline").asBoolean();
     }
@@ -55,7 +69,6 @@ public abstract class Slave extends Node {
     }
 
     public void setLabels(String l) {
-        ensureConfigPage();
         find(by.path("/labelString")).sendKeys(l);
     }
 
@@ -91,5 +104,37 @@ public abstract class Slave extends Node {
                 ;
             }
         };
+    }
+
+    /**
+     * If the slave is online, this method will mark it offline for testing purpose.
+     */
+    public void markOffline() {
+        markOffline("Just for testing... be right back...");
+    }
+
+    public void markOffline(String message) {
+
+        if(isOnline()) {
+            visit("");
+            clickButton("Mark this node temporarily offline");
+
+            find(by.input("offlineMessage")).clear();
+            find(by.input("offlineMessage")).sendKeys(message);
+
+            clickButton("Mark this node temporarily offline");
+        }
+    }
+
+    /**
+     * If the slave has been marked offline, this method will bring it up again
+     */
+
+    public void markOnline(){
+
+        if(isOffline()) {
+            visit("");
+            clickButton("Bring this node back online");
+        }
     }
 }

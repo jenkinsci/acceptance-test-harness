@@ -22,6 +22,8 @@ public interface CapybaraPortingLayer {
      */
     WebElement choose(String locator);
 
+    WebElement waitFor(By selector, int timeoutSec);
+
     /**
      * Wait until the element that matches the given selector appears.
      */

@@ -49,6 +49,8 @@ public abstract class PageObject extends CapybaraPortingLayerImpl {
     }
 
     public Jenkins getJenkins() {
+        // TODO try to find the real Jenkins root according to the owner of this object, via breadcrumb
+        // Alternately, Job could have a method to get Jenkins by appending ../../ to its own URL, if not in a folder (need a separate method to find folder owner, but that needs its own page object too)
         return injector.getInstance(Jenkins.class);
     }
 

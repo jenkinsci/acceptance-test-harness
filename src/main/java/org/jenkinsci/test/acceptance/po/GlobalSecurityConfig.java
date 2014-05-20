@@ -27,6 +27,9 @@ import java.net.URL;
 
 import org.openqa.selenium.WebElement;
 
+/**
+ * Global security configuration UI.
+ */
 public class GlobalSecurityConfig extends ContainerPageObject {
 
     public GlobalSecurityConfig(Jenkins context) {
@@ -40,7 +43,16 @@ public class GlobalSecurityConfig extends ContainerPageObject {
 
     public <T extends SecurityRealm> T useRealm(Class<T> type) {
         control("/useSecurity").check();
+        return selectFromRadioGroup(type);
+    }
 
+    public <T extends AuthorizationStrategy> T useAuthorizationStrategy(Class<T> type) {
+        control("/useSecurity").check();
+        return selectFromRadioGroup(type);
+    }
+
+
+    private <T> T selectFromRadioGroup(Class<T> type) {
         WebElement radio = findCaption(type, new Finder<WebElement>() {
             @Override protected WebElement find(String caption) {
                 return getElement(by.radioButton(caption));

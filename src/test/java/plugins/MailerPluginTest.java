@@ -5,6 +5,7 @@ import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.plugins.mailer.Mailer;
 import org.jenkinsci.test.acceptance.plugins.mailer.MailerGlobalConfig;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.utils.mail.MailService;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -21,6 +22,9 @@ import java.util.regex.Pattern;
 public class MailerPluginTest extends AbstractJUnitTest {
     @Inject
     MailerGlobalConfig mailer;
+
+    @Inject
+    MailService mail;
 
     @Before
     public void setup() {
@@ -42,7 +46,7 @@ public class MailerPluginTest extends AbstractJUnitTest {
     public void send_test_mail() throws IOException, MessagingException {
         jenkins.configure();
         mailer.sendTestMail("admin@example.com");
-        mailer.assertMail(
+        mail.assertMail(
                 Pattern.compile("Test email #1"),
                 "admin@example.com",
                 Pattern.compile("This is test email #1 sent from Jenkins"));
@@ -72,7 +76,7 @@ public class MailerPluginTest extends AbstractJUnitTest {
         job.save();
 
         job.startBuild().shouldFail();
-        mailer.assertMail(
+        mail.assertMail(
                 Pattern.compile("Build failed in Jenkins: .* #1"),
                 "dev@example.com mngmnt@example.com",
                 Pattern.compile("failure"));

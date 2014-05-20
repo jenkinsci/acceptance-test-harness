@@ -10,11 +10,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import com.google.inject.Injector;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.plexus.util.Expand;
 import org.codehaus.plexus.util.StringUtils;
 import org.jenkinsci.utils.process.ProcessInputStream;
+
+import javax.inject.Inject;
+import javax.inject.Named;
 
 import static java.lang.System.*;
 
@@ -22,7 +26,7 @@ import static java.lang.System.*;
  * Abstract base class for those JenkinsController that runs the JVM locally on
  * the same box as the test harness
  *
- * @author: Vivek Pandey
+ * @author Vivek Pandey
  */
 public abstract class LocalController extends JenkinsController {
     /**
@@ -50,6 +54,9 @@ public abstract class LocalController extends JenkinsController {
 
     private final File logFile;
 
+    @Inject @Named("form-element-path.hpi")
+    private File formElementPathPlugin;
+
     static{
         String warLocation = getenv("JENKINS_WAR");
         if(warLocation == null){
@@ -65,7 +72,7 @@ public abstract class LocalController extends JenkinsController {
     /**
      * Partial implementation of {@link JenkinsControllerFactory} for subtypes.
      */
-    public static abstract class LocalFactoryImpl extends AbstractJenkinsControllerFactory {
+    public static abstract class LocalFactoryImpl implements JenkinsControllerFactory {
         /**
          * Determines the location of the war file.
          */
@@ -99,10 +106,8 @@ public abstract class LocalController extends JenkinsController {
     /**
      * @param war
      *      Where is the jenkins.war file to be tested?
-     * @param formElementPlugin
-     *      Where is the required form-element-path.hpi file stored?
      */
-    protected LocalController(File war, final File formElementPlugin) {
+    protected LocalController(File war) {
         this.war = war;
         if (!war.exists())
             throw new RuntimeException("Invalid path to jenkins.war specified: "+war);
@@ -116,6 +121,11 @@ public abstract class LocalController extends JenkinsController {
         }
 
         this.logFile = new File(this.tempDir.getParentFile(), this.tempDir.getName()+".log");
+    }
+
+    @Override
+    public void postConstruct(Injector injector) {
+        super.postConstruct(injector);
 
         File pluginDir = new File(tempDir,"plugins");
         pluginDir.mkdirs();
@@ -145,10 +155,10 @@ public abstract class LocalController extends JenkinsController {
         }
 
         try {
-            FileUtils.copyFile(formElementPlugin, new File(pluginDir, "path-element.hpi"));
+            FileUtils.copyFile(formElementPathPlugin, new File(pluginDir, "path-element.hpi"));
         } catch (IOException e) {
             throw new RuntimeException(String.format("Failed to copy form path element file %s to plugin dir %s.",
-                    formElementPlugin, pluginDir),e);
+                    formElementPathPlugin, pluginDir),e);
         }
     }
 
@@ -222,11 +232,17 @@ public abstract class LocalController extends JenkinsController {
 
     @Override
     public void startNow() throws IOException{
-        bringItUp();
+        this.process = startProcess();
+        Runtime.getRuntime().addShutdownHook(shutdownHook);
+
+        logWatcher = new JenkinsLogWatcher(process,logFile);
+        logWatcher.start();
         try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            LOGGER.info("Waiting for Jenkins to become running in "+ this);
+            this.logWatcher.waitTillReady();
+            LOGGER.info("Jenkins is running in " + this);
+        } catch (Exception e) {
+            diagnoseFailedLoad(e);
         }
     }
 
@@ -296,21 +312,6 @@ public abstract class LocalController extends JenkinsController {
 
     protected int randomLocalPort(){
         return randomLocalPort(-1,-1);
-    }
-
-    private void bringItUp() throws IOException{
-        this.process = startProcess();
-        Runtime.getRuntime().addShutdownHook(shutdownHook);
-
-        logWatcher = new JenkinsLogWatcher(process,logFile);
-        logWatcher.start();
-        try {
-            LOGGER.info("Waiting for Jenkins to become running in "+this);
-            this.logWatcher.waitTillReady();
-            LOGGER.info("Jenkins is running in "+this);
-        } catch (Exception e) {
-            diagnoseFailedLoad(e);
-        }
     }
 
     private void diagnoseFailedLoad(Exception cause) {

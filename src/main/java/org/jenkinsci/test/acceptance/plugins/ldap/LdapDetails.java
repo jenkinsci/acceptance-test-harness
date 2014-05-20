@@ -6,7 +6,6 @@ package org.jenkinsci.test.acceptance.plugins.ldap;
  * @author Michael Prankl
  */
 public class LdapDetails {
-
     private String host;
     private int port;
     private String hostWithPort;
@@ -22,6 +21,8 @@ public class LdapDetails {
     private boolean enableCache = false;
     private int cacheSize = 20;
     private int cacheTTL = 300;
+    private String mailAddressAttributeName;
+    private String displayNameAttributeName;
 
 
     public LdapDetails(String host, int port, String managerDn, String managerPassword, String rootDn) {
@@ -42,6 +43,11 @@ public class LdapDetails {
         this.host = host;
     }
 
+    public LdapDetails host(final String host) {
+        setHost(host);
+        return this;
+    }
+
     public int getPort() {
         return port;
     }
@@ -50,12 +56,22 @@ public class LdapDetails {
         this.port = port;
     }
 
+    public LdapDetails port(final int port) {
+        setPort(port);
+        return this;
+    }
+
     public String getHostWithPort() {
         return hostWithPort;
     }
 
     public void setHostWithPort(final String hostWithPort) {
         this.hostWithPort = hostWithPort;
+    }
+
+    public LdapDetails hostWithPort(final String hostWithPort) {
+        setHostWithPort(hostWithPort);
+        return this;
     }
 
     public String getManagerDn() {
@@ -90,12 +106,22 @@ public class LdapDetails {
         this.userSearchBase = userSearchBase;
     }
 
+    public LdapDetails userSearchBase(final String userSearchBase) {
+        setUserSearchBase(userSearchBase);
+        return this;
+    }
+
     public String getUserSearchFilter() {
         return userSearchFilter;
     }
 
     public void setUserSearchFilter(final String userSearchFilter) {
         this.userSearchFilter = userSearchFilter;
+    }
+
+    public LdapDetails userSearchFilter(final String userSearchFilter) {
+        setUserSearchFilter(userSearchFilter);
+        return this;
     }
 
     public String getGroupSearchBase() {
@@ -106,6 +132,11 @@ public class LdapDetails {
         this.groupSearchBase = groupSearchBase;
     }
 
+    public LdapDetails groupSearchBase(final String groupSearchBase) {
+        setGroupSearchBase(groupSearchBase);
+        return this;
+    }
+
     public String getGroupSearchFilter() {
         return groupSearchFilter;
     }
@@ -114,17 +145,36 @@ public class LdapDetails {
         this.groupSearchFilter = groupSearchFilter;
     }
 
+    public LdapDetails groupSearchFilter(final String groupSearchFilter) {
+        setGroupSearchFilter(groupSearchFilter);
+        return this;
+    }
+
     public String getGroupMembershipFilter() {
         return groupMembershipFilter;
     }
 
-    public void setGroupMembershipFilter(final String groupMembershipFilter) { this.groupMembershipFilter = groupMembershipFilter; }
+    public void setGroupMembershipFilter(final String groupMembershipFilter) {
+        this.groupMembershipFilter = groupMembershipFilter;
+    }
+
+    public LdapDetails groupMembershipFilter(final String groupMembershipFilter) {
+        setGroupMembershipFilter(groupMembershipFilter);
+        return this;
+    }
 
     public boolean isDisableLdapEmailResolver() {
         return disableLdapEmailResolver;
     }
 
-    public void setDisableLdapEmailResolver(final boolean disableLdapEmailResolver) { this.disableLdapEmailResolver = disableLdapEmailResolver; }
+    public void setDisableLdapEmailResolver(final boolean disableLdapEmailResolver) {
+        this.disableLdapEmailResolver = disableLdapEmailResolver;
+    }
+
+    public LdapDetails disableLdapEmailResolver(final boolean disableLdapEmailResolver) {
+        setDisableLdapEmailResolver(disableLdapEmailResolver);
+        return this;
+    }
 
     public boolean isEnableCache() {
         return enableCache;
@@ -134,11 +184,60 @@ public class LdapDetails {
         this.enableCache = enableCache;
     }
 
-    public int getCacheSize() { return cacheSize; }
+    public LdapDetails enableCache(final boolean enableCache) {
+        setEnableCache(enableCache);
+        return this;
+    }
 
-    public void setCacheSize(int cacheSize) { this.cacheSize = cacheSize; }
+    public int getCacheSize() {
+        return cacheSize;
+    }
 
-    public int getCacheTTL() { return cacheTTL; }
+    public void setCacheSize(int cacheSize) {
+        this.cacheSize = cacheSize;
+    }
 
-    public void setCacheTTL(int cacheTTL) { this.cacheTTL = cacheTTL; }
+    public LdapDetails cacheSize(int cacheSize) {
+        setCacheSize(cacheSize);
+        return this;
+    }
+
+    public int getCacheTTL() {
+        return cacheTTL;
+    }
+
+    public void setCacheTTL(int cacheTTL) {
+        this.cacheTTL = cacheTTL;
+    }
+
+    public LdapDetails cacheTTL(int cacheTTL) {
+        setCacheTTL(cacheTTL);
+        return this;
+    }
+
+    public String getMailAddressAttributeName() {
+        return mailAddressAttributeName;
+    }
+
+    public void setMailAddressAttributeName(String mailAddressAttributeName) {
+        this.mailAddressAttributeName = mailAddressAttributeName;
+    }
+
+    public LdapDetails mailAdressAttributeName(String mailAddressAttributeName){
+        setMailAddressAttributeName(mailAddressAttributeName);
+        return this;
+    }
+
+    public String getDisplayNameAttributeName() {
+        return displayNameAttributeName;
+    }
+
+    public void setDisplayNameAttributeName(String displayNameAttributeName) {
+        this.displayNameAttributeName = displayNameAttributeName;
+    }
+
+    public LdapDetails displayNameAttributeName(String displayNameAttributeName){
+        setDisplayNameAttributeName(displayNameAttributeName);
+        return this;
+    }
 }

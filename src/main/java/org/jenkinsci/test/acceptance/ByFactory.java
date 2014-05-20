@@ -128,4 +128,8 @@ public class ByFactory {
     public By id(String s) {
         return css("#"+s);
     }
+
+    public By parent() {
+        return xpath("..");
+    }
 }

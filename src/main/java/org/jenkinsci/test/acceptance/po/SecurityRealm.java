@@ -30,7 +30,7 @@ package org.jenkinsci.test.acceptance.po;
  *
  * @see GlobalSecurityConfig#useRealm(Class)
  */
-public class SecurityRealm extends PageAreaImpl {
+public abstract class SecurityRealm extends PageAreaImpl {
 
     protected SecurityRealm(GlobalSecurityConfig context, String path) {
         super(context, path);

@@ -7,12 +7,17 @@ import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginPostBuildStep;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.Job;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
+import java.util.List;
+import java.util.regex.Pattern;
+
+import static org.junit.Assert.assertTrue;
 
 public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
 
@@ -83,4 +88,17 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
         final Document expected = documentBuilder.parse(resource(expectedXmlPath).asFile());
         XMLAssert.assertXMLEqual(result, expected);
     }
+
+    /**
+     * Checks if the area links of jobs matches the regular expression.
+     * @param job Job to check the area links
+     * @param regularExpression Expression should match
+     */
+    public void assertAreaLinksOfJobAreLike(Job job, String regularExpression) {
+        Pattern pattern = Pattern.compile(regularExpression);
+        for (String currentLink : job.getAreaLinks()) {
+            assertTrue("Link should be relative", pattern.matcher(currentLink).matches());
+        }
+    }
+
 }

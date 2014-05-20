@@ -70,21 +70,25 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
         return e;
     }
 
-    /**
-     * Wait until the element that matches the given selector appears.
-     */
     @Override
-    public WebElement waitFor(final By selector) {
+    public WebElement waitFor(final By selector, final int timeoutSec) {
         return waitForCond(new Callable<WebElement>() {
-            @Override
-            public WebElement call() {
+            @Override public WebElement call() {
                 try {
                     return find(selector);
                 } catch (NoSuchElementException e) {
                     return null;
                 }
             }
-        });
+        }, timeoutSec);
+    }
+
+    /**
+     * Wait until the element that matches the given selector appears.
+     */
+    @Override
+    public WebElement waitFor(final By selector) {
+        return waitFor(selector, 30);
     }
 
     /**
@@ -94,6 +98,9 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
      */
     @Override
     public <T> T waitForCond(Callable<T> block, int timeoutSec) {
+        // Stretch timeout in case we are using several cores
+        timeoutSec *= Integer.parseInt(System.getProperty("forkCount", "1"));
+
         try {
             long endTime = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(timeoutSec);
             while (System.currentTimeMillis() < endTime) {
@@ -122,7 +129,6 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     public <T> T waitForCond(Callable<T> block) {
         return waitForCond(block, 30);
     }
-
 
     /**
      * Returns the first visible element that matches the selector.
@@ -282,9 +288,10 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
         }
     }
 
-
     /**
      * Finds matching constructor and invoke it.
+     * <p/>
+     * This is often useful for binding {@link PageArea} by taking the concrete type as a parameter.
      */
     protected <T> T newInstance(Class<T> type, Object... args) {
         try {
@@ -328,7 +335,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     }
 
     protected abstract class Finder<R> {
-        protected final CapybaraPortingLayer outer = CapybaraPortingLayerImpl.this;
+        protected final CapybaraPortingLayerImpl outer = CapybaraPortingLayerImpl.this;
 
         protected abstract R find(String caption);
     }
