@@ -138,7 +138,7 @@ public class FallbackConfig extends AbstractModule {
         ElasticTime time = new ElasticTime();
         try {
             d.manage().timeouts().pageLoadTimeout(time.seconds(30), TimeUnit.MILLISECONDS);
-            d.manage().timeouts().implicitlyWait(time.milliseconds(200), TimeUnit.MILLISECONDS);
+            d.manage().timeouts().implicitlyWait(time.milliseconds(400), TimeUnit.MILLISECONDS);
         } catch (UnsupportedCommandException e) {
             // sauce labs RemoteWebDriver doesn't support this
             System.out.println(base + " doesn't support page load timeout");

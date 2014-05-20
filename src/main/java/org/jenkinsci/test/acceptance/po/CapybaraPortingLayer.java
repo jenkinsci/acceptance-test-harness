@@ -142,7 +142,8 @@ public class CapybaraPortingLayer extends Assert {
      */
     public WebElement find(By selector) {
         try {
-            for (int i=0; i<10; i++) {
+            long endTime = System.currentTimeMillis() + time.seconds(1);
+            while (System.currentTimeMillis() <= endTime) {
                 WebElement e = driver.findElement(selector);
                 if (isDisplayed(e))
                     return e;
