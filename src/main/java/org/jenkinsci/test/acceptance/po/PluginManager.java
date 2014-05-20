@@ -102,9 +102,7 @@ public class PluginManager extends ContainerPageObject {
                 final String name = newPlugin.name;
                 final String claimedVersion = candidates.get(name);
                 try {
-                    if (!isInstalled(name) || (claimedVersion != null && !jenkins.getPlugin(name).isNewerThan(claimedVersion))) {
-                        newPlugin.uploadTo(jenkins, injector, claimedVersion);
-                    }
+                    newPlugin.uploadTo(jenkins, injector, claimedVersion);
                 } catch (IOException | ArtifactResolutionException e) {
                     throw new AssertionError("Failed to upload plugin: " + newPlugin, e);
                 }
