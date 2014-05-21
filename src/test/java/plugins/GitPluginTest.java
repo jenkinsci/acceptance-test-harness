@@ -28,9 +28,7 @@ import javax.inject.Inject;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
 import org.jenkinsci.test.acceptance.junit.*;
-import org.jenkinsci.test.acceptance.plugins.credentials.ManagedCredentials;
 import org.jenkinsci.test.acceptance.plugins.git.GitScm;
-import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshPrivateKeyCredential;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.junit.Before;
 import org.junit.Test;
@@ -59,7 +57,8 @@ public class GitPluginTest extends AbstractJUnitTest {
         job.configure();
     }
 
-    @Test @Category(SmokeTest.class)
+    @Test
+    @Category(SmokeTest.class)
     public void simple_checkout() {
         job.useScm(GitScm.class)
                 .url(repoUrl)
