@@ -27,13 +27,8 @@ import javax.inject.Inject;
 
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
-import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.junit.Native;
-import org.jenkinsci.test.acceptance.junit.SmokeTest;
-import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.plugins.credentials.ManagedCredentials;
+import org.jenkinsci.test.acceptance.junit.*;
 import org.jenkinsci.test.acceptance.plugins.git.GitScm;
-import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshPrivateKeyCredential;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,6 +36,7 @@ import org.junit.experimental.categories.Category;
 
 @Native("docker")
 @WithPlugins("git")
+@WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {"gitplugin", "/ssh_keys/unsafe"})
 public class GitPluginTest extends AbstractJUnitTest {
 
     private static final String USERNAME = "gitplugin";
@@ -57,12 +53,12 @@ public class GitPluginTest extends AbstractJUnitTest {
     public void init() {
         container = gitServer.get();
         repoUrl = container.getRepoUrl();
-        addCredentials();
         job = jenkins.jobs.create();
         job.configure();
     }
 
-    @Test @Category(SmokeTest.class)
+    @Test
+    @Category(SmokeTest.class)
     public void simple_checkout() {
         job.useScm(GitScm.class)
                 .url(repoUrl)
@@ -96,6 +92,7 @@ public class GitPluginTest extends AbstractJUnitTest {
 
         job.startBuild().shouldSucceed().shouldContainsConsoleOutput("custom_origin\\s+" + repoUrl);
     }
+
 
     @Test
     public void checkout_local_branch() {
@@ -134,14 +131,5 @@ public class GitPluginTest extends AbstractJUnitTest {
 
         // We should have some build after 70 seconds
         job.getLastBuild().shouldSucceed().shouldExist();
-    }
-
-    private void addCredentials() {
-        ManagedCredentials c = new ManagedCredentials(jenkins);
-        c.open();
-        SshPrivateKeyCredential sc = c.add(SshPrivateKeyCredential.class);
-        sc.username.set(USERNAME);
-        sc.selectEnterDirectly().privateKey.set(resource("/ssh_keys/unsafe").asText());
-        c.save();
     }
 }
