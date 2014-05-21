@@ -15,6 +15,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 /**
@@ -64,7 +65,7 @@ public class Job extends ContainerPageObject {
     }
 
     public <T extends BuildStep> T addPreBuildStep(Class<T> type) {
-        return addStep(type,"prebuilder");
+        return addStep(type, "prebuilder");
     }
 
     public <T extends BuildStep> T addBuildStep(Class<T> type) {
@@ -76,13 +77,13 @@ public class Job extends ContainerPageObject {
     }
 
     public <T extends PostBuildStep> T addPublisher(Class<T> type) {
-        return addStep(type,"publisher");
+        return addStep(type, "publisher");
     }
 
     private <T extends Step> T addStep(Class<T> type, String section) {
         ensureConfigPage();
 
-        final WebElement dropDown = find(by.path("/hetero-list-add[%s]",section));
+        final WebElement dropDown = find(by.path("/hetero-list-add[%s]", section));
         findCaption(type, new Resolver() {
             @Override protected void resolve(String caption) {
                 selectDropdownMenu(caption, dropDown);
@@ -179,7 +180,7 @@ public class Job extends ContainerPageObject {
     }
 
     public Build scheduleBuild() {
-        return scheduleBuild(Collections.<String,Object>emptyMap());
+        return scheduleBuild(Collections.<String, Object>emptyMap());
     }
 
     public Build scheduleBuild(Map<String,?> params) {
@@ -268,15 +269,37 @@ public class Job extends ContainerPageObject {
     }
 
     /**
-     * Verify that the job contains some builds on the given slave.
+     * Verify that the job contains some builds on the given node
+     * To test whether the the job has built on the master, the jenkins instance has to be
+     * passed in the parameter.
      */
-    public void shouldHaveBuiltOn(Jenkins j, String nodeName) {
-        Node n;
-        if (nodeName.equals("master"))
-            n=j;
-        else
-            n=j.slaves.get(DumbSlave.class, nodeName);
-        n.getBuildHistory().shouldInclude(this.name);
+    public void shouldHaveBuiltOn(Node n){
+        assertThat(hasBuiltOn(n), is(true));
+    }
+
+    /**
+     * Check if the job contains some builds on the given node.
+     * To test whether the the job has built on the master, the jenkins instance has to be
+     * passed in the parameter.
+     */
+    public boolean hasBuiltOn(Node n) {
+        return n.getBuildHistory().includes(this.name);
+    }
+
+    /**
+     * Verify that the job contains some builds on exact one of the given list of nodes.
+     * To test whether the the job has built on the master, the jenkins instance has to be
+     * passed in the parameter.
+     */
+    public void shouldHaveBuiltOnOneOfNNodes(List<Node> nodes) {
+        int noOfNodes = 0;
+
+        for (Node n : nodes) {
+            if (hasBuiltOn(n))
+                noOfNodes++;
+        }
+
+        assertThat(noOfNodes, is(1));
     }
 
     @Override
