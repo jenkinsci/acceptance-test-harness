@@ -8,8 +8,6 @@ import org.jenkinsci.test.acceptance.junit.Resource;
 import org.openqa.selenium.WebElement;
 import org.zeroturnaround.zip.ZipUtil;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-
 import java.io.*;
 import java.net.URL;
 import java.util.*;
@@ -17,6 +15,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 /**
@@ -267,27 +266,34 @@ public class Job extends ContainerPageObject {
     /**
      * Verify that the job contains some builds on the given slave.
      */
-    public boolean shouldHaveBuiltOn(Jenkins j, String nodeName) {
+    public void shouldHaveBuiltOn(Jenkins j, String nodeName){
+        assertThat(hasBuiltOn(j,nodeName), is(true));
+    }
+
+    /**
+     * Check if the job contains some builds on the given slave.
+     */
+    public boolean hasBuiltOn(Jenkins j, String nodeName) {
         Node n;
         if (nodeName.equals("master"))
             n=j;
         else
             n=j.slaves.get(DumbSlave.class, nodeName);
-        return n.getBuildHistory().shouldInclude(this.name);
+        return n.getBuildHistory().includes(this.name);
     }
 
     /**
      * Verify that the job contains some builds on exact one of the given list of slaves.
      */
-    public boolean shouldHaveBuiltOnOneOfNNodes(Jenkins j, List<String> nodeNames) {
+    public void shouldHaveBuiltOnOneOfNNodes(Jenkins j, List<String> nodeNames) {
         int noOfNodes = 0;
 
         for (String n : nodeNames) {
-            if (shouldHaveBuiltOn(j,n))
+            if (hasBuiltOn(j, n))
                 noOfNodes++;
         }
 
-        return (noOfNodes == 1);
+        assertThat(noOfNodes, is(1));
     }
 
     @Override
