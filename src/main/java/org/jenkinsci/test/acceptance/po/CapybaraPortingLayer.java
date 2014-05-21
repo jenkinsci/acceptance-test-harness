@@ -162,7 +162,8 @@ public class CapybaraPortingLayer extends Assert {
             throw new NoSuchElementException("Unable to locate visible "+selector+" in "+driver.getCurrentUrl());
         } catch (NoSuchElementException x) {
             // this is often the best place to set a breakpoint
-            throw new NoSuchElementException("Unable to locate "+selector+" in "+driver.getCurrentUrl(),x);
+            String msg = String.format("Unable to locate %s in %s\n\n%s", selector, driver.getCurrentUrl(), driver.getPageSource());
+            throw new NoSuchElementException(msg,x);
         }
     }
 
