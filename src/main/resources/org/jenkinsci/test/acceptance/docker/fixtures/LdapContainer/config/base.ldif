@@ -37,7 +37,7 @@ displayName: Jenkins displayname
 sn: Jenkins
 uid: jenkins
 mail: jenkins@jenkins-ci.org
-gn: givenname@mailaddress.com
+givenName: givenname@mailaddress.com
 userPassword: {SSHA}cyMRP9VIG82CXvuXzCZwpmKF4m8E/4zC
 
 # hudson, password is root

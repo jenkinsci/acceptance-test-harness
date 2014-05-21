@@ -60,7 +60,7 @@ public class LdapSecurityRealm extends SecurityRealm {
             displayNameAttributeName.set(ldapDetails.getDisplayNameAttributeName());
         }
         if (ldapDetails.getMailAddressAttributeName() != null) {
-            mailAddressAttributeName.set(ldapDetails.getDisplayNameAttributeName());
+            mailAddressAttributeName.set(ldapDetails.getMailAddressAttributeName());
         }
     }
 }
