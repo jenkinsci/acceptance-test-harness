@@ -110,7 +110,6 @@ public class Docker {
             File dir = File.createTempFile("Dockerfile", "dir");
             dir.delete();
             dir.mkdirs();
-            System.out.println("#####"+fixture);
             try {
                 File jar = null;
                 try {
@@ -122,7 +121,6 @@ public class Docker {
                 if (jar!=null && jar.isFile()) {
                     // files are packaged into a war. extract them
                     String prefix = fixture.getName().replace('.', '/')+"/";
-                    System.out.println("#####"+jar);
                     try (JarFile j = new JarFile(jar)) {
                         Enumeration<JarEntry> e = j.entries();
                         while (e.hasMoreElements()) {
