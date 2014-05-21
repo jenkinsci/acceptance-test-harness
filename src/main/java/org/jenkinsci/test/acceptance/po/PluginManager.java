@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 
 import org.eclipse.aether.resolution.ArtifactResolutionException;
@@ -17,6 +18,7 @@ import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata;
 
 import com.google.common.base.Splitter;
 import com.google.inject.Inject;
+import org.openqa.selenium.TimeoutException;
 
 /**
  * Page object for plugin manager.
@@ -94,7 +96,7 @@ public class PluginManager extends ContainerPageObject {
      * is not really deprecated.
      */
     @Deprecated
-    public void installPlugins(String... shortNames) {
+    public void installPlugins(final String... shortNames) {
         final Map<String, String> candidates = getMapShortNamesVersion(shortNames);
 
         if (uploadPlugins) {
@@ -108,8 +110,17 @@ public class PluginManager extends ContainerPageObject {
                 }
             }
 
+            // plugin deployment happens asynchronously, so give it a few seconds
+            // for it to finish deploying
             // TODO: Use better detection if this is actually necessary
-            if (!isInstalled(shortNames)) {
+            try {
+                waitForCond(new Callable<Boolean>() {
+                    @Override
+                    public Boolean call() throws Exception {
+                        return isInstalled(shortNames);
+                    }
+                },5);
+            } catch (TimeoutException e) {
                 jenkins.restart();
             }
         } else {
