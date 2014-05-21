@@ -144,6 +144,13 @@ public class Build extends ContainerPageObject {
         return getResult().equals("SUCCESS");
     }
 
+    /**
+     * Returns if the current build is unstable.
+     */
+    public boolean isUnstable() {
+        return getResult().equals("UNSTABLE");
+    }
+
     public String getResult() {
         if (result!=null)   return result;
 
