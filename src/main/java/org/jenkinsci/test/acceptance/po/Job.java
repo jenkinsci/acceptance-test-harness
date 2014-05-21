@@ -264,21 +264,27 @@ public class Job extends ContainerPageObject {
     }
 
     /**
-     * Verify that the job contains some builds on the given slave.
+     * Verify that the job contains some builds on the given node
+     * To test whether the the job has built on the master, the jenkins instance has to be
+     * passed in the parameter.
      */
     public void shouldHaveBuiltOn(Node n){
         assertThat(hasBuiltOn(n), is(true));
     }
 
     /**
-     * Check if the job contains some builds on the given slave.
+     * Check if the job contains some builds on the given node.
+     * To test whether the the job has built on the master, the jenkins instance has to be
+     * passed in the parameter.
      */
     public boolean hasBuiltOn(Node n) {
         return n.getBuildHistory().includes(this.name);
     }
 
     /**
-     * Verify that the job contains some builds on exact one of the given list of slaves.
+     * Verify that the job contains some builds on exact one of the given list of nodes.
+     * To test whether the the job has built on the master, the jenkins instance has to be
+     * passed in the parameter.
      */
     public void shouldHaveBuiltOnOneOfNNodes(List<Node> nodes) {
         int noOfNodes = 0;
