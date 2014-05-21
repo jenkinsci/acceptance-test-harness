@@ -18,11 +18,19 @@ public class InteractiveConsole {
      * @param caller
      *      Methods/fields of this object becomes accessible to the script as if they are built-in.
      *      Usually you want to pass in the instance of the test class.
+     * @param args
+     *      [name, value, name, value, ... ] pair array that defines additional variables accessible
+     *      from the script. Useful to expose local variables in scope
      */
-    public static void execute(Object caller) throws InterruptedException {
+    public static void execute(Object caller, Object... args) throws InterruptedException {
         Console cons = new Console();
         cons.getConfig().setScriptBaseClass(ClosureScript.class.getName());
         cons.setVariable("delegate",caller);
+
+        for (int i=0; i<args.length; i+=2) {
+            cons.setVariable(args[i].toString(),args[i+1]);
+        }
+
         cons.run();
 
         final Object lock = new Object();
