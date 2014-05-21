@@ -311,7 +311,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
      */
     @Test
     @Bug("JENKINS-18355")
-    @WithPlugins("ldap")
+    @WithPlugins("ldap@1.8")
     public void resolve_display_name_with_defaults() {
         // Given
         useLdapAsSecurityRealm(createDefaults(ldap.get()));
@@ -334,7 +334,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
      */
     @Test
     @Bug("JENKINS-18355")
-    @WithPlugins("ldap")
+    @WithPlugins("ldap@1.8")
     public void custom_display_name() {
         // Given
         useLdapAsSecurityRealm(createDefaults(ldap.get()).displayNameAttributeName("cn"));
@@ -354,7 +354,6 @@ public class LdapPluginTest extends AbstractJUnitTest {
      * Then "jenkins" will not be member of groups "ldap1" and "ldap2"
      */
     @Test
-    @WithPlugins("ldap")
     public void custom_group_membership_filter() {
         // Given
         useLdapAsSecurityRealm(createDefaults(ldap.get()).groupMembershipFilter("(member={0})"));
@@ -377,7 +376,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
      * since ldap plugin version 1.8
      */
     @Test
-    @WithPlugins("ldap")
+    @WithPlugins("ldap@1.8")
     public void custom_mail_filter() {
         // Given
         useLdapAsSecurityRealm(createDefaults(ldap.get()).mailAdressAttributeName("gn"));
