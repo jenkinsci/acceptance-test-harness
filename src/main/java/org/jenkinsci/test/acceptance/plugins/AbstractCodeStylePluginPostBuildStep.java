@@ -22,13 +22,17 @@ public abstract class AbstractCodeStylePluginPostBuildStep extends PostBuildStep
      */
     public final Control warningThresholdUnstable = control("unstableTotalAll");
     /**
-     * Checkbox to enable delta warnings.
+     * Checkbox to enable computation of new warnings compared with old build.
      */
     public final Control computeNewWarningsComparedWithReferenceBuild = control("canComputeNew");
     /**
      * Input for warning threshold when computing delta warnings.
      */
     public final Control newWarningsThresholdFailed = control("canComputeNew/failedNewAll");
+    /**
+     * Checkbox to enable delta warnings
+     */
+    public final Control useDeltaValues = control("canComputeNew/useDeltaValues");
 
     public AbstractCodeStylePluginPostBuildStep(Job parent, String path) {
         super(parent, path);

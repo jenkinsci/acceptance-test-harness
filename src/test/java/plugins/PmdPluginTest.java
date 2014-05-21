@@ -199,8 +199,8 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
      */
     @Test @Bug("19614")
     public void build_with_warning_threshold_set_should_be_unstable() {
-        final FreeStyleJob job = setupJob("/pmd_plugin/pmd-warnings.xml", PmdPublisher.class, "pmd-warnings.xml", "0", "0");
+        final FreeStyleJob job = setupJob("/pmd_plugin/pmd-warnings.xml", PmdPublisher.class, "pmd-warnings.xml", "0", "0", true);
         final Build build = buildJobAndWait(job);
-        assertTrue("Build should be marked as unstable", build.isUnstable());
+        assertThat(build.isUnstable(), is(true));
     }
 }
