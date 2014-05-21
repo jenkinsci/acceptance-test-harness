@@ -1,6 +1,5 @@
 package plugins;
 
-import com.google.common.io.LineReader;
 import com.google.inject.Inject;
 import org.apache.commons.io.FileUtils;
 import org.hamcrest.CoreMatchers;
@@ -15,15 +14,12 @@ import org.jenkinsci.test.acceptance.plugins.publish_over_ssh.PublishOverSSHGlob
 import org.jenkinsci.test.acceptance.plugins.publish_over_ssh.PublishOverSSHGlobalConfig.InstanceSite;
 import org.jenkinsci.test.acceptance.plugins.publish_over_ssh.PublishOverSSHPublisher;
 import org.jenkinsci.test.acceptance.plugins.publish_over_ssh.PublishOverSSHGlobalConfig;
-import org.jenkinsci.test.acceptance.plugins.publish_over_ssh.PublishOverSSHPublisher;
 import org.jenkinsci.test.acceptance.plugins.publish_over_ssh.PublishOverSSHPublisher.Publishers;
 import org.jenkinsci.test.acceptance.plugins.publish_over_ssh.PublishOverSSHPublisher.TransferSet;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 
 /**
@@ -104,9 +100,6 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
         AdvancedConfig ac = is.addAdvancedConfig(); {
             ac.port.set(sshd.port(22));
             ac.timeout.set("300000");
-
-            // for disabling exec per instance
-            //ac.disableAllExecInstance.check();
         }
     }
 
@@ -121,7 +114,7 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
         }
     }
 
-    private void configureJob(FreeStyleJob j, Resource cp_file){
+    private void configureJobNoExec(FreeStyleJob j, Resource cp_file){
         j.configure(); {
             j.copyResource(cp_file);
             PublishOverSSHPublisher popsp = j.addPublisher(PublishOverSSHPublisher.class);
@@ -131,54 +124,173 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
             //Publishers newSps = popsp.addPublishers();
             // set default set
             TransferSet ts = publishers.setTransferSet();
-            // add new set
-            //TransferSet newTs = publishers.addTransferSet();
+            // set source file
             ts.sourceFiles.set("lorem-ipsum-scp.txt");
-            //ts.remoteDirectory.set("testfolder");
-            //ts.removePrefix.set("/tmp/");
-            //ts.execCommand.set("echo 'i was here' >> /tmp/testecho");
         }
     }
 
-    /**
-     @native(docker)
-     Scenario: Configure a job with over ssh publishing
-     Given I have installed the "publish-over-ssh" plugin
-     And a docker fixture "sshd"
-     And a job
-     When I configure docker fixture as SSH site
-     And I configure the job to use a unsecure keyfile without passphrase
-     And I copy resource "scp_plugin/lorem-ipsum-scp.txt" into workspace
-     And I publish "lorem-ipsum-scp.txt" with SSH plugin
-     And I save the job
-     And I build the job
-     Then the build should succeed
-     And SCP plugin should have published "lorem-ipsum-scp.txt" on docker fixture
-     */
-    @Test
-    public void configure_job_with_ssh_key_path_and_no_password_publishing() throws IOException, InterruptedException {
-        SshdContainer sshd = docker.start(SshdContainer.class);
-        Resource cp_file = resource("/scp_plugin/lorem-ipsum-scp.txt");
-        File sshFile = sshd.getPrivateKey();
-
-        FreeStyleJob j = jenkins.jobs.create();
-        jenkins.configure();
-        this.commonConfigKeyFile(sshFile, false);
-        InstanceSite is = this.instanceConfig(sshd);
-        this.advancedConfigAllowExec(is,sshd);
-        // delete button
-        //is.delete.click();
-
-        // validate input
-        //is.validate.click();
-        jenkins.save();
-        this.configureJob(j,cp_file);
-        j.save();
-        j.startBuild().shouldSucceed();
-
-        sshd.cp("/tmp/lorem-ipsum-scp.txt", new File("/tmp"));
-        assertThat(FileUtils.readFileToString(new File("/tmp/lorem-ipsum-scp.txt")), CoreMatchers.is(cp_file.asText()));
+    private void configureJobWithExec(FreeStyleJob j, Resource cp_file){
+        j.configure(); {
+            j.copyResource(cp_file);
+            PublishOverSSHPublisher popsp = j.addPublisher(PublishOverSSHPublisher.class);
+            // set default set
+            Publishers publishers = popsp.setPublishers();
+            // set default set
+            TransferSet ts = publishers.setTransferSet();
+            // set source file
+            ts.sourceFiles.set("lorem-ipsum-scp.txt");
+            // exec a command
+            ts.execCommand.set("echo 'i was here' >> /tmp/testecho");
+        }
     }
+
+//    /**
+//     @native(docker)
+//     Scenario: Configure a job with over ssh publishing
+//     Given I have installed the "publish-over-ssh" plugin
+//     And a docker fixture "sshd"
+//     And a job
+//     When I configure docker fixture as SSH site
+//     And I configure the job to use a unsecure keyfile without passphrase
+//     And I copy resource "scp_plugin/lorem-ipsum-scp.txt" into workspace
+//     And I publish "lorem-ipsum-scp.txt" with SSH plugin
+//     And I save the job
+//     And I build the job
+//     Then the build should succeed
+//     And SSH plugin should have published "lorem-ipsum-scp.txt" on docker fixture
+//     */
+//    @Test
+//    public void ssh_key_path_and_no_password_publishing() throws IOException, InterruptedException {
+//        SshdContainer sshd = docker.start(SshdContainer.class);
+//        Resource cp_file = resource("/scp_plugin/lorem-ipsum-scp.txt");
+//        File sshFile = sshd.getPrivateKey();
+//
+//        FreeStyleJob j = jenkins.jobs.create();
+//        jenkins.configure();
+//        this.commonConfigKeyFile(sshFile, false);
+//        InstanceSite is = this.instanceConfig(sshd);
+//        this.advancedConfigAllowExec(is,sshd);
+//        // delete button
+//        //is.delete.click();
+//
+//        // validate input
+//        //is.validate.click();
+//        jenkins.save();
+//        this.configureJobNoExec(j, cp_file);
+//        j.save();
+//        j.startBuild().shouldSucceed();
+//
+//        sshd.cp("/tmp/lorem-ipsum-scp.txt", new File("/tmp"));
+//        assertThat(FileUtils.readFileToString(new File("/tmp/lorem-ipsum-scp.txt")), CoreMatchers.is(cp_file.asText()));
+//    }
+//
+//    /**
+//     @native(docker)
+//     Scenario: Configure a job with over ssh publishing
+//     Given I have installed the "publish-over-ssh" plugin
+//     And a docker fixture "sshd"
+//     And a job
+//     When I configure docker fixture as SSH site
+//     And I configure the job to use a unsecure keyfile with passphrase
+//     And I copy resource "scp_plugin/lorem-ipsum-scp.txt" into workspace
+//     And I publish "lorem-ipsum-scp.txt" with SSH plugin
+//     And I save the job
+//     And I build the job
+//     Then the build should succeed
+//     And SSH plugin should have published "lorem-ipsum-scp.txt" on docker fixture
+//     */
+//    @Test
+//    public void ssh_key_path_and_key_password_publishing() throws IOException, InterruptedException {
+//        SshdContainer sshd = docker.start(SshdContainer.class);
+//        Resource cp_file = resource("/scp_plugin/lorem-ipsum-scp.txt");
+//        File sshFile = sshd.getEncryptedPrivateKey();
+//
+//        FreeStyleJob j = jenkins.jobs.create();
+//
+//        jenkins.configure();
+//        this.commonConfigKeyFileAndPassword(sshFile, false);
+//        InstanceSite is = this.instanceConfig(sshd);
+//        this.advancedConfigAllowExec(is,sshd);
+//        jenkins.save();
+//        this.configureJobNoExec(j, cp_file);
+//        j.save();
+//        j.startBuild().shouldSucceed();
+//
+//        sshd.cp("/tmp/lorem-ipsum-scp.txt", new File("/tmp"));
+//        assertThat(FileUtils.readFileToString(new File("/tmp/lorem-ipsum-scp.txt")), CoreMatchers.is(cp_file.asText()));
+//    }
+//
+//    /**
+//     @native(docker)
+//     Scenario: Configure a job with over ssh publishing
+//     Given I have installed the "publish-over-ssh" plugin
+//     And a docker fixture "sshd"
+//     And a job
+//     When I configure docker fixture as SSH site
+//     And I configure the job to use a unsecure key in a text field without passphrase
+//     And I copy resource "scp_plugin/lorem-ipsum-scp.txt" into workspace
+//     And I publish "lorem-ipsum-scp.txt" with SSH plugin
+//     And I save the job
+//     And I build the job
+//     Then the build should succeed
+//     And SSH plugin should have published "lorem-ipsum-scp.txt" on docker fixture
+//     */
+//    @Test
+//    public void ssh_key_text_and_no_password_publishing() throws IOException, InterruptedException {
+//        SshdContainer sshd = docker.start(SshdContainer.class);
+//        Resource cp_file = resource("/scp_plugin/lorem-ipsum-scp.txt");
+//
+//        FreeStyleJob j = jenkins.jobs.create();
+//
+//        jenkins.configure();
+//        this.commonConfigPassword("test",false);
+//        InstanceSite is = this.instanceConfig(sshd);
+//        this.advancedConfigAllowExec(is,sshd);
+//        jenkins.save();
+//        this.configureJobNoExec(j, cp_file);
+//        j.save();
+//        j.startBuild().shouldSucceed();
+//
+//        sshd.cp("/tmp/lorem-ipsum-scp.txt", new File("/tmp"));
+//        assertThat(FileUtils.readFileToString(new File("/tmp/lorem-ipsum-scp.txt")), CoreMatchers.is(cp_file.asText()));
+//    }
+//
+//
+//    /**
+//     @native(docker)
+//     Scenario: Configure a job with over ssh publishing
+//     Given I have installed the "publish-over-ssh" plugin
+//     And a docker fixture "sshd"
+//     And a job
+//     When I configure docker fixture as SSH site
+//     And I configure the job to use a password
+//     And I copy resource "scp_plugin/lorem-ipsum-scp.txt" into workspace
+//     And I publish "lorem-ipsum-scp.txt" with SSH plugin
+//     And I save the job
+//     And I build the job
+//     Then the build should succeed
+//     And SSH plugin should have published "lorem-ipsum-scp.txt" on docker fixture
+//     */
+//    @Test
+//    public void ssh_password_publishing() throws IOException, InterruptedException {
+//        SshdContainer sshd = docker.start(SshdContainer.class);
+//        Resource cp_file = resource("/scp_plugin/lorem-ipsum-scp.txt");
+//        File sshFile = sshd.getPrivateKey();
+//
+//        FreeStyleJob j = jenkins.jobs.create();
+//
+//        jenkins.configure();
+//        this.commonConfigKeyText(sshFile,false);
+//        InstanceSite is = this.instanceConfig(sshd);
+//        this.advancedConfigAllowExec(is,sshd);
+//        jenkins.save();
+//        this.configureJobNoExec(j, cp_file);
+//        j.save();
+//        j.startBuild().shouldSucceed();
+//
+//        sshd.cp("/tmp/lorem-ipsum-scp.txt", new File("/tmp"));
+//        assertThat(FileUtils.readFileToString(new File("/tmp/lorem-ipsum-scp.txt")), CoreMatchers.is(cp_file.asText()));
+//    }
 
     /**
      @native(docker)
@@ -193,10 +305,11 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
      And I save the job
      And I build the job
      Then the build should succeed
-     And SCP plugin should have published "lorem-ipsum-scp.txt" on docker fixture
+     And SSH plugin should have published "lorem-ipsum-scp.txt" on docker fixture
+     And SSH plugin should have create with exec "testecho" on docker fixture
      */
     @Test
-    public void configure_job_with_ssh_key_path_and_key_password_publishing() throws IOException, InterruptedException {
+    public void ssh_key_path_and_key_password_and_exec_publishing() throws IOException, InterruptedException {
         SshdContainer sshd = docker.start(SshdContainer.class);
         Resource cp_file = resource("/scp_plugin/lorem-ipsum-scp.txt");
         File sshFile = sshd.getEncryptedPrivateKey();
@@ -208,88 +321,15 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
         InstanceSite is = this.instanceConfig(sshd);
         this.advancedConfigAllowExec(is,sshd);
         jenkins.save();
-        this.configureJob(j,cp_file);
+        this.configureJobWithExec(j, cp_file);
         j.save();
         j.startBuild().shouldSucceed();
 
         sshd.cp("/tmp/lorem-ipsum-scp.txt", new File("/tmp"));
+        sshd.cp("/tmp/testecho", new File("/tmp"));
         assertThat(FileUtils.readFileToString(new File("/tmp/lorem-ipsum-scp.txt")), CoreMatchers.is(cp_file.asText()));
+        assertThat(FileUtils.readFileToString(new File("/tmp/testecho")), CoreMatchers.is("i was here\n"));
+
     }
-
-    /**
-     @native(docker)
-     Scenario: Configure a job with over ssh publishing
-     Given I have installed the "publish-over-ssh" plugin
-     And a docker fixture "sshd"
-     And a job
-     When I configure docker fixture as SSH site
-     And I configure the job to use a unsecure key in a text field without passphrase
-     And I copy resource "scp_plugin/lorem-ipsum-scp.txt" into workspace
-     And I publish "lorem-ipsum-scp.txt" with SSH plugin
-     And I save the job
-     And I build the job
-     Then the build should succeed
-     And SCP plugin should have published "lorem-ipsum-scp.txt" on docker fixture
-     */
-    @Test
-    public void configure_job_with_ssh_key_text_and_no_password_publishing() throws IOException, InterruptedException {
-        SshdContainer sshd = docker.start(SshdContainer.class);
-        Resource cp_file = resource("/scp_plugin/lorem-ipsum-scp.txt");
-
-        FreeStyleJob j = jenkins.jobs.create();
-
-        jenkins.configure();
-        this.commonConfigPassword("test",false);
-        InstanceSite is = this.instanceConfig(sshd);
-        this.advancedConfigAllowExec(is,sshd);
-        jenkins.save();
-        this.configureJob(j,cp_file);
-        j.save();
-        j.startBuild().shouldSucceed();
-
-        sshd.cp("/tmp/lorem-ipsum-scp.txt", new File("/tmp"));
-        assertThat(FileUtils.readFileToString(new File("/tmp/lorem-ipsum-scp.txt")), CoreMatchers.is(cp_file.asText()));
-    }
-
-
-    /**
-     @native(docker)
-     Scenario: Configure a job with over ssh publishing
-     Given I have installed the "publish-over-ssh" plugin
-     And a docker fixture "sshd"
-     And a job
-     When I configure docker fixture as SSH site
-     And I configure the job to use a password
-     And I copy resource "scp_plugin/lorem-ipsum-scp.txt" into workspace
-     And I publish "lorem-ipsum-scp.txt" with SSH plugin
-     And I save the job
-     And I build the job
-     Then the build should succeed
-     And SCP plugin should have published "lorem-ipsum-scp.txt" on docker fixture
-     */
-    @Test
-    public void configure_job_with_ssh_password_publishing() throws IOException, InterruptedException {
-        SshdContainer sshd = docker.start(SshdContainer.class);
-        Resource cp_file = resource("/scp_plugin/lorem-ipsum-scp.txt");
-        File sshFile = sshd.getPrivateKey();
-
-        FreeStyleJob j = jenkins.jobs.create();
-
-        jenkins.configure();
-        this.commonConfigKeyText(sshFile,false);
-        InstanceSite is = this.instanceConfig(sshd);
-        this.advancedConfigAllowExec(is,sshd);
-        jenkins.save();
-        this.configureJob(j,cp_file);
-        j.save();
-        j.startBuild().shouldSucceed();
-
-        sshd.cp("/tmp/lorem-ipsum-scp.txt", new File("/tmp"));
-        assertThat(FileUtils.readFileToString(new File("/tmp/lorem-ipsum-scp.txt")), CoreMatchers.is(cp_file.asText()));
-    }
-
-    // FIXME Tests
-    // public void configure_job_with_ssh_key_file_and_no_password_publishing() throws IOException, InterruptedException {
-    // public void configure_job_with_ssh_key_text_and_key_password_publishing() throws IOException, InterruptedException {
 
 }
