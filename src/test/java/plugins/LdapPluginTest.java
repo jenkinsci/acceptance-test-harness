@@ -379,7 +379,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
     @WithPlugins("ldap@1.8")
     public void custom_mail_filter() {
         // Given
-        useLdapAsSecurityRealm(createDefaults(ldap.get()).mailAdressAttributeName("gn"));
+        useLdapAsSecurityRealm(createDefaults(ldap.get()).mailAdressAttributeName("givenName"));
         // When
         Login login = jenkins.login();
         login.doLogin("jenkins", "root");

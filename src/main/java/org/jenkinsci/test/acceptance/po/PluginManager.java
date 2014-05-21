@@ -1,5 +1,15 @@
 package org.jenkinsci.test.acceptance.po;
 
+import com.google.common.base.Splitter;
+import com.google.inject.Inject;
+import hudson.util.VersionNumber;
+import org.eclipse.aether.resolution.ArtifactResolutionException;
+import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.po.UpdateCenter.InstallationFailedException;
+import org.jenkinsci.test.acceptance.update_center.PluginMetadata;
+import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata;
+import org.openqa.selenium.TimeoutException;
+
 import javax.annotation.Nonnull;
 import javax.inject.Named;
 import javax.inject.Provider;
@@ -9,16 +19,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
-
-import org.eclipse.aether.resolution.ArtifactResolutionException;
-import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.po.UpdateCenter.InstallationFailedException;
-import org.jenkinsci.test.acceptance.update_center.PluginMetadata;
-import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata;
-
-import com.google.common.base.Splitter;
-import com.google.inject.Inject;
-import org.openqa.selenium.TimeoutException;
 
 /**
  * Page object for plugin manager.
@@ -72,12 +72,25 @@ public class PluginManager extends ContainerPageObject {
         l.waitForLogged(jdk);
     }
 
+    /**
+     * @param shortNames plugin ids with optional version (e.g. "ldap" or "ldap@1.8")
+     * @return true, if plugin (in version greater or equal than specified) is installed
+     */
     public boolean isInstalled(String... shortNames) {
         for (String n : shortNames) {
-            String name = new PluginCoordinates(n).getName();
+            PluginCoordinates p = new PluginCoordinates(n);
+            String name = p.getName();
+            String version = p.getVersion();
             Plugin plugin;
             try {
-                plugin = jenkins.getPlugin(n);
+                plugin = jenkins.getPlugin(name);
+                if (version != null) {
+                    // check if installed version >= specified version of @WithPlugins
+                    if (plugin.getVersion().compareTo(new VersionNumber(version)) < 0) {
+                        // installed version < specified version
+                        return false;
+                    }
+                }
             } catch (IllegalArgumentException ex) {
                 return false; // Not installed at all
             }
@@ -104,7 +117,7 @@ public class PluginManager extends ContainerPageObject {
                 final String name = newPlugin.name;
                 final String claimedVersion = candidates.get(name);
                 try {
-                    newPlugin.uploadTo(jenkins, injector, claimedVersion);
+                    newPlugin.uploadTo(jenkins, injector, null);
                 } catch (IOException | ArtifactResolutionException e) {
                     throw new AssertionError("Failed to upload plugin: " + newPlugin, e);
                 }
@@ -119,7 +132,7 @@ public class PluginManager extends ContainerPageObject {
                     public Boolean call() throws Exception {
                         return isInstalled(shortNames);
                     }
-                },5);
+                }, 5);
             } catch (TimeoutException e) {
                 jenkins.restart();
             }
@@ -170,6 +183,7 @@ public class PluginManager extends ContainerPageObject {
     public static class PluginCoordinates {
         private final @Nonnull String name;
         private final String version;
+
         public PluginCoordinates(String coordinates) {
             Iterator<String> spliter = Splitter.on("@").split(coordinates).iterator();
             name = spliter.next();
