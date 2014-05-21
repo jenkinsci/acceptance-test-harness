@@ -405,7 +405,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
      * Note that in this case the main build action is still completed with status SUCCESS.
      */
 
-    @Test @WithPlugins("text-finder") @Ignore("")
+    @Test @WithPlugins("text-finder") @Bug("23129") @Ignore("Until JENKINS-23129 is fixed")
     public void trigger_if_succeeds_with_failed_post_build_step() throws Exception {
         FreeStyleJob j = jenkins.jobs.create();
 
@@ -459,7 +459,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
      * Note that in this case the main build action is still completed with status SUCCESS.
      */
 
-    @Test @Ignore("")
+    @Test @Bug("23129") @Ignore("Until JENKINS-23129 is fixed")
     public void trigger_if_succeeds_with_unstable_post_build_step() throws Exception {
         FreeStyleJob j = jenkins.jobs.create();
 
