@@ -266,30 +266,25 @@ public class Job extends ContainerPageObject {
     /**
      * Verify that the job contains some builds on the given slave.
      */
-    public void shouldHaveBuiltOn(Jenkins j, String nodeName){
-        assertThat(hasBuiltOn(j,nodeName), is(true));
+    public void shouldHaveBuiltOn(Node n){
+        assertThat(hasBuiltOn(n), is(true));
     }
 
     /**
      * Check if the job contains some builds on the given slave.
      */
-    public boolean hasBuiltOn(Jenkins j, String nodeName) {
-        Node n;
-        if (nodeName.equals("master"))
-            n=j;
-        else
-            n=j.slaves.get(DumbSlave.class, nodeName);
+    public boolean hasBuiltOn(Node n) {
         return n.getBuildHistory().includes(this.name);
     }
 
     /**
      * Verify that the job contains some builds on exact one of the given list of slaves.
      */
-    public void shouldHaveBuiltOnOneOfNNodes(Jenkins j, List<String> nodeNames) {
+    public void shouldHaveBuiltOnOneOfNNodes(List<Node> nodes) {
         int noOfNodes = 0;
 
-        for (String n : nodeNames) {
-            if (hasBuiltOn(j, n))
+        for (Node n : nodes) {
+            if (hasBuiltOn(n))
                 noOfNodes++;
         }
 
