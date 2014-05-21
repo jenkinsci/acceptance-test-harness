@@ -57,13 +57,17 @@ public class Build extends ContainerPageObject {
     }
 
     public Build waitUntilStarted() {
+        return waitUntilStarted(0);
+    }
+
+    public Build waitUntilStarted(int timeout) {
         job.getJenkins().visit("");
         waitForCond(new Callable<Boolean>() {
             @Override
             public Boolean call() {
                 return hasStarted();
             }
-        });
+        },timeout);
         return this;
     }
 

@@ -107,8 +107,12 @@ public class CapybaraPortingLayer extends Assert {
      * Repeated evaluate the given predicate until it returns true.
      *
      * If it times out, an exception will be thrown.
+     *
+     * @param timeoutSec
+     *      0 if left to the default value
      */
     public <T> T waitForCond(Callable<T> block, int timeoutSec) {
+        if (timeoutSec==0)  timeoutSec = 30;
         try {
             long endTime = System.currentTimeMillis() + time.seconds(timeoutSec);
             while (System.currentTimeMillis()<endTime) {
@@ -131,7 +135,7 @@ public class CapybaraPortingLayer extends Assert {
     }
 
     public <T> T waitForCond(Callable<T> block) {
-        return waitForCond(block,30);
+        return waitForCond(block,0);
     }
 
 
