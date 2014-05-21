@@ -117,11 +117,11 @@ public class CapybaraPortingLayer extends Assert {
                     return v;
                 sleep(1000);
             }
-            throw new TimeoutException("Failed to wait for condition "+block);
+            throw new TimeoutException("Failed to wait for condition: "+block);
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {
-            throw new Error("Failed to wait for condition "+block,e);
+            throw new Error("Failed to wait for condition: "+block,e);
         }
     }
 

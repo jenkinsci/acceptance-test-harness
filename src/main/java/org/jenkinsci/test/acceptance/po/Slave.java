@@ -43,6 +43,10 @@ public abstract class Slave extends Node {
             @Override public Boolean call() throws Exception {
                 return isOnline();
             }
+
+            @Override public String toString() {
+                return "Slave is online";
+            }
         });
         return this;
     }
