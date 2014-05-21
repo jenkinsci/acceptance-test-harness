@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.po;
 
 import javax.inject.Inject;
+
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.util.List;
@@ -17,6 +18,7 @@ import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
+import com.google.common.base.Joiner;
 import com.google.inject.Injector;
 
 import static java.util.Arrays.*;
@@ -306,7 +308,9 @@ public class CapybaraPortingLayer extends Assert {
     protected <T> T findCaption(Class<?> type, Finder<T> call) {
         String[] captions = type.getAnnotation(Describable.class).value();
 
-        RuntimeException cause = new NoSuchElementException("None of the captions exists");
+        RuntimeException cause = new NoSuchElementException(
+                "None of the captions exists: " + Joiner.on(", ").join(captions)
+        );
         for (String caption: captions) {
             try {
                 T out = call.find(caption);
