@@ -14,16 +14,17 @@ import org.junit.Test;
 
 /**
  * Feature: Subversion support
- * For Plugin Core_Version 1.54
+ * For plugin core version 1.54.
+ * Obsolete when core version gets raised to later version than 1.54.
  * As a user
  * I want to be able to check out source code from Subversion
  *
  * @author Matthias Karl
  */
-@WithPlugins("subversion@1.54")
+@WithPlugins("subversion")
 @Native("docker")
 @Deprecated
-public class SubversionPluginTest_Version154 extends AbstractJUnitTest {
+public class Subversion_Version154_PluginTest extends AbstractJUnitTest {
     @Inject
     DockerContainerHolder<SvnContainer> svn;
 
@@ -133,7 +134,7 @@ public class SubversionPluginTest_Version154 extends AbstractJUnitTest {
     }
 
     /**
-     * Scenario:basic Checkout with svn protocol
+     * Scenario:basic Checkout with svn protocol user/pwd
      * Given I have installed the "subversion" plugin
      * And a job
      * When I check out code from protected Subversion repository "SvnUrl"

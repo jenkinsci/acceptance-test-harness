@@ -7,9 +7,11 @@ import java.net.URL;
 
 /**
  * Class for the authentication method username/password in the SVN credential page.
+ * Only for plugin version 1.54 and older.
  *
  * @author Matthias Karl
  */
+@Deprecated
 public class SubversionCredentialUserPwd extends SubversionCredential {
     private static final String RADIO_BUTTON_NAME = "password";
     private static final String INPUT_USERNAME = "username1";
