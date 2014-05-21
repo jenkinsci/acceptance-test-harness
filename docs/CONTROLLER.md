@@ -23,7 +23,8 @@ The behaviour of this controller can be customized through the following environ
 * `INTERACTIVE` keep browser session opened after failed scenario for interactive investigation.
 * `PLUGINS_DIR` a directory of plugins to be loaded on Jenkins startup. If this is not specified, the first existing
     directory from the following list will be used: a `plugins` directory as a sibling to the resolved `jenkins.war`,
-    `WORKSPACE/plugins` and `$(pwd)/plugins`.
+    `WORKSPACE/plugins` and `$(pwd)/plugins`. If the environment variable `NEVER_REPLACE_EXISTING_PLUGINS` is set
+    then plugins will never be overwritten with newer versions during test.
 
 This is the default controller.
 

@@ -64,6 +64,8 @@ public class UpdateCenterMetadata {
 
     private void transitiveDependenciesOf(String n, List<PluginMetadata> r) {
         PluginMetadata p = plugins.get(n);
+        if (p==null)    return;
+
         for (Dependency d : p.dependencies)
             if (!d.optional)
                 transitiveDependenciesOf(d.name, r);

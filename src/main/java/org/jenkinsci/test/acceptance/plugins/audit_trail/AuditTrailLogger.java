@@ -26,6 +26,7 @@ package org.jenkinsci.test.acceptance.plugins.audit_trail;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,7 +34,6 @@ import org.apache.commons.io.IOUtils;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.JenkinsLogger;
 import org.jenkinsci.test.acceptance.po.PageArea;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 
 abstract public class AuditTrailLogger extends JenkinsLogger {
@@ -45,15 +45,20 @@ abstract public class AuditTrailLogger extends JenkinsLogger {
     }
 
     public static AuditTrailLogger create(Jenkins jenkins) {
-        SystemLogger logger = new SystemLogger(jenkins);
-        logger.open();
+        if (jenkins.getPlugin("audit-trail").isNewerThan("2.0")) {
+            return new ExposedFile(jenkins);
+        }
 
-        try {
-            logger.waitFor(by.xpath("//h1[text()='%s']", logger.name));
-            return logger;
-        } catch (TimeoutException ex) {} // TODO: Using plugin version would be faster
+        final SystemLogger logger = new SystemLogger(jenkins);
 
-        return new ExposedFile(jenkins);
+        logger.waitForCond(new Callable<WebElement>() {
+            @Override
+            public WebElement call() throws Exception {
+                logger.open();
+                return logger.getElement(by.xpath("//h1[text()='%s']", logger.name));
+            }
+        });
+        return logger;
     }
 
     public abstract List<String> getEvents();

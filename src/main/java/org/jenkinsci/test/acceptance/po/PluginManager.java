@@ -1,25 +1,24 @@
 package org.jenkinsci.test.acceptance.po;
 
-import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
-import com.google.common.collect.Iterables;
-import com.google.inject.Inject;
+import javax.annotation.Nonnull;
+import javax.inject.Named;
+import javax.inject.Provider;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.regex.Pattern;
 
 import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.UpdateCenter.InstallationFailedException;
 import org.jenkinsci.test.acceptance.update_center.PluginMetadata;
 import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata;
-import org.openqa.selenium.WebElement;
 
-import javax.inject.Named;
-import javax.inject.Provider;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.regex.Pattern;
+import com.google.common.base.Splitter;
+import com.google.inject.Inject;
+import org.openqa.selenium.TimeoutException;
 
 /**
  * Page object for plugin manager.
@@ -27,7 +26,6 @@ import java.util.regex.Pattern;
  * @author Kohsuke Kawaguchi
  */
 public class PluginManager extends ContainerPageObject {
-    private static final String VERSION_SEPARATOR = "@";
     /**
      * Did we fetch the update center metadata?
      */
@@ -75,47 +73,16 @@ public class PluginManager extends ContainerPageObject {
     }
 
     public boolean isInstalled(String... shortNames) {
-        visit("installed");
         for (String n : shortNames) {
-            // prefer the explicitly specified version in the name
-            String version = getVersionFromWpValue(n);
-            if (version==null) {
-                // otherwise fall back to the latest version from update center
-                // TODO: allow the test runner to specify the version from config
-                PluginMetadata metadata = ucmd.get().plugins.get(n);
-                if (metadata!=null)
-                    version = metadata.version;
+            String name = new PluginCoordinates(n).getName();
+            Plugin plugin;
+            try {
+                plugin = jenkins.getPlugin(n);
+            } catch (IllegalArgumentException ex) {
+                return false; // Not installed at all
             }
-
-            // allow the test author/runner to say "I want some version of this plugin but it doesn't have to be the latest"
-            // this is useful to test a bundled plugin as it is bundled.
-            // I wonder if this should be the default behaviour, as opposed to implicit "latest"
-            if ("any".equals(version))
-                version = null;
-
-            WebElement tr = getElement(by.xpath("//tr[td/input[@url='plugin/%s']]", getShortNameFromWpValue(n)));
-            if (tr==null)
-                return false;
-
-            // if the version is explicitly specified, check if we've got that version
-            if (version!=null && tr.findElements(by.xpath("./td/a[text()='%s']",version)).isEmpty())
-                return false;
         }
         return true;
-    }
-
-    private void waitForIsInstalled(final String... shortNames) {
-        waitForCond(new Callable<Boolean>() {
-            @Override
-            public Boolean call() throws Exception {
-                return isInstalled(shortNames);
-            }
-
-            @Override
-            public String toString() {
-                return "Plugins installed: " + Joiner.on(", ").join(shortNames);
-            }
-        }, 180);
     }
 
     /**
@@ -129,31 +96,39 @@ public class PluginManager extends ContainerPageObject {
      * is not really deprecated.
      */
     @Deprecated
-    public void installPlugin(String... shortNames) {
-        final Map<String, String> mapShortNamesVersion = getMapShortNamesVersion(shortNames);
+    public void installPlugins(final String... shortNames) {
+        final Map<String, String> candidates = getMapShortNamesVersion(shortNames);
 
-        if (isInstalled(shortNames))
-            return;
         if (uploadPlugins) {
-            for (PluginMetadata p : ucmd.get().transitiveDependenciesOf(mapShortNamesVersion.keySet())) {
+            for (PluginMetadata newPlugin : ucmd.get().transitiveDependenciesOf(candidates.keySet())) {
+                final String name = newPlugin.name;
+                final String claimedVersion = candidates.get(name);
                 try {
-                    final String claimedVersion = mapShortNamesVersion.get(p.name) != null ? mapShortNamesVersion.get(p.name) : p.version;
-                    if (!isInstalled(p.name + VERSION_SEPARATOR + claimedVersion)) {
-                        p.uploadTo(jenkins, injector, claimedVersion);
-                    }
+                    newPlugin.uploadTo(jenkins, injector, claimedVersion);
                 } catch (IOException | ArtifactResolutionException e) {
-                    throw new AssertionError("Failed to upload plugin: " + p, e);
+                    throw new AssertionError("Failed to upload plugin: " + newPlugin, e);
                 }
             }
-            //to enable updated plugins/corePlugins
-            jenkins.restart();
-            waitForIsInstalled(shortNames);
+
+            // plugin deployment happens asynchronously, so give it a few seconds
+            // for it to finish deploying
+            // TODO: Use better detection if this is actually necessary
+            try {
+                waitForCond(new Callable<Boolean>() {
+                    @Override
+                    public Boolean call() throws Exception {
+                        return isInstalled(shortNames);
+                    }
+                },5);
+            } catch (TimeoutException e) {
+                jenkins.restart();
+            }
         } else {
             if (!updated)
                 checkForUpdates();
 
             OUTER:
-            for (final String n : mapShortNamesVersion.keySet()) {
+            for (final String n : candidates.keySet()) {
                 for (int attempt = 0; attempt < 2; attempt++) {// # of installations attempted, considering retries
                     visit("available");
                     check(find(by.xpath("//input[starts-with(@name,'plugin.%s.')]", n)));
@@ -177,34 +152,6 @@ public class PluginManager extends ContainerPageObject {
     }
 
     /**
-     * Parses the version from a wpValue.
-     * Versions can be added to the shortName via "@"
-     * If no version is added, method returns null
-     *
-     * @param wpValue Value of the WithPlugin annotation
-     * @return version or null
-     */
-    private String getVersionFromWpValue(String wpValue) {
-        final Iterable<String> split = Splitter.on(VERSION_SEPARATOR).split(wpValue);
-        if (Iterables.size(split) == 1) {
-            return null;
-        } else {
-            return Iterables.getLast(split);
-        }
-    }
-
-    /**
-     * Parses the shortName from a wpValue.
-     *
-     * @param wpValue Value of the WithPlugin annotation
-     * @return shortName
-     */
-    private String getShortNameFromWpValue(String wpValue) {
-        final Iterable<String> split = Splitter.on(VERSION_SEPARATOR).split(wpValue);
-        return split.iterator().next();
-    }
-
-    /**
      * Generates a map with shortNames and version.
      * Version is null if not declared.
      *
@@ -214,9 +161,30 @@ public class PluginManager extends ContainerPageObject {
     private Map<String, String> getMapShortNamesVersion(String... wpValues) {
         Map<String, String> shortNamesVersion = new HashMap<>();
         for (String wpValue : wpValues) {
-            shortNamesVersion.put(getShortNameFromWpValue(wpValue), getVersionFromWpValue(wpValue));
+            PluginCoordinates coord = new PluginCoordinates(wpValue);
+            shortNamesVersion.put(coord.getName(), coord.getVersion());
         }
         return shortNamesVersion;
     }
 
+    public static class PluginCoordinates {
+        private final @Nonnull String name;
+        private final String version;
+        public PluginCoordinates(String coordinates) {
+            Iterator<String> spliter = Splitter.on("@").split(coordinates).iterator();
+            name = spliter.next();
+            version = spliter.hasNext()
+                    ? spliter.next()
+                    : null
+            ;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getVersion() {
+            return version;
+        }
+    }
 }

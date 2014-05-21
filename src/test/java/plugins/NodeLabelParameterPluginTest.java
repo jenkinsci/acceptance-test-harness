@@ -1,7 +1,10 @@
 package plugins;
 
+import java.util.List;
+
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Bug;
+import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.nodelabelparameter.LabelParameter;
 import org.jenkinsci.test.acceptance.plugins.nodelabelparameter.NodeParameter;
@@ -11,11 +14,11 @@ import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.openqa.selenium.WebElement;
 
 import com.google.inject.Inject;
 
-import java.util.List;
 import static java.util.Collections.*;
 import static org.hamcrest.CoreMatchers.*;
 
@@ -46,7 +49,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
            | slavename | slave42 |
        Then the build should run on "slave42"
      */
-    @Test
+    @Test @Category(SmokeTest.class)
     public void build_on_a_particular_slave() throws Exception {
         FreeStyleJob j = jenkins.jobs.create();
 
@@ -343,5 +346,61 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
 
         assertThat(pendingBuildText.contains(refText),is(true));
         assertThat(!b.hasStarted(),is(true));
+    }
+    
+    /**
+     * This test is intended to check that two created slaves are added to the
+     * node restriction box. Additionally, when selecting a slave and master as
+     * nodes in the restriction panel, only those should be available for the
+     * build.
+     */
+    @Test
+    public void run_on_online_slave_and_master_with_node_restriction() throws Exception {
+        FreeStyleJob j = jenkins.jobs.create();
+
+        Slave s1 = slave.install(jenkins).get();
+        Slave s2 = slave.install(jenkins).get();
+
+        j.configure();
+        NodeParameter p = j.addParameter(NodeParameter.class);
+        p.setName("slavename");
+
+        //check that the slaves are available in the "Possible Nodes" selection box
+        //default items are Master and ALL
+        List<WebElement> possibleNodes = p.getPossibleNodesOptions();
+        assertThat("Amount of possible nodes does not match.", possibleNodes.size(), is(4) );
+
+        //multi node selection
+        p.allowMultiple.check();
+        //node restriction master and slave1
+        possibleNodes.get(1).click();
+        possibleNodes.get(2).click();
+
+        //enable concurrent builds
+        j.concurrentBuild.check();
+
+        j.save();
+
+        //check that slaves are online
+        assertThat(s1.isOnline(), is(true) );
+        assertThat(s2.isOnline(), is(true) );
+
+        //checks that build selection box only contains the possible nodes
+        visit(j.getBuildUrl());
+        WebElement selectionBox = find(by.xpath("//select[@name='labels']"));
+        List<WebElement> selectionNodes = selectionBox.findElements(by.tagName("option"));
+
+        assertThat("Amount of selectable build nodes does not match.", selectionNodes.size(), is(2) );
+        assertThat("Selectable build node does not match.",  selectionNodes.get(0).getText(), equalTo( "master" ) );
+        assertThat("Selectable build node does not match.",  selectionNodes.get(1).getText(), equalTo( s1.getName() ) );
+
+        Build b = j.startBuild(singletonMap("slavename", s1.getName()+",master"));
+
+        j.getLastBuild().waitUntilFinished();
+
+        j.shouldHaveBuiltOn(jenkins, "master");
+        j.shouldHaveBuiltOn(jenkins,s1.getName());
+
+        assertThat(j.getNextBuildNumber(), is(3));
     }
 }

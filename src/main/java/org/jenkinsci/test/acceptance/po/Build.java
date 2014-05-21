@@ -57,6 +57,7 @@ public class Build extends ContainerPageObject {
     }
 
     public Build waitUntilStarted() {
+        job.getJenkins().visit("");
         waitForCond(new Callable<Boolean>() {
             @Override
             public Boolean call() {
@@ -141,6 +142,13 @@ public class Build extends ContainerPageObject {
 
     public boolean isSuccess() {
         return getResult().equals("SUCCESS");
+    }
+
+    /**
+     * Returns if the current build is unstable.
+     */
+    public boolean isUnstable() {
+        return getResult().equals("UNSTABLE");
     }
 
     public String getResult() {
