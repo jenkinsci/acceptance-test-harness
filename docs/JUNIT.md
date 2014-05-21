@@ -45,5 +45,15 @@ You can run the smoke tests with `mvn -DrunSmokeTests`. If you want to add a tes
 annotate the test method with the category `@Category(SmokeTest.class)`. Please make sure that the overall number
 of smoke tests is small, e.g. not more than 10 tests.
 
+## Testing recent features
+
+Acceptance harness is designed to work against any version of Jenkins and its plugins.
+Testing for recently added feature causes false negatives when older version is used
+to run tests. To avoid that there is a way around this: use `@Since("X.Y")` to
+declare a version of core or `@WithPlugins("plugin@X.Y")` for plugin version.
+
+In code, one can use `Jenkins#getVersion()` or `Plugin.getVersion()` to implement
+version agnostic page objects.
+
 ## Marking tests for immutablility
 TODO
