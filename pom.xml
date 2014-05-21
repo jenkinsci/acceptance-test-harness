@@ -478,6 +478,6 @@
         </plugins>
       </build>
     </profile>
-    <!-- TODO could be laboriously repeated for $TYPE, etc. (seems Maven provides no generic way to do this) -->
+    <!-- TODO could be laboriously repeated for $TYPE, $DISPLAY, etc. (seems Maven provides no generic way to do this) -->
   </profiles>
 </project>
