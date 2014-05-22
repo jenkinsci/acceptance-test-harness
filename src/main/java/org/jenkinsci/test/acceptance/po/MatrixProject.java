@@ -37,19 +37,8 @@ public class MatrixProject extends Job {
     public <T extends Axis> T addAxis(Class<T> type) {
         ensureConfigPage();
 
-        findCaption(type, new Resolver() {
-            @Override protected void resolve(String caption) {
-                selectDropdownMenu(caption, addAxis.resolve());
-            }
-        });
-
-        String path = waitForCond(new Callable<String>() {
-            @Override
-            public String call() throws Exception {
-                return last(by.xpath("//div[@name='axis']")).getAttribute("path");
-            }
-        });
-
+        addAxis.clickMenuButton(type);
+        String path = last(by.xpath("//div[@name='axis']")).getAttribute("path");
         return newInstance(type,this,path);
     }
 

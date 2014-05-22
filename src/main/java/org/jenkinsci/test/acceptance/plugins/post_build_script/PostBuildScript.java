@@ -40,16 +40,8 @@ public class PostBuildScript extends PostBuildStep {
     }
 
     public <T extends Step> T addStep(Class<T> type) {
-
-        final WebElement dropDown = control("hetero-list-add[buildStep]").resolve();
-        findCaption(type, new Resolver() {
-            @Override protected void resolve(String caption) {
-                selectDropdownMenu(caption, dropDown);
-            }
-        });
-
+        control("hetero-list-add[buildStep]").clickMenuButton(type);
         String path = last(by.xpath("//div[@name='buildStep']")).getAttribute("path");
-
         return newInstance(type, parent, path);
     }
 

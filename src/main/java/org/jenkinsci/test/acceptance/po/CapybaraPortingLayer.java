@@ -263,7 +263,7 @@ public class CapybaraPortingLayer extends Assert {
      * Given a menu button that shows a list of build steps, select the right item from the menu
      * to insert the said build step.
      */
-    public void selectDropdownMenu(String displayName, WebElement menuButton) {
+    public WebElement selectDropdownMenu(String displayName, WebElement menuButton) {
         menuButton.click();
 
         // With enough implementations registered the one we are looking for might
@@ -280,9 +280,11 @@ public class CapybaraPortingLayer extends Assert {
         );
 
         WebElement context = menuButton.findElement(by.xpath("ancestor::*[contains(@class,'yui-menu-button')]/.."));
-        context.findElement(by.link(displayName)).click();
+        WebElement e = context.findElement(by.link(displayName));
+        e.click();
 
         sleep(1000);
+        return e;
     }
 
     /**

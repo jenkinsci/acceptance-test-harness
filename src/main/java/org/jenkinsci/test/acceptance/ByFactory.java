@@ -132,4 +132,8 @@ public class ByFactory {
     public By parent() {
         return xpath("..");
     }
+
+    public By ancestor(String tagName) {
+        return xpath("ancestor::%s[1]",tagName);
+    }
 }

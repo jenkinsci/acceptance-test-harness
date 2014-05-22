@@ -41,15 +41,7 @@ public class MultipleScms extends Scm {
     }
 
     public <T extends Scm> T addScm(Class<T> type) {
-        addButton.click();
-
-        findCaption(type, new Finder<WebElement>() {
-            @Override protected WebElement find(String caption) {
-                return outer.find(by.link(caption));
-            }
-        }).click();
-
-        sleep(100);
+        addButton.clickMenuButton(type);
         String path = last(by.button("Delete SCM")).getAttribute("path");
 
         return newInstance(type, job, path.substring(0, path.length() - 18));

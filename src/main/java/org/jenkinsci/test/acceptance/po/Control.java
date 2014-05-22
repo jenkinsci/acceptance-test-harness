@@ -105,6 +105,20 @@ public class Control extends CapybaraPortingLayer {
     }
 
     /**
+     * Clicks a menu button, and selects the matching item from the drop down
+     *
+     * @param type
+     *      Class with {@link Describable} annotation.
+     */
+    public void clickMenuButton(Class type) {
+        findCaption(type, new Finder<WebElement>() {
+            @Override protected WebElement find(String caption) {
+                return selectDropdownMenu(caption,resolve());
+            }
+        }).click();
+    }
+
+    /**
      * Select an option.
      */
     public void select(String option) {
