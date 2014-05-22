@@ -169,24 +169,18 @@ public abstract class AbstractCodeStylePluginAction extends ContainerPageObject 
     }
 
     private SortedMap<String, Integer> getContentsOfVisibleTable(boolean removeHeader, boolean removeFooter) {
-        final Collection<WebElement> tables = all(by.xpath("//div[@id='statistics']/div/div/table"));
-        for(WebElement table : tables) {
-            if(table.isDisplayed()) {
-                final List<WebElement> immediateChildRows = table.findElements(by.xpath("./tbody/tr"));
+        WebElement table = find(by.xpath("//div[@id='statistics']/div/div/table"));
+        final List<WebElement> immediateChildRows = table.findElements(by.xpath("./tbody/tr"));
 
-                if(removeHeader) {
-                    immediateChildRows.remove(0);
-                }
-
-                if(removeFooter) {
-                    immediateChildRows.remove(immediateChildRows.size() - 1);
-                }
-
-                return mapTableCellsKeyValue(immediateChildRows);
-            }
+        if(removeHeader) {
+            immediateChildRows.remove(0);
         }
 
-        throw new IllegalStateException("No visible table found");
+        if(removeFooter) {
+            immediateChildRows.remove(immediateChildRows.size() - 1);
+        }
+
+        return mapTableCellsKeyValue(immediateChildRows);
     }
 
     private SortedMap<String, Integer> mapTableCellsKeyValue(final Collection<WebElement> rows) {

@@ -215,6 +215,28 @@ public class CapybaraPortingLayer extends Assert {
             e.click();
     }
 
+    /**
+     * Finds all the elements that match the selector.
+     *
+     * <p>
+     * Note that this method inherits the same restriction of the {@link WebDriver#findElements(By)},
+     * in that its execution is not synchronized with the JavaScript execution of the browser.
+     *
+     * <p>
+     * For example, if you click something that's expected to populate additional DOM elements,
+     * and then call {@code all()} to find them, then all() can execute before those additional DOM elements
+     * are populated, thereby failing to find the elements you are looking for.
+     *
+     * <p>
+     * In contrast, {@link #find(By)} do not have this problem, because it waits until the element
+     * that matches the criteria appears.
+     *
+     * <p>
+     * So if you are using this method, think carefully. Perhaps you can use {@link #find(By)} to
+     * achieve what you are looking for (by making the query more specific), or perhaps you can combine
+     * this with {@link #waitForCond(Callable)} so that if you don't find the elements you are looking for
+     * in the list, you'll retry.
+     */
     public List<WebElement> all(By selector) {
         return driver.findElements(selector);
     }
