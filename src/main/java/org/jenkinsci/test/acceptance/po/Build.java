@@ -235,7 +235,7 @@ public class Build extends ContainerPageObject {
         // pending message comes from the queue, and queue's maintenance is asynchronous to UI threads.
         // so if the original response doesn't contain it, we have to wait for the refersh of the build history.
         // so give it a bigger wait.
-        return find(by.xpath("//img[@alt='pending']/../.."),10).getText();
+        return find(by.xpath("//img[@alt='pending']/../..")).getText();
     }
 
     private Matcher<Build> resultIs(final String expected) {
