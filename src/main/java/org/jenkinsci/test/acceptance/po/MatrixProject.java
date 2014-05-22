@@ -6,7 +6,6 @@ import com.google.inject.Injector;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -37,7 +36,7 @@ public class MatrixProject extends Job {
     public <T extends Axis> T addAxis(Class<T> type) {
         ensureConfigPage();
 
-        addAxis.clickMenuButton(type);
+        addAxis.selectDropdownMenu(type);
         String path = last(by.xpath("//div[@name='axis']")).getAttribute("path");
         return newInstance(type,this,path);
     }

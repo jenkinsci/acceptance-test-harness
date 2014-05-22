@@ -83,7 +83,7 @@ public class Job extends ContainerPageObject {
     private <T extends Step> T addStep(Class<T> type, String section) {
         ensureConfigPage();
 
-        control(by.path("/hetero-list-add[%s]", section)).clickMenuButton(type);
+        control(by.path("/hetero-list-add[%s]", section)).selectDropdownMenu(type);
         String path = last(by.xpath("//div[@name='%s']", section)).getAttribute("path");
 
         return newInstance(type, this, path);
@@ -211,7 +211,7 @@ public class Job extends ContainerPageObject {
 
         check(find(by.xpath("//input[@name='parameterized']")));
 
-        control(by.xpath("//button[text()='Add Parameter']")).clickMenuButton(type);
+        control(by.xpath("//button[text()='Add Parameter']")).selectDropdownMenu(type);
 
 //        find(xpath("//button[text()='Add Parameter']")).click();
 //        find(xpath("//a[text()='%s']",displayName)).click();

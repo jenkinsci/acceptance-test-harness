@@ -110,13 +110,45 @@ public class Control extends CapybaraPortingLayer {
      * @param type
      *      Class with {@link Describable} annotation.
      */
-    public void clickMenuButton(Class type) {
-        findCaption(type, new Finder<WebElement>() {
-            @Override protected WebElement find(String caption) {
-                return selectDropdownMenu(caption,resolve());
-            }
-        }).click();
+    public void selectDropdownMenu(Class type) {
+        click();
+        findCaption(type,findDropDownMenuItem).click();
+        sleep(1000);
     }
+
+    public void selectDropdownMenu(String displayName) {
+        click();
+        findDropDownMenuItem.find(displayName).click();
+        sleep(1000);
+    }
+
+    /**
+     * Given a menu button that shows a list of build steps, select the right item from the menu
+     * to insert the said build step.
+     */
+    private Finder<WebElement> findDropDownMenuItem = new Finder<WebElement>() {
+        @Override
+        protected WebElement find(String caption) {
+            WebElement menuButton = resolve();
+
+            // With enough implementations registered the one we are looking for might
+            // require scrolling in menu to become visible. This dirty hack stretch
+            // yui menu so that all the items are visible.
+            executeScript("" +
+                            "YAHOO.util.Dom.batch(" +
+                            "    document.querySelector('.yui-menu-body-scrolled')," +
+                            "    function (el) {" +
+                            "        el.style.height = 'auto';" +
+                            "        YAHOO.util.Dom.removeClass(el, 'yui-menu-body-scrolled');" +
+                            "    }" +
+                            ");"
+            );
+
+            WebElement context = menuButton.findElement(by.xpath("ancestor::*[contains(@class,'yui-menu-button')]/.."));
+            WebElement e = context.findElement(by.link(caption));
+            return e;
+        }
+    };
 
     /**
      * Select an option.

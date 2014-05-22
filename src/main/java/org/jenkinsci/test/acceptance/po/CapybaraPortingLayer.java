@@ -260,34 +260,6 @@ public class CapybaraPortingLayer extends Assert {
     }
 
     /**
-     * Given a menu button that shows a list of build steps, select the right item from the menu
-     * to insert the said build step.
-     */
-    public WebElement selectDropdownMenu(String displayName, WebElement menuButton) {
-        menuButton.click();
-
-        // With enough implementations registered the one we are looking for might
-        // require scrolling in menu to become visible. This dirty hack stretch
-        // yui menu so that all the items are visible.
-        executeScript(""+
-            "YAHOO.util.Dom.batch("+
-            "    document.querySelector('.yui-menu-body-scrolled'),"+
-            "    function (el) {"+
-            "        el.style.height = 'auto';"+
-            "        YAHOO.util.Dom.removeClass(el, 'yui-menu-body-scrolled');"+
-            "    }"+
-            ");"
-        );
-
-        WebElement context = menuButton.findElement(by.xpath("ancestor::*[contains(@class,'yui-menu-button')]/.."));
-        WebElement e = context.findElement(by.link(displayName));
-        e.click();
-
-        sleep(1000);
-        return e;
-    }
-
-    /**
      * @param locator
      *      Text, ID, or link.
      */

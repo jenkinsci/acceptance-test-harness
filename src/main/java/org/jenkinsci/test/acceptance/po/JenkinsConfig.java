@@ -49,7 +49,7 @@ public class JenkinsConfig extends PageObject {
     public <T extends Cloud> T addCloud(Class<T> type) {
         jenkins.ensureConfigPage();
 
-        addCloudButton.clickMenuButton(type);
+        addCloudButton.selectDropdownMenu(type);
 
         List<WebElement> all = all(by.name("cloud"));
         WebElement last = all.get(all.size()-1);

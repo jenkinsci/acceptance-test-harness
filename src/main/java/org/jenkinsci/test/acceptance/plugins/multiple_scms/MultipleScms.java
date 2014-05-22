@@ -27,7 +27,6 @@ import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.Scm;
-import org.openqa.selenium.WebElement;
 
 @Describable("Multiple SCMs")
 public class MultipleScms extends Scm {
@@ -41,7 +40,7 @@ public class MultipleScms extends Scm {
     }
 
     public <T extends Scm> T addScm(Class<T> type) {
-        addButton.clickMenuButton(type);
+        addButton.selectDropdownMenu(type);
         String path = last(by.button("Delete SCM")).getAttribute("path");
 
         return newInstance(type, job, path.substring(0, path.length() - 18));
