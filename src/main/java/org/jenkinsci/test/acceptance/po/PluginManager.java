@@ -1,15 +1,5 @@
 package org.jenkinsci.test.acceptance.po;
 
-import com.google.common.base.Splitter;
-import com.google.inject.Inject;
-import hudson.util.VersionNumber;
-import org.eclipse.aether.resolution.ArtifactResolutionException;
-import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.po.UpdateCenter.InstallationFailedException;
-import org.jenkinsci.test.acceptance.update_center.PluginMetadata;
-import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata;
-import org.openqa.selenium.TimeoutException;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Named;
@@ -20,6 +10,19 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
+
+import org.apache.commons.lang3.StringUtils;
+import org.eclipse.aether.resolution.ArtifactResolutionException;
+import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.po.UpdateCenter.InstallationFailedException;
+import org.jenkinsci.test.acceptance.update_center.PluginMetadata;
+import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata;
+import org.openqa.selenium.TimeoutException;
+
+import com.google.common.base.Splitter;
+import com.google.inject.Inject;
+
+import hudson.util.VersionNumber;
 
 /**
  * Page object for plugin manager.
@@ -117,8 +120,15 @@ public class PluginManager extends ContainerPageObject {
             for (PluginMetadata newPlugin : ucmd.get().transitiveDependenciesOf(candidates.keySet())) {
                 final String name = newPlugin.name;
                 final String claimedVersion = candidates.get(name);
+                String currentSpec;
+                if (StringUtils.isNotEmpty(claimedVersion)) {
+                    currentSpec = name + "@" + claimedVersion;
+                }
+                else {
+                    currentSpec = name;
+                }
 
-                if (!isInstalled(name)) {
+                if (!isInstalled(currentSpec)) { // we need to override existing "old" plugins
                     try {
                         newPlugin.uploadTo(jenkins, injector, null);
                     } catch (IOException | ArtifactResolutionException e) {
