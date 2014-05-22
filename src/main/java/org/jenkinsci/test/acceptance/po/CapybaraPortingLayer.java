@@ -245,6 +245,9 @@ public class CapybaraPortingLayer extends Assert {
      * Picks up the last element that matches given selector.
      */
     public WebElement last(By selector) {
+        find(selector); // wait until at least one is found
+
+        // but what we want is the last one
         List<WebElement> l = driver.findElements(selector);
         return l.get(l.size()-1);
     }
