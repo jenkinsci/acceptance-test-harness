@@ -57,7 +57,6 @@ public class ActiveDirectoryEnv {
     }
 
     public String getBindDN() {
-        assumeNotNull(bindDN);
         return bindDN;
     }
 

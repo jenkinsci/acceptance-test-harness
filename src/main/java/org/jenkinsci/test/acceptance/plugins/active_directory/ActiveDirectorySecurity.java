@@ -75,6 +75,9 @@ public class ActiveDirectorySecurity extends PageObject {
         if(controllerEnv != null) dController.set(controllerEnv);
         if(siteEnv != null) site.set(siteEnv);
         pwd.set(passwordEnv);
+        if(bindDNEnv == null) {
+            bindDNEnv = userEnv+"@"+domainEnv;
+        }
         dn.set(bindDNEnv);
 
         int index = 0;
