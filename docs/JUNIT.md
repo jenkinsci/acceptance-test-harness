@@ -37,6 +37,20 @@ to indicate that dependency.
 This is preferable over installing plugins via UpdateCenter/PluginManager page objects, because it'll
 allow filtering of tests based on plugins.
 
+## Marking tests for credential dependencies
+If your tests depend on specific credentials being present in the credentials plugin, put `@WithCredentials` annotation on your test method or class
+to indicate that dependency.
+
+Currently the annotation supports two different types of credentials:
+
+username/password:
+`@WithCredentials(credentialType = WithCredentials.USERNAME_PASSWORD, values = {"username", "password"})`
+
+username/sshKey:
+`@WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {"username", "/ssh_keys/unsafe"})`
+
+
+
 ## Marking tests to be member of the smoke test group
 
 Since the overall test suite runs a couple of hours you can use the predefined
