@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.PluginManager;
-import org.jenkinsci.test.acceptance.po.PluginManager.PluginCoordinates;
+import org.jenkinsci.test.acceptance.po.PluginManager.PluginSpec;
 import org.junit.internal.AssumptionViolatedException;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
@@ -49,6 +49,9 @@ import static java.lang.annotation.RetentionPolicy.*;
 @Documented
 @RuleAnnotation(WithPlugins.RuleImpl.class)
 public @interface WithPlugins {
+    /**
+     * See {@link PluginManager.PluginSpec} for the syntax.
+     */
     String[] value();
 
     public class RuleImpl implements TestRule {
@@ -74,7 +77,7 @@ public @interface WithPlugins {
 
                     PluginManager pm = jenkins.getPluginManager();
                     for (String c: wp.value()) {
-                        PluginCoordinates candidate = new PluginManager.PluginCoordinates(c);
+                        PluginSpec candidate = new PluginSpec(c);
                         String name = candidate.getName();
 
                         if (!pm.isInstalled(name)) {
