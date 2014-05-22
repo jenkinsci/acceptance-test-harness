@@ -279,7 +279,9 @@ public class CapybaraPortingLayer extends Assert {
             ");"
         );
 
-        clickLink(displayName);
+        WebElement context = menuButton.findElement(by.xpath("ancestor::*[contains(@class,'yui-menu-button')]/.."));
+        context.findElement(by.link(displayName)).click();
+
         sleep(1000);
     }
 
