@@ -4,7 +4,7 @@
 # Manager-Password: jenkins
 # See config/base.ldif for user/groups directory entries
 #
-# VERSION=1
+# VERSION=2
 #
 FROM phusion/baseimage:0.9.8
 

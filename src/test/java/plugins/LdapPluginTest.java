@@ -1,20 +1,26 @@
 package plugins;
 
+import javax.inject.Inject;
+import java.io.IOException;
+import java.net.ServerSocket;
+
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.LdapContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Bug;
 import org.jenkinsci.test.acceptance.junit.Native;
+import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.ldap.LdapDetails;
-import org.jenkinsci.test.acceptance.po.*;
+import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
+import org.jenkinsci.test.acceptance.po.Jenkins;
+import org.jenkinsci.test.acceptance.po.LdapSecurityRealm;
+import org.jenkinsci.test.acceptance.po.Login;
+import org.jenkinsci.test.acceptance.po.User;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
-import javax.inject.Inject;
-import java.io.IOException;
-import java.net.ServerSocket;
-
-import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 
 
@@ -335,6 +341,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
     @Test
     @Bug("JENKINS-18355")
     @WithPlugins("ldap@1.8")
+    @Category(SmokeTest.class)
     public void custom_display_name() {
         // Given
         useLdapAsSecurityRealm(createDefaults(ldap.get()).displayNameAttributeName("cn"));
@@ -379,7 +386,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
     @WithPlugins("ldap@1.8")
     public void custom_mail_filter() {
         // Given
-        useLdapAsSecurityRealm(createDefaults(ldap.get()).mailAdressAttributeName("gn"));
+        useLdapAsSecurityRealm(createDefaults(ldap.get()).mailAdressAttributeName("givenName"));
         // When
         Login login = jenkins.login();
         login.doLogin("jenkins", "root");
