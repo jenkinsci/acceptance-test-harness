@@ -43,7 +43,6 @@ public class Subversion_Version154_PluginTest extends AbstractJUnitTest {
     public void run_basic_subversion_build() throws SubversionPluginTestException {
         final SvnContainer svnContainer = svn.get();
         final FreeStyleJob f = jenkins.jobs.create();
-        f.configure();
         f.useScm(SubversionScm.class).url.set(svnContainer.getUrlUnsaveRepo());
         f.addShellStep("test -d .svn");
         f.save();
@@ -66,7 +65,6 @@ public class Subversion_Version154_PluginTest extends AbstractJUnitTest {
         final int revision = 0;
         final SvnContainer svnContainer = svn.get();
         final FreeStyleJob f = jenkins.jobs.create();
-        f.configure();
         f.useScm(SubversionScm.class).url.set(svnContainer.getUrlUnsaveRepoAtRevision(revision));
         f.save();
 
@@ -88,7 +86,6 @@ public class Subversion_Version154_PluginTest extends AbstractJUnitTest {
     public void always_checkout_fresh_copy() throws SubversionPluginTestException {
         final SvnContainer svnContainer = svn.get();
         final FreeStyleJob f = jenkins.jobs.create();
-        f.configure();
 
         final SubversionScm subversionScm = f.useScm(SubversionScm.class);
         subversionScm.url.set(svnContainer.getUrlUnsaveRepo());
@@ -114,11 +111,10 @@ public class Subversion_Version154_PluginTest extends AbstractJUnitTest {
      * Then the build should succeed
      */
     @Test
-    public void run_basic_subversion_build_userPwd() throws SubversionPluginTestException {
+    public void run_basic_subversion_build_userPwd() throws SubversionPluginTestException, InterruptedException {
         final SvnContainer svnContainer = svn.get();
 
         final FreeStyleJob f = jenkins.jobs.create();
-        f.configure();
 
         final SubversionScm subversionScm = f.useScm(SubversionScm.class);
         subversionScm.url.set(svnContainer.getUrlUserPwdSaveRepo());
@@ -150,7 +146,6 @@ public class Subversion_Version154_PluginTest extends AbstractJUnitTest {
         final SvnContainer svnContainer = svn.get();
 
         final FreeStyleJob f = jenkins.jobs.create();
-        f.configure();
 
         final SubversionScm subversionScm = f.useScm(SubversionScm.class);
         subversionScm.url.set(svnContainer.getSvnUrl());

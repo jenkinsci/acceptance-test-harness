@@ -41,7 +41,6 @@ public class SubversionPluginTest extends AbstractJUnitTest {
     public void run_basic_subversion_build() throws SubversionPluginTestException {
         final SvnContainer svnContainer = svn.get();
         final FreeStyleJob f = jenkins.jobs.create();
-        f.configure();
         f.useScm(SubversionScm.class).url.set(svnContainer.getUrlUnsaveRepo());
         f.addShellStep("test -d .svn");
         f.save();
@@ -64,7 +63,6 @@ public class SubversionPluginTest extends AbstractJUnitTest {
         final int revision = 0;
         final SvnContainer svnContainer = svn.get();
         final FreeStyleJob f = jenkins.jobs.create();
-        f.configure();
         f.useScm(SubversionScm.class).url.set(svnContainer.getUrlUnsaveRepoAtRevision(revision));
         f.save();
 
@@ -86,7 +84,6 @@ public class SubversionPluginTest extends AbstractJUnitTest {
     public void always_checkout_fresh_copy() throws SubversionPluginTestException {
         final SvnContainer svnContainer = svn.get();
         final FreeStyleJob f = jenkins.jobs.create();
-        f.configure();
 
         final SubversionScm subversionScm = f.useScm(SubversionScm.class);
         subversionScm.url.set(svnContainer.getUrlUnsaveRepo());
@@ -115,7 +112,6 @@ public class SubversionPluginTest extends AbstractJUnitTest {
         final SvnContainer svnContainer = svn.get();
 
         final FreeStyleJob f = jenkins.jobs.create();
-        f.configure();
 
         final SubversionScm subversionScm = f.useScm(SubversionScm.class);
         subversionScm.url.set(svnContainer.getUrlUserPwdSaveRepo());
@@ -143,7 +139,6 @@ public class SubversionPluginTest extends AbstractJUnitTest {
         final SvnContainer svnContainer = svn.get();
 
         final FreeStyleJob f = jenkins.jobs.create();
-        f.configure();
 
         final SubversionScm subversionScm = f.useScm(SubversionScm.class);
         subversionScm.url.set(svnContainer.getSvnUrl());
