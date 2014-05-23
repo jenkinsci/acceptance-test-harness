@@ -53,12 +53,8 @@ public class CachedUpdateCenterMetadataLoader implements Provider<UpdateCenterMe
                     HttpUriRequest request = new HttpGet(url);
                     HttpResponse response = client.execute(request);
                     String data = EntityUtils.toString(response.getEntity());
-                    FileUtils.write(cache, data);
-                    /*if (System.getProperty("http.proxyHost") != null) {
 
-                    } else {
-                        FileUtils.copyURLToFile(new URL(url),cache);
-                    }*/
+                    FileUtils.write(cache, data);
                 }
                 metadata = UpdateCenterMetadata.parse(cache);
             }
