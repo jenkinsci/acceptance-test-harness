@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.po;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 /**
  * Special kind of page object that maps to a portion of a page with multiple INPUT controls.
@@ -34,6 +35,14 @@ public abstract class PageArea extends CapybaraPortingLayer implements Control.O
     }
 
     /**
+     * Returns {@link WebElement} that corresponds to the element that sits at the root
+     * of the area this object represents.
+     */
+    public WebElement self() {
+        return find(path(""));
+    }
+
+    /**
      * Returns the "path" selector that finds an element by following the form-element-path plugin.
      *
      * https://wiki.jenkins-ci.org/display/JENKINS/Form+Element+Path+Plugin
@@ -41,6 +50,9 @@ public abstract class PageArea extends CapybaraPortingLayer implements Control.O
     @Override
     public By path(String rel) {
         if (rel.length()==0)    return by.path(path);
+
+        // this allows path("") and path("/") to both work
+        if (rel.startsWith("/"))    rel=rel.substring(1);
         return by.path(path + '/' + rel);
     }
 

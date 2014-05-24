@@ -48,18 +48,20 @@ public class SanityChecker extends AbstractWebDriverEventListener {
     @Override
     public void afterClickOn(WebElement element, WebDriver driver) {
         try {
+            if (isFastPath(driver)) return;
+
+            // driver.switchTo().alert() is slow (~1sec) on Firefox,
+            // so try to avoid it when we can.
             driver.switchTo().alert();
 
             return; // Skip checking in case there is a dialog present
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             checkSanity(driver);
         }
     }
 
     private void checkSanity(WebDriver driver) {
-        // Performance optimization
-        if (!driver.getPageSource().contains("Oops!")) return;
+        if (isFastPath(driver)) return;
 
         List<WebElement> elements = driver.findElements(SPECIFIER);
 
@@ -73,5 +75,16 @@ public class SanityChecker extends AbstractWebDriverEventListener {
 
             throw new AssertionError("Jenkins error detected:\n" + trace);
         }
+    }
+
+    /**
+     * Quickly determine if the driver is definitely in the safe state.
+     *
+     * <p>
+     * The expectation is that the most of the time this would return true,
+     * and reduces the overhead of {@link SanityChecker}.
+     */
+    private boolean isFastPath(WebDriver driver) {
+        return !driver.getPageSource().contains("Oops!");
     }
 }

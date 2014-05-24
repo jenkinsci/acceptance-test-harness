@@ -19,6 +19,7 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
    As a Jenkins user
    I want to install and configure Warnings plugin
  */
+// TODO: should derive from AbstractCodeStylePluginHelper
 @WithPlugins("warnings")
 public class WarningsPluginTest extends AbstractJUnitTest {
 

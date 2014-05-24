@@ -6,7 +6,6 @@ package org.jenkinsci.test.acceptance.plugins.ldap;
  * @author Michael Prankl
  */
 public class LdapDetails {
-
     private String host;
     private int port;
     private String hostWithPort;
@@ -22,6 +21,8 @@ public class LdapDetails {
     private boolean enableCache = false;
     private int cacheSize = 20;
     private int cacheTTL = 300;
+    private String mailAddressAttributeName;
+    private String displayNameAttributeName;
 
 
     public LdapDetails(String host, int port, String managerDn, String managerPassword, String rootDn) {
@@ -211,6 +212,32 @@ public class LdapDetails {
 
     public LdapDetails cacheTTL(int cacheTTL) {
         setCacheTTL(cacheTTL);
+        return this;
+    }
+
+    public String getMailAddressAttributeName() {
+        return mailAddressAttributeName;
+    }
+
+    public void setMailAddressAttributeName(String mailAddressAttributeName) {
+        this.mailAddressAttributeName = mailAddressAttributeName;
+    }
+
+    public LdapDetails mailAdressAttributeName(String mailAddressAttributeName){
+        setMailAddressAttributeName(mailAddressAttributeName);
+        return this;
+    }
+
+    public String getDisplayNameAttributeName() {
+        return displayNameAttributeName;
+    }
+
+    public void setDisplayNameAttributeName(String displayNameAttributeName) {
+        this.displayNameAttributeName = displayNameAttributeName;
+    }
+
+    public LdapDetails displayNameAttributeName(String displayNameAttributeName){
+        setDisplayNameAttributeName(displayNameAttributeName);
         return this;
     }
 }

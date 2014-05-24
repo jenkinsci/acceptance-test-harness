@@ -22,4 +22,11 @@ public class Login extends PageObject {
         return this;
     }
 
+    /**
+     * Login for a common case where the user name and the password are the same
+     */
+    public Login doLogin(String user) {
+        return doLogin(user,user);
+    }
+
 }
