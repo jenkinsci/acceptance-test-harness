@@ -53,7 +53,6 @@ import static org.junit.Assume.assumeTrue;
  * - gtUserhome=/home/companion<br>
  * Plus,<br>
  * - gtUserhome/.netrc shall point to that gtHostname with gtGerrituser/pwd<br>
- * - http_proxy might need to be set, if no gerrit-trigger plugin pre-installed.
  *
  * @author Marco.Miller@ericsson.com
  */
@@ -97,7 +96,7 @@ public class GerritTriggerTest extends AbstractJUnitTest {
 
     private String pushChangeForReview(String jobName) throws InterruptedException,IOException {
         File dir = File.createTempFile("jenkins","git");
-        dir.delete();
+        dir.delete();//result !needed
         assertTrue(dir.mkdir());
         String user = GerritTriggerEnv.getInstance().getGerritUser();
         String hostName = GerritTriggerEnv.getInstance().getHostName();
@@ -106,7 +105,7 @@ public class GerritTriggerTest extends AbstractJUnitTest {
         assertEquals(0,new ProcessBuilder("git","clone","ssh://"+user+"@"+hostName+":29418/"+project,jobName).directory(dir).start().waitFor());
 
         File file = new File(dir+"/"+jobName,jobName);
-        file.delete();
+        file.delete();//result !needed
         BufferedWriter writer = new BufferedWriter(new FileWriter(file));
         writer.write(String.valueOf(System.currentTimeMillis()));
         writer.close();

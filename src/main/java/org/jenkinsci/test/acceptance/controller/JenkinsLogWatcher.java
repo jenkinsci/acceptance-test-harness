@@ -55,18 +55,22 @@ public class JenkinsLogWatcher extends LogWatcher {
             if (portConflict.isDone())
                 throw new RuntimeException("Port conflict detected");
 
-            String msg = getClass()+": Could not bring up a Jenkins server";
-            msg += "\nprocess is " + (reader.isAlive() ? "alive" : "dead");
-            msg += "\nnow = " + new Date();
-            try {
-                msg += "\n" + FileUtils.readFileToString(logFile);
-            } catch (IOException _) {
-                // ignore
-            }
-            throw new RuntimeException(msg);
+            throw new RuntimeException(failedToLoadMessage());
         } catch (InterruptedException | ExecutionException e) {
-            throw new Error(e);
+            throw new Error(failedToLoadMessage(), e);
         }
+    }
+
+    private String failedToLoadMessage() {
+        String msg = getClass()+": Could not bring up a Jenkins server";
+        msg += "\nprocess is " + (reader.isAlive() ? "alive" : "dead");
+        msg += "\nnow = " + new Date();
+        try {
+            msg += "\n" + FileUtils.readFileToString(logFile);
+        } catch (IOException _) {
+            // ignore
+        }
+        return msg;
     }
 
     public static final int DEFAULT_TIMEOUT = 300;//100 sec

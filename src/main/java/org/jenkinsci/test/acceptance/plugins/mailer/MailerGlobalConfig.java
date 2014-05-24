@@ -39,7 +39,9 @@ public class MailerGlobalConfig extends PageArea {
 
     public void sendTestMail(String recipient) {
         control(by.path(path + '/')).check();
-        control("/sendTestMailTo").set(recipient);
-        control("/validate-button").click();
+
+        // these two controls have weird paths that don't fit well with relative path expression
+        new Control(page,"/hudson-tasks-Mailer//sendTestMailTo").set(recipient);
+        new Control(page,"/hudson-tasks-Mailer//validate-button").click();
     }
 }

@@ -40,11 +40,11 @@ public class ByFactory {
      * https://wiki.jenkins-ci.org/display/JENKINS/Form+Element+Path+Plugin
      */
     public By path(String path, Object... args) {
-        return xpath(".//*[@path='%s']", String.format(path, args));
+        return css("[path='%s']", String.format(path, args));
     }
 
     public By name(String name, Object... args) {
-        return xpath(".//*[@name='%s']", String.format(name, args));
+        return css("[name='%s']", String.format(name, args));
     }
 
     /**
@@ -64,7 +64,7 @@ public class ByFactory {
      *      href of the link
      */
     public By href(String locator){
-        return xpath(".//A[@href='%1$s']", locator);
+        return css("a[href='%s']", locator);
     }
 
     /**
@@ -111,8 +111,8 @@ public class ByFactory {
                 ,locator);
     }
 
-    public By css(String css) {
-        return By.cssSelector(css);
+    public By css(String css, Object... args) {
+        return By.cssSelector(String.format(css, args));
     }
 
     public By tagName(String name) {
@@ -127,5 +127,13 @@ public class ByFactory {
 
     public By id(String s) {
         return css("#"+s);
+    }
+
+    public By parent() {
+        return xpath("..");
+    }
+
+    public By ancestor(String tagName) {
+        return xpath("ancestor::%s[1]",tagName);
     }
 }
