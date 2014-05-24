@@ -239,12 +239,12 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
             FtpPublisher fp = j.addPublisher(FtpPublisher.class);
             FtpPublisher.Site fps = fp.getDefault();
             fps.getDefaultTransfer().sourceFile.set("prefix_/");
-            fps.getDefaultTransfer().excludes.set(".exclude");
+            fps.getDefaultTransfer().excludes.set("**/*.exclude");
         }
         j.save();
         j.startBuild().shouldSucceed();
-        assertTrue(ftpd.pathExist("/tmp/prefix/"));
-        assertTrue(!ftpd.pathExist("/tmp/prefix/.exclude"));
+        assertTrue(ftpd.pathExist("/tmp/prefix_/"));
+        assertTrue(!ftpd.pathExist("/tmp/prefix_/.exclude"));
     }
 
     /**
@@ -317,8 +317,8 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         }
         j.save();
         j.startBuild().shouldSucceed();
-        assertTrue(!ftpd.pathExist("/tmp/te,st.txt"));
-        assertTrue(!ftpd.pathExist("/tmp/odes.txt"));
+        assertTrue(ftpd.pathExist("/tmp/te,st.txt"));
+        assertTrue(ftpd.pathExist("/tmp/odes.txt"));
     }
 
     /**
@@ -442,7 +442,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
 
         j.save();
         j.startBuild().shouldSucceed();
-        assertTrue(ftpd.pathExist("odes.txt"));
+        assertTrue(ftpd.pathExist("/tmp/empty/"));
         assertTrue(ftpd.pathExist("/tmp/odes.txt"));
     }
 
