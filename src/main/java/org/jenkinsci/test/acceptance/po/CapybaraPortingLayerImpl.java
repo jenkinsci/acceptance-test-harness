@@ -1,6 +1,9 @@
 package org.jenkinsci.test.acceptance.po;
 
+import com.google.common.base.Joiner;
 import com.google.inject.Injector;
+import org.jenkinsci.test.acceptance.ByFactory;
+import org.jenkinsci.test.acceptance.utils.ElasticTime;
 import org.openqa.selenium.*;
 
 import javax.inject.Inject;
@@ -8,7 +11,6 @@ import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
 import static java.util.Arrays.asList;
 
@@ -31,9 +33,11 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     @Inject
     public Injector injector;
 
+    protected static final ElasticTime time = new ElasticTime();
+
     /**
-     * Some subtypes are constructed via Guice, in which case injection is done by outside this class. The injector
-     * parameter should be null for that case.
+     * Some subtypes are constructed via Guice, in which case injection is done by outside this class.
+     * The injector parameter should be null for that case.
      * <p/>
      * Some subtypes are constructed programmatically. In that case, non-null injector must be supplied.
      */
@@ -47,7 +51,9 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     /**
      * Navigates the browser to the page.
      *
-     * @path url URL relative to the context path of Jenkins, such as "/about" or "/job/foo/configure".
+     * @path url
+     * URL relative to the context path of Jenkins, such as "/about" or
+     * "/job/foo/configure".
      */
     protected final WebDriver visit(URL url) {
         driver.get(url.toExternalForm());
@@ -70,10 +76,14 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
         return e;
     }
 
+    /**
+     * Wait until the element that matches the given selector appears.
+     */
     @Override
     public WebElement waitFor(final By selector, final int timeoutSec) {
         return waitForCond(new Callable<WebElement>() {
-            @Override public WebElement call() {
+            @Override
+            public WebElement call() {
                 try {
                     return find(selector);
                 } catch (NoSuchElementException e) {
@@ -83,9 +93,6 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
         }, timeoutSec);
     }
 
-    /**
-     * Wait until the element that matches the given selector appears.
-     */
     @Override
     public WebElement waitFor(final By selector) {
         return waitFor(selector, 30);
@@ -95,14 +102,16 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
      * Repeated evaluate the given predicate until it returns true.
      * <p/>
      * If it times out, an exception will be thrown.
+     *
+     * @param timeoutSec 0 if left to the default value
      */
     @Override
     public <T> T waitForCond(Callable<T> block, int timeoutSec) {
-        // Stretch timeout in case we are using several cores
-        timeoutSec *= Integer.parseInt(System.getProperty("forkCount", "1"));
-
+        if (timeoutSec == 0) {
+            timeoutSec = 30;
+        }
         try {
-            long endTime = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(timeoutSec);
+            long endTime = System.currentTimeMillis() + time.seconds(timeoutSec);
             while (System.currentTimeMillis() < endTime) {
                 T v = block.call();
                 if (isTrueish(v)) {
@@ -110,11 +119,11 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
                 }
                 sleep(1000);
             }
-            throw new TimeoutException("Failed to wait for condition " + block);
+            throw new TimeoutException("Failed to wait for condition: " + block);
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {
-            throw new Error("Failed to wait for condition " + block, e);
+            throw new Error("Failed to wait for condition: " + block, e);
         }
     }
 
@@ -127,7 +136,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
 
     @Override
     public <T> T waitForCond(Callable<T> block) {
-        return waitForCond(block, 30);
+        return waitForCond(block, 0);
     }
 
     /**
@@ -139,7 +148,8 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     @Override
     public WebElement find(By selector) {
         try {
-            for (int i = 0; i < 10; i++) {
+            long endTime = System.currentTimeMillis() + time.seconds(1);
+            while (System.currentTimeMillis() <= endTime) {
                 WebElement e = driver.findElement(selector);
                 if (isDisplayed(e)) {
                     return e;
@@ -158,7 +168,8 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
             throw new NoSuchElementException("Unable to locate visible " + selector + " in " + driver.getCurrentUrl());
         } catch (NoSuchElementException x) {
             // this is often the best place to set a breakpoint
-            throw new NoSuchElementException("Unable to locate " + selector + " in " + driver.getCurrentUrl(), x);
+            String msg = String.format("Unable to locate %s in %s\n\n%s", selector, driver.getCurrentUrl(), driver.getPageSource());
+            throw new NoSuchElementException(msg, x);
         }
     }
 
@@ -174,7 +185,8 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     }
 
     /**
-     * Works like {@link #find(By)} but instead of throwing an exception, this method returns null.
+     * Works like {@link #find(By)} but instead of throwing an exception,
+     * this method returns null.
      */
     @Override
     public WebElement getElement(By selector) {
@@ -213,6 +225,28 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
         }
     }
 
+    /**
+     * Finds all the elements that match the selector.
+     * <p/>
+     * <p/>
+     * Note that this method inherits the same restriction of the {@link WebDriver#findElements(By)},
+     * in that its execution is not synchronized with the JavaScript execution of the browser.
+     * <p/>
+     * <p/>
+     * For example, if you click something that's expected to populate additional DOM elements,
+     * and then call {@code all()} to find them, then all() can execute before those additional DOM elements
+     * are populated, thereby failing to find the elements you are looking for.
+     * <p/>
+     * <p/>
+     * In contrast, {@link #find(By)} do not have this problem, because it waits until the element
+     * that matches the criteria appears.
+     * <p/>
+     * <p/>
+     * So if you are using this method, think carefully. Perhaps you can use {@link #find(By)} to
+     * achieve what you are looking for (by making the query more specific), or perhaps you can combine
+     * this with {@link #waitForCond(Callable)} so that if you don't find the elements you are looking for
+     * in the list, you'll retry.
+     */
     @Override
     public List<WebElement> all(By selector) {
         return driver.findElements(selector);
@@ -223,6 +257,9 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
      */
     @Override
     public WebElement last(By selector) {
+        find(selector); // wait until at least one is found
+
+        // but what we want is the last one
         List<WebElement> l = driver.findElements(selector);
         return l.get(l.size() - 1);
     }
@@ -233,31 +270,6 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     @Override
     public Object executeScript(String javaScript, Object... args) {
         return ((JavascriptExecutor) driver).executeScript(javaScript, args);
-    }
-
-    /**
-     * Given a menu button that shows a list of build steps, select the right item from the menu to insert the said
-     * build step.
-     */
-    @Override
-    public void selectDropdownMenu(String displayName, WebElement menuButton) {
-        menuButton.click();
-
-        // With enough implementations registered the one we are looking for might
-        // require scrolling in menu to become visible. This dirty hack stretch
-        // yui menu so that all the items are visible.
-        executeScript("" +
-                        "YAHOO.util.Dom.batch(" +
-                        "    document.querySelector('.yui-menu-body-scrolled')," +
-                        "    function (el) {" +
-                        "        el.style.height = 'auto';" +
-                        "        YAHOO.util.Dom.removeClass(el, 'yui-menu-body-scrolled');" +
-                        "    }" +
-                        ");"
-        );
-
-        clickLink(displayName);
-        sleep(1000);
     }
 
     /**
@@ -279,10 +291,9 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     /**
      * Thread.sleep that masks exception.
      */
-    @Override
-    public void sleep(int ms) {
+    public static void sleep(long ms) {
         try {
-            Thread.sleep(ms);
+            Thread.sleep(time.milliseconds(ms));
         } catch (InterruptedException e) {
             throw new Error(e);
         }
@@ -319,7 +330,9 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     protected <T> T findCaption(Class<?> type, Finder<T> call) {
         String[] captions = type.getAnnotation(Describable.class).value();
 
-        RuntimeException cause = new NoSuchElementException("None of the captions exists");
+        RuntimeException cause = new NoSuchElementException(
+                "None of the captions exists: " + Joiner.on(", ").join(captions)
+        );
         for (String caption : captions) {
             try {
                 T out = call.find(caption);

@@ -21,32 +21,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.test.acceptance.plugins.post_build_script;
+package org.jenkinsci.test.acceptance.utils;
 
-import org.jenkinsci.test.acceptance.po.*;
+import java.util.concurrent.TimeUnit;
 
-@Describable({"Execute a set of scripts", "[PostBuildScript] - Execute a set of scripts"})
-public class PostBuildScript extends AbstractStep implements PostBuildStep {
-    private final Control whenSucceeded = control("scriptOnlyIfSuccess");
-    private final Control whenFailed = control("scriptOnlyIfFailure");
+public class ElasticTime {
 
-    public PostBuildScript(Job parent, String path) {
-        super(parent, path);
+    private final long concurrency = Integer.parseInt(System.getProperty("forkCount", "1"));
+
+    public long seconds(long secs) {
+        return milliseconds(TimeUnit.SECONDS.toMillis(secs));
     }
 
-    public <T extends Step> T addStep(Class<T> type) {
-        control("hetero-list-add[buildStep]").selectDropdownMenu(type);
-        String path = last(by.xpath("//div[@name='buildStep']")).getAttribute("path");
-        return newInstance(type, parent, path);
-    }
-
-    public void runWhenFailed() {
-        whenSucceeded.uncheck();
-        whenFailed.check();
-    }
-
-    public void runWhenSucceeded() {
-        whenSucceeded.check();
-        whenFailed.uncheck();
+    public long milliseconds(long ms) {
+        return ms * concurrency;
     }
 }

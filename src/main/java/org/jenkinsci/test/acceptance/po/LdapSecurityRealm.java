@@ -14,7 +14,7 @@ public class LdapSecurityRealm extends SecurityRealm {
     private final Control advanced = control("advanced-button");
     private final Control rootDn = control("rootDN");
     private final Control managerDn = control("managerDN");
-    private final Control managerPassword = control("managerPasswordSecret"/* >= 1.9*/,"managerPassword");
+    private final Control managerPassword = control("managerPasswordSecret"/* >= 1.9*/, "managerPassword");
     private final Control userSearchBase = control("userSearchBase");
     private final Control userSearchFilter = control("userSearch");
     private final Control groupSearchBase = control("groupSearchBase");
@@ -49,7 +49,10 @@ public class LdapSecurityRealm extends SecurityRealm {
         userSearchFilter.set(ldapDetails.getUserSearchFilter());
         groupSearchBase.set(ldapDetails.getGroupSearchBase());
         groupSearchFilter.set(ldapDetails.getGroupSearchFilter());
-        groupMembershipFilter.set(ldapDetails.getGroupMembershipFilter());
+        // TODO change this when plugin test is comfortable with changes in ldap@1.10
+        if (ldapDetails.getGroupMembershipFilter() != null) {
+            groupMembershipFilter.set(ldapDetails.getGroupMembershipFilter());
+        }
         disableLdapEmailResolver.check(ldapDetails.isDisableLdapEmailResolver());
         if (ldapDetails.isEnableCache()) {
             enableCache.check(true);
@@ -60,7 +63,7 @@ public class LdapSecurityRealm extends SecurityRealm {
             displayNameAttributeName.set(ldapDetails.getDisplayNameAttributeName());
         }
         if (ldapDetails.getMailAddressAttributeName() != null) {
-            mailAddressAttributeName.set(ldapDetails.getDisplayNameAttributeName());
+            mailAddressAttributeName.set(ldapDetails.getMailAddressAttributeName());
         }
     }
 }

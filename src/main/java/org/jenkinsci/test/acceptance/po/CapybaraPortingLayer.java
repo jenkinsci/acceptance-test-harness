@@ -76,12 +76,6 @@ public interface CapybaraPortingLayer {
     Object executeScript(String javaScript, Object... args);
 
     /**
-     * Given a menu button that shows a list of build steps, select the right item from the menu to insert the said
-     * build step.
-     */
-    void selectDropdownMenu(String displayName, WebElement menuButton);
-
-    /**
      * @param locator Text, ID, or link.
      */
     void clickLink(String locator);
@@ -90,9 +84,4 @@ public interface CapybaraPortingLayer {
      * Checks the specified checkbox.
      */
     void check(String locator);
-
-    /**
-     * Thread.sleep that masks exception.
-     */
-    void sleep(int ms);
 }

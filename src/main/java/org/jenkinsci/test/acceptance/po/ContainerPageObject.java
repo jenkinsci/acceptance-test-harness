@@ -3,8 +3,10 @@ package org.jenkinsci.test.acceptance.po;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Injector;
 import groovy.lang.Closure;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.concurrent.Callable;
 
@@ -83,12 +85,18 @@ public abstract class ContainerPageObject extends PageObject {
      * @param queryString Additional query string to narrow down the data retrieval, like "tree=..." or "depth=..."
      */
     public JsonNode getJson(String queryString) {
+
         URL url = getJsonApiUrl();
         try {
-            if (queryString != null) {
-                url = new URL(url + "?" + queryString);
-            }
-            return jsonParser.readTree(url);
+            if (queryString!=null)
+                url = new URL(url+"?"+queryString);
+
+            // Pass in all the cookies (in particular the session cookie.)
+            // This ensures that the API call sees what the current user sees.
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setRequestProperty("Cookie", StringUtils.join(driver.manage().getCookies(),";"));
+
+            return jsonParser.readTree(con.getInputStream());
         } catch (IOException e) {
             throw new RuntimeException("Failed to read from " + url, e);
         }

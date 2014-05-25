@@ -26,6 +26,7 @@ package org.jenkinsci.test.acceptance.plugins.git;
 import org.jenkinsci.test.acceptance.po.*;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.support.ui.Select;
 
 @Describable("Git")
 public class GitScm extends Scm {
@@ -42,7 +43,8 @@ public class GitScm extends Scm {
     }
 
     public GitScm credentials(String name) {
-        control(By.xpath("//option[.='" + name + "' and not(ancestor::tr[contains(@style,'display:none')]) and not(ancestor::tr[contains(@style,'display: none')])]")).click();
+        Select select = new Select(control(By.className("credentials-select")).resolve());
+        select.selectByVisibleText(name);
         return this;
     }
 

@@ -22,6 +22,7 @@ public class GeneralSteps extends AbstractSteps {
         check(find(by.xpath("//input[@name='%s']", name)));
     }
 
+    @Override
     @When("^I click the \"([^\"]*)\" button$")
     public void clickButton(String name) {
         find(by.xpath("//button[text()='%s']", name)).click();
@@ -35,7 +36,7 @@ public class GeneralSteps extends AbstractSteps {
 
     @And("^I wait for (\\d+) seconds$")
     public void I_wait_for_seconds(int n) throws Throwable {
-        Thread.sleep(n * 1000);
+        sleep(n * 1000);
     }
 
     @Then("^the error description should contain$")

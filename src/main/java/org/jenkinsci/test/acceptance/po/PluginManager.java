@@ -1,23 +1,28 @@
 package org.jenkinsci.test.acceptance.po;
 
-import com.google.common.base.Splitter;
-import com.google.inject.Inject;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.inject.Named;
+import javax.inject.Provider;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.UpdateCenter.InstallationFailedException;
 import org.jenkinsci.test.acceptance.update_center.PluginMetadata;
 import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata;
+import org.openqa.selenium.TimeoutException;
 
-import javax.annotation.Nonnull;
-import javax.inject.Named;
-import javax.inject.Provider;
+import com.google.common.base.Splitter;
+import com.google.inject.Inject;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.regex.Pattern;
+import hudson.util.VersionNumber;
 
 /**
  * Page object for plugin manager.
@@ -71,12 +76,25 @@ public class PluginManager extends ContainerPageObject {
         l.waitForLogged(jdk);
     }
 
-    public boolean isInstalled(String... shortNames) {
-        for (String n : shortNames) {
-            String name = new PluginCoordinates(n).getName();
+    /**
+     * @param specs plugin ids with optional version (e.g. "ldap" or "ldap@1.8")
+     * @return true, if plugin (in version greater or equal than specified) is installed
+     */
+    public boolean isInstalled(String... specs) {
+        for (String s : specs) {
+            PluginSpec p = new PluginSpec(s);
+            String name = p.getName();
+            String version = p.getVersion();
             Plugin plugin;
             try {
-                plugin = jenkins.getPlugin(n);
+                plugin = jenkins.getPlugin(name);
+                if (version != null) {
+                    // check if installed version >= specified version of @WithPlugins
+                    if (plugin.getVersion().compareTo(new VersionNumber(version)) < 0) {
+                        // installed version < specified version
+                        return false;
+                    }
+                }
             } catch (IllegalArgumentException ex) {
                 return false; // Not installed at all
             }
@@ -95,26 +113,41 @@ public class PluginManager extends ContainerPageObject {
      * is not really deprecated.
      */
     @Deprecated
-    public void installPlugins(String... shortNames) {
-        final Map<String, String> candidates = getMapShortNamesVersion(shortNames);
+    public void installPlugins(final String... specs) {
+        final Map<String, String> candidates = getMapShortNamesVersion(specs);
 
-        if (isInstalled(shortNames))
-            return;
         if (uploadPlugins) {
             for (PluginMetadata newPlugin : ucmd.get().transitiveDependenciesOf(candidates.keySet())) {
                 final String name = newPlugin.name;
                 final String claimedVersion = candidates.get(name);
-                try {
-                    if (!isInstalled(name) || (claimedVersion != null && !jenkins.getPlugin(name).isNewerThan(claimedVersion))) {
-                        newPlugin.uploadTo(jenkins, injector, claimedVersion);
+                String currentSpec;
+                if (StringUtils.isNotEmpty(claimedVersion)) {
+                    currentSpec = name + "@" + claimedVersion;
+                }
+                else {
+                    currentSpec = name;
+                }
+
+                if (!isInstalled(currentSpec)) { // we need to override existing "old" plugins
+                    try {
+                        newPlugin.uploadTo(jenkins, injector, null);
+                    } catch (IOException | ArtifactResolutionException e) {
+                        throw new AssertionError("Failed to upload plugin: " + newPlugin, e);
                     }
-                } catch (IOException | ArtifactResolutionException e) {
-                    throw new AssertionError("Failed to upload plugin: " + newPlugin, e);
                 }
             }
 
+            // plugin deployment happens asynchronously, so give it a few seconds
+            // for it to finish deploying
             // TODO: Use better detection if this is actually necessary
-            if (!isInstalled(shortNames)) {
+            try {
+                waitForCond(new Callable<Boolean>() {
+                    @Override
+                    public Boolean call() throws Exception {
+                        return isInstalled(specs);
+                    }
+                }, 5);
+            } catch (TimeoutException e) {
                 jenkins.restart();
             }
         } else {
@@ -149,22 +182,34 @@ public class PluginManager extends ContainerPageObject {
      * Generates a map with shortNames and version.
      * Version is null if not declared.
      *
-     * @param wpValues Values of the WithPlugin annotation
+     * @param specs Values of the {@link WithPlugins} annotation
      * @return Map with Key:shortName Value:Version
      */
-    private Map<String, String> getMapShortNamesVersion(String... wpValues) {
+    private Map<String, String> getMapShortNamesVersion(String... specs) {
         Map<String, String> shortNamesVersion = new HashMap<>();
-        for (String wpValue : wpValues) {
-            PluginCoordinates coord = new PluginCoordinates(wpValue);
+        for (String s : specs) {
+            PluginSpec coord = new PluginSpec(s);
             shortNamesVersion.put(coord.getName(), coord.getVersion());
         }
         return shortNamesVersion;
     }
 
-    public static class PluginCoordinates {
+    /**
+     * Reference to a plugin, optionally with the version.
+     *
+     * The string syntax of this is shortName[@version].
+     */
+    public static class PluginSpec {
+        /**
+         * Short name of the plugin.
+         */
         private final @Nonnull String name;
+        /**
+         * Optional version.
+         */
         private final String version;
-        public PluginCoordinates(String coordinates) {
+
+        public PluginSpec(String coordinates) {
             Iterator<String> spliter = Splitter.on("@").split(coordinates).iterator();
             name = spliter.next();
             version = spliter.hasNext()
@@ -173,11 +218,11 @@ public class PluginManager extends ContainerPageObject {
             ;
         }
 
-        public String getName() {
+        public @Nonnull String getName() {
             return name;
         }
 
-        public String getVersion() {
+        public @Nullable String getVersion() {
             return version;
         }
     }

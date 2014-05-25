@@ -145,11 +145,7 @@ public class SshSlaveController extends SlaveController {
 
         s.find(by.input("_.host")).sendKeys(host);
 
-        try {
-            Thread.sleep(25);
-        } catch (InterruptedException e) {
-            // ignore
-        }
+        sleep(25);
 
         final Select cId = new Select(s.find(by.input("_.credentialsId")));
         final String credentialName = String.format("%s (%s)", machine.getUser(), fingerprint);
@@ -162,7 +158,7 @@ public class SshSlaveController extends SlaveController {
                 }
                 return false;
             }
-        }, 30);
+        });
         cId.selectByVisibleText(credentialName);
         s.setExecutors(1);
 

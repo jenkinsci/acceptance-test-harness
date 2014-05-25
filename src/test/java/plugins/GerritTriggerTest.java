@@ -39,6 +39,7 @@ import java.util.regex.Pattern;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
 
@@ -52,7 +53,6 @@ import static org.junit.Assume.assumeTrue;
  * - gtUserhome=/home/companion<br>
  * Plus,<br>
  * - gtUserhome/.netrc shall point to that gtHostname with gtGerrituser/pwd<br>
- * - http_proxy might need to be set, if no gerrit-trigger plugin pre-installed.
  *
  * @author Marco.Miller@ericsson.com
  */
@@ -94,18 +94,18 @@ public class GerritTriggerTest extends AbstractJUnitTest {
         }
     }
 
-    private String pushChangeForReview(String jobName) throws InterruptedException, IOException {
-        File dir = File.createTempFile("jenkins", "git");
-        dir.delete();
-        assertThat(dir.mkdir(), is(true));
+    private String pushChangeForReview(String jobName) throws InterruptedException,IOException {
+        File dir = File.createTempFile("jenkins","git");
+        dir.delete();//result !needed
+        assertTrue(dir.mkdir());
         String user = GerritTriggerEnv.getInstance().getGerritUser();
         String hostName = GerritTriggerEnv.getInstance().getHostName();
         String project = GerritTriggerEnv.getInstance().getProject();
 
         assertThat(new ProcessBuilder("git", "clone", "ssh://" + user + "@" + hostName + ":29418/" + project, jobName).directory(dir).start().waitFor(), is(equalTo(0)));
 
-        File file = new File(dir + "/" + jobName, jobName);
-        file.delete();
+        File file = new File(dir+"/"+jobName,jobName);
+        file.delete();//result !needed
         BufferedWriter writer = new BufferedWriter(new FileWriter(file));
         writer.write(String.valueOf(System.currentTimeMillis()));
         writer.close();
