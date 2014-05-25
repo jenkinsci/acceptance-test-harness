@@ -16,4 +16,8 @@ public abstract class AbstractCodeStylePluginPostBuildStep extends AbstractStep 
     public AbstractCodeStylePluginPostBuildStep(Job parent, String path) {
         super(parent, path);
     }
+
+    public Control getPattern() {
+        return pattern;
+    }
 }
