@@ -1,7 +1,9 @@
 package plugins;
 
 import java.util.*;
+import java.util.regex.Pattern;
 
+import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Bug;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
@@ -334,20 +336,15 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         // wait for the build on slave 1 to finish
         b.waitUntilFinished();
 
-        //get back to the job's page otherwise we do not have the build history summary to evaluate their content
-        j.visit(""); //equivalent to: jenkins.visit("jobs/"+j.name);
-
         //ensure that the build on the online slave has been done
         j.shouldHaveBuiltOn(s1);
 
         //use scheduleBuild instead of startBuild to avoid a timeout waiting for Build being started
         b = j.scheduleBuild(singletonMap("slavename", s2.getName()));
 
-        String pendingBuildText = find(by.xpath("//img[@alt='pending']/../..")).getText();
-        String refText=String.format("(pending—All nodes of label ‘Job triggered without a valid online node, given where: %s’ are offline)",s2.getName());
-
-        assertThat(pendingBuildText.contains(refText), is(true));
-        assertThat(!b.hasStarted(),is(true));
+        waitFor(by.href("/queue/cancelItem?id=2")); // shown in queue
+        sleep(10000); // after some time
+        assertThat(j.open(), Matchers.hasContent(Pattern.compile("pending—All nodes of label ‘.*’ are offline")));
     }
 
     /**
