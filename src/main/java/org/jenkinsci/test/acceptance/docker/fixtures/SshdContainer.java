@@ -18,37 +18,41 @@ import static java.nio.file.attribute.PosixFilePermission.*;
  *
  * @author Kohsuke Kawaguchi
  */
-@DockerFixture(id="sshd",ports=22,bindIp="127.0.0.5")
+@DockerFixture(id = "sshd", ports = 22, bindIp = "127.0.0.5")
 public class SshdContainer extends DockerContainer {
     File privateKey;
     File privateKeyEnc;
 
     /**
-     * Get plaintext Private Key
-     * @return
-     * @throws IOException
+     * Get plaintext Private Key File
      */
-    public File getPrivateKey() throws IOException {
-        if (privateKey==null) {
-            privateKey = File.createTempFile("ssh", "key");
-            privateKey.deleteOnExit();
-            FileUtils.copyURLToFile(resource("unsafe").url,privateKey);
-            Files.setPosixFilePermissions(privateKey.toPath(), EnumSet.of(OWNER_READ));
+    public File getPrivateKey() {
+        if (privateKey == null) {
+            try {
+                privateKey = File.createTempFile("ssh", "key");
+                privateKey.deleteOnExit();
+                FileUtils.copyURLToFile(resource("unsafe").url, privateKey);
+                Files.setPosixFilePermissions(privateKey.toPath(), EnumSet.of(OWNER_READ));
+            } catch (IOException e) {
+                throw new RuntimeException("Not able to get the plaintext SSH key file. Missing file, wrong file permissions?!");
+            }
         }
         return privateKey;
     }
 
     /**
-     * Get encrypted Private Key
-     * @return
-     * @throws IOException
+     * Get encrypted Private Key File
      */
-    public File getEncryptedPrivateKey() throws IOException {
-        if (privateKeyEnc==null) {
-            privateKeyEnc = File.createTempFile("ssh_enc", "key");
-            privateKeyEnc.deleteOnExit();
-            FileUtils.copyURLToFile(resource("unsafe_enc_key").url,privateKeyEnc);
-            Files.setPosixFilePermissions(privateKeyEnc.toPath(), EnumSet.of(OWNER_READ));
+    public File getEncryptedPrivateKey() {
+        if (privateKeyEnc == null) {
+            try {
+                privateKeyEnc = File.createTempFile("ssh_enc", "key");
+                privateKeyEnc.deleteOnExit();
+                FileUtils.copyURLToFile(resource("unsafe_enc_key").url, privateKeyEnc);
+                Files.setPosixFilePermissions(privateKeyEnc.toPath(), EnumSet.of(OWNER_READ));
+            } catch (IOException e) {
+                throw new RuntimeException("Not able to get the encrypted SSH key file. Missing file, wrong file permissions?!");
+            }
         }
         return privateKeyEnc;
     }
@@ -58,7 +62,7 @@ public class SshdContainer extends DockerContainer {
      */
     public CommandBuilder ssh() throws IOException, InterruptedException {
         return new CommandBuilder("ssh")
-                .add("-p",port(22),"-o","StrictHostKeyChecking=no","-i",getPrivateKey(),"test@localhost");
+                .add("-p", port(22), "-o", "StrictHostKeyChecking=no", "-i", getPrivateKey(), "test@localhost");
     }
 
 
@@ -76,8 +80,8 @@ public class SshdContainer extends DockerContainer {
      * Login with SSH public key and run some command.
      */
     public void sshWithPublicKey(CommandBuilder cmd) throws IOException, InterruptedException {
-        if (ssh().add(cmd).system()!=0)
-            throw new AssertionError("ssh failed: "+cmd);
+        if (ssh().add(cmd).system() != 0)
+            throw new AssertionError("ssh failed: " + cmd);
     }
 
     public ProcessInputStream popen(CommandBuilder cmd) throws IOException, InterruptedException {

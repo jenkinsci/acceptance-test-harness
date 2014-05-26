@@ -1,6 +1,5 @@
 package org.jenkinsci.test.acceptance.plugins.publish_over_ssh;
 
-import com.google.inject.Injector;
 import org.jenkinsci.test.acceptance.po.*;
 
 /**
@@ -17,8 +16,8 @@ public class PublishOverSSHPublisher extends PostBuildStep {
     public final Control advancedServer = control("advanced-button");
 
     public final Control delete = control("repeatable-delete");
-
-    private static int counter = 1;
+    // is used to count how many publishers were added
+    private static int publisherCounter = 1;
 
 
     public Publishers setPublishers() {
@@ -28,8 +27,8 @@ public class PublishOverSSHPublisher extends PostBuildStep {
 
     public Publishers addPublishers() {
         addServer.click();
-        String p = last(by.xpath(".//div[@name='publishers["+ counter +"]'][starts-with(@path,'%s/publishers["+ counter +"]')]", path)).getAttribute("path");
-        counter++;
+        String p = last(by.xpath(".//div[@name='publishers["+ publisherCounter +"]'][starts-with(@path,'%s/publishers["+ publisherCounter +"]')]", path)).getAttribute("path");
+        publisherCounter++;
         return new Publishers(page,p);
     }
 
@@ -67,7 +66,6 @@ public class PublishOverSSHPublisher extends PostBuildStep {
         public final Control remoteDirectory = control("remoteDirectory");
         // exec a command
         public final Control execCommand = control("execCommand");
-
         // more options for individual transfers
         public final Control advancedTransfer = control("advanced-button");
 
