@@ -46,18 +46,13 @@ public class SanityChecker extends AbstractWebDriverEventListener {
     }
 
     @Override
-    public void afterClickOn(WebElement element, WebDriver driver) {
-        try {
-            if (isFastPath(driver)) return;
+    public void beforeNavigateTo(String url, WebDriver driver) {
+        checkSanity(driver);
+    }
 
-            // driver.switchTo().alert() is slow (~1sec) on Firefox,
-            // so try to avoid it when we can.
-            driver.switchTo().alert();
-
-            return; // Skip checking in case there is a dialog present
-        } catch (Exception e) {
-            checkSanity(driver);
-        }
+    @Override
+    public void beforeClickOn(WebElement element, WebDriver driver) {
+        checkSanity(driver);
     }
 
     private void checkSanity(WebDriver driver) {
