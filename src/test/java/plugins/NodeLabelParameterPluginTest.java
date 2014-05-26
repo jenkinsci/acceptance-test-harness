@@ -236,7 +236,6 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         Build b = j.scheduleBuild(singletonMap("slavename", s.getName()));
         sleep(3000);    // TODO: not the best way to wait for the scheduled job to go through the queue, but a bit of wait is needed
         shouldBeTriggeredWithoutValidOnlineNode(b, s.getName());
-
     }
 
     /**
@@ -250,7 +249,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
      * successfully for the online slaves.
      * Pending builds will be reactivated as soon as the particular slave becomes online.
      */
-    @Test @Bug("23014") @Ignore("Until JENKINS-23014 is fixed")
+    @Test
     public void run_on_several_online_and_offline_slaves() throws Exception {
         FreeStyleJob j = jenkins.jobs.create();
 
@@ -271,28 +270,21 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         assertThat(s2.isOnline(), is(false));
         assertThat(s1.isOnline(), is(true));
 
-        //select both slaves for this build, it should succeed due the online slave
+        //select both slaves for this build
         Build b = j.startBuild(singletonMap("slavename", s1.getName()+","+s2.getName())).shouldSucceed();
 
-        // wait for the build on slave 1 to finish
-        //b.waitUntilFinished();
-
-        // check that the build is also pending for the other slave
-        shouldBePendingForNodeParameter(b, s2.getName());
-
         //ensure that the build on the online slave has been done
+        assertEquals(1, j.getLastBuild().waitUntilFinished().getNumber());
         j.shouldHaveBuiltOn(s1);
+
+        assertThat(j.open(), Matchers.hasContent(s2.getName() + " is offline"));
 
         //bring second slave online again
         s2.markOnline();
         assertThat(s2.isOnline(), is(true));
 
-        b.waitUntilFinished();
+        assertEquals(2, j.getLastBuild().waitUntilFinished().getNumber());
         j.shouldHaveBuiltOn(s2);
-
-        //check that 2 builds have been created in total
-        assertThat(j.getNextBuildNumber(), is(3));
-
     }
 
     /**
