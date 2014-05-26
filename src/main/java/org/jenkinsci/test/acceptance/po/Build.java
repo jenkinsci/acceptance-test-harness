@@ -6,7 +6,6 @@ import org.apache.commons.io.IOUtils;
 import org.hamcrest.Description;
 import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.Matchers;
-import org.jenkinsci.test.acceptance.plugins.nodelabelparameter.NodeParameter;
 import org.openqa.selenium.WebElement;
 
 import java.io.IOException;
@@ -185,57 +184,6 @@ public class Build extends ContainerPageObject {
     public Build shouldBeUnstable() {
         assertThat(this, resultIs("UNSTABLE"));
         return this;
-    }
-
-    /**
-     * This function tries to assert that the current build is pending for a certain
-     * node using a NodeParameter. The node's name has to be specified when calling this method.
-     */
-    public Build shouldBePendingForNodeParameter(String nodename){
-        String paramname = "";
-        Parameter param;
-
-        //as a job can have multiple parameters, get the NodeParameter to determine its name
-        for (int i = 0; i < this.job.getParameters().size(); i++) {
-            param = this.job.getParameters().get(i);
-            if ( param  instanceof NodeParameter )
-                paramname = param.getName();
-        }
-
-        String pendingBuildText = this.getPendingBuildText();
-        String expectedText=String.format("(pending—%s is offline) [NodeParameterValue: %s=%s]",nodename,paramname,nodename);
-        assertThat(pendingBuildText, containsString(expectedText));
-        assertThat(this.hasStarted(), is(false));
-
-        return this;
-    }
-
-    /**
-     * This function tries to assert that the current build is pending due there are no
-     * valid online nodes. The node's name has to be specified when calling this method.
-     */
-    public Build shouldBeTriggeredWithoutValidOnlineNode(String nodename)
-    {
-        String pendingBuildText = this.getPendingBuildText();
-        String expectedText=String.format("(pending—All nodes of label ‘Job triggered without a valid online node, given where: %s’ are offline)",nodename);
-        assertThat(pendingBuildText, containsString(expectedText));
-        assertThat(this.hasStarted(), is(false));
-
-        return this;
-    }
-
-    /**
-     * This function extracts a pending build message out of the build history summary if there is one.
-     */
-    public String getPendingBuildText(){
-        //ensure to be on the job's page otherwise we do not have the build history summary
-        // to get their content
-        this.job.visit("");
-
-        // pending message comes from the queue, and queue's maintenance is asynchronous to UI threads.
-        // so if the original response doesn't contain it, we have to wait for the refersh of the build history.
-        // so give it a bigger wait.
-        return find(by.xpath("//img[@alt='pending']/../..")).getText();
     }
 
     private Matcher<Build> resultIs(final String expected) {

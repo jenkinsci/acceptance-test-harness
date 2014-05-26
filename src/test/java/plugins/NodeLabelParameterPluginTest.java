@@ -71,7 +71,6 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
      * It is expected that all nodes are available for the build job.
      * The default node shall be preselected and the job shall be built on the available slave.
      */
-
     @Test
     public void build_with_preselected_node() throws Exception {
         FreeStyleJob j = jenkins.jobs.create();
@@ -179,7 +178,6 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
      * It is expected that the job is pending due to the offline status of the slave.
      * But it will be reactivated as soon as the slave status becomes online.
      */
-
     @Test
     public void run_on_a_particular_offline_slave() throws Exception {
         FreeStyleJob j = jenkins.jobs.create();
@@ -200,7 +198,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         //use scheduleBuild instead of startBuild to avoid a timeout waiting for Build being started
         Build b = j.scheduleBuild(singletonMap("slavename", s.getName()));
         sleep(3000);    // TODO: not the best way to wait for the scheduled job to go through the queue, but a bit of wait is needed
-        b.shouldBePendingForNodeParameter(s.getName());
+        shouldBePendingForNodeParameter(b, s.getName());
 
         //bring the slave up again, the Build should start immediately
         s.markOnline();
@@ -237,7 +235,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         //use scheduleBuild instead of startBuild to avoid a timeout waiting for Build being started
         Build b = j.scheduleBuild(singletonMap("slavename", s.getName()));
         sleep(3000);    // TODO: not the best way to wait for the scheduled job to go through the queue, but a bit of wait is needed
-        b.shouldBeTriggeredWithoutValidOnlineNode(s.getName());
+        shouldBeTriggeredWithoutValidOnlineNode(b, s.getName());
 
     }
 
@@ -252,7 +250,6 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
      * successfully for the online slaves.
      * Pending builds will be reactivated as soon as the particular slave becomes online.
      */
-
     @Test @Bug("23014") @Ignore("Until JENKINS-23014 is fixed")
     public void run_on_several_online_and_offline_slaves() throws Exception {
         FreeStyleJob j = jenkins.jobs.create();
@@ -281,7 +278,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         //b.waitUntilFinished();
 
         // check that the build is also pending for the other slave
-        b.shouldBePendingForNodeParameter(s2.getName());
+        shouldBePendingForNodeParameter(b, s2.getName());
 
         //ensure that the build on the online slave has been done
         j.shouldHaveBuiltOn(s1);
@@ -308,7 +305,6 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
      * slaves selected. The build shall be pending as there is no valid online slave.
      * Pending builds will be reactivated as soon as the particular slave becomes online.
      */
-
     @Test
     public void pending_build_with_no_valid_node() throws Exception {
         FreeStyleJob j = jenkins.jobs.create();
@@ -355,7 +351,6 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
      * As a build can fail in different stages this test simulates a FAILED result
      * during the main build action.
      */
-
     @Test
     public void trigger_if_succeeds_with_failed_main_build() throws Exception {
         FreeStyleJob j = jenkins.jobs.create();
@@ -404,7 +399,6 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
      *
      * Note that in this case the main build action is still completed with status SUCCESS.
      */
-
     @Test @WithPlugins("text-finder") @Bug("23129") @Ignore("Until JENKINS-23129 is fixed")
     public void trigger_if_succeeds_with_failed_post_build_step() throws Exception {
         FreeStyleJob j = jenkins.jobs.create();
@@ -458,7 +452,6 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
      *
      * Note that in this case the main build action is still completed with status SUCCESS.
      */
-
     @Test @Bug("23129") @Ignore("Until JENKINS-23129 is fixed")
     public void trigger_if_succeeds_with_unstable_post_build_step() throws Exception {
         FreeStyleJob j = jenkins.jobs.create();
@@ -552,5 +545,51 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         j.shouldHaveBuiltOn(s1);
 
         assertThat(j.getNextBuildNumber(), is(3));
+    }
+
+    /**
+     * This function tries to assert that the current build is pending for a certain
+     * node using a NodeParameter. The node's name has to be specified when calling this method.
+     */
+    private void shouldBePendingForNodeParameter(Build build, String nodename) {
+        String paramname = "";
+        Parameter param;
+
+        //as a job can have multiple parameters, get the NodeParameter to determine its name
+        for (int i = 0; i < build.job.getParameters().size(); i++) {
+            param = build.job.getParameters().get(i);
+            if ( param  instanceof NodeParameter )
+                paramname = param.getName();
+        }
+
+        String pendingBuildText = getPendingBuildText(build);
+        String expectedText=String.format("(pending—%s is offline) [NodeParameterValue: %s=%s]",nodename,paramname,nodename);
+        assertThat(pendingBuildText, containsString(expectedText));
+        assertThat(build.hasStarted(), is(false));
+    }
+
+    /**
+     * This function tries to assert that the current build is pending due there are no
+     * valid online nodes. The node's name has to be specified when calling this method.
+     */
+    private void shouldBeTriggeredWithoutValidOnlineNode(Build build, String nodename) {
+        String pendingBuildText = getPendingBuildText(build);
+        String expectedText=String.format("(pending—All nodes of label ‘Job triggered without a valid online node, given where: %s’ are offline)",nodename);
+        assertThat(pendingBuildText, containsString(expectedText));
+        assertThat(build.hasStarted(), is(false));
+    }
+
+    /**
+     * Get pending build message in build history summary if there is one.
+     */
+    private String getPendingBuildText(Build build){
+        //ensure to be on the job's page otherwise we do not have the build history summary
+        // to get their content
+        build.job.open();
+
+        // pending message comes from the queue, and queue's maintenance is asynchronous to UI threads.
+        // so if the original response doesn't contain it, we have to wait for the refersh of the build history.
+        // so give it a bigger wait.
+        return find(by.xpath("//img[@alt='pending']/../..")).getText();
     }
 }
