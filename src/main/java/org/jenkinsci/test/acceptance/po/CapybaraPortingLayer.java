@@ -96,6 +96,9 @@ public class CapybaraPortingLayer extends Assert {
                     return null;
                 }
             }
+            @Override public String toString() {
+                return String.format("Element matching %s is present", selector.toString());
+            }
         }, timeoutSec);
     }
 
