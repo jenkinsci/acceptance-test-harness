@@ -102,6 +102,7 @@ public class Subversion_Version154_PluginTest extends AbstractJUnitTest {
      * Scenario: http:// user/pwd basic Checkout
      * Given I have installed the "subversion" plugin
      * And a job
+     * And I add a shell build step "test -d .svn"
      * When I check out code from protected Subversion repository "UrlUserPwdSaveRepo"
      * And I click the link to enter credentials
      * And I enter the right username and the right password
@@ -109,13 +110,14 @@ public class Subversion_Version154_PluginTest extends AbstractJUnitTest {
      * And I save the job
      * And I build the job
      * Then the build should succeed
+     * And console output should contain "test -d .svn"
      */
     @Test
     public void run_basic_subversion_build_userPwd() throws SubversionPluginTestException, InterruptedException {
         final SvnContainer svnContainer = svn.get();
 
         final FreeStyleJob f = jenkins.jobs.create();
-
+        f.addShellStep("test -d .svn");
         final SubversionScm subversionScm = f.useScm(SubversionScm.class);
         subversionScm.url.set(svnContainer.getUrlUserPwdSaveRepo());
 
@@ -125,7 +127,7 @@ public class Subversion_Version154_PluginTest extends AbstractJUnitTest {
         credentialPage.confirmDialog();
         f.save();
 
-        f.startBuild().shouldSucceed();
+        f.startBuild().shouldSucceed().shouldContainsConsoleOutput("test -d .svn");
 
     }
 
@@ -133,6 +135,7 @@ public class Subversion_Version154_PluginTest extends AbstractJUnitTest {
      * Scenario:basic Checkout with svn protocol user/pwd
      * Given I have installed the "subversion" plugin
      * And a job
+     * And I add a shell build step "test -d .svn"
      * When I check out code from protected Subversion repository "SvnUrl"
      * And I click the link to enter credentials
      * And I enter the right username and the right password
@@ -140,13 +143,14 @@ public class Subversion_Version154_PluginTest extends AbstractJUnitTest {
      * And I save the job
      * And I build the job
      * Then the build should succeed
+     * And console output should contain "test -d .svn"
      */
     @Test
     public void run_basic_subversion_build_svn_userPwd() throws SubversionPluginTestException {
         final SvnContainer svnContainer = svn.get();
 
         final FreeStyleJob f = jenkins.jobs.create();
-
+        f.addShellStep("test -d .svn");
         final SubversionScm subversionScm = f.useScm(SubversionScm.class);
         subversionScm.url.set(svnContainer.getSvnUrl());
 
@@ -156,7 +160,7 @@ public class Subversion_Version154_PluginTest extends AbstractJUnitTest {
         credentialPage.confirmDialog();
         f.save();
 
-        f.startBuild().shouldSucceed();
+        f.startBuild().shouldSucceed().shouldContainsConsoleOutput("test -d .svn");
 
     }
 

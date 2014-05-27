@@ -101,10 +101,12 @@ public class SubversionPluginTest extends AbstractJUnitTest {
      * Given I have installed the "subversion" plugin
      * And I have added the right username and password for svn as credentials
      * And a job
+     * And I add a shell build step "test -d .svn"
      * When I check out code from protected Subversion repository "SvnUrl"
      * And I save the job
      * And I build the job
      * Then the build should succeed
+     * And console output should contain "test -d .svn"
      */
     @Test
     @WithCredentials(credentialType = WithCredentials.USERNAME_PASSWORD, values = {SvnContainer.USER, SvnContainer.PWD})
@@ -112,13 +114,14 @@ public class SubversionPluginTest extends AbstractJUnitTest {
         final SvnContainer svnContainer = svn.get();
 
         final FreeStyleJob f = jenkins.jobs.create();
+        f.addShellStep("test -d .svn");
 
         final SubversionScm subversionScm = f.useScm(SubversionScm.class);
         subversionScm.url.set(svnContainer.getUrlUserPwdSaveRepo());
         subversionScm.credentials.select(SvnContainer.USER);
         f.save();
 
-        f.startBuild().shouldSucceed();
+        f.startBuild().shouldSucceed().shouldContainsConsoleOutput("test -d .svn");
     }
 
 
@@ -127,10 +130,12 @@ public class SubversionPluginTest extends AbstractJUnitTest {
      * Given I have installed the "subversion" plugin
      * And I have added the right username and password for svn as credentials
      * And a job
+     * And I add a shell build step "test -d .svn"
      * When I check out code from protected Subversion repository "SvnUrl"
      * And I save the job
      * And I build the job
      * Then the build should succeed
+     * And console output should contain "test -d .svn"
      */
     @Test
     @WithCredentials(credentialType = WithCredentials.USERNAME_PASSWORD, values = {SvnContainer.USER, SvnContainer.PWD})
@@ -138,12 +143,12 @@ public class SubversionPluginTest extends AbstractJUnitTest {
         final SvnContainer svnContainer = svn.get();
 
         final FreeStyleJob f = jenkins.jobs.create();
-
+        f.addShellStep("test -d .svn");
         final SubversionScm subversionScm = f.useScm(SubversionScm.class);
         subversionScm.url.set(svnContainer.getSvnUrl());
         subversionScm.credentials.select(SvnContainer.USER);
         f.save();
 
-        f.startBuild().shouldSucceed();
+        f.startBuild().shouldSucceed().shouldContainsConsoleOutput("test -d .svn");
     }
 }
