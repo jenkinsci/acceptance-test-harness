@@ -70,6 +70,10 @@ public class SanityChecker extends AbstractWebDriverEventListener {
 
             throw new AssertionError("Jenkins error detected:\n" + trace);
         }
+
+        if (driver.getPageSource().contains("HTTP ERROR 404")) {
+            throw new AssertionError("Jenkins error detected:\n" + driver.findElement(By.cssSelector("body")).getText());
+        }
     }
 
     /**
@@ -80,6 +84,7 @@ public class SanityChecker extends AbstractWebDriverEventListener {
      * and reduces the overhead of {@link SanityChecker}.
      */
     private boolean isFastPath(WebDriver driver) {
-        return !driver.getPageSource().contains("Oops!");
+        String source = driver.getPageSource();
+        return !source.contains("Oops!") && !source.contains("HTTP ERROR 404");
     }
 }
