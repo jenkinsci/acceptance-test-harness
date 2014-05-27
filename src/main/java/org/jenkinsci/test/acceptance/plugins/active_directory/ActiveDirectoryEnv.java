@@ -27,7 +27,7 @@ import static org.junit.Assume.assumeNotNull;
 
 /**
  * Thread-unsafe singleton serving ad-prefixed test env args.
- * @author Marco Miller
+ * @author Marco.Miller@ericsson.com
  */
 public class ActiveDirectoryEnv {
 
@@ -49,7 +49,7 @@ public class ActiveDirectoryEnv {
         user = System.getenv("adUser");
     }
 
-    public static ActiveDirectoryEnv getInstance() {
+    public static ActiveDirectoryEnv get() {
         if(instance == null) {
             instance = new ActiveDirectoryEnv();
         }

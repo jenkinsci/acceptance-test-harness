@@ -27,7 +27,7 @@ import static org.junit.Assume.assumeNotNull;
 
 /**
  * Thread-unsafe singleton serving gt-prefixed test env args.
- * @author Marco Miller
+ * @author Marco.Miller@ericsson.com
  */
 public class GerritTriggerEnv {
 
@@ -49,7 +49,7 @@ public class GerritTriggerEnv {
         noProxy = getEnvNP("gtNoProxyForHost");
     }
 
-    public static GerritTriggerEnv getInstance() {
+    public static GerritTriggerEnv get() {
         if(instance == null) {
             instance = new GerritTriggerEnv();
         }

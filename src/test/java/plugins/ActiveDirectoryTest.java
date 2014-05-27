@@ -25,8 +25,16 @@ package plugins;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.plugins.active_directory.ActiveDirectoryEnv;
 import org.jenkinsci.test.acceptance.plugins.active_directory.ActiveDirectorySecurity;
+import org.jenkinsci.test.acceptance.plugins.active_directory.ActiveDirectorySecurityRealm;
+import org.jenkinsci.test.acceptance.plugins.matrix_auth.MatrixRow;
+import org.jenkinsci.test.acceptance.plugins.matrix_auth.ProjectBasedMatrixAuthorizationStrategy;
+import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.WebElement;
 
 /**
  * Set these (data) at mvn-test command line to use this test:<br>
@@ -49,25 +57,53 @@ import org.junit.Test;
  */
 @WithPlugins("active-directory")
 public class ActiveDirectoryTest extends AbstractJUnitTest {
+    private ActiveDirectorySecurity adSecurity;
+
+    @Before
+    public void setUp() {
+        adSecurity = new ActiveDirectorySecurity(jenkins);
+    }
 
     /**
-     * Scenario: User can administer Jenkins after AD security configured-<br>
+     * Scenario: user can log-in to Jenkins as admin after AD security configured-<br>
      * Given a Jenkins instance that is of type=existing<br>
      *  And a pre-installed active-directory plugin version 1.34 (1.37 failed)<br>
-     *  And an AD security configuration that is matrix-based (project or not)<br>
+     *  And an AD security configuration that is matrix-based (project)<br>
      *  And a user added to that matrix so she can Administer<br>
      * When I save such an AD security configuration<br>
-     * Then that Admin user can log-in to that Jenkins<br>
-     *  And she can view her user with Administer set.
+     * Then that user can log-in to that Jenkins as admin.
      */
     @Test
-    public void user_can_administer_Jenkins_after_AD_security_configured() {
-        ActiveDirectorySecurity secConfig = new ActiveDirectorySecurity(jenkins);
-        assertTrue(secConfig.successfullySaveSecurityConfig());
+    public void user_can_login_to_Jenkins_as_admin_after_AD_security_configured() {
+        GlobalSecurityConfig security = new GlobalSecurityConfig(jenkins);
+        security.configure();//open
+        ActiveDirectorySecurityRealm realm = security.useRealm(ActiveDirectorySecurityRealm.class);
+        realm.configure();
+        ProjectBasedMatrixAuthorizationStrategy auth = security.useAuthorizationStrategy(ProjectBasedMatrixAuthorizationStrategy.class);
+        MatrixRow userAuth = auth.addUser(ActiveDirectoryEnv.get().getUser());
+        userAuth.admin();
+        security.save();
+        doLoginDespiteNoPathsThenWaitForLdap();
+        security.configure();
+        WebElement domain = getElement(by.name("_.domain"));
+        assertNotNull(domain);
+        assertEquals(ActiveDirectoryEnv.get().getDomain(),domain.getAttribute("value"));
     }
 
     /**
      * Scenario: TODO add-ing test(s) for user/group; work in progress
      */
     //@Test
+
+    @After
+    public void tearDown() {
+        adSecurity.stopUsingSecurityAndSave();
+    }
+
+    private void doLoginDespiteNoPathsThenWaitForLdap() {
+        jenkins.login();//TODO .doLogin() fails w/ my 1.554.1 => this method
+        driver.findElement(by.name("j_username")).sendKeys(ActiveDirectoryEnv.get().getUser());
+        driver.findElement(by.name("j_password")).sendKeys(ActiveDirectoryEnv.get().getPassword());
+        clickButton("log in");
+    }
 }
