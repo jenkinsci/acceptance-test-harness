@@ -6,11 +6,14 @@ import org.apache.commons.io.IOUtils;
 import org.hamcrest.Description;
 import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.Matchers;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
@@ -164,6 +167,18 @@ public class Build extends ContainerPageObject {
 
     public Artifact getArtifact(String artifact) {
         return new Artifact(this,url("artifact/%s",artifact));
+    }
+
+    public List<Artifact> getArtifacts() {
+        WebDriver artifact = visit(url("artifact"));
+        List<WebElement> fileList = artifact.findElements(By.cssSelector("table.fileList td:nth-child(2) a"));
+        List<Artifact> list = new LinkedList<>();
+        for (WebElement el : fileList) {
+            if("a".equalsIgnoreCase(el.getTagName())) {
+                list.add(getArtifact(el.getText()));
+            }
+        }
+        return list;
     }
 
     public Build shouldSucceed() {
