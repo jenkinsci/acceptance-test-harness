@@ -79,10 +79,10 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         j.configure();
         NodeParameter p = j.addParameter(NodeParameter.class);
         p.setName("slavename");
-        p.defaultNodesSelection.findElement(by.option(s.getName())).click();
+        p.defaultNodes.select(s.getName());
         p.allowedNodes.select("ALL (no restriction)");
         p.disallowMultiple.check();
-        p.allNodes.click();
+
         j.save();
 
         visit(j.getBuildUrl());
@@ -188,7 +188,6 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         NodeParameter p = j.addParameter(NodeParameter.class);
         p.setName("slavename");
         p.disallowMultiple.check();
-        p.allNodes.click();
         j.save();
 
         //as the slave has been started after creation, we have to take it down again
@@ -224,7 +223,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         NodeParameter p = j.addParameter(NodeParameter.class);
         p.setName("slavename");
         p.disallowMultiple.check();
-        p.ignoreOffline.click();
+        p.eligibility.select("Ignore Offline Nodes");
 
         j.save();
 
@@ -259,7 +258,6 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         j.configure();
         NodeParameter p = j.addParameter(NodeParameter.class);
         p.setName("slavename");
-        p.allNodes.click();
         p.allowMultiple.check();
         j.concurrentBuild.check();
 
@@ -309,7 +307,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         p.setName("slavename");
         p.allowMultiple.check();
         j.concurrentBuild.check();
-        p.ignoreOffline.click();
+        p.eligibility.select("Ignore Offline Nodes");
 
         j.save();
 
@@ -357,7 +355,6 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         // set up the node parameter
         NodeParameter p = j.addParameter(NodeParameter.class);
         p.setName("slavename");
-        p.allNodes.click();
         p.runIfSuccess.check();
 
         //ensure the main build fails by using a shell exit command
@@ -405,7 +402,6 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         // set up the node parameter
         NodeParameter p = j.addParameter(NodeParameter.class);
         p.setName("slavename");
-        p.allNodes.click();
         p.runIfSuccess.check();
 
         // copy the file to mark the status
@@ -458,7 +454,6 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         // set up the node parameter
         NodeParameter p = j.addParameter(NodeParameter.class);
         p.setName("slavename");
-        p.allNodes.click();
         p.runIfSuccess.check();
 
         // copy the unit test results
