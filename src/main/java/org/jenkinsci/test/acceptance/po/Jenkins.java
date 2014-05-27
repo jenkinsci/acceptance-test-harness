@@ -88,6 +88,13 @@ public class Jenkins extends Node {
     }
 
     /**
+     * Visit logout URL.
+     */
+    public void logout(){
+        visit(new Logout(this).url);
+    }
+
+    /**
      * Access the plugin manager page object
      */
     public PluginManager getPluginManager() {
