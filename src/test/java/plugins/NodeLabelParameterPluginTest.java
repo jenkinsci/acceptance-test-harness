@@ -21,7 +21,7 @@ import org.openqa.selenium.WebElement;
 import com.google.inject.Inject;
 
 import static java.util.Collections.*;
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.*;
 
 /**
  Feature: Use node name and label as parameter
@@ -80,7 +80,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         NodeParameter p = j.addParameter(NodeParameter.class);
         p.setName("slavename");
         p.defaultNodesSelection.findElement(by.option(s.getName())).click();
-        p.possibleNodesSelection.findElement(by.option("ALL (no restriction)")).click();
+        p.allowedNodes.select("ALL (no restriction)");
         p.disallowMultiple.check();
         p.allNodes.click();
         j.save();
@@ -500,36 +500,26 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         NodeParameter p = j.addParameter(NodeParameter.class);
         p.setName("slavename");
 
-        //check that the slaves are available in the "Possible Nodes" selection box
-        //default items are Master and ALL
-        List<WebElement> possibleNodes = p.getPossibleNodesOptions();
-        assertThat("Amount of possible nodes does not match.", possibleNodes.size(), is(4) );
+        // master, ALL + 2 slaves
+        assertThat("Amount of possible nodes does not match", p.getPossibleNodesOptions().size(), is(4));
 
-        //multi node selection
         p.allowMultiple.check();
-        //node restriction master and slave1
-        possibleNodes.get(1).click();
-        possibleNodes.get(2).click();
+        p.allowedNodes.select("master");
+        p.allowedNodes.select(s1.getName());
 
-        //enable concurrent builds
         j.concurrentBuild.check();
-
         j.save();
 
-        //check that slaves are online
-        assertThat(s1.isOnline(), is(true) );
-        assertThat(s2.isOnline(), is(true) );
+        assertThat(s1.isOnline(), is(true));
+        assertThat(s2.isOnline(), is(true));
 
         //checks that build selection box only contains the possible nodes
         visit(j.getBuildUrl());
-        WebElement selectionBox = find(by.xpath("//select[@name='labels']"));
-        List<WebElement> selectionNodes = selectionBox.findElements(by.tagName("option"));
+        List<String> slaves = p.applicableNodes();
+        assertThat("Amount of selectable nodes", slaves.size(), is(2));
+        assertThat(slaves, containsInAnyOrder("master", s1.getName()));
 
-        assertThat("Amount of selectable build nodes does not match.", selectionNodes.size(), is(2) );
-        assertThat("Selectable build node does not match.",  selectionNodes.get(0).getText(), equalTo( "master" ) );
-        assertThat("Selectable build node does not match.",  selectionNodes.get(1).getText(), equalTo( s1.getName() ) );
-
-        Build b = j.startBuild(singletonMap("slavename", s1.getName()+",master"));
+        j.startBuild(singletonMap("slavename", s1.getName()+",master"));
 
         j.getLastBuild().waitUntilFinished();
 

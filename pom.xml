@@ -229,6 +229,16 @@
       <version>4.11</version>
     </dependency>
     <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>hamcrest-library</artifactId>
+      <version>1.2.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>hamcrest-core</artifactId>
+      <version>1.2.1</version>
+    </dependency>
+    <dependency>
       <groupId>org.jvnet.hudson</groupId>
       <artifactId>trilead-ssh2</artifactId>
       <version>build212-hudson-6</version>
