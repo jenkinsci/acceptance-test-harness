@@ -7,14 +7,17 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.artifact.DefaultArtifact;
+import org.eclipse.aether.repository.Proxy;
 import org.eclipse.aether.repository.RemoteRepository;
 import org.eclipse.aether.resolution.ArtifactRequest;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
@@ -55,11 +58,25 @@ public class PluginMetadata {
         RepositorySystem rs = i.getInstance(RepositorySystem.class);
         RepositorySystemSession rss = i.getInstance(RepositorySystemSession.class);
 
+        RemoteRepository.Builder builder = new RemoteRepository.Builder("repo.jenkins-ci.org", "default", "http://repo.jenkins-ci.org/public/");
+        if (System.getProperty("http.proxyHost") != null) {
+            builder.setProxy(new Proxy("http",
+                    System.getProperty("http.proxyHost"),
+                    Integer.parseInt(System.getProperty("http.proxyPort"))));
+        }
         ArtifactResult r = rs.resolveArtifact(rss, new ArtifactRequest(
                 makeArtifact(version == null ? this.version : version),
-                Arrays.asList(new RemoteRepository.Builder("repo.jenkins-ci.org", "default", "http://repo.jenkins-ci.org/public/").build()),
+                Arrays.asList(builder.build()),
                 null));
-        HttpClient httpclient = new DefaultHttpClient();
+
+        HttpClientBuilder httpbuilder = HttpClientBuilder.create();
+        if (System.getProperty("http.proxyHost") != null) {
+            httpbuilder.setProxy(new HttpHost(
+                    System.getProperty("http.proxyHost"),
+                    Integer.parseInt(System.getProperty("http.proxyPort")),
+                    "http"));
+        }
+        HttpClient httpclient = httpbuilder.build();
 
         HttpPost post = new HttpPost(jenkins.url("pluginManager/uploadPlugin").toExternalForm());
         HttpEntity e = MultipartEntityBuilder.create()
