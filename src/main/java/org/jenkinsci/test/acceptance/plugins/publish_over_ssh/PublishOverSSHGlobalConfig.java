@@ -23,7 +23,7 @@ public class PublishOverSSHGlobalConfig extends PageArea {
     }
 
     public CommonConfig setCommonConfig() {
-        String p = last(by.xpath(".//tr[@name='commonConfig'][starts-with(@path,'/jenkins-plugins-publish_over_ssh-BapSshPublisherPlugin/')]")).getAttribute("path");
+        String p = lastIfNotVisible(by.xpath(".//tr[@name='commonConfig'][starts-with(@path,'/jenkins-plugins-publish_over_ssh-BapSshPublisherPlugin/')]")).getAttribute("path");
         return new CommonConfig(page,p);
     }
 

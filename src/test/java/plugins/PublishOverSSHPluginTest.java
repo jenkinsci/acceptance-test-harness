@@ -144,10 +144,6 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
         }
     }
 
-    private void assertThatFileIsCopied(File file, String string) throws IOException {
-        assertThat(FileUtils.readFileToString(file), CoreMatchers.is(string));
-    }
-
     /**
      @native(docker)
      Scenario: Configure a job with over ssh publishing
@@ -171,22 +167,21 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
 
         FreeStyleJob j = jenkins.jobs.create();
         jenkins.configure();
-        commonConfigKeyFile(sshFile, false);
+        this.commonConfigKeyFile(sshFile, false);
         InstanceSite is = this.instanceConfig(sshd);
-        advancedConfigAllowExec(is, sshd);
-        // commented for possible further test development
+        this.advancedConfigAllowExec(is,sshd);
         // delete button
         //is.delete.click();
 
         // validate input
         //is.validate.click();
         jenkins.save();
-        configureJobNoExec(j, cp_file);
+        this.configureJobNoExec(j, cp_file);
         j.save();
         j.startBuild().shouldSucceed();
 
         sshd.cp("/tmp/lorem-ipsum-scp.txt", new File("/tmp"));
-        assertThatFileIsCopied(new File("/tmp/lorem-ipsum-scp.txt"), cp_file.asText());
+        assertThat(FileUtils.readFileToString(new File("/tmp/lorem-ipsum-scp.txt")), CoreMatchers.is(cp_file.asText()));
     }
 
     /**
@@ -213,16 +208,16 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
         FreeStyleJob j = jenkins.jobs.create();
 
         jenkins.configure();
-        commonConfigKeyFileAndPassword(sshFile, false);
+        this.commonConfigKeyFileAndPassword(sshFile, false);
         InstanceSite is = this.instanceConfig(sshd);
-        advancedConfigAllowExec(is, sshd);
+        this.advancedConfigAllowExec(is,sshd);
         jenkins.save();
-        configureJobNoExec(j, cp_file);
+        this.configureJobNoExec(j, cp_file);
         j.save();
         j.startBuild().shouldSucceed();
 
         sshd.cp("/tmp/lorem-ipsum-scp.txt", new File("/tmp"));
-        assertThatFileIsCopied(new File("/tmp/lorem-ipsum-scp.txt"), cp_file.asText());
+        assertThat(FileUtils.readFileToString(new File("/tmp/lorem-ipsum-scp.txt")), CoreMatchers.is(cp_file.asText()));
     }
 
     /**
@@ -248,16 +243,16 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
         FreeStyleJob j = jenkins.jobs.create();
 
         jenkins.configure();
-        commonConfigPassword("test", false);
+        this.commonConfigPassword("test",false);
         InstanceSite is = this.instanceConfig(sshd);
-        advancedConfigAllowExec(is, sshd);
+        this.advancedConfigAllowExec(is,sshd);
         jenkins.save();
-        configureJobNoExec(j, cp_file);
+        this.configureJobNoExec(j, cp_file);
         j.save();
         j.startBuild().shouldSucceed();
 
         sshd.cp("/tmp/lorem-ipsum-scp.txt", new File("/tmp"));
-        assertThatFileIsCopied(new File("/tmp/lorem-ipsum-scp.txt"), cp_file.asText());
+        assertThat(FileUtils.readFileToString(new File("/tmp/lorem-ipsum-scp.txt")), CoreMatchers.is(cp_file.asText()));
     }
 
 
@@ -285,16 +280,16 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
         FreeStyleJob j = jenkins.jobs.create();
 
         jenkins.configure();
-        commonConfigKeyText(sshFile, false);
+        this.commonConfigKeyText(sshFile,false);
         InstanceSite is = this.instanceConfig(sshd);
-        advancedConfigAllowExec(is, sshd);
+        this.advancedConfigAllowExec(is,sshd);
         jenkins.save();
-        configureJobNoExec(j, cp_file);
+        this.configureJobNoExec(j, cp_file);
         j.save();
         j.startBuild().shouldSucceed();
 
         sshd.cp("/tmp/lorem-ipsum-scp.txt", new File("/tmp"));
-        assertThatFileIsCopied(new File("/tmp/lorem-ipsum-scp.txt"), cp_file.asText());
+        assertThat(FileUtils.readFileToString(new File("/tmp/lorem-ipsum-scp.txt")), CoreMatchers.is(cp_file.asText()));
     }
 
     /**
@@ -322,18 +317,18 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
         FreeStyleJob j = jenkins.jobs.create();
 
         jenkins.configure();
-        commonConfigKeyFileAndPassword(sshFile, false);
+        this.commonConfigKeyFileAndPassword(sshFile, false);
         InstanceSite is = this.instanceConfig(sshd);
-        advancedConfigAllowExec(is, sshd);
+        this.advancedConfigAllowExec(is,sshd);
         jenkins.save();
-        configureJobWithExec(j, cp_file);
+        this.configureJobWithExec(j, cp_file);
         j.save();
         j.startBuild().shouldSucceed();
 
         sshd.cp("/tmp/lorem-ipsum-scp.txt", new File("/tmp"));
         sshd.cp("/tmp/testecho", new File("/tmp"));
-        assertThatFileIsCopied(new File("/tmp/lorem-ipsum-scp.txt"), cp_file.asText());
-        assertThatFileIsCopied(new File("/tmp/testecho"), "i was here\n");
+        assertThat(FileUtils.readFileToString(new File("/tmp/lorem-ipsum-scp.txt")), CoreMatchers.is(cp_file.asText()));
+        assertThat(FileUtils.readFileToString(new File("/tmp/testecho")), CoreMatchers.is("i was here\n"));
 
     }
 
