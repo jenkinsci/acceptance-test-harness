@@ -31,7 +31,7 @@ import org.junit.Test;
 /**
  * Set these (data) at mvn-test command line to use this test:<br>
  * <br>
- * - adBindDN="CN=user,OU=CA,OU=User,OU=P001,OU=ID,OU=Data,DC=company,DC=com"<br>
+ * - adBindDN="CN=user,OU=CA,OU=User,OU=P001,OU=ID,OU=Data,DC=company,DC=com" (optional; none => user@domain)<br>
  * - adController=host.domain.company.com:3269 (optional)<br>
  * - adDomain=company.com<br>
  * - adPassword=pwd<br>

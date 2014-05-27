@@ -49,12 +49,7 @@ public class JenkinsConfig extends PageObject {
     public <T extends Cloud> T addCloud(Class<T> type) {
         jenkins.ensureConfigPage();
 
-        findCaption(type,new Resolver() {
-            @Override
-            protected void resolve(String caption) {
-                selectDropdownMenu(caption, addCloudButton.resolve());
-            }
-        });
+        addCloudButton.selectDropdownMenu(type);
 
         List<WebElement> all = all(by.name("cloud"));
         WebElement last = all.get(all.size()-1);

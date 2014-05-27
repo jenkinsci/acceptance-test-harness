@@ -57,13 +57,17 @@ public class Build extends ContainerPageObject {
     }
 
     public Build waitUntilStarted() {
+        return waitUntilStarted(0);
+    }
+
+    public Build waitUntilStarted(int timeout) {
         job.getJenkins().visit("");
         waitForCond(new Callable<Boolean>() {
             @Override
             public Boolean call() {
                 return hasStarted();
             }
-        });
+        },timeout);
         return this;
     }
 
@@ -178,6 +182,11 @@ public class Build extends ContainerPageObject {
         return this;
     }
 
+    public Build shouldBeUnstable() {
+        assertThat(this, resultIs("UNSTABLE"));
+        return this;
+    }
+
     /**
      * This function tries to assert that the current build is pending for a certain
      * node using a NodeParameter. The node's name has to be specified when calling this method.
@@ -222,6 +231,10 @@ public class Build extends ContainerPageObject {
         //ensure to be on the job's page otherwise we do not have the build history summary
         // to get their content
         this.job.visit("");
+
+        // pending message comes from the queue, and queue's maintenance is asynchronous to UI threads.
+        // so if the original response doesn't contain it, we have to wait for the refersh of the build history.
+        // so give it a bigger wait.
         return find(by.xpath("//img[@alt='pending']/../..")).getText();
     }
 

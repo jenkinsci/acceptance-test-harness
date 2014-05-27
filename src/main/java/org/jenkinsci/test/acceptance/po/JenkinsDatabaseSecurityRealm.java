@@ -23,7 +23,7 @@
  */
 package org.jenkinsci.test.acceptance.po;
 
-@Describable("Jenkins’ own user database")
+@Describable({"Jenkins’ own user database", "Jenkins’s own user database"})
 public class JenkinsDatabaseSecurityRealm extends SecurityRealm {
 
     public JenkinsDatabaseSecurityRealm(GlobalSecurityConfig context, String path) {

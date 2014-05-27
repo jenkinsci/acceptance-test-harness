@@ -53,7 +53,7 @@ public class JenkinsLogger extends PageObject {
     }
 
     public void waitForLogged(final Pattern pattern) {
-        waitForLogged(pattern, 30);
+        waitForLogged(pattern, 0);
     }
 
     public void waitForLogged(final Pattern pattern, final int timeout) {

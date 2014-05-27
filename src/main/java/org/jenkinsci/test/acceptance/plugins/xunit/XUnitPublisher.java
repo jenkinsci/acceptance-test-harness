@@ -19,10 +19,8 @@ public class XUnitPublisher extends PostBuildStep {
     }
 
     public Tool addTool(String kind) {
-        selectDropdownMenu(kind,addButton.resolve());
-
+        addButton.selectDropdownMenu(kind);
         String path = last(by.xpath("//div[starts-with(@path, '%s/tools')]",super.path)).getAttribute("path");
-
         return newInstance(Tool.class, page, path);
     }
 
