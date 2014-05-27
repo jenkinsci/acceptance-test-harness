@@ -110,7 +110,6 @@ public class Docker {
             File dir = File.createTempFile("Dockerfile", "dir");
             dir.delete();
             dir.mkdirs();
-
             try {
                 File jar = null;
                 try {

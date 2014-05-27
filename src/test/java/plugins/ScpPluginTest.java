@@ -104,7 +104,7 @@ public class ScpPluginTest extends AbstractJUnitTest {
             s.hostname.set(sshd.ipBound(22));
             s.port.set(sshd.port(22));
             s.username.set("test");
-            s.keyfile.set(resource("/ssh_keys/unsafe").asFile().getAbsolutePath());
+            s.keyfile.set(sshd.getPrivateKey().getAbsolutePath());
             s.rootRepositoryPath.set("/tmp");
         }
         jenkins.save();
