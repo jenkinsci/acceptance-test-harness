@@ -4,17 +4,17 @@ import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginPostBuildSte
 import org.jenkinsci.test.acceptance.po.Describable
 import org.jenkinsci.test.acceptance.po.Job
 import org.jenkinsci.test.acceptance.po.Page
-import org.jenkinsci.test.acceptance.po.PostBuildStep
 
 /**
  * Geb PageObject for PMD Publisher.
  *
- * It is compatible with the
+ * It is compatible with the java {@link org.jenkinsci.test.acceptance.po.PageArea}
+ * (acts as {@link AbstractCodeStylePluginPostBuildStep}).
  *
  * @author christian.fritz
  */
 @Describable("Publish PMD analysis results")
-class PmdGebPublisher extends Page implements PostBuildStep {
+class PmdGebPublisher extends Page {
 
     static content = {
         advancedButton { $("button[path=/publisher/advanced-button]") }
