@@ -31,7 +31,7 @@ import static java.util.Arrays.*;
 @SuppressWarnings("CdiManagedBeanInconsistencyInspection")
 public class CapybaraPortingLayer extends Assert {
     /**
-     * {@link WebDriver} that subtypes use to talk to the server.
+     * {@link org.openqa.selenium.WebDriver} that subtypes use to talk to the server.
      */
     @Inject
     protected WebDriver driver;
@@ -145,9 +145,9 @@ public class CapybaraPortingLayer extends Assert {
     /**
      * Returns the first visible element that matches the selector.
      *
-     * @throws NoSuchElementException
+     * @throws org.openqa.selenium.NoSuchElementException
      *      if the element is not found.
-     * @see #getElement(By)         if you don't want to see an exception
+     * @see #getElement(org.openqa.selenium.By)         if you don't want to see an exception
      */
     public WebElement find(By selector) {
         try {
@@ -175,6 +175,36 @@ public class CapybaraPortingLayer extends Assert {
     }
 
     /**
+     * Returns the first element that matches the selector even if not visible.
+     *
+     * @throws org.openqa.selenium.NoSuchElementException
+     *      if the element is not found.
+     * @see #getElement(org.openqa.selenium.By)         if you don't want to see an exception
+     */
+    public WebElement findIfNotVisible(By selector) {
+        try {
+            long endTime = System.currentTimeMillis() + time.seconds(1);
+            WebElement e = null;
+            while (System.currentTimeMillis() <= endTime) {
+                e = driver.findElement(selector);
+
+                // give a bit more chance for the element to become visible
+                sleep(100);
+
+            }
+            if(e == null){
+                throw new NoSuchElementException("Unable to locate visible "+selector+" in "+driver.getCurrentUrl());
+            }
+            return e;
+
+        } catch (NoSuchElementException x) {
+            // this is often the best place to set a breakpoint
+            String msg = String.format("Unable to locate %s in %s\n\n%s", selector, driver.getCurrentUrl(), driver.getPageSource());
+            throw new NoSuchElementException(msg,x);
+        }
+    }
+
+    /**
      * Consider stale elements not displayed.
      */
     private boolean isDisplayed(WebElement e) {
@@ -186,7 +216,7 @@ public class CapybaraPortingLayer extends Assert {
     }
 
     /**
-     * Works like {@link #find(By)} but instead of throwing an exception,
+     * Works like {@link #find(org.openqa.selenium.By)} but instead of throwing an exception,
      * this method returns null.
      */
     public WebElement getElement(By selector) {
@@ -222,7 +252,7 @@ public class CapybaraPortingLayer extends Assert {
      * Finds all the elements that match the selector.
      *
      * <p>
-     * Note that this method inherits the same restriction of the {@link WebDriver#findElements(By)},
+     * Note that this method inherits the same restriction of the {@link org.openqa.selenium.WebDriver#findElements(org.openqa.selenium.By)},
      * in that its execution is not synchronized with the JavaScript execution of the browser.
      *
      * <p>
@@ -231,13 +261,13 @@ public class CapybaraPortingLayer extends Assert {
      * are populated, thereby failing to find the elements you are looking for.
      *
      * <p>
-     * In contrast, {@link #find(By)} do not have this problem, because it waits until the element
+     * In contrast, {@link #find(org.openqa.selenium.By)} do not have this problem, because it waits until the element
      * that matches the criteria appears.
      *
      * <p>
-     * So if you are using this method, think carefully. Perhaps you can use {@link #find(By)} to
+     * So if you are using this method, think carefully. Perhaps you can use {@link #find(org.openqa.selenium.By)} to
      * achieve what you are looking for (by making the query more specific), or perhaps you can combine
-     * this with {@link #waitForCond(Callable)} so that if you don't find the elements you are looking for
+     * this with {@link #waitForCond(java.util.concurrent.Callable)} so that if you don't find the elements you are looking for
      * in the list, you'll retry.
      */
     public List<WebElement> all(By selector) {
@@ -245,10 +275,21 @@ public class CapybaraPortingLayer extends Assert {
     }
 
     /**
-     * Picks up the last element that matches given selector.
+     * Picks up the last visible element that matches given selector.
      */
     public WebElement last(By selector) {
         find(selector); // wait until at least one is found
+
+        // but what we want is the last one
+        List<WebElement> l = driver.findElements(selector);
+        return l.get(l.size()-1);
+    }
+
+    /**
+     * Picks up the last visible element that matches given selector.
+     */
+    public WebElement lastIfNotVisible(By selector) {
+        findIfNotVisible(selector); // wait until at least one is found
 
         // but what we want is the last one
         List<WebElement> l = driver.findElements(selector);
@@ -292,7 +333,7 @@ public class CapybaraPortingLayer extends Assert {
     /**
      * Finds matching constructor and invoke it.
      *
-     * This is often useful for binding {@link PageArea} by taking the concrete type as a parameter.
+     * This is often useful for binding {@link org.jenkinsci.test.acceptance.po.PageArea} by taking the concrete type as a parameter.
      */
     protected <T> T newInstance(Class<T> type, Object... args) {
         try {
