@@ -119,7 +119,6 @@ public class SubversionPluginTest extends AbstractJUnitTest {
         f.save();
 
         f.startBuild().shouldSucceed();
-        assertTrue(true);
     }
 
 
