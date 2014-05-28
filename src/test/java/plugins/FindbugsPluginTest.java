@@ -29,6 +29,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.jenkinsci.test.acceptance.junit.Bug;
+import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsAction;
 import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsPublisher;
@@ -36,6 +37,7 @@ import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.xml.sax.SAXException;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -48,7 +50,7 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
      * Builds a job and checks if warnings of Findbugs are displayed. Checks as well, if the content of the tabs is
      * the one we expect.
      */
-    @Test
+    @Test @Category(SmokeTest.class)
     public void record_analysis() {
         FreeStyleJob job = setupJob("/findbugs_plugin/findbugsXml.xml", FindbugsPublisher.class, "findbugsXml.xml");
         Build lastBuild = buildJobWithSuccess(job);
@@ -111,7 +113,7 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
      * Builds a job and tests if the findbugs api (with depth=0 parameter set) responds with the expected output.
      * Difference in whitespaces are ok.
      */
-    @Test
+    @Test @Category(SmokeTest.class)
     public void xml_api_report_depth_0() throws IOException, SAXException, ParserConfigurationException {
         final FreeStyleJob job = setupJob("/findbugs_plugin/findbugsXml.xml", FindbugsPublisher.class, "findbugsXml.xml");
         final Build build = buildJobWithSuccess(job);

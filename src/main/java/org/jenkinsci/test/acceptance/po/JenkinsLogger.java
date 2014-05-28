@@ -22,24 +22,20 @@ public class JenkinsLogger extends PageObject {
      * @see Jenkins#createLogger(String, Map)
      */
     public static JenkinsLogger create(Jenkins j, String name, Map<String, Level> levels) {
-        try {
-            j.visit("log/new");
-            j.find(by.path("/name")).sendKeys(name);
-            j.clickButton("OK");
+        j.visit("log/new");
+        j.find(by.path("/name")).sendKeys(name);
+        j.clickButton("OK");
 
-            for (Entry<String, Level> e : levels.entrySet()) {
-                j.clickButton("Add");
-                Thread.sleep(1000);
-                j.last(by.input("_.name")).sendKeys(e.getKey());
-                WebElement o = j.last(by.input("level"))
-                        .findElement(by.option(e.getValue().getName()));
-                j.check(o);
-            }
-            j.clickButton("Save");
-            return new JenkinsLogger(j,name);
-        } catch (InterruptedException e) {
-            throw new Error(e);
+        for (Entry<String, Level> e : levels.entrySet()) {
+            j.clickButton("Add");
+            sleep(1000);
+            j.last(by.input("_.name")).sendKeys(e.getKey());
+            WebElement o = j.last(by.input("level"))
+                    .findElement(by.option(e.getValue().getName()));
+            j.check(o);
         }
+        j.clickButton("Save");
+        return new JenkinsLogger(j,name);
     }
 
     public boolean isEmpty() {
@@ -57,7 +53,7 @@ public class JenkinsLogger extends PageObject {
     }
 
     public void waitForLogged(final Pattern pattern) {
-        waitForLogged(pattern, 30);
+        waitForLogged(pattern, 0);
     }
 
     public void waitForLogged(final Pattern pattern, final int timeout) {

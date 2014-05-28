@@ -5,8 +5,8 @@ import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.SvnContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Native;
+import org.jenkinsci.test.acceptance.junit.WithCredentials;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.plugins.subversion.SubversionCredentialUserPwd;
 import org.jenkinsci.test.acceptance.plugins.subversion.SubversionPluginTestException;
 import org.jenkinsci.test.acceptance.plugins.subversion.SubversionScm;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
@@ -19,11 +19,12 @@ import org.junit.Test;
  *
  * @author Matthias Karl
  */
-@WithPlugins("subversion@1.54")
+@WithPlugins("subversion@2.3")
 @Native("docker")
 public class SubversionPluginTest extends AbstractJUnitTest {
     @Inject
     DockerContainerHolder<SvnContainer> svn;
+
 
     /**
      * Scenario: Run basic Subversion build
@@ -40,7 +41,6 @@ public class SubversionPluginTest extends AbstractJUnitTest {
     public void run_basic_subversion_build() throws SubversionPluginTestException {
         final SvnContainer svnContainer = svn.get();
         final FreeStyleJob f = jenkins.jobs.create();
-        f.configure();
         f.useScm(SubversionScm.class).url.set(svnContainer.getUrlUnsaveRepo());
         f.addShellStep("test -d .svn");
         f.save();
@@ -63,7 +63,6 @@ public class SubversionPluginTest extends AbstractJUnitTest {
         final int revision = 0;
         final SvnContainer svnContainer = svn.get();
         final FreeStyleJob f = jenkins.jobs.create();
-        f.configure();
         f.useScm(SubversionScm.class).url.set(svnContainer.getUrlUnsaveRepoAtRevision(revision));
         f.save();
 
@@ -85,7 +84,6 @@ public class SubversionPluginTest extends AbstractJUnitTest {
     public void always_checkout_fresh_copy() throws SubversionPluginTestException {
         final SvnContainer svnContainer = svn.get();
         final FreeStyleJob f = jenkins.jobs.create();
-        f.configure();
 
         final SubversionScm subversionScm = f.useScm(SubversionScm.class);
         subversionScm.url.set(svnContainer.getUrlUnsaveRepo());
@@ -99,100 +97,58 @@ public class SubversionPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     * Scenario: http:// user/pwd basic Checkout
+     * Scenario:basic Checkout with svn protocol
      * Given I have installed the "subversion" plugin
+     * And I have added the right username and password for svn as credentials
      * And a job
-     * When I check out code from protected Subversion repository "UrlUserPwdSaveRepo"
-     * And I click the link to enter credentials
-     * And I enter the right username and the right password
-     * And I save the credentials
+     * And I add a shell build step "test -d .svn"
+     * When I check out code from protected Subversion repository "SvnUrl"
      * And I save the job
      * And I build the job
      * Then the build should succeed
+     * And console output should contain "test -d .svn"
      */
     @Test
+    @WithCredentials(credentialType = WithCredentials.USERNAME_PASSWORD, values = {SvnContainer.USER, SvnContainer.PWD})
     public void run_basic_subversion_build_userPwd() throws SubversionPluginTestException {
         final SvnContainer svnContainer = svn.get();
 
         final FreeStyleJob f = jenkins.jobs.create();
-        f.configure();
+        f.addShellStep("test -d .svn");
 
         final SubversionScm subversionScm = f.useScm(SubversionScm.class);
         subversionScm.url.set(svnContainer.getUrlUserPwdSaveRepo());
-
-        final SubversionCredentialUserPwd credentialPage = subversionScm.getCredentialPage(SubversionCredentialUserPwd.class);
-        credentialPage.setUsername(SvnContainer.USER);
-        credentialPage.setPassword(SvnContainer.PWD);
-        credentialPage.confirmDialog();
+        subversionScm.credentials.select(SvnContainer.USER);
         f.save();
 
-        f.startBuild().shouldSucceed();
-
+        f.startBuild().shouldSucceed().shouldContainsConsoleOutput("test -d .svn");
     }
+
 
     /**
      * Scenario:basic Checkout with svn protocol
      * Given I have installed the "subversion" plugin
+     * And I have added the right username and password for svn as credentials
      * And a job
+     * And I add a shell build step "test -d .svn"
      * When I check out code from protected Subversion repository "SvnUrl"
-     * And I click the link to enter credentials
-     * And I enter the right username and the right password
-     * And I save the credentials
      * And I save the job
      * And I build the job
      * Then the build should succeed
+     * And console output should contain "test -d .svn"
      */
     @Test
+    @WithCredentials(credentialType = WithCredentials.USERNAME_PASSWORD, values = {SvnContainer.USER, SvnContainer.PWD})
     public void run_basic_subversion_build_svn_userPwd() throws SubversionPluginTestException {
         final SvnContainer svnContainer = svn.get();
 
         final FreeStyleJob f = jenkins.jobs.create();
-        f.configure();
-
+        f.addShellStep("test -d .svn");
         final SubversionScm subversionScm = f.useScm(SubversionScm.class);
         subversionScm.url.set(svnContainer.getSvnUrl());
-
-        final SubversionCredentialUserPwd credentialPage = subversionScm.getCredentialPage(SubversionCredentialUserPwd.class);
-        credentialPage.setUsername(SvnContainer.USER);
-        credentialPage.setPassword(SvnContainer.PWD);
-        credentialPage.confirmDialog();
+        subversionScm.credentials.select(SvnContainer.USER);
         f.save();
 
-        f.startBuild().shouldSucceed();
-
+        f.startBuild().shouldSucceed().shouldContainsConsoleOutput("test -d .svn");
     }
-
-
-    /**
-     * Test not running atm. Plugin does not seem to work with credentials plugin
-     * @throws SubversionPluginTestException
-     */
-    /*
-    @Test
-    public void run_basic_subversion_build_userPwd_credentials_already_added() throws SubversionPluginTestException {
-        final SvnContainer svnContainer = svn.get();
-
-        //preconfigure credentials
-        final ManagedCredentials c = new ManagedCredentials(jenkins);
-        c.open();
-        final UserPwdCredential upc = c.add(UserPwdCredential.class);
-        upc.username.set(SvnContainer.USER);
-        upc.password.set(SvnContainer.PWD);
-        c.save();
-        jenkins.visit("credentials");
-
-        //add Job
-        final FreeStyleJob f = jenkins.jobs.create();
-        f.configure();
-
-        final SubversionScm subversionScm = f.useScm(SubversionScm.class);
-        subversionScm.url.set(svnContainer.getUrlUserPwdSaveRepo());
-
-
-        f.save();
-
-        f.startBuild().shouldSucceed();
-
-    }
-    */
 }

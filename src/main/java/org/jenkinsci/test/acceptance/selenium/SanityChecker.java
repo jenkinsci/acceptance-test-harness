@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.test.acceptance;
+package org.jenkinsci.test.acceptance.selenium;
 
 import java.util.List;
 
@@ -46,20 +46,17 @@ public class SanityChecker extends AbstractWebDriverEventListener {
     }
 
     @Override
-    public void afterClickOn(WebElement element, WebDriver driver) {
-        try {
-            driver.switchTo().alert();
+    public void beforeNavigateTo(String url, WebDriver driver) {
+        checkSanity(driver);
+    }
 
-            return; // Skip checking in case there is a dialog present
-        }
-        catch (Exception e) {
-            checkSanity(driver);
-        }
+    @Override
+    public void beforeClickOn(WebElement element, WebDriver driver) {
+        checkSanity(driver);
     }
 
     private void checkSanity(WebDriver driver) {
-        // Performance optimalization
-        if (!driver.getPageSource().contains("Oops!")) return;
+        if (isFastPath(driver)) return;
 
         List<WebElement> elements = driver.findElements(SPECIFIER);
 
@@ -73,5 +70,16 @@ public class SanityChecker extends AbstractWebDriverEventListener {
 
             throw new AssertionError("Jenkins error detected:\n" + trace);
         }
+    }
+
+    /**
+     * Quickly determine if the driver is definitely in the safe state.
+     *
+     * <p>
+     * The expectation is that the most of the time this would return true,
+     * and reduces the overhead of {@link SanityChecker}.
+     */
+    private boolean isFastPath(WebDriver driver) {
+        return !driver.getPageSource().contains("Oops!");
     }
 }

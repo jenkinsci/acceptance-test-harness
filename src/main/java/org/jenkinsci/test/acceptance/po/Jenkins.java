@@ -88,6 +88,13 @@ public class Jenkins extends Node {
     }
 
     /**
+     * Visit logout URL.
+     */
+    public void logout(){
+        visit(new Logout(this).url);
+    }
+
+    /**
      * Access the plugin manager page object
      */
     public PluginManager getPluginManager() {
@@ -109,6 +116,10 @@ public class Jenkins extends Node {
 
     public JenkinsLogger createLogger(String name, Map<String,Level> levels) {
         return JenkinsLogger.create(this,name,levels);
+    }
+
+    public Plugin getPlugin(String name) {
+        return new Plugin(getPluginManager(), name);
     }
 
     public <T extends PageObject> T getPluginPage(Class<T> type) {

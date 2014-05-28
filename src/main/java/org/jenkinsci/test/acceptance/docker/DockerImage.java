@@ -84,7 +84,7 @@ public class DockerImage {
             } while (cid==null || cid.length()==0);
 
             // rename the log file to match the container name
-            File logfile = new File("/tmp/"+cidFile+".log");
+            File logfile = new File(cidFile+".log");
             tmplog.renameTo(logfile);
 
             System.out.printf("Launching Docker container %s: logfile is at %s\n", cid, logfile);

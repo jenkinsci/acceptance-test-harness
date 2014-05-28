@@ -53,7 +53,6 @@ import static org.junit.Assume.assumeTrue;
  * - gtUserhome=/home/companion<br>
  * Plus,<br>
  * - gtUserhome/.netrc shall point to that gtHostname with gtGerrituser/pwd<br>
- * - http_proxy might need to be set, if no gerrit-trigger plugin pre-installed.
  *
  * @author Marco.Miller@ericsson.com
  */
@@ -72,7 +71,7 @@ public class GerritTriggerTest extends AbstractJUnitTest {
      */
     @Test
     public void gerrit_has_review_flags_checked_after_jenkins_set_them() {
-        assumeTrue(new File(GerritTriggerEnv.getInstance().getUserHome(),".netrc").exists());
+        assumeTrue(new File(GerritTriggerEnv.get().getUserHome(),".netrc").exists());
 
         GerritTriggerNewServer newServer = new GerritTriggerNewServer(jenkins);
         newServer.saveNewTestServerConfigIfNone();
@@ -97,16 +96,16 @@ public class GerritTriggerTest extends AbstractJUnitTest {
 
     private String pushChangeForReview(String jobName) throws InterruptedException,IOException {
         File dir = File.createTempFile("jenkins","git");
-        dir.delete();
+        dir.delete();//result !needed
         assertTrue(dir.mkdir());
-        String user = GerritTriggerEnv.getInstance().getGerritUser();
-        String hostName = GerritTriggerEnv.getInstance().getHostName();
-        String project = GerritTriggerEnv.getInstance().getProject();
+        String user = GerritTriggerEnv.get().getGerritUser();
+        String hostName = GerritTriggerEnv.get().getHostName();
+        String project = GerritTriggerEnv.get().getProject();
 
         assertEquals(0,new ProcessBuilder("git","clone","ssh://"+user+"@"+hostName+":29418/"+project,jobName).directory(dir).start().waitFor());
 
         File file = new File(dir+"/"+jobName,jobName);
-        file.delete();
+        file.delete();//result !needed
         BufferedWriter writer = new BufferedWriter(new FileWriter(file));
         writer.write(String.valueOf(System.currentTimeMillis()));
         writer.close();
@@ -122,8 +121,8 @@ public class GerritTriggerTest extends AbstractJUnitTest {
     }
 
     private Process curl(String changeId) throws IOException {
-        String hN = GerritTriggerEnv.getInstance().getHostName();
-        if(GerritTriggerEnv.getInstance().getNoProxy()) {
+        String hN = GerritTriggerEnv.get().getHostName();
+        if(GerritTriggerEnv.get().getNoProxy()) {
             return new ProcessBuilder("curl","--noproxy",hN,"-n","https://"+hN+"/a/changes/"+changeId+"/revisions/current/review").start();
         }
         return new ProcessBuilder("curl","-n","https://"+hN+"/a/changes/"+changeId+"/revisions/current/review").start();
