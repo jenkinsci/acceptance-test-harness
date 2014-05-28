@@ -6,6 +6,8 @@ import org.junit.Rule;
 import org.openqa.selenium.WebDriver;
 
 import javax.inject.Inject;
+import java.io.IOException;
+import java.net.ServerSocket;
 import java.net.URL;
 
 /**
@@ -43,4 +45,19 @@ public class AbstractJUnitTest extends CapybaraPortingLayer {
         final URL resource = getClass().getResource(path);
         if (resource == null) throw new AssertionError("No such resource " + path + " for " + getClass().getName());
         return new Resource(resource);
-    }}
+    }
+
+    /**
+     * @return finds an unused, available port on the test machine
+     */
+    public int findAvailablePort() {
+        // use port 65000 as fallback (but maybe there is something running)
+        int port = 65000;
+        try (ServerSocket s = new ServerSocket(0)) {
+            port = s.getLocalPort();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return port;
+    }
+}
