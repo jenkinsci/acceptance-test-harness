@@ -49,6 +49,10 @@ public class PluginManager extends ContainerPageObject {
     @Named("uploadPlugins")
     public boolean uploadPlugins = true;
 
+    @Inject(optional = true)
+    @Named("forceRestartAfterPluginInstallation")
+    public boolean forceRestart = false;
+
     public PluginManager(Jenkins jenkins) {
         super(jenkins.injector, jenkins.url("pluginManager/"));
         this.jenkins = jenkins;
@@ -114,6 +118,7 @@ public class PluginManager extends ContainerPageObject {
      */
     @Deprecated
     public void installPlugins(final String... specs) {
+        boolean changed = false;
         final Map<String, String> candidates = getMapShortNamesVersion(specs);
 
         if (uploadPlugins) {
@@ -131,24 +136,11 @@ public class PluginManager extends ContainerPageObject {
                 if (!isInstalled(currentSpec)) { // we need to override existing "old" plugins
                     try {
                         newPlugin.uploadTo(jenkins, injector, null);
+                        changed = true;
                     } catch (IOException | ArtifactResolutionException e) {
                         throw new AssertionError("Failed to upload plugin: " + newPlugin, e);
                     }
                 }
-            }
-
-            // plugin deployment happens asynchronously, so give it a few seconds
-            // for it to finish deploying
-            // TODO: Use better detection if this is actually necessary
-            try {
-                waitForCond(new Callable<Boolean>() {
-                    @Override
-                    public Boolean call() throws Exception {
-                        return isInstalled(specs);
-                    }
-                }, 5);
-            } catch (TimeoutException e) {
-                jenkins.restart();
             }
         } else {
             if (!updated)
@@ -166,6 +158,7 @@ public class PluginManager extends ContainerPageObject {
 
                     try {
                         new UpdateCenter(jenkins).waitForInstallationToComplete(n);
+                        changed = true;
                     } catch (InstallationFailedException e) {
                         if (e.getMessage().contains("Failed to download from")) {
                             continue;   // retry
@@ -173,6 +166,26 @@ public class PluginManager extends ContainerPageObject {
                     }
 
                     continue OUTER;  // installation completed
+                }
+            }
+        }
+
+        if (changed) {
+            if (forceRestart) {
+                jenkins.restart();
+            } else {
+                // plugin deployment happens asynchronously, so give it a few seconds
+                // for it to finish deploying
+                // TODO: Use better detection if this is actually necessary
+                try {
+                    waitForCond(new Callable<Boolean>() {
+                        @Override
+                        public Boolean call() throws Exception {
+                            return isInstalled(specs);
+                        }
+                    }, 5);
+                } catch (TimeoutException e) {
+                    jenkins.restart();
                 }
             }
         }
