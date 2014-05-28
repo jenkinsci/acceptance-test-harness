@@ -2,7 +2,6 @@ package org.jenkinsci.test.acceptance.update_center;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
@@ -14,12 +13,10 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
-import org.eclipse.aether.artifact.DefaultArtifact;
-import org.eclipse.aether.repository.RemoteRepository;
-import org.eclipse.aether.resolution.ArtifactRequest;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.eclipse.aether.resolution.ArtifactResult;
 import org.jenkinsci.test.acceptance.po.Jenkins;
+import org.jenkinsci.test.acceptance.utils.aether.ArtifactResolverUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,13 +49,13 @@ public class PluginMetadata {
      * @throws IOException
      */
     public void uploadTo(Jenkins jenkins, Injector i, String version) throws ArtifactResolutionException, IOException {
+
         RepositorySystem rs = i.getInstance(RepositorySystem.class);
         RepositorySystemSession rss = i.getInstance(RepositorySystemSession.class);
 
-        ArtifactResult r = rs.resolveArtifact(rss, new ArtifactRequest(
-                makeArtifact(version == null ? this.version : version),
-                Arrays.asList(new RemoteRepository.Builder("repo.jenkins-ci.org", "default", "http://repo.jenkins-ci.org/public/").build()),
-                null));
+        ArtifactResolverUtil resolverUtil = new ArtifactResolverUtil(rs, rss);
+        ArtifactResult r = resolverUtil.resolve(gav, version);
+
         HttpClient httpclient = new DefaultHttpClient();
 
         HttpPost post = new HttpPost(jenkins.url("pluginManager/uploadPlugin").toExternalForm());
@@ -78,15 +75,9 @@ public class PluginMetadata {
 
     }
 
-    private DefaultArtifact makeArtifact(String version) {
-        String[] t = gav.split(":");
-        return new DefaultArtifact(t[0], t[1], "hpi", version);
-    }
-
     @Override
     public String toString() {
         return super.toString() + "[" + name + "," + version + "]";
     }
-
 
 }

@@ -23,31 +23,40 @@
  */
 package org.jenkinsci.test.acceptance.plugins.active_directory;
 
-import org.jenkinsci.test.acceptance.po.Control;
-import org.jenkinsci.test.acceptance.po.Jenkins;
-import org.jenkinsci.test.acceptance.po.PageObject;
+import org.jenkinsci.test.acceptance.po.Describable;
+import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
+import org.jenkinsci.test.acceptance.po.SecurityRealm;
 
 /**
- * Page Object for AD security (global) configuration page.
+ * Realm for AD security (global) configuration page.
  * @author Marco.Miller@ericsson.com
  */
-public class ActiveDirectorySecurity extends PageObject {
-    public final Jenkins jenkins;
+@Describable("Active Directory")
+public class ActiveDirectorySecurityRealm extends SecurityRealm {
 
-    public ActiveDirectorySecurity(Jenkins jenkins) {
-        super(jenkins.injector,jenkins.url("configureSecurity"));
-        this.jenkins = jenkins;
+    public ActiveDirectorySecurityRealm(GlobalSecurityConfig context,String path) {
+        super(context,path);
     }
 
     /**
-     * Stop using security (if previously used) and save config.
+     * Configures AD-based global security.
      */
-    public void stopUsingSecurityAndSave() {
-        open();
-        Control use = control("/useSecurity");
-        if(use.resolve().isSelected()) {
-            use.click();
-            control("/Submit").click();
+    public void configure() {
+        control("domain").set(ActiveDirectoryEnv.get().getDomain());
+        control("advanced-button").click();
+
+        if(ActiveDirectoryEnv.get().getController() != null) {
+            control("server").set(ActiveDirectoryEnv.get().getController());
         }
+        if(ActiveDirectoryEnv.get().getSite() != null) {
+            control("site").set(ActiveDirectoryEnv.get().getSite());
+        }
+        control("bindPassword").set(ActiveDirectoryEnv.get().getPassword());
+
+        String bindDN = ActiveDirectoryEnv.get().getBindDN();
+        if(bindDN == null) {
+            bindDN = ActiveDirectoryEnv.get().getUser()+"@"+ActiveDirectoryEnv.get().getDomain();
+        }
+        control("bindName").set(bindDN);
     }
 }

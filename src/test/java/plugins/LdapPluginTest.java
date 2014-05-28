@@ -17,6 +17,7 @@ import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.LdapSecurityRealm;
 import org.jenkinsci.test.acceptance.po.Login;
 import org.jenkinsci.test.acceptance.po.User;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -50,7 +51,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     * Creates default ldap connection details from a running docker LdapContainer.
+     * Creates default ldap connection details from a running docker LdapContainer. 
      *
      * @param ldapContainer a docker LdapContainer
      * @return default ldap connection details
@@ -361,6 +362,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
      * Then "jenkins" will not be member of groups "ldap1" and "ldap2"
      */
     @Test
+    @Ignore("PO needs refactoring due to changes in ldap@1.10 (groupMembership)")
     public void custom_group_membership_filter() {
         // Given
         useLdapAsSecurityRealm(createDefaults(ldap.get()).groupMembershipFilter("(member={0})"));

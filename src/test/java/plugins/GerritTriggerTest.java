@@ -71,7 +71,7 @@ public class GerritTriggerTest extends AbstractJUnitTest {
      */
     @Test
     public void gerrit_has_review_flags_checked_after_jenkins_set_them() {
-        assumeTrue(new File(GerritTriggerEnv.getInstance().getUserHome(),".netrc").exists());
+        assumeTrue(new File(GerritTriggerEnv.get().getUserHome(),".netrc").exists());
 
         GerritTriggerNewServer newServer = new GerritTriggerNewServer(jenkins);
         newServer.saveNewTestServerConfigIfNone();
@@ -98,9 +98,9 @@ public class GerritTriggerTest extends AbstractJUnitTest {
         File dir = File.createTempFile("jenkins","git");
         dir.delete();//result !needed
         assertTrue(dir.mkdir());
-        String user = GerritTriggerEnv.getInstance().getGerritUser();
-        String hostName = GerritTriggerEnv.getInstance().getHostName();
-        String project = GerritTriggerEnv.getInstance().getProject();
+        String user = GerritTriggerEnv.get().getGerritUser();
+        String hostName = GerritTriggerEnv.get().getHostName();
+        String project = GerritTriggerEnv.get().getProject();
 
         assertEquals(0,new ProcessBuilder("git","clone","ssh://"+user+"@"+hostName+":29418/"+project,jobName).directory(dir).start().waitFor());
 
@@ -121,8 +121,8 @@ public class GerritTriggerTest extends AbstractJUnitTest {
     }
 
     private Process curl(String changeId) throws IOException {
-        String hN = GerritTriggerEnv.getInstance().getHostName();
-        if(GerritTriggerEnv.getInstance().getNoProxy()) {
+        String hN = GerritTriggerEnv.get().getHostName();
+        if(GerritTriggerEnv.get().getNoProxy()) {
             return new ProcessBuilder("curl","--noproxy",hN,"-n","https://"+hN+"/a/changes/"+changeId+"/revisions/current/review").start();
         }
         return new ProcessBuilder("curl","-n","https://"+hN+"/a/changes/"+changeId+"/revisions/current/review").start();
