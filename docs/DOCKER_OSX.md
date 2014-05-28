@@ -47,7 +47,7 @@ within the `boot2docker` VM. But this is done transparently to the Mac user, so 
 
 ## Prerequisites
 
-Mac OS X with pre-installed VirtualBox.
+Mac OS X with pre-installed [VirtualBox](https://www.virtualbox.org) and [Homebrew](http://brew.sh/).
 
 
 ## Installation
