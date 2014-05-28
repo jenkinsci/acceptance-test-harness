@@ -110,15 +110,23 @@ public class ActiveDirectoryTest extends AbstractJUnitTest {
         String userWannabe = ActiveDirectoryEnv.get().getUser()+"-wannabe";
         GlobalSecurityConfig security = saveSecurityConfig(userWannabe);
         jenkins.logout();
-        doLoginDespiteNoPathsThenWaitForLdap(userWannabe);
+        jenkins.login().doLoginDespiteNoPaths(userWannabe,
+                ActiveDirectoryEnv.get().getPassword());
         security.configure();
         assertNull(getElement(by.name("_.domain")));
-        doLoginDespiteNoPathsThenWaitForLdap(ActiveDirectoryEnv.get().getUser());
+        jenkins.login().doLoginDespiteNoPaths(ActiveDirectoryEnv.get().getUser(),
+                ActiveDirectoryEnv.get().getPassword());
+    }
+
+    @After
+    public void tearDown() {
+        adSecurity.stopUsingSecurityAndSave();
     }
 
     private void userCanLoginToJenkinsAsAdmin(String userOrGroupToAddAsAdmin) {
         GlobalSecurityConfig security = saveSecurityConfig(userOrGroupToAddAsAdmin);
-        doLoginDespiteNoPathsThenWaitForLdap(ActiveDirectoryEnv.get().getUser());
+        jenkins.login().doLoginDespiteNoPaths(ActiveDirectoryEnv.get().getUser(),
+                ActiveDirectoryEnv.get().getPassword());
         security.configure();
         WebElement domain = getElement(by.name("_.domain"));
         assertNotNull(domain);
@@ -135,17 +143,5 @@ public class ActiveDirectoryTest extends AbstractJUnitTest {
         userAuth.admin();
         security.save();
         return security;
-    }
-
-    private void doLoginDespiteNoPathsThenWaitForLdap(String userName) {
-        jenkins.login();//TODO .doLogin() fails w/ my 1.554.1 => this method
-        driver.findElement(by.name("j_username")).sendKeys(userName);
-        driver.findElement(by.name("j_password")).sendKeys(ActiveDirectoryEnv.get().getPassword());
-        clickButton("log in");
-    }
-
-    @After
-    public void tearDown() {
-        adSecurity.stopUsingSecurityAndSave();
     }
 }
