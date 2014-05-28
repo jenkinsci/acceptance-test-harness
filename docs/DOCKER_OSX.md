@@ -14,33 +14,33 @@ The idea of `boot2docker` is to start a very thin Linux layer as a VirtualBox VM
 within the `boot2docker` VM. But this is done transparently to the Mac user, so that the user is still able to use
 `docker` commands in the Mac OS X terminals and does not need to make an SSH connection with the `boot2docker` VM.
 
-                                                +---------------------------------------------------------------------------+
-                                                |                           boot2docker container                           |
-                                                |                                                                           |
-                                                |                                                                           |
-     -----docker command for container 1------> |                                         +-----------------------+         |
-                                                |----- command for container 1 ---------->|    container 1        |         |
-                                                |                                         |                       |         |
-                                                |<---- result after command execution ----|                       |         |
-     <---- result after command execution ----- |                                         |                       |         |
-                                                |                                         +-----------------------+         |
-                                                |                                                                           |
-     -----docker command for container 2------> |                                         +-----------------------+         |
-                                                |----- command for container 2 ---------->|    container 2        |         |
-                                                |                                         |                       |         |
-                                                |<---- result after command execution ----|                       |         |
-     <---- result after command execution ----- |                                         |                       |         |
-                                                |                                         +-----------------------+         |
-                                                |                                                  ...                      |
-                                                |                                                                           |
-                                                |                                         +-----------------------+         |
-                                                |                                         |    container N        |         |
-                                                |                                         |                       |         |
-                                                |                                         |                       |         |
-                                                |                                         |                       |         |
-                                                |                                         +-----------------------+         |
-                                                |                                                                           |
-                                                +---------------------------------------------------------------------------+
+                                                +-----------------------------------------------------------------------+
+                                                |                           boot2docker container                       |
+                                                |                                                                       |
+                                                |                                                                       |
+     -----docker command for container 1------> |                                         +-----------------------+     |
+                                                |----- command for container 1 ---------->|    container 1        |     |
+                                                |                                         |                       |     |
+                                                |<---- result after command execution ----|                       |     |
+     <---- result after command execution ----- |                                         |                       |     |
+                                                |                                         +-----------------------+     |
+                                                |                                                                       |
+     -----docker command for container 2------> |                                         +-----------------------+     |
+                                                |----- command for container 2 ---------->|    container 2        |     |
+                                                |                                         |                       |     |
+                                                |<---- result after command execution ----|                       |     |
+     <---- result after command execution ----- |                                         |                       |     |
+                                                |                                         +-----------------------+     |
+                                                |                                                  ...                  |
+                                                |                                                                       |
+                                                |                                         +-----------------------+     |
+                                                |                                         |    container N        |     |
+                                                |                                         |                       |     |
+                                                |                                         |                       |     |
+                                                |                                         |                       |     |
+                                                |                                         +-----------------------+     |
+                                                |                                                                       |
+                                            +---------------------------------------------------------------------------+
 
 
 ## Setup of `boot2docker`
