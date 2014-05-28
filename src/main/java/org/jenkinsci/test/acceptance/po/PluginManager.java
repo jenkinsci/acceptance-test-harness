@@ -47,15 +47,20 @@ public class PluginManager extends ContainerPageObject {
      */
     @Inject(optional = true)
     @Named("uploadPlugins")
-    public boolean uploadPlugins = true;
+    public Boolean uploadPlugins;
 
     @Inject(optional = true)
     @Named("forceRestartAfterPluginInstallation")
-    public boolean forceRestart = false;
+    public boolean forceRestart;
 
     public PluginManager(Jenkins jenkins) {
         super(jenkins.injector, jenkins.url("pluginManager/"));
         this.jenkins = jenkins;
+
+        // injection happens in the base class, so for us to differentiate default state vs false state,
+        // we need to use Boolean
+        if (uploadPlugins==null)
+            uploadPlugins = true;
     }
 
     /**
