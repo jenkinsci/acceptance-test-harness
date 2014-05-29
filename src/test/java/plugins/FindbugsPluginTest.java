@@ -27,6 +27,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.ExecutionException;
 
 import org.jenkinsci.test.acceptance.junit.Bug;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
@@ -35,6 +36,7 @@ import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsAction;
 import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsPublisher;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.Slave;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -158,4 +160,21 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
 
         assertAreaLinksOfJobAreLike(job, "^\\d+/findbugsResult");
     }
+
+    /**
+     * Builds a job on an slave and checks if warnings of Findbugs are displayed.
+     */
+    @Test
+    public void record_analysis_build_on_slave() throws ExecutionException, InterruptedException {
+        FreeStyleJob job = setupJob("/findbugs_plugin/findbugsXml.xml", FindbugsPublisher.class, "findbugsXml.xml");
+
+        Slave slave = makeASlaveAndConfigureJob(job);
+
+        Build lastBuild = buildJobOnSlaveWithSuccess(job, slave);
+
+        assertThat(lastBuild.getNode(), is(slave.getName()));
+        assertThat(lastBuild, hasAction("FindBugs Warnings"));
+        assertThat(job, hasAction("FindBugs Warnings"));
+    }
+
 }

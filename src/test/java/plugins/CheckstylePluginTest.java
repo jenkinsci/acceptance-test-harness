@@ -5,17 +5,25 @@ import java.io.IOException;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import com.google.inject.Inject;
 import org.jenkinsci.test.acceptance.junit.Bug;
+import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleAction;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstylePublisher;
+import org.jenkinsci.test.acceptance.plugins.nodelabelparameter.NodeParameter;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.Slave;
+import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.xml.sax.SAXException;
 
+import static java.util.Collections.singletonMap;
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.is;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 
 /**
@@ -168,6 +176,23 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
         buildJobWithSuccess(job);
 
         assertAreaLinksOfJobAreLike(job, "^\\d+/checkstyleResult");
+    }
+
+    /**
+     * Builds a job on a slave with checkstyle and verifies that the information checkstyle provides in the tabs about the build
+     * are the information we expect.
+     */
+    @Test
+    public void view_checkstyle_report_build_on_slave() throws Exception {
+        FreeStyleJob job = setupJob("/checkstyle_plugin/checkstyle-result.xml", CheckstylePublisher.class, "checkstyle-result.xml");
+
+        Slave slave = makeASlaveAndConfigureJob(job);
+
+        Build build = buildJobOnSlaveWithSuccess(job, slave);
+
+        assertThat(build.getNode(), is(slave.getName()));
+        assertThat(job.getLastBuild(), hasAction("Checkstyle Warnings"));
+        assertThat(job, hasAction("Checkstyle Warnings"));
     }
 
 }

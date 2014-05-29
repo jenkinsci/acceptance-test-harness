@@ -6,6 +6,7 @@ import org.jenkinsci.test.acceptance.plugins.pmd.PmdAction;
 import org.jenkinsci.test.acceptance.plugins.pmd.PmdPublisher;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.Slave;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -202,5 +203,33 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
         final FreeStyleJob job = setupJob("/pmd_plugin/pmd-warnings.xml", PmdPublisher.class, "pmd-warnings.xml", "0", "0", true);
         final Build build = buildJobAndWait(job);
         assertThat(build.isUnstable(), is(true));
+    }
+
+    /**
+     Scenario: Configure a job with PMD post-build steps and run on slave
+     Given I have installed the "pmd" plugin
+     And a job
+     And a slave
+     When I configure the job
+     And I set slave Affinity to slave
+     And I add "Publish PMD analysis results" post-build action
+     And I copy resource "pmd_plugin/pmd.xml" into workspace
+     And I set path to the pmd result "pmd.xml"
+     And I save the job
+     And I build the job
+     Then the build should succeed
+     And the build should be run on slave
+     And build page should has pmd summary "0 warnings"
+     */
+    @Test
+    public void configure_a_job_with_PMD_post_build_steps_build_on_slave() throws Exception {
+        FreeStyleJob job = setupJob("/pmd_plugin/pmd.xml", PmdPublisher.class, "pmd.xml");
+
+        Slave slave = makeASlaveAndConfigureJob(job);
+
+        Build build = buildJobOnSlaveWithSuccess(job, slave);
+
+        assertThat(build.getNode(), is(slave.getName()));
+        assertThat(build.open(), hasContent("0 warnings"));
     }
 }
