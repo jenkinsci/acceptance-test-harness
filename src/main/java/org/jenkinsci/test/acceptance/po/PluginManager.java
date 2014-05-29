@@ -4,6 +4,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Named;
 import javax.inject.Provider;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -242,6 +243,17 @@ public class PluginManager extends ContainerPageObject {
 
         public @Nullable String getVersion() {
             return version;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append(name);
+            if (version != null) {
+                sb.append('@').append(version);
+            }
+
+            return sb.toString();
         }
     }
 }
