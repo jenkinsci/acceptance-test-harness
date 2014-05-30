@@ -43,6 +43,12 @@ public abstract class AbstractCodeStylePluginAction extends ContainerPageObject 
     }
 
     /**
+     * Getter of the relative path for new Warnings page.
+     * @return String for new Warnings page
+     */
+    public String getNewWarningsUrlAsRelativePath() { return plugin + "Result/new"; }
+
+    /**
      * Getter of all warnings.
      * @return Number of warnings
      */
