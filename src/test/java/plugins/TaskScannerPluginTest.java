@@ -30,18 +30,19 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
 
     @Test
     public void single_task_tags_and_exclusion_pattern() throws Exception{
-        //TODO: create an appropriate setupJob method
-        FreeStyleJob j = jenkins.jobs.create();
+        //do basic setup
+        FreeStyleJob j = setupJob("/tasks_plugin/fileset1",TaskScannerPublisher.class,
+                                  "**/*.java");
 
+        //set up the some more task scanner settings
         j.configure();
-        j.copyDir(resource("/tasks_plugin/fileset1"));
-        TaskScannerPublisher pub = j.addPublisher(TaskScannerPublisher.class);
-        pub.pattern.set("**/*.java");
+        TaskScannerPublisher pub = j.getPublisher(TaskScannerPublisher.class);
         pub.excludePattern.set("**/*Test.java");
         pub.highPriorityTags.set("FIXME");
         pub.normalPriorityTags.set("TODO");
         pub.lowPriorityTags.set("@Deprecated");
         pub.ignoreCase.uncheck();
+
         j.save();
 
         // as no threshold is defined to mark the build as FAILED or UNSTABLE, the build should succeed
@@ -52,7 +53,7 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
         // The file set consists of 9 files, whereof
         //   - 2 file names match the exclusion pattern
         //   - 7 files are to be scanned for tasks
-        //   - 5 files actually contain tasks with the specified tags
+        //   - 5 files actually contain tasks with the specified tags (with case sensitivity)
         //
         // The expected task priorities are:
         //   - 1x high
@@ -69,6 +70,19 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
         tsa.assertFilesTab("fileset1_eval1");
         tsa.assertTypesTab("fileset1_eval1");
         tsa.assertWarningsTab("fileset1_eval1");
+
+        // check the correct warning extraction for two examples:
+        //  - TSRDockerImage.java:84 properly wait for either cidfile to appear or process to exit
+        //  - TSRCleaner.java:40 @Deprecated without a text
+
+        tsa.assertWarningExtraction("TSRDockerImage.java", 84, "TODO",
+                                    "properly wait for either cidfile to appear or process to exit");
+        tsa.assertWarningExtraction("TSRCleaner.java", 40, "@Deprecated","");
+
+
+        // check that the correct line / task is displayed when following the link in the warnings tab
+        tsa.assertLinkToSourceFileLine("TSRDockerImage.java", 84, "Normal Priority", "TODO",
+                                       "properly wait for either cidfile to appear or process to exit");
 
         // now disable case sensitivity and build again. Then the publisher shall also
         // find the high priority task in Ec2Provider.java:133.
@@ -90,7 +104,7 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
         assertThat(tsa.getLowWarningNumber(), is(1));
 
         lastBuild.visit(tsa.getNewWarningsUrlAsRelativePath());
-        assertThat(tsa.getResultLinkByXPathText("Ec2Provider.java:133"), startsWith("source"));
+        assertThat(tsa.getResultLinkByXPathText("TSREc2Provider.java:133"), startsWith("source"));
     }
 
 
