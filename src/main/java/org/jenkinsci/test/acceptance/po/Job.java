@@ -143,7 +143,7 @@ public class Job extends ContainerPageObject {
             byte[] archive = IOUtils.toByteArray(new FileInputStream(tmp));
 
             addShellStep(String.format(
-                    "base64 --decode << ENDOFFILE > archive.zip && unzip archive.zip \n%s\nENDOFFILE",
+                    "base64 --decode << ENDOFFILE > archive.zip && unzip -o archive.zip \n%s\nENDOFFILE",
                     new String(Base64.encodeBase64Chunked(archive))
             ));
         } catch (IOException e) {

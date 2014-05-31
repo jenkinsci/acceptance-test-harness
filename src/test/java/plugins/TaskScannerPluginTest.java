@@ -34,17 +34,7 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
         FreeStyleJob j = jenkins.jobs.create();
 
         j.configure();
-
-        //FIXME: insertion of the shell step text takes too long. firefox considers the script to be unresponsive.
-        //       It seems that using copyResource() with a manually generated tar archive is a bit
-        //       faster than copyDir(), but it is not really stable. A workaround is to place a breakpoint
-        //       at the addShellStep statement inside copyResource, doing this as single step and then
-        //       proceeding with the test.
-        //       Nevertheless, we should find a better way to get the files into the workspace
-
-        //j.copyDir(resource("/tasks_plugin/fileset1"));
-        j.copyResource(resource("/tasks_plugin/fileset1.tar"));
-        j.addShellStep("tar -xvf fileset1.tar"); //necessary when using copyResource with tar file
+        j.copyDir(resource("/tasks_plugin/fileset1"));
         TaskScannerPublisher pub = j.addPublisher(TaskScannerPublisher.class);
         pub.pattern.set("**/*.java");
         pub.excludePattern.set("**/*Test.java");
