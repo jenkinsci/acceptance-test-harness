@@ -5,7 +5,11 @@ import org.custommonkey.xmlunit.XMLAssert;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Resource;
+import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginMavenBuildConfigurator;
+import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginMavenBuildSettings;
 import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginPostBuildStep;
+import org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation;
+import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
@@ -21,7 +25,7 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
 
     /**
      * Setup a job with the given resource and publisher.
-     * @param resourceToCopy Resource to copy to to build
+     * @param resourceToCopy Resource to copy to build (Directory or File path)
      * @param publisherClass Publisher to add
      * @param publisherPattern Publisher pattern to set
      * @param <T> Type of the publisher
@@ -33,7 +37,7 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
 
     /**
      * Setup a job with the given resource and publisher.
-     * @param resourceToCopy Resource to copy to to build
+     * @param resourceToCopy Resource to copy to build (Directory or File path)
      * @param publisherClass Publisher to add
      * @param publisherPattern Publisher pattern to set
      * @param warningThresholdUnstable number of warnings needed to mark the build as unstable
@@ -78,6 +82,62 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
     }
 
     /**
+     * Setup a maven build.
+     * @param resourceProjectDir A Folder in resources which shall be copied to the working directory. Should contain the pom.xml
+     * @param goal The maven goals to set.
+     * @return The configured job.
+     */
+    public MavenModuleSet setupMavenJob(String resourceProjectDir, String goal) {
+        return setupMavenJob(resourceProjectDir, goal, null, null);
+    }
+
+    /**
+     * Setup a maven build.
+     * @param resourceProjectDir A Folder in resources which shall be copied to the working directory. Should contain the pom.xml
+     * @param goal The maven goals to set.
+     * @param codeStyleBuildSettings The code analyzer to use or null if you do not want one.
+     * @param <T> The type of the Analyzer.
+     * @return The configured job.
+     */
+    public <T extends AbstractCodeStylePluginMavenBuildSettings> MavenModuleSet setupMavenJob(String resourceProjectDir,
+                                                                                              String goal,
+                                                                                              Class<T> codeStyleBuildSettings) {
+        return setupMavenJob(resourceProjectDir, goal, codeStyleBuildSettings, null);
+    }
+
+    /**
+     * Setup a maven build.
+     * @param resourceProjectDir A Folder in resources which shall be copied to the working directory. Should contain the pom.xml
+     * @param goal The maven goals to set.
+     * @param codeStyleBuildSettings The code analyzer to use or null if you do not want one.
+     * @param configurator A configurator to custommize the code analyzer settings you want to use.
+     * @param <T> The type of the Analyzer.
+     * @return The configured job.
+     */
+    public <T extends AbstractCodeStylePluginMavenBuildSettings> MavenModuleSet setupMavenJob(String resourceProjectDir,
+                                                                                              String goal,
+                                                                                              Class<T> codeStyleBuildSettings,
+                                                                                              AbstractCodeStylePluginMavenBuildConfigurator<T> configurator) {
+        MavenInstallation.ensureThatMavenIsInstalled(jenkins);
+
+        final MavenModuleSet job = jenkins.jobs.create(MavenModuleSet.class);
+        job.copyDir(resource(resourceProjectDir));
+        job.goals.set(goal);
+
+        if (codeStyleBuildSettings != null) {
+            final T buildSettings = job.addBuildSettings(codeStyleBuildSettings);
+
+            if (configurator != null) {
+                configurator.configure(buildSettings);
+            }
+        }
+
+        job.save();
+
+        return job;
+    }
+
+    /**
      * Edits a job with the given resource and publisherPattern
      * @param job Job to edit
      * @param newResourceToCopy Second resource to copy to differ the result
@@ -98,7 +158,7 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
      *  @param job Job to build
      *  @return The made build
      */
-    public Build buildJobAndWait(FreeStyleJob job) {
+    public Build buildJobAndWait(Job job) {
         return job.startBuild().waitUntilFinished();
     }
 
@@ -107,7 +167,7 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
      *  @param job Job to build
      *  @return The made build
      */
-    public Build buildJobWithSuccess(FreeStyleJob job) {
+    public Build buildJobWithSuccess(Job job) {
         return buildJobAndWait(job).shouldSucceed();
     }
 

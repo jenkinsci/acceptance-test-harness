@@ -2,7 +2,10 @@ package plugins;
 
 import org.jenkinsci.test.acceptance.junit.Bug;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginMavenBuildConfigurator;
+import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.plugins.pmd.PmdAction;
+import org.jenkinsci.test.acceptance.plugins.pmd.PmdMavenBuildSettings;
 import org.jenkinsci.test.acceptance.plugins.pmd.PmdPublisher;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
@@ -200,5 +203,60 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
         final FreeStyleJob job = setupJob("/pmd_plugin/pmd-warnings.xml", PmdPublisher.class, "pmd-warnings.xml", "0", "0", true);
         final Build build = buildJobAndWait(job);
         assertThat(build.isUnstable(), is(true));
+    }
+
+    private MavenModuleSet setupSimpleMavenJob() {
+        return setupSimpleMavenJob(null);
+    }
+
+    private MavenModuleSet setupSimpleMavenJob(AbstractCodeStylePluginMavenBuildConfigurator<PmdMavenBuildSettings> configurator) {
+        final String projectPath = "/pmd_plugin/sample_pmd_project";
+        final String goal = "clean package pmd:pmd";
+        return setupMavenJob(projectPath, goal, PmdMavenBuildSettings.class, configurator);
+    }
+
+    /**
+     * Builds a maven project and checks if new warnings are displayed.
+     */
+    @Test
+    public void build_simple_maven_project() {
+        final MavenModuleSet job = setupSimpleMavenJob();
+        Build lastBuild = buildJobWithSuccess(job);
+        assertThat(lastBuild, hasAction("PMD Warnings"));
+        lastBuild.open();
+        PmdAction pmd = new PmdAction(job);
+        assertThat(pmd.getNewWarningNumber(), is(2));
+    }
+
+    /**
+     * Builds a maven project and checks if it is unstable.
+     */
+    @Test
+    public void build_simple_maven_project_and_check_if_it_is_unstable() {
+        final AbstractCodeStylePluginMavenBuildConfigurator<PmdMavenBuildSettings> buildConfigurator =
+                new AbstractCodeStylePluginMavenBuildConfigurator<PmdMavenBuildSettings>() {
+                    @Override
+                    public void configure(PmdMavenBuildSettings settings) {
+                        settings.setBuildUnstableTotalAll("0");
+                    }
+                };
+        final MavenModuleSet job = setupSimpleMavenJob(buildConfigurator);
+        buildJobAndWait(job).shouldBeUnstable();
+    }
+
+    /**
+     * Builds a maven project and checks if it failed.
+     */
+    @Test
+    public void build_simple_maven_project_and_check_if_failed() {
+        final AbstractCodeStylePluginMavenBuildConfigurator<PmdMavenBuildSettings> buildConfigurator =
+                new AbstractCodeStylePluginMavenBuildConfigurator<PmdMavenBuildSettings>() {
+                    @Override
+                    public void configure(PmdMavenBuildSettings settings) {
+                        settings.setBuildFailedTotalAll("0");
+                    }
+                };
+        final MavenModuleSet job = setupSimpleMavenJob(buildConfigurator);
+        buildJobAndWait(job).shouldFail();
     }
 }

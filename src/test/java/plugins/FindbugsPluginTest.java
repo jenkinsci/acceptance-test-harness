@@ -23,16 +23,14 @@
  */
 package plugins;
 
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
 import org.jenkinsci.test.acceptance.junit.Bug;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginMavenBuildConfigurator;
 import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsAction;
+import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsMavenBuildSettings;
 import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsPublisher;
+import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Ignore;
@@ -40,8 +38,13 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.xml.sax.SAXException;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.jenkinsci.test.acceptance.Matchers.*;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.jenkinsci.test.acceptance.Matchers.hasAction;
 
 @WithPlugins("findbugs")
 public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
@@ -157,5 +160,60 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
         buildJobWithSuccess(job);
 
         assertAreaLinksOfJobAreLike(job, "^\\d+/findbugsResult");
+    }
+
+    private MavenModuleSet setupSimpleMavenJob() {
+        return setupSimpleMavenJob(null);
+    }
+
+    private MavenModuleSet setupSimpleMavenJob(AbstractCodeStylePluginMavenBuildConfigurator<FindbugsMavenBuildSettings> configurator) {
+        final String projectPath = "/findbugs_plugin/sample_findbugs_project";
+        final String goal = "clean package findbugs:findbugs";
+        return setupMavenJob(projectPath, goal, FindbugsMavenBuildSettings.class, configurator);
+    }
+
+    /**
+     * Builds a maven project and checks if a new warning is displayed.
+     */
+    @Test
+    public void build_simple_maven_project() {
+        final MavenModuleSet job = setupSimpleMavenJob();
+        Build lastBuild = buildJobWithSuccess(job);
+        assertThat(lastBuild, hasAction("FindBugs Warnings"));
+        lastBuild.open();
+        FindbugsAction findbugs = new FindbugsAction(job);
+        assertThat(findbugs.getNewWarningNumber(), is(1));
+    }
+
+    /**
+     * Builds a maven project and checks if it is unstable.
+     */
+    @Test
+    public void build_simple_maven_project_and_check_if_it_is_unstable() {
+        final AbstractCodeStylePluginMavenBuildConfigurator<FindbugsMavenBuildSettings> buildConfigurator =
+                new AbstractCodeStylePluginMavenBuildConfigurator<FindbugsMavenBuildSettings>() {
+                    @Override
+                    public void configure(FindbugsMavenBuildSettings settings) {
+                        settings.setBuildUnstableTotalAll("0");
+                    }
+                };
+        final MavenModuleSet job = setupSimpleMavenJob(buildConfigurator);
+        buildJobAndWait(job).shouldBeUnstable();
+    }
+
+    /**
+     * Builds a maven project and checks if it failed.
+     */
+    @Test
+    public void build_simple_maven_project_and_check_if_failed() {
+        final AbstractCodeStylePluginMavenBuildConfigurator<FindbugsMavenBuildSettings> buildConfigurator =
+                new AbstractCodeStylePluginMavenBuildConfigurator<FindbugsMavenBuildSettings>() {
+                    @Override
+                    public void configure(FindbugsMavenBuildSettings settings) {
+                        settings.setBuildFailedTotalAll("0");
+                    }
+                };
+        final MavenModuleSet job = setupSimpleMavenJob(buildConfigurator);
+        buildJobAndWait(job).shouldFail();
     }
 }

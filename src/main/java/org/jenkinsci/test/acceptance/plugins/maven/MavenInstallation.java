@@ -27,12 +27,27 @@ import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.jenkinsci.test.acceptance.po.ToolInstallation;
 import org.jenkinsci.test.acceptance.po.ToolInstallationPageObject;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 @ToolInstallationPageObject(name="Maven", installer="hudson.tasks.Maven.MavenInstaller")
 public class MavenInstallation extends ToolInstallation {
 
     public static void installSomeMaven(Jenkins jenkins) {
         installMaven(jenkins, "default_maven", "3.0.5");
+    }
+
+    /**
+     * Ensures that maven is installed. Installs maven if it is not yet installed.
+     * @param jenkins
+     */
+    public static void ensureThatMavenIsInstalled(Jenkins jenkins) {
+        jenkins.configure();
+        final By advancedButtonBy = by.path("/hudson-tasks-Maven$MavenInstallation/advanced-button");
+        WebElement mavenAdvancedButton = jenkins.getElement(advancedButtonBy);
+        if(mavenAdvancedButton == null) {
+            installSomeMaven(jenkins);
+        }
     }
 
     public static void installMaven(Jenkins jenkins, String name, String version) {
