@@ -3,6 +3,7 @@ package groovy.plugins
 import org.jenkinsci.test.acceptance.geb.GebSpec
 import org.jenkinsci.test.acceptance.junit.WithPlugins
 import org.jenkinsci.test.acceptance.plugins.jacoco.JacocoPublisher
+import org.jenkinsci.test.acceptance.po.Build
 import org.jenkinsci.test.acceptance.po.Job
 
 /**
@@ -17,7 +18,11 @@ class JacocoPluginTest extends GebSpec {
         given: "I have a job job with jacoco results in it"
         j = jenkins.jobs.create();
         j.copyDir(resource("/jacoco/test"));
-        j.addPublisher(JacocoPublisher.class);
-        //changeBuildStatus.checked=true;
+        def publisher = j.addPublisher(JacocoPublisher.class);
+        publisher.changeBuildStatus.value(true);
+        j.save();
+        when: "the build stared and succeed"
+        Build b = j.startBuild().waitUntilFinished().shouldSucceed();
+        then: "jacoco results should be shown"
     }
 }
