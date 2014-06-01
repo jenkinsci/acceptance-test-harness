@@ -36,7 +36,7 @@ import org.junit.experimental.categories.Category;
 
 @Native("docker")
 @WithPlugins("git")
-@WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {"gitplugin", "/ssh_keys/unsafe"})
+@WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {"gitplugin", "/org/jenkinsci/test/acceptance/docker/fixtures/GitContainer/unsafe"})
 public class GitPluginTest extends AbstractJUnitTest {
 
     private static final String USERNAME = "gitplugin";

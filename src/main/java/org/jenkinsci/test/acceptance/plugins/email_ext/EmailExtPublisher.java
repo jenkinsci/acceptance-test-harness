@@ -19,8 +19,12 @@ public class EmailExtPublisher extends AbstractStep implements PostBuildStep {
 
     public void setRecipient(String r) {
         recipient.set(r);
-        ensureAdvancedOpened();
-        control("project_triggers/sendToList").check();
+
+        // since 2.38 refactored to hetero-list, recepients are preselected
+        if (getPage().getJenkins().getPlugin("email-ext").isOlderThan("2.38")) {
+            ensureAdvancedOpened();
+            control("project_triggers/sendToList").check();
+        }
     }
 
     public void ensureAdvancedOpened() {

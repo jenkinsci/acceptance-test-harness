@@ -48,8 +48,6 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
         FreeStyleJob job = setupJob("/pmd_plugin/pmd.xml", PmdPublisher.class, "pmd.xml");
         Build lastBuild = buildJobWithSuccess(job);
 
-        lastBuild.shouldSucceed();
-
         assertThat(lastBuild.open(), hasContent("0 warnings"));
     }
 

@@ -39,8 +39,7 @@ import static org.junit.Assert.fail;
 
 /**
  * Page Object for Gerrit Trigger server (configuration) page.
- *
- * @author Marco Miller
+ * @author Marco.Miller@ericsson.com
  */
 public class GerritTriggerServer extends PageObject {
 
@@ -69,10 +68,10 @@ public class GerritTriggerServer extends PageObject {
      */
     public void saveTestServerConfig() {
         open();
-        hostName.set(GerritTriggerEnv.getInstance().getHostName());
-        feUrl.set("https://" + GerritTriggerEnv.getInstance().getHostName());
-        userName.set(GerritTriggerEnv.getInstance().getGerritUser());
-        keyFile.set(GerritTriggerEnv.getInstance().getUserHome() + "/.ssh/id_rsa");
+        hostName.set(GerritTriggerEnv.get().getHostName());
+        feUrl.set("https://"+GerritTriggerEnv.get().getHostName());
+        userName.set(GerritTriggerEnv.get().getGerritUser());
+        keyFile.set(GerritTriggerEnv.get().getUserHome()+"/.ssh/id_rsa");
         advanced.click();
         try {
             codeReview.resolve();

@@ -1,11 +1,11 @@
 package org.jenkinsci.test.acceptance.po;
 
-import java.util.List;
-import java.util.concurrent.Callable;
-
 import org.jenkinsci.test.acceptance.ByFactory;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+
+import java.util.List;
+import java.util.concurrent.Callable;
 
 /**
  * Interface for assisting porting from Capybara.
@@ -22,6 +22,9 @@ public interface CapybaraPortingLayer {
      */
     WebElement choose(String locator);
 
+    /**
+     * Wait until the element that matches the given selector appears.
+     */
     WebElement waitFor(By selector, int timeoutSec);
 
     /**
@@ -33,6 +36,8 @@ public interface CapybaraPortingLayer {
      * Repeated evaluate the given predicate until it returns true.
      * <p/>
      * If it times out, an exception will be thrown.
+     *
+     * @param timeoutSec 0 if left to the default value
      */
     <T> T waitForCond(Callable<T> block, int timeoutSec);
 
@@ -47,7 +52,16 @@ public interface CapybaraPortingLayer {
     WebElement find(By selector);
 
     /**
-     * Works like {@link #find(org.openqa.selenium.By)} but instead of throwing an exception, this method returns null.
+     * Returns the first element that matches the selector even if not visible.
+     *
+     * @throws org.openqa.selenium.NoSuchElementException if the element is not found.
+     * @see #getElement(org.openqa.selenium.By)         if you don't want to see an exception
+     */
+    WebElement findIfNotVisible(By selector);
+
+    /**
+     * Works like {@link #find(org.openqa.selenium.By)} but instead of throwing an exception,
+     * this method returns null.
      */
     WebElement getElement(By selector);
 
@@ -63,12 +77,39 @@ public interface CapybaraPortingLayer {
      */
     void check(WebElement e, boolean state);
 
+    /**
+     * Finds all the elements that match the selector.
+     * <p/>
+     * <p/>
+     * Note that this method inherits the same restriction of the {@link org.openqa.selenium.WebDriver#findElements(org.openqa.selenium.By)},
+     * in that its execution is not synchronized with the JavaScript execution of the browser.
+     * <p/>
+     * <p/>
+     * For example, if you click something that's expected to populate additional DOM elements,
+     * and then call {@code all()} to find them, then all() can execute before those additional DOM elements
+     * are populated, thereby failing to find the elements you are looking for.
+     * <p/>
+     * <p/>
+     * In contrast, {@link #find(org.openqa.selenium.By)} do not have this problem, because it waits until the element
+     * that matches the criteria appears.
+     * <p/>
+     * <p/>
+     * So if you are using this method, think carefully. Perhaps you can use {@link #find(org.openqa.selenium.By)} to
+     * achieve what you are looking for (by making the query more specific), or perhaps you can combine
+     * this with {@link #waitForCond(java.util.concurrent.Callable)} so that if you don't find the elements you are looking for
+     * in the list, you'll retry.
+     */
     List<WebElement> all(By selector);
 
     /**
-     * Picks up the last element that matches given selector.
+     * Picks up the last visible element that matches given selector.
      */
     WebElement last(By selector);
+
+    /**
+     * Picks up the last visible element that matches given selector.
+     */
+    WebElement lastIfNotVisible(By selector);
 
     /**
      * Executes JavaScript.

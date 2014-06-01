@@ -4,6 +4,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Named;
 import javax.inject.Provider;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -47,11 +48,20 @@ public class PluginManager extends ContainerPageObject {
      */
     @Inject(optional = true)
     @Named("uploadPlugins")
-    public boolean uploadPlugins = true;
+    public Boolean uploadPlugins;
+
+    @Inject(optional = true)
+    @Named("forceRestartAfterPluginInstallation")
+    public boolean forceRestart;
 
     public PluginManager(Jenkins jenkins) {
         super(jenkins.injector, jenkins.url("pluginManager/"));
         this.jenkins = jenkins;
+
+        // injection happens in the base class, so for us to differentiate default state vs false state,
+        // we need to use Boolean
+        if (uploadPlugins==null)
+            uploadPlugins = true;
     }
 
     /**
@@ -114,6 +124,7 @@ public class PluginManager extends ContainerPageObject {
      */
     @Deprecated
     public void installPlugins(final String... specs) {
+        boolean changed = false;
         final Map<String, String> candidates = getMapShortNamesVersion(specs);
 
         if (uploadPlugins) {
@@ -131,24 +142,11 @@ public class PluginManager extends ContainerPageObject {
                 if (!isInstalled(currentSpec)) { // we need to override existing "old" plugins
                     try {
                         newPlugin.uploadTo(jenkins, injector, null);
+                        changed = true;
                     } catch (IOException | ArtifactResolutionException e) {
                         throw new AssertionError("Failed to upload plugin: " + newPlugin, e);
                     }
                 }
-            }
-
-            // plugin deployment happens asynchronously, so give it a few seconds
-            // for it to finish deploying
-            // TODO: Use better detection if this is actually necessary
-            try {
-                waitForCond(new Callable<Boolean>() {
-                    @Override
-                    public Boolean call() throws Exception {
-                        return isInstalled(specs);
-                    }
-                }, 5);
-            } catch (TimeoutException e) {
-                jenkins.restart();
             }
         } else {
             if (!updated)
@@ -166,6 +164,7 @@ public class PluginManager extends ContainerPageObject {
 
                     try {
                         new UpdateCenter(jenkins).waitForInstallationToComplete(n);
+                        changed = true;
                     } catch (InstallationFailedException e) {
                         if (e.getMessage().contains("Failed to download from")) {
                             continue;   // retry
@@ -173,6 +172,26 @@ public class PluginManager extends ContainerPageObject {
                     }
 
                     continue OUTER;  // installation completed
+                }
+            }
+        }
+
+        if (changed) {
+            if (forceRestart) {
+                jenkins.restart();
+            } else {
+                // plugin deployment happens asynchronously, so give it a few seconds
+                // for it to finish deploying
+                // TODO: Use better detection if this is actually necessary
+                try {
+                    waitForCond(new Callable<Boolean>() {
+                        @Override
+                        public Boolean call() throws Exception {
+                            return isInstalled(specs);
+                        }
+                    }, 5);
+                } catch (TimeoutException e) {
+                    jenkins.restart();
                 }
             }
         }
@@ -224,6 +243,17 @@ public class PluginManager extends ContainerPageObject {
 
         public @Nullable String getVersion() {
             return version;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append(name);
+            if (version != null) {
+                sb.append('@').append(version);
+            }
+
+            return sb.toString();
         }
     }
 }

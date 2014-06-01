@@ -29,7 +29,7 @@ import org.jenkinsci.test.acceptance.po.PageObject;
 
 /**
  * Page Object for Gerrit Trigger newServer (configuration) page.
- * @author Marco Miller
+ * @author Marco.Miller@ericsson.com
  */
 public class GerritTriggerNewServer extends PageObject {
 

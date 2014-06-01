@@ -1,7 +1,7 @@
 package plugins;
 
-import java.util.*;
-
+import com.google.inject.Inject;
+import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Bug;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
@@ -16,13 +16,13 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.openqa.selenium.WebElement;
 
-import com.google.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
 
-import static java.util.Collections.*;
-import static org.hamcrest.CoreMatchers.*;
 import static java.util.Collections.singletonMap;
-import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 
 /**
  * Feature: Use node name and label as parameter
@@ -51,7 +51,8 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
      * | slavename | slave42 |
      * Then the build should run on "slave42"
      */
-    @Test @Category(SmokeTest.class)
+    @Test
+    @Category(SmokeTest.class)
     public void build_on_a_particular_slave() throws Exception {
         FreeStyleJob j = jenkins.jobs.create();
 
@@ -68,11 +69,10 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
      * This test is intended to check that an online slave is ignored
      * when selected for a job and the job is configured with "Node eligibility" setting
      * is set to "Ignore Offline Nodes"
-     *
+     * <p/>
      * It is expected that all nodes are available for the build job.
      * The default node shall be preselected and the job shall be built on the available slave.
      */
-
     @Test
     public void build_with_preselected_node() throws Exception {
         FreeStyleJob j = jenkins.jobs.create();
@@ -81,14 +81,14 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         j.configure();
         NodeParameter p = j.addParameter(NodeParameter.class);
         p.setName("slavename");
-        p.defaultNodesSelection.findElement(by.option(s.getName())).click();
-        p.possibleNodesSelection.findElement(by.option("ALL (no restriction)")).click();
+        p.defaultNodes.select(s.getName());
+        p.allowedNodes.select("ALL (no restriction)");
         p.disallowMultiple.check();
-        p.allNodes.click();
+
         j.save();
 
         visit(j.getBuildUrl());
-        assertThat("Default node is selected",find(by.option(s.getName())).isSelected(), is(true));
+        assertThat("Default node is selected", find(by.option(s.getName())).isSelected(), is(true));
 
         WebElement wbElement = find(by.xpath("//select[@name='labels']"));
         List<WebElement> availableNodes = wbElement.findElements(by.tagName("option"));
@@ -100,20 +100,20 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     Scenario: Run on label
-       Given I have installed the "nodelabelparameter" plugin
-       And a job
-       And a slave named "slave42"
-       And a slave named "slave43"
-       When I configure the job
-       And I add label parameter "slavelabel"
-       And I save the job
-       And I build the job with parameter
-           | slavelabel | slave42 |
-       Then the build should run on "slave42"
-       And I build the job with parameter
-           | slavelabel | !slave42 && !slave43 |
-       Then the build should run on "master"
+     * Scenario: Run on label
+     * Given I have installed the "nodelabelparameter" plugin
+     * And a job
+     * And a slave named "slave42"
+     * And a slave named "slave43"
+     * When I configure the job
+     * And I add label parameter "slavelabel"
+     * And I save the job
+     * And I build the job with parameter
+     * | slavelabel | slave42 |
+     * Then the build should run on "slave42"
+     * And I build the job with parameter
+     * | slavelabel | !slave42 && !slave43 |
+     * Then the build should run on "master"
      */
     @Test
     public void run_on_label() throws Exception {
@@ -162,7 +162,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         j.concurrentBuild.check();
         j.save();
 
-        j.startBuild(singletonMap("slavename", s.getName()+",master")).shouldSucceed();
+        j.startBuild(singletonMap("slavename", s.getName() + ",master")).shouldSucceed();
 
         assertThat(j.getNextBuildNumber(), is(3));
 
@@ -176,11 +176,10 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
      * This test is intended to check that an offline slave is not ignored
      * when selected for a job and the job is configured with "Node eligibility" setting
      * is set to "All Nodes"
-     *
+     * <p/>
      * It is expected that the job is pending due to the offline status of the slave.
      * But it will be reactivated as soon as the slave status becomes online.
      */
-
     @Test
     public void run_on_a_particular_offline_slave() throws Exception {
         FreeStyleJob j = jenkins.jobs.create();
@@ -191,7 +190,6 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         NodeParameter p = j.addParameter(NodeParameter.class);
         p.setName("slavename");
         p.disallowMultiple.check();
-        p.allNodes.click();
         j.save();
 
         //as the slave has been started after creation, we have to take it down again
@@ -201,7 +199,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         //use scheduleBuild instead of startBuild to avoid a timeout waiting for Build being started
         Build b = j.scheduleBuild(singletonMap("slavename", s.getName()));
         sleep(3000);    // TODO: not the best way to wait for the scheduled job to go through the queue, but a bit of wait is needed
-        b.shouldBePendingForNodeParameter(s.getName());
+        shouldBePendingForNodeParameter(b, s.getName());
 
         //bring the slave up again, the Build should start immediately
         s.markOnline();
@@ -215,7 +213,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
      * This test is intended to check that an offline slave is ignored
      * when selected for a job and the job is configured with "Node eligibility" setting
      * is set to "Ignore Offline Nodes"
-     *
+     * <p/>
      * It is expected that the job is pending due no valid slave is available.
      */
     @Test
@@ -227,7 +225,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         NodeParameter p = j.addParameter(NodeParameter.class);
         p.setName("slavename");
         p.disallowMultiple.check();
-        p.ignoreOffline.click();
+        p.eligibility.select("Ignore Offline Nodes");
 
         j.save();
 
@@ -238,23 +236,21 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         //use scheduleBuild instead of startBuild to avoid a timeout waiting for Build being started
         Build b = j.scheduleBuild(singletonMap("slavename", s.getName()));
         sleep(3000);    // TODO: not the best way to wait for the scheduled job to go through the queue, but a bit of wait is needed
-        b.shouldBeTriggeredWithoutValidOnlineNode(s.getName());
-
+        shouldBeTriggeredWithoutValidOnlineNode(b, s.getName());
     }
 
     /**
      * This test is intended to check that an offline slave is not ignored
      * when selected for a job and the job is configured with "Node eligibility" setting
      * is set to "All Nodes" in combination with "Allow multiple nodes" option.
-     *
+     * <p/>
      * The job shall run on a mixed configuration of online and offline slaves.
      * It is expected that a number of builds is created equivalent to the number of
      * slaves selected. The build shall be pending for the offline slaves and executed
      * successfully for the online slaves.
      * Pending builds will be reactivated as soon as the particular slave becomes online.
      */
-
-    @Test @Bug("23014") @Ignore("Until JENKINS-23014 is fixed")
+    @Test
     public void run_on_several_online_and_offline_slaves() throws Exception {
         FreeStyleJob j = jenkins.jobs.create();
 
@@ -264,7 +260,6 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         j.configure();
         NodeParameter p = j.addParameter(NodeParameter.class);
         p.setName("slavename");
-        p.allNodes.click();
         p.allowMultiple.check();
         j.concurrentBuild.check();
 
@@ -275,41 +270,33 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         assertThat(s2.isOnline(), is(false));
         assertThat(s1.isOnline(), is(true));
 
-        //select both slaves for this build, it should succeed due the online slave
-        Build b = j.startBuild(singletonMap("slavename", s1.getName()+","+s2.getName())).shouldSucceed();
-
-        // wait for the build on slave 1 to finish
-        //b.waitUntilFinished();
-
-        // check that the build is also pending for the other slave
-        b.shouldBePendingForNodeParameter(s2.getName());
+        //select both slaves for this build
+        Build b = j.startBuild(singletonMap("slavename", s1.getName() + "," + s2.getName())).shouldSucceed();
 
         //ensure that the build on the online slave has been done
+        assertThat(j.getLastBuild().waitUntilFinished().getNumber(), is(equalTo(1)));
         j.shouldHaveBuiltOn(s1);
+
+        assertThat(j.open(), Matchers.hasContent(s2.getName() + " is offline"));
 
         //bring second slave online again
         s2.markOnline();
         assertThat(s2.isOnline(), is(true));
 
-        b.waitUntilFinished();
+        assertThat(j.getLastBuild().waitUntilFinished().getNumber(), is(equalTo(2)));
         j.shouldHaveBuiltOn(s2);
-
-        //check that 2 builds have been created in total
-        assertThat(j.getNextBuildNumber(), is(3));
-
     }
 
     /**
      * This test is intended to check that an offline slave is ignored
      * when selected for a job and the job is configured with "Node eligibility" setting
      * is set to "Ignore offline Nodes" in combination with "Allow multiple nodes" option.
-     *
+     * <p/>
      * The job shall run on a mixed configuration of online slaves.
      * It is expected that a number of builds is created equivalent to the number of
      * slaves selected. The build shall be pending as there is no valid online slave.
      * Pending builds will be reactivated as soon as the particular slave becomes online.
      */
-
     @Test
     public void pending_build_with_no_valid_node() throws Exception {
         FreeStyleJob j = jenkins.jobs.create();
@@ -322,7 +309,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         p.setName("slavename");
         p.allowMultiple.check();
         j.concurrentBuild.check();
-        p.ignoreOffline.click();
+        p.eligibility.select("Ignore Offline Nodes");
 
         j.save();
 
@@ -337,31 +324,25 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         // wait for the build on slave 1 to finish
         b.waitUntilFinished();
 
-        //get back to the job's page otherwise we do not have the build history summary to evaluate their content
-        j.visit(""); //equivalent to: jenkins.visit("jobs/"+j.name);
-
         //ensure that the build on the online slave has been done
         j.shouldHaveBuiltOn(s1);
 
         //use scheduleBuild instead of startBuild to avoid a timeout waiting for Build being started
         b = j.scheduleBuild(singletonMap("slavename", s2.getName()));
 
-        String pendingBuildText = find(by.xpath("//img[@alt='pending']/../..")).getText();
-        String refText=String.format("(pending—All nodes of label ‘Job triggered without a valid online node, given where: %s’ are offline)",s2.getName());
-
-        assertThat(pendingBuildText.contains(refText), is(true));
-        assertThat(!b.hasStarted(),is(true));
+        waitFor(by.href("/queue/cancelItem?id=2")); // shown in queue
+        sleep(10000); // after some time
+        assertThat(j.open(), Matchers.hasContent(Pattern.compile("pending—All nodes of label ‘.*’ are offline")));
     }
 
     /**
      * This test is intended to verify that the second build is not started when the
      * build already failed on the first slave in combination with the
      * "run next build only if build succeeds" setting of the node parameter.
-     *
+     * <p/>
      * As a build can fail in different stages this test simulates a FAILED result
      * during the main build action.
      */
-
     @Test
     public void trigger_if_succeeds_with_failed_main_build() throws Exception {
         FreeStyleJob j = jenkins.jobs.create();
@@ -376,7 +357,6 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         // set up the node parameter
         NodeParameter p = j.addParameter(NodeParameter.class);
         p.setName("slavename");
-        p.allNodes.click();
         p.runIfSuccess.check();
 
         //ensure the main build fails by using a shell exit command
@@ -385,7 +365,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         j.save();
 
         // select both slaves for this build
-        j.startBuild(singletonMap("slavename", slaves.get(0).getName()+","+slaves.get(1).getName()))
+        j.startBuild(singletonMap("slavename", slaves.get(0).getName() + "," + slaves.get(1).getName()))
                 .shouldFail();
 
         // verify failed result prevents the job to be built on further nodes.
@@ -402,16 +382,18 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
      * This test is intended to verify that the second build is not started when the
      * build already failed on the first slave in combination with the
      * "run next build only if build succeeds" setting of the node parameter.
-     *
+     * <p/>
      * As a build can fail in different stages this test simulates a FAILED result
      * during the post build step. Therefore the text-finder plugin is used to
      * fail the build based on a simple pattern matching with a text file copied to
      * the slave's workspace.
-     *
+     * <p/>
      * Note that in this case the main build action is still completed with status SUCCESS.
      */
-
-    @Test @WithPlugins("text-finder") @Bug("23129") @Ignore("Until JENKINS-23129 is fixed")
+    @Test
+    @WithPlugins("text-finder")
+    @Bug("23129")
+    @Ignore("Until JENKINS-23129 is fixed")
     public void trigger_if_succeeds_with_failed_post_build_step() throws Exception {
         FreeStyleJob j = jenkins.jobs.create();
 
@@ -425,7 +407,6 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         // set up the node parameter
         NodeParameter p = j.addParameter(NodeParameter.class);
         p.setName("slavename");
-        p.allNodes.click();
         p.runIfSuccess.check();
 
         // copy the file to mark the status
@@ -440,14 +421,14 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         j.save();
 
         // select both slaves for this build
-        j.startBuild(singletonMap("slavename", slaves.get(0).getName()+","+slaves.get(1).getName()))
+        j.startBuild(singletonMap("slavename", slaves.get(0).getName() + "," + slaves.get(1).getName()))
                 .shouldFail();
 
         // verify failed result prevents the job to be built on further nodes.
         // As the nodes get random names and the selected nodes are utilized in alphabetical order
         // of their names, the first build will not necessarily be done on s1. Thus, it can only
         // be verified that the job has been built on one of the slaves.
-        j.startBuild(singletonMap("slavename", slaves.get(0).getName()+","+slaves.get(1).getName()))
+        j.startBuild(singletonMap("slavename", slaves.get(0).getName() + "," + slaves.get(1).getName()))
                 .shouldFail();
 
         assertThat(j.getNextBuildNumber(), is(2));
@@ -458,14 +439,15 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
      * This test is intended to verify that the second build is not started when the
      * build already deemed unstable on the first slave in combination with the
      * "run next build only if build succeeds" setting of the node parameter.
-     *
+     * <p/>
      * The JUnit test publisher is used to create an unstable build during the post
      * build step.
-     *
+     * <p/>
      * Note that in this case the main build action is still completed with status SUCCESS.
      */
-
-    @Test @Bug("23129") @Ignore("Until JENKINS-23129 is fixed")
+    @Test
+    @Bug("23129")
+    @Ignore("Until JENKINS-23129 is fixed")
     public void trigger_if_succeeds_with_unstable_post_build_step() throws Exception {
         FreeStyleJob j = jenkins.jobs.create();
 
@@ -479,7 +461,6 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         // set up the node parameter
         NodeParameter p = j.addParameter(NodeParameter.class);
         p.setName("slavename");
-        p.allNodes.click();
         p.runIfSuccess.check();
 
         // copy the unit test results
@@ -491,14 +472,14 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         j.save();
 
         // select both slaves for this build
-        j.startBuild(singletonMap("slavename", slaves.get(0).getName()+","+slaves.get(1).getName()))
+        j.startBuild(singletonMap("slavename", slaves.get(0).getName() + "," + slaves.get(1).getName()))
                 .shouldFail();
 
         // verify unstable result prevents the job to be built on further nodes.
         // As the nodes get random names and the selected nodes are utilized in alphabetical order
         // of their names, the first build will not necessarily be done on s1. Thus, it can only
         // be verified that the job has been built on one of the slaves.
-        j.startBuild(singletonMap("slavename", slaves.get(0).getName()+","+slaves.get(1).getName()))
+        j.startBuild(singletonMap("slavename", slaves.get(0).getName() + "," + slaves.get(1).getName()))
                 .shouldFail();
 
         assertThat(j.getNextBuildNumber(), is(2));
@@ -521,36 +502,26 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         NodeParameter p = j.addParameter(NodeParameter.class);
         p.setName("slavename");
 
-        //check that the slaves are available in the "Possible Nodes" selection box
-        //default items are Master and ALL
-        List<WebElement> possibleNodes = p.getPossibleNodesOptions();
-        assertThat("Amount of possible nodes does not match.", possibleNodes.size(), is(4) );
+        // master, ALL + 2 slaves
+        assertThat("Amount of possible nodes does not match", p.getPossibleNodesOptions().size(), is(4));
 
-        //multi node selection
         p.allowMultiple.check();
-        //node restriction master and slave1
-        possibleNodes.get(1).click();
-        possibleNodes.get(2).click();
+        p.allowedNodes.select("master");
+        p.allowedNodes.select(s1.getName());
 
-        //enable concurrent builds
         j.concurrentBuild.check();
-
         j.save();
 
-        //check that slaves are online
-        assertThat(s1.isOnline(), is(true) );
-        assertThat(s2.isOnline(), is(true) );
+        assertThat(s1.isOnline(), is(true));
+        assertThat(s2.isOnline(), is(true));
 
         //checks that build selection box only contains the possible nodes
         visit(j.getBuildUrl());
-        WebElement selectionBox = find(by.xpath("//select[@name='labels']"));
-        List<WebElement> selectionNodes = selectionBox.findElements(by.tagName("option"));
+        List<String> slaves = p.applicableNodes();
+        assertThat("Amount of selectable nodes", slaves.size(), is(2));
+        assertThat(slaves, containsInAnyOrder("master", s1.getName()));
 
-        assertThat("Amount of selectable build nodes does not match.", selectionNodes.size(), is(2) );
-        assertThat("Selectable build node does not match.",  selectionNodes.get(0).getText(), equalTo( "master" ) );
-        assertThat("Selectable build node does not match.",  selectionNodes.get(1).getText(), equalTo( s1.getName() ) );
-
-        Build b = j.startBuild(singletonMap("slavename", s1.getName()+",master"));
+        j.startBuild(singletonMap("slavename", s1.getName() + ",master"));
 
         j.getLastBuild().waitUntilFinished();
 
@@ -558,5 +529,52 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         j.shouldHaveBuiltOn(s1);
 
         assertThat(j.getNextBuildNumber(), is(3));
+    }
+
+    /**
+     * This function tries to assert that the current build is pending for a certain
+     * node using a NodeParameter. The node's name has to be specified when calling this method.
+     */
+    private void shouldBePendingForNodeParameter(Build build, String nodename) {
+        String paramname = "";
+        Parameter param;
+
+        //as a job can have multiple parameters, get the NodeParameter to determine its name
+        for (int i = 0; i < build.job.getParameters().size(); i++) {
+            param = build.job.getParameters().get(i);
+            if (param instanceof NodeParameter) {
+                paramname = param.getName();
+            }
+        }
+
+        String pendingBuildText = getPendingBuildText(build);
+        String expectedText = String.format("(pending—%s is offline) [NodeParameterValue: %s=%s]", nodename, paramname, nodename);
+        assertThat(pendingBuildText, containsString(expectedText));
+        assertThat(build.hasStarted(), is(false));
+    }
+
+    /**
+     * This function tries to assert that the current build is pending due there are no
+     * valid online nodes. The node's name has to be specified when calling this method.
+     */
+    private void shouldBeTriggeredWithoutValidOnlineNode(Build build, String nodename) {
+        String pendingBuildText = getPendingBuildText(build);
+        String expectedText = String.format("(pending—All nodes of label ‘Job triggered without a valid online node, given where: %s’ are offline)", nodename);
+        assertThat(pendingBuildText, containsString(expectedText));
+        assertThat(build.hasStarted(), is(false));
+    }
+
+    /**
+     * Get pending build message in build history summary if there is one.
+     */
+    private String getPendingBuildText(Build build) {
+        //ensure to be on the job's page otherwise we do not have the build history summary
+        // to get their content
+        build.job.open();
+
+        // pending message comes from the queue, and queue's maintenance is asynchronous to UI threads.
+        // so if the original response doesn't contain it, we have to wait for the refersh of the build history.
+        // so give it a bigger wait.
+        return find(by.xpath("//img[@alt='pending']/../..")).getText();
     }
 }

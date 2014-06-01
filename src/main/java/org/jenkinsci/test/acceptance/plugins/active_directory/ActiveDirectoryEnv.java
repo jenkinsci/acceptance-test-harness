@@ -27,7 +27,7 @@ import static org.junit.Assume.assumeNotNull;
 
 /**
  * Thread-unsafe singleton serving ad-prefixed test env args.
- * @author Marco Miller
+ * @author Marco.Miller@ericsson.com
  */
 public class ActiveDirectoryEnv {
 
@@ -36,6 +36,7 @@ public class ActiveDirectoryEnv {
     private String bindDN;
     private String controller;
     private String domain;
+    private String group;
     private String password;
     private String site;
     private String user;
@@ -44,12 +45,13 @@ public class ActiveDirectoryEnv {
         bindDN = System.getenv("adBindDN");
         controller = System.getenv("adController");
         domain = System.getenv("adDomain");
+        group = System.getenv("adGroup");
         password = System.getenv("adPassword");
         site = System.getenv("adSite");
         user = System.getenv("adUser");
     }
 
-    public static ActiveDirectoryEnv getInstance() {
+    public static ActiveDirectoryEnv get() {
         if(instance == null) {
             instance = new ActiveDirectoryEnv();
         }
@@ -67,6 +69,11 @@ public class ActiveDirectoryEnv {
     public String getDomain() {
         assumeNotNull(domain);
         return domain;
+    }
+
+    public String getGroup() {
+        assumeNotNull(group);
+        return group;
     }
 
     public String getPassword() {
