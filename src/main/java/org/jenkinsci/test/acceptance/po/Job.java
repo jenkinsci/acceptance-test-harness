@@ -5,7 +5,6 @@ import cucumber.api.DataTable;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.plexus.util.Base64;
 import org.jenkinsci.test.acceptance.junit.Resource;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.zeroturnaround.zip.ZipUtil;
 
@@ -322,23 +321,6 @@ public class Job extends ContainerPageObject {
             if (matcher.find()) {
                 links.add(matcher.group(1));
             }
-        }
-        return links;
-    }
-
-    /**
-     * Get a map with all links within the navigation area.
-     * The key contains the href attribute while the value contains the link text.
-     *
-     * @return A map with all links within the navigation area.
-     */
-    public Map<String, String> getNavigationLinks() {
-        open();
-        final Map<String, String> links = new HashMap<>();
-        List<WebElement> elementLinks = all(By.cssSelector("div#navigation a.task-link"));
-
-        for (WebElement element : elementLinks) {
-            links.put(element.getAttribute("href"), element.getText());
         }
         return links;
     }
