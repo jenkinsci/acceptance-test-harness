@@ -14,6 +14,10 @@ import org.openqa.selenium.WebDriver
  */
 class Page extends geb.Page {
 
+    Page() {
+        super()
+    }
+
     Page(Injector injector) {
         super()
         init(new Browser(driver: injector.getInstance(WebDriver.class)))
