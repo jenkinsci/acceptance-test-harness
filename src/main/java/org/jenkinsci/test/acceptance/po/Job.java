@@ -5,12 +5,12 @@ import cucumber.api.DataTable;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.plexus.util.Base64;
 import org.jenkinsci.test.acceptance.junit.Resource;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.zeroturnaround.zip.ZipUtil;
 
 import java.io.*;
 import java.net.URL;
-import java.util.*;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -18,7 +18,6 @@ import java.util.zip.GZIPOutputStream;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 /**
@@ -270,7 +269,7 @@ public class Job extends ContainerPageObject {
      * To test whether the the job has built on the master, the jenkins instance has to be
      * passed in the parameter.
      */
-    public void shouldHaveBuiltOn(Node n){
+    public void shouldHaveBuiltOn(Node n) {
         assertThat(hasBuiltOn(n), is(true));
     }
 
@@ -292,10 +291,10 @@ public class Job extends ContainerPageObject {
         int noOfNodes = 0;
 
         for (Node n : nodes) {
-            if (hasBuiltOn(n))
+            if (hasBuiltOn(n)) {
                 noOfNodes++;
+            }
         }
-
         assertThat(noOfNodes, is(1));
     }
 
@@ -323,6 +322,23 @@ public class Job extends ContainerPageObject {
             if (matcher.find()) {
                 links.add(matcher.group(1));
             }
+        }
+        return links;
+    }
+
+    /**
+     * Get a map with all links within the navigation area.
+     * The key contains the href attribute while the value contains the link text.
+     *
+     * @return A map with all links within the navigation area.
+     */
+    public Map<String, String> getNavigationLinks() {
+        open();
+        final Map<String, String> links = new HashMap<>();
+        List<WebElement> elementLinks = all(By.cssSelector("div#navigation a.task-link"));
+
+        for (WebElement element : elementLinks) {
+            links.put(element.getAttribute("href"), element.getText());
         }
         return links;
     }
