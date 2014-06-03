@@ -43,6 +43,12 @@ public abstract class AbstractCodeStylePluginAction extends ContainerPageObject 
     }
 
     /**
+     * Getter of the relative path for new Warnings page.
+     * @return String for new Warnings page
+     */
+    public String getNewWarningsUrlAsRelativePath() { return plugin + "Result/new"; }
+
+    /**
      * Getter of all warnings.
      * @return Number of warnings
      */
@@ -133,8 +139,7 @@ public abstract class AbstractCodeStylePluginAction extends ContainerPageObject 
      * @return a map of the first two columns. (first column => second column)
      */
     public SortedMap<String, Integer> getFileTabContents() {
-        open();
-        find(by.xpath(".//A[@href]/em[text() = 'Files']")).click();
+        ensureTab("Files");
         return getContentsOfVisibleTable(true, true);
     }
 
@@ -143,8 +148,7 @@ public abstract class AbstractCodeStylePluginAction extends ContainerPageObject 
      * @return a map of the first two columns. (first column => second column)
      */
     public SortedMap<String, Integer> getCategoriesTabContents() {
-        open();
-        find(by.xpath(".//A[@href]/em[text() = 'Categories']")).click();
+        ensureTab("Categories");
         return getContentsOfVisibleTable(true, true);
     }
 
@@ -153,8 +157,7 @@ public abstract class AbstractCodeStylePluginAction extends ContainerPageObject 
      * @return a map of the first two columns. (first column => second column)
      */
     public SortedMap<String, Integer> getTypesTabContents() {
-        open();
-        find(by.xpath(".//A[@href]/em[text() = 'Types']")).click();
+        ensureTab("Types");
         return getContentsOfVisibleTable(true, true);
     }
 
@@ -163,12 +166,15 @@ public abstract class AbstractCodeStylePluginAction extends ContainerPageObject 
      * @return a map of the first two columns. (first column => second column)
      */
     public SortedMap<String, Integer> getWarningsTabContents() {
-        open();
-        find(by.xpath(".//A[@href]/em[text() = 'Warnings']")).click();
+        ensureTab("Warnings");
         return getContentsOfVisibleTable(true, false);
     }
 
     private SortedMap<String, Integer> getContentsOfVisibleTable(boolean removeHeader, boolean removeFooter) {
+        return mapTableCellsKeyValue(getVisibleTableRows(removeHeader,removeFooter));
+    }
+
+    protected List<WebElement> getVisibleTableRows(boolean removeHeader, boolean removeFooter){
         WebElement table = find(by.xpath("//div[@id='statistics']/div/div/table"));
         final List<WebElement> immediateChildRows = table.findElements(by.xpath("./tbody/tr"));
 
@@ -180,7 +186,7 @@ public abstract class AbstractCodeStylePluginAction extends ContainerPageObject 
             immediateChildRows.remove(immediateChildRows.size() - 1);
         }
 
-        return mapTableCellsKeyValue(immediateChildRows);
+        return immediateChildRows;
     }
 
     private SortedMap<String, Integer> mapTableCellsKeyValue(final Collection<WebElement> rows) {
@@ -192,5 +198,13 @@ public abstract class AbstractCodeStylePluginAction extends ContainerPageObject 
             result.put(key, value);
         }
         return result;
+    }
+
+    /**
+     * This is method ensures to be on the correct tab of the result page
+     */
+    protected void ensureTab(String label){
+        open();
+        find(by.xpath(".//A[@href]/em[text() = '"+label+"']")).click();
     }
 }
