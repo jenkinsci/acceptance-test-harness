@@ -1,6 +1,5 @@
 package org.jenkinsci.test.acceptance.geb
 
-import geb.spock.GebReportingSpec
 import org.jenkinsci.test.acceptance.junit.JenkinsAcceptanceTestRule
 import org.jenkinsci.test.acceptance.junit.Resource
 import org.jenkinsci.test.acceptance.po.Jenkins
@@ -13,7 +12,10 @@ import javax.inject.Inject
  *
  * @author christian.fritz
  */
-class GebSpec extends GebReportingSpec {
+class GebSpec extends geb.spock.GebSpec {
+
+    @Rule
+    public GebBrowserRule browserRule = new GebBrowserRule();
 
     @Rule
     public JenkinsAcceptanceTestRule env = new JenkinsAcceptanceTestRule();
