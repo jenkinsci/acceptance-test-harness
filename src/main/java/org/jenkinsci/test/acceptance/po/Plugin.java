@@ -57,4 +57,8 @@ public class Plugin extends ContainerPageObject {
     public boolean isNewerThan(String version) {
         return getVersion().compareTo(new VersionNumber(version)) >= 0;
     }
+
+    public boolean isOlderThan(String version) {
+        return !isNewerThan(version);
+    }
 }
