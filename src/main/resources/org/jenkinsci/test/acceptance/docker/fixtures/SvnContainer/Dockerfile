@@ -22,6 +22,11 @@ RUN addgroup subversion && \
     chown -R www-data:subversion /home/svn && \
     chmod -R g+rws /home/svn
 
+#install websvn
+RUN export DEBIAN_FRONTEND=noninteractive && apt-get -y install websvn
+RUN cp -r /usr/share/websvn/ /var/www/
+ADD ./config/config.php /etc/websvn/config.php
+
 # Configure Apache to serve up Subversion
 RUN /usr/sbin/a2enmod auth_digest && \
     rm /etc/apache2/mods-available/dav_svn.conf
