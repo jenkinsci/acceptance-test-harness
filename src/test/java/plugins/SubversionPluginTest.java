@@ -151,4 +151,40 @@ public class SubversionPluginTest extends AbstractJUnitTest {
 
         f.startBuild().shouldSucceed().shouldContainsConsoleOutput("test -d .svn");
     }
+
+    @Test
+    public void poll_for_changes() throws SubversionPluginTestException {
+        final SvnContainer svnContainer = svn.get();
+        final FreeStyleJob f = jenkins.jobs.create();
+        final SubversionScm subversionScm = f.useScm(SubversionScm.class);
+        subversionScm.url.set(svnContainer.getUrlUnsaveRepo());
+
+        f.pollScm().schedule("* * * * *");
+        f.addShellStep("test -d .svn");
+        f.save();
+
+        sleep(70000);
+
+        // We should have some build after 70 seconds
+        f.getLastBuild().shouldSucceed().shouldExist();
+    }
+
+    @Test
+    public void clean_checkout() throws SubversionPluginTestException {
+        final SvnContainer svnContainer = svn.get();
+        final FreeStyleJob f = jenkins.jobs.create();
+        final SubversionScm subversionScm = f.useScm(SubversionScm.class);
+        subversionScm.url.set(svnContainer.getUrlUnsaveRepo());
+        subversionScm.checkoutStrategy.select(SubversionScm.CLEAN_CHECKOUT);
+
+        f.addShellStep("echo test > unversioned.txt");
+        f.save();
+        f.startBuild().shouldSucceed();
+
+        f.configure();
+        f.removeFirstBuildStep();
+        f.addShellStep("! test -f unversioned.txt");
+        f.save();
+        f.startBuild().shouldSucceed();
+    }
 }
