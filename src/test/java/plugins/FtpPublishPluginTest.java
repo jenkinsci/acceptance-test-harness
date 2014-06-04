@@ -442,7 +442,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
 
         j.save();
         j.startBuild().shouldSucceed();
-        assertTrue(ftpd.pathExist("/tmp/empty/"));
+         assertTrue(ftpd.pathExist("/tmp/empty/"));
         assertTrue(ftpd.pathExist("/tmp/odes.txt"));
     }
 
