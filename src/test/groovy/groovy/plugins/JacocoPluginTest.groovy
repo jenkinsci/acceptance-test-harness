@@ -29,6 +29,19 @@ class JacocoPluginTest extends GebSpec {
         then: "jacoco appears within the navigation area."
         assert build.navigationLinks.containsValue("Coverage Report")
         to JacocoResultPage, build
+        assert summaryCoverage.instruction == 45.45
         assert summaryCoverage.branch == 50.0
+        assert summaryCoverage.complexity == 33.33
+        assert summaryCoverage.lines == 50.0
+        assert summaryCoverage.methods == 50.0
+        assert summaryCoverage.classes == 100.0
+
+        to JacocoResultPage, build, "(default)"
+        assert breakdownCoverageLine."App".instruction == 45.45
+        assert breakdownCoverageLine."App".branch == 50.0
+        assert breakdownCoverageLine."App".complexity == 33.33
+        assert breakdownCoverageLine."App".lines == 50.0
+        assert breakdownCoverageLine."App".methods == 50.0
+        assert breakdownCoverageLine."App".classes == 100.0
     }
 }

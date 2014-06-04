@@ -10,7 +10,7 @@ import org.jenkinsci.test.acceptance.po.Page
  */
 class JacocoResultPage extends Page {
     static content = {
-        heading { $ "h2" }
+        summaryHeading { $ "h3:nth-of-type(1)" }
         summaryCoverage {
             def line = $("#main-panel table.pane:not(.sortable)>tbody>tr:nth-child(2)>td")
             [
@@ -24,7 +24,7 @@ class JacocoResultPage extends Page {
         }
 
         breakdownCoverageLine {
-            $("#main-panel table.pane.sortable>tbody>tr:not(tr:first-child)").collectEntries {
+            $("#main-panel table.pane.sortable>tbody>tr:not(:first-child)").collectEntries {
                 def children = it.children('td')
                 [children.getAt(0).text(), [
                         'instruction': children.getAt(1).attr('data').toDouble(),
@@ -37,7 +37,7 @@ class JacocoResultPage extends Page {
             }
         }
     }
-    static at = { heading.text() == "JaCoCo Coverage Report" }
+    static at = { summaryHeading.text().contains("Coverage Summary") }
 
     String convertToPath(Object[] args) {
         (args[0] as Build).url.toString() + "jacoco/" + (args.size() > 1 ? args[1..-1]*.toString().join('/') : "")
