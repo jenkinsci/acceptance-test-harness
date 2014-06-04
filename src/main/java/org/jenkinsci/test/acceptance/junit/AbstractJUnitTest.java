@@ -1,12 +1,14 @@
 package org.jenkinsci.test.acceptance.junit;
 
-import javax.inject.Inject;
-import java.net.URL;
-
 import org.jenkinsci.test.acceptance.po.CapybaraPortingLayerImpl;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.junit.Rule;
 import org.openqa.selenium.WebDriver;
+
+import javax.inject.Inject;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.URL;
 
 /**
  * Convenience base class to derive your plain-old JUnit tests from.
@@ -45,5 +47,19 @@ public class AbstractJUnitTest extends CapybaraPortingLayerImpl {
             throw new AssertionError("No such resource " + path + " for " + getClass().getName());
         }
         return new Resource(resource);
+    }
+
+    /**
+     * @return finds an unused, available port on the test machine
+     */
+    public int findAvailablePort() {
+        // use port 65000 as fallback (but maybe there is something running)
+        int port = 65000;
+        try (ServerSocket s = new ServerSocket(0)) {
+            port = s.getLocalPort();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return port;
     }
 }

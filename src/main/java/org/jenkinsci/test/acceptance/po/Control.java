@@ -1,10 +1,7 @@
 package org.jenkinsci.test.acceptance.po;
 
 import org.jenkinsci.test.acceptance.junit.Resource;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 
 import com.google.inject.Injector;
 
@@ -91,10 +88,37 @@ public class Control extends CapybaraPortingLayerImpl {
         resolve().click();
     }
 
-    public void set(String text) {
+    /**
+     * The existing {@link org.jenkinsci.test.acceptance.po.Control#set(String)}
+     * method has shortcomings regarding large strings because it utilizes
+     * the sendKeys mechanism to enter the string which takes a significant amount
+     * of time, i.e. the browser may consider the script to be unresponsive.
+     *
+     * This method method shall provide a high throughput mechanism which
+     * puts the whole string at once into the text field instead of char by char.
+     *
+     * This is a solution / workaround published for Selenium Issue 4496:
+     * https://code.google.com/p/selenium/issues/detail?id=4469
+     *
+     * @param text the large string to be entered
+     */
+
+    public void setAtOnce(String text){
         WebElement e = resolve();
         e.clear();
-        e.sendKeys(text);
+        ((JavascriptExecutor)driver).executeScript("arguments[0].value = arguments[1];", e, text);
+    }
+
+
+    public void set(String text) {
+        //if the text is longer than 255 characters, use the high throughput variant
+        if (text.length() > 255)
+            setAtOnce(text);
+        else {
+            WebElement e = resolve();
+            e.clear();
+            e.sendKeys(text);
+        }
     }
 
     public void set(Object text) {

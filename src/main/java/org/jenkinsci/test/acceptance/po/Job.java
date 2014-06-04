@@ -35,6 +35,8 @@ public class Job extends ContainerPageObject {
 
     private List<Parameter> parameters = new ArrayList<>();
 
+    private List<PostBuildStep> publishers = new ArrayList<>();
+
     public final Control concurrentBuild = control("/concurrentBuild");
 
     public Job(Injector injector, URL url, String name) {
@@ -79,8 +81,27 @@ public class Job extends ContainerPageObject {
         removeFirstStep("builder");
     }
 
+    /**
+     * publishers added to the job are stored in a list member to provide
+     * later access for modification
+     */
+
     public <T extends PostBuildStep> T addPublisher(Class<T> type) {
-        return addStep(type, "publisher");
+        T p = addStep(type, "publisher");
+
+        publishers.add(p);
+        return p;
+    }
+
+    /**
+     * Getter for a specific publisher previously added to the job.
+     */
+    public <T extends PostBuildStep> T getPublisher(Class<T> type){
+        for (PostBuildStep p : publishers) {
+            if(type.isAssignableFrom(p.getClass()))
+                return (T) p;
+        }
+        return null;
     }
 
     private <T extends Step> T addStep(Class<T> type, String section) {
@@ -146,7 +167,7 @@ public class Job extends ContainerPageObject {
             byte[] archive = IOUtils.toByteArray(new FileInputStream(tmp));
 
             addShellStep(String.format(
-                    "base64 --decode << ENDOFFILE > archive.zip && unzip archive.zip \n%s\nENDOFFILE",
+                    "base64 --decode << ENDOFFILE > archive.zip && unzip -o archive.zip \n%s\nENDOFFILE",
                     new String(Base64.encodeBase64Chunked(archive))
             ));
         } catch (IOException e) {

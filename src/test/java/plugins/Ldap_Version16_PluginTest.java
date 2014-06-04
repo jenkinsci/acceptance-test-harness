@@ -2,40 +2,28 @@ package plugins;
 
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.LdapContainer;
-import org.jenkinsci.test.acceptance.junit.*;
+import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.Native;
 import org.jenkinsci.test.acceptance.plugins.ldap.LdapDetails;
-import org.jenkinsci.test.acceptance.plugins.ldap.SearchForGroupsLdapGroupMembershipStrategy;
-import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
-import org.jenkinsci.test.acceptance.po.LdapSecurityRealm;
-import org.jenkinsci.test.acceptance.po.Login;
-import org.jenkinsci.test.acceptance.po.User;
+import org.jenkinsci.test.acceptance.po.*;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
 
 import javax.inject.Inject;
-
-import static org.hamcrest.CoreMatchers.not;
-import static org.jenkinsci.test.acceptance.Matchers.*;
-import javax.annotation.CheckForNull;
-import javax.inject.Inject;
-import java.io.IOException;
-import java.net.ServerSocket;
 
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.jenkinsci.test.acceptance.Matchers.hasContent;
-import static org.jenkinsci.test.acceptance.Matchers.hasLoggedInUser;
-
+import static org.jenkinsci.test.acceptance.Matchers.*;
 
 /**
  * Feature: Tests for LdapPlugin.
- * This test suite always runs against the latest ldap plugin version.
+ * This test suite always runs against the currently installed ldap plugin version (which is currently 1.6 as this version is bundled with jenkins core).
  *
  * @author Michael Prankl
+ * @deprecated This test will possibly run against an outdated version of the ldap plugin. This test suite also may become obsolete if a newer version of the ldap plugin gets bundled with jenkins core.
  */
+@Deprecated
 @Native("docker")
-@WithPlugins("ldap@1.10")
-public class LdapPluginTest extends AbstractJUnitTest {
+public class Ldap_Version16_PluginTest extends AbstractJUnitTest {
 
     @Inject
     DockerContainerHolder<LdapContainer> ldap;
@@ -46,7 +34,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
     private void useLdapAsSecurityRealm(LdapDetails ldapDetails) {
         GlobalSecurityConfig security = new GlobalSecurityConfig(jenkins);
         security.configure();
-        LdapSecurityRealm realm = security.useRealm(LdapSecurityRealm.class);
+        LdapSecurityRealm_Pre1_10 realm = security.useRealm(LdapSecurityRealm_Pre1_10.class);
         realm.configure(ldapDetails);
         security.save();
     }
@@ -308,51 +296,6 @@ public class LdapPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     * Scenario: resolve display name of ldap user with default display name attribute
-     * Given I have a docker fixture "ldap"
-     * And Jenkins is using ldap as security realm
-     * When I login with user "jenkins" and password "root"
-     * Then the display name of "jenkins" will be "Jenkins displayname"
-     * <p/>
-     * working since ldap plugin version: 1.8
-     */
-    @Test
-    @Bug("JENKINS-18355")
-    public void resolve_display_name_with_defaults() {
-        // Given
-        useLdapAsSecurityRealm(createDefaults(ldap.get()));
-        // When
-        Login login = jenkins.login();
-        login.doLogin("jenkins", "root");
-        User userJenkins = new User(jenkins, "jenkins");
-        // Then
-        assertThat(userJenkins, fullNameIs("Jenkins displayname"));
-    }
-
-    /**
-     * Scenario: using custom display name attribute (cn instead of display name)
-     * Given I have a docker fixture "ldap"
-     * And Jenkins is using ldap as security realm and display name attribute is "cn"
-     * When I login with user "jenkins" and password "root"
-     * Then the display name of "jenkins" will be "Jenkins the Butler"
-     * <p/>
-     * working since ldap plugin version: 1.8
-     */
-    @Test
-    @Bug("JENKINS-18355")
-    @Category(SmokeTest.class)
-    public void custom_display_name() {
-        // Given
-        useLdapAsSecurityRealm(createDefaults(ldap.get()).displayNameAttributeName("cn"));
-        // When
-        Login login = jenkins.login();
-        login.doLogin("jenkins", "root");
-        User userJenkins = new User(jenkins, "jenkins");
-        // Then
-        assertThat(userJenkins, fullNameIs("Jenkins the Butler"));
-    }
-
-    /**
      * Scenario: using "search for groups containing user" strategy with group membership filter which leads to no user belongs to a group
      * Given I have a docker fixture "ldap"
      * And Jenkins is using ldap as security realm with group membership filter "(member={0})"
@@ -362,7 +305,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
     @Test
     public void custom_group_membership_filter() {
         // Given
-        useLdapAsSecurityRealm(createDefaults(ldap.get()).groupMembershipStrategy(SearchForGroupsLdapGroupMembershipStrategy.class).groupMembershipStrategyParam("(member={0})"));
+        useLdapAsSecurityRealm(createDefaults(ldap.get()).groupMembershipFilter("(member={0})"));
         // When
         Login login = jenkins.login();
         login.doLogin("jenkins", "root");
@@ -370,27 +313,6 @@ public class LdapPluginTest extends AbstractJUnitTest {
         // Then
         assertThat(userJenkins, not(isMemberOf("ldap1")));
         assertThat(userJenkins, not(isMemberOf("ldap2")));
-    }
-
-    /**
-     * Scenario: use a custom mail filter (gn instead of mail)
-     * Given I have a docker fixture "ldap"
-     * And Jenkins is using ldap as security realm and mail address attribute is "dn"
-     * When I login with user "jenkins" and password "root"
-     * Then the mail address of "jenkins" will be "givenname@mailaddress.com"
-     * <p/>
-     * since ldap plugin version 1.8
-     */
-    @Test
-    public void custom_mail_filter() {
-        // Given
-        useLdapAsSecurityRealm(createDefaults(ldap.get()).mailAdressAttributeName("givenName"));
-        // When
-        Login login = jenkins.login();
-        login.doLogin("jenkins", "root");
-        User userJenkins = new User(jenkins, "jenkins");
-        // Then
-        assertThat(userJenkins, mailAddressIs("givenname@mailaddress.com"));
     }
 
 }
