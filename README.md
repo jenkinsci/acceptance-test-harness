@@ -38,6 +38,7 @@ it's own sandboxed workspace.
     * [Mix-ins](docs/MIXIN.md)
 * [Guice is our glue](docs/GUICE.md)
 * Writing tests
+    * [Video tutorial](https://www.youtube.com/watch?v=ZHAiywgMG-M) by Kohsuke on how to write tests
     * [Writing JUnit test](docs/JUNIT.md)
     * Writing Cucumber test (TODO)
 * [Testing slaves](docs/SLAVE.md)

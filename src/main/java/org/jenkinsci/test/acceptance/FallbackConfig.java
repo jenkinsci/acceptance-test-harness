@@ -190,5 +190,16 @@ public class FallbackConfig extends AbstractModule {
         return resolvedArtifact.getArtifact().getFile();
     }
 
+    /**
+     * Switch to control if an existing plugin should be updated.
+     *
+     * <p>
+     * If true, a test will be skipped when it requires a newer version of a plugin that's already installed.
+     * If false, an existing plugin will be updated to the requirements of the test.
+     */
+    @Provides @Named("neverReplaceExistingPlugins")
+    public boolean neverReplaceExistingPlugins() {
+        return System.getenv("NEVER_REPLACE_EXISTING_PLUGINS") != null;
+    }
 }
 

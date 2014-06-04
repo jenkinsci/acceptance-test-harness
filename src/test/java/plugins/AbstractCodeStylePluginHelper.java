@@ -5,6 +5,7 @@ import org.apache.xerces.jaxp.DocumentBuilderFactoryImpl;
 import org.custommonkey.xmlunit.XMLAssert;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginPostBuildStep;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
@@ -55,7 +56,14 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
                                                                                   String thresholdFailedNewWarnings, boolean useDeltaWarnings) {
         final FreeStyleJob job = jenkins.jobs.create();
         job.configure();
-        job.copyResource(resource(resourceToCopy));
+
+        final Resource res = resource(resourceToCopy);
+        //decide whether to utilize copyResource or copyDir
+        if (res.asFile().isDirectory())
+            job.copyDir(res);
+        else
+            job.copyResource(res);
+
         final T publisher = job.addPublisher(publisherClass);
         publisher.pattern.set(publisherPattern);
 

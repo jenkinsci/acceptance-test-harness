@@ -5,7 +5,7 @@ package org.jenkinsci.test.acceptance.plugins.ldap;
  *
  * @author Michael Prankl
  */
-public class LdapDetails {
+public class LdapDetails<T extends LdapGroupMembershipStrategy> {
     private String host;
     private int port;
     private String hostWithPort;
@@ -23,6 +23,8 @@ public class LdapDetails {
     private int cacheTTL = 300;
     private String mailAddressAttributeName;
     private String displayNameAttributeName;
+    private Class<T> groupMembershipStrategy;
+    private String groupMembershipStrategyParam;
 
 
     public LdapDetails(String host, int port, String managerDn, String managerPassword, String rootDn) {
@@ -223,7 +225,7 @@ public class LdapDetails {
         this.mailAddressAttributeName = mailAddressAttributeName;
     }
 
-    public LdapDetails mailAdressAttributeName(String mailAddressAttributeName){
+    public LdapDetails mailAdressAttributeName(String mailAddressAttributeName) {
         setMailAddressAttributeName(mailAddressAttributeName);
         return this;
     }
@@ -236,8 +238,34 @@ public class LdapDetails {
         this.displayNameAttributeName = displayNameAttributeName;
     }
 
-    public LdapDetails displayNameAttributeName(String displayNameAttributeName){
+    public LdapDetails displayNameAttributeName(String displayNameAttributeName) {
         setDisplayNameAttributeName(displayNameAttributeName);
+        return this;
+    }
+
+    public String getGroupMembershipStrategyParam() {
+        return groupMembershipStrategyParam;
+    }
+
+    public void setGroupMembershipStrategyParam(String groupMembershipStrategyParam) {
+        this.groupMembershipStrategyParam = groupMembershipStrategyParam;
+    }
+
+    public LdapDetails groupMembershipStrategyParam(String groupMembershipStrategyParam) {
+        setGroupMembershipStrategyParam(groupMembershipStrategyParam);
+        return this;
+    }
+
+    public Class<T> getGroupMembershipStrategy() {
+        return groupMembershipStrategy;
+    }
+
+    public void setGroupMembershipStrategy(Class<T> groupMembershipStrategy) {
+        this.groupMembershipStrategy = groupMembershipStrategy;
+    }
+
+    public LdapDetails groupMembershipStrategy(Class<T> groupMembershipStrategy) {
+        setGroupMembershipStrategy(groupMembershipStrategy);
         return this;
     }
 }

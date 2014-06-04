@@ -46,8 +46,13 @@ public abstract class ContainerPageObject extends PageObject {
         }
     }
 
-    /** Visits configuration screen of some object. */
+    /**
+     * Open configuration page if not yet opened.
+     *
+     * @see #getConfigUrl()
+     */
     public void configure() {
+        if(driver.getCurrentUrl().equals(getConfigUrl().toExternalForm())) return;
         visit(getConfigUrl());
     }
 
