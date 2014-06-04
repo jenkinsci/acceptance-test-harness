@@ -25,14 +25,20 @@ package plugins;
 
 import javax.inject.Inject;
 
+import org.hamcrest.Matchers;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
 import org.jenkinsci.test.acceptance.junit.*;
 import org.jenkinsci.test.acceptance.plugins.git.GitScm;
+import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.openqa.selenium.By;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Native("docker")
 @WithPlugins("git")
@@ -131,5 +137,27 @@ public class GitPluginTest extends AbstractJUnitTest {
 
         // We should have some build after 70 seconds
         job.getLastBuild().shouldSucceed().shouldExist();
+    }
+
+    @Test
+    public void check_revision() {
+        job.useScm(GitScm.class)
+                .url(repoUrl)
+                .credentials(USERNAME);
+        job.save();
+        job.startBuild().waitUntilFinished();
+
+        Build build = job.getLastBuild();
+        String revision = getRevisionFromConsole(build.getConsole());
+
+        build.openStatusPage();
+        build.control(By.xpath("//*[contains(text(),'"+revision+"')]")).check();
+    }
+
+    private String getRevisionFromConsole(String console) {
+        Pattern p = Pattern.compile("(?<=\\bRevision\\s)(\\w+)");
+        Matcher m = p.matcher(console);
+        assertThat(m.find(), Matchers.is(true));
+        return m.group(0);
     }
 }
