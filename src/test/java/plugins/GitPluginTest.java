@@ -24,11 +24,16 @@
 package plugins;
 
 import javax.inject.Inject;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import org.hamcrest.Matchers;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
-import org.jenkinsci.test.acceptance.junit.*;
+import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.Native;
+import org.jenkinsci.test.acceptance.junit.SmokeTest;
+import org.jenkinsci.test.acceptance.junit.WithCredentials;
+import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.git.GitScm;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Job;
@@ -37,8 +42,8 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.openqa.selenium.By;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.core.Is.*;
 
 @Native("docker")
 @WithPlugins("git")
@@ -151,13 +156,13 @@ public class GitPluginTest extends AbstractJUnitTest {
         String revision = getRevisionFromConsole(build.getConsole());
 
         build.openStatusPage();
-        build.control(By.xpath("//*[contains(text(),'"+revision+"')]")).check();
+        build.control(By.xpath("//*[contains(text(),'" + revision + "')]")).check();
     }
 
     private String getRevisionFromConsole(String console) {
         Pattern p = Pattern.compile("(?<=\\bRevision\\s)(\\w+)");
         Matcher m = p.matcher(console);
-        assertThat(m.find(), Matchers.is(true));
+        assertThat(m.find(), is(true));
         return m.group(0);
     }
 }
