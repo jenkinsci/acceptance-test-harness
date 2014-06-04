@@ -40,12 +40,12 @@ public class TaskScannerAction  extends AbstractCodeStylePluginAction {
      * This method gets a certain task's entry in the "Warnings"-tab specified by a key.
      *
      * @param key the name of the source file containing the task
-     * @return the row as list of cells which matches the key
+     * @return the row as list of cell contents which matches the key
      *
      * @throws java.util.NoSuchElementException if key is not found
      *
      */
-    public List<WebElement> getCertainWarningsTabRow(String key){
+    public List<String> getCertainWarningsTabRow(String key){
         ensureTab("Warnings");
 
         final List<WebElement> rows = getVisibleTableRows(true,false);
@@ -53,11 +53,36 @@ public class TaskScannerAction  extends AbstractCodeStylePluginAction {
         for(WebElement elem : rows){
             final List<WebElement> cells = elem.findElements(by.xpath("./td"));
             if (key.equals(asTrimmedString(cells.get(0)))){
-                return cells;
+                return asTrimmedStringList(cells);
             }
         }
         throw new NoSuchElementException();
     }
+
+    /**
+     * This method gets the source code file line as String which is linked by the "Warnings"-tab
+     * table entries.
+     *
+     * @param linkText the name of the link in the "Warnings" tab.
+     * @param priority the task priority: "High Priority", "Normal Priority" or "Low Priority"
+     * @return the source code line as String.
+     */
+    public String getLinkedSourceFileLineAsString(String linkText, String priority){
+        return asTrimmedString(getLinkedSourceFileLine(linkText,priority));
+    }
+
+    /**
+     * This method gets line number of the source code file which is linked by the "Warnings"-tab
+     * table entries.
+     *
+     * @param linkText the name of the link in the "Warnings" tab.
+     * @param priority the task priority: "High Priority", "Normal Priority" or "Low Priority"
+     * @return the source code line as String.
+     */
+    public Integer getLinkedSourceFileLineNumber(String linkText, String priority){
+        return asInt(getLinkedSourceFileLine(linkText,priority).findElement(by.tagName("a")));
+    }
+
 
     /**
      * This method gets the source code file line which is linked by the "Warnings"-tab
@@ -65,12 +90,11 @@ public class TaskScannerAction  extends AbstractCodeStylePluginAction {
      * The particular line is found via the warning priority as it is used as title attribute's
      * value for this div object.
      *
-     * @param linkText the name link in the "Warnings" tab.
+     * @param linkText the name of the link in the "Warnings" tab.
      * @param priority the task priority: "High Priority", "Normal Priority" or "Low Priority"
      * @return the {@link org.openqa.selenium.WebElement} containing the source code line.
      */
-    public WebElement getLinkedSourceFileLine(String linkText, String priority){
-
+    private WebElement getLinkedSourceFileLine(String linkText, String priority){
         ensureTab("Warnings");
 
         //find and follow the link to the source file display
@@ -78,7 +102,6 @@ public class TaskScannerAction  extends AbstractCodeStylePluginAction {
 
         //find the highlighted line using the title attribute which is set to the priority
         return find(by.xpath("//div[@title='" + priority + "']"));
-
     }
 
 

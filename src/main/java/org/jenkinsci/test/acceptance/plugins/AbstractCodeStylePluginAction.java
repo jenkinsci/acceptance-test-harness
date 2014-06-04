@@ -5,10 +5,7 @@ import org.jenkinsci.test.acceptance.po.ContainerPageObject;
 import org.openqa.selenium.WebElement;
 
 import java.net.URL;
-import java.util.Collection;
-import java.util.List;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * Abstract action class for plugins with getter of the warnings.
@@ -132,6 +129,20 @@ public abstract class AbstractCodeStylePluginAction extends ContainerPageObject 
      */
     protected String asTrimmedString(final WebElement webElement) {
         return webElement.getText().trim();
+    }
+
+    /**
+     * Returns a list of trimmed contens of a list of {@link org.openqa.selenium.WebElement}s.
+     * @param elems the list whose contens shall be trimmed
+     * @return the trimmed strings as list
+     */
+    protected List<String> asTrimmedStringList(final List<WebElement> elems)
+    {
+        List<String> elemStrings = new ArrayList<>();
+        for (WebElement we : elems)
+            elemStrings.add(asTrimmedString(we));
+
+        return elemStrings;
     }
 
     /**

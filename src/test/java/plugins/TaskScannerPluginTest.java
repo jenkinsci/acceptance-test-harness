@@ -11,7 +11,6 @@ import org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerPublisher;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
-import org.openqa.selenium.WebElement;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -86,12 +85,12 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
         assertWarningExtraction(tsa,"TSRCleaner.java",40,"@Deprecated", "");
 
         // check that the correct line / task is displayed when following the link in the warnings tab
-        final WebElement taskLine = tsa.getLinkedSourceFileLine("TSRDockerImage.java:84", "Normal Priority");
+
 
         //assert contents of that line
-        assertThat(Integer.parseInt(taskLine.findElement(by.tagName("a")).getText().trim()), is(84));
-        assertThat(taskLine.getText(), containsString("TODO"));
-        assertThat(taskLine.getText(), endsWith("properly wait for either cidfile to appear or process to exit"));
+        assertThat(tsa.getLinkedSourceFileLineNumber("TSRDockerImage.java:84", "Normal Priority"), is(84));
+        assertThat(tsa.getLinkedSourceFileLineAsString("TSRDockerImage.java:84", "Normal Priority"), containsString("TODO"));
+        assertThat(tsa.getLinkedSourceFileLineAsString("TSRDockerImage.java:84", "Normal Priority"), endsWith("properly wait for either cidfile to appear or process to exit"));
 
 
         // now disable case sensitivity and build again. Then the publisher shall also
@@ -221,10 +220,10 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
      */
     private void assertWarningExtraction(final TaskScannerAction tsa, String filename, Integer lineNumber,
                                          String type, String warningText){
-        final List<WebElement> cells = tsa.getCertainWarningsTabRow(filename + ":" + lineNumber);
+        final List<String> cellStrings = tsa.getCertainWarningsTabRow(filename + ":" + lineNumber);
 
-        assertThat(cells.get(3).getText().trim(), is(type));
-        assertThat(cells.get(4).getText().trim(), is(warningText));
+        assertThat(cellStrings.get(3), is(type));
+        assertThat(cellStrings.get(4), is(warningText));
 
     }
 
