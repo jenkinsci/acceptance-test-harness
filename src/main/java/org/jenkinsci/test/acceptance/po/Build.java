@@ -2,6 +2,7 @@ package org.jenkinsci.test.acceptance.po;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import com.google.inject.internal.cglib.core.$ReflectUtils;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.Description;
 import org.jenkinsci.test.acceptance.Matcher;
@@ -120,6 +121,12 @@ public class Build extends ContainerPageObject {
 
     public URL getConsoleUrl() {
         return url("consoleFull");
+    }
+
+    public URL getStatusUrl() { return url(Integer.toString(getNumber())); }
+
+    public void openStatusPage() {
+        visit(getStatusUrl());
     }
 
     public String getConsole() {
