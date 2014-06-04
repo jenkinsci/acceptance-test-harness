@@ -24,13 +24,13 @@
 package org.jenkinsci.test.acceptance.po;
 
 /**
- * Base type for {@link PageArea} for Security Realm.
- *
+ * Base type for {@link PageAreaImpl} for Security Realm.
+ * <p/>
  * Use {@link Describable} annotation to register an implementation.
  *
  * @see GlobalSecurityConfig#useRealm(Class)
  */
-public abstract class SecurityRealm extends PageArea {
+public abstract class SecurityRealm extends PageAreaImpl {
 
     protected SecurityRealm(GlobalSecurityConfig context, String path) {
         super(context, path);

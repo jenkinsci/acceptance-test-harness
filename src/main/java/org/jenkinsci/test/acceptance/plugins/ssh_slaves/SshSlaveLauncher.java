@@ -21,6 +21,6 @@ public class SshSlaveLauncher extends ComputerLauncher {
     public SshCredentialDialog addCredential() {
         self().findElement(by.button("Add")).click();
 
-        return new SshCredentialDialog(page, "/credentials");
+        return new SshCredentialDialog(getPage(), "/credentials");
     }
 }

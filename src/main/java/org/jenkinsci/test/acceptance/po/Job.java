@@ -16,11 +16,12 @@ import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 /**
  * Job Page object superclass.
- *
+ * <p/>
  * Use {@link Describable} annotation to register an implementation.
  *
  * @author Kohsuke Kawaguchi
@@ -39,7 +40,7 @@ public class Job extends ContainerPageObject {
     public final Control concurrentBuild = control("/concurrentBuild");
 
     public Job(Injector injector, URL url, String name) {
-        super(injector,url);
+        super(injector, url);
         this.name = name;
     }
 
@@ -47,8 +48,9 @@ public class Job extends ContainerPageObject {
      * "Casts" this object into a subtype by creating the specified type.
      */
     public <T extends Job> T as(Class<T> type) {
-        if (type.isInstance(this))
+        if (type.isInstance(this)) {
             return type.cast(this);
+        }
         return newInstance(type, injector, url, name);
     }
 
@@ -56,7 +58,8 @@ public class Job extends ContainerPageObject {
         ensureConfigPage();
 
         WebElement radio = findCaption(type, new Finder<WebElement>() {
-            @Override protected WebElement find(String caption) {
+            @Override
+            protected WebElement find(String caption) {
                 return outer.find(by.radioButton(caption));
             }
         });
@@ -71,7 +74,7 @@ public class Job extends ContainerPageObject {
     }
 
     public <T extends BuildStep> T addBuildStep(Class<T> type) {
-        return addStep(type,"builder");
+        return addStep(type, "builder");
     }
 
     public void removeFirstBuildStep() {
@@ -113,7 +116,7 @@ public class Job extends ContainerPageObject {
     private void removeFirstStep(String section) {
         ensureConfigPage();
 
-        String sectionWithStep = String.format("/%s" , section);
+        String sectionWithStep = String.format("/%s", section);
 
         WebElement step = find(by.path(sectionWithStep));
 
@@ -132,12 +135,12 @@ public class Job extends ContainerPageObject {
 
     /**
      * Adds a shell step that copies a resource inside the test project into a file on the build machine.
-     *
+     * <p/>
      * Because there's no direct file system access to Jenkins master, we do this by packing file content in
      * base64 and put it as a heredoc in the shell script.
      */
     public void copyResource(Resource resource, String fileName) {
-        try (InputStream in=resource.asInputStream()) {
+        try (InputStream in = resource.asInputStream()) {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
 
             try (OutputStream gz = new GZIPOutputStream(out)) {
@@ -153,7 +156,7 @@ public class Job extends ContainerPageObject {
     }
 
     public void copyResource(Resource resource) {
-        copyResource(resource,resource.getName());
+        copyResource(resource, resource.getName());
     }
 
     public void copyDir(Resource dir) {
@@ -170,7 +173,9 @@ public class Job extends ContainerPageObject {
         } catch (IOException e) {
             throw new AssertionError(e);
         } finally {
-            if (tmp != null) tmp.delete();
+            if (tmp != null) {
+                tmp.delete();
+            }
         }
     }
 
@@ -179,7 +184,7 @@ public class Job extends ContainerPageObject {
     }
 
     public Build startBuild(DataTable table) {
-        Map<String,String> params = new HashMap<>();
+        Map<String, String> params = new HashMap<>();
         for (List<String> row : table.raw()) {
             params.put(row.get(0), row.get(1));
         }
@@ -190,7 +195,7 @@ public class Job extends ContainerPageObject {
         return scheduleBuild().waitUntilStarted();
     }
 
-    public Build startBuild(Map<String,?> params) {
+    public Build startBuild(Map<String, ?> params) {
         return scheduleBuild(params).waitUntilStarted();
     }
 
@@ -198,7 +203,7 @@ public class Job extends ContainerPageObject {
         return scheduleBuild(Collections.<String, Object>emptyMap());
     }
 
-    public Build scheduleBuild(Map<String,?> params) {
+    public Build scheduleBuild(Map<String, ?> params) {
         int nb = getJson().get("nextBuildNumber").intValue();
         visit(getBuildUrl());
 
@@ -210,8 +215,9 @@ public class Job extends ContainerPageObject {
         if (!parameters.isEmpty()) {
             for (Parameter def : parameters) {
                 Object v = params.get(def.getName());
-                if (v!=null)
+                if (v != null) {
                     def.fillWith(v);
+                }
             }
             clickButton("Build");
         }
@@ -220,11 +226,11 @@ public class Job extends ContainerPageObject {
     }
 
     public Build build(int buildNumber) {
-        return new Build(this,buildNumber);
+        return new Build(this, buildNumber);
     }
 
     public Build getLastBuild() {
-        return new Build(this,"lastBuild");
+        return new Build(this, "lastBuild");
     }
 
     public <T extends Parameter> T addParameter(Class<T> type) {
@@ -283,7 +289,7 @@ public class Job extends ContainerPageObject {
      * To test whether the the job has built on the master, the jenkins instance has to be
      * passed in the parameter.
      */
-    public void shouldHaveBuiltOn(Node n){
+    public void shouldHaveBuiltOn(Node n) {
         assertThat(hasBuiltOn(n), is(true));
     }
 
@@ -305,10 +311,10 @@ public class Job extends ContainerPageObject {
         int noOfNodes = 0;
 
         for (Node n : nodes) {
-            if (hasBuiltOn(n))
+            if (hasBuiltOn(n)) {
                 noOfNodes++;
+            }
         }
-
         assertThat(noOfNodes, is(1));
     }
 

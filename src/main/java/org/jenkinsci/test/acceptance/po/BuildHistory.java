@@ -2,6 +2,7 @@ package org.jenkinsci.test.acceptance.po;
 
 import org.openqa.selenium.WebElement;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * @author Kohsuke Kawaguchi

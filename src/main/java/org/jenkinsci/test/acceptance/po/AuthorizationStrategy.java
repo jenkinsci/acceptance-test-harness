@@ -7,7 +7,7 @@ package org.jenkinsci.test.acceptance.po;
  *
  * @see GlobalSecurityConfig#useAuthorizationStrategy(Class)
  */
-public abstract class AuthorizationStrategy extends PageArea {
+public abstract class AuthorizationStrategy extends PageAreaImpl {
     protected AuthorizationStrategy(GlobalSecurityConfig context, String path) {
         super(context, path);
     }

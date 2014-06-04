@@ -19,24 +19,29 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.jenkinsci.test.acceptance.Matchers.hasAction;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.jenkinsci.test.acceptance.Matchers.hasAction;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+
 /**
- Feature: Tests for PMD plugin
+ * Feature: Tests for PMD plugin
  */
 @WithPlugins("pmd")
 public class PmdPluginTest extends AbstractCodeStylePluginHelper {
 
     /**
-     Scenario: Configure a job with PMD post-build steps
-       Given I have installed the "pmd" plugin
-       And a job
-       When I configure the job
-       And I add "Publish PMD analysis results" post-build action
-       And I copy resource "pmd_plugin/pmd.xml" into workspace
-       And I set path to the pmd result "pmd.xml"
-       And I save the job
-       And I build the job
-       Then the build should succeed
-       And build page should has pmd summary "0 warnings"
+     * Scenario: Configure a job with PMD post-build steps
+     * Given I have installed the "pmd" plugin
+     * And a job
+     * When I configure the job
+     * And I add "Publish PMD analysis results" post-build action
+     * And I copy resource "pmd_plugin/pmd.xml" into workspace
+     * And I set path to the pmd result "pmd.xml"
+     * And I save the job
+     * And I build the job
+     * Then the build should succeed
+     * And build page should has pmd summary "0 warnings"
      */
     @Test
     public void configure_a_job_with_PMD_post_build_steps() {
@@ -47,19 +52,19 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
     }
 
     /**
-     Scenario: Configure a job with PMD post-build steps to run always
-       Given I have installed the "pmd" plugin
-       And a job
-       When I configure the job
-       And I add "Publish PMD analysis results" post-build action
-       And I copy resource "pmd_plugin/pmd.xml" into workspace
-       And I set path to the pmd result "pmd.xml"
-       And I add always fail build step
-       And I set publish always pdm
-       And I save the job
-       And I build the job
-       Then the build should fail
-       And build page should has pmd summary "0 warnings"
+     * Scenario: Configure a job with PMD post-build steps to run always
+     * Given I have installed the "pmd" plugin
+     * And a job
+     * When I configure the job
+     * And I add "Publish PMD analysis results" post-build action
+     * And I copy resource "pmd_plugin/pmd.xml" into workspace
+     * And I set path to the pmd result "pmd.xml"
+     * And I add always fail build step
+     * And I set publish always pdm
+     * And I save the job
+     * And I build the job
+     * Then the build should fail
+     * And build page should has pmd summary "0 warnings"
      */
     @Test
     public void configure_a_job_with_PMD_post_build_steps_run_always() {
@@ -79,18 +84,18 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
     }
 
     /**
-     Scenario: Configure a job with PMD post-build steps which display some warnings
-       Given I have installed the "pmd" plugin
-       And a job
-       When I configure the job
-       And I add "Publish PMD analysis results" post-build action
-       And I copy resource "pmd_plugin/pmd-warnings.xml" into workspace
-       And I set path to the pmd result "pmd-warnings.xml"
-       And I save the job
-       And I build the job
-       Then the build should succeed
-       And the build should have "PMD Warnings" action
-       And build page should has pmd summary "9 warnings"
+     * Scenario: Configure a job with PMD post-build steps which display some warnings
+     * Given I have installed the "pmd" plugin
+     * And a job
+     * When I configure the job
+     * And I add "Publish PMD analysis results" post-build action
+     * And I copy resource "pmd_plugin/pmd-warnings.xml" into workspace
+     * And I set path to the pmd result "pmd-warnings.xml"
+     * And I save the job
+     * And I build the job
+     * Then the build should succeed
+     * And the build should have "PMD Warnings" action
+     * And build page should has pmd summary "9 warnings"
      */
     @Test
     public void configure_a_job_with_PMD_post_build_steps_which_display_some_warnings() {

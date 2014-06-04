@@ -11,6 +11,8 @@ import org.openqa.selenium.WebElement;
 import org.w3c.dom.html.HTMLElement;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.fail;
 
 /**
  * Page object for Task Scanner action.

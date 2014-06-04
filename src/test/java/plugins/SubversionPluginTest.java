@@ -12,6 +12,8 @@ import org.jenkinsci.test.acceptance.plugins.subversion.SubversionScm;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
 
+import static org.junit.Assert.assertTrue;
+
 /**
  * Feature: Subversion support
  * As a user

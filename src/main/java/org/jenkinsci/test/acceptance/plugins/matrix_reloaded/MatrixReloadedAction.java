@@ -30,6 +30,8 @@ import org.jenkinsci.test.acceptance.po.ContainerPageObject;
 import org.jenkinsci.test.acceptance.po.MatrixBuild;
 import org.openqa.selenium.By;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+
 @ActionPageObject("matrix-reloaded")
 public class MatrixReloadedAction extends Action {
 
@@ -49,7 +51,7 @@ public class MatrixReloadedAction extends Action {
 
     public void rebuild(String... combinations) {
         open();
-        for (String c: combinations) {
+        for (String c : combinations) {
             control(checkbox(c)).check();
         }
         clickButton("Rebuild Matrix");

@@ -27,9 +27,9 @@ import org.hamcrest.Description;
 import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.PageArea;
+import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 
-public class XvncJobConfig extends PageArea {
+public class XvncJobConfig extends PageAreaImpl {
 
     public XvncJobConfig(Job context) {
         super(context, "/hudson-plugins-xvnc-Xvnc");

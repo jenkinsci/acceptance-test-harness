@@ -52,7 +52,8 @@ public class GitScm extends Scm {
         try {
             advanced();
             control("localBranch").set(branch);
-        } catch(NoSuchElementException ex) { // Git 2.0
+        }
+        catch (NoSuchElementException ex) { // Git 2.0
             addBehaviour(CheckoutToLocalBranch.class).name.set(branch);
         }
     }
@@ -85,7 +86,7 @@ public class GitScm extends Scm {
         control("userRemoteConfigs/advanced-button").click();
     }
 
-    public static class Behaviour extends PageArea {
+    public static class Behaviour extends PageAreaImpl {
         public Behaviour(GitScm git, String path) {
             super(git, path);
         }
@@ -93,6 +94,7 @@ public class GitScm extends Scm {
 
     public static class CheckoutToLocalBranch extends Behaviour {
         private final Control name = control("localBranch");
+
         public CheckoutToLocalBranch(GitScm git, String path) {
             super(git, path);
             clickLink("Check out to specific local branch");
@@ -101,6 +103,7 @@ public class GitScm extends Scm {
 
     public static class CheckoutToLocalDir extends Behaviour {
         private final Control name = control("relativeTargetDir");
+
         public CheckoutToLocalDir(GitScm git, String path) {
             super(git, path);
             clickLink("Check out to a sub-directory");

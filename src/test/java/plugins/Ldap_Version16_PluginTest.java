@@ -11,6 +11,7 @@ import org.junit.Test;
 import javax.inject.Inject;
 
 import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 
 /**

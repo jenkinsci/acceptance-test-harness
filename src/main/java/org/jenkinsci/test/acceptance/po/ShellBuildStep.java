@@ -6,7 +6,7 @@ import org.openqa.selenium.NoSuchElementException;
  * @author Kohsuke Kawaguchi
  */
 @Describable("Execute shell")
-public class ShellBuildStep extends BuildStep {
+public class ShellBuildStep extends AbstractStep implements BuildStep {
 
     public ShellBuildStep(Job parent, String path) {
         super(parent, path);

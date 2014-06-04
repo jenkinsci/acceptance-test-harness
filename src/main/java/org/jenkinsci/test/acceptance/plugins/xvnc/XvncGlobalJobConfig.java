@@ -24,9 +24,9 @@
 package org.jenkinsci.test.acceptance.plugins.xvnc;
 
 import org.jenkinsci.test.acceptance.po.JenkinsConfig;
-import org.jenkinsci.test.acceptance.po.PageArea;
+import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 
-public class XvncGlobalJobConfig extends PageArea {
+public class XvncGlobalJobConfig extends PageAreaImpl {
 
     public XvncGlobalJobConfig(JenkinsConfig context) {
         super(context, "/hudson-plugins-xvnc-Xvnc");

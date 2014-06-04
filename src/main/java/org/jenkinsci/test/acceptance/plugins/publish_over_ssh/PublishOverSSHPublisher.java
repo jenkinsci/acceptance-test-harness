@@ -6,7 +6,7 @@ import org.jenkinsci.test.acceptance.po.*;
  * @author jenky-hm
  */
 @Describable("Send build artifacts over SSH")
-public class PublishOverSSHPublisher extends PostBuildStep {
+public class PublishOverSSHPublisher extends AbstractStep implements PostBuildStep {
     public PublishOverSSHPublisher(Job parent, String path) {
         super(parent, path);
     }
@@ -21,40 +21,40 @@ public class PublishOverSSHPublisher extends PostBuildStep {
 
 
     public Publishers setPublishers() {
-        String p = last(by.xpath(".//div[@name='publishers'][starts-with(@path,'%s/publishers')]", path)).getAttribute("path");
-        return new Publishers(page,p);
+        String p = last(by.xpath(".//div[@name='publishers'][starts-with(@path,'%s/publishers')]", getPath())).getAttribute("path");
+        return new Publishers(getPage(), p);
     }
 
     public Publishers addPublishers() {
         addServer.click();
-        String p = last(by.xpath(".//div[@name='publishers["+ publisherCounter +"]'][starts-with(@path,'%s/publishers["+ publisherCounter +"]')]", path)).getAttribute("path");
+        String p = last(by.xpath(".//div[@name='publishers[" + publisherCounter + "]'][starts-with(@path,'%s/publishers[" + publisherCounter + "]')]", getPath())).getAttribute("path");
         publisherCounter++;
-        return new Publishers(page,p);
+        return new Publishers(getPage(), p);
     }
 
-    public class Publishers extends PageArea {
+    public class Publishers extends PageAreaImpl {
         public Publishers(PageObject parent, String path) {
             super(parent, path);
         }
 
         // a lot of new options behind advanced...
         public final Control advancedPublisher = control("advanced-button"); // Below dropdown list
-        public final Control addTransferSet= control("repeatable-add");
+        public final Control addTransferSet = control("repeatable-add");
 
         public TransferSet setTransferSet() {
-            String p = last(by.xpath(".//div[@name='transfers'][starts-with(@path,'%s/transfers')]", path)).getAttribute("path");
-            return new TransferSet(page,p);
+            String p = last(by.xpath(".//div[@name='transfers'][starts-with(@path,'%s/transfers')]", getPath())).getAttribute("path");
+            return new TransferSet(getPage(), p);
         }
 
         public TransferSet addTransferSet() {
             addTransferSet.click();
-            String p = last(by.xpath(".//div[@name='transfers'][starts-with(@path,'%s/transfers')]", path)).getAttribute("path");
-            return new TransferSet(page,p);
+            String p = last(by.xpath(".//div[@name='transfers'][starts-with(@path,'%s/transfers')]", getPath())).getAttribute("path");
+            return new TransferSet(getPage(), p);
         }
 
     }
 
-    public static class TransferSet extends PageArea {
+    public static class TransferSet extends PageAreaImpl {
         public TransferSet(PageObject parent, String path) {
             super(parent, path);
         }

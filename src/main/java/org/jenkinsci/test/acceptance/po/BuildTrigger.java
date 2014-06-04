@@ -6,7 +6,7 @@ package org.jenkinsci.test.acceptance.po;
  * @author Kohsuke Kawaguchi
  */
 @Describable("Build other projects")
-public class BuildTrigger extends PostBuildStep {
+public class BuildTrigger extends AbstractStep implements PostBuildStep {
     public final Control childProjects = control("childProjects");
 
     public final Control thresholdSuccess = control("threshold[SUCCESS]");

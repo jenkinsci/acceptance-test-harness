@@ -23,7 +23,7 @@
  */
 package org.jenkinsci.test.acceptance.po;
 
-public class ScmPolling extends PageArea {
+public class ScmPolling extends PageAreaImpl {
 
     public ScmPolling(Job job) {
         super(job, "/hudson-triggers-SCMTrigger");

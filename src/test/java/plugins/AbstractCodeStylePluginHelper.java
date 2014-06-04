@@ -17,6 +17,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.util.regex.Pattern;
 
+import static org.junit.Assert.assertTrue;
+
 public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
 
     /**
