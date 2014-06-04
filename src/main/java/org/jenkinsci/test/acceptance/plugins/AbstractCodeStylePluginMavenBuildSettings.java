@@ -2,13 +2,13 @@ package org.jenkinsci.test.acceptance.plugins;
 
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.PageArea;
+import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 
 /**
  * Abstract job configuration class.
  * @author Fabian Trampusch
  */
-public abstract class AbstractCodeStylePluginMavenBuildSettings extends PageArea {
+public abstract class AbstractCodeStylePluginMavenBuildSettings extends PageAreaImpl {
 
     private boolean wasAdvancedClicked = false;
     private Control advanced = control("advanced-button");
