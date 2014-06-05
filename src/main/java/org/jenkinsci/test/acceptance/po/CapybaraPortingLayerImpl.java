@@ -2,7 +2,6 @@ package org.jenkinsci.test.acceptance.po;
 
 import com.google.common.base.Joiner;
 import com.google.inject.Injector;
-import org.jenkinsci.test.acceptance.ByFactory;
 import org.jenkinsci.test.acceptance.utils.ElasticTime;
 import org.openqa.selenium.*;
 
@@ -13,6 +12,8 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import static java.util.Arrays.asList;
+import org.hamcrest.StringDescription;
+import org.jenkinsci.test.acceptance.Matcher;
 
 /**
  * For assisting porting from Capybara.
@@ -127,6 +128,20 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
             throw e;
         } catch (Exception e) {
             throw new Error("Failed to wait for condition: " + block, e);
+        }
+    }
+
+    @Override public <T> void waitFor(final Matcher<T> matcher, final T item, int timeout) {
+        try {
+            waitForCond(new Callable<Boolean>() {
+                @Override public Boolean call() throws Exception {
+                    return matcher.matchesSafely(item);
+                }
+            }, timeout);
+        } catch (TimeoutException x) {
+            StringDescription desc = new StringDescription();
+            matcher.describeMismatchSafely(item, desc);
+            throw new AssertionError(desc.toString(), x);
         }
     }
 

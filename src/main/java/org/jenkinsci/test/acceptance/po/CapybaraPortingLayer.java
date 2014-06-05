@@ -6,6 +6,7 @@ import org.openqa.selenium.WebElement;
 
 import java.util.List;
 import java.util.concurrent.Callable;
+import org.jenkinsci.test.acceptance.Matcher;
 
 /**
  * Interface for assisting porting from Capybara.
@@ -42,6 +43,9 @@ public interface CapybaraPortingLayer {
     <T> T waitForCond(Callable<T> block, int timeoutSec);
 
     <T> T waitForCond(Callable<T> block);
+
+    /** Wait until a matcher matches. */
+    <T> void waitFor(final Matcher<T> matcher, final T item, int timeoutSec);
 
     /**
      * Returns the first visible element that matches the selector.
