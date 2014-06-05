@@ -34,7 +34,7 @@ import org.jenkinsci.utils.process.CommandBuilder;
  * @author ogondza
  * @see ToolInstallationPageObject
  */
-public abstract class ToolInstallation extends PageArea {
+public abstract class ToolInstallation extends PageAreaImpl {
     public final Control name = control("name");
     private final Control autoInstall = control("properties/hudson-tools-InstallSourceProperty");
 
@@ -80,9 +80,11 @@ public abstract class ToolInstallation extends PageArea {
             command.setExecutable(true);
 
             return home.getAbsolutePath();
-        } catch (IOException ex) {
+        }
+        catch (IOException ex) {
             throw new Error(ex);
-        } catch (InterruptedException ex) {
+        }
+        catch (InterruptedException ex) {
             throw new Error(ex);
         }
     }

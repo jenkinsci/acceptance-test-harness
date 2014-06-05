@@ -4,25 +4,22 @@ import com.google.inject.Inject;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Bug;
 import org.jenkinsci.test.acceptance.junit.Since;
-import org.jenkinsci.test.acceptance.po.LabelAxis;
-import org.jenkinsci.test.acceptance.po.MatrixBuild;
-import org.jenkinsci.test.acceptance.po.MatrixConfiguration;
-import org.jenkinsci.test.acceptance.po.MatrixProject;
-import org.jenkinsci.test.acceptance.po.MatrixRun;
-import org.jenkinsci.test.acceptance.po.Slave;
-import org.jenkinsci.test.acceptance.po.StringParameter;
+import org.jenkinsci.test.acceptance.po.*;
 import org.jenkinsci.test.acceptance.slave.SlaveProvider;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
 
-import static java.util.Collections.*;
+import static java.util.Collections.singletonMap;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.lessThan;
 
 /**
- Feature: Use multi configuration job
-   As a Jenkins user
-   I want to configure and run multi configuration jobs
+ * Feature: Use multi configuration job
+ * As a Jenkins user
+ * I want to configure and run multi configuration jobs
  */
 public class MatrixTest extends AbstractJUnitTest {
     MatrixProject job;
@@ -36,20 +33,20 @@ public class MatrixTest extends AbstractJUnitTest {
     }
 
     /**
-     Scenario: Run configurations sequentially
-       Given a matrix job
-       When I configure the job
-       And I configure user axis "user_axis" with values "axis1 axis2 axis3"
-       And I configure to run configurations sequentially
-       And I add a shell build step "sleep 5"
-       And I save the job
-       And I build the job
-       Then the configurations should run sequentially
+     * Scenario: Run configurations sequentially
+     * Given a matrix job
+     * When I configure the job
+     * And I configure user axis "user_axis" with values "axis1 axis2 axis3"
+     * And I configure to run configurations sequentially
+     * And I add a shell build step "sleep 5"
+     * And I save the job
+     * And I build the job
+     * Then the configurations should run sequentially
      */
     @Test
     public void run_configurations_sequentially() {
         job.configure();
-        job.addUserAxis("user_axis","axis1 axis2 axis3");
+        job.addUserAxis("user_axis", "axis1 axis2 axis3");
         job.runSequentially.check();
         job.addShellStep("sleep 5");
         job.save();
@@ -59,19 +56,19 @@ public class MatrixTest extends AbstractJUnitTest {
     }
 
     /**
-     Scenario: Run a matrix job
-       Given a matrix job
-       When I configure the job
-       And I configure user axis "user_axis" with values "axis1 axis2 axis3"
-       And I add a shell build step "ls"
-       And I save the job
-       And I build the job
-       Then I console output of configurations should match "+ ls"
+     * Scenario: Run a matrix job
+     * Given a matrix job
+     * When I configure the job
+     * And I configure user axis "user_axis" with values "axis1 axis2 axis3"
+     * And I add a shell build step "ls"
+     * And I save the job
+     * And I build the job
+     * Then I console output of configurations should match "+ ls"
      */
     @Test
     public void run_a_matrix_job() {
         job.configure();
-        job.addUserAxis("user_axis","axis1 axis2 axis3");
+        job.addUserAxis("user_axis", "axis1 axis2 axis3");
         job.addShellStep("ls");
         job.save();
         job.startBuild().shouldSucceed();
@@ -81,24 +78,24 @@ public class MatrixTest extends AbstractJUnitTest {
     }
 
     /**
-     Scenario: Run touchstone builds first with resul stable
-       Given a matrix job
-       When I configure the job
-       And I configure user axis "user_axis" with values "axis1 axis2 axis3"
-       And I add always fail build step
-       And I configure to execute touchstone builds first with filter "user_axis=='axis3'" and required result "UNSTABLE"
-       And I save the job
-       And I build the job
-       Then combination "user_axis=axis2" should not be built
-       And combination "user_axis=axis1" should not be built
-       And combination "user_axis=axis3" should be built
+     * Scenario: Run touchstone builds first with resul stable
+     * Given a matrix job
+     * When I configure the job
+     * And I configure user axis "user_axis" with values "axis1 axis2 axis3"
+     * And I add always fail build step
+     * And I configure to execute touchstone builds first with filter "user_axis=='axis3'" and required result "UNSTABLE"
+     * And I save the job
+     * And I build the job
+     * Then combination "user_axis=axis2" should not be built
+     * And combination "user_axis=axis1" should not be built
+     * And combination "user_axis=axis3" should be built
      */
     @Test
     public void run_touchstone_builds_first_with_result_stable() {
         job.configure();
-        job.addUserAxis("user_axis","axis1 axis2 axis3");
+        job.addUserAxis("user_axis", "axis1 axis2 axis3");
         job.addShellStep("false");
-        job.setTouchStoneBuild("user_axis=='axis3'","UNSTABLE");
+        job.setTouchStoneBuild("user_axis=='axis3'", "UNSTABLE");
         job.save();
         MatrixBuild b = job.startBuild().waitUntilFinished().as(MatrixBuild.class);
 
@@ -108,17 +105,17 @@ public class MatrixTest extends AbstractJUnitTest {
     }
 
     /**
-     Scenario: Run build with combination filter
-       Given a matrix job
-       When I configure the job
-       And I configure user axis "user_axis" with values "axis1 axis2 axis3"
-       And I set combination filter to "user_axis=='axis2'"
-       And I add a shell build step "echo hello"
-       And I save the job
-       And I build the job
-       Then combination "user_axis=axis2" should be built
-       And combination "user_axis=axis1" should not be built
-       And combination "user_axis=axis3" should not be built
+     * Scenario: Run build with combination filter
+     * Given a matrix job
+     * When I configure the job
+     * And I configure user axis "user_axis" with values "axis1 axis2 axis3"
+     * And I set combination filter to "user_axis=='axis2'"
+     * And I add a shell build step "echo hello"
+     * And I save the job
+     * And I build the job
+     * Then combination "user_axis=axis2" should be built
+     * And combination "user_axis=axis1" should not be built
+     * And combination "user_axis=axis3" should not be built
      */
     @Test
     public void run_build_with_combination_filter() {
@@ -136,27 +133,28 @@ public class MatrixTest extends AbstractJUnitTest {
     }
 
     /**
-     @since(1.515)
-     @bug(7285)
-     Scenario: Use Job parameters in combination filters
-       Given a matrix job
-       When I configure the job
-       And I configure user axis "run" with values "yes maybe no"
-       And I set combination filter to "run=='yes' || (run=='maybe' && condition=='true')"
-       And I add a string parameter "condition"
-       And I save the job
-       And I build the job with parameter
-           | condition | false |
-       And I build the job with parameter
-           | condition | true |
-       Then combination "run=yes" should be built in build 1
-       Then combination "run=yes" should be built in build 2
-       Then combination "run=maybe" should not be built in build 1
-       Then combination "run=maybe" should be built in build 2
-       Then combination "run=no" should not be built in build 1
-       Then combination "run=no" should not be built in build 2
+     * @since(1.515)
+     * @bug(7285) Scenario: Use Job parameters in combination filters
+     * Given a matrix job
+     * When I configure the job
+     * And I configure user axis "run" with values "yes maybe no"
+     * And I set combination filter to "run=='yes' || (run=='maybe' && condition=='true')"
+     * And I add a string parameter "condition"
+     * And I save the job
+     * And I build the job with parameter
+     * | condition | false |
+     * And I build the job with parameter
+     * | condition | true |
+     * Then combination "run=yes" should be built in build 1
+     * Then combination "run=yes" should be built in build 2
+     * Then combination "run=maybe" should not be built in build 1
+     * Then combination "run=maybe" should be built in build 2
+     * Then combination "run=no" should not be built in build 1
+     * Then combination "run=no" should not be built in build 2
      */
-    @Test @Bug("JENKINS-7285") @Since("1.515")
+    @Test
+    @Bug("JENKINS-7285")
+    @Since("1.515")
     public void use_job_parameters_in_combination_filters() {
         job.configure();
         job.addUserAxis("run", "yes maybe no");
@@ -176,17 +174,17 @@ public class MatrixTest extends AbstractJUnitTest {
     }
 
     /**
-     Scenario: Run configurations on with a given label
-       Given a matrix job
-       When I create dumb slave named "slave"
-       And I add the label "label1" to the slave
-       And I configure the job
-       And I configure slaves axis with value "master"
-       And I configure slaves axis with value "label1"
-       And I save the job
-       And I build the job
-       Then the configuration "label=master" should be built on "master"
-       And the configuration "label=label1" should be built on "slave"
+     * Scenario: Run configurations on with a given label
+     * Given a matrix job
+     * When I create dumb slave named "slave"
+     * And I add the label "label1" to the slave
+     * And I configure the job
+     * And I configure slaves axis with value "master"
+     * And I configure slaves axis with value "label1"
+     * And I save the job
+     * And I build the job
+     * Then the configuration "label=master" should be built on "master"
+     * And the configuration "label=label1" should be built on "slave"
      */
     @Test
     public void run_configurations_on_with_a_given_label() throws Exception {
@@ -203,7 +201,7 @@ public class MatrixTest extends AbstractJUnitTest {
 
         MatrixBuild b = job.startBuild().waitUntilFinished().as(MatrixBuild.class);
         b.getConfiguration("label=master").shouldContainsConsoleOutput("(Building|Building remotely) on master");
-        b.getConfiguration("label=label1").shouldContainsConsoleOutput("(Building|Building remotely) on "+s.getName());
+        b.getConfiguration("label=label1").shouldContainsConsoleOutput("(Building|Building remotely) on " + s.getName());
     }
 
     private void assertThatBuildHasRunSequentially(MatrixBuild b) {
@@ -212,11 +210,12 @@ public class MatrixTest extends AbstractJUnitTest {
         while (b.isInProgress()) {
             int running = 0;
             for (MatrixRun r : builds) {
-                if (r.isInProgress())
+                if (r.isInProgress()) {
                     running++;
+                }
             }
 
-            assertTrue("Too many configurations running at once", running<2);
+            assertThat("Too many configurations running at once", running, is(lessThan(2)));
             sleep(100);
         }
     }

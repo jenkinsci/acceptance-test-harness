@@ -10,25 +10,27 @@ import org.jenkinsci.test.acceptance.po.MatrixConfiguration;
 import org.jenkinsci.test.acceptance.po.MatrixProject;
 import org.junit.Test;
 
-import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.jenkinsci.test.acceptance.Matchers.hasAction;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 /**
- Feature: Test Javadoc plugin
+ * Feature: Test Javadoc plugin
  */
 @WithPlugins("javadoc")
 public class JavadocPluginTest extends AbstractJUnitTest {
     /**
-     Scenario: Publish javadoc from freestyle job
-       Given a Maven
-       And a job
-       When I configure the job
-       And I add build steps to generate javadoc
-       And I add a Publish javadoc post build step with path "my-app/target/site/apidocs/"
-       And I save the job
-       And I build the job
-       Then the build should succeed
-       And the job should have "Javadoc" action
-       And the javadoc should display "com.mycompany.app"
+     * Scenario: Publish javadoc from freestyle job
+     * Given a Maven
+     * And a job
+     * When I configure the job
+     * And I add build steps to generate javadoc
+     * And I add a Publish javadoc post build step with path "my-app/target/site/apidocs/"
+     * And I save the job
+     * And I build the job
+     * Then the build should succeed
+     * And the job should have "Javadoc" action
+     * And the javadoc should display "com.mycompany.app"
      */
     @Test
     public void publish_javadoc_from_freestyle_job() {
@@ -42,15 +44,15 @@ public class JavadocPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     Scenario: Publish javadoc from matrix job
-       Given a Maven
-       And a matrix job
-       When I configure the job
-       And I add build steps to generate javadoc
-       And I add a Publish javadoc post build step with path "my-app/target/site/apidocs/"
-       And I save the job
-       And I build the job
-       Then javadoc should display "com.mycompany.app" for default configuration
+     * Scenario: Publish javadoc from matrix job
+     * Given a Maven
+     * And a matrix job
+     * When I configure the job
+     * And I add build steps to generate javadoc
+     * And I add a Publish javadoc post build step with path "my-app/target/site/apidocs/"
+     * And I save the job
+     * And I build the job
+     * Then javadoc should display "com.mycompany.app" for default configuration
      */
     @Test
     public void publish_javadoc_from_matrix_job() {

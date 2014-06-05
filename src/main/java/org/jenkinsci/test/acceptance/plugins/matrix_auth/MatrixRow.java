@@ -1,13 +1,14 @@
 package org.jenkinsci.test.acceptance.plugins.matrix_auth;
 
 import org.jenkinsci.test.acceptance.po.PageArea;
+import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 
 /**
  * Represents a single row in the matrix permission table.
  *
  * @author Kohsuke Kawaguchi
  */
-public class MatrixRow extends PageArea {
+public class MatrixRow extends PageAreaImpl {
     public MatrixRow(PageArea area, String relativePath) {
         super(area, relativePath);
     }

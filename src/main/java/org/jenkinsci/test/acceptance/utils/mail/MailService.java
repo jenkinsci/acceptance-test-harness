@@ -3,6 +3,7 @@ package org.jenkinsci.test.acceptance.utils.mail;
 import com.google.common.base.Joiner;
 import org.jenkinsci.test.acceptance.plugins.mailer.MailerGlobalConfig;
 import org.jenkinsci.test.acceptance.po.CapybaraPortingLayer;
+import org.jenkinsci.test.acceptance.po.CapybaraPortingLayerImpl;
 import org.junit.Assert;
 
 import javax.mail.MessagingException;
@@ -51,7 +52,7 @@ public abstract class MailService extends Assert {
      * Checks that the mail has arrived.
      */
     public void assertMail(final Pattern subject, String recipient, Pattern body) throws MessagingException, IOException {
-        CapybaraPortingLayer hackish = new CapybaraPortingLayer(null);
+        CapybaraPortingLayer hackish = new CapybaraPortingLayerImpl(null);
 
         MimeMessage msg = hackish.waitForCond(new Callable<MimeMessage>() {
             @Override

@@ -25,6 +25,8 @@ import org.junit.experimental.categories.Category;
 
 import com.google.inject.Inject;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+
 /**
  * Feature: Tests for SSH plugin
  * @author jenky-hm

@@ -9,28 +9,29 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.jenkinsci.test.acceptance.Matchers.hasAction;
 
 /**
- Feature: Allow publishing of Cobertura analysis
-   In order to be able track test coverage of my project
-   As a Jenkins user
-   I want to be able to publish Cobertura analysis report
+ * Feature: Allow publishing of Cobertura analysis
+ * In order to be able track test coverage of my project
+ * As a Jenkins user
+ * I want to be able to publish Cobertura analysis report
  */
 @WithPlugins("cobertura")
 public class CoberturaPluginTest extends AbstractJUnitTest {
     /**
-     Scenario: Record Cobertura coverage report
-       Given I have installed the "cobertura" plugin
-       And a job
-       When I configure the job
-       And I copy resource "cobertura_plugin/coverage.xml" into workspace
-       And I add "Publish Cobertura Coverage Report" post-build action
-       And I set up "coverage.xml" as the Cobertura report
-       And I save the job
-       And I build the job
-       Then the build should have "Coverage Report" action
-       And the job should have "Coverage Report" action
+     * Scenario: Record Cobertura coverage report
+     * Given I have installed the "cobertura" plugin
+     * And a job
+     * When I configure the job
+     * And I copy resource "cobertura_plugin/coverage.xml" into workspace
+     * And I add "Publish Cobertura Coverage Report" post-build action
+     * And I set up "coverage.xml" as the Cobertura report
+     * And I save the job
+     * And I build the job
+     * Then the build should have "Coverage Report" action
+     * And the job should have "Coverage Report" action
      */
     @Test
     public void record_covertura_coverage_report() {
@@ -54,23 +55,23 @@ public class CoberturaPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     Scenario: View Cobertura coverage report
-       Given I have installed the "cobertura" plugin
-       And a job
-       When I configure the job
-       And I copy resource "cobertura_plugin/coverage.xml" into workspace
-       And I add "Publish Cobertura Coverage Report" post-build action
-       And I set up "coverage.xml" as the Cobertura report
-       And I save the job
-       And I build the job
-       Then the build should succeed
-       When I visit Cobertura report
-       Then I should see the coverage of packages is 100%
-       Then I should see the coverage of files is 50%
-       Then I should see the coverage of classes is 31%
-       Then I should see the coverage of methods is 23%
-       Then I should see the coverage of lines is 16%
-       Then I should see the coverage of conditionals is 10%
+     * Scenario: View Cobertura coverage report
+     * Given I have installed the "cobertura" plugin
+     * And a job
+     * When I configure the job
+     * And I copy resource "cobertura_plugin/coverage.xml" into workspace
+     * And I add "Publish Cobertura Coverage Report" post-build action
+     * And I set up "coverage.xml" as the Cobertura report
+     * And I save the job
+     * And I build the job
+     * Then the build should succeed
+     * When I visit Cobertura report
+     * Then I should see the coverage of packages is 100%
+     * Then I should see the coverage of files is 50%
+     * Then I should see the coverage of classes is 31%
+     * Then I should see the coverage of methods is 23%
+     * Then I should see the coverage of lines is 16%
+     * Then I should see the coverage of conditionals is 10%
      */
     @Test
     public void view_cobertura_coverage_report() {
@@ -79,11 +80,11 @@ public class CoberturaPluginTest extends AbstractJUnitTest {
         Build b = j.startBuild().waitUntilFinished();
         CoberturaAction a = new CoberturaAction(b);
 
-        assertThat(a.getPackageCoverage(),      is(100));
-        assertThat(a.getFilesCoverage(),        is(50));
-        assertThat(a.getClassesCoverage(),      is(31));
-        assertThat(a.getMethodsCoverage(),      is(23));
-        assertThat(a.getLinesCoverage(),        is(16));
+        assertThat(a.getPackageCoverage(), is(100));
+        assertThat(a.getFilesCoverage(), is(50));
+        assertThat(a.getClassesCoverage(), is(31));
+        assertThat(a.getMethodsCoverage(), is(23));
+        assertThat(a.getLinesCoverage(), is(16));
         assertThat(a.getConditionalsCoverage(), is(10));
     }
 }

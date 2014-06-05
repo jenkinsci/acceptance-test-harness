@@ -36,6 +36,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.WebElement;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+
 /**
  * Set these (data) at mvn-test command line to use this test:<br>
  * <br>
@@ -69,9 +72,9 @@ public class ActiveDirectoryTest extends AbstractJUnitTest {
     /**
      * Scenario1: user can log-in to Jenkins as admin after AD security configured-<br>
      * Given a Jenkins instance that is of type=existing<br>
-     *  And a pre-installed active-directory plugin version 1.34 (1.37 failed)<br>
-     *  And an AD security configuration that is matrix-based (project)<br>
-     *  And a user added to that matrix so she can Administer<br>
+     * And a pre-installed active-directory plugin version 1.34 (1.37 failed)<br>
+     * And an AD security configuration that is matrix-based (project)<br>
+     * And a user added to that matrix so she can Administer<br>
      * When I save such an AD security configuration<br>
      * Then that user can log-in to that Jenkins as admin.
      */
@@ -83,10 +86,10 @@ public class ActiveDirectoryTest extends AbstractJUnitTest {
     /**
      * Scenario2: user can log-in to Jenkins as admin group member after AD security configured-<br>
      * Given a Jenkins instance that is of type=existing<br>
-     *  And a pre-installed active-directory plugin version 1.34 (1.37 failed)<br>
-     *  And an AD security configuration that is matrix-based (project)<br>
-     *  And a group added to that matrix so its members can Administer<br>
-     *  And a user being a member of that group<br>
+     * And a pre-installed active-directory plugin version 1.34 (1.37 failed)<br>
+     * And an AD security configuration that is matrix-based (project)<br>
+     * And a group added to that matrix so its members can Administer<br>
+     * And a user being a member of that group<br>
      * When I save such an AD security configuration<br>
      * Then that user can log-in to that Jenkins as admin.
      */
@@ -98,22 +101,22 @@ public class ActiveDirectoryTest extends AbstractJUnitTest {
     /**
      * Scenario3: user wannabe cannot log-in to Jenkins after AD security configured-<br>
      * Given a Jenkins instance that is of type=existing<br>
-     *  And a pre-installed active-directory plugin version 1.34 (1.37 failed)<br>
-     *  And an AD security configuration that is matrix-based (project)<br>
-     *  And a wannabe added to that matrix thinking he can Administer<br>
+     * And a pre-installed active-directory plugin version 1.34 (1.37 failed)<br>
+     * And an AD security configuration that is matrix-based (project)<br>
+     * And a wannabe added to that matrix thinking he can Administer<br>
      * When I save such an AD security configuration<br>
      * Then that user wannabe cannot log-in to that Jenkins at all.
      */
     @Test
     public void wannabe_cannot_login_to_Jenkins_after_AD_security_configured() {
         userCanLoginToJenkinsAsAdmin(ActiveDirectoryEnv.get().getUser());
-        String userWannabe = ActiveDirectoryEnv.get().getUser()+"-wannabe";
+        String userWannabe = ActiveDirectoryEnv.get().getUser() + "-wannabe";
         GlobalSecurityConfig security = saveSecurityConfig(userWannabe);
         jenkins.logout();
         jenkins.login().doLoginDespiteNoPaths(userWannabe,
                 ActiveDirectoryEnv.get().getPassword());
         security.configure();
-        assertNull(getElement(by.name("_.domain")));
+        assertThat(getElement(by.name("_.domain")), is(nullValue()));
         jenkins.login().doLoginDespiteNoPaths(ActiveDirectoryEnv.get().getUser(),
                 ActiveDirectoryEnv.get().getPassword());
     }
@@ -129,8 +132,8 @@ public class ActiveDirectoryTest extends AbstractJUnitTest {
                 ActiveDirectoryEnv.get().getPassword());
         security.configure();
         WebElement domain = getElement(by.name("_.domain"));
-        assertNotNull(domain);
-        assertEquals(ActiveDirectoryEnv.get().getDomain(),domain.getAttribute("value"));
+        assertThat(domain, is(notNullValue()));
+        assertThat(domain.getAttribute("value"), is(equalTo(ActiveDirectoryEnv.get().getDomain())));
     }
 
     private GlobalSecurityConfig saveSecurityConfig(String user) {

@@ -6,8 +6,9 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 /**
  * Artifact of a build
@@ -18,7 +19,7 @@ public class Artifact extends PageObject {
     public final Build build;
 
     public Artifact(Build build, URL url) {
-        super(build.injector,url);
+        super(build.injector, url);
         this.build = build;
     }
 
@@ -42,7 +43,7 @@ public class Artifact extends PageObject {
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             assertThat(con.getResponseCode(), is(should ? 200 : 404));
         } catch (IOException e) {
-            throw new AssertionError("Failed to check status of "+url,e);
+            throw new AssertionError("Failed to check status of " + url, e);
         }
     }
 }

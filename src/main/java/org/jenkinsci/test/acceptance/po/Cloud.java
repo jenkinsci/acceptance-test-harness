@@ -5,7 +5,7 @@ package org.jenkinsci.test.acceptance.po;
  *
  * @author Kohsuke Kawaguchi
  */
-public abstract class Cloud extends PageArea {
+public abstract class Cloud extends PageAreaImpl {
     protected Cloud(PageObject context, String path) {
         super(context, path);
     }

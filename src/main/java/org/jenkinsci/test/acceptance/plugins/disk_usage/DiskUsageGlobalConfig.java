@@ -25,9 +25,9 @@ package org.jenkinsci.test.acceptance.plugins.disk_usage;
 
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.JenkinsConfig;
-import org.jenkinsci.test.acceptance.po.PageArea;
+import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 
-public class DiskUsageGlobalConfig extends PageArea {
+public class DiskUsageGlobalConfig extends PageAreaImpl {
     public final Control showGraphOnProjectPage = control("showGraph");
 
     public DiskUsageGlobalConfig(JenkinsConfig context) {
