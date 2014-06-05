@@ -131,7 +131,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
         }
     }
 
-    @Override public <T> void waitFor(final Matcher<T> matcher, final T item, int timeout) {
+    @Override public <T> void waitFor(final T item, final Matcher<T> matcher, int timeout) {
         try {
             waitForCond(new Callable<Boolean>() {
                 @Override public Boolean call() throws Exception {

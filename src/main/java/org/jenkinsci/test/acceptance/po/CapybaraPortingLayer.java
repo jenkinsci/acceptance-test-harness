@@ -45,7 +45,7 @@ public interface CapybaraPortingLayer {
     <T> T waitForCond(Callable<T> block);
 
     /** Wait until a matcher matches. */
-    <T> void waitFor(final Matcher<T> matcher, final T item, int timeoutSec);
+    <T> void waitFor(T item, Matcher<T> matcher, int timeoutSec);
 
     /**
      * Returns the first visible element that matches the selector.
