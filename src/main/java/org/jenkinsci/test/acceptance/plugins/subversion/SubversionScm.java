@@ -22,6 +22,7 @@ public class SubversionScm extends Scm {
     public final Control local = control("locations/local");
     public final Control checkoutStrategy = control(by.xpath("//td[@class='setting-name' and text()='%s']/../td[@class='setting-main']/select", "Check-out Strategy"));
     public final Control credentials = control("locations/credentialsId");
+    public final Control repositoryBrowser = control(by.xpath("//td[@class='setting-name' and text()='%s']/../td[@class='setting-main']/select", "Repository browser"));
 
     /**
      * Opens the SVNPlugin credential page for protected repositories.
@@ -51,6 +52,13 @@ public class SubversionScm extends Scm {
             SubversionPluginTestException.throwMalformedURL(e, urlString);
         }
         return this.newInstance(type, this.injector, urlOfCredentialPage, driver.getWindowHandle());
+    }
+
+    public <T extends RepositoryBrowser> T useRepositoryBrowser(Class<T> type) {
+        final String[] nameOfRepositoryBrowser = type.getAnnotation(Describable.class).value();
+        repositoryBrowser.select(nameOfRepositoryBrowser[0]);
+        String path = repositoryBrowser.resolve().getAttribute("path");
+        return this.newInstance(type, this, path);
     }
 
 

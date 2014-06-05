@@ -265,4 +265,10 @@ public class Build extends ContainerPageObject {
             throw new AssertionError(e);
         }
     }
+
+    public Changes getChanges() {
+        final URL changesUrl = url("changes");
+        visit(changesUrl);
+        return new Changes(this, changesUrl);
+    }
 }
