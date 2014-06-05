@@ -64,7 +64,7 @@ ENV APACHE_LOG_DIR     /var/log/apache2
 #upload SVN data
 RUN mkdir -p /svnRepo
 ADD ./svnRepo /svnRepo
-RUN /usr/sbin/apache2 && svn checkout http://127.0.0.1/svn /svnRepo && svn add /svnRepo/* && svn commit -m 'init' /svnRepo/*
+RUN /usr/sbin/apache2 && svn checkout http://127.0.0.1/svn /svnRepo && svn add /svnRepo/* && svn commit -m 'init' /svnRepo/* && echo 'newRev' >> /svnRepo/testOne.txt && svn commit -m 'Rev with changes' /svnRepo/*
 
 
 

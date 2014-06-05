@@ -7,8 +7,10 @@ import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Native;
 import org.jenkinsci.test.acceptance.junit.WithCredentials;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.plugins.subversion.RepositoryBrowserWebSvn;
 import org.jenkinsci.test.acceptance.plugins.subversion.SubversionPluginTestException;
 import org.jenkinsci.test.acceptance.plugins.subversion.SubversionScm;
+import org.jenkinsci.test.acceptance.po.Changes;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
 
@@ -169,6 +171,7 @@ public class SubversionPluginTest extends AbstractJUnitTest {
         f.getLastBuild().shouldSucceed().shouldExist();
     }
 
+
     @Test
     public void clean_checkout() throws SubversionPluginTestException {
         final SvnContainer svnContainer = svn.get();
@@ -187,4 +190,55 @@ public class SubversionPluginTest extends AbstractJUnitTest {
         f.save();
         f.startBuild().shouldSucceed();
     }
+
+    @Test
+    public void build_has_changes() throws SubversionPluginTestException {
+        final SvnContainer svnContainer = svn.get();
+        final FreeStyleJob f = jenkins.jobs.create();
+        final SubversionScm subversionScm = f.useScm(SubversionScm.class);
+        subversionScm.url.set(svnContainer.getUrlUnsaveRepoAtRevision(1));
+
+        f.save();
+        f.startBuild().shouldSucceed();
+
+        f.configure();
+        subversionScm.url.set(svnContainer.getUrlUnsaveRepoAtRevision(2));
+        f.save();
+        f.startBuild().shouldSucceed();
+        final Changes changes = f.getLastBuild().getChanges();
+        assertTrue("Build hat keine changes.", changes.hasChanges());
+    }
+
+    @Test
+    public void build_has_no_changes() throws SubversionPluginTestException {
+        final SvnContainer svnContainer = svn.get();
+        final FreeStyleJob f = jenkins.jobs.create();
+        final SubversionScm subversionScm = f.useScm(SubversionScm.class);
+        subversionScm.url.set(svnContainer.getUrlUnsaveRepo());
+
+        f.save();
+        f.startBuild();
+        final Changes changes = f.getLastBuild().getChanges();
+        assertFalse("Build hat changes.", changes.hasChanges());
+    }
+
+    @Test
+    public void build_has_changes_and_repoBrowser() throws SubversionPluginTestException {
+        final SvnContainer svnContainer = svn.get();
+        final FreeStyleJob f = jenkins.jobs.create();
+        final SubversionScm subversionScm = f.useScm(SubversionScm.class);
+        subversionScm.url.set(svnContainer.getUrlUnsaveRepoAtRevision(1));
+        final RepositoryBrowserWebSvn repositoryBrowserWebSvn = subversionScm.useRepositoryBrowser(RepositoryBrowserWebSvn.class);
+        repositoryBrowserWebSvn.url.set(svnContainer.getUrlUnsaveRepo());
+        f.save();
+        f.startBuild().shouldSucceed();
+
+        f.configure();
+        subversionScm.url.set(svnContainer.getUrlUnsaveRepoAtRevision(2));
+        f.save();
+        f.startBuild().shouldSucceed();
+        final Changes changes = f.getLastBuild().getChanges();
+        assertTrue("Build hat keine changes.", changes.hasChanges());
+    }
+
 }
