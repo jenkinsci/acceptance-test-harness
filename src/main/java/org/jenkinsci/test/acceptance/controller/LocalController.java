@@ -235,7 +235,7 @@ public abstract class LocalController extends JenkinsController {
         this.process = startProcess();
         Runtime.getRuntime().addShutdownHook(shutdownHook);
 
-        logWatcher = new JenkinsLogWatcher(process,logFile);
+        logWatcher = new JenkinsLogWatcher(getLogId(),process,logFile);
         logWatcher.start();
         try {
             LOGGER.info("Waiting for Jenkins to become running in "+ this);
@@ -244,6 +244,13 @@ public abstract class LocalController extends JenkinsController {
         } catch (Exception e) {
             diagnoseFailedLoad(e);
         }
+    }
+
+    /**
+     * Returns the short ID used to prefix log output from the process into the test.
+     */
+    protected String getLogId() {
+        return String.format("master%05d",getUrl().getPort());
     }
 
     @Override

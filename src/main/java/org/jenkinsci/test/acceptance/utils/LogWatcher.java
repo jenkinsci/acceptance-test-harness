@@ -54,14 +54,7 @@ public class LogWatcher implements Closeable {
                 try {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(LogWatcher.this.pipe));
                     while ((line = reader.readLine()) != null) {
-                        synchronized (watchers) {
-                            Iterator<Watcher> itr = watchers.iterator();
-                            while (itr.hasNext()) {
-                                Watcher w =  itr.next();
-                                if (w.feed(line))
-                                    itr.remove();
-                            }
-                        }
+                        processLine(line);
                     }
                     System.out.println("Jenkins is stopped");
                 } catch (Exception e) {
@@ -83,6 +76,20 @@ public class LogWatcher implements Closeable {
             }
         };
         reader = new Thread(r);
+    }
+
+    /**
+     * Called on each line of log output.
+     */
+    protected void processLine(String line) {
+        synchronized (watchers) {
+            Iterator<Watcher> itr = watchers.iterator();
+            while (itr.hasNext()) {
+                Watcher w =  itr.next();
+                if (w.feed(line))
+                    itr.remove();
+            }
+        }
     }
 
     /**

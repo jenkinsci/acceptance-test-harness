@@ -36,13 +36,28 @@ public class JenkinsLogWatcher extends LogWatcher {
 
     public final File logFile;
 
-    public JenkinsLogWatcher(InputStream pipe, File logFile) throws FileNotFoundException {
+    private final String prefix;
+
+    /**
+     * @param id
+     *      Short ID that indicates the log that we are watching.
+     */
+    public JenkinsLogWatcher(String id, InputStream pipe, File logFile) throws FileNotFoundException {
         super(new TeeInputStream(pipe,new FileOutputStream(logFile)));
 
         this.logFile = logFile;
+        this.prefix = id==null ? null : id+"|";
 
         ready = watch(Pattern.compile(" Completed initialization"));
         portConflict = watch(Pattern.compile("java.net.BindException: Address already in use"));
+    }
+
+    @Override
+    protected void processLine(String line) {
+        if (prefix!=null)
+            System.out.print(prefix);
+        System.out.println(line);
+        super.processLine(line);
     }
 
     /**
