@@ -9,6 +9,7 @@ import org.jenkinsci.test.acceptance.plugins.pmd.PmdMavenBuildSettings;
 import org.jenkinsci.test.acceptance.plugins.pmd.PmdPublisher;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.Slave;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -263,5 +264,22 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
                 };
         final MavenModuleSet job = setupSimpleMavenJob(buildConfigurator);
         buildJobAndWait(job).shouldFail();
+    }
+
+	/**
+     * Builds a job on a slave with pmd and verifies that the information pmd provides in the tabs about the build
+     * are the information we expect.
+     */
+    @Test
+    public void configure_a_job_with_PMD_post_build_steps_build_on_slave() throws Exception {
+        FreeStyleJob job = setupJob("/pmd_plugin/pmd-warnings.xml", PmdPublisher.class, "pmd-warnings.xml");
+
+        Slave slave = makeASlaveAndConfigureJob(job);
+
+        Build build = buildJobOnSlaveWithSuccess(job, slave);
+
+        assertThat(build.getNode(), is(slave.getName()));
+        assertThat(build, hasAction("PMD Warnings"));
+        assertThat(job, hasAction("PMD Warnings"));
     }
 }

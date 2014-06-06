@@ -1,5 +1,6 @@
 package plugins;
 
+import com.google.inject.Inject;
 import org.apache.xerces.jaxp.DocumentBuilderFactoryImpl;
 import org.custommonkey.xmlunit.XMLAssert;
 import org.custommonkey.xmlunit.XMLUnit;
@@ -13,17 +14,25 @@ import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
+import org.jenkinsci.test.acceptance.po.Slave;
+import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 
+import static java.util.Collections.singletonMap;
 import static org.junit.Assert.assertTrue;
 
 public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
+
+    /** For slave test */
+    @Inject
+    SlaveController slaveController;
 
     /**
      * Setup a job with the given resource and publisher.
@@ -81,6 +90,21 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
         }
         job.save();
         return job;
+    }
+
+    /**
+     * Generates a slave and configure job to run on slave
+     * @param job Job to run on slave
+     * @return Generated skave
+     * @throws ExecutionException if computation of slave threw an exception
+     * @throws InterruptedException if thread was interrupted while waiting
+     */
+    public Slave makeASlaveAndConfigureJob(Job job) throws ExecutionException, InterruptedException {
+        Slave slave = slaveController.install(jenkins).get();
+        job.configure();
+        job.setLabelExpression(slave.getName());
+        job.save();
+        return slave;
     }
 
     /**
@@ -171,6 +195,16 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
      */
     public Build buildJobWithSuccess(Job job) {
         return buildJobAndWait(job).shouldSucceed();
+    }
+
+    /**
+     *  Build Job and wait until finished.
+     *  @param job Job to build
+     *  @param slave Slave to run job on
+     *  @return The made build
+     */
+    public Build buildJobOnSlaveWithSuccess(FreeStyleJob job, Slave slave) {
+        return job.startBuild(singletonMap("slavename", slave.getName())).shouldSucceed();
     }
 
     /**
