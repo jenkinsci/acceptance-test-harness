@@ -112,7 +112,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     @Override
     public <T> T waitForCond(Callable<T> block, int timeoutSec) {
         if (timeoutSec == 0) {
-            timeoutSec = 30;
+            timeoutSec = 120;
         }
         try {
             long endTime = System.currentTimeMillis() + time.seconds(timeoutSec);
@@ -121,7 +121,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
                 if (isTrueish(v)) {
                     return v;
                 }
-                sleep(1000);
+                sleep(500);
             }
             throw new TimeoutException("Failed to wait for condition: " + block);
         } catch (RuntimeException e) {
