@@ -10,11 +10,17 @@ import org.jenkinsci.test.acceptance.po.DumbSlave;
 import org.junit.Test;
 import org.openqa.selenium.NoSuchElementException;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.fail;
+
 /**
  * @author Vivek Pandey
  */
 public class CreateSlaveTest extends AbstractJUnitTest {
-    @Test @Since("1.560")
+    @Test
+    @Since("1.560")
     public void newSlave() {
         // this test requires a newer version of credentials plugin that has inline "Add" button
         // I'm not sure exactly which version it is, but 1.532 LTS doesn't have it, and 1.555 has it,
@@ -57,7 +63,7 @@ public class CreateSlaveTest extends AbstractJUnitTest {
     }
 
     @Test
-    public void newSlaveWithExistingCredential(){
+    public void newSlaveWithExistingCredential() {
 
         String username = "xyz";
         String description = "SSH Key setup";
@@ -75,8 +81,8 @@ public class CreateSlaveTest extends AbstractJUnitTest {
 
         //now verify
         c.open();
-        assertEquals(find(by.input("_.username")).getAttribute("value"), username);
-        assertEquals(find(by.input("_.privateKey")).getText(), privateKey);
+        assertThat(find(by.input("_.username")).getAttribute("value"), is(equalTo(username)));
+        assertThat(find(by.input("_.privateKey")).getText(), is(equalTo(privateKey)));
 
         // Just to make sure the dumb slave is set up properly, we should seed it
         // with a FS root and executors

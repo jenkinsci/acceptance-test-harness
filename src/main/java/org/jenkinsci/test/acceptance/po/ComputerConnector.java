@@ -7,7 +7,7 @@ package org.jenkinsci.test.acceptance.po;
  *
  * @author Kohsuke Kawaguchi
  */
-public abstract class ComputerConnector extends PageArea {
+public abstract class ComputerConnector extends PageAreaImpl {
     protected ComputerConnector(PageObject context, String path) {
         super(context, path);
     }

@@ -32,6 +32,11 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.fail;
+
 /**
  * Page Object for Gerrit Trigger server (configuration) page.
  * @author Marco.Miller@ericsson.com
@@ -51,10 +56,10 @@ public class GerritTriggerServer extends PageObject {
     public final Control verifiedD = control("/verdictCategories[3]/verdictDescription");
     public final Control start = control("/button");
 
-    private static final String serverUrl = "gerrit-trigger/server/"+GerritTriggerServer.class.getPackage().getName();
+    private static final String serverUrl = "gerrit-trigger/server/" + GerritTriggerServer.class.getPackage().getName();
 
     public GerritTriggerServer(Jenkins jenkins) {
-        super(jenkins.injector,jenkins.url(serverUrl));
+        super(jenkins.injector, jenkins.url(serverUrl));
         this.jenkins = jenkins;
     }
 
@@ -70,8 +75,7 @@ public class GerritTriggerServer extends PageObject {
         advanced.click();
         try {
             codeReview.resolve();
-        }
-        catch(NoSuchElementException e) {
+        } catch (NoSuchElementException e) {
             add.click();
             codeReview.set("Code-Review");
             codeReviewD.set("Code Review");
@@ -82,16 +86,14 @@ public class GerritTriggerServer extends PageObject {
         clickButton("Save");
         try {
             start.click();
-        }
-        catch(NoSuchElementException e) {
+        } catch (NoSuchElementException e) {
             try {
-                HttpURLConnection c = (HttpURLConnection)new URL(url+"/wakeup").openConnection();
+                HttpURLConnection c = (HttpURLConnection) new URL(url + "/wakeup").openConnection();
                 c.setRequestMethod("GET");
                 c.setConnectTimeout(3000);
                 c.setReadTimeout(3000);
-                assertEquals(200,c.getResponseCode());
-            }
-            catch(IOException ioe) {
+                assertThat(c.getResponseCode(), is(equalTo(200)));
+            } catch (IOException ioe) {
                 fail(ioe.getMessage());
             }
         }

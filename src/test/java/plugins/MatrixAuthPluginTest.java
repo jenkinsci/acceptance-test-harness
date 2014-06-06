@@ -13,6 +13,8 @@ import org.jenkinsci.test.acceptance.utils.groovy.InteractiveConsole;
 import org.junit.Test;
 
 import static org.jenkinsci.test.acceptance.plugins.matrix_auth.MatrixRow.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 /**
  * @author Kohsuke Kawaguchi

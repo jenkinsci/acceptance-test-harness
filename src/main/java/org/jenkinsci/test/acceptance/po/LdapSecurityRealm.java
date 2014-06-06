@@ -58,7 +58,7 @@ public class LdapSecurityRealm<T extends LdapGroupMembershipStrategy> extends Se
     /**
      * Fills the input fields for ldap access control.
      */
-    public void configure(LdapDetails ldapDetails) {
+    public void configure(LdapDetails<T> ldapDetails) {
         ldapServer.set(ldapDetails.getHostWithPort());
         advanced.click();
         rootDn.set(ldapDetails.getRootDn());
@@ -86,7 +86,7 @@ public class LdapSecurityRealm<T extends LdapGroupMembershipStrategy> extends Se
     /**
      * Subclasses can override this to handle group membership differently.
      */
-    protected void configureGroupMembership(LdapDetails ldapDetails) {
+    protected void configureGroupMembership(LdapDetails<T> ldapDetails) {
         if (ldapDetails.getGroupMembershipStrategy() != null) {
             T groupMembershipStrategy = useGroupMembershipStrategy(ldapDetails.getGroupMembershipStrategy());
             groupMembershipStrategy.configure(ldapDetails.getGroupMembershipStrategyParam());

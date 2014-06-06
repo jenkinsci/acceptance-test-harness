@@ -24,11 +24,13 @@
 package org.jenkinsci.test.acceptance.plugins.maven;
 
 import com.google.inject.Injector;
+import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginMavenBuildSettings;
 import org.jenkinsci.test.acceptance.po.BuildStep;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.ShellBuildStep;
+import org.openqa.selenium.WebElement;
 
 import java.net.URL;
 
@@ -54,6 +56,21 @@ public class MavenModuleSet extends Job {
 
         advancedButton.click();
         advancedButton = null;
+    }
+
+    /**
+     * Change build settings.
+     * @param type The setting you would like to set and configure, e.g. FindbugsCodeStylePluginMavenBuildSettings.
+     * @return an instance of AbstractCodeStylePluginMavenBuildSettings (e.g. FindbugsCodeStylePluginMavenBuildSettings)
+     */
+    public <T extends AbstractCodeStylePluginMavenBuildSettings> T addBuildSettings(Class<T> type) {
+        WebElement radio = findCaption(type, new Finder<WebElement>() {
+            @Override protected WebElement find(String caption) {
+                return outer.find(by.checkbox(caption));
+            }
+        });
+        radio.click();
+        return newInstance(type, this);
     }
 
     @Override

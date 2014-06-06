@@ -2,17 +2,16 @@ package core;
 
 import com.google.inject.Inject;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.po.Artifact;
-import org.jenkinsci.test.acceptance.po.ArtifactArchiver;
-import org.jenkinsci.test.acceptance.po.Build;
-import org.jenkinsci.test.acceptance.po.FreeStyleJob;
-import org.jenkinsci.test.acceptance.po.Slave;
+import org.jenkinsci.test.acceptance.po.*;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * Feature: Archive artifacts
@@ -43,14 +42,14 @@ public class ArtifactsTest extends AbstractJUnitTest {
         job.configure();
         job.setLabelExpression(slave.getName());
         job.addShellStep("#!/bin/bash\n" +
-                "dd if=/dev/zero of="+LARGE_FILE_GB+"GB-${BUILD_NUMBER}-file.txt bs="+LARGE_FILE_GB+"M count=1000\n" +
+                "dd if=/dev/zero of=" + LARGE_FILE_GB + "GB-${BUILD_NUMBER}-file.txt bs=" + LARGE_FILE_GB + "M count=1000\n" +
                 "ls -l");
         ArtifactArchiver archiver = job.addPublisher(ArtifactArchiver.class);
         archiver.includes("*-file.txt");
         job.save();
         Build build = job.scheduleBuild().waitUntilFinished(240);
-        Artifact artifact = build.getArtifact(LARGE_FILE_GB + "GB-"+build.getNumber()+"-file.txt");
-        assertNotNull(artifact);
+        Artifact artifact = build.getArtifact(LARGE_FILE_GB + "GB-" + build.getNumber() + "-file.txt");
+        assertThat(artifact, is(notNullValue()));
         artifact.assertThatExists(true);
     }
 
@@ -65,7 +64,7 @@ public class ArtifactsTest extends AbstractJUnitTest {
         job.setLabelExpression(slave.getName());
         job.addShellStep("#!/bin/bash\n" +
                 "rm ./job*.txt\n" +
-                "for i in {1.."+NO_SMALL_FILES+"}\n" +
+                "for i in {1.." + NO_SMALL_FILES + "}\n" +
                 "do\n" +
                 " dd if=/dev/zero of=job-${BUILD_NUMBER}-file-$i.txt bs=1k count=1\n" +
                 "done\n" +
@@ -75,7 +74,7 @@ public class ArtifactsTest extends AbstractJUnitTest {
         job.save();
         Build build = job.scheduleBuild().waitUntilFinished();
         List<Artifact> artifacts = build.getArtifacts();
-        assertNotNull(artifacts);
-        assertEquals(NO_SMALL_FILES, artifacts.size());
+        assertThat(artifacts, is(notNullValue()));
+        assertThat(artifacts.size(), is(equalTo(NO_SMALL_FILES)));
     }
 }

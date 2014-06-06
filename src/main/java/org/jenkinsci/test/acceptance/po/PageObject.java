@@ -1,38 +1,35 @@
 package org.jenkinsci.test.acceptance.po;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.inject.Injector;
+import javax.inject.Inject;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import org.kohsuke.randname.RandomNameGenerator;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
-import javax.inject.Inject;
-
-import java.net.MalformedURLException;
-import java.net.URL;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.inject.Injector;
 
 /**
  * Encapsulates a model in Jenkins and wraps interactions with it.
- *
+ * <p/>
  * See https://code.google.com/p/selenium/wiki/PageObjects
- *
- * <p>
+ * <p/>
+ * <p/>
  * Most non-trivial page objects should derive from {@link ContainerPageObject}.
  *
  * @author Kohsuke Kawaguchi
  */
 @SuppressWarnings("CdiManagedBeanInconsistencyInspection")
-public abstract class PageObject extends CapybaraPortingLayer {
+public abstract class PageObject extends CapybaraPortingLayerImpl {
     @Inject
     protected ObjectMapper jsonParser;
 
     /**
-     * Full URL of the object that this page object represents. Ends with '/',
-     * like "http://localhsot:8080/job/foo/"
+     * Full URL of the object that this page object represents. Ends with '/', like "http://localhsot:8080/job/foo/"
      *
-     * @see ContainerPageObject#url(String)
-     *      Method that lets you resolve relative paths easily.
+     * @see ContainerPageObject#url(String) Method that lets you resolve relative paths easily.
      */
     public final URL url;
 
@@ -76,30 +73,31 @@ public abstract class PageObject extends CapybaraPortingLayer {
      */
     public URL url(String rel) {
         try {
-            return new URL(url,rel);
-        } catch (MalformedURLException e) {
+            return new URL(url, rel);
+        }
+        catch (MalformedURLException e) {
             throw new AssertionError(e);
         }
     }
 
     public URL url(String format, Object... args) {
-        return url(String.format(format,args));
+        return url(String.format(format, args));
     }
 
     /**
      * Create a control object that wraps access to the specific INPUT element in this page area.
-     *
-     * The {@link Control} object itself can be created early as the actual element resolution happens
-     * lazily. This means {@link PageArea} implementations can put these in their fields.
-     *
-     * Several paths can be provided to find the first matching element. Useful
-     * when element path changed between versions.
+     * <p/>
+     * The {@link Control} object itself can be created early as the actual element resolution happens lazily. This
+     * means {@link PageAreaImpl} implementations can put these in their fields.
+     * <p/>
+     * Several paths can be provided to find the first matching element. Useful when element path changed between
+     * versions.
      */
     public Control control(String... relativePaths) {
-        return new Control(this,relativePaths);
+        return new Control(this, relativePaths);
     }
 
     public Control control(By selector) {
-        return new Control(injector,selector);
+        return new Control(injector, selector);
     }
 }

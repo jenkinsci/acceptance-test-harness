@@ -4,20 +4,21 @@ import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 /**
- Feature: Copy a job
-   Copy a job and check if exists and has the same configuration as the original job
+ * Feature: Copy a job
+ * Copy a job and check if exists and has the same configuration as the original job
  */
 public class CopyJobTest extends AbstractJUnitTest {
     /**
-     Scenario: Copy a simple job
-       When I create a job named "simple-job"
-       And I copy the job named "simple-job-copy" from job named "simple-job"
-       Then the page should say "simple-job-copy"
-       And the job configuration should be equal to "simple-job" configuration
+     * Scenario: Copy a simple job
+     * When I create a job named "simple-job"
+     * And I copy the job named "simple-job-copy" from job named "simple-job"
+     * Then the page should say "simple-job-copy"
+     * And the job configuration should be equal to "simple-job" configuration
      */
     @Test
     public void copy_a_simple_job() {

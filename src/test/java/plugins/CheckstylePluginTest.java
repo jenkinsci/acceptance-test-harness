@@ -1,17 +1,14 @@
 package plugins;
 
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
 import com.google.inject.Inject;
 import org.jenkinsci.test.acceptance.junit.Bug;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginMavenBuildConfigurator;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleAction;
+import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleMavenBuildSettings;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstylePublisher;
-import org.jenkinsci.test.acceptance.plugins.nodelabelparameter.NodeParameter;
+import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Slave;
@@ -21,16 +18,24 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.xml.sax.SAXException;
 
-import static java.util.Collections.singletonMap;
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.Matchers.is;
-import static org.jenkinsci.test.acceptance.Matchers.*;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.jenkinsci.test.acceptance.Matchers.hasAction;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.jenkinsci.test.acceptance.Matchers.hasAction;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 /**
  * Feature: Allow publishing of Checkstyle report
-   In order to be able to check code style of my project
-   As a Jenkins user
-   I want to be able to publish Checkstyle report
+ * In order to be able to check code style of my project
+ * As a Jenkins user
+ * I want to be able to publish Checkstyle report
  */
 @WithPlugins("checkstyle")
 public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
@@ -178,7 +183,62 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
         assertAreaLinksOfJobAreLike(job, "^\\d+/checkstyleResult");
     }
 
+    private MavenModuleSet setupSimpleMavenJob() {
+        return setupSimpleMavenJob(null);
+    }
+
+    private MavenModuleSet setupSimpleMavenJob(AbstractCodeStylePluginMavenBuildConfigurator<CheckstyleMavenBuildSettings> configurator) {
+        final String projectPath = "/checkstyle_plugin/sample_checkstyle_project";
+        final String goal = "clean package checkstyle:checkstyle";
+        return setupMavenJob(projectPath, goal, CheckstyleMavenBuildSettings.class, configurator);
+    }
+
     /**
+     * Builds a maven project and checks if new warning are displayed.
+     */
+    @Test
+    public void build_simple_maven_project() {
+        final MavenModuleSet job = setupSimpleMavenJob();
+        Build lastBuild = buildJobWithSuccess(job);
+        assertThat(lastBuild, hasAction("Checkstyle Warnings"));
+        lastBuild.open();
+        CheckstyleAction checkstyle = new CheckstyleAction(job);
+        assertThat(checkstyle.getNewWarningNumber(), is(12));
+    }
+
+    /**
+     * Builds a maven project and checks if it is unstable.
+     */
+    @Test
+    public void build_simple_maven_project_and_check_if_it_is_unstable() {
+        final AbstractCodeStylePluginMavenBuildConfigurator<CheckstyleMavenBuildSettings> buildConfigurator =
+                new AbstractCodeStylePluginMavenBuildConfigurator<CheckstyleMavenBuildSettings>() {
+                    @Override
+                    public void configure(CheckstyleMavenBuildSettings settings) {
+                        settings.setBuildUnstableTotalAll("0");
+                    }
+                };
+        final MavenModuleSet job = setupSimpleMavenJob(buildConfigurator);
+        buildJobAndWait(job).shouldBeUnstable();
+    }
+
+    /**
+     * Builds a maven project and checks if it failed.
+     */
+    @Test
+    public void build_simple_maven_project_and_check_if_failed() {
+        final AbstractCodeStylePluginMavenBuildConfigurator<CheckstyleMavenBuildSettings> buildConfigurator =
+                new AbstractCodeStylePluginMavenBuildConfigurator<CheckstyleMavenBuildSettings>() {
+                    @Override
+                    public void configure(CheckstyleMavenBuildSettings settings) {
+                        settings.setBuildFailedTotalAll("0");
+                    }
+                };
+        final MavenModuleSet job = setupSimpleMavenJob(buildConfigurator);
+        buildJobAndWait(job).shouldFail();
+    }
+	
+	/**
      * Builds a job on a slave with checkstyle and verifies that the information checkstyle provides in the tabs about the build
      * are the information we expect.
      */

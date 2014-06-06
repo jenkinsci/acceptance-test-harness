@@ -23,13 +23,10 @@
  */
 package org.jenkinsci.test.acceptance.plugins.groovy;
 
-import org.jenkinsci.test.acceptance.po.BuildStep;
-import org.jenkinsci.test.acceptance.po.CodeMirror;
-import org.jenkinsci.test.acceptance.po.Describable;
-import org.jenkinsci.test.acceptance.po.Job;
+import org.jenkinsci.test.acceptance.po.*;
 
 @Describable("Execute system Groovy script")
-public class SystemGroovyStep extends BuildStep {
+public class SystemGroovyStep extends AbstractStep implements BuildStep {
 
     public SystemGroovyStep(Job parent, String path) {
         super(parent, path);
@@ -37,7 +34,7 @@ public class SystemGroovyStep extends BuildStep {
 
     public SystemGroovyStep script(String script) {
         control("scriptSource[0]").check();
-        new CodeMirror(parent, path + "/scriptSource[0]/command").set(script);
+        new CodeMirror(parent, getPath() + "/scriptSource[0]/command").set(script);
         control("scriptSource[0]/validate-button").click();
         return this;
     }
