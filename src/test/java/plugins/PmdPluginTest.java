@@ -204,30 +204,19 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
     }
 
     /**
-     Scenario: Configure a job with PMD post-build steps and run on slave
-     Given I have installed the "pmd" plugin
-     And a job
-     And a slave
-     When I configure the job
-     And I set slave Affinity to slave
-     And I add "Publish PMD analysis results" post-build action
-     And I copy resource "pmd_plugin/pmd.xml" into workspace
-     And I set path to the pmd result "pmd.xml"
-     And I save the job
-     And I build the job
-     Then the build should succeed
-     And the build should be run on slave
-     And build page should has pmd summary "0 warnings"
+     * Builds a job on a slave with pmd and verifies that the information pmd provides in the tabs about the build
+     * are the information we expect.
      */
     @Test
     public void configure_a_job_with_PMD_post_build_steps_build_on_slave() throws Exception {
-        FreeStyleJob job = setupJob("/pmd_plugin/pmd.xml", PmdPublisher.class, "pmd.xml");
+        FreeStyleJob job = setupJob("/pmd_plugin/pmd-warnings.xml", PmdPublisher.class, "pmd-warnings.xml");
 
         Slave slave = makeASlaveAndConfigureJob(job);
 
         Build build = buildJobOnSlaveWithSuccess(job, slave);
 
         assertThat(build.getNode(), is(slave.getName()));
-        assertThat(build.open(), hasContent("0 warnings"));
+        assertThat(build, hasAction("PMD Warnings"));
+        assertThat(job, hasAction("PMD Warnings"));
     }
 }
