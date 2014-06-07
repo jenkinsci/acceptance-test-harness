@@ -1,12 +1,6 @@
 package org.jenkinsci.test.acceptance.controller;
 
-import java.io.Closeable;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.URL;
-
+import com.cloudbees.sdk.extensibility.ExtensionPoint;
 import com.google.inject.Injector;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
@@ -14,7 +8,11 @@ import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.jenkinsci.test.acceptance.guice.AutoCleaned;
 
-import com.cloudbees.sdk.extensibility.ExtensionPoint;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URL;
 
 /**
  * Starts/stops Jenkins and exposes where it is running.
@@ -27,7 +25,7 @@ import com.cloudbees.sdk.extensibility.ExtensionPoint;
  * @author Vivek Pandey
  */
 @ExtensionPoint
-public abstract class JenkinsController implements Closeable, AutoCleaned {
+public abstract class JenkinsController implements IJenkinsController, AutoCleaned {
     /**
      * directory on the computer where this code is running that points to a directory
      * where test code can place log files, cache files, etc.

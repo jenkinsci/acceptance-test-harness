@@ -1,26 +1,26 @@
 package org.jenkinsci.test.acceptance.server;
 
-import static java.lang.System.getenv;
-import static java.lang.System.in;
-import static java.lang.System.out;
-
 import com.cloudbees.sdk.extensibility.Extension;
+import hudson.remoting.Channel;
+import hudson.remoting.Channel.Mode;
+import hudson.remoting.ChannelBuilder;
 import jnr.unixsocket.UnixSocketAddress;
 import jnr.unixsocket.UnixSocketChannel;
+import org.jenkinsci.test.acceptance.controller.IJenkinsController;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.LocalController.LocalFactoryImpl;
 import org.jenkinsci.test.acceptance.log.LogListenable;
 import org.jenkinsci.test.acceptance.log.LogListener;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
+
+import static java.lang.System.*;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -28,10 +28,10 @@ import java.util.List;
 public class PooledJenkinsController extends JenkinsController implements LogListenable {
     private URL url;
     private final File socket;
-    private UnixSocketChannel channel;
-    private PrintWriter w;
-    private BufferedReader r;
+    private UnixSocketChannel conn;
     private List<LogListener> listeners = new ArrayList<>();
+    private Channel channel;
+    private IJenkinsController controller;
 
     public PooledJenkinsController(File socket) {
         this.socket = socket;
@@ -52,14 +52,21 @@ public class PooledJenkinsController extends JenkinsController implements LogLis
     }
 
     private boolean connect() throws IOException {
-        if (channel!=null)      return false;
+        if (conn !=null)      return false;
 
         UnixSocketAddress address = new UnixSocketAddress(socket);
-        channel = UnixSocketChannel.open(address);
-        w = new PrintWriter(Channels.newOutputStream(channel),true);
-        r = new BufferedReader(new InputStreamReader(Channels.newInputStream(channel)));
+        conn = UnixSocketChannel.open(address);
 
-        url = new URL(r.readLine());
+        channel = new ChannelBuilder("JenkinsPool", Executors.newCachedThreadPool())
+                .withMode(Mode.BINARY)
+                .build(Channels.newInputStream(conn), Channels.newOutputStream(conn));
+
+        try {
+            controller = (IJenkinsController)channel.waitForRemoteProperty(IJenkinsController.class);
+            url = controller.getUrl();
+        } catch (InterruptedException e) {
+            throw new IOException(e);
+        }
 
         return true;
     }
@@ -67,13 +74,13 @@ public class PooledJenkinsController extends JenkinsController implements LogLis
     @Override
     public void startNow() throws IOException {
         if (!connect()) {
-            w.println("start");
+            controller.start();
         }
     }
 
     @Override
     public void stopNow() throws IOException {
-        w.println("stop");
+        controller.stop();
     }
 
     @Override
@@ -90,13 +97,10 @@ public class PooledJenkinsController extends JenkinsController implements LogLis
 
     @Override
     public void tearDown() throws IOException {
-        if (w!=null)
-            w.close();
-        if (r!=null)
-            r.close();
-        if (channel!=null)
-            channel.close();
-        channel = null;
+        channel.close();
+        if (conn !=null)
+            conn.close();
+        conn = null;
     }
 
     @Override

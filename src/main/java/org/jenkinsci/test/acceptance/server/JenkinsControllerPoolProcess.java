@@ -2,10 +2,14 @@ package org.jenkinsci.test.acceptance.server;
 
 import com.cloudbees.sdk.extensibility.ExtensionList;
 import com.google.inject.Injector;
+import hudson.remoting.Channel;
+import hudson.remoting.Channel.Mode;
+import hudson.remoting.ChannelBuilder;
 import jnr.unixsocket.UnixServerSocketChannel;
 import jnr.unixsocket.UnixSocketAddress;
 import jnr.unixsocket.UnixSocketChannel;
 import org.jenkinsci.test.acceptance.FallbackConfig;
+import org.jenkinsci.test.acceptance.controller.IJenkinsController;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.JenkinsControllerFactory;
 import org.jenkinsci.test.acceptance.guice.World;
@@ -14,13 +18,14 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 
 import javax.inject.Inject;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.channels.Channels;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.SynchronousQueue;
 
@@ -50,6 +55,7 @@ public class JenkinsControllerPoolProcess {
     @Option(name="-socket",usage="Unix domain socket file to communicate with client")
     public File socket = SOCKET;
 
+    private final ExecutorService executors = Executors.newCachedThreadPool();
 
     public static void main(String[] args) throws Exception {
         MAIN = true;
@@ -137,28 +143,21 @@ public class JenkinsControllerPoolProcess {
         try {
             try {
                 try (
-                    BufferedReader in = new BufferedReader(new InputStreamReader(Channels.newInputStream(c)));
-                    PrintWriter out = new PrintWriter(Channels.newOutputStream(c),true)) {
+                    InputStream in = Channels.newInputStream(c);
+                    OutputStream out = Channels.newOutputStream(c)) {
 
-                    out.println(j.getUrl());
-                    String cmd;
-                    while (null != (cmd = in.readLine())) {
-                        switch (cmd.trim().toLowerCase()) {
-                            case "start":
-                                j.start();
-                                break;
-                            case "stop":
-                                j.stop();
-                                break;
-                        }
-                    }
+                    Channel ch = new ChannelBuilder("channel", executors).withMode(Mode.BINARY).build(in, out);
+                    ch.setProperty(IJenkinsController.class, ch.export(IJenkinsController.class,j));
+
+                    // wait for the connection to be shut down
+                    ch.join();
                 }
             } finally {
                 System.out.println("done");
                 j.stop();
                 j.tearDown();
             }
-        } catch (IOException e) {
+        } catch (IOException|InterruptedException e) {
             e.printStackTrace();
         }
     }
