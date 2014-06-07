@@ -171,7 +171,10 @@ public class Build extends ContainerPageObject {
         assertThat(this, resultIs("SUCCESS"));
         return this;
     }
-
+    public Build shouldUnstable() {
+        assertThat(this, resultIs("UNSTABLE"));
+        return this;
+    }
     public Build shouldFail() {
         assertThat(this, resultIs("FAILURE"));
         return this;
