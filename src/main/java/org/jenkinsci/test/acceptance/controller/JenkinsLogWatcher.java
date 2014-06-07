@@ -2,6 +2,7 @@ package org.jenkinsci.test.acceptance.controller;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.input.TeeInputStream;
+import org.jenkinsci.test.acceptance.utils.LogPrinter;
 import org.jenkinsci.test.acceptance.utils.LogWatcher;
 
 import java.io.File;
@@ -36,8 +37,6 @@ public class JenkinsLogWatcher extends LogWatcher {
 
     public final File logFile;
 
-    private final String prefix;
-
     /**
      * @param id
      *      Short ID that indicates the log that we are watching.
@@ -46,18 +45,10 @@ public class JenkinsLogWatcher extends LogWatcher {
         super(new TeeInputStream(pipe,new FileOutputStream(logFile)));
 
         this.logFile = logFile;
-        this.prefix = id==null ? null : id+"|";
+        addLogListener(new LogPrinter(id));
 
         ready = watch(Pattern.compile(" Completed initialization"));
         portConflict = watch(Pattern.compile("java.net.BindException: Address already in use"));
-    }
-
-    @Override
-    public void processLine(String line) {
-        if (prefix!=null)
-            System.out.print(prefix);
-        System.out.println(line);
-        super.processLine(line);
     }
 
     /**

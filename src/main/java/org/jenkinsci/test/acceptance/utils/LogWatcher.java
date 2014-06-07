@@ -1,7 +1,6 @@
 package org.jenkinsci.test.acceptance.utils;
 
 import org.apache.http.concurrent.BasicFuture;
-import org.jenkinsci.test.acceptance.controller.LogListenable;
 import org.jenkinsci.test.acceptance.controller.LogListener;
 
 import java.io.BufferedReader;
@@ -9,28 +8,23 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Monitor standard output from a process and flags if a specific string appears.
+ * Reads {@link InputStream} and provides a regular expression pattern matching.
  *
  * @author Vivek Pandey
  * @author Kohsuke Kawaguchi
  */
-public class LogWatcher implements Closeable, LogListenable, LogListener {
+public class LogWatcher implements Closeable {
     private InputStream pipe;
 
     /**
-     * Expressions we are watching.
+     * All the listeners in here is {@link Watcher}s.
      */
-    private final List<Watcher> watchers = new ArrayList<>();
-
-    private final List<LogListener> listeners = new ArrayList<>();
+    private final LogSplitter splitter = new LogSplitter();
 
     /**
      * Thread that reads input stream.
@@ -58,9 +52,7 @@ public class LogWatcher implements Closeable, LogListenable, LogListener {
                 try {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(LogWatcher.this.pipe));
                     while ((line = reader.readLine()) != null) {
-                        for (LogListener l : listeners) {
-                            l.processLine(line);
-                        }
+                        splitter.processLine(line);
                     }
                     System.out.println("Jenkins is stopped");
                 } catch (Exception e) {
@@ -73,40 +65,13 @@ public class LogWatcher implements Closeable, LogListenable, LogListener {
             }
 
             private void failWatchers(Exception e) {
-                synchronized (watchers) {
-                    for (Watcher w : watchers) {
-                        w.failed(e);
-                    }
-                    watchers.clear();
+                for (LogListener w : splitter.getListeners()) {
+                    ((Watcher)w).failed(e);
                 }
+                splitter.clear();
             }
         };
         reader = new Thread(r);
-        listeners.add(this);
-    }
-
-    @Override
-    public void addLogListener(LogListener l) {
-        listeners.add(l);
-    }
-
-    @Override
-    public void removeLogListener(LogListener l) {
-        listeners.remove(l);
-    }
-
-    /**
-     * Called on each line of log output.
-     */
-    public void processLine(String line) {
-        synchronized (watchers) {
-            Iterator<Watcher> itr = watchers.iterator();
-            while (itr.hasNext()) {
-                Watcher w =  itr.next();
-                if (w.feed(line))
-                    itr.remove();
-            }
-        }
     }
 
     /**
@@ -122,14 +87,12 @@ public class LogWatcher implements Closeable, LogListenable, LogListener {
      * Returned future will signal when the expression is found.
      */
     public Future<Matcher> watch(Pattern regexp) {
-        synchronized (watchers) {
-            Watcher w = new Watcher(regexp);
-            watchers.add(w);
-            return w;
-        }
+        Watcher w = new Watcher(regexp);
+        splitter.addLogListener(w);
+        return w;
     }
 
-    class Watcher extends BasicFuture<Matcher> {
+    class Watcher extends BasicFuture<Matcher> implements LogListener {
         private final Pattern pattern;
 
         public Watcher(Pattern pattern) {
@@ -137,13 +100,12 @@ public class LogWatcher implements Closeable, LogListenable, LogListener {
             this.pattern = pattern;
         }
 
-        boolean feed(String line) {
+        @Override
+        public void processLine(String line) throws IOException {
             Matcher m = pattern.matcher(line);
             if (m.find()) {
                 completed(m);
-                return true;
-            } else {
-                return false;
+                splitter.removeLogListener(this);
             }
         }
     }
