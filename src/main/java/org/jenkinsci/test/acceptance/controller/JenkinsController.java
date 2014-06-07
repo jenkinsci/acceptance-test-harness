@@ -68,9 +68,9 @@ public abstract class JenkinsController implements IJenkinsController, AutoClean
      * @throws IOException
      */
     public void start() throws IOException {
-        if(!isRunning) {
+        if (!isRunning) {
             startNow();
-            this.isRunning = true;
+            isRunning = true;
         }
     }
 
@@ -86,8 +86,9 @@ public abstract class JenkinsController implements IJenkinsController, AutoClean
      * @throws IOException
      */
     public void stop() throws IOException {
-        if(isRunning) {
+        if (isRunning) {
             stopNow();
+            isRunning = false;
         }
     }
 
