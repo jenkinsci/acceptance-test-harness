@@ -9,6 +9,8 @@ import jnr.unixsocket.UnixSocketAddress;
 import jnr.unixsocket.UnixSocketChannel;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.LocalController.LocalFactoryImpl;
+import org.jenkinsci.test.acceptance.controller.LogListenable;
+import org.jenkinsci.test.acceptance.controller.LogListener;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -17,16 +19,19 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.nio.channels.Channels;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Kohsuke Kawaguchi
  */
-public class PooledJenkinsController extends JenkinsController {
+public class PooledJenkinsController extends JenkinsController implements LogListenable {
     private URL url;
     private final File socket;
     private UnixSocketChannel channel;
     private PrintWriter w;
     private BufferedReader r;
+    private List<LogListener> listeners = new ArrayList<>();
 
     public PooledJenkinsController(File socket) {
         this.socket = socket;
@@ -34,6 +39,16 @@ public class PooledJenkinsController extends JenkinsController {
 
     public PooledJenkinsController() {
         this(JenkinsControllerPoolProcess.SOCKET);
+    }
+
+    @Override
+    public void addLogListener(LogListener l) {
+        listeners.add(l);
+    }
+
+    @Override
+    public void removeLogListener(LogListener l) {
+        listeners.remove(l);
     }
 
     private boolean connect() throws IOException {

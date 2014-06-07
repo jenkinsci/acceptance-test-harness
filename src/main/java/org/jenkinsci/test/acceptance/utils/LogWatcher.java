@@ -1,6 +1,8 @@
 package org.jenkinsci.test.acceptance.utils;
 
 import org.apache.http.concurrent.BasicFuture;
+import org.jenkinsci.test.acceptance.controller.LogListenable;
+import org.jenkinsci.test.acceptance.controller.LogListener;
 
 import java.io.BufferedReader;
 import java.io.Closeable;
@@ -20,13 +22,15 @@ import java.util.regex.Pattern;
  * @author Vivek Pandey
  * @author Kohsuke Kawaguchi
  */
-public class LogWatcher implements Closeable {
+public class LogWatcher implements Closeable, LogListenable, LogListener {
     private InputStream pipe;
 
     /**
      * Expressions we are watching.
      */
     private final List<Watcher> watchers = new ArrayList<>();
+
+    private final List<LogListener> listeners = new ArrayList<>();
 
     /**
      * Thread that reads input stream.
@@ -54,7 +58,9 @@ public class LogWatcher implements Closeable {
                 try {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(LogWatcher.this.pipe));
                     while ((line = reader.readLine()) != null) {
-                        processLine(line);
+                        for (LogListener l : listeners) {
+                            l.processLine(line);
+                        }
                     }
                     System.out.println("Jenkins is stopped");
                 } catch (Exception e) {
@@ -76,12 +82,23 @@ public class LogWatcher implements Closeable {
             }
         };
         reader = new Thread(r);
+        listeners.add(this);
+    }
+
+    @Override
+    public void addLogListener(LogListener l) {
+        listeners.add(l);
+    }
+
+    @Override
+    public void removeLogListener(LogListener l) {
+        listeners.remove(l);
     }
 
     /**
      * Called on each line of log output.
      */
-    protected void processLine(String line) {
+    public void processLine(String line) {
         synchronized (watchers) {
             Iterator<Watcher> itr = watchers.iterator();
             while (itr.hasNext()) {

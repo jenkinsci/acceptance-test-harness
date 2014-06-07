@@ -53,7 +53,7 @@ public class JenkinsLogWatcher extends LogWatcher {
     }
 
     @Override
-    protected void processLine(String line) {
+    public void processLine(String line) {
         if (prefix!=null)
             System.out.print(prefix);
         System.out.println(line);
