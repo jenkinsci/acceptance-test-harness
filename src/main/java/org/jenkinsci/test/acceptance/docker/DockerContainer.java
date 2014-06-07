@@ -23,7 +23,7 @@ public class DockerContainer implements Closeable {
     private File logfile;
     private Thread shutdownHook;
 
-    /*package*/ void init(String cid, Process p, File logfile) {
+    /* package */ void init(String cid, Process p, File logfile) {
         this.cid = cid;
         this.p = p;
         this.logfile = logfile;
@@ -91,7 +91,30 @@ public class DockerContainer implements Closeable {
             throw new AssertionError("Failed to figure out port map "+n,e);
         }
     }
+    /**
+     * Tries to copy one file from Path toPath. Returns afterwards if the file exist.
+     * @param Path
+     * @param toPath
+     * @return
+     * @throws InterruptedException
+     */
+    public Boolean tryCopyFile(String Path,String toPath) throws  InterruptedException{
+        File srcFile = new File(Path);
+        String fileName= srcFile.getName();
+        File destFile = new File(toPath+"/"+fileName);
+        if(destFile.exists()){
+            //TODO: add log
+            destFile.delete();
+        }
+        try {
+            cp(Path, new File(toPath));
+        }
+        catch (IOException ex){
+            //General catch, docker sometimes throws an error, even if it copies a file
+        }
 
+        return destFile.exists();
+    }
     /**
      * Stops and remove any trace of the container
      */

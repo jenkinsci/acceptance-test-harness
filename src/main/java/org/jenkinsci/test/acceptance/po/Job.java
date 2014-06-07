@@ -159,11 +159,15 @@ public class Job extends ContainerPageObject {
         copyResource(resource, resource.getName());
     }
 
-    public void copyDir(Resource dir) {
+    /**
+     * "Copy" any file from the System into the Workspace using a zipFIle.
+     * @param file
+     */
+    public void copyFile(File file) {
         File tmp = null;
         try {
             tmp = File.createTempFile("jenkins-acceptance-tests", "dir");
-            ZipUtil.pack(dir.asFile(), tmp);
+            ZipUtil.pack(file, tmp);
             byte[] archive = IOUtils.toByteArray(new FileInputStream(tmp));
 
             addShellStep(String.format(
@@ -177,6 +181,10 @@ public class Job extends ContainerPageObject {
                 tmp.delete();
             }
         }
+    }
+
+    public void copyDir(Resource dir) {
+        copyFile(dir.asFile());
     }
 
     public URL getBuildUrl() {
