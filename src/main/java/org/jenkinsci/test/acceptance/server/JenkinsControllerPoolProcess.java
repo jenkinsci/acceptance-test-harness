@@ -12,6 +12,8 @@ import org.jenkinsci.test.acceptance.FallbackConfig;
 import org.jenkinsci.test.acceptance.controller.IJenkinsController;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.JenkinsControllerFactory;
+import org.jenkinsci.test.acceptance.guice.TestCleaner;
+import org.jenkinsci.test.acceptance.guice.TestLifecycle;
 import org.jenkinsci.test.acceptance.guice.World;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
@@ -22,6 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -46,7 +49,10 @@ public class JenkinsControllerPoolProcess {
     @Inject
     Injector injector;
 
-    private BlockingQueue<JenkinsController> queue;
+    @Inject
+    TestLifecycle lifecycle;
+
+    private BlockingQueue<QueueItem> queue;
 
     @Option(name="-n",usage="Number of instances to pool. >=1.")
     public int n = Integer.getInteger("count",1);
@@ -91,8 +97,9 @@ public class JenkinsControllerPoolProcess {
                 try {
                     FallbackConfig f = new FallbackConfig();
                     while (true) {
+                        lifecycle.startTestScope();
                         JenkinsController c = f.createController(injector,factories);
-                        queue.put(c);
+                        queue.put(new QueueItem(c,lifecycle.export()));
                     }
                 } catch (Throwable e) {
                     // fail fatally
@@ -122,13 +129,22 @@ public class JenkinsControllerPoolProcess {
             while (true) {
                 final UnixSocketChannel c = channel.accept();
                 System.out.println("Accepted");
-                final JenkinsController j = queue.take();
+                final QueueItem qi = queue.take();
+                final JenkinsController j = qi.controller;
                 System.out.println("Handed out "+j.getUrl());
 
                 new Thread("Connection handling thread") {
                     @Override
                     public void run() {
-                        processConnection(c, j);
+                        lifecycle.import_(qi.testScope);
+                        try {
+                            processConnection(c, j);
+                        } finally {
+                            TestCleaner scope = injector.getInstance(TestCleaner.class);
+                            if (scope!=null)
+                                scope.performCleanUp();
+                            lifecycle.endTestScope();
+                        }
                     }
                 }.start();
             }
@@ -167,4 +183,14 @@ public class JenkinsControllerPoolProcess {
      * Are we running the JUT server?
      */
     public static boolean MAIN = false;
+
+    static class QueueItem {
+        final JenkinsController controller;
+        final Map testScope;
+
+        QueueItem(JenkinsController controller, Map testScope) {
+            this.controller = controller;
+            this.testScope = testScope;
+        }
+    }
 }
