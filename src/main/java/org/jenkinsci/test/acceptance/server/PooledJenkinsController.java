@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.server;
 
 import com.cloudbees.sdk.extensibility.Extension;
+import hudson.remoting.Callable;
 import hudson.remoting.Channel;
 import hudson.remoting.Channel.Mode;
 import hudson.remoting.ChannelBuilder;
@@ -11,25 +12,27 @@ import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.LocalController.LocalFactoryImpl;
 import org.jenkinsci.test.acceptance.log.LogListenable;
 import org.jenkinsci.test.acceptance.log.LogListener;
+import org.jenkinsci.test.acceptance.log.LogPrinter;
+import org.jenkinsci.test.acceptance.log.LogSplitter;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.channels.Channels;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Executors;
 
 import static java.lang.System.*;
 
 /**
+ * {@link JenkinsController} that talks to {@link JenkinsControllerPoolProcess} over Unix domain socket.
+ *
  * @author Kohsuke Kawaguchi
  */
 public class PooledJenkinsController extends JenkinsController implements LogListenable {
     private URL url;
     private final File socket;
     private UnixSocketChannel conn;
-    private List<LogListener> listeners = new ArrayList<>();
+    private final LogSplitter splitter = new LogSplitter();
     private Channel channel;
     private IJenkinsController controller;
 
@@ -43,12 +46,12 @@ public class PooledJenkinsController extends JenkinsController implements LogLis
 
     @Override
     public void addLogListener(LogListener l) {
-        listeners.add(l);
+        splitter.addLogListener(l);
     }
 
     @Override
     public void removeLogListener(LogListener l) {
-        listeners.remove(l);
+        splitter.removeLogListener(l);
     }
 
     private boolean connect() throws IOException {
@@ -64,6 +67,12 @@ public class PooledJenkinsController extends JenkinsController implements LogLis
         try {
             controller = (IJenkinsController)channel.waitForRemoteProperty(IJenkinsController.class);
             url = controller.getUrl();
+
+            splitter.addLogListener(new LogPrinter(getLogId()));
+
+            final LogListener l = channel.export(LogListener.class, splitter);
+            channel.call(new InstallLogger(controller,l));
+
         } catch (InterruptedException e) {
             throw new IOException(e);
         }
@@ -129,5 +138,29 @@ public class PooledJenkinsController extends JenkinsController implements LogLis
         public JenkinsController create() {
             return new PooledJenkinsController();
         }
+    }
+
+    /**
+     * Runs on the pool server to install logger.
+     */
+    private static class InstallLogger implements Callable<Void, IOException> {
+        private final IJenkinsController controller;
+        private final LogListener l;
+
+        private InstallLogger(IJenkinsController controller, LogListener l) {
+            this.controller = controller;
+            this.l = l;
+        }
+
+        @Override
+        public Void call() throws IOException {
+            if (controller instanceof LogListenable) {
+                LogListenable ll = (LogListenable) controller;
+                ll.addLogListener(l);
+            }
+            return null;
+        }
+
+        private static final long serialVersionUID = 1L;
     }
 }

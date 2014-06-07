@@ -257,13 +257,6 @@ public abstract class LocalController extends JenkinsController implements LogLi
         }
     }
 
-    /**
-     * Returns the short ID used to prefix log output from the process into the test.
-     */
-    protected String getLogId() {
-        return String.format("master%05d",getUrl().getPort());
-    }
-
     @Override
     public void stopNow() throws IOException{
         process.getProcess().destroy();
