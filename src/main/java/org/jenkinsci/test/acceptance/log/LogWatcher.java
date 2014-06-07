@@ -1,7 +1,6 @@
-package org.jenkinsci.test.acceptance.utils;
+package org.jenkinsci.test.acceptance.log;
 
 import org.apache.http.concurrent.BasicFuture;
-import org.jenkinsci.test.acceptance.controller.LogListener;
 
 import java.io.IOException;
 import java.util.concurrent.Future;

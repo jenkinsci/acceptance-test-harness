@@ -9,8 +9,8 @@ import jnr.unixsocket.UnixSocketAddress;
 import jnr.unixsocket.UnixSocketChannel;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.LocalController.LocalFactoryImpl;
-import org.jenkinsci.test.acceptance.controller.LogListenable;
-import org.jenkinsci.test.acceptance.controller.LogListener;
+import org.jenkinsci.test.acceptance.log.LogListenable;
+import org.jenkinsci.test.acceptance.log.LogListener;
 
 import java.io.BufferedReader;
 import java.io.File;

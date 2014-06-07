@@ -1,6 +1,4 @@
-package org.jenkinsci.test.acceptance.utils;
-
-import org.jenkinsci.test.acceptance.controller.LogListener;
+package org.jenkinsci.test.acceptance.log;
 
 import java.io.IOException;
 

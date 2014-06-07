@@ -2,10 +2,12 @@ package org.jenkinsci.test.acceptance.controller;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.input.TeeInputStream;
-import org.jenkinsci.test.acceptance.utils.LogPrinter;
-import org.jenkinsci.test.acceptance.utils.LogReader;
-import org.jenkinsci.test.acceptance.utils.LogSplitter;
-import org.jenkinsci.test.acceptance.utils.LogWatcher;
+import org.jenkinsci.test.acceptance.log.LogListenable;
+import org.jenkinsci.test.acceptance.log.LogListener;
+import org.jenkinsci.test.acceptance.log.LogPrinter;
+import org.jenkinsci.test.acceptance.log.LogReader;
+import org.jenkinsci.test.acceptance.log.LogSplitter;
+import org.jenkinsci.test.acceptance.log.LogWatcher;
 
 import java.io.Closeable;
 import java.io.File;

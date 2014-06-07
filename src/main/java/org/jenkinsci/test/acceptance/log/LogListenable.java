@@ -1,4 +1,6 @@
-package org.jenkinsci.test.acceptance.controller;
+package org.jenkinsci.test.acceptance.log;
+
+import org.jenkinsci.test.acceptance.controller.JenkinsController;
 
 /**
  * Produces line-by-line log.
