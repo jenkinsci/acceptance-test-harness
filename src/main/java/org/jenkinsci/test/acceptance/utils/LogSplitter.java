@@ -36,6 +36,13 @@ public class LogSplitter implements LogListenable, LogListener {
         }
     }
 
+    @Override
+    public void processClose(Exception t) {
+        for (LogListener l : listeners) {
+            l.processClose(t);
+        }
+    }
+
     public void clear() {
         listeners.clear();
     }

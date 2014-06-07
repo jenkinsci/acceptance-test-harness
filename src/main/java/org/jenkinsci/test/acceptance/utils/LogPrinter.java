@@ -23,4 +23,8 @@ public class LogPrinter implements LogListener {
             System.out.print(prefix);
         System.out.println(line);
     }
+
+    @Override
+    public void processClose(Exception t) {
+    }
 }

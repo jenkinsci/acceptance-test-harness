@@ -3,8 +3,11 @@ package org.jenkinsci.test.acceptance.controller;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.input.TeeInputStream;
 import org.jenkinsci.test.acceptance.utils.LogPrinter;
+import org.jenkinsci.test.acceptance.utils.LogReader;
+import org.jenkinsci.test.acceptance.utils.LogSplitter;
 import org.jenkinsci.test.acceptance.utils.LogWatcher;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -24,7 +27,7 @@ import static java.util.concurrent.TimeUnit.*;
  *
  * @author Kohsuke Kawaguchi
  */
-public class JenkinsLogWatcher extends LogWatcher {
+public class JenkinsLogWatcher implements LogListenable, Closeable {
     /**
      * Signals when Jenkins is ready for action.
      */
@@ -37,18 +40,48 @@ public class JenkinsLogWatcher extends LogWatcher {
 
     public final File logFile;
 
+    private InputStream pipe;
+
+    /**
+     * Thread that reads log output from Jenkins.
+     */
+    protected final Thread reader;
+
+    /**
+     * Splits the log file to multiple sinks.
+     */
+    private final LogSplitter splitter = new LogSplitter();
+
+    private final LogWatcher watcher = new LogWatcher();
+
     /**
      * @param id
      *      Short ID that indicates the log that we are watching.
      */
     public JenkinsLogWatcher(String id, InputStream pipe, File logFile) throws FileNotFoundException {
-        super(new TeeInputStream(pipe,new FileOutputStream(logFile)));
-
         this.logFile = logFile;
-        addLogListener(new LogPrinter(id));
+        this.pipe = new TeeInputStream(pipe,new FileOutputStream(logFile));
 
-        ready = watch(Pattern.compile(" Completed initialization"));
-        portConflict = watch(Pattern.compile("java.net.BindException: Address already in use"));
+        splitter.addLogListener(new LogPrinter(id));
+        splitter.addLogListener(watcher);
+        reader = new Thread(new LogReader(pipe,splitter));
+
+        ready = watcher.watch(Pattern.compile(" Completed initialization"));
+        portConflict = watcher.watch(Pattern.compile("java.net.BindException: Address already in use"));
+    }
+
+    /**
+     * Starts scanning logs.
+     */
+    public void start() {
+        reader.start();
+    }
+
+    public void close() throws IOException {
+        if(pipe != null){
+            pipe.close();
+            pipe = null;
+        }
     }
 
     /**
@@ -77,6 +110,16 @@ public class JenkinsLogWatcher extends LogWatcher {
             // ignore
         }
         return msg;
+    }
+
+    @Override
+    public void addLogListener(LogListener l) {
+        splitter.addLogListener(l);
+    }
+
+    @Override
+    public void removeLogListener(LogListener l) {
+        splitter.removeLogListener(l);
     }
 
     public static final int DEFAULT_TIMEOUT = 300;//100 sec
