@@ -18,7 +18,6 @@ import org.jenkinsci.test.acceptance.log.LogSplitter;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.channels.Channels;
 import java.util.concurrent.Executors;
 
 import static java.lang.System.*;
@@ -62,10 +61,10 @@ public class PooledJenkinsController extends JenkinsController implements LogLis
 
         channel = new ChannelBuilder("JenkinsPool", Executors.newCachedThreadPool())
                 .withMode(Mode.BINARY)
-                .build(Channels.newInputStream(conn), Channels.newOutputStream(conn));
+                .build(ChannelStream.in(conn), ChannelStream.out(conn));
 
         try {
-            controller = (IJenkinsController)channel.waitForRemoteProperty(IJenkinsController.class);
+            controller = (IJenkinsController)channel.waitForRemoteProperty("controller");
             url = controller.getUrl();
 
             splitter.addLogListener(new LogPrinter(getLogId()));
@@ -107,9 +106,15 @@ public class PooledJenkinsController extends JenkinsController implements LogLis
     @Override
     public void tearDown() throws IOException {
         channel.close();
-        if (conn !=null)
-            conn.close();
-        conn = null;
+        try {
+            channel.join(3000);
+        } catch (InterruptedException e) {
+            throw new IOException(e);
+        } finally {
+            if (conn !=null)
+                conn.close();
+            conn = null;
+        }
     }
 
     @Override

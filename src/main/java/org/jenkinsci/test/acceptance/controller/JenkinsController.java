@@ -137,7 +137,7 @@ public abstract class JenkinsController implements IJenkinsController, AutoClean
     /**
      * Returns the short ID used to prefix log output from the process into the test.
      */
-    protected String getLogId() {
+    public String getLogId() {
         return String.format("master%05d",getUrl().getPort());
     }
 

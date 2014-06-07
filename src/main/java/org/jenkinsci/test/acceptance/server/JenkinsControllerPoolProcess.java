@@ -22,7 +22,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.channels.Channels;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -126,7 +125,7 @@ public class JenkinsControllerPoolProcess {
                 final JenkinsController j = queue.take();
                 System.out.println("Handed out "+j.getUrl());
 
-                new Thread() {
+                new Thread("Connection handling thread") {
                     @Override
                     public void run() {
                         processConnection(c, j);
@@ -143,11 +142,11 @@ public class JenkinsControllerPoolProcess {
         try {
             try {
                 try (
-                    InputStream in = Channels.newInputStream(c);
-                    OutputStream out = Channels.newOutputStream(c)) {
+                    InputStream in = ChannelStream.in(c);
+                    OutputStream out = ChannelStream.out(c)) {
 
-                    Channel ch = new ChannelBuilder("channel", executors).withMode(Mode.BINARY).build(in, out);
-                    ch.setProperty(IJenkinsController.class, ch.export(IJenkinsController.class,j));
+                    Channel ch = new ChannelBuilder(j.getLogId(), executors).withMode(Mode.BINARY).build(in, out);
+                    ch.setProperty("controller", ch.export(IJenkinsController.class,j));
 
                     // wait for the connection to be shut down
                     ch.join();
@@ -156,6 +155,7 @@ public class JenkinsControllerPoolProcess {
                 System.out.println("done");
                 j.stop();
                 j.tearDown();
+                c.close();
             }
         } catch (IOException|InterruptedException e) {
             e.printStackTrace();
