@@ -102,7 +102,7 @@ public class JenkinsControllerPoolProcess {
     }
 
     /**
-     * Acccepts connection to Unix domain socket and hand it off to a connection handling thread.
+     * Accepts connection to Unix domain socket and hand it off to a connection handling thread.
      */
     private void processServerSocket() throws IOException, InterruptedException {
         socket.deleteOnExit();
