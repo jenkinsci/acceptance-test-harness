@@ -93,9 +93,7 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
                                 "properly wait for either cidfile to appear or process to exit");
         assertWarningExtraction(tsa,"TSRCleaner.java",40,"@Deprecated", "");
 
-        // check that the correct line / task is displayed when following the link in the warnings tab
-
-
+        //check that the correct line / task is displayed when following the link in the warnings tab
         //assert contents of that line
         assertThat(tsa.getLinkedSourceFileLineNumber("TSRDockerImage.java:84", "Normal Priority"), is(84));
         assertThat(tsa.getLinkedSourceFileLineAsString("TSRDockerImage.java:84", "Normal Priority"), containsString("TODO"));
@@ -155,12 +153,86 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
     }
 
     /**
+     * This test's objective is to verify that the plugin correctly works for
+     * multiple tags per priority.
+     * In the first step the task scanner is configured with two tags for high
+     * priority tasks. Prior to the second build also the normal and low priority
+     * tag list is extended.
+     */
+    @Test
+    public void multiple_task_tags() throws Exception{
+        //do basic setup
+        FreeStyleJob j = setupJob("/tasks_plugin/fileset1",TaskScannerPublisher.class,
+                "**/*.java");
+
+        //set up the some more task scanner settings
+        j.configure();
+        TaskScannerPublisher pub = j.getPublisher(TaskScannerPublisher.class);
+        pub.excludePattern.set("**/*Test.java");
+        pub.highPriorityTags.set("FIXME,BUG");
+        pub.normalPriorityTags.set("TODO");
+        pub.lowPriorityTags.set("@Deprecated");
+        pub.ignoreCase.check();
+
+        j.save();
+
+        // as no threshold is defined to mark the build as FAILED or UNSTABLE, the build should succeed
+        Build lastBuild = buildJobWithSuccess(j);
+        lastBuild.open();
+        TaskScannerAction tsa = new TaskScannerAction(j);
+
+        // The file set consists of 9 files, whereof
+        //   - 2 file names match the exclusion pattern
+        //   - 7 files are to be scanned for tasks
+        //   - 6 files actually contain tasks with the specified tags
+        //
+        // The expected task priorities are:
+        //   - 3x high
+        //   - 4x medium
+        //   - 1x low
+
+        assertThat(tsa.getResultLinkByXPathText("8 open tasks"), is("tasksResult"));
+        assertThat(tsa.getResultTextByXPathText("8 open tasks"), endsWith("in 7 workspace files."));
+        assertThat(tsa.getWarningNumber(), is(8));
+        assertThat(tsa.getHighWarningNumber(), is(3));
+        assertThat(tsa.getNormalWarningNumber(), is(4));
+        assertThat(tsa.getLowWarningNumber(), is(1));
+
+        // now add further task tags. Then the publisher shall also
+        // find the second priority task in TSRDockerImage.java (line 102) amd
+        // a low priority task in TSRDockerImage.java (line 56).
+
+        j.configure();
+        pub.normalPriorityTags.set("TODO,XXX");
+        pub.lowPriorityTags.set("@Deprecated,\\?\\?\\?");
+        j.save();
+
+        lastBuild = buildJobWithSuccess(j);
+
+        lastBuild.open();
+        assertThat(tsa.getResultLinkByXPathText("10 open tasks"), is("tasksResult"));
+        assertThat(tsa.getResultTextByXPathText("10 open tasks"), endsWith("in 7 workspace files."));
+        assertThat(tsa.getResultLinkByXPathText("2 new open tasks"), is("tasksResult/new"));
+        assertThat(tsa.getWarningNumber(), is(10));
+        assertThat(tsa.getNewWarningNumber(), is(2));
+        assertThat(tsa.getHighWarningNumber(), is(3));
+        assertThat(tsa.getNormalWarningNumber(), is(5));
+        assertThat(tsa.getLowWarningNumber(), is(2));
+
+        assertFilesTab(tsa, "fileset1_eval2");
+        assertTypesTab(tsa, "fileset1_eval2");
+        assertWarningsTab(tsa, "fileset1_eval2");
+
+    }
+
+    /**
      * This method asserts the correct content of the files tab
      * depending on the file set loaded to the workspace and the
      * task tags used.
      *
      * Supported assertions:
      *  - fileset1_eval1 = fileset1, tags: FIXME, TODO, @Deprecated, case sensitive
+     *  - fileset1_eval2 = fileset1, tags: FIXME, BUG, TODO, XXX, @Deprecated, ???, not case sensitive
      *
      * @param tsa the {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerAction} object for
      *            the current job
@@ -174,6 +246,14 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
                 expectedContent.put("TSRCleaner.java", 1);
                 expectedContent.put("TSRDockerImage.java", 1);
                 expectedContent.put("TSRGitRepo.java", 2);
+                expectedContent.put("TSRJenkinsAcceptanceTestRule.java", 1);
+                expectedContent.put("TSRWinstoneDockerController.java", 1);
+                break;
+            case "fileset1_eval2":
+                expectedContent.put("TSRCleaner.java", 1);
+                expectedContent.put("TSRDockerImage.java", 3);
+                expectedContent.put("TSRGitRepo.java", 3);
+                expectedContent.put("TSREc2Provider.java", 1);
                 expectedContent.put("TSRJenkinsAcceptanceTestRule.java", 1);
                 expectedContent.put("TSRWinstoneDockerController.java", 1);
                 break;
@@ -191,6 +271,7 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
      *
      * Supported assertions:
      *  - fileset1_eval1 = fileset1, tags: FIXME, TODO, @Deprecated, case sensitive
+     *  - fileset1_eval2 = fileset1, tags: FIXME, BUG, TODO, XXX, @Deprecated, ???, not case sensitive
      *
      * @param tsa the {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerAction} object for
      *            the current job
@@ -204,6 +285,15 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
                 expectedContent.put("@Deprecated", 1);
                 expectedContent.put("FIXME", 1);
                 expectedContent.put("TODO", 4);
+                break;
+            case "fileset1_eval2":
+                expectedContent.put("@Deprecated", 1);
+                expectedContent.put("FIXME", 1);
+                expectedContent.put("fixme", 1);
+                expectedContent.put("TODO", 4);
+                expectedContent.put("BUG", 1);
+                expectedContent.put("XXX", 1);
+                expectedContent.put("???", 1);
                 break;
             default:
                 fail("invalid expectedList value");
@@ -219,6 +309,7 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
      *
      * Supported assertions:
      *  - fileset1_eval1 = fileset1, tags: FIXME, TODO, @Deprecated, case sensitive
+     *  - fileset1_eval2 = fileset1, tags: FIXME, BUG, TODO, XXX, @Deprecated, ???, not case sensitive
      *
      * @param tsa the {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerAction} object for
      *            the current job
@@ -230,11 +321,23 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
         switch (expectedList){
             case "fileset1_eval1":
                 expectedContent.put("TSRGitRepo.java:38", 38);
+                expectedContent.put("TSRGitRepo.java:69", 69);
                 expectedContent.put("TSRDockerImage.java:84", 84);
                 expectedContent.put("TSRJenkinsAcceptanceTestRule.java:51", 51);
-                expectedContent.put("TSRGitRepo.java:69", 69);
                 expectedContent.put("TSRWinstoneDockerController.java:73", 73);
                 expectedContent.put("TSRCleaner.java:40", 40);
+                break;
+            case "fileset1_eval2":
+                expectedContent.put("TSRGitRepo.java:38", 38);
+                expectedContent.put("TSRGitRepo.java:69", 69);
+                expectedContent.put("TSRGitRepo.java:88", 88);
+                expectedContent.put("TSRDockerImage.java:56", 56);
+                expectedContent.put("TSRDockerImage.java:84", 84);
+                expectedContent.put("TSRDockerImage.java:102", 102);
+                expectedContent.put("TSRJenkinsAcceptanceTestRule.java:51", 51);
+                expectedContent.put("TSRWinstoneDockerController.java:73", 73);
+                expectedContent.put("TSRCleaner.java:40", 40);
+                expectedContent.put("TSREc2Provider.java:133", 133);
                 break;
             default:
                 fail("invalid expectedList value");
