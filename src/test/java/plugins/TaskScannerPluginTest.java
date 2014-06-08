@@ -1,16 +1,22 @@
 package plugins;
 
 
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsPublisher;
 import org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerAction;
 import org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerPublisher;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
+import org.xml.sax.SAXException;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -25,6 +31,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
  */
 @WithPlugins("tasks")
 public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
+
+    //TODO: Test for JENKINS-22744: https://issues.jenkins-ci.org/browse/JENKINS-22744
+
 
     /**
      * This test's objective is to verify the basic functionality of the Task
@@ -116,7 +125,34 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
         assertThat(tsa.getResultLinkByXPathText("TSREc2Provider.java:133"), startsWith("source"));
     }
 
-    //TODO: Test for JENKINS-22744: https://issues.jenkins-ci.org/browse/JENKINS-22744
+
+    /**
+     * Builds a job and tests if the tasks api (with depth=0 parameter set) responds with the expected output.
+     * Difference in whitespaces are ok.
+     */
+    @Test
+    public void xml_api_report_depth_0() throws IOException, SAXException, ParserConfigurationException {
+        //do the same setup as in test single_task_tags_and_exclusion_pattern
+        FreeStyleJob j = setupJob("/tasks_plugin/fileset1",TaskScannerPublisher.class,
+                "**/*.java");
+
+        //set up the some more task scanner settings
+        j.configure();
+        TaskScannerPublisher pub = j.getPublisher(TaskScannerPublisher.class);
+        pub.excludePattern.set("**/*Test.java");
+        pub.highPriorityTags.set("FIXME");
+        pub.normalPriorityTags.set("TODO");
+        pub.lowPriorityTags.set("@Deprecated");
+        pub.ignoreCase.uncheck();
+
+        j.save();
+
+        Build build = buildJobWithSuccess(j);
+
+        final String apiUrl = "tasksResult/api/xml?depth=0";
+        final String expectedXmlPath = "/tasks_plugin/api_depth_0.xml";
+        assertXmlApiMatchesExpected(build, apiUrl, expectedXmlPath);
+    }
 
     /**
      * This method asserts the correct content of the files tab
