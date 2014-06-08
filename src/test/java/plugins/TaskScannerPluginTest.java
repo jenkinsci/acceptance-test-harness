@@ -225,6 +225,69 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
 
     }
 
+
+    /**
+     * This test's objective is to verify the detection of closed tasks.
+     * Therefore two runs of the same job with the same task scanner setup are
+     * conducted but the fileset in the workspace will be replaced by the same
+     * files containing less warnings for the second run.
+     * The tasks that have been removed shall be correctly listed as closed tasks.
+     */
+
+    @Test
+    public void closed_tasks() throws Exception {
+        //do the same setup as for single_task_tags_and_exclusion_pattern
+        FreeStyleJob j = setupJob("/tasks_plugin/fileset1", TaskScannerPublisher.class,
+                "**/*.java");
+
+        j.configure();
+        TaskScannerPublisher pub = j.getPublisher(TaskScannerPublisher.class);
+        pub.excludePattern.set("**/*Test.java");
+        pub.highPriorityTags.set("FIXME");
+        pub.normalPriorityTags.set("TODO");
+        pub.lowPriorityTags.set("@Deprecated");
+        pub.ignoreCase.uncheck();
+
+        j.save();
+
+        // as no threshold is defined to mark the build as FAILED or UNSTABLE, the build should succeed
+        Build lastBuild = buildJobWithSuccess(j);
+
+        // this time we do not check the task scanner output as the result is the same
+        // as for single_task_tags_and_exclusion_pattern
+        // So we proceed directly with the preparation of build #2
+
+        j.configure();
+        j.removeFirstBuildStep(); //removes the build step previously created by copyDir
+        j.copyDir(resource("/tasks_plugin/fileset1_less"));
+        j.save();
+
+        lastBuild = buildJobWithSuccess(j);
+        lastBuild.open();
+        TaskScannerAction tsa = new TaskScannerAction(j);
+
+        // In the first build the task priorities were
+        //   - 1x high
+        //   - 4x medium
+        //   - 1x low
+        //
+        // For the second build (reduced warnings) the expected priorities are
+        //   - 3x medium
+        //
+        // --> we expect 3 closed tasks (1x high, 1x normal, 1x low)
+
+        assertThat(tsa.getResultLinkByXPathText("3 open tasks"), is("tasksResult"));
+        assertThat(tsa.getResultTextByXPathText("3 open tasks"), endsWith("in 7 workspace files."));
+        assertThat(tsa.getResultLinkByXPathText("3 closed tasks"), is("tasksResult/fixed"));
+        assertThat(tsa.getWarningNumber(), is(3));
+        assertThat(tsa.getFixedWarningNumber(), is(3));
+        assertThat(tsa.getHighWarningNumber(), is(0));
+        assertThat(tsa.getNormalWarningNumber(), is(3));
+        assertThat(tsa.getLowWarningNumber(), is(0));
+
+        assertFixedTab(tsa, "fileset1_less");
+    }
+
     /**
      * This method asserts the correct content of the files tab
      * depending on the file set loaded to the workspace and the
@@ -344,6 +407,34 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
         }
 
         assertThat(tsa.getWarningsTabContents(), is(expectedContent));
+    }
+
+    /**
+     * This method asserts the correct content of the "Fixed" tab
+     * depending on the file set loaded to the workspace and the
+     * task tags used.
+     *
+     * Supported assertions:
+     *  - fileset1_less = fileset1_less, tags: FIXME, TODO, @Deprecated, case sensitive
+     *
+     * @param tsa the {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerAction} object for
+     *            the current job
+     * @param expectedList determines which files and which warning counts are expected
+     */
+    private void assertFixedTab(TaskScannerAction tsa, String expectedList) {
+        SortedMap<String, String> expectedContent = new TreeMap<>();
+        // TODO: extend for all filesets
+        switch (expectedList) {
+            case "fileset1_less":
+                expectedContent.put("TSRCleaner.java", "@Deprecated");
+                expectedContent.put("TSRDockerImage.java", "TODO");
+                expectedContent.put("TSRGitRepo.java", "FIXME");
+                break;
+            default:
+                fail("invalid expectedList value");
+        }
+
+        assertThat(tsa.getFixedTabContents(), is(expectedContent));
     }
 
     /**
