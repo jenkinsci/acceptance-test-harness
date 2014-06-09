@@ -5,6 +5,8 @@ import org.openqa.selenium.*;
 
 import com.google.inject.Injector;
 
+import javax.annotation.Nullable;
+
 /**
  * Wraps a specific form element in {@link PageAreaImpl} to provide operations.
  * <p/>
@@ -110,9 +112,14 @@ public class Control extends CapybaraPortingLayerImpl {
     }
 
 
-    public void set(String text) {
+    /**
+     * Sets the value of the input field to the specified text.
+     *
+     * Any existing value gets cleared.
+     */
+    public void set(@Nullable String text) {
         //if the text is longer than 255 characters, use the high throughput variant
-        if (text.length() > 255)
+        if (text!=null && text.length() > 255)
             setAtOnce(text);
         else {
             WebElement e = resolve();
