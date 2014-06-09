@@ -289,6 +289,57 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
     }
 
     /**
+     * This test's objective is to check the "Run always" option of the publisher,
+     * i.e whether the task scanner activity is skipped in case the main build step
+     * has already failed and the option "run always" is not activated. The option
+     * is activated for the second part to also scan for tasks in this failed job
+     */
+
+    @Test
+    public void run_always_option() throws Exception {
+        //do the same setup as for single_task_tags_and_exclusion_pattern
+        FreeStyleJob j = setupJob("/tasks_plugin/fileset1", TaskScannerPublisher.class,
+                "**/*.java");
+
+        j.configure();
+        j.addShellStep("exit 1"); //ensures the FAILURE status of the main build
+        TaskScannerPublisher pub = j.getPublisher(TaskScannerPublisher.class);
+        pub.excludePattern.set("**/*Test.java");
+        pub.highPriorityTags.set("FIXME");
+        pub.ignoreCase.check();
+        pub.advanced.click();
+        pub.runAlways.uncheck();
+        j.save();
+
+        // due to the "exit 1" shell step, the build fails
+        Build lastBuild = j.startBuild().shouldFail();
+
+        // the task scanner activity shall be skipped due to the failed main build
+        // so we have to search for the particular console output
+        lastBuild.shouldContainsConsoleOutput(".*\\[TASKS\\] Skipping publisher since build result is FAILURE");
+
+        // now activate "Run always"
+        j.configure();
+        pub.advanced.click();
+        pub.runAlways.check();
+        j.save();
+
+        lastBuild = j.startBuild().shouldFail();
+        lastBuild.open();
+
+        TaskScannerAction tsa = new TaskScannerAction(j);
+
+        // as the failed result is now ignored, we expect 2 open tasks, both
+        // of high priority and both considered as new warnings.
+        assertThat(tsa.getResultLinkByXPathText("2 open tasks"), is("tasksResult"));
+        assertThat(tsa.getResultTextByXPathText("2 open tasks"), endsWith("in 7 workspace files."));
+        assertThat(tsa.getResultLinkByXPathText("2 new open tasks"), is("tasksResult/new"));
+        assertThat(tsa.getWarningNumber(), is(2));
+        assertThat(tsa.getHighWarningNumber(), is(2));
+
+    }
+
+    /**
      * This method asserts the correct content of the files tab
      * depending on the file set loaded to the workspace and the
      * task tags used.
