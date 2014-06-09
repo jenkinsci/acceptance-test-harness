@@ -105,8 +105,8 @@ abstract public class AuditTrailLogger extends JenkinsLogger {
             );
 
             jenkins.configure();
-            PageArea area = new GlobalPluginConfiguration(jenkins, "audit-trail");
-            area.control("hetero-list-add[loggers]").selectDropdownMenu("Log file");
+            AuditTrailGlobalConfiguration area = new AuditTrailGlobalConfiguration(jenkins);
+            area.addLogger.selectDropdownMenu("Log file");
 
             area.control("loggers/log").set(logfile);
             area.control("loggers/limit").set(10);
