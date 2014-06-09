@@ -154,6 +154,8 @@ public abstract class LocalController extends JenkinsController {
             }
         }
 
+        System.out.println("running with given plugins: " + Arrays.toString(pluginDir.list()));
+
         try {
             FileUtils.copyFile(formElementPathPlugin, new File(pluginDir, "path-element.hpi"));
         } catch (IOException e) {
