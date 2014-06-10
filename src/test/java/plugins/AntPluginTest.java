@@ -71,8 +71,6 @@ public class AntPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void autoInstallAnt() {
-        jenkins.getPluginManager().checkForUpdates();
-
         AntInstallation.install(jenkins, "ant_1.8.4", "1.8.4");
 
         buildHelloWorld("ant_1.8.4").shouldContainsConsoleOutput(
