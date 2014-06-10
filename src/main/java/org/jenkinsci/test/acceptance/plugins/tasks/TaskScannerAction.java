@@ -2,17 +2,12 @@ package org.jenkinsci.test.acceptance.plugins.tasks;
 
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginAction;
+import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.ContainerPageObject;
 import org.openqa.selenium.WebElement;
-
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.fail;
 
 /**
  * Page object for Task Scanner action.
@@ -83,7 +78,31 @@ public class TaskScannerAction  extends AbstractCodeStylePluginAction {
         return asInt(getLinkedSourceFileLine(linkText,priority).findElement(by.tagName("a")));
     }
 
+    /**
+     * Getter for the "Plug-in Result:" line on a build's page. This line is only displayed
+     * in case the Task Scanner plugin is configured to change the build status w.r.t to
+     * certain warning thresholds.
+     *
+     * The resulting build status is displayed as image. In order to facilitate evaluation of
+     * this line the image is replaced by it's title (= status).
+     *
+     * @param build the {@link org.jenkinsci.test.acceptance.po.Build} object to get the result from
+     * @return the full line starting with "Plug-in Result:"
+     */
+    public String getPluginResult(Build build){
+        //ensure the build status page is open:
+        build.open();
 
+        String pResult = asTrimmedString(
+                find(by.xpath(".//li[starts-with(normalize-space(.), 'Plug-in Result:')]")));
+
+        //insert the icon title at the place of the icon
+        return StringUtils.substringBefore(pResult,":") + ": " + find(by.xpath(
+                ".//img[@title = 'Success' or @title = 'Unstable' or @title = 'Failed']")).
+                getAttribute("title").toUpperCase() + " -" + StringUtils.substringAfterLast(pResult, "-");
+    }
+
+//pResult =
     /**
      * This method gets the source code file line which is linked by the "Warnings"-tab
      * table entries.

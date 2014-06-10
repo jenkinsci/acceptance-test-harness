@@ -9,6 +9,10 @@ import java.util.*;
 
 /**
  * Abstract action class for plugins with getter of the warnings.
+ *
+ * FIXME: all xpath strings of methods get*WarningNumber rely on the structure of the table.
+ *        but the table structure changes according to the actual warnings.
+ *
  * @author Martin Kurz
  */
 public abstract class AbstractCodeStylePluginAction extends ContainerPageObject {

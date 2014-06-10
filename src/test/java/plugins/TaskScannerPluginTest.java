@@ -336,7 +336,232 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
         assertThat(tsa.getResultLinkByXPathText("2 new open tasks"), is("tasksResult/new"));
         assertThat(tsa.getWarningNumber(), is(2));
         assertThat(tsa.getHighWarningNumber(), is(2));
+    }
 
+    /**
+     * This test's objective is to the correct treatment of the status thresholds (totals).
+     * Therefore a more complex test case has been created which modifies files and task tags
+     * to scan for multiple times to create appropriate scenarios for different thresholds.
+     *
+     * It shall also check whether the determination / justification of the build status is
+     * done based on the highest priority threshold that has been exceeded.
+     *
+     * The test case consists of 6 steps:
+     * 1 - create reference build (SUCCESS) -> no threshold exceeded
+     * 2 - exceed the UNSTABLE LOW threshold
+     * 3 - exceed the UNSTABLE NORMAL threshold but do not exceed UNSTABLE LOW
+     * 4 - exceed UNSTABLE LOW, NORMAL and HIGH -> build status justified with HIGH priority tasks
+     * 5 - further exceed the UNSTABLE TOTAL threshold -> new justification for build status
+     * 6 - further exceed the FAILURE TOTAL threshold -> build failed
+     *
+     */
+
+    @Test
+    public void status_thresholds() throws Exception {
+
+        // +----------------------------------------------------------------------------+
+        // |                            BASIC SETUP / STEP 1                            |
+        // +----------------------------------------------------------------------------+
+
+        FreeStyleJob j = setupJob("/tasks_plugin/fileset1_less",TaskScannerPublisher.class,
+                "**/*.java");
+
+        j.configure();
+        TaskScannerPublisher pub = j.getPublisher(TaskScannerPublisher.class);
+        pub.excludePattern.set("**/*Test.java");
+        pub.highPriorityTags.set(""); //no high prio tags
+        pub.normalPriorityTags.set("TODO");
+        pub.lowPriorityTags.set("@Deprecated");
+        pub.ignoreCase.uncheck();
+
+        // setup thresholds
+        pub.advanced.click();
+        pub.warningThresholdLowUnstable.set("1");
+        pub.warningThresholdNormalUnstable.set("4");
+        pub.warningThresholdHighUnstable.set("0");
+        pub.warningThresholdUnstable.set("10");
+        pub.warningThresholdFailed.set("15");
+
+        j.save();
+
+        // The file set consists of 9 files, whereof
+        //   - 7 files are to be scanned for tasks
+        //
+        // The expected task priorities are:
+        //   - 0x high
+        //   - 3x medium
+        //   - 0x low
+        //
+        // ==> build status shall be SUCCESS, no threshold exceeded
+
+        Build lastBuild = buildJobWithSuccess(j);
+        lastBuild.open();
+        TaskScannerAction tsa = new TaskScannerAction(j);
+
+        assertThat(tsa.getResultTextByXPathText("3 open tasks"), endsWith("in 7 workspace files."));
+        assertThat(tsa.getResultLinkByXPathText("3 new open tasks"), is("tasksResult/new"));
+        assertThat(tsa.getWarningNumber(), is(3));
+        ////TODO: clarify conditions to omit summary table cells -> seems inconsistent
+        //assertThat(tsa.getNormalWarningNumber(), is(3));
+        assertThat(tsa.getPluginResult(lastBuild), is("Plug-in Result: SUCCESS - no threshold has been exceeded"));
+
+        // +----------------------------------------------------------------------------+
+        // |                                   STEP 2                                   |
+        // +----------------------------------------------------------------------------+
+
+        j.configure();
+        j.removeFirstBuildStep(); // remove copyDir shell step for fileset1_less
+        j.copyDir(resource("/tasks_plugin/fileset1"));
+        pub.lowPriorityTags.set("@Deprecated,\\?\\?\\?"); // add tag "???"
+        j.save();
+
+        // The file set consists of 9 files, whereof
+        //   - 7 files are to be scanned for tasks
+        //
+        // The expected task priorities are:
+        //   - 0x high
+        //   - 4x medium
+        //   - 2x low
+        //
+        // ==> build status shall be UNSTABLE due to low priority threshold is exceeded by 1
+
+        lastBuild = j.startBuild().shouldBeUnstable();
+        lastBuild.open();
+
+        assertThat(tsa.getResultTextByXPathText("6 open tasks"), endsWith("in 7 workspace files."));
+        assertThat(tsa.getResultLinkByXPathText("3 new open tasks"), is("tasksResult/new"));
+        assertThat(tsa.getWarningNumber(), is(6));
+        //assertThat(tsa.getNewWarningNumber(), is(2));
+        //assertThat(tsa.getNormalWarningNumber(), is(4));
+        //assertThat(tsa.getLowWarningNumber(), is(2));
+        assertThat(tsa.getPluginResult(lastBuild),
+                is("Plug-in Result: UNSTABLE - 2 warnings of priority Low Priority exceed the threshold of 1 by 1 (Reference build: #1)"));
+
+        // +----------------------------------------------------------------------------+
+        // |                                   STEP 3                                   |
+        // +----------------------------------------------------------------------------+
+
+        j.configure();
+        pub.lowPriorityTags.set("@Deprecated"); // remove tag "???"
+        pub.normalPriorityTags.set("TODO,XXX"); // add tag "XXX"
+        j.save();
+
+        // The file set consists of 9 files, whereof
+        //   - 7 files are to be scanned for tasks
+        //
+        // The expected task priorities are:
+        //   - 0x high
+        //   - 5x medium
+        //   - 1x low
+        //
+        // ==> build status shall be UNSTABLE due to normal priority threshold is exceeded by 1
+
+        lastBuild = j.startBuild().shouldBeUnstable();
+        lastBuild.open();
+
+        assertThat(tsa.getResultTextByXPathText("6 open tasks"), endsWith("in 7 workspace files."));
+        //TODO: possible BUG regarding delta warning determination -> clarify with Prof. Hafner
+        //assertThat(tsa.getResultLinkByXPathText("1 new open task"), is("tasksResult/new"));
+        //assertThat(tsa.getResultLinkByXPathText("1 closed task"), is("tasksResult/fixed"));
+        assertThat(tsa.getWarningNumber(), is(6));
+        //assertThat(tsa.getNewWarningNumber(), is(2));
+        //assertThat(tsa.getNormalWarningNumber(), is(4));
+        //assertThat(tsa.getLowWarningNumber(), is(2));
+        assertThat(tsa.getPluginResult(lastBuild),
+                is("Plug-in Result: UNSTABLE - 5 warnings of priority Normal Priority exceed the threshold of 4 by 1 (Reference build: #1)"));
+
+        // +----------------------------------------------------------------------------+
+        // |                                   STEP 4                                   |
+        // +----------------------------------------------------------------------------+
+
+        j.configure();
+        pub.lowPriorityTags.set("@Deprecated,\\?\\?\\?"); // add tag "???"
+        pub.highPriorityTags.set("FIXME"); // add tag "FIXME"
+        j.save();
+
+        // The file set consists of 9 files, whereof
+        //   - 7 files are to be scanned for tasks
+        //
+        // The expected task priorities are:
+        //   - 1x high
+        //   - 5x medium
+        //   - 2x low
+        //
+        // ==> build status shall be UNSTABLE due to high priority threshold is exceeded by 1
+
+        lastBuild = j.startBuild().shouldBeUnstable();
+        lastBuild.open();
+
+        assertThat(tsa.getResultTextByXPathText("8 open tasks"), endsWith("in 7 workspace files."));
+        //assertThat(tsa.getResultLinkByXPathText("2 new open tasks"), is("tasksResult/new"));
+        assertThat(tsa.getWarningNumber(), is(8));
+        //assertThat(tsa.getNewWarningNumber(), is(2));
+        //assertThat(tsa.getNormalWarningNumber(), is(4));
+        //assertThat(tsa.getLowWarningNumber(), is(2));
+        assertThat(tsa.getPluginResult(lastBuild),
+                is("Plug-in Result: UNSTABLE - 1 warning of priority High Priority exceeds the threshold of 0 by 1 (Reference build: #1)"));
+
+        // +----------------------------------------------------------------------------+
+        // |                                   STEP 5                                   |
+        // +----------------------------------------------------------------------------+
+
+        j.configure();
+        j.copyDir(resource("/tasks_plugin/fileset2")); // add a second shell step to copy another folder
+        pub.normalPriorityTags.set("TODO"); //remove tag "XXX"
+        j.save();
+
+        // The file set consists of 19 files, whereof
+        //   - 17 files are to be scanned for tasks
+        //
+        // The expected task priorities are:
+        //   -  1x high
+        //   - 11x medium
+        //   -  3x low
+        //
+        // ==> build status shall be UNSTABLE due to total warnings threshold is exceeded by 5
+
+        lastBuild = j.startBuild().shouldBeUnstable();
+        lastBuild.open();
+
+        assertThat(tsa.getResultTextByXPathText("15 open tasks"), endsWith("in 17 workspace files."));
+        //assertThat(tsa.getResultLinkByXPathText("7 new open tasks"), is("tasksResult/new"));
+        //assertThat(tsa.getResultLinkByXPathText("1 closed task"), is("tasksResult/fixed"));
+        assertThat(tsa.getWarningNumber(), is(15));
+        //assertThat(tsa.getNewWarningNumber(), is(2));
+        //assertThat(tsa.getNormalWarningNumber(), is(4));
+        //assertThat(tsa.getLowWarningNumber(), is(2));
+        assertThat(tsa.getPluginResult(lastBuild),
+                is("Plug-in Result: UNSTABLE - 15 warnings exceed the threshold of 10 by 5 (Reference build: #1)"));
+
+        // +----------------------------------------------------------------------------+
+        // |                                   STEP 6                                   |
+        // +----------------------------------------------------------------------------+
+
+        j.configure();
+        pub.ignoreCase.check(); //disable case sensitivity
+        j.save();
+
+        // The file set consists of 19 files, whereof
+        //   - 17 files are to be scanned for tasks
+        //
+        // The expected task priorities are:
+        //   -  2x high
+        //   - 11x medium
+        //   -  3x low
+        //
+        // ==> build status shall be FAILED due to total warnings threshold is exceeded by 1
+
+        lastBuild = j.startBuild().shouldFail();
+        lastBuild.open();
+
+        assertThat(tsa.getResultTextByXPathText("16 open tasks"), endsWith("in 17 workspace files."));
+        //assertThat(tsa.getResultLinkByXPathText("1 new open task"), is("tasksResult/new"));
+        assertThat(tsa.getWarningNumber(), is(16));
+        //assertThat(tsa.getNewWarningNumber(), is(2));
+        //assertThat(tsa.getNormalWarningNumber(), is(4));
+        //assertThat(tsa.getLowWarningNumber(), is(2));
+        assertThat(tsa.getPluginResult(lastBuild),
+                is("Plug-in Result: FAILED - 16 warnings exceed the threshold of 15 by 1 (Reference build: #1)"));
     }
 
     /**
