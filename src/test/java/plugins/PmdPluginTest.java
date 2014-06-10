@@ -20,10 +20,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.jenkinsci.test.acceptance.Matchers.hasAction;
-import static org.jenkinsci.test.acceptance.Matchers.hasContent;
-
-import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.jenkinsci.test.acceptance.Matchers.hasAction;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
@@ -191,7 +187,9 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
     /**
      * Runs job two times to check if the links of the graph are relative.
      */
-    @Test @Bug("21723") @Ignore("Until JENKINS-21723 is fixed")
+    @Test
+    @Bug("21723")
+    @Ignore("Until JENKINS-21723 is fixed")
     public void view_pmd_report_job_graph_links() {
         FreeStyleJob job = setupJob("/pmd_plugin/pmd-warnings.xml", PmdPublisher.class, "pmd-warnings.xml");
         buildJobAndWait(job);
@@ -204,7 +202,8 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
     /*
      * Runs a job with warning threshold configured once and validates that build is marked as unstable.
      */
-    @Test @Bug("19614")
+    @Test
+    @Bug("19614")
     public void build_with_warning_threshold_set_should_be_unstable() {
         final FreeStyleJob job = setupJob("/pmd_plugin/pmd-warnings.xml", PmdPublisher.class, "pmd-warnings.xml", "0", "0", true);
         final Build build = buildJobAndWait(job);
@@ -219,6 +218,19 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
         final String projectPath = "/pmd_plugin/sample_pmd_project";
         final String goal = "clean package pmd:pmd";
         return setupMavenJob(projectPath, goal, PmdMavenBuildSettings.class, configurator);
+    }
+
+    /**
+     * Builds a freestyle project and checks if new warning are displayed.
+     */
+    @Test
+    public void build_simple_freestyle_mavengoals_project() {
+        final FreeStyleJob job = setupFreestyleJobWithMavenGoals("/pmd_plugin/sample_pmd_project", "clean package pmd:pmd", PmdPublisher.class, "target/pmd.xml");
+        Build lastBuild = buildJobWithSuccess(job);
+        assertThat(lastBuild, hasAction("PMD Warnings"));
+        lastBuild.open();
+        PmdAction pmd = new PmdAction(job);
+        assertThat(pmd.getNewWarningNumber(), is(2));
     }
 
     /**
@@ -266,7 +278,7 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
         buildJobAndWait(job).shouldFail();
     }
 
-	/**
+    /**
      * Builds a job on a slave with pmd and verifies that the information pmd provides in the tabs about the build
      * are the information we expect.
      */
