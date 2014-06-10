@@ -1,12 +1,13 @@
 package org.jenkinsci.test.acceptance.server;
 
 import com.cloudbees.sdk.extensibility.Extension;
+
 import hudson.remoting.Callable;
 import hudson.remoting.Channel;
 import hudson.remoting.Channel.Mode;
-import hudson.remoting.ChannelBuilder;
 import jnr.unixsocket.UnixSocketAddress;
 import jnr.unixsocket.UnixSocketChannel;
+
 import org.jenkinsci.test.acceptance.controller.IJenkinsController;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.LocalController.LocalFactoryImpl;
@@ -14,6 +15,7 @@ import org.jenkinsci.test.acceptance.log.LogListenable;
 import org.jenkinsci.test.acceptance.log.LogListener;
 import org.jenkinsci.test.acceptance.log.LogPrinter;
 import org.jenkinsci.test.acceptance.log.LogSplitter;
+import org.jenkinsci.test.acceptance.log.LoggingController;
 
 import java.io.File;
 import java.io.IOException;
@@ -159,9 +161,9 @@ public class PooledJenkinsController extends JenkinsController implements LogLis
 
         @Override
         public Void call() throws IOException {
-            if (controller instanceof LogListenable) {
-                LogListenable ll = (LogListenable) controller;
-                ll.addLogListener(l);
+            if (controller instanceof LoggingController) {
+                LoggingController lc = (LoggingController) controller;
+                lc.getLogWatcher().addLogListener(l);
             }
             return null;
         }

@@ -1,8 +1,10 @@
 package org.jenkinsci.test.acceptance.controller;
 
 import jnr.ffi.LibraryLoader;
+
 import org.codehaus.plexus.util.FileUtils;
 import org.jenkinsci.test.acceptance.Ssh;
+import org.jenkinsci.test.acceptance.log.LoggingController;
 import org.jenkinsci.test.acceptance.machine.Machine;
 import org.jenkinsci.test.acceptance.utils.GNUCLibrary;
 import org.jenkinsci.utils.process.CommandBuilder;
@@ -37,7 +39,7 @@ import static java.lang.System.*;
  *
  * @author Vivek Pandey
  */
-public class RemoteJenkinsController extends JenkinsController {
+public class RemoteJenkinsController extends JenkinsController implements LoggingController {
 
     private final Machine machine;
     private final String jenkinsHome;
@@ -160,11 +162,12 @@ public class RemoteJenkinsController extends JenkinsController {
         } catch (IOException e) {
             throw new AssertionError("Failed to clean machine");
         }
-
     }
 
     private static final Logger localLogger = LoggerFactory.getLogger(RemoteJenkinsController.class);
 
-
-
+    @Override
+    public JenkinsLogWatcher getLogWatcher() {
+        return logWatcher;
+    }
 }
