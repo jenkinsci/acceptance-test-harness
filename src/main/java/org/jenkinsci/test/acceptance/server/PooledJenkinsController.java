@@ -5,6 +5,7 @@ import com.cloudbees.sdk.extensibility.Extension;
 import hudson.remoting.Callable;
 import hudson.remoting.Channel;
 import hudson.remoting.Channel.Mode;
+import hudson.remoting.ChannelBuilder;
 import jnr.unixsocket.UnixSocketAddress;
 import jnr.unixsocket.UnixSocketChannel;
 
