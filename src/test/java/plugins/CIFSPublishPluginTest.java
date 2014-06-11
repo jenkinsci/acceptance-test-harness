@@ -24,6 +24,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertThat;
+
 /**
  * Feature: Tests for CIFS plugin
  *
@@ -115,6 +118,7 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
         j.save();
 
         j.startBuild().shouldSucceed();
+
         assertTrue(smbd.tryCopyFile("/tmp/odes.txt","/tmp/"));
         assertThat(FileUtils.readFileToString(new File("/tmp/odes.txt")), CoreMatchers.is(cp_file.asText()));
     }

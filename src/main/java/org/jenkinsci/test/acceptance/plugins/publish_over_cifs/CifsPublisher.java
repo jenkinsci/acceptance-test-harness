@@ -6,11 +6,11 @@ import org.jenkinsci.test.acceptance.po.*;
  * @author Tobias Meyer
  */
 @Describable("Send build artifacts to a windows share")
-public class CifsPublisher extends PostBuildStep {
+public class CifsPublisher extends AbstractStep  implements PostBuildStep {
     public CifsPublisher(Job parent, String path) {
         super(parent, path);
         String p = last(by.xpath(".//div[@name='publishers'][starts-with(@path,'%s/publishers')]", path)).getAttribute("path");
-        defaultSite = new Site(page, p);
+        defaultSite = new Site(getPage(), p);
     }
 
     private Site defaultSite;
@@ -22,15 +22,15 @@ public class CifsPublisher extends PostBuildStep {
 
     public Site addServer() {
         add.click();
-        String p = last(by.xpath(".//div[@name='publishers'][starts-with(@path,'%s/publishers')]", path)).getAttribute("path");
-        return new Site(page, p);
+        String p = last(by.xpath(".//div[@name='publishers'][starts-with(@path,'%s/publishers')]", getPath())).getAttribute("path");
+        return new Site(getPage(), p);
     }
 
-    public static class Site extends PageArea {
+    public static class Site extends PageAreaImpl {
         public Site(PageObject parent, String path) {
             super(parent, path);
             String p = last(by.xpath(".//div[@name='transfers'][starts-with(@path,'%s/transfers')]", path)).getAttribute("path");
-            defaultTransfer = new TransferArea(page, p);
+            defaultTransfer = new TransferArea(getPage(), p);
         }
 
         public final Control add = control("repeatable-add");
@@ -44,12 +44,12 @@ public class CifsPublisher extends PostBuildStep {
 
         public TransferArea addTransferSet() {
             add.click();
-            String p = last(by.xpath(".//div[@name='transfers'][starts-with(@path,'%s/transfers')]", path)).getAttribute("path");
-            return new TransferArea(page, p);
+            String p = last(by.xpath(".//div[@name='transfers'][starts-with(@path,'%s/transfers')]", getPath())).getAttribute("path");
+            return new TransferArea(getPage(), p);
         }
     }
 
-    public static class TransferArea extends PageArea {
+    public static class TransferArea extends PageAreaImpl {
         public TransferArea(PageObject parent, String path) {
             super(parent, path);
             Control advanced = control("advanced-button");
