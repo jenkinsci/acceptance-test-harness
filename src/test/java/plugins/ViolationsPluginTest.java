@@ -13,6 +13,8 @@ import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+
 @WithPlugins("violations")
 public class ViolationsPluginTest extends AbstractJUnitTest {
 

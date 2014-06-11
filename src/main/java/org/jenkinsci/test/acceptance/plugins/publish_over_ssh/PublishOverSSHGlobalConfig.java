@@ -3,7 +3,7 @@ package org.jenkinsci.test.acceptance.plugins.publish_over_ssh;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Jenkins;
-import org.jenkinsci.test.acceptance.po.PageArea;
+import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.PageObject;
 
 import javax.inject.Inject;
@@ -11,7 +11,7 @@ import javax.inject.Inject;
 /**
  * @author jenky-hm
  */
-public class PublishOverSSHGlobalConfig extends PageArea {
+public class PublishOverSSHGlobalConfig extends PageAreaImpl {
     @Inject
     JenkinsController controller;
 
@@ -24,10 +24,10 @@ public class PublishOverSSHGlobalConfig extends PageArea {
 
     public CommonConfig setCommonConfig() {
         String p = lastIfNotVisible(by.xpath(".//tr[@name='commonConfig'][starts-with(@path,'/jenkins-plugins-publish_over_ssh-BapSshPublisherPlugin/')]")).getAttribute("path");
-        return new CommonConfig(page,p);
+        return new CommonConfig(getPage(), p);
     }
 
-    public static class CommonConfig extends PageArea {
+    public static class CommonConfig extends PageAreaImpl {
         public CommonConfig(PageObject parent, String path) {
             super(parent, path);
         }
@@ -45,10 +45,10 @@ public class PublishOverSSHGlobalConfig extends PageArea {
     public InstanceSite addInstanceSite() {
         add.click();
         String p = last(by.xpath(".//div[@name='instance'][starts-with(@path,'/jenkins-plugins-publish_over_ssh-BapSshPublisherPlugin/')]")).getAttribute("path");
-        return new InstanceSite(page,p);
+        return new InstanceSite(getPage(), p);
     }
 
-    public static class InstanceSite extends PageArea {
+    public static class InstanceSite extends PageAreaImpl {
         public InstanceSite(PageObject parent, String path) {
             super(parent, path);
         }
@@ -62,17 +62,17 @@ public class PublishOverSSHGlobalConfig extends PageArea {
         // advanced config button
         public final Control addAdvancedConfig = control("advanced-button");
 
-        public AdvancedConfig addAdvancedConfig(){
+        public AdvancedConfig addAdvancedConfig() {
             addAdvancedConfig.click();
             String p = last(by.xpath(".//div[@name='instance'][starts-with(@path,'/jenkins-plugins-publish_over_ssh-BapSshPublisherPlugin/')]")).getAttribute("path");
-            return new AdvancedConfig(page,p);
+            return new AdvancedConfig(getPage(), p);
         }
 
         public final Control validate = control("validate-button");
         public final Control delete = control("repeatable-delete");
     }
 
-    public static class AdvancedConfig extends PageArea {
+    public static class AdvancedConfig extends PageAreaImpl {
         public AdvancedConfig(PageObject parent, String path) {
             super(parent, path);
         }

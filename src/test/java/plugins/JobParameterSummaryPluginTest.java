@@ -30,6 +30,8 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.StringParameter;
 import org.junit.Test;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+
 @WithPlugins("job-parameter-summary")
 public class JobParameterSummaryPluginTest extends AbstractJUnitTest {
 

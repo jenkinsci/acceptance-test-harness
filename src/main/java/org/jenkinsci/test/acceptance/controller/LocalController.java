@@ -1,5 +1,16 @@
 package org.jenkinsci.test.acceptance.controller;
 
+import com.google.inject.Injector;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.codehaus.plexus.util.Expand;
+import org.codehaus.plexus.util.StringUtils;
+import org.jenkinsci.test.acceptance.log.LogListenable;
+import org.jenkinsci.test.acceptance.log.LogListener;
+import org.jenkinsci.utils.process.ProcessInputStream;
+
+import javax.inject.Inject;
+import javax.inject.Named;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -10,16 +21,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import com.google.inject.Injector;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.codehaus.plexus.util.Expand;
-import org.codehaus.plexus.util.StringUtils;
-import org.jenkinsci.utils.process.ProcessInputStream;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import static java.lang.System.*;
 
 /**
@@ -28,7 +29,7 @@ import static java.lang.System.*;
  *
  * @author Vivek Pandey
  */
-public abstract class LocalController extends JenkinsController {
+public abstract class LocalController extends JenkinsController implements LogListenable {
     /**
      * jenkins.war. Subject under test.
      */
@@ -154,12 +155,24 @@ public abstract class LocalController extends JenkinsController {
             }
         }
 
+        System.out.println("running with given plugins: " + Arrays.toString(pluginDir.list()));
+
         try {
             FileUtils.copyFile(formElementPathPlugin, new File(pluginDir, "path-element.hpi"));
         } catch (IOException e) {
             throw new RuntimeException(String.format("Failed to copy form path element file %s to plugin dir %s.",
                     formElementPathPlugin, pluginDir),e);
         }
+    }
+
+    @Override
+    public void addLogListener(LogListener l) {
+        logWatcher.addLogListener(l);
+    }
+
+    @Override
+    public void removeLogListener(LogListener l) {
+        logWatcher.removeLogListener(l);
     }
 
     /**
@@ -235,7 +248,7 @@ public abstract class LocalController extends JenkinsController {
         this.process = startProcess();
         Runtime.getRuntime().addShutdownHook(shutdownHook);
 
-        logWatcher = new JenkinsLogWatcher(process,logFile);
+        logWatcher = new JenkinsLogWatcher(getLogId(),process,logFile);
         logWatcher.start();
         try {
             LOGGER.info("Waiting for Jenkins to become running in "+ this);

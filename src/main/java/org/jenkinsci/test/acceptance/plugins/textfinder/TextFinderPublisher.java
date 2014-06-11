@@ -1,9 +1,6 @@
 package org.jenkinsci.test.acceptance.plugins.textfinder;
 
-import org.jenkinsci.test.acceptance.po.Control;
-import org.jenkinsci.test.acceptance.po.Describable;
-import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.PostBuildStep;
+import org.jenkinsci.test.acceptance.po.*;
 import org.openqa.selenium.WebElement;
 
 
@@ -19,7 +16,7 @@ import org.openqa.selenium.WebElement;
  */
 
 @Describable("Jenkins Text Finder")
-public class TextFinderPublisher extends PostBuildStep {
+public class TextFinderPublisher extends AbstractStep implements PostBuildStep {
 
     public final WebElement filePath = find(by.xpath("//input[@name='_.fileSet']"));
     public final WebElement regEx =find(by.xpath("//input[@name='_.regexp']"));

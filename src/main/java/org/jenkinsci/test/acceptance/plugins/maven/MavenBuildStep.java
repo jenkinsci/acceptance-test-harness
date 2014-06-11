@@ -1,15 +1,12 @@
 package org.jenkinsci.test.acceptance.plugins.maven;
 
-import org.jenkinsci.test.acceptance.po.BuildStep;
-import org.jenkinsci.test.acceptance.po.Control;
-import org.jenkinsci.test.acceptance.po.Describable;
-import org.jenkinsci.test.acceptance.po.Job;
+import org.jenkinsci.test.acceptance.po.*;
 
 /**
  * @author Kohsuke Kawaguchi
  */
 @Describable("Invoke top-level Maven targets")
-public class MavenBuildStep extends BuildStep {
+public class MavenBuildStep extends AbstractStep implements BuildStep {
     public final Control version = control("name");
     public final Control targets = control("targets");
 
@@ -32,7 +29,9 @@ public class MavenBuildStep extends BuildStep {
     }
 
     private void ensureAdvanced() {
-        if (advancedButton == null) return;
+        if (advancedButton == null) {
+            return;
+        }
 
         advancedButton.click();
         advancedButton = null;

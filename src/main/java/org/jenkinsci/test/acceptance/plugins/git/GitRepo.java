@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.plugins.git;
 
 import org.apache.commons.io.FileUtils;
+import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
 
 import java.io.Closeable;
 import java.io.File;
@@ -52,7 +53,7 @@ public class GitRepo implements Closeable {
     private File initDir() throws IOException {
         // FIXME: perhaps this logic that makes it use a separate key should be moved elsewhere?
         privateKey = File.createTempFile("ssh", "key");
-        FileUtils.copyURLToFile(GitRepo.class.getResource("/ssh_keys/unsafe"), privateKey);
+        FileUtils.copyURLToFile(GitContainer.class.getResource("GitContainer/unsafe"), privateKey);
         Files.setPosixFilePermissions(privateKey.toPath(), singleton(OWNER_READ));
 
         ssh = File.createTempFile("jenkins", "ssh");

@@ -1,6 +1,7 @@
 package plugins;
 
 import com.google.inject.Inject;
+import hudson.util.VersionNumber;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.SvnContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
@@ -10,7 +11,10 @@ import org.jenkinsci.test.acceptance.plugins.subversion.SubversionCredentialUser
 import org.jenkinsci.test.acceptance.plugins.subversion.SubversionPluginTestException;
 import org.jenkinsci.test.acceptance.plugins.subversion.SubversionScm;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.junit.Before;
 import org.junit.Test;
+
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Feature: Subversion support
@@ -27,6 +31,11 @@ import org.junit.Test;
 public class Subversion_Version154_PluginTest extends AbstractJUnitTest {
     @Inject
     DockerContainerHolder<SvnContainer> svn;
+
+    @Before
+    public void setUp() {
+        assumeTrue(jenkins.getPlugin("subversion").getVersion().compareTo(new VersionNumber("1.55"))<0);
+    }
 
     /**
      * Scenario: Run basic Subversion build

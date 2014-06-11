@@ -17,13 +17,15 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.junit.Assert.fail;
+
 /**
- Feature: Update JIRA tickets when a build is ready
-   In order to notify people waiting for a bug fix
-   As a Jenkins developer
-   I want JIRA issues to be updated when a new build is made
+ * Feature: Update JIRA tickets when a build is ready
+ * In order to notify people waiting for a bug fix
+ * As a Jenkins developer
+ * I want JIRA issues to be updated when a new build is made
  */
-@WithPlugins({"jira","git"})
+@WithPlugins({"jira", "git"})
 public class JiraPluginTest extends AbstractJUnitTest {
     @Inject
     Docker docker;
@@ -37,42 +39,43 @@ public class JiraPluginTest extends AbstractJUnitTest {
 
     @After
     public void tearDown() throws Exception {
-        git.close();
+        if (git!=null)
+            git.close();
     }
 
     /**
-     @native(docker)
-     Scenario: JIRA ticket gets updated with a build link
-       Given a docker fixture "jira"
-       And "ABC" project on docker jira fixture
-       And a new issue in "ABC" project on docker jira fixture
-       And a new issue in "ABC" project on docker jira fixture
-       And I have installed the "jira" plugin
-
-       Given I have installed the "git" plugin
-       And an empty test git repository
-       And a job
-
-       Then I configure docker fixture as JIRA site
-
-       Then I configure the job
-       And I check out code from the test Git repository
-       And I add "Update relevant JIRA issues" post-build action
-       And I save the job
-
-       Then I commit "initial commit" to the test Git repository
-       And I build the job
-       And the build should succeed
-
-       When I commit "[ABC-1] fixed" to the test Git repository
-       And I commit "[ABC-2] fixed" to the test Git repository
-       And I build the job
-       Then the build should succeed
-       And the build should link to JIRA ABC-1 ticket
-       And the build should link to JIRA ABC-2 ticket
-       And JIRA ABC-1 ticket has comment from admin that refers to the build
+     * @native(docker) Scenario: JIRA ticket gets updated with a build link
+     * Given a docker fixture "jira"
+     * And "ABC" project on docker jira fixture
+     * And a new issue in "ABC" project on docker jira fixture
+     * And a new issue in "ABC" project on docker jira fixture
+     * And I have installed the "jira" plugin
+     * <p/>
+     * Given I have installed the "git" plugin
+     * And an empty test git repository
+     * And a job
+     * <p/>
+     * Then I configure docker fixture as JIRA site
+     * <p/>
+     * Then I configure the job
+     * And I check out code from the test Git repository
+     * And I add "Update relevant JIRA issues" post-build action
+     * And I save the job
+     * <p/>
+     * Then I commit "initial commit" to the test Git repository
+     * And I build the job
+     * And the build should succeed
+     * <p/>
+     * When I commit "[ABC-1] fixed" to the test Git repository
+     * And I commit "[ABC-2] fixed" to the test Git repository
+     * And I build the job
+     * Then the build should succeed
+     * And the build should link to JIRA ABC-1 ticket
+     * And the build should link to JIRA ABC-2 ticket
+     * And JIRA ABC-1 ticket has comment from admin that refers to the build
      */
-    @Test @Native("docker")
+    @Test
+    @Native("docker")
     public void jira_ticket_gets_updated_with_a_build_link() throws Exception {
         JiraContainer jira = docker.start(JiraContainer.class);
         jira.waitForReady(this);
@@ -80,13 +83,15 @@ public class JiraPluginTest extends AbstractJUnitTest {
         jira.createIssue("ABC");
         jira.createIssue("ABC");
 
-        jenkins.configure(); {
+        jenkins.configure();
+        {
             new JiraGlobalConfig(jenkins).addSite(jira.getURL(), "admin", "admin");
         }
         jenkins.save();
 
         FreeStyleJob job = jenkins.jobs.create();
-        job.configure(); {
+        job.configure();
+        {
             job.useScm(GitScm.class).url(git.dir.toString());
             job.addPublisher(JiraUpdater.class);
         }
@@ -105,8 +110,9 @@ public class JiraPluginTest extends AbstractJUnitTest {
 
         String buildUrl = job.build(b.getNumber()).url.toString();
         for (RemoteComment c : jira.getComments("ABC-1")) {
-            if (c.getBody().contains(buildUrl))
+            if (c.getBody().contains(buildUrl)) {
                 return;
+            }
         }
         fail("Comment back to Jenkins not found");
     }

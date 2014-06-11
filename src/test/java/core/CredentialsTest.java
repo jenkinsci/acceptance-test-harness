@@ -2,10 +2,13 @@ package core;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.plugins.credentials.ManagedCredentials;
-import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshPrivateKeyCredential;
 import org.jenkinsci.test.acceptance.plugins.credentials.UserPwdCredential;
-import org.junit.Assert;
+import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshPrivateKeyCredential;
 import org.junit.Test;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 
 /**
  * @author Vivek Pandey
@@ -26,8 +29,8 @@ public class CredentialsTest extends AbstractJUnitTest {
 
         //now verify
         jenkins.visit("credentials");
-        Assert.assertEquals(find(by.input("_.username")).getAttribute("value"), username);
-        Assert.assertEquals(find(by.input("_.privateKey")).getText(), privKey);
+        assertThat(find(by.input("_.username")).getAttribute("value"), is(equalTo(username)));
+        assertThat(find(by.input("_.privateKey")).getText(), is(equalTo(privKey)));
     }
 
     @Test
@@ -45,6 +48,6 @@ public class CredentialsTest extends AbstractJUnitTest {
 
         //now verify
         jenkins.visit("credentials");
-        Assert.assertEquals(find(by.input("_.username")).getAttribute("value"), username);
+        assertThat(find(by.input("_.username")).getAttribute("value"), is(equalTo(username)));
     }
 }

@@ -5,11 +5,12 @@ import com.google.inject.Injector;
 import java.net.URL;
 
 import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 /**
  * Page object for view, which is a collection of jobs rendered in the UI.
- *
+ * <p/>
  * Use {@link Describable} annotation to register an implementation.
  *
  * @author Kohsuke Kawaguchi
@@ -26,7 +27,7 @@ public abstract class View extends ContainerPageObject {
      * Clicks a build button for a job of the specified name.
      */
     public void build(String name) {
-        find(by.xpath("//a[contains(@href, '/%s/build?')]/img[contains(@title, 'Schedule a build')]",name)).click();
+        find(by.xpath("//a[contains(@href, '/%s/build?')]/img[contains(@title, 'Schedule a build')]", name)).click();
     }
 
 
