@@ -1,8 +1,6 @@
 package plugins;
 
-import com.google.inject.Inject;
 import org.jenkinsci.test.acceptance.junit.Bug;
-import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginMavenBuildConfigurator;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleAction;
@@ -12,10 +10,8 @@ import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Slave;
-import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -24,12 +20,8 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.jenkinsci.test.acceptance.Matchers.hasAction;
-
-import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.jenkinsci.test.acceptance.Matchers.hasAction;
-import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 /**
  * Feature: Allow publishing of Checkstyle report
@@ -173,7 +165,9 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
     /**
      * Runs job two times to check if the links of the graph are relative.
      */
-    @Test @Bug("21723")  @Ignore("Until JENKINS-21723 is fixed")
+    @Test
+    @Bug("21723")
+    @Ignore("Until JENKINS-21723 is fixed")
     public void view_checkstyle_report_job_graph_links() throws Exception {
         FreeStyleJob job = setupJob("/checkstyle_plugin/checkstyle-result.xml", CheckstylePublisher.class, "checkstyle-result.xml");
         buildJobAndWait(job);
@@ -191,6 +185,19 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
         final String projectPath = "/checkstyle_plugin/sample_checkstyle_project";
         final String goal = "clean package checkstyle:checkstyle";
         return setupMavenJob(projectPath, goal, CheckstyleMavenBuildSettings.class, configurator);
+    }
+
+    /**
+     * Builds a freestyle project and checks if new warning are displayed.
+     */
+    @Test
+    public void build_simple_freestyle_mavengoals_project() {
+        final FreeStyleJob job = setupFreestyleJobWithMavenGoals("/checkstyle_plugin/sample_checkstyle_project", "clean package checkstyle:checkstyle", CheckstylePublisher.class, "target/checkstyle-result.xml");
+        Build lastBuild = buildJobWithSuccess(job);
+        assertThat(lastBuild, hasAction("Checkstyle Warnings"));
+        lastBuild.open();
+        CheckstyleAction checkstyle = new CheckstyleAction(job);
+        assertThat(checkstyle.getNewWarningNumber(), is(12));
     }
 
     /**
@@ -237,8 +244,8 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
         final MavenModuleSet job = setupSimpleMavenJob(buildConfigurator);
         buildJobAndWait(job).shouldFail();
     }
-	
-	/**
+
+    /**
      * Builds a job on a slave with checkstyle and verifies that the information checkstyle provides in the tabs about the build
      * are the information we expect.
      */

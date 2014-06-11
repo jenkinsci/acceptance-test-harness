@@ -1,13 +1,15 @@
 package org.jenkinsci.test.acceptance.po;
 
-import org.jenkinsci.test.acceptance.Matcher;
-import org.jenkinsci.test.acceptance.slave.SlaveController;
-
-import com.google.common.base.Joiner;
-
 import java.io.File;
+import java.io.IOException;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
+
+import org.jenkinsci.test.acceptance.Matcher;
+import org.jenkinsci.test.acceptance.slave.SlaveController;
+import org.jenkinsci.utils.process.CommandBuilder;
+
+import com.google.common.base.Joiner;
 
 /**
  * A slave page object.
@@ -81,6 +83,7 @@ public abstract class Slave extends Node {
      * call this in the context of the config UI
      */
     public void asLocal() {
+        assertCurl();
         File jar = new File("/tmp/slave"+createRandomName()+".jar");
         find(by.option("hudson.slaves.CommandLauncher")).click();
         find(by.input("_.command")).sendKeys(String.format(
@@ -88,6 +91,18 @@ public abstract class Slave extends Node {
                 jar, url("../../")
         ));
 
+    }
+
+    // TODO: check if the installation could be achieved without curl
+    private void assertCurl() {
+        try {
+            if (new CommandBuilder("which", "curl").system() != 0) {
+                throw new IllegalStateException("curl is required to run tests that run on local slaves.");
+            }
+        }
+        catch (IOException | InterruptedException e) {
+            // ignore and assume that curl is installed
+        }
     }
 
     public static Matcher<Slave> runBuildsInOrder(final Job... jobs) {

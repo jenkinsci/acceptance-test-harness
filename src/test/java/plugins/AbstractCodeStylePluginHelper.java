@@ -9,6 +9,7 @@ import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginMavenBuildConfigurator;
 import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginMavenBuildSettings;
 import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginPostBuildStep;
+import org.jenkinsci.test.acceptance.plugins.maven.MavenBuildStep;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.po.Build;
@@ -105,6 +106,28 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
         job.setLabelExpression(slave.getName());
         job.save();
         return slave;
+    }
+
+    /**
+     * Setup a freestyle build with maven goals.
+     * @param resourceProjectDir A Folder in resources which shall be copied to the working directory.
+     * @param goal The maven goals to set.
+     * @param publisherClass Publisher to add
+     * @param publisherPattern Publisher pattern to set
+     * @return The configured job.
+     */
+    public <T extends AbstractCodeStylePluginPostBuildStep> FreeStyleJob setupFreestyleJobWithMavenGoals(String resourceProjectDir, String goal, Class<T> publisherClass, String publisherPattern) {
+        MavenInstallation.ensureThatMavenIsInstalled(jenkins);
+
+        final FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class);
+        job.copyDir(resource(resourceProjectDir));
+        job.addBuildStep(MavenBuildStep.class).targets.set(goal);
+
+        final T publisher = job.addPublisher(publisherClass);
+        publisher.pattern.set(publisherPattern);
+
+        job.save();
+        return job;
     }
 
     /**
