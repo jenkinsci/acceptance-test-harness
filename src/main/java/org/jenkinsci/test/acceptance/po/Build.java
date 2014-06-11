@@ -1,13 +1,6 @@
 package org.jenkinsci.test.acceptance.po;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.regex.Pattern;
-
+import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.Description;
 import org.jenkinsci.test.acceptance.Matcher;
@@ -16,10 +9,16 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.regex.Pattern;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -54,9 +53,8 @@ public class Build extends ContainerPageObject {
      * "Casts" this object into a subtype by creating the specified type
      */
     public <T extends Build> T as(Class<T> type) {
-        if (type.isInstance(this)) {
+        if (type.isInstance(this))
             return type.cast(this);
-        }
         return newInstance(type, job, url);
     }
 
@@ -71,14 +69,13 @@ public class Build extends ContainerPageObject {
             public Boolean call() {
                 return hasStarted();
             }
-        },timeout);
+        }, timeout);
         return this;
     }
 
     public boolean hasStarted() {
-        if (result != null) {
+        if (result != null)
             return true;
-        }
 
         try {
             getJson();
@@ -110,12 +107,8 @@ public class Build extends ContainerPageObject {
     }
 
     public boolean isInProgress() {
-        if (result != null) {
-            return false;
-        }
-        if (!hasStarted()) {
-            return false;
-        }
+        if (result != null) return false;
+        if (!hasStarted()) return false;
 
         JsonNode d = getJson();
         return d.get("building").booleanValue() || d.get("result") == null;
@@ -129,25 +122,16 @@ public class Build extends ContainerPageObject {
         return url("consoleFull");
     }
 
-    public URL getStatusUrl() { return url(Integer.toString(getNumber())); }
-
-    public void openStatusPage() {
-        visit(getStatusUrl());
-    }
-
     public String getConsole() {
-        if (console != null) {
-            return console;
-        }
+        if (console != null) return console;
 
         visit(getConsoleUrl());
 
         List<WebElement> a = all(by.xpath("//pre"));
-        if (a.size() > 1) {
+        if (a.size() > 1)
             console = find(by.xpath("//pre[@id='out']")).getText();
-        } else {
+        else
             console = a.get(0).getText();
-        }
 
         return console;
     }
@@ -174,9 +158,7 @@ public class Build extends ContainerPageObject {
     }
 
     public String getResult() {
-        if (result != null) {
-            return result;
-        }
+        if (result != null) return result;
 
         waitUntilFinished();
         result = getJson().get("result").asText();
@@ -192,7 +174,7 @@ public class Build extends ContainerPageObject {
         List<WebElement> fileList = artifact.findElements(By.cssSelector("table.fileList td:nth-child(2) a"));
         List<Artifact> list = new LinkedList<>();
         for (WebElement el : fileList) {
-            if("a".equalsIgnoreCase(el.getTagName())) {
+            if ("a".equalsIgnoreCase(el.getTagName())) {
                 list.add(getArtifact(el.getText()));
             }
         }
@@ -203,10 +185,7 @@ public class Build extends ContainerPageObject {
         assertThat(this, resultIs("SUCCESS"));
         return this;
     }
-    public Build shouldUnstable() {
-        assertThat(this, resultIs("UNSTABLE"));
-        return this;
-    }
+
     public Build shouldFail() {
         assertThat(this, resultIs("FAILURE"));
         return this;
@@ -240,9 +219,7 @@ public class Build extends ContainerPageObject {
 
     public String getNode() {
         String n = getJson().get("builtOn").asText();
-        if (n.length() == 0) {
-            return "master";
-        }
+        if (n.length() == 0) return "master";
         return n;
     }
 
