@@ -14,6 +14,7 @@ import org.jenkinsci.test.acceptance.po.Changes;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
