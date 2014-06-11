@@ -1,19 +1,18 @@
 package org.jenkinsci.test.acceptance.controller;
 
-import java.io.Closeable;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.URL;
-
+import com.cloudbees.sdk.extensibility.ExtensionPoint;
+import com.google.inject.Injector;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.jenkinsci.test.acceptance.guice.AutoCleaned;
 
-import com.cloudbees.sdk.extensibility.ExtensionPoint;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URL;
 
 /**
  * Starts/stops Jenkins and exposes where it is running.
@@ -23,10 +22,10 @@ import com.cloudbees.sdk.extensibility.ExtensionPoint;
  * which is determined at runtime by the user who runs the tests, not by the author
  * of tests.
  *
- * @author: Vivek Pandey
+ * @author Vivek Pandey
  */
 @ExtensionPoint
-public abstract class JenkinsController implements Closeable, AutoCleaned {
+public abstract class JenkinsController implements IJenkinsController, AutoCleaned {
     /**
      * directory on the computer where this code is running that points to a directory
      * where test code can place log files, cache files, etc.
@@ -57,14 +56,21 @@ public abstract class JenkinsController implements Closeable, AutoCleaned {
     }
 
     /**
+     * Called when {@link JenkinsController} is pulled into a world prior to {@link #start()}
+     */
+    public void postConstruct(Injector injector) {
+        injector.injectMembers(this);
+    }
+
+    /**
      * Starts Jenkins.
      *
      * @throws IOException
      */
     public void start() throws IOException {
-        if(!isRunning) {
+        if (!isRunning) {
             startNow();
-            this.isRunning = true;
+            isRunning = true;
         }
     }
 
@@ -80,8 +86,9 @@ public abstract class JenkinsController implements Closeable, AutoCleaned {
      * @throws IOException
      */
     public void stop() throws IOException {
-        if(isRunning) {
+        if (isRunning) {
             stopNow();
+            isRunning = false;
         }
     }
 
@@ -127,6 +134,13 @@ public abstract class JenkinsController implements Closeable, AutoCleaned {
      * Gives URL where Jenkins is listening. Must end with "/"
      */
     public abstract URL getUrl();
+
+    /**
+     * Returns the short ID used to prefix log output from the process into the test.
+     */
+    public String getLogId() {
+        return String.format("master%05d",getUrl().getPort());
+    }
 
     /**
      * Perform controller specific diagnostics for test failure. Defaults to no-op.

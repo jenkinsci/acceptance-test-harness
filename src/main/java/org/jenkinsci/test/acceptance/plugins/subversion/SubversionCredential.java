@@ -10,9 +10,11 @@ import java.util.Set;
 
 /**
  * Superclass for the different authentication methods in the SVN credential page.
+ * Only for plugin version 1.54 and older.
  *
  * @author Matthias Karl
  */
+@Deprecated
 public class SubversionCredential extends PageObject {
     public static final String BUTTON_OK = "OK";
 

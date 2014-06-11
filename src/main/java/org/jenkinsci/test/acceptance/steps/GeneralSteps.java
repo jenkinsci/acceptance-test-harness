@@ -4,8 +4,9 @@ import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -21,6 +22,7 @@ public class GeneralSteps extends AbstractSteps {
         check(find(by.xpath("//input[@name='%s']", name)));
     }
 
+    @Override
     @When("^I click the \"([^\"]*)\" button$")
     public void clickButton(String name) {
         find(by.xpath("//button[text()='%s']", name)).click();
@@ -34,7 +36,7 @@ public class GeneralSteps extends AbstractSteps {
 
     @And("^I wait for (\\d+) seconds$")
     public void I_wait_for_seconds(int n) throws Throwable {
-        Thread.sleep(n * 1000);
+        sleep(n * 1000);
     }
 
     @Then("^the error description should contain$")

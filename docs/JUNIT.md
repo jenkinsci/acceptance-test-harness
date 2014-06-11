@@ -37,6 +37,37 @@ to indicate that dependency.
 This is preferable over installing plugins via UpdateCenter/PluginManager page objects, because it'll
 allow filtering of tests based on plugins.
 
+## Marking tests for credential dependencies
+If your tests depend on specific credentials being present in the credentials plugin, put `@WithCredentials` annotation on your test method or class
+to indicate that dependency.
+
+Currently the annotation supports two different types of credentials:
+
+username/password:
+`@WithCredentials(credentialType = WithCredentials.USERNAME_PASSWORD, values = {"username", "password"})`
+
+username/sshKey:
+`@WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {"username", "/ssh_keys/unsafe"})`
+
+
+
+## Marking tests to be member of the smoke test group
+
+Since the overall test suite runs a couple of hours you can use the predefined
+set of "Smoke Tests" to get a first impression if everything is still running as expected.
+You can run the smoke tests with `mvn -DrunSmokeTests`. If you want to add a test to the set of smoke tests
+annotate the test method with the category `@Category(SmokeTest.class)`. Please make sure that the overall number
+of smoke tests is small, e.g. not more than 10 tests.
+
+## Testing recent features
+
+Acceptance harness is designed to work against any version of Jenkins and its plugins.
+Testing for recently added feature causes false negatives when older version is used
+to run tests. To avoid that there is a way around this: use `@Since("X.Y")` to
+declare a version of core or `@WithPlugins("plugin@X.Y")` for plugin version.
+
+In code, one can use `Jenkins#getVersion()` or `Plugin.getVersion()` to implement
+version agnostic page objects.
 
 ## Marking tests for immutablility
 TODO

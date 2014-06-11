@@ -2,15 +2,23 @@ package org.jenkinsci.test.acceptance.po;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Injector;
-
 import groovy.lang.Closure;
+import org.apache.commons.lang3.StringUtils;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 /**
  * {@link PageObject} that represents a model that has multiple views underneath.
@@ -20,12 +28,13 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
 public abstract class ContainerPageObject extends PageObject {
     protected ContainerPageObject(Injector injector, URL url) {
         super(injector, url);
-        if (!url.toExternalForm().endsWith("/"))
-            throw new IllegalArgumentException("URL should end with '/': "+url);
+        if (!url.toExternalForm().endsWith("/")) {
+            throw new IllegalArgumentException("URL should end with '/': " + url);
+        }
     }
 
     protected ContainerPageObject(PageObject context, URL url) {
-        this(context.injector,url);
+        this(context.injector, url);
     }
 
     public void configure(Closure body) {
@@ -45,7 +54,15 @@ public abstract class ContainerPageObject extends PageObject {
         }
     }
 
+    /**
+     * Open configuration page if not yet opened.
+     *
+     * @see #getConfigUrl()
+     */
     public void configure() {
+        if (driver.getCurrentUrl().equals(getConfigUrl().toExternalForm())) {
+            return;
+        }
         visit(getConfigUrl());
     }
 
@@ -77,17 +94,24 @@ public abstract class ContainerPageObject extends PageObject {
     }
 
     /**
-     * @param queryString
-     *      Additional query string to narrow down the data retrieval, like "tree=..." or "depth=..."
+     * @param queryString Additional query string to narrow down the data retrieval, like "tree=..." or "depth=..."
      */
     public JsonNode getJson(String queryString) {
+
         URL url = getJsonApiUrl();
         try {
-            if (queryString!=null)
-                url = new URL(url+"?"+queryString);
-            return jsonParser.readTree(url);
+            if (queryString != null) {
+                url = new URL(url + "?" + queryString);
+            }
+
+            // Pass in all the cookies (in particular the session cookie.)
+            // This ensures that the API call sees what the current user sees.
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setRequestProperty("Cookie", StringUtils.join(driver.manage().getCookies(), ";"));
+
+            return jsonParser.readTree(con.getInputStream());
         } catch (IOException e) {
-            throw new RuntimeException("Failed to read from "+ url,e);
+            throw new RuntimeException("Failed to read from " + url, e);
         }
     }
 
@@ -106,10 +130,29 @@ public abstract class ContainerPageObject extends PageObject {
 
         T instance = newInstance(type, this, path);
 
-        if (!instance.isApplicable(this)) throw new AssertionError(
-                "Action can not be attached to " + getClass().getCanonicalName()
-        );
+        if (!instance.isApplicable(this)) {
+            throw new AssertionError(
+                    "Action can not be attached to " + getClass().getCanonicalName()
+            );
+        }
 
         return instance;
+    }
+
+    /**
+     * Get a map with all links within the navigation area.
+     * The key contains the href attribute while the value contains the link text.
+     *
+     * @return A map with all links within the navigation area.
+     */
+    public Map<String, String> getNavigationLinks() {
+        open();
+        final Map<String, String> links = new HashMap<>();
+        List<WebElement> elementLinks = all(By.cssSelector("div#navigation a.task-link"));
+
+        for (WebElement element : elementLinks) {
+            links.put(element.getAttribute("href"), element.getText());
+        }
+        return links;
     }
 }

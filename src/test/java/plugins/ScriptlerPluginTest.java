@@ -23,12 +23,7 @@
  */
 package plugins;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.nullValue;
-
-import java.util.HashMap;
-
+import com.google.inject.Inject;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
@@ -40,7 +35,10 @@ import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.google.inject.Inject;
+import java.util.HashMap;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 @WithPlugins("scriptler")
 public class ScriptlerPluginTest extends AbstractJUnitTest {
@@ -82,8 +80,8 @@ public class ScriptlerPluginTest extends AbstractJUnitTest {
 
         params.delete();
 
-        assertTrue(simple.exists());
-        assertFalse(params.exists());
+        assertThat(simple.exists(), is(true));
+        assertThat(params.exists(), is(false));
     }
 
     @Test

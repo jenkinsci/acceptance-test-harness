@@ -23,18 +23,19 @@
  */
 package org.jenkinsci.test.acceptance.plugins.audit_trail;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.apache.commons.io.IOUtils;
+import org.jenkinsci.test.acceptance.po.GlobalPluginConfiguration;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.JenkinsLogger;
 import org.jenkinsci.test.acceptance.po.PageArea;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 abstract public class AuditTrailLogger extends JenkinsLogger {
 
@@ -45,15 +46,20 @@ abstract public class AuditTrailLogger extends JenkinsLogger {
     }
 
     public static AuditTrailLogger create(Jenkins jenkins) {
-        SystemLogger logger = new SystemLogger(jenkins);
-        logger.open();
+        if (jenkins.getPlugin("audit-trail").isNewerThan("2.0")) {
+            return new ExposedFile(jenkins);
+        }
 
-        try {
-            logger.waitFor(by.xpath("//h1[text()='%s']", logger.name));
-            return logger;
-        } catch (TimeoutException ex) {} // TODO: Using plugin version would be faster
+        final SystemLogger logger = new SystemLogger(jenkins);
 
-        return new ExposedFile(jenkins);
+        logger.waitForCond(new Callable<WebElement>() {
+            @Override
+            public WebElement call() throws Exception {
+                logger.open();
+                return logger.getElement(by.xpath("//h1[text()='%s']", logger.name));
+            }
+        });
+        return logger;
     }
 
     public abstract List<String> getEvents();
@@ -73,7 +79,9 @@ abstract public class AuditTrailLogger extends JenkinsLogger {
             List<String> events = new ArrayList<>();
             for (WebElement e : all(by.css("#main-panel pre"))) {
                 Matcher m = LOG_PATTERN.matcher(e.getText());
-                if (!m.matches())    continue; // Earlier versions used one element per log entry newer use two
+                if (!m.matches()) {
+                    continue; // Earlier versions used one element per log entry newer use two
+                }
                 events.add(m.group(1));
             }
             return events;
@@ -82,7 +90,7 @@ abstract public class AuditTrailLogger extends JenkinsLogger {
 
     /**
      * Expose file through /userContent/ and wrap in Logger.
-     *
+     * <p/>
      * Traditional logger in no longer created after Audit Trail 2.0
      */
     private static class ExposedFile extends AuditTrailLogger {
@@ -92,13 +100,13 @@ abstract public class AuditTrailLogger extends JenkinsLogger {
 
             String logfile = jenkins.runScript(
                     "def log = new File(Jenkins.instance.rootDir, 'userContent/audit-trail.log');" +
-                    "log.createNewFile();" +
-                    "println log.absolutePath;"
+                            "log.createNewFile();" +
+                            "println log.absolutePath;"
             );
 
             jenkins.configure();
-            PageArea area = new PageArea(jenkins.getConfigPage(), "/jenkins-model-GlobalPluginConfiguration/plugin") {};
-            area.selectDropdownMenu("Log file", area.control("hetero-list-add[loggers]").resolve());
+            AuditTrailGlobalConfiguration area = new AuditTrailGlobalConfiguration(jenkins);
+            area.addLogger.selectDropdownMenu("Log file");
 
             area.control("loggers/log").set(logfile);
             area.control("loggers/limit").set(10);
@@ -120,14 +128,15 @@ abstract public class AuditTrailLogger extends JenkinsLogger {
         public List<String> getEvents() {
             try {
                 List<String> events = new ArrayList<>();
-                for (String line: (List<String>) IOUtils.readLines(url.openStream())) {
+                for (String line : (List<String>) IOUtils.readLines(url.openStream())) {
                     Matcher m = LOG_PATTERN.matcher(line);
                     m.find();
                     events.add(m.group(1));
                 }
 
                 return events;
-            } catch (IOException ex) {
+            }
+            catch (IOException ex) {
                 throw new AssertionError("Audit trail log not exposed", ex);
             }
         }
@@ -135,7 +144,8 @@ abstract public class AuditTrailLogger extends JenkinsLogger {
         private String getContent() {
             try {
                 return IOUtils.toString(url.openStream());
-            } catch (IOException ex) {
+            }
+            catch (IOException ex) {
                 throw new AssertionError("Audit trail log not exposed", ex);
             }
         }

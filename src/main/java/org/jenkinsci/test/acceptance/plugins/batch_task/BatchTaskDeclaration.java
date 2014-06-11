@@ -1,13 +1,13 @@
 package org.jenkinsci.test.acceptance.plugins.batch_task;
 
 import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.PageArea;
+import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.openqa.selenium.WebElement;
 
 /**
  * @author Kohsuke Kawaguchi
  */
-public class BatchTaskDeclaration extends PageArea {
+public class BatchTaskDeclaration extends PageAreaImpl {
     private static final String PREFIX = "/properties/hudson-plugins-batch_task-BatchTaskProperty/on";
 
     private String name;
@@ -17,13 +17,14 @@ public class BatchTaskDeclaration extends PageArea {
         WebElement checkbox = job.find(by.path(PREFIX));
         if (!checkbox.isSelected()) {
             checkbox.click();
-        } else {
+        }
+        else {
             job.clickButton("Add another task...");
             job.sleep(1000);
         }
 
         String p = job.last(by.input("batch-task.name")).getAttribute("path");
-        String path_prefix = p.substring(0,p.length()-5); // trim off '/name'
+        String path_prefix = p.substring(0, p.length() - 5); // trim off '/name'
 
         BatchTaskDeclaration b = new BatchTaskDeclaration(job, path_prefix);
         b.setName(name);
@@ -45,6 +46,6 @@ public class BatchTaskDeclaration extends PageArea {
     }
 
     public BatchTask getTask() {
-        return new BatchTask(job,name);
+        return new BatchTask(job, name);
     }
 }

@@ -23,15 +23,10 @@
  */
 package org.jenkinsci.test.acceptance.plugins.post_build_script;
 
-import org.jenkinsci.test.acceptance.po.Control;
-import org.jenkinsci.test.acceptance.po.Describable;
-import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.PostBuildStep;
-import org.jenkinsci.test.acceptance.po.Step;
-import org.openqa.selenium.WebElement;
+import org.jenkinsci.test.acceptance.po.*;
 
 @Describable({"Execute a set of scripts", "[PostBuildScript] - Execute a set of scripts"})
-public class PostBuildScript extends PostBuildStep {
+public class PostBuildScript extends AbstractStep implements PostBuildStep {
     private final Control whenSucceeded = control("scriptOnlyIfSuccess");
     private final Control whenFailed = control("scriptOnlyIfFailure");
 
@@ -40,16 +35,8 @@ public class PostBuildScript extends PostBuildStep {
     }
 
     public <T extends Step> T addStep(Class<T> type) {
-
-        final WebElement dropDown = control("hetero-list-add[buildStep]").resolve();
-        findCaption(type, new Resolver() {
-            @Override protected void resolve(String caption) {
-                selectDropdownMenu(caption, dropDown);
-            }
-        });
-
+        control("hetero-list-add[buildStep]").selectDropdownMenu(type);
         String path = last(by.xpath("//div[@name='buildStep']")).getAttribute("path");
-
         return newInstance(type, parent, path);
     }
 

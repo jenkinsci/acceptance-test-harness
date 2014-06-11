@@ -1,37 +1,32 @@
 package org.jenkinsci.test.acceptance.po;
 
+import org.jenkinsci.test.acceptance.junit.Resource;
+import org.openqa.selenium.*;
+
 import com.google.inject.Injector;
 
-import org.jenkinsci.test.acceptance.junit.Resource;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.WebElement;
-
-import java.security.acl.Owner;
+import javax.annotation.Nullable;
 
 /**
- * Wraps a specific form element in {@link PageArea} to provide operations.
- *
+ * Wraps a specific form element in {@link PageAreaImpl} to provide operations.
+ * <p/>
  * {@link Control} is like a {@link WebElement}, but with the following key differences:
- *
- * <ul>
- * <li>{@link Control} is late binding, and the underlying {@link WebElement} is resolved only when
- *     an interaction with control happens. This allows {@link Control}s to be instantiated earlier
- *     (typically when a {@link PageObject} subtype is instantiated.)
- * <li>{@link Control} offers richer methods to interact with a form element, making the right code easier to write.
- * </ul>
- *
- * See {@link PageArea} subtypes for typical usage.
+ * <p/>
+ * <ul> <li>{@link Control} is late binding, and the underlying {@link WebElement} is resolved only when an interaction
+ * with control happens. This allows {@link Control}s to be instantiated earlier (typically when a {@link PageObject}
+ * subtype is instantiated.) <li>{@link Control} offers richer methods to interact with a form element, making the right
+ * code easier to write. </ul>
+ * <p/>
+ * See {@link PageAreaImpl} subtypes for typical usage.
  *
  * @author Kohsuke Kawaguchi
- * @see PageArea#control(String...)
+ * @see PageAreaImpl#control(String...)
  */
-public class Control extends CapybaraPortingLayer {
+public class Control extends CapybaraPortingLayerImpl {
     private final Owner parent;
     private final String[] relativePaths;
 
-    public Control(PageArea parent, String... relativePaths) {
+    public Control(PageAreaImpl parent, String... relativePaths) {
         super(parent.injector);
         this.parent = parent;
         this.relativePaths = relativePaths;
@@ -64,10 +59,11 @@ public class Control extends CapybaraPortingLayer {
 
     public WebElement resolve() {
         NoSuchElementException problem = new NoSuchElementException("No relative path specified!");
-        for(String p : relativePaths) {
+        for (String p : relativePaths) {
             try {
                 return find(parent.path(p));
-            } catch (NoSuchElementException e) {
+            }
+            catch (NoSuchElementException e) {
                 problem = e;
             }
         }
@@ -83,26 +79,104 @@ public class Control extends CapybaraPortingLayer {
     }
 
     public void check() {
-        check(resolve(),true);
+        check(resolve(), true);
     }
 
     public void check(boolean state) {
-        check(resolve(),state);
+        check(resolve(), state);
     }
 
     public void click() {
         resolve().click();
     }
 
-    public void set(String text) {
+    /**
+     * The existing {@link org.jenkinsci.test.acceptance.po.Control#set(String)}
+     * method has shortcomings regarding large strings because it utilizes
+     * the sendKeys mechanism to enter the string which takes a significant amount
+     * of time, i.e. the browser may consider the script to be unresponsive.
+     *
+     * This method method shall provide a high throughput mechanism which
+     * puts the whole string at once into the text field instead of char by char.
+     *
+     * This is a solution / workaround published for Selenium Issue 4496:
+     * https://code.google.com/p/selenium/issues/detail?id=4469
+     *
+     * @param text the large string to be entered
+     */
+
+    public void setAtOnce(String text){
         WebElement e = resolve();
         e.clear();
-        e.sendKeys(text);
+        ((JavascriptExecutor)driver).executeScript("arguments[0].value = arguments[1];", e, text);
+    }
+
+
+    /**
+     * Sets the value of the input field to the specified text.
+     *
+     * Any existing value gets cleared.
+     */
+    public void set(@Nullable String text) {
+        //if the text is longer than 255 characters, use the high throughput variant
+        if (text!=null && text.length() > 255)
+            setAtOnce(text);
+        else {
+            WebElement e = resolve();
+            e.clear();
+            e.sendKeys(text);
+        }
     }
 
     public void set(Object text) {
         set(text.toString());
     }
+
+    /**
+     * Clicks a menu button, and selects the matching item from the drop down
+     *
+     * @param type
+     *      Class with {@link Describable} annotation.
+     */
+    public void selectDropdownMenu(Class type) {
+        click();
+        findCaption(type,findDropDownMenuItem).click();
+        sleep(1000);
+    }
+
+    public void selectDropdownMenu(String displayName) {
+        click();
+        findDropDownMenuItem.find(displayName).click();
+        sleep(1000);
+    }
+
+    /**
+     * Given a menu button that shows a list of build steps, select the right item from the menu
+     * to insert the said build step.
+     */
+    private Finder<WebElement> findDropDownMenuItem = new Finder<WebElement>() {
+        @Override
+        protected WebElement find(String caption) {
+            WebElement menuButton = resolve();
+
+            // With enough implementations registered the one we are looking for might
+            // require scrolling in menu to become visible. This dirty hack stretch
+            // yui menu so that all the items are visible.
+            executeScript("" +
+                            "YAHOO.util.Dom.batch(" +
+                            "    document.querySelector('.yui-menu-body-scrolled')," +
+                            "    function (el) {" +
+                            "        el.style.height = 'auto';" +
+                            "        YAHOO.util.Dom.removeClass(el, 'yui-menu-body-scrolled');" +
+                            "    }" +
+                            ");"
+            );
+
+            WebElement context = menuButton.findElement(by.xpath("ancestor::*[contains(@class,'yui-menu-button')]/.."));
+            WebElement e = context.findElement(by.link(caption));
+            return e;
+        }
+    };
 
     /**
      * Select an option.

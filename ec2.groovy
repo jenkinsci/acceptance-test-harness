@@ -45,7 +45,7 @@ masters = subworld {
 }
 
 joc = subworld {
-    bind JenkinsController toInstance new WinstoneController(localWar, JenkinsController.downloadPathElement())
+    bind JenkinsController toInstance new WinstoneController(localWar)
 }
 
 bind SlaveProvider toProvider slaves[SshSlaveProvider]

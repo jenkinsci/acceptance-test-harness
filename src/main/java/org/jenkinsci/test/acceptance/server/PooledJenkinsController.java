@@ -1,32 +1,42 @@
 package org.jenkinsci.test.acceptance.server;
 
-import static java.lang.System.getenv;
-import static java.lang.System.in;
-import static java.lang.System.out;
-
 import com.cloudbees.sdk.extensibility.Extension;
+
+import hudson.remoting.Callable;
+import hudson.remoting.Channel;
+import hudson.remoting.Channel.Mode;
+import hudson.remoting.ChannelBuilder;
 import jnr.unixsocket.UnixSocketAddress;
 import jnr.unixsocket.UnixSocketChannel;
+
+import org.jenkinsci.test.acceptance.controller.IJenkinsController;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.LocalController.LocalFactoryImpl;
+import org.jenkinsci.test.acceptance.log.LogListenable;
+import org.jenkinsci.test.acceptance.log.LogListener;
+import org.jenkinsci.test.acceptance.log.LogPrinter;
+import org.jenkinsci.test.acceptance.log.LogSplitter;
+import org.jenkinsci.test.acceptance.log.LoggingController;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.URL;
-import java.nio.channels.Channels;
+import java.util.concurrent.Executors;
+
+import static java.lang.System.*;
 
 /**
+ * {@link JenkinsController} that talks to {@link JenkinsControllerPoolProcess} over Unix domain socket.
+ *
  * @author Kohsuke Kawaguchi
  */
-public class PooledJenkinsController extends JenkinsController {
+public class PooledJenkinsController extends JenkinsController implements LogListenable {
     private URL url;
     private final File socket;
-    private UnixSocketChannel channel;
-    private PrintWriter w;
-    private BufferedReader r;
+    private UnixSocketChannel conn;
+    private final LogSplitter splitter = new LogSplitter();
+    private Channel channel;
+    private IJenkinsController controller;
 
     public PooledJenkinsController(File socket) {
         this.socket = socket;
@@ -36,15 +46,38 @@ public class PooledJenkinsController extends JenkinsController {
         this(JenkinsControllerPoolProcess.SOCKET);
     }
 
+    @Override
+    public void addLogListener(LogListener l) {
+        splitter.addLogListener(l);
+    }
+
+    @Override
+    public void removeLogListener(LogListener l) {
+        splitter.removeLogListener(l);
+    }
+
     private boolean connect() throws IOException {
-        if (channel!=null)      return false;
+        if (conn !=null)      return false;
 
         UnixSocketAddress address = new UnixSocketAddress(socket);
-        channel = UnixSocketChannel.open(address);
-        w = new PrintWriter(Channels.newOutputStream(channel),true);
-        r = new BufferedReader(new InputStreamReader(Channels.newInputStream(channel)));
+        conn = UnixSocketChannel.open(address);
 
-        url = new URL(r.readLine());
+        channel = new ChannelBuilder("JenkinsPool", Executors.newCachedThreadPool())
+                .withMode(Mode.BINARY)
+                .build(ChannelStream.in(conn), ChannelStream.out(conn));
+
+        try {
+            controller = (IJenkinsController)channel.waitForRemoteProperty("controller");
+            url = controller.getUrl();
+
+            splitter.addLogListener(new LogPrinter(getLogId()));
+
+            final LogListener l = channel.export(LogListener.class, splitter);
+            channel.call(new InstallLogger(controller,l));
+
+        } catch (InterruptedException e) {
+            throw new IOException(e);
+        }
 
         return true;
     }
@@ -52,13 +85,13 @@ public class PooledJenkinsController extends JenkinsController {
     @Override
     public void startNow() throws IOException {
         if (!connect()) {
-            w.println("start");
+            controller.start();
         }
     }
 
     @Override
     public void stopNow() throws IOException {
-        w.println("stop");
+        controller.stop();
     }
 
     @Override
@@ -75,13 +108,16 @@ public class PooledJenkinsController extends JenkinsController {
 
     @Override
     public void tearDown() throws IOException {
-        if (w!=null)
-            w.close();
-        if (r!=null)
-            r.close();
-        if (channel!=null)
-            channel.close();
-        channel = null;
+        channel.close();
+        try {
+            channel.join(3000);
+        } catch (InterruptedException e) {
+            throw new IOException(e);
+        } finally {
+            if (conn !=null)
+                conn.close();
+            conn = null;
+        }
     }
 
     @Override
@@ -110,5 +146,29 @@ public class PooledJenkinsController extends JenkinsController {
         public JenkinsController create() {
             return new PooledJenkinsController();
         }
+    }
+
+    /**
+     * Runs on the pool server to install logger.
+     */
+    private static class InstallLogger implements Callable<Void, IOException> {
+        private final IJenkinsController controller;
+        private final LogListener l;
+
+        private InstallLogger(IJenkinsController controller, LogListener l) {
+            this.controller = controller;
+            this.l = l;
+        }
+
+        @Override
+        public Void call() throws IOException {
+            if (controller instanceof LoggingController) {
+                LoggingController lc = (LoggingController) controller;
+                lc.getLogWatcher().addLogListener(l);
+            }
+            return null;
+        }
+
+        private static final long serialVersionUID = 1L;
     }
 }

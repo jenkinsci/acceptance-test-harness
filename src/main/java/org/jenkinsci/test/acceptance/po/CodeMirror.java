@@ -27,39 +27,41 @@ import org.openqa.selenium.JavascriptExecutor;
 
 /**
  * Encapsulate CodeMirror wizardry.
+ *
  * @author ogondza
  */
-public class CodeMirror extends PageArea {
+public class CodeMirror extends PageAreaImpl {
     public CodeMirror(PageObject context, String path) {
         super(context, path);
     }
 
-    public CodeMirror(PageArea area, String relativePath) {
+    public CodeMirror(PageAreaImpl area, String relativePath) {
         super(area, relativePath);
     }
 
     public void set(String content) {
-        if (!(driver instanceof JavascriptExecutor)) throw new AssertionError(
-                "JavaScript execution not supported"
-        );
+        if (!(driver instanceof JavascriptExecutor)) {
+            throw new AssertionError(
+                    "JavaScript execution not supported"
+            );
+        }
 
         // can't use find() because it wants a visible element
-        driver.findElement(by.xpath("//*[@path='%s']", path));    // wait until the element in question appears in DOM
+        driver.findElement(by.xpath("//*[@path='%s']", getPath()));    // wait until the element in question appears in DOM
 
-        executeScript(script, String.format("//*[@path='%s']", path), content);
+        executeScript(script, String.format("//*[@path='%s']", getPath()), content);
     }
 
     private static final String script =
             "textarea = document.evaluate(" +
-            "        arguments[0], document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null" +
-            ").singleNodeValue;" +
-            "codemirror = textarea.codemirrorObject;" +
-            "if (codemirror == null) {" +
-            "    console.log('creating');" +
-            "    codemirror = CodeMirror.fromTextArea(textarea);" +
-            "}" +
-            "codemirror.setValue(arguments[1]);" +
-            // This is necessary to avoid random content loss in GroovyPluginTest#use_custom_groovy_version
-            "codemirror.save();"
-    ;
+                    "        arguments[0], document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null" +
+                    ").singleNodeValue;" +
+                    "codemirror = textarea.codemirrorObject;" +
+                    "if (codemirror == null) {" +
+                    "    console.log('creating');" +
+                    "    codemirror = CodeMirror.fromTextArea(textarea);" +
+                    "}" +
+                    "codemirror.setValue(arguments[1]);" +
+                    // This is necessary to avoid random content loss in GroovyPluginTest#use_custom_groovy_version
+                    "codemirror.save();";
 }

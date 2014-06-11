@@ -31,6 +31,10 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.ShellBuildStep;
 import org.junit.Test;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.is;
+
 @WithPlugins("jobConfigHistory")
 public class JobConfigHistoryPluginTest extends AbstractJUnitTest {
 
@@ -43,8 +47,8 @@ public class JobConfigHistoryPluginTest extends AbstractJUnitTest {
 
         job.action(JobConfigHistory.class).open();
         assertThat(driver, Matchers.hasContent("Created"));
-        assertTrue(all(by.xpath("//tr//a[contains(text(),'View as XML')]")).size() > 2);
-        assertTrue(all(by.xpath("//tr//a[contains(text(),'(RAW)')]")).size() > 2);
+        assertThat(all(by.xpath("//tr//a[contains(text(),'View as XML')]")).size(), is(greaterThan(2)));
+        assertThat(all(by.xpath("//tr//a[contains(text(),'(RAW)')]")).size(), is(greaterThan(2)));
     }
 
     @Test

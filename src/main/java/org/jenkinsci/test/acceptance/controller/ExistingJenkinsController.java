@@ -26,13 +26,11 @@ import com.cloudbees.sdk.extensibility.Extension;
 public class ExistingJenkinsController extends JenkinsController {
     private final URL uploadUrl;
     private final URL url;
-    private final File formElementsPathFile;
 
-    public ExistingJenkinsController(String url, final File formElementsPathFile) {
+    public ExistingJenkinsController(String url) {
         try {
             this.url = new URL(url);
             this.uploadUrl = new URL(url + "/pluginManager/api/xml");
-            this.formElementsPathFile = formElementsPathFile;
         } catch (IOException e) {
             throw new AssertionError("Invalid URL: "+url,e);
         }
@@ -92,7 +90,7 @@ public class ExistingJenkinsController extends JenkinsController {
     }
 
     @Extension
-    public static class FactoryImpl extends AbstractJenkinsControllerFactory {
+    public static class FactoryImpl implements JenkinsControllerFactory {
         @Override
         public String getId() {
             return "existing";
@@ -103,7 +101,7 @@ public class ExistingJenkinsController extends JenkinsController {
             String url = System.getenv("JENKINS_URL");
             if (url==null)  url = "http://localhost:8080/";
 
-            return new ExistingJenkinsController(url, getFormElementsPathFile());
+            return new ExistingJenkinsController(url);
         }
     }
 }

@@ -12,7 +12,7 @@ public interface JenkinsControllerFactory {
     /**
      * Unique short name that distinguishes this controller from others.
      *
-     * User can select the factory by specifying its ID to the "type" environment variable.
+     * User can select the factory by specifying its ID to the "TYPE" environment variable.
      */
     String getId();
 

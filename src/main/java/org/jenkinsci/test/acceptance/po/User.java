@@ -29,6 +29,7 @@ public class User extends ContainerPageObject {
 
     private String id;
     private String fullName;
+    private String mail;
 
     public User(Jenkins context, String name) {
         super(context, context.url("user/%s/", name));
@@ -36,6 +37,16 @@ public class User extends ContainerPageObject {
         JsonNode json = getJson();
         id = json.get("id").asText();
         fullName = json.get("fullName").asText();
+        JsonNode property = json.get("property");
+        if (property != null) {
+            if (property.isArray()) {
+                for (JsonNode propertyNodes : property) {
+                    if (propertyNodes.get("address") != null) {
+                        mail = propertyNodes.get("address").asText();
+                    }
+                }
+            }
+        }
     }
 
     public String id() {
@@ -44,6 +55,10 @@ public class User extends ContainerPageObject {
 
     public String fullName() {
         return fullName;
+    }
+
+    public String mail() {
+        return mail;
     }
 
     @Override

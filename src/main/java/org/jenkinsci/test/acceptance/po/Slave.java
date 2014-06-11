@@ -1,12 +1,15 @@
 package org.jenkinsci.test.acceptance.po;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.Callable;
+import java.util.regex.Pattern;
+
 import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
+import org.jenkinsci.utils.process.CommandBuilder;
 
 import com.google.common.base.Joiner;
-
-import java.io.File;
-import java.util.regex.Pattern;
 
 /**
  * A slave page object.
@@ -33,6 +36,23 @@ public abstract class Slave extends Node {
         return !isOffline();
     }
 
+    /**
+     * Waits for a slave to come online before proceeding.
+     * @see #isOnline
+     */
+    public Slave waitUntilOnline() {
+        waitForCond(new Callable<Boolean>() {
+            @Override public Boolean call() throws Exception {
+                return isOnline();
+            }
+
+            @Override public String toString() {
+                return "Slave is online";
+            }
+        });
+        return this;
+    }
+
     public boolean isOffline() {
         return getJson().get("offline").asBoolean();
     }
@@ -55,7 +75,6 @@ public abstract class Slave extends Node {
     }
 
     public void setLabels(String l) {
-        ensureConfigPage();
         find(by.path("/labelString")).sendKeys(l);
     }
 
@@ -64,6 +83,7 @@ public abstract class Slave extends Node {
      * call this in the context of the config UI
      */
     public void asLocal() {
+        assertCurl();
         File jar = new File("/tmp/slave"+createRandomName()+".jar");
         find(by.option("hudson.slaves.CommandLauncher")).click();
         find(by.input("_.command")).sendKeys(String.format(
@@ -71,6 +91,18 @@ public abstract class Slave extends Node {
                 jar, url("../../")
         ));
 
+    }
+
+    // TODO: check if the installation could be achieved without curl
+    private void assertCurl() {
+        try {
+            if (new CommandBuilder("which", "curl").system() != 0) {
+                throw new IllegalStateException("curl is required to run tests that run on local slaves.");
+            }
+        }
+        catch (IOException | InterruptedException e) {
+            // ignore and assume that curl is installed
+        }
     }
 
     public static Matcher<Slave> runBuildsInOrder(final Job... jobs) {
@@ -91,5 +123,37 @@ public abstract class Slave extends Node {
                 ;
             }
         };
+    }
+
+    /**
+     * If the slave is online, this method will mark it offline for testing purpose.
+     */
+    public void markOffline() {
+        markOffline("Just for testing... be right back...");
+    }
+
+    public void markOffline(String message) {
+
+        if(isOnline()) {
+            visit("");
+            clickButton("Mark this node temporarily offline");
+
+            find(by.input("offlineMessage")).clear();
+            find(by.input("offlineMessage")).sendKeys(message);
+
+            clickButton("Mark this node temporarily offline");
+        }
+    }
+
+    /**
+     * If the slave has been marked offline, this method will bring it up again
+     */
+
+    public void markOnline(){
+
+        if(isOffline()) {
+            visit("");
+            clickButton("Bring this node back online");
+        }
     }
 }

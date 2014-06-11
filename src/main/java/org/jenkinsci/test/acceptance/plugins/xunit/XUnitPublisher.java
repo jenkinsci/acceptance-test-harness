@@ -1,17 +1,12 @@
 package org.jenkinsci.test.acceptance.plugins.xunit;
 
-import org.jenkinsci.test.acceptance.po.Control;
-import org.jenkinsci.test.acceptance.po.Describable;
-import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.PageArea;
-import org.jenkinsci.test.acceptance.po.PageObject;
-import org.jenkinsci.test.acceptance.po.PostBuildStep;
+import org.jenkinsci.test.acceptance.po.*;
 
 /**
  * @author Kohsuke Kawaguchi
  */
 @Describable("Publish xUnit test result report")
-public class XUnitPublisher extends PostBuildStep {
+public class XUnitPublisher extends AbstractStep implements PostBuildStep {
     public final Control addButton = control("hetero-list-add[tools]");
 
     public XUnitPublisher(Job parent, String path) {
@@ -19,14 +14,12 @@ public class XUnitPublisher extends PostBuildStep {
     }
 
     public Tool addTool(String kind) {
-        selectDropdownMenu(kind,addButton.resolve());
-
-        String path = last(by.xpath("//div[starts-with(@path, '%s/tools')]",super.path)).getAttribute("path");
-
-        return newInstance(Tool.class, page, path);
+        addButton.selectDropdownMenu(kind);
+        String path = last(by.xpath("//div[starts-with(@path, '%s/tools')]",super.getPath())).getAttribute("path");
+        return newInstance(Tool.class, getPage(), path);
     }
 
-    public static class Tool extends PageArea {
+    public static class Tool extends PageAreaImpl {
         public final Control pattern = control("pattern");
 
         public Tool(PageObject parent, String path) {

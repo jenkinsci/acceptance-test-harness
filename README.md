@@ -28,6 +28,7 @@ it's own sandboxed workspace.
 * [Selecting browser](docs/BROWSER.md)
 * [Selecting how to launch Jenkins under test (JUT)](docs/CONTROLLER.md)
 * [Running one test](docs/SINGLE-TEST.md)
+* [Using a http proxy](docs/USING-A-HTTP-PROXY.md)
 * [Prelaunch JUT](docs/PRELAUNCH.md)
 * Selecting tests based on plugins they cover (TODO)
 
@@ -37,9 +38,11 @@ it's own sandboxed workspace.
     * [Mix-ins](docs/MIXIN.md)
 * [Guice is our glue](docs/GUICE.md)
 * Writing tests
+    * [Video tutorial](https://www.youtube.com/watch?v=ZHAiywgMG-M) by Kohsuke on how to write tests
     * [Writing JUnit test](docs/JUNIT.md)
     * Writing Cucumber test (TODO)
 * [Testing slaves](docs/SLAVE.md)
+* [Testing emails](docs/EMAIL.md)
 * explain how cucumber hooks into Guice (TODO)
 * [Hamcrest matchers](docs/MATCHERS.md)
 * how to use this from your own module (TODO)

@@ -32,8 +32,8 @@ public class WinstoneDockerController extends LocalController {
 
     private WinstoneContainer container;
 
-    public WinstoneDockerController(File war, File formElementHpi) {
-        super(war, formElementHpi);
+    public WinstoneDockerController(File war) {
+        super(war);
     }
 
     public void setFixture(Class<? extends WinstoneContainer> fixtureType) {
@@ -109,7 +109,7 @@ public class WinstoneDockerController extends LocalController {
 
         @Override
         public WinstoneDockerController create() {
-            WinstoneDockerController c = new WinstoneDockerController(getWarFile(), getFormElementsPathFile());
+            WinstoneDockerController c = new WinstoneDockerController(getWarFile());
             injector.injectMembers(c);
             String img = System.getenv("DOCKER_IMAGE");
             if (img!=null)
