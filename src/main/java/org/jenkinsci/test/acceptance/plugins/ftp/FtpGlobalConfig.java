@@ -1,17 +1,14 @@
 package org.jenkinsci.test.acceptance.plugins.ftp;
 
-import org.jenkinsci.test.acceptance.controller.JenkinsController;
-import org.jenkinsci.test.acceptance.po.Control;
-import org.jenkinsci.test.acceptance.po.Jenkins;
-import org.jenkinsci.test.acceptance.po.PageArea;
-import org.jenkinsci.test.acceptance.po.PageObject;
-
 import javax.inject.Inject;
+
+import org.jenkinsci.test.acceptance.controller.JenkinsController;
+import org.jenkinsci.test.acceptance.po.*;
 
 /**
  * @author Tobias Meyer
  */
-public class FtpGlobalConfig extends PageArea {
+public class FtpGlobalConfig extends PageAreaImpl {
     @Inject
     JenkinsController controller;
 
@@ -25,10 +22,10 @@ public class FtpGlobalConfig extends PageArea {
     public Site addSite() {
         add.click();
         String p = last(by.xpath(".//div[@name='instance'][starts-with(@path,'/jenkins-plugins-publish_over_ftp-BapFtpPublisherPlugin/')]")).getAttribute("path");
-        return new Site(page, p);
+        return new Site(getPage(), p);
     }
 
-    public static class Site extends PageArea {
+    public static class Site extends PageAreaImpl {
         public Site(PageObject parent, String path) {
             super(parent, path);
             Control advanced = control("advanced-button");

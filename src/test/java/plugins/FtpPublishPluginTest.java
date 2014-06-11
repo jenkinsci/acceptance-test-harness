@@ -5,7 +5,6 @@ import org.apache.commons.io.FileUtils;
 import org.hamcrest.CoreMatchers;
 import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.docker.fixtures.FtpdContainer;
-import org.jenkinsci.test.acceptance.docker.fixtures.WinstoneContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Native;
 import org.jenkinsci.test.acceptance.junit.Resource;
@@ -13,11 +12,7 @@ import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.ftp.FtpGlobalConfig;
 import org.jenkinsci.test.acceptance.plugins.ftp.FtpGlobalConfig.Site;
 import org.jenkinsci.test.acceptance.plugins.ftp.FtpPublisher;
-import org.jenkinsci.test.acceptance.plugins.nodelabelparameter.LabelParameter;
-import org.jenkinsci.test.acceptance.plugins.nodelabelparameter.NodeParameter;
-import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
-import org.jenkinsci.test.acceptance.po.LabelAxis;
 import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.slave.SlaveProvider;
 import org.junit.Test;
@@ -28,8 +23,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
-
-import static java.util.Collections.singletonMap;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Feature: Tests for FTP plugin
