@@ -58,7 +58,7 @@ public class SubversionScm extends Scm {
         final String[] nameOfRepositoryBrowser = type.getAnnotation(Describable.class).value();
         repositoryBrowser.select(nameOfRepositoryBrowser[0]);
         String path = repositoryBrowser.resolve().getAttribute("path");
-        return this.newInstance(type, this, path);
+        return this.newInstance(type, this, this.getPage().url(path));
     }
 
 

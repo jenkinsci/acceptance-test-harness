@@ -4,6 +4,8 @@ import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Scm;
 
+import java.net.URL;
+
 /**
  * PageArea for the WebSvn repository browser
  *
@@ -15,7 +17,7 @@ public class SvnRepositoryBrowserWebSvn extends SvnRepositoryBrowser {
     public Control url = control(by.xpath("//td[@class='setting-name' and text()='%s']/../td[@class='setting-main']/input", "URL"));
 
 
-    public SvnRepositoryBrowserWebSvn(Scm area, String path) {
+    public SvnRepositoryBrowserWebSvn(Scm area, URL path) {
         super(area, path);
     }
 }
