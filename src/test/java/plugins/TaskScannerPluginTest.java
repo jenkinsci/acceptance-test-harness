@@ -7,15 +7,12 @@ import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsPublisher;
 import org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerAction;
 import org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerPublisher;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
 import org.xml.sax.SAXException;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -251,7 +248,7 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
         j.save();
 
         // as no threshold is defined to mark the build as FAILED or UNSTABLE, the build should succeed
-        Build lastBuild = buildJobWithSuccess(j);
+        buildJobWithSuccess(j);
 
         // this time we do not check the task scanner output as the result is the same
         // as for single_task_tags_and_exclusion_pattern
@@ -262,7 +259,7 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
         j.copyDir(resource("/tasks_plugin/fileset1_less"));
         j.save();
 
-        lastBuild = buildJobWithSuccess(j);
+        Build lastBuild = buildJobWithSuccess(j);
         lastBuild.open();
         TaskScannerAction tsa = new TaskScannerAction(j);
 
@@ -390,7 +387,7 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
         // The expected task priorities are:
         //   - 0x high
         //   - 3x medium
-        //   - 0x low
+        //   - 0x low//pResult =
         //
         // ==> build status shall be SUCCESS, no threshold exceeded
 
@@ -401,8 +398,12 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
         assertThat(tsa.getResultTextByXPathText("3 open tasks"), endsWith("in 7 workspace files."));
         assertThat(tsa.getResultLinkByXPathText("3 new open tasks"), is("tasksResult/new"));
         assertThat(tsa.getWarningNumber(), is(3));
-        ////TODO: clarify conditions to omit summary table cells -> seems inconsistent
+
+        // Note:
+        //   high warning is omitted in summary table because no high prio tag is defined.
+
         //assertThat(tsa.getNormalWarningNumber(), is(3));
+        //assertThat(tsa.getLowWarningNumber(), is(0));
         assertThat(tsa.getPluginResult(lastBuild), is("Plug-in Result: SUCCESS - no threshold has been exceeded"));
 
         // +----------------------------------------------------------------------------+
@@ -431,7 +432,7 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
         assertThat(tsa.getResultTextByXPathText("6 open tasks"), endsWith("in 7 workspace files."));
         assertThat(tsa.getResultLinkByXPathText("3 new open tasks"), is("tasksResult/new"));
         assertThat(tsa.getWarningNumber(), is(6));
-        //assertThat(tsa.getNewWarningNumber(), is(2));
+        assertThat(tsa.getNewWarningNumber(), is(3));
         //assertThat(tsa.getNormalWarningNumber(), is(4));
         //assertThat(tsa.getLowWarningNumber(), is(2));
         assertThat(tsa.getPluginResult(lastBuild),
@@ -460,13 +461,17 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
         lastBuild.open();
 
         assertThat(tsa.getResultTextByXPathText("6 open tasks"), endsWith("in 7 workspace files."));
-        //TODO: possible BUG regarding delta warning determination -> clarify with Prof. Hafner
-        //assertThat(tsa.getResultLinkByXPathText("1 new open task"), is("tasksResult/new"));
-        //assertThat(tsa.getResultLinkByXPathText("1 closed task"), is("tasksResult/fixed"));
+
+        // Note:
+        //   As the previous build was unstable the determination which warnings have changed is
+        //   done based on the reference buil (#1)!!
+        //   The same applies to step 4 to 6
+
+        assertThat(tsa.getResultLinkByXPathText("3 new open tasks"), is("tasksResult/new"));
         assertThat(tsa.getWarningNumber(), is(6));
-        //assertThat(tsa.getNewWarningNumber(), is(2));
-        //assertThat(tsa.getNormalWarningNumber(), is(4));
-        //assertThat(tsa.getLowWarningNumber(), is(2));
+        assertThat(tsa.getNewWarningNumber(), is(3));
+        //assertThat(tsa.getNormalWarningNumber(), is(5));
+        //assertThat(tsa.getLowWarningNumber(), is(1));
         assertThat(tsa.getPluginResult(lastBuild),
                 is("Plug-in Result: UNSTABLE - 5 warnings of priority Normal Priority exceed the threshold of 4 by 1 (Reference build: #1)"));
 
@@ -493,11 +498,12 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
         lastBuild.open();
 
         assertThat(tsa.getResultTextByXPathText("8 open tasks"), endsWith("in 7 workspace files."));
-        //assertThat(tsa.getResultLinkByXPathText("2 new open tasks"), is("tasksResult/new"));
+        assertThat(tsa.getResultLinkByXPathText("5 new open tasks"), is("tasksResult/new"));
         assertThat(tsa.getWarningNumber(), is(8));
-        //assertThat(tsa.getNewWarningNumber(), is(2));
-        //assertThat(tsa.getNormalWarningNumber(), is(4));
-        //assertThat(tsa.getLowWarningNumber(), is(2));
+        assertThat(tsa.getNewWarningNumber(), is(5));
+        assertThat(tsa.getHighWarningNumber(), is(1));
+        assertThat(tsa.getNormalWarningNumber(), is(5));
+        assertThat(tsa.getLowWarningNumber(), is(2));
         assertThat(tsa.getPluginResult(lastBuild),
                 is("Plug-in Result: UNSTABLE - 1 warning of priority High Priority exceeds the threshold of 0 by 1 (Reference build: #1)"));
 
@@ -524,12 +530,13 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
         lastBuild.open();
 
         assertThat(tsa.getResultTextByXPathText("15 open tasks"), endsWith("in 17 workspace files."));
-        //assertThat(tsa.getResultLinkByXPathText("7 new open tasks"), is("tasksResult/new"));
-        //assertThat(tsa.getResultLinkByXPathText("1 closed task"), is("tasksResult/fixed"));
+        assertThat(tsa.getResultLinkByXPathText("12 new open tasks"), is("tasksResult/new"));
+
         assertThat(tsa.getWarningNumber(), is(15));
-        //assertThat(tsa.getNewWarningNumber(), is(2));
-        //assertThat(tsa.getNormalWarningNumber(), is(4));
-        //assertThat(tsa.getLowWarningNumber(), is(2));
+        assertThat(tsa.getNewWarningNumber(), is(12));
+        assertThat(tsa.getHighWarningNumber(), is(1));
+        assertThat(tsa.getNormalWarningNumber(), is(11));
+        assertThat(tsa.getLowWarningNumber(), is(3));
         assertThat(tsa.getPluginResult(lastBuild),
                 is("Plug-in Result: UNSTABLE - 15 warnings exceed the threshold of 10 by 5 (Reference build: #1)"));
 
@@ -555,11 +562,12 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
         lastBuild.open();
 
         assertThat(tsa.getResultTextByXPathText("16 open tasks"), endsWith("in 17 workspace files."));
-        //assertThat(tsa.getResultLinkByXPathText("1 new open task"), is("tasksResult/new"));
+        assertThat(tsa.getResultLinkByXPathText("13 new open tasks"), is("tasksResult/new"));
         assertThat(tsa.getWarningNumber(), is(16));
-        //assertThat(tsa.getNewWarningNumber(), is(2));
-        //assertThat(tsa.getNormalWarningNumber(), is(4));
-        //assertThat(tsa.getLowWarningNumber(), is(2));
+        assertThat(tsa.getNewWarningNumber(), is(13));
+        assertThat(tsa.getHighWarningNumber(), is(2));
+        assertThat(tsa.getNormalWarningNumber(), is(11));
+        assertThat(tsa.getLowWarningNumber(), is(3));
         assertThat(tsa.getPluginResult(lastBuild),
                 is("Plug-in Result: FAILED - 16 warnings exceed the threshold of 15 by 1 (Reference build: #1)"));
     }

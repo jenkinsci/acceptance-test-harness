@@ -102,7 +102,6 @@ public class TaskScannerAction  extends AbstractCodeStylePluginAction {
                 getAttribute("title").toUpperCase() + " -" + StringUtils.substringAfterLast(pResult, "-");
     }
 
-//pResult =
     /**
      * This method gets the source code file line which is linked by the "Warnings"-tab
      * table entries.

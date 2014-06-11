@@ -10,8 +10,7 @@ import java.util.*;
 /**
  * Abstract action class for plugins with getter of the warnings.
  *
- * FIXME: all xpath strings of methods get*WarningNumber rely on the structure of the table.
- *        but the table structure changes according to the actual warnings.
+ * FIXME: change selectors used in get*WarningNumber in order to use IDs introduced in analysis core version 1.57
  *
  * @author Martin Kurz
  */
@@ -232,36 +231,29 @@ public abstract class AbstractCodeStylePluginAction extends ContainerPageObject 
     }
 
     private SortedMap<String, Integer> mapTableCellsKeyValue(final Collection<WebElement> rows) {
-        //final SortedMap<String, Integer> result = new TreeMap<String, Integer>();
-        //for(WebElement elem : rows) {
-        //    final List<WebElement> cells = elem.findElements(by.xpath("./td"));
-        //    final String key = asTrimmedString(cells.get(0));
-        //    final Integer value = asInt(cells.get(1));
-        //    result.put(key, value);
-        //}
-        //return result;
         return mapTableCellsKeyValue(Integer.class, rows);
     }
 
     /**
      * This is a generic variant of {@link org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginAction#mapTableCellsKeyValue(java.util.Collection)}
-     * which does not care about the type of the value part as long as it is derived
-     * from {@link java.lang.Object}.
+     * which does not care about the type of the value part.
      *
-     * At the moment if type is not Integer the value part is treated as String
-     * //TODO: check whether this may cause negative side effects
-     *
+     * At the moment the only supported types are Integer and String. Calling this method for other
+     * types results in a {@link java.lang.IllegalStateException}.
      */
-    private <T extends Object > SortedMap<String, T> mapTableCellsKeyValue(Class<T> type, final Collection<WebElement> rows) {
+    private <T> SortedMap<String, T> mapTableCellsKeyValue(Class<T> type, final Collection<WebElement> rows) {
         final SortedMap<String, T> result = new TreeMap<>();
         for(WebElement elem : rows) {
             final List<WebElement> cells = elem.findElements(by.xpath("./td"));
             final String key = asTrimmedString(cells.get(0));
             T value = null;
             if(type.isAssignableFrom(Integer.class))
-                value = (T) asInteger(cells.get(1));
+                value = type.cast(asInteger(cells.get(1)));
+            else if (type.isAssignableFrom(String.class))
+                value = type.cast(asTrimmedString(cells.get(1)));
             else
-                value = (T) asTrimmedString(cells.get(1));
+                throw new IllegalStateException("Parameter type (" +
+                        type.getSimpleName() + ") is not supported");
 
             result.put(key, value);
         }
