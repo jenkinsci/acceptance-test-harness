@@ -1,17 +1,16 @@
 package org.jenkinsci.test.acceptance.controller;
 
 import com.google.inject.Injector;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.plexus.util.Expand;
 import org.codehaus.plexus.util.StringUtils;
-import org.jenkinsci.test.acceptance.log.LoggingController;
+import org.jenkinsci.test.acceptance.log.LogListenable;
+import org.jenkinsci.test.acceptance.log.LogListener;
 import org.jenkinsci.utils.process.ProcessInputStream;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -30,7 +29,7 @@ import static java.lang.System.*;
  *
  * @author Vivek Pandey
  */
-public abstract class LocalController extends JenkinsController implements LoggingController {
+public abstract class LocalController extends JenkinsController implements LogListenable {
     /**
      * jenkins.war. Subject under test.
      */
@@ -164,6 +163,16 @@ public abstract class LocalController extends JenkinsController implements Loggi
             throw new RuntimeException(String.format("Failed to copy form path element file %s to plugin dir %s.",
                     formElementPathPlugin, pluginDir),e);
         }
+    }
+
+    @Override
+    public void addLogListener(LogListener l) {
+        logWatcher.addLogListener(l);
+    }
+
+    @Override
+    public void removeLogListener(LogListener l) {
+        logWatcher.removeLogListener(l);
     }
 
     /**
@@ -368,7 +377,7 @@ public abstract class LocalController extends JenkinsController implements Loggi
         throw new Error(cause);
     }
 
-    private boolean isFreePort(int port){
+    private boolean  isFreePort(int port){
         try {
             ServerSocket ss = new ServerSocket(port);
             ss.close();
@@ -376,11 +385,6 @@ public abstract class LocalController extends JenkinsController implements Loggi
         } catch (IOException ex) {
             return false;
         }
-    }
-
-    @Override
-    public JenkinsLogWatcher getLogWatcher() {
-        return logWatcher;
     }
 
     private static final Logger LOGGER = Logger.getLogger(LocalController.class.getName());
