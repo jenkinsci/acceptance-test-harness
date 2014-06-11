@@ -4,13 +4,13 @@ import org.jenkinsci.test.acceptance.po.PageArea;
 import org.jenkinsci.test.acceptance.po.Scm;
 
 /**
- * Superclass for the different repositorybrowser accessable in the svn plugin
+ * Superclass for the different repository browser accessable in the svn plugin
  *
  * @author Matthias Karl
  */
-public class RepositoryBrowser extends PageArea {
+public class SvnRepositoryBrowser extends PageArea {
 
-    public RepositoryBrowser(Scm area, String path) {
+    public SvnRepositoryBrowser(Scm area, String path) {
         super(area.page, path);
 
     }
