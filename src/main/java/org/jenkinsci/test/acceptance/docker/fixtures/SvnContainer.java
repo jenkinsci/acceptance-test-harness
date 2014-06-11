@@ -11,12 +11,13 @@ import java.net.URL;
 
 /**
  * Runs stock svn  container.
- *SVN -version 1.8
+ * SVN -version 1.8
+ *
  * @author Matthias Karl
  */
 @DockerFixture(id = "svn", ports = {80, 3690, 22})
 public class SvnContainer extends DockerContainer {
-    public static final String USER = "user";
+    public static final String USER = "svnUser";
     public static final String PWD = "test";
 
     private static final String PROTOCOL_HTTP = "http://";

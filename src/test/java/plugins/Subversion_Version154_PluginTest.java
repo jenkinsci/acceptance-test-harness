@@ -1,6 +1,7 @@
 package plugins;
 
 import com.google.inject.Inject;
+import hudson.util.VersionNumber;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.SvnContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
@@ -10,22 +11,31 @@ import org.jenkinsci.test.acceptance.plugins.subversion.SubversionCredentialUser
 import org.jenkinsci.test.acceptance.plugins.subversion.SubversionPluginTestException;
 import org.jenkinsci.test.acceptance.plugins.subversion.SubversionScm;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.junit.Before;
 import org.junit.Test;
+
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Feature: Subversion support
- * For Plugin Core_Version 1.54
+ * For plugin core version 1.54.
+ * Obsolete when core version gets raised to later version than 1.54.
  * As a user
  * I want to be able to check out source code from Subversion
  *
  * @author Matthias Karl
  */
-@WithPlugins("subversion@1.54")
+@WithPlugins("subversion")
 @Native("docker")
 @Deprecated
-public class SubversionPluginTest_Version154 extends AbstractJUnitTest {
+public class Subversion_Version154_PluginTest extends AbstractJUnitTest {
     @Inject
     DockerContainerHolder<SvnContainer> svn;
+
+    @Before
+    public void setUp() {
+        assumeTrue(jenkins.getPlugin("subversion").getVersion().compareTo(new VersionNumber("1.55"))<0);
+    }
 
     /**
      * Scenario: Run basic Subversion build
@@ -42,7 +52,6 @@ public class SubversionPluginTest_Version154 extends AbstractJUnitTest {
     public void run_basic_subversion_build() throws SubversionPluginTestException {
         final SvnContainer svnContainer = svn.get();
         final FreeStyleJob f = jenkins.jobs.create();
-        f.configure();
         f.useScm(SubversionScm.class).url.set(svnContainer.getUrlUnsaveRepo());
         f.addShellStep("test -d .svn");
         f.save();
@@ -65,7 +74,6 @@ public class SubversionPluginTest_Version154 extends AbstractJUnitTest {
         final int revision = 0;
         final SvnContainer svnContainer = svn.get();
         final FreeStyleJob f = jenkins.jobs.create();
-        f.configure();
         f.useScm(SubversionScm.class).url.set(svnContainer.getUrlUnsaveRepoAtRevision(revision));
         f.save();
 
@@ -87,7 +95,6 @@ public class SubversionPluginTest_Version154 extends AbstractJUnitTest {
     public void always_checkout_fresh_copy() throws SubversionPluginTestException {
         final SvnContainer svnContainer = svn.get();
         final FreeStyleJob f = jenkins.jobs.create();
-        f.configure();
 
         final SubversionScm subversionScm = f.useScm(SubversionScm.class);
         subversionScm.url.set(svnContainer.getUrlUnsaveRepo());
@@ -104,6 +111,7 @@ public class SubversionPluginTest_Version154 extends AbstractJUnitTest {
      * Scenario: http:// user/pwd basic Checkout
      * Given I have installed the "subversion" plugin
      * And a job
+     * And I add a shell build step "test -d .svn"
      * When I check out code from protected Subversion repository "UrlUserPwdSaveRepo"
      * And I click the link to enter credentials
      * And I enter the right username and the right password
@@ -111,14 +119,14 @@ public class SubversionPluginTest_Version154 extends AbstractJUnitTest {
      * And I save the job
      * And I build the job
      * Then the build should succeed
+     * And console output should contain "test -d .svn"
      */
     @Test
-    public void run_basic_subversion_build_userPwd() throws SubversionPluginTestException {
+    public void run_basic_subversion_build_userPwd() throws SubversionPluginTestException, InterruptedException {
         final SvnContainer svnContainer = svn.get();
 
         final FreeStyleJob f = jenkins.jobs.create();
-        f.configure();
-
+        f.addShellStep("test -d .svn");
         final SubversionScm subversionScm = f.useScm(SubversionScm.class);
         subversionScm.url.set(svnContainer.getUrlUserPwdSaveRepo());
 
@@ -128,14 +136,15 @@ public class SubversionPluginTest_Version154 extends AbstractJUnitTest {
         credentialPage.confirmDialog();
         f.save();
 
-        f.startBuild().shouldSucceed();
+        f.startBuild().shouldSucceed().shouldContainsConsoleOutput("test -d .svn");
 
     }
 
     /**
-     * Scenario:basic Checkout with svn protocol
+     * Scenario:basic Checkout with svn protocol user/pwd
      * Given I have installed the "subversion" plugin
      * And a job
+     * And I add a shell build step "test -d .svn"
      * When I check out code from protected Subversion repository "SvnUrl"
      * And I click the link to enter credentials
      * And I enter the right username and the right password
@@ -143,14 +152,14 @@ public class SubversionPluginTest_Version154 extends AbstractJUnitTest {
      * And I save the job
      * And I build the job
      * Then the build should succeed
+     * And console output should contain "test -d .svn"
      */
     @Test
     public void run_basic_subversion_build_svn_userPwd() throws SubversionPluginTestException {
         final SvnContainer svnContainer = svn.get();
 
         final FreeStyleJob f = jenkins.jobs.create();
-        f.configure();
-
+        f.addShellStep("test -d .svn");
         final SubversionScm subversionScm = f.useScm(SubversionScm.class);
         subversionScm.url.set(svnContainer.getSvnUrl());
 
@@ -160,7 +169,7 @@ public class SubversionPluginTest_Version154 extends AbstractJUnitTest {
         credentialPage.confirmDialog();
         f.save();
 
-        f.startBuild().shouldSucceed();
+        f.startBuild().shouldSucceed().shouldContainsConsoleOutput("test -d .svn");
 
     }
 

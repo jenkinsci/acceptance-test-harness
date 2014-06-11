@@ -1,15 +1,15 @@
 package org.jenkinsci.test.acceptance.plugins.jira;
 
-import org.jenkinsci.test.acceptance.po.Jenkins;
-import org.jenkinsci.test.acceptance.po.PageArea;
-
 import javax.inject.Inject;
 import java.net.URL;
+
+import org.jenkinsci.test.acceptance.po.Jenkins;
+import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 
 /**
  * @author Kohsuke Kawaguchi
  */
-public class JiraGlobalConfig extends PageArea {
+public class JiraGlobalConfig extends PageAreaImpl {
 
     @Inject
     public JiraGlobalConfig(Jenkins jenkins) {

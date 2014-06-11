@@ -32,6 +32,16 @@ public class TestLifecycle implements Scope {
         testScopeObjects.set(null);
     }
 
+    public Map export() {
+        Map o = testScopeObjects.get();
+        testScopeObjects.set(null);
+        return o;
+    }
+
+    public void import_(Map o) {
+        testScopeObjects.set(o);
+    }
+
     /**
      * Returns already existing instances.
      */

@@ -1,16 +1,12 @@
 package org.jenkinsci.test.acceptance.plugins.warnings;
 
-import org.jenkinsci.test.acceptance.po.Control;
-import org.jenkinsci.test.acceptance.po.Describable;
-import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.PageArea;
-import org.jenkinsci.test.acceptance.po.PostBuildStep;
+import org.jenkinsci.test.acceptance.po.*;
 
 /**
  * @author Kohsuke Kawaguchi
  */
 @Describable("Scan for compiler warnings")
-public class WarningsPublisher extends PostBuildStep {
+public class WarningsPublisher extends AbstractStep implements PostBuildStep {
     private Control addConsoleLogScanner = control("repeatable-add");
     private Control addWorkspaceFileScanner = control("repeatable-add[1]");
 
@@ -23,7 +19,8 @@ public class WarningsPublisher extends PostBuildStep {
         sleep(1000);
         String path = last(by.xpath("//div[@name='consoleParsers']")).getAttribute("path");
 
-        PageArea a = new PageArea(page,path) {};
+        PageArea a = new PageAreaImpl(getPage(), path) {
+        };
         a.control("parserName").select(caption);
     }
 
@@ -32,7 +29,8 @@ public class WarningsPublisher extends PostBuildStep {
         sleep(1000);
         String path = last(by.xpath("//div[@name='parserConfigurations']")).getAttribute("path");
 
-        PageArea a = new PageArea(page,path) {};
+        PageArea a = new PageAreaImpl(getPage(), path) {
+        };
         a.control("pattern").set(pattern);
         a.control("parserName").select(caption);
     }

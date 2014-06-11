@@ -1,5 +1,8 @@
 package org.jenkinsci.test.acceptance.po;
 
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 import org.openqa.selenium.WebElement;
 
 import java.util.List;

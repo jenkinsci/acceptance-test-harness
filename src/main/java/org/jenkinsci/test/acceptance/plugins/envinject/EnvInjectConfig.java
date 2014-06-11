@@ -25,15 +25,15 @@ package org.jenkinsci.test.acceptance.plugins.envinject;
 
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.PageArea;
+import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.PageObject;
 
-public class EnvInjectConfig extends PageArea {
+public class EnvInjectConfig extends PageAreaImpl {
     public final Control properties = control("propertiesContent");
-    
+
     protected EnvInjectConfig(PageObject context, String path) {
         super(context, path);
-    }    
+    }
 
     public static class Property extends EnvInjectConfig {
         public Property(Job job) {
@@ -41,7 +41,7 @@ public class EnvInjectConfig extends PageArea {
             job.check("Prepare an environment for the run");
         }
     }
-    
+
     public static class Environment extends EnvInjectConfig {
         public Environment(Job job) {
             super(job, "/org-jenkinsci-plugins-envinject-EnvInjectBuildWrapper");

@@ -4,12 +4,12 @@ import org.openqa.selenium.By;
 
 /**
  * Parameter for builds.
- *
+ * <p/>
  * Use {@link Describable} annotation to register an implementation.
  *
  * @author Kohsuke Kawaguchi
  */
-public abstract class Parameter extends PageArea {
+public abstract class Parameter extends PageAreaImpl {
     public final Job job;
     private String name;
 
@@ -39,8 +39,8 @@ public abstract class Parameter extends PageArea {
     }
 
     /**
-     * Given an subtype-specific value object that represents the actual argument,
-     * fill in the parameterized build form.
+     * Given an subtype-specific value object that represents the actual argument, fill in the parameterized build
+     * form.
      */
     public abstract void fillWith(Object v);
 
@@ -49,8 +49,9 @@ public abstract class Parameter extends PageArea {
      */
     @Override
     public By path(String rel) {
-        if (driver.getCurrentUrl().endsWith("/configure"))
+        if (driver.getCurrentUrl().endsWith("/configure")) {
             return super.path(rel);
+        }
 
         String np = driver.findElement(by.xpath("//input[@name='name' and @value='%s']", name)).getAttribute("path");
         String path = np.replaceAll("/name$", "") + "/" + rel;

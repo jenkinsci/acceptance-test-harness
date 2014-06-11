@@ -1,10 +1,7 @@
 package org.jenkinsci.test.acceptance.junit;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.PluginManager;
@@ -14,7 +11,10 @@ import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
-import com.google.inject.Inject;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
@@ -61,6 +61,10 @@ public @interface WithPlugins {
         @Inject
         JenkinsController controller;
 
+        @Inject(optional=true) @Named("neverReplaceExistingPlugins")
+        boolean neverReplaceExistingPlugins;
+
+
         @Override
         public Statement apply(final Statement base, final Description d) {
             return new Statement() {
@@ -82,16 +86,14 @@ public @interface WithPlugins {
 
                         if (!pm.isInstalled(name)) {
                             pm.installPlugins(name);
-                        }
-                        else {
+                        } else {
                             String requiredVersion = candidate.getVersion();
                             if (requiredVersion != null) {
                                 if (!jenkins.getPlugin(name).isNewerThan(requiredVersion)) {
-                                    if (System.getenv("NEVER_REPLACE_EXISTING_PLUGINS") != null) {
+                                    if (neverReplaceExistingPlugins) {
                                         throw new AssumptionViolatedException(String.format(
                                                 "Test requires %s plugin in version %s", name, requiredVersion));
-                                    }
-                                    else {
+                                    } else {
                                         pm.installPlugins(c);
                                     }
                                 }
