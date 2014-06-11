@@ -22,20 +22,29 @@ public class BuildTimeout extends PageAreaImpl {
 
     public void abortAfter(int timeout) {
         ensureActive();
-        choose("Absolute");
+        chooseStrategy("Absolute");
         fillIn("_.timeoutMinutes", timeout);
         abortBuild();
     }
 
     public void abortWhenStuck() {
         ensureActive();
-        choose("Likely stuck");
+        chooseStrategy("Likely stuck");
         abortBuild();
     }
 
     private void ensureActive() {
         job.ensureConfigPage();
         control("").check();
+    }
+
+    private void chooseStrategy(String name) {
+        // JENKINS-20164
+        if (job.getJenkins().getPlugin("build-timeout").isNewerThan("1.14")) {
+            control("/").select(name);
+        } else {
+            choose(name);
+        }
     }
 
     public void abortBuild() {

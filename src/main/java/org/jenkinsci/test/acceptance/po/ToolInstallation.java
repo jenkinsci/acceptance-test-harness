@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
+import org.jenkinsci.test.acceptance.log.LoggingController;
 import org.jenkinsci.utils.process.CommandBuilder;
 
 /**
@@ -42,7 +43,13 @@ public abstract class ToolInstallation extends PageAreaImpl {
         final ToolInstallationPageObject annotation = type.getAnnotation(ToolInstallationPageObject.class);
 
         final Pattern pattern = Pattern.compile("Obtained the updated data file for " + Pattern.quote(annotation.installer()));
-        jenkins.getLogger("all").waitForLogged(pattern, 60);
+
+        // TODO make all controllers LoggingControllers
+        if (jenkins instanceof LoggingController) {
+            ((LoggingController) jenkins).getLogWatcher().waitForLogged(pattern, 60);
+        } else {
+            jenkins.getLogger("all").waitForLogged(pattern, 60);
+        }
     }
 
     public ToolInstallation(JenkinsConfig context, String path) {

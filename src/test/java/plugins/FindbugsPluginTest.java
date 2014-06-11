@@ -33,6 +33,7 @@ import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsPublisher;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.Slave;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -42,14 +43,11 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.util.SortedMap;
 import java.util.TreeMap;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.jenkinsci.test.acceptance.Matchers.hasAction;
+import java.util.concurrent.ExecutionException;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.jenkinsci.test.acceptance.Matchers.hasAction;
-import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 @WithPlugins("findbugs")
 public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
@@ -58,7 +56,8 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
      * Builds a job and checks if warnings of Findbugs are displayed. Checks as well, if the content of the tabs is
      * the one we expect.
      */
-    @Test @Category(SmokeTest.class)
+    @Test
+    @Category(SmokeTest.class)
     public void record_analysis() {
         FreeStyleJob job = setupJob("/findbugs_plugin/findbugsXml.xml", FindbugsPublisher.class, "findbugsXml.xml");
         Build lastBuild = buildJobWithSuccess(job);
@@ -121,7 +120,8 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
      * Builds a job and tests if the findbugs api (with depth=0 parameter set) responds with the expected output.
      * Difference in whitespaces are ok.
      */
-    @Test @Category(SmokeTest.class)
+    @Test
+    @Category(SmokeTest.class)
     public void xml_api_report_depth_0() throws IOException, SAXException, ParserConfigurationException {
         final FreeStyleJob job = setupJob("/findbugs_plugin/findbugsXml.xml", FindbugsPublisher.class, "findbugsXml.xml");
         final Build build = buildJobWithSuccess(job);
@@ -157,7 +157,9 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
     /**
      * Runs job two times to check if the links of the graph are relative.
      */
-    @Test @Bug("21723")  @Ignore("Until JENKINS-21723 is fixed")
+    @Test
+    @Bug("21723")
+    @Ignore("Until JENKINS-21723 is fixed")
     public void view_findbugs_report_job_graph_links() {
         final FreeStyleJob job = setupJob("/findbugs_plugin/findbugsXml.xml", FindbugsPublisher.class, "findbugsXml.xml");
         buildJobAndWait(job);
@@ -165,6 +167,19 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
         buildJobWithSuccess(job);
 
         assertAreaLinksOfJobAreLike(job, "^\\d+/findbugsResult");
+    }
+
+    /**
+     * Builds a freestyle project and checks if new warning are displayed.
+     */
+    @Test
+    public void build_simple_freestyle_mavengoals_project() {
+        final FreeStyleJob job = setupFreestyleJobWithMavenGoals("/findbugs_plugin/sample_findbugs_project", "clean package findbugs:findbugs", FindbugsPublisher.class, "target/findbugsXml.xml");
+        Build lastBuild = buildJobWithSuccess(job);
+        assertThat(lastBuild, hasAction("FindBugs Warnings"));
+        lastBuild.open();
+        FindbugsAction findbugs = new FindbugsAction(job);
+        assertThat(findbugs.getNewWarningNumber(), is(1));
     }
 
     private MavenModuleSet setupSimpleMavenJob() {
@@ -221,4 +236,21 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
         final MavenModuleSet job = setupSimpleMavenJob(buildConfigurator);
         buildJobAndWait(job).shouldFail();
     }
+
+    /**
+     * Builds a job on an slave and checks if warnings of Findbugs are displayed.
+     */
+    @Test
+    public void record_analysis_build_on_slave() throws ExecutionException, InterruptedException {
+        FreeStyleJob job = setupJob("/findbugs_plugin/findbugsXml.xml", FindbugsPublisher.class, "findbugsXml.xml");
+
+        Slave slave = makeASlaveAndConfigureJob(job);
+
+        Build lastBuild = buildJobOnSlaveWithSuccess(job, slave);
+
+        assertThat(lastBuild.getNode(), is(slave.getName()));
+        assertThat(lastBuild, hasAction("FindBugs Warnings"));
+        assertThat(job, hasAction("FindBugs Warnings"));
+    }
+
 }

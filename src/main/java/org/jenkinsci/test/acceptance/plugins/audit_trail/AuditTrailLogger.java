@@ -23,20 +23,19 @@
  */
 package org.jenkinsci.test.acceptance.plugins.audit_trail;
 
+import org.apache.commons.io.IOUtils;
+import org.jenkinsci.test.acceptance.po.GlobalPluginConfiguration;
+import org.jenkinsci.test.acceptance.po.Jenkins;
+import org.jenkinsci.test.acceptance.po.JenkinsLogger;
+import org.jenkinsci.test.acceptance.po.PageArea;
+import org.openqa.selenium.WebElement;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.apache.commons.io.IOUtils;
-import org.jenkinsci.test.acceptance.po.Jenkins;
-import org.jenkinsci.test.acceptance.po.JenkinsLogger;
-import org.jenkinsci.test.acceptance.po.PageArea;
-import org.jenkinsci.test.acceptance.po.PageAreaImpl;
-import org.openqa.selenium.TimeoutException;
-import org.openqa.selenium.WebElement;
 
 abstract public class AuditTrailLogger extends JenkinsLogger {
 
@@ -106,8 +105,8 @@ abstract public class AuditTrailLogger extends JenkinsLogger {
             );
 
             jenkins.configure();
-            PageArea area = new PageAreaImpl(jenkins.getConfigPage(), "/jenkins-model-GlobalPluginConfiguration/plugin") {};
-            area.control("hetero-list-add[loggers]").selectDropdownMenu("Log file");
+            AuditTrailGlobalConfiguration area = new AuditTrailGlobalConfiguration(jenkins);
+            area.addLogger.selectDropdownMenu("Log file");
 
             area.control("loggers/log").set(logfile);
             area.control("loggers/limit").set(10);

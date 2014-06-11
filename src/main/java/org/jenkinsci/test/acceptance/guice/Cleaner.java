@@ -48,7 +48,7 @@ public class Cleaner {
             }
         });
     }
-    /*package*/ void performCleanUp() {
+    public void performCleanUp() {
         for (Statement task : tasks) {
             try {
                 task.evaluate();

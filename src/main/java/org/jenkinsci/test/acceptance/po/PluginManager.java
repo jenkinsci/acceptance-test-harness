@@ -10,8 +10,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.regex.Pattern;
-
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
@@ -71,19 +69,6 @@ public class PluginManager extends ContainerPageObject {
         visit("checkUpdates");
         waitFor(by.xpath("//span[@id='completionMarker' and text()='Done']"));
         updated = true;
-
-        waitForUpdates();
-    }
-
-    public void waitForUpdates() {
-        JenkinsLogger l = jenkins.getLogger("all");
-
-        Pattern ant = Pattern.compile(".*hudson.tasks.Ant.AntInstaller");
-        Pattern maven = Pattern.compile(".*hudson.tasks.Maven.MavenInstaller");
-        Pattern jdk = Pattern.compile(".*hudson.tools.JDKInstaller");
-        l.waitForLogged(ant);
-        l.waitForLogged(maven);
-        l.waitForLogged(jdk);
     }
 
     /**

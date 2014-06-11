@@ -1,5 +1,6 @@
 package plugins;
 
+import com.google.inject.Inject;
 import org.apache.xerces.jaxp.DocumentBuilderFactoryImpl;
 import org.custommonkey.xmlunit.XMLAssert;
 import org.custommonkey.xmlunit.XMLUnit;
@@ -8,22 +9,31 @@ import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginMavenBuildConfigurator;
 import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginMavenBuildSettings;
 import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginPostBuildStep;
+import org.jenkinsci.test.acceptance.plugins.maven.MavenBuildStep;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
+import org.jenkinsci.test.acceptance.po.Slave;
+import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 
+import static java.util.Collections.singletonMap;
 import static org.junit.Assert.assertTrue;
 
 public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
+
+    /** For slave test */
+    @Inject
+    SlaveController slaveController;
 
     /**
      * Setup a job with the given resource and publisher.
@@ -79,6 +89,43 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
                 publisher.useDeltaValues.check();
             }
         }
+        job.save();
+        return job;
+    }
+
+    /**
+     * Generates a slave and configure job to run on slave
+     * @param job Job to run on slave
+     * @return Generated skave
+     * @throws ExecutionException if computation of slave threw an exception
+     * @throws InterruptedException if thread was interrupted while waiting
+     */
+    public Slave makeASlaveAndConfigureJob(Job job) throws ExecutionException, InterruptedException {
+        Slave slave = slaveController.install(jenkins).get();
+        job.configure();
+        job.setLabelExpression(slave.getName());
+        job.save();
+        return slave;
+    }
+
+    /**
+     * Setup a freestyle build with maven goals.
+     * @param resourceProjectDir A Folder in resources which shall be copied to the working directory.
+     * @param goal The maven goals to set.
+     * @param publisherClass Publisher to add
+     * @param publisherPattern Publisher pattern to set
+     * @return The configured job.
+     */
+    public <T extends AbstractCodeStylePluginPostBuildStep> FreeStyleJob setupFreestyleJobWithMavenGoals(String resourceProjectDir, String goal, Class<T> publisherClass, String publisherPattern) {
+        MavenInstallation.ensureThatMavenIsInstalled(jenkins);
+
+        final FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class);
+        job.copyDir(resource(resourceProjectDir));
+        job.addBuildStep(MavenBuildStep.class).targets.set(goal);
+
+        final T publisher = job.addPublisher(publisherClass);
+        publisher.pattern.set(publisherPattern);
+
         job.save();
         return job;
     }
@@ -171,6 +218,16 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
      */
     public Build buildJobWithSuccess(Job job) {
         return buildJobAndWait(job).shouldSucceed();
+    }
+
+    /**
+     *  Build Job and wait until finished.
+     *  @param job Job to build
+     *  @param slave Slave to run job on
+     *  @return The made build
+     */
+    public Build buildJobOnSlaveWithSuccess(FreeStyleJob job, Slave slave) {
+        return job.startBuild(singletonMap("slavename", slave.getName())).shouldSucceed();
     }
 
     /**

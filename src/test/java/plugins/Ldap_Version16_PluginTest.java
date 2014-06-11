@@ -1,11 +1,14 @@
 package plugins;
 
+import hudson.util.VersionNumber;
+import org.hamcrest.CoreMatchers;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.LdapContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Native;
 import org.jenkinsci.test.acceptance.plugins.ldap.LdapDetails;
 import org.jenkinsci.test.acceptance.po.*;
+import org.junit.Before;
 import org.junit.Test;
 
 import javax.inject.Inject;
@@ -13,6 +16,7 @@ import javax.inject.Inject;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.junit.Assume.*;
 
 /**
  * Feature: Tests for LdapPlugin.
@@ -27,6 +31,11 @@ public class Ldap_Version16_PluginTest extends AbstractJUnitTest {
 
     @Inject
     DockerContainerHolder<LdapContainer> ldap;
+
+    @Before
+    public void setUp() {
+        assumeTrue(jenkins.getPlugin("ldap").getVersion().isOlderThan(new VersionNumber("1.7")));
+    }
 
     /**
      * "Jenkins is using ldap as security realm"

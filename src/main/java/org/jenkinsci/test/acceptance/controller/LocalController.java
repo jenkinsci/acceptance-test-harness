@@ -1,5 +1,17 @@
 package org.jenkinsci.test.acceptance.controller;
 
+import com.google.inject.Injector;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.codehaus.plexus.util.Expand;
+import org.codehaus.plexus.util.StringUtils;
+import org.jenkinsci.test.acceptance.log.LoggingController;
+import org.jenkinsci.utils.process.ProcessInputStream;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -10,16 +22,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import com.google.inject.Injector;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.codehaus.plexus.util.Expand;
-import org.codehaus.plexus.util.StringUtils;
-import org.jenkinsci.utils.process.ProcessInputStream;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import static java.lang.System.*;
 
 /**
@@ -28,7 +30,7 @@ import static java.lang.System.*;
  *
  * @author Vivek Pandey
  */
-public abstract class LocalController extends JenkinsController {
+public abstract class LocalController extends JenkinsController implements LoggingController {
     /**
      * jenkins.war. Subject under test.
      */
@@ -154,6 +156,8 @@ public abstract class LocalController extends JenkinsController {
             }
         }
 
+        System.out.println("running with given plugins: " + Arrays.toString(pluginDir.list()));
+
         try {
             FileUtils.copyFile(formElementPathPlugin, new File(pluginDir, "path-element.hpi"));
         } catch (IOException e) {
@@ -235,7 +239,7 @@ public abstract class LocalController extends JenkinsController {
         this.process = startProcess();
         Runtime.getRuntime().addShutdownHook(shutdownHook);
 
-        logWatcher = new JenkinsLogWatcher(process,logFile);
+        logWatcher = new JenkinsLogWatcher(getLogId(),process,logFile);
         logWatcher.start();
         try {
             LOGGER.info("Waiting for Jenkins to become running in "+ this);
@@ -364,7 +368,7 @@ public abstract class LocalController extends JenkinsController {
         throw new Error(cause);
     }
 
-    private boolean  isFreePort(int port){
+    private boolean isFreePort(int port){
         try {
             ServerSocket ss = new ServerSocket(port);
             ss.close();
@@ -372,6 +376,11 @@ public abstract class LocalController extends JenkinsController {
         } catch (IOException ex) {
             return false;
         }
+    }
+
+    @Override
+    public JenkinsLogWatcher getLogWatcher() {
+        return logWatcher;
     }
 
     private static final Logger LOGGER = Logger.getLogger(LocalController.class.getName());

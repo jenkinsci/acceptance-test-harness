@@ -18,6 +18,6 @@ public class BatchTaskTrigger extends AbstractStep implements PostBuildStep {
     public void setTask(BatchTask t) {
         project.set(t.job.name);
         task.click();
-        task.sendKeys(t.name);
+        task.select(t.name);
     }
 }
