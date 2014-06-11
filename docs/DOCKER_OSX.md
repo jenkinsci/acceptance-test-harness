@@ -68,17 +68,24 @@ Now you need to init and start `boot2docker` VM, so that VirtualBox knows about 
 
 ### Update `boot2docker`
 
+**Please Note!** This step is just an update of `boot2docker`. If you went through
+this tutorial and installed `boot2docker` just before, than you can omit this step.
+
 I suggest to update your `boot2docker` VM by executing the commands:
 
     boot2docker stop
     boot2docker download
+
+Updating of `boot2docker` can be done at any time, but beware, that your running
+VMs are going to be shut down as well. Therefore it is highly recommended, that you
+double check if VMs can/should be shut down at all.
 
 
 ### Create VM rules to allow direct access to ports exported by `docker`
 
 **Please note!** VM must be switched off for the subsequent command to succeed.
 
-The next step is going to allow you direct connection with your `docker` containers on exported steps. The trick here
+The next step is going to allow you direct connection with your `docker` containers on exported ports. The trick here
 is to map all possible ports to the Host machine that all docker containers might be using. This can be done
 automatically with a VirtualBox management tool:
 
@@ -94,6 +101,24 @@ Finally, you need to start the `boot2docker` container again:
 
     boot2docker up
 
+
+### Working with `docker` from IDE
+
+If you run docker commands from IDE or an application which is started from an IDE on Mac OS X,
+you must export the `DOCKER_HOST` environment variable for the process being run from IDE.
+
+For IntelliJ IDEA the steps are depicted below:
+
+![Exporting DOCKER_HOST steps](img/exporting_docker_host_steps.png)
+
+1. Click on the selected configuration combo box and click the 'Edis Configurations' menu
+1. Select the 'run/debug' configuration, which controls `docker` instances
+1. Click on the '...' button to define the environment variables for the selected config
+1. Insert in the 'Environment Variables' dialog `DOCKER_HOST` with the host/port pair where `docker` is run. Usually, this is `tcp://localhost:4243`.
+
+If you get an error message stating smth. like: `dial unix /var/run/docker.sock` that means that you did not properly export `DOCKER_HOST` environment variable.
+
+
 ### Working with `docker` command from the shell
 
 To work with docker containers from the shell one needs to export an environment variable where the `docker` command
@@ -102,6 +127,7 @@ should be sending the commands to:
     export DOCKER_HOST=tcp://localhost:4243
 
 Port `4243` is going to be forwarded in the `boot2docker` VM config automatically.
+
 
 ### Status Quo
 
@@ -121,7 +147,7 @@ the next section.
 Some test cases which were testing proper functioning of SSH executions in Jenkins did not want to rely at the end of
 the test case on SSH protocol to copy produced data back for comparison. These test cases used `docker cp` to copy back
 the files. On Mac OS X `docker cp` via `boot2docker` fails with 'Permission denied' error. There are numerous bugs filed
-for that and also numerous workarounds. These workarounds are rely on an introduction of the file sharing into
+for that and also numerous workarounds. These workarounds rely on an introduction of the file sharing into
 `boot2docker`. Unfortunately, that is not easily done as `boot2docker` is a really minimalist Linux distribution. These
 solutions require manual rebuilding of `boot2docker` VM with VirtualBox guest tool additions. For someone who just wants
 to start writing/executing tests this is too much effort and might be not very well reproducible.
