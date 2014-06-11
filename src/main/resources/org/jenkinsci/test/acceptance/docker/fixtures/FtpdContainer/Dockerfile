@@ -23,7 +23,7 @@ RUN echo "pasv_max_port=7055" >> /etc/myftp.conf
 RUN mkdir -p /var/run/vsftpd/empty
 
 # create a test user
-RUN useradd test -d /home/test && \
+RUN useradd test -d /home/test -s /bin/bash && \
         mkdir -p /home/test/ftp && \
         chown test /home/test && \
         echo "test:test" | chpasswd
