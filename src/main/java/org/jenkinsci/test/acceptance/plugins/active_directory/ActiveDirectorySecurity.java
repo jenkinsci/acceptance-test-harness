@@ -26,109 +26,28 @@ package org.jenkinsci.test.acceptance.plugins.active_directory;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.PageObject;
-import org.openqa.selenium.NoSuchElementException;
 
 /**
  * Page Object for AD security (global) configuration page.
- * @author Marco Miller
+ * @author Marco.Miller@ericsson.com
  */
 public class ActiveDirectorySecurity extends PageObject {
-
-    private static String bindDNEnv;
-    private static String controllerEnv;
-    private static String domainEnv;
-    private static String passwordEnv;
-    private static String siteEnv;
-    private static String userEnv;
-
-    private static final String sec = "/useSecurity";
-    private static final String realm = sec+"/realm[0]";
-    private static final String authPrefix = sec+"/authorization[";
-
     public final Jenkins jenkins;
-    public final Control use = control(sec);
-    public final Control aD = control(realm);
-    public final Control domain = control(realm+"/domain");
-    public final Control advanced = control(realm+"/advanced-button");
-    public final Control dController = control(realm+"/server");
-    public final Control site = control(realm+"/site");
-    public final Control pwd = control(realm+"/bindPassword");
-    public final Control dn = control(realm+"/bindName");
-    public final Control save = control("/Submit");
-    public Control auth;
 
     public ActiveDirectorySecurity(Jenkins jenkins) {
         super(jenkins.injector,jenkins.url("configureSecurity"));
         this.jenkins = jenkins;
-        getEnvs();
     }
 
     /**
-     * @return true if successfully saved AD security configuration, false otherwise-
+     * Stop using security (if previously used) and save config.
      */
-    public boolean successfullySaveSecurityConfig() {
+    public void stopUsingSecurityAndSave() {
         open();
-        if(!use.resolve().isSelected()) use.click();
-        if(!aD.resolve().isSelected()) aD.click();
-        domain.set(domainEnv);
-        advanced.click();
-        if(controllerEnv != null) dController.set(controllerEnv);
-        if(siteEnv != null) site.set(siteEnv);
-        pwd.set(passwordEnv);
-        if(bindDNEnv == null) {
-            bindDNEnv = userEnv+"@"+domainEnv;
+        Control use = control("/useSecurity");
+        if(use.resolve().isSelected()) {
+            use.click();
+            control("/Submit").click();
         }
-        dn.set(bindDNEnv);
-
-        int index = 0;
-        boolean firstMatrixBasedFound = false;
-        while(!firstMatrixBasedFound) {
-            auth = control(authPrefix+index+"]");
-            auth.click();
-            auth = control(authPrefix+index+"]/");
-            try {
-                auth.resolve();
-                firstMatrixBasedFound = true;
-                auth.set(userEnv);
-                clickButton("Add");
-                auth = control(authPrefix+index+"]/data/"+userEnv+"/hudson.model.Hudson.Administer");
-                if(!auth.resolve().isSelected()) auth.click();
-            }
-            catch(NoSuchElementException e) {
-                index++;
-            }
-        }
-        save.click();
-        doLoginDespiteNoPathsThenWaitForLdap();
-        open();
-        boolean succeeded = true;
-        try {
-            auth.resolve();
-            if(use.resolve().isSelected()) {
-                use.click();
-                save.click();
-            }
-            else succeeded = false;
-        }
-        catch(NoSuchElementException e) {
-            succeeded = false;
-        }
-        return succeeded;
-    }
-
-    private void doLoginDespiteNoPathsThenWaitForLdap() {
-        jenkins.login();
-        driver.findElement(by.name("j_username")).sendKeys(userEnv);
-        driver.findElement(by.name("j_password")).sendKeys(passwordEnv);
-        clickButton("log in");
-    }
-
-    private void getEnvs() {
-        bindDNEnv = ActiveDirectoryEnv.getInstance().getBindDN();
-        controllerEnv = ActiveDirectoryEnv.getInstance().getController();
-        domainEnv = ActiveDirectoryEnv.getInstance().getDomain();
-        passwordEnv = ActiveDirectoryEnv.getInstance().getPassword();
-        siteEnv = ActiveDirectoryEnv.getInstance().getSite();
-        userEnv = ActiveDirectoryEnv.getInstance().getUser();
     }
 }

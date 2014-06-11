@@ -1,5 +1,6 @@
 package org.jenkinsci.test.acceptance.plugins.nodelabelparameter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jenkinsci.test.acceptance.po.Control;
@@ -20,24 +21,31 @@ public class NodeParameter extends Parameter {
     public final Control allowMultiple = control("triggerIfResult[allowMultiSelectionForConcurrentBuilds]");
     public final Control disallowMultiple = control("triggerIfResult[multiSelectionDisallowed]");
 
-    public final WebElement defaultNodesSelection = find(by.xpath("//select[@name='defaultSlaves']"));
-    public final WebElement possibleNodesSelection = find(by.xpath("//select[@name='allowedSlaves']"));
+    public final Control defaultNodes = control("defaultSlaves");
+    public final Control allowedNodes = control("allowedSlaves");
 
-    public final WebElement allNodes = find(by.xpath("//option[text()[normalize-space(.)='All Nodes']]"));
-    public final WebElement ignoreOffline = find(by.xpath("//option[text()[normalize-space(.)='Ignore Offline Nodes']]"));
-    public final WebElement ignoreTempOffline = find(by.xpath("//option[text()[normalize-space(.)='Ignore Temp Offline Nodes']]"));
+    public final Control eligibility = control("");
 
     public NodeParameter(Job job, String path) {
         super(job, path);
     }
 
-    public List<WebElement> getPossibleNodesOptions(){ return possibleNodesSelection.findElements(by.tagName("option")); }
-    public List<WebElement> getDefaultNodeOptions(){ return defaultNodesSelection.findElements(by.tagName("option")); }
+    public List<WebElement> getPossibleNodesOptions() {
+        return allowedNodes.resolve().findElements(by.tagName("option"));
+    }
 
     @Override
     public void fillWith(Object v) {
         for (String l : v.toString().split(",[ ]?")) {
             control("labels").select(l);
         }
+    }
+
+    public List<String> applicableNodes() {
+        List<String> nodes = new ArrayList<>();
+        for (WebElement slave: control("labels").resolve().findElements(by.tagName("option"))) {
+            nodes.add(slave.getText());
+        }
+        return nodes;
     }
 }

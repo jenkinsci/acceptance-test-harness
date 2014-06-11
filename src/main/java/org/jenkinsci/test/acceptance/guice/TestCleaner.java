@@ -15,7 +15,7 @@ public class TestCleaner extends Cleaner {
     TestLifecycle lifecycle;
 
     @Override
-    void performCleanUp() {
+    public void performCleanUp() {
         super.performCleanUp();
         for (Object o : lifecycle.getInstances()) {
             if (o instanceof AutoCleaned) {

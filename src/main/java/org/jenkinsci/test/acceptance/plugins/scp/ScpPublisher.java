@@ -1,17 +1,12 @@
 package org.jenkinsci.test.acceptance.plugins.scp;
 
-import org.jenkinsci.test.acceptance.po.Control;
-import org.jenkinsci.test.acceptance.po.Describable;
-import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.PageArea;
-import org.jenkinsci.test.acceptance.po.PageObject;
-import org.jenkinsci.test.acceptance.po.PostBuildStep;
+import org.jenkinsci.test.acceptance.po.*;
 
 /**
  * @author Kohsuke Kawaguchi
  */
 @Describable("Publish artifacts to SCP Repository")
-public class ScpPublisher extends PostBuildStep {
+public class ScpPublisher extends AbstractStep implements PostBuildStep {
     public ScpPublisher(Job parent, String path) {
         super(parent, path);
     }
@@ -20,11 +15,11 @@ public class ScpPublisher extends PostBuildStep {
 
     public Site add() {
         add.click();
-        String p = last(by.xpath(".//div[@name='entries'][starts-with(@path,'%s/entries')]", path)).getAttribute("path");
-        return new Site(page, p);
+        String p = last(by.xpath(".//div[@name='entries'][starts-with(@path,'%s/entries')]", getPath())).getAttribute("path");
+        return new Site(getPage(), p);
     }
 
-    public static class Site extends PageArea {
+    public static class Site extends PageAreaImpl {
         public Site(PageObject parent, String path) {
             super(parent, path);
         }

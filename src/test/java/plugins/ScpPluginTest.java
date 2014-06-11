@@ -18,28 +18,31 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+
 /**
- Feature: Tests for SCP plugin
+ * Feature: Tests for SCP plugin
  */
 @WithPlugins("scp")
 public class ScpPluginTest extends AbstractJUnitTest {
     @Inject
     Docker docker;
+
     @Native("docker")
     /**
      @native(docker)
      Scenario: Configure a job with SCP publishing
-       Given I have installed the "scp" plugin
-       And a docker fixture "sshd"
-       And a job
-       When I configure docker fixture as SCP site with password
-       And I configure the job
-       And I copy resource "scp_plugin/lorem-ipsum-scp.txt" into workspace
-       And I publish "pmd.xml" with SCP plugin
-       And I save the job
-       And I build the job
-       Then the build should succeed
-       And SCP plugin should have published "lorem-ipsum-scp.txt" on docker fixture
+     Given I have installed the "scp" plugin
+     And a docker fixture "sshd"
+     And a job
+     When I configure docker fixture as SCP site with password
+     And I configure the job
+     And I copy resource "scp_plugin/lorem-ipsum-scp.txt" into workspace
+     And I publish "pmd.xml" with SCP plugin
+     And I save the job
+     And I build the job
+     Then the build should succeed
+     And SCP plugin should have published "lorem-ipsum-scp.txt" on docker fixture
      */
     @Test
 
@@ -50,7 +53,8 @@ public class ScpPluginTest extends AbstractJUnitTest {
         FreeStyleJob j = jenkins.jobs.create();
 
         jenkins.configure();
-        Site s = new ScpGlobalConfig(jenkins).addSite(); {
+        Site s = new ScpGlobalConfig(jenkins).addSite();
+        {
             s.hostname.set(sshd.ipBound(22));
             s.port.set(sshd.port(22));
             s.username.set("test");
@@ -59,7 +63,8 @@ public class ScpPluginTest extends AbstractJUnitTest {
         }
         jenkins.save();
 
-        j.configure(); {
+        j.configure();
+        {
             j.copyResource(cp_file);
             ScpPublisher sp = j.addPublisher(ScpPublisher.class);
             ScpPublisher.Site sps = sp.add();
@@ -100,16 +105,18 @@ public class ScpPluginTest extends AbstractJUnitTest {
         FreeStyleJob j = jenkins.jobs.create();
 
         jenkins.configure();
-        Site s = new ScpGlobalConfig(jenkins).addSite(); {
+        Site s = new ScpGlobalConfig(jenkins).addSite();
+        {
             s.hostname.set(sshd.ipBound(22));
             s.port.set(sshd.port(22));
             s.username.set("test");
-            s.keyfile.set(resource("/ssh_keys/unsafe").asFile().getAbsolutePath());
+            s.keyfile.set(sshd.getPrivateKey().getAbsolutePath());
             s.rootRepositoryPath.set("/tmp");
         }
         jenkins.save();
 
-        j.configure(); {
+        j.configure();
+        {
             j.copyResource(cp_file);
             ScpPublisher sp = j.addPublisher(ScpPublisher.class);
             ScpPublisher.Site sps = sp.add();

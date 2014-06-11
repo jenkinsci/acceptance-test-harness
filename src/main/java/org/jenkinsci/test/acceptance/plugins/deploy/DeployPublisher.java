@@ -1,16 +1,13 @@
 package org.jenkinsci.test.acceptance.plugins.deploy;
 
-import org.jenkinsci.test.acceptance.po.Control;
-import org.jenkinsci.test.acceptance.po.Describable;
-import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.PostBuildStep;
+import org.jenkinsci.test.acceptance.po.*;
 import org.openqa.selenium.WebElement;
 
 /**
  * @author Kohsuke Kawaguchi
  */
 @Describable("Deploy war/ear to a container")
-public class DeployPublisher  extends PostBuildStep {
+public class DeployPublisher extends AbstractStep implements PostBuildStep {
     public DeployPublisher(Job parent, String path) {
         super(parent, path);
     }

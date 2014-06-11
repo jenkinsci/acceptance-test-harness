@@ -36,8 +36,19 @@ public class SlavesMixIn extends MixIn {
 
         // reasonable starting point values
         s.setExecutors(1);
-        s.setRemoteFs("/tmp/"+name);
+        s.setRemoteFs(remoteFs(name));
 
         return s;
+    }
+
+    private String remoteFs(String name) {
+        String base = "/tmp/";
+        if (System.getenv("SLAVE_FS_BASE") != null) {
+            base = System.getenv("SLAVE_FS_BASE");
+            if (!base.endsWith("/")) {
+                base += "/";
+            }
+        }
+        return base + name;
     }
 }

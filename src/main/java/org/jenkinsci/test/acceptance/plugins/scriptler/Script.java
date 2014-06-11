@@ -25,7 +25,7 @@ package org.jenkinsci.test.acceptance.plugins.scriptler;
 
 import java.util.Map;
 
-import org.jenkinsci.test.acceptance.po.CapybaraPortingLayer;
+import org.jenkinsci.test.acceptance.po.CapybaraPortingLayerImpl;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Node;
 import org.openqa.selenium.By;
@@ -34,7 +34,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 // Can not be a PageObject due to plugin url scheme
-public class Script extends CapybaraPortingLayer {
+public class Script extends CapybaraPortingLayerImpl {
 
     private final Scriptler scriptler;
     private final String id;
@@ -76,7 +76,8 @@ public class Script extends CapybaraPortingLayer {
         if (slave != null) {
             try {
                 control("/node").select(slave);
-            } catch (NoSuchElementException ex) {
+            }
+            catch (NoSuchElementException ex) {
                 sleep(1000);
                 visitAction("runScript");
                 control("/node").select(slave);
@@ -111,11 +112,13 @@ public class Script extends CapybaraPortingLayer {
     }
 
     private void fillParams(Map<String, String> params) {
-        if (params == null || params.isEmpty()) return;
+        if (params == null || params.isEmpty()) {
+            return;
+        }
 
         control("/defineParams").check();
 
-        for (Map.Entry<String, String> pair: params.entrySet()) {
+        for (Map.Entry<String, String> pair : params.entrySet()) {
 
             WebElement elem = getElement(by.xpath("//input[@name='name' and @value='%s']", pair.getKey()));
             if (elem == null) {
@@ -132,7 +135,7 @@ public class Script extends CapybaraPortingLayer {
         control("/defineParams").check();
 
         String prefix = "/defineParams/parameters/";
-        for (Map.Entry<String, String> pair: params.entrySet()) {
+        for (Map.Entry<String, String> pair : params.entrySet()) {
 
             control(prefix + "name").set(pair.getKey());
             control(prefix + "value").set(pair.getValue());

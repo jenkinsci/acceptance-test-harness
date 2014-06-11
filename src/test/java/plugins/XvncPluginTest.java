@@ -1,16 +1,17 @@
 package plugins;
 
-import static org.jenkinsci.test.acceptance.plugins.xvnc.XvncJobConfig.*;
-
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.Native;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.xvnc.XvncGlobalJobConfig;
 import org.jenkinsci.test.acceptance.plugins.xvnc.XvncJobConfig;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
-import org.jenkinsci.test.acceptance.junit.Native;
 import org.junit.Before;
 import org.junit.Test;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.jenkinsci.test.acceptance.plugins.xvnc.XvncJobConfig.*;
 
 @WithPlugins("xvnc")
 public class XvncPluginTest extends AbstractJUnitTest {
@@ -21,7 +22,8 @@ public class XvncPluginTest extends AbstractJUnitTest {
         job = jenkins.jobs.create(FreeStyleJob.class);
     }
 
-    @Test @Native("vncserver")
+    @Test
+    @Native("vncserver")
     public void run_xvnc_during_the_build() {
         job.configure();
         new XvncJobConfig(job).useXvnc();
@@ -31,7 +33,8 @@ public class XvncPluginTest extends AbstractJUnitTest {
         assertThat(build, runXvnc());
     }
 
-    @Test @Native({"vncserver", "import"})
+    @Test
+    @Native({"vncserver", "import"})
     public void take_screenshot_at_the_end_of_the_build() {
         job.configure();
         new XvncJobConfig(job).useXvnc().takeScreenshot();
@@ -43,7 +46,8 @@ public class XvncPluginTest extends AbstractJUnitTest {
         build.getArtifact("screenshot.jpg").assertThatExists(true);
     }
 
-    @Test @Native("vncserver")
+    @Test
+    @Native("vncserver")
     public void use_specific_display_number() {
         jenkins.configure();
         new XvncGlobalJobConfig(jenkins.getConfigPage()).useDisplayNumber(42);

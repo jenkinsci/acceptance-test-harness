@@ -1,14 +1,11 @@
 package org.jenkinsci.test.acceptance.po;
 
 /**
- * {@link PageArea} that corresponds to 'Publisher' in the core.
- *
+ * Marker Interface for {@link PageArea} that corresponds to 'Publisher' in the core.
+ * <p/>
  * Subtypes should have {@link Describable} annotation on it.
  *
- * @author Kohsuke Kawaguchi
+ * @author christian.fritz
  */
-public class PostBuildStep extends Step {
-    public PostBuildStep(Job parent, String path) {
-        super(parent, path);
-    }
+public interface PostBuildStep extends Step {
 }

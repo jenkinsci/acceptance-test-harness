@@ -1,42 +1,44 @@
 package plugins;
 
-import javax.inject.Inject;
-import java.io.IOException;
-import java.net.ServerSocket;
-
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.LdapContainer;
-import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.junit.Bug;
-import org.jenkinsci.test.acceptance.junit.Native;
-import org.jenkinsci.test.acceptance.junit.SmokeTest;
-import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.junit.*;
 import org.jenkinsci.test.acceptance.plugins.ldap.LdapDetails;
+import org.jenkinsci.test.acceptance.plugins.ldap.SearchForGroupsLdapGroupMembershipStrategy;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
-import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.LdapSecurityRealm;
 import org.jenkinsci.test.acceptance.po.Login;
 import org.jenkinsci.test.acceptance.po.User;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-import static org.hamcrest.CoreMatchers.*;
+import javax.inject.Inject;
+
+import static org.hamcrest.CoreMatchers.not;
 import static org.jenkinsci.test.acceptance.Matchers.*;
+import javax.annotation.CheckForNull;
+import javax.inject.Inject;
+import java.io.IOException;
+import java.net.ServerSocket;
+
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+import static org.jenkinsci.test.acceptance.Matchers.hasLoggedInUser;
 
 
 /**
  * Feature: Tests for LdapPlugin.
+ * This test suite always runs against the latest ldap plugin version.
  *
  * @author Michael Prankl
  */
 @Native("docker")
+@WithPlugins("ldap@1.10")
 public class LdapPluginTest extends AbstractJUnitTest {
 
     @Inject
     DockerContainerHolder<LdapContainer> ldap;
-
-    @Inject
-    Jenkins jenkins;
 
     /**
      * "Jenkins is using ldap as security realm"
@@ -56,8 +58,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
      * @return default ldap connection details
      */
     private LdapDetails createDefaults(LdapContainer ldapContainer) {
-        LdapDetails details = new LdapDetails(ldapContainer.getHost(), ldapContainer.getPort(), ldapContainer.getManagerDn(), ldapContainer.getManagerPassword(), ldapContainer.getRootDn());
-        return details;
+        return new LdapDetails(ldapContainer.getHost(), ldapContainer.getPort(), ldapContainer.getManagerDn(), ldapContainer.getManagerPassword(), ldapContainer.getRootDn());
     }
 
     /**
@@ -317,7 +318,6 @@ public class LdapPluginTest extends AbstractJUnitTest {
      */
     @Test
     @Bug("JENKINS-18355")
-    @WithPlugins("ldap@1.8")
     public void resolve_display_name_with_defaults() {
         // Given
         useLdapAsSecurityRealm(createDefaults(ldap.get()));
@@ -340,7 +340,6 @@ public class LdapPluginTest extends AbstractJUnitTest {
      */
     @Test
     @Bug("JENKINS-18355")
-    @WithPlugins("ldap@1.8")
     @Category(SmokeTest.class)
     public void custom_display_name() {
         // Given
@@ -354,7 +353,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     * Scenario: using custom group membership filter which leads to no user belongs to a group
+     * Scenario: using "search for groups containing user" strategy with group membership filter which leads to no user belongs to a group
      * Given I have a docker fixture "ldap"
      * And Jenkins is using ldap as security realm with group membership filter "(member={0})"
      * When I login with user "jenkins" and password "root"
@@ -363,7 +362,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
     @Test
     public void custom_group_membership_filter() {
         // Given
-        useLdapAsSecurityRealm(createDefaults(ldap.get()).groupMembershipFilter("(member={0})"));
+        useLdapAsSecurityRealm(createDefaults(ldap.get()).groupMembershipStrategy(SearchForGroupsLdapGroupMembershipStrategy.class).groupMembershipStrategyParam("(member={0})"));
         // When
         Login login = jenkins.login();
         login.doLogin("jenkins", "root");
@@ -383,7 +382,6 @@ public class LdapPluginTest extends AbstractJUnitTest {
      * since ldap plugin version 1.8
      */
     @Test
-    @WithPlugins("ldap@1.8")
     public void custom_mail_filter() {
         // Given
         useLdapAsSecurityRealm(createDefaults(ldap.get()).mailAdressAttributeName("givenName"));
@@ -395,14 +393,4 @@ public class LdapPluginTest extends AbstractJUnitTest {
         assertThat(userJenkins, mailAddressIs("givenname@mailaddress.com"));
     }
 
-    private int findAvailablePort() {
-        // use ldap port 389 as fallback (but maybe there is a ldap server running)
-        int port = 389;
-        try (ServerSocket s = new ServerSocket(0)) {
-            port = s.getLocalPort();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return port;
-    }
 }

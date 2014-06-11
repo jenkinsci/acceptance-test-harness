@@ -1,22 +1,25 @@
 package org.jenkinsci.test.acceptance.po;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.Description;
 import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.Matchers;
-import org.jenkinsci.test.acceptance.plugins.nodelabelparameter.NodeParameter;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.regex.Pattern;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.*;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -33,12 +36,12 @@ public class Build extends ContainerPageObject {
     private boolean success;
 
     public Build(Job job, int buildNumber) {
-        super(job.injector,job.url("%d/",buildNumber));
+        super(job.injector, job.url("%d/", buildNumber));
         this.job = job;
     }
 
     public Build(Job job, String permalink) {
-        super(job.injector,job.url(permalink+"/"));
+        super(job.injector, job.url(permalink + "/"));
         this.job = job;
     }
 
@@ -51,8 +54,9 @@ public class Build extends ContainerPageObject {
      * "Casts" this object into a subtype by creating the specified type
      */
     public <T extends Build> T as(Class<T> type) {
-        if (type.isInstance(this))
+        if (type.isInstance(this)) {
             return type.cast(this);
+        }
         return newInstance(type, job, url);
     }
 
@@ -72,8 +76,9 @@ public class Build extends ContainerPageObject {
     }
 
     public boolean hasStarted() {
-        if (result!=null)
+        if (result != null) {
             return true;
+        }
 
         try {
             getJson();
@@ -100,16 +105,20 @@ public class Build extends ContainerPageObject {
             public Boolean call() {
                 return !isInProgress();
             }
-        },timeout);
+        }, timeout);
         return this;
     }
 
     public boolean isInProgress() {
-        if (result!=null)   return false;
-        if (!hasStarted())  return false;
+        if (result != null) {
+            return false;
+        }
+        if (!hasStarted()) {
+            return false;
+        }
 
         JsonNode d = getJson();
-        return d.get("building").booleanValue() || d.get("result")==null;
+        return d.get("building").booleanValue() || d.get("result") == null;
     }
 
     public int getNumber() {
@@ -120,16 +129,25 @@ public class Build extends ContainerPageObject {
         return url("consoleFull");
     }
 
+    public URL getStatusUrl() { return url(Integer.toString(getNumber())); }
+
+    public void openStatusPage() {
+        visit(getStatusUrl());
+    }
+
     public String getConsole() {
-        if (console!=null)  return console;
+        if (console != null) {
+            return console;
+        }
 
         visit(getConsoleUrl());
 
         List<WebElement> a = all(by.xpath("//pre"));
-        if (a.size()>1)
+        if (a.size() > 1) {
             console = find(by.xpath("//pre[@id='out']")).getText();
-        else
+        } else {
             console = a.get(0).getText();
+        }
 
         return console;
     }
@@ -156,7 +174,9 @@ public class Build extends ContainerPageObject {
     }
 
     public String getResult() {
-        if (result!=null)   return result;
+        if (result != null) {
+            return result;
+        }
 
         waitUntilFinished();
         result = getJson().get("result").asText();
@@ -164,7 +184,19 @@ public class Build extends ContainerPageObject {
     }
 
     public Artifact getArtifact(String artifact) {
-        return new Artifact(this,url("artifact/%s",artifact));
+        return new Artifact(this, url("artifact/%s", artifact));
+    }
+
+    public List<Artifact> getArtifacts() {
+        WebDriver artifact = visit(url("artifact"));
+        List<WebElement> fileList = artifact.findElements(By.cssSelector("table.fileList td:nth-child(2) a"));
+        List<Artifact> list = new LinkedList<>();
+        for (WebElement el : fileList) {
+            if("a".equalsIgnoreCase(el.getTagName())) {
+                list.add(getArtifact(el.getText()));
+            }
+        }
+        return list;
     }
 
     public Build shouldSucceed() {
@@ -190,64 +222,15 @@ public class Build extends ContainerPageObject {
         return this;
     }
 
-    /**
-     * This function tries to assert that the current build is pending for a certain
-     * node using a NodeParameter. The node's name has to be specified when calling this method.
-     */
-    public Build shouldBePendingForNodeParameter(String nodename){
-        String paramname = "";
-        Parameter param;
-
-        //as a job can have multiple parameters, get the NodeParameter to determine its name
-        for (int i = 0; i < this.job.getParameters().size(); i++) {
-            param = this.job.getParameters().get(i);
-            if ( param  instanceof NodeParameter )
-                paramname = param.getName();
-        }
-
-        String pendingBuildText = this.getPendingBuildText();
-        String expectedText=String.format("(pending—%s is offline) [NodeParameterValue: %s=%s]",nodename,paramname,nodename);
-        assertThat(pendingBuildText, containsString(expectedText));
-        assertThat(this.hasStarted(), is(false));
-
-        return this;
-    }
-
-    /**
-     * This function tries to assert that the current build is pending due there are no
-     * valid online nodes. The node's name has to be specified when calling this method.
-     */
-    public Build shouldBeTriggeredWithoutValidOnlineNode(String nodename)
-    {
-        String pendingBuildText = this.getPendingBuildText();
-        String expectedText=String.format("(pending—All nodes of label ‘Job triggered without a valid online node, given where: %s’ are offline)",nodename);
-        assertThat(pendingBuildText, containsString(expectedText));
-        assertThat(this.hasStarted(), is(false));
-
-        return this;
-    }
-
-    /**
-     * This function extracts a pending build message out of the build history summary if there is one.
-     */
-    public String getPendingBuildText(){
-        //ensure to be on the job's page otherwise we do not have the build history summary
-        // to get their content
-        this.job.visit("");
-
-        // pending message comes from the queue, and queue's maintenance is asynchronous to UI threads.
-        // so if the original response doesn't contain it, we have to wait for the refersh of the build history.
-        // so give it a bigger wait.
-        return find(by.xpath("//img[@alt='pending']/../..")).getText();
-    }
-
     private Matcher<Build> resultIs(final String expected) {
         return new Matcher<Build>("Build result %s", expected) {
-            @Override public boolean matchesSafely(Build item) {
+            @Override
+            public boolean matchesSafely(Build item) {
                 return item.getResult().equals(expected);
             }
 
-            @Override public void describeMismatchSafely(Build item, Description dsc) {
+            @Override
+            public void describeMismatchSafely(Build item, Description dsc) {
                 dsc.appendText("was ").appendText(item.getResult())
                         .appendText(". Console output:\n").appendText(getConsole())
                 ;
@@ -257,7 +240,9 @@ public class Build extends ContainerPageObject {
 
     public String getNode() {
         String n = getJson().get("builtOn").asText();
-        if (n.length()==0)  return "master";
+        if (n.length() == 0) {
+            return "master";
+        }
         return n;
     }
 
@@ -274,7 +259,7 @@ public class Build extends ContainerPageObject {
 
     public void shouldNotExist() {
         try {
-            HttpURLConnection con = (HttpURLConnection)url.openConnection();
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
             assertThat(con.getResponseCode(), is(404));
         } catch (IOException e) {
             throw new AssertionError(e);

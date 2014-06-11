@@ -29,7 +29,7 @@ import org.jenkinsci.test.acceptance.po.PageObject;
 
 /**
  * Page Object for Gerrit Trigger test-job (configuration) page.
- * @author Marco Miller
+ * @author Marco.Miller@ericsson.com
  */
 public class GerritTriggerJob extends PageObject {
 
@@ -61,7 +61,7 @@ public class GerritTriggerJob extends PageObject {
         failVerif.set("-1");
         passRev.set("1");
         failRev.set("-1");
-        project.set(GerritTriggerEnv.getInstance().getProject());
+        project.set(GerritTriggerEnv.get().getProject());
         branch.set("master");
         clickButton("Save");
     }
