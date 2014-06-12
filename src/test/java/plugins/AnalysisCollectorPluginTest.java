@@ -44,11 +44,60 @@ public class AnalysisCollectorPluginTest extends AbstractJUnitTest {
         assertThat(job, hasAction("Static Analysis Warnings"));
         assertThat(lastBuild, hasAction("Static Analysis Warnings"));
         AnalysisCollectorAction result = new AnalysisCollectorAction(job);
-        assertThat(result.getWarningNumber(), is(795));
-        assertThat(result.getHighWarningNumber(), is(779));
-        assertThat(result.getNormalWarningNumber(), is(9));
-        assertThat(result.getLowWarningNumber(), is(7));
-        assertThat(result.getNewWarningNumber(), is(795));
+        assertThat(result.getWarningNumber(), is(799));
+        assertThat(result.getHighWarningNumber(), is(780));
+        assertThat(result.getNormalWarningNumber(), is(11));
+        assertThat(result.getLowWarningNumber(), is(8));
+        assertThat(result.getNewWarningNumber(), is(799));
+    }
+
+    /**
+     * Scenario: Workspace has more warnings than prior build
+     * Given I have job with artifacts of static analysis tools
+     * And this artifacts are published by their corresponding plugins
+     * And the first build got 4 warnings in total
+     * When I add a new resource that contains 4 more warnings
+     * Then the second build will have 8 warnings in total
+     * And the second build will have 4 new warnings
+     */
+    @Test
+    public void more_warnings_in_second_build(){
+        FreeStyleJob job = setupJob("/analysis_collector_plugin/Tasks.java");
+        job.startBuild().waitUntilFinished();
+        // copy new resource
+        job.configure();
+        copyResources("/analysis_collector_plugin/Tasks2.java", job);
+        job.save();
+        // start second build
+        job.startBuild().waitUntilFinished();
+        AnalysisCollectorAction result = new AnalysisCollectorAction(job);
+        assertThat(result.getWarningNumber(), is(8));
+        assertThat(result.getHighWarningNumber(), is(2));
+        assertThat(result.getNormalWarningNumber(), is(4));
+        assertThat(result.getLowWarningNumber(), is(2));
+        assertThat(result.getNewWarningNumber(), is(4));
+    }
+
+    /**
+     * Scenario: Build should become status unstable when warning threshold is exceeded.
+     * Given I have job with artifacts of static analysis tools
+     * And this artifacts are published by their corresponding plugins
+     * And the resources of the job contain 6 warnings
+     * And I set the unstable status threshold for all priorities to 5
+     * When I start a build
+     * Then the build should get status unstable
+     */
+    @Test
+    public void warning_threshold_build_unstable(){
+        FreeStyleJob job = jenkins.jobs.create();
+        job.configure();
+        copyResources("/analysis_collector_plugin/findbugs.xml", job);
+        job.addPublisher(FindbugsPublisher.class);
+        AnalysisCollectorPublisher analysis = job.addPublisher(AnalysisCollectorPublisher.class);
+        analysis.advanced.click();
+        analysis.warningThresholdUnstable.sendKeys("5");
+        job.save();
+        job.startBuild().waitUntilFinished().shouldBeUnstable();
     }
 
     /**
@@ -58,7 +107,7 @@ public class AnalysisCollectorPluginTest extends AbstractJUnitTest {
      * @return the made job
      */
     public FreeStyleJob setupJob(String resourceToCopy) {
-        final FreeStyleJob job = jenkins.jobs.create();
+        FreeStyleJob job = jenkins.jobs.create();
         job.configure();
         copyResources(resourceToCopy, job);
         job.addPublisher(CheckstylePublisher.class);
