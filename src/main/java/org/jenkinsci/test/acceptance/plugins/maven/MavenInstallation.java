@@ -46,16 +46,12 @@ public class MavenInstallation extends ToolInstallation {
         final By advancedButtonBy = by.path("/hudson-tasks-Maven$MavenInstallation/advanced-button");
         WebElement mavenAdvancedButton = jenkins.getElement(advancedButtonBy);
         if(mavenAdvancedButton == null) {
-            installMavenImmediately(jenkins, "default_maven", "3.0.5");
+            installSomeMaven(jenkins);
         }
     }
 
     public static void installMaven(Jenkins jenkins, String name, String version) {
         waitForUpdates(jenkins, MavenInstallation.class);
-        installMavenImmediately(jenkins, name, version);
-    }
-
-    private static void installMavenImmediately(Jenkins jenkins, String name, String version) {
         jenkins.configure();
         MavenInstallation maven = jenkins.getConfigPage().addTool(MavenInstallation.class);
         maven.name.set(name);
