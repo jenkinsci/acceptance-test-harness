@@ -77,15 +77,15 @@ public abstract class AbstractCodeStylePluginAction extends ContainerPageObject 
      * @return Number of high warnings
      */
     public int getHighWarningNumber() {
-        return getIntByXPath("//table[@id='analysis.summary']/tbody/tr/td[@class='pane'][2]");
+        return getIntByXPath("//table[@id='analysis.summary']/tbody/tr/td[@class='pane']/div[@id='HIGH']");
     }
 
     /**
      * Getter of normal warnings.
-     * @return Number of normal warnings
+     * @return Number of normal warningsdie
      */
     public int getNormalWarningNumber() {
-        return getIntByXPath("//table[@id='analysis.summary']/tbody/tr/td[@class='pane'][3]");
+        return getIntByXPath("//table[@id='analysis.summary']/tbody/tr/td[@class='pane']/div[@id='NORMAL']");
     }
 
     /**
@@ -93,7 +93,7 @@ public abstract class AbstractCodeStylePluginAction extends ContainerPageObject 
      * @return Number of low warnings.
      */
     public int getLowWarningNumber() {
-        return getIntByXPath("//table[@id='analysis.summary']/tbody/tr/td[@class='pane'][4]");
+        return getIntByXPath("//table[@id='analysis.summary']/tbody/tr/td[@class='pane']/div[@id='LOW']");
     }
 
     /**

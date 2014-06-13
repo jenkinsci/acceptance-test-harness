@@ -402,8 +402,8 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
         // Note:
         //   high warning is omitted in summary table because no high prio tag is defined.
 
-        //assertThat(tsa.getNormalWarningNumber(), is(3));
-        //assertThat(tsa.getLowWarningNumber(), is(0));
+        assertThat(tsa.getNormalWarningNumber(), is(3));
+        assertThat(tsa.getLowWarningNumber(), is(0));
         assertThat(tsa.getPluginResult(lastBuild), is("Plug-in Result: SUCCESS - no threshold has been exceeded"));
 
         // +----------------------------------------------------------------------------+
@@ -433,8 +433,8 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
         assertThat(tsa.getResultLinkByXPathText("3 new open tasks"), is("tasksResult/new"));
         assertThat(tsa.getWarningNumber(), is(6));
         assertThat(tsa.getNewWarningNumber(), is(3));
-        //assertThat(tsa.getNormalWarningNumber(), is(4));
-        //assertThat(tsa.getLowWarningNumber(), is(2));
+        assertThat(tsa.getNormalWarningNumber(), is(4));
+        assertThat(tsa.getLowWarningNumber(), is(2));
         assertThat(tsa.getPluginResult(lastBuild),
                 is("Plug-in Result: UNSTABLE - 2 warnings of priority Low Priority exceed the threshold of 1 by 1 (Reference build: #1)"));
 
@@ -470,8 +470,8 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
         assertThat(tsa.getResultLinkByXPathText("3 new open tasks"), is("tasksResult/new"));
         assertThat(tsa.getWarningNumber(), is(6));
         assertThat(tsa.getNewWarningNumber(), is(3));
-        //assertThat(tsa.getNormalWarningNumber(), is(5));
-        //assertThat(tsa.getLowWarningNumber(), is(1));
+        assertThat(tsa.getNormalWarningNumber(), is(5));
+        assertThat(tsa.getLowWarningNumber(), is(1));
         assertThat(tsa.getPluginResult(lastBuild),
                 is("Plug-in Result: UNSTABLE - 5 warnings of priority Normal Priority exceed the threshold of 4 by 1 (Reference build: #1)"));
 
