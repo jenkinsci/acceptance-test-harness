@@ -356,15 +356,49 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
     @Test
     public void status_thresholds() throws Exception {
 
-        // +----------------------------------------------------------------------------+
-        // |                            BASIC SETUP / STEP 1                            |
-        // +----------------------------------------------------------------------------+
+        // Basic setup
 
         FreeStyleJob j = setupJob("/tasks_plugin/fileset1_less",TaskScannerPublisher.class,
                 "**/*.java");
 
-        j.configure();
         TaskScannerPublisher pub = j.getPublisher(TaskScannerPublisher.class);
+        TaskScannerAction tsa = new TaskScannerAction(j);
+
+        // In order to increase readability each step has been placed in a separate
+        // private function
+
+        j = status_thresholds_step1(j, pub, tsa);
+        j = status_thresholds_step2(j, pub, tsa);
+        j = status_thresholds_step3(j, pub, tsa);
+        j = status_thresholds_step4(j, pub, tsa);
+        j = status_thresholds_step5(j, pub, tsa);
+        j = status_thresholds_step6(j, pub, tsa);
+
+
+    }
+
+    /**
+     * This method does special configurations for test step 1 of test
+     * {@link TaskScannerPluginTest#status_thresholds()}. The scenario is that the file set
+     * consists of 9 files, whereof
+     *   - 7 files are to be scanned for tasks
+     *
+     * The expected task priorities are:
+     *   - 0x high
+     *   - 3x medium
+     *   - 0x low
+     *
+     * So, the build status shall be SUCCESS as no threshold will be exceeded.     *
+     *
+     * @param j the {@link org.jenkinsci.test.acceptance.po.FreeStyleJob} created in the Test
+     * @param pub a {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerPublisher} added to the Job
+     * @param tsa a the {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerAction} object for the current job
+     *
+     * @return The modified {@link org.jenkinsci.test.acceptance.po.FreeStyleJob}.
+     */
+
+    private FreeStyleJob status_thresholds_step1(FreeStyleJob j, TaskScannerPublisher pub, TaskScannerAction tsa){
+        j.configure();
         pub.excludePattern.set("**/*Test.java");
         pub.highPriorityTags.set(""); //no high prio tags
         pub.normalPriorityTags.set("TODO");
@@ -381,19 +415,8 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
 
         j.save();
 
-        // The file set consists of 9 files, whereof
-        //   - 7 files are to be scanned for tasks
-        //
-        // The expected task priorities are:
-        //   - 0x high
-        //   - 3x medium
-        //   - 0x low//pResult =
-        //
-        // ==> build status shall be SUCCESS, no threshold exceeded
-
-        Build lastBuild = buildJobWithSuccess(j);
+        final Build lastBuild = buildJobWithSuccess(j);
         lastBuild.open();
-        TaskScannerAction tsa = new TaskScannerAction(j);
 
         assertThat(tsa.getResultTextByXPathText("3 open tasks"), endsWith("in 7 workspace files."));
         assertThat(tsa.getResultLinkByXPathText("3 new open tasks"), is("tasksResult/new"));
@@ -406,27 +429,37 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
         assertThat(tsa.getLowWarningNumber(), is(0));
         assertThat(tsa.getPluginResult(lastBuild), is("Plug-in Result: SUCCESS - no threshold has been exceeded"));
 
-        // +----------------------------------------------------------------------------+
-        // |                                   STEP 2                                   |
-        // +----------------------------------------------------------------------------+
+        return j;
+    }
 
+    /**
+     * This method does special configurations for test step 2 of test
+     * {@link TaskScannerPluginTest#status_thresholds()}. The scenario is that the file set
+     * consists of 9 files, whereof
+     *   - 7 files are to be scanned for tasks
+     *
+     * The expected task priorities are:
+     *   - 0x high
+     *   - 4x medium
+     *   - 2x low
+     *
+     * So, the build status shall be UNSTABLE due to low priority threshold is exceeded by 1.
+     *
+     * @param j the {@link org.jenkinsci.test.acceptance.po.FreeStyleJob} created in the Test
+     * @param pub a {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerPublisher} added to the Job
+     * @param tsa a the {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerAction} object for the current job
+     *
+     * @return The modified {@link org.jenkinsci.test.acceptance.po.FreeStyleJob}.
+     */
+
+    private FreeStyleJob status_thresholds_step2(FreeStyleJob j, TaskScannerPublisher pub, TaskScannerAction tsa){
         j.configure();
         j.removeFirstBuildStep(); // remove copyDir shell step for fileset1_less
         j.copyDir(resource("/tasks_plugin/fileset1"));
         pub.lowPriorityTags.set("@Deprecated,\\?\\?\\?"); // add tag "???"
         j.save();
 
-        // The file set consists of 9 files, whereof
-        //   - 7 files are to be scanned for tasks
-        //
-        // The expected task priorities are:
-        //   - 0x high
-        //   - 4x medium
-        //   - 2x low
-        //
-        // ==> build status shall be UNSTABLE due to low priority threshold is exceeded by 1
-
-        lastBuild = j.startBuild().shouldBeUnstable();
+        final Build lastBuild = j.startBuild().shouldBeUnstable();
         lastBuild.open();
 
         assertThat(tsa.getResultTextByXPathText("6 open tasks"), endsWith("in 7 workspace files."));
@@ -438,26 +471,36 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
         assertThat(tsa.getPluginResult(lastBuild),
                 is("Plug-in Result: UNSTABLE - 2 warnings of priority Low Priority exceed the threshold of 1 by 1 (Reference build: #1)"));
 
-        // +----------------------------------------------------------------------------+
-        // |                                   STEP 3                                   |
-        // +----------------------------------------------------------------------------+
+        return j;
+    }
 
+    /**
+     * This method does special configurations for test step 3 of test
+     * {@link TaskScannerPluginTest#status_thresholds()}. The scenario is that the file set
+     * consists of 9 files, whereof
+     *   - 7 files are to be scanned for tasks
+     *
+     * The expected task priorities are:
+     *   - 0x high
+     *   - 5x medium
+     *   - 1x low
+     *
+     * So, the build status shall be UNSTABLE due to normal priority threshold is exceeded by 1.
+     *
+     * @param j the {@link org.jenkinsci.test.acceptance.po.FreeStyleJob} created in the Test
+     * @param pub a {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerPublisher} added to the Job
+     * @param tsa a the {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerAction} object for the current job
+     *
+     * @return The modified {@link org.jenkinsci.test.acceptance.po.FreeStyleJob}.
+     */
+
+    private FreeStyleJob status_thresholds_step3(FreeStyleJob j, TaskScannerPublisher pub, TaskScannerAction tsa){
         j.configure();
         pub.lowPriorityTags.set("@Deprecated"); // remove tag "???"
         pub.normalPriorityTags.set("TODO,XXX"); // add tag "XXX"
         j.save();
 
-        // The file set consists of 9 files, whereof
-        //   - 7 files are to be scanned for tasks
-        //
-        // The expected task priorities are:
-        //   - 0x high
-        //   - 5x medium
-        //   - 1x low
-        //
-        // ==> build status shall be UNSTABLE due to normal priority threshold is exceeded by 1
-
-        lastBuild = j.startBuild().shouldBeUnstable();
+        final Build lastBuild = j.startBuild().shouldBeUnstable();
         lastBuild.open();
 
         assertThat(tsa.getResultTextByXPathText("6 open tasks"), endsWith("in 7 workspace files."));
@@ -475,26 +518,36 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
         assertThat(tsa.getPluginResult(lastBuild),
                 is("Plug-in Result: UNSTABLE - 5 warnings of priority Normal Priority exceed the threshold of 4 by 1 (Reference build: #1)"));
 
-        // +----------------------------------------------------------------------------+
-        // |                                   STEP 4                                   |
-        // +----------------------------------------------------------------------------+
+        return j;
+    }
 
+    /**
+     * This method does special configurations for test step 4 of test
+     * {@link TaskScannerPluginTest#status_thresholds()}. The scenario is that the file set
+     * consists of 9 files, whereof
+     *   - 7 files are to be scanned for tasks
+     *
+     * The expected task priorities are:
+     *   - 1x high
+     *   - 5x medium
+     *   - 2x low
+     *
+     * So, the build status shall be UNSTABLE due to high priority threshold is exceeded by 1.
+     *
+     * @param j the {@link org.jenkinsci.test.acceptance.po.FreeStyleJob} created in the Test
+     * @param pub a {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerPublisher} added to the Job
+     * @param tsa a the {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerAction} object for the current job
+     *
+     * @return The modified {@link org.jenkinsci.test.acceptance.po.FreeStyleJob}.
+     */
+
+    private FreeStyleJob status_thresholds_step4(FreeStyleJob j, TaskScannerPublisher pub, TaskScannerAction tsa){
         j.configure();
         pub.lowPriorityTags.set("@Deprecated,\\?\\?\\?"); // add tag "???"
         pub.highPriorityTags.set("FIXME"); // add tag "FIXME"
         j.save();
 
-        // The file set consists of 9 files, whereof
-        //   - 7 files are to be scanned for tasks
-        //
-        // The expected task priorities are:
-        //   - 1x high
-        //   - 5x medium
-        //   - 2x low
-        //
-        // ==> build status shall be UNSTABLE due to high priority threshold is exceeded by 1
-
-        lastBuild = j.startBuild().shouldBeUnstable();
+        final Build lastBuild = j.startBuild().shouldBeUnstable();
         lastBuild.open();
 
         assertThat(tsa.getResultTextByXPathText("8 open tasks"), endsWith("in 7 workspace files."));
@@ -507,26 +560,36 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
         assertThat(tsa.getPluginResult(lastBuild),
                 is("Plug-in Result: UNSTABLE - 1 warning of priority High Priority exceeds the threshold of 0 by 1 (Reference build: #1)"));
 
-        // +----------------------------------------------------------------------------+
-        // |                                   STEP 5                                   |
-        // +----------------------------------------------------------------------------+
+        return j;
+    }
 
+    /**
+     * This method does special configurations for test step 5 of test
+     * {@link TaskScannerPluginTest#status_thresholds()}. The scenario is that the file set
+     * consists of 19 files, whereof
+     *   - 17 files are to be scanned for tasks
+     *
+     * The expected task priorities are:
+     *   -  1x high
+     *   - 11x medium
+     *   -  3x low
+     *
+     * So, the build status shall be UNSTABLE due to total warnings threshold is exceeded by 5.
+     *
+     * @param j the {@link org.jenkinsci.test.acceptance.po.FreeStyleJob} created in the Test
+     * @param pub a {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerPublisher} added to the Job
+     * @param tsa a the {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerAction} object for the current job
+     *
+     * @return The modified {@link org.jenkinsci.test.acceptance.po.FreeStyleJob}.
+     */
+
+    private FreeStyleJob status_thresholds_step5(FreeStyleJob j, TaskScannerPublisher pub, TaskScannerAction tsa){
         j.configure();
         j.copyDir(resource("/tasks_plugin/fileset2")); // add a second shell step to copy another folder
         pub.normalPriorityTags.set("TODO"); //remove tag "XXX"
         j.save();
 
-        // The file set consists of 19 files, whereof
-        //   - 17 files are to be scanned for tasks
-        //
-        // The expected task priorities are:
-        //   -  1x high
-        //   - 11x medium
-        //   -  3x low
-        //
-        // ==> build status shall be UNSTABLE due to total warnings threshold is exceeded by 5
-
-        lastBuild = j.startBuild().shouldBeUnstable();
+        final Build lastBuild = j.startBuild().shouldBeUnstable();
         lastBuild.open();
 
         assertThat(tsa.getResultTextByXPathText("15 open tasks"), endsWith("in 17 workspace files."));
@@ -540,25 +603,35 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
         assertThat(tsa.getPluginResult(lastBuild),
                 is("Plug-in Result: UNSTABLE - 15 warnings exceed the threshold of 10 by 5 (Reference build: #1)"));
 
-        // +----------------------------------------------------------------------------+
-        // |                                   STEP 6                                   |
-        // +----------------------------------------------------------------------------+
+        return j;
+    }
 
+    /**
+     * This method does special configurations for test step 6 of test
+     * {@link TaskScannerPluginTest#status_thresholds()}. The scenario is that the file set
+     * consists of 19 files, whereof
+     *   - 17 files are to be scanned for tasks
+     *
+     * The expected task priorities are:
+     *   -  2x high
+     *   - 11x medium
+     *   -  3x low
+     *
+     * So, the build status shall be FAILED due to total warnings threshold is exceeded by 1.
+     *
+     * @param j the {@link org.jenkinsci.test.acceptance.po.FreeStyleJob} created in the Test
+     * @param pub a {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerPublisher} added to the Job
+     * @param tsa a the {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerAction} object for the current job
+     *
+     * @return The modified {@link org.jenkinsci.test.acceptance.po.FreeStyleJob}.
+     */
+
+    private FreeStyleJob status_thresholds_step6(FreeStyleJob j, TaskScannerPublisher pub, TaskScannerAction tsa){
         j.configure();
         pub.ignoreCase.check(); //disable case sensitivity
         j.save();
 
-        // The file set consists of 19 files, whereof
-        //   - 17 files are to be scanned for tasks
-        //
-        // The expected task priorities are:
-        //   -  2x high
-        //   - 11x medium
-        //   -  3x low
-        //
-        // ==> build status shall be FAILED due to total warnings threshold is exceeded by 1
-
-        lastBuild = j.startBuild().shouldFail();
+        final Build lastBuild = j.startBuild().shouldFail();
         lastBuild.open();
 
         assertThat(tsa.getResultTextByXPathText("16 open tasks"), endsWith("in 17 workspace files."));
@@ -570,6 +643,8 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
         assertThat(tsa.getLowWarningNumber(), is(3));
         assertThat(tsa.getPluginResult(lastBuild),
                 is("Plug-in Result: FAILED - 16 warnings exceed the threshold of 15 by 1 (Reference build: #1)"));
+
+        return j;
     }
 
     /**
