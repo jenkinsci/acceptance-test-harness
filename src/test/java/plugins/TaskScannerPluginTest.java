@@ -16,7 +16,8 @@ import org.junit.Test;
 import org.xml.sax.SAXException;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.jenkinsci.test.acceptance.Matchers.hasAction;
+import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.junit.Assert.*;
 
 /**
  Feature: Scan for open tasks
@@ -121,6 +122,8 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
         lastBuild.visit(tsa.getNewWarningsUrlAsRelativePath());
         assertThat(tsa.getResultLinkByXPathText("TSREc2Provider.java:133"), startsWith("source"));
     }
+
+
 
 
     /**
