@@ -78,9 +78,9 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
         assertThat(tsa.getNormalWarningNumber(), is(4));
         assertThat(tsa.getLowWarningNumber(), is(1));
 
-        assertFilesTab(tsa, "fileset1_eval1");
-        assertTypesTab(tsa, "fileset1_eval1");
-        assertWarningsTab(tsa, "fileset1_eval1");
+        assertFilesTabFS1E1(tsa);
+        assertTypesTabFS1E1(tsa);
+        assertWarningsTabFS1E1(tsa);
 
         // check the correct warning extraction for two examples:
         //  - TSRDockerImage.java:84 properly wait for either cidfile to appear or process to exit
@@ -216,9 +216,9 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
         assertThat(tsa.getNormalWarningNumber(), is(5));
         assertThat(tsa.getLowWarningNumber(), is(2));
 
-        assertFilesTab(tsa, "fileset1_eval2");
-        assertTypesTab(tsa, "fileset1_eval2");
-        assertWarningsTab(tsa, "fileset1_eval2");
+        assertFilesTabFS1E2(tsa);
+        assertTypesTabFS1E2(tsa);
+        assertWarningsTabFS1E2(tsa);
 
     }
 
@@ -282,7 +282,7 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
         assertThat(tsa.getNormalWarningNumber(), is(3));
         assertThat(tsa.getLowWarningNumber(), is(0));
 
-        assertFixedTab(tsa, "fileset1_less");
+        assertFixedTab(tsa);
     }
 
     /**
@@ -573,150 +573,140 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
     }
 
     /**
-     * This method asserts the correct content of the files tab
-     * depending on the file set loaded to the workspace and the
-     * task tags used.
-     *
-     * Supported assertions:
-     *  - fileset1_eval1 = fileset1, tags: FIXME, TODO, @Deprecated, case sensitive
-     *  - fileset1_eval2 = fileset1, tags: FIXME, BUG, TODO, XXX, @Deprecated, ???, not case sensitive
-     *
-     * @param tsa the {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerAction} object for
+     * This method asserts the correct content of the files tab for the files in fileset 1
+     * with the TaskScanner scanning for FIXME, TODO and @Deprecated (case sensitive).
+     +
+     *  @param tsa the {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerAction} object for
      *            the current job
-     * @param expectedList determines which files and which warning counts are expected
      */
-    private void assertFilesTab(TaskScannerAction tsa, String expectedList){
+    private void assertFilesTabFS1E1(TaskScannerAction tsa){
         SortedMap<String, Integer> expectedContent = new TreeMap<>();
-        // TODO: extend for all filesets
-        switch (expectedList){
-            case "fileset1_eval1":
-                expectedContent.put("TSRCleaner.java", 1);
-                expectedContent.put("TSRDockerImage.java", 1);
-                expectedContent.put("TSRGitRepo.java", 2);
-                expectedContent.put("TSRJenkinsAcceptanceTestRule.java", 1);
-                expectedContent.put("TSRWinstoneDockerController.java", 1);
-                break;
-            case "fileset1_eval2":
-                expectedContent.put("TSRCleaner.java", 1);
-                expectedContent.put("TSRDockerImage.java", 3);
-                expectedContent.put("TSRGitRepo.java", 3);
-                expectedContent.put("TSREc2Provider.java", 1);
-                expectedContent.put("TSRJenkinsAcceptanceTestRule.java", 1);
-                expectedContent.put("TSRWinstoneDockerController.java", 1);
-                break;
-            default:
-                fail("invalid expectedList value");
-        }
+
+        expectedContent.put("TSRCleaner.java", 1);
+        expectedContent.put("TSRDockerImage.java", 1);
+        expectedContent.put("TSRGitRepo.java", 2);
+        expectedContent.put("TSRJenkinsAcceptanceTestRule.java", 1);
+        expectedContent.put("TSRWinstoneDockerController.java", 1);
 
         assertThat(tsa.getFileTabContents(), is(expectedContent));
     }
 
     /**
-     * This method asserts the correct content of the Types tab
-     * depending on the file set loaded to the workspace and the
-     * task tags used.
-     *
-     * Supported assertions:
-     *  - fileset1_eval1 = fileset1, tags: FIXME, TODO, @Deprecated, case sensitive
-     *  - fileset1_eval2 = fileset1, tags: FIXME, BUG, TODO, XXX, @Deprecated, ???, not case sensitive
-     *
-     * @param tsa the {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerAction} object for
+     * This method asserts the correct content of the files tab for the files in fileset 1
+     * with the TaskScanner scanning for FIXME, BUG, TODO, XXX, @Deprecated and ??? (not case sensitive).
+     +
+     *  @param tsa the {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerAction} object for
      *            the current job
-     * @param expectedList determines which files and which warning counts are expected
      */
-    private void assertTypesTab(TaskScannerAction tsa, String expectedList){
+    private void assertFilesTabFS1E2(TaskScannerAction tsa){
         SortedMap<String, Integer> expectedContent = new TreeMap<>();
-        // TODO: extend for all filesets
-        switch (expectedList){
-            case "fileset1_eval1":
-                expectedContent.put("@Deprecated", 1);
-                expectedContent.put("FIXME", 1);
-                expectedContent.put("TODO", 4);
-                break;
-            case "fileset1_eval2":
-                expectedContent.put("@Deprecated", 1);
-                expectedContent.put("FIXME", 1);
-                expectedContent.put("fixme", 1);
-                expectedContent.put("TODO", 4);
-                expectedContent.put("BUG", 1);
-                expectedContent.put("XXX", 1);
-                expectedContent.put("???", 1);
-                break;
-            default:
-                fail("invalid expectedList value");
-        }
+
+        expectedContent.put("TSRCleaner.java", 1);
+        expectedContent.put("TSRDockerImage.java", 3);
+        expectedContent.put("TSRGitRepo.java", 3);
+        expectedContent.put("TSREc2Provider.java", 1);
+        expectedContent.put("TSRJenkinsAcceptanceTestRule.java", 1);
+        expectedContent.put("TSRWinstoneDockerController.java", 1);
+
+        assertThat(tsa.getFileTabContents(), is(expectedContent));
+    }
+
+    /**
+     * This method asserts the correct content of the Types tab for the files in fileset 1
+     * with the TaskScanner scanning for FIXME, TODO and @Deprecated (case sensitive).
+     +
+     *  @param tsa the {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerAction} object for
+     *            the current job
+     */
+    private void assertTypesTabFS1E1(TaskScannerAction tsa){
+        SortedMap<String, Integer> expectedContent = new TreeMap<>();
+
+        expectedContent.put("@Deprecated", 1);
+        expectedContent.put("FIXME", 1);
+        expectedContent.put("TODO", 4);
 
         assertThat(tsa.getTypesTabContents(), is(expectedContent));
     }
 
     /**
-     * This method asserts the correct content of the Warnings tab
-     * depending on the file set loaded to the workspace and the
-     * task tags used.
-     *
-     * Supported assertions:
-     *  - fileset1_eval1 = fileset1, tags: FIXME, TODO, @Deprecated, case sensitive
-     *  - fileset1_eval2 = fileset1, tags: FIXME, BUG, TODO, XXX, @Deprecated, ???, not case sensitive
-     *
-     * @param tsa the {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerAction} object for
+     * This method asserts the correct content of the Types tab for the files in fileset 1
+     * with the TaskScanner scanning for FIXME, BUG, TODO, XXX, @Deprecated and ??? (not case sensitive).
+     +
+     *  @param tsa the {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerAction} object for
      *            the current job
-     * @param expectedList determines which files and lines are expected
      */
-    private void assertWarningsTab(TaskScannerAction tsa, String expectedList){
+    private void assertTypesTabFS1E2(TaskScannerAction tsa){
         SortedMap<String, Integer> expectedContent = new TreeMap<>();
-        // TODO: extend for all filesets
-        switch (expectedList){
-            case "fileset1_eval1":
-                expectedContent.put("TSRGitRepo.java:38", 38);
-                expectedContent.put("TSRGitRepo.java:69", 69);
-                expectedContent.put("TSRDockerImage.java:84", 84);
-                expectedContent.put("TSRJenkinsAcceptanceTestRule.java:51", 51);
-                expectedContent.put("TSRWinstoneDockerController.java:73", 73);
-                expectedContent.put("TSRCleaner.java:40", 40);
-                break;
-            case "fileset1_eval2":
-                expectedContent.put("TSRGitRepo.java:38", 38);
-                expectedContent.put("TSRGitRepo.java:69", 69);
-                expectedContent.put("TSRGitRepo.java:88", 88);
-                expectedContent.put("TSRDockerImage.java:56", 56);
-                expectedContent.put("TSRDockerImage.java:84", 84);
-                expectedContent.put("TSRDockerImage.java:102", 102);
-                expectedContent.put("TSRJenkinsAcceptanceTestRule.java:51", 51);
-                expectedContent.put("TSRWinstoneDockerController.java:73", 73);
-                expectedContent.put("TSRCleaner.java:40", 40);
-                expectedContent.put("TSREc2Provider.java:133", 133);
-                break;
-            default:
-                fail("invalid expectedList value");
-        }
+
+        expectedContent.put("@Deprecated", 1);
+        expectedContent.put("FIXME", 1);
+        expectedContent.put("fixme", 1);
+        expectedContent.put("TODO", 4);
+        expectedContent.put("BUG", 1);
+        expectedContent.put("XXX", 1);
+        expectedContent.put("???", 1);
+
+        assertThat(tsa.getTypesTabContents(), is(expectedContent));
+    }
+
+    /**
+     * This method asserts the correct content of the Warnings tab for the files in fileset 1
+     * with the TaskScanner scanning for FIXME, TODO and @Deprecated (case sensitive).
+     +
+     *  @param tsa the {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerAction} object for
+     *            the current job
+     */
+    private void assertWarningsTabFS1E1(TaskScannerAction tsa){
+        SortedMap<String, Integer> expectedContent = new TreeMap<>();
+
+        expectedContent.put("TSRGitRepo.java:38", 38);
+        expectedContent.put("TSRGitRepo.java:69", 69);
+        expectedContent.put("TSRDockerImage.java:84", 84);
+        expectedContent.put("TSRJenkinsAcceptanceTestRule.java:51", 51);
+        expectedContent.put("TSRWinstoneDockerController.java:73", 73);
+        expectedContent.put("TSRCleaner.java:40", 40);
 
         assertThat(tsa.getWarningsTabContents(), is(expectedContent));
     }
 
     /**
-     * This method asserts the correct content of the "Fixed" tab
-     * depending on the file set loaded to the workspace and the
-     * task tags used.
-     *
-     * Supported assertions:
-     *  - fileset1_less = fileset1_less, tags: FIXME, TODO, @Deprecated, case sensitive
+     * This method asserts the correct content of the Warnings tab for the files in fileset 1
+     * with the TaskScanner scanning for FIXME, BUG, TODO, XXX, @Deprecated and ??? (not case sensitive).
+     +
+     *  @param tsa the {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerAction} object for
+     *            the current job
+     */
+    private void assertWarningsTabFS1E2(TaskScannerAction tsa){
+        SortedMap<String, Integer> expectedContent = new TreeMap<>();
+
+        expectedContent.put("TSRGitRepo.java:38", 38);
+        expectedContent.put("TSRGitRepo.java:69", 69);
+        expectedContent.put("TSRGitRepo.java:88", 88);
+        expectedContent.put("TSRDockerImage.java:56", 56);
+        expectedContent.put("TSRDockerImage.java:84", 84);
+        expectedContent.put("TSRDockerImage.java:102", 102);
+        expectedContent.put("TSRJenkinsAcceptanceTestRule.java:51", 51);
+        expectedContent.put("TSRWinstoneDockerController.java:73", 73);
+        expectedContent.put("TSRCleaner.java:40", 40);
+        expectedContent.put("TSREc2Provider.java:133", 133);
+
+        assertThat(tsa.getWarningsTabContents(), is(expectedContent));
+    }
+
+
+    /**
+     * This method asserts the correct content of the Fixed tab for the files in fileset_1_less
+     * with the TaskScanner scanning for FIXME, TODO, and @Deprecated (case sensitive).
      *
      * @param tsa the {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerAction} object for
      *            the current job
-     * @param expectedList determines which files and which warning counts are expected
      */
-    private void assertFixedTab(TaskScannerAction tsa, String expectedList) {
+    private void assertFixedTab(TaskScannerAction tsa) {
         SortedMap<String, String> expectedContent = new TreeMap<>();
-        // TODO: extend for all filesets
-        switch (expectedList) {
-            case "fileset1_less":
-                expectedContent.put("TSRCleaner.java", "@Deprecated");
-                expectedContent.put("TSRDockerImage.java", "TODO");
-                expectedContent.put("TSRGitRepo.java", "FIXME");
-                break;
-            default:
-                fail("invalid expectedList value");
-        }
+
+        expectedContent.put("TSRCleaner.java", "@Deprecated");
+        expectedContent.put("TSRDockerImage.java", "TODO");
+        expectedContent.put("TSRGitRepo.java", "FIXME");
 
         assertThat(tsa.getFixedTabContents(), is(expectedContent));
     }
