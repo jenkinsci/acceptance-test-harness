@@ -16,7 +16,7 @@ import org.junit.Test;
 import org.xml.sax.SAXException;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.jenkinsci.test.acceptance.Matchers.hasAction;
 
 /**
  Feature: Scan for open tasks
@@ -58,6 +58,8 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
 
         // as no threshold is defined to mark the build as FAILED or UNSTABLE, the build should succeed
         Build lastBuild = buildJobWithSuccess(j);
+        assertThat(lastBuild, hasAction("Open Tasks"));
+        assertThat(j, hasAction("Open Tasks"));
         lastBuild.open();
         TaskScannerAction tsa = new TaskScannerAction(j);
 
@@ -350,6 +352,7 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
      * 4 - exceed UNSTABLE LOW, NORMAL and HIGH -> build status justified with HIGH priority tasks
      * 5 - further exceed the UNSTABLE TOTAL threshold -> new justification for build status
      * 6 - further exceed the FAILURE TOTAL threshold -> build failed
+     * 7 - remove most of the task tags -> build is stable again
      *
      */
 
@@ -373,6 +376,7 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
         j = status_thresholds_step4(j, pub, tsa);
         j = status_thresholds_step5(j, pub, tsa);
         j = status_thresholds_step6(j, pub, tsa);
+        status_thresholds_step7(j, tsa);
 
 
     }
@@ -643,6 +647,64 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
         assertThat(tsa.getLowWarningNumber(), is(3));
         assertThat(tsa.getPluginResult(lastBuild),
                 is("Plug-in Result: FAILED - 16 warnings exceed the threshold of 15 by 1 (Reference build: #1)"));
+
+        return j;
+    }
+
+    /**
+     * This method does special configurations for test step 6 of test
+     * {@link TaskScannerPluginTest#status_thresholds()}. Another shell step is added which
+     * consists of a small script to replace all todo, fixme, xxx, deprecated occurences in the
+     * workspace files by the string "CLOSED".
+     *
+     * The scenario is that the file set consists of 19 files, whereof
+     *   - 17 files are to be scanned for tasks
+     *
+     * The expected task priorities are:
+     *   -  0x high
+     *   -  0x medium
+     *   -  1x low
+     *
+     * So, the build status shall be SUCCESS as no threshold will be exceeded.
+     *
+     * @param j the {@link org.jenkinsci.test.acceptance.po.FreeStyleJob} created in the Test
+     * @param tsa a the {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerAction} object for the current job
+     *
+     * @return The modified {@link org.jenkinsci.test.acceptance.po.FreeStyleJob}.
+     */
+
+    private FreeStyleJob status_thresholds_step7(FreeStyleJob j, TaskScannerAction tsa){
+        j.configure();
+        j.addShellStep( "NEW=\"CLOSED\"\n" +
+                        "for t in \"todo\" \"xxx\" \"fixme\" \"deprecated\"\n" +
+                        "do\n" +
+                        "  OLD=$t\n" +
+                        "  for f in `ls`\n" +
+                        "  do\n" +
+                        "    if [ -f $f -a -r $f ]; then\n" +
+                        "      sed \"s/$OLD/$NEW/I\" \"$f\" > \"${f}.new\"\n" +
+                        "      mv \"${f}.new\" \"$f\"\n" +
+                        "    else\n" +
+                        "      echo \"Error: Cannot read $f\"\n" +
+                        "    fi\n" +
+                        "  done\n" +
+                        "done");
+        j.save();
+
+        final Build lastBuild = buildJobWithSuccess(j);
+        lastBuild.open();
+
+        assertThat(tsa.getResultTextByXPathText("1 open task"), endsWith("in 17 workspace files."));
+        assertThat(tsa.getResultLinkByXPathText("1 new open task"), is("tasksResult/new"));
+        assertThat(tsa.getResultLinkByXPathText("3 closed tasks"), is("tasksResult/fixed"));
+        assertThat(tsa.getWarningNumber(), is(1));
+        assertThat(tsa.getNewWarningNumber(), is(1));
+        assertThat(tsa.getFixedWarningNumber(), is(3));
+        assertThat(tsa.getHighWarningNumber(), is(0));
+        assertThat(tsa.getNormalWarningNumber(), is(0));
+        assertThat(tsa.getLowWarningNumber(), is(1));
+        assertThat(tsa.getPluginResult(lastBuild),
+                is("Plug-in Result: SUCCESS - no threshold has been exceeded (Reference build: #1)"));
 
         return j;
     }
