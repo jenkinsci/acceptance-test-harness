@@ -199,7 +199,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         //use scheduleBuild instead of startBuild to avoid a timeout waiting for Build being started
         Build b = j.scheduleBuild(singletonMap("slavename", s.getName()));
         sleep(3000);    // TODO: not the best way to wait for the scheduled job to go through the queue, but a bit of wait is needed
-        shouldBeTriggeredWithoutValidOnlineNode(b, s.getName());
+        shouldBeTriggeredWithoutOnlineNode(b, s.getName());
 
         //bring the slave up again, the Build should start immediately
         s.markOnline();
@@ -529,6 +529,13 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         j.shouldHaveBuiltOn(s1);
 
         assertThat(j.getNextBuildNumber(), is(3));
+    }
+
+    private void shouldBeTriggeredWithoutOnlineNode(Build build, String nodename) {
+        String pendingBuildText = getPendingBuildText(build);
+
+        assertThat(pendingBuildText, containsString(nodename + " is offline"));
+        assertThat(build, not(started()));
     }
 
     /**
