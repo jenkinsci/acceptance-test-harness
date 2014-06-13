@@ -311,7 +311,7 @@ public abstract class LocalController extends JenkinsController implements LogLi
      */
     protected @Nonnull Map<String, String> commonLaunchEnv() {
         HashMap<String, String> env = new HashMap<>();
-        env.put("JAVA_OPTS", "-DJENKINS_HOME=" + getJenkinsHome());
+        env.put("JENKINS_HOME", getJenkinsHome().getAbsolutePath());
         File javaHome = getJavaHome();
         if (javaHome != null) {
             env.put("JAVA_HOME", javaHome.getAbsolutePath());
