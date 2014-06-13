@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.controller;
 
 import com.google.inject.Injector;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.plexus.util.Expand;
@@ -9,8 +10,10 @@ import org.jenkinsci.test.acceptance.log.LogListenable;
 import org.jenkinsci.test.acceptance.log.LogListener;
 import org.jenkinsci.utils.process.ProcessInputStream;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Named;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -301,6 +304,19 @@ public abstract class LocalController extends JenkinsController implements LogLi
             }
 
         }
+    }
+
+    /**
+     * Common environment variables to put to {@link CommandBuilder} when launching Jenkins.
+     */
+    protected @Nonnull Map<String, String> commonLaunchEnv() {
+        HashMap<String, String> env = new HashMap<>();
+        env.put("JAVA_OPTS", "-DJENKINS_HOME=" + getJenkinsHome());
+        File javaHome = getJavaHome();
+        if (javaHome != null) {
+            env.put("JAVA_HOME", javaHome.getAbsolutePath());
+        }
+        return env;
     }
 
     /**
