@@ -1,4 +1,6 @@
-package org.jenkinsci.test.acceptance.po
+package org.jenkinsci.test.acceptance.po.users
+
+import org.jenkinsci.test.acceptance.po.Page
 
 /**
  * Page object for the user list page.

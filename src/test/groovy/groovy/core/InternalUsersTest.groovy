@@ -1,7 +1,11 @@
 package groovy.core
 
 import org.jenkinsci.test.acceptance.geb.GebSpec
-import org.jenkinsci.test.acceptance.po.*
+import org.jenkinsci.test.acceptance.po.SecurityConfiguration
+import org.jenkinsci.test.acceptance.po.users.AddUserPage
+import org.jenkinsci.test.acceptance.po.users.ConfigureUserPage
+import org.jenkinsci.test.acceptance.po.users.DeleteUserPage
+import org.jenkinsci.test.acceptance.po.users.UserListPage
 
 /**
  * Test for the internal user dictionary of jenkins.
