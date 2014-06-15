@@ -7,6 +7,7 @@ import org.jenkinsci.test.acceptance.po.SecurityConfiguration
 import org.jenkinsci.test.acceptance.po.UserListPage
 
 /**
+ * Test for the internal user dictionary of jenkins.
  *
  * @author christian.fritz
  */

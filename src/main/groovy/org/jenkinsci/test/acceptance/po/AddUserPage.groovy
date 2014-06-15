@@ -3,6 +3,7 @@ package org.jenkinsci.test.acceptance.po
 import org.kohsuke.randname.RandomNameGenerator
 
 /**
+ * Geb Page object for adding a new user.
  *
  * @author christian.fritz
  */
@@ -20,11 +21,16 @@ class AddUserPage extends Page {
     }
     private static RandomNameGenerator randomNameGenerator = new RandomNameGenerator();
 
-    static def randName() {
+    private static def randName() {
         randomNameGenerator.next();
     }
 
-    def fillUserInfo() {
+    /**
+     * Fill out the user info
+     *
+     * @return the username of the created user
+     */
+    static def fillUserInfo() {
         def name = randName();
         def pwd = randName();
 

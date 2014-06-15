@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.po
 
 /**
+ * PageObject for the delete user page.
  *
  * @author christian.fritz
  */

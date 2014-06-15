@@ -1,6 +1,9 @@
 package org.jenkinsci.test.acceptance.po
 
 /**
+ * Page object for the security configuration page.
+ *
+ * The page object did not contains all possible form fields!
  *
  * @author christian.fritz
  */

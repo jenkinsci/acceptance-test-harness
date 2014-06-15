@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.po
 
 /**
+ * Page object for the user list page.
  *
  * @author christian.fritz
  */
