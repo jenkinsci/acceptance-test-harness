@@ -15,14 +15,14 @@ class UserListPage extends Page {
 
         configure {
             $("table#people>tbody>tr:not(:first-child)>td:nth-child(4)>a[href\$='configure']").collectEntries {
-                def userName = it.attr("href").split("/")[1]
+                def userName = it.attr("href").split("/")[-2]
                 [userName, it]
             }
         }
 
         delete(to: DeleteUserPage) {
             $("table#people>tbody>tr:not(:first-child)>td:nth-child(4)>a[href\$='delete']").collectEntries {
-                def userName = it.attr("href").split("/")[1]
+                def userName = it.attr("href").split("/")[-2]
                 [userName, it]
             }
         }
