@@ -20,7 +20,7 @@ class UserListPage extends Page {
             }
         }
 
-        delete {
+        delete(to: DeleteUserPage) {
             $("table#people>tbody>tr:not(:first-child)>td:nth-child(4)>a[href\$='delete']").collectEntries {
                 def userName = it.attr("href").split("/")[1]
                 [userName, it]
