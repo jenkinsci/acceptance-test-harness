@@ -66,7 +66,7 @@ public class AnalysisCollectorPluginTest extends AbstractJUnitTest {
         job.startBuild().waitUntilFinished();
         // copy new resource
         job.configure();
-        copyResources("/analysis_collector_plugin/Tasks2.java", job);
+        job.copyResource("/analysis_collector_plugin/Tasks2.java");
         job.save();
         // start second build
         job.startBuild().waitUntilFinished();
@@ -91,7 +91,7 @@ public class AnalysisCollectorPluginTest extends AbstractJUnitTest {
     public void warning_threshold_build_unstable(){
         FreeStyleJob job = jenkins.jobs.create();
         job.configure();
-        copyResources("/analysis_collector_plugin/findbugs.xml", job);
+        job.copyResource("/analysis_collector_plugin/findbugs.xml");
         job.addPublisher(FindbugsPublisher.class);
         AnalysisCollectorPublisher analysis = job.addPublisher(AnalysisCollectorPublisher.class);
         analysis.advanced.click();
@@ -109,7 +109,7 @@ public class AnalysisCollectorPluginTest extends AbstractJUnitTest {
     public FreeStyleJob setupJob(String resourceToCopy) {
         FreeStyleJob job = jenkins.jobs.create();
         job.configure();
-        copyResources(resourceToCopy, job);
+        job.copyResource(resourceToCopy);
         job.addPublisher(CheckstylePublisher.class);
         job.addPublisher(PmdPublisher.class);
         job.addPublisher(FindbugsPublisher.class);
@@ -122,12 +122,4 @@ public class AnalysisCollectorPluginTest extends AbstractJUnitTest {
         return job;
     }
 
-    private void copyResources(String resourceToCopy, FreeStyleJob job) {
-        final Resource res = resource(resourceToCopy);
-        //decide whether to utilize copyResource or copyDir
-        if (res.asFile().isDirectory())
-            job.copyDir(res);
-        else
-            job.copyResource(res);
-    }
 }
