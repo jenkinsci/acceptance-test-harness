@@ -1,6 +1,7 @@
 package groovy.core
 
 import org.jenkinsci.test.acceptance.geb.GebSpec
+import org.jenkinsci.test.acceptance.po.AddUserPage
 import org.jenkinsci.test.acceptance.po.SecurityConfiguration
 
 /**
@@ -15,5 +16,10 @@ class InternalUsersTest extends GebSpec {
         useSecurity.value(true)
         securityRealm.jenkinsDB.click()
         submit.click()
+
+        when: "create a new user"
+        to AddUserPage
+        def createdUserName = fillUserInfo()
+        signUp.click()
     }
 }
