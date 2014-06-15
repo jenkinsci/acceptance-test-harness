@@ -63,12 +63,7 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
         final FreeStyleJob job = jenkins.jobs.create();
         job.configure();
 
-        final Resource res = resource(resourceToCopy);
-        //decide whether to utilize copyResource or copyDir
-        if (res.asFile().isDirectory())
-            job.copyDir(res);
-        else
-            job.copyResource(res);
+        job.copyResource(resourceToCopy);
 
         final T publisher = job.addPublisher(publisherClass);
         publisher.pattern.set(publisherPattern);
