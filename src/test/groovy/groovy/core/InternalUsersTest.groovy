@@ -3,6 +3,7 @@ package groovy.core
 import org.jenkinsci.test.acceptance.geb.GebSpec
 import org.jenkinsci.test.acceptance.po.AddUserPage
 import org.jenkinsci.test.acceptance.po.SecurityConfiguration
+import org.jenkinsci.test.acceptance.po.UserListPage
 
 /**
  *
@@ -21,5 +22,9 @@ class InternalUsersTest extends GebSpec {
         to AddUserPage
         def createdUserName = fillUserInfo()
         signUp.click()
+
+        then: "should be on user list"
+        at UserListPage
+        assert userNames.size() == 1
     }
 }
