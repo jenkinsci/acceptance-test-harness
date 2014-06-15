@@ -39,17 +39,6 @@ public class AbstractJUnitTest extends CapybaraPortingLayerImpl {
     }
 
     /**
-     * Obtains a resource in a wrapper.
-     */
-    public Resource resource(String path) {
-        final URL resource = getClass().getResource(path);
-        if (resource == null) {
-            throw new AssertionError("No such resource " + path + " for " + getClass().getName());
-        }
-        return new Resource(resource);
-    }
-
-    /**
      * @return finds an unused, available port on the test machine
      */
     public int findAvailablePort() {
