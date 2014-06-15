@@ -36,9 +36,13 @@ class SomePostBuildStep extends Page {
 ```
 
 Within the content closure are all WebElements you wan't to access from the test. The parent field annotated with @Delegate take care that this page object is valid PostBuildStep and can be used within the [Job Class](../src/main/java/org/jenkinsci/test/acceptance/po/Job.java) as build step. This field must be initialized with a valid instance of the PostBuildStep interface.
+## Tests with Spock
+Writing tests with the Spock Framework is very similar with writing a new JUnit test. All Spock tests have to extend the `org.jenkinsci.test.acceptance.geb.GebSpec` class that initialize the test environment.
 
 ## Examples
 ### PageObjects
 Examples for Geb PageObjects can be found for the [Jacoco Plugin](../src/main/groovy/org/jenkinsci/test/acceptance/plugins/jacoco/) and the [Jenkins internal user management](../src/main/groovy/org/jenkinsci/test/acceptance/po/users/). 
 ### Tests using Spock
 Examples for tests they using Spock can be found under [src/test/groovy/groovy](../src/test/groovy/groovy/).
+
+There are two interesting examples. First the tests for the [Jenkins' user management](../src/test/groovy/groovy/core/InternalUsersTest.groovy), which is written with plain Geb, Spock and without any existing Java support. Second the [Jacoco Plugin](../src/test/groovy/groovy/plugins/JacocoPluginTest.groovy) test, which is a Spock test that mixes the existing PageObjects (i.e. the Jenkins, and the Job-Object) with a PostBuildStep written with Geb. 
