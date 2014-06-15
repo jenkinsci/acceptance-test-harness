@@ -14,6 +14,10 @@ class UserListPage extends Page {
             $("table#people>tbody>tr:not(:first-child)>td:nth-child(2)>a")*.text()
         }
 
+        fullNames {
+            $("table#people>tbody>tr:not(:first-child)>td:nth-child(3)>a")*.text()
+        }
+
         configure {
             $("table#people>tbody>tr:not(:first-child)>td:nth-child(4)>a[href\$='configure']").collectEntries {
                 def userName = it.attr("href").split("/")[-2]

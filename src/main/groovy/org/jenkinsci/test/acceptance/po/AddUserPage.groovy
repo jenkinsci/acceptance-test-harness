@@ -30,7 +30,7 @@ class AddUserPage extends Page {
      *
      * @return the username of the created user
      */
-    static def fillUserInfo() {
+    def fillUserInfo() {
         def name = randName();
         def pwd = randName();
 

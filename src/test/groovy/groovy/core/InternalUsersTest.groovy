@@ -1,10 +1,7 @@
 package groovy.core
 
 import org.jenkinsci.test.acceptance.geb.GebSpec
-import org.jenkinsci.test.acceptance.po.AddUserPage
-import org.jenkinsci.test.acceptance.po.DeleteUserPage
-import org.jenkinsci.test.acceptance.po.SecurityConfiguration
-import org.jenkinsci.test.acceptance.po.UserListPage
+import org.jenkinsci.test.acceptance.po.*
 
 /**
  * Test for the internal user dictionary of jenkins.
@@ -13,7 +10,7 @@ import org.jenkinsci.test.acceptance.po.UserListPage
  */
 class InternalUsersTest extends GebSpec {
 
-    def "Create, update delete user"() {
+    def "Create, update and delete user"() {
         given: "Use the internal user authentification"
         to SecurityConfiguration
         useSecurity.value(true)
@@ -28,6 +25,19 @@ class InternalUsersTest extends GebSpec {
         then: "should be on user list"
         at UserListPage
         assert userNames.size() == 1
+        def fullName = fullNames.get(0)
+
+        when: "change the full name for the user"
+        configure[createdUserName].click()
+        at ConfigureUserPage
+        def newFullName = changeFullName()
+        save.click()
+
+        then: "the user should exist but with the new full name"
+        to UserListPage
+        assert userNames.size() == 1
+        assert fullNames.get(0) != fullName
+        assert fullNames.get(0) == newFullName
 
         when: "delete the first user"
         delete[createdUserName].click();
