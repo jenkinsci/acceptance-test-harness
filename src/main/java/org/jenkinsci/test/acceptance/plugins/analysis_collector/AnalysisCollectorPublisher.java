@@ -16,11 +16,51 @@ public class AnalysisCollectorPublisher extends AbstractCodeStylePluginPostBuild
     public final Control isPmdActivated = control("isPmdActivated");
     public final Control isOpenTasksActivated = control("isOpenTasksActivated");
     public final Control isWarningsActivated = control("isWarningsActivated");
-    public final Control isFindbugsActivated = control("isFindbugsActivated");
+    public final Control isFindbugsActivated = control("isFindBugsActivated");
 
 
     public AnalysisCollectorPublisher(Job parent, String path) {
         super(parent, path);
+    }
+
+    /**
+     * Select if the warnings of given plugin should be collected by Analysis Collector Plugin.
+     *
+     * @param plugin  the Plugin
+     * @param checked true or false
+     */
+    public void checkCollectedPlugin(AnalysisPlugin plugin, boolean checked) {
+        switch (plugin) {
+            case CHECKSTYLE:
+                isCheckstyleActivated.check(checked);
+                break;
+            case DRY:
+                isDryActivated.check(checked);
+                break;
+            case PMD:
+                isPmdActivated.check(checked);
+                break;
+            case FINDBUGS:
+                isFindbugsActivated.check(checked);
+                break;
+            case TASKS:
+                isOpenTasksActivated.check(checked);
+                break;
+            case WARNINGS:
+                isWarningsActivated.check(checked);
+                break;
+            default:
+                break;
+        }
+    }
+
+    public enum AnalysisPlugin {
+        CHECKSTYLE,
+        DRY,
+        PMD,
+        FINDBUGS,
+        TASKS,
+        WARNINGS;
     }
 
 }
