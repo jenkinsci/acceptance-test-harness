@@ -2,6 +2,7 @@ package groovy.core
 
 import org.jenkinsci.test.acceptance.geb.GebSpec
 import org.jenkinsci.test.acceptance.po.AddUserPage
+import org.jenkinsci.test.acceptance.po.DeleteUserPage
 import org.jenkinsci.test.acceptance.po.SecurityConfiguration
 import org.jenkinsci.test.acceptance.po.UserListPage
 
@@ -26,5 +27,14 @@ class InternalUsersTest extends GebSpec {
         then: "should be on user list"
         at UserListPage
         assert userNames.size() == 1
+
+        when: "delete the first user"
+        delete[createdUserName].click();
+        at DeleteUserPage
+        yes.click()
+
+        then: "there should be any user"
+        at UserListPage
+        assert userNames.size() == 0
     }
 }
