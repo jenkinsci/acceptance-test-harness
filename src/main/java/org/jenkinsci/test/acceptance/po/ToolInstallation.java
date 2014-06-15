@@ -25,10 +25,9 @@ package org.jenkinsci.test.acceptance.po;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.regex.Pattern;
+import java.util.concurrent.Callable;
 
 import org.apache.commons.io.FileUtils;
-import org.jenkinsci.test.acceptance.log.LoggingController;
 import org.jenkinsci.utils.process.CommandBuilder;
 
 /**
@@ -39,17 +38,22 @@ public abstract class ToolInstallation extends PageAreaImpl {
     public final Control name = control("name");
     private final Control autoInstall = control("properties/hudson-tools-InstallSourceProperty");
 
-    public static void waitForUpdates(Jenkins jenkins, Class<? extends ToolInstallation> type) {
+    public static void waitForUpdates(final Jenkins jenkins, Class<? extends ToolInstallation> type) {
         final ToolInstallationPageObject annotation = type.getAnnotation(ToolInstallationPageObject.class);
 
-        final Pattern pattern = Pattern.compile("Obtained the updated data file for " + Pattern.quote(annotation.installer()));
+        jenkins.waitForCond(new Callable<Boolean>() {
+            @Override
+            public Boolean call() throws Exception {
+                return Boolean.parseBoolean(jenkins.runScript(
+                        "println DownloadService.Downloadable.get('%s').data != null", annotation.installer()
+                ));
+            }
 
-        // TODO make all controllers LoggingControllers
-        if (jenkins instanceof LoggingController) {
-            ((LoggingController) jenkins).getLogWatcher().waitForLogged(pattern, 60);
-        } else {
-            jenkins.getLogger("all").waitForLogged(pattern, 60);
-        }
+            @Override
+            public String toString() {
+                return "tool installer metadata for " + annotation.installer() + " has arrived";
+            }
+        }, 60);
     }
 
     public ToolInstallation(JenkinsConfig context, String path) {

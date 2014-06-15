@@ -9,7 +9,7 @@
   </parent>
 
   <artifactId>acceptance-test-harness</artifactId>
-  <version>1.10-SNAPSHOT</version>
+  <version>1.11-SNAPSHOT</version>
 
   <name>Acceptance Test Harness</name>
   <licenses>
@@ -193,6 +193,11 @@
     </dependency>
 
     <!-- other random stuff -->
+    <dependency>
+      <groupId>commons-net</groupId>
+      <artifactId>commons-net</artifactId>
+      <version>2.2</version>
+    </dependency>
     <dependency>
       <groupId>org.jenkins-ci</groupId>
       <artifactId>process-utils</artifactId>

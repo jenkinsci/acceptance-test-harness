@@ -1,18 +1,13 @@
 package org.jenkinsci.test.acceptance.plugins.tasks;
 
 import java.util.List;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.NoSuchElementException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginAction;
+import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.ContainerPageObject;
 import org.openqa.selenium.WebElement;
-import org.w3c.dom.html.HTMLElement;
-
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.fail;
 
 /**
  * Page object for Task Scanner action.
@@ -37,145 +32,94 @@ public class TaskScannerAction  extends AbstractCodeStylePluginAction {
     }
 
     /**
-     * This method asserts the correct content of the files tab
-     * depending on the file set loaded to the workspace and the
-     * task tags used.
+     * This method gets a certain task's entry in the "Warnings"-tab specified by a key.
      *
-     * Supported assertions:
-     *  - fileset1_eval1 = fileset1, tags: FIXME, TODO, @Deprecated, case sensitive
+     * @param key the name of the source file containing the task
+     * @return the row as list of cell contents which matches the key
      *
-     * @param expectedList determines which files and which warning counts are expected
+     * @throws java.util.NoSuchElementException if key is not found
+     *
      */
-    public void assertFilesTab(String expectedList){
-        SortedMap<String, Integer> expectedContent = new TreeMap<>();
-        // TODO: extend for all filesets
-        switch (expectedList){
-            case "fileset1_eval1":
-                expectedContent.put("TSRCleaner.java", 1);
-                expectedContent.put("TSRDockerImage.java", 1);
-                expectedContent.put("TSRGitRepo.java", 2);
-                expectedContent.put("TSRJenkinsAcceptanceTestRule.java", 1);
-                expectedContent.put("TSRWinstoneDockerController.java", 1);
-                break;
-            default:
-                fail("invalid expectedList value");
-        }
-
-        assertThat(this.getFileTabContents(), is(expectedContent));
-    }
-
-    /**
-     * This method asserts the correct content of the Types tab
-     * depending on the file set loaded to the workspace and the
-     * task tags used.
-     *
-     * Supported assertions:
-     *  - fileset1_eval1 = fileset1, tags: FIXME, TODO, @Deprecated, case sensitive
-     *
-     * @param expectedList determines which files and which warning counts are expected
-     */
-    public void assertTypesTab(String expectedList){
-        SortedMap<String, Integer> expectedContent = new TreeMap<>();
-        // TODO: extend for all filesets
-        switch (expectedList){
-            case "fileset1_eval1":
-                expectedContent.put("@Deprecated", 1);
-                expectedContent.put("FIXME", 1);
-                expectedContent.put("TODO", 4);
-                break;
-            default:
-                fail("invalid expectedList value");
-        }
-
-        assertThat(this.getTypesTabContents(), is(expectedContent));
-    }
-
-    /**
-     * This method asserts the correct content of the Warnings tab
-     * depending on the file set loaded to the workspace and the
-     * task tags used.
-     *
-     * Supported assertions:
-     *  - fileset1_eval1 = fileset1, tags: FIXME, TODO, @Deprecated, case sensitive
-     *
-     * @param expectedList determines which files and lines are expected
-     */
-    public void assertWarningsTab(String expectedList){
-        SortedMap<String, Integer> expectedContent = new TreeMap<>();
-        // TODO: extend for all filesets
-        switch (expectedList){
-            case "fileset1_eval1":
-                expectedContent.put("TSRGitRepo.java:38", 38);
-                expectedContent.put("TSRDockerImage.java:84", 84);
-                expectedContent.put("TSRJenkinsAcceptanceTestRule.java:51", 51);
-                expectedContent.put("TSRGitRepo.java:69", 69);
-                expectedContent.put("TSRWinstoneDockerController.java:73", 73);
-                expectedContent.put("TSRCleaner.java:40", 40);
-                break;
-            default:
-                fail("invalid expectedList value");
-        }
-
-        assertThat(this.getWarningsTabContents(), is(expectedContent));
-    }
-
-    /**
-     * This method asserts that a certain task is contained in the table shown in
-     * the "Warnings"-tab with the correct task type and text
-     *
-     * @param filename the name of the source file containing the task
-     * @param lineNumber the line number of the task
-     * @param type the task type
-     * @param warningText the text which should have been extracted from the source file
-     */
-    public void assertWarningExtraction(String filename, Integer lineNumber,
-                                        String type, String warningText){
+    public List<String> getCertainWarningsTabRow(String key){
         ensureTab("Warnings");
 
         final List<WebElement> rows = getVisibleTableRows(true,false);
-        boolean isContained = false;
 
         for(WebElement elem : rows){
             final List<WebElement> cells = elem.findElements(by.xpath("./td"));
-            final String key = filename + ":" + lineNumber;
             if (key.equals(asTrimmedString(cells.get(0)))){
-                assertThat(asTrimmedString(cells.get(3)), is(type));
-                assertThat(asTrimmedString(cells.get(4)), is(warningText));
-                isContained = true;
-                break;
+                return asTrimmedStringList(cells);
             }
         }
-
-        //assert that the Warning was listed
-        assertThat(isContained, is(true));
+        throw new NoSuchElementException();
     }
 
     /**
-     * This method asserts the correct linking between the "Warnings"-tab table entries
-     * and the source file display page where the task line is highlighted
+     * This method gets the source code file line as String which is linked by the "Warnings"-tab
+     * table entries.
      *
-     * @param filename the name of the source file containing the task
-     * @param lineNumber the line number which shall be highlighted
+     * @param linkText the name of the link in the "Warnings" tab.
      * @param priority the task priority: "High Priority", "Normal Priority" or "Low Priority"
-     * @param type the task type
-     * @param warningText the text which should have been extracted from the source file
+     * @return the source code line as String.
      */
-    public void assertLinkToSourceFileLine(String filename, Integer lineNumber, String priority,
-                                           String type, String warningText){
+    public String getLinkedSourceFileLineAsString(String linkText, String priority){
+        return asTrimmedString(getLinkedSourceFileLine(linkText,priority));
+    }
 
+    /**
+     * This method gets line number of the source code file which is linked by the "Warnings"-tab
+     * table entries.
+     *
+     * @param linkText the name of the link in the "Warnings" tab.
+     * @param priority the task priority: "High Priority", "Normal Priority" or "Low Priority"
+     * @return the source code line as String.
+     */
+    public Integer getLinkedSourceFileLineNumber(String linkText, String priority){
+        return asInt(getLinkedSourceFileLine(linkText,priority).findElement(by.tagName("a")));
+    }
+
+    /**
+     * Getter for the "Plug-in Result:" line on a build's page. This line is only displayed
+     * in case the Task Scanner plugin is configured to change the build status w.r.t to
+     * certain warning thresholds.
+     *
+     * The resulting build status is displayed as image. In order to facilitate evaluation of
+     * this line the image is replaced by it's title (= status).
+     *
+     * @param build the {@link org.jenkinsci.test.acceptance.po.Build} object to get the result from
+     * @return the full line starting with "Plug-in Result:"
+     */
+    public String getPluginResult(Build build){
+        //ensure the build status page is open:
+        build.open();
+
+        String pResult = asTrimmedString(
+                find(by.xpath(".//li[starts-with(normalize-space(.), 'Plug-in Result:')]")));
+
+        //insert the icon title at the place of the icon
+        return StringUtils.substringBefore(pResult,":") + ": " + find(by.xpath(
+                ".//img[@title = 'Success' or @title = 'Unstable' or @title = 'Failed']")).
+                getAttribute("title").toUpperCase() + " -" + StringUtils.substringAfterLast(pResult, "-");
+    }
+
+    /**
+     * This method gets the source code file line which is linked by the "Warnings"-tab
+     * table entries.
+     * The particular line is found via the warning priority as it is used as title attribute's
+     * value for this div object.
+     *
+     * @param linkText the name of the link in the "Warnings" tab.
+     * @param priority the task priority: "High Priority", "Normal Priority" or "Low Priority"
+     * @return the {@link org.openqa.selenium.WebElement} containing the source code line.
+     */
+    private WebElement getLinkedSourceFileLine(String linkText, String priority){
         ensureTab("Warnings");
 
         //find and follow the link to the source file display
-        find(by.xpath(".//A[text() = '" + filename + ":" + lineNumber + "']")).click();
+        find(by.xpath(".//A[text() = '" + linkText + "']")).click();
 
         //find the highlighted line using the title attribute which is set to the priority
-        WebElement taskLine = find(by.xpath("//div[@title='" + priority + "']"));
-
-        //assert contents of that line
-        assertThat(asInt(taskLine.findElement(by.tagName("a"))), is(lineNumber));
-        assertThat(taskLine.getText(), containsString(type));
-        assertThat(taskLine.getText(), endsWith(warningText));
-
+        return find(by.xpath("//div[@title='" + priority + "']"));
     }
 
 

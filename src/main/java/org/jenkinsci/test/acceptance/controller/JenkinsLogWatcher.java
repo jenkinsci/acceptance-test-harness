@@ -18,7 +18,6 @@ import java.io.InputStream;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -80,7 +79,6 @@ public class JenkinsLogWatcher implements LogListenable, Closeable {
         reader.start();
     }
 
-    @Override
     public void close() throws IOException {
         if(pipe != null){
             pipe.close();
@@ -126,15 +124,7 @@ public class JenkinsLogWatcher implements LogListenable, Closeable {
         splitter.removeLogListener(l);
     }
 
-    public void waitForLogged(Pattern regexp, long seconds) {
-        try {
-            watcher.watch(regexp).get(seconds, TimeUnit.SECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException ex) {
-            throw new AssertionError(ex);
-        }
-    }
-
-    public static final int DEFAULT_TIMEOUT = 300; // seconds
+    public static final int DEFAULT_TIMEOUT = 300;//100 sec
 
     public static final int TIMEOUT = System.getenv("STARTUP_TIME") != null && Integer.parseInt(System.getenv("STARTUP_TIME")) > 0
             ? Integer.parseInt(System.getenv("STARTUP_TIME")) : DEFAULT_TIMEOUT;

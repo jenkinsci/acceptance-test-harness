@@ -1,6 +1,8 @@
 package plugins;
 
 import com.google.inject.Inject;
+
+import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Bug;
@@ -18,8 +20,6 @@ import org.openqa.selenium.WebElement;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
-
 import static java.util.Collections.singletonMap;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -199,7 +199,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         //use scheduleBuild instead of startBuild to avoid a timeout waiting for Build being started
         Build b = j.scheduleBuild(singletonMap("slavename", s.getName()));
         sleep(3000);    // TODO: not the best way to wait for the scheduled job to go through the queue, but a bit of wait is needed
-        shouldBePendingForNodeParameter(b, s.getName());
+        shouldBeTriggeredWithoutOnlineNode(b, s.getName());
 
         //bring the slave up again, the Build should start immediately
         s.markOnline();
@@ -332,7 +332,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
 
         waitFor(by.href("/queue/cancelItem?id=2")); // shown in queue
         sleep(10000); // after some time
-        assertThat(j.open(), Matchers.hasContent(Pattern.compile("pending—All nodes of label ‘.*’ are offline")));
+        shouldBeTriggeredWithoutValidOnlineNode(b, s2.getName());
     }
 
     /**
@@ -493,10 +493,10 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void run_on_online_slave_and_master_with_node_restriction() throws Exception {
-        FreeStyleJob j = jenkins.jobs.create();
-
         Slave s1 = slave.install(jenkins).get();
         Slave s2 = slave.install(jenkins).get();
+
+        FreeStyleJob j = jenkins.jobs.create();
 
         j.configure();
         NodeParameter p = j.addParameter(NodeParameter.class);
@@ -531,26 +531,11 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         assertThat(j.getNextBuildNumber(), is(3));
     }
 
-    /**
-     * This function tries to assert that the current build is pending for a certain
-     * node using a NodeParameter. The node's name has to be specified when calling this method.
-     */
-    private void shouldBePendingForNodeParameter(Build build, String nodename) {
-        String paramname = "";
-        Parameter param;
-
-        //as a job can have multiple parameters, get the NodeParameter to determine its name
-        for (int i = 0; i < build.job.getParameters().size(); i++) {
-            param = build.job.getParameters().get(i);
-            if (param instanceof NodeParameter) {
-                paramname = param.getName();
-            }
-        }
-
+    private void shouldBeTriggeredWithoutOnlineNode(Build build, String nodename) {
         String pendingBuildText = getPendingBuildText(build);
-        String expectedText = String.format("(pending—%s is offline) [NodeParameterValue: %s=%s]", nodename, paramname, nodename);
-        assertThat(pendingBuildText, containsString(expectedText));
-        assertThat(build.hasStarted(), is(false));
+
+        assertThat(pendingBuildText, containsString(nodename + " is offline"));
+        assertThat(build, not(started()));
     }
 
     /**
@@ -559,9 +544,25 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
      */
     private void shouldBeTriggeredWithoutValidOnlineNode(Build build, String nodename) {
         String pendingBuildText = getPendingBuildText(build);
-        String expectedText = String.format("(pending—All nodes of label ‘Job triggered without a valid online node, given where: %s’ are offline)", nodename);
-        assertThat(pendingBuildText, containsString(expectedText));
-        assertThat(build.hasStarted(), is(false));
+
+        assertThat(pendingBuildText, isPending(nodename));
+        assertThat(build, not(started()));
+    }
+
+    private Matcher<Build> started() {
+        return new Matcher<Build>("Build has started") {
+            @Override
+            public boolean matchesSafely(Build build) {
+                return build.hasStarted();
+            }
+        };
+    }
+
+    private org.hamcrest.Matcher<String> isPending(String nodename) {
+        return allOf(
+                containsString("Job triggered without a valid online node, given where: " + nodename),
+                containsString("pending")
+        );
     }
 
     /**

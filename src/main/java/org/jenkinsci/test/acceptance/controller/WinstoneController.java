@@ -32,11 +32,11 @@ public class WinstoneController extends LocalController {
         File javaHome = getJavaHome();
         String java = javaHome == null ? "java" : String.format("%s/bin/java",javaHome.getAbsolutePath());
         CommandBuilder cb = new CommandBuilder(java).add(
-                "-DJENKINS_HOME=" + getJenkinsHome(),
                 "-Duser.language=en",
                 "-jar", war,
                 "--ajp13Port=-1",
                 "--httpPort=" + httpPort);
+        cb.env.putAll(commonLaunchEnv());
         System.out.println("Starting Jenkins: " + cb.toString());
         return cb.popen();
     }
