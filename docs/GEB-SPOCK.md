@@ -39,6 +39,6 @@ Within the content closure are all WebElements you wan't to access from the test
 
 ## Examples
 ### PageObjects
-Examples for Geb PageObjects can be found for the [Jacoco Plugin](../src/main/groovy/org/jenkinsci/test/acceptance/plugins/jacoco/) and the [Jenkins internal user management](../src/main/groovy/org/jenkinsci/test/acceptance/po). 
+Examples for Geb PageObjects can be found for the [Jacoco Plugin](../src/main/groovy/org/jenkinsci/test/acceptance/plugins/jacoco/) and the [Jenkins internal user management](../src/main/groovy/org/jenkinsci/test/acceptance/po/users/). 
 ### Tests using Spock
 Examples for tests they using Spock can be found under [src/test/groovy/groovy](../src/test/groovy/groovy/).
