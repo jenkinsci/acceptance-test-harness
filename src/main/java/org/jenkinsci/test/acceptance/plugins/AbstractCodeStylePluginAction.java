@@ -5,13 +5,13 @@ import org.jenkinsci.test.acceptance.po.ContainerPageObject;
 import org.openqa.selenium.WebElement;
 
 import java.net.URL;
-import java.util.Collection;
-import java.util.List;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * Abstract action class for plugins with getter of the warnings.
+ *
+ * FIXME: change selectors used in get*WarningNumber in order to use IDs introduced in analysis core version 1.57
+ *
  * @author Martin Kurz
  */
 public abstract class AbstractCodeStylePluginAction extends ContainerPageObject {
@@ -77,15 +77,15 @@ public abstract class AbstractCodeStylePluginAction extends ContainerPageObject 
      * @return Number of high warnings
      */
     public int getHighWarningNumber() {
-        return getIntByXPath("//table[@id='analysis.summary']/tbody/tr/td[@class='pane'][2]");
+        return getIntByXPath("//table[@id='analysis.summary']/tbody/tr/td[@class='pane']/div[@id='HIGH']");
     }
 
     /**
      * Getter of normal warnings.
-     * @return Number of normal warnings
+     * @return Number of normal warningsdie
      */
     public int getNormalWarningNumber() {
-        return getIntByXPath("//table[@id='analysis.summary']/tbody/tr/td[@class='pane'][3]");
+        return getIntByXPath("//table[@id='analysis.summary']/tbody/tr/td[@class='pane']/div[@id='NORMAL']");
     }
 
     /**
@@ -93,7 +93,7 @@ public abstract class AbstractCodeStylePluginAction extends ContainerPageObject 
      * @return Number of low warnings.
      */
     public int getLowWarningNumber() {
-        return getIntByXPath("//table[@id='analysis.summary']/tbody/tr/td[@class='pane'][4]");
+        return getIntByXPath("//table[@id='analysis.summary']/tbody/tr/td[@class='pane']/div[@id='LOW']");
     }
 
     /**
@@ -119,6 +119,15 @@ public abstract class AbstractCodeStylePluginAction extends ContainerPageObject 
     /**
      * Returns the integer value of the webelement.
      * @param e Webelement with number to get
+     * @return Integer value of webelement as Integer object
+     */
+    protected Integer asInteger(WebElement e) {
+        return Integer.decode(e.getText().trim());
+    }
+
+    /**
+     * Returns the integer value of the webelement.
+     * @param e Webelement with number to get
      * @return Integer value of webelement
      */
     protected int asInt(WebElement e) {
@@ -132,6 +141,20 @@ public abstract class AbstractCodeStylePluginAction extends ContainerPageObject 
      */
     protected String asTrimmedString(final WebElement webElement) {
         return webElement.getText().trim();
+    }
+
+    /**
+     * Returns a list of trimmed contens of a list of {@link org.openqa.selenium.WebElement}s.
+     * @param elems the list whose contens shall be trimmed
+     * @return the trimmed strings as list
+     */
+    protected List<String> asTrimmedStringList(final List<WebElement> elems)
+    {
+        List<String> elemStrings = new ArrayList<>();
+        for (WebElement we : elems)
+            elemStrings.add(asTrimmedString(we));
+
+        return elemStrings;
     }
 
     /**
@@ -170,8 +193,26 @@ public abstract class AbstractCodeStylePluginAction extends ContainerPageObject 
         return getContentsOfVisibleTable(true, false);
     }
 
+    /**
+     * Returns the first two columns of the "Fixed"-tab as key => value pairs, skipping the header row.
+     * @return a map of the first two columns. (first column => second column)
+     */
+    public SortedMap<String, String> getFixedTabContents() {
+        ensureTab("Fixed");
+        return getContentsOfVisibleTable(String.class, true, false);
+    }
+
     private SortedMap<String, Integer> getContentsOfVisibleTable(boolean removeHeader, boolean removeFooter) {
         return mapTableCellsKeyValue(getVisibleTableRows(removeHeader,removeFooter));
+    }
+
+    /**
+     * This is a generic variant of {@link org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginAction#getContentsOfVisibleTable(boolean, boolean)}
+     * which does not care about the type of the value part as long as it is derived
+     * from {@link java.lang.Object}.
+     */
+    private <T extends Object> SortedMap<String, T> getContentsOfVisibleTable(Class<T> type, boolean removeHeader, boolean removeFooter) {
+        return mapTableCellsKeyValue(type, getVisibleTableRows(removeHeader,removeFooter));
     }
 
     protected List<WebElement> getVisibleTableRows(boolean removeHeader, boolean removeFooter){
@@ -190,11 +231,30 @@ public abstract class AbstractCodeStylePluginAction extends ContainerPageObject 
     }
 
     private SortedMap<String, Integer> mapTableCellsKeyValue(final Collection<WebElement> rows) {
-        final SortedMap<String, Integer> result = new TreeMap<String, Integer>();
+        return mapTableCellsKeyValue(Integer.class, rows);
+    }
+
+    /**
+     * This is a generic variant of {@link org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginAction#mapTableCellsKeyValue(java.util.Collection)}
+     * which does not care about the type of the value part.
+     *
+     * At the moment the only supported types are Integer and String. Calling this method for other
+     * types results in a {@link java.lang.IllegalStateException}.
+     */
+    private <T> SortedMap<String, T> mapTableCellsKeyValue(Class<T> type, final Collection<WebElement> rows) {
+        final SortedMap<String, T> result = new TreeMap<>();
         for(WebElement elem : rows) {
             final List<WebElement> cells = elem.findElements(by.xpath("./td"));
             final String key = asTrimmedString(cells.get(0));
-            final Integer value = asInt(cells.get(1));
+            T value = null;
+            if(type.isAssignableFrom(Integer.class))
+                value = type.cast(asInteger(cells.get(1)));
+            else if (type.isAssignableFrom(String.class))
+                value = type.cast(asTrimmedString(cells.get(1)));
+            else
+                throw new IllegalStateException("Parameter type (" +
+                        type.getSimpleName() + ") is not supported");
+
             result.put(key, value);
         }
         return result;

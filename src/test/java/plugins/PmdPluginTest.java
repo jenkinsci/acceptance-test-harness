@@ -5,23 +5,23 @@ import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginMavenBuildConfigurator;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.plugins.pmd.PmdAction;
+import org.jenkinsci.test.acceptance.plugins.pmd.PmdColumn;
 import org.jenkinsci.test.acceptance.plugins.pmd.PmdMavenBuildSettings;
 import org.jenkinsci.test.acceptance.plugins.pmd.PmdPublisher;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.ListView;
 import org.jenkinsci.test.acceptance.po.Slave;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.util.SortedMap;
 import java.util.TreeMap;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.jenkinsci.test.acceptance.Matchers.hasAction;
-import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -191,7 +191,9 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
     /**
      * Runs job two times to check if the links of the graph are relative.
      */
-    @Test @Bug("21723") @Ignore("Until JENKINS-21723 is fixed")
+    @Test
+    @Bug("21723")
+    @Ignore("Until JENKINS-21723 is fixed")
     public void view_pmd_report_job_graph_links() {
         FreeStyleJob job = setupJob("/pmd_plugin/pmd-warnings.xml", PmdPublisher.class, "pmd-warnings.xml");
         buildJobAndWait(job);
@@ -204,7 +206,8 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
     /*
      * Runs a job with warning threshold configured once and validates that build is marked as unstable.
      */
-    @Test @Bug("19614")
+    @Test
+    @Bug("19614")
     public void build_with_warning_threshold_set_should_be_unstable() {
         final FreeStyleJob job = setupJob("/pmd_plugin/pmd-warnings.xml", PmdPublisher.class, "pmd-warnings.xml", "0", "0", true);
         final Build build = buildJobAndWait(job);
@@ -219,6 +222,19 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
         final String projectPath = "/pmd_plugin/sample_pmd_project";
         final String goal = "clean package pmd:pmd";
         return setupMavenJob(projectPath, goal, PmdMavenBuildSettings.class, configurator);
+    }
+
+    /**
+     * Builds a freestyle project and checks if new warning are displayed.
+     */
+    @Test
+    public void build_simple_freestyle_mavengoals_project() {
+        final FreeStyleJob job = setupFreestyleJobWithMavenGoals("/pmd_plugin/sample_pmd_project", "clean package pmd:pmd", PmdPublisher.class, "target/pmd.xml");
+        Build lastBuild = buildJobWithSuccess(job);
+        assertThat(lastBuild, hasAction("PMD Warnings"));
+        lastBuild.open();
+        PmdAction pmd = new PmdAction(job);
+        assertThat(pmd.getNewWarningNumber(), is(2));
     }
 
     /**
@@ -266,7 +282,7 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
         buildJobAndWait(job).shouldFail();
     }
 
-	/**
+    /**
      * Builds a job on a slave with pmd and verifies that the information pmd provides in the tabs about the build
      * are the information we expect.
      */
@@ -282,4 +298,22 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
         assertThat(build, hasAction("PMD Warnings"));
         assertThat(job, hasAction("PMD Warnings"));
     }
+
+    /**
+     * Build a job and check set up a dashboard view. Check, if the dashboard view shows correct warning count.
+     */
+    @Test
+    public void build_a_job_and_check_if_dashboard_shows_correct_warnings() {
+        MavenModuleSet job = setupSimpleMavenJob();
+        buildJobAndWait(job).shouldSucceed();
+        ListView view = addDashboardColumn(PmdColumn.class);
+
+        By expectedDashboardLinkMatcher = by.css("a[href='job/" + job.name + "/pmd']");
+        assertThat(jenkins.all(expectedDashboardLinkMatcher).size(), is(1));
+        WebElement dashboardLink = jenkins.getElement(expectedDashboardLinkMatcher);
+        assertThat(dashboardLink.getText().trim(), is("2"));
+
+        view.delete();
+    }
+
 }

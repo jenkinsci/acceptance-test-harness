@@ -43,10 +43,10 @@ public abstract class Node extends ContainerPageObject {
 
     public abstract String getName();
 
-    public String runScript(String script) {
+    public String runScript(String script, Object... args) {
         visit("script");
         CodeMirror cm = new CodeMirror(this, "/script");
-        cm.set(script);
+        cm.set(String.format(script, args));
         clickButton("Run");
 
         return find(by.css("h2 + pre")).getText().replaceAll("^Result: ", "");
