@@ -28,15 +28,19 @@ import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginMavenBuildConfigurator;
 import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsAction;
+import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsColumn;
 import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsMavenBuildSettings;
 import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsPublisher;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.ListView;
 import org.jenkinsci.test.acceptance.po.Slave;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -251,6 +255,23 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
         assertThat(lastBuild.getNode(), is(slave.getName()));
         assertThat(lastBuild, hasAction("FindBugs Warnings"));
         assertThat(job, hasAction("FindBugs Warnings"));
+    }
+
+    /**
+     * Build a job and check set up a dashboard view. Check, if the dashboard view shows correct warning count.
+     */
+    @Test
+    public void build_a_job_and_check_if_dashboard_shows_correct_warnings() {
+        MavenModuleSet job = setupSimpleMavenJob();
+        buildJobAndWait(job).shouldSucceed();
+        ListView view = addDashboardColumn(FindbugsColumn.class);
+
+        By expectedDashboardLinkMatcher = by.css("a[href='job/" + job.name + "/findbugs']");
+        assertThat(jenkins.all(expectedDashboardLinkMatcher).size(), is(1));
+        WebElement dashboardLink = jenkins.getElement(expectedDashboardLinkMatcher);
+        assertThat(dashboardLink.getText().trim(), is("1"));
+
+        view.delete();
     }
 
 }
