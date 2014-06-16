@@ -156,6 +156,11 @@ public class TaskScannerPublisher extends AbstractCodeStylePluginPostBuildStep {
      */
     public final Control useStableBuildAsReference = control("canComputeNew/useStableBuildAsReference");
 
+    /**
+     * Input for default file encoding
+     */
+    public final Control defaultEncoding = control("defaultEncoding");
+
 
 
 

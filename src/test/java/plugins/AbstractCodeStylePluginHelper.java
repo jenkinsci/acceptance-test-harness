@@ -12,10 +12,7 @@ import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginPostBuildSte
 import org.jenkinsci.test.acceptance.plugins.maven.MavenBuildStep;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
-import org.jenkinsci.test.acceptance.po.Build;
-import org.jenkinsci.test.acceptance.po.FreeStyleJob;
-import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.Slave;
+import org.jenkinsci.test.acceptance.po.*;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -259,4 +256,18 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
         }
     }
 
+    /**
+     * Adds a column on the dashboard.
+     * @param columnClass The ListViewColumn that should bee added.
+     * @param <T> The concrete type of the ListViewColumn.
+     * @return The ListView.
+     */
+    protected <T extends ListViewColumn> ListView addDashboardColumn(Class<T> columnClass) {
+        ListView view = jenkins.views.create(ListView.class, jenkins.createRandomName());
+        view.configure();
+        view.matchAllJobs();
+        view.addColumn(columnClass);
+        view.save();
+        return view;
+    }
 }
