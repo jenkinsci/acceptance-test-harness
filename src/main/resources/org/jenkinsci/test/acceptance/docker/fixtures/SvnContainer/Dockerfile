@@ -4,7 +4,7 @@ RUN apt-get update
 
 # Install Subversion 1.8 and Apache
 RUN apt-get install -y wget
-RUN echo 'deb http://us.archive.ubuntu.com/ubuntu/ precise universe' >> /etc/apt/sources.list
+RUN echo 'deb http://archive.ubuntu.com/ubuntu precise main universe' >> /etc/apt/sources.list
 RUN sh -c 'echo "deb http://opensource.wandisco.com/ubuntu precise svn18" >> /etc/apt/sources.list.d/WANdisco.list'
 RUN wget -q http://opensource.wandisco.com/wandisco-debian.gpg -O- | apt-key add -
 RUN apt-get update -y
@@ -21,6 +21,7 @@ RUN addgroup subversion && \
     usermod -a -G subversion www-data && \
     chown -R www-data:subversion /home/svn && \
     chmod -R g+rws /home/svn
+
 
 #install websvn
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get -y install websvn
