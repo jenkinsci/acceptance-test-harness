@@ -66,6 +66,7 @@ public class Mailtrap extends MailService {
     /**
      * Set up the configuration to use the shared mailtrap.io account.
      */
+    @Override
     public void setup(MailerGlobalConfig config) {
         config.smtpServer.set("mailtrap.io");
         config.advancedButton.click();
@@ -86,6 +87,7 @@ public class Mailtrap extends MailService {
     /**
      * @return null if nothing found.
      */
+    @Override
     public MimeMessage getMail(Pattern subject) throws IOException {
         List<MimeMessage> match = new ArrayList<>();
 
@@ -105,6 +107,7 @@ public class Mailtrap extends MailService {
         }
     }
 
+    @Override
     public List<MimeMessage> getAllMails() throws IOException {
         List<MimeMessage> match = new ArrayList<>();
 
