@@ -6,7 +6,8 @@ Here are only the specifics described that are needed to be compatible with the 
 ## Geb PageObjects
 Page objects written with Geb are very simple. All Geb page objects must extends the `org.jenkinsci.test.acceptance.po.Page` class. This class takes care about the correct initialization of the PageObject. Geb PageObjects are actually independent from the existing Java infrastructure and can not be used as arguments for i.e. build steps.
 
-To make a page object compatible with the existing infrastructure, simply add a new instance variable of the favored class/interface and add the `@Delegate` annotation. It must be initialized, either inline or within the constructor.
+This page objects are actually not compatible with the existing java infrastructure.
+To make a page object compatible with the existing infrastructure, simply add a new instance variable of the favored class/interface to which the page object should be compatible and add the `@Delegate` annotation. It must be initialized, either inline or within the constructor.
 
 
 Here is an example how to write a Geb page object that can be used as a PostBuildStep within every JUnit test.
@@ -35,7 +36,7 @@ class SomePostBuildStep extends Page {
 }
 ```
 
-Within the content closure are all WebElements you wan't to access from the test. The parent field annotated with @Delegate takes care that this page object is a valid PostBuildStep and can be used within the [Job Class](../src/main/java/org/jenkinsci/test/acceptance/po/Job.java) as build step. This field must be initialized with a valid instance of the PostBuildStep interface.
+Within the content closure are all WebElements you want to access from the test. The parent field annotated with @Delegate takes care that this page object is a valid PostBuildStep and can be used within the [Job Class](../src/main/java/org/jenkinsci/test/acceptance/po/Job.java) as build step. This field must be initialized with a valid instance of the PostBuildStep interface.
 ## Tests with Spock
 Writing tests with the Spock Framework is very similar with writing a new JUnit test. All Spock tests have to extend the `org.jenkinsci.test.acceptance.geb.GebSpec` class that initialize the test environment.
 
