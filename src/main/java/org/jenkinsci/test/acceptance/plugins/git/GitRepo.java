@@ -13,6 +13,7 @@ import static java.lang.ProcessBuilder.Redirect.INHERIT;
 import static java.nio.file.attribute.PosixFilePermission.OWNER_EXECUTE;
 import static java.nio.file.attribute.PosixFilePermission.OWNER_READ;
 import static java.util.Collections.singleton;
+import static org.jenkinsci.test.acceptance.docker.fixtures.GitContainer.*;
 
 /**
  * Manipulates git repository locally.
@@ -29,7 +30,7 @@ public class GitRepo implements Closeable {
     private File ssh;
 
     /**
-     * Private key file that contains /ssh_keys/unsafe
+     * Private key file that contains /ssh_keys/unsafe.
      */
     private File privateKey;
 
@@ -39,7 +40,7 @@ public class GitRepo implements Closeable {
     }
 
     /**
-     * Creates a new repo by cloning the given URL
+     * Creates a new repo by cloning the given URL.
      */
     public GitRepo(String url) throws IOException, InterruptedException {
         dir = initDir();
@@ -58,13 +59,17 @@ public class GitRepo implements Closeable {
                         "exec ssh -o StrictHostKeyChecking=no -i " + privateKey.getAbsolutePath() + " \"$@\"");
         Files.setPosixFilePermissions(ssh.toPath(), new HashSet<>(Arrays.asList(OWNER_READ, OWNER_EXECUTE)));
 
-        File dir = File.createTempFile("jenkins", "git");
-        dir.delete();
-        dir.mkdir();
-        return dir;
+        return createTempDir("git");
     }
 
     public void git(Object... args) throws IOException, InterruptedException {
+        gitDir(this.dir, args);
+    }
+
+    /**
+     * Execute git command in specified directory.
+     */
+    public void gitDir(File dir, Object... args) throws IOException, InterruptedException {
         List<String> cmds = new ArrayList<>();
         cmds.add("git");
         for (Object a : args) {
@@ -112,17 +117,47 @@ public class GitRepo implements Closeable {
     }
 
     /**
+     * Add a submodule to the main repository.
+     * @param submoduleName Name of the submodule
+     */
+    public GitRepo addSubmodule(String submoduleName) throws IOException, InterruptedException {
+        File submoduleDir = new File(createTempDir(submoduleName).getAbsolutePath() + "/" + submoduleName);
+        submoduleDir.delete();
+        submoduleDir.mkdir();
+
+        gitDir(submoduleDir, "init");
+        try (FileWriter o = new FileWriter(new File(submoduleDir, "foo"), true)) {
+            o.write("more");
+        }
+
+        gitDir(submoduleDir, "add", "foo");
+        gitDir(submoduleDir, "commit", "-m", "Initial commit");
+
+        git("submodule", "add", submoduleDir.getAbsolutePath());
+        git("commit", "-am", "Added submodule");
+
+        return this;
+    }
+
+    public File createTempDir(String name) throws IOException {
+        File tmp = File.createTempFile("jenkins", name);
+        tmp.delete();
+        tmp.mkdir();
+        return tmp;
+    }
+
+    /**
      * Zip bare repository, copy to Docker container using sftp, then unzip.
      * The repo is now accessible over "ssh://git@ip:port/home/git/gitRepo.git"
      *
      * @param host IP of Docker container
      * @param port SSH port of Docker container
      */
-    public void transferRepositoryToDockerContainer(String host, int port) throws IOException, InterruptedException, JSchException, SftpException {
-        git("clone", "--bare", ".", "bare.git");
+    public void transferToDockerContainer(String host, int port) throws IOException, InterruptedException, JSchException, SftpException {
 
-        File zipppedRepo = new File(dir.getPath() + "/bare.zip");
-        ZipUtil.pack(new File(dir.getPath() + "/bare.git"), zipppedRepo);
+        String zippedFilename = "repo.zip";
+        File zipppedRepo = new File(dir.getPath() + "/" + zippedFilename);
+        ZipUtil.pack(new File(dir.getPath()), zipppedRepo);
 
         Properties props = new Properties();
         props.put("StrictHostKeyChecking", "no");
@@ -137,11 +172,11 @@ public class GitRepo implements Closeable {
         ChannelSftp channel = (ChannelSftp) session.openChannel("sftp");
         channel.connect();
         channel.cd("/home/git");
-        channel.put(new FileInputStream(zipppedRepo), "bare.zip");
+        channel.put(new FileInputStream(zipppedRepo), zippedFilename);
 
         ChannelExec channelExec = (ChannelExec) session.openChannel("exec");
         InputStream in = channelExec.getInputStream();
-        channelExec.setCommand("unzip bare.zip -d gitRepo.git");
+        channelExec.setCommand("unzip " + zippedFilename + " -d " + REPO_NAME);
         channelExec.connect();
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(in));

@@ -75,7 +75,7 @@ public class GitPluginTest extends AbstractJUnitTest {
     @Category(SmokeTest.class)
     public void simple_checkout() throws InterruptedException, JSchException, SftpException, IOException {
         buildGitRepo()
-                .transferRepositoryToDockerContainer(HOST, port);
+                .transferToDockerContainer(HOST, port);
 
         job.useScm(GitScm.class)
                 .url(repoUrl)
@@ -90,7 +90,7 @@ public class GitPluginTest extends AbstractJUnitTest {
     public void checkout_branch() throws InterruptedException, JSchException, SftpException, IOException {
         GitRepo repo = buildGitRepo();
         repo.git("branch", "svn");
-        repo.transferRepositoryToDockerContainer(HOST, port);
+        repo.transferToDockerContainer(HOST, port);
 
         job.useScm(GitScm.class)
                 .url(repoUrl)
@@ -105,7 +105,7 @@ public class GitPluginTest extends AbstractJUnitTest {
     @Test
     public void name_remote_repo() throws IOException, InterruptedException, SftpException, JSchException {
         buildGitRepo()
-                .transferRepositoryToDockerContainer(HOST, port);
+                .transferToDockerContainer(HOST, port);
 
         job.useScm(GitScm.class)
                 .url(repoUrl)
@@ -121,7 +121,7 @@ public class GitPluginTest extends AbstractJUnitTest {
     @Test
     public void checkout_local_branch() throws IOException, InterruptedException, SftpException, JSchException {
         buildGitRepo()
-                .transferRepositoryToDockerContainer(HOST, port);
+                .transferToDockerContainer(HOST, port);
 
         job.useScm(GitScm.class)
                 .url(repoUrl)
@@ -136,7 +136,7 @@ public class GitPluginTest extends AbstractJUnitTest {
     @Test
     public void checkout_to_local_dir() throws IOException, InterruptedException, SftpException, JSchException {
         buildGitRepo()
-                .transferRepositoryToDockerContainer(HOST, port);
+                .transferToDockerContainer(HOST, port);
 
         job.useScm(GitScm.class)
                 .url(repoUrl)
@@ -151,7 +151,7 @@ public class GitPluginTest extends AbstractJUnitTest {
     @Test
     public void poll_for_changes() throws IOException, InterruptedException, SftpException, JSchException {
         buildGitRepo()
-                .transferRepositoryToDockerContainer(HOST, port);
+                .transferToDockerContainer(HOST, port);
 
         job.useScm(GitScm.class) //
                 .url(container.getRepoUrl())
@@ -169,7 +169,7 @@ public class GitPluginTest extends AbstractJUnitTest {
     @Test
     public void check_revision() throws IOException, InterruptedException, SftpException, JSchException {
         buildGitRepo()
-                .transferRepositoryToDockerContainer(HOST, port);
+                .transferToDockerContainer(HOST, port);
 
         job.useScm(GitScm.class)
                 .url(repoUrl)
@@ -182,6 +182,23 @@ public class GitPluginTest extends AbstractJUnitTest {
 
         build.openStatusPage();
         build.control(By.xpath("//*[contains(text(),'" + revision + "')]")).check();
+    }
+
+    @Test
+    public void update_submodules_recursively() throws IOException, InterruptedException, JSchException, SftpException {
+        String name = "submodule";
+        buildGitRepo()
+                .addSubmodule(name)
+                .transferToDockerContainer(HOST, port);
+
+        job.useScm(GitScm.class)
+                .url(repoUrl)
+                .credentials(USERNAME)
+                .enableRecursiveSubmoduleProcessing();
+
+        job.addShellStep("cd " + name + " && test -f foo");
+        job.save();
+        job.startBuild().shouldSucceed();
     }
 
     private String getRevisionFromConsole(String console) {
