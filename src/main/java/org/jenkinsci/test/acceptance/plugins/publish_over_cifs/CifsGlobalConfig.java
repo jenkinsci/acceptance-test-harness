@@ -9,6 +9,7 @@ import org.jenkinsci.test.acceptance.po.PageObject;
 import javax.inject.Inject;
 
 /**
+ * Allows the global configuration for the Publish Over Cifs plugin.
  * @author Tobias Meyer
  */
 public class CifsGlobalConfig extends PageAreaImpl {

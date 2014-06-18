@@ -93,17 +93,16 @@ public class DockerContainer implements Closeable {
     }
     /**
      * Tries to copy one file from Path toPath. Returns afterwards if the file exist.
-     * @param Path
-     * @param toPath
-     * @return
+     * @param Path the Source Path
+     * @param toPath the Destination Path
+     * @return true if the copy was a success otherwise false
      * @throws InterruptedException
      */
-    public Boolean tryCopyFile(String Path,String toPath) throws  InterruptedException{
+    public boolean tryCopyFile(String Path,String toPath) throws  InterruptedException{
         File srcFile = new File(Path);
         String fileName= srcFile.getName();
         File destFile = new File(toPath+"/"+fileName);
         if(destFile.exists()){
-            //TODO: add log
             destFile.delete();
         }
         try {

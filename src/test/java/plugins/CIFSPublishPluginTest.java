@@ -70,7 +70,7 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
      * @param servername Name to Access Instance
      * @param smb       Docker Instance of the Server
      */
-    private void jenkinsCifsConfigure(String servername, SMBContainer smb) {
+    private void configureCifs(String servername, SMBContainer smb) {
         jenkins.configure();
         Site s = new CifsGlobalConfig(jenkins).addSite();
         {
@@ -107,7 +107,7 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
         Resource cp_file = resource("/ftp_plugin/odes.txt");
 
         FreeStyleJob j = jenkins.jobs.create();
-        jenkinsCifsConfigure("asd", smbd);
+        configureCifs("asd", smbd);
         j.configure();
         {
             j.copyResource(cp_file);
@@ -148,7 +148,7 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
         String randomPath = "/tmp/" + randomName + "/";
         FreeStyleJob j = jenkins.jobs.create(FreeStyleJob.class, randomName);
 
-        jenkinsCifsConfigure("asd", smb);
+        configureCifs("asd", smb);
         j.configure();
         {
             j.copyResource(cp_file);
@@ -187,7 +187,7 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
         Resource cp_dir = resource("/ftp_plugin/");
         Resource test = resource("/ftp_plugin/prefix_/test.txt");
         FreeStyleJob j = jenkins.jobs.create();
-        jenkinsCifsConfigure("asd", smb);
+        configureCifs("asd", smb);
         j.configure();
         {
             j.copyDir(cp_dir);
@@ -227,7 +227,7 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
         Resource cp_dir = resource("/ftp_plugin/");
 
         FreeStyleJob j = jenkins.jobs.create();
-        jenkinsCifsConfigure("asd", smb);
+        configureCifs("asd", smb);
         j.configure();
         {
             j.copyDir(cp_dir);
@@ -264,7 +264,7 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
         Resource cp_dir = resource("/ftp_plugin/");
 
         FreeStyleJob j = jenkins.jobs.create();
-        jenkinsCifsConfigure("asd", smb);
+        configureCifs("asd", smb);
         j.configure();
         {
             j.copyDir(cp_dir);
@@ -303,7 +303,7 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
         Resource cp_dir = resource("/ftp_plugin/");
 
         FreeStyleJob j = jenkins.jobs.create();
-        jenkinsCifsConfigure("asd", smb);
+        configureCifs("asd", smb);
         j.configure();
         {
             j.copyDir(cp_dir);
@@ -343,7 +343,7 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
         Resource cp_txt = resource("/ftp_plugin/odes.txt");
 
         FreeStyleJob j = jenkins.jobs.create();
-        jenkinsCifsConfigure("asd", smb);
+        configureCifs("asd", smb);
         j.configure();
         {
             j.copyResource(cp_txt, ".svn");
@@ -383,7 +383,7 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
         Resource cp_txt = resource("/ftp_plugin/odes.txt");
 
         FreeStyleJob j = jenkins.jobs.create();
-        jenkinsCifsConfigure("asd", smb);
+        configureCifs("asd", smb);
         j.configure();
         {
             j.copyResource(cp_txt, ".svn");
@@ -427,7 +427,7 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
         nestedEmptyDir.mkdir();
 
         FreeStyleJob j = jenkins.jobs.create();
-        jenkinsCifsConfigure("asd", smb);
+        configureCifs("asd", smb);
         j.configure();
         {
             j.copyResource(cp_txt);
@@ -469,7 +469,7 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
         nestedEmptyDir.mkdir();
 
         FreeStyleJob j = jenkins.jobs.create();
-        jenkinsCifsConfigure("asd", smb);
+        configureCifs("asd", smb);
         j.configure();
         {
             j.copyResource(cp_txt);
@@ -508,7 +508,7 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
         Resource cp_dir = resource("/ftp_plugin/");
 
         FreeStyleJob j = jenkins.jobs.create();
-        jenkinsCifsConfigure("asd", smb);
+        configureCifs("asd", smb);
         j.configure();
         {
             j.copyDir(cp_dir);
@@ -544,7 +544,7 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
         Resource cp_dir = resource("/ftp_plugin/");
 
         FreeStyleJob j = jenkins.jobs.create();
-        jenkinsCifsConfigure("asd", smb);
+        configureCifs("asd", smb);
         j.configure();
         {
             j.copyDir(cp_dir);
@@ -580,7 +580,7 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
         Resource cp_txt = resource("/ftp_plugin/odes.txt");
 
         FreeStyleJob j = jenkins.jobs.create();
-        jenkinsCifsConfigure("asd", smb);
+        configureCifs("asd", smb);
         j.configure();
         {
             j.copyResource(cp_txt);
@@ -621,7 +621,7 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
         SMBContainer smb = docker.start(SMBContainer.class);
         Resource cp_txt = resource("/ftp_plugin/odes.txt");
         FreeStyleJob j = jenkins.jobs.create();
-        jenkinsCifsConfigure("asd", smb);
+        configureCifs("asd", smb);
         j.configure();
         {
             j.copyResource(cp_txt);
@@ -661,7 +661,7 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
         Resource cp_txt = resource("/ftp_plugin/odes.txt");
 
         FreeStyleJob j = jenkins.jobs.create();
-        jenkinsCifsConfigure("asd", smb);
+        configureCifs("asd", smb);
         j.configure();
         {
             j.copyResource(cp_txt);
@@ -708,8 +708,8 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
         Resource cp_txt = resource("/ftp_plugin/odes.txt");
 
         FreeStyleJob j = jenkins.jobs.create();
-        jenkinsCifsConfigure("docker1", smb);
-        jenkinsCifsConfigure("docker2", smb2);
+        configureCifs("docker1", smb);
+        configureCifs("docker2", smb2);
         j.configure();
         {
             j.copyResource(cp_txt);
@@ -756,7 +756,7 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
         s.save();
 
         FreeStyleJob j = jenkins.jobs.create();
-        jenkinsCifsConfigure("asd", smb);
+        configureCifs("asd", smb);
         j.configure();
         {
             j.copyResource(cp_file);

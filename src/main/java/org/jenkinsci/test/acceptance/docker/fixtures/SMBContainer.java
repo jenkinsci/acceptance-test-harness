@@ -25,18 +25,18 @@ public class SMBContainer extends DockerContainer {
     private final String password = "test";
 
     /**
-     * Gets the ftp password of the ftp user on the docker server
+     * Gets the samba password of the samba user on the docker server
      *
-     * @return ftp password
+     * @return Samba password
      */
     public String getPassword() {
         return password;
     }
 
     /**
-     * Gets the username of the ftp user on the docker server
+     * Gets the username of the samba user on the docker server
      *
-     * @return ftp username
+     * @return Samba username
      */
     public String getUsername() {
         return username;
