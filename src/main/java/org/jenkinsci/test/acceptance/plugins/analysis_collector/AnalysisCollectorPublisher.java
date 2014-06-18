@@ -1,6 +1,6 @@
 package org.jenkinsci.test.acceptance.plugins.analysis_collector;
 
-import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginPostBuildStep;
+import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginBuildSettings;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Job;
@@ -9,7 +9,7 @@ import org.jenkinsci.test.acceptance.po.Job;
  * @author Michael Prankl
  */
 @Describable("Publish combined analysis results")
-public class AnalysisCollectorPublisher extends AbstractCodeStylePluginPostBuildStep {
+public class AnalysisCollectorPublisher extends AbstractCodeStylePluginBuildSettings {
 
     public final Control isCheckstyleActivated = control("isCheckStyleActivated");
     public final Control isDryActivated = control("isDryActivated");

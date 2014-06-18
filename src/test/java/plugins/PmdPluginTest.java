@@ -2,12 +2,9 @@ package plugins;
 
 import org.jenkinsci.test.acceptance.junit.Bug;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginMavenBuildConfigurator;
+import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginBuildConfigurator;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
-import org.jenkinsci.test.acceptance.plugins.pmd.PmdAction;
-import org.jenkinsci.test.acceptance.plugins.pmd.PmdColumn;
-import org.jenkinsci.test.acceptance.plugins.pmd.PmdMavenBuildSettings;
-import org.jenkinsci.test.acceptance.plugins.pmd.PmdPublisher;
+import org.jenkinsci.test.acceptance.plugins.pmd.*;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.ListView;
@@ -49,7 +46,7 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
      */
     @Test
     public void configure_a_job_with_PMD_post_build_steps() {
-        FreeStyleJob job = setupJob("/pmd_plugin/pmd.xml", PmdPublisher.class, "pmd.xml");
+        FreeStyleJob job = setupFreestyleJob("/pmd_plugin/pmd.xml", "pmd.xml", PmdFreestyleBuildSettings.class);
         Build lastBuild = buildJobWithSuccess(job);
 
         assertThat(lastBuild.open(), hasContent("0 warnings"));
@@ -76,10 +73,10 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
         job.configure();
         job.copyResource(resource("/pmd_plugin/pmd.xml"));
         job.addShellStep("false");
-        PmdPublisher pmd = job.addPublisher(PmdPublisher.class);
+        // TODO: refactor to use setupFreestyleJob() with configurator callback
+        PmdFreestyleBuildSettings pmd = job.addPublisher(PmdFreestyleBuildSettings.class);
         pmd.pattern.set("pmd.xml");
-        pmd.advanced.click();
-        pmd.canRunOnFailed.check();
+        pmd.setCanRunOnFailed(true);
         job.save();
 
         Build b = job.startBuild().waitUntilFinished().shouldFail();
@@ -103,7 +100,7 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
      */
     @Test
     public void configure_a_job_with_PMD_post_build_steps_which_display_some_warnings() {
-        FreeStyleJob job = setupJob("/pmd_plugin/pmd-warnings.xml", PmdPublisher.class, "pmd-warnings.xml");
+        FreeStyleJob job = setupFreestyleJob("/pmd_plugin/pmd-warnings.xml", "pmd-warnings.xml", PmdFreestyleBuildSettings.class);
 
         Build lastBuild = buildJobWithSuccess(job);
         assertThat(lastBuild, hasAction("PMD Warnings"));
@@ -157,7 +154,7 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
      */
     @Test
     public void xml_api_report_depth_0() throws IOException, SAXException, ParserConfigurationException {
-        final FreeStyleJob job = setupJob("/pmd_plugin/pmd-warnings.xml", PmdPublisher.class, "pmd-warnings.xml");
+        final FreeStyleJob job = setupFreestyleJob("/pmd_plugin/pmd-warnings.xml", "pmd-warnings.xml", PmdFreestyleBuildSettings.class);
         final Build build = buildJobWithSuccess(job);
         final String apiUrl = "pmdResult/api/xml?depth=0";
         final String expectedXmlPath = "/pmd_plugin/api_depth_0.xml";
@@ -169,9 +166,9 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
      */
     @Test
     public void configure_a_job_with_PMD_post_build_steps_which_display_some_warnings_two_runs() {
-        FreeStyleJob job = setupJob("/pmd_plugin/pmd-warnings.xml", PmdPublisher.class, "pmd-warnings.xml");
+        FreeStyleJob job = setupFreestyleJob("/pmd_plugin/pmd-warnings.xml", "pmd-warnings.xml", PmdFreestyleBuildSettings.class);
         buildJobAndWait(job);
-        editJobAndChangeLastRessource(job, "/pmd_plugin/pmd-warnings-2.xml", "pmd-warnings.xml");
+        editJobAndChangeLastResource(job, "/pmd_plugin/pmd-warnings-2.xml", "pmd-warnings.xml");
 
         Build lastBuild = buildJobWithSuccess(job);
         assertThat(lastBuild, hasAction("PMD Warnings"));
@@ -195,9 +192,9 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
     @Bug("21723")
     @Ignore("Until JENKINS-21723 is fixed")
     public void view_pmd_report_job_graph_links() {
-        FreeStyleJob job = setupJob("/pmd_plugin/pmd-warnings.xml", PmdPublisher.class, "pmd-warnings.xml");
+        FreeStyleJob job = setupFreestyleJob("/pmd_plugin/pmd-warnings.xml", "pmd-warnings.xml", PmdFreestyleBuildSettings.class);
         buildJobAndWait(job);
-        editJobAndChangeLastRessource(job, "/pmd_plugin/pmd-warnings-2.xml", "pmd-warnings.xml");
+        editJobAndChangeLastResource(job, "/pmd_plugin/pmd-warnings-2.xml", "pmd-warnings.xml");
         buildJobWithSuccess(job);
 
         assertAreaLinksOfJobAreLike(job, "^\\d+/pmdResult");
@@ -209,7 +206,16 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
     @Test
     @Bug("19614")
     public void build_with_warning_threshold_set_should_be_unstable() {
-        final FreeStyleJob job = setupJob("/pmd_plugin/pmd-warnings.xml", PmdPublisher.class, "pmd-warnings.xml", "0", "0", true);
+        AbstractCodeStylePluginBuildConfigurator<PmdFreestyleBuildSettings> configurator = new AbstractCodeStylePluginBuildConfigurator<PmdFreestyleBuildSettings>() {
+            @Override
+            public void configure(PmdFreestyleBuildSettings settings) {
+                settings.setBuildUnstableTotalAll("0");
+                settings.setNewWarningsThresholdFailed("0");
+                settings.setUseDeltaValues(true);
+            }
+        };
+        final FreeStyleJob job = setupFreestyleJob("/pmd_plugin/pmd-warnings.xml", "pmd-warnings.xml", PmdFreestyleBuildSettings.class, configurator);
+
         final Build build = buildJobAndWait(job);
         assertThat(build.isUnstable(), is(true));
     }
@@ -218,7 +224,7 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
         return setupSimpleMavenJob(null);
     }
 
-    private MavenModuleSet setupSimpleMavenJob(AbstractCodeStylePluginMavenBuildConfigurator<PmdMavenBuildSettings> configurator) {
+    private MavenModuleSet setupSimpleMavenJob(AbstractCodeStylePluginBuildConfigurator<PmdMavenBuildSettings> configurator) {
         final String projectPath = "/pmd_plugin/sample_pmd_project";
         final String goal = "clean package pmd:pmd";
         return setupMavenJob(projectPath, goal, PmdMavenBuildSettings.class, configurator);
@@ -229,7 +235,7 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
      */
     @Test
     public void build_simple_freestyle_mavengoals_project() {
-        final FreeStyleJob job = setupFreestyleJobWithMavenGoals("/pmd_plugin/sample_pmd_project", "clean package pmd:pmd", PmdPublisher.class, "target/pmd.xml");
+        final FreeStyleJob job = setupFreestyleJobWithMavenGoals("/pmd_plugin/sample_pmd_project", "clean package pmd:pmd", PmdFreestyleBuildSettings.class, "target/pmd.xml");
         Build lastBuild = buildJobWithSuccess(job);
         assertThat(lastBuild, hasAction("PMD Warnings"));
         lastBuild.open();
@@ -255,8 +261,8 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
      */
     @Test
     public void build_simple_maven_project_and_check_if_it_is_unstable() {
-        final AbstractCodeStylePluginMavenBuildConfigurator<PmdMavenBuildSettings> buildConfigurator =
-                new AbstractCodeStylePluginMavenBuildConfigurator<PmdMavenBuildSettings>() {
+        final AbstractCodeStylePluginBuildConfigurator<PmdMavenBuildSettings> buildConfigurator =
+                new AbstractCodeStylePluginBuildConfigurator<PmdMavenBuildSettings>() {
                     @Override
                     public void configure(PmdMavenBuildSettings settings) {
                         settings.setBuildUnstableTotalAll("0");
@@ -271,8 +277,8 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
      */
     @Test
     public void build_simple_maven_project_and_check_if_failed() {
-        final AbstractCodeStylePluginMavenBuildConfigurator<PmdMavenBuildSettings> buildConfigurator =
-                new AbstractCodeStylePluginMavenBuildConfigurator<PmdMavenBuildSettings>() {
+        final AbstractCodeStylePluginBuildConfigurator<PmdMavenBuildSettings> buildConfigurator =
+                new AbstractCodeStylePluginBuildConfigurator<PmdMavenBuildSettings>() {
                     @Override
                     public void configure(PmdMavenBuildSettings settings) {
                         settings.setBuildFailedTotalAll("0");
@@ -288,7 +294,7 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
      */
     @Test
     public void configure_a_job_with_PMD_post_build_steps_build_on_slave() throws Exception {
-        FreeStyleJob job = setupJob("/pmd_plugin/pmd-warnings.xml", PmdPublisher.class, "pmd-warnings.xml");
+        FreeStyleJob job = setupFreestyleJob("/pmd_plugin/pmd-warnings.xml", "pmd-warnings.xml", PmdFreestyleBuildSettings.class);
 
         Slave slave = makeASlaveAndConfigureJob(job);
 

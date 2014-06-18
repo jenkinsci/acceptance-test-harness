@@ -42,8 +42,8 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
     @Test
     public void single_task_tags_and_exclusion_pattern() throws Exception{
         //do basic setup
-        FreeStyleJob j = setupJob("/tasks_plugin/fileset1",TaskScannerPublisher.class,
-                                  "**/*.java");
+        FreeStyleJob j = setupFreestyleJob("/tasks_plugin/fileset1", "**/*.java", TaskScannerPublisher.class
+        );
 
         //set up the some more task scanner settings
         j.configure();
@@ -132,8 +132,8 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
     @Test
     public void xml_api_report_depth_0() throws IOException, SAXException, ParserConfigurationException {
         //do the same setup as in test single_task_tags_and_exclusion_pattern
-        FreeStyleJob j = setupJob("/tasks_plugin/fileset1",TaskScannerPublisher.class,
-                "**/*.java");
+        FreeStyleJob j = setupFreestyleJob("/tasks_plugin/fileset1", "**/*.java", TaskScannerPublisher.class
+        );
 
         //set up the some more task scanner settings
         j.configure();
@@ -163,8 +163,8 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
     @Test
     public void multiple_task_tags() throws Exception{
         //do basic setup
-        FreeStyleJob j = setupJob("/tasks_plugin/fileset1",TaskScannerPublisher.class,
-                "**/*.java");
+        FreeStyleJob j = setupFreestyleJob("/tasks_plugin/fileset1", "**/*.java", TaskScannerPublisher.class
+        );
 
         //set up the some more task scanner settings
         j.configure();
@@ -238,8 +238,8 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
     @Test
     public void closed_tasks() throws Exception {
         //do the same setup as for single_task_tags_and_exclusion_pattern
-        FreeStyleJob j = setupJob("/tasks_plugin/fileset1", TaskScannerPublisher.class,
-                "**/*.java");
+        FreeStyleJob j = setupFreestyleJob("/tasks_plugin/fileset1", "**/*.java", TaskScannerPublisher.class
+        );
 
         j.configure();
         TaskScannerPublisher pub = j.getPublisher(TaskScannerPublisher.class);
@@ -299,8 +299,8 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
     @Test
     public void run_always_option() throws Exception {
         //do the same setup as for single_task_tags_and_exclusion_pattern
-        FreeStyleJob j = setupJob("/tasks_plugin/fileset1", TaskScannerPublisher.class,
-                "**/*.java");
+        FreeStyleJob j = setupFreestyleJob("/tasks_plugin/fileset1", "**/*.java", TaskScannerPublisher.class
+        );
 
         j.configure();
         j.addShellStep("exit 1"); //ensures the FAILURE status of the main build
@@ -351,8 +351,8 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
     @Test @Bug("22744") @Ignore("until JENKINS-22744 is fixed.")
     public void file_encoding_windows1251() throws Exception {
         //basic setup
-        FreeStyleJob j = setupJob("/tasks_plugin/cp1251_files", TaskScannerPublisher.class,
-                                   "**/*.java");
+        FreeStyleJob j = setupFreestyleJob("/tasks_plugin/cp1251_files", "**/*.java", TaskScannerPublisher.class
+        );
         j.configure();
         TaskScannerPublisher pub = j.getPublisher(TaskScannerPublisher.class);
         pub.normalPriorityTags.set("TODO");
@@ -412,8 +412,8 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
 
         // Basic setup
 
-        FreeStyleJob j = setupJob("/tasks_plugin/fileset1_less",TaskScannerPublisher.class,
-                "**/*.java");
+        FreeStyleJob j = setupFreestyleJob("/tasks_plugin/fileset1_less", "**/*.java", TaskScannerPublisher.class
+        );
 
         TaskScannerPublisher pub = j.getPublisher(TaskScannerPublisher.class);
         TaskScannerAction tsa = new TaskScannerAction(j);

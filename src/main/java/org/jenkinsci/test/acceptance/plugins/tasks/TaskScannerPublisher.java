@@ -1,6 +1,6 @@
 package org.jenkinsci.test.acceptance.plugins.tasks;
 
-import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginPostBuildStep;
+import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginBuildSettings;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Job;
@@ -11,7 +11,7 @@ import org.jenkinsci.test.acceptance.po.Job;
  *
  * It provides access to the particular controls to configure the post build step.
  * This class derives some common controls from
- * {@link org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginPostBuildStep}.
+ * {@link org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginBuildSettings}.
  *
  * This post build step requires installation of the tasks plugin.
  *
@@ -19,7 +19,7 @@ import org.jenkinsci.test.acceptance.po.Job;
  */
 
 @Describable("Scan workspace for open tasks")
-public class TaskScannerPublisher extends AbstractCodeStylePluginPostBuildStep {
+public class TaskScannerPublisher extends AbstractCodeStylePluginBuildSettings {
 
     /**
      * The input for the file names to be excluded

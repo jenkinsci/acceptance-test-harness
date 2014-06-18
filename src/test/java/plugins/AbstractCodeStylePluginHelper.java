@@ -6,9 +6,9 @@ import org.custommonkey.xmlunit.XMLAssert;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Resource;
-import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginMavenBuildConfigurator;
+import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginBuildConfigurator;
+import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginFreestyleBuildSettings;
 import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginMavenBuildSettings;
-import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginPostBuildStep;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenBuildStep;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
@@ -35,13 +35,12 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
     /**
      * Setup a job with the given resource and publisher.
      * @param resourceToCopy Resource to copy to build (Directory or File path)
-     * @param publisherClass Publisher to add
      * @param publisherPattern Publisher pattern to set
-     * @param <T> Type of the publisher
+     * @param publisherClass Publisher to add
      * @return The made job
      */
-    public <T extends AbstractCodeStylePluginPostBuildStep> FreeStyleJob setupJob(String resourceToCopy, Class<T> publisherClass, String publisherPattern) {
-        return setupJob(resourceToCopy, publisherClass, publisherPattern, null, null, false);
+    public <T extends AbstractCodeStylePluginFreestyleBuildSettings> FreeStyleJob setupFreestyleJob(String resourceToCopy, String publisherPattern, Class<T> publisherClass) {
+        return setupFreestyleJob(resourceToCopy, publisherPattern, publisherClass, null);
     }
 
     /**
@@ -49,43 +48,30 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
      * @param resourceToCopy Resource to copy to build (Directory or File path)
      * @param publisherClass Publisher to add
      * @param publisherPattern Publisher pattern to set
-     * @param warningThresholdUnstable number of warnings needed to mark the build as unstable
-     * @param thresholdFailedNewWarnings number of new warnings needed to mark the build as failure
-     * @param useDeltaWarnings
      * @return The made job
      */
-    public <T extends AbstractCodeStylePluginPostBuildStep> FreeStyleJob setupJob(String resourceToCopy, Class<T> publisherClass,
-                                                                                  String publisherPattern, String warningThresholdUnstable,
-                                                                                  String thresholdFailedNewWarnings, boolean useDeltaWarnings) {
+    public <T extends AbstractCodeStylePluginFreestyleBuildSettings> FreeStyleJob setupFreestyleJob(String resourceToCopy,
+                                                                                                    String publisherPattern,
+                                                                                                    Class<T> publisherClass,
+                                                                                                    AbstractCodeStylePluginBuildConfigurator<T> configurator) {
         final FreeStyleJob job = jenkins.jobs.create();
         job.configure();
 
         final Resource res = resource(resourceToCopy);
         //decide whether to utilize copyResource or copyDir
-        if (res.asFile().isDirectory())
+        if (res.asFile().isDirectory()) {
             job.copyDir(res);
-        else
+        } else {
             job.copyResource(res);
-
-        final T publisher = job.addPublisher(publisherClass);
-        publisher.pattern.set(publisherPattern);
-
-        if (warningThresholdUnstable != null || thresholdFailedNewWarnings != null) {
-            publisher.advanced.click();
-
-            if (warningThresholdUnstable != null) {
-                publisher.warningThresholdUnstable.set(warningThresholdUnstable);
-            }
-
-            if (thresholdFailedNewWarnings != null) {
-                publisher.computeNewWarningsComparedWithReferenceBuild.check();
-                publisher.newWarningsThresholdFailed.set(thresholdFailedNewWarnings);
-            }
-
-            if (useDeltaWarnings) {
-                publisher.useDeltaValues.check();
-            }
         }
+
+        final T buildSettings = job.addPublisher(publisherClass);
+        buildSettings.pattern.set(publisherPattern);
+
+        if (configurator != null) {
+            configurator.configure(buildSettings);
+        }
+
         job.save();
         return job;
     }
@@ -113,7 +99,7 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
      * @param publisherPattern Publisher pattern to set
      * @return The configured job.
      */
-    public <T extends AbstractCodeStylePluginPostBuildStep> FreeStyleJob setupFreestyleJobWithMavenGoals(String resourceProjectDir, String goal, Class<T> publisherClass, String publisherPattern) {
+    public <T extends AbstractCodeStylePluginFreestyleBuildSettings> FreeStyleJob setupFreestyleJobWithMavenGoals(String resourceProjectDir, String goal, Class<T> publisherClass, String publisherPattern) {
         MavenInstallation.ensureThatMavenIsInstalled(jenkins);
 
         final FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class);
@@ -131,30 +117,6 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
      * Setup a maven build.
      * @param resourceProjectDir A Folder in resources which shall be copied to the working directory. Should contain the pom.xml
      * @param goal The maven goals to set.
-     * @return The configured job.
-     */
-    public MavenModuleSet setupMavenJob(String resourceProjectDir, String goal) {
-        return setupMavenJob(resourceProjectDir, goal, null, null);
-    }
-
-    /**
-     * Setup a maven build.
-     * @param resourceProjectDir A Folder in resources which shall be copied to the working directory. Should contain the pom.xml
-     * @param goal The maven goals to set.
-     * @param codeStyleBuildSettings The code analyzer to use or null if you do not want one.
-     * @param <T> The type of the Analyzer.
-     * @return The configured job.
-     */
-    public <T extends AbstractCodeStylePluginMavenBuildSettings> MavenModuleSet setupMavenJob(String resourceProjectDir,
-                                                                                              String goal,
-                                                                                              Class<T> codeStyleBuildSettings) {
-        return setupMavenJob(resourceProjectDir, goal, codeStyleBuildSettings, null);
-    }
-
-    /**
-     * Setup a maven build.
-     * @param resourceProjectDir A Folder in resources which shall be copied to the working directory. Should contain the pom.xml
-     * @param goal The maven goals to set.
      * @param codeStyleBuildSettings The code analyzer to use or null if you do not want one.
      * @param configurator A configurator to custommize the code analyzer settings you want to use.
      * @param <T> The type of the Analyzer.
@@ -163,19 +125,17 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
     public <T extends AbstractCodeStylePluginMavenBuildSettings> MavenModuleSet setupMavenJob(String resourceProjectDir,
                                                                                               String goal,
                                                                                               Class<T> codeStyleBuildSettings,
-                                                                                              AbstractCodeStylePluginMavenBuildConfigurator<T> configurator) {
+                                                                                              AbstractCodeStylePluginBuildConfigurator<T> configurator) {
         MavenInstallation.ensureThatMavenIsInstalled(jenkins);
 
         final MavenModuleSet job = jenkins.jobs.create(MavenModuleSet.class);
         job.copyDir(resource(resourceProjectDir));
         job.goals.set(goal);
 
-        if (codeStyleBuildSettings != null) {
-            final T buildSettings = job.addBuildSettings(codeStyleBuildSettings);
+        final T buildSettings = job.addBuildSettings(codeStyleBuildSettings);
 
-            if (configurator != null) {
-                configurator.configure(buildSettings);
-            }
+        if (configurator != null) {
+            configurator.configure(buildSettings);
         }
 
         job.save();
@@ -191,7 +151,7 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
      * @param <T> Type of the publisher
      * @return The made job
      */
-    public <T extends AbstractCodeStylePluginPostBuildStep> FreeStyleJob editJobAndChangeLastRessource(FreeStyleJob job, String newResourceToCopy, String publisherPattern) {
+    public <T extends AbstractCodeStylePluginFreestyleBuildSettings> FreeStyleJob editJobAndChangeLastResource(FreeStyleJob job, String newResourceToCopy, String publisherPattern) {
         job.configure();
         job.removeFirstBuildStep();
         job.copyResource(resource(newResourceToCopy), publisherPattern);

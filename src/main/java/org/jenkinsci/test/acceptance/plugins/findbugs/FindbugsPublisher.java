@@ -23,14 +23,12 @@
  */
 package org.jenkinsci.test.acceptance.plugins.findbugs;
 
-import org.jenkinsci.test.acceptance.po.Control;
+import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginFreestyleBuildSettings;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.PostBuildStep;
-import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginPostBuildStep;
 
 @Describable("Publish FindBugs analysis results")
-public class FindbugsPublisher extends AbstractCodeStylePluginPostBuildStep {
+public class FindbugsPublisher extends AbstractCodeStylePluginFreestyleBuildSettings {
 
     public FindbugsPublisher(Job parent, String path) {
         super(parent, path);

@@ -8,14 +8,11 @@ import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisCollecto
 import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisCollectorPublisher;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstylePublisher;
 import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsPublisher;
-import org.jenkinsci.test.acceptance.plugins.pmd.PmdPublisher;
+import org.jenkinsci.test.acceptance.plugins.pmd.PmdFreestyleBuildSettings;
 import org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerPublisher;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.jenkinsci.test.acceptance.Matchers.hasAction;
@@ -111,7 +108,7 @@ public class AnalysisCollectorPluginTest extends AbstractJUnitTest {
         job.configure();
         copyResources(resourceToCopy, job);
         job.addPublisher(CheckstylePublisher.class);
-        job.addPublisher(PmdPublisher.class);
+        job.addPublisher(PmdFreestyleBuildSettings.class);
         job.addPublisher(FindbugsPublisher.class);
         TaskScannerPublisher taskScannerPublisher = job.addPublisher(TaskScannerPublisher.class);
         taskScannerPublisher.highPriorityTags.sendKeys("PRIO1");
