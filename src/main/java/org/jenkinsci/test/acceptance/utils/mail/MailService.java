@@ -62,7 +62,7 @@ public abstract class MailService extends Assert {
 
             @Override
             public String toString() {
-                return "Email whose subject matches "+subject;
+                return "Email whose subject matches: "+subject;
             }
         });
 
@@ -73,8 +73,14 @@ public abstract class MailService extends Assert {
             MimeMultipart content = (MimeMultipart) c;
             c = content.getBodyPart(0).getContent();
         }
-
         assertTrue("body metches", body.matcher(c.toString()).find());
+    }
+
+    /**
+     * Checks that the mail has arrived.
+     */
+    public void assertMail(final Pattern subject, String recipient) throws MessagingException, IOException {
+        assertMail(subject, recipient, Pattern.compile(".*"));
     }
 
     /**
