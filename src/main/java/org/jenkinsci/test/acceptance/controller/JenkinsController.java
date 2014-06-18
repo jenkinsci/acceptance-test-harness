@@ -2,6 +2,7 @@ package org.jenkinsci.test.acceptance.controller;
 
 import com.cloudbees.sdk.extensibility.ExtensionPoint;
 import com.google.inject.Injector;
+
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.codehaus.plexus.util.FileUtils;
@@ -12,6 +13,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URISyntaxException;
 import java.net.URL;
 
 /**
@@ -67,8 +69,14 @@ public abstract class JenkinsController implements IJenkinsController, AutoClean
      *
      * @throws IOException
      */
+    @Override
     public void start() throws IOException {
         if (!isRunning) {
+            try {
+                populateJenkinsHome(new File(JenkinsController.class.getResource("jenkins_updates").toURI()), false);
+            } catch (URISyntaxException ex) {
+                throw new AssertionError(ex);
+            }
             startNow();
             isRunning = true;
         }
@@ -85,6 +93,7 @@ public abstract class JenkinsController implements IJenkinsController, AutoClean
      *
      * @throws IOException
      */
+    @Override
     public void stop() throws IOException {
         if (isRunning) {
             stopNow();
@@ -104,6 +113,7 @@ public abstract class JenkinsController implements IJenkinsController, AutoClean
     /**
      * Alias for {@link #tearDown()}.
      */
+    @Override
     public final void close() throws IOException {
         stop();
         tearDown();
@@ -133,6 +143,7 @@ public abstract class JenkinsController implements IJenkinsController, AutoClean
     /**
      * Gives URL where Jenkins is listening. Must end with "/"
      */
+    @Override
     public abstract URL getUrl();
 
     /**

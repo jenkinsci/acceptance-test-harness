@@ -7,11 +7,13 @@ import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import org.jenkinsci.test.acceptance.junit.Bug;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerAction;
 import org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerPublisher;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
@@ -29,9 +31,6 @@ import static org.junit.Assert.*;
  */
 @WithPlugins("tasks")
 public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
-
-    //TODO: Test for JENKINS-22744: https://issues.jenkins-ci.org/browse/JENKINS-22744
-
 
     /**
      * This test's objective is to verify the basic functionality of the Task
@@ -339,6 +338,55 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
         assertThat(tsa.getWarningNumber(), is(2));
         assertThat(tsa.getHighWarningNumber(), is(2));
     }
+
+    /**
+     * This test's objective to check the correct treatment and display of tasks
+     * in files with windows-1251 (a.k.a. cp1251) encoding.
+     *
+     * This test shall reproduce the observations described in JENKINS-22744:
+     * https://issues.jenkins-ci.org/browse/JENKINS-22744
+     *
+     */
+
+    @Test @Bug("22744") @Ignore("until JENKINS-22744 is fixed.")
+    public void file_encoding_windows1251() throws Exception {
+        //basic setup
+        FreeStyleJob j = setupJob("/tasks_plugin/cp1251_files", TaskScannerPublisher.class,
+                                   "**/*.java");
+        j.configure();
+        TaskScannerPublisher pub = j.getPublisher(TaskScannerPublisher.class);
+        pub.normalPriorityTags.set("TODO");
+        pub.highPriorityTags.set("FIXME");
+        pub.ignoreCase.check();
+        pub.advanced.click();
+        pub.defaultEncoding.set("windows-1251");
+
+        j.save();
+
+        Build lastBuild = buildJobWithSuccess(j);
+        assertThat(lastBuild, hasAction("Open Tasks"));
+        assertThat(j, hasAction("Open Tasks"));
+        lastBuild.open();
+        TaskScannerAction tsa = new TaskScannerAction(j);
+
+        // The expected task priorities are:
+        //   - 1x high
+        //   - 1x medium
+
+        assertThat(tsa.getResultLinkByXPathText("2 open tasks"), is("tasksResult"));
+        assertThat(tsa.getResultTextByXPathText("2 open tasks"), endsWith("in 1 workspace file."));
+        assertThat(tsa.getWarningNumber(), is(2));
+        assertThat(tsa.getHighWarningNumber(), is(1));
+        assertThat(tsa.getNormalWarningNumber(), is(1));
+
+        // verify source code display in desired encoding
+        assertThat(tsa.getLinkedSourceFileLineAsString("TestTaskScanner.java:5", "Normal Priority"), endsWith("пример комментария на русском"));
+
+        // verify extraction in Warnings tab uses desired encoding
+        assertWarningExtraction(tsa,"TestTaskScanner.java",5,"TODO","пример комментария на русском");
+
+    }
+
 
     /**
      * This test's objective is to the correct treatment of the status thresholds (totals).

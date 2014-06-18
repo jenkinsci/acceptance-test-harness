@@ -9,9 +9,12 @@ import org.jenkinsci.test.acceptance.junit.WithCredentials;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.subversion.SubversionPluginTestException;
 import org.jenkinsci.test.acceptance.plugins.subversion.SubversionScm;
+import org.jenkinsci.test.acceptance.plugins.subversion.SvnRepositoryBrowserWebSvn;
+import org.jenkinsci.test.acceptance.po.Changes;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -153,4 +156,151 @@ public class SubversionPluginTest extends AbstractJUnitTest {
 
         f.startBuild().shouldSucceed().shouldContainsConsoleOutput("test -d .svn");
     }
+
+    /**
+     * Scenario:basic Checkout triggered by polling
+     * Given I have installed the "subversion" plugin
+     * And a job
+     * And I add a shell build step "test -d .svn"
+     * When I enter the Url to a valid SVN repository
+     * And I add a polling schedule for every minute
+     * And I save the job
+     * Then there should be a succeeded Build after more than one minute
+     */
+    @Test
+    public void poll_for_changes() throws SubversionPluginTestException {
+        final SvnContainer svnContainer = svn.get();
+        final FreeStyleJob f = jenkins.jobs.create();
+        final SubversionScm subversionScm = f.useScm(SubversionScm.class);
+        subversionScm.url.set(svnContainer.getUrlUnsaveRepo());
+
+        f.pollScm().schedule("* * * * *");
+        f.addShellStep("test -d .svn");
+        f.save();
+
+        sleep(70000);
+
+        // We should have some build after 70 seconds
+        f.getLastBuild().shouldSucceed().shouldExist();
+    }
+
+    /**
+     * Scenario: clean check out
+     * Given I have installed the "subversion" plugin
+     * And a job
+     * When I check out code from Subversion repository "UrlUnsaveRepo"
+     * And I select a Emulated clean checkout
+     * And I add a shell step to generate an unversioned file
+     * And I save the job
+     * And I build the job
+     * And I remove the shell step
+     * And I add a shell step to check if the unversioned file is present
+     * And I build the job again
+     * Then the build should succeed
+     */
+    @Test
+    public void clean_checkout() throws SubversionPluginTestException {
+        final SvnContainer svnContainer = svn.get();
+        final FreeStyleJob f = jenkins.jobs.create();
+        final SubversionScm subversionScm = f.useScm(SubversionScm.class);
+        subversionScm.url.set(svnContainer.getUrlUnsaveRepo());
+        subversionScm.checkoutStrategy.select(SubversionScm.CLEAN_CHECKOUT);
+
+        f.addShellStep("echo test > unversioned.txt");
+        f.save();
+        f.startBuild().shouldSucceed();
+
+        f.configure();
+        f.removeFirstBuildStep();
+        f.addShellStep("! test -f unversioned.txt");
+        f.save();
+        f.startBuild().shouldSucceed();
+    }
+
+    /**
+     * Scenario: Build has changes
+     * Given I have installed the "subversion" plugin
+     * And a job
+     * When I check out code from Subversion repository at specific Revision
+     * And I save the job
+     * And I build the job
+     * And I check out code from Subversion repository at a different Revision with changes
+     * And I save the job
+     * And I build the job
+     * Then changes should be visible on the Changes site
+     */
+    @Test
+    public void build_has_changes() throws SubversionPluginTestException {
+        final SvnContainer svnContainer = svn.get();
+        final FreeStyleJob f = jenkins.jobs.create();
+        final SubversionScm subversionScm = f.useScm(SubversionScm.class);
+        subversionScm.url.set(svnContainer.getUrlUnsaveRepoAtRevision(1));
+
+        f.save();
+        f.startBuild().shouldSucceed();
+
+        f.configure();
+        subversionScm.url.set(svnContainer.getUrlUnsaveRepoAtRevision(2));
+        f.save();
+        f.startBuild().shouldSucceed();
+        final Changes changes = f.getLastBuild().getChanges();
+        assertTrue("Build has no changes.", changes.hasChanges());
+    }
+
+    /**
+     * Scenario: Build has no changes
+     * Given I have installed the "subversion" plugin
+     * And a job
+     * When I check out code from Subversion repository at specific Revision
+     * And I save the job
+     * And I build the job
+     * Then no changes should be visible on the Changes site
+     */
+    @Test
+    public void build_has_no_changes() throws SubversionPluginTestException {
+        final SvnContainer svnContainer = svn.get();
+        final FreeStyleJob f = jenkins.jobs.create();
+        final SubversionScm subversionScm = f.useScm(SubversionScm.class);
+        subversionScm.url.set(svnContainer.getUrlUnsaveRepo());
+
+        f.save();
+        f.startBuild();
+        final Changes changes = f.getLastBuild().getChanges();
+        assertFalse("Build has changes.", changes.hasChanges());
+    }
+
+    /**
+     * Scenario: Build has changes and there is a link to view the diff of the changed file.
+     * Given I have installed the "subversion" plugin
+     * And a job
+     * And the repository is accessible with the repository browser websvn
+     * When I check out code from Subversion repository at specific Revision
+     * And I select websvn as repository browser
+     * And I enter the URL to websvn
+     * And I save the job
+     * And I build the job
+     * And I check out code from Subversion repository at a different Revision with changes
+     * And I save the job
+     * And I build the job
+     * Then a changed file with a diff link to websvn should be visible on the Changes site
+     */
+    @Test
+    public void build_has_changes_and_repoBrowser() throws SubversionPluginTestException {
+        final SvnContainer svnContainer = svn.get();
+        final FreeStyleJob f = jenkins.jobs.create();
+        final SubversionScm subversionScm = f.useScm(SubversionScm.class);
+        subversionScm.url.set(svnContainer.getUrlUnsaveRepoAtRevision(1));
+        final SvnRepositoryBrowserWebSvn repositoryBrowserWebSvn = subversionScm.useRepositoryBrowser(SvnRepositoryBrowserWebSvn.class);
+        repositoryBrowserWebSvn.url.set(svnContainer.getUrlWebSVN());
+        f.save();
+        f.startBuild().shouldSucceed();
+
+        f.configure();
+        subversionScm.url.set(svnContainer.getUrlUnsaveRepoAtRevision(2));
+        f.save();
+        f.startBuild().shouldSucceed();
+        final Changes changes = f.getLastBuild().getChanges();
+        assertTrue("Build has no diff link.", changes.hasDiffFileLink("testOne.txt"));
+    }
+
 }
