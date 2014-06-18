@@ -1,0 +1,62 @@
+{"list": [
+    {
+    "id": "2.4",
+    "name": "Sonar Runner 2.4",
+    "url": "http://repo1.maven.org/maven2/org/codehaus/sonar/runner/sonar-runner-dist/2.4/sonar-runner-dist-2.4.zip"
+  },
+    {
+    "id": "2.3",
+    "name": "Sonar Runner 2.3",
+    "url": "http://repo1.maven.org/maven2/org/codehaus/sonar/runner/sonar-runner-dist/2.3/sonar-runner-dist-2.3.zip"
+  },
+    {
+    "id": "2.2.2",
+    "name": "Sonar Runner 2.2.2",
+    "url": "http://repo1.maven.org/maven2/org/codehaus/sonar/runner/sonar-runner-dist/2.2.2/sonar-runner-dist-2.2.2.zip"
+  },
+    {
+    "id": "2.2.1",
+    "name": "Sonar Runner 2.2.1",
+    "url": "http://repo1.maven.org/maven2/org/codehaus/sonar/runner/sonar-runner-dist/2.2.1/sonar-runner-dist-2.2.1.zip"
+  },
+    {
+    "id": "2.2",
+    "name": "Sonar Runner 2.2",
+    "url": "http://repo1.maven.org/maven2/org/codehaus/sonar/runner/sonar-runner-dist/2.2/sonar-runner-dist-2.2.zip"
+  },
+    {
+    "id": "2.1",
+    "name": "Sonar Runner 2.1",
+    "url": "http://repo1.maven.org/maven2/org/codehaus/sonar/runner/sonar-runner-dist/2.1/sonar-runner-dist-2.1.zip"
+  },
+    {
+    "id": "2.0",
+    "name": "Sonar Runner 2.0",
+    "url": "http://repo1.maven.org/maven2/org/codehaus/sonar-plugins/sonar-runner/2.0/sonar-runner-2.0.zip"
+  },
+    {
+    "id": "1.4",
+    "name": "Sonar Runner 1.4",
+    "url": "http://repo1.maven.org/maven2/org/codehaus/sonar-plugins/sonar-runner/1.4/sonar-runner-1.4.zip"
+  },
+    {
+    "id": "1.3",
+    "name": "Sonar Runner 1.3",
+    "url": "http://repo1.maven.org/maven2/org/codehaus/sonar-plugins/sonar-runner/1.3/sonar-runner-1.3.zip"
+  },
+    {
+    "id": "1.2",
+    "name": "Sonar Runner 1.2",
+    "url": "http://repo1.maven.org/maven2/org/codehaus/sonar-plugins/sonar-runner/1.2/sonar-runner-1.2.zip"
+  },
+    {
+    "id": "1.1",
+    "name": "Sonar Runner 1.1",
+    "url": "http://repo1.maven.org/maven2/org/codehaus/sonar-plugins/sonar-runner/1.1/sonar-runner-1.1.zip"
+  },
+    {
+    "id": "1.0",
+    "name": "Sonar Runner 1.0",
+    "url": "http://repo1.maven.org/maven2/org/codehaus/sonar-plugins/sonar-runner/1.0/sonar-runner-1.0.zip"
+  }
+]}

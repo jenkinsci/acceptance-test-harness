@@ -16,7 +16,7 @@ public class AnalysisCollectorPublisher extends AbstractCodeStylePluginPostBuild
     public final Control isPmdActivated = control("isPmdActivated");
     public final Control isOpenTasksActivated = control("isOpenTasksActivated");
     public final Control isWarningsActivated = control("isWarningsActivated");
-    public final Control isFindbugsActivated = control("isFindBugsActivated");
+    public final Control isFindbugsActivated = control("isFindbugsActivated");
 
 
     public AnalysisCollectorPublisher(Job parent, String path) {

@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.geb
 
 import org.jenkinsci.test.acceptance.guice.World
+import org.jenkinsci.test.acceptance.po.Jenkins
 import org.junit.rules.MethodRule
 import org.junit.runners.model.FrameworkMethod
 import org.junit.runners.model.Statement
@@ -27,7 +28,9 @@ class GebBrowserRule implements MethodRule {
         new Statement() {
             @Override
             void evaluate() throws Throwable {
-                target?.browser?.config?.driver = World.get().getInjector().getInstance(WebDriver.class);
+                def injector = World.get().getInjector()
+                target?.browser?.config?.driver = injector.getInstance(WebDriver.class);
+                target?.browser?.baseUrl = injector.getInstance(Jenkins.class).url.toString();
                 base.evaluate();
             }
         }

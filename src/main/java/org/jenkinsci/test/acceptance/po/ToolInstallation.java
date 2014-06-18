@@ -38,22 +38,33 @@ public abstract class ToolInstallation extends PageAreaImpl {
     public final Control name = control("name");
     private final Control autoInstall = control("properties/hudson-tools-InstallSourceProperty");
 
-    public static void waitForUpdates(final Jenkins jenkins, Class<? extends ToolInstallation> type) {
-        final ToolInstallationPageObject annotation = type.getAnnotation(ToolInstallationPageObject.class);
+    public static void waitForUpdates(final Jenkins jenkins, final Class<? extends ToolInstallation> type) {
+
+        if (hasUpdatesFor(jenkins, type)) return;
+
+        jenkins.getPluginManager().checkForUpdates();
 
         jenkins.waitForCond(new Callable<Boolean>() {
             @Override
             public Boolean call() throws Exception {
-                return Boolean.parseBoolean(jenkins.runScript(
-                        "println DownloadService.Downloadable.get('%s').data != null", annotation.installer()
-                ));
+                return hasUpdatesFor(jenkins, type);
             }
 
             @Override
             public String toString() {
-                return "tool installer metadata for " + annotation.installer() + " has arrived";
+                return String.format(
+                        "tool installer metadata for %s has arrived",
+                        type.getAnnotation(ToolInstallationPageObject.class).installer()
+                );
             }
         }, 60);
+    }
+
+    private static boolean hasUpdatesFor(final Jenkins jenkins, Class<? extends ToolInstallation> type) {
+        return Boolean.parseBoolean(jenkins.runScript(
+                "println DownloadService.Downloadable.get('%s').data != null",
+                type.getAnnotation(ToolInstallationPageObject.class).installer()
+        ));
     }
 
     public ToolInstallation(JenkinsConfig context, String path) {
