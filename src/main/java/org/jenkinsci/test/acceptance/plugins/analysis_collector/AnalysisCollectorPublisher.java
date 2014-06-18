@@ -34,44 +34,54 @@ public class AnalysisCollectorPublisher extends AbstractCodeStylePluginPostBuild
     }
 
     public enum AnalysisPlugin {
-        CHECKSTYLE {
+        CHECKSTYLE("Checkstyle") {
             @Override
             public void check(AnalysisCollectorPublisher publisher, boolean checked) {
                 publisher.isCheckstyleActivated.check(checked);
             }
         },
-        DRY {
+        DRY("Duplicate Code") {
             @Override
             public void check(AnalysisCollectorPublisher publisher, boolean checked) {
                 publisher.isDryActivated.check(checked);
             }
         },
-        PMD {
+        PMD("PMD") {
             @Override
             public void check(AnalysisCollectorPublisher publisher, boolean checked) {
                 publisher.isPmdActivated.check(checked);
             }
         },
-        FINDBUGS {
+        FINDBUGS("FindBugs") {
             @Override
             public void check(AnalysisCollectorPublisher publisher, boolean checked) {
                 publisher.isFindbugsActivated.check(checked);
             }
         },
-        TASKS {
+        TASKS("Open Tasks") {
             @Override
             public void check(AnalysisCollectorPublisher publisher, boolean checked) {
                 publisher.isOpenTasksActivated.check(checked);
             }
         },
-        WARNINGS {
+        WARNINGS("Compiler Warnings") {
             @Override
             public void check(AnalysisCollectorPublisher publisher, boolean checked) {
                 publisher.isWarningsActivated.check(checked);
             }
         };
 
+        private String name;
+
+        AnalysisPlugin(final String name) {
+            this.name = name;
+        }
+
         public abstract void check(final AnalysisCollectorPublisher publisher, final boolean checked);
+
+        public String getName() {
+            return name;
+        }
     }
 
 }
