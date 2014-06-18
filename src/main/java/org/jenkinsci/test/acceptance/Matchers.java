@@ -1,7 +1,7 @@
 package org.jenkinsci.test.acceptance;
 
 import org.hamcrest.Description;
-import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisCollectorPublisher;
+import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisPlugin;
 import org.jenkinsci.test.acceptance.po.*;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -209,7 +209,7 @@ public class Matchers {
         };
     }
 
-    public static Matcher<Job> hasAnalysisWarningsFor(final AnalysisCollectorPublisher.AnalysisPlugin plugin) {
+    public static Matcher<Job> hasAnalysisWarningsFor(final AnalysisPlugin plugin) {
         return new Matcher<Job>(" shows analysis results for plugin %s", plugin.getName()) {
             @Override
             public boolean matchesSafely(final Job job) {
