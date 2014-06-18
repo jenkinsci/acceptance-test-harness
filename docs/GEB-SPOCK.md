@@ -6,7 +6,7 @@ Here are only the specifics described that are needed to be compatible with the 
 ## Geb PageObjects
 Page objects written with Geb are very simple. All Geb page objects must extends the `org.jenkinsci.test.acceptance.po.Page` class. This class takes care about the correct initialization of the PageObject. Geb PageObjects are actually independent from the existing Java infrastructure and can not be used as arguments for i.e. build steps.
 
-To make a page object compatible with the existing infrastructure, simply add a new instance variable of the favored class/interface and add the `@Delegate` annotation. Of course it must be initialized, either inline or within the constructor.
+To make a page object compatible with the existing infrastructure, simply add a new instance variable of the favored class/interface and add the `@Delegate` annotation. It must be initialized, either inline or within the constructor.
 
 
 Here is an example how to write a Geb page object that can be used as a PostBuildStep within every JUnit test.
