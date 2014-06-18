@@ -6,9 +6,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Map;
 import java.util.logging.Level;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import javax.inject.Inject;
 
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
@@ -60,15 +57,18 @@ public class Jenkins extends Node {
     public VersionNumber getVersion() {
         if (version!=null)      return  version;
 
-        String prefix = "About Jenkins ";
-        visit("about");
-        String text = waitFor(by.xpath("//h1[starts-with(., '"+prefix+"')]")).getText();
+        String text;
+        try {
+            text = url.openConnection().getHeaderField("X-Jenkins");
+        } catch (IOException ex) {
+            throw new AssertionError(ex);
+        }
+        int space = text.indexOf(' ');
+        if (space != -1) {
+            text = text.substring(0, space);
+        }
 
-        Matcher m = VERSION.matcher(text);
-        if (m.find())
-            return version = new VersionNumber(m.group(1));
-        else
-            throw new AssertionError("Unexpected version string: "+text);
+        return version = new VersionNumber(text);
     }
 
     /**
@@ -132,6 +132,4 @@ public class Jenkins extends Node {
     public String getName() {
         return "(master)";
     }
-
-    private static final Pattern VERSION = Pattern.compile("^About Jenkins ([^-]*)");
 }

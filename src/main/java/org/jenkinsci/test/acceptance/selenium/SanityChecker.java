@@ -58,8 +58,8 @@ public class SanityChecker extends AbstractWebDriverEventListener {
     private void checkSanity(WebDriver driver) {
         if (isFastPath(driver)) return;
 
+        // Exception
         List<WebElement> elements = driver.findElements(SPECIFIER);
-
         if (!elements.isEmpty()) {
             String trace = elements.get(0).getText();
 
@@ -70,6 +70,11 @@ public class SanityChecker extends AbstractWebDriverEventListener {
 
             throw new AssertionError("Jenkins error detected:\n" + trace);
         }
+
+        // POST required
+        WebElement postForm = driver.findElement(By.cssSelector("form > input[value='Try POSTing']"));
+        if (postForm != null) throw new AssertionError("Post required at " + driver.getCurrentUrl());
+
     }
 
     /**
@@ -80,6 +85,7 @@ public class SanityChecker extends AbstractWebDriverEventListener {
      * and reduces the overhead of {@link SanityChecker}.
      */
     private boolean isFastPath(WebDriver driver) {
-        return !driver.getPageSource().contains("Oops!");
+        final String pageSource = driver.getPageSource();
+        return !(pageSource.contains("Oops!") || pageSource.contains("Try POSTing"));
     }
 }

@@ -25,10 +25,9 @@ package org.jenkinsci.test.acceptance.po;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.regex.Pattern;
+import java.util.concurrent.Callable;
 
 import org.apache.commons.io.FileUtils;
-import org.jenkinsci.test.acceptance.log.LoggingController;
 import org.jenkinsci.utils.process.CommandBuilder;
 
 /**
@@ -39,17 +38,33 @@ public abstract class ToolInstallation extends PageAreaImpl {
     public final Control name = control("name");
     private final Control autoInstall = control("properties/hudson-tools-InstallSourceProperty");
 
-    public static void waitForUpdates(Jenkins jenkins, Class<? extends ToolInstallation> type) {
-        final ToolInstallationPageObject annotation = type.getAnnotation(ToolInstallationPageObject.class);
+    public static void waitForUpdates(final Jenkins jenkins, final Class<? extends ToolInstallation> type) {
 
-        final Pattern pattern = Pattern.compile("Obtained the updated data file for " + Pattern.quote(annotation.installer()));
+        if (hasUpdatesFor(jenkins, type)) return;
 
-        // TODO make all controllers LoggingControllers
-        if (jenkins instanceof LoggingController) {
-            ((LoggingController) jenkins).getLogWatcher().waitForLogged(pattern, 60);
-        } else {
-            jenkins.getLogger("all").waitForLogged(pattern, 60);
-        }
+        jenkins.getPluginManager().checkForUpdates();
+
+        jenkins.waitForCond(new Callable<Boolean>() {
+            @Override
+            public Boolean call() throws Exception {
+                return hasUpdatesFor(jenkins, type);
+            }
+
+            @Override
+            public String toString() {
+                return String.format(
+                        "tool installer metadata for %s has arrived",
+                        type.getAnnotation(ToolInstallationPageObject.class).installer()
+                );
+            }
+        }, 60);
+    }
+
+    private static boolean hasUpdatesFor(final Jenkins jenkins, Class<? extends ToolInstallation> type) {
+        return Boolean.parseBoolean(jenkins.runScript(
+                "println DownloadService.Downloadable.get('%s').data != null",
+                type.getAnnotation(ToolInstallationPageObject.class).installer()
+        ));
     }
 
     public ToolInstallation(JenkinsConfig context, String path) {

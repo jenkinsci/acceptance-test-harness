@@ -1,5 +1,7 @@
 # Docker Test Fixtures
 
+**Mac OS X Note:** To execute tests on Mac OS X please read about [Docker on Mac OS X](./DOCKER_OSX.md) first.
+
 End-to-end testing requires a lot of non-trivial test fixtures that you want Jenkins to interact with,
 such as SSH daemon, JIRA server, LDAP server, etc.
 

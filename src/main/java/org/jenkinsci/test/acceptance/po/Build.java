@@ -1,13 +1,6 @@
 package org.jenkinsci.test.acceptance.po;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.regex.Pattern;
-
+import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.Description;
 import org.jenkinsci.test.acceptance.Matcher;
@@ -16,10 +9,17 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.regex.Pattern;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -71,7 +71,7 @@ public class Build extends ContainerPageObject {
             public Boolean call() {
                 return hasStarted();
             }
-        },timeout);
+        }, timeout);
         return this;
     }
 
@@ -129,7 +129,9 @@ public class Build extends ContainerPageObject {
         return url("consoleFull");
     }
 
-    public URL getStatusUrl() { return url(Integer.toString(getNumber())); }
+    public URL getStatusUrl() {
+        return url(Integer.toString(getNumber()));
+    }
 
     public void openStatusPage() {
         visit(getStatusUrl());
@@ -192,7 +194,7 @@ public class Build extends ContainerPageObject {
         List<WebElement> fileList = artifact.findElements(By.cssSelector("table.fileList td:nth-child(2) a"));
         List<Artifact> list = new LinkedList<>();
         for (WebElement el : fileList) {
-            if("a".equalsIgnoreCase(el.getTagName())) {
+            if ("a".equalsIgnoreCase(el.getTagName())) {
                 list.add(getArtifact(el.getText()));
             }
         }
@@ -203,6 +205,7 @@ public class Build extends ContainerPageObject {
         assertThat(this, resultIs("SUCCESS"));
         return this;
     }
+
     public Build shouldUnstable() {
         assertThat(this, resultIs("UNSTABLE"));
         return this;
@@ -264,5 +267,12 @@ public class Build extends ContainerPageObject {
         } catch (IOException e) {
             throw new AssertionError(e);
         }
+    }
+
+
+    public Changes getChanges() {
+        final URL changesUrl = url("changes");
+        visit(changesUrl);
+        return new Changes(this, changesUrl);
     }
 }
