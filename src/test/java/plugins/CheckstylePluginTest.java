@@ -1,6 +1,12 @@
 package plugins;
 
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
 import org.jenkinsci.test.acceptance.junit.Bug;
+import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginMavenBuildConfigurator;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleAction;
@@ -14,18 +20,14 @@ import org.jenkinsci.test.acceptance.po.ListView;
 import org.jenkinsci.test.acceptance.po.Slave;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.jenkinsci.test.acceptance.Matchers.hasAction;
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.*;
+import static org.jenkinsci.test.acceptance.Matchers.*;
 
 /**
  * Feature: Allow publishing of Checkstyle report
@@ -270,6 +272,7 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
      * Build a job and check set up a dashboard view. Check, if the dashboard view shows correct warning count.
      */
     @Test
+    @Category(SmokeTest.class)
     public void build_a_job_and_check_if_dashboard_shows_correct_warnings() {
         MavenModuleSet job = setupSimpleMavenJob();
         buildJobAndWait(job).shouldSucceed();

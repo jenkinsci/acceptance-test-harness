@@ -23,6 +23,12 @@
  */
 package plugins;
 
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.concurrent.ExecutionException;
+
 import org.jenkinsci.test.acceptance.junit.Bug;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
@@ -43,15 +49,9 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import java.util.concurrent.ExecutionException;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.jenkinsci.test.acceptance.Matchers.hasAction;
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.*;
+import static org.jenkinsci.test.acceptance.Matchers.*;
 
 @WithPlugins("findbugs")
 public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
@@ -61,7 +61,6 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
      * the one we expect.
      */
     @Test
-    @Category(SmokeTest.class)
     public void record_analysis() {
         FreeStyleJob job = setupJob("/findbugs_plugin/findbugsXml.xml", FindbugsPublisher.class, "findbugsXml.xml");
         Build lastBuild = buildJobWithSuccess(job);
@@ -125,7 +124,6 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
      * Difference in whitespaces are ok.
      */
     @Test
-    @Category(SmokeTest.class)
     public void xml_api_report_depth_0() throws IOException, SAXException, ParserConfigurationException {
         final FreeStyleJob job = setupJob("/findbugs_plugin/findbugsXml.xml", FindbugsPublisher.class, "findbugsXml.xml");
         final Build build = buildJobWithSuccess(job);
@@ -200,6 +198,7 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
      * Builds a maven project and checks if a new warning is displayed.
      */
     @Test
+    @Category(SmokeTest.class)
     public void build_simple_maven_project() {
         final MavenModuleSet job = setupSimpleMavenJob();
         Build lastBuild = buildJobWithSuccess(job);
