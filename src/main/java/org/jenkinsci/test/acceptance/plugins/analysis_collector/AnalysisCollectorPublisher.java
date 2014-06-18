@@ -30,37 +30,48 @@ public class AnalysisCollectorPublisher extends AbstractCodeStylePluginPostBuild
      * @param checked true or false
      */
     public void checkCollectedPlugin(AnalysisPlugin plugin, boolean checked) {
-        switch (plugin) {
-            case CHECKSTYLE:
-                isCheckstyleActivated.check(checked);
-                break;
-            case DRY:
-                isDryActivated.check(checked);
-                break;
-            case PMD:
-                isPmdActivated.check(checked);
-                break;
-            case FINDBUGS:
-                isFindbugsActivated.check(checked);
-                break;
-            case TASKS:
-                isOpenTasksActivated.check(checked);
-                break;
-            case WARNINGS:
-                isWarningsActivated.check(checked);
-                break;
-            default:
-                break;
-        }
+        plugin.check(this, checked);
     }
 
     public enum AnalysisPlugin {
-        CHECKSTYLE,
-        DRY,
-        PMD,
-        FINDBUGS,
-        TASKS,
-        WARNINGS;
+        CHECKSTYLE {
+            @Override
+            public void check(AnalysisCollectorPublisher publisher, boolean checked) {
+                publisher.isCheckstyleActivated.check(checked);
+            }
+        },
+        DRY {
+            @Override
+            public void check(AnalysisCollectorPublisher publisher, boolean checked) {
+                publisher.isDryActivated.check(checked);
+            }
+        },
+        PMD {
+            @Override
+            public void check(AnalysisCollectorPublisher publisher, boolean checked) {
+                publisher.isPmdActivated.check(checked);
+            }
+        },
+        FINDBUGS {
+            @Override
+            public void check(AnalysisCollectorPublisher publisher, boolean checked) {
+                publisher.isFindbugsActivated.check(checked);
+            }
+        },
+        TASKS {
+            @Override
+            public void check(AnalysisCollectorPublisher publisher, boolean checked) {
+                publisher.isOpenTasksActivated.check(checked);
+            }
+        },
+        WARNINGS {
+            @Override
+            public void check(AnalysisCollectorPublisher publisher, boolean checked) {
+                publisher.isWarningsActivated.check(checked);
+            }
+        };
+
+        public abstract void check(final AnalysisCollectorPublisher publisher, final boolean checked);
     }
 
 }
