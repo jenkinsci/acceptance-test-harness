@@ -28,8 +28,8 @@ public class TaskScannerFreestyleBuildSettings extends AbstractTaskScannerBuildS
     /**
      * Sets the input for a different default file encoding
      */
-    public void setDefaultEncoding() {
+    public void setDefaultEncoding(String defaultEncoding) {
         ensureAdvancedClicked();
-        this.defaultEncoding = null;
+        this.defaultEncoding.set(defaultEncoding);
     }
 }

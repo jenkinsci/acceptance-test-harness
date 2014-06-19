@@ -59,22 +59,22 @@ public abstract class AbstractTaskScannerBuildSettings extends AbstractCodeStyle
     /**
      * Sets the input for the high priority task tags.
      */
-    public void setHighPriorityTags() {
-        this.highPriorityTags = null;
+    public void setHighPriorityTags(String tags) {
+        this.highPriorityTags.set(tags);
     }
 
     /**
      * Sets the input for the normal priority task tags.
      */
-    public void setNormalPriorityTags() {
-        this.normalPriorityTags = null;
+    public void setNormalPriorityTags(String tags) {
+        this.normalPriorityTags.set(tags);
     }
 
     /**
      * Sets the input for the low priority task tags.
      */
-    public void setLowPriorityTags() {
-        this.lowPriorityTags = null;
+    public void setLowPriorityTags(String tags) {
+        this.lowPriorityTags.set(tags);
     }
 
     /**
@@ -95,72 +95,72 @@ public abstract class AbstractTaskScannerBuildSettings extends AbstractCodeStyle
     /**
      * Sets the input for warning threshold, when computing delta warnings.
      */
-    public void setBuildUnstableNewAll() {
+    public void setBuildUnstableNewAll(String threshold) {
         ensureAdvancedClicked();
         canComputeNew.check(true);
-        this.buildUnstableNewAll = null;
+        this.buildUnstableNewAll.set(threshold);
     }
 
     /**
      * Sets the input for high priority warning threshold, when computing delta warnings.
      */
-    public void setBuildUnstableNewHigh() {
+    public void setBuildUnstableNewHigh(String threshold) {
         ensureAdvancedClicked();
         canComputeNew.check(true);
-        this.buildUnstableNewHigh = null;
+        this.buildUnstableNewHigh.set(threshold);
     }
 
     /**
      * Sets the input for normal priority warning threshold, when computing delta warnings.
      */
-    public void setBuildUnstableNewNormal() {
+    public void setBuildUnstableNewNormal(String threshold) {
         ensureAdvancedClicked();
         canComputeNew.check(true);
-        this.buildUnstableNewNormal = null;
+        this.buildUnstableNewNormal.set(threshold);
     }
 
     /**
      * Sets the input for low priority warning threshold, when computing delta warnings.
      */
-    public void setBuildUnstableNewLow() {
+    public void setBuildUnstableNewLow(String threshold) {
         ensureAdvancedClicked();
         canComputeNew.check(true);
-        this.buildUnstableNewLow = null;
+        this.buildUnstableNewLow.set(threshold);
     }
 
     /**
      * Sets the input for high priority warning threshold, when computing delta warnings.
      */
-    public void setBuildFailedNewHigh() {
+    public void setBuildFailedNewHigh(String threshold) {
         ensureAdvancedClicked();
         canComputeNew.check(true);
-        this.buildFailedNewHigh = null;
+        this.buildFailedNewHigh.set(threshold);
     }
 
     /**
      * Sets the input for normal priority warning threshold, when computing delta warnings.
      */
-    public void setBuildFailedNewNormal() {
+    public void setBuildFailedNewNormal(String threshold) {
         ensureAdvancedClicked();
         canComputeNew.check(true);
-        this.buildFailedNewNormal = null;
+        this.buildFailedNewNormal.set(threshold);
     }
 
     /**
      * Sets the input for low priority warning threshold, when computing delta warnings.
      */
-    public void setBuildFailedNewLow() {
+    public void setBuildFailedNewLow(String threshold) {
         ensureAdvancedClicked();
         canComputeNew.check(true);
-        this.buildFailedNewLow = null;
+        this.buildFailedNewLow.set(threshold);
     }
 
     /**
      * Decides whether to use the last stable build as reference when calculating the number of new warnings
      */
-    public void setUseStableBuildAsReference() {
+    public void setUseStableBuildAsReference(boolean useStableBuild) {
         ensureAdvancedClicked();
         canComputeNew.check(true);
-        this.useStableBuildAsReference = null;
+        this.useStableBuildAsReference.check(useStableBuild);
     }
 }
