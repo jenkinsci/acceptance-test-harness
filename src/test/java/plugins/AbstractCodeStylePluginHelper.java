@@ -7,6 +7,7 @@ import org.custommonkey.xmlunit.XMLUnit;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginBuildConfigurator;
+import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginBuildSettings;
 import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginFreestyleBuildSettings;
 import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginMavenBuildSettings;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenBuildStep;
@@ -39,6 +40,7 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
      * @param publisherClass Publisher to add
      * @return The made job
      */
+    @Deprecated
     public <T extends AbstractCodeStylePluginFreestyleBuildSettings> FreeStyleJob setupFreestyleJob(String resourceToCopy, String publisherPattern, Class<T> publisherClass) {
         return setupFreestyleJob(resourceToCopy, publisherPattern, publisherClass, null);
     }
@@ -50,6 +52,7 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
      * @param publisherPattern Publisher pattern to set
      * @return The made job
      */
+    @Deprecated
     public <T extends AbstractCodeStylePluginFreestyleBuildSettings> FreeStyleJob setupFreestyleJob(String resourceToCopy,
                                                                                                     String publisherPattern,
                                                                                                     Class<T> publisherClass,
@@ -77,6 +80,93 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
     }
 
     /**
+     * Set up a Job of a certain type with a given resource and  a publisher which can be
+     * configured by providing a configurator
+     *
+     * @param resourceToCopy Resource to copy to build (Directory or File path)
+     * @param jobClass the type the job shall be created of, e.g. FreeStyleJob
+     * @param goal a maven goal to be added to the job or null otherwise
+     * @param publisherClass the type of the publisher to be added
+     * @param configurator the configuration of the publisher
+     * @return the new job
+     */
+    public <J extends Job, T extends AbstractCodeStylePluginBuildSettings & PostBuildStep> J setupJob(String resourceToCopy,
+                                                                                                      Class<J> jobClass,
+                                                                                                      String goal,
+                                                                                                      Class<T> publisherClass,
+                                                                                                      AbstractCodeStylePluginBuildConfigurator<T> configurator){
+        if(jobClass.isAssignableFrom(MavenModuleSet.class)){
+            MavenInstallation.ensureThatMavenIsInstalled(jenkins);
+        }
+
+        final J job = jenkins.jobs.create(jobClass);
+        job.configure();
+
+        // check if a goal is defined and configure the job depending on the job class
+        if (goal != null)
+        {
+            if (jobClass.isAssignableFrom(MavenModuleSet.class)){
+                ((MavenModuleSet) job).goals.set(goal);
+            }else if(jobClass.isAssignableFrom(FreeStyleJob.class)){
+                job.addBuildStep(MavenBuildStep.class).targets.set(goal);
+            }
+
+        }
+
+        addResourceToJob(job, resourceToCopy);
+
+        final T buildSettings = job.addPublisher(publisherClass);
+
+        if (configurator != null) {
+            configurator.configure(buildSettings);
+        }
+
+        job.save();
+        return job;
+
+    }
+
+    /**
+     * Provides the ability to edit an existing job by changing or adding the resource to copy
+     * and/or by changing the configuration of a publisher
+     *
+     * @param newResourceToCopy the new resource to be copied to build (Directory or File path) or null if not to be changed
+     * @param isAdditionalResource decides whether the old resource is kept (FALSE) or deleted (TRUE)
+     * @param job the job to be changed
+     * @param publisherClass the type of the publisher to be modified
+     * @param configurator the new configuration of the publisher
+     * @return the edited job
+     */
+
+    public <J extends Job, T extends AbstractCodeStylePluginBuildSettings & PostBuildStep> J editJob(String newResourceToCopy,
+                                                                                                     boolean isAdditionalResource,
+                                                                                                     J job,
+                                                                                                     Class<T> publisherClass,
+                                                                                                     AbstractCodeStylePluginBuildConfigurator<T> configurator){
+        job.configure();
+
+        //check whether to exchange the copy resource shell step
+        if (!isAdditionalResource){
+            job.removeFirstBuildStep();
+        }
+
+        if( newResourceToCopy != null) {
+            //add the new copy resource shell step
+            addResourceToJob(job, newResourceToCopy);
+        }
+
+        //change the configuration of the publisher
+        if(configurator != null){
+            configurator.configure(job.getPublisher(publisherClass));
+        }
+
+        job.save();
+
+        return job;
+    }
+
+
+    /**
      * Generates a slave and configure job to run on slave
      * @param job Job to run on slave
      * @return Generated skave
@@ -99,6 +189,7 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
      * @param publisherPattern Publisher pattern to set
      * @return The configured job.
      */
+    @Deprecated
     public <T extends AbstractCodeStylePluginFreestyleBuildSettings> FreeStyleJob setupFreestyleJobWithMavenGoals(String resourceProjectDir, String goal, Class<T> publisherClass, String publisherPattern) {
         MavenInstallation.ensureThatMavenIsInstalled(jenkins);
 
@@ -122,6 +213,7 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
      * @param <T> The type of the Analyzer.
      * @return The configured job.
      */
+    @Deprecated
     public <T extends AbstractCodeStylePluginMavenBuildSettings> MavenModuleSet setupMavenJob(String resourceProjectDir,
                                                                                               String goal,
                                                                                               Class<T> codeStyleBuildSettings,
@@ -151,6 +243,7 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
      * @param <T> Type of the publisher
      * @return The made job
      */
+    @Deprecated
     public <T extends AbstractCodeStylePluginFreestyleBuildSettings> FreeStyleJob editJobAndChangeLastResource(FreeStyleJob job, String newResourceToCopy, String publisherPattern) {
         job.configure();
         job.removeFirstBuildStep();
@@ -229,5 +322,25 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
         view.addColumn(columnClass);
         view.save();
         return view;
+    }
+
+    /**
+     * Adds a shell step to a given job to copy resources to the job's workspace.
+     *
+     * @param job the job the resource shall be added to
+     * @param resourceToCopy Resource to copy to build (Directory or File path)
+     * @return
+     */
+    protected <J extends Job> J addResourceToJob(J job, String resourceToCopy){
+
+        final Resource res = resource(resourceToCopy);
+        //decide whether to utilize copyResource or copyDir
+        if (res.asFile().isDirectory()) {
+            job.copyDir(res);
+        } else {
+            job.copyResource(res);
+        }
+
+        return job;
     }
 }

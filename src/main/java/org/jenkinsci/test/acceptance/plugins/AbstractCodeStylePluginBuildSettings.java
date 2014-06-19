@@ -3,12 +3,13 @@ package org.jenkinsci.test.acceptance.plugins;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
+import org.jenkinsci.test.acceptance.po.PostBuildStep;
 
 /**
  * Abstract job configuration class.
  * @author Fabian Trampusch
  */
-public abstract class AbstractCodeStylePluginBuildSettings extends PageAreaImpl {
+public abstract class AbstractCodeStylePluginBuildSettings extends PageAreaImpl implements PostBuildStep {
 
     protected boolean wasAdvancedClicked = false;
     protected Control advanced = control("advanced-button");
@@ -41,7 +42,7 @@ public abstract class AbstractCodeStylePluginBuildSettings extends PageAreaImpl 
      * @param selectorPath the selector path used as prefix.
      */
     public AbstractCodeStylePluginBuildSettings(Job parent, String selectorPath) {
-        super(parent, "/hudson-plugins-" + selectorPath);
+        super(parent, selectorPath);
         this.advanced = control("advanced-button");
     }
 

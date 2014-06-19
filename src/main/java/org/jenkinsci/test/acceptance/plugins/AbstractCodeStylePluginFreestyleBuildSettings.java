@@ -8,7 +8,7 @@ import org.jenkinsci.test.acceptance.po.PostBuildStep;
  * Abstract job configuration class.
  * @author Fabian Trampusch
  */
-public abstract class AbstractCodeStylePluginFreestyleBuildSettings extends AbstractCodeStylePluginBuildSettings implements PostBuildStep {
+public abstract class AbstractCodeStylePluginFreestyleBuildSettings extends AbstractCodeStylePluginBuildSettings {
     /**
      * The input for the file name.
      */

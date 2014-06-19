@@ -15,6 +15,6 @@ public abstract class AbstractCodeStylePluginMavenBuildSettings extends Abstract
      * @param selectorPath the selector path used as prefix.
      */
     public AbstractCodeStylePluginMavenBuildSettings(Job parent, String selectorPath) {
-        super(parent, selectorPath);
+        super(parent, "/hudson-plugins-" + selectorPath);
     }
 }
