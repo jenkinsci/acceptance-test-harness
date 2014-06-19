@@ -25,11 +25,13 @@ public class JabberContainer extends DockerContainer {
 //        return "ssh://git@localhost:" + port(22) + REPO_DIR;
 //    }
     public File getLogbotLogFile() throws IOException, InterruptedException {
-        File logfileLocal = new File("/tmp/logbot.log");
+        String timeString = getTimestampForLogfile();
+        File logfileDir = new File("/tmp/");
+        File logfileLocal = new File("/tmp/"+ timeString + ".txt");
         // .../test/.. is the hardcoded name of the conference room the bot joins
-        String logfilePathRemote = "/.logbot/logs/test/"+ getTimestampForLogfile() + ".txt";
+        String logfilePathRemote = "/.logbot/logs/test/"+ timeString + ".txt";
 
-        super.cp(logfilePathRemote,logfileLocal);
+        super.cp(logfilePathRemote,logfileDir);
         return logfileLocal;
     }
 

@@ -87,6 +87,7 @@ public class JabberPluginTest extends AbstractJUnitTest {
             //sleep(10000);
             ac.port.set(jabber.port(5222));
             ac.enableSASL.check(false);
+
         }
         jenkins.save();
 
