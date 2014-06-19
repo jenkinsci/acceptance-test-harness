@@ -10,7 +10,7 @@ import java.util.TreeMap;
 import org.jenkinsci.test.acceptance.junit.Bug;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerAction;
-import org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerPublisher;
+import org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerFreestyleBuildSettings;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Ignore;
@@ -42,12 +42,12 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
     @Test
     public void single_task_tags_and_exclusion_pattern() throws Exception{
         //do basic setup
-        FreeStyleJob j = setupFreestyleJob("/tasks_plugin/fileset1", "**/*.java", TaskScannerPublisher.class
+        FreeStyleJob j = setupFreestyleJob("/tasks_plugin/fileset1", "**/*.java", TaskScannerFreestyleBuildSettings.class
         );
 
         //set up the some more task scanner settings
         j.configure();
-        TaskScannerPublisher pub = j.getPublisher(TaskScannerPublisher.class);
+        TaskScannerFreestyleBuildSettings pub = j.getPublisher(TaskScannerFreestyleBuildSettings.class);
         pub.excludePattern.set("**/*Test.java");
         pub.highPriorityTags.set("FIXME");
         pub.normalPriorityTags.set("TODO");
@@ -132,12 +132,12 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
     @Test
     public void xml_api_report_depth_0() throws IOException, SAXException, ParserConfigurationException {
         //do the same setup as in test single_task_tags_and_exclusion_pattern
-        FreeStyleJob j = setupFreestyleJob("/tasks_plugin/fileset1", "**/*.java", TaskScannerPublisher.class
+        FreeStyleJob j = setupFreestyleJob("/tasks_plugin/fileset1", "**/*.java", TaskScannerFreestyleBuildSettings.class
         );
 
         //set up the some more task scanner settings
         j.configure();
-        TaskScannerPublisher pub = j.getPublisher(TaskScannerPublisher.class);
+        TaskScannerFreestyleBuildSettings pub = j.getPublisher(TaskScannerFreestyleBuildSettings.class);
         pub.excludePattern.set("**/*Test.java");
         pub.highPriorityTags.set("FIXME");
         pub.normalPriorityTags.set("TODO");
@@ -163,12 +163,12 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
     @Test
     public void multiple_task_tags() throws Exception{
         //do basic setup
-        FreeStyleJob j = setupFreestyleJob("/tasks_plugin/fileset1", "**/*.java", TaskScannerPublisher.class
+        FreeStyleJob j = setupFreestyleJob("/tasks_plugin/fileset1", "**/*.java", TaskScannerFreestyleBuildSettings.class
         );
 
         //set up the some more task scanner settings
         j.configure();
-        TaskScannerPublisher pub = j.getPublisher(TaskScannerPublisher.class);
+        TaskScannerFreestyleBuildSettings pub = j.getPublisher(TaskScannerFreestyleBuildSettings.class);
         pub.excludePattern.set("**/*Test.java");
         pub.highPriorityTags.set("FIXME,BUG");
         pub.normalPriorityTags.set("TODO");
@@ -238,11 +238,11 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
     @Test
     public void closed_tasks() throws Exception {
         //do the same setup as for single_task_tags_and_exclusion_pattern
-        FreeStyleJob j = setupFreestyleJob("/tasks_plugin/fileset1", "**/*.java", TaskScannerPublisher.class
+        FreeStyleJob j = setupFreestyleJob("/tasks_plugin/fileset1", "**/*.java", TaskScannerFreestyleBuildSettings.class
         );
 
         j.configure();
-        TaskScannerPublisher pub = j.getPublisher(TaskScannerPublisher.class);
+        TaskScannerFreestyleBuildSettings pub = j.getPublisher(TaskScannerFreestyleBuildSettings.class);
         pub.excludePattern.set("**/*Test.java");
         pub.highPriorityTags.set("FIXME");
         pub.normalPriorityTags.set("TODO");
@@ -299,17 +299,17 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
     @Test
     public void run_always_option() throws Exception {
         //do the same setup as for single_task_tags_and_exclusion_pattern
-        FreeStyleJob j = setupFreestyleJob("/tasks_plugin/fileset1", "**/*.java", TaskScannerPublisher.class
+        FreeStyleJob j = setupFreestyleJob("/tasks_plugin/fileset1", "**/*.java", TaskScannerFreestyleBuildSettings.class
         );
 
         j.configure();
         j.addShellStep("exit 1"); //ensures the FAILURE status of the main build
-        TaskScannerPublisher pub = j.getPublisher(TaskScannerPublisher.class);
+        TaskScannerFreestyleBuildSettings pub = j.getPublisher(TaskScannerFreestyleBuildSettings.class);
         pub.excludePattern.set("**/*Test.java");
         pub.highPriorityTags.set("FIXME");
         pub.ignoreCase.check();
         pub.advanced.click();
-        pub.runAlways.uncheck();
+        pub.canRunOnFailed.uncheck();
         j.save();
 
         // due to the "exit 1" shell step, the build fails
@@ -322,7 +322,7 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
         // now activate "Run always"
         j.configure();
         pub.advanced.click();
-        pub.runAlways.check();
+        pub.canRunOnFailed.check();
         j.save();
 
         lastBuild = j.startBuild().shouldFail();
@@ -351,10 +351,10 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
     @Test @Bug("22744") @Ignore("until JENKINS-22744 is fixed.")
     public void file_encoding_windows1251() throws Exception {
         //basic setup
-        FreeStyleJob j = setupFreestyleJob("/tasks_plugin/cp1251_files", "**/*.java", TaskScannerPublisher.class
+        FreeStyleJob j = setupFreestyleJob("/tasks_plugin/cp1251_files", "**/*.java", TaskScannerFreestyleBuildSettings.class
         );
         j.configure();
-        TaskScannerPublisher pub = j.getPublisher(TaskScannerPublisher.class);
+        TaskScannerFreestyleBuildSettings pub = j.getPublisher(TaskScannerFreestyleBuildSettings.class);
         pub.normalPriorityTags.set("TODO");
         pub.highPriorityTags.set("FIXME");
         pub.ignoreCase.check();
@@ -412,10 +412,10 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
 
         // Basic setup
 
-        FreeStyleJob j = setupFreestyleJob("/tasks_plugin/fileset1_less", "**/*.java", TaskScannerPublisher.class
+        FreeStyleJob j = setupFreestyleJob("/tasks_plugin/fileset1_less", "**/*.java", TaskScannerFreestyleBuildSettings.class
         );
 
-        TaskScannerPublisher pub = j.getPublisher(TaskScannerPublisher.class);
+        TaskScannerFreestyleBuildSettings pub = j.getPublisher(TaskScannerFreestyleBuildSettings.class);
         TaskScannerAction tsa = new TaskScannerAction(j);
 
         // In order to increase readability each step has been placed in a separate
@@ -446,13 +446,13 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
      * So, the build status shall be SUCCESS as no threshold will be exceeded.     *
      *
      * @param j the {@link org.jenkinsci.test.acceptance.po.FreeStyleJob} created in the Test
-     * @param pub a {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerPublisher} added to the Job
+     * @param pub a {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerFreestyleBuildSettings} added to the Job
      * @param tsa a the {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerAction} object for the current job
      *
      * @return The modified {@link org.jenkinsci.test.acceptance.po.FreeStyleJob}.
      */
 
-    private FreeStyleJob status_thresholds_step1(FreeStyleJob j, TaskScannerPublisher pub, TaskScannerAction tsa){
+    private FreeStyleJob status_thresholds_step1(FreeStyleJob j, TaskScannerFreestyleBuildSettings pub, TaskScannerAction tsa){
         j.configure();
         pub.excludePattern.set("**/*Test.java");
         pub.highPriorityTags.set(""); //no high prio tags
@@ -462,11 +462,11 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
 
         // setup thresholds
         pub.advanced.click();
-        pub.warningThresholdLowUnstable.set("1");
-        pub.warningThresholdNormalUnstable.set("4");
-        pub.warningThresholdHighUnstable.set("0");
+        pub.buildUnstableTotalLow.set("1");
+        pub.buildUnstableTotalNormal.set("4");
+        pub.buildUnstableTotalHigh.set("0");
         pub.warningThresholdUnstable.set("10");
-        pub.warningThresholdFailed.set("15");
+        pub.buildFailedTotalAll.set("15");
 
         j.save();
 
@@ -501,13 +501,13 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
      * So, the build status shall be UNSTABLE due to low priority threshold is exceeded by 1.
      *
      * @param j the {@link org.jenkinsci.test.acceptance.po.FreeStyleJob} created in the Test
-     * @param pub a {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerPublisher} added to the Job
+     * @param pub a {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerFreestyleBuildSettings} added to the Job
      * @param tsa a the {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerAction} object for the current job
      *
      * @return The modified {@link org.jenkinsci.test.acceptance.po.FreeStyleJob}.
      */
 
-    private FreeStyleJob status_thresholds_step2(FreeStyleJob j, TaskScannerPublisher pub, TaskScannerAction tsa){
+    private FreeStyleJob status_thresholds_step2(FreeStyleJob j, TaskScannerFreestyleBuildSettings pub, TaskScannerAction tsa){
         j.configure();
         j.removeFirstBuildStep(); // remove copyDir shell step for fileset1_less
         j.copyDir(resource("/tasks_plugin/fileset1"));
@@ -543,13 +543,13 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
      * So, the build status shall be UNSTABLE due to normal priority threshold is exceeded by 1.
      *
      * @param j the {@link org.jenkinsci.test.acceptance.po.FreeStyleJob} created in the Test
-     * @param pub a {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerPublisher} added to the Job
+     * @param pub a {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerFreestyleBuildSettings} added to the Job
      * @param tsa a the {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerAction} object for the current job
      *
      * @return The modified {@link org.jenkinsci.test.acceptance.po.FreeStyleJob}.
      */
 
-    private FreeStyleJob status_thresholds_step3(FreeStyleJob j, TaskScannerPublisher pub, TaskScannerAction tsa){
+    private FreeStyleJob status_thresholds_step3(FreeStyleJob j, TaskScannerFreestyleBuildSettings pub, TaskScannerAction tsa){
         j.configure();
         pub.lowPriorityTags.set("@Deprecated"); // remove tag "???"
         pub.normalPriorityTags.set("TODO,XXX"); // add tag "XXX"
@@ -590,13 +590,13 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
      * So, the build status shall be UNSTABLE due to high priority threshold is exceeded by 1.
      *
      * @param j the {@link org.jenkinsci.test.acceptance.po.FreeStyleJob} created in the Test
-     * @param pub a {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerPublisher} added to the Job
+     * @param pub a {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerFreestyleBuildSettings} added to the Job
      * @param tsa a the {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerAction} object for the current job
      *
      * @return The modified {@link org.jenkinsci.test.acceptance.po.FreeStyleJob}.
      */
 
-    private FreeStyleJob status_thresholds_step4(FreeStyleJob j, TaskScannerPublisher pub, TaskScannerAction tsa){
+    private FreeStyleJob status_thresholds_step4(FreeStyleJob j, TaskScannerFreestyleBuildSettings pub, TaskScannerAction tsa){
         j.configure();
         pub.lowPriorityTags.set("@Deprecated,\\?\\?\\?"); // add tag "???"
         pub.highPriorityTags.set("FIXME"); // add tag "FIXME"
@@ -632,13 +632,13 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
      * So, the build status shall be UNSTABLE due to total warnings threshold is exceeded by 5.
      *
      * @param j the {@link org.jenkinsci.test.acceptance.po.FreeStyleJob} created in the Test
-     * @param pub a {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerPublisher} added to the Job
+     * @param pub a {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerFreestyleBuildSettings} added to the Job
      * @param tsa a the {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerAction} object for the current job
      *
      * @return The modified {@link org.jenkinsci.test.acceptance.po.FreeStyleJob}.
      */
 
-    private FreeStyleJob status_thresholds_step5(FreeStyleJob j, TaskScannerPublisher pub, TaskScannerAction tsa){
+    private FreeStyleJob status_thresholds_step5(FreeStyleJob j, TaskScannerFreestyleBuildSettings pub, TaskScannerAction tsa){
         j.configure();
         j.copyDir(resource("/tasks_plugin/fileset2")); // add a second shell step to copy another folder
         pub.normalPriorityTags.set("TODO"); //remove tag "XXX"
@@ -675,13 +675,13 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
      * So, the build status shall be FAILED due to total warnings threshold is exceeded by 1.
      *
      * @param j the {@link org.jenkinsci.test.acceptance.po.FreeStyleJob} created in the Test
-     * @param pub a {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerPublisher} added to the Job
+     * @param pub a {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerFreestyleBuildSettings} added to the Job
      * @param tsa a the {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerAction} object for the current job
      *
      * @return The modified {@link org.jenkinsci.test.acceptance.po.FreeStyleJob}.
      */
 
-    private FreeStyleJob status_thresholds_step6(FreeStyleJob j, TaskScannerPublisher pub, TaskScannerAction tsa){
+    private FreeStyleJob status_thresholds_step6(FreeStyleJob j, TaskScannerFreestyleBuildSettings pub, TaskScannerAction tsa){
         j.configure();
         pub.ignoreCase.check(); //disable case sensitivity
         j.save();
