@@ -8,6 +8,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.jenkinsci.test.acceptance.junit.Bug;
+import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerAction;
 import org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerPublisher;
@@ -15,6 +16,7 @@ import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.xml.sax.SAXException;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -40,6 +42,7 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
      */
 
     @Test
+    @Category(SmokeTest.class)
     public void single_task_tags_and_exclusion_pattern() throws Exception{
         //do basic setup
         FreeStyleJob j = setupJob("/tasks_plugin/fileset1",TaskScannerPublisher.class,

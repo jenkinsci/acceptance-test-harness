@@ -31,9 +31,14 @@ import org.jenkinsci.test.acceptance.plugins.gerrit_trigger.GerritTriggerJob;
 import org.jenkinsci.test.acceptance.plugins.gerrit_trigger.GerritTriggerNewServer;
 import org.jenkinsci.test.acceptance.plugins.gerrit_trigger.GerritTriggerServer;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.*;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -58,6 +63,17 @@ import static org.junit.Assume.assumeTrue;
  */
 @WithPlugins("gerrit-trigger")
 public class GerritTriggerTest extends AbstractJUnitTest {
+    private static final Logger LOGGER = Logger.getLogger(GerritTriggerTest.class.getName());
+
+    @Before
+    public void setUpLogger() {
+        LOGGER.setLevel(Level.ALL);
+        LOGGER.setUseParentHandlers(false);
+        ConsoleHandler handler = new ConsoleHandler();
+        handler.setFormatter(new SimpleFormatter());
+        handler.setLevel(Level.ALL);
+        LOGGER.addHandler(handler);
+    }
 
     /**
      * Scenario: Gerrit has its Change review flags checked after Jenkins set them-<br>
@@ -86,6 +102,7 @@ public class GerritTriggerTest extends AbstractJUnitTest {
             String changeId = pushChangeForReview(jobName);
             sleep(10000);
             String rev = stringFrom(curl(changeId));
+            logCurlHttpCodeIssues(rev);
             assertThat(Integer.parseInt(valueFrom(rev, ".+Verified\":\\{\"all\":\\[\\{\"value\":(\\d).+")), is(equalTo(1)));
             assertThat(Integer.parseInt(valueFrom(rev, ".+Code-Review\":\\{\"all\":\\[\\{\"value\":(\\d).+")), is(equalTo(1)));
         }
@@ -102,7 +119,7 @@ public class GerritTriggerTest extends AbstractJUnitTest {
         String hostName = GerritTriggerEnv.get().getHostName();
         String project = GerritTriggerEnv.get().getProject();
 
-        assertThat(new ProcessBuilder("git", "clone", "ssh://" + user + "@" + hostName + ":29418/" + project, jobName).directory(dir).start().waitFor(), is(equalTo(0)));
+        assertThat(logProcessBuilderIssues(new ProcessBuilder("git", "clone", "ssh://" + user + "@" + hostName + ":29418/" + project, jobName).directory(dir).start(), "git clone"), is(equalTo(0)));
 
         File file = new File(dir+"/"+jobName,jobName);
         file.delete();//result !needed
@@ -111,21 +128,27 @@ public class GerritTriggerTest extends AbstractJUnitTest {
         writer.close();
         dir = file.getParentFile();
 
-        assertThat(new ProcessBuilder("git", "add", jobName).directory(dir).start().waitFor(), is(equalTo(0)));
-        assertThat(new ProcessBuilder("scp", "-p", "-P", "29418", user + "@" + hostName + ":hooks/commit-msg", ".git/hooks/").directory(dir).start().waitFor(), is(equalTo(0)));
-        assertThat(new ProcessBuilder("git", "commit", "-m", jobName).directory(dir).start().waitFor(), is(equalTo(0)));
-        assertThat(new ProcessBuilder("git", "push", "origin", "HEAD:refs/for/master").directory(dir).start().waitFor(), is(equalTo(0)));
+        assertThat(logProcessBuilderIssues(new ProcessBuilder("git", "add", jobName ).directory(dir).start(), "git add"), is(equalTo(0)));
+        assertThat(logProcessBuilderIssues(new ProcessBuilder("scp", "-p", "-P", "29418", user + "@" + hostName + ":hooks/commit-msg", ".git/hooks/").directory(dir).start(), "scp"), is(equalTo(0)));
+        assertThat(logProcessBuilderIssues(new ProcessBuilder("git", "commit", "-m", jobName).directory(dir).start(), "git commit"), is(equalTo(0)));
+        assertThat(logProcessBuilderIssues(new ProcessBuilder("git", "push", "origin", "HEAD:refs/for/master").directory(dir).start(), "git push"), is(equalTo(0)));
 
         Process gitLog1 = new ProcessBuilder("git","log","-1").directory(dir).start();
+        logProcessBuilderIssues(gitLog1, "git log");
         return valueFrom(stringFrom(gitLog1),".+Change-Id:(.+)");
     }
 
-    private Process curl(String changeId) throws IOException {
+    private Process curl(String changeId) throws IOException, InterruptedException {
         String hN = GerritTriggerEnv.get().getHostName();
+        Process curlProcess;
         if(GerritTriggerEnv.get().getNoProxy()) {
-            return new ProcessBuilder("curl","--noproxy",hN,"-n","https://"+hN+"/a/changes/"+changeId+"/revisions/current/review").start();
+            curlProcess = new ProcessBuilder("curl","-w","%{http_code}","--noproxy",hN,"-n","https://"+hN+"/a/changes/"+changeId+"/revisions/current/review").start();
+            logProcessBuilderIssues(curlProcess, "curl");
+            return curlProcess;
         }
-        return new ProcessBuilder("curl","-n","https://"+hN+"/a/changes/"+changeId+"/revisions/current/review").start();
+        curlProcess = new ProcessBuilder("curl","-n","https://"+hN+"/a/changes/"+changeId+"/revisions/current/review").start();
+        logProcessBuilderIssues(curlProcess, "curl");
+        return curlProcess;
     }
 
     private String stringFrom(Process curl) throws InterruptedException, IOException {
@@ -145,5 +168,24 @@ public class GerritTriggerTest extends AbstractJUnitTest {
         }
         assertThat(value, is(not(nullValue())));
         return value;
+    }
+
+    private int logProcessBuilderIssues(Process processToRun, String commandName) throws InterruptedException, IOException {
+        int result = processToRun.waitFor();
+        if (result != 0) {
+            StringWriter writer = new StringWriter();
+            IOUtils.copy(processToRun.getErrorStream(), writer);
+            LOGGER.severe("Issue occurred during command \"" + commandName + "\":\n" + writer.toString());
+            writer.close();
+        }
+        return result;
+    }
+
+    private void logCurlHttpCodeIssues(String curlResponse) {
+        String responseCode = curlResponse.substring(curlResponse.length() - 3, curlResponse.length());
+        if (!responseCode.matches("2[0-9][0-9]")) {
+            LOGGER.severe("Issue occurred during curl command. Returned an erroneous http response code: " + responseCode + ".\n"
+                    + "Expected 2XX response code.");
+        }
     }
 }
