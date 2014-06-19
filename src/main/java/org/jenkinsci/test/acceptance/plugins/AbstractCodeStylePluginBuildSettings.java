@@ -11,7 +11,6 @@ import org.jenkinsci.test.acceptance.po.PostBuildStep;
  */
 public abstract class AbstractCodeStylePluginBuildSettings extends PageAreaImpl implements PostBuildStep {
 
-    protected boolean wasAdvancedClicked = false;
     protected Control advanced = control("advanced-button");
 
     protected Control canRunOnFailed = control("canRunOnFailed");
@@ -96,12 +95,72 @@ public abstract class AbstractCodeStylePluginBuildSettings extends PageAreaImpl 
     }
 
     /**
+     * Build is marked as unstable if at least these warnings of high
+     * priority are found.
+     * @param threshold number of warnings to set the build to unstable.
+     */
+    public void setBuildUnstableTotalHigh(String threshold) {
+        ensureAdvancedClicked();
+        buildUnstableTotalHigh.set(threshold);
+    }
+
+    /**
+     * Build is marked as unstable if at least these warnings of normal
+     * priority are found.
+     * @param threshold number of warnings to set the build to unstable.
+     */
+    public void setBuildUnstableTotalNormal(String threshold) {
+        ensureAdvancedClicked();
+        buildUnstableTotalNormal.set(threshold);
+    }
+
+    /**
+     * Build is marked as unstable if at least these warnings of low
+     * priority are found.
+     * @param threshold number of warnings to set the build to unstable.
+     */
+    public void setBuildUnstableTotalLow(String threshold) {
+        ensureAdvancedClicked();
+        buildUnstableTotalLow.set(threshold);
+    }
+
+    /**
      * Build is marked as failed if at least these warnings are found.
      * @param threshold number of warnings to set the build to failed.
      */
     public void setBuildFailedTotalAll(String threshold) {
         ensureAdvancedClicked();
         buildFailedTotalAll.set(threshold);
+    }
+
+    /**
+     * Build is marked as failed if at least these warnings of high
+     * priority are found.
+     * @param threshold number of warnings to set the build to unstable.
+     */
+    public void setBuildFailedTotalHigh(String threshold) {
+        ensureAdvancedClicked();
+        buildFailedTotalHigh.set(threshold);
+    }
+
+    /**
+     * Build is marked as failed if at least these warnings of normal
+     * priority are found.
+     * @param threshold number of warnings to set the build to unstable.
+     */
+    public void setBuildFailedTotalNormal(String threshold) {
+        ensureAdvancedClicked();
+        buildFailedTotalNormal.set(threshold);
+    }
+
+    /**
+     * Build is marked as failed if at least these warnings of low
+     * priority are found.
+     * @param threshold number of warnings to set the build to unstable.
+     */
+    public void setBuildFailedTotalLow(String threshold) {
+        ensureAdvancedClicked();
+        buildFailedTotalLow.set(threshold);
     }
 
     /**
@@ -137,9 +196,8 @@ public abstract class AbstractCodeStylePluginBuildSettings extends PageAreaImpl 
      * Ensures that advanced is clicked and the other controls are visible.
      */
     protected void ensureAdvancedClicked() {
-        if (!wasAdvancedClicked) {
+        if (advanced.exists()) {
             advanced.click();
-            wasAdvancedClicked = true;
         }
     }
 }

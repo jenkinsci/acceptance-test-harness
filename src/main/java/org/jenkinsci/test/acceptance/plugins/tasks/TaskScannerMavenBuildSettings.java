@@ -19,6 +19,6 @@ import org.jenkinsci.test.acceptance.po.Job;
 @Describable("Scan workspace for open tasks")
 public class TaskScannerMavenBuildSettings extends AbstractTaskScannerBuildSettings {
 
-    public TaskScannerMavenBuildSettings(Job parent) { super(parent, "tasks-TasksReporter"); }
+    public TaskScannerMavenBuildSettings(Job parent) { super(parent, "/hudson-plugins-tasks-TasksReporter"); }
 
 }

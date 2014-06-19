@@ -145,12 +145,12 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
                                                                                                      AbstractCodeStylePluginBuildConfigurator<T> configurator){
         job.configure();
 
-        //check whether to exchange the copy resource shell step
-        if (!isAdditionalResource){
-            job.removeFirstBuildStep();
-        }
-
         if( newResourceToCopy != null) {
+           //check whether to exchange the copy resource shell step
+            if (!isAdditionalResource){
+                job.removeFirstBuildStep();
+            }
+
             //add the new copy resource shell step
             addResourceToJob(job, newResourceToCopy);
         }
