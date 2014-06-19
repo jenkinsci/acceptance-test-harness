@@ -66,6 +66,13 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
         e.click();
     }
 
+    @Override
+    public void clickButton(String text, int num){
+        List<WebElement> e = all(by.button(text));
+        e.get(num).click();
+    }
+
+
     /**
      * Select radio button by its name, id, or label text.
      */

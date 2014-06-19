@@ -34,4 +34,32 @@ public class WarningsPublisher extends AbstractStep implements PostBuildStep {
         a.control("pattern").set(pattern);
         a.control("parserName").select(caption);
     }
+
+    public void openAdvancedOptions(){
+        clickButton("Advanced...", 5);
+    }
+
+    public void addWarningsToInclude(String pattern){
+        find(by.xpath("//input[@name='_.includePattern']")).sendKeys(pattern);
+    }
+
+
+    public void addWarningsToIgnore(String pattern){
+        find(by.xpath("//input[@name='_.excludePattern']")).sendKeys(pattern);
+    }
+
+
+    public void runAlways(){
+        check(find(by.xpath("//input[@name='canRunOnFailed']")));
+    }
+
+
+    public void detectModules(){
+        check(find(by.xpath("//input[@name='shouldDetectModules']")));
+    }
+
+
+    public void resolveRelativePaths(){
+        check(find(by.xpath("//input[@name='shouldDetectModules']")));
+    }
 }
