@@ -60,13 +60,7 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
         FreeStyleJob job = jenkins.jobs.create();
         job.configure();
 
-        Resource res = resource(resourceToCopy);
-        //decide whether to utilize copyResource or copyDir
-        if (res.asFile().isDirectory()) {
-            job.copyDir(res);
-        } else {
-            job.copyResource(res);
-        }
+        job.copyResource(resourceToCopy);
 
         T buildSettings = job.addPublisher(publisherClass);
         buildSettings.pattern.set(publisherPattern);
@@ -162,7 +156,6 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
         }
 
         job.save();
-
         return job;
     }
 
