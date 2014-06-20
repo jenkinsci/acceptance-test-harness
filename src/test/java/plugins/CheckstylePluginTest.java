@@ -232,7 +232,7 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
                     }
                 };
         final MavenModuleSet job = setupSimpleMavenJob(buildConfigurator);
-        buildJobAndWait(job).shouldBeUnstable();
+        buildJobAndWait(job).shouldUnstable();
     }
 
     /**

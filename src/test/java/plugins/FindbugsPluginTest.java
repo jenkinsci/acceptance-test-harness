@@ -221,7 +221,7 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
                     }
                 };
         final MavenModuleSet job = setupSimpleMavenJob(buildConfigurator);
-        buildJobAndWait(job).shouldBeUnstable();
+        buildJobAndWait(job).shouldUnstable();
     }
 
     /**
