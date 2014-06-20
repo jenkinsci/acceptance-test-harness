@@ -1,21 +1,18 @@
 package plugins;
 
+import com.google.inject.Inject;
+import org.hamcrest.CoreMatchers;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.SvnContainer;
-import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.junit.Native;
-import org.jenkinsci.test.acceptance.junit.SmokeTest;
-import org.jenkinsci.test.acceptance.junit.WithCredentials;
-import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.junit.*;
 import org.jenkinsci.test.acceptance.plugins.subversion.SubversionPluginTestException;
 import org.jenkinsci.test.acceptance.plugins.subversion.SubversionScm;
+import org.jenkinsci.test.acceptance.plugins.subversion.SubversionSvmAdvanced;
 import org.jenkinsci.test.acceptance.plugins.subversion.SvnRepositoryBrowserWebSvn;
 import org.jenkinsci.test.acceptance.po.Changes;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-
-import com.google.inject.Inject;
 
 import static org.junit.Assert.*;
 
@@ -159,32 +156,6 @@ public class SubversionPluginTest extends AbstractJUnitTest {
         f.startBuild().shouldSucceed().shouldContainsConsoleOutput("test -d .svn");
     }
 
-    /**
-     * Scenario:basic Checkout triggered by polling
-     * Given I have installed the "subversion" plugin
-     * And a job
-     * And I add a shell build step "test -d .svn"
-     * When I enter the Url to a valid SVN repository
-     * And I add a polling schedule for every minute
-     * And I save the job
-     * Then there should be a succeeded Build after more than one minute
-     */
-    @Test
-    public void poll_for_changes() throws SubversionPluginTestException {
-        final SvnContainer svnContainer = svn.get();
-        final FreeStyleJob f = jenkins.jobs.create();
-        final SubversionScm subversionScm = f.useScm(SubversionScm.class);
-        subversionScm.url.set(svnContainer.getUrlUnsaveRepo());
-
-        f.pollScm().schedule("* * * * *");
-        f.addShellStep("test -d .svn");
-        f.save();
-
-        sleep(70000);
-
-        // We should have some build after 70 seconds
-        f.getLastBuild().shouldSucceed().shouldExist();
-    }
 
     /**
      * Scenario: clean check out
@@ -304,6 +275,74 @@ public class SubversionPluginTest extends AbstractJUnitTest {
         f.startBuild().shouldSucceed();
         final Changes changes = f.getLastBuild().getChanges();
         assertTrue("Build has no diff link.", changes.hasDiffFileLink("testOne.txt"));
+    }
+
+
+    /**
+     * Given I have installed the "subversion" plugin
+     * And a job
+     * When I check out code from Subversion repository at specific Revision
+     * And I save the job
+     * And I build the job
+     * And I change the Url to a different Revision with changes
+     * And I add a polling for changes every minute
+     * And I save the job
+     * Then there should be a second build after 70 seconds
+     */
+    @Test
+    public void poll_for_changes() throws SubversionPluginTestException {
+        final SvnContainer svnContainer = svn.get();
+        final FreeStyleJob f = jenkins.jobs.create();
+        final SubversionScm subversionScm = f.useScm(SubversionScm.class);
+        subversionScm.url.set(svnContainer.getUrlUnsaveRepoAtRevision(1));
+        f.save();
+        f.startBuild().shouldSucceed();
+
+        f.configure();
+        subversionScm.url.set(svnContainer.getUrlUnsaveRepoAtRevision(2));
+        f.pollScm().schedule("* * * * *");
+        f.addShellStep("test -d .svn");
+        f.save();
+
+        sleep(70000);
+
+        // We should have a second build after 70 seconds
+        assertThat(f.getNextBuildNumber(), CoreMatchers.is(3));
+
+    }
+
+    /**
+     * Given I have installed the "subversion" plugin
+     * And a job
+     * When I check out code from Subversion repository at specific Revision
+     * And I save the job
+     * And I build the job
+     * And I change the Url to a different Revision with changes in a *.txt
+     * And I add a polling for changes every minute
+     * And I exclude changes of *.txt
+     * And I save the job
+     * Then there should not be a second build after 70 seconds
+     */
+    @Test
+    public void poll_for_changes_excluded() throws SubversionPluginTestException {
+        final SvnContainer svnContainer = svn.get();
+        final FreeStyleJob f = jenkins.jobs.create();
+        final SubversionScm subversionScm = f.useScm(SubversionScm.class);
+        subversionScm.url.set(svnContainer.getUrlUnsaveRepoAtRevision(1));
+        final SubversionSvmAdvanced scmAdvanced = subversionScm.advanced();
+        scmAdvanced.excludedRegions.set(".*\\.txt");
+        f.save();
+        f.startBuild().shouldSucceed();
+
+        f.configure();
+        subversionScm.url.set(svnContainer.getUrlUnsaveRepoAtRevision(2));
+        f.pollScm().schedule("* * * * *");
+        f.save();
+
+        sleep(70000);
+
+        // We should not have a second build after 70 seconds
+        assertThat(f.getNextBuildNumber(), CoreMatchers.is(2));
     }
 
 }
