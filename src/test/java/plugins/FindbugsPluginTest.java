@@ -49,7 +49,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.jenkinsci.test.acceptance.Matchers.hasAction;
 
@@ -191,6 +191,10 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
         lastBuild.open();
         FindbugsAction findbugs = new FindbugsAction(job);
         assertThat(findbugs.getNewWarningNumber(), is(1));
+
+// TODO decision of uhafner
+//        assertThat(findbugs.getLinkedSourceFileLineNumber("Details", "Main.java:18", "Normal"), is(18));
+//        assertThat(findbugs.getLinkedSourceFileLineAsString("Details", "Main.java:18", "Normal"), endsWith("if(o == null) {"));
     }
 
     private MavenModuleSet setupSimpleMavenJob() {

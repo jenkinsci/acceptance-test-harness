@@ -286,6 +286,13 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
         lastBuild.open();
         PmdAction pmd = new PmdAction(job);
         assertThat(pmd.getNewWarningNumber(), is(2));
+        SortedMap<String, Integer> expectedContent = new TreeMap<>();
+        expectedContent.put("Main.java:9", 9);
+        expectedContent.put("Main.java:13", 13);
+// TODO decision of uhafner
+//        assertThat(pmd.getWarningsTabContents(), is(expectedContent));
+//        assertThat(pmd.getLinkedSourceFileLineNumber("Warnings", "Main.java:9", "High"), is(9));
+//        assertThat(pmd.getLinkedSourceFileLineAsString("Warnings", "Main.java:13", "High"), endsWith("if(false) {"));
     }
 
     /**
