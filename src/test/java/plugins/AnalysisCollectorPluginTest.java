@@ -2,18 +2,19 @@ package plugins;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginBuildConfigurator;
 import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisCollectorAction;
-import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisCollectorPublisher;
-import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstylePublisher;
-import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsPublisher;
+import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisCollectorFreestyleBuildSettings;
+import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisPlugin;
+import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleFreestyleBuildSettings;
+import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsFreestyleBuildSettings;
 import org.jenkinsci.test.acceptance.plugins.pmd.PmdFreestyleBuildSettings;
-import org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerPublisher;
+import org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerFreestyleBuildSettings;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.*;
 import static org.jenkinsci.test.acceptance.Matchers.hasAction;
 import static org.jenkinsci.test.acceptance.Matchers.hasAnalysisWarningsFor;
@@ -92,10 +93,15 @@ public class AnalysisCollectorPluginTest extends AbstractJUnitTest {
         FreeStyleJob job = jenkins.jobs.create();
         job.configure();
         job.copyResource(ANALYSIS_COLLECTOR_PLUGIN_RESOURCES + "/findbugs.xml");
-        job.addPublisher(FindbugsPublisher.class);
-        AnalysisCollectorPublisher analysis = job.addPublisher(AnalysisCollectorPublisher.class);
-        analysis.advanced.click();
-        analysis.warningThresholdUnstable.sendKeys("5");
+        job.addPublisher(FindbugsFreestyleBuildSettings.class);
+        AnalysisCollectorFreestyleBuildSettings analysis = job.addPublisher(AnalysisCollectorFreestyleBuildSettings.class);
+        AbstractCodeStylePluginBuildConfigurator<AnalysisCollectorFreestyleBuildSettings> configurator = new AbstractCodeStylePluginBuildConfigurator<AnalysisCollectorFreestyleBuildSettings>() {
+            @Override
+            public void configure(AnalysisCollectorFreestyleBuildSettings settings) {
+                settings.setBuildUnstableTotalAll("5");
+            }
+        };
+        configurator.configure(analysis);
         job.save();
         job.startBuild().waitUntilFinished().shouldBeUnstable();
     }
@@ -115,16 +121,16 @@ public class AnalysisCollectorPluginTest extends AbstractJUnitTest {
     public void deselect_plugins() {
         FreeStyleJob job = setupJob(ANALYSIS_COLLECTOR_PLUGIN_RESOURCES, true);
         // no checkstyle
-        AnalysisCollectorAction result = deselectPluginAndBuild(AnalysisCollectorPublisher.AnalysisPlugin.CHECKSTYLE, job);
+        AnalysisCollectorAction result = deselectPluginAndBuild(AnalysisPlugin.CHECKSTYLE, job);
         assertThat(result.getWarningNumber(), is(23));
         // no checkstyle, no findbugs
-        result = deselectPluginAndBuild(AnalysisCollectorPublisher.AnalysisPlugin.FINDBUGS, job);
+        result = deselectPluginAndBuild(AnalysisPlugin.FINDBUGS, job);
         assertThat(result.getWarningNumber(), is(17));
         // no checkstyle, no findbugs, no pmd
-        result = deselectPluginAndBuild(AnalysisCollectorPublisher.AnalysisPlugin.PMD, job);
+        result = deselectPluginAndBuild(AnalysisPlugin.PMD, job);
         assertThat(result.getWarningNumber(), is(8));
         // no checkstyle, no findbugs, no pmd, no tasks => zero warnings
-        result = deselectPluginAndBuild(AnalysisCollectorPublisher.AnalysisPlugin.TASKS, job);
+        result = deselectPluginAndBuild(AnalysisPlugin.TASKS, job);
         assertThat(result.getWarningNumber(), is(0));
     }
 
@@ -143,18 +149,18 @@ public class AnalysisCollectorPluginTest extends AbstractJUnitTest {
         // check if results for checked plugins are visible
         assertThat(job,
                 allOf(
-                        hasAnalysisWarningsFor(AnalysisCollectorPublisher.AnalysisPlugin.CHECKSTYLE),
-                        hasAnalysisWarningsFor(AnalysisCollectorPublisher.AnalysisPlugin.PMD),
-                        hasAnalysisWarningsFor(AnalysisCollectorPublisher.AnalysisPlugin.FINDBUGS),
-                        hasAnalysisWarningsFor(AnalysisCollectorPublisher.AnalysisPlugin.TASKS)
+                        hasAnalysisWarningsFor(AnalysisPlugin.CHECKSTYLE),
+                        hasAnalysisWarningsFor(AnalysisPlugin.PMD),
+                        hasAnalysisWarningsFor(AnalysisPlugin.FINDBUGS),
+                        hasAnalysisWarningsFor(AnalysisPlugin.TASKS)
                 )
         );
         // check if results for unchecked/not installed plugins are NOT visible
         assertThat(job,
                 not(
                         anyOf(
-                                hasAnalysisWarningsFor(AnalysisCollectorPublisher.AnalysisPlugin.WARNINGS),
-                                hasAnalysisWarningsFor(AnalysisCollectorPublisher.AnalysisPlugin.DRY)
+                                hasAnalysisWarningsFor(AnalysisPlugin.WARNINGS),
+                                hasAnalysisWarningsFor(AnalysisPlugin.DRY)
                         )
                 )
         );
@@ -167,9 +173,9 @@ public class AnalysisCollectorPluginTest extends AbstractJUnitTest {
      * @param job    the job
      * @return the result action for asserts etc.
      */
-    private AnalysisCollectorAction deselectPluginAndBuild(AnalysisCollectorPublisher.AnalysisPlugin plugin, Job job) {
+    private AnalysisCollectorAction deselectPluginAndBuild(AnalysisPlugin plugin, Job job) {
         job.configure();
-        AnalysisCollectorPublisher publisher = job.getPublisher(AnalysisCollectorPublisher.class);
+        AnalysisCollectorFreestyleBuildSettings publisher = job.getPublisher(AnalysisCollectorFreestyleBuildSettings.class);
         publisher.checkCollectedPlugin(plugin, false);
         job.save();
         job.startBuild().waitUntilFinished();
@@ -186,15 +192,21 @@ public class AnalysisCollectorPluginTest extends AbstractJUnitTest {
         FreeStyleJob job = jenkins.jobs.create();
         job.configure();
         job.copyResource(resourceToCopy);
-        job.addPublisher(CheckstylePublisher.class);
+        job.addPublisher(CheckstyleFreestyleBuildSettings.class);
         job.addPublisher(PmdFreestyleBuildSettings.class);
-        job.addPublisher(FindbugsPublisher.class);
-        TaskScannerPublisher taskScannerPublisher = job.addPublisher(TaskScannerPublisher.class);
-        taskScannerPublisher.highPriorityTags.sendKeys("PRIO1");
-        taskScannerPublisher.normalPriorityTags.sendKeys("PRIO2,TODO");
-        taskScannerPublisher.lowPriorityTags.sendKeys("PRIO3");
+        job.addPublisher(FindbugsFreestyleBuildSettings.class);
+        TaskScannerFreestyleBuildSettings taskScannerSettings = job.addPublisher(TaskScannerFreestyleBuildSettings.class);
+        AbstractCodeStylePluginBuildConfigurator<TaskScannerFreestyleBuildSettings> configurator = new AbstractCodeStylePluginBuildConfigurator<TaskScannerFreestyleBuildSettings>() {
+            @Override
+            public void configure(TaskScannerFreestyleBuildSettings settings) {
+                settings.setHighPriorityTags("PRIO1");
+                settings.setNormalPriorityTags("PRIO2,TODO");
+                settings.setLowPriorityTags("PRIO3");
+            }
+        };
+        configurator.configure(taskScannerSettings);
         if (addAnalysisPublisher) {
-            job.addPublisher(AnalysisCollectorPublisher.class);
+            job.addPublisher(AnalysisCollectorFreestyleBuildSettings.class);
         }
         job.save();
         return job;
