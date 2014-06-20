@@ -43,22 +43,12 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
      * Helper method to create a temporary empty directory
      *
      * @return File Descriptor for empty Directory
-     * @throws java.io.IOException
+     * @throws IOException
      */
     private static File createTempDirectory()
             throws IOException {
         File temp;
-
-        temp = File.createTempFile("temp", Long.toString(System.nanoTime()));
-
-        if (!(temp.delete())) {
-            throw new IOException("Could not delete temp file: " + temp.getAbsolutePath());
-        }
-        temp = new File(temp.getPath() + "d");
-
-        if (!(temp.mkdir())) {
-            throw new IOException("Could not create temp directory: " + temp.getAbsolutePath());
-        }
+        temp = java.nio.file.Files.createTempDirectory("temp").toFile();
         temp.deleteOnExit();
         return (temp);
     }
@@ -104,13 +94,13 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
     @Test
     public void publish_resources() throws IOException, InterruptedException {
         SMBContainer smbd = docker.start(SMBContainer.class);
-        Resource cp_file = resource("/ftp_plugin/odes.txt");
+        Resource cpFile = resource("/ftp_plugin/odes.txt");
 
         FreeStyleJob j = jenkins.jobs.create();
         configureCifs("asd", smbd);
         j.configure();
         {
-            j.copyResource(cp_file);
+            j.copyResource(cpFile);
             CifsPublisher fp = j.addPublisher(CifsPublisher.class);
             CifsPublisher.Site fps = fp.getDefault();
             fps.getDefaultTransfer().sourceFile.set("odes.txt");
@@ -120,7 +110,7 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
         j.startBuild().shouldSucceed();
 
         assertTrue(smbd.tryCopyFile("/tmp/odes.txt","/tmp/"));
-        assertThat(FileUtils.readFileToString(new File("/tmp/odes.txt")), CoreMatchers.is(cp_file.asText()));
+        assertThat(FileUtils.readFileToString(new File("/tmp/odes.txt")), CoreMatchers.is(cpFile.asText()));
     }
 
     /**
@@ -143,7 +133,7 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
     @Test
     public void publish_jenkins_variables() throws IOException, InterruptedException {
         SMBContainer smb = docker.start(SMBContainer.class);
-        Resource cp_file = resource("/ftp_plugin/odes.txt");
+        Resource cpFile = resource("/ftp_plugin/odes.txt");
         String randomName = jenkins.jobs.createRandomName();
         String randomPath = "/tmp/" + randomName + "/";
         FreeStyleJob j = jenkins.jobs.create(FreeStyleJob.class, randomName);
@@ -151,7 +141,7 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
         configureCifs("asd", smb);
         j.configure();
         {
-            j.copyResource(cp_file);
+            j.copyResource(cpFile);
             CifsPublisher fp = j.addPublisher(CifsPublisher.class);
             CifsPublisher.Site fps = fp.getDefault();
             fps.getDefaultTransfer().remoteDirectory.set("${JOB_NAME}/");
@@ -161,7 +151,7 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
 
         j.startBuild().shouldSucceed();
         assertTrue(smb.tryCopyFile(randomPath + "odes.txt","/tmp/"));
-        assertThat(FileUtils.readFileToString(new File("/tmp/odes.txt")), CoreMatchers.is(cp_file.asText()));
+        assertThat(FileUtils.readFileToString(new File("/tmp/odes.txt")), CoreMatchers.is(cpFile.asText()));
     }
 
     /**
@@ -184,13 +174,13 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
     @Test
     public void publish_resources_and_remove_prefix() throws IOException, InterruptedException {
         SMBContainer smb = docker.start(SMBContainer.class);
-        Resource cp_dir = resource("/ftp_plugin/");
+        Resource cpDir = resource("/ftp_plugin/");
         Resource test = resource("/ftp_plugin/prefix_/test.txt");
         FreeStyleJob j = jenkins.jobs.create();
         configureCifs("asd", smb);
         j.configure();
         {
-            j.copyDir(cp_dir);
+            j.copyDir(cpDir);
             CifsPublisher fp = j.addPublisher(CifsPublisher.class);
             CifsPublisher.Site fps = fp.getDefault();
             fps.getDefaultTransfer().sourceFile.set("prefix_/test.txt");
@@ -224,13 +214,13 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
     @Test
     public void publish_resources_with_excludes() throws IOException, InterruptedException {
         SMBContainer smb = docker.start(SMBContainer.class);
-        Resource cp_dir = resource("/ftp_plugin/");
+        Resource cpDir = resource("/ftp_plugin/");
 
         FreeStyleJob j = jenkins.jobs.create();
         configureCifs("asd", smb);
         j.configure();
         {
-            j.copyDir(cp_dir);
+            j.copyDir(cpDir);
             CifsPublisher fp = j.addPublisher(CifsPublisher.class);
             CifsPublisher.Site fps = fp.getDefault();
             fps.getDefaultTransfer().sourceFile.set("prefix_/");
@@ -261,13 +251,13 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
     @Test
     public void publish_with_default_pattern() throws IOException, InterruptedException {
         SMBContainer smb = docker.start(SMBContainer.class);
-        Resource cp_dir = resource("/ftp_plugin/");
+        Resource cpDir = resource("/ftp_plugin/");
 
         FreeStyleJob j = jenkins.jobs.create();
         configureCifs("asd", smb);
         j.configure();
         {
-            j.copyDir(cp_dir);
+            j.copyDir(cpDir);
             CifsPublisher fp = j.addPublisher(CifsPublisher.class);
             CifsPublisher.Site fps = fp.getDefault();
             fps.getDefaultTransfer().sourceFile.set("prefix_/test.txt,odes.txt");
@@ -300,13 +290,13 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
     @Test
     public void publish_with_own_pattern() throws IOException, InterruptedException {
         SMBContainer smb = docker.start(SMBContainer.class);
-        Resource cp_dir = resource("/ftp_plugin/");
+        Resource cpDir = resource("/ftp_plugin/");
 
         FreeStyleJob j = jenkins.jobs.create();
         configureCifs("asd", smb);
         j.configure();
         {
-            j.copyDir(cp_dir);
+            j.copyDir(cpDir);
             CifsPublisher fp = j.addPublisher(CifsPublisher.class);
             CifsPublisher.Site fps = fp.getDefault();
             fps.getDefaultTransfer().patternSeparator.set("[;]+");
@@ -340,15 +330,15 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
     @Test
     public void publish_with_default_exclude() throws IOException, InterruptedException {
         SMBContainer smb = docker.start(SMBContainer.class);
-        Resource cp_txt = resource("/ftp_plugin/odes.txt");
+        Resource cpTxt = resource("/ftp_plugin/odes.txt");
 
         FreeStyleJob j = jenkins.jobs.create();
         configureCifs("asd", smb);
         j.configure();
         {
-            j.copyResource(cp_txt, ".svn");
-            j.copyResource(cp_txt, "CVS");
-            j.copyResource(cp_txt);
+            j.copyResource(cpTxt, ".svn");
+            j.copyResource(cpTxt, "CVS");
+            j.copyResource(cpTxt);
             CifsPublisher fp = j.addPublisher(CifsPublisher.class);
             CifsPublisher.Site fps = fp.getDefault();
             fps.getDefaultTransfer().sourceFile.set(".svn,CVS,odes.txt");
@@ -380,15 +370,15 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
     @Test
     public void publish_with_no_default_exclude() throws IOException, InterruptedException {
         SMBContainer smb = docker.start(SMBContainer.class);
-        Resource cp_txt = resource("/ftp_plugin/odes.txt");
+        Resource cpTxt = resource("/ftp_plugin/odes.txt");
 
         FreeStyleJob j = jenkins.jobs.create();
         configureCifs("asd", smb);
         j.configure();
         {
-            j.copyResource(cp_txt, ".svn");
-            j.copyResource(cp_txt, "CVS");
-            j.copyResource(cp_txt);
+            j.copyResource(cpTxt, ".svn");
+            j.copyResource(cpTxt, "CVS");
+            j.copyResource(cpTxt);
             CifsPublisher fp = j.addPublisher(CifsPublisher.class);
             CifsPublisher.Site fps = fp.getDefault();
             fps.getDefaultTransfer().sourceFile.set(".svn,CVS,odes.txt");
@@ -421,7 +411,7 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
     @Test
     public void publish_with_empty_directory() throws IOException, InterruptedException {
         SMBContainer smb = docker.start(SMBContainer.class);
-        Resource cp_txt = resource("/ftp_plugin/odes.txt");
+        Resource cpTxt = resource("/ftp_plugin/odes.txt");
         File tmpDir = createTempDirectory();
         File nestedEmptyDir = new File(tmpDir + "/empty");
         nestedEmptyDir.mkdir();
@@ -430,7 +420,7 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
         configureCifs("asd", smb);
         j.configure();
         {
-            j.copyResource(cp_txt);
+            j.copyResource(cpTxt);
             j.copyFile(tmpDir);
             CifsPublisher fp = j.addPublisher(CifsPublisher.class);
             CifsPublisher.Site fps = fp.getDefault();
@@ -463,7 +453,7 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
     @Test
     public void publish_without_empty_directory() throws IOException, InterruptedException {
         SMBContainer smb = docker.start(SMBContainer.class);
-        Resource cp_txt = resource("/ftp_plugin/odes.txt");
+        Resource cpTxt = resource("/ftp_plugin/odes.txt");
         File tmpDir = createTempDirectory();
         File nestedEmptyDir = new File(tmpDir + "/empty");
         nestedEmptyDir.mkdir();
@@ -472,7 +462,7 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
         configureCifs("asd", smb);
         j.configure();
         {
-            j.copyResource(cp_txt);
+            j.copyResource(cpTxt);
             j.copyFile(tmpDir);
             CifsPublisher fp = j.addPublisher(CifsPublisher.class);
             CifsPublisher.Site fps = fp.getDefault();
@@ -505,13 +495,13 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
     @Test
     public void publish_without_flatten_files() throws IOException, InterruptedException {
         SMBContainer smb = docker.start(SMBContainer.class);
-        Resource cp_dir = resource("/ftp_plugin/");
+        Resource cpDir = resource("/ftp_plugin/");
 
         FreeStyleJob j = jenkins.jobs.create();
         configureCifs("asd", smb);
         j.configure();
         {
-            j.copyDir(cp_dir);
+            j.copyDir(cpDir);
             CifsPublisher fp = j.addPublisher(CifsPublisher.class);
             CifsPublisher.Site fps = fp.getDefault();
             fps.getDefaultTransfer().sourceFile.set("flat/odes.txt,odes.txt");
@@ -541,13 +531,13 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
     @Test
     public void publish_with_flatten_files() throws IOException, InterruptedException {
         SMBContainer smb = docker.start(SMBContainer.class);
-        Resource cp_dir = resource("/ftp_plugin/");
+        Resource cpDir = resource("/ftp_plugin/");
 
         FreeStyleJob j = jenkins.jobs.create();
         configureCifs("asd", smb);
         j.configure();
         {
-            j.copyDir(cp_dir);
+            j.copyDir(cpDir);
             CifsPublisher fp = j.addPublisher(CifsPublisher.class);
             CifsPublisher.Site fps = fp.getDefault();
             fps.getDefaultTransfer().flatten.check();
@@ -577,13 +567,13 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
     @Test
     public void publish_with_date_format() throws IOException, InterruptedException {
         SMBContainer smb = docker.start(SMBContainer.class);
-        Resource cp_txt = resource("/ftp_plugin/odes.txt");
+        Resource cpTxt = resource("/ftp_plugin/odes.txt");
 
         FreeStyleJob j = jenkins.jobs.create();
         configureCifs("asd", smb);
         j.configure();
         {
-            j.copyResource(cp_txt);
+            j.copyResource(cpTxt);
             CifsPublisher fp = j.addPublisher(CifsPublisher.class);
             CifsPublisher.Site fps = fp.getDefault();
             fps.getDefaultTransfer().remoteDirectorySDF.check();
@@ -619,12 +609,12 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
     @Test
     public void publish_with_clean_remote() throws IOException, InterruptedException {
         SMBContainer smb = docker.start(SMBContainer.class);
-        Resource cp_txt = resource("/ftp_plugin/odes.txt");
+        Resource cpTxt = resource("/ftp_plugin/odes.txt");
         FreeStyleJob j = jenkins.jobs.create();
         configureCifs("asd", smb);
         j.configure();
         {
-            j.copyResource(cp_txt);
+            j.copyResource(cpTxt);
             CifsPublisher fp = j.addPublisher(CifsPublisher.class);
             CifsPublisher.Site fps = fp.getDefault();
             fps.getDefaultTransfer().cleanRemote.check();
@@ -658,15 +648,15 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
     @Test
     public void publish_multiple_sets() throws IOException, InterruptedException {
         SMBContainer smb = docker.start(SMBContainer.class);
-        Resource cp_txt = resource("/ftp_plugin/odes.txt");
+        Resource cpTxt = resource("/ftp_plugin/odes.txt");
 
         FreeStyleJob j = jenkins.jobs.create();
         configureCifs("asd", smb);
         j.configure();
         {
-            j.copyResource(cp_txt);
-            j.copyResource(cp_txt, "odes2.txt");
-            j.copyResource(cp_txt, "odes3.txt");
+            j.copyResource(cpTxt);
+            j.copyResource(cpTxt, "odes2.txt");
+            j.copyResource(cpTxt, "odes3.txt");
             CifsPublisher fp = j.addPublisher(CifsPublisher.class);
             CifsPublisher.Site fps = fp.getDefault();
             fps.getDefaultTransfer().sourceFile.set("odes.txt");
@@ -705,14 +695,14 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
     public void publish_multiple_servers() throws IOException, InterruptedException {
         SMBContainer smb = docker.start(SMBContainer.class);
         SMBContainer smb2 = docker.start(SMBContainer.class);
-        Resource cp_txt = resource("/ftp_plugin/odes.txt");
+        Resource cpTxt = resource("/ftp_plugin/odes.txt");
 
         FreeStyleJob j = jenkins.jobs.create();
         configureCifs("docker1", smb);
         configureCifs("docker2", smb2);
         j.configure();
         {
-            j.copyResource(cp_txt);
+            j.copyResource(cpTxt);
             CifsPublisher fp = j.addPublisher(CifsPublisher.class);
             CifsPublisher.Site fps = fp.getDefault();
             fps.configName.select("docker1");
@@ -749,7 +739,7 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
     @Test
     public void publish_slave_resourses() throws IOException, InterruptedException,ExecutionException {
         SMBContainer smb = docker.start(SMBContainer.class);
-        Resource cp_file = resource("/ftp_plugin/odes.txt");
+        Resource cpFile = resource("/ftp_plugin/odes.txt");
 
         Slave s = slaves.get().install(jenkins).get();
         s.configure();
@@ -759,7 +749,7 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
         configureCifs("asd", smb);
         j.configure();
         {
-            j.copyResource(cp_file);
+            j.copyResource(cpFile);
             CifsPublisher fp = j.addPublisher(CifsPublisher.class);
             CifsPublisher.Site fps = fp.getDefault();
             fps.getDefaultTransfer().sourceFile.set("odes.txt");
@@ -767,6 +757,6 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
         j.save();
         j.startBuild().shouldSucceed();
         assertTrue(smb.tryCopyFile("/tmp/odes.txt","/tmp"));
-        assertThat(FileUtils.readFileToString(new File("/tmp/odes.txt")), CoreMatchers.is(cp_file.asText()));
+        assertThat(FileUtils.readFileToString(new File("/tmp/odes.txt")), CoreMatchers.is(cpFile.asText()));
     }
 }
