@@ -19,6 +19,7 @@ public class SubversionScm extends Scm {
     public static final String CLEAN_CHECKOUT = "Emulate clean checkout by first deleting";
 
     public final Control url = control("locations/remote");
+    public final Control btAdvanced = control(by.button("yui-gen10-button"));
     public final Control local = control("locations/local");
     public final Control checkoutStrategy = control(by.xpath("//td[@class='setting-name' and text()='%s']/../td[@class='setting-main']/select", "Check-out Strategy"));
     public final Control credentials = control("locations/credentialsId");
@@ -54,11 +55,17 @@ public class SubversionScm extends Scm {
         return this.newInstance(type, this.injector, urlOfCredentialPage, driver.getWindowHandle());
     }
 
+
     public <T extends SvnRepositoryBrowser> T useRepositoryBrowser(Class<T> type) {
         final String[] nameOfRepositoryBrowser = type.getAnnotation(Describable.class).value();
         repositoryBrowser.select(nameOfRepositoryBrowser[0]);
         String path = repositoryBrowser.resolve().getAttribute("path");
         return this.newInstance(type, this, this.getPage().url(path));
+    }
+
+    public SubversionSvmAdvanced advanced() {
+        btAdvanced.click();
+        return this.newInstance(SubversionSvmAdvanced.class, this.getPage(), this.getPage().url);
     }
 
 
