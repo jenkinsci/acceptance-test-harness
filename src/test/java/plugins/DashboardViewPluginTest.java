@@ -7,7 +7,7 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
 
 /**
- Feature: Add spport for dashboards
+ Feature: Add support for dashboards
    In order to be able to create custom dashboards
    As a Jenkins user
    I want to install and configure dashboard-view plugin

@@ -98,9 +98,9 @@ public class Job extends ContainerPageObject {
      * If a publisher of a class is requested which has not been added previously
      * this will result in a {@link java.util.NoSuchElementException}.
      */
-    public <T extends PostBuildStep> T getPublisher(Class<T> type){
+    public <T extends PostBuildStep> T getPublisher(Class<T> type) {
         for (PostBuildStep p : publishers) {
-            if(type.isAssignableFrom(p.getClass()))
+            if (type.isAssignableFrom(p.getClass()))
                 return (T) p;
         }
 
@@ -165,6 +165,7 @@ public class Job extends ContainerPageObject {
 
     /**
      * "Copy" any file from the System into the Workspace using a zipFIle.
+     *
      * @param file
      */
     public void copyFile(File file) {
@@ -189,6 +190,22 @@ public class Job extends ContainerPageObject {
 
     public void copyDir(Resource dir) {
         copyFile(dir.asFile());
+    }
+
+    /**
+     * "Copies" a resource (can be a single file or a directory) to the jobs workspace by utilizing a shell step.
+     *
+     * @param resourcePath the resource to copy
+     */
+    public void copyResource(String resourcePath) {
+        ensureConfigPage();
+        final Resource res = resource(resourcePath);
+        //decide whether to utilize copyResource or copyDir
+        if (res.asFile().isDirectory()) {
+            copyDir(res);
+        } else {
+            copyResource(res);
+        }
     }
 
     public URL getBuildUrl() {

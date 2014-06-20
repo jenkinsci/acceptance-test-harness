@@ -2,6 +2,7 @@ package org.jenkinsci.test.acceptance.po;
 
 import com.google.common.base.Joiner;
 import com.google.inject.Injector;
+import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.utils.ElasticTime;
 import org.openqa.selenium.*;
 
@@ -405,6 +406,17 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
         }
 
         throw cause;
+    }
+
+    /**
+     * Obtains a resource in a wrapper.
+     */
+    public Resource resource(String path) {
+        final URL resource = getClass().getResource(path);
+        if (resource == null) {
+            throw new AssertionError("No such resource " + path + " for " + getClass().getName());
+        }
+        return new Resource(resource);
     }
 
     protected abstract class Finder<R> {
