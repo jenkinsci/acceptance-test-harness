@@ -9,9 +9,9 @@ import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Native;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.plugins.ftp.FtpGlobalConfig;
-import org.jenkinsci.test.acceptance.plugins.ftp.FtpGlobalConfig.Site;
-import org.jenkinsci.test.acceptance.plugins.ftp.FtpPublisher;
+import org.jenkinsci.test.acceptance.plugins.publish_over.FtpGlobalConfig;
+import org.jenkinsci.test.acceptance.plugins.publish_over.FtpGlobalConfig.FtpSite;
+import org.jenkinsci.test.acceptance.plugins.publish_over.FtpPublisher;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.slave.SlaveProvider;
@@ -49,17 +49,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
     private static File createTempDirectory()
             throws IOException {
         File temp;
-
-        temp = File.createTempFile("temp", Long.toString(System.nanoTime()));
-
-        if (!(temp.delete())) {
-            throw new IOException("Could not delete temp file: " + temp.getAbsolutePath());
-        }
-        temp = new File(temp.getPath() + "d");
-
-        if (!(temp.mkdir())) {
-            throw new IOException("Could not create temp directory: " + temp.getAbsolutePath());
-        }
+        temp = java.nio.file.Files.createTempDirectory("temp").toFile();
         temp.deleteOnExit();
         return (temp);
     }
@@ -73,7 +63,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
      */
     private void jenkinsFtpConfigure(String servername, FtpdContainer ftpd) {
         jenkins.configure();
-        Site s = new FtpGlobalConfig(jenkins).addSite();
+        FtpSite s = new FtpGlobalConfig(jenkins).addSite();
         {
             s.name.set(servername);
             s.hostname.set(ftpd.ipBound(21));
@@ -106,13 +96,13 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
     @Test
     public void publish_resources() throws IOException, InterruptedException {
         FtpdContainer ftpd = docker.start(FtpdContainer.class);
-        Resource cp_file = resource("/ftp_plugin/odes.txt");
+        Resource cpFile = resource("/ftp_plugin/odes.txt");
 
         FreeStyleJob j = jenkins.jobs.create();
         jenkinsFtpConfigure("asd", ftpd);
         j.configure();
         {
-            j.copyResource(cp_file);
+            j.copyResource(cpFile);
             FtpPublisher fp = j.addPublisher(FtpPublisher.class);
             FtpPublisher.Site fps = fp.getDefault();
             fps.getDefaultTransfer().sourceFile.set("odes.txt");
@@ -121,7 +111,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
 
         j.startBuild().shouldSucceed();
         ftpd.cp("/tmp/odes.txt", new File("/tmp"));
-        assertThat(FileUtils.readFileToString(new File("/tmp/odes.txt")), CoreMatchers.is(cp_file.asText()));
+        assertThat(FileUtils.readFileToString(new File("/tmp/odes.txt")), CoreMatchers.is(cpFile.asText()));
     }
 
     /**
@@ -144,7 +134,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
     @Test
     public void publish_jenkins_variables() throws IOException, InterruptedException {
         FtpdContainer ftpd = docker.start(FtpdContainer.class);
-        Resource cp_file = resource("/ftp_plugin/odes.txt");
+        Resource cpFile = resource("/ftp_plugin/odes.txt");
         String randomName = jenkins.jobs.createRandomName();
         String randomPath = "/tmp/" + randomName + "/";
         FreeStyleJob j = jenkins.jobs.create(FreeStyleJob.class, randomName);
@@ -152,7 +142,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         jenkinsFtpConfigure("asd", ftpd);
         j.configure();
         {
-            j.copyResource(cp_file);
+            j.copyResource(cpFile);
             FtpPublisher fp = j.addPublisher(FtpPublisher.class);
             FtpPublisher.Site fps = fp.getDefault();
             fps.getDefaultTransfer().remoteDirectory.set("${JOB_NAME}/");
@@ -162,7 +152,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
 
         j.startBuild().shouldSucceed();
         ftpd.cp(randomPath + "odes.txt", new File("/tmp"));
-        assertThat(FileUtils.readFileToString(new File("/tmp/odes.txt")), CoreMatchers.is(cp_file.asText()));
+        assertThat(FileUtils.readFileToString(new File("/tmp/odes.txt")), CoreMatchers.is(cpFile.asText()));
     }
 
     /**
@@ -185,13 +175,13 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
     @Test
     public void publish_resources_and_remove_prefix() throws IOException, InterruptedException {
         FtpdContainer ftpd = docker.start(FtpdContainer.class);
-        Resource cp_dir = resource("/ftp_plugin/");
+        Resource cpDir = resource("/ftp_plugin/");
         Resource test = resource("/ftp_plugin/prefix_/test.txt");
         FreeStyleJob j = jenkins.jobs.create();
         jenkinsFtpConfigure("asd", ftpd);
         j.configure();
         {
-            j.copyDir(cp_dir);
+            j.copyDir(cpDir);
             FtpPublisher fp = j.addPublisher(FtpPublisher.class);
             FtpPublisher.Site fps = fp.getDefault();
             fps.getDefaultTransfer().sourceFile.set("prefix_/test.txt");
@@ -224,13 +214,13 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
     @Test
     public void publish_resources_with_excludes() throws IOException, InterruptedException {
         FtpdContainer ftpd = docker.start(FtpdContainer.class);
-        Resource cp_dir = resource("/ftp_plugin/");
+        Resource cpDir = resource("/ftp_plugin/");
 
         FreeStyleJob j = jenkins.jobs.create();
         jenkinsFtpConfigure("asd", ftpd);
         j.configure();
         {
-            j.copyDir(cp_dir);
+            j.copyDir(cpDir);
             FtpPublisher fp = j.addPublisher(FtpPublisher.class);
             FtpPublisher.Site fps = fp.getDefault();
             fps.getDefaultTransfer().sourceFile.set("prefix_/");
@@ -261,13 +251,13 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
     @Test
     public void publish_with_default_pattern() throws IOException, InterruptedException {
         FtpdContainer ftpd = docker.start(FtpdContainer.class);
-        Resource cp_dir = resource("/ftp_plugin/");
+        Resource cpDir = resource("/ftp_plugin/");
 
         FreeStyleJob j = jenkins.jobs.create();
         jenkinsFtpConfigure("asd", ftpd);
         j.configure();
         {
-            j.copyDir(cp_dir);
+            j.copyDir(cpDir);
             FtpPublisher fp = j.addPublisher(FtpPublisher.class);
             FtpPublisher.Site fps = fp.getDefault();
             fps.getDefaultTransfer().sourceFile.set("prefix_/test.txt,odes.txt");
@@ -298,13 +288,13 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
     @Test
     public void publish_with_own_pattern() throws IOException, InterruptedException {
         FtpdContainer ftpd = docker.start(FtpdContainer.class);
-        Resource cp_dir = resource("/ftp_plugin/");
+        Resource cpDir = resource("/ftp_plugin/");
 
         FreeStyleJob j = jenkins.jobs.create();
         jenkinsFtpConfigure("asd", ftpd);
         j.configure();
         {
-            j.copyDir(cp_dir);
+            j.copyDir(cpDir);
             FtpPublisher fp = j.addPublisher(FtpPublisher.class);
             FtpPublisher.Site fps = fp.getDefault();
             fps.getDefaultTransfer().patternSeparator.set("[;]+");
@@ -336,15 +326,15 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
     @Test
     public void publish_with_default_exclude() throws IOException, InterruptedException {
         FtpdContainer ftpd = docker.start(FtpdContainer.class);
-        Resource cp_txt = resource("/ftp_plugin/odes.txt");
+        Resource cpTxt = resource("/ftp_plugin/odes.txt");
 
         FreeStyleJob j = jenkins.jobs.create();
         jenkinsFtpConfigure("asd", ftpd);
         j.configure();
         {
-            j.copyResource(cp_txt, ".svn");
-            j.copyResource(cp_txt, "CVS");
-            j.copyResource(cp_txt);
+            j.copyResource(cpTxt, ".svn");
+            j.copyResource(cpTxt, "CVS");
+            j.copyResource(cpTxt);
             FtpPublisher fp = j.addPublisher(FtpPublisher.class);
             FtpPublisher.Site fps = fp.getDefault();
             fps.getDefaultTransfer().sourceFile.set(".svn,CVS,odes.txt");
@@ -377,15 +367,15 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
     @Test
     public void publish_with_no_default_exclude() throws IOException, InterruptedException {
         FtpdContainer ftpd = docker.start(FtpdContainer.class);
-        Resource cp_txt = resource("/ftp_plugin/odes.txt");
+        Resource cpTxt = resource("/ftp_plugin/odes.txt");
 
         FreeStyleJob j = jenkins.jobs.create();
         jenkinsFtpConfigure("asd", ftpd);
         j.configure();
         {
-            j.copyResource(cp_txt, ".svn");
-            j.copyResource(cp_txt, "CVS");
-            j.copyResource(cp_txt);
+            j.copyResource(cpTxt, ".svn");
+            j.copyResource(cpTxt, "CVS");
+            j.copyResource(cpTxt);
             FtpPublisher fp = j.addPublisher(FtpPublisher.class);
             FtpPublisher.Site fps = fp.getDefault();
             fps.getDefaultTransfer().sourceFile.set(".svn,CVS,odes.txt");
@@ -418,7 +408,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
     @Test
     public void publish_with_empty_directory() throws IOException, InterruptedException {
         FtpdContainer ftpd = docker.start(FtpdContainer.class);
-        Resource cp_txt = resource("/ftp_plugin/odes.txt");
+        Resource cpTxt = resource("/ftp_plugin/odes.txt");
         File tmpDir = createTempDirectory();
         File nestedEmptyDir = new File(tmpDir + "/empty");
         nestedEmptyDir.mkdir();
@@ -427,7 +417,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         jenkinsFtpConfigure("asd", ftpd);
         j.configure();
         {
-            j.copyResource(cp_txt);
+            j.copyResource(cpTxt);
             j.copyFile(tmpDir);
             FtpPublisher fp = j.addPublisher(FtpPublisher.class);
             FtpPublisher.Site fps = fp.getDefault();
@@ -460,7 +450,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
     @Test
     public void publish_without_empty_directory() throws IOException, InterruptedException {
         FtpdContainer ftpd = docker.start(FtpdContainer.class);
-        Resource cp_txt = resource("/ftp_plugin/odes.txt");
+        Resource cpTxt = resource("/ftp_plugin/odes.txt");
         File tmpDir = createTempDirectory();
         File nestedEmptyDir = new File(tmpDir + "/empty");
         nestedEmptyDir.mkdir();
@@ -469,7 +459,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         jenkinsFtpConfigure("asd", ftpd);
         j.configure();
         {
-            j.copyResource(cp_txt);
+            j.copyResource(cpTxt);
             j.copyFile(tmpDir);
             FtpPublisher fp = j.addPublisher(FtpPublisher.class);
             FtpPublisher.Site fps = fp.getDefault();
@@ -502,13 +492,13 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
     @Test
     public void publish_without_flatten_files() throws IOException, InterruptedException {
         FtpdContainer ftpd = docker.start(FtpdContainer.class);
-        Resource cp_dir = resource("/ftp_plugin/");
+        Resource cpDir = resource("/ftp_plugin/");
 
         FreeStyleJob j = jenkins.jobs.create();
         jenkinsFtpConfigure("asd", ftpd);
         j.configure();
         {
-            j.copyDir(cp_dir);
+            j.copyDir(cpDir);
             FtpPublisher fp = j.addPublisher(FtpPublisher.class);
             FtpPublisher.Site fps = fp.getDefault();
             fps.getDefaultTransfer().sourceFile.set("flat/odes.txt,odes.txt");
@@ -538,13 +528,13 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
     @Test
     public void publish_with_flatten_files() throws IOException, InterruptedException {
         FtpdContainer ftpd = docker.start(FtpdContainer.class);
-        Resource cp_dir = resource("/ftp_plugin/");
+        Resource cpDir = resource("/ftp_plugin/");
 
         FreeStyleJob j = jenkins.jobs.create();
         jenkinsFtpConfigure("asd", ftpd);
         j.configure();
         {
-            j.copyDir(cp_dir);
+            j.copyDir(cpDir);
             FtpPublisher fp = j.addPublisher(FtpPublisher.class);
             FtpPublisher.Site fps = fp.getDefault();
             fps.getDefaultTransfer().flatten.check();
@@ -574,13 +564,13 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
     @Test
     public void publish_with_date_format() throws IOException, InterruptedException {
         FtpdContainer ftpd = docker.start(FtpdContainer.class);
-        Resource cp_txt = resource("/ftp_plugin/odes.txt");
+        Resource cpTxt = resource("/ftp_plugin/odes.txt");
 
         FreeStyleJob j = jenkins.jobs.create();
         jenkinsFtpConfigure("asd", ftpd);
         j.configure();
         {
-            j.copyResource(cp_txt);
+            j.copyResource(cpTxt);
             FtpPublisher fp = j.addPublisher(FtpPublisher.class);
             FtpPublisher.Site fps = fp.getDefault();
             fps.getDefaultTransfer().remoteDirectorySDF.check();
@@ -615,15 +605,15 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
     @Test
     public void publish_with_clean_remote() throws IOException, InterruptedException {
         FtpdContainer ftpd = docker.start(FtpdContainer.class);
-        Resource cp_txt = resource("/ftp_plugin/odes.txt");
-        Resource old_txt = resource("/ftp_plugin/old.txt");
-        ftpd.uploadBinary(old_txt.asFile().getAbsolutePath(), "/tmp/old.txt");
+        Resource cpTxt = resource("/ftp_plugin/odes.txt");
+        Resource oldTxt = resource("/ftp_plugin/old.txt");
+        ftpd.uploadBinary(oldTxt.asFile().getAbsolutePath(), "/tmp/old.txt");
 
         FreeStyleJob j = jenkins.jobs.create();
         jenkinsFtpConfigure("asd", ftpd);
         j.configure();
         {
-            j.copyResource(cp_txt);
+            j.copyResource(cpTxt);
             FtpPublisher fp = j.addPublisher(FtpPublisher.class);
             FtpPublisher.Site fps = fp.getDefault();
             fps.getDefaultTransfer().cleanRemote.check();
@@ -657,15 +647,15 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
     @Test
     public void publish_multiple_sets() throws IOException, InterruptedException {
         FtpdContainer ftpd = docker.start(FtpdContainer.class);
-        Resource cp_txt = resource("/ftp_plugin/odes.txt");
+        Resource cpTxt = resource("/ftp_plugin/odes.txt");
 
         FreeStyleJob j = jenkins.jobs.create();
         jenkinsFtpConfigure("asd", ftpd);
         j.configure();
         {
-            j.copyResource(cp_txt);
-            j.copyResource(cp_txt, "odes2.txt");
-            j.copyResource(cp_txt, "odes3.txt");
+            j.copyResource(cpTxt);
+            j.copyResource(cpTxt, "odes2.txt");
+            j.copyResource(cpTxt, "odes3.txt");
             FtpPublisher fp = j.addPublisher(FtpPublisher.class);
             FtpPublisher.Site fps = fp.getDefault();
             fps.getDefaultTransfer().sourceFile.set("odes.txt");
@@ -704,14 +694,14 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
     public void publish_multiple_servers() throws IOException, InterruptedException {
         FtpdContainer ftpd = docker.start(FtpdContainer.class);
         FtpdContainer ftpd2 = docker.start(FtpdContainer.class);
-        Resource cp_txt = resource("/ftp_plugin/odes.txt");
+        Resource cpTxt = resource("/ftp_plugin/odes.txt");
 
         FreeStyleJob j = jenkins.jobs.create();
         jenkinsFtpConfigure("docker1", ftpd);
         jenkinsFtpConfigure("docker2", ftpd2);
         j.configure();
         {
-            j.copyResource(cp_txt);
+            j.copyResource(cpTxt);
             FtpPublisher fp = j.addPublisher(FtpPublisher.class);
             FtpPublisher.Site fps = fp.getDefault();
             fps.configName.select("docker1");
@@ -748,7 +738,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
     @Test
     public void publish_slave_resourses() throws IOException, InterruptedException,ExecutionException {
         FtpdContainer ftpd = docker.start(FtpdContainer.class);
-        Resource cp_file = resource("/ftp_plugin/odes.txt");
+        Resource cpFile = resource("/ftp_plugin/odes.txt");
 
         Slave s = slaves.get().install(jenkins).get();
         s.configure();
@@ -758,7 +748,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         jenkinsFtpConfigure("asd", ftpd);
         j.configure();
         {
-            j.copyResource(cp_file);
+            j.copyResource(cpFile);
             FtpPublisher fp = j.addPublisher(FtpPublisher.class);
             FtpPublisher.Site fps = fp.getDefault();
             fps.getDefaultTransfer().sourceFile.set("odes.txt");
@@ -766,6 +756,6 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         j.save();
         j.startBuild().shouldSucceed();
         ftpd.cp("/tmp/odes.txt", new File("/tmp"));
-        assertThat(FileUtils.readFileToString(new File("/tmp/odes.txt")), CoreMatchers.is(cp_file.asText()));
+        assertThat(FileUtils.readFileToString(new File("/tmp/odes.txt")), CoreMatchers.is(cpFile.asText()));
     }
 }

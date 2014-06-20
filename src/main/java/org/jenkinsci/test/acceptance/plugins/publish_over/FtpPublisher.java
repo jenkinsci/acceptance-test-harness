@@ -1,14 +1,13 @@
-package org.jenkinsci.test.acceptance.plugins.publish_over_cifs;
+package org.jenkinsci.test.acceptance.plugins.publish_over;
 
 import org.jenkinsci.test.acceptance.po.*;
 
 /**
- * Allows the  configuration for one job for the Publish Over Cifs plugin.
  * @author Tobias Meyer
  */
-@Describable("Send build artifacts to a windows share")
-public class CifsPublisher extends AbstractStep  implements PostBuildStep {
-    public CifsPublisher(Job parent, String path) {
+@Describable("Send build artifacts over FTP")
+public class FtpPublisher extends AbstractStep implements PostBuildStep {
+    public FtpPublisher(Job parent, String path) {
         super(parent, path);
         String p = last(by.xpath(".//div[@name='publishers'][starts-with(@path,'%s/publishers')]", path)).getAttribute("path");
         defaultSite = new Site(getPage(), p);
@@ -67,5 +66,6 @@ public class CifsPublisher extends AbstractStep  implements PostBuildStep {
         public final Control flatten = control("flatten");
         public final Control remoteDirectorySDF = control("remoteDirectorySDF");
         public final Control cleanRemote = control("cleanRemote");
+        public final Control asciiMode = control("asciiMode");
     }
 }
