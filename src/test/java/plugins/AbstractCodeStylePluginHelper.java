@@ -57,10 +57,10 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
                                                                                                     String publisherPattern,
                                                                                                     Class<T> publisherClass,
                                                                                                     AbstractCodeStylePluginBuildConfigurator<T> configurator) {
-        final FreeStyleJob job = jenkins.jobs.create();
+        FreeStyleJob job = jenkins.jobs.create();
         job.configure();
 
-        final Resource res = resource(resourceToCopy);
+        Resource res = resource(resourceToCopy);
         //decide whether to utilize copyResource or copyDir
         if (res.asFile().isDirectory()) {
             job.copyDir(res);
@@ -68,7 +68,7 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
             job.copyResource(res);
         }
 
-        final T buildSettings = job.addPublisher(publisherClass);
+        T buildSettings = job.addPublisher(publisherClass);
         buildSettings.pattern.set(publisherPattern);
 
         if (configurator != null) {
@@ -99,8 +99,11 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
             MavenInstallation.ensureThatMavenIsInstalled(jenkins);
         }
 
-        final J job = jenkins.jobs.create(jobClass);
+        J job = jenkins.jobs.create(jobClass);
         job.configure();
+
+        // first copy resource and then add a goal
+        addResourceToJob(job, resourceToCopy);
 
         // check if a goal is defined and configure the job depending on the job class
         if (goal != null)
@@ -113,9 +116,7 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
 
         }
 
-        addResourceToJob(job, resourceToCopy);
-
-        final T buildSettings = job.addPublisher(publisherClass);
+        T buildSettings = job.addPublisher(publisherClass);
 
         if (configurator != null) {
             configurator.configure(buildSettings);
@@ -193,11 +194,11 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
     public <T extends AbstractCodeStylePluginFreestyleBuildSettings> FreeStyleJob setupFreestyleJobWithMavenGoals(String resourceProjectDir, String goal, Class<T> publisherClass, String publisherPattern) {
         MavenInstallation.ensureThatMavenIsInstalled(jenkins);
 
-        final FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class);
+        FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class);
         job.copyDir(resource(resourceProjectDir));
         job.addBuildStep(MavenBuildStep.class).targets.set(goal);
 
-        final T publisher = job.addPublisher(publisherClass);
+        T publisher = job.addPublisher(publisherClass);
         publisher.pattern.set(publisherPattern);
 
         job.save();
@@ -220,11 +221,11 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
                                                                                               AbstractCodeStylePluginBuildConfigurator<T> configurator) {
         MavenInstallation.ensureThatMavenIsInstalled(jenkins);
 
-        final MavenModuleSet job = jenkins.jobs.create(MavenModuleSet.class);
+        MavenModuleSet job = jenkins.jobs.create(MavenModuleSet.class);
         job.copyDir(resource(resourceProjectDir));
         job.goals.set(goal);
 
-        final T buildSettings = job.addBuildSettings(codeStyleBuildSettings);
+        T buildSettings = job.addBuildSettings(codeStyleBuildSettings);
 
         if (configurator != null) {
             configurator.configure(buildSettings);
@@ -289,11 +290,11 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
      */
     protected void assertXmlApiMatchesExpected(Build build, String apiUrl, String expectedXmlPath) throws ParserConfigurationException, SAXException, IOException {
         XMLUnit.setIgnoreWhitespace(true);
-        final String xmlUrl = build.url(apiUrl).toString();
-        final DocumentBuilder documentBuilder = DocumentBuilderFactoryImpl.newInstance().newDocumentBuilder();
-        final Document result = documentBuilder.parse(xmlUrl);
+        String xmlUrl = build.url(apiUrl).toString();
+        DocumentBuilder documentBuilder = DocumentBuilderFactoryImpl.newInstance().newDocumentBuilder();
+        Document result = documentBuilder.parse(xmlUrl);
 
-        final Document expected = documentBuilder.parse(resource(expectedXmlPath).asFile());
+        Document expected = documentBuilder.parse(resource(expectedXmlPath).asFile());
         XMLAssert.assertXMLEqual(result, expected);
     }
 
@@ -329,11 +330,10 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
      *
      * @param job the job the resource shall be added to
      * @param resourceToCopy Resource to copy to build (Directory or File path)
-     * @return
      */
     protected <J extends Job> J addResourceToJob(J job, String resourceToCopy){
 
-        final Resource res = resource(resourceToCopy);
+        Resource res = resource(resourceToCopy);
         //decide whether to utilize copyResource or copyDir
         if (res.asFile().isDirectory()) {
             job.copyDir(res);

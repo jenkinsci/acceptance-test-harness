@@ -2,7 +2,6 @@ package org.jenkinsci.test.acceptance.plugins;
 
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.PostBuildStep;
 
 /**
  * Abstract job configuration class.
