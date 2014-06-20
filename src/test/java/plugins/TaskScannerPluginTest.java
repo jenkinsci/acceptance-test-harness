@@ -517,7 +517,7 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
         pub.lowPriorityTags.set("@Deprecated,\\?\\?\\?"); // add tag "???"
         j.save();
 
-        final Build lastBuild = j.startBuild().shouldBeUnstable();
+        final Build lastBuild = j.startBuild().shouldUnstable();
         lastBuild.open();
 
         assertThat(tsa.getResultTextByXPathText("6 open tasks"), endsWith("in 7 workspace files."));
@@ -558,7 +558,7 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
         pub.normalPriorityTags.set("TODO,XXX"); // add tag "XXX"
         j.save();
 
-        final Build lastBuild = j.startBuild().shouldBeUnstable();
+        final Build lastBuild = j.startBuild().shouldUnstable();
         lastBuild.open();
 
         assertThat(tsa.getResultTextByXPathText("6 open tasks"), endsWith("in 7 workspace files."));
@@ -605,7 +605,7 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
         pub.highPriorityTags.set("FIXME"); // add tag "FIXME"
         j.save();
 
-        final Build lastBuild = j.startBuild().shouldBeUnstable();
+        final Build lastBuild = j.startBuild().shouldUnstable();
         lastBuild.open();
 
         assertThat(tsa.getResultTextByXPathText("8 open tasks"), endsWith("in 7 workspace files."));
@@ -647,7 +647,7 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
         pub.normalPriorityTags.set("TODO"); //remove tag "XXX"
         j.save();
 
-        final Build lastBuild = j.startBuild().shouldBeUnstable();
+        final Build lastBuild = j.startBuild().shouldUnstable();
         lastBuild.open();
 
         assertThat(tsa.getResultTextByXPathText("15 open tasks"), endsWith("in 17 workspace files."));
