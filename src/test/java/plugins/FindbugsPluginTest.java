@@ -293,7 +293,7 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
                 settings.pattern.set("findbugsXml.xml");
             }
         };
-        FreeStyleJob job = setupJob("/findbugs_plugin/findbugsXml.xml", FreeStyleJob.class, null,
+        FreeStyleJob job = setupJob("/findbugs_plugin/findbugsXml.xml", FreeStyleJob.class,
                 FindbugsFreestyleBuildSettings.class, buildConfigurator);
         return job;
     }

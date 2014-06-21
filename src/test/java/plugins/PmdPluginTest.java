@@ -56,7 +56,7 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
             }
         };
 
-        FreeStyleJob job = setupJob("/pmd_plugin/pmd.xml", FreeStyleJob.class, null,
+        FreeStyleJob job = setupJob("/pmd_plugin/pmd.xml", FreeStyleJob.class,
                 PmdFreestyleBuildSettings.class, buildConfigurator);
 
         Build lastBuild = buildJobWithSuccess(job);
@@ -91,7 +91,7 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
             }
         };
 
-        FreeStyleJob job = setupJob("/pmd_plugin/pmd.xml", FreeStyleJob.class, null,
+        FreeStyleJob job = setupJob("/pmd_plugin/pmd.xml", FreeStyleJob.class,
                 PmdFreestyleBuildSettings.class, buildConfigurator);
 
         // TODO Maybe edit resource to check whether it's a directory, file or normal step?
@@ -127,7 +127,7 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
             }
         };
 
-        FreeStyleJob job = setupJob("/pmd_plugin/pmd-warnings.xml", FreeStyleJob.class, null,
+        FreeStyleJob job = setupJob("/pmd_plugin/pmd-warnings.xml", FreeStyleJob.class,
                 PmdFreestyleBuildSettings.class, buildConfigurator);
 
         Build lastBuild = buildJobWithSuccess(job);
@@ -189,7 +189,7 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
             }
         };
 
-        FreeStyleJob job = setupJob("/pmd_plugin/pmd-warnings.xml", FreeStyleJob.class, null,
+        FreeStyleJob job = setupJob("/pmd_plugin/pmd-warnings.xml", FreeStyleJob.class,
                 PmdFreestyleBuildSettings.class, buildConfigurator);
 
         Build build = buildJobWithSuccess(job);
@@ -251,7 +251,7 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
                 settings.setUseDeltaValues(true);
             }
         };
-        FreeStyleJob job = setupJob("/pmd_plugin/pmd-warnings.xml", FreeStyleJob.class, null,
+        FreeStyleJob job = setupJob("/pmd_plugin/pmd-warnings.xml", FreeStyleJob.class,
                 PmdFreestyleBuildSettings.class, buildConfigurator);
 
         Build build = buildJobAndWait(job);
@@ -376,7 +376,7 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
                 settings.pattern.set("pmd-warnings.xml");
             }
         };
-        FreeStyleJob job = setupJob("/pmd_plugin/pmd-warnings.xml", FreeStyleJob.class, null,
+        FreeStyleJob job = setupJob("/pmd_plugin/pmd-warnings.xml", FreeStyleJob.class,
                 PmdFreestyleBuildSettings.class, buildConfigurator);
         return job;
     }

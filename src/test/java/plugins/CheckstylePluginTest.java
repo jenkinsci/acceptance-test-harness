@@ -299,7 +299,7 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
                 settings.pattern.set("checkstyle-result.xml");
             }
         };
-        FreeStyleJob job = setupJob("/checkstyle_plugin/checkstyle-result.xml", FreeStyleJob.class, null,
+        FreeStyleJob job = setupJob("/checkstyle_plugin/checkstyle-result.xml", FreeStyleJob.class,
                 CheckstyleFreestyleBuildSettings.class, buildConfigurator);
         return job;
     }
