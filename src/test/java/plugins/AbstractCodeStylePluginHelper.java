@@ -156,7 +156,6 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
      * @param <T> The type of the Analyzer.
      * @return The configured job.
      */
-    @Deprecated
     public <T extends AbstractCodeStylePluginMavenBuildSettings> MavenModuleSet setupMavenJob(String resourceProjectDir,
                                                                                               String goal,
                                                                                               Class<T> codeStyleBuildSettings,
