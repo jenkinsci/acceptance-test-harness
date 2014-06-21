@@ -13,8 +13,9 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.*;
 import static org.jenkinsci.test.acceptance.Matchers.hasAction;
+import static org.jenkinsci.test.acceptance.Matchers.hasAnalysisWarningsFor;
 import static org.junit.Assert.assertThat;
 
 /**
@@ -124,6 +125,38 @@ public class AnalysisCollectorPluginTest extends AbstractJUnitTest {
         // no checkstyle, no findbugs, no pmd, no tasks => zero warnings
         result = deselectPluginAndBuild(AnalysisCollectorPublisher.AnalysisPlugin.TASKS, job);
         assertThat(result.getWarningNumber(), is(0));
+    }
+
+    /**
+     * Scenario: Job should show analysis results of selected plugins
+     * Given I have job with artifacts of static analysis tools
+     * And this artifacts are published by their corresponding plugins
+     * And the resources of the job contain warnings
+     * When I start a build
+     * Then the job should show the warnings of each selected plugin
+     */
+    @Test
+    public void check_analysis_results_of_job() {
+        FreeStyleJob job = setupJob(ANALYSIS_COLLECTOR_PLUGIN_RESOURCES, true);
+        job.startBuild().waitUntilFinished();
+        // check if results for checked plugins are visible
+        assertThat(job,
+                allOf(
+                        hasAnalysisWarningsFor(AnalysisCollectorPublisher.AnalysisPlugin.CHECKSTYLE),
+                        hasAnalysisWarningsFor(AnalysisCollectorPublisher.AnalysisPlugin.PMD),
+                        hasAnalysisWarningsFor(AnalysisCollectorPublisher.AnalysisPlugin.FINDBUGS),
+                        hasAnalysisWarningsFor(AnalysisCollectorPublisher.AnalysisPlugin.TASKS)
+                )
+        );
+        // check if results for unchecked/not installed plugins are NOT visible
+        assertThat(job,
+                not(
+                        anyOf(
+                                hasAnalysisWarningsFor(AnalysisCollectorPublisher.AnalysisPlugin.WARNINGS),
+                                hasAnalysisWarningsFor(AnalysisCollectorPublisher.AnalysisPlugin.DRY)
+                        )
+                )
+        );
     }
 
     /**
