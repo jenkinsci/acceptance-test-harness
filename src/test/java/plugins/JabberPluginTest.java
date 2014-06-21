@@ -46,18 +46,18 @@ public class JabberPluginTest extends AbstractJUnitTest {
 
     /**
      @native(docker)
-     Scenario: Configure a job with over ssh publishing
-     Given I have installed the "publish-over-ssh" plugin
-     And a docker fixture "sshd"
+     Scenario: Configure a job with jabber notification
+     Given I have installed the "jabber" plugin
+     And a docker fixture "jabber"
      And a job
-     When I configure docker fixture as SSH site
-     And I configure the job to use a unsecure keyfile without passphrase
-     And I copy resource "scp_plugin/lorem-ipsum-scp.txt" into workspace
-     And I publish "lorem-ipsum-scp.txt" with SSH plugin
+     When I configure docker fixture as Jabber server
+     And I configure the jenkins to use a jid and password
+     And I configure the jenkins to use a the test chatroom
+     And I configure the job to use a shell step
      And I save the job
      And I build the job
      Then the build should succeed
-     And SSH plugin should have published "lorem-ipsum-scp.txt" on docker fixture
+     And Jabber plugin should have notified the users in test chatroom on docker fixture
      */
     @Test
     public void jabber_notification_success_publishing() throws IOException, InterruptedException {
