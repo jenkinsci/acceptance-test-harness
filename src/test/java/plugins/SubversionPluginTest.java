@@ -1,10 +1,10 @@
 package plugins;
 
-import com.google.inject.Inject;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.SvnContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Native;
+import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithCredentials;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.subversion.SubversionPluginTestException;
@@ -13,9 +13,11 @@ import org.jenkinsci.test.acceptance.plugins.subversion.SvnRepositoryBrowserWebS
 import org.jenkinsci.test.acceptance.po.Changes;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import com.google.inject.Inject;
+
+import static org.junit.Assert.*;
 
 /**
  * Feature: Subversion support
@@ -285,6 +287,7 @@ public class SubversionPluginTest extends AbstractJUnitTest {
      * Then a changed file with a diff link to websvn should be visible on the Changes site
      */
     @Test
+    @Category(SmokeTest.class)
     public void build_has_changes_and_repoBrowser() throws SubversionPluginTestException {
         final SvnContainer svnContainer = svn.get();
         final FreeStyleJob f = jenkins.jobs.create();
