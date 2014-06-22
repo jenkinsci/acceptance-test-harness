@@ -1,14 +1,5 @@
 package org.jenkinsci.test.acceptance.po;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import org.apache.commons.io.IOUtils;
-import org.hamcrest.Description;
-import org.jenkinsci.test.acceptance.Matcher;
-import org.jenkinsci.test.acceptance.Matchers;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -17,9 +8,18 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
+import org.apache.commons.io.IOUtils;
+import org.hamcrest.Description;
+import org.jenkinsci.test.acceptance.Matcher;
+import org.jenkinsci.test.acceptance.Matchers;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.*;
 
 /**
  * @author Kohsuke Kawaguchi
