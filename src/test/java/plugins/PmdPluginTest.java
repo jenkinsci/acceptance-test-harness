@@ -265,7 +265,7 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
                     }
                 };
         final MavenModuleSet job = setupSimpleMavenJob(buildConfigurator);
-        buildJobAndWait(job).shouldUnstable();
+        buildJobAndWait(job).shouldBeUnstable();
     }
 
     /**

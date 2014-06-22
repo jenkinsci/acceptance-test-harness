@@ -216,7 +216,7 @@ public class Build extends ContainerPageObject {
         return this;
     }
 
-    public Build shouldUnstable() {
+    public Build shouldBeUnstable() {
         assertThat(this, resultIs("UNSTABLE"));
         return this;
     }

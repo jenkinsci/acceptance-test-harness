@@ -541,7 +541,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
             fps.getDefaultTransfer().sourceFile.set("flat/odes.txt,odes.txt");
         }
         j.save();
-        j.startBuild().shouldUnstable();
+        j.startBuild().shouldBeUnstable();
     }
 
     /**

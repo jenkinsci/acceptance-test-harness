@@ -24,8 +24,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 
 /**
  * Feature: Tests for CIFS plugin
@@ -109,7 +109,7 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
 
         j.startBuild().shouldSucceed();
 
-        assertTrue(smbd.tryCopyFile("/tmp/odes.txt","/tmp/"));
+        assertThat(smbd.tryCopyFile("/tmp/odes.txt","/tmp/"), is(true));
         assertThat(FileUtils.readFileToString(new File("/tmp/odes.txt")), CoreMatchers.is(cpFile.asText()));
     }
 
@@ -150,7 +150,7 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
         j.save();
 
         j.startBuild().shouldSucceed();
-        assertTrue(smb.tryCopyFile(randomPath + "odes.txt","/tmp/"));
+        assertThat(smb.tryCopyFile(randomPath + "odes.txt","/tmp/"), is(true));
         assertThat(FileUtils.readFileToString(new File("/tmp/odes.txt")), CoreMatchers.is(cpFile.asText()));
     }
 
@@ -188,7 +188,7 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
         }
         j.save();
         j.startBuild().shouldSucceed();
-        assertTrue(smb.tryCopyFile("/tmp/test.txt","/tmp"));
+        assertThat(smb.tryCopyFile("/tmp/test.txt","/tmp"), is(true));
         assertThat(FileUtils.readFileToString(new File("/tmp/test.txt")), CoreMatchers.is(test.asText()));
     }
 
@@ -228,8 +228,8 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
         }
         j.save();
         j.startBuild().shouldSucceed();
-        assertTrue(smb.tryCopyFile("/tmp/prefix_/", "/tmp"));
-        assertTrue(!smb.tryCopyFile("/tmp/prefix_/.exclude", "/tmp"));
+        assertThat(smb.tryCopyFile("/tmp/prefix_/", "/tmp"), is(true));
+        assertThat(!smb.tryCopyFile("/tmp/prefix_/.exclude", "/tmp"), is(true));
     }
 
     /**
@@ -264,10 +264,10 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
         }
         j.save();
         j.startBuild().shouldSucceed();
-        assertTrue(smb.tryCopyFile("/tmp/prefix_/test.txt", "/tmp"));
-        assertTrue( smb.tryCopyFile("/tmp/odes.txt", "/tmp"));
-        assertTrue(new File("/tmp/test.txt").exists());
-        assertTrue(new File("/tmp/odes.txt").exists());
+        assertThat(smb.tryCopyFile("/tmp/prefix_/test.txt", "/tmp"), is(true));
+        assertThat( smb.tryCopyFile("/tmp/odes.txt", "/tmp"), is(true));
+        assertThat(new File("/tmp/test.txt").exists(), is(true));
+        assertThat(new File("/tmp/odes.txt").exists(), is(true));
     }
 
     /**
@@ -304,10 +304,10 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
         }
         j.save();
         j.startBuild().shouldSucceed();
-        assertTrue(smb.tryCopyFile("/tmp/te,st.txt","/tmp"));
-        assertTrue(smb.tryCopyFile("/tmp/odes.txt", "/tmp"));
-        assertTrue(new File("/tmp/te,st.txt").exists());
-        assertTrue(new File("/tmp/odes.txt").exists());
+        assertThat(smb.tryCopyFile("/tmp/te,st.txt","/tmp"), is(true));
+        assertThat(smb.tryCopyFile("/tmp/odes.txt", "/tmp"), is(true));
+        assertThat(new File("/tmp/te,st.txt").exists(), is(true));
+        assertThat(new File("/tmp/odes.txt").exists(), is(true));
     }
 
     /**
@@ -345,9 +345,9 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
         }
         j.save();
         j.startBuild().shouldSucceed();
-        assertTrue(smb.tryCopyFile("/tmp/odes.txt", "/tmp/"));
-        assertTrue(!smb.tryCopyFile("/tmp/.svn", "/tmp/"));
-        assertTrue(!smb.tryCopyFile("/tmp/CVS", "/tmp/"));
+        assertThat(smb.tryCopyFile("/tmp/odes.txt", "/tmp/"), is(true));
+        assertThat(!smb.tryCopyFile("/tmp/.svn", "/tmp/"), is(true));
+        assertThat(!smb.tryCopyFile("/tmp/CVS", "/tmp/"), is(true));
     }
 
     /**
@@ -386,9 +386,9 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
         }
         j.save();
         j.startBuild().shouldSucceed();
-        assertTrue(smb.tryCopyFile("/tmp/odes.txt", "/tmp/"));
-        assertTrue(smb.tryCopyFile("/tmp/.svn", "/tmp/"));
-        assertTrue(smb.tryCopyFile("/tmp/CVS", "/tmp/"));
+        assertThat(smb.tryCopyFile("/tmp/odes.txt", "/tmp/"), is(true));
+        assertThat(smb.tryCopyFile("/tmp/.svn", "/tmp/"), is(true));
+        assertThat(smb.tryCopyFile("/tmp/CVS", "/tmp/"), is(true));
     }
 
     /**
@@ -430,8 +430,8 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
 
         j.save();
         j.startBuild().shouldSucceed();
-        assertTrue(smb.tryCopyFile("/tmp/odes.txt", "/tmp/"));
-        assertTrue(smb.tryCopyFile("/tmp/empty", "/tmp/"));
+        assertThat(smb.tryCopyFile("/tmp/odes.txt", "/tmp/"), is(true));
+        assertThat(smb.tryCopyFile("/tmp/empty", "/tmp/"), is(true));
     }
 
     /**
@@ -472,8 +472,8 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
 
         j.save();
         j.startBuild().shouldSucceed();
-        assertTrue(smb.tryCopyFile("/tmp/odes.txt", "/tmp/"));
-        assertTrue(!smb.tryCopyFile("/tmp/dockertmp/empty", "/tmp/"));
+        assertThat(smb.tryCopyFile("/tmp/odes.txt", "/tmp/"), is(true));
+        assertThat(!smb.tryCopyFile("/tmp/dockertmp/empty", "/tmp/"), is(true));
     }
 
     /**
@@ -508,8 +508,8 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
         }
         j.save();
         j.startBuild().shouldSucceed();
-        assertTrue(smb.tryCopyFile("/tmp/flat/odes.txt", "/tmp/flat"));
-        assertTrue(smb.tryCopyFile("/tmp/odes.txt", "/tmp/"));
+        assertThat(smb.tryCopyFile("/tmp/flat/odes.txt", "/tmp/flat"), is(true));
+        assertThat(smb.tryCopyFile("/tmp/odes.txt", "/tmp/"), is(true));
     }
 
     /**
@@ -544,7 +544,7 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
             fps.getDefaultTransfer().sourceFile.set("flat/odes.txt,odes.txt");
         }
         j.save();
-        j.startBuild().shouldUnstable();
+        j.startBuild().shouldBeUnstable();
     }
 
     /**
@@ -584,8 +584,8 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
         Date date = new Date();
         j.save();
         j.startBuild().shouldSucceed();
-        assertTrue(smb.tryCopyFile("/tmp/" + dateFormat.format(date) + "/odes.txt","/tmp/"));
-        assertTrue(new File("/tmp/odes.txt").exists());
+        assertThat(smb.tryCopyFile("/tmp/" + dateFormat.format(date) + "/odes.txt","/tmp/"), is(true));
+        assertThat(new File("/tmp/odes.txt").exists(), is(true));
     }
 
     /**
@@ -622,8 +622,8 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
         }
         j.save();
         j.startBuild().shouldSucceed();
-        assertTrue(smb.tryCopyFile("/tmp/odes.txt","/tmp/"));
-        assertTrue(!smb.tryCopyFile("/tmp/old.txt","/tmp/"));
+        assertThat(smb.tryCopyFile("/tmp/odes.txt","/tmp/"), is(true));
+        assertThat(!smb.tryCopyFile("/tmp/old.txt","/tmp/"), is(true));
     }
 
     /**
@@ -665,9 +665,9 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
         }
         j.save();
         j.startBuild().shouldSucceed();
-        assertTrue(smb.tryCopyFile("/tmp/odes.txt","/tmp/"));
-        assertTrue(smb.tryCopyFile("/tmp/odes.txt2","/tmp/"));
-        assertTrue(smb.tryCopyFile("/tmp/odes.txt3","/tmp/"));
+        assertThat(smb.tryCopyFile("/tmp/odes.txt","/tmp/"), is(true));
+        assertThat(smb.tryCopyFile("/tmp/odes.txt2","/tmp/"), is(true));
+        assertThat(smb.tryCopyFile("/tmp/odes.txt3","/tmp/"), is(true));
     }
 
     /**
@@ -713,8 +713,8 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
         }
         j.save();
         j.startBuild().shouldSucceed();
-        assertTrue(smb.tryCopyFile("/tmp/odes.txt","/tmp/dockertmp"));
-        assertTrue(smb.tryCopyFile("/tmp/odes.txt","/tmp/dockertmp2"));
+        assertThat(smb.tryCopyFile("/tmp/odes.txt","/tmp/dockertmp"), is(true));
+        assertThat(smb.tryCopyFile("/tmp/odes.txt","/tmp/dockertmp2"), is(true));
 
     }
 
@@ -756,7 +756,7 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
         }
         j.save();
         j.startBuild().shouldSucceed();
-        assertTrue(smb.tryCopyFile("/tmp/odes.txt","/tmp"));
+        assertThat(smb.tryCopyFile("/tmp/odes.txt","/tmp"), is(true));
         assertThat(FileUtils.readFileToString(new File("/tmp/odes.txt")), CoreMatchers.is(cpFile.asText()));
     }
 }
