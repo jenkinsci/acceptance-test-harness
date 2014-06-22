@@ -95,7 +95,7 @@ public class AnalysisCollectorPluginTest extends AbstractJUnitTest {
         analysis.advanced.click();
         analysis.warningThresholdUnstable.sendKeys("5");
         job.save();
-        job.startBuild().waitUntilFinished().shouldUnstable();
+        job.startBuild().waitUntilFinished().shouldBeUnstable();
     }
 
     /**
