@@ -1,4 +1,4 @@
-package org.jenkinsci.test.acceptance.plugins;
+package org.jenkinsci.test.acceptance.plugins.analysis_core;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.test.acceptance.po.ContainerPageObject;
@@ -207,7 +207,7 @@ public abstract class AbstractCodeStylePluginAction extends ContainerPageObject 
     }
 
     /**
-     * This is a generic variant of {@link org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginAction#getContentsOfVisibleTable(boolean, boolean)}
+     * This is a generic variant of {@link AbstractCodeStylePluginAction#getContentsOfVisibleTable(boolean, boolean)}
      * which does not care about the type of the value part as long as it is derived
      * from {@link java.lang.Object}.
      */
@@ -235,7 +235,7 @@ public abstract class AbstractCodeStylePluginAction extends ContainerPageObject 
     }
 
     /**
-     * This is a generic variant of {@link org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginAction#mapTableCellsKeyValue(java.util.Collection)}
+     * This is a generic variant of {@link AbstractCodeStylePluginAction#mapTableCellsKeyValue(java.util.Collection)}
      * which does not care about the type of the value part.
      *
      * At the moment the only supported types are Integer and String. Calling this method for other

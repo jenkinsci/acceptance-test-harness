@@ -6,9 +6,9 @@ import org.custommonkey.xmlunit.XMLAssert;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Resource;
-import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginBuildConfigurator;
-import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginBuildSettings;
-import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginMavenBuildSettings;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.AbstractCodeStylePluginBuildConfigurator;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.AbstractCodeStylePluginBuildSettings;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.AbstractCodeStylePluginMavenBuildSettings;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenBuildStep;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
@@ -28,7 +28,9 @@ import static org.junit.Assert.assertTrue;
 
 public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
 
-    /** For slave test */
+    /**
+     * For slave test
+     */
     @Inject
     SlaveController slaveController;
 
@@ -37,16 +39,16 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
      * configured by providing a configurator
      *
      * @param resourceToCopy Resource to copy to build (Directory or File path)
-     * @param jobClass the type the job shall be created of, e.g. FreeStyleJob
+     * @param jobClass       the type the job shall be created of, e.g. FreeStyleJob
      * @param publisherClass the type of the publisher to be added
-     * @param configurator the configuration of the publisher
+     * @param configurator   the configuration of the publisher
      * @return the new job
      */
     public <J extends Job, T extends AbstractCodeStylePluginBuildSettings & PostBuildStep> J setupJob(String resourceToCopy,
                                                                                                       Class<J> jobClass,
                                                                                                       Class<T> publisherClass,
                                                                                                       AbstractCodeStylePluginBuildConfigurator<T> configurator) {
-        return setupJob(resourceToCopy, jobClass, null, publisherClass, configurator);
+        return setupJob(resourceToCopy, jobClass, publisherClass, configurator, null);
     }
 
     /**
@@ -54,17 +56,15 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
      * configured by providing a configurator
      *
      * @param resourceToCopy Resource to copy to build (Directory or File path)
-     * @param jobClass the type the job shall be created of, e.g. FreeStyleJob
-     * @param goal a maven goal to be added to the job or null otherwise
+     * @param jobClass       the type the job shall be created of, e.g. FreeStyleJob
      * @param publisherClass the type of the publisher to be added
-     * @param configurator the configuration of the publisher
+     * @param configurator   the configuration of the publisher
+     * @param goal           a maven goal to be added to the job or null otherwise
      * @return the new job
      */
     public <J extends Job, T extends AbstractCodeStylePluginBuildSettings & PostBuildStep> J setupJob(String resourceToCopy,
                                                                                                       Class<J> jobClass,
-                                                                                                      String goal,
-                                                                                                      Class<T> publisherClass,
-                                                                                                      AbstractCodeStylePluginBuildConfigurator<T> configurator){
+                                                                                                      Class<T> publisherClass, AbstractCodeStylePluginBuildConfigurator<T> configurator, String goal) {
         if (jobClass.isAssignableFrom(MavenModuleSet.class)) {
             MavenInstallation.ensureThatMavenIsInstalled(jenkins);
         }
@@ -98,18 +98,18 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
      * Provides the ability to edit an existing job by changing or adding the resource to copy
      * and/or by changing the configuration of a publisher
      *
-     * @param newResourceToCopy the new resource to be copied to build (Directory or File path) or null if not to be changed
+     * @param newResourceToCopy    the new resource to be copied to build (Directory or File path) or null if not to be changed
      * @param isAdditionalResource decides whether the old resource is kept (FALSE) or deleted (TRUE)
-     * @param job the job to be changed
-     * @param publisherClass the type of the publisher to be modified
-     * @param configurator the new configuration of the publisher
+     * @param job                  the job to be changed
+     * @param publisherClass       the type of the publisher to be modified
+     * @param configurator         the new configuration of the publisher
      * @return the edited job
      */
     public <J extends Job, T extends AbstractCodeStylePluginBuildSettings & PostBuildStep> J editJob(String newResourceToCopy,
                                                                                                      boolean isAdditionalResource,
                                                                                                      J job,
                                                                                                      Class<T> publisherClass,
-                                                                                                     AbstractCodeStylePluginBuildConfigurator<T> configurator){
+                                                                                                     AbstractCodeStylePluginBuildConfigurator<T> configurator) {
         job.configure();
 
         if (newResourceToCopy != null) {
@@ -134,9 +134,10 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
 
     /**
      * Generates a slave and configure job to run on slave
+     *
      * @param job Job to run on slave
      * @return Generated skave
-     * @throws ExecutionException if computation of slave threw an exception
+     * @throws ExecutionException   if computation of slave threw an exception
      * @throws InterruptedException if thread was interrupted while waiting
      */
     public Slave makeASlaveAndConfigureJob(Job job) throws ExecutionException, InterruptedException {
@@ -149,11 +150,12 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
 
     /**
      * Setup a maven build.
-     * @param resourceProjectDir A Folder in resources which shall be copied to the working directory. Should contain the pom.xml
-     * @param goal The maven goals to set.
+     *
+     * @param resourceProjectDir     A Folder in resources which shall be copied to the working directory. Should contain the pom.xml
+     * @param goal                   The maven goals to set.
      * @param codeStyleBuildSettings The code analyzer to use or null if you do not want one.
-     * @param configurator A configurator to custommize the code analyzer settings you want to use.
-     * @param <T> The type of the Analyzer.
+     * @param configurator           A configurator to custommize the code analyzer settings you want to use.
+     * @param <T>                    The type of the Analyzer.
      * @return The configured job.
      */
     public <T extends AbstractCodeStylePluginMavenBuildSettings> MavenModuleSet setupMavenJob(String resourceProjectDir,
@@ -178,28 +180,31 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
     }
 
     /**
-     *  Build Job and wait until finished.
-     *  @param job Job to build
-     *  @return The made build
+     * Build Job and wait until finished.
+     *
+     * @param job Job to build
+     * @return The made build
      */
     public Build buildJobAndWait(Job job) {
         return job.startBuild().waitUntilFinished();
     }
 
     /**
-     *  Build Job successfully once.
-     *  @param job Job to build
-     *  @return The made build
+     * Build Job successfully once.
+     *
+     * @param job Job to build
+     * @return The made build
      */
     public Build buildJobWithSuccess(Job job) {
         return buildJobAndWait(job).shouldSucceed();
     }
 
     /**
-     *  Build Job and wait until finished.
-     *  @param job Job to build
-     *  @param slave Slave to run job on
-     *  @return The made build
+     * Build Job and wait until finished.
+     *
+     * @param job   Job to build
+     * @param slave Slave to run job on
+     * @return The made build
      */
     public Build buildJobOnSlaveWithSuccess(FreeStyleJob job, Slave slave) {
         return job.startBuild(singletonMap("slavename", slave.getName())).shouldSucceed();
@@ -208,8 +213,9 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
     /**
      * When Given a finished build, an API-Url and a reference XML-File, this method compares if the api call to the
      * build matches the expected XML-File. Whitespace differences are ignored.
-     * @param build The build, whose api shall be called.
-     * @param apiUrl The API-Url, declares which build API shall be called.
+     *
+     * @param build           The build, whose api shall be called.
+     * @param apiUrl          The API-Url, declares which build API shall be called.
      * @param expectedXmlPath The Resource-Path to a file, which contains the expected XML
      */
     protected void assertXmlApiMatchesExpected(Build build, String apiUrl, String expectedXmlPath) throws ParserConfigurationException, SAXException, IOException {
@@ -224,7 +230,8 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
 
     /**
      * Checks if the area links of jobs matches the regular expression.
-     * @param job Job to check the area links
+     *
+     * @param job               Job to check the area links
      * @param regularExpression Expression should match
      */
     public void assertAreaLinksOfJobAreLike(Job job, String regularExpression) {
@@ -236,8 +243,9 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
 
     /**
      * Adds a column on the dashboard.
+     *
      * @param columnClass The ListViewColumn that should bee added.
-     * @param <T> The concrete type of the ListViewColumn.
+     * @param <T>         The concrete type of the ListViewColumn.
      * @return The ListView.
      */
     protected <T extends ListViewColumn> ListView addDashboardColumn(Class<T> columnClass) {
@@ -252,10 +260,10 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
     /**
      * Adds a shell step to a given job to copy resources to the job's workspace.
      *
-     * @param job the job the resource shall be added to
+     * @param job            the job the resource shall be added to
      * @param resourceToCopy Resource to copy to build (Directory or File path)
      */
-    protected <J extends Job> J addResourceToJob(J job, String resourceToCopy){
+    protected <J extends Job> J addResourceToJob(J job, String resourceToCopy) {
 
         Resource res = resource(resourceToCopy);
         //decide whether to utilize copyResource or copyDir

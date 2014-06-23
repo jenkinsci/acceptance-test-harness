@@ -8,7 +8,7 @@ import java.util.TreeMap;
 import org.jenkinsci.test.acceptance.junit.Bug;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginBuildConfigurator;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.AbstractCodeStylePluginBuildConfigurator;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleAction;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleColumn;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleFreestyleBuildSettings;
@@ -203,8 +203,8 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
                 settings.pattern.set("target/checkstyle-result.xml");
             }
         };
-        FreeStyleJob job = setupJob("/checkstyle_plugin/sample_checkstyle_project", FreeStyleJob.class, "clean package checkstyle:checkstyle",
-                CheckstyleFreestyleBuildSettings.class, buildConfigurator);
+        FreeStyleJob job = setupJob("/checkstyle_plugin/sample_checkstyle_project", FreeStyleJob.class, CheckstyleFreestyleBuildSettings.class, buildConfigurator, "clean package checkstyle:checkstyle"
+        );
         Build lastBuild = buildJobWithSuccess(job);
         assertThat(lastBuild, hasAction("Checkstyle Warnings"));
         lastBuild.open();

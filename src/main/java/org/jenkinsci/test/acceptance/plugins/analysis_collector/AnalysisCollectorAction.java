@@ -1,6 +1,6 @@
 package org.jenkinsci.test.acceptance.plugins.analysis_collector;
 
-import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginAction;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.AbstractCodeStylePluginAction;
 import org.jenkinsci.test.acceptance.po.ContainerPageObject;
 
 /**

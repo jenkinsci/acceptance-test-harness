@@ -32,7 +32,7 @@ import java.util.concurrent.ExecutionException;
 import org.jenkinsci.test.acceptance.junit.Bug;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginBuildConfigurator;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.AbstractCodeStylePluginBuildConfigurator;
 import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsAction;
 import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsColumn;
 import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsFreestyleBuildSettings;
@@ -182,7 +182,7 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
                 settings.pattern.set("target/findbugsXml.xml");
             }
         };
-        FreeStyleJob job = setupJob("/findbugs_plugin/sample_findbugs_project", FreeStyleJob.class, "clean package findbugs:findbugs", FindbugsFreestyleBuildSettings.class, buildConfigurator);
+        FreeStyleJob job = setupJob("/findbugs_plugin/sample_findbugs_project", FreeStyleJob.class, FindbugsFreestyleBuildSettings.class, buildConfigurator, "clean package findbugs:findbugs");
 
         Build lastBuild = buildJobWithSuccess(job);
         assertThat(lastBuild, hasAction("FindBugs Warnings"));
