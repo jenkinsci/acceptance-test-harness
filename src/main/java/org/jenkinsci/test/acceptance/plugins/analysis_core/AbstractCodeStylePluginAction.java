@@ -75,15 +75,15 @@ public abstract class AbstractCodeStylePluginAction extends ContainerPageObject 
      * @return Number of high warnings
      */
     public int getHighWarningNumber() {
-        return getIntByXPath("//table[@id='analysis.summary']/tbody/tr/td[@class='pane']/div[@id='HIGH']");
+        return getPriorityWarningNumber("HIGH");
     }
 
     /**
      * Getter of normal warnings.
-     * @return Number of normal warningsdie
+     * @return Number of normal warnings
      */
     public int getNormalWarningNumber() {
-        return getIntByXPath("//table[@id='analysis.summary']/tbody/tr/td[@class='pane']/div[@id='NORMAL']");
+        return getPriorityWarningNumber("NORMAL");
     }
 
     /**
@@ -91,7 +91,7 @@ public abstract class AbstractCodeStylePluginAction extends ContainerPageObject 
      * @return Number of low warnings.
      */
     public int getLowWarningNumber() {
-        return getIntByXPath("//table[@id='analysis.summary']/tbody/tr/td[@class='pane']/div[@id='LOW']");
+        return getPriorityWarningNumber("LOW");
     }
 
     /**
@@ -102,6 +102,15 @@ public abstract class AbstractCodeStylePluginAction extends ContainerPageObject 
     public String getResultLinkByXPathText(final String linkText) {
         final String htmlElement = find(by.xpath(".//A[text() = '" + linkText + "']")).getAttribute("outerHTML");
         return StringUtils.substringBetween(htmlElement, "\"");
+    }
+
+    /**
+     * Getter for warning counts of a certain priority
+     * @param priority the desired priority whose number of warnings shall be extracted (LOW, NORMAL, HIGH)
+     * @return number of warnings of that priority
+     */
+    private int getPriorityWarningNumber(String priority){
+        return getIntByXPath("//table[@id='analysis.summary']/tbody/tr/td[@class='pane']/div[@id='"+priority+"']");
     }
 
     /**

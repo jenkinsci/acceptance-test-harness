@@ -773,8 +773,8 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
     /**
      * This method does special configurations for test step 6 of test
      * {@link TaskScannerPluginTest#status_thresholds()}. Another shell step is added which
-     * consists of a small script to replace all todo, fixme, xxx, deprecated occurences in the
-     * workspace files by the string "CLOSED".
+     * consists of a small script to replace all TODO, todo, FIXME, fixme, XXX, Deprecated
+     * occurences in the workspace files by the string "CLOSED".
      *
      * The scenario is that the file set consists of 19 files, whereof
      *   - 17 files are to be scanned for tasks
@@ -795,13 +795,13 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
     private FreeStyleJob status_thresholds_step7(FreeStyleJob j, TaskScannerAction tsa){
         j.configure();
         j.addShellStep( "NEW=\"CLOSED\"\n" +
-                        "for t in \"todo\" \"xxx\" \"fixme\" \"deprecated\"\n" +
+                        "for t in \"todo\" \"TODO\" \"XXX\" \"fixme\" \"FIXME\" \"Deprecated\"\n" +
                         "do\n" +
                         "  OLD=$t\n" +
                         "  for f in `ls`\n" +
                         "  do\n" +
                         "    if [ -f $f -a -r $f ]; then\n" +
-                        "      sed \"s/$OLD/$NEW/I\" \"$f\" > \"${f}.new\"\n" +
+                        "      sed \"s/$OLD/$NEW/\" \"$f\" > \"${f}.new\"\n" +
                         "      mv \"${f}.new\" \"$f\"\n" +
                         "    else\n" +
                         "      echo \"Error: Cannot read $f\"\n" +
