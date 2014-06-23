@@ -2,6 +2,7 @@ package plugins;
 
 
 import org.jenkinsci.test.acceptance.junit.Bug;
+import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginBuildConfigurator;
 import org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerAction;
@@ -10,6 +11,7 @@ import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -41,6 +43,7 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
      */
 
     @Test
+    @Category(SmokeTest.class)
     public void single_task_tags_and_exclusion_pattern() throws Exception{
         //do setup
         AbstractCodeStylePluginBuildConfigurator<TaskScannerFreestyleBuildSettings> buildConfigurator =
@@ -56,7 +59,7 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
                     }
                 };
 
-        FreeStyleJob j = setupJob("/tasks_plugin/fileset1", FreeStyleJob.class, null,
+        FreeStyleJob j = setupJob("/tasks_plugin/fileset1", FreeStyleJob.class,
                                   TaskScannerFreestyleBuildSettings.class, buildConfigurator);
 
         // as no threshold is defined to mark the build as FAILED or UNSTABLE, the build should succeed
@@ -154,7 +157,7 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
                     }
                 };
 
-        FreeStyleJob j = setupJob("/tasks_plugin/fileset1", FreeStyleJob.class, null,
+        FreeStyleJob j = setupJob("/tasks_plugin/fileset1", FreeStyleJob.class,
                 TaskScannerFreestyleBuildSettings.class, buildConfigurator);
 
         Build build = buildJobWithSuccess(j);
@@ -188,7 +191,7 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
                     }
                 };
 
-        FreeStyleJob j = setupJob("/tasks_plugin/fileset1", FreeStyleJob.class, null,
+        FreeStyleJob j = setupJob("/tasks_plugin/fileset1", FreeStyleJob.class,
                 TaskScannerFreestyleBuildSettings.class, buildConfigurator);
 
         // as no threshold is defined to mark the build as FAILED or UNSTABLE, the build should succeed
@@ -270,7 +273,7 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
                     }
                 };
 
-        FreeStyleJob j = setupJob("/tasks_plugin/fileset1", FreeStyleJob.class, null,
+        FreeStyleJob j = setupJob("/tasks_plugin/fileset1", FreeStyleJob.class,
                 TaskScannerFreestyleBuildSettings.class, buildConfigurator);
 
         // as no threshold is defined to mark the build as FAILED or UNSTABLE, the build should succeed
@@ -330,7 +333,7 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
                     }
                 };
 
-        FreeStyleJob j = setupJob("/tasks_plugin/fileset1", FreeStyleJob.class, null,
+        FreeStyleJob j = setupJob("/tasks_plugin/fileset1", FreeStyleJob.class,
                 TaskScannerFreestyleBuildSettings.class, buildConfigurator);
 
         j.configure();
@@ -394,7 +397,7 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
                     }
                 };
 
-        FreeStyleJob j = setupJob("/tasks_plugin/cp1251_files", FreeStyleJob.class, null,
+        FreeStyleJob j = setupJob("/tasks_plugin/cp1251_files", FreeStyleJob.class,
                 TaskScannerFreestyleBuildSettings.class, buildConfigurator);
 
         Build lastBuild = buildJobWithSuccess(j);
@@ -466,7 +469,7 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
                     }
                 };
 
-        FreeStyleJob j = setupJob("/tasks_plugin/fileset1_less", FreeStyleJob.class, null,
+        FreeStyleJob j = setupJob("/tasks_plugin/fileset1_less", FreeStyleJob.class,
                 TaskScannerFreestyleBuildSettings.class, buildConfigurator);
 
         TaskScannerAction tsa = new TaskScannerAction(j);

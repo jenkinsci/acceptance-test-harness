@@ -217,7 +217,8 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
      Then the build should succeed
      And SSH plugin should have published "lorem-ipsum-scp.txt" on docker fixture
      */
-    @Test @Category(SmokeTest.class)
+    @Test
+    @Category(SmokeTest.class)
     public void ssh_key_path_and_key_password_publishing() throws IOException, InterruptedException {
         SshdContainer sshd = docker.start(SshdContainer.class);
         Resource cp_file = resource(resourceFilePath);

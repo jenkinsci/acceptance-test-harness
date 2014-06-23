@@ -1,6 +1,12 @@
 package plugins;
 
-import com.google.inject.Inject;
+import java.io.File;
+import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.concurrent.ExecutionException;
+
 import org.apache.commons.io.FileUtils;
 import org.hamcrest.CoreMatchers;
 import org.jenkinsci.test.acceptance.docker.Docker;
@@ -17,14 +23,9 @@ import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.slave.SlaveProvider;
 import org.junit.Test;
 
-import java.io.File;
-import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.concurrent.ExecutionException;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import com.google.inject.Inject;
+
+import static org.junit.Assert.*;
 
 /**
  * Feature: Tests for FTP plugin
@@ -551,7 +552,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
             fps.getDefaultTransfer().sourceFile.set("flat/odes.txt,odes.txt");
         }
         j.save();
-        j.startBuild().shouldUnstable();
+        j.startBuild().shouldBeUnstable();
     }
 
     /**

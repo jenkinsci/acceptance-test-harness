@@ -8,7 +8,6 @@ import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginBuildConfigurator;
 import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginBuildSettings;
-import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginFreestyleBuildSettings;
 import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginMavenBuildSettings;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenBuildStep;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation;
@@ -34,47 +33,24 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
     SlaveController slaveController;
 
     /**
-     * Setup a job with the given resource and publisher.
+     * Set up a Job of a certain type with a given resource and a publisher which can be
+     * configured by providing a configurator
+     *
      * @param resourceToCopy Resource to copy to build (Directory or File path)
-     * @param publisherPattern Publisher pattern to set
-     * @param publisherClass Publisher to add
-     * @return The made job
+     * @param jobClass the type the job shall be created of, e.g. FreeStyleJob
+     * @param publisherClass the type of the publisher to be added
+     * @param configurator the configuration of the publisher
+     * @return the new job
      */
-    @Deprecated
-    public <T extends AbstractCodeStylePluginFreestyleBuildSettings> FreeStyleJob setupFreestyleJob(String resourceToCopy, String publisherPattern, Class<T> publisherClass) {
-        return setupFreestyleJob(resourceToCopy, publisherPattern, publisherClass, null);
+    public <J extends Job, T extends AbstractCodeStylePluginBuildSettings & PostBuildStep> J setupJob(String resourceToCopy,
+                                                                                                      Class<J> jobClass,
+                                                                                                      Class<T> publisherClass,
+                                                                                                      AbstractCodeStylePluginBuildConfigurator<T> configurator) {
+        return setupJob(resourceToCopy, jobClass, null, publisherClass, configurator);
     }
 
     /**
-     * Setup a job with the given resource and publisher.
-     * @param resourceToCopy Resource to copy to build (Directory or File path)
-     * @param publisherClass Publisher to add
-     * @param publisherPattern Publisher pattern to set
-     * @return The made job
-     */
-    @Deprecated
-    public <T extends AbstractCodeStylePluginFreestyleBuildSettings> FreeStyleJob setupFreestyleJob(String resourceToCopy,
-                                                                                                    String publisherPattern,
-                                                                                                    Class<T> publisherClass,
-                                                                                                    AbstractCodeStylePluginBuildConfigurator<T> configurator) {
-        FreeStyleJob job = jenkins.jobs.create();
-        job.configure();
-
-        job.copyResource(resourceToCopy);
-
-        T buildSettings = job.addPublisher(publisherClass);
-        buildSettings.pattern.set(publisherPattern);
-
-        if (configurator != null) {
-            configurator.configure(buildSettings);
-        }
-
-        job.save();
-        return job;
-    }
-
-    /**
-     * Set up a Job of a certain type with a given resource and  a publisher which can be
+     * Set up a Job of a certain type with a given resource and a publisher which can be
      * configured by providing a configurator
      *
      * @param resourceToCopy Resource to copy to build (Directory or File path)
@@ -89,7 +65,7 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
                                                                                                       String goal,
                                                                                                       Class<T> publisherClass,
                                                                                                       AbstractCodeStylePluginBuildConfigurator<T> configurator){
-        if(jobClass.isAssignableFrom(MavenModuleSet.class)){
+        if (jobClass.isAssignableFrom(MavenModuleSet.class)) {
             MavenInstallation.ensureThatMavenIsInstalled(jenkins);
         }
 
@@ -100,14 +76,12 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
         addResourceToJob(job, resourceToCopy);
 
         // check if a goal is defined and configure the job depending on the job class
-        if (goal != null)
-        {
-            if (jobClass.isAssignableFrom(MavenModuleSet.class)){
+        if (goal != null) {
+            if (jobClass.isAssignableFrom(MavenModuleSet.class)) {
                 ((MavenModuleSet) job).goals.set(goal);
-            }else if(jobClass.isAssignableFrom(FreeStyleJob.class)){
+            } else if (jobClass.isAssignableFrom(FreeStyleJob.class)) {
                 job.addBuildStep(MavenBuildStep.class).targets.set(goal);
             }
-
         }
 
         T buildSettings = job.addPublisher(publisherClass);
@@ -118,7 +92,6 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
 
         job.save();
         return job;
-
     }
 
     /**
@@ -132,7 +105,6 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
      * @param configurator the new configuration of the publisher
      * @return the edited job
      */
-
     public <J extends Job, T extends AbstractCodeStylePluginBuildSettings & PostBuildStep> J editJob(String newResourceToCopy,
                                                                                                      boolean isAdditionalResource,
                                                                                                      J job,
@@ -140,9 +112,9 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
                                                                                                      AbstractCodeStylePluginBuildConfigurator<T> configurator){
         job.configure();
 
-        if( newResourceToCopy != null) {
-           //check whether to exchange the copy resource shell step
-            if (!isAdditionalResource){
+        if (newResourceToCopy != null) {
+            //check whether to exchange the copy resource shell step
+            if (!isAdditionalResource) {
                 job.removeFirstBuildStep();
             }
 
@@ -151,7 +123,7 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
         }
 
         //change the configuration of the publisher
-        if(configurator != null){
+        if (configurator != null) {
             configurator.configure(job.getPublisher(publisherClass));
         }
 
@@ -176,29 +148,6 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
     }
 
     /**
-     * Setup a freestyle build with maven goals.
-     * @param resourceProjectDir A Folder in resources which shall be copied to the working directory.
-     * @param goal The maven goals to set.
-     * @param publisherClass Publisher to add
-     * @param publisherPattern Publisher pattern to set
-     * @return The configured job.
-     */
-    @Deprecated
-    public <T extends AbstractCodeStylePluginFreestyleBuildSettings> FreeStyleJob setupFreestyleJobWithMavenGoals(String resourceProjectDir, String goal, Class<T> publisherClass, String publisherPattern) {
-        MavenInstallation.ensureThatMavenIsInstalled(jenkins);
-
-        FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class);
-        job.copyDir(resource(resourceProjectDir));
-        job.addBuildStep(MavenBuildStep.class).targets.set(goal);
-
-        T publisher = job.addPublisher(publisherClass);
-        publisher.pattern.set(publisherPattern);
-
-        job.save();
-        return job;
-    }
-
-    /**
      * Setup a maven build.
      * @param resourceProjectDir A Folder in resources which shall be copied to the working directory. Should contain the pom.xml
      * @param goal The maven goals to set.
@@ -207,7 +156,6 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
      * @param <T> The type of the Analyzer.
      * @return The configured job.
      */
-    @Deprecated
     public <T extends AbstractCodeStylePluginMavenBuildSettings> MavenModuleSet setupMavenJob(String resourceProjectDir,
                                                                                               String goal,
                                                                                               Class<T> codeStyleBuildSettings,
@@ -226,23 +174,6 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
 
         job.save();
 
-        return job;
-    }
-
-    /**
-     * Edits a job with the given resource and publisherPattern
-     * @param job Job to edit
-     * @param newResourceToCopy Second resource to copy to differ the result
-     * @param publisherPattern Publisher pattern to set
-     * @param <T> Type of the publisher
-     * @return The made job
-     */
-    @Deprecated
-    public <T extends AbstractCodeStylePluginFreestyleBuildSettings> FreeStyleJob editJobAndChangeLastResource(FreeStyleJob job, String newResourceToCopy, String publisherPattern) {
-        job.configure();
-        job.removeFirstBuildStep();
-        job.copyResource(resource(newResourceToCopy), publisherPattern);
-        job.save();
         return job;
     }
 
