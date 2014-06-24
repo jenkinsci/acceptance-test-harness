@@ -4,11 +4,9 @@ import org.jenkinsci.test.acceptance.junit.Bug;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AbstractCodeStylePluginBuildConfigurator;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
-import org.jenkinsci.test.acceptance.plugins.pmd.PmdAction;
-import org.jenkinsci.test.acceptance.plugins.pmd.PmdColumn;
-import org.jenkinsci.test.acceptance.plugins.pmd.PmdFreestyleBuildSettings;
-import org.jenkinsci.test.acceptance.plugins.pmd.PmdMavenBuildSettings;
+import org.jenkinsci.test.acceptance.plugins.pmd.*;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.ListView;
@@ -358,6 +356,25 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
         MavenModuleSet job = setupSimpleMavenJob();
         buildJobAndWait(job).shouldSucceed();
         ListView view = addDashboardListViewColumn(PmdColumn.class);
+
+        By expectedDashboardLinkMatcher = by.css("a[href='job/" + job.name + "/pmd']");
+        assertThat(jenkins.all(expectedDashboardLinkMatcher).size(), is(1));
+        WebElement dashboardLink = jenkins.getElement(expectedDashboardLinkMatcher);
+        assertThat(dashboardLink.getText().trim(), is("2"));
+
+        view.delete();
+    }
+
+    /**
+     * Build a job and check set up a "dashboard"-style view. Check, if the dashboard view shows correct warning count.
+     */
+    @Test
+    @WithPlugins("dashboard-view")
+    public void build_a_job_and_check_if_dashboard_view_shows_correct_warnings() {
+        MavenModuleSet job = setupSimpleMavenJob();
+        buildJobAndWait(job).shouldSucceed();
+
+        DashboardView view = addDashboardViewAndBottomPortlet(PmdWarningsPerProjectDashboardViewPortlet.class);
 
         By expectedDashboardLinkMatcher = by.css("a[href='job/" + job.name + "/pmd']");
         assertThat(jenkins.all(expectedDashboardLinkMatcher).size(), is(1));
