@@ -34,6 +34,7 @@ import static org.junit.Assert.assertThat;
 public class AnalysisCollectorPluginTest extends AbstractJUnitTest {
 
     private static final String ANALYSIS_COLLECTOR_PLUGIN_RESOURCES = "/analysis_collector_plugin";
+    private static final String XPATH_LISTVIEW_WARNING_TD = "//table[@id='projectstatus']/tbody/tr[2]/td[last()-1]";
 
     /**
      * Scenario: First build with new warnings
@@ -191,7 +192,7 @@ public class AnalysisCollectorPluginTest extends AbstractJUnitTest {
         view.addColumn(AnalysisCollectorColumn.class);
         view.save();
         view.open();
-        WebElement warningsCell = view.find(by.xpath("//table[@id='projectstatus']/tbody/tr[2]/td[last()-1]"));
+        WebElement warningsCell = view.find(by.xpath(XPATH_LISTVIEW_WARNING_TD));
         assertThat(warningsCell.getText(), is("799"));
         // check that tooltip contains link to checked analysis plugin results
         String tooltip = warningsCell.getAttribute("tooltip");
@@ -209,7 +210,7 @@ public class AnalysisCollectorPluginTest extends AbstractJUnitTest {
         view.save();
         view.open();
         // check that PMD warnings are not collected to total warning number and tooltip
-        warningsCell = view.find(by.xpath("//table[@id='projectstatus']/tbody/tr[2]/td[last()-1]"));
+        warningsCell = view.find(by.xpath(XPATH_LISTVIEW_WARNING_TD));
         assertThat(warningsCell.getText(), is("790"));
         tooltip = warningsCell.getAttribute("tooltip");
         assertThat(tooltip, not(containsString("<a href=\"job/" + job.name + "/pmd\">9</a>")));
