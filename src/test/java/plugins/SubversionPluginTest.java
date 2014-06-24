@@ -329,8 +329,11 @@ public class SubversionPluginTest extends AbstractJUnitTest {
         final FreeStyleJob f = jenkins.jobs.create();
         final SubversionScm subversionScm = f.useScm(SubversionScm.class);
         subversionScm.url.set(svnContainer.getUrlUnsaveRepoAtRevision(1));
+
+        //EXCLUDE THE CHANGES TO REV 2
         final SubversionSvmAdvanced scmAdvanced = subversionScm.advanced();
         scmAdvanced.excludedRegions.set(".*\\.txt");
+
         f.save();
         f.startBuild().shouldSucceed();
 

@@ -19,7 +19,7 @@ public class SubversionScm extends Scm {
     public static final String CLEAN_CHECKOUT = "Emulate clean checkout by first deleting";
 
     public final Control url = control("locations/remote");
-    public final Control btAdvanced = control(by.button("yui-gen10-button"));
+    public final Control btAdvanced = control(by.xpath("//tr[@nameref='radio-block-3']//div[@class='advancedLink']//button"));
     public final Control local = control("locations/local");
     public final Control checkoutStrategy = control(by.xpath("//td[@class='setting-name' and text()='%s']/../td[@class='setting-main']/select", "Check-out Strategy"));
     public final Control credentials = control("locations/credentialsId");

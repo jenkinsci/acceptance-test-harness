@@ -7,7 +7,8 @@ import java.net.URL;
 
 /**
  * PageObject for the Subversion "advanced" section.
- * Created by karl on 6/20/14.
+ *
+ * @author Matthias Karl
  */
 public class SubversionSvmAdvanced extends PageObject {
     public final Control excludedRegions = control(by.input("_.excludedRegions"));
