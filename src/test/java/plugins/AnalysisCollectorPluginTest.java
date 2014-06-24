@@ -173,13 +173,13 @@ public class AnalysisCollectorPluginTest extends AbstractJUnitTest {
 
     /**
      * Scenario: Custom list view column shows number of warnings
-     * Given I have job with artifacts of static analysis tools
+     * Given I have a job with artifacts of static analysis tools
      * And this artifacts are published by their corresponding plugins
      * And the resources of the job contain warnings
      * And this job is included in a custom list view with added column "Number of warnings"
      * When I start a build
      * Then the list view will show the correct number of total warnings
-     * And the mouse-over will show the correct number of warnings per checked plugin
+     * And the mouse-over tooltip will show the correct number of warnings per checked plugin
      */
     @Test
     public void check_warnings_column() {
@@ -195,9 +195,13 @@ public class AnalysisCollectorPluginTest extends AbstractJUnitTest {
         assertThat(warningsCell.getText(), is("799"));
         // check that tooltip contains link to checked analysis plugin results
         String tooltip = warningsCell.getAttribute("tooltip");
-        assertThat(tooltip, containsString("<a href=\"job/" + job.name + "/checkstyle\">776</a>"));
-        assertThat(tooltip, containsString("<a href=\"job/" + job.name + "/findbugs\">6</a>"));
-        assertThat(tooltip, containsString("<a href=\"job/" + job.name + "/pmd\">9</a>"));
+        assertThat(tooltip,
+                allOf(
+                        containsString("<a href=\"job/" + job.name + "/checkstyle\">776</a>"),
+                        containsString("<a href=\"job/" + job.name + "/findbugs\">6</a>"),
+                        containsString("<a href=\"job/" + job.name + "/pmd\">9</a>")
+                )
+        );
         // uncheck PMD plugin
         view.configure();
         AnalysisCollectorColumn column = view.getColumn(AnalysisCollectorColumn.class);
