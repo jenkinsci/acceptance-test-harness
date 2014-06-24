@@ -1,7 +1,5 @@
 package plugins;
 
-import org.hamcrest.CoreMatchers;
-import org.hamcrest.MatcherAssert;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginBuildConfigurator;
@@ -18,13 +16,13 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.ListView;
 import org.junit.Test;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.jenkinsci.test.acceptance.Matchers.hasAction;
 import static org.jenkinsci.test.acceptance.Matchers.hasAnalysisWarningsFor;
 import static org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisPlugin.*;
+import static org.jenkinsci.test.acceptance.po.PageObject.createRandomName;
 import static org.junit.Assert.assertThat;
 
 /**
@@ -187,7 +185,7 @@ public class AnalysisCollectorPluginTest extends AbstractJUnitTest {
     public void check_warnings_column() {
         FreeStyleJob job = setupJob(ANALYSIS_COLLECTOR_PLUGIN_RESOURCES, true);
         job.startBuild().waitUntilFinished();
-        ListView view = jenkins.views.create(ListView.class, jenkins.createRandomName());
+        ListView view = jenkins.views.create(ListView.class, createRandomName());
         view.configure();
         view.matchAllJobs();
         view.addColumn(AnalysisCollectorColumn.class);
