@@ -19,6 +19,7 @@ import org.junit.Test;
 import static org.hamcrest.CoreMatchers.*;
 import static org.jenkinsci.test.acceptance.Matchers.hasAction;
 import static org.jenkinsci.test.acceptance.Matchers.hasAnalysisWarningsFor;
+import static org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisPlugin.*;
 import static org.junit.Assert.assertThat;
 
 /**
@@ -117,16 +118,16 @@ public class AnalysisCollectorPluginTest extends AbstractJUnitTest {
     public void deselect_plugins() {
         FreeStyleJob job = setupJob(ANALYSIS_COLLECTOR_PLUGIN_RESOURCES, true);
         // no checkstyle
-        AnalysisCollectorAction result = deselectPluginAndBuild(AnalysisPlugin.CHECKSTYLE, job);
+        AnalysisCollectorAction result = deselectPluginAndBuild(CHECKSTYLE, job);
         assertThat(result.getWarningNumber(), is(23));
         // no checkstyle, no findbugs
-        result = deselectPluginAndBuild(AnalysisPlugin.FINDBUGS, job);
+        result = deselectPluginAndBuild(FINDBUGS, job);
         assertThat(result.getWarningNumber(), is(17));
         // no checkstyle, no findbugs, no pmd
-        result = deselectPluginAndBuild(AnalysisPlugin.PMD, job);
+        result = deselectPluginAndBuild(PMD, job);
         assertThat(result.getWarningNumber(), is(8));
         // no checkstyle, no findbugs, no pmd, no tasks => zero warnings
-        result = deselectPluginAndBuild(AnalysisPlugin.TASKS, job);
+        result = deselectPluginAndBuild(TASKS, job);
         assertThat(result.getWarningNumber(), is(0));
     }
 
@@ -145,18 +146,18 @@ public class AnalysisCollectorPluginTest extends AbstractJUnitTest {
         // check if results for checked plugins are visible
         assertThat(job,
                 allOf(
-                        hasAnalysisWarningsFor(AnalysisPlugin.CHECKSTYLE),
-                        hasAnalysisWarningsFor(AnalysisPlugin.PMD),
-                        hasAnalysisWarningsFor(AnalysisPlugin.FINDBUGS),
-                        hasAnalysisWarningsFor(AnalysisPlugin.TASKS)
+                        hasAnalysisWarningsFor(CHECKSTYLE),
+                        hasAnalysisWarningsFor(PMD),
+                        hasAnalysisWarningsFor(FINDBUGS),
+                        hasAnalysisWarningsFor(TASKS)
                 )
         );
         // check if results for unchecked/not installed plugins are NOT visible
         assertThat(job,
                 not(
                         anyOf(
-                                hasAnalysisWarningsFor(AnalysisPlugin.WARNINGS),
-                                hasAnalysisWarningsFor(AnalysisPlugin.DRY)
+                                hasAnalysisWarningsFor(WARNINGS),
+                                hasAnalysisWarningsFor(DRY)
                         )
                 )
         );
@@ -173,14 +174,14 @@ public class AnalysisCollectorPluginTest extends AbstractJUnitTest {
      * And the mouse-over will show the correct number of warnings per checked plugin
      */
     @Test
-    public void check_warnings_column(){
+    public void check_warnings_column() {
         FreeStyleJob job = setupJob(ANALYSIS_COLLECTOR_PLUGIN_RESOURCES, true);
         job.startBuild().waitUntilFinished();
         ListView view = jenkins.views.create(ListView.class, jenkins.createRandomName());
         view.configure();
         view.matchAllJobs();
         AnalysisCollectorColumn analysisCollectorColumn = view.addColumn(AnalysisCollectorColumn.class);
-        analysisCollectorColumn.checkPlugin(AnalysisPlugin.CHECKSTYLE, false);
+        analysisCollectorColumn.checkPlugin(CHECKSTYLE, false);
         view.save();
     }
 
