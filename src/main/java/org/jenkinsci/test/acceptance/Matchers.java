@@ -1,10 +1,8 @@
 package org.jenkinsci.test.acceptance;
 
 import org.hamcrest.Description;
-import org.jenkinsci.test.acceptance.po.ContainerPageObject;
-import org.jenkinsci.test.acceptance.po.Jenkins;
-import org.jenkinsci.test.acceptance.po.PageObject;
-import org.jenkinsci.test.acceptance.po.User;
+import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisPlugin;
+import org.jenkinsci.test.acceptance.po.*;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
@@ -210,6 +208,27 @@ public class Matchers {
             }
         };
     }
+
+    public static Matcher<Job> hasAnalysisWarningsFor(final AnalysisPlugin plugin) {
+        return new Matcher<Job>(" shows analysis results for plugin %s", plugin.getName()) {
+            @Override
+            public boolean matchesSafely(final Job job) {
+                job.open();
+                try {
+                    job.find(By.xpath("//h2[text()='Analysis results']/following-sibling::ul/li/img[@title='" + plugin.getName() + "']"));
+                    return true;
+                } catch (NoSuchElementException e) {
+                    return false;
+                }
+            }
+
+            @Override
+            public void describeMismatchSafely(final Job item, final Description desc) {
+                desc.appendText("Job is not showing analysis results for plugin " + plugin.getName());
+            }
+        };
+    }
+
 
     public static final ByFactory by = new ByFactory();
 }

@@ -8,11 +8,11 @@ import java.util.TreeMap;
 import org.jenkinsci.test.acceptance.junit.Bug;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginMavenBuildConfigurator;
+import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginBuildConfigurator;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleAction;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleColumn;
+import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleFreestyleBuildSettings;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleMavenBuildSettings;
-import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstylePublisher;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
@@ -43,7 +43,7 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
      */
     @Test
     public void record_checkstyle_report() {
-        FreeStyleJob job = setupJob("/checkstyle_plugin/checkstyle-result.xml", CheckstylePublisher.class, "checkstyle-result.xml");
+        FreeStyleJob job = setUpCheckstyleFreestyleJob();
         buildJobWithSuccess(job);
 
         assertThat(job.getLastBuild(), hasAction("Checkstyle Warnings"));
@@ -56,10 +56,10 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
      */
     @Test
     public void view_checkstyle_report() {
-        final FreeStyleJob job = setupJob("/checkstyle_plugin/checkstyle-result.xml", CheckstylePublisher.class, "checkstyle-result.xml");
+        FreeStyleJob job = setUpCheckstyleFreestyleJob();
         buildJobWithSuccess(job).open();
 
-        final CheckstyleAction ca = new CheckstyleAction(job);
+        CheckstyleAction ca = new CheckstyleAction(job);
         assertThat(ca.getResultLinkByXPathText("776 warnings"), is("checkstyleResult"));
         assertThat(ca.getResultLinkByXPathText("776 new warnings"), is("checkstyleResult/new"));
         assertThat(ca.getWarningNumber(), is(776));
@@ -73,8 +73,8 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
         assertTypeTab(ca);
     }
 
-    private void assertFileTab(final CheckstyleAction ca) {
-        final SortedMap<String, Integer> expectedFileDetails = new TreeMap<>();
+    private void assertFileTab(CheckstyleAction ca) {
+        SortedMap<String, Integer> expectedFileDetails = new TreeMap<>();
         expectedFileDetails.put("JavaProvider.java", 18);
         expectedFileDetails.put("PluginImpl.java", 8);
         expectedFileDetails.put("RemoteLauncher.java", 63);
@@ -85,8 +85,8 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
         assertThat(ca.getFileTabContents(), is(expectedFileDetails));
     }
 
-    private void assertCategoryTab(final CheckstyleAction ca) {
-        final SortedMap<String, Integer> expectedCategories = new TreeMap<>();
+    private void assertCategoryTab(CheckstyleAction ca) {
+        SortedMap<String, Integer> expectedCategories = new TreeMap<>();
         expectedCategories.put("Blocks", 28);
         expectedCategories.put("Checks", 123);
         expectedCategories.put("Coding", 61);
@@ -100,8 +100,8 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
         assertThat(ca.getCategoriesTabContents(), is(expectedCategories));
     }
 
-    private void assertTypeTab(final CheckstyleAction ca) {
-        final SortedMap<String, Integer> expectedTypes = new TreeMap<>();
+    private void assertTypeTab(CheckstyleAction ca) {
+        SortedMap<String, Integer> expectedTypes = new TreeMap<>();
         expectedTypes.put("AvoidInlineConditionalsCheck", 9);
         expectedTypes.put("AvoidStarImportCheck", 1);
         expectedTypes.put("ConstantNameCheck", 1);
@@ -137,10 +137,10 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
      */
     @Test
     public void xml_api_report_depth_0() throws IOException, SAXException, ParserConfigurationException {
-        final FreeStyleJob job = setupJob("/checkstyle_plugin/checkstyle-result.xml", CheckstylePublisher.class, "checkstyle-result.xml");
-        final Build build = buildJobWithSuccess(job);
-        final String apiUrl = "checkstyleResult/api/xml?depth=0";
-        final String expectedXmlPath = "/checkstyle_plugin/api_depth_0.xml";
+        FreeStyleJob job = setUpCheckstyleFreestyleJob();
+        Build build = buildJobWithSuccess(job);
+        String apiUrl = "checkstyleResult/api/xml?depth=0";
+        String expectedXmlPath = "/checkstyle_plugin/api_depth_0.xml";
         assertXmlApiMatchesExpected(build, apiUrl, expectedXmlPath);
     }
 
@@ -149,10 +149,9 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
      */
     @Test
     public void view_checkstyle_report_two_runs_and_changed_results() {
-        FreeStyleJob job = setupJob("/checkstyle_plugin/checkstyle-result.xml", CheckstylePublisher.class, "checkstyle-result.xml");
+        FreeStyleJob job = setUpCheckstyleFreestyleJob();
         buildJobAndWait(job);
-        editJobAndChangeLastRessource(job, "/checkstyle_plugin/checkstyle-result-2.xml", "checkstyle-result.xml");
-
+        editJob("/checkstyle_plugin/forSecondRun/checkstyle-result.xml", false, job, CheckstyleFreestyleBuildSettings.class, null);
         Build lastBuild = buildJobWithSuccess(job);
         assertThat(lastBuild, hasAction("Checkstyle Warnings"));
         lastBuild.open();
@@ -175,9 +174,9 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
     @Bug("21723")
     @Ignore("Until JENKINS-21723 is fixed")
     public void view_checkstyle_report_job_graph_links() throws Exception {
-        FreeStyleJob job = setupJob("/checkstyle_plugin/checkstyle-result.xml", CheckstylePublisher.class, "checkstyle-result.xml");
+        FreeStyleJob job = setUpCheckstyleFreestyleJob();
         buildJobAndWait(job);
-        editJobAndChangeLastRessource(job, "/checkstyle_plugin/checkstyle-result-2.xml", "checkstyle-result.xml");
+        editJob("/checkstyle_plugin/forSecondRun/checkstyle-result.xml", false, job, CheckstyleFreestyleBuildSettings.class, null);
         buildJobWithSuccess(job);
 
         assertAreaLinksOfJobAreLike(job, "^\\d+/checkstyleResult");
@@ -187,9 +186,9 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
         return setupSimpleMavenJob(null);
     }
 
-    private MavenModuleSet setupSimpleMavenJob(AbstractCodeStylePluginMavenBuildConfigurator<CheckstyleMavenBuildSettings> configurator) {
-        final String projectPath = "/checkstyle_plugin/sample_checkstyle_project";
-        final String goal = "clean package checkstyle:checkstyle";
+    private MavenModuleSet setupSimpleMavenJob(AbstractCodeStylePluginBuildConfigurator<CheckstyleMavenBuildSettings> configurator) {
+        String projectPath = "/checkstyle_plugin/sample_checkstyle_project";
+        String goal = "clean package checkstyle:checkstyle";
         return setupMavenJob(projectPath, goal, CheckstyleMavenBuildSettings.class, configurator);
     }
 
@@ -198,7 +197,14 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
      */
     @Test
     public void build_simple_freestyle_mavengoals_project() {
-        final FreeStyleJob job = setupFreestyleJobWithMavenGoals("/checkstyle_plugin/sample_checkstyle_project", "clean package checkstyle:checkstyle", CheckstylePublisher.class, "target/checkstyle-result.xml");
+        AbstractCodeStylePluginBuildConfigurator<CheckstyleFreestyleBuildSettings> buildConfigurator = new AbstractCodeStylePluginBuildConfigurator<CheckstyleFreestyleBuildSettings>() {
+            @Override
+            public void configure(CheckstyleFreestyleBuildSettings settings) {
+                settings.pattern.set("target/checkstyle-result.xml");
+            }
+        };
+        FreeStyleJob job = setupJob("/checkstyle_plugin/sample_checkstyle_project", FreeStyleJob.class, "clean package checkstyle:checkstyle",
+                CheckstyleFreestyleBuildSettings.class, buildConfigurator);
         Build lastBuild = buildJobWithSuccess(job);
         assertThat(lastBuild, hasAction("Checkstyle Warnings"));
         lastBuild.open();
@@ -211,7 +217,7 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
      */
     @Test
     public void build_simple_maven_project() {
-        final MavenModuleSet job = setupSimpleMavenJob();
+        MavenModuleSet job = setupSimpleMavenJob();
         Build lastBuild = buildJobWithSuccess(job);
         assertThat(lastBuild, hasAction("Checkstyle Warnings"));
         lastBuild.open();
@@ -224,14 +230,14 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
      */
     @Test
     public void build_simple_maven_project_and_check_if_it_is_unstable() {
-        final AbstractCodeStylePluginMavenBuildConfigurator<CheckstyleMavenBuildSettings> buildConfigurator =
-                new AbstractCodeStylePluginMavenBuildConfigurator<CheckstyleMavenBuildSettings>() {
+        AbstractCodeStylePluginBuildConfigurator<CheckstyleMavenBuildSettings> buildConfigurator =
+                new AbstractCodeStylePluginBuildConfigurator<CheckstyleMavenBuildSettings>() {
                     @Override
                     public void configure(CheckstyleMavenBuildSettings settings) {
                         settings.setBuildUnstableTotalAll("0");
                     }
                 };
-        final MavenModuleSet job = setupSimpleMavenJob(buildConfigurator);
+        MavenModuleSet job = setupSimpleMavenJob(buildConfigurator);
         buildJobAndWait(job).shouldBeUnstable();
     }
 
@@ -240,14 +246,14 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
      */
     @Test
     public void build_simple_maven_project_and_check_if_failed() {
-        final AbstractCodeStylePluginMavenBuildConfigurator<CheckstyleMavenBuildSettings> buildConfigurator =
-                new AbstractCodeStylePluginMavenBuildConfigurator<CheckstyleMavenBuildSettings>() {
+        AbstractCodeStylePluginBuildConfigurator<CheckstyleMavenBuildSettings> buildConfigurator =
+                new AbstractCodeStylePluginBuildConfigurator<CheckstyleMavenBuildSettings>() {
                     @Override
                     public void configure(CheckstyleMavenBuildSettings settings) {
                         settings.setBuildFailedTotalAll("0");
                     }
                 };
-        final MavenModuleSet job = setupSimpleMavenJob(buildConfigurator);
+        MavenModuleSet job = setupSimpleMavenJob(buildConfigurator);
         buildJobAndWait(job).shouldFail();
     }
 
@@ -257,10 +263,8 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
      */
     @Test
     public void view_checkstyle_report_build_on_slave() throws Exception {
-        FreeStyleJob job = setupJob("/checkstyle_plugin/checkstyle-result.xml", CheckstylePublisher.class, "checkstyle-result.xml");
-
+        FreeStyleJob job = setUpCheckstyleFreestyleJob();
         Slave slave = makeASlaveAndConfigureJob(job);
-
         Build build = buildJobOnSlaveWithSuccess(job, slave);
 
         assertThat(build.getNode(), is(slave.getName()));
@@ -284,5 +288,22 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
         assertThat(dashboardLink.getText().trim(), is("12"));
 
         view.delete();
+    }
+
+    /**
+     * Makes a Freestyle Job with Checkstyle and a warnigns-file.
+     *
+     * @return The new Job
+     */
+    private FreeStyleJob setUpCheckstyleFreestyleJob() {
+        AbstractCodeStylePluginBuildConfigurator<CheckstyleFreestyleBuildSettings> buildConfigurator = new AbstractCodeStylePluginBuildConfigurator<CheckstyleFreestyleBuildSettings>() {
+            @Override
+            public void configure(CheckstyleFreestyleBuildSettings settings) {
+                settings.pattern.set("checkstyle-result.xml");
+            }
+        };
+        FreeStyleJob job = setupJob("/checkstyle_plugin/checkstyle-result.xml", FreeStyleJob.class,
+                CheckstyleFreestyleBuildSettings.class, buildConfigurator);
+        return job;
     }
 }

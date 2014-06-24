@@ -32,11 +32,11 @@ import java.util.concurrent.ExecutionException;
 import org.jenkinsci.test.acceptance.junit.Bug;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginMavenBuildConfigurator;
+import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginBuildConfigurator;
 import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsAction;
 import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsColumn;
+import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsFreestyleBuildSettings;
 import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsMavenBuildSettings;
-import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsPublisher;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
@@ -62,7 +62,7 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
      */
     @Test
     public void record_analysis() {
-        FreeStyleJob job = setupJob("/findbugs_plugin/findbugsXml.xml", FindbugsPublisher.class, "findbugsXml.xml");
+        FreeStyleJob job = setUpFindbugsFreestyleJob();
         Build lastBuild = buildJobWithSuccess(job);
 
         assertThat(lastBuild, hasAction("FindBugs Warnings"));
@@ -125,10 +125,10 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
      */
     @Test
     public void xml_api_report_depth_0() throws IOException, SAXException, ParserConfigurationException {
-        final FreeStyleJob job = setupJob("/findbugs_plugin/findbugsXml.xml", FindbugsPublisher.class, "findbugsXml.xml");
-        final Build build = buildJobWithSuccess(job);
-        final String apiUrl = "findbugsResult/api/xml?depth=0";
-        final String expectedXmlPath = "/findbugs_plugin/api_depth_0.xml";
+        FreeStyleJob job = setUpFindbugsFreestyleJob();
+        Build build = buildJobWithSuccess(job);
+        String apiUrl = "findbugsResult/api/xml?depth=0";
+        String expectedXmlPath = "/findbugs_plugin/api_depth_0.xml";
         assertXmlApiMatchesExpected(build, apiUrl, expectedXmlPath);
     }
 
@@ -137,9 +137,9 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
      */
     @Test
     public void record_analysis_two_runs() {
-        final FreeStyleJob job = setupJob("/findbugs_plugin/findbugsXml.xml", FindbugsPublisher.class, "findbugsXml.xml");
+        FreeStyleJob job = setUpFindbugsFreestyleJob();
         buildJobAndWait(job);
-        editJobAndChangeLastRessource(job, "/findbugs_plugin/findbugsXml-2.xml", "findbugsXml.xml");
+        editJob("/findbugs_plugin/forSecondRun/findbugsXml.xml", false, job, FindbugsFreestyleBuildSettings.class, null);
 
         Build lastBuild = buildJobWithSuccess(job);
         assertThat(lastBuild, hasAction("FindBugs Warnings"));
@@ -163,9 +163,9 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
     @Bug("21723")
     @Ignore("Until JENKINS-21723 is fixed")
     public void view_findbugs_report_job_graph_links() {
-        final FreeStyleJob job = setupJob("/findbugs_plugin/findbugsXml.xml", FindbugsPublisher.class, "findbugsXml.xml");
+        FreeStyleJob job = setUpFindbugsFreestyleJob();
         buildJobAndWait(job);
-        editJobAndChangeLastRessource(job, "/findbugs_plugin/findbugsXml-2.xml", "findbugsXml.xml");
+        editJob("/findbugs_plugin/forSecondRun/findbugsXml.xml", false, job, FindbugsFreestyleBuildSettings.class, null);
         buildJobWithSuccess(job);
 
         assertAreaLinksOfJobAreLike(job, "^\\d+/findbugsResult");
@@ -176,7 +176,14 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
      */
     @Test
     public void build_simple_freestyle_mavengoals_project() {
-        final FreeStyleJob job = setupFreestyleJobWithMavenGoals("/findbugs_plugin/sample_findbugs_project", "clean package findbugs:findbugs", FindbugsPublisher.class, "target/findbugsXml.xml");
+        AbstractCodeStylePluginBuildConfigurator<FindbugsFreestyleBuildSettings> buildConfigurator = new AbstractCodeStylePluginBuildConfigurator<FindbugsFreestyleBuildSettings>() {
+            @Override
+            public void configure(FindbugsFreestyleBuildSettings settings) {
+                settings.pattern.set("target/findbugsXml.xml");
+            }
+        };
+        FreeStyleJob job = setupJob("/findbugs_plugin/sample_findbugs_project", FreeStyleJob.class, "clean package findbugs:findbugs", FindbugsFreestyleBuildSettings.class, buildConfigurator);
+
         Build lastBuild = buildJobWithSuccess(job);
         assertThat(lastBuild, hasAction("FindBugs Warnings"));
         lastBuild.open();
@@ -188,9 +195,9 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
         return setupSimpleMavenJob(null);
     }
 
-    private MavenModuleSet setupSimpleMavenJob(AbstractCodeStylePluginMavenBuildConfigurator<FindbugsMavenBuildSettings> configurator) {
-        final String projectPath = "/findbugs_plugin/sample_findbugs_project";
-        final String goal = "clean package findbugs:findbugs";
+    private MavenModuleSet setupSimpleMavenJob(AbstractCodeStylePluginBuildConfigurator<FindbugsMavenBuildSettings> configurator) {
+        String projectPath = "/findbugs_plugin/sample_findbugs_project";
+        String goal = "clean package findbugs:findbugs";
         return setupMavenJob(projectPath, goal, FindbugsMavenBuildSettings.class, configurator);
     }
 
@@ -200,7 +207,7 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
     @Test
     @Category(SmokeTest.class)
     public void build_simple_maven_project() {
-        final MavenModuleSet job = setupSimpleMavenJob();
+        MavenModuleSet job = setupSimpleMavenJob();
         Build lastBuild = buildJobWithSuccess(job);
         assertThat(lastBuild, hasAction("FindBugs Warnings"));
         lastBuild.open();
@@ -213,14 +220,14 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
      */
     @Test
     public void build_simple_maven_project_and_check_if_it_is_unstable() {
-        final AbstractCodeStylePluginMavenBuildConfigurator<FindbugsMavenBuildSettings> buildConfigurator =
-                new AbstractCodeStylePluginMavenBuildConfigurator<FindbugsMavenBuildSettings>() {
+        AbstractCodeStylePluginBuildConfigurator<FindbugsMavenBuildSettings> buildConfigurator =
+                new AbstractCodeStylePluginBuildConfigurator<FindbugsMavenBuildSettings>() {
                     @Override
                     public void configure(FindbugsMavenBuildSettings settings) {
                         settings.setBuildUnstableTotalAll("0");
                     }
                 };
-        final MavenModuleSet job = setupSimpleMavenJob(buildConfigurator);
+        MavenModuleSet job = setupSimpleMavenJob(buildConfigurator);
         buildJobAndWait(job).shouldBeUnstable();
     }
 
@@ -229,14 +236,14 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
      */
     @Test
     public void build_simple_maven_project_and_check_if_failed() {
-        final AbstractCodeStylePluginMavenBuildConfigurator<FindbugsMavenBuildSettings> buildConfigurator =
-                new AbstractCodeStylePluginMavenBuildConfigurator<FindbugsMavenBuildSettings>() {
+        AbstractCodeStylePluginBuildConfigurator<FindbugsMavenBuildSettings> buildConfigurator =
+                new AbstractCodeStylePluginBuildConfigurator<FindbugsMavenBuildSettings>() {
                     @Override
                     public void configure(FindbugsMavenBuildSettings settings) {
                         settings.setBuildFailedTotalAll("0");
                     }
                 };
-        final MavenModuleSet job = setupSimpleMavenJob(buildConfigurator);
+        MavenModuleSet job = setupSimpleMavenJob(buildConfigurator);
         buildJobAndWait(job).shouldFail();
     }
 
@@ -245,7 +252,7 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
      */
     @Test
     public void record_analysis_build_on_slave() throws ExecutionException, InterruptedException {
-        FreeStyleJob job = setupJob("/findbugs_plugin/findbugsXml.xml", FindbugsPublisher.class, "findbugsXml.xml");
+        FreeStyleJob job = setUpFindbugsFreestyleJob();
 
         Slave slave = makeASlaveAndConfigureJob(job);
 
@@ -271,6 +278,23 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
         assertThat(dashboardLink.getText().trim(), is("1"));
 
         view.delete();
+    }
+
+    /**
+     * Makes a Freestyle Job with Findbugs and a warnigns-file.
+     *
+     * @return The new Job
+     */
+    private FreeStyleJob setUpFindbugsFreestyleJob() {
+        AbstractCodeStylePluginBuildConfigurator<FindbugsFreestyleBuildSettings> buildConfigurator = new AbstractCodeStylePluginBuildConfigurator<FindbugsFreestyleBuildSettings>() {
+            @Override
+            public void configure(FindbugsFreestyleBuildSettings settings) {
+                settings.pattern.set("findbugsXml.xml");
+            }
+        };
+        FreeStyleJob job = setupJob("/findbugs_plugin/findbugsXml.xml", FreeStyleJob.class,
+                FindbugsFreestyleBuildSettings.class, buildConfigurator);
+        return job;
     }
 
 }
