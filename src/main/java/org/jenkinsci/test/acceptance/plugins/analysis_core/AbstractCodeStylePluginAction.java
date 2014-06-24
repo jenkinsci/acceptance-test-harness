@@ -10,8 +10,6 @@ import java.util.*;
 /**
  * Abstract action class for plugins with getter of the warnings.
  *
- * FIXME: change selectors used in get*WarningNumber in order to use IDs introduced in analysis core version 1.57
- *
  * @author Martin Kurz
  */
 public abstract class AbstractCodeStylePluginAction extends ContainerPageObject {
