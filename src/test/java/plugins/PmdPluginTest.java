@@ -1,10 +1,5 @@
 package plugins;
 
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
 import org.jenkinsci.test.acceptance.junit.Bug;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
@@ -25,9 +20,15 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.xml.sax.SAXException;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.*;
-import static org.jenkinsci.test.acceptance.Matchers.*;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.jenkinsci.test.acceptance.Matchers.hasAction;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 /**
  * Feature: Tests for PMD plugin
@@ -207,7 +208,7 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
     public void configure_a_job_with_PMD_post_build_steps_which_display_some_warnings_two_runs() {
         FreeStyleJob job = setUpPmdFreestyleJob();
         buildJobAndWait(job);
-        editJob("/pmd_plugin/forSecondRun/pmd-warnings.xml", false, job, PmdFreestyleBuildSettings.class, null);
+        editJob("/pmd_plugin/forSecondRun/pmd-warnings.xml", false, job);
         Build lastBuild = buildJobWithSuccess(job);
         assertThat(lastBuild, hasAction("PMD Warnings"));
         lastBuild.open();
@@ -232,7 +233,7 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
     public void view_pmd_report_job_graph_links() {
         FreeStyleJob job = setUpPmdFreestyleJob();
         buildJobAndWait(job);
-        editJob("/pmd_plugin/forSecondRun/pmd-warnings.xml", false, job, PmdFreestyleBuildSettings.class, null);
+        editJob("/pmd_plugin/forSecondRun/pmd-warnings.xml", false, job);
         buildJobWithSuccess(job);
 
         assertAreaLinksOfJobAreLike(job, "^\\d+/pmdResult");
@@ -378,9 +379,8 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
                 settings.pattern.set("pmd-warnings.xml");
             }
         };
-        FreeStyleJob job = setupJob("/pmd_plugin/pmd-warnings.xml", FreeStyleJob.class,
+        return setupJob("/pmd_plugin/pmd-warnings.xml", FreeStyleJob.class,
                 PmdFreestyleBuildSettings.class, buildConfigurator);
-        return job;
     }
 
 }

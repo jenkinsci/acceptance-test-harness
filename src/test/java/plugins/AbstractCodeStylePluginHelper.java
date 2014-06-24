@@ -17,6 +17,7 @@ import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
+import javax.annotation.CheckForNull;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
@@ -98,11 +99,26 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
      * Provides the ability to edit an existing job by changing or adding the resource to copy
      * and/or by changing the configuration of a publisher
      *
-     * @param newResourceToCopy    the new resource to be copied to build (Directory or File path) or null if not to be changed
+     * @param newResourceToCopy the new resource to be copied to build (Directory or File path) or null if not to be changed
      * @param isAdditionalResource decides whether the old resource is kept (FALSE) or deleted (TRUE)
-     * @param job                  the job to be changed
-     * @param publisherClass       the type of the publisher to be modified
-     * @param configurator         the new configuration of the publisher
+     * @param job the job to be changed
+     * @return the edited job
+     */
+    public <J extends Job, T extends AbstractCodeStylePluginBuildSettings & PostBuildStep> J editJob(String newResourceToCopy,
+                                                                                                     boolean isAdditionalResource,
+                                                                                                     J job) {
+        return edit(newResourceToCopy, isAdditionalResource, job, null, null);
+    }
+
+    /**
+     * Provides the ability to edit an existing job by changing or adding the resource to copy
+     * and/or by changing the configuration of a publisher
+     *
+     * @param newResourceToCopy the new resource to be copied to build (Directory or File path) or null if not to be changed
+     * @param isAdditionalResource decides whether the old resource is kept (FALSE) or deleted (TRUE)
+     * @param job the job to be changed
+     * @param publisherClass the type of the publisher to be modified
+     * @param configurator the new configuration of the publisher
      * @return the edited job
      */
     public <J extends Job, T extends AbstractCodeStylePluginBuildSettings & PostBuildStep> J editJob(String newResourceToCopy,
@@ -110,6 +126,42 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
                                                                                                      J job,
                                                                                                      Class<T> publisherClass,
                                                                                                      AbstractCodeStylePluginBuildConfigurator<T> configurator) {
+        return edit(newResourceToCopy, isAdditionalResource, job, publisherClass, configurator);
+    }
+
+    /**
+     * Provides the ability to edit an existing job by changing or adding the resource to copy
+     * and/or by changing the configuration of a publisher
+     *
+     * @param isAdditionalResource decides whether the old resource is kept (FALSE) or deleted (TRUE)
+     * @param job the job to be changed
+     * @param publisherClass the type of the publisher to be modified
+     * @param configurator the new configuration of the publisher
+     * @return the edited job
+     */
+    public <J extends Job, T extends AbstractCodeStylePluginBuildSettings & PostBuildStep> J editJob(boolean isAdditionalResource,
+                                                                                                     J job,
+                                                                                                     Class<T> publisherClass,
+                                                                                                     AbstractCodeStylePluginBuildConfigurator<T> configurator) {
+        return edit(null, isAdditionalResource, job, publisherClass, configurator);
+    }
+
+    /**
+     * Provides the ability to edit an existing job by changing or adding the resource to copy
+     * and/or by changing the configuration of a publisher
+     *
+     * @param newResourceToCopy the new resource to be copied to build (Directory or File path) or null if not to be changed
+     * @param isAdditionalResource decides whether the old resource is kept (FALSE) or deleted (TRUE)
+     * @param job the job to be changed
+     * @param publisherClass the type of the publisher to be modified
+     * @param configurator the new configuration of the publisher
+     * @return the edited job
+     */
+    private <J extends Job, T extends AbstractCodeStylePluginBuildSettings & PostBuildStep> J edit(String newResourceToCopy,
+                                                                                                   boolean isAdditionalResource,
+                                                                                                   J job,
+                                                                                                   Class<T> publisherClass,
+                                                                                                   @CheckForNull AbstractCodeStylePluginBuildConfigurator<T> configurator) {
         job.configure();
 
         if (newResourceToCopy != null) {
@@ -136,7 +188,7 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
      * Generates a slave and configure job to run on slave
      *
      * @param job Job to run on slave
-     * @return Generated skave
+     * @return Generated slave
      * @throws ExecutionException   if computation of slave threw an exception
      * @throws InterruptedException if thread was interrupted while waiting
      */

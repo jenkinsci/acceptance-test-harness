@@ -116,7 +116,7 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
                     }
                 };
 
-        editJob(null, false, j, TaskScannerFreestyleBuildSettings.class, buildConfigurator );
+        editJob(false, j, TaskScannerFreestyleBuildSettings.class, buildConfigurator);
 
         lastBuild = buildJobWithSuccess(j);
 
@@ -228,7 +228,7 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
                     }
                 };
 
-        editJob(null, false, j, TaskScannerFreestyleBuildSettings.class, buildConfigurator);
+        editJob(false, j, TaskScannerFreestyleBuildSettings.class, buildConfigurator);
 
         lastBuild = buildJobWithSuccess(j);
 
@@ -273,21 +273,21 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
                     }
                 };
 
-        FreeStyleJob j = setupJob("/tasks_plugin/fileset1", FreeStyleJob.class,
+        FreeStyleJob job = setupJob("/tasks_plugin/fileset1", FreeStyleJob.class,
                 TaskScannerFreestyleBuildSettings.class, buildConfigurator);
 
         // as no threshold is defined to mark the build as FAILED or UNSTABLE, the build should succeed
-        buildJobWithSuccess(j);
+        buildJobWithSuccess(job);
 
         // this time we do not check the task scanner output as the result is the same
         // as for single_task_tags_and_exclusion_pattern
         // So we proceed directly with the preparation of build #2
 
-        editJob("/tasks_plugin/fileset1_less",false,j,null,null);
+        editJob("/tasks_plugin/fileset1_less", false, job);
 
-        Build lastBuild = buildJobWithSuccess(j);
+        Build lastBuild = buildJobWithSuccess(job);
         lastBuild.open();
-        TaskScannerAction tsa = new TaskScannerAction(j);
+        TaskScannerAction tsa = new TaskScannerAction(job);
 
         // In the first build the task priorities were
         //   - 1x high
@@ -356,7 +356,7 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
                     }
                 };
 
-        editJob(null, false, j, TaskScannerFreestyleBuildSettings.class, buildConfigurator);
+        editJob(false, j, TaskScannerFreestyleBuildSettings.class, buildConfigurator);
 
         lastBuild = j.startBuild().shouldFail();
         lastBuild.open();
@@ -556,7 +556,7 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
                     }
                 };
 
-        editJob("/tasks_plugin/fileset1", false, j, TaskScannerFreestyleBuildSettings.class, buildConfigurator );
+        editJob("/tasks_plugin/fileset1", false, j, TaskScannerFreestyleBuildSettings.class, buildConfigurator);
 
         final Build lastBuild = j.startBuild().shouldBeUnstable();
         lastBuild.open();
@@ -603,7 +603,7 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
                     }
                 };
 
-        editJob(null, false, j, TaskScannerFreestyleBuildSettings.class, buildConfigurator );
+        editJob(false, j, TaskScannerFreestyleBuildSettings.class, buildConfigurator);
 
         final Build lastBuild = j.startBuild().shouldBeUnstable();
         lastBuild.open();
@@ -656,7 +656,7 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
                     }
                 };
 
-        editJob(null, false, j, TaskScannerFreestyleBuildSettings.class, buildConfigurator );
+        editJob(false, j, TaskScannerFreestyleBuildSettings.class, buildConfigurator);
 
         final Build lastBuild = j.startBuild().shouldBeUnstable();
         lastBuild.open();
@@ -704,7 +704,7 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
                 };
 
         // add a second shell step to copy another folder
-        editJob("/tasks_plugin/fileset2", true, j, TaskScannerFreestyleBuildSettings.class, buildConfigurator );
+        editJob("/tasks_plugin/fileset2", true, j, TaskScannerFreestyleBuildSettings.class, buildConfigurator);
 
         final Build lastBuild = j.startBuild().shouldBeUnstable();
         lastBuild.open();
@@ -752,7 +752,7 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
                     }
                 };
 
-        editJob(null, false, j, TaskScannerFreestyleBuildSettings.class, buildConfigurator );
+        editJob(false, j, TaskScannerFreestyleBuildSettings.class, buildConfigurator);
 
         final Build lastBuild = j.startBuild().shouldFail();
         lastBuild.open();
