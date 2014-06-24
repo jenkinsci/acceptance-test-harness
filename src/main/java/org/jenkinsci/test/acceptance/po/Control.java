@@ -193,6 +193,23 @@ public class Control extends CapybaraPortingLayerImpl {
         resolve().sendKeys(res.asFile().getAbsolutePath());
     }
 
+    /**
+     * Determines whether an object is existing on the current page
+     * @return TRUE if it exists
+     */
+    public boolean exists(){
+        try{
+            this.resolve();
+            return true;
+        }
+        catch (NoSuchElementException e)
+        {
+            return false;
+        }
+    }
+
+
+
     public interface Owner {
         /**
          * Resolves relative path into a selector.

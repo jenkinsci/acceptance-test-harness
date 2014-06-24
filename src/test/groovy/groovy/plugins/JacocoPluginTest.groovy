@@ -1,7 +1,9 @@
 package groovy.plugins
 
 import org.jenkinsci.test.acceptance.geb.GebSpec
+import org.jenkinsci.test.acceptance.junit.SmokeTest
 import org.jenkinsci.test.acceptance.junit.WithPlugins
+import org.junit.experimental.categories.Category
 import org.jenkinsci.test.acceptance.plugins.jacoco.JacocoPublisher
 import org.jenkinsci.test.acceptance.plugins.jacoco.JacocoResultPage
 import org.jenkinsci.test.acceptance.po.Job
@@ -15,6 +17,7 @@ import org.jenkinsci.test.acceptance.po.Job
 class JacocoPluginTest extends GebSpec {
     private Job job;
 
+    @Category(SmokeTest.class)
     def "Check successfully execution and summary"() {
         given: "A job with jacoco results"
         job = jenkins.jobs.create();
