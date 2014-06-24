@@ -264,13 +264,13 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
     }
 
     /**
-     * Build a job and check set up a dashboard view. Check, if the dashboard view shows correct warning count.
+     * Build a job and check set up a dashboard list-view. Check, if the dashboard view shows correct warning count.
      */
     @Test
-    public void build_a_job_and_check_if_dashboard_shows_correct_warnings() {
+    public void build_a_job_and_check_if_dashboard_list_view_shows_correct_warnings() {
         MavenModuleSet job = setupSimpleMavenJob();
         buildJobAndWait(job).shouldSucceed();
-        ListView view = addDashboardColumn(FindbugsColumn.class);
+        ListView view = addDashboardListViewColumn(FindbugsColumn.class);
 
         By expectedDashboardLinkMatcher = by.css("a[href='job/" + job.name + "/findbugs']");
         assertThat(jenkins.all(expectedDashboardLinkMatcher).size(), is(1));

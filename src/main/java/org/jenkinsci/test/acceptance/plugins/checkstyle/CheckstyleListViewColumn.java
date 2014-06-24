@@ -10,8 +10,8 @@ import org.jenkinsci.test.acceptance.po.ListView;
  * @author Fabian Trampusch
  */
 @Describable("Number of Checkstyle warnings")
-public class CheckstyleColumn extends AbstractListViewColumn {
-    public CheckstyleColumn(ListView parent, String path) {
+public class CheckstyleListViewColumn extends AbstractListViewColumn {
+    public CheckstyleListViewColumn(ListView parent, String path) {
         super(parent, path);
     }
 }

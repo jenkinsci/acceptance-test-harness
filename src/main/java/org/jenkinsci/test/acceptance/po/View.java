@@ -30,6 +30,24 @@ public abstract class View extends ContainerPageObject {
         find(by.xpath("//a[contains(@href, '/%s/build?')]/img[contains(@title, 'Schedule a build')]", name)).click();
     }
 
+    /**
+     * Configures the view to include all jobs.
+     */
+    public void matchAllJobs() {
+        control("/useincluderegex").check();
+        String matchEverything = ".*";
+        Control regexJobFilter = control("/useincluderegex/includeRegex");
+        regexJobFilter.set(matchEverything);
+    }
+
+    /**
+     * Deletes the view.
+     */
+    public void delete() {
+        configure();
+        clickLink("Delete View");
+        clickButton("Yes");
+    }
 
     @Override
     public void save() {
