@@ -1,7 +1,6 @@
 package org.jenkinsci.test.acceptance.plugins.analysis_collector;
 
 import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginFreestyleBuildSettings;
-import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Job;
 
@@ -10,13 +9,8 @@ import org.jenkinsci.test.acceptance.po.Job;
  */
 @Describable("Publish combined analysis results")
 public class AnalysisCollectorFreestyleBuildSettings extends AbstractCodeStylePluginFreestyleBuildSettings {
-    public final Control isCheckstyleActivated = control("isCheckStyleActivated");
-    public final Control isDryActivated = control("isDryActivated");
-    public final Control isPmdActivated = control("isPmdActivated");
-    public final Control isOpenTasksActivated = control("isOpenTasksActivated");
-    public final Control isWarningsActivated = control("isWarningsActivated");
-    public final Control isFindbugsActivated = control("isFindBugsActivated");
 
+    private AnalysisCollectorPluginArea pluginArea;
 
     /**
      * Constructor for the build settings page area.
@@ -26,6 +20,7 @@ public class AnalysisCollectorFreestyleBuildSettings extends AbstractCodeStylePl
      */
     public AnalysisCollectorFreestyleBuildSettings(Job parent, String selectorPath) {
         super(parent, selectorPath);
+        this.pluginArea = new AnalysisCollectorPluginArea(parent, selectorPath);
     }
 
     /**
@@ -35,7 +30,7 @@ public class AnalysisCollectorFreestyleBuildSettings extends AbstractCodeStylePl
      * @param checked true or false
      */
     public void checkCollectedPlugin(AnalysisPlugin plugin, boolean checked) {
-        plugin.check(this, checked);
+        plugin.check(this.pluginArea, checked);
     }
 
 }

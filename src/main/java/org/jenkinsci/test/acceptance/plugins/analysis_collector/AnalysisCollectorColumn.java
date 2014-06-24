@@ -14,7 +14,7 @@ public class AnalysisCollectorColumn extends AbstractListViewColumn {
 
     private AnalysisCollectorPluginArea pluginArea;
 
-    protected AnalysisCollectorColumn(ListView parent, String path) {
+    public AnalysisCollectorColumn(ListView parent, String path) {
         super(parent, path);
         this.pluginArea = new AnalysisCollectorPluginArea(parent, path);
     }

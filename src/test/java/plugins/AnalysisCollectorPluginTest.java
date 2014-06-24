@@ -1,5 +1,7 @@
 package plugins;
 
+import org.hamcrest.CoreMatchers;
+import org.hamcrest.MatcherAssert;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginBuildConfigurator;
@@ -16,6 +18,8 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.ListView;
 import org.junit.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.jenkinsci.test.acceptance.Matchers.hasAction;
@@ -186,9 +190,27 @@ public class AnalysisCollectorPluginTest extends AbstractJUnitTest {
         ListView view = jenkins.views.create(ListView.class, jenkins.createRandomName());
         view.configure();
         view.matchAllJobs();
-        AnalysisCollectorColumn analysisCollectorColumn = view.addColumn(AnalysisCollectorColumn.class);
-        analysisCollectorColumn.checkPlugin(CHECKSTYLE, false);
+        view.addColumn(AnalysisCollectorColumn.class);
         view.save();
+        view.open();
+        WebElement warningsCell = view.find(by.xpath("//table[@id='projectstatus']/tbody/tr[2]/td[last()-1]"));
+        assertThat(warningsCell.getText(), is("799"));
+        // check that tooltip contains link to checked analysis plugin results
+        String tooltip = warningsCell.getAttribute("tooltip");
+        assertThat(tooltip, containsString("<a href=\"job/" + job.name + "/checkstyle\">776</a>"));
+        assertThat(tooltip, containsString("<a href=\"job/" + job.name + "/findbugs\">6</a>"));
+        assertThat(tooltip, containsString("<a href=\"job/" + job.name + "/pmd\">9</a>"));
+        // uncheck PMD plugin
+        view.configure();
+        AnalysisCollectorColumn column = view.getColumn(AnalysisCollectorColumn.class);
+        column.checkPlugin(PMD, false);
+        view.save();
+        view.open();
+        // check that PMD warnings are not collected to total warning number and tooltip
+        warningsCell = view.find(by.xpath("//table[@id='projectstatus']/tbody/tr[2]/td[last()-1]"));
+        assertThat(warningsCell.getText(), is("790"));
+        tooltip = warningsCell.getAttribute("tooltip");
+        assertThat(tooltip, not(containsString("<a href=\"job/" + job.name + "/pmd\">9</a>")));
     }
 
     /**
