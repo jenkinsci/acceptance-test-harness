@@ -46,22 +46,4 @@ public class ListView extends View {
         throw new NoSuchElementException();
     }
 
-    /**
-     * Configures the listview to include all jobs.
-     */
-    public void matchAllJobs() {
-        control("/useincluderegex").check();
-        String matchEverything = ".*";
-        Control regexJobFilter = control("/useincluderegex/includeRegex");
-        regexJobFilter.set(matchEverything);
-    }
-
-    /**
-     * Deletes the listview.
-     */
-    public void delete() {
-        configure();
-        clickLink("Delete View");
-        clickButton("Yes");
-    }
 }

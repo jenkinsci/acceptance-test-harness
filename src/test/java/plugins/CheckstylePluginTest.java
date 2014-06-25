@@ -4,10 +4,8 @@ import org.jenkinsci.test.acceptance.junit.Bug;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AbstractCodeStylePluginBuildConfigurator;
-import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleAction;
-import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleColumn;
-import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleFreestyleBuildSettings;
-import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleMavenBuildSettings;
+import org.jenkinsci.test.acceptance.plugins.checkstyle.*;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
@@ -273,14 +271,14 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
     }
 
     /**
-     * Build a job and check set up a dashboard view. Check, if the dashboard view shows correct warning count.
+     * Build a job and check set up a dashboard list-view. Check, if the dashboard view shows correct warning count.
      */
     @Test
     @Category(SmokeTest.class)
-    public void build_a_job_and_check_if_dashboard_shows_correct_warnings() {
+    public void build_a_job_and_check_if_dashboard_list_view_shows_correct_warnings() {
         MavenModuleSet job = setupSimpleMavenJob();
         buildJobAndWait(job).shouldSucceed();
-        ListView view = addDashboardColumn(CheckstyleColumn.class);
+        ListView view = addDashboardListViewColumn(CheckstyleListViewColumn.class);
 
         By expectedDashboardLinkMatcher = by.css("a[href='job/" + job.name + "/checkstyle']");
         assertThat(jenkins.all(expectedDashboardLinkMatcher).size(), is(1));
@@ -291,7 +289,26 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
     }
 
     /**
-     * Makes a Freestyle Job with Checkstyle and a warnigns-file.
+     * Build a job and check set up a "dashboard"-style view. Check, if the dashboard view shows correct warning count.
+     */
+    @Test
+    @WithPlugins("dashboard-view")
+    public void build_a_job_and_check_if_dashboard_view_shows_correct_warnings() {
+        MavenModuleSet job = setupSimpleMavenJob();
+        buildJobAndWait(job).shouldSucceed();
+
+        DashboardView view = addDashboardViewAndBottomPortlet(CheckstyleWarningsPerProjectDashboardViewPortlet.class);
+
+        By expectedDashboardLinkMatcher = by.css("a[href='job/" + job.name + "/checkstyle']");
+        assertThat(jenkins.all(expectedDashboardLinkMatcher).size(), is(1));
+        WebElement dashboardLink = jenkins.getElement(expectedDashboardLinkMatcher);
+        assertThat(dashboardLink.getText().trim(), is("12"));
+
+        view.delete();
+    }
+
+    /**
+     * Makes a Freestyle Job with Checkstyle and a warnings-file.
      *
      * @return The new Job
      */

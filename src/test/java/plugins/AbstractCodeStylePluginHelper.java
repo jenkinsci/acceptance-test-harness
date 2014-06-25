@@ -9,6 +9,8 @@ import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AbstractCodeStylePluginBuildConfigurator;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AbstractCodeStylePluginBuildSettings;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AbstractCodeStylePluginMavenBuildSettings;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.AbstractDashboardViewPortlet;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenBuildStep;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
@@ -294,18 +296,29 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
     }
 
     /**
-     * Adds a column on the dashboard.
+     * Creates a new view and adds the given column to the view.
      *
      * @param columnClass The ListViewColumn that should bee added.
      * @param <T>         The concrete type of the ListViewColumn.
      * @return The ListView.
      */
-    protected <T extends ListViewColumn> ListView addDashboardColumn(Class<T> columnClass) {
-        ListView view = jenkins.views.create(ListView.class, jenkins.createRandomName());
-        view.configure();
-        view.matchAllJobs();
+    protected <T extends ListViewColumn> ListView addDashboardListViewColumn(Class<T> columnClass) {
+        ListView view = createNewViewForAllJobs(ListView.class);
         view.addColumn(columnClass);
         view.save();
+        return view;
+    }
+
+    /**
+     * Creates a new view with a random name that matches all jobs.
+     * @param viewClass The view that shall be used.
+     * @param <T> The type constraint of the view.
+     * @return The view.
+     */
+    private <T extends View> T createNewViewForAllJobs(Class<T> viewClass) {
+        T view = jenkins.views.create(viewClass, jenkins.createRandomName());
+        view.configure();
+        view.matchAllJobs();
         return view;
     }
 
@@ -326,5 +339,19 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
         }
 
         return job;
+    }
+
+    /**
+     * Creates a new Dashboard-View and adds the given portlet as "bottom portlet".
+     *
+     * @param portlet The Portlet that shall be added.
+     * @param <T> The type constraint of the portlet.
+     * @return The view.
+     */
+    protected <T extends AbstractDashboardViewPortlet> DashboardView addDashboardViewAndBottomPortlet(Class<T> portlet) {
+        DashboardView view = createNewViewForAllJobs(DashboardView.class);
+        view.addBottomPortlet(portlet);
+        view.save();
+        return view;
     }
 }

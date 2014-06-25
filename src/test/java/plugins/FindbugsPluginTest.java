@@ -27,10 +27,8 @@ import org.jenkinsci.test.acceptance.junit.Bug;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AbstractCodeStylePluginBuildConfigurator;
-import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsAction;
-import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsColumn;
-import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsFreestyleBuildSettings;
-import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsMavenBuildSettings;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
+import org.jenkinsci.test.acceptance.plugins.findbugs.*;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
@@ -264,13 +262,32 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
     }
 
     /**
-     * Build a job and check set up a dashboard view. Check, if the dashboard view shows correct warning count.
+     * Build a job and check set up a dashboard list-view. Check, if the dashboard view shows correct warning count.
      */
     @Test
-    public void build_a_job_and_check_if_dashboard_shows_correct_warnings() {
+    public void build_a_job_and_check_if_dashboard_list_view_shows_correct_warnings() {
         MavenModuleSet job = setupSimpleMavenJob();
         buildJobAndWait(job).shouldSucceed();
-        ListView view = addDashboardColumn(FindbugsColumn.class);
+        ListView view = addDashboardListViewColumn(FindbugsColumn.class);
+
+        By expectedDashboardLinkMatcher = by.css("a[href='job/" + job.name + "/findbugs']");
+        assertThat(jenkins.all(expectedDashboardLinkMatcher).size(), is(1));
+        WebElement dashboardLink = jenkins.getElement(expectedDashboardLinkMatcher);
+        assertThat(dashboardLink.getText().trim(), is("1"));
+
+        view.delete();
+    }
+
+    /**
+     * Build a job and check set up a "dashboard"-style view. Check, if the dashboard view shows correct warning count.
+     */
+    @Test
+    @WithPlugins("dashboard-view")
+    public void build_a_job_and_check_if_dashboard_view_shows_correct_warnings() {
+        MavenModuleSet job = setupSimpleMavenJob();
+        buildJobAndWait(job).shouldSucceed();
+
+        DashboardView view = addDashboardViewAndBottomPortlet(FindbugsWarningsPerProjectDashboardViewPortlet.class);
 
         By expectedDashboardLinkMatcher = by.css("a[href='job/" + job.name + "/findbugs']");
         assertThat(jenkins.all(expectedDashboardLinkMatcher).size(), is(1));

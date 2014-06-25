@@ -18,4 +18,16 @@ public class DashboardView extends View {
     public DashboardView(Injector injector, URL url) {
         super(injector, url);
     }
+
+    /**
+     * Adds a new bottom portlet.
+     * @param portletClass The class of the portlet.
+     * @param <T> The type constraint for portlets.
+     * @return The new portlet.
+     */
+    public <T extends AbstractDashboardViewPortlet> T addBottomPortlet(Class<T> portletClass) {
+        bottomPortlet.selectDropdownMenu(portletClass);
+        String path = last(by.css("[name='bottomPortlet']")).getAttribute("path");
+        return newInstance(portletClass, this, path);
+    }
 }
