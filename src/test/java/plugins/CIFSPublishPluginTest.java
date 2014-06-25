@@ -10,7 +10,6 @@ import org.jenkinsci.test.acceptance.junit.Native;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.publish_over.CifsGlobalConfig;
-import org.jenkinsci.test.acceptance.plugins.publish_over.CifsGlobalConfig.Site;
 import org.jenkinsci.test.acceptance.plugins.publish_over.CifsPublisher;
 import org.jenkinsci.test.acceptance.plugins.publish_over.PublishGlobalConfig;
 import org.jenkinsci.test.acceptance.plugins.publish_over.PublishGlobalPublisher;
@@ -64,7 +63,7 @@ public class CIFSPublishPluginTest extends AbstractJUnitTest {
      */
     private void configureCifs(String servername, SMBContainer smb) {
         jenkins.configure();
-        Site s = new CifsGlobalConfig(jenkins).addSite();
+        CifsGlobalConfig.CifSite s = new CifsGlobalConfig(jenkins).addSite();
         {
             s.name.set(servername);
             s.hostname.set(smb.ipBound(139));
