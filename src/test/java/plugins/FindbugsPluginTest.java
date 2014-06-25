@@ -187,6 +187,10 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
         lastBuild.open();
         FindbugsAction findbugs = new FindbugsAction(job);
         assertThat(findbugs.getNewWarningNumber(), is(1));
+
+// TODO decision of uhafner
+//        assertThat(findbugs.getLinkedSourceFileLineNumber("Details", "Main.java:18", "Normal"), is(18));
+//        assertThat(findbugs.getLinkedSourceFileLineAsString("Details", "Main.java:18", "Normal"), endsWith("if(o == null) {"));
     }
 
     private MavenModuleSet setupSimpleMavenJob() {

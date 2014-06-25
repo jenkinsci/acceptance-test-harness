@@ -208,6 +208,23 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
         lastBuild.open();
         CheckstyleAction checkstyle = new CheckstyleAction(job);
         assertThat(checkstyle.getNewWarningNumber(), is(12));
+
+        SortedMap<String, Integer> expectedContent = new TreeMap<>();
+        expectedContent.put("Main.java:0", 0);
+        expectedContent.put("Main.java:2", 2);
+        expectedContent.put("Main.java:4", 4);
+        expectedContent.put("Main.java:6", 6);
+        expectedContent.put("Main.java:9", 9);
+        expectedContent.put("Main.java:13", 13);
+        expectedContent.put("Main.java:18", 18);
+        expectedContent.put("Main.java:23", 23);
+        expectedContent.put("Main.java:24", 24);
+        expectedContent.put("Main.java:27", 27);
+        assertThat(checkstyle.getWarningsTabContents(), is(expectedContent));
+// TODO decision of uhafner
+//        assertThat(checkstyle.getLinkedSourceFileLineNumber("Warnings", "Main.java:27", "High"), is(27));
+//        assertThat(checkstyle.getLinkedSourceFileLineAsString("Warnings", "Main.java:0", "High"), containsString("Missing package-info.java file."));
+//        assertThat(checkstyle.getLinkedSourceFileLineAsString("Warnings", "Main.java:6", "High"), endsWith("public static void main(String[] args) {"));
     }
 
     /**

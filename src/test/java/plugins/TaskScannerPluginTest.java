@@ -100,9 +100,9 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
 
         //check that the correct line / task is displayed when following the link in the warnings tab
         //assert contents of that line
-        assertThat(tsa.getLinkedSourceFileLineNumber("TSRDockerImage.java:84", "Normal Priority"), is(84));
-        assertThat(tsa.getLinkedSourceFileLineAsString("TSRDockerImage.java:84", "Normal Priority"), containsString("TODO"));
-        assertThat(tsa.getLinkedSourceFileLineAsString("TSRDockerImage.java:84", "Normal Priority"), endsWith("properly wait for either cidfile to appear or process to exit"));
+        assertThat(tsa.getLinkedSourceFileLineNumber("Warnings", "TSRDockerImage.java:84", "Normal Priority"), is(84));
+        assertThat(tsa.getLinkedSourceFileLineAsString("Warnings", "TSRDockerImage.java:84", "Normal Priority"), containsString("TODO"));
+        assertThat(tsa.getLinkedSourceFileLineAsString("Warnings", "TSRDockerImage.java:84", "Normal Priority"), endsWith("properly wait for either cidfile to appear or process to exit"));
 
 
         // now disable case sensitivity and build again. Then the publisher shall also
@@ -417,7 +417,7 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
         assertThat(tsa.getNormalWarningNumber(), is(1));
 
         // verify source code display in desired encoding
-        assertThat(tsa.getLinkedSourceFileLineAsString("TestTaskScanner.java:5", "Normal Priority"), endsWith("пример комментария на русском"));
+        assertThat(tsa.getLinkedSourceFileLineAsString("Warnings", "TestTaskScanner.java:5", "Normal Priority"), endsWith("пример комментария на русском"));
 
         // verify extraction in Warnings tab uses desired encoding
         assertWarningExtraction(tsa,"TestTaskScanner.java",5,"TODO","пример комментария на русском");

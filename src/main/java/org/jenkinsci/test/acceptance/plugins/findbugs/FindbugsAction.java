@@ -1,5 +1,7 @@
 package org.jenkinsci.test.acceptance.plugins.findbugs;
 
+import org.jenkinsci.test.acceptance.plugins.analysis_core.AbstractCodeStylePluginAction;
+
 import org.jenkinsci.test.acceptance.po.ContainerPageObject;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AbstractCodeStylePluginAction;
 

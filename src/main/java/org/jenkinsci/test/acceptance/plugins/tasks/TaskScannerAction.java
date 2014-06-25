@@ -1,13 +1,13 @@
 package org.jenkinsci.test.acceptance.plugins.tasks;
 
-import java.util.List;
-import java.util.NoSuchElementException;
-
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AbstractCodeStylePluginAction;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.ContainerPageObject;
 import org.openqa.selenium.WebElement;
+
+import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * Page object for Task Scanner action.
@@ -55,30 +55,6 @@ public class TaskScannerAction  extends AbstractCodeStylePluginAction {
     }
 
     /**
-     * This method gets the source code file line as String which is linked by the "Warnings"-tab
-     * table entries.
-     *
-     * @param linkText the name of the link in the "Warnings" tab.
-     * @param priority the task priority: "High Priority", "Normal Priority" or "Low Priority"
-     * @return the source code line as String.
-     */
-    public String getLinkedSourceFileLineAsString(String linkText, String priority){
-        return asTrimmedString(getLinkedSourceFileLine(linkText,priority));
-    }
-
-    /**
-     * This method gets line number of the source code file which is linked by the "Warnings"-tab
-     * table entries.
-     *
-     * @param linkText the name of the link in the "Warnings" tab.
-     * @param priority the task priority: "High Priority", "Normal Priority" or "Low Priority"
-     * @return the source code line as String.
-     */
-    public Integer getLinkedSourceFileLineNumber(String linkText, String priority){
-        return asInt(getLinkedSourceFileLine(linkText,priority).findElement(by.tagName("a")));
-    }
-
-    /**
      * Getter for the "Plug-in Result:" line on a build's page. This line is only displayed
      * in case the Task Scanner plugin is configured to change the build status w.r.t to
      * certain warning thresholds.
@@ -101,26 +77,5 @@ public class TaskScannerAction  extends AbstractCodeStylePluginAction {
                 ".//img[@title = 'Success' or @title = 'Unstable' or @title = 'Failed']")).
                 getAttribute("title").toUpperCase() + " -" + StringUtils.substringAfterLast(pResult, "-");
     }
-
-    /**
-     * This method gets the source code file line which is linked by the "Warnings"-tab
-     * table entries.
-     * The particular line is found via the warning priority as it is used as title attribute's
-     * value for this div object.
-     *
-     * @param linkText the name of the link in the "Warnings" tab.
-     * @param priority the task priority: "High Priority", "Normal Priority" or "Low Priority"
-     * @return the {@link org.openqa.selenium.WebElement} containing the source code line.
-     */
-    private WebElement getLinkedSourceFileLine(String linkText, String priority){
-        ensureTab("Warnings");
-
-        //find and follow the link to the source file display
-        find(by.xpath(".//A[text() = '" + linkText + "']")).click();
-
-        //find the highlighted line using the title attribute which is set to the priority
-        return find(by.xpath("//div[@title='" + priority + "']"));
-    }
-
 
 }

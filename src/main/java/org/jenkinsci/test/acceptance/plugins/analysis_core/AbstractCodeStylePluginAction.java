@@ -120,7 +120,12 @@ public abstract class AbstractCodeStylePluginAction extends ContainerPageObject 
      * @return Integer value of webelement as Integer object
      */
     protected Integer asInteger(WebElement e) {
-        return Integer.decode(e.getText().trim());
+        String trimmedText = e.getText().trim();
+        // if no line number is given, sometimes a '-' is returned
+        if ("-".equals(trimmedText)) {
+            return 0;
+        }
+        return Integer.decode(trimmedText);
     }
 
     /**
@@ -265,4 +270,55 @@ public abstract class AbstractCodeStylePluginAction extends ContainerPageObject 
         open();
         find(by.xpath(".//A[@href]/em[text() = '"+label+"']")).click();
     }
+
+    /**
+     * This method gets the source code file line as String which is linked by the "Warnings"-tab
+     * table entries.
+     *
+     *
+     * @param tabName the name of the tab to use.
+     * @param linkText the name of the link in the "Warnings" tab.
+     * @param priority the task priority: "High Priority", "Normal Priority" or "Low Priority"
+     * @return the source code line as String.
+     */
+    public String getLinkedSourceFileLineAsString(String tabName, String linkText, String priority){
+        return asTrimmedString(getLinkedSourceFileLine(tabName, linkText, priority));
+    }
+
+    /**
+     * This method gets the source code file line which is linked by the "Warnings"-tab
+     * table entries.
+     * The particular line is found via the warning priority as it is used as title attribute's
+     * value for this div object.
+     *
+     *
+     * @param tabName the name of the tab to use.
+     * @param linkText the name of the link in the "Warnings" tab.
+     * @param priority the task priority: "High Priority", "Normal Priority" or "Low Priority"
+     * @return the {@link org.openqa.selenium.WebElement} containing the source code line.
+     */
+    protected WebElement getLinkedSourceFileLine(String tabName, String linkText, String priority){
+        ensureTab(tabName);
+
+        //find and follow the link to the source file display
+        find(by.xpath(".//A[text() = '" + linkText + "']")).click();
+
+        //find the highlighted line using the title attribute which is set to the priority
+        return find(by.xpath("//div[@title='" + priority + "']"));
+    }
+
+    /**
+     * This method gets line number of the source code file which is linked by the "Warnings"-tab
+     * table entries.
+     *
+     *
+     * @param tabName the name of the tab to use.
+     * @param linkText the name of the link in the tab.
+     * @param priority the task priority: "High Priority", "Normal Priority" or "Low Priority"
+     * @return the source code line as String.
+     */
+    public Integer getLinkedSourceFileLineNumber(String tabName, String linkText, String priority){
+        return asInt(getLinkedSourceFileLine(tabName, linkText, priority).findElement(by.tagName("a")));
+    }
+
 }
