@@ -19,7 +19,7 @@ import static java.nio.file.attribute.PosixFilePermission.OWNER_READ;
  * @author Tobias Meyer
  */
 @DockerFixture(id="sshd",ports={445,139},bindIp="127.0.0.2")
-public class SMBContainer extends DockerContainer {
+public class SMBContainer extends DockerContainer implements IPasswordDockerContainer {
     private final String username = "test";
 
     private final String password = "test";
