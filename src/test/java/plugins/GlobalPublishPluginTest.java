@@ -672,8 +672,8 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
         j.save();
         j.startBuild().shouldSucceed();
         assertThat(dock.tryCopyFile("/tmp/odes.txt","/tmp/"), is(true));
-        assertThat(dock.tryCopyFile("/tmp/odes.txt2","/tmp/"), is(true));
-        assertThat(dock.tryCopyFile("/tmp/odes.txt3","/tmp/"), is(true));
+        assertThat(dock.tryCopyFile("/tmp/odes2.txt","/tmp/"), is(true));
+        assertThat(dock.tryCopyFile("/tmp/odes3.txt","/tmp/"), is(true));
     }
 
     /**
