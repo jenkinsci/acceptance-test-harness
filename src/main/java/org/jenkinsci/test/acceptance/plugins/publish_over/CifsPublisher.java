@@ -7,7 +7,7 @@ import org.jenkinsci.test.acceptance.po.*;
  * @author Tobias Meyer
  */
 @Describable("Send build artifacts to a windows share")
-public class CifsPublisher extends PublishGlobalPublisher implements PostBuildStep {
+public class CifsPublisher extends PublishGlobalPublisher{
     public CifsPublisher(Job parent, String path) {
         super(parent, path);
     }

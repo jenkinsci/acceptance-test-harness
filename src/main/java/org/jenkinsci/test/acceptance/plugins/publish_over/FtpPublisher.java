@@ -3,10 +3,11 @@ package org.jenkinsci.test.acceptance.plugins.publish_over;
 import org.jenkinsci.test.acceptance.po.*;
 
 /**
+ * Concrete Implementation for the FtpPublisher config page
  * @author Tobias Meyer
  */
 @Describable("Send build artifacts over FTP")
-public class FtpPublisher extends PublishGlobalPublisher implements PostBuildStep {
+public class FtpPublisher extends PublishGlobalPublisher {
     public FtpPublisher(Job parent, String path) {
         super(parent, path);
     }

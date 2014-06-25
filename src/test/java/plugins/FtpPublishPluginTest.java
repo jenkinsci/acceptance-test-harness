@@ -1,33 +1,12 @@
 package plugins;
 
-import java.io.File;
-import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.concurrent.ExecutionException;
-
-import org.apache.commons.io.FileUtils;
-import org.hamcrest.CoreMatchers;
-import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.docker.DockerContainer;
 import org.jenkinsci.test.acceptance.docker.fixtures.FtpdContainer;
 import org.jenkinsci.test.acceptance.docker.fixtures.IPasswordDockerContainer;
-import org.jenkinsci.test.acceptance.docker.fixtures.SMBContainer;
-import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.junit.Native;
-import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.publish_over.*;
 import org.jenkinsci.test.acceptance.plugins.publish_over.FtpGlobalConfig.FtpSite;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
-import org.jenkinsci.test.acceptance.po.Slave;
-import org.jenkinsci.test.acceptance.slave.SlaveProvider;
-import org.junit.Test;
-
-import com.google.inject.Inject;
-
-import static org.junit.Assert.*;
 
 /**
  * Feature: Tests for FTP plugin
@@ -41,8 +20,8 @@ public class FtpPublishPluginTest extends GlobalPublishPluginTest {
 
 
     /**
-     * Creates & Returns the instance of the correspending Docker Container for this publisher.
-     * @return
+     * Creates & Returns a FtpdContainer for the SMB Tests
+     * @return FtpdContainer
      */
     protected DockerContainer CreatePublisherContainer()
     {
@@ -50,8 +29,8 @@ public class FtpPublishPluginTest extends GlobalPublishPluginTest {
     }
 
     /**
-     *
-     * @return
+     * Creates and returns a FtpGlobalConfig.GlobalSite for the FTP Test
+     * @return FtpGlobalConfig.GlobalSite
      */
     protected  PublishGlobalConfig.GlobalSite CreateGlobalConfig()
     {
@@ -59,8 +38,8 @@ public class FtpPublishPluginTest extends GlobalPublishPluginTest {
     }
 
     /**
-     *
-     * @return
+     * Creates and returns a PublishGlobalPublisher  for the FTP Test
+     * @return PublishGlobalPublisher
      */
     protected  PublishGlobalPublisher AddGlobalPublisher(FreeStyleJob j)
     {
@@ -71,14 +50,14 @@ public class FtpPublishPluginTest extends GlobalPublishPluginTest {
      * Helper method to configure Jenkins.
      * It adds the DockerContainer as FTP Server with the name
      *
-     * @param servername Name to Access Instance
+     * @param serverName Name to Access Instance
      * @param dock       Docker Instance of the Server
      */
-    protected void configurePublisher(String servername, DockerContainer dock) {
+    protected void configurePublisher(String serverName, DockerContainer dock) {
         jenkins.configure();
         FtpSite s = new FtpGlobalConfig(jenkins).addSite();
         {
-            s.name.set(servername);
+            s.name.set(serverName);
             s.hostname.set(dock.ipBound(21));
             s.port.set(dock.port(21));
             if(dock instanceof IPasswordDockerContainer) {

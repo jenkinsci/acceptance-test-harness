@@ -1,34 +1,14 @@
 package plugins;
 
-import com.google.inject.Inject;
-import org.apache.commons.io.FileUtils;
-import org.hamcrest.CoreMatchers;
-import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.docker.DockerContainer;
 import org.jenkinsci.test.acceptance.docker.fixtures.IPasswordDockerContainer;
 import org.jenkinsci.test.acceptance.docker.fixtures.SMBContainer;
-import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.junit.Native;
-import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.publish_over.CifsGlobalConfig;
 import org.jenkinsci.test.acceptance.plugins.publish_over.CifsPublisher;
 import org.jenkinsci.test.acceptance.plugins.publish_over.PublishGlobalConfig;
 import org.jenkinsci.test.acceptance.plugins.publish_over.PublishGlobalPublisher;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
-import org.jenkinsci.test.acceptance.po.Slave;
-import org.jenkinsci.test.acceptance.slave.SlaveProvider;
-import org.junit.Test;
-
-import java.io.File;
-import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.concurrent.ExecutionException;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
 
 /**
  * Feature: Tests for CIFS plugin
@@ -40,8 +20,8 @@ public class CIFSPublishPluginTest extends GlobalPublishPluginTest {
 
 
     /**
-     * Creates & Returns the instance of the correspending Docker Container for this publisher.
-     * @return
+     * Creates & Returns a SMBContainer for the CIF Tests
+     * @return SMBContainer
      */
     protected  DockerContainer CreatePublisherContainer()
     {
@@ -49,8 +29,8 @@ public class CIFSPublishPluginTest extends GlobalPublishPluginTest {
     }
 
     /**
-     *
-     * @return
+     * Creates and returns a CifsGlobalConfig.GlobalSite for the CIF Test
+     * @return CifsGlobalConfig.GlobalSite
      */
     protected  PublishGlobalConfig.GlobalSite CreateGlobalConfig()
     {
@@ -58,8 +38,8 @@ public class CIFSPublishPluginTest extends GlobalPublishPluginTest {
     }
 
     /**
-     *
-     * @return
+     * Creates and returns a PublishGlobalPublisher  for the CIF Test
+     * @return PublishGlobalPublisher
      */
     protected  PublishGlobalPublisher AddGlobalPublisher(FreeStyleJob j)
     {
@@ -68,16 +48,16 @@ public class CIFSPublishPluginTest extends GlobalPublishPluginTest {
 
     /**
      * Helper method to configure Jenkins.
-     * It adds the DockerContainer with smbsmb Server with the name
+     * It adds the DockerContainer with smb Server with the name
      *
-     * @param servername Name to Access Instance
+     * @param serverName Name to Access Instance
      * @param dock       Docker Instance of the Server
      */
-    protected void configurePublisher(String servername, DockerContainer dock) {
+    protected void configurePublisher(String serverName, DockerContainer dock) {
         jenkins.configure();
         CifsGlobalConfig.CifSite s = new CifsGlobalConfig(jenkins).addSite();
         {
-            s.name.set(servername);
+            s.name.set(serverName);
             s.hostname.set(dock.ipBound(139));
             s.port.set(dock.port(139));
             if(dock instanceof IPasswordDockerContainer) {

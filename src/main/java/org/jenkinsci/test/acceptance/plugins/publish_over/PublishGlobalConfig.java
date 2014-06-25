@@ -15,7 +15,9 @@ import javax.inject.Inject;
 public abstract class PublishGlobalConfig extends PageAreaImpl {
     @Inject
     JenkinsController controller;
-
+    /**
+     * Add Button for one Server
+     */
     public final Control add = control("repeatable-add");
 
     @Inject
@@ -23,12 +25,19 @@ public abstract class PublishGlobalConfig extends PageAreaImpl {
         super(jenkins, path);
     }
 
+    /**
+     * Add one PublishOver ServerConfiguration
+     * @return
+     */
     public GlobalSite addSite() {
         add.click();
         String p = last(by.xpath(".//div[@name='instance'][starts-with(@path,'"+getPath()+"/')]")).getAttribute("path");
         return new GlobalSite(getPage(), p);
     }
 
+    /**
+     * GlobalSite describing the server configuration for  publish over xxx
+     */
     public static class GlobalSite extends PageAreaImpl {
         public GlobalSite(PageObject parent, String path) {
             super(parent, path);

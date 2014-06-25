@@ -5,12 +5,9 @@ import org.apache.commons.io.FileUtils;
 import org.hamcrest.CoreMatchers;
 import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.docker.DockerContainer;
-import org.jenkinsci.test.acceptance.docker.fixtures.IPasswordDockerContainer;
-import org.jenkinsci.test.acceptance.docker.fixtures.SMBContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Native;
 import org.jenkinsci.test.acceptance.junit.Resource;
-import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.publish_over.PublishGlobalConfig;
 import org.jenkinsci.test.acceptance.plugins.publish_over.PublishGlobalPublisher;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
@@ -29,7 +26,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 /**
- * Abstract class for the publisher class
+ * Abstract class for the publisher class.
+ * This class implements base test which are used by all PublishOver* Classes.
+ * 
+ * For an concrete implementation of the test, the abstract functions need to be implemented.
  *
  * @author Tobias Meyer
  */
@@ -55,7 +55,7 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
 
     /**
      * Creates & Returns the instance of the corresponding Docker Container for this publisher.
-     * @return
+     * @return a DockerContainer
      */
     protected abstract DockerContainer CreatePublisherContainer();
 
@@ -73,20 +73,20 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
 
     /**
      * Helper method to configure Jenkins.
-     * It adds the DockerContainer with smbsmb Server with the name
+     * It adds the DockerContainer with publisher Server with the name
      *
-     * @param servername Name to Access Instance
+     * @param serverName Name to Access Instance
      * @param dock       Docker Instance of the Server
      */
-    protected abstract void configurePublisher(String servername, DockerContainer dock) ;
+    protected abstract void configurePublisher(String serverName, DockerContainer dock) ;
 
     /**
-     * @native(docker) Scenario: Configure a job with smbsmb publishing
-     * Given I have installed the "smbsmb" plugin
-     * And a docker fixture "smbd"
+     * @native(docker) Scenario: Configure a job with publisher publishing
+     * Given I have installed the "publisher" plugin
+     * And a docker fixture "dock"
      * And a job
-     * When I configure docker fixture as smbsmb host
-     * And I configure the job with one smbsmb Transfer Set
+     * When I configure docker fixture as publisher host
+     * And I configure the job with one publisher Transfer Set
      * And I configure the Transfer Set
      * With Source Files "odes.txt"
      * And With Remote Directory myfolder/
@@ -120,12 +120,12 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     * @native(docker) Scenario: Configure a job with smbsmb publishing
-     * Given I have installed the "smbsmb" plugin
-     * And a docker fixture "smb"
+     * @native(docker) Scenario: Configure a job with publisher publishing
+     * Given I have installed the "publisher" plugin
+     * And a docker fixture "dock"
      * And a job
-     * When I configure docker fixture as smbsmb host
-     * And I configure the job with one smbsmb Transfer Set
+     * When I configure docker fixture as publisher host
+     * And I configure the job with one publisher Transfer Set
      * And I configure the Transfer Set
      * With Source Files "odes.txt"
      * And With Remote Directory "/tmp/${JOB_NAME}"
@@ -133,7 +133,7 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
      * And I save the job
      * And I build the job
      * Then the build should succeed
-     * And smbsmb plugin should have published "odes.txt" on docker fixture
+     * And publisher plugin should have published "odes.txt" on docker fixture
      */
 
     @Test
@@ -161,12 +161,12 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     * @native(docker) Scenario: Configure a job with smb publishing
-     * Given I have installed the "smb" plugin
-     * And a docker fixture "smb"
+     * @native(docker) Scenario: Configure a job with publisher publishing
+     * Given I have installed the "publisher" plugin
+     * And a docker fixture "dock"
      * And a job
-     * When I configure docker fixture as smb site
-     * And I configure the job with one smbs Transfer Set
+     * When I configure docker fixture as publisher site
+     * And I configure the job with one publisher Transfer Set
      * And I configure the Transfer Set
      * With Source Files "prefix_/test.txt"
      * And With Remote Directory /tmp/
@@ -174,7 +174,7 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
      * And I save the job
      * And I build the job
      * Then the build should succeed
-     * And smb plugin should have published "test.txt" on docker fixture
+     * And publisher plugin should have published "test.txt" on docker fixture
      */
 
     @Test
@@ -199,14 +199,14 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     * @native(docker) Scenario: Configure a job with smbsmb publishing
-     * Given I have installed the "smbsmb" plugin
+     * @native(docker) Scenario: Configure a job with publisher publishing
+     * Given I have installed the "publisher" plugin
      * And a resources Directory "prefix_/"
      * With the file ".exclude"
-     * And a docker fixture "smb"
+     * And a docker fixture "dock"
      * And a job
-     * When I configure docker fixture as smbsmb site
-     * And I configure the job with one smbsmb Transfer Set
+     * When I configure docker fixture as publisher site
+     * And I configure the job with one publisher Transfer Set
      * And I configure the Transfer Set
      * With Source Files  "prefix_/"
      * And With exclude ".exclude"
@@ -214,7 +214,7 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
      * And I save the job
      * And I build the job
      * Then the build should succeed
-     * And smbsmb plugin should have published "prefix_/" without the ".exclude" on docker fixture
+     * And publisher plugin should have published "prefix_/" without the ".exclude" on docker fixture
      */
 
     @Test
@@ -239,19 +239,19 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     * @native(docker) Scenario: Configure a job with smbsmb publishing
-     * Given I have installed the "smbsmb" plugin
-     * And a docker fixture "smb"
+     * @native(docker) Scenario: Configure a job with publisher publishing
+     * Given I have installed the "publisher" plugin
+     * And a docker fixture "dock"
      * And a job
-     * When I configure docker fixture as smbsmb site
-     * And I configure the job with one smbsmb Transfer Set
+     * When I configure docker fixture as publisher site
+     * And I configure the job with one publisher Transfer Set
      * And I configure the Transfer Set
      * With Source Files "prefix_/test.txt,odes.txt"
      * And I copy resources "prefix_/test.txt,odes.txt"  into workspace
      * And I save the job
      * And I build the job
      * Then the build should succeed
-     * And smbsmb plugin should have published "prefix_/test.txt" and "odes.txt"
+     * And publisher plugin should have published "prefix_/test.txt" and "odes.txt"
      */
 
     @Test
@@ -277,12 +277,12 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     * @native(docker) Scenario: Configure a job with smbsmb publishing
-     * Given I have installed the "smbsmb" plugin
-     * And a docker fixture "smb"
+     * @native(docker) Scenario: Configure a job with publisher publishing
+     * Given I have installed the "publisher" plugin
+     * And a docker fixture "dock"
      * And a job
-     * When I configure docker fixture as smbsmb site
-     * And I configure the job with one smbsmb Transfer Set
+     * When I configure docker fixture as publisher site
+     * And I configure the job with one publisher Transfer Set
      * And I configure the Transfer Set
      * With Source Files "te,st.txt;odes.txt"
      * And With Pattern separator [;]+
@@ -290,7 +290,7 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
      * And I save the job
      * And I build the job
      * Then the build should succeed
-     * And smbsmb plugin should have published "te,st.txt" and "odes.txt"
+     * And publisher plugin should have published "te,st.txt" and "odes.txt"
      */
 
     @Test
@@ -317,20 +317,20 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     * @native(docker) Scenario: Configure a job with smbsmb publishing
-     * Given I have installed the "smbsmb" plugin
-     * And a docker fixture "smb"
+     * @native(docker) Scenario: Configure a job with publisher publishing
+     * Given I have installed the "publisher" plugin
+     * And a docker fixture "dock"
      * And a job
-     * When I configure docker fixture as smbsmb site
-     * And I configure the job with one smbsmb Transfer Set
+     * When I configure docker fixture as publisher site
+     * And I configure the job with one publisher Transfer Set
      * And I configure the Transfer Set
-     * With Source Files ".svn,.git,odes.txt"  with smbsmb plugin
+     * With Source Files ".svn,.git,odes.txt"  with publisher plugin
      * And I copy resources "odes.txt" as "odes.txt,.svn,.git" into workspace
      * And I save the job
      * And I build the job
      * Then the build should succeed
-     * And smbsmb plugin should have published "odes.txt"
-     * And smbsmb plugin should have not published  ".svn,.git"
+     * And publisher plugin should have published "odes.txt"
+     * And publisher plugin should have not published  ".svn,.git"
      */
 
     @Test
@@ -357,20 +357,20 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     * @native(docker) Scenario: Configure a job with smbsmb publishing
-     * Given I have installed the "smbsmb" plugin
-     * And a docker fixture "smb"
+     * @native(docker) Scenario: Configure a job with publisher publishing
+     * Given I have installed the "publisher" plugin
+     * And a docker fixture "dock"
      * And a job
-     * When I configure docker fixture as smbsmb site
-     * And I configure the job with one smbsmb Transfer Set
+     * When I configure docker fixture as publisher site
+     * And I configure the job with one publisher Transfer Set
      * And I configure the Transfer Set
-     * With Source Files ".svn,.git,odes.txt"  with smbsmb plugin
+     * With Source Files ".svn,.git,odes.txt"  with publisher plugin
      * And With No default excludes checked
      * And I copy resources "odes.txt" as "odes.txt,.svn,.git" into workspace
      * And I save the job
      * And I build the job
      * Then the build should succeed
-     * And smbsmb plugin should have published  .svn/,.git"
+     * And publisher plugin should have published  .svn/,.git"
      */
 
     @Test
@@ -398,20 +398,20 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     * @native(docker) Scenario: Configure a job with smbsmb publishing
-     * Given I have installed the "smbsmb" plugin
-     * And a docker fixture "smb"
+     * @native(docker) Scenario: Configure a job with publisher publishing
+     * Given I have installed the "publisher" plugin
+     * And a docker fixture "dock"
      * And a job
-     * When I configure docker fixture as smbsmb site
-     * And I configure the job with one smbsmb Transfer Set
+     * When I configure docker fixture as publisher site
+     * And I configure the job with one publisher Transfer Set
      * And I configure the Transfer Set
-     * With Source Files "empty/,odes.txt" with smbsmb plugin
+     * With Source Files "empty/,odes.txt" with publisher plugin
      * And With Make empty dirs  Checked
      * And I create the directory "empty/" into workspace
      * And I save the job
      * And I build the job
      * Then the build should succeed
-     * And smbsmb plugin should have published  "empty/" and "odes.txt"
+     * And publisher plugin should have published  "empty/" and "odes.txt"
      */
 
     @Test
@@ -441,19 +441,19 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     * @native(docker) Scenario: Configure a job with smbsmb publishing
-     * Given I have installed the "smbsmb" plugin
-     * And a docker fixture "smb"
+     * @native(docker) Scenario: Configure a job with publisher publishing
+     * Given I have installed the "publisher" plugin
+     * And a docker fixture "dock"
      * And a job
-     * When I configure docker fixture as smbsmb site
-     * And I configure the job with one smbsmb Transfer Set
+     * When I configure docker fixture as publisher site
+     * And I configure the job with one publisher Transfer Set
      * And I configure the Transfer Set
-     * With Source Files "empty/,odes.txt" with smbsmb plugin
+     * With Source Files "empty/,odes.txt" with publisher plugin
      * And I create the directory "empty/" into workspace
      * And I save the job
      * And I build the job
      * Then the build should succeed
-     * And smbsmb plugin should have not published "empty/" and "odes.txt"
+     * And publisher plugin should have not published "empty/" and "odes.txt"
      */
 
     @Test
@@ -483,19 +483,19 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     * @native(docker) Scenario: Configure a job with smbsmb publishing
-     * Given I have installed the "smbsmb" plugin
-     * And a docker fixture "smb"
+     * @native(docker) Scenario: Configure a job with publisher publishing
+     * Given I have installed the "publisher" plugin
+     * And a docker fixture "dock"
      * And a job
-     * When I configure docker fixture as smbsmb site
-     * And I configure the job with one smbsmb Transfer Set
+     * When I configure docker fixture as publisher site
+     * And I configure the job with one publisher Transfer Set
      * And I configure the Transfer Set
-     * With SourceFiles "odes.txt" and "flat\odes.txt" with smbsmb plugin
+     * With SourceFiles "odes.txt" and "flat\odes.txt" with publisher plugin
      * And I copy resources "ftp_plugin/"
      * And I save the job
      * And I build the job
      * Then the build should succeed
-     * And smbsmb plugin should have published "odes.txt" and "flat/odes.txt"
+     * And publisher plugin should have published "odes.txt" and "flat/odes.txt"
      */
 
     @Test
@@ -519,14 +519,14 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     * @native(docker) Scenario: Configure a job with smbsmb publishing
-     * Given I have installed the "smbsmb" plugin
-     * And a docker fixture "smb"
+     * @native(docker) Scenario: Configure a job with publisher publishing
+     * Given I have installed the "publisher" plugin
+     * And a docker fixture "dock"
      * And a job
-     * When I configure docker fixture as smbsmb site
-     * And I configure the job with one smbsmb Transfer Set
+     * When I configure docker fixture as publisher site
+     * And I configure the job with one publisher Transfer Set
      * And I configure the Transfer Set
-     * With SourceFiles "odes.txt" and "flat\odes.txt" with smbsmb plugin
+     * With SourceFiles "odes.txt" and "flat\odes.txt" with publisher plugin
      * And With Flatten files Checked
      * And I copy resources "ftp_plugin/"
      * And I save the job
@@ -554,20 +554,20 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     * @native(docker) Scenario: Configure a job with smbsmb publishing
-     * Given I have installed the "smbsmb" plugin
-     * And a docker fixture "smb"
+     * @native(docker) Scenario: Configure a job with publisher publishing
+     * Given I have installed the "publisher" plugin
+     * And a docker fixture "dock"
      * And a job
-     * When I configure docker fixture as smbsmb site
-     * And I configure the job with one smbsmb Transfer Set
+     * When I configure docker fixture as publisher site
+     * And I configure the job with one publisher Transfer Set
      * And I configure the Transfer Set
-     * With SourceFiles "odes.txt" with smbsmb plugin
+     * With SourceFiles "odes.txt" with publisher plugin
      * And With Remote directory  is a date format Checked "yyyyMMddHH"
      * And I copy resources "odes.txt" into workspace
      * And I save the job
      * And I build the job
      * Then the build should succeed
-     * And smbsmb plugin should have published "odes.txt" under 'yyyyMMddHH'
+     * And publisher plugin should have published "odes.txt" under 'yyyyMMddHH'
      */
 
     @Test
@@ -595,20 +595,20 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     * @native(docker) Scenario: Configure a job with smbsmb publishing
-     * Given I have installed the "smbsmb" plugin
-     * And a docker fixture "smb"
-     * And I Upload "oldfile.txt" to the smbsmb Server
+     * @native(docker) Scenario: Configure a job with publisher publishing
+     * Given I have installed the "publisher" plugin
+     * And a docker fixture "dock"
+     * And I Upload "oldfile.txt" to the publisher Server
      * And a job
-     * And I configure the job with one smbsmb Transfer Set
+     * And I configure the job with one publisher Transfer Set
      * And I configure the Transfer Set
-     * With SourceFiles "myresources" with smbsmb plugin
+     * With SourceFiles "myresources" with publisher plugin
      * And With Clean remote
      * And I copy resources "myresources" into workspace
      * And I save the job
      * And I build the job
      * Then the build should succeed
-     * And smbsmb plugin should have published "myresources"
+     * And publisher plugin should have published "myresources"
      * And the RemoteDIR should not contain "old.txt"
      */
 
@@ -633,12 +633,12 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     * @native(docker) Scenario: Configure a job with smbsmb publishing
-     * Given I have installed the "smbsmb" plugin
-     * And a docker fixture "smb"
+     * @native(docker) Scenario: Configure a job with publisher publishing
+     * Given I have installed the "publisher" plugin
+     * And a docker fixture "dock"
      * And a job
-     * When I configure docker fixture as smbsmb site
-     * And I configure the job with three smbsmb Transfer Sets
+     * When I configure docker fixture as publisher site
+     * And I configure the job with three publisher Transfer Sets
      * And I configure the Transfer Set 1
      * With SourceFiles  odes.txt
      * And I configure the Transfer Set 2
@@ -649,7 +649,7 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
      * And I save the job
      * And I build the job
      * Then the build should succeed
-     * And smbsmb plugin should have published odes.txt,odes2.txt,odes3.txt on docker fixture
+     * And publisher plugin should have published odes.txt,odes2.txt,odes3.txt on docker fixture
      */
     @Test
     public void publish_multiple_sets() throws IOException, InterruptedException {
@@ -677,25 +677,25 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     * @native(docker) Scenario: Configure a job with smbsmb publishing
-     * Given I have installed the "smbsmb" plugin
-     * And 2 docker fixtures "smb"
+     * @native(docker) Scenario: Configure a job with publisher publishing
+     * Given I have installed the "publisher" plugin
+     * And 2 docker fixtures "dock"
      * And a job
-     * When I configure docker docker1 as smbsmb site
-     * And I configure docker  docker2 as smbsmb site
+     * When I configure docker docker1 as publisher site
+     * And I configure docker  docker2 as publisher site
      * And I configure the job with docker1 Server
-     * And one smbsmb Transfer Set
+     * And one publisher Transfer Set
      * And I configure the Transfer Set
      * With SourceFiles odes.txt
      * And I Add Server docker2
-     * And one smbsmb Transfer Set
+     * And one publisher Transfer Set
      * And I configure the Transfer Set
      * With SourceFiles odes.txt
      * And I copy resources odes.txt  into workspace
      * And I save the job
      * And I build the job
      * Then the build should succeed
-     * And smbsmb plugin should have published my set of files at all docker fixtures
+     * And publisher plugin should have published my set of files at all docker fixtures
      */
     @Test
     public void publish_multiple_servers() throws IOException, InterruptedException {
@@ -725,13 +725,13 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     * @native(docker) Scenario: Configure a job with smbsmb publishing
-     * Given I have installed the "smbsmb" plugin
-     * And a docker fixture "smb"
+     * @native(docker) Scenario: Configure a job with publisher publishing
+     * Given I have installed the "publisher" plugin
+     * And a docker fixture "dock"
      * And a ssh slave
      * And a job
-     * When I configure docker fixture as smbsmb host
-     * And I configure the job with one smbsmb Transfer Set
+     * When I configure docker fixture as publisher host
+     * And I configure the job with one publisher Transfer Set
      * And I configure the Transfer Set
      * With Source Files "odes.txt"
      * And With Remote Directory myfolder/
@@ -739,7 +739,7 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
      * And I save the job
      * And I build the job
      * Then the build should succeed
-     * And smbsmb plugin should have published "odes.txt" on docker fixture
+     * And publisher plugin should have published "odes.txt" on docker fixture
      */
 
     @Test
