@@ -18,6 +18,7 @@ import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.publish_over.FtpGlobalConfig;
 import org.jenkinsci.test.acceptance.plugins.publish_over.FtpGlobalConfig.FtpSite;
 import org.jenkinsci.test.acceptance.plugins.publish_over.FtpPublisher;
+import org.jenkinsci.test.acceptance.plugins.publish_over.PublishGlobalPublisher;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.slave.SlaveProvider;
@@ -105,7 +106,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         {
             j.copyResource(cpFile);
             FtpPublisher fp = j.addPublisher(FtpPublisher.class);
-            FtpPublisher.Site fps = fp.getDefault();
+            PublishGlobalPublisher.GlobalPublishSite fps = fp.getDefault();
             fps.getDefaultTransfer().sourceFile.set("odes.txt");
         }
         j.save();
@@ -145,7 +146,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         {
             j.copyResource(cpFile);
             FtpPublisher fp = j.addPublisher(FtpPublisher.class);
-            FtpPublisher.Site fps = fp.getDefault();
+            PublishGlobalPublisher.GlobalPublishSite fps = fp.getDefault();
             fps.getDefaultTransfer().remoteDirectory.set("${JOB_NAME}/");
             fps.getDefaultTransfer().sourceFile.set("odes.txt");
         }
@@ -184,7 +185,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         {
             j.copyDir(cpDir);
             FtpPublisher fp = j.addPublisher(FtpPublisher.class);
-            FtpPublisher.Site fps = fp.getDefault();
+            PublishGlobalPublisher.GlobalPublishSite fps = fp.getDefault();
             fps.getDefaultTransfer().sourceFile.set("prefix_/test.txt");
             fps.getDefaultTransfer().removePrefix.set("prefix_");
         }
@@ -223,7 +224,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         {
             j.copyDir(cpDir);
             FtpPublisher fp = j.addPublisher(FtpPublisher.class);
-            FtpPublisher.Site fps = fp.getDefault();
+            PublishGlobalPublisher.GlobalPublishSite fps = fp.getDefault();
             fps.getDefaultTransfer().sourceFile.set("prefix_/");
             fps.getDefaultTransfer().excludes.set("**/*.exclude");
         }
@@ -260,7 +261,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         {
             j.copyDir(cpDir);
             FtpPublisher fp = j.addPublisher(FtpPublisher.class);
-            FtpPublisher.Site fps = fp.getDefault();
+            PublishGlobalPublisher.GlobalPublishSite fps = fp.getDefault();
             fps.getDefaultTransfer().sourceFile.set("prefix_/test.txt,odes.txt");
         }
         j.save();
@@ -297,7 +298,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         {
             j.copyDir(cpDir);
             FtpPublisher fp = j.addPublisher(FtpPublisher.class);
-            FtpPublisher.Site fps = fp.getDefault();
+            PublishGlobalPublisher.GlobalPublishSite fps = fp.getDefault();
             fps.getDefaultTransfer().patternSeparator.set("[;]+");
             fps.getDefaultTransfer().sourceFile.set("te,st.txt;odes.txt");
         }
@@ -337,7 +338,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
             j.copyResource(cpTxt, "CVS");
             j.copyResource(cpTxt);
             FtpPublisher fp = j.addPublisher(FtpPublisher.class);
-            FtpPublisher.Site fps = fp.getDefault();
+            PublishGlobalPublisher.GlobalPublishSite fps = fp.getDefault();
             fps.getDefaultTransfer().sourceFile.set(".svn,CVS,odes.txt");
         }
         j.save();
@@ -378,7 +379,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
             j.copyResource(cpTxt, "CVS");
             j.copyResource(cpTxt);
             FtpPublisher fp = j.addPublisher(FtpPublisher.class);
-            FtpPublisher.Site fps = fp.getDefault();
+            PublishGlobalPublisher.GlobalPublishSite fps = fp.getDefault();
             fps.getDefaultTransfer().sourceFile.set(".svn,CVS,odes.txt");
             fps.getDefaultTransfer().noDefaultExcludes.check();
         }
@@ -421,7 +422,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
             j.copyResource(cpTxt);
             j.copyFile(tmpDir);
             FtpPublisher fp = j.addPublisher(FtpPublisher.class);
-            FtpPublisher.Site fps = fp.getDefault();
+            PublishGlobalPublisher.GlobalPublishSite fps = fp.getDefault();
             fps.getDefaultTransfer().sourceFile.set("empty/,odes.txt");
             fps.getDefaultTransfer().makeEmptyDirs.check();
         }
@@ -463,7 +464,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
             j.copyResource(cpTxt);
             j.copyFile(tmpDir);
             FtpPublisher fp = j.addPublisher(FtpPublisher.class);
-            FtpPublisher.Site fps = fp.getDefault();
+            PublishGlobalPublisher.GlobalPublishSite fps = fp.getDefault();
             fps.getDefaultTransfer().sourceFile.set("empty/,odes.txt");
 
         }
@@ -501,7 +502,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         {
             j.copyDir(cpDir);
             FtpPublisher fp = j.addPublisher(FtpPublisher.class);
-            FtpPublisher.Site fps = fp.getDefault();
+            PublishGlobalPublisher.GlobalPublishSite fps = fp.getDefault();
             fps.getDefaultTransfer().sourceFile.set("flat/odes.txt,odes.txt");
         }
         j.save();
@@ -537,7 +538,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         {
             j.copyDir(cpDir);
             FtpPublisher fp = j.addPublisher(FtpPublisher.class);
-            FtpPublisher.Site fps = fp.getDefault();
+            PublishGlobalPublisher.GlobalPublishSite fps = fp.getDefault();
             fps.getDefaultTransfer().flatten.check();
             fps.getDefaultTransfer().sourceFile.set("flat/odes.txt,odes.txt");
         }
@@ -573,7 +574,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         {
             j.copyResource(cpTxt);
             FtpPublisher fp = j.addPublisher(FtpPublisher.class);
-            FtpPublisher.Site fps = fp.getDefault();
+            PublishGlobalPublisher.GlobalPublishSite fps = fp.getDefault();
             fps.getDefaultTransfer().remoteDirectorySDF.check();
             fps.getDefaultTransfer().remoteDirectory.set("yyyyMMddHH");
             fps.getDefaultTransfer().sourceFile.set("odes.txt");
@@ -616,7 +617,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         {
             j.copyResource(cpTxt);
             FtpPublisher fp = j.addPublisher(FtpPublisher.class);
-            FtpPublisher.Site fps = fp.getDefault();
+            PublishGlobalPublisher.GlobalPublishSite fps = fp.getDefault();
             fps.getDefaultTransfer().cleanRemote.check();
             fps.getDefaultTransfer().sourceFile.set("odes.txt");
         }
@@ -658,7 +659,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
             j.copyResource(cpTxt, "odes2.txt");
             j.copyResource(cpTxt, "odes3.txt");
             FtpPublisher fp = j.addPublisher(FtpPublisher.class);
-            FtpPublisher.Site fps = fp.getDefault();
+            PublishGlobalPublisher.GlobalPublishSite fps = fp.getDefault();
             fps.getDefaultTransfer().sourceFile.set("odes.txt");
             fps.addTransferSet().sourceFile.set("odes2.txt");
             fps.addTransferSet().sourceFile.set("odes3.txt");
@@ -704,10 +705,10 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         {
             j.copyResource(cpTxt);
             FtpPublisher fp = j.addPublisher(FtpPublisher.class);
-            FtpPublisher.Site fps = fp.getDefault();
+            PublishGlobalPublisher.GlobalPublishSite fps = fp.getDefault();
             fps.configName.select("docker1");
             fps.getDefaultTransfer().sourceFile.set("odes.txt");
-            FtpPublisher.Site fps2 = fp.addServer();
+            PublishGlobalPublisher.GlobalPublishSite fps2 = fp.addServer();
             fps2.configName.select("docker2");
             fps2.getDefaultTransfer().sourceFile.set("odes.txt");
         }
@@ -751,7 +752,7 @@ public class FtpPublishPluginTest extends AbstractJUnitTest {
         {
             j.copyResource(cpFile);
             FtpPublisher fp = j.addPublisher(FtpPublisher.class);
-            FtpPublisher.Site fps = fp.getDefault();
+            PublishGlobalPublisher.GlobalPublishSite fps = fp.getDefault();
             fps.getDefaultTransfer().sourceFile.set("odes.txt");
         }
         j.save();
