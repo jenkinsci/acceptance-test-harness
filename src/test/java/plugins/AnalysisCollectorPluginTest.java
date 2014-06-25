@@ -4,6 +4,7 @@ import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginBuildConfigurator;
 import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisCollectorAction;
+import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisCollectorColumn;
 import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisCollectorFreestyleBuildSettings;
 import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisPlugin;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleFreestyleBuildSettings;
@@ -13,11 +14,15 @@ import org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerFreestyleBuildSett
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
+import org.jenkinsci.test.acceptance.po.ListView;
 import org.junit.Test;
+import org.openqa.selenium.WebElement;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.jenkinsci.test.acceptance.Matchers.hasAction;
 import static org.jenkinsci.test.acceptance.Matchers.hasAnalysisWarningsFor;
+import static org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisPlugin.*;
+import static org.jenkinsci.test.acceptance.po.PageObject.createRandomName;
 import static org.junit.Assert.assertThat;
 
 /**
@@ -29,6 +34,7 @@ import static org.junit.Assert.assertThat;
 public class AnalysisCollectorPluginTest extends AbstractJUnitTest {
 
     private static final String ANALYSIS_COLLECTOR_PLUGIN_RESOURCES = "/analysis_collector_plugin";
+    private static final String XPATH_LISTVIEW_WARNING_TD = "//table[@id='projectstatus']/tbody/tr[2]/td[last()-1]";
 
     /**
      * Scenario: First build with new warnings
@@ -121,16 +127,16 @@ public class AnalysisCollectorPluginTest extends AbstractJUnitTest {
     public void deselect_plugins() {
         FreeStyleJob job = setupJob(ANALYSIS_COLLECTOR_PLUGIN_RESOURCES, true);
         // no checkstyle
-        AnalysisCollectorAction result = deselectPluginAndBuild(AnalysisPlugin.CHECKSTYLE, job);
+        AnalysisCollectorAction result = deselectPluginAndBuild(CHECKSTYLE, job);
         assertThat(result.getWarningNumber(), is(23));
         // no checkstyle, no findbugs
-        result = deselectPluginAndBuild(AnalysisPlugin.FINDBUGS, job);
+        result = deselectPluginAndBuild(FINDBUGS, job);
         assertThat(result.getWarningNumber(), is(17));
         // no checkstyle, no findbugs, no pmd
-        result = deselectPluginAndBuild(AnalysisPlugin.PMD, job);
+        result = deselectPluginAndBuild(PMD, job);
         assertThat(result.getWarningNumber(), is(8));
         // no checkstyle, no findbugs, no pmd, no tasks => zero warnings
-        result = deselectPluginAndBuild(AnalysisPlugin.TASKS, job);
+        result = deselectPluginAndBuild(TASKS, job);
         assertThat(result.getWarningNumber(), is(0));
     }
 
@@ -149,21 +155,65 @@ public class AnalysisCollectorPluginTest extends AbstractJUnitTest {
         // check if results for checked plugins are visible
         assertThat(job,
                 allOf(
-                        hasAnalysisWarningsFor(AnalysisPlugin.CHECKSTYLE),
-                        hasAnalysisWarningsFor(AnalysisPlugin.PMD),
-                        hasAnalysisWarningsFor(AnalysisPlugin.FINDBUGS),
-                        hasAnalysisWarningsFor(AnalysisPlugin.TASKS)
+                        hasAnalysisWarningsFor(CHECKSTYLE),
+                        hasAnalysisWarningsFor(PMD),
+                        hasAnalysisWarningsFor(FINDBUGS),
+                        hasAnalysisWarningsFor(TASKS)
                 )
         );
         // check if results for unchecked/not installed plugins are NOT visible
         assertThat(job,
                 not(
                         anyOf(
-                                hasAnalysisWarningsFor(AnalysisPlugin.WARNINGS),
-                                hasAnalysisWarningsFor(AnalysisPlugin.DRY)
+                                hasAnalysisWarningsFor(WARNINGS),
+                                hasAnalysisWarningsFor(DRY)
                         )
                 )
         );
+    }
+
+    /**
+     * Scenario: Custom list view column shows number of warnings
+     * Given I have a job with artifacts of static analysis tools
+     * And this artifacts are published by their corresponding plugins
+     * And the resources of the job contain warnings
+     * And this job is included in a custom list view with added column "Number of warnings"
+     * When I start a build
+     * Then the list view will show the correct number of total warnings
+     * And the mouse-over tooltip will show the correct number of warnings per checked plugin
+     */
+    @Test
+    public void check_warnings_column() {
+        FreeStyleJob job = setupJob(ANALYSIS_COLLECTOR_PLUGIN_RESOURCES, true);
+        job.startBuild().waitUntilFinished();
+        ListView view = jenkins.views.create(ListView.class, createRandomName());
+        view.configure();
+        view.matchAllJobs();
+        view.addColumn(AnalysisCollectorColumn.class);
+        view.save();
+        view.open();
+        WebElement warningsCell = view.find(by.xpath(XPATH_LISTVIEW_WARNING_TD));
+        assertThat(warningsCell.getText(), is("799"));
+        // check that tooltip contains link to checked analysis plugin results
+        String tooltip = warningsCell.getAttribute("tooltip");
+        assertThat(tooltip,
+                allOf(
+                        containsString("<a href=\"job/" + job.name + "/checkstyle\">776</a>"),
+                        containsString("<a href=\"job/" + job.name + "/findbugs\">6</a>"),
+                        containsString("<a href=\"job/" + job.name + "/pmd\">9</a>")
+                )
+        );
+        // uncheck PMD plugin
+        view.configure();
+        AnalysisCollectorColumn column = view.getColumn(AnalysisCollectorColumn.class);
+        column.checkPlugin(PMD, false);
+        view.save();
+        view.open();
+        // check that PMD warnings are not collected to total warning number and tooltip
+        warningsCell = view.find(by.xpath(XPATH_LISTVIEW_WARNING_TD));
+        assertThat(warningsCell.getText(), is("790"));
+        tooltip = warningsCell.getAttribute("tooltip");
+        assertThat(tooltip, not(containsString("<a href=\"job/" + job.name + "/pmd\">9</a>")));
     }
 
     /**
