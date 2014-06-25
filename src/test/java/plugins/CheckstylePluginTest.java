@@ -1,14 +1,9 @@
 package plugins;
 
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
 import org.jenkinsci.test.acceptance.junit.Bug;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginBuildConfigurator;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.AbstractCodeStylePluginBuildConfigurator;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleAction;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleColumn;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleFreestyleBuildSettings;
@@ -25,9 +20,14 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.xml.sax.SAXException;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.*;
-import static org.jenkinsci.test.acceptance.Matchers.*;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.jenkinsci.test.acceptance.Matchers.hasAction;
 
 /**
  * Feature: Allow publishing of Checkstyle report
@@ -151,7 +151,7 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
     public void view_checkstyle_report_two_runs_and_changed_results() {
         FreeStyleJob job = setUpCheckstyleFreestyleJob();
         buildJobAndWait(job);
-        editJob("/checkstyle_plugin/forSecondRun/checkstyle-result.xml", false, job, CheckstyleFreestyleBuildSettings.class, null);
+        editJob("/checkstyle_plugin/forSecondRun/checkstyle-result.xml", false, job);
         Build lastBuild = buildJobWithSuccess(job);
         assertThat(lastBuild, hasAction("Checkstyle Warnings"));
         lastBuild.open();
@@ -176,7 +176,7 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
     public void view_checkstyle_report_job_graph_links() throws Exception {
         FreeStyleJob job = setUpCheckstyleFreestyleJob();
         buildJobAndWait(job);
-        editJob("/checkstyle_plugin/forSecondRun/checkstyle-result.xml", false, job, CheckstyleFreestyleBuildSettings.class, null);
+        editJob("/checkstyle_plugin/forSecondRun/checkstyle-result.xml", false, job);
         buildJobWithSuccess(job);
 
         assertAreaLinksOfJobAreLike(job, "^\\d+/checkstyleResult");
@@ -203,8 +203,8 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
                 settings.pattern.set("target/checkstyle-result.xml");
             }
         };
-        FreeStyleJob job = setupJob("/checkstyle_plugin/sample_checkstyle_project", FreeStyleJob.class, "clean package checkstyle:checkstyle",
-                CheckstyleFreestyleBuildSettings.class, buildConfigurator);
+        FreeStyleJob job = setupJob("/checkstyle_plugin/sample_checkstyle_project", FreeStyleJob.class, CheckstyleFreestyleBuildSettings.class, buildConfigurator, "clean package checkstyle:checkstyle"
+        );
         Build lastBuild = buildJobWithSuccess(job);
         assertThat(lastBuild, hasAction("Checkstyle Warnings"));
         lastBuild.open();

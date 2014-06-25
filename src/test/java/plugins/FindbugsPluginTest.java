@@ -23,16 +23,10 @@
  */
 package plugins;
 
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import java.util.concurrent.ExecutionException;
-
 import org.jenkinsci.test.acceptance.junit.Bug;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginBuildConfigurator;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.AbstractCodeStylePluginBuildConfigurator;
 import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsAction;
 import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsColumn;
 import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsFreestyleBuildSettings;
@@ -49,9 +43,15 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.xml.sax.SAXException;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.*;
-import static org.jenkinsci.test.acceptance.Matchers.*;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.concurrent.ExecutionException;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.jenkinsci.test.acceptance.Matchers.hasAction;
 
 @WithPlugins("findbugs")
 public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
@@ -139,7 +139,7 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
     public void record_analysis_two_runs() {
         FreeStyleJob job = setUpFindbugsFreestyleJob();
         buildJobAndWait(job);
-        editJob("/findbugs_plugin/forSecondRun/findbugsXml.xml", false, job, FindbugsFreestyleBuildSettings.class, null);
+        editJob("/findbugs_plugin/forSecondRun/findbugsXml.xml", false, job);
 
         Build lastBuild = buildJobWithSuccess(job);
         assertThat(lastBuild, hasAction("FindBugs Warnings"));
@@ -165,7 +165,7 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
     public void view_findbugs_report_job_graph_links() {
         FreeStyleJob job = setUpFindbugsFreestyleJob();
         buildJobAndWait(job);
-        editJob("/findbugs_plugin/forSecondRun/findbugsXml.xml", false, job, FindbugsFreestyleBuildSettings.class, null);
+        editJob("/findbugs_plugin/forSecondRun/findbugsXml.xml", false, job);
         buildJobWithSuccess(job);
 
         assertAreaLinksOfJobAreLike(job, "^\\d+/findbugsResult");
@@ -182,7 +182,7 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
                 settings.pattern.set("target/findbugsXml.xml");
             }
         };
-        FreeStyleJob job = setupJob("/findbugs_plugin/sample_findbugs_project", FreeStyleJob.class, "clean package findbugs:findbugs", FindbugsFreestyleBuildSettings.class, buildConfigurator);
+        FreeStyleJob job = setupJob("/findbugs_plugin/sample_findbugs_project", FreeStyleJob.class, FindbugsFreestyleBuildSettings.class, buildConfigurator, "clean package findbugs:findbugs");
 
         Build lastBuild = buildJobWithSuccess(job);
         assertThat(lastBuild, hasAction("FindBugs Warnings"));

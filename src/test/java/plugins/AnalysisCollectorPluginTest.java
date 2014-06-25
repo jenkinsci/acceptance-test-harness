@@ -2,7 +2,7 @@ package plugins;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginBuildConfigurator;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.AbstractCodeStylePluginBuildConfigurator;
 import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisCollectorAction;
 import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisCollectorColumn;
 import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisCollectorFreestyleBuildSettings;

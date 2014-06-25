@@ -1,6 +1,6 @@
 package org.jenkinsci.test.acceptance.plugins.tasks;
 
-import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginBuildSettings;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.AbstractCodeStylePluginBuildSettings;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Job;
 
@@ -9,7 +9,7 @@ import org.jenkinsci.test.acceptance.po.Job;
  *
  * It provides access to the particular controls to configure the post build step.
  * This class derives conrtols common to all static analyser plugins from
- * {@link org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginBuildSettings}
+ * {@link org.jenkinsci.test.acceptance.plugins.analysis_core.AbstractCodeStylePluginBuildSettings}
  * and adds task scanner specific controls.
  *
  * This post build step requires installation of the tasks plugin.

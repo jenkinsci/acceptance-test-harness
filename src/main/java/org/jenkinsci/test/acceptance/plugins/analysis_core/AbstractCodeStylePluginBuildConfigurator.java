@@ -1,4 +1,4 @@
-package org.jenkinsci.test.acceptance.plugins;
+package org.jenkinsci.test.acceptance.plugins.analysis_core;
 
 /**
  * Configures code style plugin (Findbugs / PMD / ...).

@@ -24,7 +24,7 @@
 package org.jenkinsci.test.acceptance.plugins.maven;
 
 import com.google.inject.Injector;
-import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginMavenBuildSettings;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.AbstractCodeStylePluginMavenBuildSettings;
 import org.jenkinsci.test.acceptance.po.BuildStep;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;

@@ -23,7 +23,7 @@
  */
 package org.jenkinsci.test.acceptance.plugins.findbugs;
 
-import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginFreestyleBuildSettings;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.AbstractCodeStylePluginFreestyleBuildSettings;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Job;
 
