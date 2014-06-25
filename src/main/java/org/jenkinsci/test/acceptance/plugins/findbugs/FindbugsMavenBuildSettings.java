@@ -1,6 +1,6 @@
 package org.jenkinsci.test.acceptance.plugins.findbugs;
 
-import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginMavenBuildSettings;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.AbstractCodeStylePluginMavenBuildSettings;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.po.Describable;
 

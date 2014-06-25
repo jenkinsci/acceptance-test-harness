@@ -1,10 +1,10 @@
-package org.jenkinsci.test.acceptance.plugins;
+package org.jenkinsci.test.acceptance.plugins.analysis_core;
 
 /**
  * Configures code style plugin (Findbugs / PMD / ...).
  * @author Fabian Trampusch
  */
-public abstract class AbstractCodeStylePluginMavenBuildConfigurator<T extends AbstractCodeStylePluginMavenBuildSettings> {
+public abstract class AbstractCodeStylePluginBuildConfigurator<T extends AbstractCodeStylePluginBuildSettings> {
 
     /**
      * Override this method to access the code analyzer job configuration page area and set e.g. the thresholds as you like.

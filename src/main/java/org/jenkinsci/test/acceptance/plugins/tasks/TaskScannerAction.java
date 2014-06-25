@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jenkinsci.test.acceptance.plugins.AbstractCodeStylePluginAction;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.AbstractCodeStylePluginAction;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.ContainerPageObject;
 import org.openqa.selenium.WebElement;
