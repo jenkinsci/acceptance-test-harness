@@ -4,7 +4,10 @@ import com.google.inject.Injector;
 import org.hamcrest.Description;
 import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisPlugin;
-import org.jenkinsci.test.acceptance.po.*;
+import org.jenkinsci.test.acceptance.po.Control;
+import org.jenkinsci.test.acceptance.po.Describable;
+import org.jenkinsci.test.acceptance.po.Job;
+import org.jenkinsci.test.acceptance.po.View;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
@@ -46,8 +49,8 @@ public class DashboardView extends View {
      */
     public <T extends AbstractDashboardViewPortlet> T getBottomPortlet(Class<T> portletClass) {
         for (AbstractDashboardViewPortlet p : bottomPortlets) {
-            if (portletClass.isAssignableFrom(p.getClass()))
-                return (T) p;
+            if (portletClass.isInstance(p))
+                return portletClass.cast(p);
         }
         throw new java.util.NoSuchElementException();
     }
@@ -61,10 +64,9 @@ public class DashboardView extends View {
                     WebElement warningsLink = view.find(by.css("a[href='job/" + job.name + "/" + plugin.getId() + "']"));
                     String linkText = warningsLink.getText();
                     return Integer.parseInt(linkText) == warningsCount;
-                } catch (NoSuchElementException e) {
-                } catch (NumberFormatException e) {
+                } catch (NoSuchElementException | NumberFormatException e) {
+                    return false;
                 }
-                return false;
             }
 
             @Override
