@@ -274,7 +274,7 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
         buildJobAndWait(job).shouldSucceed();
         ListView view = addDashboardListViewColumn(FindbugsColumn.class);
 
-        By expectedDashboardLinkMatcher = by.css("a[href='job/" + job.name + "/findbugs']");
+        By expectedDashboardLinkMatcher = by.css("a[href$='job/" + job.name + "/findbugs']");
         assertThat(jenkins.all(expectedDashboardLinkMatcher).size(), is(1));
         WebElement dashboardLink = jenkins.getElement(expectedDashboardLinkMatcher);
         assertThat(dashboardLink.getText().trim(), is("1"));

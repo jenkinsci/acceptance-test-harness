@@ -364,7 +364,7 @@ public class PmdPluginTest extends AbstractCodeStylePluginHelper {
         buildJobAndWait(job).shouldSucceed();
         ListView view = addDashboardListViewColumn(PmdColumn.class);
 
-        By expectedDashboardLinkMatcher = by.css("a[href='job/" + job.name + "/pmd']");
+        By expectedDashboardLinkMatcher = by.css("a[href$='job/" + job.name + "/pmd']");
         assertThat(jenkins.all(expectedDashboardLinkMatcher).size(), is(1));
         WebElement dashboardLink = jenkins.getElement(expectedDashboardLinkMatcher);
         assertThat(dashboardLink.getText().trim(), is("2"));
