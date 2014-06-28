@@ -43,15 +43,15 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
      *
      * @param resourceToCopy Resource to copy to build (Directory or File path)
      * @param jobClass       the type the job shall be created of, e.g. FreeStyleJob
-     * @param publisherClass the type of the publisher to be added
+     * @param publisherBuildSettingsClass the type of the publisher to be added
      * @param configurator   the configuration of the publisher
      * @return the new job
      */
     public <J extends Job, T extends AbstractCodeStylePluginBuildSettings & PostBuildStep> J setupJob(String resourceToCopy,
                                                                                                       Class<J> jobClass,
-                                                                                                      Class<T> publisherClass,
+                                                                                                      Class<T> publisherBuildSettingsClass,
                                                                                                       AbstractCodeStylePluginBuildConfigurator<T> configurator) {
-        return setupJob(resourceToCopy, jobClass, publisherClass, configurator, null);
+        return setupJob(resourceToCopy, jobClass, publisherBuildSettingsClass, configurator, null);
     }
 
     /**
@@ -60,14 +60,16 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
      *
      * @param resourceToCopy Resource to copy to build (Directory or File path)
      * @param jobClass       the type the job shall be created of, e.g. FreeStyleJob
-     * @param publisherClass the type of the publisher to be added
+     * @param publisherBuildSettingsClass the type of the publisher to be added
      * @param configurator   the configuration of the publisher
      * @param goal           a maven goal to be added to the job or null otherwise
      * @return the new job
      */
     public <J extends Job, T extends AbstractCodeStylePluginBuildSettings & PostBuildStep> J setupJob(String resourceToCopy,
                                                                                                       Class<J> jobClass,
-                                                                                                      Class<T> publisherClass, AbstractCodeStylePluginBuildConfigurator<T> configurator, String goal) {
+                                                                                                      Class<T> publisherBuildSettingsClass,
+                                                                                                      AbstractCodeStylePluginBuildConfigurator<T> configurator,
+                                                                                                      String goal) {
         if (jobClass.isAssignableFrom(MavenModuleSet.class)) {
             MavenInstallation.ensureThatMavenIsInstalled(jenkins);
         }
@@ -87,9 +89,15 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
             }
         }
 
-        T buildSettings = job.addPublisher(publisherClass);
+        T buildSettings = null;
 
-        if (configurator != null) {
+        if (jobClass.isAssignableFrom(MavenModuleSet.class)) {
+            buildSettings = ((MavenModuleSet) job).addBuildSettings(publisherBuildSettingsClass);
+        } else if (jobClass.isAssignableFrom(FreeStyleJob.class)) {
+            buildSettings = job.addPublisher(publisherBuildSettingsClass);
+        }
+
+        if ((buildSettings != null) && (configurator != null)) {
             configurator.configure(buildSettings);
         }
 
@@ -119,16 +127,16 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
      * @param newResourceToCopy the new resource to be copied to build (Directory or File path) or null if not to be changed
      * @param isAdditionalResource decides whether the old resource is kept (FALSE) or deleted (TRUE)
      * @param job the job to be changed
-     * @param publisherClass the type of the publisher to be modified
+     * @param publisherBuildSettingsClass the type of the publisher to be modified
      * @param configurator the new configuration of the publisher
      * @return the edited job
      */
     public <J extends Job, T extends AbstractCodeStylePluginBuildSettings & PostBuildStep> J editJob(String newResourceToCopy,
                                                                                                      boolean isAdditionalResource,
                                                                                                      J job,
-                                                                                                     Class<T> publisherClass,
+                                                                                                     Class<T> publisherBuildSettingsClass,
                                                                                                      AbstractCodeStylePluginBuildConfigurator<T> configurator) {
-        return edit(newResourceToCopy, isAdditionalResource, job, publisherClass, configurator);
+        return edit(newResourceToCopy, isAdditionalResource, job, publisherBuildSettingsClass, configurator);
     }
 
     /**
@@ -137,15 +145,15 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
      *
      * @param isAdditionalResource decides whether the old resource is kept (FALSE) or deleted (TRUE)
      * @param job the job to be changed
-     * @param publisherClass the type of the publisher to be modified
+     * @param publisherBuildSettingsClass the type of the publisher to be modified
      * @param configurator the new configuration of the publisher
      * @return the edited job
      */
     public <J extends Job, T extends AbstractCodeStylePluginBuildSettings & PostBuildStep> J editJob(boolean isAdditionalResource,
                                                                                                      J job,
-                                                                                                     Class<T> publisherClass,
+                                                                                                     Class<T> publisherBuildSettingsClass,
                                                                                                      AbstractCodeStylePluginBuildConfigurator<T> configurator) {
-        return edit(null, isAdditionalResource, job, publisherClass, configurator);
+        return edit(null, isAdditionalResource, job, publisherBuildSettingsClass, configurator);
     }
 
     /**
@@ -155,14 +163,14 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
      * @param newResourceToCopy the new resource to be copied to build (Directory or File path) or null if not to be changed
      * @param isAdditionalResource decides whether the old resource is kept (FALSE) or deleted (TRUE)
      * @param job the job to be changed
-     * @param publisherClass the type of the publisher to be modified
+     * @param publisherBuildSettingsClass the type of the publisher to be modified
      * @param configurator the new configuration of the publisher
      * @return the edited job
      */
     private <J extends Job, T extends AbstractCodeStylePluginBuildSettings & PostBuildStep> J edit(String newResourceToCopy,
                                                                                                    boolean isAdditionalResource,
                                                                                                    J job,
-                                                                                                   Class<T> publisherClass,
+                                                                                                   Class<T> publisherBuildSettingsClass,
                                                                                                    @CheckForNull AbstractCodeStylePluginBuildConfigurator<T> configurator) {
         job.configure();
 
@@ -178,7 +186,14 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
 
         //change the configuration of the publisher
         if (configurator != null) {
-            configurator.configure(job.getPublisher(publisherClass));
+
+            if (job instanceof MavenModuleSet) {
+                configurator.configure(((MavenModuleSet) job).getBuildSettings(publisherBuildSettingsClass));
+            } else if (job instanceof FreeStyleJob) {
+                configurator.configure(job.getPublisher(publisherBuildSettingsClass));
+            }
+
+
         }
 
         job.save();
