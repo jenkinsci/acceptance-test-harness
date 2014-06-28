@@ -801,8 +801,12 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
                         "  for f in `ls`\n" +
                         "  do\n" +
                         "    if [ -f $f -a -r $f ]; then\n" +
-                        "      sed \"s/$OLD/$NEW/\" \"$f\" > \"${f}.new\"\n" +
-                        "      mv \"${f}.new\" \"$f\"\n" +
+                        "      if file --mime-type $f | grep -q \"^${f}: text/\"; then\n" +
+                        "        sed \"s/$OLD/$NEW/\" \"$f\" > \"${f}.new\"\n" +
+                        "        mv \"${f}.new\" \"$f\"\n" +
+                        "      else\n" +
+                        "        echo \"Info: $f is not a text file. Skipped.\"\n" +
+                        "      fi" +
                         "    else\n" +
                         "      echo \"Error: Cannot read $f\"\n" +
                         "    fi\n" +
