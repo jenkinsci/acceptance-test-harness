@@ -23,7 +23,7 @@ public class FtpPublishPluginTest extends GlobalPublishPluginTest {
      * Creates & Returns a FtpdContainer for the SMB Tests
      * @return FtpdContainer
      */
-    protected DockerContainer CreatePublisherContainer()
+    protected DockerContainer createPublisherContainer()
     {
         return docker.start(FtpdContainer.class);
     }
@@ -32,7 +32,7 @@ public class FtpPublishPluginTest extends GlobalPublishPluginTest {
      * Creates and returns a FtpGlobalConfig.GlobalSite for the FTP Test
      * @return FtpGlobalConfig.GlobalSite
      */
-    protected  PublishGlobalConfig.GlobalSite CreateGlobalConfig()
+    protected  PublishGlobalConfig.GlobalSite createGlobalConfig()
     {
         return new FtpGlobalConfig(jenkins).addSite();
     }
@@ -41,7 +41,7 @@ public class FtpPublishPluginTest extends GlobalPublishPluginTest {
      * Creates and returns a PublishGlobalPublisher  for the FTP Test
      * @return PublishGlobalPublisher
      */
-    protected  PublishGlobalPublisher AddGlobalPublisher(FreeStyleJob j)
+    protected  PublishGlobalPublisher addGlobalPublisher(FreeStyleJob j)
     {
         return  j.addPublisher(FtpPublisher.class);
     }

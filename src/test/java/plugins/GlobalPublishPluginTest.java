@@ -28,7 +28,7 @@ import static org.hamcrest.Matchers.is;
 /**
  * Abstract class for the publisher class.
  * This class implements base test which are used by all PublishOver* Classes.
- * 
+ * <p/>
  * For an concrete implementation of the test, the abstract functions need to be implemented.
  *
  * @author Tobias Meyer
@@ -39,6 +39,7 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
     Docker docker;
     @Inject
     SlaveProvider slaves;
+
     /**
      * Helper method to create a temporary empty directory
      *
@@ -55,21 +56,24 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
 
     /**
      * Creates & Returns the instance of the corresponding Docker Container for this publisher.
+     *
      * @return a DockerContainer
      */
-    protected abstract DockerContainer CreatePublisherContainer();
+    protected abstract DockerContainer createPublisherContainer();
 
     /**
-     *  Creates the global Config for the test.
+     * Creates the global Config for the test.
+     *
      * @return concrete instance of the config for the test
      */
-    protected abstract PublishGlobalConfig.GlobalSite CreateGlobalConfig();
+    protected abstract PublishGlobalConfig.GlobalSite createGlobalConfig();
 
     /**
      * Creates the Publisher config for the test
+     *
      * @return concrete instance of the config for the test
      */
-    protected abstract PublishGlobalPublisher AddGlobalPublisher(FreeStyleJob j);
+    protected abstract PublishGlobalPublisher addGlobalPublisher(FreeStyleJob j);
 
     /**
      * Helper method to configure Jenkins.
@@ -78,7 +82,7 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
      * @param serverName Name to Access Instance
      * @param dock       Docker Instance of the Server
      */
-    protected abstract void configurePublisher(String serverName, DockerContainer dock) ;
+    protected abstract void configurePublisher(String serverName, DockerContainer dock);
 
     /**
      * @native(docker) Scenario: Configure a job with publisher publishing
@@ -99,7 +103,7 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
 
     @Test
     public void publish_resources() throws IOException, InterruptedException {
-        DockerContainer dock = CreatePublisherContainer();
+        DockerContainer dock = createPublisherContainer();
         Resource cpFile = resource("/ftp_plugin/odes.txt");
 
         FreeStyleJob j = jenkins.jobs.create();
@@ -107,7 +111,7 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
         j.configure();
         {
             j.copyResource(cpFile);
-            PublishGlobalPublisher fp = AddGlobalPublisher(j);
+            PublishGlobalPublisher fp = addGlobalPublisher(j);
             PublishGlobalPublisher.GlobalPublishSite fps = fp.getDefault();
             fps.getDefaultTransfer().sourceFile.set("odes.txt");
         }
@@ -115,7 +119,7 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
 
         j.startBuild().shouldSucceed();
 
-        assertThat(dock.tryCopyFile("/tmp/odes.txt","/tmp/"), is(true));
+        assertThat(dock.tryCopyFile("/tmp/odes.txt", "/tmp/"), is(true));
         assertThat(FileUtils.readFileToString(new File("/tmp/odes.txt")), CoreMatchers.is(cpFile.asText()));
     }
 
@@ -138,7 +142,7 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
 
     @Test
     public void publish_jenkins_variables() throws IOException, InterruptedException {
-        DockerContainer dock = CreatePublisherContainer();
+        DockerContainer dock = createPublisherContainer();
         Resource cpFile = resource("/ftp_plugin/odes.txt");
         String randomName = jenkins.jobs.createRandomName();
         String randomPath = "/tmp/" + randomName + "/";
@@ -148,7 +152,7 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
         j.configure();
         {
             j.copyResource(cpFile);
-            PublishGlobalPublisher fp = AddGlobalPublisher(j);
+            PublishGlobalPublisher fp = addGlobalPublisher(j);
             PublishGlobalPublisher.GlobalPublishSite fps = fp.getDefault();
             fps.getDefaultTransfer().remoteDirectory.set("${JOB_NAME}/");
             fps.getDefaultTransfer().sourceFile.set("odes.txt");
@@ -156,7 +160,7 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
         j.save();
 
         j.startBuild().shouldSucceed();
-        assertThat(dock.tryCopyFile(randomPath + "odes.txt","/tmp/"), is(true));
+        assertThat(dock.tryCopyFile(randomPath + "odes.txt", "/tmp/"), is(true));
         assertThat(FileUtils.readFileToString(new File("/tmp/odes.txt")), CoreMatchers.is(cpFile.asText()));
     }
 
@@ -179,7 +183,7 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
 
     @Test
     public void publish_resources_and_remove_prefix() throws IOException, InterruptedException {
-        DockerContainer dock = CreatePublisherContainer();
+        DockerContainer dock = createPublisherContainer();
         Resource cpDir = resource("/ftp_plugin/");
         Resource test = resource("/ftp_plugin/prefix_/test.txt");
         FreeStyleJob j = jenkins.jobs.create();
@@ -187,14 +191,14 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
         j.configure();
         {
             j.copyDir(cpDir);
-            PublishGlobalPublisher fp = AddGlobalPublisher(j);
-            PublishGlobalPublisher.GlobalPublishSite  fps = fp.getDefault();
+            PublishGlobalPublisher fp = addGlobalPublisher(j);
+            PublishGlobalPublisher.GlobalPublishSite fps = fp.getDefault();
             fps.getDefaultTransfer().sourceFile.set("prefix_/test.txt");
             fps.getDefaultTransfer().removePrefix.set("prefix_");
         }
         j.save();
         j.startBuild().shouldSucceed();
-        assertThat(dock.tryCopyFile("/tmp/test.txt","/tmp"), is(true));
+        assertThat(dock.tryCopyFile("/tmp/test.txt", "/tmp"), is(true));
         assertThat(FileUtils.readFileToString(new File("/tmp/test.txt")), CoreMatchers.is(test.asText()));
     }
 
@@ -219,7 +223,7 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
 
     @Test
     public void publish_resources_with_excludes() throws IOException, InterruptedException {
-        DockerContainer dock = CreatePublisherContainer();
+        DockerContainer dock = createPublisherContainer();
         Resource cpDir = resource("/ftp_plugin/");
 
         FreeStyleJob j = jenkins.jobs.create();
@@ -227,8 +231,8 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
         j.configure();
         {
             j.copyDir(cpDir);
-            PublishGlobalPublisher fp = AddGlobalPublisher(j);
-            PublishGlobalPublisher.GlobalPublishSite  fps = fp.getDefault();
+            PublishGlobalPublisher fp = addGlobalPublisher(j);
+            PublishGlobalPublisher.GlobalPublishSite fps = fp.getDefault();
             fps.getDefaultTransfer().sourceFile.set("prefix_/");
             fps.getDefaultTransfer().excludes.set("**/*.exclude");
         }
@@ -256,7 +260,7 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
 
     @Test
     public void publish_with_default_pattern() throws IOException, InterruptedException {
-        DockerContainer dock = CreatePublisherContainer();
+        DockerContainer dock = createPublisherContainer();
         Resource cpDir = resource("/ftp_plugin/");
 
         FreeStyleJob j = jenkins.jobs.create();
@@ -264,14 +268,14 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
         j.configure();
         {
             j.copyDir(cpDir);
-            PublishGlobalPublisher fp = AddGlobalPublisher(j);
+            PublishGlobalPublisher fp = addGlobalPublisher(j);
             PublishGlobalPublisher.GlobalPublishSite fps = fp.getDefault();
             fps.getDefaultTransfer().sourceFile.set("prefix_/test.txt,odes.txt");
         }
         j.save();
         j.startBuild().shouldSucceed();
         assertThat(dock.tryCopyFile("/tmp/prefix_/test.txt", "/tmp"), is(true));
-        assertThat( dock.tryCopyFile("/tmp/odes.txt", "/tmp"), is(true));
+        assertThat(dock.tryCopyFile("/tmp/odes.txt", "/tmp"), is(true));
         assertThat(new File("/tmp/test.txt").exists(), is(true));
         assertThat(new File("/tmp/odes.txt").exists(), is(true));
     }
@@ -295,7 +299,7 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
 
     @Test
     public void publish_with_own_pattern() throws IOException, InterruptedException {
-        DockerContainer dock = CreatePublisherContainer();
+        DockerContainer dock = createPublisherContainer();
         Resource cpDir = resource("/ftp_plugin/");
 
         FreeStyleJob j = jenkins.jobs.create();
@@ -303,14 +307,14 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
         j.configure();
         {
             j.copyDir(cpDir);
-            PublishGlobalPublisher fp = AddGlobalPublisher(j);
+            PublishGlobalPublisher fp = addGlobalPublisher(j);
             PublishGlobalPublisher.GlobalPublishSite fps = fp.getDefault();
             fps.getDefaultTransfer().patternSeparator.set("[;]+");
             fps.getDefaultTransfer().sourceFile.set("te,st.txt;odes.txt");
         }
         j.save();
         j.startBuild().shouldSucceed();
-        assertThat(dock.tryCopyFile("/tmp/te,st.txt","/tmp"), is(true));
+        assertThat(dock.tryCopyFile("/tmp/te,st.txt", "/tmp"), is(true));
         assertThat(dock.tryCopyFile("/tmp/odes.txt", "/tmp"), is(true));
         assertThat(new File("/tmp/te,st.txt").exists(), is(true));
         assertThat(new File("/tmp/odes.txt").exists(), is(true));
@@ -335,7 +339,7 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
 
     @Test
     public void publish_with_default_exclude() throws IOException, InterruptedException {
-        DockerContainer dock = CreatePublisherContainer();
+        DockerContainer dock = createPublisherContainer();
         Resource cpTxt = resource("/ftp_plugin/odes.txt");
 
         FreeStyleJob j = jenkins.jobs.create();
@@ -345,8 +349,8 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
             j.copyResource(cpTxt, ".svn");
             j.copyResource(cpTxt, "CVS");
             j.copyResource(cpTxt);
-            PublishGlobalPublisher fp = AddGlobalPublisher(j);
-            PublishGlobalPublisher.GlobalPublishSite  fps = fp.getDefault();
+            PublishGlobalPublisher fp = addGlobalPublisher(j);
+            PublishGlobalPublisher.GlobalPublishSite fps = fp.getDefault();
             fps.getDefaultTransfer().sourceFile.set(".svn,CVS,odes.txt");
         }
         j.save();
@@ -375,7 +379,7 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
 
     @Test
     public void publish_with_no_default_exclude() throws IOException, InterruptedException {
-        DockerContainer dock = CreatePublisherContainer();
+        DockerContainer dock = createPublisherContainer();
         Resource cpTxt = resource("/ftp_plugin/odes.txt");
 
         FreeStyleJob j = jenkins.jobs.create();
@@ -385,8 +389,8 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
             j.copyResource(cpTxt, ".svn");
             j.copyResource(cpTxt, "CVS");
             j.copyResource(cpTxt);
-            PublishGlobalPublisher fp = AddGlobalPublisher(j);
-            PublishGlobalPublisher.GlobalPublishSite  fps = fp.getDefault();
+            PublishGlobalPublisher fp = addGlobalPublisher(j);
+            PublishGlobalPublisher.GlobalPublishSite fps = fp.getDefault();
             fps.getDefaultTransfer().sourceFile.set(".svn,CVS,odes.txt");
             fps.getDefaultTransfer().noDefaultExcludes.check();
         }
@@ -416,7 +420,7 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
 
     @Test
     public void publish_with_empty_directory() throws IOException, InterruptedException {
-        DockerContainer dock = CreatePublisherContainer();
+        DockerContainer dock = createPublisherContainer();
         Resource cpTxt = resource("/ftp_plugin/odes.txt");
         File tmpDir = createTempDirectory();
         File nestedEmptyDir = new File(tmpDir + "/empty");
@@ -428,8 +432,8 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
         {
             j.copyResource(cpTxt);
             j.copyFile(tmpDir);
-            PublishGlobalPublisher fp = AddGlobalPublisher(j);
-            PublishGlobalPublisher.GlobalPublishSite  fps = fp.getDefault();
+            PublishGlobalPublisher fp = addGlobalPublisher(j);
+            PublishGlobalPublisher.GlobalPublishSite fps = fp.getDefault();
             fps.getDefaultTransfer().sourceFile.set("empty/,odes.txt");
             fps.getDefaultTransfer().makeEmptyDirs.check();
         }
@@ -458,7 +462,7 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
 
     @Test
     public void publish_without_empty_directory() throws IOException, InterruptedException {
-        DockerContainer dock = CreatePublisherContainer();
+        DockerContainer dock = createPublisherContainer();
         Resource cpTxt = resource("/ftp_plugin/odes.txt");
         File tmpDir = createTempDirectory();
         File nestedEmptyDir = new File(tmpDir + "/empty");
@@ -470,8 +474,8 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
         {
             j.copyResource(cpTxt);
             j.copyFile(tmpDir);
-            PublishGlobalPublisher fp = AddGlobalPublisher(j);
-            PublishGlobalPublisher.GlobalPublishSite  fps = fp.getDefault();
+            PublishGlobalPublisher fp = addGlobalPublisher(j);
+            PublishGlobalPublisher.GlobalPublishSite fps = fp.getDefault();
             fps.getDefaultTransfer().sourceFile.set("empty/,odes.txt");
 
         }
@@ -500,7 +504,7 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
 
     @Test
     public void publish_without_flatten_files() throws IOException, InterruptedException {
-        DockerContainer dock = CreatePublisherContainer();
+        DockerContainer dock = createPublisherContainer();
         Resource cpDir = resource("/ftp_plugin/");
 
         FreeStyleJob j = jenkins.jobs.create();
@@ -508,7 +512,7 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
         j.configure();
         {
             j.copyDir(cpDir);
-            PublishGlobalPublisher fp = AddGlobalPublisher(j);
+            PublishGlobalPublisher fp = addGlobalPublisher(j);
             PublishGlobalPublisher.GlobalPublishSite fps = fp.getDefault();
             fps.getDefaultTransfer().sourceFile.set("flat/odes.txt,odes.txt");
         }
@@ -536,7 +540,7 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
 
     @Test
     public void publish_with_flatten_files() throws IOException, InterruptedException {
-        DockerContainer dock = CreatePublisherContainer();
+        DockerContainer dock = createPublisherContainer();
         Resource cpDir = resource("/ftp_plugin/");
 
         FreeStyleJob j = jenkins.jobs.create();
@@ -544,7 +548,7 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
         j.configure();
         {
             j.copyDir(cpDir);
-            PublishGlobalPublisher fp = AddGlobalPublisher(j);
+            PublishGlobalPublisher fp = addGlobalPublisher(j);
             PublishGlobalPublisher.GlobalPublishSite fps = fp.getDefault();
             fps.getDefaultTransfer().flatten.check();
             fps.getDefaultTransfer().sourceFile.set("flat/odes.txt,odes.txt");
@@ -572,7 +576,7 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
 
     @Test
     public void publish_with_date_format() throws IOException, InterruptedException {
-        DockerContainer dock = CreatePublisherContainer();
+        DockerContainer dock = createPublisherContainer();
         Resource cpTxt = resource("/ftp_plugin/odes.txt");
 
         FreeStyleJob j = jenkins.jobs.create();
@@ -580,8 +584,8 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
         j.configure();
         {
             j.copyResource(cpTxt);
-            PublishGlobalPublisher fp = AddGlobalPublisher(j);
-            PublishGlobalPublisher.GlobalPublishSite  fps = fp.getDefault();
+            PublishGlobalPublisher fp = addGlobalPublisher(j);
+            PublishGlobalPublisher.GlobalPublishSite fps = fp.getDefault();
             fps.getDefaultTransfer().remoteDirectorySDF.check();
             fps.getDefaultTransfer().remoteDirectory.set("yyyyMMddHH");
             fps.getDefaultTransfer().sourceFile.set("odes.txt");
@@ -590,7 +594,7 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
         Date date = new Date();
         j.save();
         j.startBuild().shouldSucceed();
-        assertThat(dock.tryCopyFile("/tmp/" + dateFormat.format(date) + "/odes.txt","/tmp/"), is(true));
+        assertThat(dock.tryCopyFile("/tmp/" + dateFormat.format(date) + "/odes.txt", "/tmp/"), is(true));
         assertThat(new File("/tmp/odes.txt").exists(), is(true));
     }
 
@@ -614,22 +618,22 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
 
     @Test
     public void publish_with_clean_remote() throws IOException, InterruptedException {
-        DockerContainer dock = CreatePublisherContainer();
+        DockerContainer dock = createPublisherContainer();
         Resource cpTxt = resource("/ftp_plugin/odes.txt");
         FreeStyleJob j = jenkins.jobs.create();
         configurePublisher("asd", dock);
         j.configure();
         {
             j.copyResource(cpTxt);
-            PublishGlobalPublisher fp = AddGlobalPublisher(j);
+            PublishGlobalPublisher fp = addGlobalPublisher(j);
             PublishGlobalPublisher.GlobalPublishSite fps = fp.getDefault();
             fps.getDefaultTransfer().cleanRemote.check();
             fps.getDefaultTransfer().sourceFile.set("odes.txt");
         }
         j.save();
         j.startBuild().shouldSucceed();
-        assertThat(dock.tryCopyFile("/tmp/odes.txt","/tmp/"), is(true));
-        assertThat(!dock.tryCopyFile("/tmp/old.txt","/tmp/"), is(true));
+        assertThat(dock.tryCopyFile("/tmp/odes.txt", "/tmp/"), is(true));
+        assertThat(!dock.tryCopyFile("/tmp/old.txt", "/tmp/"), is(true));
     }
 
     /**
@@ -653,7 +657,7 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void publish_multiple_sets() throws IOException, InterruptedException {
-        DockerContainer dock = CreatePublisherContainer();
+        DockerContainer dock = createPublisherContainer();
         Resource cpTxt = resource("/ftp_plugin/odes.txt");
 
         FreeStyleJob j = jenkins.jobs.create();
@@ -663,7 +667,7 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
             j.copyResource(cpTxt);
             j.copyResource(cpTxt, "odes2.txt");
             j.copyResource(cpTxt, "odes3.txt");
-            PublishGlobalPublisher fp = AddGlobalPublisher(j);
+            PublishGlobalPublisher fp = addGlobalPublisher(j);
             PublishGlobalPublisher.GlobalPublishSite fps = fp.getDefault();
             fps.getDefaultTransfer().sourceFile.set("odes.txt");
             fps.addTransferSet().sourceFile.set("odes2.txt");
@@ -671,9 +675,9 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
         }
         j.save();
         j.startBuild().shouldSucceed();
-        assertThat(dock.tryCopyFile("/tmp/odes.txt","/tmp/"), is(true));
-        assertThat(dock.tryCopyFile("/tmp/odes2.txt","/tmp/"), is(true));
-        assertThat(dock.tryCopyFile("/tmp/odes3.txt","/tmp/"), is(true));
+        assertThat(dock.tryCopyFile("/tmp/odes.txt", "/tmp/"), is(true));
+        assertThat(dock.tryCopyFile("/tmp/odes2.txt", "/tmp/"), is(true));
+        assertThat(dock.tryCopyFile("/tmp/odes3.txt", "/tmp/"), is(true));
     }
 
     /**
@@ -699,8 +703,8 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void publish_multiple_servers() throws IOException, InterruptedException {
-        DockerContainer dock = CreatePublisherContainer();
-        DockerContainer dock2 = CreatePublisherContainer();
+        DockerContainer dock = createPublisherContainer();
+        DockerContainer dock2 = createPublisherContainer();
         Resource cpTxt = resource("/ftp_plugin/odes.txt");
 
         FreeStyleJob j = jenkins.jobs.create();
@@ -709,8 +713,8 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
         j.configure();
         {
             j.copyResource(cpTxt);
-            PublishGlobalPublisher fp = AddGlobalPublisher(j);
-            PublishGlobalPublisher.GlobalPublishSite  fps = fp.getDefault();
+            PublishGlobalPublisher fp = addGlobalPublisher(j);
+            PublishGlobalPublisher.GlobalPublishSite fps = fp.getDefault();
             fps.configName.select("docker1");
             fps.getDefaultTransfer().sourceFile.set("odes.txt");
             PublishGlobalPublisher.GlobalPublishSite fps2 = fp.addServer();
@@ -719,8 +723,8 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
         }
         j.save();
         j.startBuild().shouldSucceed();
-        assertThat(dock.tryCopyFile("/tmp/odes.txt","/tmp/dockertmp"), is(true));
-        assertThat(dock.tryCopyFile("/tmp/odes.txt","/tmp/dockertmp2"), is(true));
+        assertThat(dock.tryCopyFile("/tmp/odes.txt", "/tmp/dockertmp"), is(true));
+        assertThat(dock.tryCopyFile("/tmp/odes.txt", "/tmp/dockertmp2"), is(true));
 
     }
 
@@ -743,8 +747,8 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
      */
 
     @Test
-    public void publish_slave_resourses() throws IOException, InterruptedException,ExecutionException {
-        DockerContainer dock = CreatePublisherContainer();
+    public void publish_slave_resourses() throws IOException, InterruptedException, ExecutionException {
+        DockerContainer dock = createPublisherContainer();
         Resource cpFile = resource("/ftp_plugin/odes.txt");
 
         Slave s = slaves.get().install(jenkins).get();
@@ -756,13 +760,13 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
         j.configure();
         {
             j.copyResource(cpFile);
-            PublishGlobalPublisher fp = AddGlobalPublisher(j);
+            PublishGlobalPublisher fp = addGlobalPublisher(j);
             PublishGlobalPublisher.GlobalPublishSite fps = fp.getDefault();
             fps.getDefaultTransfer().sourceFile.set("odes.txt");
         }
         j.save();
         j.startBuild().shouldSucceed();
-        assertThat(dock.tryCopyFile("/tmp/odes.txt","/tmp"), is(true));
+        assertThat(dock.tryCopyFile("/tmp/odes.txt", "/tmp"), is(true));
         assertThat(FileUtils.readFileToString(new File("/tmp/odes.txt")), CoreMatchers.is(cpFile.asText()));
     }
 }

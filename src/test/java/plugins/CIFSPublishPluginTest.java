@@ -23,7 +23,7 @@ public class CIFSPublishPluginTest extends GlobalPublishPluginTest {
      * Creates & Returns a SMBContainer for the CIF Tests
      * @return SMBContainer
      */
-    protected  DockerContainer CreatePublisherContainer()
+    protected  DockerContainer createPublisherContainer()
     {
         return docker.start(SMBContainer.class);
     }
@@ -32,7 +32,7 @@ public class CIFSPublishPluginTest extends GlobalPublishPluginTest {
      * Creates and returns a CifsGlobalConfig.GlobalSite for the CIF Test
      * @return CifsGlobalConfig.GlobalSite
      */
-    protected  PublishGlobalConfig.GlobalSite CreateGlobalConfig()
+    protected  PublishGlobalConfig.GlobalSite createGlobalConfig()
     {
         return new CifsGlobalConfig(jenkins).addSite();
     }
@@ -41,7 +41,7 @@ public class CIFSPublishPluginTest extends GlobalPublishPluginTest {
      * Creates and returns a PublishGlobalPublisher  for the CIF Test
      * @return PublishGlobalPublisher
      */
-    protected  PublishGlobalPublisher AddGlobalPublisher(FreeStyleJob j)
+    protected  PublishGlobalPublisher addGlobalPublisher(FreeStyleJob j)
     {
         return  j.addPublisher(CifsPublisher.class);
     }

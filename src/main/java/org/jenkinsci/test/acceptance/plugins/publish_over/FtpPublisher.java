@@ -11,7 +11,7 @@ public class FtpPublisher extends PublishGlobalPublisher {
     public FtpPublisher(Job parent, String path) {
         super(parent, path);
     }
-    protected GlobalPublishSite CreatePublishSite(String p)
+    protected GlobalPublishSite createPublishSite(String p)
     {
         return new FTPPublishSite(getPage(), p);
     }
@@ -19,7 +19,7 @@ public class FtpPublisher extends PublishGlobalPublisher {
         public FTPPublishSite(PageObject parent, String path) {
             super(parent, path);
         }
-        protected FTPTransferArea CreateTransferArea(String p)
+        protected FTPTransferArea createTransferArea(String p)
         {
             return new FTPTransferArea(getPage(), p);
         }

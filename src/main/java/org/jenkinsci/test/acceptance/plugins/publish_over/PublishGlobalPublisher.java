@@ -15,7 +15,7 @@ public abstract class PublishGlobalPublisher extends AbstractStep  implements Po
     public PublishGlobalPublisher(Job parent, String path) {
         super(parent, path);
         String p = last(by.xpath(".//div[@name='publishers'][starts-with(@path,'%s/publishers')]", path)).getAttribute("path");
-        defaultSite = CreatePublishSite(p);
+        defaultSite = createPublishSite(p);
     }
 
     /**
@@ -43,7 +43,7 @@ public abstract class PublishGlobalPublisher extends AbstractStep  implements Po
     public GlobalPublishSite addServer() {
         add.click();
         String p = last(by.xpath(".//div[@name='publishers'][starts-with(@path,'%s/publishers')]", getPath())).getAttribute("path");
-        return CreatePublishSite(p);
+        return createPublishSite(p);
     }
 
     /**
@@ -51,7 +51,7 @@ public abstract class PublishGlobalPublisher extends AbstractStep  implements Po
      * @param p XML Path of the Element as String
      * @return GlobalPublishSite
      */
-    protected GlobalPublishSite CreatePublishSite(String p) {
+    protected GlobalPublishSite createPublishSite(String p) {
         return new GlobalPublishSite(getPage(), p);
     }
 
@@ -62,7 +62,7 @@ public abstract class PublishGlobalPublisher extends AbstractStep  implements Po
         public GlobalPublishSite(PageObject parent, String path) {
             super(parent, path);
             String p = last(by.xpath(".//div[@name='transfers'][starts-with(@path,'%s/transfers')]", path)).getAttribute("path");
-            defaultTransfer = CreateTransferArea(p);
+            defaultTransfer = createTransferArea(p);
         }
 
         /**
@@ -71,7 +71,7 @@ public abstract class PublishGlobalPublisher extends AbstractStep  implements Po
          * @param p XML Path of the Element as String
          * @return GlobalTransferArea
          */
-        protected GlobalTransferArea CreateTransferArea(String p)
+        protected GlobalTransferArea createTransferArea(String p)
         {
             return new GlobalTransferArea(getPage(), p);
         }
@@ -105,7 +105,7 @@ public abstract class PublishGlobalPublisher extends AbstractStep  implements Po
         public GlobalTransferArea addTransferSet() {
             add.click();
             String p = last(by.xpath(".//div[@name='transfers'][starts-with(@path,'%s/transfers')]", getPath())).getAttribute("path");
-            return CreateTransferArea(p);
+            return createTransferArea(p);
         }
     }
 
