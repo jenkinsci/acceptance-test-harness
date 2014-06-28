@@ -41,8 +41,7 @@ public class CIFSPublishPluginTest extends GlobalPublishPluginTest {
      * Creates and returns a PublishGlobalPublisher  for the CIF Test
      * @return PublishGlobalPublisher
      */
-    protected  PublishGlobalPublisher addGlobalPublisher(FreeStyleJob j)
-    {
+    protected  PublishGlobalPublisher addGlobalPublisher(FreeStyleJob j){
         return  j.addPublisher(CifsPublisher.class);
     }
 
