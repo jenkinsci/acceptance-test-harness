@@ -1,49 +1,51 @@
 package org.jenkinsci.test.acceptance.plugins.analysis_collector;
 
 /**
-* @author Michael Prankl
-*/
+ * @author Michael Prankl
+ */
 public enum AnalysisPlugin {
-    CHECKSTYLE("Checkstyle") {
+    CHECKSTYLE("checkstyle", "Checkstyle") {
         @Override
         public void check(AnalysisCollectorPluginArea pluginArea, boolean checked) {
             pluginArea.isCheckstyleActivated.check(checked);
         }
     },
-    DRY("Duplicate Code") {
+    DRY("dry", "Duplicate Code") {
         @Override
         public void check(AnalysisCollectorPluginArea pluginArea, boolean checked) {
             pluginArea.isDryActivated.check(checked);
         }
     },
-    PMD("PMD") {
+    PMD("pmd", "PMD") {
         @Override
         public void check(AnalysisCollectorPluginArea pluginArea, boolean checked) {
             pluginArea.isPmdActivated.check(checked);
         }
     },
-    FINDBUGS("FindBugs") {
+    FINDBUGS("findbugs", "FindBugs") {
         @Override
         public void check(AnalysisCollectorPluginArea pluginArea, boolean checked) {
             pluginArea.isFindbugsActivated.check(checked);
         }
     },
-    TASKS("Open Tasks") {
+    TASKS("tasks", "Open Tasks") {
         @Override
         public void check(AnalysisCollectorPluginArea pluginArea, boolean checked) {
             pluginArea.isOpenTasksActivated.check(checked);
         }
     },
-    WARNINGS("Compiler Warnings") {
+    WARNINGS("warnings", "Compiler Warnings") {
         @Override
         public void check(AnalysisCollectorPluginArea pluginArea, boolean checked) {
             pluginArea.isWarningsActivated.check(checked);
         }
     };
 
+    private String id;
     private String name;
 
-    AnalysisPlugin(final String name) {
+    AnalysisPlugin(final String id, final String name) {
+        this.id = id;
         this.name = name;
     }
 
@@ -51,5 +53,9 @@ public enum AnalysisPlugin {
 
     public String getName() {
         return name;
+    }
+
+    public String getId() {
+        return id;
     }
 }

@@ -2,12 +2,10 @@ package plugins;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.plugins.analysis_collector.*;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AbstractCodeStylePluginBuildConfigurator;
-import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisCollectorAction;
-import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisCollectorColumn;
-import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisCollectorFreestyleBuildSettings;
-import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisPlugin;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleFreestyleBuildSettings;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
 import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsFreestyleBuildSettings;
 import org.jenkinsci.test.acceptance.plugins.pmd.PmdFreestyleBuildSettings;
 import org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerFreestyleBuildSettings;
@@ -22,6 +20,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.jenkinsci.test.acceptance.Matchers.hasAction;
 import static org.jenkinsci.test.acceptance.Matchers.hasAnalysisWarningsFor;
 import static org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisPlugin.*;
+import static org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView.hasWarningsFor;
 import static org.jenkinsci.test.acceptance.po.PageObject.createRandomName;
 import static org.junit.Assert.assertThat;
 
@@ -214,6 +213,42 @@ public class AnalysisCollectorPluginTest extends AbstractJUnitTest {
         assertThat(warningsCell.getText(), is("790"));
         tooltip = warningsCell.getAttribute("tooltip");
         assertThat(tooltip, not(containsString("<a href=\"job/" + job.name + "/pmd\">9</a>")));
+    }
+
+    /**
+     * Scenario: "Warnings per project" portlet shows correct number of warnings
+     * Given I have a job with artifacts of static analysis tools
+     * And this artifacts are published by their corresponding plugins
+     * And the resources of the job contain warnings
+     * And this job is included in a the portlet "Warnings per project"
+     * When I start a build
+     * Then the portlet will show the correct number of total warnings
+     */
+    @Test
+    @WithPlugins("dashboard-view")
+    public void warnings_per_project_portlet() {
+        FreeStyleJob job = setupJob(ANALYSIS_COLLECTOR_PLUGIN_RESOURCES, true);
+        job.startBuild().waitUntilFinished();
+        DashboardView dash = jenkins.views.create(DashboardView.class, createRandomName());
+        dash.configure();
+        dash.matchAllJobs();
+        WarningsPerProjectPortlet portlet = dash.addBottomPortlet(WarningsPerProjectPortlet.class);
+        portlet.setName("My Warnings");
+        portlet.hideZeroWarningsProjects(false).showImagesInTableHeader(true);
+        dash.save();
+        dash.open();
+        // check that warnings are shown
+        assertThat(dash, hasWarningsFor(job, CHECKSTYLE, 776));
+        assertThat(dash, hasWarningsFor(job, PMD, 9));
+        assertThat(dash, hasWarningsFor(job, FINDBUGS, 6));
+        assertThat(dash, hasWarningsFor(job, TASKS, 8));
+        // uncheck Open Tasks
+        dash.configure();
+        portlet = dash.getBottomPortlet(WarningsPerProjectPortlet.class);
+        portlet.checkCollectedPlugin(TASKS, false);
+        dash.save();
+        dash.open();
+        assertThat(dash, not(hasWarningsFor(job, TASKS, 8)));
     }
 
     /**
