@@ -5,8 +5,10 @@ import org.jenkinsci.test.acceptance.junit.Bug;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AbstractCodeStylePluginBuildConfigurator;
+import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerAction;
 import org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerFreestyleBuildSettings;
+import org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerMavenBuildSettings;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Ignore;
@@ -424,6 +426,83 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
 
     }
 
+    /**
+     * This test case verifies several task scanner functions for a maven project such as
+     *  - treatment of exclusion pattern
+     *  - correct counting of warnings
+     *  - correct prioritisation of warnings
+     *  - changing build status based on thresholds
+     */
+
+    @Test
+    public void basic_functions_maven_project() throws Exception{
+        //do setup
+        AbstractCodeStylePluginBuildConfigurator<TaskScannerMavenBuildSettings> buildConfigurator =
+                new AbstractCodeStylePluginBuildConfigurator<TaskScannerMavenBuildSettings>() {
+                    @Override
+                    public void configure(TaskScannerMavenBuildSettings settings) {
+                        settings.setPattern("**/*.java");
+                        settings.setExcludePattern("**/*Test.java");
+                        settings.setHighPriorityTags("FIXME");
+                        settings.setNormalPriorityTags("TODO");
+                        settings.setLowPriorityTags("@Deprecated");
+                        settings.setIgnoreCase(false);
+                    }
+                };
+
+        MavenModuleSet j = setupJob("/tasks_plugin/sample_tasks_project",
+                                  MavenModuleSet.class, TaskScannerMavenBuildSettings.class,
+                                  buildConfigurator, "clean package test");
+
+        // as one of the unit tests fail, the build should be unstable
+        Build lastBuild = j.startBuild().shouldBeUnstable();
+        assertThat(lastBuild, hasAction("Open Tasks"));
+        assertThat(j, hasAction("Open Tasks"));
+        lastBuild.open();
+        TaskScannerAction tsa = new TaskScannerAction(j);
+
+        // The expected task priorities are:
+        //   - 1x high
+        //   - 1x medium
+        //   - 1x low
+
+        assertThat(tsa.getResultLinkByXPathText("3 open tasks"), is("tasksResult"));
+        assertThat(tsa.getResultTextByXPathText("3 open tasks"), endsWith("in 1 workspace file."));
+        assertThat(tsa.getWarningNumber(), is(3));
+        assertThat(tsa.getHighWarningNumber(), is(1));
+        assertThat(tsa.getNormalWarningNumber(), is(1));
+        assertThat(tsa.getLowWarningNumber(), is(1));
+
+        // re-configure the job and set a threshold to mark the build as failed
+        buildConfigurator =
+                new AbstractCodeStylePluginBuildConfigurator<TaskScannerMavenBuildSettings>() {
+                    @Override
+                    public void configure(TaskScannerMavenBuildSettings settings) {
+                        settings.setBuildFailedTotalHigh("0");
+                        settings.setBuildFailedTotalNormal("5");
+                        settings.setBuildFailedTotalLow("10");
+                    }
+                };
+
+        editJob(false, j, TaskScannerMavenBuildSettings.class, buildConfigurator);
+
+        // as the threshold for high priority warnings is exceeded, the build should be marked as failed
+        lastBuild = j.startBuild().shouldFail();
+        assertThat(lastBuild, hasAction("Open Tasks"));
+        assertThat(j, hasAction("Open Tasks"));
+        lastBuild.open();
+
+        //check build result text
+        assertThat(tsa.getPluginResult(lastBuild),
+                is("Plug-in Result: FAILED - 1 warning of priority High Priority exceeds the threshold of 0 by 1 (Reference build: #1)"));
+
+        //no change in warning counts expected
+        assertThat(tsa.getHighWarningNumber(), is(1));
+        assertThat(tsa.getNormalWarningNumber(), is(1));
+        assertThat(tsa.getLowWarningNumber(), is(1));
+
+    }
+
 
     /**
      * This test's objective is to the correct treatment of the status thresholds (totals).
@@ -773,8 +852,8 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
     /**
      * This method does special configurations for test step 6 of test
      * {@link TaskScannerPluginTest#status_thresholds()}. Another shell step is added which
-     * consists of a small script to replace all todo, fixme, xxx, deprecated occurences in the
-     * workspace files by the string "CLOSED".
+     * consists of a small script to replace all TODO, todo, FIXME, fixme, XXX, Deprecated
+     * occurences in the workspace files by the string "CLOSED".
      *
      * The scenario is that the file set consists of 19 files, whereof
      *   - 17 files are to be scanned for tasks
@@ -795,14 +874,18 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
     private FreeStyleJob status_thresholds_step7(FreeStyleJob j, TaskScannerAction tsa){
         j.configure();
         j.addShellStep( "NEW=\"CLOSED\"\n" +
-                        "for t in \"todo\" \"xxx\" \"fixme\" \"deprecated\"\n" +
+                        "for t in \"todo\" \"TODO\" \"XXX\" \"fixme\" \"FIXME\" \"Deprecated\"\n" +
                         "do\n" +
                         "  OLD=$t\n" +
                         "  for f in `ls`\n" +
                         "  do\n" +
                         "    if [ -f $f -a -r $f ]; then\n" +
-                        "      sed \"s/$OLD/$NEW/I\" \"$f\" > \"${f}.new\"\n" +
-                        "      mv \"${f}.new\" \"$f\"\n" +
+                        "      if file --mime-type $f | grep -q \"^${f}: text/\"; then\n" +
+                        "        sed \"s/$OLD/$NEW/\" \"$f\" > \"${f}.new\"\n" +
+                        "        mv \"${f}.new\" \"$f\"\n" +
+                        "      else\n" +
+                        "        echo \"Info: $f is not a text file. Skipped.\"\n" +
+                        "      fi" +
                         "    else\n" +
                         "      echo \"Error: Cannot read $f\"\n" +
                         "    fi\n" +

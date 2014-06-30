@@ -35,7 +35,7 @@ public class Job extends ContainerPageObject {
 
     private List<Parameter> parameters = new ArrayList<>();
 
-    private List<PostBuildStep> publishers = new ArrayList<>();
+    protected List<PostBuildStep> publishers = new ArrayList<>();
 
     public final Control concurrentBuild = control("/concurrentBuild");
 

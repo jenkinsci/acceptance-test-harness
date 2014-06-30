@@ -23,16 +23,13 @@
  */
 package org.jenkinsci.test.acceptance.plugins.maven;
 
-import com.google.inject.Injector;
-import org.jenkinsci.test.acceptance.plugins.analysis_core.AbstractCodeStylePluginMavenBuildSettings;
-import org.jenkinsci.test.acceptance.po.BuildStep;
-import org.jenkinsci.test.acceptance.po.Control;
-import org.jenkinsci.test.acceptance.po.Describable;
-import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.ShellBuildStep;
+import java.net.URL;
+
+import org.jenkinsci.test.acceptance.plugins.analysis_core.AbstractCodeStylePluginBuildSettings;
+import org.jenkinsci.test.acceptance.po.*;
 import org.openqa.selenium.WebElement;
 
-import java.net.URL;
+import com.google.inject.Injector;
 
 @Describable("hudson.maven.MavenModuleSet")
 public class MavenModuleSet extends Job {
@@ -63,14 +60,26 @@ public class MavenModuleSet extends Job {
      * @param type The setting you would like to set and configure, e.g. FindbugsCodeStylePluginMavenBuildSettings.
      * @return an instance of AbstractCodeStylePluginMavenBuildSettings (e.g. FindbugsCodeStylePluginMavenBuildSettings)
      */
-    public <T extends AbstractCodeStylePluginMavenBuildSettings> T addBuildSettings(Class<T> type) {
+    public <T extends AbstractCodeStylePluginBuildSettings> T addBuildSettings(Class<T> type) {
         WebElement radio = findCaption(type, new Finder<WebElement>() {
             @Override protected WebElement find(String caption) {
                 return outer.find(by.checkbox(caption));
             }
         });
         radio.click();
-        return newInstance(type, this);
+        T bs = newInstance(type, this);
+
+        publishers.add(bs);
+        return bs;
+    }
+
+    /**
+     * Wrapper function to get a previously added build settings object.
+     * @param type the type of the build settings to be retrieved
+     * @return the build settings object
+     */
+    public <T extends AbstractCodeStylePluginBuildSettings & PostBuildStep> T getBuildSettings(Class<T> type) {
+        return getPublisher(type);
     }
 
     @Override
@@ -98,4 +107,6 @@ public class MavenModuleSet extends Job {
     public MavenBuild getLastBuild() {
         return new MavenBuild(this,"lastBuild");
     }
+
+
 }
