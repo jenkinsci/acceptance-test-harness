@@ -23,17 +23,12 @@
  */
 package plugins;
 
-import javax.inject.Inject;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.SftpException;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
-import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.junit.Native;
-import org.jenkinsci.test.acceptance.junit.SmokeTest;
-import org.jenkinsci.test.acceptance.junit.WithCredentials;
-import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.junit.*;
+import org.jenkinsci.test.acceptance.plugins.git.GitRepo;
 import org.jenkinsci.test.acceptance.plugins.git.GitScm;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Job;
@@ -42,8 +37,13 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.openqa.selenium.By;
 
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.core.Is.*;
+import javax.inject.Inject;
+import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
 
 @Native("docker")
 @WithPlugins("git")
@@ -51,6 +51,7 @@ import static org.hamcrest.core.Is.*;
 public class GitPluginTest extends AbstractJUnitTest {
 
     private static final String USERNAME = "gitplugin";
+    private static final String HOST = "localhost";
 
     @Inject
     DockerContainerHolder<GitContainer> gitServer;
@@ -59,29 +60,38 @@ public class GitPluginTest extends AbstractJUnitTest {
 
     private GitContainer container;
     private String repoUrl;
+    private int port;
 
     @Before
     public void init() {
         container = gitServer.get();
         repoUrl = container.getRepoUrl();
+        port = container.port(22);
         job = jenkins.jobs.create();
         job.configure();
     }
 
     @Test
     @Category(SmokeTest.class)
-    public void simple_checkout() {
+    public void simple_checkout() throws InterruptedException, JSchException, SftpException, IOException {
+        buildGitRepo()
+                .transferRepositoryToDockerContainer(HOST, port);
+
         job.useScm(GitScm.class)
                 .url(repoUrl)
                 .credentials(USERNAME);
-        job.addShellStep("test -f init.txt");
+        job.addShellStep("test -f foo");
         job.save();
 
         job.startBuild().shouldSucceed();
     }
 
     @Test
-    public void checkout_branch() {
+    public void checkout_branch() throws InterruptedException, JSchException, SftpException, IOException {
+        GitRepo repo = buildGitRepo();
+        repo.git("branch", "svn");
+        repo.transferRepositoryToDockerContainer(HOST, port);
+
         job.useScm(GitScm.class)
                 .url(repoUrl)
                 .credentials(USERNAME)
@@ -93,12 +103,15 @@ public class GitPluginTest extends AbstractJUnitTest {
     }
 
     @Test
-    public void name_remote_repo() {
+    public void name_remote_repo() throws IOException, InterruptedException, SftpException, JSchException {
+        buildGitRepo()
+                .transferRepositoryToDockerContainer(HOST, port);
+
         job.useScm(GitScm.class)
                 .url(repoUrl)
                 .credentials(USERNAME)
                 .remoteName("custom_origin");
-        job.addShellStep("test -f init.txt && git remote -v");
+        job.addShellStep("test -f foo && git remote -v");
         job.save();
 
         job.startBuild().shouldSucceed().shouldContainsConsoleOutput("custom_origin\\s+" + repoUrl);
@@ -106,7 +119,10 @@ public class GitPluginTest extends AbstractJUnitTest {
 
 
     @Test
-    public void checkout_local_branch() {
+    public void checkout_local_branch() throws IOException, InterruptedException, SftpException, JSchException {
+        buildGitRepo()
+                .transferRepositoryToDockerContainer(HOST, port);
+
         job.useScm(GitScm.class)
                 .url(repoUrl)
                 .credentials(USERNAME)
@@ -118,24 +134,30 @@ public class GitPluginTest extends AbstractJUnitTest {
     }
 
     @Test
-    public void checkout_to_local_dir() {
+    public void checkout_to_local_dir() throws IOException, InterruptedException, SftpException, JSchException {
+        buildGitRepo()
+                .transferRepositoryToDockerContainer(HOST, port);
+
         job.useScm(GitScm.class)
                 .url(repoUrl)
                 .credentials(USERNAME)
                 .localDir("local_dir");
-        job.addShellStep("cd local_dir && test -f init.txt");
+        job.addShellStep("cd local_dir && test -f foo");
         job.save();
 
         job.startBuild().shouldSucceed();
     }
 
     @Test
-    public void poll_for_changes() {
+    public void poll_for_changes() throws IOException, InterruptedException, SftpException, JSchException {
+        buildGitRepo()
+                .transferRepositoryToDockerContainer(HOST, port);
+
         job.useScm(GitScm.class) //
                 .url(container.getRepoUrl())
                 .credentials(USERNAME);
         job.pollScm().schedule("* * * * *");
-        job.addShellStep("test -f init.txt");
+        job.addShellStep("test -f foo");
         job.save();
 
         sleep(70000);
@@ -145,7 +167,10 @@ public class GitPluginTest extends AbstractJUnitTest {
     }
 
     @Test
-    public void check_revision() {
+    public void check_revision() throws IOException, InterruptedException, SftpException, JSchException {
+        buildGitRepo()
+                .transferRepositoryToDockerContainer(HOST, port);
+
         job.useScm(GitScm.class)
                 .url(repoUrl)
                 .credentials(USERNAME);
@@ -164,5 +189,11 @@ public class GitPluginTest extends AbstractJUnitTest {
         Matcher m = p.matcher(console);
         assertThat(m.find(), is(true));
         return m.group(0);
+    }
+
+    private GitRepo buildGitRepo() throws IOException, InterruptedException {
+        GitRepo repo = new GitRepo();
+        repo.commit("Initial commit");
+        return repo;
     }
 }
