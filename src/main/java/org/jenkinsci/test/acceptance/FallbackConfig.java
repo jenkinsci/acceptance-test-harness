@@ -1,9 +1,9 @@
 package org.jenkinsci.test.acceptance;
 
 import javax.inject.Named;
+
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -29,6 +29,9 @@ import org.jenkinsci.test.acceptance.utils.SauceLabsConnection;
 import org.jenkinsci.test.acceptance.utils.aether.ArtifactResolverUtil;
 import org.jenkinsci.test.acceptance.utils.mail.MailService;
 import org.jenkinsci.test.acceptance.utils.mail.Mailtrap;
+import org.jenkinsci.test.acceptance.utils.pluginreporter.ExercisedPluginsReporter;
+import org.jenkinsci.test.acceptance.utils.pluginreporter.TextFileExercisedPluginReporter;
+import org.jenkinsci.test.acceptance.utils.pluginreporter.ConsoleExercisedPluginReporter;
 import org.junit.runners.model.Statement;
 import org.openqa.selenium.UnsupportedCommandException;
 import org.openqa.selenium.WebDriver;
@@ -201,5 +204,30 @@ public class FallbackConfig extends AbstractModule {
     public boolean neverReplaceExistingPlugins() {
         return System.getenv("NEVER_REPLACE_EXISTING_PLUGINS") != null;
     }
+
+    /**
+     *  Provides a mechanism to create a report on which plugins were used
+     *  during the test execution
+     *
+     *  @return An ExercisedPluginReporter based on env var EXERCISEDPLUGINREPORTER
+     */
+     @Provides @Named("ExercisedPluginReporter")
+     public ExercisedPluginsReporter createExercisedPluginReporter() {
+         String reporter = System.getenv("EXERCISEDPLUGINREPORTER");
+         if (reporter==null) {
+             reporter = "console";
+         } else {
+             reporter = reporter.toLowerCase(Locale.ENGLISH);
+         }
+
+         switch (reporter) {
+         case "console":
+             return new ConsoleExercisedPluginReporter();
+         case "textfile":
+             return TextFileExercisedPluginReporter.getInstance();
+         default:
+             throw new AssertionError("Unrecognized Exercised Plugin Report type: "+reporter);
+         }
+     }
 }
 
