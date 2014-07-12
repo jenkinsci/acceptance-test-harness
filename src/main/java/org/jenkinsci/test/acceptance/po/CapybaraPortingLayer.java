@@ -17,6 +17,7 @@ public interface CapybaraPortingLayer {
     ByFactory by = new ByFactory();
 
     void clickButton(String text);
+    void clickButton(String text, int num);
 
     /**
      * Select radio button by its name, id, or label text.
