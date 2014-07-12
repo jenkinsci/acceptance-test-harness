@@ -91,7 +91,29 @@ public class DockerContainer implements Closeable {
             throw new AssertionError("Failed to figure out port map "+n,e);
         }
     }
+    /**
+     * Tries to copy one file from Path toPath. Returns afterwards if the file exist.
+     * @param Path the Source Path
+     * @param toPath the Destination Path
+     * @return true if the copy was a success otherwise false
+     * @throws InterruptedException
+     */
+    public boolean tryCopyFile(String Path,String toPath) throws  InterruptedException{
+        File srcFile = new File(Path);
+        String fileName= srcFile.getName();
+        File destFile = new File(toPath+"/"+fileName);
+        if(destFile.exists()){
+            destFile.delete();
+        }
+        try {
+            cp(Path, new File(toPath));
+        }
+        catch (IOException ex){
+            //General catch, docker sometimes throws an error, even if it copies a file
+        }
 
+        return destFile.exists();
+    }
     /**
      * Stops and remove any trace of the container
      */
