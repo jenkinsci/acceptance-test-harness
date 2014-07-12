@@ -1,20 +1,27 @@
 package org.jenkinsci.test.acceptance.po;
 
-import com.google.common.base.Joiner;
-import com.google.inject.Injector;
-import org.jenkinsci.test.acceptance.junit.Resource;
-import org.jenkinsci.test.acceptance.utils.ElasticTime;
-import org.openqa.selenium.*;
-
 import javax.inject.Inject;
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import static java.util.Arrays.asList;
 import org.hamcrest.StringDescription;
 import org.jenkinsci.test.acceptance.Matcher;
+import org.jenkinsci.test.acceptance.junit.Resource;
+import org.jenkinsci.test.acceptance.utils.ElasticTime;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+
+import com.google.common.base.Joiner;
+import com.google.inject.Injector;
+
+import static java.util.Arrays.*;
 
 /**
  * For assisting porting from Capybara.
@@ -65,13 +72,6 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
         WebElement e = find(by.button(text));
         e.click();
     }
-
-    @Override
-    public void clickButton(String text, int num){
-        List<WebElement> e = all(by.button(text));
-        e.get(num).click();
-    }
-
 
     /**
      * Select radio button by its name, id, or label text.

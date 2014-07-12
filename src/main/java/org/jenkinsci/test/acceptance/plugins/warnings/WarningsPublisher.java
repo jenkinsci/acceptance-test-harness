@@ -9,6 +9,7 @@ import org.jenkinsci.test.acceptance.po.*;
 public class WarningsPublisher extends AbstractStep implements PostBuildStep {
     private Control addConsoleLogScanner = control("repeatable-add");
     private Control addWorkspaceFileScanner = control("repeatable-add[1]");
+    protected Control advanced = control("advanced-button");
 
     public WarningsPublisher(Job parent, String path) {
         super(parent, path);
@@ -35,10 +36,6 @@ public class WarningsPublisher extends AbstractStep implements PostBuildStep {
         a.control("parserName").select(caption);
     }
 
-    public void openAdvancedOptions(){
-        clickButton("Advanced...", 5);
-    }
-
     public void addWarningsToInclude(String pattern){
         find(by.xpath("//input[@name='_.includePattern']")).sendKeys(pattern);
     }
@@ -61,5 +58,9 @@ public class WarningsPublisher extends AbstractStep implements PostBuildStep {
 
     public void resolveRelativePaths(){
         check(find(by.xpath("//input[@name='shouldDetectModules']")));
+    }
+
+    public void openAdvancedOptions() {
+        advanced.click();
     }
 }

@@ -1,12 +1,12 @@
 package org.jenkinsci.test.acceptance.po;
 
-import org.jenkinsci.test.acceptance.ByFactory;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
-
 import java.util.List;
 import java.util.concurrent.Callable;
+
+import org.jenkinsci.test.acceptance.ByFactory;
 import org.jenkinsci.test.acceptance.Matcher;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 /**
  * Interface for assisting porting from Capybara.
@@ -17,7 +17,6 @@ public interface CapybaraPortingLayer {
     ByFactory by = new ByFactory();
 
     void clickButton(String text);
-    void clickButton(String text, int num);
 
     /**
      * Select radio button by its name, id, or label text.

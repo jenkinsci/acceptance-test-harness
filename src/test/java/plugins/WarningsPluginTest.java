@@ -1,21 +1,16 @@
 package plugins;
 
-import org.hamcrest.Matcher;
-import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsAction;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsPublisher;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
-import org.jenkinsci.test.acceptance.po.PageObject;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.jenkinsci.test.acceptance.Matchers.hasAction;
-import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.*;
+import static org.jenkinsci.test.acceptance.Matchers.*;
 
 /**
  * Feature: Adds Warnings collection support
@@ -25,7 +20,6 @@ import static org.jenkinsci.test.acceptance.Matchers.hasContent;
  */
 @WithPlugins("warnings")
 public class WarningsPluginTest extends AbstractCodeStylePluginHelper {
-
     private FreeStyleJob job;
 
     @Before
@@ -87,8 +81,8 @@ public class WarningsPluginTest extends AbstractCodeStylePluginHelper {
 
         assertThat(b, hasAction("Maven Warnings"));
         WarningsAction wa = new WarningsAction(job);
-        assertThat(wa.getResultLinkByXPathText("1 warning"), is("warnings29Result"));
-        assertThat(wa.getResultLinkByXPathText("1 new warning"), is("warnings29Result/new"));
+        assertThat(wa.getResultLinkByXPathText("1 warning"), is("warnings33Result"));
+        assertThat(wa.getResultLinkByXPathText("1 new warning"), is("warnings33Result/new"));
         assertThat(driver, hasContent("Maven Warnings: 1"));
         assertThat(wa.getNewWarningNumber(), is(1));
         assertThat(wa.getWarningNumber(), is(1));
