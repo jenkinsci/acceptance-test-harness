@@ -1,29 +1,24 @@
 package plugins;
 
-import java.io.File;
-import java.io.IOException;
-
+import com.google.inject.Inject;
 import org.apache.commons.io.FileUtils;
 import org.hamcrest.CoreMatchers;
 import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.docker.fixtures.SshdContainer;
-import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.junit.Native;
-import org.jenkinsci.test.acceptance.junit.Resource;
-import org.jenkinsci.test.acceptance.junit.SmokeTest;
-import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.plugins.publish_over_ssh.PublishOverSSHGlobalConfig;
-import org.jenkinsci.test.acceptance.plugins.publish_over_ssh.PublishOverSSHGlobalConfig.AdvancedConfig;
-import org.jenkinsci.test.acceptance.plugins.publish_over_ssh.PublishOverSSHGlobalConfig.CommonConfig;
-import org.jenkinsci.test.acceptance.plugins.publish_over_ssh.PublishOverSSHGlobalConfig.InstanceSite;
-import org.jenkinsci.test.acceptance.plugins.publish_over_ssh.PublishOverSSHPublisher;
-import org.jenkinsci.test.acceptance.plugins.publish_over_ssh.PublishOverSSHPublisher.Publishers;
-import org.jenkinsci.test.acceptance.plugins.publish_over_ssh.PublishOverSSHPublisher.TransferSet;
+import org.jenkinsci.test.acceptance.junit.*;
+import org.jenkinsci.test.acceptance.plugins.publish_over.PublishOverSSHGlobalConfig;
+import org.jenkinsci.test.acceptance.plugins.publish_over.PublishOverSSHGlobalConfig.AdvancedConfig;
+import org.jenkinsci.test.acceptance.plugins.publish_over.PublishOverSSHGlobalConfig.CommonConfig;
+import org.jenkinsci.test.acceptance.plugins.publish_over.PublishOverSSHGlobalConfig.InstanceSite;
+import org.jenkinsci.test.acceptance.plugins.publish_over.PublishOverSSHPublisher;
+import org.jenkinsci.test.acceptance.plugins.publish_over.PublishOverSSHPublisher.Publishers;
+import org.jenkinsci.test.acceptance.plugins.publish_over.PublishOverSSHPublisher.TransferSet;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-import com.google.inject.Inject;
+import java.io.File;
+import java.io.IOException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -198,7 +193,7 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
         j.save();
         j.startBuild().shouldSucceed();
 
-        sshd.cp(tempCopyFile, new File(tempPath));
+        sshd.cp(tempCopyFile, tempPath);
         assertThat(FileUtils.readFileToString(new File(tempCopyFile)), CoreMatchers.is(cp_file.asText()));
     }
 
@@ -235,7 +230,7 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
         j.save();
         j.startBuild().shouldSucceed();
 
-        sshd.cp(tempCopyFile, new File(tempPath));
+        sshd.cp(tempCopyFile, tempPath);
         assertThat(FileUtils.readFileToString(new File(tempCopyFile)), CoreMatchers.is(cp_file.asText()));
     }
 
@@ -270,7 +265,7 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
         j.save();
         j.startBuild().shouldSucceed();
 
-        sshd.cp(tempCopyFile, new File(tempPath));
+        sshd.cp(tempCopyFile, tempPath);
         assertThat(FileUtils.readFileToString(new File(tempCopyFile)), CoreMatchers.is(cp_file.asText()));
     }
 
@@ -307,7 +302,7 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
         j.save();
         j.startBuild().shouldSucceed();
 
-        sshd.cp(tempCopyFile, new File(tempPath));
+        sshd.cp(tempCopyFile, tempPath);
         assertThat(FileUtils.readFileToString(new File(tempCopyFile)), CoreMatchers.is(cp_file.asText()));
     }
 
@@ -344,8 +339,8 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
         j.save();
         j.startBuild().shouldSucceed();
 
-        sshd.cp(tempCopyFile, new File(tempPath));
-        sshd.cp(tempCopyFileEcho, new File(tempPath));
+        sshd.cp(tempCopyFile, tempPath);
+        sshd.cp(tempCopyFileEcho, tempPath);
         assertThat(FileUtils.readFileToString(new File(tempCopyFile)), CoreMatchers.is(cp_file.asText()));
         assertThat(FileUtils.readFileToString(new File(tempCopyFileEcho)), CoreMatchers.is("i was here\n"));
 

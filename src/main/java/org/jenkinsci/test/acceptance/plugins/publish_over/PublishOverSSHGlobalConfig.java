@@ -1,4 +1,4 @@
-package org.jenkinsci.test.acceptance.plugins.publish_over_ssh;
+package org.jenkinsci.test.acceptance.plugins.publish_over;
 
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.po.Control;

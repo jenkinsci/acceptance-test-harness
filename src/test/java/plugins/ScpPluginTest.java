@@ -75,7 +75,7 @@ public class ScpPluginTest extends AbstractJUnitTest {
 
         j.startBuild().shouldSucceed();
 
-        sshd.cp("/tmp/abc/lorem-ipsum-scp.txt", new File("/tmp"));
+        sshd.cp("/tmp/abc/lorem-ipsum-scp.txt", "/tmp");
         assertThat(FileUtils.readFileToString(new File("/tmp/lorem-ipsum-scp.txt")), CoreMatchers.is(cp_file.asText()));
     }
 
@@ -127,7 +127,7 @@ public class ScpPluginTest extends AbstractJUnitTest {
 
         j.startBuild().shouldSucceed();
 
-        sshd.cp("/tmp/abc/lorem-ipsum-scp.txt", new File("/tmp"));
+        sshd.cp("/tmp/abc/lorem-ipsum-scp.txt", "/tmp");
         assertThat(FileUtils.readFileToString(new File("/tmp/lorem-ipsum-scp.txt")), CoreMatchers.is(cp_file.asText()));
     }
 }
