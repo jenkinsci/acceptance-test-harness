@@ -1,7 +1,9 @@
 package plugins;
 
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.AbstractCodeStylePluginBuildConfigurator;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsAction;
+import org.jenkinsci.test.acceptance.plugins.warnings.WarningsBuildSettings;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsPublisher;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
@@ -317,18 +319,29 @@ public class WarningsPluginTest extends AbstractCodeStylePluginHelper {
      Then build should have 5 Java Warnings
      */
     @Test
-    public void include_warnings_specified_in_included_parts(){
-        job.configure();
-        WarningsPublisher wp = job.addPublisher(WarningsPublisher.class);
-        wp.addWorkspaceFileScanner("Java Compiler (javac)", "**/*");
-        wp.openAdvancedOptions();
-        wp.addWarningsToInclude(".*/include*/.*, .*/default/.*");
-        String warningsPath = this.getClass().getResource("/warnings_plugin/warningsForRegEx.txt").getPath();
-        job.addShellStep("cat " + warningsPath + " >> errors.log");
-        job.save();
-        Build b = buildJobWithSuccess(job);
-        assertThat(b, hasAction("Java Warnings"));
-        b.open();
-        assertThat(driver, hasContent("Java Warnings: 5"));
+    public void include_warnings_specified_in_included_parts() {
+        AbstractCodeStylePluginBuildConfigurator<WarningsBuildSettings> buildConfigurator = new AbstractCodeStylePluginBuildConfigurator<WarningsBuildSettings>() {
+            @Override
+            public void configure(WarningsBuildSettings settings) {
+                settings.addWorkspaceFileScanner("Java Compiler (javac)", "**/*");
+                settings.addWarningsToInclude(".*/include*/.*, .*/default/.*");
+            }
+        };
+        FreeStyleJob job = setupJob("/warnings_plugin/warningsForRegEx.txt", FreeStyleJob.class,
+                WarningsBuildSettings.class, buildConfigurator);
+        Build build = buildJobWithSuccess(job);
+        assertThat(build, hasAction("Java Warnings"));
+        assertThat(job.getLastBuild(), hasAction("Java Warnings"));
+
+        WarningsAction action = new WarningsAction(job);
+        assertThat(action.getResultLinkByXPathText("5 warnings"), containsRegexp("warnings.*Result"));
+        assertThat(action.getResultLinkByXPathText("5 new warnings"), containsRegexp("warnings.*Result/new"));
+
+        assertThat(action.getWarningNumber(), is(5));
+        assertThat(action.getNewWarningNumber(), is(5));
+        assertThat(action.getFixedWarningNumber(), is(0));
+        assertThat(action.getHighWarningNumber(), is(0));
+        assertThat(action.getNormalWarningNumber(), is(5));
+        assertThat(action.getLowWarningNumber(), is(0));
     }
 }
