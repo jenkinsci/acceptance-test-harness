@@ -1,21 +1,18 @@
 #
-# Runs sshd and allow the 'test' user to login
+# Runs smbd and allow the 'test' user to connect
 #
 
-FROM ubuntu:latest
+FROM ubuntu
 
-# Configure apt
-RUN echo 'deb http://us.archive.ubuntu.com/ubuntu/ precise universe' >> /etc/apt/sources.list
-RUN apt-get -y update
-#install samba
-RUN apt-get install -y samba
+RUN echo "deb http://archive.ubuntu.com/ubuntu precise main universe" > /etc/apt/sources.list
+RUN apt-get update
 
-
-# create a test user
 RUN useradd test -d /home/test -s /bin/bash && \
-        mkdir -p /home/test/ftp && \
+        mkdir -p /home/test && \
         chown test /home/test && \
         echo "test:test" | chpasswd
+
+RUN apt-get install -y samba
 
 RUN echo "workgroup = WORKGROUP" >> /etc/mysmb.conf
 RUN echo "restrict anonymous = no" >> /etc/mysmb.conf
@@ -27,6 +24,6 @@ RUN echo "[tmp]" >> /etc/mysmb.conf
 RUN echo "  comment = Temp" >> /etc/mysmb.conf
 RUN echo "  path = /tmp" >> /etc/mysmb.conf
 RUN echo "  guest ok = Yes" >> /etc/mysmb.conf
-RUN echo "  read only=no" >> /etc/mysmb.conf
+RUN echo "  read only = no" >> /etc/mysmb.conf
 
-CMD /usr/sbin/smbd -i -s /etc/mysmb.conf
+CMD ["/usr/sbin/smbd", "-i", "-s", "/etc/mysmb.conf"]

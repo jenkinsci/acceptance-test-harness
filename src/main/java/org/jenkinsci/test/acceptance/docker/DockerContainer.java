@@ -42,12 +42,12 @@ public class DockerContainer implements Closeable {
      * the class name.
      */
     public Resource resource(String relativePath) {
-        for (Class c = getClass(); c!=null; c=c.getSuperclass()) {
+        for (Class c = getClass(); c != null; c = c.getSuperclass()) {
             URL res = c.getResource(c.getSimpleName() + "/" + relativePath);
-            if (res!=null)
+            if (res != null)
                 return new Resource(res);
         }
-        throw new IllegalArgumentException("No such resource "+relativePath+" in "+getClass());
+        throw new IllegalArgumentException("No such resource " + relativePath + " in " + getClass());
     }
 
     public String getCid() {
@@ -72,8 +72,8 @@ public class DockerContainer implements Closeable {
                 throw new IllegalStateException(format("Port %d is not mapped for container %s", n, cid));
 
             return out.split(":")[0];
-        } catch (IOException|InterruptedException e) {
-            throw new AssertionError("Failed to figure out port map "+n,e);
+        } catch (IOException | InterruptedException e) {
+            throw new AssertionError("Failed to figure out port map " + n, e);
         }
     }
 
@@ -87,33 +87,11 @@ public class DockerContainer implements Closeable {
                 throw new IllegalStateException(format("Port %d is not mapped for container %s", n, cid));
 
             return Integer.parseInt(out.split(":")[1]);
-        } catch (IOException|InterruptedException e) {
-            throw new AssertionError("Failed to figure out port map "+n,e);
+        } catch (IOException | InterruptedException e) {
+            throw new AssertionError("Failed to figure out port map " + n, e);
         }
     }
-    /**
-     * Tries to copy one file from Path toPath. Returns afterwards if the file exist.
-     * @param Path the Source Path
-     * @param toPath the Destination Path
-     * @return true if the copy was a success otherwise false
-     * @throws InterruptedException
-     */
-    public boolean tryCopyFile(String Path,String toPath) throws  InterruptedException{
-        File srcFile = new File(Path);
-        String fileName= srcFile.getName();
-        File destFile = new File(toPath+"/"+fileName);
-        if(destFile.exists()){
-            destFile.delete();
-        }
-        try {
-            cp(Path, new File(toPath));
-        }
-        catch (IOException ex){
-            //General catch, docker sometimes throws an error, even if it copies a file
-        }
 
-        return destFile.exists();
-    }
     /**
      * Stops and remove any trace of the container
      */
@@ -124,20 +102,36 @@ public class DockerContainer implements Closeable {
                     .popen().verifyOrDieWith("Failed to kill " + cid);
             Docker.cmd("rm").add(cid)
                     .popen().verifyOrDieWith("Failed to rm " + cid);
-            if (shutdownHook!=null) {
+            if (shutdownHook != null) {
                 Runtime.getRuntime().removeShutdownHook(shutdownHook);
             }
-        } catch (IOException|InterruptedException e) {
-            throw new AssertionError("Failed to close down docker container "+cid,e);
+        } catch (IOException | InterruptedException e) {
+            throw new AssertionError("Failed to close down docker container " + cid, e);
         }
     }
 
     /**
-     * Copies a files/folders from inside the container to outside
+     * Copies a file or folder from inside the container to the outside. Silently overwrites an existing file.
+     *
+     * @param from the absolute path of the resource to copy
+     * @param toPath the absolute path of the destination directory
+     * @return {@code true}  if the copy was a success otherwise {@code false}
      */
-    public void cp(String from, File to) throws IOException, InterruptedException {
-        Docker.cmd("cp").add(cid+":"+from).add(to)
-                .popen().verifyOrDieWith(format("Failed to copy %s to %s", from, to));
+    public boolean cp(String from, String toPath) {
+        File srcFile = new File(from);
+        String fileName = srcFile.getName();
+        File destFile = new File(toPath, fileName);
+        if (destFile.exists()) {
+            destFile.delete();
+        }
+        try {
+            Docker.cmd("cp").add(cid + ":" + from).add(new File(toPath))
+                    .popen().verifyOrDieWith(format("Failed to copy %s to %s", from, toPath));
+        } catch (IOException | InterruptedException e) {
+            return false;
+        }
+
+        return destFile.exists();
     }
 
     /**
@@ -156,6 +150,6 @@ public class DockerContainer implements Closeable {
 
     @Override
     public String toString() {
-        return "Docker container "+cid;
+        return "Docker container " + cid;
     }
 }

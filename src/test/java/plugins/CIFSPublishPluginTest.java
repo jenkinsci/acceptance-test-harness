@@ -17,8 +17,6 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
  */
 @WithPlugins("publish-over-cifs")
 public class CIFSPublishPluginTest extends GlobalPublishPluginTest {
-
-
     /**
      * Creates & Returns a SMBContainer for the CIF Tests
      * @return SMBContainer
@@ -57,7 +55,7 @@ public class CIFSPublishPluginTest extends GlobalPublishPluginTest {
         CifsGlobalConfig.CifSite s = new CifsGlobalConfig(jenkins).addSite();
         {
             s.name.set(serverName);
-            s.hostname.set(dock.ipBound(139));
+            s.hostname.set("localhost");
             s.port.set(dock.port(139));
             if(dock instanceof IPasswordDockerContainer) {
                 s.username.set(((IPasswordDockerContainer)dock).getUsername());
