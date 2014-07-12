@@ -1,13 +1,12 @@
 package org.jenkinsci.test.acceptance.plugins.jabber;
 
+import javax.inject.Inject;
+
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
-import org.jenkinsci.test.acceptance.plugins.publish_over_ssh.PublishOverSSHGlobalConfig;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.PageObject;
-
-import javax.inject.Inject;
 
 /**
  * Created by jenky-hm on 6/14/14.

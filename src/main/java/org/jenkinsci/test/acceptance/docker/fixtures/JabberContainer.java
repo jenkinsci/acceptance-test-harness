@@ -1,13 +1,12 @@
 package org.jenkinsci.test.acceptance.docker.fixtures;
 
-import org.jenkinsci.test.acceptance.docker.DockerContainer;
-import org.jenkinsci.test.acceptance.docker.DockerFixture;
-
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.util.Date;
 import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import org.jenkinsci.test.acceptance.docker.DockerContainer;
+import org.jenkinsci.test.acceptance.docker.DockerFixture;
 
 /**
  * Runs  XMPP / Jabber server container.
@@ -26,12 +25,11 @@ public class JabberContainer extends DockerContainer {
 //    }
     public File getLogbotLogFile() throws IOException, InterruptedException {
         String timeString = getTimestampForLogfile();
-        File logfileDir = new File("/tmp/");
         File logfileLocal = new File("/tmp/"+ timeString + ".txt");
         // .../test/.. is the hardcoded name of the conference room the bot joins
         String logfilePathRemote = "/.logbot/logs/test/"+ timeString + ".txt";
 
-        super.cp(logfilePathRemote,logfileDir);
+        super.cp(logfilePathRemote, "/tmp/");
         return logfileLocal;
     }
 
