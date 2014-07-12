@@ -77,7 +77,7 @@ public class ExistingJenkinsController extends JenkinsController {
 
     @Override
     public void populateJenkinsHome(File template, boolean clean) throws IOException {
-        throw new UnsupportedOperationException("unsupported");
+        // nothing to do, Jenkins is already running
     }
 
     @Override
