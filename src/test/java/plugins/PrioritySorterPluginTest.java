@@ -1,12 +1,15 @@
 package plugins;
 
 import com.google.inject.Inject;
+
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.plugins.job_config_history.JobConfigHistory;
 import org.jenkinsci.test.acceptance.plugins.priority_sorter.PriorityConfig;
 import org.jenkinsci.test.acceptance.plugins.priority_sorter.PriorityConfig.Group;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.jenkinsci.test.acceptance.po.ListView;
 import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
@@ -14,6 +17,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.jenkinsci.test.acceptance.po.Slave.runBuildsInOrder;
 
 /**
@@ -93,6 +97,23 @@ public class PrioritySorterPluginTest extends AbstractJUnitTest {
         p2b.shouldSucceed();
 
         assertThat(slave, runBuildsInOrder(p1, p2));
+    }
+
+    // Reproduce regression fixed in https://github.com/jenkinsci/priority-sorter-plugin/commit/e46b2b1fbc4396f441c69692eb328fb982325572
+    @Test @WithPlugins("jobConfigHistory")
+    public void saving_global_config_should_not_create_job_change() {
+        FreeStyleJob job = jenkins.jobs.create();
+        job.save();
+
+        JobConfigHistory action = job.action(JobConfigHistory.class);
+        final int expected = action.getChanges().size();
+
+        final JenkinsConfig global = jenkins.getConfigPage();
+        global.configure();
+        global.numExecutors.set(42);
+        global.save();
+
+        assertThat(action.getChanges().size(), equalTo(expected));
     }
 
     private void tieToLabel(FreeStyleJob job, String label) {

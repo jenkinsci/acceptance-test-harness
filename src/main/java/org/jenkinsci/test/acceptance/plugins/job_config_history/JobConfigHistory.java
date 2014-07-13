@@ -23,10 +23,15 @@
  */
 package org.jenkinsci.test.acceptance.plugins.job_config_history;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jenkinsci.test.acceptance.po.Action;
 import org.jenkinsci.test.acceptance.po.ActionPageObject;
 import org.jenkinsci.test.acceptance.po.ContainerPageObject;
 import org.jenkinsci.test.acceptance.po.Job;
+import org.jenkinsci.test.acceptance.po.PageObject;
+import org.openqa.selenium.WebElement;
 
 @ActionPageObject("jobConfigHistory")
 public class JobConfigHistory extends Action {
@@ -40,8 +45,32 @@ public class JobConfigHistory extends Action {
         clickButton("Show Diffs");
     }
 
+    public List<Change> getChanges() {
+        open();
+
+        final List<WebElement> rows = all(by.xpath("//table//a[text()='(RAW)']/../../*[1]"));
+        final ArrayList<Change> changes = new ArrayList<Change>(rows.size());
+
+        for (WebElement row: rows) {
+            changes.add(new Change(this, row.getText()));
+        }
+
+        return changes;
+    }
+
     @Override
     public boolean isApplicable(ContainerPageObject po) {
         return po instanceof Job;
+    }
+
+    public static class Change extends PageObject {
+
+        private final String timestamp;
+
+        public Change(JobConfigHistory owner, String timestamp) {
+            super(owner, owner.url("configOutput?type=xml&timestamp=" + timestamp));
+
+            this.timestamp = timestamp;
+        }
     }
 }
