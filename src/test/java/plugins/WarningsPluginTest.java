@@ -22,6 +22,11 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
  */
 @WithPlugins("warnings")
 public class WarningsPluginTest extends AbstractCodeStylePluginHelper {
+    /** Contains warnings for Javac parser. Warnings have file names preset for include/exclude filter tests. */
+    private static final String WARNINGS_FILE_FOR_INCLUDE_EXCLUDE_TESTS = "/warnings_plugin/warningsForRegEx.txt";
+    /** Contains warnings for several parsers. */
+    private static final String WARNINGS_FILE_SEVERAL_PARSERS = "/warnings_plugin/warningsAll.txt";
+
     private FreeStyleJob job;
 
     @Before
@@ -174,7 +179,7 @@ public class WarningsPluginTest extends AbstractCodeStylePluginHelper {
         wp.addConsoleScanner("Java Compiler (javac)");
         wp.addConsoleScanner("JavaDoc Tool");
         wp.addConsoleScanner("MSBuild");
-        String warningsPath = this.getClass().getResource("/warnings_plugin/warningsAll.txt").getPath();
+        String warningsPath = this.getClass().getResource(WARNINGS_FILE_SEVERAL_PARSERS).getPath();
         job.addShellStep("cat " + warningsPath);
         job.save();
         Build b = buildJobWithSuccess(job);
@@ -206,7 +211,7 @@ public class WarningsPluginTest extends AbstractCodeStylePluginHelper {
         wp.addWorkspaceFileScanner("Java Compiler (javac)", "**/*");
         wp.addWorkspaceFileScanner("JavaDoc Tool", "**/*");
         wp.addWorkspaceFileScanner("MSBuild", "**/*");
-        String warningsPath = this.getClass().getResource("/warnings_plugin/warningsAll.txt").getPath();
+        String warningsPath = this.getClass().getResource(WARNINGS_FILE_SEVERAL_PARSERS).getPath();
         job.addShellStep("cat " + warningsPath + " >> errors.log");
         job.save();
         Build b = buildJobWithSuccess(job);
@@ -265,7 +270,7 @@ public class WarningsPluginTest extends AbstractCodeStylePluginHelper {
         wp.addWorkspaceFileScanner("Java Compiler (javac)", "**/*");
         wp.openAdvancedOptions();
         wp.runAlways();
-        String warningsPath = this.getClass().getResource("/warnings_plugin/warningsALL.txt").getPath();
+        String warningsPath = this.getClass().getResource(WARNINGS_FILE_SEVERAL_PARSERS).getPath();
         job.addShellStep("cat " + warningsPath + " >> errors.log");
         job.addShellStep("exit 1");
         job.save();
@@ -297,7 +302,7 @@ public class WarningsPluginTest extends AbstractCodeStylePluginHelper {
         wp.openAdvancedOptions();
         wp.addWarningsToInclude(".*/.*");
         wp.addWarningsToIgnore(".*/ignore1/.*, .*/ignore2/.*, .*/default/.*");
-        String warningsPath = this.getClass().getResource("/warnings_plugin/warningsForRegEx.txt").getPath();
+        String warningsPath = this.getClass().getResource(WARNINGS_FILE_FOR_INCLUDE_EXCLUDE_TESTS).getPath();
         job.addShellStep("cat " + warningsPath);
         job.save();
         Build b = buildJobWithSuccess(job);
@@ -327,7 +332,7 @@ public class WarningsPluginTest extends AbstractCodeStylePluginHelper {
                 settings.addWarningsToInclude(".*/include*/.*, .*/default/.*");
             }
         };
-        FreeStyleJob job = setupJob("/warnings_plugin/warningsForRegEx.txt", FreeStyleJob.class,
+        FreeStyleJob job = setupJob(WARNINGS_FILE_FOR_INCLUDE_EXCLUDE_TESTS, FreeStyleJob.class,
                 WarningsBuildSettings.class, buildConfigurator);
         Build build = buildJobWithSuccess(job);
         assertThat(build, hasAction("Java Warnings"));
