@@ -1,6 +1,12 @@
 package plugins;
 
-import com.google.inject.Inject;
+import javax.annotation.CheckForNull;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.util.concurrent.ExecutionException;
+import java.util.regex.Pattern;
+
 import org.apache.xerces.jaxp.DocumentBuilderFactoryImpl;
 import org.custommonkey.xmlunit.XMLAssert;
 import org.custommonkey.xmlunit.XMLUnit;
@@ -14,20 +20,22 @@ import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenBuildStep;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
-import org.jenkinsci.test.acceptance.po.*;
+import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.Job;
+import org.jenkinsci.test.acceptance.po.ListView;
+import org.jenkinsci.test.acceptance.po.ListViewColumn;
+import org.jenkinsci.test.acceptance.po.PostBuildStep;
+import org.jenkinsci.test.acceptance.po.Slave;
+import org.jenkinsci.test.acceptance.po.View;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-import javax.annotation.CheckForNull;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.util.concurrent.ExecutionException;
-import java.util.regex.Pattern;
+import com.google.inject.Inject;
 
-import static java.util.Collections.singletonMap;
-import static org.junit.Assert.assertTrue;
+import static java.util.Collections.*;
+import static org.junit.Assert.*;
 
 public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
 
@@ -77,8 +85,10 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
         J job = jenkins.jobs.create(jobClass);
         job.configure();
 
-        // first copy resource and then add a goal
-        addResourceToJob(job, resourceToCopy);
+        if (resourceToCopy != null) {
+            // first copy resource and then add a goal
+            addResourceToJob(job, resourceToCopy);
+        }
 
         // check if a goal is defined and configure the job depending on the job class
         if (goal != null) {
