@@ -48,6 +48,7 @@ import static org.hamcrest.Matchers.*;
  * - adGroup=groupToWhichUserBelongs (optional; none => skip group test)<br>
  * - adPassword=pwd<br>
  * - adSite=Site (optional)<br>
+ * - adGroupLookupStrategy={ AUTO, RECURSIVE, CHAIN } (optional)<br>
  * - adUser=user<br>
  * <br>
  * Consider setting -Dhudson.plugins.active_directory.ActiveDirectorySecurityRealm.forceLdaps=true<br>
@@ -60,7 +61,7 @@ import static org.hamcrest.Matchers.*;
  *
  * @author Marco.Miller@ericsson.com
  */
-@WithPlugins("active-directory")
+@WithPlugins("active-directory@1.38")
 public class ActiveDirectoryTest extends AbstractJUnitTest {
     private ActiveDirectorySecurity adSecurity;
 
@@ -71,8 +72,8 @@ public class ActiveDirectoryTest extends AbstractJUnitTest {
 
     /**
      * Scenario1: user can log-in to Jenkins as admin after AD security configured-<br>
-     * Given a Jenkins instance that is of type=existing<br>
-     * And a pre-installed active-directory plugin version 1.34 (1.37 failed)<br>
+     * Given a Jenkins instance<br>
+     * And an active-directory plugin version 1.38 (or greater)<br>
      * And an AD security configuration that is matrix-based (project)<br>
      * And a user added to that matrix so she can Administer<br>
      * When I save such an AD security configuration<br>
@@ -85,8 +86,8 @@ public class ActiveDirectoryTest extends AbstractJUnitTest {
 
     /**
      * Scenario2: user can log-in to Jenkins as admin group member after AD security configured-<br>
-     * Given a Jenkins instance that is of type=existing<br>
-     * And a pre-installed active-directory plugin version 1.34 (1.37 failed)<br>
+     * Given a Jenkins instance<br>
+     * And an active-directory plugin version 1.38 (or greater)<br>
      * And an AD security configuration that is matrix-based (project)<br>
      * And a group added to that matrix so its members can Administer<br>
      * And a user being a member of that group<br>
@@ -100,8 +101,8 @@ public class ActiveDirectoryTest extends AbstractJUnitTest {
 
     /**
      * Scenario3: user wannabe cannot log-in to Jenkins after AD security configured-<br>
-     * Given a Jenkins instance that is of type=existing<br>
-     * And a pre-installed active-directory plugin version 1.34 (1.37 failed)<br>
+     * Given a Jenkins instance<br>
+     * And an active-directory plugin version 1.38 (or greater)<br>
      * And an AD security configuration that is matrix-based (project)<br>
      * And a wannabe added to that matrix thinking he can Administer<br>
      * When I save such an AD security configuration<br>
