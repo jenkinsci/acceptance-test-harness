@@ -77,8 +77,8 @@ public class GerritTriggerTest extends AbstractJUnitTest {
 
     /**
      * Scenario: Gerrit has its Change review flags checked after Jenkins set them-<br>
-     * Given a Jenkins instance that is either test-default or type=existing<br>
-     * And a gerrit-trigger plugin that is either test-default or pre-installed<br>
+     * Given a Jenkins instance<br>
+     * And a gerrit-trigger plugin<br>
      * And an existing Gerrit instance configured in that Jenkins<br>
      * When I push a Change that builds successfully for review<br>
      * Then Jenkins does build it successfully indeed<br>
