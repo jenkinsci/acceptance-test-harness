@@ -53,7 +53,6 @@ public class GerritTriggerJob extends PageObject {
      * Saves harness' gerrit-trigger test-job configuration.
      */
     public void saveTestJobConfig() {
-        open();
         if(!event.resolve().isSelected()) event.click();
         server.select(this.getClass().getPackage().getName());
         advanced.click();

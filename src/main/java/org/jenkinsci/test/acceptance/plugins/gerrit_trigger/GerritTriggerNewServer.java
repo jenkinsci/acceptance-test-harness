@@ -47,9 +47,17 @@ public class GerritTriggerNewServer extends PageObject {
      * Does not matter if already configured; no-op with harmless error then.
      */
     public void saveNewTestServerConfigIfNone() {
+        avoidOccasional404FromNonReadyGerritUI();
         open();
         name.set(this.getClass().getPackage().getName());
         modeDefault.click();
         clickButton("OK");
+    }
+
+    private void avoidOccasional404FromNonReadyGerritUI() {
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e1) {
+        }
     }
 }

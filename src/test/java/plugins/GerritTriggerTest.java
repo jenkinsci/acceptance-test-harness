@@ -31,6 +31,9 @@ import org.jenkinsci.test.acceptance.plugins.gerrit_trigger.GerritTriggerJob;
 import org.jenkinsci.test.acceptance.plugins.gerrit_trigger.GerritTriggerNewServer;
 import org.jenkinsci.test.acceptance.plugins.gerrit_trigger.GerritTriggerServer;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -101,12 +104,31 @@ public class GerritTriggerTest extends AbstractJUnitTest {
         try {
             String changeId = pushChangeForReview(jobName);
             sleep(10000);
-            String rev = stringFrom(curl(changeId));
+            String rev = readJson(curl(changeId));
             logCurlHttpCodeIssues(rev);
-            assertThat(Integer.parseInt(valueFrom(rev, ".+Verified\":\\{\"all\":\\[\\{\"value\":(\\d).+")), is(equalTo(1)));
-            assertThat(Integer.parseInt(valueFrom(rev, ".+Code-Review\":\\{\"all\":\\[\\{\"value\":(\\d).+")), is(equalTo(1)));
+
+            checkLabelValueFromJSON(rev, "Verified");
+            checkLabelValueFromJSON(rev, "Code-Review");
         }
         catch(InterruptedException|IOException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    private void checkLabelValueFromJSON(String json, String labelName) {
+        try {
+            JSONObject obj = new JSONObject(json);
+            JSONArray allArray = obj.getJSONObject("labels").getJSONObject(labelName).getJSONArray("all");
+            boolean foundValue = false;
+            for (int i = 0; i < allArray.length(); i++) {
+                JSONObject testObj = allArray.getJSONObject(i);
+                if (testObj.has("value") && testObj.getInt("value") == 1) {
+                    foundValue = true;
+                    break;
+                }
+            }
+            assertTrue(labelName + " flag should be " + 1, foundValue);
+        } catch (JSONException e) {
             fail(e.getMessage());
         }
     }
@@ -119,7 +141,7 @@ public class GerritTriggerTest extends AbstractJUnitTest {
         String hostName = GerritTriggerEnv.get().getHostName();
         String project = GerritTriggerEnv.get().getProject();
 
-        assertThat(logProcessBuilderIssues(new ProcessBuilder("git", "clone", "ssh://" + user + "@" + hostName + ":29418/" + project, jobName).directory(dir).start(), "git clone"), is(equalTo(0)));
+        assertThat(logProcessBuilderIssues(new ProcessBuilder("git", "clone", "ssh://" + user + "@" + hostName + ":29418/" + project, jobName).directory(dir), "git clone").exitValue(), is(equalTo(0)));
 
         File file = new File(dir+"/"+jobName,jobName);
         file.delete();//result !needed
@@ -128,27 +150,45 @@ public class GerritTriggerTest extends AbstractJUnitTest {
         writer.close();
         dir = file.getParentFile();
 
-        assertThat(logProcessBuilderIssues(new ProcessBuilder("git", "add", jobName ).directory(dir).start(), "git add"), is(equalTo(0)));
-        assertThat(logProcessBuilderIssues(new ProcessBuilder("scp", "-p", "-P", "29418", user + "@" + hostName + ":hooks/commit-msg", ".git/hooks/").directory(dir).start(), "scp"), is(equalTo(0)));
-        assertThat(logProcessBuilderIssues(new ProcessBuilder("git", "commit", "-m", jobName).directory(dir).start(), "git commit"), is(equalTo(0)));
-        assertThat(logProcessBuilderIssues(new ProcessBuilder("git", "push", "origin", "HEAD:refs/for/master").directory(dir).start(), "git push"), is(equalTo(0)));
+        assertThat(logProcessBuilderIssues(new ProcessBuilder("git", "add", jobName ).directory(dir), "git add").exitValue(), is(equalTo(0)));
+        File hooksDir = new File(dir,".git/hooks/");
+        if (!hooksDir.exists()) {
+            assertTrue(hooksDir.mkdir());
+        }
+        assertThat(logProcessBuilderIssues(new ProcessBuilder("scp", "-p", "-P", "29418", user + "@" + hostName + ":hooks/commit-msg", ".git/hooks/").directory(dir), "scp commit-msg").exitValue(), is(equalTo(0)));
+        assertThat(logProcessBuilderIssues(new ProcessBuilder("git", "commit", "-m", jobName).directory(dir), "git commit").exitValue(), is(equalTo(0)));
+        assertThat(logProcessBuilderIssues(new ProcessBuilder("git", "push", "origin", "HEAD:refs/for/master").directory(dir), "git push").exitValue(), is(equalTo(0)));
 
-        Process gitLog1 = new ProcessBuilder("git","log","-1").directory(dir).start();
-        logProcessBuilderIssues(gitLog1, "git log");
-        return valueFrom(stringFrom(gitLog1),".+Change-Id:(.+)");
+        ProcessBuilder gitLog1Pb = new ProcessBuilder("git","log","-1").directory(dir);
+        return valueFrom(stringFrom(logProcessBuilderIssues(gitLog1Pb, "git log")),".+Change-Id:(.+)");
     }
 
     private Process curl(String changeId) throws IOException, InterruptedException {
         String hN = GerritTriggerEnv.get().getHostName();
-        Process curlProcess;
+        ProcessBuilder curlProcess;
         if(GerritTriggerEnv.get().getNoProxy()) {
-            curlProcess = new ProcessBuilder("curl","-w","%{http_code}","--noproxy",hN,"-n","https://"+hN+"/a/changes/"+changeId+"/revisions/current/review").start();
-            logProcessBuilderIssues(curlProcess, "curl");
-            return curlProcess;
+            curlProcess = new ProcessBuilder("curl","-w","%{http_code}","--noproxy",hN,"-n","https://"+hN+"/a/changes/"+changeId+"/revisions/current/review");
+            return logProcessBuilderIssues(curlProcess, "curl");
         }
-        curlProcess = new ProcessBuilder("curl","-n","https://"+hN+"/a/changes/"+changeId+"/revisions/current/review").start();
-        logProcessBuilderIssues(curlProcess, "curl");
-        return curlProcess;
+        curlProcess = new ProcessBuilder("curl","-n","https://"+hN+"/a/changes/"+changeId+"/revisions/current/review");
+        return logProcessBuilderIssues(curlProcess, "curl");
+    }
+
+    private String readJson(Process curl) throws InterruptedException, IOException {
+        assertThat(curl.waitFor(), is(equalTo(0)));
+        StringWriter writer = new StringWriter();
+        IOUtils.copy(curl.getInputStream(), writer);
+
+        String[] lines = writer.toString().split(System.getProperty("line.separator"));
+        writer.close();
+
+        // need to remove first line from JSON response
+        // see: http://gerrit-documentation.googlecode.com/svn/Documentation/2.6/rest-api.html#output
+        StringBuilder sb = new StringBuilder();
+        for (int i = 1 ; i < lines.length ; i++) {
+            sb.append(lines[i] + "\n");
+        }
+        return sb.toString();
     }
 
     private String stringFrom(Process curl) throws InterruptedException, IOException {
@@ -170,7 +210,13 @@ public class GerritTriggerTest extends AbstractJUnitTest {
         return value;
     }
 
-    private int logProcessBuilderIssues(Process processToRun, String commandName) throws InterruptedException, IOException {
+    private Process logProcessBuilderIssues(ProcessBuilder pb, String commandName) throws InterruptedException, IOException {
+        String dir = "";
+        if (pb.directory() != null) {
+            dir = pb.directory().getAbsolutePath();
+        }
+        LOGGER.info("Running : " + pb.command() + " => directory: " + dir);
+        Process processToRun = pb.start();
         int result = processToRun.waitFor();
         if (result != 0) {
             StringWriter writer = new StringWriter();
@@ -178,11 +224,13 @@ public class GerritTriggerTest extends AbstractJUnitTest {
             LOGGER.severe("Issue occurred during command \"" + commandName + "\":\n" + writer.toString());
             writer.close();
         }
-        return result;
+        return processToRun;
     }
 
     private void logCurlHttpCodeIssues(String curlResponse) {
-        String responseCode = curlResponse.substring(curlResponse.length() - 3, curlResponse.length());
+        String[] lines = curlResponse.split(System.getProperty("line.separator"));
+
+        String responseCode = lines[lines.length-1];
         if (!responseCode.matches("2[0-9][0-9]")) {
             LOGGER.severe("Issue occurred during curl command. Returned an erroneous http response code: " + responseCode + ".\n"
                     + "Expected 2XX response code.");
