@@ -23,6 +23,7 @@
  */
 package org.jenkinsci.test.acceptance.plugins.active_directory;
 
+
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
 import org.jenkinsci.test.acceptance.po.SecurityRealm;
@@ -58,5 +59,10 @@ public class ActiveDirectorySecurityRealm extends SecurityRealm {
             bindDN = ActiveDirectoryEnv.get().getUser()+"@"+ActiveDirectoryEnv.get().getDomain();
         }
         control("bindName").set(bindDN);
+
+        String groupLookupStrategy = ActiveDirectoryEnv.get().getGroupLookupStrategy();
+        if (groupLookupStrategy != null) {
+            control("groupLookupStrategy").select(groupLookupStrategy);
+        }
     }
 }
