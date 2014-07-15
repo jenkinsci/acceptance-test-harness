@@ -46,6 +46,6 @@ it's own sandboxed workspace.
 * [Testing emails](docs/EMAIL.md)
 * explain how cucumber hooks into Guice (TODO)
 * [Hamcrest matchers](docs/MATCHERS.md)
-* [How to use this from your own module](EXTERNAL.md)
+* [How to use this from your own module](docs/EXTERNAL.md)
 
 * [EC2 provider configuration](docs/EC2-CONFIG.md)
