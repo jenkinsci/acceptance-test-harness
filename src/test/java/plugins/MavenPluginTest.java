@@ -32,6 +32,8 @@ import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Bug;
 import org.jenkinsci.test.acceptance.junit.Native;
 import org.jenkinsci.test.acceptance.junit.Since;
+import org.jenkinsci.test.acceptance.plugins.mailer.Mailer;
+import org.jenkinsci.test.acceptance.plugins.mailer.MailerGlobalConfig;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenBuild;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenBuildStep;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation;
@@ -40,7 +42,10 @@ import org.jenkinsci.test.acceptance.plugins.maven.MavenProjectConfig;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.StringParameter;
+import org.jenkinsci.test.acceptance.utils.mail.MailService;
 import org.junit.Test;
+
+import com.google.inject.Inject;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
@@ -50,6 +55,12 @@ import static org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation.*;
 public class MavenPluginTest extends AbstractJUnitTest {
 
     private static final String GENERATE = "archetype:generate -DarchetypeGroupId=org.apache.maven.archetypes -DgroupId=com.mycompany.app -DartifactId=my-app -Dversion=1.0 -B";
+
+    @Inject
+    MailerGlobalConfig mailer;
+
+    @Inject
+    MailService mail;
 
     @Test
     public void autoinstall_maven_for_freestyle_job() {
@@ -204,6 +215,27 @@ public class MavenPluginTest extends AbstractJUnitTest {
         assertHasModule(job, "gid$root");
         assertHasModule(job, "gid$module_a");
         assertHasModule(job, "gid$module_b");
+    }
+
+    @Test @Bug({"JENKINS-20209", "JENKINS-21045"})
+    public void send_mail() throws Exception {
+        jenkins.configure();
+        mailer.setupDefaults();
+        jenkins.save();
+
+        MavenModuleSet job = jenkins.jobs.create(MavenModuleSet.class);
+        job.configure();
+        Mailer mailer = job.addBuildSettings(Mailer.class);
+        mailer.recipients.set("root@example.com");
+        job.save();
+
+        job.startBuild().shouldFail();
+
+        mail.assertMail(
+                Pattern.compile("Build failed in Jenkins: .* #1"),
+                "root@example.com",
+                Pattern.compile(job.name)
+        );
     }
 
     private void assertHasModule(MavenModuleSet job, String name) {

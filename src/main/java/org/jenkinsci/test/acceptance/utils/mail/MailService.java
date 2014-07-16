@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.utils.mail;
 
 import com.google.common.base.Joiner;
+
 import org.jenkinsci.test.acceptance.plugins.mailer.MailerGlobalConfig;
 import org.jenkinsci.test.acceptance.po.CapybaraPortingLayer;
 import org.jenkinsci.test.acceptance.po.CapybaraPortingLayerImpl;
@@ -9,6 +10,7 @@ import org.junit.Assert;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
@@ -17,6 +19,7 @@ import java.util.regex.Pattern;
 
 import static javax.mail.Message.RecipientType.*;
 import static org.hamcrest.CoreMatchers.*;
+import static org.jenkinsci.test.acceptance.Matchers.*;
 
 /**
  * Encapsulated the mail server to be used for test and access to emails that were sent.
@@ -73,7 +76,7 @@ public abstract class MailService extends Assert {
             MimeMultipart content = (MimeMultipart) c;
             c = content.getBodyPart(0).getContent();
         }
-        assertTrue("body metches", body.matcher(c.toString()).find());
+        assertThat(c.toString(), containsRegexp(body));
     }
 
     /**

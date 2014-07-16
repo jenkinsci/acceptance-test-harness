@@ -98,9 +98,14 @@ public class Matchers {
      * Matches if a string contains a portion that matches to the regular expression.
      */
     public static Matcher<String> containsRegexp(final String regexp, int opts) {
-        final Pattern re = Pattern.compile(regexp, opts);
+        return containsRegexp(Pattern.compile(regexp, opts));
+    }
 
-        return new Matcher<String>("Matches regexp %s", regexp) {
+    /**
+     * Matches if a string contains a portion that matches to the regular expression.
+     */
+    public static Matcher<String> containsRegexp(final Pattern re) {
+        return new Matcher<String>("Matches regexp %s", re.toString()) {
             @Override
             public boolean matchesSafely(String item) {
                 return re.matcher(item).find();
