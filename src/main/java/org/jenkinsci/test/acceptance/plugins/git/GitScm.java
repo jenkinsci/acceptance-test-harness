@@ -68,6 +68,10 @@ public class GitScm extends Scm {
         }
     }
 
+    public void enableRecursiveSubmoduleProcessing() {
+        addBehaviour(RecursiveSubmodules.class).enable.click();
+    }
+
     public void remoteName(String name) {
         remoteAdvanced();
         control("userRemoteConfigs/name").set(name);
@@ -107,6 +111,15 @@ public class GitScm extends Scm {
         public CheckoutToLocalDir(GitScm git, String path) {
             super(git, path);
             clickLink("Check out to a sub-directory");
+        }
+    }
+
+    public static class RecursiveSubmodules extends Behaviour {
+        private final Control enable = control("recursiveSubmodules");
+
+        public RecursiveSubmodules(GitScm git, String path) {
+            super(git, path);
+            clickLink("Advanced sub-modules behaviours");
         }
     }
 }
