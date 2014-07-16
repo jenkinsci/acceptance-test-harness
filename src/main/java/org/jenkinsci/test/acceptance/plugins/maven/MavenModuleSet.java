@@ -25,7 +25,6 @@ package org.jenkinsci.test.acceptance.plugins.maven;
 
 import java.net.URL;
 
-import org.jenkinsci.test.acceptance.plugins.analysis_core.AbstractCodeStylePluginBuildSettings;
 import org.jenkinsci.test.acceptance.po.*;
 import org.openqa.selenium.WebElement;
 
@@ -55,19 +54,14 @@ public class MavenModuleSet extends Job {
         advancedButton = null;
     }
 
-    /**
-     * Change build settings.
-     * @param type The setting you would like to set and configure, e.g. FindbugsCodeStylePluginMavenBuildSettings.
-     * @return an instance of AbstractCodeStylePluginMavenBuildSettings (e.g. FindbugsCodeStylePluginMavenBuildSettings)
-     */
-    public <T extends AbstractCodeStylePluginBuildSettings> T addBuildSettings(Class<T> type) {
-        WebElement radio = findCaption(type, new Finder<WebElement>() {
+    public <T extends PostBuildStep> T addBuildSettings(Class<T> type) {
+        WebElement checkbox = findCaption(type, new Finder<WebElement>() {
             @Override protected WebElement find(String caption) {
                 return outer.find(by.checkbox(caption));
             }
         });
-        radio.click();
-        T bs = newInstance(type, this);
+        checkbox.click();
+        T bs = newInstance(type, this, checkbox.getAttribute("path"));
 
         publishers.add(bs);
         return bs;
@@ -78,7 +72,7 @@ public class MavenModuleSet extends Job {
      * @param type the type of the build settings to be retrieved
      * @return the build settings object
      */
-    public <T extends AbstractCodeStylePluginBuildSettings & PostBuildStep> T getBuildSettings(Class<T> type) {
+    public <T extends PostBuildStep> T getBuildSettings(Class<T> type) {
         return getPublisher(type);
     }
 
@@ -107,6 +101,4 @@ public class MavenModuleSet extends Job {
     public MavenBuild getLastBuild() {
         return new MavenBuild(this,"lastBuild");
     }
-
-
 }

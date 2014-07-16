@@ -1,6 +1,6 @@
 package org.jenkinsci.test.acceptance.plugins.analysis_core;
 
-import org.jenkinsci.test.acceptance.po.Job;
+import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 
 /**
  * Abstract job configuration class.
@@ -12,9 +12,8 @@ public abstract class AbstractCodeStylePluginMavenBuildSettings extends Abstract
      * Constructor for the build settings page area.
      *
      * @param parent       the job currently being configured.
-     * @param selectorPath the selector path used as prefix.
      */
-    public AbstractCodeStylePluginMavenBuildSettings(Job parent, String selectorPath) {
-        super(parent, "/hudson-plugins-" + selectorPath);
+    public AbstractCodeStylePluginMavenBuildSettings(MavenModuleSet parent, String selectorPath) {
+        super(parent, selectorPath);
     }
 }

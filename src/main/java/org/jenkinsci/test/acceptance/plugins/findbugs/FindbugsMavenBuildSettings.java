@@ -11,11 +11,7 @@ import org.jenkinsci.test.acceptance.po.Describable;
 @Describable("Publish FindBugs analysis results")
 public class FindbugsMavenBuildSettings extends AbstractCodeStylePluginMavenBuildSettings {
 
-    /**
-     * Constructor for the build settings page area.
-     * @param parent the job currently being configured.
-     */
-    public FindbugsMavenBuildSettings(MavenModuleSet parent) {
-        super(parent, "findbugs-FindBugsReporter");
+    public FindbugsMavenBuildSettings(MavenModuleSet parent, String selectorPath) {
+        super(parent, selectorPath);
     }
 }

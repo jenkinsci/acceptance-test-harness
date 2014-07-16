@@ -11,11 +11,7 @@ import org.jenkinsci.test.acceptance.po.Describable;
 @Describable("Publish Checkstyle analysis results")
 public class CheckstyleMavenBuildSettings extends AbstractCodeStylePluginMavenBuildSettings {
 
-    /**
-     * Constructor for the build settings page area.
-     * @param parent the job currently being configured.
-     */
-    public CheckstyleMavenBuildSettings(MavenModuleSet parent) {
-        super(parent, "checkstyle-CheckStyleReporter");
+    public CheckstyleMavenBuildSettings(MavenModuleSet parent, String selectorPath) {
+        super(parent, selectorPath);
     }
 }
