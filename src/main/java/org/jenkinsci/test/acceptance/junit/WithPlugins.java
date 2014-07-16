@@ -77,13 +77,13 @@ public @interface WithPlugins {
             return new Statement() {
                 @Override
                 public void evaluate() throws Throwable {
-                    installPlugins(d.getAnnotation(WithPlugins.class), d.getTestClass());
-                    installPlugins(d.getTestClass().getAnnotation(WithPlugins.class), d.getTestClass());
+                    installPlugins(d.getAnnotation(WithPlugins.class));
+                    installPlugins(d.getTestClass().getAnnotation(WithPlugins.class));
 
                     base.evaluate();
                 }
 
-                private boolean installPlugins(WithPlugins wp, Class<?> testClass) {
+                private boolean installPlugins(WithPlugins wp) {
                     if (wp == null) return false;
 
                     PluginManager pm = jenkins.getPluginManager();
@@ -110,7 +110,7 @@ public @interface WithPlugins {
                         VersionNumber installedVersion = installedPlugin.getVersion();
                         String version = installedVersion.toString();
 
-                        pluginReporter.log(testClass.getCanonicalName(), name, version);
+                        pluginReporter.log(d.getClassName() + "." + d.getMethodName(), name, version);
 
                     }
                     return true;

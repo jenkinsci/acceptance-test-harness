@@ -80,7 +80,7 @@ public class TextFileExercisedPluginReporter implements ExercisedPluginsReporter
             return;
         }
 
-        config.setProperty(testName + "::" + pluginName, pluginVersion);
+        config.setProperty(testName + "$" + pluginName, pluginVersion);
         try {
             config.save();
         } catch (ConfigurationException e) {
