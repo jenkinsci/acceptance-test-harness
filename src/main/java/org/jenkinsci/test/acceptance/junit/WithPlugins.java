@@ -2,14 +2,19 @@ package org.jenkinsci.test.acceptance.junit;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.po.Jenkins;
+import org.jenkinsci.test.acceptance.po.Plugin;
 import org.jenkinsci.test.acceptance.po.PluginManager;
 import org.jenkinsci.test.acceptance.po.PluginManager.PluginSpec;
+import org.jenkinsci.test.acceptance.utils.pluginreporter.ExercisedPluginsReporter;
 import org.junit.internal.AssumptionViolatedException;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
+
+import hudson.util.VersionNumber;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Inherited;
@@ -61,22 +66,24 @@ public @interface WithPlugins {
         @Inject
         JenkinsController controller;
 
+        @Inject @Named("ExercisedPluginReporter")
+        ExercisedPluginsReporter pluginReporter;
+
         @Inject(optional=true) @Named("neverReplaceExistingPlugins")
         boolean neverReplaceExistingPlugins;
-
 
         @Override
         public Statement apply(final Statement base, final Description d) {
             return new Statement() {
                 @Override
                 public void evaluate() throws Throwable {
-                    installPlugins(d.getAnnotation(WithPlugins.class));
-                    installPlugins(d.getTestClass().getAnnotation(WithPlugins.class));
+                    installPlugins(d.getAnnotation(WithPlugins.class), d.getTestClass());
+                    installPlugins(d.getTestClass().getAnnotation(WithPlugins.class), d.getTestClass());
 
                     base.evaluate();
                 }
 
-                private boolean installPlugins(WithPlugins wp) {
+                private boolean installPlugins(WithPlugins wp, Class<?> testClass) {
                     if (wp == null) return false;
 
                     PluginManager pm = jenkins.getPluginManager();
@@ -99,6 +106,12 @@ public @interface WithPlugins {
                                 }
                             }
                         }
+                        Plugin installedPlugin = jenkins.getPlugin(name);
+                        VersionNumber installedVersion = installedPlugin.getVersion();
+                        String version = installedVersion.toString();
+
+                        pluginReporter.log(testClass.getCanonicalName(), name, version);
+
                     }
                     return true;
                 }
