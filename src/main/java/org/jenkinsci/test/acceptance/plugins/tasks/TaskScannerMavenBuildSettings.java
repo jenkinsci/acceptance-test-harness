@@ -1,7 +1,7 @@
 package org.jenkinsci.test.acceptance.plugins.tasks;
 
+import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.po.Describable;
-import org.jenkinsci.test.acceptance.po.Job;
 
 /**
  * This class provides the ability to add a 'Scan workspace for open tasks'
@@ -15,10 +15,10 @@ import org.jenkinsci.test.acceptance.po.Job;
  *
  * @author Martin Ende
  */
-
 @Describable("Scan workspace for open tasks")
 public class TaskScannerMavenBuildSettings extends AbstractTaskScannerBuildSettings {
 
-    public TaskScannerMavenBuildSettings(Job parent) { super(parent, "/hudson-plugins-tasks-TasksReporter"); }
-
+    public TaskScannerMavenBuildSettings(MavenModuleSet parent, String path) {
+        super(parent, path);
+    }
 }
