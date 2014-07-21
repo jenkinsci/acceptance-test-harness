@@ -1,8 +1,12 @@
 package org.jenkinsci.test.acceptance.po;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Injector;
 
 import java.net.URL;
+
+import org.hamcrest.Description;
+import org.jenkinsci.test.acceptance.Matcher;
 
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -53,5 +57,27 @@ public abstract class View extends ContainerPageObject {
     public void save() {
         clickButton("OK");
         assertThat(driver, not(hasContent("This page expects a form submission")));
+    }
+
+    public static Matcher<View> containsJob(final Job needle) {
+        return new Matcher<View>("Contains job " + needle.name) {
+            @Override
+            public boolean matchesSafely(View view) {
+                for (JsonNode job: view.getJson().get("jobs")) {
+                    String name = job.get("name").asText();
+                    if (needle.name.equals(name)) return true;
+                }
+                return false;
+            }
+
+            @Override
+            public void describeMismatchSafely(View view, Description mismatchDescription) {
+                mismatchDescription.appendText("view containing:");
+                for (JsonNode job: view.getJson().get("jobs")) {
+                    String name = job.get("name").asText();
+                    mismatchDescription.appendText(" ").appendText(name);
+                }
+            }
+        };
     }
 }

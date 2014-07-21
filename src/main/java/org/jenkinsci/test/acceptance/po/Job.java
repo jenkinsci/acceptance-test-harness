@@ -27,7 +27,7 @@ import static org.jenkinsci.test.acceptance.Matchers.hasContent;
  * @author Kohsuke Kawaguchi
  */
 public class Job extends ContainerPageObject {
-    public final String name;
+    public String name;
 
     public List<Parameter> getParameters() {
         return parameters;
@@ -42,6 +42,12 @@ public class Job extends ContainerPageObject {
     public Job(Injector injector, URL url, String name) {
         super(injector, url);
         this.name = name;
+    }
+
+    public void setName(String name) {
+        ensureConfigPage();
+        this.name = name;
+        control("/name").set(name);
     }
 
     /**
