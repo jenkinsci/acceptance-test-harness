@@ -42,12 +42,12 @@ public class GradlePluginTest extends AbstractJUnitTest {
         FreeStyleJob job = jenkins.jobs.create();
         job.copyResource(resource("/gradle_plugin/script.gradle"), "build.gradle");
         GradleStep step = job.addBuildStep(GradleStep.class);
-        step.version.select("gradle-1.5");
+        step.useVersion("gradle-1.5");
         step.tasks.set("hello");
         step.switches.set("--quiet");
         job.save();
 
-        job.startBuild().waitUntilFinished(60).shouldSucceed()
+        job.startBuild().shouldSucceed()
                 .shouldContainsConsoleOutput("Hello world!")
                 .shouldContainsConsoleOutput("gradle --quiet")
         ;
@@ -61,12 +61,12 @@ public class GradlePluginTest extends AbstractJUnitTest {
         job.copyResource(resource("/gradle_plugin/script.gradle"), "gradle/hello.gradle");
         GradleStep step = job.addBuildStep(GradleStep.class);
         step.file.set("hello.gradle");
-        step.version.select("gradle-1.5");
+        step.useVersion("gradle-1.5");
         step.tasks.set("hello");
         step.dir.set("gradle");
         job.save();
 
-        job.startBuild().waitUntilFinished(60).shouldSucceed().shouldContainsConsoleOutput("Hello world!");
+        job.startBuild().shouldSucceed().shouldContainsConsoleOutput("Hello world!");
     }
 
     private void install(String name, String version) {

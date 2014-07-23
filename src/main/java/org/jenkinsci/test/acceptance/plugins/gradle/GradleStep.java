@@ -30,10 +30,18 @@ public class GradleStep extends AbstractStep implements BuildStep {
     public final Control file = control("buildFile");
     public final Control dir = control("rootBuildScriptDir");
     public final Control switches = control("switches");
-    public final Control version = control("useWrapper[false]/gradleName");
     public final Control tasks = control("tasks");
 
     public GradleStep(Job parent, String path) {
         super(parent, path);
+    }
+
+    public void useVersion(String version) {
+        String path = parent.getJenkins().getPlugin("gradle").isOlderThan("1.24")
+                ? "useWrapper[false]/gradleName"
+                : "gradleName"
+        ;
+
+        control(path).select(version);
     }
 }
