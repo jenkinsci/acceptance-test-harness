@@ -148,7 +148,7 @@ public abstract class ContainerPageObject extends PageObject {
     public Map<String, String> getNavigationLinks() {
         open();
         final Map<String, String> links = new HashMap<>();
-        List<WebElement> elementLinks = all(By.cssSelector("div#navigation a.task-link"));
+        List<WebElement> elementLinks = all(By.cssSelector("#tasks a.task-link"));
 
         for (WebElement element : elementLinks) {
             links.put(element.getAttribute("href"), element.getText());
