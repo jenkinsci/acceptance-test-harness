@@ -9,7 +9,6 @@ import org.jenkinsci.test.acceptance.plugins.matrix_auth.ProjectMatrixProperty;
 import org.jenkinsci.test.acceptance.plugins.mock_security_realm.MockSecurityRealm;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
-import org.jenkinsci.test.acceptance.utils.groovy.InteractiveConsole;
 import org.junit.Test;
 
 import static org.jenkinsci.test.acceptance.plugins.matrix_auth.MatrixRow.*;
@@ -45,9 +44,6 @@ public class MatrixAuthPluginTest extends AbstractJUnitTest {
             bob.on(OVERALL_READ);
         }
         sc.save();
-
-
-        System.out.println();
 
         jenkins.login().doLogin("alice");
 
