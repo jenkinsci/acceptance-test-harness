@@ -33,6 +33,7 @@ import org.jenkinsci.test.acceptance.utils.pluginreporter.ExercisedPluginsReport
 import org.jenkinsci.test.acceptance.utils.pluginreporter.TextFileExercisedPluginReporter;
 import org.jenkinsci.test.acceptance.utils.pluginreporter.ConsoleExercisedPluginReporter;
 import org.junit.runners.model.Statement;
+import org.openqa.selenium.Dimension;
 import org.openqa.selenium.UnsupportedCommandException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -132,6 +133,11 @@ public class FallbackConfig extends AbstractModule {
     @Provides @TestScope
     public WebDriver createWebDriver(TestCleaner cleaner, TestName testName) throws IOException {
         WebDriver base = createWebDriver(testName);
+        Dimension oldSize = base.manage().window().getSize();
+        if (oldSize.height < 768 || oldSize.width < 1024) {
+            base.manage().window().setSize(new Dimension(1024, 768));
+        }
+
         final EventFiringWebDriver d = new EventFiringWebDriver(base);
         d.register(new SanityChecker());
         d.register(new Scroller());
