@@ -158,71 +158,51 @@ public class WarningsPluginTest extends AbstractCodeStylePluginHelper {
     }
 
     /**
-     * Scenario: Warnings pluign skips failed builds by default Given I have installed the "warnings" plugin And a job
-     * that shall fail When I configure the job And I add "Scan for compiler warnings" post-build action And I add
-     * console parser for "Java" And I add a shell build step "exit 1" And I save the job And I build the job Then build
-     * should fail and warnings plugin shall skip build
+     * Checks that the warnings plugin will not skip build results if "Run always" is checked.
      */
     @Test
     public void skip_failed_builds() {
-        job.configure();
-        WarningsPublisher wp = job.addPublisher(WarningsPublisher.class);
-        wp.addConsoleScanner("Java Compiler (javac");
-        job.addShellStep("exit 1");
-        job.save();
-        Build b = job.startBuild().shouldFail();
-        assertThat(b, not(hasAction("Java Warnings")));
-        b.open();
+        FreeStyleJob job = runBuildWithRunAlwaysOption(false);
+        Build build = buildJobAndWait(job).shouldFail();
+
+        assertThat(build, not(hasAction("Java Warnings")));
+        assertThat(job.getLastBuild(), not(hasAction("Java Warnings")));
+
+        build.open();
         assertThat(driver, not(hasContent("Java Warnings:")));
     }
 
     /**
-     * Scenario: Warnings plugin shall not skip build results if "Run always" is checked Given I have installed the
-     * "warnings" plugin And a job that shall fail When I configure the job And I add "Scan for compiler warnings"
-     * post-build action And I add workspace parser for "Java" And I add a shell build step "cat
-     * /warnings_plugin/warningsALL.txt >> errors.log" And I add a shell build step "exit 1" And I configure the
-     * Advanced option "Run always" And I save the job And I build the job Then build should fail and should have 131
-     * Java Warnings
+     * Checks that the warnings plugin will not skip build results if "Run always" is checked.
      */
     @Test
     public void do_not_skip_failed_builds_with_option_run_always() {
-        job.configure();
-        WarningsPublisher wp = job.addPublisher(WarningsPublisher.class);
-        wp.addWorkspaceFileScanner("Java Compiler (javac)", "**/*");
-        wp.openAdvancedOptions();
-        wp.runAlways();
-        String warningsPath = this.getClass().getResource(WARNINGS_FILE_SEVERAL_PARSERS).getPath();
-        job.addShellStep("cat " + warningsPath + " >> errors.log");
-        job.addShellStep("exit 1");
-        job.save();
-        Build b = job.startBuild().shouldFail();
-        assertThat(b, hasAction("Java Warnings"));
-        b.open();
-        assertThat(driver, hasContent("Java Warnings: 131"));
+        FreeStyleJob job = runBuildWithRunAlwaysOption(true);
+        Build build = buildJobAndWait(job).shouldFail();
+
+        assertThatActionExists(job, build, "Java Warnings");
+
+        WarningsAction action = new WarningsAction(job);
+        assertThatWarningsCountIs(action, 131);
+        assertThatNewWarningsCountIs(action, 131);
     }
 
-    /**
-     * Scenario: Warnings plugin shall ignore specified parts Given I have installed the "warnings" plugin And a job
-     * When I configure the job And I add "Scan for compiler warnings" post-build action And I add console parser for
-     * "Java" And I add a shell build step "cat /warnings_plugin/warningsForRegEx.txt" And I add Warnings to include
-     * ".*\/.*" And I add Warnings to ignore ".*\/ignore1/.*, .*\/ignore2/.*, .*\/default/.*" And I save the job And I
-     * build the job Then build should have 5 Java Warnings
-     */
-    @Test
-    public void skip_warnings_in_ignored_parts() {
+    private FreeStyleJob runBuildWithRunAlwaysOption(final boolean canRunOnFailed) {
+        AbstractCodeStylePluginBuildConfigurator<WarningsBuildSettings> buildConfigurator = new AbstractCodeStylePluginBuildConfigurator<WarningsBuildSettings>() {
+            @Override
+            public void configure(WarningsBuildSettings settings) {
+                settings.addWorkspaceFileScanner("Java Compiler (javac)", "**/*");
+                settings.setCanRunOnFailed(canRunOnFailed);
+            }
+        };
+        FreeStyleJob job = setupJob(WARNINGS_FILE_SEVERAL_PARSERS, FreeStyleJob.class,
+                WarningsBuildSettings.class, buildConfigurator);
+
         job.configure();
-        WarningsPublisher wp = job.addPublisher(WarningsPublisher.class);
-        wp.addConsoleScanner("Java Compiler (javac)");
-        wp.openAdvancedOptions();
-        wp.addWarningsToInclude(".*/.*");
-        wp.addWarningsToIgnore(".*/ignore1/.*, .*/ignore2/.*, .*/default/.*");
-        String warningsPath = this.getClass().getResource(WARNINGS_FILE_FOR_INCLUDE_EXCLUDE_TESTS).getPath();
-        job.addShellStep("cat " + warningsPath);
+        job.addShellStep("exit 1");
         job.save();
-        Build b = buildJobWithSuccess(job);
-        assertThat(b, hasAction("Java Warnings"));
-        b.open();
-        assertThat(driver, hasContent("Java Warnings: 4"));
+
+        return job;
     }
 
     /**
@@ -262,6 +242,32 @@ public class WarningsPluginTest extends AbstractCodeStylePluginHelper {
     private void assertThatActionExists(final Job job, final Build build, final String type) {
         assertThat(build, hasAction(type));
         assertThat(job.getLastBuild(), hasAction(type));
+    }
+
+    /**
+     * Checks whether the warnings plugin picks only specific warnings. The warnings to exclude are given by three exclude
+     * patterns {".*ignore1.*, .*ignore2.*, .*default.*"}. The result should be a build with 4 Java Warnings (from a file that
+     * contains 9 warnings).
+     */
+    @Test
+    public void skip_warnings_in_ignored_parts() {
+        AbstractCodeStylePluginBuildConfigurator<WarningsBuildSettings> buildConfigurator = new AbstractCodeStylePluginBuildConfigurator<WarningsBuildSettings>() {
+            @Override
+            public void configure(WarningsBuildSettings settings) {
+                settings.addWorkspaceFileScanner("Java Compiler (javac)", "**/*");
+                settings.addWarningsToInclude(".*/.*");
+                settings.addWarningsToIgnore(".*/ignore1/.*, .*/ignore2/.*, .*/default/.*");
+            }
+        };
+        FreeStyleJob job = setupJob(WARNINGS_FILE_FOR_INCLUDE_EXCLUDE_TESTS, FreeStyleJob.class,
+                WarningsBuildSettings.class, buildConfigurator);
+
+        Build build = buildJobWithSuccess(job);
+        assertThatActionExists(job, build, "Java Warnings");
+
+        WarningsAction action = new WarningsAction(job);
+        assertThatWarningsCountIs(action, 4);
+        assertThatNewWarningsCountIs(action, 4);
     }
 
     /**
