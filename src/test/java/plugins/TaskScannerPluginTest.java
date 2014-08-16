@@ -1,6 +1,12 @@
 package plugins;
 
 
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.util.List;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
 import org.jenkinsci.test.acceptance.junit.Bug;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
@@ -11,20 +17,13 @@ import org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerFreestyleBuildSett
 import org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerMavenBuildSettings;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.util.List;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
 import static org.hamcrest.CoreMatchers.*;
-import static org.jenkinsci.test.acceptance.Matchers.hasAction;
-import static org.junit.Assert.assertThat;
+import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.junit.Assert.*;
 
 /**
  Feature: Scan for open tasks
@@ -382,8 +381,7 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
      * https://issues.jenkins-ci.org/browse/JENKINS-22744
      *
      */
-
-    @Test @Bug("22744") @Ignore("until JENKINS-22744 is fixed.")
+    @Test @Bug("22744") @WithPlugins("analysis-core@1.58-SNAPSHOT")
     public void file_encoding_windows1251() throws Exception {
         //do setup
         AbstractCodeStylePluginBuildConfigurator<TaskScannerFreestyleBuildSettings> buildConfigurator =
@@ -420,10 +418,10 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
 
         // verify source code display in desired encoding
         assertThat(tsa.getLinkedSourceFileLineAsString("Warnings", "TestTaskScanner.java:5", "Normal Priority"), endsWith("пример комментария на русском"));
+        assertThat(tsa.getLinkedSourceFileLineAsString("Warnings", "TestTaskScanner.java:4", "High Priority"), endsWith("тестирование Jenkins"));
 
         // verify extraction in Warnings tab uses desired encoding
         assertWarningExtraction(tsa,"TestTaskScanner.java",5,"TODO","пример комментария на русском");
-
     }
 
     /**
@@ -1067,7 +1065,5 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
 
         assertThat(cellStrings.get(3), is(type));
         assertThat(cellStrings.get(4), is(warningText));
-
     }
-
 }
