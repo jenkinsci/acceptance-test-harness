@@ -72,10 +72,11 @@ public abstract class JenkinsController implements IJenkinsController, AutoClean
     @Override
     public void start() throws IOException {
         if (!isRunning) {
+            URL url = JenkinsController.class.getResource("jenkins_updates");
             try {
-                populateJenkinsHome(new File(JenkinsController.class.getResource("jenkins_updates").toURI()), false);
+                populateJenkinsHome(new File(url.toURI()), false);
             } catch (URISyntaxException ex) {
-                throw new AssertionError(ex);
+                throw new AssertionError(url+" is not a valid URI",ex);
             }
             startNow();
             isRunning = true;
