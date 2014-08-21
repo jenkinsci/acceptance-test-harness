@@ -1,5 +1,6 @@
 package org.jenkinsci.test.acceptance.update_center;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
@@ -35,6 +36,11 @@ public class PluginMetadata {
     public List<Dependency> dependencies;
     public URL url;
 
+    /**
+     * If non-null, use this file instead of the one pointed by {@link #url} or {@link #gav}.
+     */
+    public File override;
+
     void init(UpdateCenterMetadata parent) {
         for (Dependency d : dependencies) {
             d.init(parent);
@@ -49,18 +55,12 @@ public class PluginMetadata {
      * @throws IOException
      */
     public void uploadTo(Jenkins jenkins, Injector i, String version) throws ArtifactResolutionException, IOException {
-
-        RepositorySystem rs = i.getInstance(RepositorySystem.class);
-        RepositorySystemSession rss = i.getInstance(RepositorySystemSession.class);
-
-        ArtifactResolverUtil resolverUtil = new ArtifactResolverUtil(rs, rss);
-        ArtifactResult r = resolverUtil.resolve(gav, version);
-
         HttpClient httpclient = new DefaultHttpClient();
 
         HttpPost post = new HttpPost(jenkins.url("pluginManager/uploadPlugin").toExternalForm());
+        File f = resolve(i, version);
         HttpEntity e = MultipartEntityBuilder.create()
-                .addBinaryBody("name", r.getArtifact().getFile(), APPLICATION_OCTET_STREAM, name + ".jpi")
+                .addBinaryBody("name", f, APPLICATION_OCTET_STREAM, name + ".jpi")
                 .build();
         post.setEntity(e);
 
@@ -68,11 +68,20 @@ public class PluginMetadata {
         if (response.getStatusLine().getStatusCode() >= 400) {
             throw new IOException("Failed to upload plugin: " + response.getStatusLine() + "\n" +
                     IOUtils.toString(response.getEntity().getContent()));
+        } else {
+            System.out.format("Plugin %s installed\n", f);
         }
-        else {
-            System.out.format("Plugin %s installed\n", r.getArtifact());
-        }
+    }
 
+    public File resolve(Injector i, String version) {
+        if (override!=null) return override;
+
+        RepositorySystem rs = i.getInstance(RepositorySystem.class);
+        RepositorySystemSession rss = i.getInstance(RepositorySystemSession.class);
+
+        ArtifactResolverUtil resolverUtil = new ArtifactResolverUtil(rs, rss);
+        ArtifactResult r = resolverUtil.resolve(gav, version);
+        return r.getArtifact().getFile();
     }
 
     @Override
