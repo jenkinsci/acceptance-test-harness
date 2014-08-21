@@ -453,6 +453,23 @@
           <arguments>-DskipTests</arguments>
         </configuration>
       </plugin>
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.7</version>
+        <executions>
+          <execution>
+            <phase>generate-resources</phase>
+            <configuration>
+              <target>
+                <zip destfile="target/classes/tool_installers.zip" basedir="${project.basedir}/src/main/tool_installers" />
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 

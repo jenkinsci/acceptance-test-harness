@@ -2,7 +2,6 @@ package org.jenkinsci.test.acceptance.controller;
 
 import com.cloudbees.sdk.extensibility.ExtensionPoint;
 import com.google.inject.Injector;
-
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.codehaus.plexus.util.FileUtils;
@@ -13,8 +12,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.URISyntaxException;
 import java.net.URL;
+
+import static org.apache.commons.io.FileUtils.*;
 
 /**
  * Starts/stops Jenkins and exposes where it is running.
@@ -72,11 +72,13 @@ public abstract class JenkinsController implements IJenkinsController, AutoClean
     @Override
     public void start() throws IOException {
         if (!isRunning) {
-            URL url = JenkinsController.class.getResource("jenkins_updates");
+            File t = File.createTempFile("temp", "zip");
             try {
-                populateJenkinsHome(new File(url.toURI()), false);
-            } catch (URISyntaxException ex) {
-                throw new AssertionError(url+" is not a valid URI",ex);
+                URL url = JenkinsController.class.getResource("/tool_installers.zip");
+                copyURLToFile(url, t);
+                populateJenkinsHome(t, false);
+            } finally {
+                t.delete();
             }
             startNow();
             isRunning = true;
