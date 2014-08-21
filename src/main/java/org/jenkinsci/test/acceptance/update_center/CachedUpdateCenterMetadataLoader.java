@@ -1,5 +1,6 @@
 package org.jenkinsci.test.acceptance.update_center;
 
+import com.cloudbees.sdk.extensibility.ExtensionList;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.apache.commons.io.FileUtils;
@@ -26,6 +27,9 @@ public class CachedUpdateCenterMetadataLoader implements Provider<UpdateCenterMe
     @Inject(optional=true) @Named("update_center_url")
     String url = "https://updates.jenkins-ci.org/update-center.json.html";
 
+    @Inject
+    ExtensionList<UpdateCenterMetadataDecorator> decorators;
+
     @Override
     public UpdateCenterMetadata get() {
         try {
@@ -35,6 +39,9 @@ public class CachedUpdateCenterMetadataLoader implements Provider<UpdateCenterMe
                     FileUtils.copyURLToFile(new URL(url),cache);
                 }
                 metadata = UpdateCenterMetadata.parse(cache);
+                for (UpdateCenterMetadataDecorator decorator : decorators) {
+                    decorator.decorate(metadata);
+                }
             }
             return metadata;
         } catch (IOException e) {

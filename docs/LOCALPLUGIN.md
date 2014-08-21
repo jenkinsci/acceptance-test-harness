@@ -9,11 +9,11 @@ accordingly.
 
 One way to do so is to set the environment variable:
 
-    $ export LDAP.JPI=/path/to/your/ldap.jpi
+    $ export ldap.jpi=/path/to/your/ldap.jpi
     $ mvn test            // run the tests
 
 You can also do this from [the groovy wiring script](WIRING.md).
 
-    envs['LDAP.JPI'] = '/path/to/your.ldap.jpi'
+    envs['ldap.jpi'] = '/path/to/your.ldap.jpi'
 
 TODO: provide a better binding for this
