@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
+import org.jenkinsci.test.acceptance.guice.LocalPluginOverride;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.Plugin;
 import org.jenkinsci.test.acceptance.po.PluginManager;
@@ -16,6 +17,7 @@ import org.junit.runners.model.Statement;
 
 import hudson.util.VersionNumber;
 
+import java.io.File;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
@@ -72,6 +74,9 @@ public @interface WithPlugins {
         @Inject(optional=true) @Named("neverReplaceExistingPlugins")
         boolean neverReplaceExistingPlugins;
 
+        @Inject // TODO: generalize this extension to allow anything that can install plugins
+        LocalPluginOverride override;
+
         @Override
         public Statement apply(final Statement base, final Description d) {
             return new Statement() {
@@ -92,7 +97,12 @@ public @interface WithPlugins {
                         String name = candidate.getName();
 
                         if (!pm.isInstalled(name)) {
-                            pm.installPlugins(name);
+                            File override = RuleImpl.this.override.get(name);
+                            if (override != null) {
+                                pm.installPlugin(override);
+                            } else {
+                                pm.installPlugins(name);
+                            }
                         } else {
                             String requiredVersion = candidate.getVersion();
                             if (requiredVersion != null) {
