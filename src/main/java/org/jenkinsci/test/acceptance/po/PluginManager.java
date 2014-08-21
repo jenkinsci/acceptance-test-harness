@@ -5,6 +5,7 @@ import javax.annotation.Nullable;
 import javax.inject.Named;
 import javax.inject.Provider;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -22,6 +23,7 @@ import com.google.common.base.Splitter;
 import com.google.inject.Inject;
 
 import hudson.util.VersionNumber;
+import org.openqa.selenium.WebElement;
 
 /**
  * Page object for plugin manager.
@@ -180,6 +182,17 @@ public class PluginManager extends ContainerPageObject {
                 }
             }
         }
+    }
+
+    /**
+     * Installs a plugin by uploading the *.jpi image.
+     */
+    public void installPlugin(File localFile) {
+        visit("advanced");
+        WebElement form = find(by.name("uploadPlugin"));
+        WebElement upload = form.findElement(by.input("name"));
+        upload.sendKeys(localFile.getAbsolutePath());
+        form.submit();
     }
 
     /**
