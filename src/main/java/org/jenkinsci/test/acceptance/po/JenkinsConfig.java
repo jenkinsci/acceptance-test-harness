@@ -7,9 +7,6 @@ import org.openqa.selenium.WebElement;
 
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.jenkinsci.test.acceptance.Matchers.*;
-
 /**
  * Page object for the system configuration page.
  *
@@ -58,5 +55,9 @@ public class JenkinsConfig extends PageObject {
         WebElement last = all.get(all.size()-1);
 
         return newInstance(type, this, last.getAttribute("path"));
+    }
+
+    public void setJenkinsUrl(String url) {
+        control("/jenkins-model-JenkinsLocationConfiguration/url").set(url);
     }
 }
