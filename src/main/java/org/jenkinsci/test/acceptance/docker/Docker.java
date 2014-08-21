@@ -68,7 +68,7 @@ public class Docker {
      */
     public boolean isAvailable() {
         try {
-            return cmd("help").popen().waitFor() == 0;
+            return cmd("ps").popen().waitFor() == 0;
         } catch (InterruptedException | IOException e) {
             return false;
         }
