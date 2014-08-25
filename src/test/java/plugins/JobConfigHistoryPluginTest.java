@@ -23,11 +23,17 @@
  */
 package plugins;
 
+import java.util.List;
+
 import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.Bug;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.job_config_history.JobConfigHistory;
+import org.jenkinsci.test.acceptance.plugins.job_config_history.JobConfigHistory.Change;
+import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.MatrixProject;
 import org.jenkinsci.test.acceptance.po.ShellBuildStep;
 import org.junit.Test;
 
@@ -49,6 +55,40 @@ public class JobConfigHistoryPluginTest extends AbstractJUnitTest {
         assertThat(driver, Matchers.hasContent("Created"));
         assertThat(all(by.xpath("//tr//a[contains(text(),'View as XML')]")).size(), is(greaterThan(2)));
         assertThat(all(by.xpath("//tr//a[contains(text(),'(RAW)')]")).size(), is(greaterThan(2)));
+    }
+
+    @Test @Bug("JENKINS-24410")
+    public void track_change_in_matrix_project() {
+        MatrixProject job = jenkins.jobs.create(MatrixProject.class);
+
+        JobConfigHistory history = job.action(JobConfigHistory.class);
+
+        List<Change> original = history.getChanges();
+
+        job.configure();
+        job.runSequentially.check();
+        job.save();
+
+        List<Change> newOnes = history.getChanges();
+
+        assertThat("New changes saved", newOnes.size(), greaterThan(original.size()));
+    }
+
+    @Test @Bug("JENKINS-24410")
+    public void track_change_in_maven_project() {
+        MavenModuleSet job = jenkins.jobs.create(MavenModuleSet.class);
+
+        JobConfigHistory history = job.action(JobConfigHistory.class);
+
+        List<Change> original = history.getChanges();
+
+        job.configure();
+        job.goals.set("clean");
+        job.save();
+
+        List<Change> newOnes = history.getChanges();
+
+        assertThat("New changes saved", newOnes.size(), greaterThan(original.size()));
     }
 
     @Test
