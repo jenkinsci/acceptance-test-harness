@@ -2,7 +2,6 @@ package org.jenkinsci.test.acceptance.plugins.mailer;
 
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Jenkins;
-import org.jenkinsci.test.acceptance.po.PageArea;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.utils.mail.MailService;
 
@@ -19,7 +18,7 @@ public class MailerGlobalConfig extends PageAreaImpl {
     public final Control advancedButton = control("advanced-button");
     public final Control useSMTPAuth = control("useSMTPAuth");
     public final Control smtpAuthUserName = control("useSMTPAuth/smtpAuthUserName");
-    public final Control smtpAuthPassword = control("useSMTPAuth/smtpAuthPassword");
+    public final Control smtpAuthPassword = control("useSMTPAuth/smtpAuthPasswordSecret", "useSMTPAuth/smtpAuthPassword");
     public final Control smtpPort = control("smtpPort");
     public final Control replyToAddress = control("replyToAddress");
 
