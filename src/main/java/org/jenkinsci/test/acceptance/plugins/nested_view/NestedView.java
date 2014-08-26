@@ -1,10 +1,10 @@
 package org.jenkinsci.test.acceptance.plugins.nested_view;
 
 import com.google.inject.Injector;
+
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.View;
 import org.jenkinsci.test.acceptance.po.ViewsMixIn;
-
 import java.net.URL;
 
 /**
@@ -25,10 +25,10 @@ public class NestedView extends View {
     }
 
     public void assertActiveView(String name) {
-        find(by.xpath("//table[@id='viewList']//td[@class='active' and text()='%s']",name));
+        find(by.xpath("//*[contains(@class, 'active') and (text()='%1$s' or a/text()='%1$s')]", name));
     }
 
     public void assertInactiveView(String name) {
-        find(by.xpath("//table[@id='viewList']//td[contains(@class,'inactive')]/a[text()='%s']",name));
+        find(by.xpath("//*[contains(@class, 'inactive') or not(contains(@class, 'active'))]/a[text()='%s']", name));
     }
 }

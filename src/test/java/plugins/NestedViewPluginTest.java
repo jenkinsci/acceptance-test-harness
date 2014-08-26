@@ -1,5 +1,7 @@
 package plugins;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.CoreMatchers.endsWith;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.nested_view.NestedView;
@@ -33,7 +35,8 @@ public class NestedViewPluginTest extends AbstractJUnitTest {
     @Test
     public void create_nested_view() {
         jenkins.open();
-        find(by.xpath("//table[@id='viewList']//a[text()='%s']","Nested"));
+        clickLink("Nested");
+        assertThat(driver.getCurrentUrl(), endsWith("/view/Nested/"));
     }
 
     /**
