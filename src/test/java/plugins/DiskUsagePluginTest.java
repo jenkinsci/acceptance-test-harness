@@ -77,12 +77,12 @@ public class DiskUsagePluginTest extends AbstractJUnitTest {
         job.save();
         job.startBuild().waitUntilFinished();
 
-        assertReports(job, "Workspace [1-9]\\d*,");
+        assertReports(job, "Workspace [1-9]\\d*");
 
         job.getWorkspace().wipeOut();
         du.reload();
 
-        assertReports(job, "Workspace 0,");
+        assertReports(job, "Workspace [0\\-]");
     }
 
     private void showGraphOnProjectPage() {
