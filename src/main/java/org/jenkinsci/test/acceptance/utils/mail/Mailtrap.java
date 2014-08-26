@@ -2,17 +2,19 @@ package org.jenkinsci.test.acceptance.utils.mail;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.test.acceptance.ByFactory;
+import org.jenkinsci.test.acceptance.guice.TestScope;
 import org.jenkinsci.test.acceptance.plugins.mailer.MailerGlobalConfig;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.openqa.selenium.WebElement;
 
-import javax.inject.Singleton;
 import javax.mail.Address;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -31,7 +33,7 @@ import java.util.regex.Pattern;
  *
  * @author Kohsuke Kawaguchi
  */
-@Singleton
+@TestScope
 public class Mailtrap extends MailService {
     // these default values is the account that the project "owns".
 
