@@ -53,6 +53,6 @@ public class DescriptionSetterPluginTest extends AbstractJUnitTest {
         assertThat(find(by.xpath("//div[@id='description']/div")).getText(), is(equalTo(msg)));
 
         j.open();
-        assertThat(find(by.xpath("//table[@id='buildHistory']/tbody/tr/td[@class='desc']")).getText(), is(equalTo(msg)));
+        assertThat(find(by.xpath("//*[@id='buildHistory']//*[@class='desc']")).getText(), is(equalTo(msg)));
     }
 }
