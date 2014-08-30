@@ -1,10 +1,21 @@
 package plugins;
 
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.jenkinsci.test.acceptance.junit.Bug;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AbstractCodeStylePluginBuildConfigurator;
-import org.jenkinsci.test.acceptance.plugins.checkstyle.*;
+import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleAction;
+import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleFreestyleBuildSettings;
+import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleListViewColumn;
+import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleMavenBuildSettings;
+import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleWarningsPerProjectDashboardViewPortlet;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.po.Build;
@@ -18,14 +29,9 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.jenkinsci.test.acceptance.Matchers.hasAction;
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.*;
+import static org.jenkinsci.test.acceptance.Matchers.*;
 
 /**
  * Feature: Allow publishing of Checkstyle report
@@ -292,15 +298,26 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
      */
     @Test
     @Category(SmokeTest.class)
+    @Bug("24436")
     public void build_a_job_and_check_if_dashboard_list_view_shows_correct_warnings() {
         MavenModuleSet job = setupSimpleMavenJob();
         buildJobAndWait(job).shouldSucceed();
         ListView view = addDashboardListViewColumn(CheckstyleListViewColumn.class);
 
-        By expectedDashboardLinkMatcher = by.css("a[href$='job/" + job.name + "/checkstyle']");
+        String relativeUrl = "job/" + job.name + "/checkstyle";
+        By expectedDashboardLinkMatcher = by.css("a[href$='" +
+                relativeUrl +
+                "']");
         assertThat(jenkins.all(expectedDashboardLinkMatcher).size(), is(1));
         WebElement dashboardLink = jenkins.getElement(expectedDashboardLinkMatcher);
         assertThat(dashboardLink.getText().trim(), is("12"));
+
+        final Pattern pattern = Pattern.compile("href=\"(.*?)\"");
+
+        String link = dashboardLink.getAttribute("outerHTML");
+        Matcher matcher = pattern.matcher(link);
+        assertThat(matcher.find(), is(true));
+        assertThat(matcher.group(1), is(relativeUrl));
 
         view.delete();
     }
