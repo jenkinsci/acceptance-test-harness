@@ -975,9 +975,8 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
     private void assertTypesTabFS1E2(TaskScannerAction tsa){
         SortedMap<String, Integer> expectedContent = new TreeMap<>();
 
-        expectedContent.put("@Deprecated", 1);
-        expectedContent.put("FIXME", 1);
-        expectedContent.put("fixme", 1);
+        expectedContent.put("@DEPRECATED", 1);
+        expectedContent.put("FIXME", 2);
         expectedContent.put("TODO", 4);
         expectedContent.put("BUG", 1);
         expectedContent.put("XXX", 1);
