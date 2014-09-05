@@ -43,6 +43,14 @@ public class ByFactory {
         return css("[path='%s']", String.format(path, args));
     }
 
+    public By url(String path, Object... args) {
+        return css("[url='%s']", String.format(path, args));
+    }
+
+    public By action(String path, Object... args) {
+        return css("[action='%s']", String.format(path, args));
+    }
+
     public By name(String name, Object... args) {
         return css("[name='%s']", String.format(name, args));
     }
