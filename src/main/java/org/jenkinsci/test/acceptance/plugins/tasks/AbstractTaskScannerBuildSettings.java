@@ -26,6 +26,7 @@ public abstract class AbstractTaskScannerBuildSettings extends AbstractCodeStyle
     protected Control normalPriorityTags = control("normal");
     protected Control lowPriorityTags = control("low");
     protected Control ignoreCase = control("ignoreCase");
+    protected Control asRegexp = control("asRegexp");
 
     protected Control shouldDetectModules = control("shouldDetectModules");
 
@@ -50,7 +51,7 @@ public abstract class AbstractTaskScannerBuildSettings extends AbstractCodeStyle
     }
 
     /**
-     * Sets the input for the file names to be excluded
+     * Sets the input for the file names to be excluded.
      */
     public void setExcludePattern(String pattern) {
         this.excludePattern.set(pattern);
@@ -78,10 +79,17 @@ public abstract class AbstractTaskScannerBuildSettings extends AbstractCodeStyle
     }
 
     /**
-     * Decides whether to ignore the case when searching for task tags
+     * Decides whether to ignore the case when searching for task tags.
      */
     public void setIgnoreCase(boolean ignore) {
         this.ignoreCase.check(ignore);
+    }
+
+    /**
+     * Decides whether to treat tags as regular expressions.
+     */
+    public void setAsRegexp(boolean asRegexp) {
+        this.asRegexp.check(asRegexp);
     }
 
     /**

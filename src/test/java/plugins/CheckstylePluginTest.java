@@ -305,9 +305,7 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
         ListView view = addDashboardListViewColumn(CheckstyleListViewColumn.class);
 
         String relativeUrl = "job/" + job.name + "/checkstyle";
-        By expectedDashboardLinkMatcher = by.css("a[href$='" +
-                relativeUrl +
-                "']");
+        By expectedDashboardLinkMatcher = by.css("a[href$='" + relativeUrl + "']");
         assertThat(jenkins.all(expectedDashboardLinkMatcher).size(), is(1));
         WebElement dashboardLink = jenkins.getElement(expectedDashboardLinkMatcher);
         assertThat(dashboardLink.getText().trim(), is("12"));

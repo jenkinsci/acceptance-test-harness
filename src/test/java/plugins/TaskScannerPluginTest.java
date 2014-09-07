@@ -17,6 +17,7 @@ import org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerFreestyleBuildSett
 import org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerMavenBuildSettings;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.Job;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.xml.sax.SAXException;
@@ -37,7 +38,7 @@ import static org.junit.Assert.*;
 public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
 
     /**
-     * This test's objective is to verify the basic functionality of the Task
+     * This tests objective is to verify the basic functionality of the Task
      * Scanner plugin, i.e. finding different task tags, including / excluding
      * files and providing the correct results.
      * The test builds the same job twice with and without case sensitivity.
@@ -169,7 +170,64 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
     }
 
     /**
-     * This test's objective is to verify that the plugin correctly works for
+     * This tests objective is to verify that the plugin correctly works for
+     * tags that are treated as regular expression.
+     */
+    @Test
+    public void regular_expression() throws Exception {
+        AbstractCodeStylePluginBuildConfigurator<TaskScannerFreestyleBuildSettings> buildConfigurator =
+                new AbstractCodeStylePluginBuildConfigurator<TaskScannerFreestyleBuildSettings>() {
+                    @Override
+                    public void configure(TaskScannerFreestyleBuildSettings settings) {
+                        settings.setPattern("**/*.txt");
+                        settings.setNormalPriorityTags("^.*(TODO(?:[0-9]*))(.*)$");
+                        settings.setAsRegexp(true);
+                    }
+                };
+
+        FreeStyleJob job = setupJob("/tasks_plugin/regexp", FreeStyleJob.class,
+                TaskScannerFreestyleBuildSettings.class, buildConfigurator);
+
+        verifyRegularExpressionScannerResult(job);
+    }
+
+    private void verifyRegularExpressionScannerResult(final Job job) {
+        Build lastBuild = buildJobWithSuccess(job);
+        lastBuild.open();
+        TaskScannerAction tsa = new TaskScannerAction(job);
+
+        assertThat(tsa.getResultLinkByXPathText("5 open tasks"), is("tasksResult"));
+        assertThat(tsa.getResultTextByXPathText("5 open tasks"), endsWith("in 1 workspace file."));
+        assertThat(tsa.getWarningNumber(), is(5));
+        assertThat(tsa.getNormalWarningNumber(), is(5));
+    }
+
+    /**
+     * This tests objective is to verify that the plugin correctly works for
+     * tags that are treated as regular expression.
+     */
+    @Test
+    public void regular_expression_maven() throws Exception {
+        AbstractCodeStylePluginBuildConfigurator<TaskScannerMavenBuildSettings> buildConfigurator =
+                new AbstractCodeStylePluginBuildConfigurator<TaskScannerMavenBuildSettings>() {
+                    @Override
+                    public void configure(TaskScannerMavenBuildSettings settings) {
+                        settings.setPattern("**/*.txt");
+                        settings.setNormalPriorityTags("^.*(TODO(?:[0-9]*))(.*)$");
+                        settings.setAsRegexp(true);
+                    }
+                };
+
+        MavenModuleSet job = setupJob("/tasks_plugin/regexp",
+                MavenModuleSet.class, TaskScannerMavenBuildSettings.class,
+                buildConfigurator, null);
+
+        verifyRegularExpressionScannerResult(job);
+    }
+
+
+    /**
+     * This tests objective is to verify that the plugin correctly works for
      * multiple tags per priority.
      * In the first step the task scanner is configured with two tags for high
      * priority tasks. Prior to the second build also the normal and low priority
@@ -251,7 +309,7 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
 
 
     /**
-     * This test's objective is to verify the detection of closed tasks.
+     * This tests objective is to verify the detection of closed tasks.
      * Therefore two runs of the same job with the same task scanner setup are
      * conducted but the fileset in the workspace will be replaced by the same
      * files containing less warnings for the second run.
@@ -313,7 +371,7 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
     }
 
     /**
-     * This test's objective is to check the "Run always" option of the publisher,
+     * This tests objective is to check the "Run always" option of the publisher,
      * i.e whether the task scanner activity is skipped in case the main build step
      * has already failed and the option "run always" is not activated. The option
      * is activated for the second part to also scan for tasks in this failed job
@@ -374,7 +432,7 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
     }
 
     /**
-     * This test's objective to check the correct treatment and display of tasks
+     * This tests objective to check the correct treatment and display of tasks
      * in files with windows-1251 (a.k.a. cp1251) encoding.
      *
      * This test shall reproduce the observations described in JENKINS-22744:
@@ -503,7 +561,7 @@ public class TaskScannerPluginTest extends AbstractCodeStylePluginHelper{
 
 
     /**
-     * This test's objective is to the correct treatment of the status thresholds (totals).
+     * This tests objective is to the correct treatment of the status thresholds (totals).
      * Therefore a more complex test case has been created which modifies files and task tags
      * to scan for multiple times to create appropriate scenarios for different thresholds.
      *
