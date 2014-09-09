@@ -61,13 +61,8 @@ public abstract class Slave extends Node {
         return getJson().get("executors").size();
     }
 
-
     public void setExecutors(int n) {
-        find(by.input("_.numExecutors")).clear(); //clear the previous value or it gets appended
-        find(by.input("_.numExecutors")).sendKeys(String.valueOf(n));
-        // in my chrome, I need to move the focus out from the control to have it recognize the value entered
-        // perhaps it's related to the way input type=number is emulated?
-        find(by.input("_.remoteFS")).click();
+        control("/numExecutors").set(n);
     }
 
     public void setRemoteFs(String s) {
