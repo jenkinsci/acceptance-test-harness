@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
@@ -118,6 +119,7 @@ public class JUnitTestPublisherTest extends AbstractJUnitTest {
 
     private void assertMessage(String test, String msg) {
         toggle(test);
+        sleep(1000); // Try to wait a bit to ajax to fetch the content
         assertThat(driver, hasContent(msg));
         toggle(test);
     }
@@ -132,7 +134,8 @@ public class JUnitTestPublisherTest extends AbstractJUnitTest {
             }
         }
 
-        assert (!elements.isEmpty());
+        assertThat("No test with given name", elements.isEmpty(), equalTo(false));
+
         for (WebElement e : elements) {
             e.click();
         }
