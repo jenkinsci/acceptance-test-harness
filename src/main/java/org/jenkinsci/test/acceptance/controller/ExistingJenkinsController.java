@@ -76,8 +76,8 @@ public class ExistingJenkinsController extends JenkinsController {
     }
 
     @Override
-    public void populateJenkinsHome(File template, boolean clean) throws IOException {
-        // nothing to do, Jenkins is already running
+    public void populateJenkinsHome(byte[] template, boolean clean) throws IOException {
+        // TODO use CLI or /script or something to unpack this
     }
 
     @Override

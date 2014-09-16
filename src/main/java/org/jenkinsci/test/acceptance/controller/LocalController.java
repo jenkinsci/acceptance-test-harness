@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import static java.lang.System.*;
+import org.jenkinsci.utils.process.CommandBuilder;
 
 /**
  * Abstract base class for those JenkinsController that runs the JVM locally on
@@ -197,31 +198,27 @@ public abstract class LocalController extends JenkinsController implements LogLi
     }
 
     @Override
-    public void populateJenkinsHome(File template, boolean clean) throws IOException {
-        boolean running = isRunning();
+    public void populateJenkinsHome(byte[] _template, boolean clean) throws IOException {
         try {
-            stop();
             if (clean && tempDir.isDirectory()) {
                 FileUtils.cleanDirectory(tempDir);
             }
             if (!tempDir.isDirectory() && ! tempDir.mkdirs()) {
                 throw new IOException("Could not create directory: " + tempDir);
             }
-            if (template.isDirectory()) {
-                FileUtils.copyDirectory(template, tempDir);
-            } else if (template.isFile()) {
+            File template = File.createTempFile("template", ".dat");
+            try {
+                FileUtils.writeByteArrayToFile(template, _template);
                 Expand expand = new Expand();
                 expand.setSrc(template);
                 expand.setOverwrite(true);
                 expand.setDest(tempDir);
                 expand.execute();
+            } finally {
+                template.delete();
             }
         } catch (Exception e) {
             throw new IOException(e.getMessage(), e);
-        } finally {
-            if (running && !isRunning()) {
-                start();
-            }
         }
     }
 

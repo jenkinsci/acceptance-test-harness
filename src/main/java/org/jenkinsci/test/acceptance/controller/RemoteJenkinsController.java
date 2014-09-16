@@ -111,30 +111,25 @@ public class RemoteJenkinsController extends JenkinsController {
     }
 
     @Override
-    public void populateJenkinsHome(File template, boolean clean) throws IOException {
+    public void populateJenkinsHome(byte[] _template, boolean clean) throws IOException {
         boolean running = isRunning();
         try (Ssh connection = machine.connect()) {
             stop();
             if (clean) {
                 connection.executeRemoteCommand("rm -rf "+ Ssh.escape(jenkinsHome) + "; mkdir -p " + Ssh.escape(jenkinsHome));
             }
-            if (template.isDirectory()) {
-                File archive = File.createTempFile("home", "template.zip", new File(WORKSPACE));
-                try {
-                connection.copyTo(archive.getAbsolutePath(), ".home-template.zip", jenkinsHome);
-                } finally {
-                    FileUtils.forceDelete(archive);
-                }
-            } else if (template.isFile()) {
+            File template = File.createTempFile("template", ".dat");
+            try {
+                org.apache.commons.io.FileUtils.writeByteArrayToFile(template, _template);
                 connection.copyTo(template.getAbsolutePath(), ".home-template.zip", jenkinsHome);
+            } finally {
+                template.delete();
             }
-            if (template.exists()) {
                 String templateArchive =
                         Ssh.escape(jenkinsHome + (jenkinsHome.endsWith("/") ? "" : "/") + ".home-template.zip");
                 connection.executeRemoteCommand(
                         "unzip -o " + templateArchive + " -d " + Ssh.escape(jenkinsHome) + " && rm -f "
                                 + templateArchive);
-            }
         } catch (Exception e) {
             throw new IOException(e.getMessage(), e);
         } finally {

@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
 
-import static org.apache.commons.io.FileUtils.*;
+import org.apache.commons.io.IOUtils;
 
 /**
  * Starts/stops Jenkins and exposes where it is running.
@@ -72,14 +72,8 @@ public abstract class JenkinsController implements IJenkinsController, AutoClean
     @Override
     public void start() throws IOException {
         if (!isRunning) {
-            File t = File.createTempFile("temp", "zip");
-            try {
-                URL url = JenkinsController.class.getResource("/tool_installers.zip");
-                copyURLToFile(url, t);
-                populateJenkinsHome(t, false);
-            } finally {
-                t.delete();
-            }
+            URL url = JenkinsController.class.getResource("/tool_installers.zip");
+            populateJenkinsHome(IOUtils.toByteArray(url), false);
             startNow();
             isRunning = true;
         }
@@ -161,26 +155,6 @@ public abstract class JenkinsController implements IJenkinsController, AutoClean
      * @param cause Failure cause
      */
     public void diagnose(Throwable cause) throws IOException {}
-
-    /**
-     * Populates the Jenkins Home with the specified template (which can be either a ZIP file or a directory). If
-     * Jenkins is already running then it will be restarted.
-     *
-     * @param template The template (either a ZIP file or a directory).
-     */
-    public void populateJenkinsHome(File template) throws IOException {
-        populateJenkinsHome(template, true);
-    }
-
-    /**
-     * Populates the Jenkins Home with the specified template (which can be either a ZIP file or a directory). If
-     * Jenkins is already running then it will be restarted.
-     *
-     * @param template The template (either a ZIP file or a directory).
-     * @param clean    if {@code true} then the home will be wiped clean before the template is applied. If false then
-     *                 the template will simply overwrite the existing (if any) home.
-     */
-    public abstract void populateJenkinsHome(File template, boolean clean) throws IOException;
 
     /**
      * Downloads the latest version of the form-element-path plugin that we use for testing.

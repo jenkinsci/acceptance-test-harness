@@ -21,6 +21,8 @@ import java.net.URL;
 import java.util.concurrent.Executors;
 
 import static java.lang.System.*;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * {@link JenkinsController} that talks to {@link JenkinsControllerPoolProcess} over Unix domain socket.
@@ -34,6 +36,7 @@ public class PooledJenkinsController extends JenkinsController implements LogLis
     private final LogSplitter splitter = new LogSplitter();
     private Channel channel;
     private IJenkinsController controller;
+    private final List<byte[]> toUnpack = new LinkedList<>();
 
     public PooledJenkinsController(File socket) {
         this.socket = socket;
@@ -72,6 +75,10 @@ public class PooledJenkinsController extends JenkinsController implements LogLis
             final LogListener l = channel.export(LogListener.class, splitter);
             channel.call(new InstallLogger(controller,l));
 
+            for (byte[] content : toUnpack) {
+                controller.populateJenkinsHome(content, false);
+            }
+            toUnpack.clear();
         } catch (InterruptedException e) {
             throw new IOException(e);
         }
@@ -92,8 +99,15 @@ public class PooledJenkinsController extends JenkinsController implements LogLis
     }
 
     @Override
-    public void populateJenkinsHome(File template, boolean clean) throws IOException {
-        throw new UnsupportedOperationException("unsupported");
+    public void populateJenkinsHome(byte[] template, boolean clean) throws IOException {
+        if (controller != null) {
+            controller.populateJenkinsHome(template, clean);
+        } else {
+            if (clean) {
+                throw new UnsupportedOperationException("clean mode unsupported for now");
+            }
+            toUnpack.add(template);
+        }
     }
 
     @Override
