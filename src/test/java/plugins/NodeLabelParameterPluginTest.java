@@ -219,6 +219,8 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
     @Test
     public void run_on_a_particular_offline_slave_with_ignore() throws Exception {
         FreeStyleJob j = jenkins.jobs.create();
+        j.configure();
+        j.save();
 
         Slave s = slave.install(jenkins).get();
         j.configure();
