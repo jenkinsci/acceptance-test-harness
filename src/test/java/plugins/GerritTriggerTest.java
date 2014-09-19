@@ -103,7 +103,7 @@ public class GerritTriggerTest extends AbstractJUnitTest {
         job.saveTestJobConfig();
         try {
             String changeId = pushChangeForReview(jobName);
-            sleep(10000);
+            elasticSleep(10000);
             String rev = readJson(curl(changeId));
             logCurlHttpCodeIssues(rev);
 

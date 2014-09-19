@@ -106,7 +106,7 @@ public class Jenkins extends Node {
         clickButton("Yes");
 
         do {
-            sleep(1000);
+            elasticSleep(1000);
         } while (driver.getPageSource().contains("Please wait"));
     }
 

@@ -119,7 +119,7 @@ public class JUnitTestPublisherTest extends AbstractJUnitTest {
 
     private void assertMessage(String test, String msg) {
         toggle(test);
-        sleep(1000); // Try to wait a bit to ajax to fetch the content
+        elasticSleep(1000); // Try to wait a bit to ajax to fetch the content
         assertThat(driver, hasContent(msg));
         toggle(test);
     }

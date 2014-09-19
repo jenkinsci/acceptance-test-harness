@@ -113,7 +113,7 @@ public class SshSlaveController extends SlaveController {
         //exit from wait if any
         if(!slaveWaitComplete.get()){
             slaveWaitComplete.set(true);
-            sleep(1000);
+            elasticSleep(1000);
         }
         stop();
         machine.close();
@@ -128,7 +128,7 @@ public class SshSlaveController extends SlaveController {
                     slaveWaitComplete.set(true);
                     return;
                 }
-                sleep(1000);
+                elasticSleep(1000);
             }
             throw new org.openqa.selenium.TimeoutException(String.format("Slave could not be online in %s seconds",timeout));
         } catch (RuntimeException e) {
@@ -145,7 +145,7 @@ public class SshSlaveController extends SlaveController {
 
         s.find(by.input("_.host")).sendKeys(host);
 
-        sleep(25);
+        elasticSleep(25);
 
         final Select cId = new Select(s.find(by.input("_.credentialsId")));
         final String credentialName = String.format("%s (%s)", machine.getUser(), fingerprint);

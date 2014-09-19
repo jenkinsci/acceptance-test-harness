@@ -7,7 +7,6 @@ import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.docker.fixtures.JabberContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Native;
-import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.jabber.JabberGlobalConfig;
 import org.jenkinsci.test.acceptance.plugins.jabber.JabberGlobalConfig.AdvancedConfig;
@@ -30,7 +29,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
  * because DNS resolution issues. These issues arise because of the used Smack API
  *      (http://www.igniterealtime.org/projects/smack/index.jsp)
  * that does rely on successful DNS resolution, which is totally valid in terms on conformity with the XMPP Standard.
- * 
+ *
  * This test is broken until a new version of the jabber plugin with a new Smack Library is provided that falls back to
  * using the hostname if the FQDN could not be resolved, *
  *
@@ -105,7 +104,7 @@ public class JabberPluginTest extends AbstractJUnitTest {
             j.addShellStep("echo 'Hello, Jenkins CI was here!'");
             JabberPublisher jp = j.addPublisher(JabberPublisher.class);
             Publishers publisher = jp.setPublisher();
-            sleep(10000);
+            elasticSleep(10000);
             publisher.targets.set(confRoom);
 
         }

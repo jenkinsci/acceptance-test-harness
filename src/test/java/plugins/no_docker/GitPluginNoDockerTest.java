@@ -101,7 +101,7 @@ public class GitPluginNoDockerTest extends AbstractJUnitTest {
         job.addShellStep("test -f pom.xml");
         job.save();
 
-        sleep(70000);
+        elasticSleep(70000);
 
         // We should have some build after 70 seconds
         job.getLastBuild().shouldSucceed().shouldExist();

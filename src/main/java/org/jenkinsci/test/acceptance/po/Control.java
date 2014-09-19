@@ -141,13 +141,13 @@ public class Control extends CapybaraPortingLayerImpl {
     public void selectDropdownMenu(Class type) {
         click();
         findCaption(type,findDropDownMenuItem).click();
-        sleep(1000);
+        elasticSleep(1000);
     }
 
     public void selectDropdownMenu(String displayName) {
         click();
         findDropDownMenuItem.find(displayName).click();
-        sleep(1000);
+        elasticSleep(1000);
     }
 
     /**
