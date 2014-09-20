@@ -7,9 +7,6 @@ import org.openqa.selenium.WebElement;
 
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.jenkinsci.test.acceptance.Matchers.*;
-
 /**
  * Page object for the system configuration page.
  *
@@ -42,7 +39,7 @@ public class JenkinsConfig extends PageObject {
         String name = type.getAnnotation(ToolInstallationPageObject.class).name();
 
         clickButton("Add " + name);
-        sleep(100);
+        elasticSleep(100);
         String path = find(by.button("Delete " + name)).getAttribute("path");
         String prefix = path.substring(0, path.length() - 18);
 

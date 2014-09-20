@@ -96,10 +96,6 @@ When /^I set artifacts? "([^"]*)" to archive and exclude "([^"]*)" in the job co
   end
 end
 
-When /^I want to keep only the latest successful artifacts$/ do
-  @artifact_archiver.latest_only true
-end
-
 When /^I set (\d+) builds? to keep$/ do |number|
   step %{I check the "logrotate" checkbox}
 

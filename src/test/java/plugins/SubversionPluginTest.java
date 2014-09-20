@@ -304,7 +304,7 @@ public class SubversionPluginTest extends AbstractJUnitTest {
         f.addShellStep("test -d .svn");
         f.save();
 
-        sleep(70000);
+        elasticSleep(70000);
 
         // We should have a second build after 70 seconds
         assertThat(f.getNextBuildNumber(), CoreMatchers.is(3));
@@ -342,7 +342,7 @@ public class SubversionPluginTest extends AbstractJUnitTest {
         f.pollScm().schedule("* * * * *");
         f.save();
 
-        sleep(70000);
+        elasticSleep(70000);
 
         // We should not have a second build after 70 seconds
         assertThat(f.getNextBuildNumber(), CoreMatchers.is(2));

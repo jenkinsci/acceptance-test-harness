@@ -198,7 +198,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
 
         //use scheduleBuild instead of startBuild to avoid a timeout waiting for Build being started
         Build b = j.scheduleBuild(singletonMap("slavename", s.getName()));
-        sleep(3000);    // TODO: not the best way to wait for the scheduled job to go through the queue, but a bit of wait is needed
+        elasticSleep(3000);    // TODO: not the best way to wait for the scheduled job to go through the queue, but a bit of wait is needed
         shouldBeTriggeredWithoutOnlineNode(b, s.getName());
 
         //bring the slave up again, the Build should start immediately
@@ -219,6 +219,8 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
     @Test
     public void run_on_a_particular_offline_slave_with_ignore() throws Exception {
         FreeStyleJob j = jenkins.jobs.create();
+        j.configure();
+        j.save();
 
         Slave s = slave.install(jenkins).get();
         j.configure();
@@ -235,7 +237,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
 
         //use scheduleBuild instead of startBuild to avoid a timeout waiting for Build being started
         Build b = j.scheduleBuild(singletonMap("slavename", s.getName()));
-        sleep(3000);    // TODO: not the best way to wait for the scheduled job to go through the queue, but a bit of wait is needed
+        elasticSleep(3000);    // TODO: not the best way to wait for the scheduled job to go through the queue, but a bit of wait is needed
         shouldBeTriggeredWithoutValidOnlineNode(b, s.getName());
     }
 
@@ -331,7 +333,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         b = j.scheduleBuild(singletonMap("slavename", s2.getName()));
 
         waitFor(by.href("/queue/cancelItem?id=2")); // shown in queue
-        sleep(10000); // after some time
+        elasticSleep(10000); // after some time
         shouldBeTriggeredWithoutValidOnlineNode(b, s2.getName());
     }
 

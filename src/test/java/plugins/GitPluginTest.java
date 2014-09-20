@@ -160,7 +160,7 @@ public class GitPluginTest extends AbstractJUnitTest {
         job.addShellStep("test -f foo");
         job.save();
 
-        sleep(70000);
+        elasticSleep(70000);
 
         // We should have some build after 70 seconds
         job.getLastBuild().shouldSucceed().shouldExist();

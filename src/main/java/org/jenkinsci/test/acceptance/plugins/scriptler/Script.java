@@ -78,7 +78,7 @@ public class Script extends CapybaraPortingLayerImpl {
                 control("/node").select(slave);
             }
             catch (NoSuchElementException ex) {
-                sleep(1000);
+                elasticSleep(1000);
                 visitAction("runScript");
                 control("/node").select(slave);
             }
@@ -144,7 +144,7 @@ public class Script extends CapybaraPortingLayerImpl {
             if (addButton != null) {
                 addButton.click();
 
-                sleep(1000); // wait for new parameter to appear
+                elasticSleep(1000); // wait for new parameter to appear
                 String path = find(by.button("Add Parameter")).getAttribute("path");
                 prefix = path.substring(0, path.length() - 25);
             }

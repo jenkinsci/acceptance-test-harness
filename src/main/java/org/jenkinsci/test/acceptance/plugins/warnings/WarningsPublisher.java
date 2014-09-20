@@ -17,7 +17,7 @@ public class WarningsPublisher extends AbstractStep implements PostBuildStep {
 
     public void addConsoleScanner(String caption) {
         addConsoleLogScanner.click();
-        sleep(1000);
+        elasticSleep(1000);
         String path = last(by.xpath("//div[@name='consoleParsers']")).getAttribute("path");
 
         PageArea a = new PageAreaImpl(getPage(), path) {
@@ -27,7 +27,7 @@ public class WarningsPublisher extends AbstractStep implements PostBuildStep {
 
     public void addWorkspaceFileScanner(String caption, String pattern) {
         addWorkspaceFileScanner.click();
-        sleep(1000);
+        elasticSleep(1000);
         String path = last(by.xpath("//div[@name='parserConfigurations']")).getAttribute("path");
 
         PageArea a = new PageAreaImpl(getPage(), path) {

@@ -188,7 +188,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
                 }
 
                 // give a bit more chance for the element to become visible
-                sleep(100);
+                elasticSleep(100);
             }
 
             throw new NoSuchElementException("Unable to locate visible " + selector + " in " + driver.getCurrentUrl());
@@ -214,7 +214,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
                 e = driver.findElement(selector);
 
                 // give a bit more chance for the element to become visible
-                sleep(100);
+                elasticSleep(100);
 
             }
             if (e == null) {
@@ -361,10 +361,14 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
      */
     public static void sleep(long ms) {
         try {
-            Thread.sleep(time.milliseconds(ms));
+            Thread.sleep(ms);
         } catch (InterruptedException e) {
             throw new Error(e);
         }
+    }
+
+    public static void elasticSleep(long ms) {
+        sleep(time.milliseconds(ms));
     }
 
     /**

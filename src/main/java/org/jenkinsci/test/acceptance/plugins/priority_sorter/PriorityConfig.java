@@ -39,7 +39,7 @@ public class PriorityConfig extends Action {
 
     public Group addGroup() {
         control("/repeatable-add").click();
-        sleep(1000);
+        elasticSleep(1000);
         String prefix = last(by.name("view")).getAttribute("path").replace("/view", "");
         return new Group(this, prefix);
     }

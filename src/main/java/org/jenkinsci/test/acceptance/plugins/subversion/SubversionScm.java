@@ -42,7 +42,7 @@ public class SubversionScm extends Scm {
         WebElement linkToCredentialPage;
         String urlString = null;
         try {
-            sleep(1000);
+            elasticSleep(1000);
             linkToCredentialPage = this.find(by.link("enter credential"));
             urlString = linkToCredentialPage.getAttribute("href");
             urlOfCredentialPage = new URL(urlString);

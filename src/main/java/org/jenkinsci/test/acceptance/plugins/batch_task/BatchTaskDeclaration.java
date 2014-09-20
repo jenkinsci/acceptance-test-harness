@@ -20,7 +20,7 @@ public class BatchTaskDeclaration extends PageAreaImpl {
         }
         else {
             job.clickButton("Add another task...");
-            job.sleep(1000);
+            job.elasticSleep(1000);
         }
 
         String p = job.last(by.input("batch-task.name")).getAttribute("path");

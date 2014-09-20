@@ -278,7 +278,7 @@ public class Job extends ContainerPageObject {
 //        find(xpath("//button[text()='Add Parameter']")).click();
 //        find(xpath("//a[text()='%s']",displayName)).click();
 
-        sleep(500);
+        elasticSleep(500);
 
         String path = last(by.xpath("//div[@name='parameter']")).getAttribute("path");
 

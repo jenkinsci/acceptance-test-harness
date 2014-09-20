@@ -19,10 +19,4 @@ public class ArtifactArchiver extends AbstractStep implements PostBuildStep {
         control("excludes").set(value);
         return this;
     }
-
-    public ArtifactArchiver latestOnly(boolean check) {
-        control("advanced-button").click();
-        control("latestOnly").check(check);
-        return this;
-    }
 }

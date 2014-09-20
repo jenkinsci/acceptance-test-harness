@@ -83,11 +83,6 @@ public class JobConfigurationSteps extends AbstractSteps {
         my.job.save();
     }
 
-    @And("^I want to keep only the latest successful artifacts$")
-    public void I_want_to_keep_only_the_latest_successful_artifacts() throws Throwable {
-        my.artifactArchiver.latestOnly(true);
-    }
-
     @And("^I schedule job to run periodically at \"([^\"]*)\"$")
     public void I_schedule_job_to_run_periodically_at(String cron) throws Throwable {
         check("hudson-triggers-TimerTrigger");

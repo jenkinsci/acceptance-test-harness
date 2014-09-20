@@ -25,6 +25,13 @@ package org.jenkinsci.test.acceptance.utils;
 
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Represent proportional to execution speed.
+ *
+ * This implementation takes number of concurrent threads into account.
+ *
+ * @author ogondza
+ */
 public class ElasticTime {
 
     private final long concurrency = Integer.parseInt(System.getProperty("forkCount", "1"));

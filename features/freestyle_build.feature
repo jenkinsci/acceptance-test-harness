@@ -135,18 +135,6 @@ Feature: Configure/build freestyle jobs
     And the artifact "test1.txt" should be archived
     And the artifact "test2.txt" should not be archived
 
-  Scenario: Archive artifact and keep only the last successful
-    Given a job
-    When I configure the job
-    And I add a shell build step "echo 'archive test' > test.txt"
-    And I set artifact "test.txt" to archive
-    And I want to keep only the latest successful artifacts
-    And I save the job
-    And I build 3 jobs sequentially
-    Then the build #1 should not have archived "test.txt" artifact
-    And the build #2 should have archived "test.txt" artifact
-    And the build #3 should have archived "test.txt" artifact
-
   Scenario: Schedule build periodically
     Given a job
     When I configure the job
