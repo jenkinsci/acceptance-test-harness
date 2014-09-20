@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 import org.jenkinsci.test.acceptance.junit.Bug;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.plugins.analysis_core.AbstractCodeStylePluginBuildConfigurator;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleAction;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleFreestyleBuildSettings;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleListViewColumn;
@@ -34,14 +34,10 @@ import static org.hamcrest.MatcherAssert.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 
 /**
- * Feature: Allow publishing of Checkstyle report
- * In order to be able to check code style of my project
- * As a Jenkins user
- * I want to be able to publish Checkstyle report
+ * Acceptance tests for the CheckStyle plugin.
  */
 @WithPlugins("checkstyle")
-public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
-
+public class CheckStylePluginTest extends AbstractAnalysisTest {
     /**
      * Builds a job with checkstyle enabled and verifies that checkstyle details are displayed in the build overview.
      */
@@ -190,7 +186,7 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
         return setupSimpleMavenJob(null);
     }
 
-    private MavenModuleSet setupSimpleMavenJob(AbstractCodeStylePluginBuildConfigurator<CheckstyleMavenBuildSettings> configurator) {
+    private MavenModuleSet setupSimpleMavenJob(AnalysisConfigurator<CheckstyleMavenBuildSettings> configurator) {
         String projectPath = "/checkstyle_plugin/sample_checkstyle_project";
         String goal = "clean package checkstyle:checkstyle";
         return setupMavenJob(projectPath, goal, CheckstyleMavenBuildSettings.class, configurator);
@@ -201,7 +197,7 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
      */
     @Test
     public void build_simple_freestyle_mavengoals_project() {
-        AbstractCodeStylePluginBuildConfigurator<CheckstyleFreestyleBuildSettings> buildConfigurator = new AbstractCodeStylePluginBuildConfigurator<CheckstyleFreestyleBuildSettings>() {
+        AnalysisConfigurator<CheckstyleFreestyleBuildSettings> buildConfigurator = new AnalysisConfigurator<CheckstyleFreestyleBuildSettings>() {
             @Override
             public void configure(CheckstyleFreestyleBuildSettings settings) {
                 settings.pattern.set("target/checkstyle-result.xml");
@@ -251,8 +247,8 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
      */
     @Test
     public void build_simple_maven_project_and_check_if_it_is_unstable() {
-        AbstractCodeStylePluginBuildConfigurator<CheckstyleMavenBuildSettings> buildConfigurator =
-                new AbstractCodeStylePluginBuildConfigurator<CheckstyleMavenBuildSettings>() {
+        AnalysisConfigurator<CheckstyleMavenBuildSettings> buildConfigurator =
+                new AnalysisConfigurator<CheckstyleMavenBuildSettings>() {
                     @Override
                     public void configure(CheckstyleMavenBuildSettings settings) {
                         settings.setBuildUnstableTotalAll("0");
@@ -267,8 +263,8 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
      */
     @Test
     public void build_simple_maven_project_and_check_if_failed() {
-        AbstractCodeStylePluginBuildConfigurator<CheckstyleMavenBuildSettings> buildConfigurator =
-                new AbstractCodeStylePluginBuildConfigurator<CheckstyleMavenBuildSettings>() {
+        AnalysisConfigurator<CheckstyleMavenBuildSettings> buildConfigurator =
+                new AnalysisConfigurator<CheckstyleMavenBuildSettings>() {
                     @Override
                     public void configure(CheckstyleMavenBuildSettings settings) {
                         settings.setBuildFailedTotalAll("0");
@@ -345,7 +341,7 @@ public class CheckstylePluginTest extends AbstractCodeStylePluginHelper {
      * @return The new Job
      */
     private FreeStyleJob setUpCheckstyleFreestyleJob() {
-        AbstractCodeStylePluginBuildConfigurator<CheckstyleFreestyleBuildSettings> buildConfigurator = new AbstractCodeStylePluginBuildConfigurator<CheckstyleFreestyleBuildSettings>() {
+        AnalysisConfigurator<CheckstyleFreestyleBuildSettings> buildConfigurator = new AnalysisConfigurator<CheckstyleFreestyleBuildSettings>() {
             @Override
             public void configure(CheckstyleFreestyleBuildSettings settings) {
                 settings.pattern.set("checkstyle-result.xml");

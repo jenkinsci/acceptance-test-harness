@@ -1,7 +1,7 @@
 package org.jenkinsci.test.acceptance.plugins.tasks;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jenkinsci.test.acceptance.plugins.analysis_core.AbstractCodeStylePluginAction;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisAction;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.ContainerPageObject;
 import org.openqa.selenium.WebElement;
@@ -14,7 +14,7 @@ import java.util.NoSuchElementException;
  *
  * @author Martin Ende
  */
-public class TaskScannerAction  extends AbstractCodeStylePluginAction {
+public class TaskScannerAction  extends AnalysisAction {
 
     public TaskScannerAction(ContainerPageObject parent) {
         super(parent, "tasks");

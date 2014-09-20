@@ -1,6 +1,6 @@
 package org.jenkinsci.test.acceptance.plugins.pmd;
 
-import org.jenkinsci.test.acceptance.plugins.analysis_core.AbstractCodeStylePluginMavenBuildSettings;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisMavenSettings;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.po.Describable;
 
@@ -9,7 +9,7 @@ import org.jenkinsci.test.acceptance.po.Describable;
  * @author Fabian Trampusch
  */
 @Describable("Publish PMD analysis results")
-public class PmdMavenBuildSettings extends AbstractCodeStylePluginMavenBuildSettings {
+public class PmdMavenBuildSettings extends AnalysisMavenSettings {
 
     public PmdMavenBuildSettings(MavenModuleSet parent, String selectorPath) {
         super(parent, selectorPath);

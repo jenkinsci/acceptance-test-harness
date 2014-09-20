@@ -7,7 +7,7 @@ import org.jenkinsci.test.acceptance.po.Job;
  * Abstract job configuration class.
  * @author Fabian Trampusch
  */
-public abstract class AbstractCodeStylePluginFreestyleBuildSettings extends AbstractCodeStylePluginBuildSettings {
+public abstract class AnalysisFreestyleSettings extends AnalysisSettings {
     /**
      * The input for the file name.
      */
@@ -19,7 +19,7 @@ public abstract class AbstractCodeStylePluginFreestyleBuildSettings extends Abst
      * @param parent       the job currently being configured.
      * @param selectorPath the selector path used as prefix.
      */
-    public AbstractCodeStylePluginFreestyleBuildSettings(Job parent, String selectorPath) {
+    public AnalysisFreestyleSettings(Job parent, String selectorPath) {
         super(parent, selectorPath);
     }
 }

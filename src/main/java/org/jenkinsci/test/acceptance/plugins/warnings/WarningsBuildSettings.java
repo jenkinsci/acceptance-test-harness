@@ -1,6 +1,6 @@
 package org.jenkinsci.test.acceptance.plugins.warnings;
 
-import org.jenkinsci.test.acceptance.plugins.analysis_core.AbstractCodeStylePluginFreestyleBuildSettings;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisFreestyleSettings;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Job;
@@ -11,7 +11,7 @@ import org.jenkinsci.test.acceptance.po.PageAreaImpl;
  * Settings of the warnigns plugin. There is no difference between freestyle and maven jobs.
  */
 @Describable("Scan for compiler warnings")
-public class WarningsBuildSettings extends AbstractCodeStylePluginFreestyleBuildSettings {
+public class WarningsBuildSettings extends AnalysisFreestyleSettings {
     private Control addConsoleLogScanner = control("repeatable-add");
     private Control addWorkspaceFileScanner = control("repeatable-add[1]");
 

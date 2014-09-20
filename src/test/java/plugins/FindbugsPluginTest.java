@@ -26,7 +26,7 @@ package plugins;
 import org.jenkinsci.test.acceptance.junit.Bug;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.plugins.analysis_core.AbstractCodeStylePluginBuildConfigurator;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
 import org.jenkinsci.test.acceptance.plugins.findbugs.*;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
@@ -52,7 +52,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.jenkinsci.test.acceptance.Matchers.hasAction;
 
 @WithPlugins("findbugs")
-public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
+public class FindbugsPluginTest extends AbstractAnalysisTest {
 
     /**
      * Builds a job and checks if warnings of Findbugs are displayed. Checks as well, if the content of the tabs is
@@ -174,7 +174,7 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
      */
     @Test
     public void build_simple_freestyle_mavengoals_project() {
-        AbstractCodeStylePluginBuildConfigurator<FindbugsFreestyleBuildSettings> buildConfigurator = new AbstractCodeStylePluginBuildConfigurator<FindbugsFreestyleBuildSettings>() {
+        AnalysisConfigurator<FindbugsFreestyleBuildSettings> buildConfigurator = new AnalysisConfigurator<FindbugsFreestyleBuildSettings>() {
             @Override
             public void configure(FindbugsFreestyleBuildSettings settings) {
                 settings.pattern.set("target/findbugsXml.xml");
@@ -197,7 +197,7 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
         return setupSimpleMavenJob(null);
     }
 
-    private MavenModuleSet setupSimpleMavenJob(AbstractCodeStylePluginBuildConfigurator<FindbugsMavenBuildSettings> configurator) {
+    private MavenModuleSet setupSimpleMavenJob(AnalysisConfigurator<FindbugsMavenBuildSettings> configurator) {
         String projectPath = "/findbugs_plugin/sample_findbugs_project";
         String goal = "clean package findbugs:findbugs";
         return setupMavenJob(projectPath, goal, FindbugsMavenBuildSettings.class, configurator);
@@ -222,8 +222,8 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
      */
     @Test
     public void build_simple_maven_project_and_check_if_it_is_unstable() {
-        AbstractCodeStylePluginBuildConfigurator<FindbugsMavenBuildSettings> buildConfigurator =
-                new AbstractCodeStylePluginBuildConfigurator<FindbugsMavenBuildSettings>() {
+        AnalysisConfigurator<FindbugsMavenBuildSettings> buildConfigurator =
+                new AnalysisConfigurator<FindbugsMavenBuildSettings>() {
                     @Override
                     public void configure(FindbugsMavenBuildSettings settings) {
                         settings.setBuildUnstableTotalAll("0");
@@ -238,8 +238,8 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
      */
     @Test
     public void build_simple_maven_project_and_check_if_failed() {
-        AbstractCodeStylePluginBuildConfigurator<FindbugsMavenBuildSettings> buildConfigurator =
-                new AbstractCodeStylePluginBuildConfigurator<FindbugsMavenBuildSettings>() {
+        AnalysisConfigurator<FindbugsMavenBuildSettings> buildConfigurator =
+                new AnalysisConfigurator<FindbugsMavenBuildSettings>() {
                     @Override
                     public void configure(FindbugsMavenBuildSettings settings) {
                         settings.setBuildFailedTotalAll("0");
@@ -307,7 +307,7 @@ public class FindbugsPluginTest extends AbstractCodeStylePluginHelper {
      * @return The new Job
      */
     private FreeStyleJob setUpFindbugsFreestyleJob() {
-        AbstractCodeStylePluginBuildConfigurator<FindbugsFreestyleBuildSettings> buildConfigurator = new AbstractCodeStylePluginBuildConfigurator<FindbugsFreestyleBuildSettings>() {
+        AnalysisConfigurator<FindbugsFreestyleBuildSettings> buildConfigurator = new AnalysisConfigurator<FindbugsFreestyleBuildSettings>() {
             @Override
             public void configure(FindbugsFreestyleBuildSettings settings) {
                 settings.pattern.set("findbugsXml.xml");

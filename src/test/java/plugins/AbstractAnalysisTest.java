@@ -12,9 +12,9 @@ import org.custommonkey.xmlunit.XMLAssert;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Resource;
-import org.jenkinsci.test.acceptance.plugins.analysis_core.AbstractCodeStylePluginBuildConfigurator;
-import org.jenkinsci.test.acceptance.plugins.analysis_core.AbstractCodeStylePluginBuildSettings;
-import org.jenkinsci.test.acceptance.plugins.analysis_core.AbstractCodeStylePluginMavenBuildSettings;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisSettings;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisMavenSettings;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.AbstractDashboardViewPortlet;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenBuildStep;
@@ -37,7 +37,7 @@ import com.google.inject.Inject;
 import static java.util.Collections.*;
 import static org.junit.Assert.*;
 
-public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
+public abstract class AbstractAnalysisTest extends AbstractJUnitTest {
 
     /**
      * For slave test
@@ -55,10 +55,10 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
      * @param configurator   the configuration of the publisher
      * @return the new job
      */
-    public <J extends Job, T extends AbstractCodeStylePluginBuildSettings & PostBuildStep> J setupJob(String resourceToCopy,
+    public <J extends Job, T extends AnalysisSettings & PostBuildStep> J setupJob(String resourceToCopy,
                                                                                                       Class<J> jobClass,
                                                                                                       Class<T> publisherBuildSettingsClass,
-                                                                                                      AbstractCodeStylePluginBuildConfigurator<T> configurator) {
+                                                                                                      AnalysisConfigurator<T> configurator) {
         return setupJob(resourceToCopy, jobClass, publisherBuildSettingsClass, configurator, null);
     }
 
@@ -73,10 +73,10 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
      * @param goal           a maven goal to be added to the job or null otherwise
      * @return the new job
      */
-    public <J extends Job, T extends AbstractCodeStylePluginBuildSettings & PostBuildStep> J setupJob(String resourceToCopy,
+    public <J extends Job, T extends AnalysisSettings & PostBuildStep> J setupJob(String resourceToCopy,
                                                                                                       Class<J> jobClass,
                                                                                                       Class<T> publisherBuildSettingsClass,
-                                                                                                      AbstractCodeStylePluginBuildConfigurator<T> configurator,
+                                                                                                      AnalysisConfigurator<T> configurator,
                                                                                                       String goal) {
         if (jobClass.isAssignableFrom(MavenModuleSet.class)) {
             MavenInstallation.ensureThatMavenIsInstalled(jenkins);
@@ -124,7 +124,7 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
      * @param job the job to be changed
      * @return the edited job
      */
-    public <J extends Job, T extends AbstractCodeStylePluginBuildSettings & PostBuildStep> J editJob(String newResourceToCopy,
+    public <J extends Job, T extends AnalysisSettings & PostBuildStep> J editJob(String newResourceToCopy,
                                                                                                      boolean isAdditionalResource,
                                                                                                      J job) {
         return edit(newResourceToCopy, isAdditionalResource, job, null, null);
@@ -141,11 +141,11 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
      * @param configurator the new configuration of the publisher
      * @return the edited job
      */
-    public <J extends Job, T extends AbstractCodeStylePluginBuildSettings & PostBuildStep> J editJob(String newResourceToCopy,
+    public <J extends Job, T extends AnalysisSettings & PostBuildStep> J editJob(String newResourceToCopy,
                                                                                                      boolean isAdditionalResource,
                                                                                                      J job,
                                                                                                      Class<T> publisherBuildSettingsClass,
-                                                                                                     AbstractCodeStylePluginBuildConfigurator<T> configurator) {
+                                                                                                     AnalysisConfigurator<T> configurator) {
         return edit(newResourceToCopy, isAdditionalResource, job, publisherBuildSettingsClass, configurator);
     }
 
@@ -159,10 +159,10 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
      * @param configurator the new configuration of the publisher
      * @return the edited job
      */
-    public <J extends Job, T extends AbstractCodeStylePluginBuildSettings & PostBuildStep> J editJob(boolean isAdditionalResource,
+    public <J extends Job, T extends AnalysisSettings & PostBuildStep> J editJob(boolean isAdditionalResource,
                                                                                                      J job,
                                                                                                      Class<T> publisherBuildSettingsClass,
-                                                                                                     AbstractCodeStylePluginBuildConfigurator<T> configurator) {
+                                                                                                     AnalysisConfigurator<T> configurator) {
         return edit(null, isAdditionalResource, job, publisherBuildSettingsClass, configurator);
     }
 
@@ -177,11 +177,11 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
      * @param configurator the new configuration of the publisher
      * @return the edited job
      */
-    private <J extends Job, T extends AbstractCodeStylePluginBuildSettings & PostBuildStep> J edit(String newResourceToCopy,
+    private <J extends Job, T extends AnalysisSettings & PostBuildStep> J edit(String newResourceToCopy,
                                                                                                    boolean isAdditionalResource,
                                                                                                    J job,
                                                                                                    Class<T> publisherBuildSettingsClass,
-                                                                                                   @CheckForNull AbstractCodeStylePluginBuildConfigurator<T> configurator) {
+                                                                                                   @CheckForNull AnalysisConfigurator<T> configurator) {
         job.configure();
 
         if (newResourceToCopy != null) {
@@ -237,10 +237,10 @@ public abstract class AbstractCodeStylePluginHelper extends AbstractJUnitTest {
      * @param <T>                    The type of the Analyzer.
      * @return The configured job.
      */
-    public <T extends AbstractCodeStylePluginMavenBuildSettings> MavenModuleSet setupMavenJob(String resourceProjectDir,
+    public <T extends AnalysisMavenSettings> MavenModuleSet setupMavenJob(String resourceProjectDir,
                                                                                               String goal,
                                                                                               Class<T> codeStyleBuildSettings,
-                                                                                              AbstractCodeStylePluginBuildConfigurator<T> configurator) {
+                                                                                              AnalysisConfigurator<T> configurator) {
         MavenInstallation.ensureThatMavenIsInstalled(jenkins);
 
         MavenModuleSet job = jenkins.jobs.create(MavenModuleSet.class);

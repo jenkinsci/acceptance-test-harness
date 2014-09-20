@@ -1,19 +1,22 @@
 package org.jenkinsci.test.acceptance.plugins.analysis_core;
 
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.test.acceptance.po.ContainerPageObject;
 import org.openqa.selenium.WebElement;
 
-import java.net.URL;
-import java.util.*;
-
 /**
- * Abstract action class for plugins with getter of the warnings.
+ * Abstract action class for static analysis plugins with getters for warnings.
  *
  * @author Martin Kurz
  */
-public abstract class AbstractCodeStylePluginAction extends ContainerPageObject {
-
+public abstract class AnalysisAction extends ContainerPageObject {
 	protected final ContainerPageObject parent;
 
     /**
@@ -26,7 +29,7 @@ public abstract class AbstractCodeStylePluginAction extends ContainerPageObject 
      * @param parent Parent container page object
      * @param plugin Path to plugin without / at the end
      */
-    public AbstractCodeStylePluginAction(ContainerPageObject parent, String plugin) {
+    public AnalysisAction(ContainerPageObject parent, String plugin) {
         super(parent, parent.url(plugin + '/'));
         this.parent = parent;
         this.plugin = plugin;
@@ -219,7 +222,7 @@ public abstract class AbstractCodeStylePluginAction extends ContainerPageObject 
     }
 
     /**
-     * This is a generic variant of {@link AbstractCodeStylePluginAction#getContentsOfVisibleTable(boolean, boolean)}
+     * This is a generic variant of {@link AnalysisAction#getContentsOfVisibleTable(boolean, boolean)}
      * which does not care about the type of the value part as long as it is derived
      * from {@link java.lang.Object}.
      */
@@ -247,7 +250,7 @@ public abstract class AbstractCodeStylePluginAction extends ContainerPageObject 
     }
 
     /**
-     * This is a generic variant of {@link AbstractCodeStylePluginAction#mapTableCellsKeyValue(java.util.Collection)}
+     * This is a generic variant of {@link AnalysisAction#mapTableCellsKeyValue(java.util.Collection)}
      * which does not care about the type of the value part.
      *
      * At the moment the only supported types are Integer and String. Calling this method for other

@@ -9,7 +9,7 @@ import org.jenkinsci.test.acceptance.po.PostBuildStep;
  * Abstract job configuration class.
  * @author Fabian Trampusch
  */
-public abstract class AbstractCodeStylePluginBuildSettings extends PageAreaImpl implements PostBuildStep {
+public abstract class AnalysisSettings extends PageAreaImpl implements PostBuildStep {
 
     protected Control advanced = control("advanced-button");
 
@@ -40,7 +40,7 @@ public abstract class AbstractCodeStylePluginBuildSettings extends PageAreaImpl 
      * @param parent the job currently being configured.
      * @param selectorPath the selector path used as prefix.
      */
-    public AbstractCodeStylePluginBuildSettings(Job parent, String selectorPath) {
+    public AnalysisSettings(Job parent, String selectorPath) {
         super(parent, selectorPath);
         this.advanced = control("advanced-button");
     }

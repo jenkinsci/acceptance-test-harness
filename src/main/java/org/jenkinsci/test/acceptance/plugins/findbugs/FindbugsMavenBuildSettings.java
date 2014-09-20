@@ -1,6 +1,6 @@
 package org.jenkinsci.test.acceptance.plugins.findbugs;
 
-import org.jenkinsci.test.acceptance.plugins.analysis_core.AbstractCodeStylePluginMavenBuildSettings;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisMavenSettings;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.po.Describable;
 
@@ -9,7 +9,7 @@ import org.jenkinsci.test.acceptance.po.Describable;
  * @author Fabian Trampusch
  */
 @Describable("Publish FindBugs analysis results")
-public class FindbugsMavenBuildSettings extends AbstractCodeStylePluginMavenBuildSettings {
+public class FindbugsMavenBuildSettings extends AnalysisMavenSettings {
 
     public FindbugsMavenBuildSettings(MavenModuleSet parent, String selectorPath) {
         super(parent, selectorPath);

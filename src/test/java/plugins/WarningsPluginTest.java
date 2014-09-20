@@ -2,7 +2,7 @@ package plugins;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.plugins.analysis_core.AbstractCodeStylePluginBuildConfigurator;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsAction;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsBuildSettings;
 import org.jenkinsci.test.acceptance.po.Build;
@@ -19,7 +19,7 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
  * workspace. This file is then analyzed by console and workspace parsers.
  */
 @WithPlugins("warnings")
-public class WarningsPluginTest extends AbstractCodeStylePluginHelper {
+public class WarningsPluginTest extends AbstractAnalysisTest {
     /** Contains warnings for Javac parser. Warnings have file names preset for include/exclude filter tests. */
     private static final String WARNINGS_FILE_FOR_INCLUDE_EXCLUDE_TESTS = "/warnings_plugin/warningsForRegEx.txt";
     private static final String SEVERAL_PARSERS_FILE_NAME = "warningsAll.txt";
@@ -31,7 +31,7 @@ public class WarningsPluginTest extends AbstractCodeStylePluginHelper {
      */
     @Test
     public void detect_no_errors_in_console_log_and_workspace_when_there_are_none() {
-        AbstractCodeStylePluginBuildConfigurator<WarningsBuildSettings> buildConfigurator = new AbstractCodeStylePluginBuildConfigurator<WarningsBuildSettings>() {
+        AnalysisConfigurator<WarningsBuildSettings> buildConfigurator = new AnalysisConfigurator<WarningsBuildSettings>() {
             @Override
             public void configure(WarningsBuildSettings settings) {
                 settings.addConsoleScanner("Maven");
@@ -55,7 +55,7 @@ public class WarningsPluginTest extends AbstractCodeStylePluginHelper {
      */
     @Test
     public void do_not_detect_errors_in_ignored_parts_of_the_workspace() {
-        AbstractCodeStylePluginBuildConfigurator<WarningsBuildSettings> buildConfigurator = new AbstractCodeStylePluginBuildConfigurator<WarningsBuildSettings>() {
+        AnalysisConfigurator<WarningsBuildSettings> buildConfigurator = new AnalysisConfigurator<WarningsBuildSettings>() {
             @Override
             public void configure(WarningsBuildSettings settings) {
                 settings.addWorkspaceFileScanner("Maven", "no_errors_here.log");
@@ -81,7 +81,7 @@ public class WarningsPluginTest extends AbstractCodeStylePluginHelper {
      */
     @Test
     public void detect_warnings_of_multiple_compilers_in_console() {
-        AbstractCodeStylePluginBuildConfigurator<WarningsBuildSettings> buildConfigurator = new AbstractCodeStylePluginBuildConfigurator<WarningsBuildSettings>() {
+        AnalysisConfigurator<WarningsBuildSettings> buildConfigurator = new AnalysisConfigurator<WarningsBuildSettings>() {
             @Override
             public void configure(WarningsBuildSettings settings) {
                 settings.addConsoleScanner("Java Compiler (javac)");
@@ -105,7 +105,7 @@ public class WarningsPluginTest extends AbstractCodeStylePluginHelper {
      */
     @Test
     public void detect_warnings_of_multiple_compilers_in_workspace() {
-        AbstractCodeStylePluginBuildConfigurator<WarningsBuildSettings> buildConfigurator = new AbstractCodeStylePluginBuildConfigurator<WarningsBuildSettings>() {
+        AnalysisConfigurator<WarningsBuildSettings> buildConfigurator = new AnalysisConfigurator<WarningsBuildSettings>() {
             @Override
             public void configure(WarningsBuildSettings settings) {
                 settings.addWorkspaceFileScanner("Java Compiler (javac)", "**/*");
@@ -166,7 +166,7 @@ public class WarningsPluginTest extends AbstractCodeStylePluginHelper {
     }
 
     private FreeStyleJob runBuildWithRunAlwaysOption(final boolean canRunOnFailed) {
-        AbstractCodeStylePluginBuildConfigurator<WarningsBuildSettings> buildConfigurator = new AbstractCodeStylePluginBuildConfigurator<WarningsBuildSettings>() {
+        AnalysisConfigurator<WarningsBuildSettings> buildConfigurator = new AnalysisConfigurator<WarningsBuildSettings>() {
             @Override
             public void configure(WarningsBuildSettings settings) {
                 settings.addWorkspaceFileScanner("Java Compiler (javac)", "**/*");
@@ -189,7 +189,7 @@ public class WarningsPluginTest extends AbstractCodeStylePluginHelper {
      */
     @Test
     public void detect_errors_in_console_log() {
-        AbstractCodeStylePluginBuildConfigurator<WarningsBuildSettings> buildConfigurator = new AbstractCodeStylePluginBuildConfigurator<WarningsBuildSettings>() {
+        AnalysisConfigurator<WarningsBuildSettings> buildConfigurator = new AnalysisConfigurator<WarningsBuildSettings>() {
             @Override
             public void configure(WarningsBuildSettings settings) {
                 settings.addConsoleScanner("Maven");
@@ -229,7 +229,7 @@ public class WarningsPluginTest extends AbstractCodeStylePluginHelper {
      */
     @Test
     public void skip_warnings_in_ignored_parts() {
-        AbstractCodeStylePluginBuildConfigurator<WarningsBuildSettings> buildConfigurator = new AbstractCodeStylePluginBuildConfigurator<WarningsBuildSettings>() {
+        AnalysisConfigurator<WarningsBuildSettings> buildConfigurator = new AnalysisConfigurator<WarningsBuildSettings>() {
             @Override
             public void configure(WarningsBuildSettings settings) {
                 settings.addWorkspaceFileScanner("Java Compiler (javac)", "**/*");
@@ -255,7 +255,7 @@ public class WarningsPluginTest extends AbstractCodeStylePluginHelper {
      */
     @Test
     public void include_warnings_specified_in_included_parts() {
-        AbstractCodeStylePluginBuildConfigurator<WarningsBuildSettings> buildConfigurator = new AbstractCodeStylePluginBuildConfigurator<WarningsBuildSettings>() {
+        AnalysisConfigurator<WarningsBuildSettings> buildConfigurator = new AnalysisConfigurator<WarningsBuildSettings>() {
             @Override
             public void configure(WarningsBuildSettings settings) {
                 settings.addWorkspaceFileScanner("Java Compiler (javac)", "**/*");
