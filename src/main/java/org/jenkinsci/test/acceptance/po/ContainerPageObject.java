@@ -1,12 +1,5 @@
 package org.jenkinsci.test.acceptance.po;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.google.inject.Injector;
-import groovy.lang.Closure;
-import org.apache.commons.lang3.StringUtils;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
-
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -15,10 +8,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+import org.apache.commons.lang3.StringUtils;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.google.inject.Injector;
+
+import groovy.lang.Closure;
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.*;
+import static org.jenkinsci.test.acceptance.Matchers.*;
 
 /**
  * {@link PageObject} that represents a model that has multiple views underneath.
@@ -64,6 +64,7 @@ public abstract class ContainerPageObject extends PageObject {
             return;
         }
         visit(getConfigUrl());
+        elasticSleep(1000); // configure page requires some time to load
     }
 
     /**
