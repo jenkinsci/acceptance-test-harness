@@ -1,14 +1,20 @@
 package plugins;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jenkinsci.test.acceptance.junit.Bug;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsAction;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsBuildSettings;
+import org.jenkinsci.test.acceptance.plugins.warnings.WarningsColumn;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
+import org.jenkinsci.test.acceptance.po.ListView;
+import org.jenkinsci.test.acceptance.po.MatrixProject;
 import org.junit.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
@@ -76,27 +82,93 @@ public class WarningsPluginTest extends AbstractAnalysisTest {
     }
 
     /**
-     * Checks that warning results are correctly created for the parsers
+     * Build a job and check set up a dashboard list-view. Check, if the dashboard view shows correct warning count.
+     */
+    @Test
+    public void build_a_freestyle_job_and_check_if_dashboard_list_view_shows_correct_warnings() {
+        FreeStyleJob job = setupJob(SEVERAL_PARSERS_FILE_FULL_PATH, FreeStyleJob.class,
+                WarningsBuildSettings.class, create3ParserConfiguration());
+
+        catWarningsToConsole(job);
+
+        buildJobAndWait(job).shouldSucceed();
+
+        verifyWarningsColumn(job);
+    }
+
+    /**
+     * Build a job and check set up a dashboard list-view. Check, if the dashboard view shows correct warning count.
+     */
+    @Test @Bug("23446") @WithPlugins("warnings@4.42-SNAPSHOT")
+    public void build_a_matrix_project_and_check_if_dashboard_list_view_shows_correct_warnings() {
+        MatrixProject job = setupJob(SEVERAL_PARSERS_FILE_FULL_PATH, MatrixProject.class,
+                WarningsBuildSettings.class, create3ParserConfiguration());
+
+        catWarningsToConsole(job);
+
+        buildJobAndWait(job).shouldSucceed();
+
+        verifyWarningsColumn(job);
+    }
+
+    private void verifyWarningsColumn(final Job job) {
+        ListView view = addDashboardListViewColumn(WarningsColumn.class);
+
+        By expectedDashboardLinkMatcher = by.css("a[href$='job/" + job.name + "/warnings']");
+        assertThat(jenkins.all(expectedDashboardLinkMatcher).size(), is(1));
+        WebElement dashboardLink = jenkins.getElement(expectedDashboardLinkMatcher);
+        assertThat(dashboardLink.getText().trim(), is("154"));
+
+        view.delete();
+    }
+
+    /**
+     * Checks that warning results are correctly created for a matrix job with the parsers
      * "Java", "JavaDoc" and "MSBuild" if the console log contains multiple warnings of these types.
      */
     @Test
-    public void detect_warnings_of_multiple_compilers_in_console() {
-        AnalysisConfigurator<WarningsBuildSettings> buildConfigurator = new AnalysisConfigurator<WarningsBuildSettings>() {
-            @Override
-            public void configure(WarningsBuildSettings settings) {
-                settings.addConsoleScanner("Java Compiler (javac)");
-                settings.addConsoleScanner("JavaDoc Tool");
-                settings.addConsoleScanner("MSBuild");
-            }
-        };
-        FreeStyleJob job = setupJob(SEVERAL_PARSERS_FILE_FULL_PATH, FreeStyleJob.class,
-                WarningsBuildSettings.class, buildConfigurator);
+    public void detect_warnings_of_multiple_compilers_in_console_matrix() {
+        MatrixProject job = setupJob(SEVERAL_PARSERS_FILE_FULL_PATH, MatrixProject.class,
+                WarningsBuildSettings.class, create3ParserConfiguration());
+
+        catWarningsToConsole(job);
 
         job.configure();
-        job.addShellStep("cat " + SEVERAL_PARSERS_FILE_NAME);
+        job.addUserAxis("user_axis", "axis1 axis2 axis3");
         job.save();
 
         verify3ParserResults(job);
+    }
+
+    /**
+     * Checks that warning results are correctly created for a freestyle project with the parsers
+     * "Java", "JavaDoc" and "MSBuild" if the console log contains multiple warnings of these types.
+     */
+    @Test
+    public void detect_warnings_of_multiple_compilers_in_console_freestyle() {
+        FreeStyleJob job = setupJob(SEVERAL_PARSERS_FILE_FULL_PATH, FreeStyleJob.class,
+                WarningsBuildSettings.class, create3ParserConfiguration());
+
+        catWarningsToConsole(job);
+
+        verify3ParserResults(job);
+    }
+
+    private void catWarningsToConsole(final Job job) {
+        job.configure();
+        job.addShellStep("cat " + SEVERAL_PARSERS_FILE_NAME);
+        job.save();
+    }
+
+    private AnalysisConfigurator<WarningsBuildSettings> create3ParserConfiguration() {
+        return new AnalysisConfigurator<WarningsBuildSettings>() {
+                @Override
+                public void configure(WarningsBuildSettings settings) {
+                    settings.addConsoleScanner("Java Compiler (javac)");
+                    settings.addConsoleScanner("JavaDoc Tool");
+                    settings.addConsoleScanner("MSBuild");
+                }
+            };
     }
 
     /**
@@ -119,7 +191,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest {
         verify3ParserResults(job);
     }
 
-    private void verify3ParserResults(final FreeStyleJob job) {
+    private void verify3ParserResults(final Job job) {
         Build build = buildJobWithSuccess(job);
         assertThatActionExists(job, build, "Java Warnings");
         assertThatActionExists(job, build, "JavaDoc Warnings");

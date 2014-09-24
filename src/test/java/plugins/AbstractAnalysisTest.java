@@ -13,8 +13,8 @@ import org.custommonkey.xmlunit.XMLUnit;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
-import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisSettings;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisMavenSettings;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisSettings;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.AbstractDashboardViewPortlet;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenBuildStep;
@@ -25,6 +25,7 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.ListView;
 import org.jenkinsci.test.acceptance.po.ListViewColumn;
+import org.jenkinsci.test.acceptance.po.MatrixProject;
 import org.jenkinsci.test.acceptance.po.PostBuildStep;
 import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.po.View;
@@ -46,38 +47,38 @@ public abstract class AbstractAnalysisTest extends AbstractJUnitTest {
     SlaveController slaveController;
 
     /**
-     * Set up a Job of a certain type with a given resource and a publisher which can be
-     * configured by providing a configurator
+     * Set up a Job of a certain type with a given resource and a publisher which can be configured by providing a
+     * configurator
      *
-     * @param resourceToCopy Resource to copy to build (Directory or File path)
-     * @param jobClass       the type the job shall be created of, e.g. FreeStyleJob
+     * @param resourceToCopy              Resource to copy to build (Directory or File path)
+     * @param jobClass                    the type the job shall be created of, e.g. FreeStyleJob
      * @param publisherBuildSettingsClass the type of the publisher to be added
-     * @param configurator   the configuration of the publisher
+     * @param configurator                the configuration of the publisher
      * @return the new job
      */
     public <J extends Job, T extends AnalysisSettings & PostBuildStep> J setupJob(String resourceToCopy,
-                                                                                                      Class<J> jobClass,
-                                                                                                      Class<T> publisherBuildSettingsClass,
-                                                                                                      AnalysisConfigurator<T> configurator) {
+                                                                                  Class<J> jobClass,
+                                                                                  Class<T> publisherBuildSettingsClass,
+                                                                                  AnalysisConfigurator<T> configurator) {
         return setupJob(resourceToCopy, jobClass, publisherBuildSettingsClass, configurator, null);
     }
 
     /**
-     * Set up a Job of a certain type with a given resource and a publisher which can be
-     * configured by providing a configurator
+     * Set up a Job of a certain type with a given resource and a publisher which can be configured by providing a
+     * configurator
      *
-     * @param resourceToCopy Resource to copy to build (Directory or File path)
-     * @param jobClass       the type the job shall be created of, e.g. FreeStyleJob
+     * @param resourceToCopy              Resource to copy to build (Directory or File path)
+     * @param jobClass                    the type the job shall be created of, e.g. FreeStyleJob
      * @param publisherBuildSettingsClass the type of the publisher to be added
-     * @param configurator   the configuration of the publisher
-     * @param goal           a maven goal to be added to the job or null otherwise
+     * @param configurator                the configuration of the publisher
+     * @param goal                        a maven goal to be added to the job or null otherwise
      * @return the new job
      */
     public <J extends Job, T extends AnalysisSettings & PostBuildStep> J setupJob(String resourceToCopy,
-                                                                                                      Class<J> jobClass,
-                                                                                                      Class<T> publisherBuildSettingsClass,
-                                                                                                      AnalysisConfigurator<T> configurator,
-                                                                                                      String goal) {
+                                                                                  Class<J> jobClass,
+                                                                                  Class<T> publisherBuildSettingsClass,
+                                                                                  AnalysisConfigurator<T> configurator,
+                                                                                  String goal) {
         if (jobClass.isAssignableFrom(MavenModuleSet.class)) {
             MavenInstallation.ensureThatMavenIsInstalled(jenkins);
         }
@@ -94,7 +95,8 @@ public abstract class AbstractAnalysisTest extends AbstractJUnitTest {
         if (goal != null) {
             if (jobClass.isAssignableFrom(MavenModuleSet.class)) {
                 ((MavenModuleSet) job).goals.set(goal);
-            } else if (jobClass.isAssignableFrom(FreeStyleJob.class)) {
+            }
+            else if (isFreeStyleOrMatrixJob(jobClass)) {
                 job.addBuildStep(MavenBuildStep.class).targets.set(goal);
             }
         }
@@ -103,7 +105,8 @@ public abstract class AbstractAnalysisTest extends AbstractJUnitTest {
 
         if (jobClass.isAssignableFrom(MavenModuleSet.class)) {
             buildSettings = ((MavenModuleSet) job).addBuildSettings(publisherBuildSettingsClass);
-        } else if (jobClass.isAssignableFrom(FreeStyleJob.class)) {
+        }
+        else if (isFreeStyleOrMatrixJob(jobClass)) {
             buildSettings = job.addPublisher(publisherBuildSettingsClass);
         }
 
@@ -115,73 +118,81 @@ public abstract class AbstractAnalysisTest extends AbstractJUnitTest {
         return job;
     }
 
+    private <J extends Job> boolean isFreeStyleOrMatrixJob(final Class<J> jobClass) {
+        return jobClass.isAssignableFrom(FreeStyleJob.class)
+                || jobClass.isAssignableFrom((MatrixProject.class));
+    }
+
     /**
-     * Provides the ability to edit an existing job by changing or adding the resource to copy
-     * and/or by changing the configuration of a publisher
+     * Provides the ability to edit an existing job by changing or adding the resource to copy and/or by changing the
+     * configuration of a publisher
      *
-     * @param newResourceToCopy the new resource to be copied to build (Directory or File path) or null if not to be changed
+     * @param newResourceToCopy    the new resource to be copied to build (Directory or File path) or null if not to be
+     *                             changed
      * @param isAdditionalResource decides whether the old resource is kept (FALSE) or deleted (TRUE)
-     * @param job the job to be changed
+     * @param job                  the job to be changed
      * @return the edited job
      */
     public <J extends Job, T extends AnalysisSettings & PostBuildStep> J editJob(String newResourceToCopy,
-                                                                                                     boolean isAdditionalResource,
-                                                                                                     J job) {
+                                                                                 boolean isAdditionalResource,
+                                                                                 J job) {
         return edit(newResourceToCopy, isAdditionalResource, job, null, null);
     }
 
     /**
-     * Provides the ability to edit an existing job by changing or adding the resource to copy
-     * and/or by changing the configuration of a publisher
+     * Provides the ability to edit an existing job by changing or adding the resource to copy and/or by changing the
+     * configuration of a publisher
      *
-     * @param newResourceToCopy the new resource to be copied to build (Directory or File path) or null if not to be changed
-     * @param isAdditionalResource decides whether the old resource is kept (FALSE) or deleted (TRUE)
-     * @param job the job to be changed
+     * @param newResourceToCopy           the new resource to be copied to build (Directory or File path) or null if not
+     *                                    to be changed
+     * @param isAdditionalResource        decides whether the old resource is kept (FALSE) or deleted (TRUE)
+     * @param job                         the job to be changed
      * @param publisherBuildSettingsClass the type of the publisher to be modified
-     * @param configurator the new configuration of the publisher
+     * @param configurator                the new configuration of the publisher
      * @return the edited job
      */
     public <J extends Job, T extends AnalysisSettings & PostBuildStep> J editJob(String newResourceToCopy,
-                                                                                                     boolean isAdditionalResource,
-                                                                                                     J job,
-                                                                                                     Class<T> publisherBuildSettingsClass,
-                                                                                                     AnalysisConfigurator<T> configurator) {
+                                                                                 boolean isAdditionalResource,
+                                                                                 J job,
+                                                                                 Class<T> publisherBuildSettingsClass,
+                                                                                 AnalysisConfigurator<T> configurator) {
         return edit(newResourceToCopy, isAdditionalResource, job, publisherBuildSettingsClass, configurator);
     }
 
     /**
-     * Provides the ability to edit an existing job by changing or adding the resource to copy
-     * and/or by changing the configuration of a publisher
+     * Provides the ability to edit an existing job by changing or adding the resource to copy and/or by changing the
+     * configuration of a publisher
      *
-     * @param isAdditionalResource decides whether the old resource is kept (FALSE) or deleted (TRUE)
-     * @param job the job to be changed
+     * @param isAdditionalResource        decides whether the old resource is kept (FALSE) or deleted (TRUE)
+     * @param job                         the job to be changed
      * @param publisherBuildSettingsClass the type of the publisher to be modified
-     * @param configurator the new configuration of the publisher
+     * @param configurator                the new configuration of the publisher
      * @return the edited job
      */
     public <J extends Job, T extends AnalysisSettings & PostBuildStep> J editJob(boolean isAdditionalResource,
-                                                                                                     J job,
-                                                                                                     Class<T> publisherBuildSettingsClass,
-                                                                                                     AnalysisConfigurator<T> configurator) {
+                                                                                 J job,
+                                                                                 Class<T> publisherBuildSettingsClass,
+                                                                                 AnalysisConfigurator<T> configurator) {
         return edit(null, isAdditionalResource, job, publisherBuildSettingsClass, configurator);
     }
 
     /**
-     * Provides the ability to edit an existing job by changing or adding the resource to copy
-     * and/or by changing the configuration of a publisher
+     * Provides the ability to edit an existing job by changing or adding the resource to copy and/or by changing the
+     * configuration of a publisher
      *
-     * @param newResourceToCopy the new resource to be copied to build (Directory or File path) or null if not to be changed
-     * @param isAdditionalResource decides whether the old resource is kept (FALSE) or deleted (TRUE)
-     * @param job the job to be changed
+     * @param newResourceToCopy           the new resource to be copied to build (Directory or File path) or null if not
+     *                                    to be changed
+     * @param isAdditionalResource        decides whether the old resource is kept (FALSE) or deleted (TRUE)
+     * @param job                         the job to be changed
      * @param publisherBuildSettingsClass the type of the publisher to be modified
-     * @param configurator the new configuration of the publisher
+     * @param configurator                the new configuration of the publisher
      * @return the edited job
      */
     private <J extends Job, T extends AnalysisSettings & PostBuildStep> J edit(String newResourceToCopy,
-                                                                                                   boolean isAdditionalResource,
-                                                                                                   J job,
-                                                                                                   Class<T> publisherBuildSettingsClass,
-                                                                                                   @CheckForNull AnalysisConfigurator<T> configurator) {
+                                                                               boolean isAdditionalResource,
+                                                                               J job,
+                                                                               Class<T> publisherBuildSettingsClass,
+                                                                               @CheckForNull AnalysisConfigurator<T> configurator) {
         job.configure();
 
         if (newResourceToCopy != null) {
@@ -199,7 +210,8 @@ public abstract class AbstractAnalysisTest extends AbstractJUnitTest {
 
             if (job instanceof MavenModuleSet) {
                 configurator.configure(((MavenModuleSet) job).getBuildSettings(publisherBuildSettingsClass));
-            } else if (job instanceof FreeStyleJob) {
+            }
+            else if (job instanceof FreeStyleJob) {
                 configurator.configure(job.getPublisher(publisherBuildSettingsClass));
             }
 
@@ -230,7 +242,8 @@ public abstract class AbstractAnalysisTest extends AbstractJUnitTest {
     /**
      * Setup a maven build.
      *
-     * @param resourceProjectDir     A Folder in resources which shall be copied to the working directory. Should contain the pom.xml
+     * @param resourceProjectDir     A Folder in resources which shall be copied to the working directory. Should
+     *                               contain the pom.xml
      * @param goal                   The maven goals to set.
      * @param codeStyleBuildSettings The code analyzer to use or null if you do not want one.
      * @param configurator           A configurator to custommize the code analyzer settings you want to use.
@@ -238,9 +251,9 @@ public abstract class AbstractAnalysisTest extends AbstractJUnitTest {
      * @return The configured job.
      */
     public <T extends AnalysisMavenSettings> MavenModuleSet setupMavenJob(String resourceProjectDir,
-                                                                                              String goal,
-                                                                                              Class<T> codeStyleBuildSettings,
-                                                                                              AnalysisConfigurator<T> configurator) {
+                                                                          String goal,
+                                                                          Class<T> codeStyleBuildSettings,
+                                                                          AnalysisConfigurator<T> configurator) {
         MavenInstallation.ensureThatMavenIsInstalled(jenkins);
 
         MavenModuleSet job = jenkins.jobs.create(MavenModuleSet.class);
@@ -336,8 +349,9 @@ public abstract class AbstractAnalysisTest extends AbstractJUnitTest {
 
     /**
      * Creates a new view with a random name that matches all jobs.
+     *
      * @param viewClass The view that shall be used.
-     * @param <T> The type constraint of the view.
+     * @param <T>       The type constraint of the view.
      * @return The view.
      */
     private <T extends View> T createNewViewForAllJobs(Class<T> viewClass) {
@@ -359,7 +373,8 @@ public abstract class AbstractAnalysisTest extends AbstractJUnitTest {
         //decide whether to utilize copyResource or copyDir
         if (res.asFile().isDirectory()) {
             job.copyDir(res);
-        } else {
+        }
+        else {
             job.copyResource(res);
         }
 
@@ -370,7 +385,7 @@ public abstract class AbstractAnalysisTest extends AbstractJUnitTest {
      * Creates a new Dashboard-View and adds the given portlet as "bottom portlet".
      *
      * @param portlet The Portlet that shall be added.
-     * @param <T> The type constraint of the portlet.
+     * @param <T>     The type constraint of the portlet.
      * @return The view.
      */
     protected <T extends AbstractDashboardViewPortlet> DashboardView addDashboardViewAndBottomPortlet(Class<T> portlet) {
