@@ -73,27 +73,38 @@ public class PluginManager extends ContainerPageObject {
         updated = true;
     }
 
+    public enum InstallationStatus {NOT_INSTALLED, OUTDATED, UP_TO_DATE}
+    /**
+     * @param spec plugin id with optional version (e.g. "ldap" or "ldap@1.8")
+     * @return whether the plugin (in version greater or equal than specified) is installed
+     */
+    public InstallationStatus installationStatus(String spec) {
+        PluginSpec p = new PluginSpec(spec);
+        String name = p.getName();
+        String version = p.getVersion();
+        Plugin plugin;
+        try {
+            plugin = jenkins.getPlugin(name);
+            if (version != null) {
+                // check if installed version >= specified version of @WithPlugins
+                if (plugin.getVersion().compareTo(new VersionNumber(version)) < 0) {
+                    return InstallationStatus.OUTDATED;
+                }
+            }
+            return InstallationStatus.UP_TO_DATE;
+        } catch (IllegalArgumentException ex) {
+            return InstallationStatus.NOT_INSTALLED;
+        }
+    }
+
     /**
      * @param specs plugin ids with optional version (e.g. "ldap" or "ldap@1.8")
      * @return true, if plugin (in version greater or equal than specified) is installed
      */
     public boolean isInstalled(String... specs) {
         for (String s : specs) {
-            PluginSpec p = new PluginSpec(s);
-            String name = p.getName();
-            String version = p.getVersion();
-            Plugin plugin;
-            try {
-                plugin = jenkins.getPlugin(name);
-                if (version != null) {
-                    // check if installed version >= specified version of @WithPlugins
-                    if (plugin.getVersion().compareTo(new VersionNumber(version)) < 0) {
-                        // installed version < specified version
-                        return false;
-                    }
-                }
-            } catch (IllegalArgumentException ex) {
-                return false; // Not installed at all
+            if (installationStatus(s) != InstallationStatus.UP_TO_DATE) {
+                return false;
             }
         }
         return true;
@@ -108,16 +119,35 @@ public class PluginManager extends ContainerPageObject {
      * <p/>
      * The deprecation marker is to call attention to {@link WithPlugins}. This method
      * is not really deprecated.
+     * @return true if {@link Jenkins#restart} is required
      */
     @Deprecated
-    public void installPlugins(final String... specs) {
+    public boolean installPlugins(final String... specs) {
         boolean changed = false;
+        boolean restartRequired = false;
         final Map<String, String> candidates = getMapShortNamesVersion(specs);
 
         if (uploadPlugins) {
+            // First check to see whether we need to do anything.
+            // If not, do not consider transitive dependencies of the requested plugins,
+            // which might force updates (and thus restarts) even though we already have
+            // a sufficiently new version of the requested plugin.
+            boolean someChangeRequired = false;
+            for (String spec : specs) {
+                if (installationStatus(spec) != InstallationStatus.UP_TO_DATE) {
+                    someChangeRequired = true;
+                    break;
+                }
+            }
+            if (!someChangeRequired) {
+                return false;
+            }
             for (PluginMetadata newPlugin : ucmd.get().transitiveDependenciesOf(candidates.keySet())) {
                 final String name = newPlugin.name;
-                final String claimedVersion = candidates.get(name);
+                String claimedVersion = candidates.get(name);
+                if (claimedVersion == null) { // a dependency
+                    claimedVersion = newPlugin.version;
+                }
                 String currentSpec;
                 if (StringUtils.isNotEmpty(claimedVersion)) {
                     currentSpec = name + "@" + claimedVersion;
@@ -126,10 +156,12 @@ public class PluginManager extends ContainerPageObject {
                     currentSpec = name;
                 }
 
-                if (!isInstalled(currentSpec)) { // we need to override existing "old" plugins
+                InstallationStatus status = installationStatus(currentSpec);
+                if (status != InstallationStatus.UP_TO_DATE) {
                     try {
                         newPlugin.uploadTo(jenkins, injector, null);
                         changed = true;
+                        restartRequired |= status == InstallationStatus.OUTDATED;
                     } catch (IOException | ArtifactResolutionException e) {
                         throw new AssertionError("Failed to upload plugin: " + newPlugin, e);
                     }
@@ -161,11 +193,12 @@ public class PluginManager extends ContainerPageObject {
                     continue OUTER;  // installation completed
                 }
             }
+            // TODO set restartRequired if we did updates
         }
 
         if (changed) {
-            if (forceRestart) {
-                jenkins.restart();
+            if (restartRequired || forceRestart) {
+                return true;
             } else {
                 // plugin deployment happens asynchronously, so give it a few seconds
                 // for it to finish deploying
@@ -178,10 +211,11 @@ public class PluginManager extends ContainerPageObject {
                         }
                     }, 5);
                 } catch (TimeoutException e) {
-                    jenkins.restart();
+                    return true;
                 }
             }
         }
+        return false;
     }
 
     /**

@@ -27,4 +27,7 @@ public @interface RuleAnnotation {
      * The instance is obtained through Guice.
      */
     Class<? extends TestRule> value();
+
+    /** Optional ordering among rules. */
+    int priority() default 0;
 }

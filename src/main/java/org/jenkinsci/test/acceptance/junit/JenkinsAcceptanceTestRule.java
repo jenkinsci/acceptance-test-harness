@@ -15,8 +15,12 @@ import org.openqa.selenium.WebDriver;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -72,12 +76,22 @@ public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should us
                 collectAnnotationTypes(target.getClass(), annotations);
 
                 Description testDescription = Description.createTestDescription(target.getClass(), method.getName(), method.getAnnotations());
+                List<RuleAnnotation> ruleAnnotations = new ArrayList<>();
                 for (Class<? extends  Annotation> a : annotations) {
                     RuleAnnotation r = a.getAnnotation(RuleAnnotation.class);
                     if (r!=null) {
-                        TestRule tr = injector.getInstance(r.value());
-                        body = tr.apply(body,testDescription);
+                        ruleAnnotations.add(r);
                     }
+                }
+                Collections.sort(ruleAnnotations, new Comparator<RuleAnnotation>() {
+                    @Override public int compare(RuleAnnotation r1, RuleAnnotation r2) {
+                        // Reversed since we apply the TestRule inside out:
+                        return r2.priority() - r1.priority();
+                    }
+                });
+                for (RuleAnnotation r : ruleAnnotations) {
+                    TestRule tr = injector.getInstance(r.value());
+                    body = tr.apply(body,testDescription);
                 }
                 return body;
             }

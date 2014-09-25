@@ -23,6 +23,8 @@ import java.lang.annotation.Target;
 
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Indicates that a test requires the presence of the specified plugins.
@@ -52,7 +54,7 @@ import static java.lang.annotation.RetentionPolicy.*;
 @Target({METHOD, TYPE})
 @Inherited
 @Documented
-@RuleAnnotation(WithPlugins.RuleImpl.class)
+@RuleAnnotation(value=WithPlugins.RuleImpl.class, /* must precede @WithCredentials if used */priority=-100)
 public @interface WithPlugins {
     /**
      * See {@link PluginManager.PluginSpec} for the syntax.
@@ -77,43 +79,48 @@ public @interface WithPlugins {
             return new Statement() {
                 @Override
                 public void evaluate() throws Throwable {
-                    installPlugins(d.getAnnotation(WithPlugins.class));
-                    installPlugins(d.getTestClass().getAnnotation(WithPlugins.class));
-
-                    base.evaluate();
-                }
-
-                private boolean installPlugins(WithPlugins wp) {
-                    if (wp == null) return false;
-
-                    PluginManager pm = jenkins.getPluginManager();
-                    for (String c: wp.value()) {
-                        PluginSpec candidate = new PluginSpec(c);
-                        String name = candidate.getName();
-
-                        if (!pm.isInstalled(name)) {
-                            pm.installPlugins(name);
-                        } else {
-                            String requiredVersion = candidate.getVersion();
-                            if (requiredVersion != null) {
-                                if (!jenkins.getPlugin(name).isNewerThan(requiredVersion)) {
-                                    if (neverReplaceExistingPlugins) {
-                                        throw new AssumptionViolatedException(String.format(
-                                                "Test requires %s plugin in version %s", name, requiredVersion));
-                                    } else {
-                                        pm.installPlugins(c);
-                                    }
-                                }
-                            }
-                        }
+                    Set<String> plugins = new TreeSet<>();
+                    boolean restartRequired = installPlugins(d.getAnnotation(WithPlugins.class), plugins);
+                    restartRequired |= installPlugins(d.getTestClass().getAnnotation(WithPlugins.class), plugins);
+                    if (restartRequired) {
+                        jenkins.restart();
+                    }
+                    for (String name : plugins) {
                         Plugin installedPlugin = jenkins.getPlugin(name);
                         VersionNumber installedVersion = installedPlugin.getVersion();
                         String version = installedVersion.toString();
-
                         pluginReporter.log(d.getClassName() + "." + d.getMethodName(), name, version);
-
                     }
-                    return true;
+                    base.evaluate();
+                }
+                @SuppressWarnings("deprecation")
+                private boolean installPlugins(WithPlugins wp, Set<String> plugins) {
+                    if (wp == null) return false;
+
+                    PluginManager pm = jenkins.getPluginManager();
+                    boolean restartRequired = false;
+                    for (String c: wp.value()) {
+                        PluginSpec candidate = new PluginSpec(c);
+                        String name = candidate.getName();
+                        plugins.add(name);
+
+                         switch (pm.installationStatus(c)) {
+                        case NOT_INSTALLED:
+                            restartRequired |= pm.installPlugins(c);
+                            break;
+                        case OUTDATED:
+                            if (neverReplaceExistingPlugins) {
+                                throw new AssumptionViolatedException(String.format(
+                                        "Test requires %s plugin", c));
+                            } else {
+                                restartRequired |= pm.installPlugins(c);
+                            }
+                        break;
+                        default:
+                            // OK
+                        }
+                    }
+                    return restartRequired;
                 }
             };
         }
