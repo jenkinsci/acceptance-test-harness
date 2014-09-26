@@ -90,9 +90,10 @@ public class PluginManager extends ContainerPageObject {
         try {
             plugin = jenkins.getPlugin(name);
             if (version != null) {
+                VersionNumber actualVersion = plugin.getVersion();
                 // check if installed version >= specified version of @WithPlugins
-                if (plugin.getVersion().compareTo(new VersionNumber(version)) < 0) {
-                    LOGGER.info(spec + " is out of date");
+                if (actualVersion.compareTo(new VersionNumber(version)) < 0) {
+                    LOGGER.info(name + " has version " + actualVersion + " but " + version + " was requested");
                     return InstallationStatus.OUTDATED;
                 }
             }
