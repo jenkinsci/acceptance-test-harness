@@ -43,6 +43,10 @@ public class UpdateCenter extends ContainerPageObject {
                     if (st.get("success").asBoolean()) {
                         return true;    // successfully installed
                     }
+                    JsonNode type = st.get("type");
+                    if (type.asText().equals("Failure")) {
+                        throw new InstallationFailedException("failed, see log");
+                    }
 
                     return false;   // still in progress
                 }

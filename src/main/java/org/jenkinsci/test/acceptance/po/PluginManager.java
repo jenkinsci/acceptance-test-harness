@@ -168,9 +168,16 @@ public class PluginManager extends ContainerPageObject {
                 if (status != InstallationStatus.UP_TO_DATE) {
                     try {
                         newPlugin.uploadTo(jenkins, injector, null);
-                        new UpdateCenter(jenkins).waitForInstallationToComplete(name);
                         changed = true;
                         restartRequired |= status == InstallationStatus.OUTDATED;
+                        try {
+                            new UpdateCenter(jenkins).waitForInstallationToComplete(name);
+                        } catch (InstallationFailedException x) {
+                            if (!restartRequired) {
+                                throw x;
+                            }
+                            // JENKINS-19859: else ignore; may be fine after the restart
+                        }
                     } catch (IOException | ArtifactResolutionException e) {
                         throw new AssertionError("Failed to upload plugin: " + newPlugin, e);
                     }
