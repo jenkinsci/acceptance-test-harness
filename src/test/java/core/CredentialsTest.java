@@ -9,10 +9,12 @@ import org.junit.Test;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import org.jenkinsci.test.acceptance.junit.WithPlugins;
 
 /**
  * @author Vivek Pandey
  */
+@WithPlugins("credentials@1.5")
 public class CredentialsTest extends AbstractJUnitTest {
     @Test
     public void createSshKeys() {
