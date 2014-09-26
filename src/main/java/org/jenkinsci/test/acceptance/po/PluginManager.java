@@ -168,6 +168,7 @@ public class PluginManager extends ContainerPageObject {
                 if (status != InstallationStatus.UP_TO_DATE) {
                     try {
                         newPlugin.uploadTo(jenkins, injector, null);
+                        new UpdateCenter(jenkins).waitForInstallationToComplete(name);
                         changed = true;
                         restartRequired |= status == InstallationStatus.OUTDATED;
                     } catch (IOException | ArtifactResolutionException e) {
