@@ -64,7 +64,7 @@ public class XvncJobConfig extends PageAreaImpl {
     }
 
     public static Matcher<Build> usedDisplayNumber(final int number) {
-        return new BuildMatcher("build bumber %d was used", number) {
+        return new BuildMatcher("display number %d was used", number) {
             @Override public boolean matchesSafely(Build item) {
                 return item.getConsole().contains(String.format(" :%s ", number));
             }

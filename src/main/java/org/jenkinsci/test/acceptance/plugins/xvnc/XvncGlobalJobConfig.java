@@ -32,8 +32,14 @@ public class XvncGlobalJobConfig extends PageAreaImpl {
         super(context, "/hudson-plugins-xvnc-Xvnc");
     }
 
-    public void useDisplayNumber(int number) {
+    public XvncGlobalJobConfig useDisplayNumber(int number) {
         control("minDisplayNumber").set(number);
         control("maxDisplayNumber").set(number);
+        return this;
+    }
+
+    public XvncGlobalJobConfig command(String command) {
+        control("commandline").set(command);
+        return this;
     }
 }

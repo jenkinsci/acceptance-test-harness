@@ -47,10 +47,13 @@ public class XvncPluginTest extends AbstractJUnitTest {
     }
 
     @Test
-    @Native("vncserver")
     public void use_specific_display_number() {
         jenkins.configure();
-        new XvncGlobalJobConfig(jenkins.getConfigPage()).useDisplayNumber(42);
+        // Do not actually run vnc as DISPLAY_NUMBER can collide with accupied one.
+        new XvncGlobalJobConfig(jenkins.getConfigPage())
+                .useDisplayNumber(42)
+                .command("echo 'Fake vncserver on :$DISPLAY_NUMBER' display")
+        ;
         jenkins.save();
 
         job.configure();
