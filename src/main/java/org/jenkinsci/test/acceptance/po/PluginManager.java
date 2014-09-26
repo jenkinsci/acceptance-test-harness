@@ -23,6 +23,7 @@ import com.google.common.base.Splitter;
 import com.google.inject.Inject;
 
 import hudson.util.VersionNumber;
+import java.util.logging.Logger;
 import org.openqa.selenium.WebElement;
 
 /**
@@ -31,6 +32,9 @@ import org.openqa.selenium.WebElement;
  * @author Kohsuke Kawaguchi
  */
 public class PluginManager extends ContainerPageObject {
+
+    private static final Logger LOGGER = Logger.getLogger(PluginManager.class.getName());
+
     /**
      * Did we fetch the update center metadata?
      */
@@ -88,11 +92,14 @@ public class PluginManager extends ContainerPageObject {
             if (version != null) {
                 // check if installed version >= specified version of @WithPlugins
                 if (plugin.getVersion().compareTo(new VersionNumber(version)) < 0) {
+                    LOGGER.info(spec + " is out of date");
                     return InstallationStatus.OUTDATED;
                 }
             }
+            LOGGER.info(spec + " is up to date");
             return InstallationStatus.UP_TO_DATE;
         } catch (IllegalArgumentException ex) {
+            LOGGER.info(spec + " is not installed");
             return InstallationStatus.NOT_INSTALLED;
         }
     }

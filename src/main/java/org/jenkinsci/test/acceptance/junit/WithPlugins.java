@@ -25,6 +25,7 @@ import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.logging.Logger;
 
 /**
  * Indicates that a test requires the presence of the specified plugins.
@@ -62,6 +63,9 @@ public @interface WithPlugins {
     String[] value();
 
     public class RuleImpl implements TestRule {
+
+        private static final Logger LOGGER = Logger.getLogger(WithPlugins.class.getName());
+
         @Inject
         Jenkins jenkins;
 
@@ -82,6 +86,7 @@ public @interface WithPlugins {
                     Set<String> plugins = new TreeSet<>();
                     boolean restartRequired = installPlugins(d.getAnnotation(WithPlugins.class), plugins);
                     restartRequired |= installPlugins(d.getTestClass().getAnnotation(WithPlugins.class), plugins);
+                    LOGGER.info("for " + d + " asked to install " + plugins + "; restartRequired? " + restartRequired);
                     if (restartRequired) {
                         jenkins.restart();
                     }
@@ -104,7 +109,7 @@ public @interface WithPlugins {
                         String name = candidate.getName();
                         plugins.add(name);
 
-                         switch (pm.installationStatus(c)) {
+                        switch (pm.installationStatus(c)) {
                         case NOT_INSTALLED:
                             restartRequired |= pm.installPlugins(c);
                             break;
