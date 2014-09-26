@@ -13,6 +13,7 @@ import org.openqa.selenium.NoSuchElementException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import static org.junit.Assert.fail;
 
 /**
@@ -62,6 +63,7 @@ public class CreateSlaveTest extends AbstractJUnitTest {
         s.save();
     }
 
+    @WithPlugins("ssh-credentials@1.0")
     @Test
     public void newSlaveWithExistingCredential() {
 
