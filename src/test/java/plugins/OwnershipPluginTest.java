@@ -1,10 +1,15 @@
 package plugins;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import com.google.inject.Inject;
+
 import org.hamcrest.Description;
 import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.Bug;
 import org.jenkinsci.test.acceptance.junit.Since;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.ownership.OwnershipAction;
@@ -14,6 +19,7 @@ import org.junit.Test;
 import org.openqa.selenium.WebDriver;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.CoreMatchers.equalTo;
 
 @WithPlugins("ownership")
 public class OwnershipPluginTest extends AbstractJUnitTest {
@@ -40,6 +46,37 @@ public class OwnershipPluginTest extends AbstractJUnitTest {
 
         assertThat(slave, ownedBy(user));
         assertThat(job, ownedBy(user));
+    }
+
+    @Test
+    @Since("1.509") @Bug("JENKINS-24370")
+    public void correct_redirect_after_save() throws Exception {
+        JenkinsConfig cp = jenkins.getConfigPage();
+        cp.configure();
+        cp.setJenkinsUrl("http://www.google.com");
+        cp.save();
+
+        Slave slave = slaves.install(jenkins).get();
+        slave.visit("ownership/manage-owners");
+        clickButton("Save");
+        assertThat(currentUrl(), equalTo(slave.url));
+
+        FreeStyleJob job = jenkins.jobs.create();
+        job.visit("ownership/manage-owners");
+        clickButton("Save");
+        assertThat(currentUrl(), equalTo(job.url));
+
+        job.visit("ownership/configure-project-specifics");
+        clickButton("Save");
+        assertThat(currentUrl(), equalTo(job.url));
+
+        job.visit("ownership/configure-project-specifics");
+        clickButton("Restore default settings...");
+        assertThat(currentUrl(), equalTo(job.url));
+    }
+
+    private URL currentUrl() throws MalformedURLException {
+        return new URL(driver.getCurrentUrl());
     }
 
     private void own(ContainerPageObject item, User user) {

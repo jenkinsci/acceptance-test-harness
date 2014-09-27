@@ -56,4 +56,8 @@ public class JenkinsConfig extends PageObject {
 
         return newInstance(type, this, last.getAttribute("path"));
     }
+
+    public void setJenkinsUrl(String url) {
+        control("/jenkins-model-JenkinsLocationConfiguration/url").set(url);
+    }
 }
