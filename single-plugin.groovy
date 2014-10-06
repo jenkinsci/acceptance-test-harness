@@ -1,6 +1,6 @@
-// Run tests that requires plugins enumerated in RUN_ONLY_PLUGINS variable.
+// Run tests that requires plugins enumerated in TEST_ONLY_PLUGINS variable.
 //
-// 'RUN_ONLY_PLUGINS=git,envinject' run all tests that require git or envinject
+// 'TEST_ONLY_PLUGINS=git,envinject' run all tests that require git or envinject
 // using WithPlugins annotations
 
 import org.junit.runners.model.FrameworkMethod;
@@ -18,16 +18,16 @@ class FilterImpl extends Filter {
     public String whySkip(Statement base, FrameworkMethod method, Object target) {
         for (annot in getAnnotations(method, target, WithPlugins.class)) {
             for (value in annot.value()) {
-                if (runOnlyPlugins().contains(new PluginSpec(value).name)) {
+                if (testOnlyPlugins().contains(new PluginSpec(value).name)) {
                     return null;
                 }
             }
         }
 
-        return "Running only tests for plugins: ${runOnlyPlugins()}";
+        return "Running only tests for plugins: ${testOnlyPlugins()}";
     }
 
-    private Collection<String> runOnlyPlugins() {
-        return (System.getenv("RUN_ONLY_PLUGINS") ?: "").split(",").each { it.trim() };
+    private Collection<String> testOnlyPlugins() {
+        return (System.getenv("TEST_ONLY_PLUGINS") ?: "").split(",").each { it.trim() };
     }
 }
