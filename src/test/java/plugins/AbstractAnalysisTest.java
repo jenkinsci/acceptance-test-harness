@@ -314,10 +314,10 @@ public abstract class AbstractAnalysisTest extends AbstractJUnitTest {
         XMLUnit.setIgnoreWhitespace(true);
         String xmlUrl = build.url(apiUrl).toString();
         DocumentBuilder documentBuilder = DocumentBuilderFactoryImpl.newInstance().newDocumentBuilder();
-        Document result = documentBuilder.parse(xmlUrl);
+        Document actual = documentBuilder.parse(xmlUrl);
 
         Document expected = documentBuilder.parse(resource(expectedXmlPath).asFile());
-        XMLAssert.assertXMLEqual(result, expected);
+        XMLAssert.assertXMLEqual(expected, actual);
     }
 
     /**
