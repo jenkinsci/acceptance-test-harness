@@ -31,9 +31,26 @@ public class User extends ContainerPageObject {
     private String fullName;
     private String mail;
 
+    /*package*/ static User getCurrent(Jenkins context) {
+        try {
+            return new User(context);
+        } catch (Exception ex) {
+            // /me not accessible => not logged in
+            return null;
+        }
+    }
+
+    private User(Jenkins context) {
+        super(context, context.url("me/"));
+        load();
+    }
+
     public User(Jenkins context, String name) {
         super(context, context.url("user/%s/", name));
+        load();
+    }
 
+    private void load() {
         JsonNode json = getJson();
         id = json.get("id").asText();
         fullName = json.get("fullName").asText();
@@ -64,5 +81,21 @@ public class User extends ContainerPageObject {
     @Override
     public String toString() {
         return String.format("%s (%s)", id, fullName);
+    }
+
+    @Override
+    public boolean equals(Object rhs) {
+        if (this == rhs) return true;
+        if (rhs == null) return false;
+
+        if (!getClass().equals(rhs.getClass())) return false;
+
+        User other = (User) rhs;
+        return id.equals(other.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
     }
 }

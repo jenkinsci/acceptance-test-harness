@@ -95,6 +95,13 @@ public class Jenkins extends Node {
     }
 
     /**
+     * Get user currently logged in.
+     */
+    public User getCurrentUser() {
+        return User.getCurrent(this);
+    }
+
+    /**
      * Access the plugin manager page object
      */
     public PluginManager getPluginManager() {

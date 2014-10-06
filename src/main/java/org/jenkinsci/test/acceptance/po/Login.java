@@ -46,4 +46,7 @@ public class Login extends PageObject {
         return doLogin(user,user);
     }
 
+    public Login doLogin(User user) {
+        return doLogin(user.fullName());
+    }
 }

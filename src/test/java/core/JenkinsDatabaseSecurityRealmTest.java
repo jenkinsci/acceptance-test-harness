@@ -21,29 +21,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.test.acceptance.po;
+package core;
 
-@Describable({"Jenkins’ own user database", "Jenkins’s own user database"})
-public class JenkinsDatabaseSecurityRealm extends SecurityRealm {
+import static org.junit.Assert.assertEquals;
 
-    public JenkinsDatabaseSecurityRealm(GlobalSecurityConfig context, String path) {
-        super(context, path);
+import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
+import org.jenkinsci.test.acceptance.po.JenkinsDatabaseSecurityRealm;
+import org.jenkinsci.test.acceptance.po.User;
+import org.junit.Before;
+import org.junit.Test;
+
+public class JenkinsDatabaseSecurityRealmTest extends AbstractJUnitTest {
+
+    private JenkinsDatabaseSecurityRealm realm;
+
+    @Before
+    public void setUp() {
+        GlobalSecurityConfig security = new GlobalSecurityConfig(jenkins);
+        security.configure();
+        realm = security.useRealm(JenkinsDatabaseSecurityRealm.class);
+        security.save();
     }
 
-    public void allowUsersToSignUp(boolean allow) {
-        control("allowSignup").check(allow);
-    }
+    @Test
+    public void login_and_logout() {
 
-    public User signup(String name) {
-        getPage().getJenkins().visit("signup");
-        control(by.input("username")).set(name);
-        control(by.input("password1")).set(name);
-        control(by.input("password2")).set(name);
-        control(by.input("fullname")).set(name);
-        control(by.input("email")).set(name + "@mailinator.com");
+        User user = realm.signup("jenkins-acceptance-tests-user");
 
-        clickButton("Sign up");
+        jenkins.login().doLogin(user);
 
-        return new User(getPage().getJenkins(), name);
+        assertEquals(user, jenkins.getCurrentUser());
+
+        jenkins.logout();
+
+        assertEquals(null, jenkins.getCurrentUser());
     }
 }
