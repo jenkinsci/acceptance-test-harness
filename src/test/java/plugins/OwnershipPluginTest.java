@@ -14,6 +14,7 @@ import org.jenkinsci.test.acceptance.junit.Bug;
 import org.jenkinsci.test.acceptance.junit.Since;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.ownership.OwnershipAction;
+import org.jenkinsci.test.acceptance.plugins.ownership.OwnershipGlobalConfig;
 import org.jenkinsci.test.acceptance.po.*;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.junit.Test;
@@ -46,6 +47,28 @@ public class OwnershipPluginTest extends AbstractJUnitTest {
         own(job, user);
 
         assertThat(slave, ownedBy(user));
+        assertThat(job, ownedBy(user));
+    }
+
+    @Test
+    @Since("1.509")
+    public void implicitly_set_job_ownership() {
+        GlobalSecurityConfig security = new GlobalSecurityConfig(jenkins);
+        security.configure();
+        JenkinsDatabaseSecurityRealm realm = security.useRealm(JenkinsDatabaseSecurityRealm.class);
+        security.save();
+
+        final JenkinsConfig globalConfig = jenkins.getConfigPage();
+        globalConfig.configure();
+        new OwnershipGlobalConfig(globalConfig).setImplicitJobOwnership();
+        globalConfig.save();
+
+        User user = realm.signup("jenkins-acceptance-tests-user");
+        jenkins.login().doLogin(user);
+
+        FreeStyleJob job = jenkins.jobs.create();
+        job.save();
+
         assertThat(job, ownedBy(user));
     }
 
