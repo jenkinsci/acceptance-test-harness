@@ -550,7 +550,7 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
 
         //check build result text
         assertThat(tsa.getPluginResult(lastBuild),
-                is("Plug-in Result: FAILED - 1 warning of priority High Priority exceeds the threshold of 0 by 1 (Reference build: #1)"));
+                is("Plug-in Result: FAILED - 1 warning of priority High exceeds the threshold of 0 by 1 (Reference build: #1)"));
 
         //no change in warning counts expected
         assertThat(tsa.getHighWarningNumber(), is(1));
@@ -703,7 +703,7 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
         assertThat(tsa.getNormalWarningNumber(), is(4));
         assertThat(tsa.getLowWarningNumber(), is(2));
         assertThat(tsa.getPluginResult(lastBuild),
-                is("Plug-in Result: UNSTABLE - 2 warnings of priority Low Priority exceed the threshold of 1 by 1 (Reference build: #1)"));
+                is("Plug-in Result: UNSTABLE - 2 warnings of priority Low exceed the threshold of 1 by 1 (Reference build: #1)"));
 
         return j;
     }
