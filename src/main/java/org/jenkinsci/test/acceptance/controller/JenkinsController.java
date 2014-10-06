@@ -1,20 +1,20 @@
 package org.jenkinsci.test.acceptance.controller;
 
-import com.cloudbees.sdk.extensibility.ExtensionPoint;
-import com.google.inject.Injector;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.codehaus.plexus.util.FileUtils;
-import org.codehaus.plexus.util.IOUtil;
-import org.jenkinsci.test.acceptance.guice.AutoCleaned;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
 
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.io.IOUtils;
+import org.codehaus.plexus.util.FileUtils;
+import org.codehaus.plexus.util.IOUtil;
+import org.jenkinsci.test.acceptance.guice.AutoCleaned;
+
+import com.cloudbees.sdk.extensibility.ExtensionPoint;
+import com.google.inject.Injector;
 
 /**
  * Starts/stops Jenkins and exposes where it is running.
@@ -73,6 +73,12 @@ public abstract class JenkinsController implements IJenkinsController, AutoClean
     public void start() throws IOException {
         if (!isRunning) {
             URL url = JenkinsController.class.getResource("/tool_installers.zip");
+            if (url == null) {
+                throw new RuntimeException(
+                        "You need to run 'mvn generate-resources' before you can start test cases.\n"
+                                + "Starting the Jenkins server under test requires that the tools configuration\n"
+                                + "is provided in file tool_installers.zip in your class path.");
+            }
             populateJenkinsHome(IOUtils.toByteArray(url), false);
             startNow();
             isRunning = true;
