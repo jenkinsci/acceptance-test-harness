@@ -151,4 +151,27 @@ public abstract class Slave extends Node {
             clickButton("Bring this node back online");
         }
     }
+
+    /**
+     * If the slave is online, this method will disconnect for testing purpose.
+     */
+    public void disconnect(String message) {
+        if (isOnline()) {
+            visit("");
+            find(by.link("Disconnect")).click();
+            find(by.input("offlineMessage")).clear();
+            find(by.input("offlineMessage")).sendKeys(message);
+            clickButton("Yes");
+        }
+    }
+
+    /**
+     * If the slave is offline, this method will launch the slave agent.
+     */
+    public void launchSlaveAgent() {
+        if (isOffline()) {
+            visit("");
+            clickButton("Launch slave agent");
+        }
+    }
 }
