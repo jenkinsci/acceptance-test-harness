@@ -8,7 +8,6 @@ import org.openqa.selenium.WebDriver;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.net.URL;
 
 /**
  * Convenience base class to derive your plain-old JUnit tests from.
@@ -19,8 +18,12 @@ import java.net.URL;
  * @author Kohsuke Kawaguchi
  */
 public class AbstractJUnitTest extends CapybaraPortingLayerImpl {
+
     @Rule
-    public JenkinsAcceptanceTestRule env = new JenkinsAcceptanceTestRule();
+    public MethodRuleChain rules = MethodRuleChain
+            .outerRule(new FilterRule()) // Filtering should run before standard setup
+            .around(new JenkinsAcceptanceTestRule())
+    ;
 
     /**
      * Jenkins under test.
