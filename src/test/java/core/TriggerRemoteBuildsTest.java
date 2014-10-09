@@ -24,15 +24,14 @@
 package core;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.po.BuildHistory;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
 import org.jenkinsci.test.acceptance.po.MatrixProject;
+import org.jenkinsci.test.acceptance.po.ServletSecurityRealm;
 import org.jenkinsci.test.acceptance.po.ShellBuildStep;
 import org.jenkinsci.test.acceptance.po.StringParameter;
-import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.WebElement;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
@@ -42,20 +41,17 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class TriggerRemoteBuildsTest extends AbstractJUnitTest {
     public static int NO_BUILDS = 30;
 
-    @Before
-    public void setUp() throws ExecutionException, InterruptedException {
-        // Security must be enabled to have the option to trigger remote builds.
-        jenkins.visit("configureSecurity/");
-        jenkins.control("/useSecurity").check();
-        jenkins.control("/useSecurity/realm[0]").check(); // Delegate to servlet container
-        jenkins.save();
-    }
-
     /**
      * Tests that matrix builds can be triggered remotely from another job.
      */
     @Test
     public void triggerMatrixBuildsRemotely() {
+
+        GlobalSecurityConfig sc = new GlobalSecurityConfig(jenkins);
+        sc.open();
+        sc.useRealm(ServletSecurityRealm.class);
+        sc.save();
+
         MatrixProject job = jenkins.jobs.create(MatrixProject.class);
         job.configure();
         job.addParameter(StringParameter.class).setName("ID").setDefault("0");
@@ -79,8 +75,7 @@ public class TriggerRemoteBuildsTest extends AbstractJUnitTest {
         job2.save();
 
         job2.startBuild().waitUntilFinished();
-        jenkins.visit("view/All/builds");
-        List<WebElement> list = all(by.href("/job/" + job.name + "/"));
-        assertThat("All triggered builds have not been run or put in build queue.", list.size() == NO_BUILDS);
+        int nrOfBuilds = jenkins.getBuildHistory().numberOfInclusions(job.name);
+        assertThat("All triggered builds have not been run or put in build queue.", nrOfBuilds == NO_BUILDS);
     }
 }
