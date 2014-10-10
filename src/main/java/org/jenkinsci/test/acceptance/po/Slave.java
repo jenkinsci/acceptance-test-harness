@@ -130,7 +130,7 @@ public abstract class Slave extends Node {
     public void markOffline(String message) {
 
         if(isOnline()) {
-            visit("");
+            open();
             clickButton("Mark this node temporarily offline");
 
             find(by.input("offlineMessage")).clear();
@@ -147,7 +147,7 @@ public abstract class Slave extends Node {
     public void markOnline(){
 
         if(isOffline()) {
-            visit("");
+            open();
             clickButton("Bring this node back online");
         }
     }
@@ -157,7 +157,7 @@ public abstract class Slave extends Node {
      */
     public void disconnect(String message) {
         if (isOnline()) {
-            visit("");
+            open();
             find(by.link("Disconnect")).click();
             find(by.input("offlineMessage")).clear();
             find(by.input("offlineMessage")).sendKeys(message);
@@ -170,7 +170,7 @@ public abstract class Slave extends Node {
      */
     public void launchSlaveAgent() {
         if (isOffline()) {
-            visit("");
+            open();
             clickButton("Launch slave agent");
         }
     }
