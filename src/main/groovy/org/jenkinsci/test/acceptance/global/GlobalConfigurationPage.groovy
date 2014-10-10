@@ -17,6 +17,8 @@ class GlobalConfigurationPage extends Page {
         artifactoryUsername(wait: true, required: false){$('input', path: '/org-jfrog-hudson-ArtifactoryBuilder/artifactoryServer/deployerCredentials/username')[0]}
         artifactoryPassword(wait: true, required: false){$('input', path: '/org-jfrog-hudson-ArtifactoryBuilder/artifactoryServer/deployerCredentials/password')[0]}
         artifactoryTestConnectionButton(wait: true, required: false){$('button', text: 'Test Connection')[0]}
+        goodConnectionFeedback(required: false){$('div.ok')}
+        errorConnectionFeedback(required: false){$('div.error')}
 
     }
 
