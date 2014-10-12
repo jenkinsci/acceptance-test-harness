@@ -1,13 +1,17 @@
 package groovy.plugins
 
+import org.jenkinsci.test.acceptance.docker.DockerContainerHolder
+import org.jenkinsci.test.acceptance.docker.fixtures.ArtifactoryContainer
 import org.jenkinsci.test.acceptance.geb.GebSpec
 import org.jenkinsci.test.acceptance.global.GlobalConfigurationPage
+import org.jenkinsci.test.acceptance.junit.Native
 import org.jenkinsci.test.acceptance.junit.WithPlugins
 import org.jenkinsci.test.acceptance.plugins.artifactory.ArtifactoryPublisher
 import org.jenkinsci.test.acceptance.plugins.gradle.GradleStep
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet
 import org.jenkinsci.test.acceptance.po.FreeStyleJob
 import spock.lang.Ignore
+import com.google.inject.Inject;
 
 import static org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation.installSomeMaven
 
@@ -15,15 +19,16 @@ import static org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation.inst
  * Created by eli on 10/6/14.
  */
 @WithPlugins(['artifactory', 'gradle', 'maven-plugin'])
-//@Native("docker")
-//@Stepwise
+@Native("docker")
 class ArtifactoryPluginTest extends GebSpec {
 
-//    @Inject
-//    DockerContainerHolder<ArtifactoryContainer> artifactoryServer;
+    @Inject
+    DockerContainerHolder<ArtifactoryContainer> artifactoryContainer;
+
     def "Check config is persistence"() {
         given:
-        addArtifactory()
+        final ArtifactoryContainer artifactory = artifactoryContainer.get()
+        addArtifactory(artifactory.getURL())
         to GlobalConfigurationPage
 
         expect:
@@ -53,7 +58,8 @@ class ArtifactoryPluginTest extends GebSpec {
 
     def "Maven integration"() {
         given:
-        addArtifactory()
+        final ArtifactoryContainer artifactory = artifactoryContainer.get()
+        addArtifactory(artifactory.getURL())
         installSomeMaven(jenkins);
         MavenModuleSet job = jenkins.jobs.create(MavenModuleSet.class);
         job.configure();
@@ -77,13 +83,14 @@ class ArtifactoryPluginTest extends GebSpec {
         build.shouldContainsConsoleOutput('Deploying artifact')
 
         and:
-        build.shouldContainsConsoleOutput('Deploying build info to: http://localhost:8081/artifactory/api/build')
+        build.shouldContainsConsoleOutput("Deploying build info to: ${artifactory.getURL()}/api/build")
     }
 
 
     def "Gradle integration"() {
         given:
-        addArtifactory()
+        final ArtifactoryContainer artifactory = artifactoryContainer.get()
+        addArtifactory(artifactory.getURL())
         FreeStyleJob job = jenkins.jobs.create();
         job.copyDir(resource('/artifactory_plugin/quickstart'))
         $('input', name: 'org-jfrog-hudson-gradle-ArtifactoryGradleConfigurator').click()
@@ -110,14 +117,14 @@ class ArtifactoryPluginTest extends GebSpec {
         build.shouldContainsConsoleOutput('Deploying artifact')
 
         and:
-        build.shouldContainsConsoleOutput('Deploying build info to: http://localhost:8081/artifactory/api/build')
+        build.shouldContainsConsoleOutput("Deploying build info to: ${artifactory.getURL()}/api/build")
 
     }
 
-    def addArtifactory() {
+    def addArtifactory(def artUrl) {
         to GlobalConfigurationPage
         addArtifactoryButton.click()
-        artifactoryUrl.value('http://localhost:8081/artifactory')
+        artifactoryUrl.value(artUrl)
         artifactoryUsername.value('admin')
         artifactoryPassword.value('password')
         saveButton.click()

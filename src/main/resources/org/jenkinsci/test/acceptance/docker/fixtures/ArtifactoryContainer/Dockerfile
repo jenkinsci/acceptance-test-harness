@@ -7,7 +7,7 @@ RUN apt-get upgrade -y
 RUN apt-get install unzip -y
 RUN wget --content-disposition http://dl.bintray.com/jfrog/artifactory/artifactory-3.4.0.zip
 RUN cd /opt && unzip ~/artifactory-3.4.0.zip
-RUN mv /opt/artifactory-3.3.0 /opt/artifactory
+RUN mv /opt/artifactory-3.4.0 /opt/artifactory
 RUN rm ~/artifactory-3.4.0.zip
 RUN mkdir /opt/artifactory/data
 
