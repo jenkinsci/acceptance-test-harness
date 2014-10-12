@@ -10,14 +10,17 @@ import org.jenkinsci.test.acceptance.plugins.artifactory.ArtifactoryPublisher
 import org.jenkinsci.test.acceptance.plugins.gradle.GradleStep
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet
 import org.jenkinsci.test.acceptance.po.FreeStyleJob
-import spock.lang.Ignore
 import com.google.inject.Inject;
 
 import static org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation.installSomeMaven
 
 /**
- * Created by eli on 10/6/14.
+ * Checks the successfully integration of Artifactory plugin.
+ *
+ * @author Eli Givoni
+ *
  */
+
 @WithPlugins(['artifactory', 'gradle', 'maven-plugin'])
 @Native("docker")
 class ArtifactoryPluginTest extends GebSpec {
@@ -25,6 +28,10 @@ class ArtifactoryPluginTest extends GebSpec {
     @Inject
     DockerContainerHolder<ArtifactoryContainer> artifactoryContainer;
 
+    /**
+     @native(docker)
+      Test the plugin configuration and communication with Artifactory on the global jenkins config page.
+     */
     def "Check config is persistence"() {
         given:
         final ArtifactoryContainer artifactory = artifactoryContainer.get()
@@ -55,7 +62,10 @@ class ArtifactoryPluginTest extends GebSpec {
         errorConnectionFeedback.text().contains('Connection to http://localhost:4898 refused')
 
     }
-
+    /**
+     @native(docker)
+      Test the plugin records and deploy on a native maven build
+     */
     def "Maven integration"() {
         given:
         final ArtifactoryContainer artifactory = artifactoryContainer.get()
@@ -86,7 +96,10 @@ class ArtifactoryPluginTest extends GebSpec {
         build.shouldContainsConsoleOutput("Deploying build info to: ${artifactory.getURL()}/api/build")
     }
 
-
+    /**
+     @native(docker)
+      Test the plugin record and deploy on a freestyle gradle build
+     */
     def "Gradle integration"() {
         given:
         final ArtifactoryContainer artifactory = artifactoryContainer.get()

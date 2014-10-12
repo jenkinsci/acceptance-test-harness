@@ -11,7 +11,8 @@ import org.jenkinsci.test.acceptance.po.PostBuildStep
 import org.jenkinsci.test.acceptance.po.Step
 
 /**
- * Created by eli on 10/9/14.
+ * Geb Page Object for the Artifactory Publisher.
+ * @author Eli Givoni
  */
 @Describable("Deploy artifacts to Artifactory")
 class ArtifactoryPublisher extends Page {

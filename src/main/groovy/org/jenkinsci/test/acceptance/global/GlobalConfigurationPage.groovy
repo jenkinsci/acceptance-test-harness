@@ -3,7 +3,8 @@ package org.jenkinsci.test.acceptance.global
 import org.jenkinsci.test.acceptance.po.Page
 
 /**
- * Created by eli on 10/6/14.
+ * Geb Page Object for the global config page
+ * Currently it contains only the relevant Artifactory plugin config elements and the page Save/Apply button
  */
 class GlobalConfigurationPage extends Page {
     static url = 'configure'

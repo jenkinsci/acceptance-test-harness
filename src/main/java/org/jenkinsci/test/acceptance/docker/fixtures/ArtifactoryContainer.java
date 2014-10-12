@@ -7,7 +7,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
- * Created by eli on 10/6/14.
+ * Runs Artifactory OSS container
  */
 @DockerFixture(id = "artifactory",ports = 8081)
 public class ArtifactoryContainer extends DockerContainer {
