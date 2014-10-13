@@ -1,5 +1,6 @@
 package groovy.plugins
 
+import org.apache.commons.io.IOUtils
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder
 import org.jenkinsci.test.acceptance.docker.fixtures.ArtifactoryContainer
 import org.jenkinsci.test.acceptance.geb.GebSpec
@@ -10,7 +11,9 @@ import org.jenkinsci.test.acceptance.plugins.artifactory.ArtifactoryPublisher
 import org.jenkinsci.test.acceptance.plugins.gradle.GradleStep
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet
 import org.jenkinsci.test.acceptance.po.FreeStyleJob
-import com.google.inject.Inject;
+import com.google.inject.Inject
+
+import java.util.concurrent.Callable;
 
 import static org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation.installSomeMaven
 
@@ -29,13 +32,14 @@ class ArtifactoryPluginTest extends GebSpec {
     DockerContainerHolder<ArtifactoryContainer> artifactoryContainer;
 
     /**
-     @native(docker)
+     @native (docker)
       Test the plugin configuration and communication with Artifactory on the global jenkins config page.
      */
     def "Check config is persistence"() {
         given:
         final ArtifactoryContainer artifactory = artifactoryContainer.get()
-        addArtifactory(artifactory.getURL())
+        waitForArtifactory(artifactory)
+        addArtifactory(artifactory)
         to GlobalConfigurationPage
 
         expect:
@@ -62,15 +66,17 @@ class ArtifactoryPluginTest extends GebSpec {
         errorConnectionFeedback.text().contains('Connection to http://localhost:4898 refused')
 
     }
-    /**
-     @native(docker)
-      Test the plugin records and deploy on a native maven build
-     */
+
+/**
+ @native (docker)
+  Test the plugin records and deploy on a native maven build
+ */
     def "Maven integration"() {
         given:
-        final ArtifactoryContainer artifactory = artifactoryContainer.get()
-        addArtifactory(artifactory.getURL())
         installSomeMaven(jenkins);
+        final ArtifactoryContainer artifactory = artifactoryContainer.get()
+        waitForArtifactory(artifactory)
+        addArtifactory(artifactory)
         MavenModuleSet job = jenkins.jobs.create(MavenModuleSet.class);
         job.configure();
         job.copyDir(resource("/artifactory_plugin/multimodule/"));
@@ -78,6 +84,7 @@ class ArtifactoryPluginTest extends GebSpec {
         job.options("-verbose");
         def publisher = job.addPublisher(ArtifactoryPublisher.class)
         publisher.refreshRepoButton.click()
+        waitFor { publisher.targetReleaseRepository.text() != "" }
         job.save();
 
         when:
@@ -96,14 +103,15 @@ class ArtifactoryPluginTest extends GebSpec {
         build.shouldContainsConsoleOutput("Deploying build info to: ${artifactory.getURL()}/api/build")
     }
 
-    /**
-     @native(docker)
-      Test the plugin record and deploy on a freestyle gradle build
-     */
+/**
+ @native (docker)
+  Test the plugin record and deploy on a freestyle gradle build
+ */
     def "Gradle integration"() {
         given:
         final ArtifactoryContainer artifactory = artifactoryContainer.get()
-        addArtifactory(artifactory.getURL())
+        waitForArtifactory(artifactory)
+        addArtifactory(artifactory)
         FreeStyleJob job = jenkins.jobs.create();
         job.copyDir(resource('/artifactory_plugin/quickstart'))
         $('input', name: 'org-jfrog-hudson-gradle-ArtifactoryGradleConfigurator').click()
@@ -134,12 +142,28 @@ class ArtifactoryPluginTest extends GebSpec {
 
     }
 
-    def addArtifactory(def artUrl) {
+    def addArtifactory(ArtifactoryContainer artifactory) {
         to GlobalConfigurationPage
         addArtifactoryButton.click()
-        artifactoryUrl.value(artUrl)
+        artifactoryUrl.value(artifactory.getURL())
         artifactoryUsername.value('admin')
         artifactoryPassword.value('password')
         saveButton.click()
     }
+
+    def waitForArtifactory(ArtifactoryContainer artifactory) {
+        jenkins.waitForCond(new Callable<Boolean>() {
+            @Override
+            public Boolean call() throws Exception {
+                try {
+                    String s = IOUtils.toString(artifactory.getPingURL().openStream());
+                    return s.contains("OK");
+                } catch (IOException e) {//catching IOException when server in not fully up and retuning 503
+                    return null;
+                }
+            }
+        }, 60);
+    }
+
+
 }
