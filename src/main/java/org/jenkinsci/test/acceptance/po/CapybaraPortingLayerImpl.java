@@ -107,7 +107,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
 
     @Override
     public WebElement waitFor(final By selector) {
-        return waitFor(selector, 30);
+        return waitFor(selector, 0);
     }
 
     /**
