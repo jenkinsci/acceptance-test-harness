@@ -162,8 +162,6 @@ class ArtifactoryPluginTest extends GebSpec {
                     return null;
                 }
             }
-        }, 60);
+        }, 180);
     }
-
-
 }
