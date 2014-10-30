@@ -26,19 +26,18 @@ package plugins;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.emma.EmmaPublisher;
+import org.jenkinsci.test.acceptance.plugins.emma.EmmaResultsPage;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenBuildStep;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.junit.Test;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Checks the successfully execution of Emma coverage reports.
- * Reuses and is inspired by Jacoco test case.
+ * Reuses Jacoco test files.
  *
  * @author Orjan Percy
  */
@@ -48,8 +47,9 @@ public class EmmaPluginTest extends AbstractJUnitTest {
     private Job job;
 
     /*
-     * Performs a coverage test by enabling coverage reporting and when tests are run a coverage report is created.
-     * The coverage report data is extracted and verified.
+     * Performs a coverage test by enabling coverage reporting and when
+     * tests are run a coverage report is created.
+     * The coverage report data is then verified.
      */
     @Test
     public void coverage_test() {
@@ -63,37 +63,13 @@ public class EmmaPluginTest extends AbstractJUnitTest {
         MavenBuildStep mbs = job.addBuildStep(MavenBuildStep.class);
         mbs.targets.set("clean emma:emma package");
         EmmaPublisher ep = job.addPublisher(EmmaPublisher.class);
-        ep.maxClass.sendKeys("100");
-        ep.maxMethod.sendKeys("70");
-        ep.maxBlock.sendKeys("80");
-        ep.maxLine.sendKeys("80");
-        ep.maxCondition.sendKeys("80");
-        ep.minClass.sendKeys("0");
-        ep.minMethod.sendKeys("0");
-        ep.minBlock.sendKeys("0");
-        ep.minLine.sendKeys("0");
-        ep.minCondition.sendKeys("0");
+        ep.setReportingThresholds(100, 70, 80, 80, 80, 0, 0, 0, 0, 0);
         job.save();
 
         Build build = job.startBuild().waitUntilFinished().shouldSucceed();
-        assert(build.getNavigationLinks().containsValue("Coverage Report"));
-        find(by.link("Coverage Report")).click();
-
-        // Extract the result data and verify.
-        String content = find(by.css("div#main-panel-content")).getText();
-        Pattern p = Pattern.compile("\\d+(?:[,.]\\d+)");
-        Matcher m = p.matcher(content);
-        List<String> l = new ArrayList<String>();
-        while (m.find()) {
-            l.add(m.group());
-        }
-        assert(l.get(0).compareTo("100.0") == 0); // class
-        assert(l.get(1).compareTo("50.0") == 0);  // method
-        assert(l.get(2).compareTo("45.5") == 0); // block
-        assert(l.get(3).compareTo("50.0") == 0); // line
-        assert(l.get(4).compareTo("100.0") == 0);
-        assert(l.get(5).compareTo("50.0") == 0);
-        assert(l.get(6).compareTo("45.5") == 0);
-        assert(l.get(7).compareTo("50.0") == 0);
+        EmmaResultsPage resultsPage = new EmmaResultsPage(jenkins.injector, build.getConsoleUrl());
+        //                                     class    method  block   line
+        List<String> expected = Arrays.asList("100.0", "50.0", "45.5", "50.0", "100.0", "50.0", "45.5", "50.0");
+        resultsPage.assertHasResult(expected);
     }
 }

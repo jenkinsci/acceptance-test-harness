@@ -57,4 +57,22 @@ public class EmmaPublisher extends AbstractStep implements PostBuildStep {
     public EmmaPublisher(Job parent, String path) {
         super(parent, path);
     }
+
+    /*
+     * Configure health reporting thresholds.
+     */
+    public void setReportingThresholds(int maxClass, int maxMethod, int maxBlock, int maxLine, int maxCondition,
+                                       int minClass, int minMethod, int minBlock, int minLine, int minCondition) {
+        this.maxClass.sendKeys(Integer.toString(maxClass));
+        this.maxMethod.sendKeys(Integer.toString(maxMethod));
+        this.maxBlock.sendKeys(Integer.toString(maxBlock));
+        this.maxLine.sendKeys(Integer.toString(maxLine));
+        this.maxCondition.sendKeys(Integer.toString(maxCondition));
+        this.minClass.sendKeys(Integer.toString(minClass));
+        this.minMethod.sendKeys(Integer.toString(minMethod));
+        this.minBlock.sendKeys(Integer.toString(minBlock));
+        this.minLine.sendKeys(Integer.toString(minLine));
+        this.minCondition.sendKeys(Integer.toString(minCondition));
+    }
 }
+
