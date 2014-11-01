@@ -4,8 +4,6 @@ import org.jenkinsci.test.acceptance.cucumber.Should;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.URL;
-
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
@@ -17,17 +15,19 @@ import static org.jenkinsci.test.acceptance.Matchers.hasContent;
  */
 public class Artifact extends PageObject {
     public final Build build;
+    private final String name;
 
-    public Artifact(Build build, URL url) {
-        super(build.injector, url);
+    public Artifact(Build build, String name) {
+        super(build.injector, build.url("artifact/%s", name));
         this.build = build;
+        this.name = name;
     }
 
     /**
      * Asserts that this artifact have the given content.
      */
     public void shouldHaveContent(String content) {
-        open();
+        visit(url("%s/*view*/", name));
         assertThat(driver, hasContent(content));
     }
 
