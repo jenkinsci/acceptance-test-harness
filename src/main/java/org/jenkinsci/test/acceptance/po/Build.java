@@ -271,4 +271,9 @@ public class Build extends ContainerPageObject {
         visit(changesUrl);
         return new Changes(this, changesUrl);
     }
+
+    @Override
+    public String toString() {
+        return job.name + " " + getNumber();
+    }
 }
