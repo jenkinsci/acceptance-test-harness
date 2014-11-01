@@ -38,6 +38,8 @@ public class Job extends ContainerPageObject {
     protected List<PostBuildStep> publishers = new ArrayList<>();
 
     public final Control concurrentBuild = control("/concurrentBuild");
+    private final Control hasSlaveAffinity = control("/hasSlaveAffinity");
+    private final Control assignedLabel = control("/hasSlaveAffinity/assignedLabelString", "/label");
 
     public Job(Injector injector, URL url, String name) {
         super(injector, url);
@@ -307,10 +309,10 @@ public class Job extends ContainerPageObject {
         find(by.path("/customWorkspace/directory")).sendKeys(ws);
     }
 
-    public void setLabelExpression(String l) {
+    public void setLabelExpression(String label) {
         ensureConfigPage();
-        check(find(by.input("hasSlaveAffinity")));
-        find(by.input("_.assignedLabelString")).sendKeys(l);
+        hasSlaveAffinity.check();
+        assignedLabel.set(label);
     }
 
     public Job shouldBeTiedToLabel(final String label) {
