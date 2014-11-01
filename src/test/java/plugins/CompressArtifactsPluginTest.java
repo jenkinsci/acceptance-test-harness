@@ -30,6 +30,7 @@ import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 
 import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.Since;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.compress_artifacts.CompressingArtifactManager;
 import org.jenkinsci.test.acceptance.po.ArtifactArchiver;
@@ -39,7 +40,8 @@ import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.jenkinsci.test.acceptance.po.ShellBuildStep;
 import org.junit.Test;
 
-public class CompressArtifactsPlugin extends AbstractJUnitTest {
+@Since("1.532") // No artifact managers before 1.532
+public class CompressArtifactsPluginTest extends AbstractJUnitTest {
 
     private static final String ARTIFACT_NAME = "the.artifact";
 
