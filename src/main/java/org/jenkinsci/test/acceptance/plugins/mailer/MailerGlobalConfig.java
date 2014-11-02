@@ -1,5 +1,7 @@
 package org.jenkinsci.test.acceptance.plugins.mailer;
 
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
@@ -43,5 +45,7 @@ public class MailerGlobalConfig extends PageAreaImpl {
         // these two controls have weird paths that don't fit well with relative path expression
         new Control(getPage(),"/hudson-tasks-Mailer//sendTestMailTo").set(recipient);
         new Control(getPage(),"/hudson-tasks-Mailer//validate-button").click();
+
+        waitFor(driver, hasContent("Email was successfully sent"), 10);
     }
 }

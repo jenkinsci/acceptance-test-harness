@@ -36,6 +36,10 @@ public abstract class Matcher<T> extends TypeSafeMatcher<T> {
         description.appendText(this.description);
     }
 
+    public final String getDescription() {
+        return description;
+    }
+
     @Override public abstract boolean matchesSafely(T item);
 
     @Override public void describeMismatchSafely(T item, Description mismatchDescription) {

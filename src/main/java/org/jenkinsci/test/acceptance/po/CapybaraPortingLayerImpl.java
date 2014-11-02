@@ -145,6 +145,10 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
                 @Override public Boolean call() throws Exception {
                     return matcher.matchesSafely(item);
                 }
+
+                @Override public String toString() {
+                    return matcher.getDescription();
+                }
             }, timeout);
         } catch (TimeoutException x) {
             StringDescription desc = new StringDescription();
