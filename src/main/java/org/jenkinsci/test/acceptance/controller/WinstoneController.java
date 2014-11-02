@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.jenkinsci.utils.process.ProcessInputStream;
@@ -30,12 +31,16 @@ public class WinstoneController extends LocalController {
     @Override
     public ProcessInputStream startProcess() throws IOException{
         File javaHome = getJavaHome();
+        ArrayList<String> proxyProperties = getProxyProperties();
         String java = javaHome == null ? "java" : String.format("%s/bin/java",javaHome.getAbsolutePath());
-        CommandBuilder cb = new CommandBuilder(java).add(
-                "-Duser.language=en",
-                "-jar", war,
-                "--ajp13Port=-1",
-                "--httpPort=" + httpPort);
+        CommandBuilder cb = new CommandBuilder(java).add("-DJENKINS_HOME=" + getJenkinsHome());
+        for (String proxyProp: proxyProperties) {
+            cb.add(proxyProp);
+        }
+        cb.add("-Duser.language=en");
+        cb.add("-jar", war);
+        cb.add("--ajp13Port=-1");
+        cb.add("--httpPort=" + httpPort);
         cb.env.putAll(commonLaunchEnv());
         System.out.println("Starting Jenkins: " + cb.toString());
         return cb.popen();

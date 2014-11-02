@@ -1,5 +1,16 @@
 package org.jenkinsci.test.acceptance.controller;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.lang.reflect.Field;
+import java.net.ServerSocket;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Logger;
+
 import com.google.inject.Injector;
 
 import org.apache.commons.io.FileUtils;
@@ -13,16 +24,6 @@ import org.jenkinsci.utils.process.ProcessInputStream;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Named;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.StringWriter;
-import java.lang.reflect.Field;
-import java.net.ServerSocket;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Logger;
 
 import static java.lang.System.*;
 import org.jenkinsci.utils.process.CommandBuilder;
@@ -220,6 +221,23 @@ public abstract class LocalController extends JenkinsController implements LogLi
         } catch (Exception e) {
             throw new IOException(e.getMessage(), e);
         }
+    }
+
+    private void addProxyProperty(ArrayList<String> properties, String proxyProperty) {
+        String prop = System.getProperty(proxyProperty);
+        if (prop != null) {
+            properties.add("-D" + proxyProperty + "=" + prop);
+        }
+    }
+
+    public ArrayList<String> getProxyProperties() {
+        ArrayList<String> properties = new ArrayList<String>();
+        addProxyProperty(properties, "http.proxyHost");
+        addProxyProperty(properties, "http.proxyPort");
+        addProxyProperty(properties, "https.proxyHost");
+        addProxyProperty(properties, "https.proxyPort");
+        addProxyProperty(properties, "http.nonProxyHosts");
+        return properties;
     }
 
     public File getJavaHome() {
