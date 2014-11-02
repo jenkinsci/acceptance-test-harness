@@ -305,8 +305,9 @@ public class Job extends ContainerPageObject {
         ensureConfigPage();
         clickButton("Advanced...");
 
-        check(find(by.path("/customWorkspace")));
-        find(by.path("/customWorkspace/directory")).sendKeys(ws);
+        // Note that ordering is important here as the old name for the checkbox == new name for the text field.
+        control("/customWorkspace", "/hasCustomWorkspace").check();
+        control("/customWorkspace/directory", "/customWorkspace").set(ws);
     }
 
     public void setLabelExpression(String label) {
