@@ -26,10 +26,8 @@ package plugins;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.active_directory.ActiveDirectoryEnv;
-import org.jenkinsci.test.acceptance.plugins.active_directory.ActiveDirectorySecurity;
+import org.jenkinsci.test.acceptance.utils.pluginTests.SecurityDisabler;
 import org.jenkinsci.test.acceptance.plugins.active_directory.ActiveDirectorySecurityRealm;
-import org.jenkinsci.test.acceptance.plugins.matrix_auth.MatrixRow;
-import org.jenkinsci.test.acceptance.plugins.matrix_auth.ProjectBasedMatrixAuthorizationStrategy;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
 import org.junit.After;
 import org.junit.Before;
@@ -38,6 +36,7 @@ import org.openqa.selenium.WebElement;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.jenkinsci.test.acceptance.utils.pluginTests.SecurityConfigUtils.authorizeUserAsAdmin;
 
 /**
  * Set these (data) at mvn-test command line to use this test:<br>
@@ -63,11 +62,11 @@ import static org.hamcrest.Matchers.*;
  */
 @WithPlugins("active-directory@1.38")
 public class ActiveDirectoryTest extends AbstractJUnitTest {
-    private ActiveDirectorySecurity adSecurity;
+    private SecurityDisabler securityDisabler;
 
     @Before
     public void setUp() {
-        adSecurity = new ActiveDirectorySecurity(jenkins);
+        securityDisabler = new SecurityDisabler(jenkins);
     }
 
     /**
@@ -124,7 +123,7 @@ public class ActiveDirectoryTest extends AbstractJUnitTest {
 
     @After
     public void tearDown() {
-        adSecurity.stopUsingSecurityAndSave();
+        securityDisabler.stopUsingSecurityAndSave();
     }
 
     private void userCanLoginToJenkinsAsAdmin(String userOrGroupToAddAsAdmin) {
@@ -137,15 +136,18 @@ public class ActiveDirectoryTest extends AbstractJUnitTest {
         assertThat(domain.getAttribute("value"), is(equalTo(ActiveDirectoryEnv.get().getDomain())));
     }
 
-    private GlobalSecurityConfig saveSecurityConfig(String user) {
+    private GlobalSecurityConfig saveSecurityConfig(String userOrGroupToAddAsAdmin) {
         GlobalSecurityConfig security = new GlobalSecurityConfig(jenkins);
-        security.configure();//open
+        security.configure();
+        security = authorizeUserAsAdmin(userOrGroupToAddAsAdmin, security);
+        security = configSecurityRealm(security);
+        security.save();
+        return security;
+    }
+
+    private GlobalSecurityConfig configSecurityRealm(GlobalSecurityConfig security) {
         ActiveDirectorySecurityRealm realm = security.useRealm(ActiveDirectorySecurityRealm.class);
         realm.configure();
-        ProjectBasedMatrixAuthorizationStrategy auth = security.useAuthorizationStrategy(ProjectBasedMatrixAuthorizationStrategy.class);
-        MatrixRow userAuth = auth.addUser(user);
-        userAuth.admin();
-        security.save();
         return security;
     }
 }

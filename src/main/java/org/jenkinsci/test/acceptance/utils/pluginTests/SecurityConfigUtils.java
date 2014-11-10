@@ -21,33 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.test.acceptance.plugins.active_directory;
+package org.jenkinsci.test.acceptance.utils.pluginTests;
 
-import org.jenkinsci.test.acceptance.po.Control;
-import org.jenkinsci.test.acceptance.po.Jenkins;
-import org.jenkinsci.test.acceptance.po.PageObject;
+import org.jenkinsci.test.acceptance.plugins.matrix_auth.MatrixRow;
+import org.jenkinsci.test.acceptance.plugins.matrix_auth.ProjectBasedMatrixAuthorizationStrategy;
+import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
 
-/**
- * Page Object for AD security (global) configuration page.
- * @author Marco.Miller@ericsson.com
- */
-public class ActiveDirectorySecurity extends PageObject {
-    public final Jenkins jenkins;
+public class SecurityConfigUtils {
 
-    public ActiveDirectorySecurity(Jenkins jenkins) {
-        super(jenkins.injector,jenkins.url("configureSecurity"));
-        this.jenkins = jenkins;
+    private SecurityConfigUtils() {
     }
 
     /**
-     * Stop using security (if previously used) and save config.
+     * Add and authorize given user admin role under "Project-based Matrix Authorization Strategy"
+     *
+     * @param user user to be added and authorized as admin
+     * @param security page object
+     * @return security page object
      */
-    public void stopUsingSecurityAndSave() {
-        open();
-        Control use = control("/useSecurity");
-        if(use.resolve().isSelected()) {
-            use.click();
-            control("/Submit").click();
-        }
+    public static GlobalSecurityConfig authorizeUserAsAdmin(String user, GlobalSecurityConfig security) {
+        ProjectBasedMatrixAuthorizationStrategy auth = security.useAuthorizationStrategy(ProjectBasedMatrixAuthorizationStrategy.class);
+        MatrixRow userAuth = auth.addUser(user);
+        userAuth.admin();
+        return security;
     }
 }
