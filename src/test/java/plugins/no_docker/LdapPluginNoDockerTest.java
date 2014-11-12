@@ -25,6 +25,7 @@ package plugins.no_docker;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.plugins.matrix_auth.ProjectBasedMatrixAuthorizationStrategy;
 import org.jenkinsci.test.acceptance.utils.pluginTests.SecurityDisabler;
 import org.jenkinsci.test.acceptance.plugins.ldap.LdapDetails;
 import org.jenkinsci.test.acceptance.plugins.ldap.LdapEnv;
@@ -36,7 +37,6 @@ import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.jenkinsci.test.acceptance.Matchers.hasLoggedInUser;
-import static org.jenkinsci.test.acceptance.utils.pluginTests.SecurityConfigUtils.*;
 
 /**
  * Set these (data) at mvn-test command line to use this test:<br>
@@ -62,8 +62,6 @@ import static org.jenkinsci.test.acceptance.utils.pluginTests.SecurityConfigUtil
  * -ldapEnableCache (true or false, default false)<br>
  * -ldapCacheSize (default 20) <br>
  * -ldapCacheTTL (default 300)<br>
- * <br>
- * Consider setting -Dhudson.plugins.active_directory.ActiveDirectorySecurityRealm.forceLdaps=true<br>
  * <br>
  * Test(s) disables security once over.
  *
@@ -145,7 +143,7 @@ public class LdapPluginNoDockerTest extends AbstractJUnitTest {
         GlobalSecurityConfig security = new GlobalSecurityConfig(jenkins);
         security.configure();
         security = configSecurityRealm(security);
-        security = authorizeUserAsAdmin(userOrGroupToAddAsAdmin, security);
+        security = ProjectBasedMatrixAuthorizationStrategy.authorizeUserAsAdmin(userOrGroupToAddAsAdmin, security);
         security.save();
         return security;
     }

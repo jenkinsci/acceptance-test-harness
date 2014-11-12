@@ -11,4 +11,19 @@ public class ProjectBasedMatrixAuthorizationStrategy extends MatrixAuthorization
     public ProjectBasedMatrixAuthorizationStrategy(GlobalSecurityConfig context, String path) {
         super(context, path);
     }
+
+    /**
+     * Add and authorize given user admin role under "Project-based Matrix Authorization Strategy"
+     *
+     * @param user     user to be added and authorized as admin
+     * @param security page object
+     * @return security page object
+     */
+    public static GlobalSecurityConfig authorizeUserAsAdmin(String user, GlobalSecurityConfig security) {
+        ProjectBasedMatrixAuthorizationStrategy auth;
+        auth = security.useAuthorizationStrategy(ProjectBasedMatrixAuthorizationStrategy.class);
+        MatrixRow userAuth = auth.addUser(user);
+        userAuth.admin();
+        return security;
+    }
 }
