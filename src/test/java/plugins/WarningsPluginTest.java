@@ -2,6 +2,7 @@ package plugins;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.test.acceptance.junit.Bug;
+import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsAction;
@@ -13,6 +14,7 @@ import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.ListView;
 import org.jenkinsci.test.acceptance.po.MatrixProject;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
@@ -31,6 +33,33 @@ public class WarningsPluginTest extends AbstractAnalysisTest {
     private static final String SEVERAL_PARSERS_FILE_NAME = "warningsAll.txt";
     /** Contains warnings for several parsers. */
     private static final String SEVERAL_PARSERS_FILE_FULL_PATH = "/warnings_plugin/" + SEVERAL_PARSERS_FILE_NAME;
+
+    /**
+     * Checks that the plug-in sends a mail after a build has been failed. The content of the mail
+     * contains several tokens that should be expanded in the mail with the correct vaules.
+     */
+    @Test @Category(SmokeTest.class) @Bug("25501")
+    @WithPlugins({"email-ext", "warnings@4.44-SNAPSHOT"})
+    public void should_send_mail_with_expanded_tokens() {
+        setUpMailer();
+
+        AnalysisConfigurator<WarningsBuildSettings> buildConfigurator = new AnalysisConfigurator<WarningsBuildSettings>() {
+            @Override
+            public void configure(WarningsBuildSettings settings) {
+                settings.addWorkspaceFileScanner("Java Compiler (javac)", "**/*");
+                settings.setBuildFailedTotalAll("0");
+            }
+        };
+        FreeStyleJob job = setupJob(SEVERAL_PARSERS_FILE_FULL_PATH, FreeStyleJob.class,
+                WarningsBuildSettings.class, buildConfigurator);
+
+        configureEmailNotification(job, "Warnings: ${WARNINGS_RESULT}",
+                "Warnings: ${WARNINGS_COUNT}-${WARNINGS_FIXED}-${WARNINGS_NEW}");
+
+        job.startBuild().shouldFail();
+
+        verifyReceivedMail("Warnings: FAILURE", "Warnings: 131-0-131");
+    }
 
     /**
      * Checks that no warnings are reported if the build does nothing.
@@ -99,7 +128,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest {
     /**
      * Build a job and check set up a dashboard list-view. Check, if the dashboard view shows correct warning count.
      */
-    @Test @Bug("23446") @WithPlugins("warnings@4.42-SNAPSHOT")
+    @Test @Bug("23446") @WithPlugins("warnings@4.42")
     public void build_a_matrix_project_and_check_if_dashboard_list_view_shows_correct_warnings() {
         MatrixProject job = setupJob(SEVERAL_PARSERS_FILE_FULL_PATH, MatrixProject.class,
                 WarningsBuildSettings.class, create3ParserConfiguration());

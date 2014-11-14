@@ -38,6 +38,36 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
  */
 @WithPlugins("checkstyle")
 public class CheckStylePluginTest extends AbstractAnalysisTest {
+    private static final String PATTERN_WITH_776_WARNINGS = "checkstyle-result.xml";
+    private static final String FILE_WITH_776_WARNINGS = "/checkstyle_plugin/" + PATTERN_WITH_776_WARNINGS;
+
+    /**
+     * Checks that the plug-in sends a mail after a build has been failed. The content of the mail
+     * contains several tokens that should be expanded in the mail with the correct vaules.
+     */
+    @Test @WithPlugins("email-ext") @Bug("25501")
+    public void should_send_mail_with_expanded_tokens() {
+        setUpMailer();
+
+        AnalysisConfigurator<CheckstyleFreestyleBuildSettings> buildConfigurator =
+                new AnalysisConfigurator<CheckstyleFreestyleBuildSettings>() {
+                    @Override
+                    public void configure(CheckstyleFreestyleBuildSettings settings) {
+                        settings.setBuildFailedTotalAll("0");
+                        settings.pattern.set(PATTERN_WITH_776_WARNINGS);
+                    }
+                };
+        FreeStyleJob job = setupJob(FILE_WITH_776_WARNINGS, FreeStyleJob.class,
+                CheckstyleFreestyleBuildSettings.class, buildConfigurator);
+
+        configureEmailNotification(job, "Checkstyle: ${CHECKSTYLE_RESULT}",
+                "Checkstyle: ${CHECKSTYLE_COUNT}-${CHECKSTYLE_FIXED}-${CHECKSTYLE_NEW}");
+
+        job.startBuild().shouldFail();
+
+        verifyReceivedMail("Checkstyle: FAILURE", "Checkstyle: 776-0-776");
+    }
+
     /**
      * Builds a job with checkstyle enabled and verifies that checkstyle details are displayed in the build overview.
      */
@@ -344,10 +374,10 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
         AnalysisConfigurator<CheckstyleFreestyleBuildSettings> buildConfigurator = new AnalysisConfigurator<CheckstyleFreestyleBuildSettings>() {
             @Override
             public void configure(CheckstyleFreestyleBuildSettings settings) {
-                settings.pattern.set("checkstyle-result.xml");
+                settings.pattern.set(PATTERN_WITH_776_WARNINGS);
             }
         };
-        FreeStyleJob job = setupJob("/checkstyle_plugin/checkstyle-result.xml", FreeStyleJob.class,
+        FreeStyleJob job = setupJob(FILE_WITH_776_WARNINGS, FreeStyleJob.class,
                 CheckstyleFreestyleBuildSettings.class, buildConfigurator);
         return job;
     }

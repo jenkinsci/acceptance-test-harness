@@ -1,6 +1,7 @@
 package plugins;
 
 import javax.annotation.CheckForNull;
+import javax.mail.MessagingException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
@@ -17,6 +18,8 @@ import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisMavenSettings
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisSettings;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.AbstractDashboardViewPortlet;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
+import org.jenkinsci.test.acceptance.plugins.email_ext.EmailExtPublisher;
+import org.jenkinsci.test.acceptance.plugins.mailer.MailerGlobalConfig;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenBuildStep;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
@@ -30,6 +33,7 @@ import org.jenkinsci.test.acceptance.po.PostBuildStep;
 import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.po.View;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
+import org.jenkinsci.test.acceptance.utils.mail.MailService;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -38,13 +42,64 @@ import com.google.inject.Inject;
 import static java.util.Collections.*;
 import static org.junit.Assert.*;
 
+/**
+ * Base class for tests of the static analysis plug-ins.
+ */
 public abstract class AbstractAnalysisTest extends AbstractJUnitTest {
+    /** Configuration of the mailing in Jenkins global configuration screen. */
+    @Inject
+    private MailerGlobalConfig mailer;
+
+    /** Mock that verifies that mails have been sent by Jenkins email-ext plugin. */
+    @Inject
+    private MailService mail;
+
+    /** Provides slaves for tests that need build slaves. */
+    @Inject
+    private SlaveController slaveController;
 
     /**
-     * For slave test
+     * Configures the mailer with default values required for the mock.
      */
-    @Inject
-    SlaveController slaveController;
+    protected void setUpMailer() {
+        jenkins.configure();
+        mailer.setupDefaults();
+        jenkins.save();
+    }
+
+    /**
+     * Configures the mail notification of the email-ext plug-in.
+     *
+     * @param job     the job to configure
+     * @param subject subject of the mail
+     * @param body    body of the mail
+     */
+    protected void configureEmailNotification(final FreeStyleJob job, final String subject, final String body) {
+        job.configure();
+        EmailExtPublisher pub = job.addPublisher(EmailExtPublisher.class);
+        pub.subject.set(subject);
+        pub.setRecipient("dev@example.com");
+        pub.body.set(body);
+        job.save();
+    }
+
+    /**
+     * Verifies that Jenkins sent a mail with the specified content.
+     *
+     * @param subject the expected subject of the mail
+     * @param body    the expected body of the mail
+     */
+    protected void verifyReceivedMail(final String subject, final String body) {
+        try {
+            mail.assertMail(Pattern.compile(subject), "dev@example.com", Pattern.compile(body));
+        }
+        catch (MessagingException e) {
+            throw new IllegalStateException("Mailer exception", e);
+        }
+        catch (IOException e) {
+            throw new IllegalStateException("Mailer exception", e);
+        }
+    }
 
     /**
      * Set up a Job of a certain type with a given resource and a publisher which can be configured by providing a

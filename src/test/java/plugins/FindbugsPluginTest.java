@@ -23,12 +23,22 @@
  */
 package plugins;
 
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.concurrent.ExecutionException;
+
 import org.jenkinsci.test.acceptance.junit.Bug;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
-import org.jenkinsci.test.acceptance.plugins.findbugs.*;
+import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsAction;
+import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsColumn;
+import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsFreestyleBuildSettings;
+import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsMavenBuildSettings;
+import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsWarningsPerProjectDashboardViewPortlet;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
@@ -41,18 +51,41 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import java.util.concurrent.ExecutionException;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.jenkinsci.test.acceptance.Matchers.hasAction;
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.*;
+import static org.jenkinsci.test.acceptance.Matchers.*;
 
 @WithPlugins("findbugs")
 public class FindbugsPluginTest extends AbstractAnalysisTest {
+    private static final String PATTERN_WITH_6_WARNINGS = "findbugsXml.xml";
+    private static final String FILE_WITH_6_WARNINGS = "/findbugs_plugin/" + PATTERN_WITH_6_WARNINGS;
+
+    /**
+     * Checks that the plug-in sends a mail after a build has been failed. The content of the mail
+     * contains several tokens that should be expanded in the mail with the correct vaules.
+     */
+    @Test @WithPlugins("email-ext") @Bug("25501")
+    public void should_send_mail_with_expanded_tokens() {
+        setUpMailer();
+
+        AnalysisConfigurator<FindbugsFreestyleBuildSettings> buildConfigurator =
+                new AnalysisConfigurator<FindbugsFreestyleBuildSettings>() {
+                    @Override
+                    public void configure(FindbugsFreestyleBuildSettings settings) {
+                        settings.setBuildFailedTotalAll("0");
+                        settings.pattern.set(PATTERN_WITH_6_WARNINGS);
+                    }
+                };
+        FreeStyleJob job = setupJob(FILE_WITH_6_WARNINGS, FreeStyleJob.class,
+                FindbugsFreestyleBuildSettings.class, buildConfigurator);
+
+        configureEmailNotification(job, "FindBugs: ${FINDBUGS_RESULT}",
+                "FindBugs: ${FINDBUGS_COUNT}-${FINDBUGS_FIXED}-${FINDBUGS_NEW}");
+
+        job.startBuild().shouldFail();
+
+        verifyReceivedMail("FindBugs: FAILURE", "FindBugs: 6-0-6");
+    }
 
     /**
      * Builds a job and checks if warnings of Findbugs are displayed. Checks as well, if the content of the tabs is
@@ -310,10 +343,10 @@ public class FindbugsPluginTest extends AbstractAnalysisTest {
         AnalysisConfigurator<FindbugsFreestyleBuildSettings> buildConfigurator = new AnalysisConfigurator<FindbugsFreestyleBuildSettings>() {
             @Override
             public void configure(FindbugsFreestyleBuildSettings settings) {
-                settings.pattern.set("findbugsXml.xml");
+                settings.pattern.set(PATTERN_WITH_6_WARNINGS);
             }
         };
-        FreeStyleJob job = setupJob("/findbugs_plugin/findbugsXml.xml", FreeStyleJob.class,
+        FreeStyleJob job = setupJob(FILE_WITH_6_WARNINGS, FreeStyleJob.class,
                 FindbugsFreestyleBuildSettings.class, buildConfigurator);
         return job;
     }

@@ -37,7 +37,36 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
 @WithPlugins("pmd")
 public class PmdPluginTest extends AbstractAnalysisTest {
     private static final String PMD_FILE_WITHOUT_WARNINGS = "/pmd_plugin/pmd.xml";
-    private static final String PMD_FILE_WITH_WARNINGS = "/pmd_plugin/pmd-warnings.xml";
+
+    private static final String PATTERN_WITH_9_WARNINGS = "pmd-warnings.xml";
+    private static final String FILE_WITH_9_WARNINGS = "/pmd_plugin/" + PATTERN_WITH_9_WARNINGS;
+
+    /**
+     * Checks that the plug-in sends a mail after a build has been failed. The content of the mail
+     * contains several tokens that should be expanded in the mail with the correct vaules.
+     */
+    @Test @WithPlugins("email-ext") @Bug("25501")
+    public void should_send_mail_with_expanded_tokens() {
+        setUpMailer();
+
+        AnalysisConfigurator<PmdFreestyleSettings> buildConfigurator =
+                new AnalysisConfigurator<PmdFreestyleSettings>() {
+                    @Override
+                    public void configure(PmdFreestyleSettings settings) {
+                        settings.setBuildFailedTotalAll("0");
+                        settings.pattern.set(PATTERN_WITH_9_WARNINGS);
+                    }
+                };
+        FreeStyleJob job = setupJob(FILE_WITH_9_WARNINGS, FreeStyleJob.class,
+                PmdFreestyleSettings.class, buildConfigurator);
+
+        configureEmailNotification(job, "PMD: ${PMD_RESULT}",
+                "PMD: ${PMD_COUNT}-${PMD_FIXED}-${PMD_NEW}");
+
+        job.startBuild().shouldFail();
+
+        verifyReceivedMail("PMD: FAILURE", "PMD: 9-0-9");
+    }
 
     /**
      * Configures a job with PMD and checks that the parsed PMD file does not contain warnings.
@@ -104,7 +133,7 @@ public class PmdPluginTest extends AbstractAnalysisTest {
             }
         };
 
-        FreeStyleJob job = createFreeStyleJob(PMD_FILE_WITH_WARNINGS, buildConfigurator);
+        FreeStyleJob job = createFreeStyleJob(FILE_WITH_9_WARNINGS, buildConfigurator);
 
         Build lastBuild = buildJobWithSuccess(job);
         assertThat(lastBuild, hasAction("PMD Warnings"));
@@ -168,7 +197,7 @@ public class PmdPluginTest extends AbstractAnalysisTest {
             }
         };
 
-        FreeStyleJob job = createFreeStyleJob(PMD_FILE_WITH_WARNINGS, buildConfigurator);
+        FreeStyleJob job = createFreeStyleJob(FILE_WITH_9_WARNINGS, buildConfigurator);
 
         Build build = buildJobWithSuccess(job);
         String apiUrl = "pmdResult/api/xml?depth=0";
@@ -231,7 +260,7 @@ public class PmdPluginTest extends AbstractAnalysisTest {
                 settings.setUseDeltaValues(true);
             }
         };
-        FreeStyleJob job = createFreeStyleJob(PMD_FILE_WITH_WARNINGS, buildConfigurator);
+        FreeStyleJob job = createFreeStyleJob(FILE_WITH_9_WARNINGS, buildConfigurator);
 
         Build build = buildJobAndWait(job);
         assertThat(build.isUnstable(), is(true));
@@ -381,7 +410,7 @@ public class PmdPluginTest extends AbstractAnalysisTest {
                 settings.pattern.set("pmd-warnings.xml");
             }
         };
-        return createFreeStyleJob(PMD_FILE_WITH_WARNINGS, buildConfigurator);
+        return createFreeStyleJob(FILE_WITH_9_WARNINGS, buildConfigurator);
     }
 
 }

@@ -36,6 +36,38 @@ import static org.junit.Assert.*;
  */
 @WithPlugins("tasks")
 public class TaskScannerPluginTest extends AbstractAnalysisTest {
+    /**
+     * Checks that the plug-in sends a mail after a build has been failed. The content of the mail
+     * contains several tokens that should be expanded in the mail with the correct vaules.
+     */
+    @Test @WithPlugins("email-ext") @Bug("25501")
+    public void should_send_mail_with_expanded_tokens() {
+        setUpMailer();
+
+        AnalysisConfigurator<TaskScannerFreestyleBuildSettings> buildConfigurator =
+                new AnalysisConfigurator<TaskScannerFreestyleBuildSettings>() {
+                    @Override
+                    public void configure(TaskScannerFreestyleBuildSettings settings) {
+                        settings.setPattern("**/*.java");
+                        settings.setExcludePattern("**/*Test.java");
+                        settings.setHighPriorityTags("FIXME");
+                        settings.setNormalPriorityTags("TODO");
+                        settings.setLowPriorityTags("@Deprecated");
+                        settings.setIgnoreCase(false);
+                        settings.setBuildFailedTotalAll("0");
+                    }
+                };
+
+        FreeStyleJob job = setupJob("/tasks_plugin/fileset1", FreeStyleJob.class,
+                TaskScannerFreestyleBuildSettings.class, buildConfigurator);
+
+        configureEmailNotification(job, "Tasks: ${TASKS_RESULT}",
+                "Tasks: ${TASKS_COUNT}-${TASKS_FIXED}-${TASKS_NEW}");
+
+        job.startBuild().shouldFail();
+
+        verifyReceivedMail("Tasks: FAILURE", "Tasks: 6-0-6");
+    }
 
     /**
      * This tests objective is to verify the basic functionality of the Task
