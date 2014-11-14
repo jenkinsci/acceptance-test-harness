@@ -25,6 +25,7 @@ The behaviour of this controller can be customized through the following environ
     directory from the following list will be used: a `plugins` directory as a sibling to the resolved `jenkins.war`,
     `WORKSPACE/plugins` and `$(pwd)/plugins`. If the environment variable `NEVER_REPLACE_EXISTING_PLUGINS` is set
     then plugins will never be overwritten with newer versions during test.
+* `JENKINS_JAVA_OPTS` Adds additional options to the java process like `-Xms=XXm -Xmx=XXXm`.     
 
 This is the default controller.
 
