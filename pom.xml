@@ -27,7 +27,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <selenium.version>2.42.2</selenium.version>
+    <selenium.version>2.44.0</selenium.version>
     <aether.version>0.9.0.v20140226</aether.version>
     <maven.version>3.1.0</maven.version>
     <groovy.version>2.3.1</groovy.version>
@@ -360,6 +360,11 @@
         <groupId>commons-configuration</groupId>
         <artifactId>commons-configuration</artifactId>
         <version>1.10</version>
+    </dependency>
+    <dependency>
+      <groupId>org.json</groupId>
+      <artifactId>json</artifactId>
+      <version>20080701</version>
     </dependency>
   </dependencies>
 
