@@ -25,7 +25,7 @@ public class WinstoneController extends LocalController {
     private static final List<String> JAVA_OPTS;
 
     static {
-        String opts = StringUtils.defaultString(System.getenv("WINSTONE_JAVA_OPTS"));
+        String opts = StringUtils.defaultString(System.getenv("JENKINS_JAVA_OPTS"));
         if (opts.isEmpty()) {
             JAVA_OPTS = null;
         } else {
