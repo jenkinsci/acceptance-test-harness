@@ -21,20 +21,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.test.acceptance.plugins.active_directory;
+package org.jenkinsci.test.acceptance.utils.pluginTests;
 
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.PageObject;
 
 /**
- * Page Object for AD security (global) configuration page.
+ * Page Object for security (global) configuration page.
  * @author Marco.Miller@ericsson.com
  */
-public class ActiveDirectorySecurity extends PageObject {
+public class SecurityDisabler extends PageObject {
     public final Jenkins jenkins;
 
-    public ActiveDirectorySecurity(Jenkins jenkins) {
+    public SecurityDisabler(Jenkins jenkins) {
         super(jenkins.injector,jenkins.url("configureSecurity"));
         this.jenkins = jenkins;
     }
