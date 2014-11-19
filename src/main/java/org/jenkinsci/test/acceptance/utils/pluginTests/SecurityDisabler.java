@@ -23,9 +23,12 @@
  */
 package org.jenkinsci.test.acceptance.utils.pluginTests;
 
+import java.util.logging.Logger;
+
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.PageObject;
+import org.openqa.selenium.UnhandledAlertException;
 
 /**
  * Page Object for security (global) configuration page.
@@ -33,6 +36,7 @@ import org.jenkinsci.test.acceptance.po.PageObject;
  */
 public class SecurityDisabler extends PageObject {
     public final Jenkins jenkins;
+    private static final Logger LOGGER = Logger.getLogger(SecurityDisabler.class.getName());
 
     public SecurityDisabler(Jenkins jenkins) {
         super(jenkins.injector,jenkins.url("configureSecurity"));
@@ -43,11 +47,15 @@ public class SecurityDisabler extends PageObject {
      * Stop using security (if previously used) and save config.
      */
     public void stopUsingSecurityAndSave() {
-        open();
-        Control use = control("/useSecurity");
-        if(use.resolve().isSelected()) {
-            use.click();
-            control("/Submit").click();
+        try {
+            open();
+            Control use = control("/useSecurity");
+            if(use.resolve().isSelected()) {
+                use.click();
+                control("/Submit").click();
+            }
+        } catch (UnhandledAlertException e) {
+            LOGGER.info("Data you have entered may not be saved.");
         }
     }
 }

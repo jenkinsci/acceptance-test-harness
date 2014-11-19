@@ -77,6 +77,12 @@ public abstract class ContainerPageObject extends PageObject {
     public URL getConfigUrl() {
         return url("configure");
     }
+    
+    public void testButton() {
+        clickButton("Test");
+        List<WebElement> labelSuccess = driver.findElements(By.className("ok"));
+        assertThat("Test button failed",labelSuccess.size(), not(equalTo(0)));
+    }
 
     public void save() {
         clickButton("Save");
