@@ -631,5 +631,25 @@
       </build>
     </profile>
     <!-- TODO could be laboriously repeated for $TYPE, $DISPLAY, etc. (seems Maven provides no generic way to do this) -->
+
+    <profile>
+      <!-- if ./excludes.txt is present, use that as the exclusion list. Useful when skipping tests. -->
+      <id>excludes</id>
+      <activation>
+        <file>
+          <exists>excludes.txt</exists>
+        </file>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <excludesFile>excludes.txt</excludesFile>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
   </profiles>
 </project>
