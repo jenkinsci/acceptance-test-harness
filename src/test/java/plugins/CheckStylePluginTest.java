@@ -4,8 +4,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.Bug;
@@ -358,6 +356,9 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
         assertThat(jenkins.all(expectedDashboardLinkMatcher).size(), is(1));
         WebElement dashboardLink = jenkins.getElement(expectedDashboardLinkMatcher);
         assertThat(dashboardLink.getText().trim(), is("12"));
+
+        dashboardLink.click();
+        assertThat(driver, Matchers.hasContent("CheckStyle Result"));
 
         view.delete();
     }
