@@ -7,6 +7,7 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.Bug;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
@@ -336,12 +337,8 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
         WebElement dashboardLink = jenkins.getElement(expectedDashboardLinkMatcher);
         assertThat(dashboardLink.getText().trim(), is("12"));
 
-        final Pattern pattern = Pattern.compile("href=\"(.*?)\"");
-
-        String link = dashboardLink.getAttribute("outerHTML");
-        Matcher matcher = pattern.matcher(link);
-        assertThat(matcher.find(), is(true));
-        assertThat(matcher.group(1), is(relativeUrl));
+        dashboardLink.click();
+        assertThat(driver, Matchers.hasContent("CheckStyle Result"));
 
         view.delete();
     }
