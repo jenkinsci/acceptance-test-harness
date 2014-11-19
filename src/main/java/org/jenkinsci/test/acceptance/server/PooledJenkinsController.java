@@ -7,6 +7,7 @@ import hudson.remoting.Channel.Mode;
 import hudson.remoting.ChannelBuilder;
 import jnr.unixsocket.UnixSocketAddress;
 import jnr.unixsocket.UnixSocketChannel;
+import org.jenkinsci.remoting.RoleChecker;
 import org.jenkinsci.test.acceptance.controller.IJenkinsController;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.LocalController.LocalFactoryImpl;
@@ -178,6 +179,10 @@ public class PooledJenkinsController extends JenkinsController implements LogLis
                 ll.addLogListener(l);
             }
             return null;
+        }
+
+        @Override
+        public void checkRoles(RoleChecker checker) throws SecurityException {
         }
 
         private static final long serialVersionUID = 1L;
