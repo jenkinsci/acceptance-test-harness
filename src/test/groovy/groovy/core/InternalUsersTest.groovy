@@ -1,6 +1,7 @@
 package groovy.core
 
 import org.jenkinsci.test.acceptance.geb.GebSpec
+import org.jenkinsci.test.acceptance.po.JenkinsDatabaseSecurityRealm
 import org.jenkinsci.test.acceptance.po.SecurityConfiguration
 import org.jenkinsci.test.acceptance.po.users.AddUserPage
 import org.jenkinsci.test.acceptance.po.users.ConfigureUserPage
@@ -18,7 +19,7 @@ class InternalUsersTest extends GebSpec {
         given: "Use the internal user authentification"
         to SecurityConfiguration
         useSecurity.value(true)
-        securityRealm.jenkinsDB.click()
+        useRealm(JenkinsDatabaseSecurityRealm.class);
         submit.click()
 
         when: "create a new user"

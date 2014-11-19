@@ -1,5 +1,7 @@
 package org.jenkinsci.test.acceptance.po
 
+import javax.inject.Inject
+
 /**
  * Page object for the security configuration page.
  *
@@ -16,24 +18,15 @@ class SecurityConfiguration extends Page {
         avoidCSRF { $("input[path='/hudson-security-csrf-GlobalCrumbIssuerConfiguration/csrf']") }
         disableRememberMe { $("input[path='/useSecurity/disableRememberMe']") }
         submit { $("span.submit-button button") }
+    }
 
-        securityRealm {
-            [
-                    delegateContainer: $("input[path='/useSecurity/realm[0]']"),
-                    jenkinsDB        : $("input[path='/useSecurity/realm[1]']"),
-                    ldap             : $("input[path='/useSecurity/realm[2]']"),
-                    unix             : $("input[path='/useSecurity/realm[3]']"),
-            ]
-        }
+    @Inject Jenkins jenkins;
 
-        authorization {
-            [
-                    loggedInCanAll    : $("input[path='/useSecurity/authorization[0]']"),
-                    anyoneCanAll      : $("input[path='/useSecurity/authorization[1]']"),
-                    legacyMode        : $("input[path='/useSecurity/authorization[2]']"),
-                    matrixBased       : $("input[path='/useSecurity/authorization[3]']"),
-                    projectMatrixBased: $("input[path='/useSecurity/authorization[4]']"),
-            ]
-        }
+    def useRealm(Class<? extends SecurityRealm> type) {
+        new GlobalSecurityConfig(jenkins).useRealm(type)
+    }
+
+    def useAuthorizationStrategy(Class<? extends AuthorizationStrategy> type) {
+        new GlobalSecurityConfig(jenkins).useAuthorizationStrategy(type)
     }
 }
