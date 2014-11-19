@@ -23,13 +23,13 @@
  */
 package org.jenkinsci.test.acceptance.plugins.ownership;
 
-import org.jenkinsci.test.acceptance.po.PageAreaImpl;
+import org.jenkinsci.test.acceptance.po.GlobalPluginConfiguration;
 import org.jenkinsci.test.acceptance.po.PageObject;
 
-public class OwnershipGlobalConfig extends PageAreaImpl {
+public class OwnershipGlobalConfig extends GlobalPluginConfiguration {
 
     public OwnershipGlobalConfig(PageObject context) {
-        super(context, "/jenkins-model-GlobalPluginConfiguration/plugin");
+        super(context, "ownership");
     }
 
     public OwnershipGlobalConfig setImplicitJobOwnership() {
