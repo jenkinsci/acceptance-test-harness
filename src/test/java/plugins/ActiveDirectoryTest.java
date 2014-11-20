@@ -75,7 +75,7 @@ public class ActiveDirectoryTest extends AbstractJUnitTest {
      * And an active-directory plugin version 1.38 (or greater)<br>
      * And an AD security configuration that is matrix-based (project)<br>
      * And a user added to that matrix so she can Administer<br>
-     * When test button success<br>
+     * When test button succeeded<br>
      * And I save such an AD security configuration<br>
      * Then that user can log-in to that Jenkins as admin.
      */
@@ -91,7 +91,7 @@ public class ActiveDirectoryTest extends AbstractJUnitTest {
      * And an AD security configuration that is matrix-based (project)<br>
      * And a group added to that matrix so its members can Administer<br>
      * And a user being a member of that group<br>
-     * When test button success<br>
+     * When test button succeeded<br>
      * And I save such an AD security configuration<br>
      * Then that user can log-in to that Jenkins as admin.
      */
@@ -106,7 +106,7 @@ public class ActiveDirectoryTest extends AbstractJUnitTest {
      * And an active-directory plugin version 1.38 (or greater)<br>
      * And an AD security configuration that is matrix-based (project)<br>
      * And a wannabe added to that matrix thinking he can Administer<br>
-     * When test button success<br>
+     * When test button succeeded<br>
      * And I save such an AD security configuration<br>
      * Then that user wannabe cannot log-in to that Jenkins at all.
      */
@@ -144,7 +144,6 @@ public class ActiveDirectoryTest extends AbstractJUnitTest {
         security.configure();
         security = ProjectBasedMatrixAuthorizationStrategy.authorizeUserAsAdmin(userOrGroupToAddAsAdmin, security);
         security = configSecurityRealm(security);
-        security.testButton();
         security.save();
         return security;
     }
@@ -152,6 +151,7 @@ public class ActiveDirectoryTest extends AbstractJUnitTest {
     private GlobalSecurityConfig configSecurityRealm(GlobalSecurityConfig security) {
         ActiveDirectorySecurityRealm realm = security.useRealm(ActiveDirectorySecurityRealm.class);
         realm.configure();
+        realm.testButton();
         return security;
     }
 }

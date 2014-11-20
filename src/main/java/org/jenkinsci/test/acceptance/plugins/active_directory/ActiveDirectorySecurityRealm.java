@@ -24,6 +24,7 @@
 package org.jenkinsci.test.acceptance.plugins.active_directory;
 
 
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
 import org.jenkinsci.test.acceptance.po.SecurityRealm;
@@ -64,5 +65,10 @@ public class ActiveDirectorySecurityRealm extends SecurityRealm {
         if (groupLookupStrategy != null) {
             control("groupLookupStrategy").select(groupLookupStrategy);
         }
+    }
+    
+    public void testButton() {
+        control("validate-button").click();
+        waitFor(driver, hasContent("Success"), 10);
     }
 }
