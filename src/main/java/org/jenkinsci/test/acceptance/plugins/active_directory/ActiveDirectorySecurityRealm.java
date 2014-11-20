@@ -66,8 +66,8 @@ public class ActiveDirectorySecurityRealm extends SecurityRealm {
             control("groupLookupStrategy").select(groupLookupStrategy);
         }
     }
-    
-    public void testButton() {
+
+    public void validateConfig() {
         control("validate-button").click();
         waitFor(driver, hasContent("Success"), 10);
     }

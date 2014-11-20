@@ -26,7 +26,6 @@ package plugins;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.active_directory.ActiveDirectoryEnv;
-import org.jenkinsci.test.acceptance.utils.pluginTests.SecurityDisabler;
 import org.jenkinsci.test.acceptance.plugins.active_directory.ActiveDirectorySecurityRealm;
 import org.jenkinsci.test.acceptance.plugins.matrix_auth.ProjectBasedMatrixAuthorizationStrategy;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
@@ -151,7 +150,7 @@ public class ActiveDirectoryTest extends AbstractJUnitTest {
     private GlobalSecurityConfig configSecurityRealm(GlobalSecurityConfig security) {
         ActiveDirectorySecurityRealm realm = security.useRealm(ActiveDirectorySecurityRealm.class);
         realm.configure();
-        realm.testButton();
+        realm.validateConfig();
         return security;
     }
 }
