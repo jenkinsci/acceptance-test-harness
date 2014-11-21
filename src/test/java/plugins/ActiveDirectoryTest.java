@@ -29,6 +29,7 @@ import org.jenkinsci.test.acceptance.plugins.active_directory.ActiveDirectoryEnv
 import org.jenkinsci.test.acceptance.plugins.active_directory.ActiveDirectorySecurityRealm;
 import org.jenkinsci.test.acceptance.plugins.matrix_auth.ProjectBasedMatrixAuthorizationStrategy;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
+import org.jenkinsci.test.acceptance.utils.pluginTests.SecurityDisabler;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
