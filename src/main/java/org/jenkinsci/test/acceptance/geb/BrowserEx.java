@@ -23,6 +23,6 @@ public class BrowserEx extends Browser {
 
     @Override
     public <T extends Page> T createPage(Class<T> pageType) {
-        return injector.getInstance(pageType).init(this);
+        return pageType.cast(injector.getInstance(pageType).init(this));
     }
 }
