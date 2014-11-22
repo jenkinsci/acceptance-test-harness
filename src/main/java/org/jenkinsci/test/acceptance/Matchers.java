@@ -26,9 +26,13 @@ public class Matchers {
 
     public static Matcher<WebDriver> hasContent(final Pattern pattern) {
         return new Matcher<WebDriver>("Text matching %s", pattern) {
+            // text captured the time matchesSafely was executed
+            private String pageText;
+
             @Override
             public boolean matchesSafely(WebDriver item) {
-                return pattern.matcher(pageText(item)).find();
+                pageText = pageText(item);
+                return pattern.matcher(pageText).find();
             }
 
             @Override
@@ -36,7 +40,7 @@ public class Matchers {
                 mismatchDescription.appendText("was ")
                         .appendValue(item.getCurrentUrl())
                         .appendText("\n")
-                        .appendValue(pageText(item));
+                        .appendValue(pageText);
             }
 
             private String pageText(WebDriver item) {
