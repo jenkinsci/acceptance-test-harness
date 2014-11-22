@@ -23,7 +23,7 @@ import com.google.inject.ProvidedBy;
  * up to Jenkins.
  * <p/>
  * <p/>
- * Test authors write tests by injecting {@link SlaveController} and
+ * Test authors write tests by injecting {@link SlaveController} and calling {@link install}.
  *
  * @author Kohsuke Kawaguchi
  * @see SlaveProvider
@@ -98,5 +98,6 @@ public abstract class SlaveController extends CapybaraPortingLayerImpl implement
      * <p/>
      * Once this method is called, no other methods should be called.
      */
+    @Override
     public abstract void close() throws IOException;
 }
