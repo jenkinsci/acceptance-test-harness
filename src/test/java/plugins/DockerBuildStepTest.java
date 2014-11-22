@@ -36,12 +36,19 @@ import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.jenkinsci.test.acceptance.po.Job;
+import org.jenkinsci.test.acceptance.po.Slave;
+import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.google.inject.Inject;
 
 @WithPlugins("docker-build-step")
 @Native("docker")
 public class DockerBuildStepTest extends AbstractJUnitTest {
+
+    @Inject
+    SlaveController slaveController;
 
     // Address in form http://<HOST>:<PORT>
     private static final String DOCKER_DAEMON_TCP = System.getenv("DOCKER_DAEMON_TCP");
@@ -67,6 +74,21 @@ public class DockerBuildStepTest extends AbstractJUnitTest {
         command(job, DockerCommand.CreateContainer.class).name("my_image");
         command(job, DockerCommand.StartContainers.class).containerIds("$DOCKER_CONTAINER_IDS");
         command(job, DockerCommand.RemoveContainers.class).containerIds("$DOCKER_CONTAINER_IDS");
+        job.save();
+
+        Build build = job.startBuild().waitUntilFinished();
+        assertTrue(build.isSuccess());
+    }
+
+    @Test
+    public void run_commands_remotelly() throws Exception {
+        Slave slave = slaveController.install(jenkins).get();
+
+        FreeStyleJob job = jenkins.jobs.create();
+        job.configure();
+        job.setLabelExpression(slave.getName());
+        job.copyDir(resource("/docker_build_step/context.dir"));
+        command(job, DockerCommand.CreateImage.class).contextFolder("$WORKSPACE").tag("my_image");
         job.save();
 
         Build build = job.startBuild().waitUntilFinished();
