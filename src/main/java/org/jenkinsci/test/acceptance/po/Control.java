@@ -189,6 +189,19 @@ public class Control extends CapybaraPortingLayerImpl {
         e.sendKeys(Keys.TAB);
     }
 
+    public void select(Class<?> describable) {
+        String element = findCaption(describable, new Finder<String>() {
+            @Override
+            protected String find(String caption) {
+                return Control.this.getElement(by.option(caption)) != null
+                        ? caption : null
+                ;
+            }
+        });
+
+        select(element);
+    }
+
     public void upload(Resource res) {
         resolve().sendKeys(res.asFile().getAbsolutePath());
     }
