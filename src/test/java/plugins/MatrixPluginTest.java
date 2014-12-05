@@ -1,4 +1,4 @@
-package core;
+package plugins;
 
 import com.google.inject.Inject;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
@@ -21,7 +21,7 @@ import static org.hamcrest.Matchers.lessThan;
  * As a Jenkins user
  * I want to configure and run multi configuration jobs
  */
-public class MatrixTest extends AbstractJUnitTest {
+public class MatrixPluginTest extends AbstractJUnitTest {
     MatrixProject job;
 
     @Inject

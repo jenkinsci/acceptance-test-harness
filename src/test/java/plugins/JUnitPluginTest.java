@@ -1,4 +1,4 @@
-package core;
+package plugins;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Bug;
@@ -19,7 +19,7 @@ import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 /**
  * @author Kohsuke Kawaguchi
  */
-public class JUnitTestPublisherTest extends AbstractJUnitTest {
+public class JUnitPluginTest extends AbstractJUnitTest {
     /**
      * Scenario: Publish test result which passed
      * When I create a job named "javadoc-test"
