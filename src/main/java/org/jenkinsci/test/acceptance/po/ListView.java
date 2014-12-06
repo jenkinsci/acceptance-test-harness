@@ -46,4 +46,11 @@ public class ListView extends View {
         throw new NoSuchElementException();
     }
 
+    /**
+     * Explicitly add a job to the view.
+     */
+    public void addJob(Job job) {
+        ensureConfigPage();
+        check(job.name);
+    }
 }
