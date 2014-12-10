@@ -29,10 +29,6 @@ public class Build extends ContainerPageObject {
 
     private String result;
 
-    /**
-     * Console output. Cached.
-     */
-    private String console;
     private boolean success;
 
     public Build(Job job, int buildNumber) {
@@ -138,20 +134,15 @@ public class Build extends ContainerPageObject {
     }
 
     public String getConsole() {
-        if (console != null) {
-            return console;
-        }
-
+        // TODO this would more efficiently be done by directly fetching consoleText
         visit(getConsoleUrl());
 
         List<WebElement> a = all(by.xpath("//pre"));
         if (a.size() > 1) {
-            console = find(by.xpath("//pre[@id='out']")).getText();
+            return find(by.xpath("//pre[@id='out']")).getText();
         } else {
-            console = a.get(0).getText();
+            return a.get(0).getText();
         }
-
-        return console;
     }
 
     public Build shouldContainsConsoleOutput(String fragment) {
