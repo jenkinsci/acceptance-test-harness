@@ -112,9 +112,7 @@ public class Jenkins extends Node {
         visit("restart");
         clickButton("Yes");
 
-        do {
-            elasticSleep(1000);
-        } while (driver.getPageSource().contains("Please wait"));
+        waitFor(driver, Matchers.hasContent("Please wait"), 120);
     }
 
     public JenkinsLogger getLogger(String name) {
