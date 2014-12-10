@@ -6,8 +6,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Map;
 import java.util.logging.Level;
+
 import javax.inject.Inject;
 
+import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.guice.TestScope;
 
