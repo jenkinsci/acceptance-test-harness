@@ -35,8 +35,8 @@ public class Job extends ContainerPageObject {
 
     private List<Parameter> parameters = new ArrayList<>();
 
+    // TODO these controls (and some methods) actually belong in a subclass corresponding to AbstractProject
     protected List<PostBuildStep> publishers = new ArrayList<>();
-
     public final Control concurrentBuild = control("/concurrentBuild");
     private final Control hasSlaveAffinity = control("/hasSlaveAffinity");
     private final Control assignedLabel = control("/hasSlaveAffinity/assignedLabelString", "/label");
