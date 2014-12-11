@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import org.jenkinsci.test.acceptance.ByFactory;
-import org.jenkinsci.test.acceptance.Matcher;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
@@ -45,7 +44,7 @@ public interface CapybaraPortingLayer {
     <T> T waitForCond(Callable<T> block);
 
     /** Wait until a matcher matches. */
-    <T> void waitFor(T item, Matcher<T> matcher, int timeoutSec);
+    <T> void waitFor(T item, org.hamcrest.Matcher<T> matcher, int timeoutSec);
 
     /**
      * Returns the first visible element that matches the selector.

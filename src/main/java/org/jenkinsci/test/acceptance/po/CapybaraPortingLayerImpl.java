@@ -1,13 +1,13 @@
 package org.jenkinsci.test.acceptance.po;
 
 import javax.inject.Inject;
+
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.util.List;
 import java.util.concurrent.Callable;
 
 import org.hamcrest.StringDescription;
-import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.utils.ElasticTime;
 import org.openqa.selenium.By;
@@ -139,20 +139,22 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
         }
     }
 
-    @Override public <T> void waitFor(final T item, final Matcher<T> matcher, int timeout) {
+    @Override public <T> void waitFor(final T item, final org.hamcrest.Matcher<T> matcher, int timeout) {
         try {
             waitForCond(new Callable<Boolean>() {
                 @Override public Boolean call() throws Exception {
-                    return matcher.matchesSafely(item);
+                    return matcher.matches(item);
                 }
 
                 @Override public String toString() {
-                    return matcher.getDescription();
+                    StringDescription desc = new StringDescription();
+                    matcher.describeTo(desc);
+                    return desc.toString();
                 }
             }, timeout);
         } catch (TimeoutException x) {
             StringDescription desc = new StringDescription();
-            matcher.describeMismatchSafely(item, desc);
+            matcher.describeMismatch(item, desc);
             throw new AssertionError(desc.toString(), x);
         }
     }

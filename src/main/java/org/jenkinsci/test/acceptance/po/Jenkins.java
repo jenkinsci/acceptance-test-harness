@@ -1,5 +1,7 @@
 package org.jenkinsci.test.acceptance.po;
 
+import static org.hamcrest.Matchers.not;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 import hudson.util.VersionNumber;
 
 import java.io.IOException;
@@ -114,7 +116,7 @@ public class Jenkins extends Node {
         visit("restart");
         clickButton("Yes");
 
-        waitFor(driver, Matchers.hasContent("Please wait"), 120);
+        waitFor(driver, not(hasContent("Please wait")), 120);
     }
 
     public JenkinsLogger getLogger(String name) {
