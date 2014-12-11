@@ -29,7 +29,7 @@ import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Bug;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.po.BuildOtherProjects;
+import org.jenkinsci.test.acceptance.po.BuildTrigger;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.ListView;
 import org.junit.Test;
@@ -45,7 +45,7 @@ public class UpstreamDownstreamColumnPluginTest extends AbstractJUnitTest {
         FreeStyleJob sut = jenkins.jobs.create(FreeStyleJob.class, "sut");
 
         sut.configure();
-        sut.addPublisher(BuildOtherProjects.class).childProjects.set("in_no_view, in_observed_view, in_different_view");
+        sut.addPublisher(BuildTrigger.class).childProjects.set("in_no_view, in_observed_view, in_different_view");
         sut.save();
 
         ListView observed = jenkins.views.create(ListView.class, "observed");

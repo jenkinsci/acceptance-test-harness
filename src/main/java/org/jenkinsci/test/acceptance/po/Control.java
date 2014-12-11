@@ -133,8 +133,8 @@ public class Control extends CapybaraPortingLayerImpl {
     }
 
     /**
-     * Clicks a menu button, and selects the matching item from the drop down
-     *
+     * Clicks a menu button, and selects the matching item from the drop down.
+     * TODO using a class name as the {@link Describable#value} does not seem to work.
      * @param type
      *      Class with {@link Describable} annotation.
      */
