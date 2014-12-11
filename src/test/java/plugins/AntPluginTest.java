@@ -28,24 +28,8 @@ public class AntPluginTest extends AbstractJUnitTest {
         job = jenkins.jobs.create(FreeStyleJob.class);
     }
 
-    /**
-     Scenario: Configure a job with Ant build steps
-       Given I have installed the "ant" plugin
-       And a job
-       When I configure the job
-       And I add an Ant build step
-         """
-           <project default="hello">
-             <target name="hello">
-               <echo message="Hello World"/>
-             </target>
-           </project>
-         """
-       When I build the job
-       Then the build should succeed
-     */
-    @Test
-    public void allow_user_to_use_Ant_in_freestyle_project() {
+    @Test @Native("ant")
+    public void use_default_ant_installation() {
         buildHelloWorld(null);
     }
 
@@ -78,24 +62,6 @@ public class AntPluginTest extends AbstractJUnitTest {
         );
     }
 
-    /**
-     Scenario: Add locally installed Ant
-       Given I have installed the "ant" plugin
-       And fake Ant installation at "/tmp/fake-ant"
-       And a job
-       And I have Ant "local_ant_1.8.4" installed in "/tmp/fake-ant" configured
-       When I add an Ant build step for "local_ant_1.8.4"
-         """
-           <project default="hello">
-             <target name="hello">
-               <echo message="Hello World"/>
-             </target>
-           </project>
-         """
-       And I build the job
-       Then console output should contain "fake ant at /tmp/fake-ant/bin/ant"
-       And the build should succeed
-     */
     @Test @Native("ant")
     public void locallyInstalledAnt() {
         String expectedVersion = localAntVersion();
