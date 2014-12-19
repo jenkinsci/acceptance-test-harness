@@ -636,6 +636,26 @@
         </plugins>
       </build>
     </profile>
+    <profile>
+      <id>LOCAL_SNAPSHOTS</id>
+      <activation>
+        <property>
+          <name>LOCAL_SNAPSHOTS</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <environmentVariables>
+                <LOCAL_SNAPSHOTS>${LOCAL_SNAPSHOTS}</LOCAL_SNAPSHOTS>
+              </environmentVariables>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
     <!-- TODO could be laboriously repeated for $TYPE, $DISPLAY, etc. (seems Maven provides no generic way to do this) -->
 
     <profile>
