@@ -1,5 +1,6 @@
 package org.jenkinsci.test.acceptance.update_center;
 
+import com.cloudbees.sdk.extensibility.Extension;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
@@ -13,6 +14,7 @@ import java.util.jar.JarFile;
  *
  * @author Kohsuke Kawaguchi
  */
+@Extension
 public class LocalOverrideUpdateCenterMetadataDecoratorImpl implements UpdateCenterMetadataDecorator {
     @Override
     public void decorate(UpdateCenterMetadata ucm) {

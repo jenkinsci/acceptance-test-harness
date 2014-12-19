@@ -26,7 +26,7 @@ import com.google.inject.Injector;
  *
  * @author Vivek Pandey
  */
-@ExtensionPoint
+@ExtensionPoint // TODO is it not the JenkinsControllerFactory that is the extension point?
 public abstract class JenkinsController implements IJenkinsController, AutoCleaned {
     /**
      * directory on the computer where this code is running that points to a directory
