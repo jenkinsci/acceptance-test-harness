@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -71,6 +70,11 @@ public class WinstoneController extends LocalController {
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public String toString() {
+        return getUrl().toExternalForm();
     }
 
     @Extension
