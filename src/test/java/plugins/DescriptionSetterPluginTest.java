@@ -50,9 +50,9 @@ public class DescriptionSetterPluginTest extends AbstractJUnitTest {
         Build b = j.startBuild().shouldSucceed();
 
         b.open();
-        assertThat(find(by.xpath("//div[@id='description']/div")).getText(), is(equalTo(msg)));
+        assertThat(find(by.css("div#description div")).getText(), is(equalTo(msg)));
 
         j.open();
-        assertThat(find(by.xpath("//*[@id='buildHistory']//*[@class='desc']")).getText(), is(equalTo(msg)));
+        assertThat(find(by.css("#buildHistory .desc")).getText(), is(equalTo(msg)));
     }
 }
