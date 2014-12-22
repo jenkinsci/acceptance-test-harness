@@ -59,6 +59,10 @@ public abstract class View extends ContainerPageObject {
         assertThat(driver, not(hasContent("This page expects a form submission")));
     }
 
+    public BuildHistory getBuildHistory() {
+        return new BuildHistory(this);
+    }
+
     public static Matcher<View> containsJob(final Job needle) {
         return new Matcher<View>("Contains job " + needle.name) {
             @Override

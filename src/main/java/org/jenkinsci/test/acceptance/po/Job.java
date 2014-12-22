@@ -1,7 +1,9 @@
 package org.jenkinsci.test.acceptance.po;
 
 import com.google.inject.Injector;
+
 import cucumber.api.DataTable;
+
 import org.apache.commons.io.IOUtils;
 import org.codehaus.plexus.util.Base64;
 import org.jenkinsci.test.acceptance.junit.Resource;
@@ -323,24 +325,6 @@ public class Job extends ContainerPageObject {
     }
 
     /**
-     * Verify that the job contains some builds on the given node
-     * To test whether the the job has built on the master, the jenkins instance has to be
-     * passed in the parameter.
-     */
-    public void shouldHaveBuiltOn(Node n) {
-        assertThat(hasBuiltOn(n), is(true));
-    }
-
-    /**
-     * Check if the job contains some builds on the given node.
-     * To test whether the the job has built on the master, the jenkins instance has to be
-     * passed in the parameter.
-     */
-    public boolean hasBuiltOn(Node n) {
-        return n.getBuildHistory().includes(this.name);
-    }
-
-    /**
      * Verify that the job contains some builds on exact one of the given list of nodes.
      * To test whether the the job has built on the master, the jenkins instance has to be
      * passed in the parameter.
@@ -349,7 +333,7 @@ public class Job extends ContainerPageObject {
         int noOfNodes = 0;
 
         for (Node n : nodes) {
-            if (hasBuiltOn(n)) {
+            if (!n.getBuildHistory().getBuildsOf(this).isEmpty()) {
                 noOfNodes++;
             }
         }
@@ -382,5 +366,21 @@ public class Job extends ContainerPageObject {
             }
         }
         return links;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other == null) return false;
+        if (this == other) return true;
+
+        if (!(other instanceof Job)) return false;
+
+        Job rhs = (Job) other;
+        return this.name.equals(rhs.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode() ^ url.hashCode();
     }
 }

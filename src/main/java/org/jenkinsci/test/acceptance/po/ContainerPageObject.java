@@ -156,4 +156,21 @@ public abstract class ContainerPageObject extends PageObject {
         }
         return links;
     }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other == null) return false;
+        if (this == other) return true;
+
+        if (!(other instanceof ContainerPageObject)) return false;
+
+        ContainerPageObject rhs = (ContainerPageObject) other;
+        System.out.printf("%s != %s%n", this.url.toExternalForm(), rhs.url.toExternalForm());
+        return this.url.toExternalForm().equals(rhs.url.toExternalForm());
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode() ^ url.hashCode();
+    }
 }

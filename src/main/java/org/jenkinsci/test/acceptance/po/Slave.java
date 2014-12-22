@@ -19,10 +19,10 @@ import com.google.common.base.Joiner;
  * @author Kohsuke Kawaguchi
  * @see Jenkins#slaves
  */
-public abstract class Slave extends Node {
+public class Slave extends Node {
     private final String name;
 
-    protected Slave(Jenkins j, String name) {
+    public Slave(Jenkins j, String name) {
         super(j, j.url("computer/%s/",name));
         this.name = name;
     }

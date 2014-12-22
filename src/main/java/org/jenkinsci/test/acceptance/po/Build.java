@@ -266,6 +266,22 @@ public class Build extends ContainerPageObject {
 
     @Override
     public String toString() {
-        return job.name + " " + getNumber();
+        return job.name + " #" + getNumber();
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other == null) return false;
+        if (this == other) return true;
+
+        if (!(other instanceof Build)) return false;
+
+        Build rhs = (Build) other;
+        return getNumber() == rhs.getNumber() && job.equals(rhs.job);
+    }
+
+    @Override
+    public int hashCode() {
+        return job.hashCode() + getNumber();
     }
 }

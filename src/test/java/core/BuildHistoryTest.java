@@ -1,31 +1,49 @@
 package core;
 
-import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.po.BuildHistory;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.ListView;
 import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.not;
 
-/**
- * Feature: Display build history
- * As a Jenkins user or administrator
- * I should be able to view the build history both globally or per-job
- * So that I can identify build trends, times, etc.
- */
 public class BuildHistoryTest extends AbstractJUnitTest {
-    /**
-     * Scenario: Viewing global build history
-     * Given a simple job
-     * When I build the job
-     * Then the global build history should show the build
-     */
-    @Test
-    public void view_global_build_history() {
-        FreeStyleJob job = jenkins.jobs.create();
-        job.startBuild().waitUntilFinished();
 
-        jenkins.visit("view/All/builds");
-        assertThat(driver, Matchers.hasContent(String.format("%s #1", job.name)));
+    @Test
+    public void global_build_history() {
+        FreeStyleJob job = jenkins.jobs.create();
+        Build build = job.startBuild().waitUntilFinished();
+
+        BuildHistory history = jenkins.getBuildHistory();
+        assertThat(history.getBuilds(), contains(build));
+        assertThat(history.getBuildsOf(job), contains(build));
+    }
+
+    @Test
+    public void slave_build_history() {
+        FreeStyleJob job = jenkins.jobs.create();
+        Build build = job.startBuild().waitUntilFinished();
+
+        BuildHistory history = build.getNode().getBuildHistory();
+        assertThat(history.getBuilds(), contains(build));
+        assertThat(history.getBuildsOf(job), contains(build));
+    }
+
+    @Test
+    public void view_build_history() {
+        ListView view = jenkins.views.create(ListView.class, "a_view");
+
+        FreeStyleJob inViewJob = view.jobs.create(FreeStyleJob.class, "in_view");
+        Build inViewBuild = inViewJob.startBuild().waitUntilFinished();
+        FreeStyleJob outOfViewJob = jenkins.jobs.create(FreeStyleJob.class, "not_in_view");
+        Build outOfViewBuild = outOfViewJob.startBuild().waitUntilFinished();
+
+        BuildHistory history = view.getBuildHistory();
+        assertThat(history.getBuilds(), contains(inViewBuild));
+        assertThat(history.getBuilds(), not(contains(outOfViewBuild)));
     }
 }
