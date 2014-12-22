@@ -3,6 +3,7 @@ package core;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.Node;
 import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.junit.Test;
@@ -38,7 +39,7 @@ public class ConfigureSlavesTest extends AbstractJUnitTest {
     public void tie_job_to_specifid_label() throws Exception {
         FreeStyleJob j = jenkins.jobs.create();
 
-        Slave s = slave1.install(jenkins).get();
+        Node s = slave1.install(jenkins).get();
 
         s.configure();
         s.setLabels("test");
@@ -50,6 +51,6 @@ public class ConfigureSlavesTest extends AbstractJUnitTest {
 
         Build b = j.startBuild().shouldSucceed();
         j.shouldBeTiedToLabel("test");
-        assertThat(b.getNode(), is(s.getName()));
+        assertThat(b.getNode(), is(s));
     }
 }

@@ -1,6 +1,7 @@
 package plugins;
 
 import javax.xml.parsers.ParserConfigurationException;
+
 import java.io.IOException;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -20,7 +21,7 @@ import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.ListView;
-import org.jenkinsci.test.acceptance.po.Slave;
+import org.jenkinsci.test.acceptance.po.Node;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -310,10 +311,10 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
     @Test
     public void view_checkstyle_report_build_on_slave() throws Exception {
         FreeStyleJob job = setUpCheckstyleFreestyleJob();
-        Slave slave = makeASlaveAndConfigureJob(job);
+        Node slave = makeASlaveAndConfigureJob(job);
         Build build = buildJobOnSlaveWithSuccess(job, slave);
 
-        assertThat(build.getNode(), is(slave.getName()));
+        assertThat(build.getNode(), is(slave));
         assertThat(job.getLastBuild(), hasAction("Checkstyle Warnings"));
         assertThat(job, hasAction("Checkstyle Warnings"));
     }

@@ -24,6 +24,7 @@
 package plugins;
 
 import javax.xml.parsers.ParserConfigurationException;
+
 import java.io.IOException;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -43,7 +44,7 @@ import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.ListView;
-import org.jenkinsci.test.acceptance.po.Slave;
+import org.jenkinsci.test.acceptance.po.Node;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -289,11 +290,11 @@ public class FindbugsPluginTest extends AbstractAnalysisTest {
     public void record_analysis_build_on_slave() throws ExecutionException, InterruptedException {
         FreeStyleJob job = setUpFindbugsFreestyleJob();
 
-        Slave slave = makeASlaveAndConfigureJob(job);
+        Node slave = makeASlaveAndConfigureJob(job);
 
         Build lastBuild = buildJobOnSlaveWithSuccess(job, slave);
 
-        assertThat(lastBuild.getNode(), is(slave.getName()));
+        assertThat(lastBuild.getNode(), is(slave));
         assertThat(lastBuild, hasAction("FindBugs Warnings"));
         assertThat(job, hasAction("FindBugs Warnings"));
     }

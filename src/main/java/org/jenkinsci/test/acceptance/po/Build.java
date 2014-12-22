@@ -228,12 +228,13 @@ public class Build extends ContainerPageObject {
         };
     }
 
-    public String getNode() {
+    public Node getNode() {
         String n = getJson().get("builtOn").asText();
-        if (n.length() == 0) {
-            return "master";
+        if (!n.isEmpty()) {
+            return getJenkins().slaves.get(Slave.class, n);
         }
-        return n;
+
+        return getJenkins();
     }
 
     /**

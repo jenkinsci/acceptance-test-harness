@@ -56,13 +56,13 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
     public void build_on_a_particular_slave() throws Exception {
         FreeStyleJob j = jenkins.jobs.create();
 
-        Slave s = slave.install(jenkins).get();
+        Node s = slave.install(jenkins).get();
         j.configure();
         j.addParameter(NodeParameter.class).setName("slavename");
         j.save();
 
         Build b = j.startBuild(singletonMap("slavename", s.getName())).shouldSucceed();
-        assertThat(b.getNode(), is(s.getName()));
+        assertThat(b.getNode(), is(s));
     }
 
     /**
@@ -77,7 +77,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
     public void build_with_preselected_node() throws Exception {
         FreeStyleJob j = jenkins.jobs.create();
 
-        Slave s = slave.install(jenkins).get();
+        Node s = slave.install(jenkins).get();
         j.configure();
         NodeParameter p = j.addParameter(NodeParameter.class);
         p.setName("slavename");
@@ -96,7 +96,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         assertThat("master", is(availableNodes.get(0).getText()));
         assertThat(s.getName(), is(availableNodes.get(1).getText()));
         Build b = j.startBuild(singletonMap("slavename", s.getName())).shouldSucceed();
-        assertThat(b.getNode(), is(s.getName()));
+        assertThat(b.getNode(), is(s));
     }
 
     /**
@@ -119,18 +119,18 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
     public void run_on_label() throws Exception {
         FreeStyleJob j = jenkins.jobs.create();
 
-        Slave s1 = slave.install(jenkins).get();
-        Slave s2 = slave2.install(jenkins).get();
+        Node s1 = slave.install(jenkins).get();
+        Node s2 = slave2.install(jenkins).get();
 
         j.configure();
         j.addParameter(LabelParameter.class).setName("slavelabel");
         j.save();
 
         Build b = j.startBuild(singletonMap("slavelabel", s1.getName())).shouldSucceed();
-        assertThat(b.getNode(), is(s1.getName()));
+        assertThat(b.getNode(), is(s1));
 
         b = j.startBuild(singletonMap("slavelabel", String.format("!%s && !%s", s1.getName(), s2.getName()))).shouldSucceed();
-        assertThat(b.getNode(), is("master"));
+        assertThat(b.getNode(), is((Node) jenkins));
     }
 
     /**

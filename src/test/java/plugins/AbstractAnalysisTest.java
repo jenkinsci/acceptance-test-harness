@@ -4,6 +4,7 @@ import javax.annotation.CheckForNull;
 import javax.mail.MessagingException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.ParserConfigurationException;
+
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
@@ -29,6 +30,7 @@ import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.ListView;
 import org.jenkinsci.test.acceptance.po.ListViewColumn;
 import org.jenkinsci.test.acceptance.po.MatrixProject;
+import org.jenkinsci.test.acceptance.po.Node;
 import org.jenkinsci.test.acceptance.po.PostBuildStep;
 import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.po.View;
@@ -353,7 +355,7 @@ public abstract class AbstractAnalysisTest extends AbstractJUnitTest {
      * @param slave Slave to run job on
      * @return The made build
      */
-    public Build buildJobOnSlaveWithSuccess(FreeStyleJob job, Slave slave) {
+    public Build buildJobOnSlaveWithSuccess(FreeStyleJob job, Node slave) {
         return job.startBuild(singletonMap("slavename", slave.getName())).shouldSucceed();
     }
 

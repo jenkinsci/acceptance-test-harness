@@ -43,6 +43,18 @@ public abstract class Node extends ContainerPageObject {
 
     public abstract String getName();
 
+    public void setExecutors(int n) {
+        control("/numExecutors").set(n);
+    }
+
+    public void setRemoteFs(String s) {
+        find(by.input("_.remoteFS")).sendKeys(s);
+    }
+
+    public void setLabels(String l) {
+        find(by.path("/labelString")).sendKeys(l);
+    }
+
     public String runScript(String script, Object... args) {
         visit("script");
         CodeMirror cm = new CodeMirror(this, "/script");

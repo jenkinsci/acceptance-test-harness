@@ -61,18 +61,6 @@ public abstract class Slave extends Node {
         return getJson().get("executors").size();
     }
 
-    public void setExecutors(int n) {
-        control("/numExecutors").set(n);
-    }
-
-    public void setRemoteFs(String s) {
-        find(by.input("_.remoteFS")).sendKeys(s);
-    }
-
-    public void setLabels(String l) {
-        find(by.path("/labelString")).sendKeys(l);
-    }
-
     /**
      * Set up this slave as a local slave that launches slave on the same host as Jenkins
      * call this in the context of the config UI

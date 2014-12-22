@@ -1,6 +1,7 @@
 package plugins;
 
 import javax.xml.parsers.ParserConfigurationException;
+
 import java.io.IOException;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -19,7 +20,7 @@ import org.jenkinsci.test.acceptance.plugins.pmd.PmdWarningsPerProjectDashboardV
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.ListView;
-import org.jenkinsci.test.acceptance.po.Slave;
+import org.jenkinsci.test.acceptance.po.Node;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -355,9 +356,9 @@ public class PmdPluginTest extends AbstractAnalysisTest {
     @Test
     public void configure_a_job_with_PMD_post_build_steps_build_on_slave() throws Exception {
         FreeStyleJob job = setUpPmdFreestyleJob();
-        Slave slave = makeASlaveAndConfigureJob(job);
+        Node slave = makeASlaveAndConfigureJob(job);
         Build build = buildJobOnSlaveWithSuccess(job, slave);
-        assertThat(build.getNode(), is(slave.getName()));
+        assertThat(build.getNode(), is(slave));
         assertThat(build, hasAction("PMD Warnings"));
         assertThat(job, hasAction("PMD Warnings"));
     }
