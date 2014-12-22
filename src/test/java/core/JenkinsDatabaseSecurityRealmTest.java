@@ -24,6 +24,7 @@
 package core;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
@@ -48,6 +49,8 @@ public class JenkinsDatabaseSecurityRealmTest extends AbstractJUnitTest {
     public void login_and_logout() {
 
         User user = realm.signup("jenkins-acceptance-tests-user");
+
+        assertTrue("User should exist", !new User(jenkins, "jenkins-acceptance-tests-userx").mail().isEmpty());
 
         jenkins.login().doLogin(user);
 
