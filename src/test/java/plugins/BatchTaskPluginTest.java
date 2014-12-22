@@ -139,8 +139,8 @@ public class BatchTaskPluginTest extends AbstractJUnitTest {
 
 
     private void configureBatchTrigger(Job job, BatchTask task) {
-        job.save();
-        // Needed to save configured batch tasks before configuring triggers
+        job.save(); // Needed to save configured batch tasks before configuring triggers
+        sleep(100); // Configured tasks are sometimes missing immediately after save
         job.configure();
         job.addPublisher(BatchTaskTrigger.class).setTask(task);
     }
