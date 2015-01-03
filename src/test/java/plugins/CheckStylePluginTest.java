@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.Bug;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
@@ -228,7 +227,9 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
     }
 
     /**
-     * Builds a freestyle project and checks if new warning are displayed.
+     * Builds an existing freestyle project using actual maven commands and checks if new warning are displayed.
+     * Also verifies that the warnings have links to the actual source code and the source code view shows the
+     * affected line.
      */
     @Test
     public void build_simple_freestyle_mavengoals_project() {
@@ -238,7 +239,8 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
                 settings.pattern.set("target/checkstyle-result.xml");
             }
         };
-        FreeStyleJob job = setupJob("/checkstyle_plugin/sample_checkstyle_project", FreeStyleJob.class, CheckstyleFreestyleBuildSettings.class, buildConfigurator, "clean package checkstyle:checkstyle"
+        FreeStyleJob job = setupJob("/checkstyle_plugin/sample_checkstyle_project", FreeStyleJob.class,
+                CheckstyleFreestyleBuildSettings.class, buildConfigurator, "clean package checkstyle:checkstyle"
         );
         Build lastBuild = buildJobWithSuccess(job);
         assertThatBuildHasCheckstyleResults(lastBuild);
@@ -258,6 +260,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
         expectedContent.put("Main.java:24", 24);
         expectedContent.put("Main.java:27", 27);
         assertThat(checkstyle.getWarningsTabContents(), is(expectedContent));
+        // FIXME: Add source file checks
 // TODO decision of uhafner
 //        assertThat(checkstyle.getLinkedSourceFileLineNumber("Warnings", "Main.java:27", "High"), is(27));
 //        assertThat(checkstyle.getLinkedSourceFileLineAsString("Warnings", "Main.java:0", "High"), containsString("Missing package-info.java file."));
@@ -310,8 +313,8 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
     }
 
     /**
-     * Builds a job on a slave with checkstyle and verifies that the information checkstyle provides in the tabs about the build
-     * are the information we expect.
+     * Builds a job on a slave with checkstyle and verifies that the information checkstyle provides in the tabs about
+     * the build are the information we expect.
      */
     @Test
     public void view_checkstyle_report_build_on_slave() throws Exception {
@@ -321,52 +324,56 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
 
         assertThat(build.getNode(), is(slave));
         assertThatBuildHasCheckstyleResults(job.getLastBuild());
-        assertThat(job, hasAction("Checkstyle Warnings"));
+        assertThatBuildHasCheckstyleResults(job);
     }
 
     /**
-     * Build a job and check set up a dashboard list-view. Check, if the dashboard view shows correct warning count.
+     * Sets up a list view with a warnings column. Builds a job and checks if the column shows the correct number of
+     * warnings and provides a direct link to the actual warning results.
      */
     @Test
     @Category(SmokeTest.class)
     @Bug("24436")
-    public void build_a_job_and_check_if_dashboard_list_view_shows_correct_warnings() {
+    public void build_a_job_and_check_if_list_view_column_shows_correct_warnings() {
         MavenModuleSet job = setupSimpleMavenJob();
         buildJobAndWait(job).shouldSucceed();
+
         ListView view = addDashboardListViewColumn(CheckstyleListViewColumn.class);
 
         String relativeUrl = "job/" + job.name + "/checkstyle";
         By expectedDashboardLinkMatcher = by.css("a[href$='" + relativeUrl + "']");
-        assertThat(jenkins.all(expectedDashboardLinkMatcher).size(), is(1));
-        WebElement dashboardLink = jenkins.getElement(expectedDashboardLinkMatcher);
-        assertThat(dashboardLink.getText().trim(), is("12"));
 
-        dashboardLink.click();
-        assertThat(driver, Matchers.hasContent("CheckStyle Result"));
+        assertValidLink(expectedDashboardLinkMatcher);
 
         view.delete();
     }
 
     /**
-     * Build a job and check set up a "dashboard"-style view. Check, if the dashboard view shows correct warning count.
+     * Sets up a dashboard view with a warnings-per-project portlet. Builds a job and checks if the portlett shows the
+     * correct number of warnings and provides a direct link to the actual warning results.
      */
     @Test
     @WithPlugins("dashboard-view")
-    public void build_a_job_and_check_if_dashboard_view_shows_correct_warnings() {
+    public void build_a_job_and_check_if_dashboard_portlet_shows_correct_warnings() {
         MavenModuleSet job = setupSimpleMavenJob();
         buildJobAndWait(job).shouldSucceed();
 
         DashboardView view = addDashboardViewAndBottomPortlet(CheckstyleWarningsPerProjectDashboardViewPortlet.class);
 
         By expectedDashboardLinkMatcher = by.css("a[href='job/" + job.name + "/checkstyle']");
-        assertThat(jenkins.all(expectedDashboardLinkMatcher).size(), is(1));
-        WebElement dashboardLink = jenkins.getElement(expectedDashboardLinkMatcher);
-        assertThat(dashboardLink.getText().trim(), is("12"));
 
-        dashboardLink.click();
-        assertThat(driver, Matchers.hasContent("CheckStyle Result"));
+        assertValidLink(expectedDashboardLinkMatcher);
 
         view.delete();
+    }
+
+    private void assertValidLink(final By warningsLinkMatcher) {
+        assertThat(jenkins.all(warningsLinkMatcher).size(), is(1));
+        WebElement link = jenkins.getElement(warningsLinkMatcher);
+        assertThat(link.getText().trim(), is("12"));
+
+        link.click();
+        assertThat(driver, hasContent("CheckStyle Result"));
     }
 
     /**
@@ -381,7 +388,6 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
                 settings.pattern.set(PATTERN_WITH_776_WARNINGS);
             }
         };
-        FreeStyleJob job = setUpFreestyleJob(buildConfigurator);
-        return job;
+        return setUpFreestyleJob(buildConfigurator);
     }
 }
