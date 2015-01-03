@@ -33,6 +33,7 @@ public abstract class AnalysisSettings extends PageAreaImpl implements PostBuild
 
     protected Control canComputeNew = control("canComputeNew");
     protected Control newWarningsThresholdFailed = control("canComputeNew/failedNewAll");
+    protected Control newWarningsThresholdUnstable = control("canComputeNew/unstableNewAll");
     protected Control useDeltaValues = control("canComputeNew/useDeltaValues");
 
     /**
@@ -171,6 +172,16 @@ public abstract class AnalysisSettings extends PageAreaImpl implements PostBuild
         ensureAdvancedClicked();
         canComputeNew.check(true);
         newWarningsThresholdFailed.set(threshold);
+    }
+
+    /**
+     * Build is marked as unstable if at least these new warnings are found.
+     * @param threshold number of new warnings to set the build to unstable.
+     */
+    public void setNewWarningsThresholdUnstable(String threshold) {
+        ensureAdvancedClicked();
+        canComputeNew.check(true);
+        newWarningsThresholdUnstable.set(threshold);
     }
 
     /**

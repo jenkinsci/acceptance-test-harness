@@ -25,9 +25,11 @@ import static org.hamcrest.MatcherAssert.*;
  * @author Kohsuke Kawaguchi
  */
 public class Build extends ContainerPageObject {
+    public enum Result {SUCCESS, UNSTABLE, FAILURE, ABORTED, NOT_BUILT}
+
     public final Job job;
 
-    private String result;
+    private Result result;
 
     private boolean success;
 
@@ -168,12 +170,12 @@ public class Build extends ContainerPageObject {
 
     public String getResult() {
         if (result != null) {
-            return result;
+            return result.name();
         }
 
         waitUntilFinished();
-        result = getJson().get("result").asText();
-        return result;
+        result = Result.valueOf(getJson().get("result").asText());
+        return result.name();
     }
 
     public Artifact getArtifact(String artifact) {
@@ -193,30 +195,35 @@ public class Build extends ContainerPageObject {
     }
 
     public Build shouldSucceed() {
-        assertThat(this, resultIs("SUCCESS"));
+        assertThat(this, resultIs(Result.SUCCESS));
         return this;
     }
 
     public Build shouldFail() {
-        assertThat(this, resultIs("FAILURE"));
+        assertThat(this, resultIs(Result.FAILURE));
         return this;
     }
 
     public Build shouldAbort() {
-        assertThat(this, resultIs("ABORTED"));
+        assertThat(this, resultIs(Result.ABORTED));
         return this;
     }
 
     public Build shouldBeUnstable() {
-        assertThat(this, resultIs("UNSTABLE"));
+        assertThat(this, resultIs(Result.UNSTABLE));
         return this;
     }
 
-    private Matcher<Build> resultIs(final String expected) {
+    public Build shouldBe(final Result result) {
+        assertThat(this, resultIs(result));
+        return this;
+    }
+
+    private Matcher<Build> resultIs(final Result expected) {
         return new Matcher<Build>("Build result %s", expected) {
             @Override
             public boolean matchesSafely(Build item) {
-                return item.getResult().equals(expected);
+                return item.getResult().equals(expected.name());
             }
 
             @Override

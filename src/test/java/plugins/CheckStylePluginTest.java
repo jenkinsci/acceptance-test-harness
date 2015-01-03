@@ -17,6 +17,7 @@ import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleWarningsPerPro
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.po.Build.Result;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.ListView;
 import org.jenkinsci.test.acceptance.po.Node;
@@ -38,14 +39,17 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
 @WithPlugins("checkstyle")
 public class CheckStylePluginTest extends AbstractAnalysisTest {
     private static final String PATTERN_WITH_776_WARNINGS = "checkstyle-result.xml";
-    private static final String FILE_WITH_776_WARNINGS = "/checkstyle_plugin/" + PATTERN_WITH_776_WARNINGS;
+    private static final String CHECKSTYLE_PLUGIN_ROOT = "/checkstyle_plugin/";
+    private static final String FILE_WITH_776_WARNINGS = CHECKSTYLE_PLUGIN_ROOT + PATTERN_WITH_776_WARNINGS;
     private static final String FILE_FOR_2ND_RUN = "/checkstyle_plugin/forSecondRun/checkstyle-result.xml";
 
     /**
-     * Checks that the plug-in sends a mail after a build has been failed. The content of the mail
-     * contains several tokens that should be expanded in the mail with the correct vaules.
+     * Checks that the plug-in sends a mail after a build has been failed. The content of the mail contains several
+     * tokens that should be expanded in the mail with the correct vaules.
      */
-    @Test @WithPlugins("email-ext") @Bug("25501")
+    @Test
+    @WithPlugins("email-ext")
+    @Bug("25501")
     public void should_send_mail_with_expanded_tokens() {
         setUpMailer();
 
@@ -227,9 +231,9 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
     }
 
     /**
-     * Builds an existing freestyle project using actual maven commands and checks if new warning are displayed.
-     * Also verifies that the warnings have links to the actual source code and the source code view shows the
-     * affected line.
+     * Builds an existing freestyle project using actual maven commands and checks if new warning are displayed. Also
+     * verifies that the warnings have links to the actual source code and the source code view shows the affected
+     * line.
      */
     @Test
     public void build_simple_freestyle_mavengoals_project() {
@@ -389,5 +393,48 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
             }
         };
         return setUpFreestyleJob(buildConfigurator);
+    }
+
+    /**
+     * Creates a sequence of Freestyle builds and checks if the build result is set correctly. New warning threshold is
+     * set to zero, e.g. a new warning should mark a build as unstable.
+     * <p/>
+     * <ol>
+     *     <li>Build 1: 1 new warning (SUCCESS since no reference build is set)</li>
+     *     <li>Build 2: 2 new warnings (UNSTABLE since threshold is reached)</li>
+     *     <li>Build 3: 1 new warning (UNSTABLE since still one warning is new based on delta with reference build)</li>
+     *     <li>Build 4: 1 new warning (SUCCESS since no reference build is set)</li>
+     * </ol>
+     */
+    @Test
+    public void should_set_build_status_in_build_sequence() {
+        FreeStyleJob job = setupJob(FILE_WITH_776_WARNINGS, FreeStyleJob.class, CheckstyleFreestyleBuildSettings.class, null);
+
+        runBuild(job, 1, Result.SUCCESS, 1);
+        runBuild(job, 2, Result.UNSTABLE, 2);
+        runBuild(job, 3, Result.UNSTABLE, 1);
+        runBuild(job, 4, Result.SUCCESS, 0);
+    }
+
+    private void runBuild(final FreeStyleJob job, final int number, final Result expectedResult, final int expectedNewWarnings) {
+        final String fileName = "checkstyle-result-build" + number + ".xml";
+        AnalysisConfigurator<CheckstyleFreestyleBuildSettings> buildConfigurator = new AnalysisConfigurator<CheckstyleFreestyleBuildSettings>() {
+            @Override
+            public void configure(CheckstyleFreestyleBuildSettings settings) {
+                settings.setNewWarningsThresholdUnstable("0");
+                settings.pattern.set(fileName);
+            }
+        };
+
+        editJob(CHECKSTYLE_PLUGIN_ROOT + fileName, false, job,
+                CheckstyleFreestyleBuildSettings.class, buildConfigurator);
+        Build lastBuild = buildJobAndWait(job).shouldBe(expectedResult);
+
+        if (expectedNewWarnings > 0) {
+            assertThatBuildHasCheckstyleResults(lastBuild);
+            lastBuild.open();
+            CheckstyleAction checkstyle = new CheckstyleAction(job);
+            assertThat(checkstyle.getNewWarningNumber(), is(expectedNewWarnings));
+        }
     }
 }
