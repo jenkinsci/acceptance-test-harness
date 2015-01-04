@@ -170,6 +170,30 @@ public class WarningsPluginTest extends AbstractAnalysisTest {
     }
 
     /**
+     * Runs a job with warning threshold configured once and validates that build is marked as unstable.
+     */
+    @Test
+    @Bug("19614")
+    public void should_set_build_to_unstable_if_total_warnings_threshold_set() {
+        AnalysisConfigurator<WarningsBuildSettings> buildConfiguration = new AnalysisConfigurator<WarningsBuildSettings>() {
+            @Override
+            public void configure(WarningsBuildSettings settings) {
+                settings.addConsoleScanner("Java Compiler (javac)");
+                settings.addConsoleScanner("JavaDoc Tool");
+                settings.addConsoleScanner("MSBuild");
+                settings.setBuildUnstableTotalAll("0");
+                settings.setNewWarningsThresholdFailed("0");
+                settings.setUseDeltaValues(true);
+            }
+        };
+        FreeStyleJob job = setupJob(SEVERAL_PARSERS_FILE_FULL_PATH, FreeStyleJob.class,
+                WarningsBuildSettings.class, buildConfiguration);
+
+        catWarningsToConsole(job);
+        buildJobAndWait(job).shouldBeUnstable();
+    }
+
+    /**
      * Checks that warning results are correctly created for a freestyle project with the parsers
      * "Java", "JavaDoc" and "MSBuild" if the console log contains multiple warnings of these types.
      */
