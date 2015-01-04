@@ -1,0 +1,9 @@
+<pmd version="oclint-0.7dev">
+
+<file name="/sample-project/ChannelContentAPIClient.m">
+<violation begincolumn="1" beginline="32" priority="5" rule="long line">
+Line with 127 characters exceeds limit of 100
+</violation>
+</file>
+
+</pmd>

@@ -1,7 +1,6 @@
 package plugins;
 
 import javax.xml.parsers.ParserConfigurationException;
-
 import java.io.IOException;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -18,9 +17,11 @@ import org.jenkinsci.test.acceptance.plugins.pmd.PmdFreestyleSettings;
 import org.jenkinsci.test.acceptance.plugins.pmd.PmdMavenBuildSettings;
 import org.jenkinsci.test.acceptance.plugins.pmd.PmdWarningsPerProjectDashboardViewPortlet;
 import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.po.Build.Result;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.ListView;
 import org.jenkinsci.test.acceptance.po.Node;
+import org.jenkinsci.test.acceptance.po.PageObject;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -37,10 +38,11 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
  */
 @WithPlugins("pmd")
 public class PmdPluginTest extends AbstractAnalysisTest {
-    private static final String PMD_FILE_WITHOUT_WARNINGS = "/pmd_plugin/pmd.xml";
-
+    private static final String PMD_PLUGIN_ROOT = "/pmd_plugin/";
+    private static final String PATTERN_WITHOUT_WARNINGS = "pmd.xml";
+    private static final String PMD_FILE_WITHOUT_WARNINGS = PMD_PLUGIN_ROOT + PATTERN_WITHOUT_WARNINGS;
     private static final String PATTERN_WITH_9_WARNINGS = "pmd-warnings.xml";
-    private static final String FILE_WITH_9_WARNINGS = "/pmd_plugin/" + PATTERN_WITH_9_WARNINGS;
+    private static final String FILE_WITH_9_WARNINGS = PMD_PLUGIN_ROOT + PATTERN_WITH_9_WARNINGS;
 
     /**
      * Checks that the plug-in sends a mail after a build has been failed. The content of the mail
@@ -77,7 +79,7 @@ public class PmdPluginTest extends AbstractAnalysisTest {
         AnalysisConfigurator<PmdFreestyleSettings> buildConfigurator = new AnalysisConfigurator<PmdFreestyleSettings>() {
             @Override
             public void configure(PmdFreestyleSettings settings) {
-                settings.pattern.set("pmd.xml");
+                settings.pattern.set(PATTERN_WITHOUT_WARNINGS);
             }
         };
 
@@ -107,7 +109,7 @@ public class PmdPluginTest extends AbstractAnalysisTest {
         AnalysisConfigurator<PmdFreestyleSettings> buildConfigurator = new AnalysisConfigurator<PmdFreestyleSettings>() {
             @Override
             public void configure(PmdFreestyleSettings settings) {
-                settings.pattern.set("pmd.xml");
+                settings.pattern.set(PATTERN_WITHOUT_WARNINGS);
                 settings.setCanRunOnFailed(true);
             }
         };
@@ -130,14 +132,14 @@ public class PmdPluginTest extends AbstractAnalysisTest {
         AnalysisConfigurator<PmdFreestyleSettings> buildConfigurator = new AnalysisConfigurator<PmdFreestyleSettings>() {
             @Override
             public void configure(PmdFreestyleSettings settings) {
-                settings.pattern.set("pmd-warnings.xml");
+                settings.pattern.set(PATTERN_WITH_9_WARNINGS);
             }
         };
 
         FreeStyleJob job = createFreeStyleJob(FILE_WITH_9_WARNINGS, buildConfigurator);
 
         Build lastBuild = buildJobWithSuccess(job);
-        assertThat(lastBuild, hasAction("PMD Warnings"));
+        assertThatPageHasPmdResults(lastBuild);
 
         lastBuild.open();
 
@@ -194,7 +196,7 @@ public class PmdPluginTest extends AbstractAnalysisTest {
         AnalysisConfigurator<PmdFreestyleSettings> buildConfigurator = new AnalysisConfigurator<PmdFreestyleSettings>() {
             @Override
             public void configure(PmdFreestyleSettings settings) {
-                settings.pattern.set("pmd-warnings.xml");
+                settings.pattern.set(PATTERN_WITH_9_WARNINGS);
             }
         };
 
@@ -202,7 +204,7 @@ public class PmdPluginTest extends AbstractAnalysisTest {
 
         Build build = buildJobWithSuccess(job);
         String apiUrl = "pmdResult/api/xml?depth=0";
-        String expectedXmlPath = "/pmd_plugin/api_depth_0.xml";
+        String expectedXmlPath = PMD_PLUGIN_ROOT + "api_depth_0.xml";
         assertXmlApiMatchesExpected(build, apiUrl, expectedXmlPath);
     }
 
@@ -214,9 +216,9 @@ public class PmdPluginTest extends AbstractAnalysisTest {
         FreeStyleJob job = setUpPmdFreestyleJob();
         buildJobAndWait(job);
 
-        editJob("/pmd_plugin/forSecondRun/pmd-warnings.xml", false, job);
+        editJob(PMD_PLUGIN_ROOT + "forSecondRun/pmd-warnings.xml", false, job);
         Build lastBuild = buildJobWithSuccess(job);
-        assertThat(lastBuild, hasAction("PMD Warnings"));
+        assertThatPageHasPmdResults(lastBuild);
         lastBuild.open();
 
         PmdAction action = new PmdAction(job);
@@ -240,7 +242,7 @@ public class PmdPluginTest extends AbstractAnalysisTest {
     public void view_pmd_report_job_graph_links() {
         FreeStyleJob job = setUpPmdFreestyleJob();
         buildJobAndWait(job);
-        editJob("/pmd_plugin/forSecondRun/pmd-warnings.xml", false, job);
+        editJob(PMD_PLUGIN_ROOT + "forSecondRun/pmd-warnings.xml", false, job);
         buildJobWithSuccess(job);
 
         assertAreaLinksOfJobAreLike(job, "^\\d+/pmdResult");
@@ -255,7 +257,7 @@ public class PmdPluginTest extends AbstractAnalysisTest {
         AnalysisConfigurator<PmdFreestyleSettings> buildConfigurator = new AnalysisConfigurator<PmdFreestyleSettings>() {
             @Override
             public void configure(PmdFreestyleSettings settings) {
-                settings.pattern.set("pmd-warnings.xml");
+                settings.pattern.set(PATTERN_WITH_9_WARNINGS);
                 settings.setBuildUnstableTotalAll("0");
                 settings.setNewWarningsThresholdFailed("0");
                 settings.setUseDeltaValues(true);
@@ -272,7 +274,7 @@ public class PmdPluginTest extends AbstractAnalysisTest {
     }
 
     private MavenModuleSet setupSimpleMavenJob(AnalysisConfigurator<PmdMavenBuildSettings> configurator) {
-        String projectPath = "/pmd_plugin/sample_pmd_project";
+        String projectPath = PMD_PLUGIN_ROOT + "sample_pmd_project";
         String goal = "clean package pmd:pmd";
         return setupMavenJob(projectPath, goal, PmdMavenBuildSettings.class, configurator);
     }
@@ -288,10 +290,10 @@ public class PmdPluginTest extends AbstractAnalysisTest {
                 settings.pattern.set("target/pmd.xml");
             }
         };
-        FreeStyleJob job = setupJob("/pmd_plugin/sample_pmd_project", FreeStyleJob.class, PmdFreestyleSettings.class, buildConfigurator, "clean package pmd:pmd"
+        FreeStyleJob job = setupJob(PMD_PLUGIN_ROOT + "sample_pmd_project", FreeStyleJob.class, PmdFreestyleSettings.class, buildConfigurator, "clean package pmd:pmd"
         );
         Build lastBuild = buildJobWithSuccess(job);
-        assertThat(lastBuild, hasAction("PMD Warnings"));
+        assertThatPageHasPmdResults(lastBuild);
         lastBuild.open();
         PmdAction pmd = new PmdAction(job);
         assertThat(pmd.getNewWarningNumber(), is(2));
@@ -311,10 +313,14 @@ public class PmdPluginTest extends AbstractAnalysisTest {
     public void build_simple_maven_project() {
         MavenModuleSet job = setupSimpleMavenJob();
         Build lastBuild = buildJobWithSuccess(job);
-        assertThat(lastBuild, hasAction("PMD Warnings"));
+        assertThatPageHasPmdResults(lastBuild);
         lastBuild.open();
         PmdAction pmd = new PmdAction(job);
         assertThat(pmd.getNewWarningNumber(), is(2));
+    }
+
+    private void assertThatPageHasPmdResults(final PageObject page) {
+        assertThat(page, hasAction("PMD Warnings"));
     }
 
     /**
@@ -359,8 +365,8 @@ public class PmdPluginTest extends AbstractAnalysisTest {
         Node slave = makeASlaveAndConfigureJob(job);
         Build build = buildJobOnSlaveWithSuccess(job, slave);
         assertThat(build.getNode(), is(slave));
-        assertThat(build, hasAction("PMD Warnings"));
-        assertThat(job, hasAction("PMD Warnings"));
+        assertThatPageHasPmdResults(build);
+        assertThatPageHasPmdResults(job);
     }
 
     /**
@@ -408,10 +414,72 @@ public class PmdPluginTest extends AbstractAnalysisTest {
         AnalysisConfigurator<PmdFreestyleSettings> buildConfigurator = new AnalysisConfigurator<PmdFreestyleSettings>() {
             @Override
             public void configure(PmdFreestyleSettings settings) {
-                settings.pattern.set("pmd-warnings.xml");
+                settings.pattern.set(PATTERN_WITH_9_WARNINGS);
             }
         };
         return createFreeStyleJob(FILE_WITH_9_WARNINGS, buildConfigurator);
     }
 
+    /**
+     * Creates a sequence of Freestyle builds and checks if the build result is set correctly. New warning threshold is
+     * set to zero, e.g. a new warning should mark a build as unstable.
+     * <p/>
+     * <ol>
+     *     <li>Build 1: 1 new warning (SUCCESS since no reference build is set)</li>
+     *     <li>Build 2: 2 new warnings (UNSTABLE since threshold is reached)</li>
+     *     <li>Build 3: 1 new warning (UNSTABLE since still one warning is new based on delta with reference build)</li>
+     *     <li>Build 4: 1 new warning (SUCCESS since there are no warnings)</li>
+     * </ol>
+     */
+    @Test
+    public void should_set_build_status_in_build_sequence_compare_to_reference_build() {
+        FreeStyleJob job = setupJob(FILE_WITH_9_WARNINGS, FreeStyleJob.class, PmdFreestyleSettings.class, null);
+
+        runBuild(job, 1, Result.SUCCESS, 1, false);
+        runBuild(job, 2, Result.UNSTABLE, 2, false);
+        runBuild(job, 3, Result.UNSTABLE, 1, false);
+        runBuild(job, 4, Result.SUCCESS, 0, false);
+    }
+
+    /**
+     * Creates a sequence of Freestyle builds and checks if the build result is set correctly. New warning threshold is
+     * set to zero, e.g. a new warning should mark a build as unstable.
+     * <p/>
+     * <ol>
+     *     <li>Build 1: 1 new warning (SUCCESS since no reference build is set)</li>
+     *     <li>Build 2: 2 new warnings (UNSTABLE since threshold is reached)</li>
+     *     <li>Build 3: 1 new warning (SUCCESS since all warnings of previous build are fixed)</li>
+     * </ol>
+     */
+    @Test
+    @Bug("13458")
+    public void should_set_build_status_in_build_sequence_compare_to_previous_build() {
+        FreeStyleJob job = setupJob(FILE_WITH_9_WARNINGS, FreeStyleJob.class, PmdFreestyleSettings.class, null);
+
+        runBuild(job, 1, Result.SUCCESS, 1, true);
+        runBuild(job, 2, Result.UNSTABLE, 2, true);
+        runBuild(job, 3, Result.SUCCESS, 0, true);
+    }
+
+    private void runBuild(final FreeStyleJob job, final int number, final Result expectedResult, final int expectedNewWarnings, final boolean usePreviousAsReference) {
+        final String fileName = "pmd-warnings-build" + number + ".xml";
+        AnalysisConfigurator<PmdFreestyleSettings> buildConfigurator = new AnalysisConfigurator<PmdFreestyleSettings>() {
+            @Override
+            public void configure(PmdFreestyleSettings settings) {
+                settings.setNewWarningsThresholdUnstable("0", usePreviousAsReference);
+                settings.pattern.set(fileName);
+            }
+        };
+
+        editJob(PMD_PLUGIN_ROOT + fileName, false, job,
+                PmdFreestyleSettings.class, buildConfigurator);
+        Build lastBuild = buildJobAndWait(job).shouldBe(expectedResult);
+
+        if (expectedNewWarnings > 0) {
+            assertThatPageHasPmdResults(lastBuild);
+            lastBuild.open();
+            PmdAction pmd = new PmdAction(job);
+            assertThat(pmd.getNewWarningNumber(), is(expectedNewWarnings));
+        }
+    }
 }
