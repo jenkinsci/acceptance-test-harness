@@ -224,10 +224,10 @@ public class PmdPluginTest extends AbstractAnalysisTest {
         PmdAction action = new PmdAction(job);
         assertThat(action.getResultLinkByXPathText("8 warnings"), is("pmdResult"));
         assertThat(action.getResultLinkByXPathText("1 new warning"), is("pmdResult/new"));
-        assertThat(action.getResultLinkByXPathText("2 fixed warnings"), is("pmdResult/fixed"));
+        assertThat(action.getResultLinkByXPathText("1 fixed warning"), is("pmdResult/fixed"));
         assertThat(action.getWarningNumber(), is(8));
         assertThat(action.getNewWarningNumber(), is(1));
-        assertThat(action.getFixedWarningNumber(), is(2));
+        assertThat(action.getFixedWarningNumber(), is(1));
         assertThat(action.getHighWarningNumber(), is(0));
         assertThat(action.getNormalWarningNumber(), is(2));
         assertThat(action.getLowWarningNumber(), is(6));
