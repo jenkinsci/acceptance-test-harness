@@ -192,10 +192,10 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
         CheckstyleAction ca = new CheckstyleAction(job);
         assertThat(ca.getResultLinkByXPathText("679 warnings"), is("checkstyleResult"));
         assertThat(ca.getResultLinkByXPathText("3 new warnings"), is("checkstyleResult/new"));
-        assertThat(ca.getResultLinkByXPathText("100 fixed warnings"), is("checkstyleResult/fixed"));
+        assertThat(ca.getResultLinkByXPathText("97 fixed warnings"), is("checkstyleResult/fixed"));
         assertThat(ca.getWarningNumber(), is(679));
         assertThat(ca.getNewWarningNumber(), is(3));
-        assertThat(ca.getFixedWarningNumber(), is(100));
+        assertThat(ca.getFixedWarningNumber(), is(97));
         assertThat(ca.getHighWarningNumber(), is(679));
         assertThat(ca.getNormalWarningNumber(), is(0));
         assertThat(ca.getLowWarningNumber(), is(0));
