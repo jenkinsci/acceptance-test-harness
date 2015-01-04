@@ -9,9 +9,9 @@ import org.jenkinsci.test.acceptance.po.Describable;
  * @author Fabian Trampusch
  */
 @Describable("Publish PMD analysis results")
-public class PmdMavenBuildSettings extends AnalysisMavenSettings {
+public class PmdMavenSettings extends AnalysisMavenSettings {
 
-    public PmdMavenBuildSettings(MavenModuleSet parent, String selectorPath) {
+    public PmdMavenSettings(MavenModuleSet parent, String selectorPath) {
         super(parent, selectorPath);
     }
 }

@@ -14,7 +14,7 @@ import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.plugins.pmd.PmdAction;
 import org.jenkinsci.test.acceptance.plugins.pmd.PmdColumn;
 import org.jenkinsci.test.acceptance.plugins.pmd.PmdFreestyleSettings;
-import org.jenkinsci.test.acceptance.plugins.pmd.PmdMavenBuildSettings;
+import org.jenkinsci.test.acceptance.plugins.pmd.PmdMavenSettings;
 import org.jenkinsci.test.acceptance.plugins.pmd.PmdWarningsPerProjectDashboardViewPortlet;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Build.Result;
@@ -52,16 +52,13 @@ public class PmdPluginTest extends AbstractAnalysisTest {
     public void should_send_mail_with_expanded_tokens() {
         setUpMailer();
 
-        AnalysisConfigurator<PmdFreestyleSettings> buildConfigurator =
-                new AnalysisConfigurator<PmdFreestyleSettings>() {
-                    @Override
-                    public void configure(PmdFreestyleSettings settings) {
-                        settings.setBuildFailedTotalAll("0");
-                        settings.pattern.set(PATTERN_WITH_9_WARNINGS);
-                    }
-                };
-        FreeStyleJob job = setupJob(FILE_WITH_9_WARNINGS, FreeStyleJob.class,
-                PmdFreestyleSettings.class, buildConfigurator);
+        FreeStyleJob job = createFreeStyleJob(new AnalysisConfigurator<PmdFreestyleSettings>() {
+            @Override
+            public void configure(PmdFreestyleSettings settings) {
+                settings.setBuildFailedTotalAll("0");
+                settings.pattern.set(PATTERN_WITH_9_WARNINGS);
+            }
+        });
 
         configureEmailNotification(job, "PMD: ${PMD_RESULT}",
                 "PMD: ${PMD_COUNT}-${PMD_FIXED}-${PMD_NEW}");
@@ -75,7 +72,7 @@ public class PmdPluginTest extends AbstractAnalysisTest {
      * Configures a job with PMD and checks that the parsed PMD file does not contain warnings.
      */
     @Test
-    public void configure_a_job_with_PMD_post_build_steps() {
+    public void should_find_no_warnings() {
         AnalysisConfigurator<PmdFreestyleSettings> buildConfigurator = new AnalysisConfigurator<PmdFreestyleSettings>() {
             @Override
             public void configure(PmdFreestyleSettings settings) {
@@ -83,7 +80,7 @@ public class PmdPluginTest extends AbstractAnalysisTest {
             }
         };
 
-        FreeStyleJob job = createFreestyleJob(buildConfigurator);
+        FreeStyleJob job = createFreeStyleJob(buildConfigurator);
 
         Build lastBuild = buildJobWithSuccess(job);
         assertThatBuildHasNoWarnings(lastBuild);
@@ -93,7 +90,7 @@ public class PmdPluginTest extends AbstractAnalysisTest {
         assertThat(lastBuild.open(), hasContent("0 warnings"));
     }
 
-    private FreeStyleJob createFreestyleJob(final AnalysisConfigurator<PmdFreestyleSettings> buildConfigurator) {
+    private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<PmdFreestyleSettings> buildConfigurator) {
         return createFreeStyleJob(PMD_FILE_WITHOUT_WARNINGS, buildConfigurator);
     }
 
@@ -105,7 +102,7 @@ public class PmdPluginTest extends AbstractAnalysisTest {
      * Checks that PMD runs even if the build failed if the property 'canRunOnFailed' is set.
      */
     @Test
-    public void configure_a_job_with_PMD_post_build_steps_run_always() {
+    public void should_collect_warnings_even_if_build_failed() {
         AnalysisConfigurator<PmdFreestyleSettings> buildConfigurator = new AnalysisConfigurator<PmdFreestyleSettings>() {
             @Override
             public void configure(PmdFreestyleSettings settings) {
@@ -114,7 +111,7 @@ public class PmdPluginTest extends AbstractAnalysisTest {
             }
         };
 
-        FreeStyleJob job = createFreestyleJob(buildConfigurator);
+        FreeStyleJob job = createFreeStyleJob(buildConfigurator);
 
         job.configure();
         job.addShellStep("false");
@@ -128,7 +125,7 @@ public class PmdPluginTest extends AbstractAnalysisTest {
      * Configures a job with PMD and checks that the parsed PMD file contains 9 warnings.
      */
     @Test
-    public void configure_a_job_with_PMD_post_build_steps_which_display_some_warnings() {
+    public void should_report_details_in_different_tabs() {
         AnalysisConfigurator<PmdFreestyleSettings> buildConfigurator = new AnalysisConfigurator<PmdFreestyleSettings>() {
             @Override
             public void configure(PmdFreestyleSettings settings) {
@@ -192,7 +189,7 @@ public class PmdPluginTest extends AbstractAnalysisTest {
      */
     @Test
     @Category(SmokeTest.class)
-    public void xml_api_report_depth_0() throws IOException, SAXException, ParserConfigurationException {
+    public void should_return_results_via_remote_api() throws IOException, SAXException, ParserConfigurationException {
         AnalysisConfigurator<PmdFreestyleSettings> buildConfigurator = new AnalysisConfigurator<PmdFreestyleSettings>() {
             @Override
             public void configure(PmdFreestyleSettings settings) {
@@ -211,9 +208,9 @@ public class PmdPluginTest extends AbstractAnalysisTest {
     /**
      * Runs job two times to check if new and fixed warnings are displayed.
      */
-    @Test
-    public void configure_a_job_with_PMD_post_build_steps_which_display_some_warnings_two_runs() {
-        FreeStyleJob job = setUpPmdFreestyleJob();
+    @Test @WithPlugins("pmd@3.40-SNAPSHOT")
+    public void should_report_new_and_fixed_warnings_in_consecutive_builds() {
+        FreeStyleJob job = setUpFreestyleJob();
         buildJobAndWait(job);
 
         editJob(PMD_PLUGIN_ROOT + "forSecondRun/pmd-warnings.xml", false, job);
@@ -240,7 +237,7 @@ public class PmdPluginTest extends AbstractAnalysisTest {
     @Bug("21723")
     @Ignore("Until JENKINS-21723 is fixed")
     public void view_pmd_report_job_graph_links() {
-        FreeStyleJob job = setUpPmdFreestyleJob();
+        FreeStyleJob job = setUpFreestyleJob();
         buildJobAndWait(job);
         editJob(PMD_PLUGIN_ROOT + "forSecondRun/pmd-warnings.xml", false, job);
         buildJobWithSuccess(job);
@@ -248,12 +245,12 @@ public class PmdPluginTest extends AbstractAnalysisTest {
         assertAreaLinksOfJobAreLike(job, "^\\d+/pmdResult");
     }
 
-    /*
+    /**
      * Runs a job with warning threshold configured once and validates that build is marked as unstable.
      */
     @Test
     @Bug("19614")
-    public void build_with_warning_threshold_set_should_be_unstable() {
+    public void should_set_build_to_unstable_if_total_warnings_threshold_set() {
         AnalysisConfigurator<PmdFreestyleSettings> buildConfigurator = new AnalysisConfigurator<PmdFreestyleSettings>() {
             @Override
             public void configure(PmdFreestyleSettings settings) {
@@ -265,25 +262,24 @@ public class PmdPluginTest extends AbstractAnalysisTest {
         };
         FreeStyleJob job = createFreeStyleJob(FILE_WITH_9_WARNINGS, buildConfigurator);
 
-        Build build = buildJobAndWait(job);
-        assertThat(build.isUnstable(), is(true));
+        buildJobAndWait(job).shouldBeUnstable();
     }
 
-    private MavenModuleSet setupSimpleMavenJob() {
-        return setupSimpleMavenJob(null);
+    private MavenModuleSet setUpMavenJob() {
+        return setUpMavenJob(null);
     }
 
-    private MavenModuleSet setupSimpleMavenJob(AnalysisConfigurator<PmdMavenBuildSettings> configurator) {
+    private MavenModuleSet setUpMavenJob(AnalysisConfigurator<PmdMavenSettings> configurator) {
         String projectPath = PMD_PLUGIN_ROOT + "sample_pmd_project";
         String goal = "clean package pmd:pmd";
-        return setupMavenJob(projectPath, goal, PmdMavenBuildSettings.class, configurator);
+        return setupMavenJob(projectPath, goal, PmdMavenSettings.class, configurator);
     }
 
     /**
      * Builds a freestyle project and checks if new warning are displayed.
      */
     @Test
-    public void build_simple_freestyle_mavengoals_project() {
+    public void should_link_to_source_code_in_real_project() {
         AnalysisConfigurator<PmdFreestyleSettings> buildConfigurator = new AnalysisConfigurator<PmdFreestyleSettings>() {
             @Override
             public void configure(PmdFreestyleSettings settings) {
@@ -310,8 +306,8 @@ public class PmdPluginTest extends AbstractAnalysisTest {
      * Builds a maven project and checks if new warnings are displayed.
      */
     @Test
-    public void build_simple_maven_project() {
-        MavenModuleSet job = setupSimpleMavenJob();
+    public void should_retrieve_results_from_maven_job() {
+        MavenModuleSet job = setUpMavenJob();
         Build lastBuild = buildJobWithSuccess(job);
         assertThatPageHasPmdResults(lastBuild);
         lastBuild.open();
@@ -327,15 +323,15 @@ public class PmdPluginTest extends AbstractAnalysisTest {
      * Builds a maven project and checks if it is unstable.
      */
     @Test
-    public void build_simple_maven_project_and_check_if_it_is_unstable() {
-        AnalysisConfigurator<PmdMavenBuildSettings> buildConfigurator =
-                new AnalysisConfigurator<PmdMavenBuildSettings>() {
+    public void should_set_result_to_unstable_if_warning_found() {
+        AnalysisConfigurator<PmdMavenSettings> buildConfigurator =
+                new AnalysisConfigurator<PmdMavenSettings>() {
                     @Override
-                    public void configure(PmdMavenBuildSettings settings) {
+                    public void configure(PmdMavenSettings settings) {
                         settings.setBuildUnstableTotalAll("0");
                     }
                 };
-        MavenModuleSet job = setupSimpleMavenJob(buildConfigurator);
+        MavenModuleSet job = setUpMavenJob(buildConfigurator);
         buildJobAndWait(job).shouldBeUnstable();
     }
 
@@ -343,15 +339,15 @@ public class PmdPluginTest extends AbstractAnalysisTest {
      * Builds a maven project and checks if it failed.
      */
     @Test
-    public void build_simple_maven_project_and_check_if_failed() {
-        AnalysisConfigurator<PmdMavenBuildSettings> buildConfigurator =
-                new AnalysisConfigurator<PmdMavenBuildSettings>() {
+    public void should_set_result_to_failed_if_warning_found() {
+        AnalysisConfigurator<PmdMavenSettings> buildConfigurator =
+                new AnalysisConfigurator<PmdMavenSettings>() {
                     @Override
-                    public void configure(PmdMavenBuildSettings settings) {
+                    public void configure(PmdMavenSettings settings) {
                         settings.setBuildFailedTotalAll("0");
                     }
                 };
-        MavenModuleSet job = setupSimpleMavenJob(buildConfigurator);
+        MavenModuleSet job = setUpMavenJob(buildConfigurator);
         buildJobAndWait(job).shouldFail();
     }
 
@@ -360,48 +356,54 @@ public class PmdPluginTest extends AbstractAnalysisTest {
      * are the information we expect.
      */
     @Test
-    public void configure_a_job_with_PMD_post_build_steps_build_on_slave() throws Exception {
-        FreeStyleJob job = setUpPmdFreestyleJob();
+    public void should_retrieve_results_from_slave() throws Exception {
+        FreeStyleJob job = setUpFreestyleJob();
         Node slave = makeASlaveAndConfigureJob(job);
         Build build = buildJobOnSlaveWithSuccess(job, slave);
+
         assertThat(build.getNode(), is(slave));
         assertThatPageHasPmdResults(build);
         assertThatPageHasPmdResults(job);
     }
 
     /**
-     * Build a job and check set up a dashboard list-view. Check, if the dashboard view shows correct warning count.
+     * Sets up a list view with a warnings column. Builds a job and checks if the column shows the correct number of
+     * warnings and provides a direct link to the actual warning results.
      */
     @Test
-    public void build_a_job_and_check_if_dashboard_list_view_shows_correct_warnings() {
-        MavenModuleSet job = setupSimpleMavenJob();
+    @Bug("24436")
+    public void should_set_warnings_count_in_list_view_column() {
+        MavenModuleSet job = setUpMavenJob();
         buildJobAndWait(job).shouldSucceed();
+
         ListView view = addDashboardListViewColumn(PmdColumn.class);
-
-        By expectedDashboardLinkMatcher = by.css("a[href$='job/" + job.name + "/pmd']");
-        assertThat(jenkins.all(expectedDashboardLinkMatcher).size(), is(1));
-        WebElement dashboardLink = jenkins.getElement(expectedDashboardLinkMatcher);
-        assertThat(dashboardLink.getText().trim(), is("2"));
-
+        assertValidLink(job.name);
         view.delete();
     }
 
+    private void assertValidLink(final String jobName) {
+        By warningsLinkMatcher = by.css("a[href$='job/" + jobName + "/pmd']");
+
+        assertThat(jenkins.all(warningsLinkMatcher).size(), is(1));
+        WebElement link = jenkins.getElement(warningsLinkMatcher);
+        assertThat(link.getText().trim(), is("2"));
+
+        link.click();
+        assertThat(driver, hasContent("PMD Result"));
+    }
+
     /**
-     * Build a job and check set up a "dashboard"-style view. Check, if the dashboard view shows correct warning count.
+     * Sets up a dashboard view with a warnings-per-project portlet. Builds a job and checks if the portlett shows the
+     * correct number of warnings and provides a direct link to the actual warning results.
      */
     @Test
     @WithPlugins("dashboard-view")
-    public void build_a_job_and_check_if_dashboard_view_shows_correct_warnings() {
-        MavenModuleSet job = setupSimpleMavenJob();
+    public void should_set_warnings_count_in_dashboard_portlet() {
+        MavenModuleSet job = setUpMavenJob();
         buildJobAndWait(job).shouldSucceed();
 
         DashboardView view = addDashboardViewAndBottomPortlet(PmdWarningsPerProjectDashboardViewPortlet.class);
-
-        By expectedDashboardLinkMatcher = by.css("a[href='job/" + job.name + "/pmd']");
-        assertThat(jenkins.all(expectedDashboardLinkMatcher).size(), is(1));
-        WebElement dashboardLink = jenkins.getElement(expectedDashboardLinkMatcher);
-        assertThat(dashboardLink.getText().trim(), is("2"));
-
+        assertValidLink(job.name);
         view.delete();
     }
 
@@ -410,7 +412,7 @@ public class PmdPluginTest extends AbstractAnalysisTest {
      *
      * @return The new Job
      */
-    private FreeStyleJob setUpPmdFreestyleJob() {
+    private FreeStyleJob setUpFreestyleJob() {
         AnalysisConfigurator<PmdFreestyleSettings> buildConfigurator = new AnalysisConfigurator<PmdFreestyleSettings>() {
             @Override
             public void configure(PmdFreestyleSettings settings) {
@@ -421,7 +423,7 @@ public class PmdPluginTest extends AbstractAnalysisTest {
     }
 
     /**
-     * Creates a sequence of Freestyle builds and checks if the build result is set correctly. New warning threshold is
+     * Creates a sequence of freestyle builds and checks if the build result is set correctly. New warning threshold is
      * set to zero, e.g. a new warning should mark a build as unstable.
      * <p/>
      * <ol>
@@ -431,8 +433,8 @@ public class PmdPluginTest extends AbstractAnalysisTest {
      *     <li>Build 4: 1 new warning (SUCCESS since there are no warnings)</li>
      * </ol>
      */
-    @Test
-    public void should_set_build_status_in_build_sequence_compare_to_reference_build() {
+    @Test @WithPlugins("md@3.40-SNAPSHOT")
+    public void should_set_result_in_build_sequence_when_comparing_to_reference_build() {
         FreeStyleJob job = setupJob(FILE_WITH_9_WARNINGS, FreeStyleJob.class, PmdFreestyleSettings.class, null);
 
         runBuild(job, 1, Result.SUCCESS, 1, false);
@@ -442,7 +444,7 @@ public class PmdPluginTest extends AbstractAnalysisTest {
     }
 
     /**
-     * Creates a sequence of Freestyle builds and checks if the build result is set correctly. New warning threshold is
+     * Creates a sequence of freestyle builds and checks if the build result is set correctly. New warning threshold is
      * set to zero, e.g. a new warning should mark a build as unstable.
      * <p/>
      * <ol>
@@ -452,8 +454,8 @@ public class PmdPluginTest extends AbstractAnalysisTest {
      * </ol>
      */
     @Test
-    @Bug("13458")
-    public void should_set_build_status_in_build_sequence_compare_to_previous_build() {
+    @Bug("13458") @WithPlugins("pmd@3.40-SNAPSHOT")
+    public void should_set_result_in_build_sequence_when_comparing_to_previous_build() {
         FreeStyleJob job = setupJob(FILE_WITH_9_WARNINGS, FreeStyleJob.class, PmdFreestyleSettings.class, null);
 
         runBuild(job, 1, Result.SUCCESS, 1, true);

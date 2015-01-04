@@ -9,9 +9,9 @@ import org.jenkinsci.test.acceptance.po.Describable;
  * @author Fabian Trampusch
  */
 @Describable("Publish Checkstyle analysis results")
-public class CheckstyleMavenBuildSettings extends AnalysisMavenSettings {
+public class CheckStyleMavenSettings extends AnalysisMavenSettings {
 
-    public CheckstyleMavenBuildSettings(MavenModuleSet parent, String selectorPath) {
+    public CheckStyleMavenSettings(MavenModuleSet parent, String selectorPath) {
         super(parent, selectorPath);
     }
 }
