@@ -10,7 +10,7 @@ import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleAction;
-import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleFreestyleBuildSettings;
+import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckStyleFreestyleSettings;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleListViewColumn;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleMavenBuildSettings;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleWarningsPerProjectDashboardViewPortlet;
@@ -53,9 +53,9 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
     public void should_send_mail_with_expanded_tokens() {
         setUpMailer();
 
-        FreeStyleJob job = setUpFreestyleJob(new AnalysisConfigurator<CheckstyleFreestyleBuildSettings>() {
+        FreeStyleJob job = setUpFreestyleJob(new AnalysisConfigurator<CheckStyleFreestyleSettings>() {
             @Override
-            public void configure(CheckstyleFreestyleBuildSettings settings) {
+            public void configure(CheckStyleFreestyleSettings settings) {
                 settings.setBuildFailedTotalAll("0");
                 settings.pattern.set(PATTERN_WITH_776_WARNINGS);
             }
@@ -69,9 +69,9 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
         verifyReceivedMail("Checkstyle: FAILURE", "Checkstyle: 776-0-776");
     }
 
-    private FreeStyleJob setUpFreestyleJob(final AnalysisConfigurator<CheckstyleFreestyleBuildSettings> buildConfigurator) {
+    private FreeStyleJob setUpFreestyleJob(final AnalysisConfigurator<CheckStyleFreestyleSettings> buildConfigurator) {
         return setupJob(FILE_WITH_776_WARNINGS, FreeStyleJob.class,
-                CheckstyleFreestyleBuildSettings.class, buildConfigurator);
+                CheckStyleFreestyleSettings.class, buildConfigurator);
     }
 
     /**
@@ -82,8 +82,8 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
         FreeStyleJob job = setUpFreestyleJob();
         buildJobWithSuccess(job);
 
-        assertThatBuildHasCheckstyleResults(job.getLastBuild());
-        assertThatBuildHasCheckstyleResults(job);
+        assertThatPageContainsCheckstyleResults(job.getLastBuild());
+        assertThatPageContainsCheckstyleResults(job);
     }
 
     /**
@@ -187,7 +187,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
         buildJobAndWait(job);
         editJob(FILE_FOR_2ND_RUN, false, job);
         Build lastBuild = buildJobWithSuccess(job);
-        assertThatBuildHasCheckstyleResults(lastBuild);
+        assertThatPageContainsCheckstyleResults(lastBuild);
         lastBuild.open();
         CheckstyleAction ca = new CheckstyleAction(job);
         assertThat(ca.getResultLinkByXPathText("679 warnings"), is("checkstyleResult"));
@@ -201,8 +201,8 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
         assertThat(ca.getLowWarningNumber(), is(0));
     }
 
-    private void assertThatBuildHasCheckstyleResults(final PageObject build) {
-        assertThat(build, hasAction("Checkstyle Warnings"));
+    private void assertThatPageContainsCheckstyleResults(final PageObject page) {
+        assertThat(page, hasAction("Checkstyle Warnings"));
     }
 
     /**
@@ -237,17 +237,17 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
      */
     @Test
     public void build_simple_freestyle_mavengoals_project() {
-        AnalysisConfigurator<CheckstyleFreestyleBuildSettings> buildConfigurator = new AnalysisConfigurator<CheckstyleFreestyleBuildSettings>() {
+        AnalysisConfigurator<CheckStyleFreestyleSettings> buildConfigurator = new AnalysisConfigurator<CheckStyleFreestyleSettings>() {
             @Override
-            public void configure(CheckstyleFreestyleBuildSettings settings) {
+            public void configure(CheckStyleFreestyleSettings settings) {
                 settings.pattern.set("target/checkstyle-result.xml");
             }
         };
         FreeStyleJob job = setupJob("/checkstyle_plugin/sample_checkstyle_project", FreeStyleJob.class,
-                CheckstyleFreestyleBuildSettings.class, buildConfigurator, "clean package checkstyle:checkstyle"
+                CheckStyleFreestyleSettings.class, buildConfigurator, "clean package checkstyle:checkstyle"
         );
         Build lastBuild = buildJobWithSuccess(job);
-        assertThatBuildHasCheckstyleResults(lastBuild);
+        assertThatPageContainsCheckstyleResults(lastBuild);
         lastBuild.open();
         CheckstyleAction checkstyle = new CheckstyleAction(job);
         assertThat(checkstyle.getNewWarningNumber(), is(12));
@@ -278,7 +278,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
     public void build_simple_maven_project() {
         MavenModuleSet job = setupSimpleMavenJob();
         Build lastBuild = buildJobWithSuccess(job);
-        assertThatBuildHasCheckstyleResults(lastBuild);
+        assertThatPageContainsCheckstyleResults(lastBuild);
         lastBuild.open();
         CheckstyleAction checkstyle = new CheckstyleAction(job);
         assertThat(checkstyle.getNewWarningNumber(), is(12));
@@ -327,8 +327,8 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
         Build build = buildJobOnSlaveWithSuccess(job, slave);
 
         assertThat(build.getNode(), is(slave));
-        assertThatBuildHasCheckstyleResults(job.getLastBuild());
-        assertThatBuildHasCheckstyleResults(job);
+        assertThatPageContainsCheckstyleResults(job.getLastBuild());
+        assertThatPageContainsCheckstyleResults(job);
     }
 
     /**
@@ -386,9 +386,9 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
      * @return The new Job
      */
     private FreeStyleJob setUpFreestyleJob() {
-        AnalysisConfigurator<CheckstyleFreestyleBuildSettings> buildConfigurator = new AnalysisConfigurator<CheckstyleFreestyleBuildSettings>() {
+        AnalysisConfigurator<CheckStyleFreestyleSettings> buildConfigurator = new AnalysisConfigurator<CheckStyleFreestyleSettings>() {
             @Override
-            public void configure(CheckstyleFreestyleBuildSettings settings) {
+            public void configure(CheckStyleFreestyleSettings settings) {
                 settings.pattern.set(PATTERN_WITH_776_WARNINGS);
             }
         };
@@ -408,7 +408,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
      */
     @Test
     public void should_set_build_status_in_build_sequence_compare_to_reference_build() {
-        FreeStyleJob job = setupJob(FILE_WITH_776_WARNINGS, FreeStyleJob.class, CheckstyleFreestyleBuildSettings.class, null);
+        FreeStyleJob job = setupJob(FILE_WITH_776_WARNINGS, FreeStyleJob.class, CheckStyleFreestyleSettings.class, null);
 
         runBuild(job, 1, Result.SUCCESS, 1, false);
         runBuild(job, 2, Result.UNSTABLE, 2, false);
@@ -427,8 +427,9 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
      * </ol>
      */
     @Test
+    @Bug("13458")
     public void should_set_build_status_in_build_sequence_compare_to_previous_build() {
-        FreeStyleJob job = setupJob(FILE_WITH_776_WARNINGS, FreeStyleJob.class, CheckstyleFreestyleBuildSettings.class, null);
+        FreeStyleJob job = setupJob(FILE_WITH_776_WARNINGS, FreeStyleJob.class, CheckStyleFreestyleSettings.class, null);
 
         runBuild(job, 1, Result.SUCCESS, 1, true);
         runBuild(job, 2, Result.UNSTABLE, 2, true);
@@ -437,20 +438,20 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
 
     private void runBuild(final FreeStyleJob job, final int number, final Result expectedResult, final int expectedNewWarnings, final boolean usePreviousAsReference) {
         final String fileName = "checkstyle-result-build" + number + ".xml";
-        AnalysisConfigurator<CheckstyleFreestyleBuildSettings> buildConfigurator = new AnalysisConfigurator<CheckstyleFreestyleBuildSettings>() {
+        AnalysisConfigurator<CheckStyleFreestyleSettings> buildConfigurator = new AnalysisConfigurator<CheckStyleFreestyleSettings>() {
             @Override
-            public void configure(CheckstyleFreestyleBuildSettings settings) {
+            public void configure(CheckStyleFreestyleSettings settings) {
                 settings.setNewWarningsThresholdUnstable("0", usePreviousAsReference);
                 settings.pattern.set(fileName);
             }
         };
 
         editJob(CHECKSTYLE_PLUGIN_ROOT + fileName, false, job,
-                CheckstyleFreestyleBuildSettings.class, buildConfigurator);
+                CheckStyleFreestyleSettings.class, buildConfigurator);
         Build lastBuild = buildJobAndWait(job).shouldBe(expectedResult);
 
         if (expectedNewWarnings > 0) {
-            assertThatBuildHasCheckstyleResults(lastBuild);
+            assertThatPageContainsCheckstyleResults(lastBuild);
             lastBuild.open();
             CheckstyleAction checkstyle = new CheckstyleAction(job);
             assertThat(checkstyle.getNewWarningNumber(), is(expectedNewWarnings));

@@ -4,7 +4,7 @@ import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_collector.*;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
-import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleFreestyleBuildSettings;
+import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckStyleFreestyleSettings;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
 import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsFreestyleBuildSettings;
 import org.jenkinsci.test.acceptance.plugins.pmd.PmdFreestyleSettings;
@@ -277,7 +277,7 @@ public class AnalysisCollectorPluginTest extends AbstractJUnitTest {
         FreeStyleJob job = jenkins.jobs.create();
         job.configure();
         job.copyResource(resourceToCopy);
-        job.addPublisher(CheckstyleFreestyleBuildSettings.class);
+        job.addPublisher(CheckStyleFreestyleSettings.class);
         job.addPublisher(PmdFreestyleSettings.class);
         job.addPublisher(FindbugsFreestyleBuildSettings.class);
         TaskScannerFreestyleBuildSettings taskScannerSettings = job.addPublisher(TaskScannerFreestyleBuildSettings.class);
