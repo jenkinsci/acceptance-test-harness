@@ -79,6 +79,7 @@ public abstract class AbstractAnalysisTest extends AbstractJUnitTest {
     protected void configureEmailNotification(final FreeStyleJob job, final String subject, final String body) {
         job.configure();
         EmailExtPublisher pub = job.addPublisher(EmailExtPublisher.class);
+        elasticSleep(1000);
         pub.subject.set(subject);
         pub.setRecipient("dev@example.com");
         pub.body.set(body);
