@@ -403,25 +403,44 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
      *     <li>Build 1: 1 new warning (SUCCESS since no reference build is set)</li>
      *     <li>Build 2: 2 new warnings (UNSTABLE since threshold is reached)</li>
      *     <li>Build 3: 1 new warning (UNSTABLE since still one warning is new based on delta with reference build)</li>
-     *     <li>Build 4: 1 new warning (SUCCESS since no reference build is set)</li>
+     *     <li>Build 4: 1 new warning (SUCCESS since there are no warnings)</li>
      * </ol>
      */
     @Test
-    public void should_set_build_status_in_build_sequence() {
+    public void should_set_build_status_in_build_sequence_compare_to_reference_build() {
         FreeStyleJob job = setupJob(FILE_WITH_776_WARNINGS, FreeStyleJob.class, CheckstyleFreestyleBuildSettings.class, null);
 
-        runBuild(job, 1, Result.SUCCESS, 1);
-        runBuild(job, 2, Result.UNSTABLE, 2);
-        runBuild(job, 3, Result.UNSTABLE, 1);
-        runBuild(job, 4, Result.SUCCESS, 0);
+        runBuild(job, 1, Result.SUCCESS, 1, false);
+        runBuild(job, 2, Result.UNSTABLE, 2, false);
+        runBuild(job, 3, Result.UNSTABLE, 1, false);
+        runBuild(job, 4, Result.SUCCESS, 0, false);
     }
 
-    private void runBuild(final FreeStyleJob job, final int number, final Result expectedResult, final int expectedNewWarnings) {
+    /**
+     * Creates a sequence of Freestyle builds and checks if the build result is set correctly. New warning threshold is
+     * set to zero, e.g. a new warning should mark a build as unstable.
+     * <p/>
+     * <ol>
+     *     <li>Build 1: 1 new warning (SUCCESS since no reference build is set)</li>
+     *     <li>Build 2: 2 new warnings (UNSTABLE since threshold is reached)</li>
+     *     <li>Build 3: 1 new warning (SUCCESS since all warnings of previous build are fixed)</li>
+     * </ol>
+     */
+    @Test
+    public void should_set_build_status_in_build_sequence_compare_to_previous_build() {
+        FreeStyleJob job = setupJob(FILE_WITH_776_WARNINGS, FreeStyleJob.class, CheckstyleFreestyleBuildSettings.class, null);
+
+        runBuild(job, 1, Result.SUCCESS, 1, true);
+        runBuild(job, 2, Result.UNSTABLE, 2, true);
+        runBuild(job, 3, Result.SUCCESS, 0, true);
+    }
+
+    private void runBuild(final FreeStyleJob job, final int number, final Result expectedResult, final int expectedNewWarnings, final boolean usePreviousAsReference) {
         final String fileName = "checkstyle-result-build" + number + ".xml";
         AnalysisConfigurator<CheckstyleFreestyleBuildSettings> buildConfigurator = new AnalysisConfigurator<CheckstyleFreestyleBuildSettings>() {
             @Override
             public void configure(CheckstyleFreestyleBuildSettings settings) {
-                settings.setNewWarningsThresholdUnstable("0");
+                settings.setNewWarningsThresholdUnstable("0", usePreviousAsReference);
                 settings.pattern.set(fileName);
             }
         };

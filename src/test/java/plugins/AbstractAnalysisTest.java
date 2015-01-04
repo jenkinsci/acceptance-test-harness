@@ -256,6 +256,7 @@ public abstract class AbstractAnalysisTest extends AbstractJUnitTest {
             //check whether to exchange the copy resource shell step
             if (!isAdditionalResource) {
                 job.removeFirstBuildStep();
+                elasticSleep(1000); // chrome needs some time
             }
 
             //add the new copy resource shell step

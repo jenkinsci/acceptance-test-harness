@@ -6,7 +6,8 @@ import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.PostBuildStep;
 
 /**
- * Abstract job configuration class.
+ * Job settings for all static analysis plug-ins.
+ *
  * @author Fabian Trampusch
  */
 public abstract class AnalysisSettings extends PageAreaImpl implements PostBuildStep {
@@ -35,15 +36,18 @@ public abstract class AnalysisSettings extends PageAreaImpl implements PostBuild
     protected Control newWarningsThresholdFailed = control("canComputeNew/failedNewAll");
     protected Control newWarningsThresholdUnstable = control("canComputeNew/unstableNewAll");
     protected Control useDeltaValues = control("canComputeNew/useDeltaValues");
+    protected Control usePreviousBuild = control("canComputeNew/usePreviousBuildAsReference");
 
     /**
-     * Constructor for the build settings page area.
-     * @param parent the job currently being configured.
+     * Creates a new instance of {@link AnalysisSettings}.
+     *
+     * @param parent       the job currently being configured.
      * @param selectorPath the selector path used as prefix.
      */
     public AnalysisSettings(Job parent, String selectorPath) {
         super(parent, selectorPath);
-        this.advanced = control("advanced-button");
+
+        advanced = control("advanced-button");
     }
 
     /**
@@ -88,6 +92,7 @@ public abstract class AnalysisSettings extends PageAreaImpl implements PostBuild
 
     /**
      * Build is marked as unstable if at least these warnings are found.
+     *
      * @param threshold number of warnings to set the build to unstable.
      */
     public void setBuildUnstableTotalAll(String threshold) {
@@ -96,8 +101,8 @@ public abstract class AnalysisSettings extends PageAreaImpl implements PostBuild
     }
 
     /**
-     * Build is marked as unstable if at least these warnings of high
-     * priority are found.
+     * Build is marked as unstable if at least these warnings of high priority are found.
+     *
      * @param threshold number of warnings to set the build to unstable.
      */
     public void setBuildUnstableTotalHigh(String threshold) {
@@ -106,8 +111,8 @@ public abstract class AnalysisSettings extends PageAreaImpl implements PostBuild
     }
 
     /**
-     * Build is marked as unstable if at least these warnings of normal
-     * priority are found.
+     * Build is marked as unstable if at least these warnings of normal priority are found.
+     *
      * @param threshold number of warnings to set the build to unstable.
      */
     public void setBuildUnstableTotalNormal(String threshold) {
@@ -116,8 +121,8 @@ public abstract class AnalysisSettings extends PageAreaImpl implements PostBuild
     }
 
     /**
-     * Build is marked as unstable if at least these warnings of low
-     * priority are found.
+     * Build is marked as unstable if at least these warnings of low priority are found.
+     *
      * @param threshold number of warnings to set the build to unstable.
      */
     public void setBuildUnstableTotalLow(String threshold) {
@@ -127,6 +132,7 @@ public abstract class AnalysisSettings extends PageAreaImpl implements PostBuild
 
     /**
      * Build is marked as failed if at least these warnings are found.
+     *
      * @param threshold number of warnings to set the build to failed.
      */
     public void setBuildFailedTotalAll(String threshold) {
@@ -135,8 +141,8 @@ public abstract class AnalysisSettings extends PageAreaImpl implements PostBuild
     }
 
     /**
-     * Build is marked as failed if at least these warnings of high
-     * priority are found.
+     * Build is marked as failed if at least these warnings of high priority are found.
+     *
      * @param threshold number of warnings to set the build to unstable.
      */
     public void setBuildFailedTotalHigh(String threshold) {
@@ -145,8 +151,8 @@ public abstract class AnalysisSettings extends PageAreaImpl implements PostBuild
     }
 
     /**
-     * Build is marked as failed if at least these warnings of normal
-     * priority are found.
+     * Build is marked as failed if at least these warnings of normal priority are found.
+     *
      * @param threshold number of warnings to set the build to unstable.
      */
     public void setBuildFailedTotalNormal(String threshold) {
@@ -155,8 +161,8 @@ public abstract class AnalysisSettings extends PageAreaImpl implements PostBuild
     }
 
     /**
-     * Build is marked as failed if at least these warnings of low
-     * priority are found.
+     * Build is marked as failed if at least these warnings of low priority are found.
+     *
      * @param threshold number of warnings to set the build to unstable.
      */
     public void setBuildFailedTotalLow(String threshold) {
@@ -166,26 +172,53 @@ public abstract class AnalysisSettings extends PageAreaImpl implements PostBuild
 
     /**
      * Build is marked as failed if at least these new warnings are found.
+     *
      * @param threshold number of new warnings to set the build to failed.
      */
-    public void setNewWarningsThresholdFailed(String threshold) {
+    public void setNewWarningsThresholdFailed(final String threshold) {
+        setNewWarningsThresholdFailed(threshold, false);
+    }
+
+    /**
+     * Build is marked as failed if at least these new warnings are found.
+     *
+     * @param threshold              number of new warnings to set the build to failed.
+     * @param usePreviousAsReference determines if the delta computation should use the previous build rather than the
+     *                               reference build
+     */
+    public void setNewWarningsThresholdFailed(final String threshold, final boolean usePreviousAsReference) {
         ensureAdvancedClicked();
         canComputeNew.check(true);
         newWarningsThresholdFailed.set(threshold);
+        usePreviousBuild.check(usePreviousAsReference);
     }
 
     /**
      * Build is marked as unstable if at least these new warnings are found.
+     *
      * @param threshold number of new warnings to set the build to unstable.
      */
-    public void setNewWarningsThresholdUnstable(String threshold) {
+    public void setNewWarningsThresholdUnstable(final String threshold) {
+        setNewWarningsThresholdUnstable(threshold, false);
+    }
+
+    /**
+     * Build is marked as unstable if at least these new warnings are found.
+     *
+     * @param threshold number of new warnings to set the build to unstable.
+     * @param usePreviousAsReference determines if the delta computation should use the previous build rather than the
+     *                               reference build
+     */
+    public void setNewWarningsThresholdUnstable(final String threshold, final boolean usePreviousAsReference) {
         ensureAdvancedClicked();
         canComputeNew.check(true);
         newWarningsThresholdUnstable.set(threshold);
+        usePreviousBuild.check(usePreviousAsReference);
     }
 
     /**
      * Detect new warnings in comparison with the last build.
+     *
      * @param deltaValues compare if true
      */
     public void setUseDeltaValues(boolean deltaValues) {
@@ -196,6 +229,7 @@ public abstract class AnalysisSettings extends PageAreaImpl implements PostBuild
 
     /**
      * Decides if the code analyzer shall run if the build has failed.
+     *
      * @param canRun build if true.
      */
     public void setCanRunOnFailed(boolean canRun) {
