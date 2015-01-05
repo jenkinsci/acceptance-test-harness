@@ -38,8 +38,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest {
      * Checks that the plug-in sends a mail after a build has been failed. The content of the mail
      * contains several tokens that should be expanded in the mail with the correct vaules.
      */
-    @Test @Category(SmokeTest.class) @Bug("25501")
-    @WithPlugins({"email-ext", "warnings@4.44-SNAPSHOT"})
+    @Test @Bug("25501") @Category(SmokeTest.class) @WithPlugins("email-ext")
     public void should_send_mail_with_expanded_tokens() {
         setUpMailer();
 
@@ -128,7 +127,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest {
     /**
      * Build a job and check set up a dashboard list-view. Check, if the dashboard view shows correct warning count.
      */
-    @Test @Bug("23446") @WithPlugins("warnings@4.42")
+    @Test @Bug("23446")
     public void build_a_matrix_project_and_check_if_dashboard_list_view_shows_correct_warnings() {
         MatrixProject job = setupJob(SEVERAL_PARSERS_FILE_FULL_PATH, MatrixProject.class,
                 WarningsBuildSettings.class, create3ParserConfiguration());
@@ -172,8 +171,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest {
     /**
      * Runs a job with warning threshold configured once and validates that build is marked as unstable.
      */
-    @Test
-    @Bug("19614")
+    @Test @Bug("19614")
     public void should_set_build_to_unstable_if_total_warnings_threshold_set() {
         AnalysisConfigurator<WarningsBuildSettings> buildConfiguration = new AnalysisConfigurator<WarningsBuildSettings>() {
             @Override

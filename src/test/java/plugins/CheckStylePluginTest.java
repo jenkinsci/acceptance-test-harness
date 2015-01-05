@@ -192,7 +192,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
     /**
      * Runs job two times to check if new and fixed warnings are displayed.
      */
-    @Test @WithPlugins("checkstyle@3.41")
+    @Test
     public void should_report_new_and_fixed_warnings_in_consecutive_builds() {
         FreeStyleJob job = createFreeStyleJob();
         buildJobAndWait(job);
@@ -232,9 +232,9 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
     /**
      * Runs a job with warning threshold configured once and validates that build is marked as unstable.
      */
-    @Test @Bug("19614") @WithPlugins("checkstyle@3.41")
+    @Test @Bug("19614")
     public void should_set_build_to_unstable_if_total_warnings_threshold_set() {
-        AnalysisConfigurator<CheckStyleFreestyleSettings> buildConfigurator = new AnalysisConfigurator<CheckStyleFreestyleSettings>() {
+        FreeStyleJob job = createFreeStyleJob(FILE_WITH_776_WARNINGS, new AnalysisConfigurator<CheckStyleFreestyleSettings>() {
             @Override
             public void configure(CheckStyleFreestyleSettings settings) {
                 settings.pattern.set(PATTERN_WITH_776_WARNINGS);
@@ -242,17 +242,16 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
                 settings.setNewWarningsThresholdFailed("0");
                 settings.setUseDeltaValues(true);
             }
-        };
-        FreeStyleJob job = createFreeStyleJob(FILE_WITH_776_WARNINGS, buildConfigurator);
+        });
 
         buildJobAndWait(job).shouldBeUnstable();
     }
 
-    private MavenModuleSet setUpMavenJob() {
-        return setUpMavenJob(null);
+    private MavenModuleSet createMavenJob() {
+        return createMavenJob(null);
     }
 
-    private MavenModuleSet setUpMavenJob(AnalysisConfigurator<CheckStyleMavenSettings> configurator) {
+    private MavenModuleSet createMavenJob(AnalysisConfigurator<CheckStyleMavenSettings> configurator) {
         String projectPath = CHECKSTYLE_PLUGIN_ROOT + "sample_checkstyle_project";
         String goal = "clean package checkstyle:checkstyle";
         return setupMavenJob(projectPath, goal, CheckStyleMavenSettings.class, configurator);
@@ -304,7 +303,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
      */
     @Test
     public void should_retrieve_results_from_maven_job() {
-        MavenModuleSet job = setUpMavenJob();
+        MavenModuleSet job = createMavenJob();
         Build lastBuild = buildJobWithSuccess(job);
         assertThatPageContainsCheckstyleResults(lastBuild);
         lastBuild.open();
@@ -317,14 +316,12 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
      */
     @Test
     public void should_set_result_to_unstable_if_warning_found() {
-        AnalysisConfigurator<CheckStyleMavenSettings> buildConfigurator =
-                new AnalysisConfigurator<CheckStyleMavenSettings>() {
-                    @Override
-                    public void configure(CheckStyleMavenSettings settings) {
-                        settings.setBuildUnstableTotalAll("0");
-                    }
-                };
-        MavenModuleSet job = setUpMavenJob(buildConfigurator);
+        MavenModuleSet job = createMavenJob(new AnalysisConfigurator<CheckStyleMavenSettings>() {
+            @Override
+            public void configure(CheckStyleMavenSettings settings) {
+                settings.setBuildUnstableTotalAll("0");
+            }
+        });
         buildJobAndWait(job).shouldBeUnstable();
     }
 
@@ -333,14 +330,12 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
      */
     @Test
     public void should_set_result_to_failed_if_warning_found() {
-        AnalysisConfigurator<CheckStyleMavenSettings> buildConfigurator =
-                new AnalysisConfigurator<CheckStyleMavenSettings>() {
-                    @Override
-                    public void configure(CheckStyleMavenSettings settings) {
-                        settings.setBuildFailedTotalAll("0");
-                    }
-                };
-        MavenModuleSet job = setUpMavenJob(buildConfigurator);
+        MavenModuleSet job = createMavenJob(new AnalysisConfigurator<CheckStyleMavenSettings>() {
+            @Override
+            public void configure(CheckStyleMavenSettings settings) {
+                settings.setBuildFailedTotalAll("0");
+            }
+        });
         buildJobAndWait(job).shouldFail();
     }
 
@@ -365,7 +360,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
      */
     @Test @Category(SmokeTest.class) @Bug("24436")
     public void should_set_warnings_count_in_list_view_column() {
-        MavenModuleSet job = setUpMavenJob();
+        MavenModuleSet job = createMavenJob();
         buildJobAndWait(job).shouldSucceed();
 
         ListView view = addDashboardListViewColumn(CheckstyleListViewColumn.class);
@@ -379,7 +374,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
      */
     @Test @WithPlugins("dashboard-view")
     public void should_set_warnings_count_in_dashboard_portlet() {
-        MavenModuleSet job = setUpMavenJob();
+        MavenModuleSet job = createMavenJob();
         buildJobAndWait(job).shouldSucceed();
 
         DashboardView view = addDashboardViewAndBottomPortlet(CheckstyleWarningsPerProjectDashboardViewPortlet.class);
@@ -409,9 +404,9 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
      *     <li>Build 4: 1 new warning (SUCCESS since there are no warnings)</li>
      * </ol>
      */
-    @Test @WithPlugins("checkstyle@3.41")
+    @Test
     public void should_set_result_in_build_sequence_when_comparing_to_reference_build() {
-        FreeStyleJob job = setupJob(FILE_WITH_776_WARNINGS, FreeStyleJob.class, CheckStyleFreestyleSettings.class, null);
+        FreeStyleJob job = createFreeStyleJob();
 
         runBuild(job, 1, Result.SUCCESS, 1, false);
         runBuild(job, 2, Result.UNSTABLE, 2, false);
@@ -429,9 +424,9 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
      *     <li>Build 3: 1 new warning (SUCCESS since all warnings of previous build are fixed)</li>
      * </ol>
      */
-    @Test @Bug("13458") @WithPlugins("checkstyle@3.41")
+    @Test @Bug("13458")
     public void should_set_result_in_build_sequence_when_comparing_to_previous_build() {
-        FreeStyleJob job = setupJob(FILE_WITH_776_WARNINGS, FreeStyleJob.class, CheckStyleFreestyleSettings.class, null);
+        FreeStyleJob job = createFreeStyleJob();
 
         runBuild(job, 1, Result.SUCCESS, 1, true);
         runBuild(job, 2, Result.UNSTABLE, 2, true);

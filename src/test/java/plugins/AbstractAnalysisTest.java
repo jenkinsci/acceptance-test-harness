@@ -4,7 +4,6 @@ import javax.annotation.CheckForNull;
 import javax.mail.MessagingException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.ParserConfigurationException;
-
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
@@ -79,7 +78,6 @@ public abstract class AbstractAnalysisTest extends AbstractJUnitTest {
     protected void configureEmailNotification(final FreeStyleJob job, final String subject, final String body) {
         job.configure();
         EmailExtPublisher pub = job.addPublisher(EmailExtPublisher.class);
-        elasticSleep(1000);
         pub.subject.set(subject);
         pub.setRecipient("dev@example.com");
         pub.body.set(body);

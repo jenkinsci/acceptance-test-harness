@@ -65,7 +65,7 @@ public class FindbugsPluginTest extends AbstractAnalysisTest {
      * Checks that the plug-in sends a mail after a build has been failed. The content of the mail
      * contains several tokens that should be expanded in the mail with the correct vaules.
      */
-    @Test @WithPlugins("email-ext") @Bug("25501")
+    @Test @Bug("25501") @WithPlugins("email-ext")
     public void should_send_mail_with_expanded_tokens() {
         setUpMailer();
 
@@ -191,9 +191,7 @@ public class FindbugsPluginTest extends AbstractAnalysisTest {
     /**
      * Runs job two times to check if the links of the graph are relative.
      */
-    @Test
-    @Bug("21723")
-    @Ignore("Until JENKINS-21723 is fixed")
+    @Test @Bug("21723") @Ignore("Until JENKINS-21723 is fixed")
     public void view_findbugs_report_job_graph_links() {
         FreeStyleJob job = setUpFindbugsFreestyleJob();
         buildJobAndWait(job);
@@ -240,8 +238,7 @@ public class FindbugsPluginTest extends AbstractAnalysisTest {
     /**
      * Builds a maven project and checks if a new warning is displayed.
      */
-    @Test
-    @Category(SmokeTest.class)
+    @Test @Category(SmokeTest.class)
     public void build_simple_maven_project() {
         MavenModuleSet job = setupSimpleMavenJob();
         Build lastBuild = buildJobWithSuccess(job);
@@ -319,8 +316,7 @@ public class FindbugsPluginTest extends AbstractAnalysisTest {
     /**
      * Build a job and check set up a "dashboard"-style view. Check, if the dashboard view shows correct warning count.
      */
-    @Test
-    @WithPlugins("dashboard-view")
+    @Test @WithPlugins("dashboard-view")
     public void build_a_job_and_check_if_dashboard_view_shows_correct_warnings() {
         MavenModuleSet job = setupSimpleMavenJob();
         buildJobAndWait(job).shouldSucceed();
