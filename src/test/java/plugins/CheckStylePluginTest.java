@@ -47,9 +47,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
      * Checks that the plug-in sends a mail after a build has been failed. The content of the mail contains several
      * tokens that should be expanded in the mail with the correct vaules.
      */
-    @Test
-    @WithPlugins("email-ext")
-    @Bug("25501")
+    @Test @Bug("25501") @WithPlugins("email-ext")
     public void should_send_mail_with_expanded_tokens() {
         setUpMailer();
 
@@ -194,7 +192,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
     /**
      * Runs job two times to check if new and fixed warnings are displayed.
      */
-    @Test @WithPlugins("checkstyle@3.41-SNAPSHOT")
+    @Test @WithPlugins("checkstyle@3.41")
     public void should_report_new_and_fixed_warnings_in_consecutive_builds() {
         FreeStyleJob job = createFreeStyleJob();
         buildJobAndWait(job);
@@ -221,9 +219,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
     /**
      * Runs job two times to check if the links of the graph are relative.
      */
-    @Test
-    @Bug("21723")
-    @Ignore("Until JENKINS-21723 is fixed")
+    @Test @Bug("21723") @Ignore("Until JENKINS-21723 is fixed")
     public void view_checkstyle_report_job_graph_links() throws Exception {
         FreeStyleJob job = createFreeStyleJob();
         buildJobAndWait(job);
@@ -236,8 +232,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
     /**
      * Runs a job with warning threshold configured once and validates that build is marked as unstable.
      */
-    @Test
-    @Bug("19614")
+    @Test @Bug("19614") @WithPlugins("checkstyle@3.41")
     public void should_set_build_to_unstable_if_total_warnings_threshold_set() {
         AnalysisConfigurator<CheckStyleFreestyleSettings> buildConfigurator = new AnalysisConfigurator<CheckStyleFreestyleSettings>() {
             @Override
@@ -368,9 +363,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
      * Sets up a list view with a warnings column. Builds a job and checks if the column shows the correct number of
      * warnings and provides a direct link to the actual warning results.
      */
-    @Test
-    @Category(SmokeTest.class)
-    @Bug("24436")
+    @Test @Category(SmokeTest.class) @Bug("24436")
     public void should_set_warnings_count_in_list_view_column() {
         MavenModuleSet job = setUpMavenJob();
         buildJobAndWait(job).shouldSucceed();
@@ -384,8 +377,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
      * Sets up a dashboard view with a warnings-per-project portlet. Builds a job and checks if the portlett shows the
      * correct number of warnings and provides a direct link to the actual warning results.
      */
-    @Test
-    @WithPlugins("dashboard-view")
+    @Test @WithPlugins("dashboard-view")
     public void should_set_warnings_count_in_dashboard_portlet() {
         MavenModuleSet job = setUpMavenJob();
         buildJobAndWait(job).shouldSucceed();
@@ -417,7 +409,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
      *     <li>Build 4: 1 new warning (SUCCESS since there are no warnings)</li>
      * </ol>
      */
-    @Test @WithPlugins("checkstyle@3.41-SNAPSHOT")
+    @Test @WithPlugins("checkstyle@3.41")
     public void should_set_result_in_build_sequence_when_comparing_to_reference_build() {
         FreeStyleJob job = setupJob(FILE_WITH_776_WARNINGS, FreeStyleJob.class, CheckStyleFreestyleSettings.class, null);
 
@@ -437,8 +429,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
      *     <li>Build 3: 1 new warning (SUCCESS since all warnings of previous build are fixed)</li>
      * </ol>
      */
-    @Test
-    @Bug("13458") @WithPlugins("checkstyle@3.41-SNAPSHOT")
+    @Test @Bug("13458") @WithPlugins("checkstyle@3.41")
     public void should_set_result_in_build_sequence_when_comparing_to_previous_build() {
         FreeStyleJob job = setupJob(FILE_WITH_776_WARNINGS, FreeStyleJob.class, CheckStyleFreestyleSettings.class, null);
 
