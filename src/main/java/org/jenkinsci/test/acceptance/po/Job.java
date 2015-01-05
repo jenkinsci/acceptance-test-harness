@@ -1,8 +1,22 @@
 package org.jenkinsci.test.acceptance.po;
 
-import com.google.inject.Injector;
-
-import cucumber.api.DataTable;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.io.IOUtils;
 import org.codehaus.plexus.util.Base64;
@@ -10,16 +24,12 @@ import org.jenkinsci.test.acceptance.junit.Resource;
 import org.openqa.selenium.WebElement;
 import org.zeroturnaround.zip.ZipUtil;
 
-import java.io.*;
-import java.net.URL;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.zip.GZIPOutputStream;
+import com.google.inject.Injector;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+import cucumber.api.DataTable;
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.*;
+import static org.jenkinsci.test.acceptance.Matchers.*;
 
 /**
  * Job Page object superclass.
@@ -122,7 +132,9 @@ public class Job extends ContainerPageObject {
         ensureConfigPage();
 
         control(by.path("/hetero-list-add[%s]", section)).selectDropdownMenu(type);
-        String path = last(by.xpath("//div[@name='%s']", section)).getAttribute("path");
+        elasticSleep(1000); // it takes some time until the element is visible
+        WebElement last = last(by.xpath("//div[@name='%s']", section));
+        String path = last.getAttribute("path");
 
         return newInstance(type, this, path);
     }
