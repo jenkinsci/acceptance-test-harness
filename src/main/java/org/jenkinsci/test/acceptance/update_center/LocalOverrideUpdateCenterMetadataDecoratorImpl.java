@@ -80,10 +80,14 @@ public class LocalOverrideUpdateCenterMetadataDecoratorImpl implements UpdateCen
             if (dep!=null) {
                 for (String token : dep.split(",")) {
                     Dependency d = new Dependency();
-                    d.optional = dep.endsWith(OPTIONAL);
+                    d.optional = token.endsWith(OPTIONAL);
                     if(d.optional)
                         token = token.substring(0, token.length()-OPTIONAL.length());
                     String[] tokens = token.split(":");
+                    if (tokens.length != 2) {
+                        System.err.println("Bad token ‘" + token + "’ from ‘" + dep + "’ in " + jpi);
+                        continue;
+                    }
                     d.name = tokens[0];
                     d.version = tokens[1];
                     m.dependencies.add(d);
