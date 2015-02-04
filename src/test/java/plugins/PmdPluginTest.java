@@ -22,7 +22,6 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.ListView;
 import org.jenkinsci.test.acceptance.po.Node;
 import org.jenkinsci.test.acceptance.po.PageObject;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.openqa.selenium.By;
@@ -233,14 +232,14 @@ public class PmdPluginTest extends AbstractAnalysisTest {
     /**
      * Runs job two times to check if the links of the graph are relative.
      */
-    @Test @Bug("21723") @Ignore("Until JENKINS-21723 is fixed")
+    @Test @Bug("21723")
     public void view_pmd_report_job_graph_links() {
         FreeStyleJob job = createFreeStyleJob();
         buildJobAndWait(job);
         editJob(PLUGIN_ROOT + "forSecondRun/pmd-warnings.xml", false, job);
         buildJobWithSuccess(job);
 
-        assertAreaLinksOfJobAreLike(job, "^\\d+/pmdResult");
+        assertAreaLinksOfJobAreLike(job, "pmd");
     }
 
     /**

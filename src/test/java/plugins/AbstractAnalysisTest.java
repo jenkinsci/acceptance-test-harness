@@ -380,11 +380,11 @@ public abstract class AbstractAnalysisTest extends AbstractJUnitTest {
     /**
      * Checks if the area links of jobs matches the regular expression.
      *
-     * @param job               Job to check the area links
-     * @param regularExpression Expression should match
+     * @param job    job to check the area links
+     * @param plugin URL of the corresponding plug-in
      */
-    public void assertAreaLinksOfJobAreLike(Job job, String regularExpression) {
-        Pattern pattern = Pattern.compile(regularExpression);
+    public void assertAreaLinksOfJobAreLike(Job job, String plugin) {
+        Pattern pattern = Pattern.compile("^\\d+/" + plugin + "Result/(HIGH|NORMAL|LOW)");
         for (String currentLink : job.getAreaLinks()) {
             assertTrue("Link should be relative", pattern.matcher(currentLink).matches());
         }
