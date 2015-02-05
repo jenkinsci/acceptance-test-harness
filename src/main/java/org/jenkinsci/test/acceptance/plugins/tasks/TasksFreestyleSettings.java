@@ -20,7 +20,6 @@ import org.jenkinsci.test.acceptance.po.Job;
 
 @Describable("Scan workspace for open tasks")
 public class TasksFreestyleSettings extends AbstractTaskScannerBuildSettings {
-
     protected Control defaultEncoding = control("defaultEncoding");
 
     public TasksFreestyleSettings(Job parent, String path) { super(parent, path); }

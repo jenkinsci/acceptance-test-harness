@@ -8,7 +8,7 @@ import org.jenkinsci.test.acceptance.po.Job;
  * Abstract class for tasks plugin configuration.
  *
  * It provides access to the particular controls to configure the post build step.
- * This class derives conrtols common to all static analyser plugins from
+ * This class derives controls common to all static analyser plugins from
  * {@link org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisSettings}
  * and adds task scanner specific controls.
  *
@@ -16,9 +16,7 @@ import org.jenkinsci.test.acceptance.po.Job;
  *
  * @author Martin Ende
  */
-
 public abstract class AbstractTaskScannerBuildSettings extends AnalysisSettings {
-
     protected Control pattern = control("pattern");
     protected Control excludePattern = control("excludePattern");
 
@@ -41,7 +39,6 @@ public abstract class AbstractTaskScannerBuildSettings extends AnalysisSettings 
     protected Control useStableBuildAsReference = control("canComputeNew/useStableBuildAsReference");
 
     public AbstractTaskScannerBuildSettings(Job parent, String path) { super(parent, path); }
-
 
     /**
      * Sets the input for the file names to be scanned for tasks.

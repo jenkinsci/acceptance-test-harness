@@ -10,9 +10,8 @@ import org.jenkinsci.test.acceptance.po.Describable;
  * @author Fabian Trampusch
  */
 @Describable("Checkstyle warnings per project")
-public class CheckstyleWarningsPerProjectDashboardViewPortlet extends AbstractDashboardViewPortlet {
-
-    public CheckstyleWarningsPerProjectDashboardViewPortlet(DashboardView parent, String path) {
+public class CheckStylePortlet extends AbstractDashboardViewPortlet {
+    public CheckStylePortlet(final DashboardView parent, final String path) {
         super(parent, path);
     }
 

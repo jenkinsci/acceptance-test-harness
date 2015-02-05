@@ -5,13 +5,13 @@ import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.ListView;
 
 /**
- * The PMD Column.
+ * A list view column showing the PMD warnings count.
  *
  * @author Fabian Trampusch
  */
 @Describable("Number of PMD warnings")
 public class PmdColumn extends AbstractListViewColumn {
-    public PmdColumn(ListView parent, String path) {
+    public PmdColumn(final ListView parent, final String path) {
         super(parent, path);
     }
 }

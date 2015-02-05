@@ -5,13 +5,13 @@ import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.po.Describable;
 
 /**
- * Findbugs build settings for maven projects.
+ * FindBugs build settings for maven projects.
+ *
  * @author Fabian Trampusch
  */
 @Describable("Publish FindBugs analysis results")
-public class FindbugsMavenBuildSettings extends AnalysisMavenSettings {
-
-    public FindbugsMavenBuildSettings(MavenModuleSet parent, String selectorPath) {
+public class FindBugsMavenSettings extends AnalysisMavenSettings {
+    public FindBugsMavenSettings(final MavenModuleSet parent, final String selectorPath) {
         super(parent, selectorPath);
     }
 }

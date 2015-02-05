@@ -6,12 +6,12 @@ import org.jenkinsci.test.acceptance.po.Describable;
 
 /**
  * PMD build settings for maven projects.
+ *
  * @author Fabian Trampusch
  */
 @Describable("Publish PMD analysis results")
 public class PmdMavenSettings extends AnalysisMavenSettings {
-
-    public PmdMavenSettings(MavenModuleSet parent, String selectorPath) {
+    public PmdMavenSettings(final MavenModuleSet parent, final String selectorPath) {
         super(parent, selectorPath);
     }
 }

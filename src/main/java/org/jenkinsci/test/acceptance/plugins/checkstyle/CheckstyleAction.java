@@ -5,11 +5,11 @@ import org.jenkinsci.test.acceptance.po.ContainerPageObject;
 
 /**
  * Page object for Checkstyle action.
+ *
+ * @author Fabian Trampusch
  */
-public class CheckstyleAction extends AnalysisAction {
-
-    public CheckstyleAction(ContainerPageObject parent) {
+public class CheckStyleAction extends AnalysisAction {
+    public CheckStyleAction(final ContainerPageObject parent) {
         super(parent, "checkstyle");
     }
-
 }

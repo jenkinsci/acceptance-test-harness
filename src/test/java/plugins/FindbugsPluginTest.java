@@ -35,15 +35,16 @@ import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
 import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsAction;
-import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsColumn;
-import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsFreestyleBuildSettings;
-import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsMavenBuildSettings;
-import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsWarningsPerProjectDashboardViewPortlet;
+import org.jenkinsci.test.acceptance.plugins.findbugs.FindBugsColumn;
+import org.jenkinsci.test.acceptance.plugins.findbugs.FindBugsFreestyleSettings;
+import org.jenkinsci.test.acceptance.plugins.findbugs.FindBugsMavenSettings;
+import org.jenkinsci.test.acceptance.plugins.findbugs.FindBugsPortlet;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.ListView;
 import org.jenkinsci.test.acceptance.po.Node;
+import org.jenkinsci.test.acceptance.po.PageObject;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.openqa.selenium.By;
@@ -62,7 +63,7 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
  * @author Ullrich Hafner
  */
 @WithPlugins("findbugs")
-public class FindbugsPluginTest extends AbstractAnalysisTest {
+public class FindBugsPluginTest extends AbstractAnalysisTest {
     private static final String PATTERN_WITH_6_WARNINGS = "findbugsXml.xml";
     private static final String FILE_WITH_6_WARNINGS = "/findbugs_plugin/" + PATTERN_WITH_6_WARNINGS;
     private static final String PLUGIN_ROOT = "/findbugs_plugin/";
@@ -75,16 +76,13 @@ public class FindbugsPluginTest extends AbstractAnalysisTest {
     public void should_send_mail_with_expanded_tokens() {
         setUpMailer();
 
-        AnalysisConfigurator<FindbugsFreestyleBuildSettings> buildConfigurator =
-                new AnalysisConfigurator<FindbugsFreestyleBuildSettings>() {
-                    @Override
-                    public void configure(FindbugsFreestyleBuildSettings settings) {
-                        settings.setBuildFailedTotalAll("0");
-                        settings.pattern.set(PATTERN_WITH_6_WARNINGS);
-                    }
-                };
-        FreeStyleJob job = setupJob(FILE_WITH_6_WARNINGS, FreeStyleJob.class,
-                FindbugsFreestyleBuildSettings.class, buildConfigurator);
+        FreeStyleJob job = createFreeStyleJob(new AnalysisConfigurator<FindBugsFreestyleSettings>() {
+            @Override
+            public void configure(FindBugsFreestyleSettings settings) {
+                settings.setBuildFailedTotalAll("0");
+                settings.pattern.set(PATTERN_WITH_6_WARNINGS);
+            }
+        });
 
         configureEmailNotification(job, "FindBugs: ${FINDBUGS_RESULT}",
                 "FindBugs: ${FINDBUGS_COUNT}-${FINDBUGS_FIXED}-${FINDBUGS_NEW}");
@@ -94,17 +92,34 @@ public class FindbugsPluginTest extends AbstractAnalysisTest {
         verifyReceivedMail("FindBugs: FAILURE", "FindBugs: 6-0-6");
     }
 
+    private FreeStyleJob createFreeStyleJob() {
+        return createFreeStyleJob(new AnalysisConfigurator<FindBugsFreestyleSettings>() {
+            @Override
+            public void configure(FindBugsFreestyleSettings settings) {
+                settings.pattern.set(PATTERN_WITH_6_WARNINGS);
+            }
+        });
+    }
+
+    private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<FindBugsFreestyleSettings> buildConfigurator) {
+        return createFreeStyleJob(FILE_WITH_6_WARNINGS, buildConfigurator);
+    }
+
+    private FreeStyleJob createFreeStyleJob(final String file, final AnalysisConfigurator<FindBugsFreestyleSettings> buildConfigurator) {
+        return setupJob(file, FreeStyleJob.class, FindBugsFreestyleSettings.class, buildConfigurator);
+    }
+
     /**
      * Builds a job and checks if warnings of Findbugs are displayed. Checks as well, if the content of the tabs is
      * the one we expect.
      */
     @Test
-    public void record_analysis() {
+    public void should_find_warnings_in_freestyle_job() {
         FreeStyleJob job = createFreeStyleJob();
         Build lastBuild = buildJobWithSuccess(job);
 
-        assertThat(lastBuild, hasAction("FindBugs Warnings"));
-        assertThat(job, hasAction("FindBugs Warnings"));
+        assertThatPageHasFindBugsResults(lastBuild);
+        assertThatPageHasFindBugsResults(job);
         lastBuild.open();
         FindbugsAction fa = new FindbugsAction(job);
         assertThat(fa.getResultLinkByXPathText("6 warnings"), is("findbugsResult"));
@@ -172,13 +187,13 @@ public class FindbugsPluginTest extends AbstractAnalysisTest {
      * Runs job two times to check if new and fixed warnings are displayed.
      */
     @Test
-    public void record_analysis_two_runs() {
+    public void should_report_new_and_fixed_warnings_in_consecutive_builds() {
         FreeStyleJob job = createFreeStyleJob();
         buildJobAndWait(job);
         editJob("/findbugs_plugin/forSecondRun/findbugsXml.xml", false, job);
 
         Build lastBuild = buildJobWithSuccess(job);
-        assertThat(lastBuild, hasAction("FindBugs Warnings"));
+        assertThatPageHasFindBugsResults(lastBuild);
         lastBuild.open();
         FindbugsAction fa = new FindbugsAction(job);
         assertThat(fa.getResultLinkByXPathText("5 warnings"), is("findbugsResult"));
@@ -209,18 +224,18 @@ public class FindbugsPluginTest extends AbstractAnalysisTest {
      * Builds a freestyle project and checks if new warning are displayed.
      */
     @Test
-    public void build_simple_freestyle_mavengoals_project() {
-        AnalysisConfigurator<FindbugsFreestyleBuildSettings> buildConfigurator = new AnalysisConfigurator<FindbugsFreestyleBuildSettings>() {
+    public void should_link_to_source_code_in_real_project() {
+        AnalysisConfigurator<FindBugsFreestyleSettings> buildConfigurator = new AnalysisConfigurator<FindBugsFreestyleSettings>() {
             @Override
-            public void configure(FindbugsFreestyleBuildSettings settings) {
+            public void configure(FindBugsFreestyleSettings settings) {
                 settings.pattern.set("target/findbugsXml.xml");
             }
         };
         FreeStyleJob job = setupJob("/findbugs_plugin/sample_findbugs_project", FreeStyleJob.class,
-                FindbugsFreestyleBuildSettings.class, buildConfigurator, "clean package findbugs:findbugs");
+                FindBugsFreestyleSettings.class, buildConfigurator, "clean package findbugs:findbugs");
 
         Build lastBuild = buildJobWithSuccess(job);
-        assertThat(lastBuild, hasAction("FindBugs Warnings"));
+        assertThatPageHasFindBugsResults(lastBuild);
         lastBuild.open();
         FindbugsAction findbugs = new FindbugsAction(job);
         assertThat(findbugs.getNewWarningNumber(), is(1));
@@ -230,24 +245,23 @@ public class FindbugsPluginTest extends AbstractAnalysisTest {
                 "Redundant nullcheck of o, which is known to be non-null in Main.main(String[])");
     }
 
-    private MavenModuleSet setupSimpleMavenJob() {
-        return setupSimpleMavenJob(null);
+    private MavenModuleSet createMavenJob() {
+        return createMavenJob(null);
     }
 
-    private MavenModuleSet setupSimpleMavenJob(AnalysisConfigurator<FindbugsMavenBuildSettings> configurator) {
-        String projectPath = "/findbugs_plugin/sample_findbugs_project";
-        String goal = "clean package findbugs:findbugs";
-        return setupMavenJob(projectPath, goal, FindbugsMavenBuildSettings.class, configurator);
+    private MavenModuleSet createMavenJob(AnalysisConfigurator<FindBugsMavenSettings> configurator) {
+        return setupMavenJob("/findbugs_plugin/sample_findbugs_project", "clean package findbugs:findbugs",
+                FindBugsMavenSettings.class, configurator);
     }
 
     /**
      * Builds a maven project and checks if a new warning is displayed.
      */
     @Test @Category(SmokeTest.class)
-    public void build_simple_maven_project() {
-        MavenModuleSet job = setupSimpleMavenJob();
+    public void should_retrieve_results_from_maven_job() {
+        MavenModuleSet job = createMavenJob();
         Build lastBuild = buildJobWithSuccess(job);
-        assertThat(lastBuild, hasAction("FindBugs Warnings"));
+        assertThatPageHasFindBugsResults(lastBuild);
         lastBuild.open();
         FindbugsAction findbugs = new FindbugsAction(job);
         assertThat(findbugs.getNewWarningNumber(), is(1));
@@ -257,15 +271,13 @@ public class FindbugsPluginTest extends AbstractAnalysisTest {
      * Builds a maven project and checks if it is unstable.
      */
     @Test
-    public void build_simple_maven_project_and_check_if_it_is_unstable() {
-        AnalysisConfigurator<FindbugsMavenBuildSettings> buildConfigurator =
-                new AnalysisConfigurator<FindbugsMavenBuildSettings>() {
-                    @Override
-                    public void configure(FindbugsMavenBuildSettings settings) {
-                        settings.setBuildUnstableTotalAll("0");
-                    }
-                };
-        MavenModuleSet job = setupSimpleMavenJob(buildConfigurator);
+    public void should_set_result_to_unstable_if_warning_found() {
+        MavenModuleSet job = createMavenJob(new AnalysisConfigurator<FindBugsMavenSettings>() {
+            @Override
+            public void configure(FindBugsMavenSettings settings) {
+                settings.setBuildUnstableTotalAll("0");
+            }
+        });
         buildJobAndWait(job).shouldBeUnstable();
     }
 
@@ -273,15 +285,13 @@ public class FindbugsPluginTest extends AbstractAnalysisTest {
      * Builds a maven project and checks if it failed.
      */
     @Test
-    public void build_simple_maven_project_and_check_if_failed() {
-        AnalysisConfigurator<FindbugsMavenBuildSettings> buildConfigurator =
-                new AnalysisConfigurator<FindbugsMavenBuildSettings>() {
-                    @Override
-                    public void configure(FindbugsMavenBuildSettings settings) {
-                        settings.setBuildFailedTotalAll("0");
-                    }
-                };
-        MavenModuleSet job = setupSimpleMavenJob(buildConfigurator);
+    public void should_set_result_to_failed_if_warning_found() {
+        MavenModuleSet job = createMavenJob(new AnalysisConfigurator<FindBugsMavenSettings>() {
+            @Override
+            public void configure(FindBugsMavenSettings settings) {
+                settings.setBuildFailedTotalAll("0");
+            }
+        });
         buildJobAndWait(job).shouldFail();
     }
 
@@ -289,32 +299,30 @@ public class FindbugsPluginTest extends AbstractAnalysisTest {
      * Builds a job on an slave and checks if warnings of Findbugs are displayed.
      */
     @Test
-    public void record_analysis_build_on_slave() throws ExecutionException, InterruptedException {
+    public void should_retrieve_results_from_slave() throws ExecutionException, InterruptedException {
         FreeStyleJob job = createFreeStyleJob();
-
         Node slave = makeASlaveAndConfigureJob(job);
-
         Build lastBuild = buildJobOnSlaveWithSuccess(job, slave);
 
         assertThat(lastBuild.getNode(), is(slave));
-        assertThat(lastBuild, hasAction("FindBugs Warnings"));
-        assertThat(job, hasAction("FindBugs Warnings"));
+        assertThatPageHasFindBugsResults(lastBuild);
+        assertThatPageHasFindBugsResults(job);
+    }
+
+    private void assertThatPageHasFindBugsResults(final PageObject page) {
+        assertThat(page, hasAction("FindBugs Warnings"));
     }
 
     /**
      * Build a job and check set up a dashboard list-view. Check, if the dashboard view shows correct warning count.
      */
     @Test
-    public void build_a_job_and_check_if_dashboard_list_view_shows_correct_warnings() {
-        MavenModuleSet job = setupSimpleMavenJob();
+    public void should_set_warnings_count_in_list_view_column() {
+        MavenModuleSet job = createMavenJob();
         buildJobAndWait(job).shouldSucceed();
-        ListView view = addDashboardListViewColumn(FindbugsColumn.class);
 
-        By expectedDashboardLinkMatcher = by.css("a[href$='job/" + job.name + "/findbugs']");
-        assertThat(jenkins.all(expectedDashboardLinkMatcher).size(), is(1));
-        WebElement dashboardLink = jenkins.getElement(expectedDashboardLinkMatcher);
-        assertThat(dashboardLink.getText().trim(), is("1"));
-
+        ListView view = addDashboardListViewColumn(FindBugsColumn.class);
+        assertValidLink(job.name);
         view.delete();
     }
 
@@ -322,35 +330,23 @@ public class FindbugsPluginTest extends AbstractAnalysisTest {
      * Build a job and check set up a "dashboard"-style view. Check, if the dashboard view shows correct warning count.
      */
     @Test @WithPlugins("dashboard-view")
-    public void build_a_job_and_check_if_dashboard_view_shows_correct_warnings() {
-        MavenModuleSet job = setupSimpleMavenJob();
+    public void should_set_warnings_count_in_dashboard_portlet() {
+        MavenModuleSet job = createMavenJob();
         buildJobAndWait(job).shouldSucceed();
 
-        DashboardView view = addDashboardViewAndBottomPortlet(FindbugsWarningsPerProjectDashboardViewPortlet.class);
-
-        By expectedDashboardLinkMatcher = by.css("a[href='job/" + job.name + "/findbugs']");
-        assertThat(jenkins.all(expectedDashboardLinkMatcher).size(), is(1));
-        WebElement dashboardLink = jenkins.getElement(expectedDashboardLinkMatcher);
-        assertThat(dashboardLink.getText().trim(), is("1"));
-
+        DashboardView view = addDashboardViewAndBottomPortlet(FindBugsPortlet.class);
+        assertValidLink(job.name);
         view.delete();
     }
 
-    /**
-     * Makes a Freestyle Job with Findbugs and a warnigns-file.
-     *
-     * @return The new Job
-     */
-    private FreeStyleJob createFreeStyleJob() {
-        AnalysisConfigurator<FindbugsFreestyleBuildSettings> buildConfigurator = new AnalysisConfigurator<FindbugsFreestyleBuildSettings>() {
-            @Override
-            public void configure(FindbugsFreestyleBuildSettings settings) {
-                settings.pattern.set(PATTERN_WITH_6_WARNINGS);
-            }
-        };
-        FreeStyleJob job = setupJob(FILE_WITH_6_WARNINGS, FreeStyleJob.class,
-                FindbugsFreestyleBuildSettings.class, buildConfigurator);
-        return job;
-    }
+    private void assertValidLink(final String jobName) {
+        By warningsLinkMatcher = by.css("a[href$='job/" + jobName + "/findbugs']");
 
+        assertThat(jenkins.all(warningsLinkMatcher).size(), is(1));
+        WebElement link = jenkins.getElement(warningsLinkMatcher);
+        assertThat(link.getText().trim(), is("2"));
+
+        link.click();
+        assertThat(driver, hasContent("FindBugs Result"));
+    }
 }

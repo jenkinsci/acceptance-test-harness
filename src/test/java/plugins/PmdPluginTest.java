@@ -13,7 +13,7 @@ import org.jenkinsci.test.acceptance.plugins.pmd.PmdAction;
 import org.jenkinsci.test.acceptance.plugins.pmd.PmdColumn;
 import org.jenkinsci.test.acceptance.plugins.pmd.PmdFreestyleSettings;
 import org.jenkinsci.test.acceptance.plugins.pmd.PmdMavenSettings;
-import org.jenkinsci.test.acceptance.plugins.pmd.PmdWarningsPerProjectDashboardViewPortlet;
+import org.jenkinsci.test.acceptance.plugins.pmd.PmdWarningsPortlet;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Build.Result;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
@@ -364,17 +364,6 @@ public class PmdPluginTest extends AbstractAnalysisTest {
         view.delete();
     }
 
-    private void assertValidLink(final String jobName) {
-        By warningsLinkMatcher = by.css("a[href$='job/" + jobName + "/pmd']");
-
-        assertThat(jenkins.all(warningsLinkMatcher).size(), is(1));
-        WebElement link = jenkins.getElement(warningsLinkMatcher);
-        assertThat(link.getText().trim(), is("2"));
-
-        link.click();
-        assertThat(driver, hasContent("PMD Result"));
-    }
-
     /**
      * Sets up a dashboard view with a warnings-per-project portlet. Builds a job and checks if the portlett shows the
      * correct number of warnings and provides a direct link to the actual warning results.
@@ -384,9 +373,20 @@ public class PmdPluginTest extends AbstractAnalysisTest {
         MavenModuleSet job = createMavenJob();
         buildJobAndWait(job).shouldSucceed();
 
-        DashboardView view = addDashboardViewAndBottomPortlet(PmdWarningsPerProjectDashboardViewPortlet.class);
+        DashboardView view = addDashboardViewAndBottomPortlet(PmdWarningsPortlet.class);
         assertValidLink(job.name);
         view.delete();
+    }
+
+    private void assertValidLink(final String jobName) {
+        By warningsLinkMatcher = by.css("a[href$='job/" + jobName + "/pmd']");
+
+        assertThat(jenkins.all(warningsLinkMatcher).size(), is(1));
+        WebElement link = jenkins.getElement(warningsLinkMatcher);
+        assertThat(link.getText().trim(), is("2"));
+
+        link.click();
+        assertThat(driver, hasContent("PMD Result"));
     }
 
     /**

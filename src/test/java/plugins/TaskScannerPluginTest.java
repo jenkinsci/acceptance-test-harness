@@ -10,7 +10,7 @@ import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerAction;
-import org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerMavenBuildSettings;
+import org.jenkinsci.test.acceptance.plugins.tasks.TasksMavenSettings;
 import org.jenkinsci.test.acceptance.plugins.tasks.TasksFreestyleSettings;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
@@ -184,9 +184,9 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
      */
     @Test
     public void should_detect_regular_expression_in_maven_job() throws Exception {
-        MavenModuleSet job = createMavenJob("/tasks_plugin/regexp", new AnalysisConfigurator<TaskScannerMavenBuildSettings>() {
+        MavenModuleSet job = createMavenJob("/tasks_plugin/regexp", new AnalysisConfigurator<TasksMavenSettings>() {
             @Override
-            public void configure(TaskScannerMavenBuildSettings settings) {
+            public void configure(TasksMavenSettings settings) {
                 settings.setPattern("**/*.txt");
                 settings.setNormalPriorityTags("^.*(TODO(?:[0-9]*))(.*)$");
                 settings.setAsRegexp(true);
@@ -196,12 +196,12 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
         verifyRegularExpressionScannerResult(job);
     }
 
-    private MavenModuleSet createMavenJob(final String files, final AnalysisConfigurator<TaskScannerMavenBuildSettings> buildConfigurator) {
-        return setupJob(files, MavenModuleSet.class, TaskScannerMavenBuildSettings.class, buildConfigurator, null);
+    private MavenModuleSet createMavenJob(final String files, final AnalysisConfigurator<TasksMavenSettings> buildConfigurator) {
+        return setupJob(files, MavenModuleSet.class, TasksMavenSettings.class, buildConfigurator, null);
     }
 
-    private MavenModuleSet createMavenJob(final String files, final String goal, final AnalysisConfigurator<TaskScannerMavenBuildSettings> buildConfigurator) {
-        return setupJob(files, MavenModuleSet.class, TaskScannerMavenBuildSettings.class, buildConfigurator, goal);
+    private MavenModuleSet createMavenJob(final String files, final String goal, final AnalysisConfigurator<TasksMavenSettings> buildConfigurator) {
+        return setupJob(files, MavenModuleSet.class, TasksMavenSettings.class, buildConfigurator, goal);
     }
 
     private void verifyRegularExpressionScannerResult(final Job job) {
@@ -432,9 +432,9 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
     @Test
     public void should_find_tasks_in_maven_project() throws Exception {
         MavenModuleSet job = createMavenJob("/tasks_plugin/sample_tasks_project", "clean package test",
-                new AnalysisConfigurator<TaskScannerMavenBuildSettings>() {
+                new AnalysisConfigurator<TasksMavenSettings>() {
                     @Override
-                    public void configure(TaskScannerMavenBuildSettings settings) {
+                    public void configure(TasksMavenSettings settings) {
                         settings.setPattern("**/*.java");
                         settings.setExcludePattern("**/*Test.java");
                         settings.setHighPriorityTags("FIXME");
@@ -464,9 +464,9 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
         assertThat(tsa.getLowWarningNumber(), is(1));
 
         // re-configure the job and set a threshold to mark the build as failed
-        editJob(false, job, TaskScannerMavenBuildSettings.class, new AnalysisConfigurator<TaskScannerMavenBuildSettings>() {
+        editJob(false, job, TasksMavenSettings.class, new AnalysisConfigurator<TasksMavenSettings>() {
             @Override
-            public void configure(TaskScannerMavenBuildSettings settings) {
+            public void configure(TasksMavenSettings settings) {
                 settings.setBuildFailedTotalHigh("0");
                 settings.setBuildFailedTotalNormal("5");
                 settings.setBuildFailedTotalLow("10");
@@ -504,7 +504,7 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
      * failed 7 - remove most of the task tags -> build is stable again
      */
     @Test
-    public void should_set_build_result_based_on_status_thresholds() throws Exception {
+    public void should_set_build_result_based_on_status_thresholds() {
         FreeStyleJob job = createFreeStyleJob("/tasks_plugin/fileset1_less", new AnalysisConfigurator<TasksFreestyleSettings>() {
             @Override
             public void configure(TasksFreestyleSettings settings) {
@@ -529,91 +529,11 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
         // private function
 
         job = status_thresholds_step1(job, action);
-        job = status_thresholds_step2(job, new AnalysisConfigurator<TasksFreestyleSettings>() {
-            @Override
-            public void configure(TasksFreestyleSettings settings) {
-                settings.setPattern("**/*.java");
-                settings.setExcludePattern("**/*Test.java");
-                settings.setHighPriorityTags(""); //no high prio tags
-                settings.setNormalPriorityTags("TODO");
-                settings.setLowPriorityTags("@Deprecated");
-                settings.setIgnoreCase(false);
-                //setup thresholds
-                settings.setBuildUnstableTotalLow("1");
-                settings.setBuildUnstableTotalNormal("4");
-                settings.setBuildUnstableTotalHigh("0");
-                settings.setBuildUnstableTotalAll("10");
-                settings.setBuildFailedTotalAll("15");
-            }
-        }, action);
-        job = status_thresholds_step3(job, new AnalysisConfigurator<TasksFreestyleSettings>() {
-            @Override
-            public void configure(TasksFreestyleSettings settings) {
-                settings.setPattern("**/*.java");
-                settings.setExcludePattern("**/*Test.java");
-                settings.setHighPriorityTags(""); //no high prio tags
-                settings.setNormalPriorityTags("TODO");
-                settings.setLowPriorityTags("@Deprecated");
-                settings.setIgnoreCase(false);
-                //setup thresholds
-                settings.setBuildUnstableTotalLow("1");
-                settings.setBuildUnstableTotalNormal("4");
-                settings.setBuildUnstableTotalHigh("0");
-                settings.setBuildUnstableTotalAll("10");
-                settings.setBuildFailedTotalAll("15");
-            }
-        }, action);
-        job = status_thresholds_step4(job, new AnalysisConfigurator<TasksFreestyleSettings>() {
-            @Override
-            public void configure(TasksFreestyleSettings settings) {
-                settings.setPattern("**/*.java");
-                settings.setExcludePattern("**/*Test.java");
-                settings.setHighPriorityTags(""); //no high prio tags
-                settings.setNormalPriorityTags("TODO");
-                settings.setLowPriorityTags("@Deprecated");
-                settings.setIgnoreCase(false);
-                //setup thresholds
-                settings.setBuildUnstableTotalLow("1");
-                settings.setBuildUnstableTotalNormal("4");
-                settings.setBuildUnstableTotalHigh("0");
-                settings.setBuildUnstableTotalAll("10");
-                settings.setBuildFailedTotalAll("15");
-            }
-        }, action);
-        job = status_thresholds_step5(job, new AnalysisConfigurator<TasksFreestyleSettings>() {
-            @Override
-            public void configure(TasksFreestyleSettings settings) {
-                settings.setPattern("**/*.java");
-                settings.setExcludePattern("**/*Test.java");
-                settings.setHighPriorityTags(""); //no high prio tags
-                settings.setNormalPriorityTags("TODO");
-                settings.setLowPriorityTags("@Deprecated");
-                settings.setIgnoreCase(false);
-                //setup thresholds
-                settings.setBuildUnstableTotalLow("1");
-                settings.setBuildUnstableTotalNormal("4");
-                settings.setBuildUnstableTotalHigh("0");
-                settings.setBuildUnstableTotalAll("10");
-                settings.setBuildFailedTotalAll("15");
-            }
-        }, action);
-        job = status_thresholds_step6(job, new AnalysisConfigurator<TasksFreestyleSettings>() {
-            @Override
-            public void configure(TasksFreestyleSettings settings) {
-                settings.setPattern("**/*.java");
-                settings.setExcludePattern("**/*Test.java");
-                settings.setHighPriorityTags(""); //no high prio tags
-                settings.setNormalPriorityTags("TODO");
-                settings.setLowPriorityTags("@Deprecated");
-                settings.setIgnoreCase(false);
-                //setup thresholds
-                settings.setBuildUnstableTotalLow("1");
-                settings.setBuildUnstableTotalNormal("4");
-                settings.setBuildUnstableTotalHigh("0");
-                settings.setBuildUnstableTotalAll("10");
-                settings.setBuildFailedTotalAll("15");
-            }
-        }, action);
+        job = status_thresholds_step2(job, action);
+        job = status_thresholds_step3(job, action);
+        job = status_thresholds_step4(job, action);
+        job = status_thresholds_step5(job, action);
+        job = status_thresholds_step6(job, action);
         status_thresholds_step7(job, action);
     }
 
@@ -630,7 +550,7 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
      *               job
      * @return The modified {@link org.jenkinsci.test.acceptance.po.FreeStyleJob}.
      */
-    private FreeStyleJob status_thresholds_step1(FreeStyleJob job, TaskScannerAction action) {
+    private FreeStyleJob status_thresholds_step1(final FreeStyleJob job, final TaskScannerAction action) {
         Build lastBuild = buildJobWithSuccess(job);
         lastBuild.open();
 
@@ -656,38 +576,31 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
      * <p/>
      * So, the build status shall be UNSTABLE due to low priority threshold is exceeded by 1.
      *
-     * @param j                 the {@link org.jenkinsci.test.acceptance.po.FreeStyleJob} created in the Test
-     * @param buildConfigurator a {@link TasksFreestyleSettings}
-     *                          added to the Job
-     * @param tsa               a the {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerAction} object for
-     *                          the current job
+     * @param job    the {@link FreeStyleJob} created in the Test
+     * @param action a the {@link TaskScannerAction} object for the current job
      * @return The modified {@link org.jenkinsci.test.acceptance.po.FreeStyleJob}.
      */
-    private FreeStyleJob status_thresholds_step2(FreeStyleJob j, AnalysisConfigurator<TasksFreestyleSettings> buildConfigurator, TaskScannerAction tsa) {
+    private FreeStyleJob status_thresholds_step2(final FreeStyleJob job, final TaskScannerAction action) {
+        editJob("/tasks_plugin/fileset1", false, job, TasksFreestyleSettings.class, new AnalysisConfigurator<TasksFreestyleSettings>() {
+            @Override
+            public void configure(TasksFreestyleSettings settings) {
+                settings.setLowPriorityTags("@Deprecated,\\?\\?\\?"); // add tag "???"
+            }
+        });
 
-        buildConfigurator =
-                new AnalysisConfigurator<TasksFreestyleSettings>() {
-                    @Override
-                    public void configure(TasksFreestyleSettings settings) {
-                        settings.setLowPriorityTags("@Deprecated,\\?\\?\\?"); // add tag "???"
-                    }
-                };
-
-        editJob("/tasks_plugin/fileset1", false, j, TasksFreestyleSettings.class, buildConfigurator);
-
-        final Build lastBuild = j.startBuild().shouldBeUnstable();
+        Build lastBuild = job.startBuild().shouldBeUnstable();
         lastBuild.open();
 
-        assertThat(tsa.getResultTextByXPathText("6 open tasks"), endsWith("in 7 workspace files."));
-        assertThat(tsa.getResultLinkByXPathText("3 new open tasks"), is("tasksResult/new"));
-        assertThat(tsa.getWarningNumber(), is(6));
-        assertThat(tsa.getNewWarningNumber(), is(3));
-        assertThat(tsa.getNormalWarningNumber(), is(4));
-        assertThat(tsa.getLowWarningNumber(), is(2));
-        assertThat(tsa.getPluginResult(lastBuild),
+        assertThat(action.getResultTextByXPathText("6 open tasks"), endsWith("in 7 workspace files."));
+        assertThat(action.getResultLinkByXPathText("3 new open tasks"), is("tasksResult/new"));
+        assertThat(action.getWarningNumber(), is(6));
+        assertThat(action.getNewWarningNumber(), is(3));
+        assertThat(action.getNormalWarningNumber(), is(4));
+        assertThat(action.getLowWarningNumber(), is(2));
+        assertThat(action.getPluginResult(lastBuild),
                 is("Plug-in Result: UNSTABLE - 2 warnings of priority Low exceed the threshold of 1 by 1 (Reference build: #1)"));
 
-        return j;
+        return job;
     }
 
     /**
@@ -698,45 +611,38 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
      * <p/>
      * So, the build status shall be UNSTABLE due to normal priority threshold is exceeded by 1.
      *
-     * @param j                 the {@link org.jenkinsci.test.acceptance.po.FreeStyleJob} created in the Test
-     * @param buildConfigurator a {@link TasksFreestyleSettings}
-     *                          added to the Job
-     * @param tsa               a the {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerAction} object for
-     *                          the current job
+     * @param job    the {@link FreeStyleJob} created in the Test
+     * @param action a the {@link TaskScannerAction} object for the current job
      * @return The modified {@link org.jenkinsci.test.acceptance.po.FreeStyleJob}.
      */
+    private FreeStyleJob status_thresholds_step3(final FreeStyleJob job, final TaskScannerAction action) {
+        editJob(false, job, TasksFreestyleSettings.class, new AnalysisConfigurator<TasksFreestyleSettings>() {
+            @Override
+            public void configure(TasksFreestyleSettings settings) {
+                settings.setNormalPriorityTags("TODO,XXX"); // add tag "XXX"
+                settings.setLowPriorityTags("@Deprecated"); // remove tag "???"
+            }
+        });
 
-    private FreeStyleJob status_thresholds_step3(FreeStyleJob j, AnalysisConfigurator<TasksFreestyleSettings> buildConfigurator, TaskScannerAction tsa) {
-        buildConfigurator =
-                new AnalysisConfigurator<TasksFreestyleSettings>() {
-                    @Override
-                    public void configure(TasksFreestyleSettings settings) {
-                        settings.setNormalPriorityTags("TODO,XXX"); // add tag "XXX"
-                        settings.setLowPriorityTags("@Deprecated"); // remove tag "???"
-                    }
-                };
-
-        editJob(false, j, TasksFreestyleSettings.class, buildConfigurator);
-
-        final Build lastBuild = j.startBuild().shouldBeUnstable();
+        Build lastBuild = job.startBuild().shouldBeUnstable();
         lastBuild.open();
 
-        assertThat(tsa.getResultTextByXPathText("6 open tasks"), endsWith("in 7 workspace files."));
+        assertThat(action.getResultTextByXPathText("6 open tasks"), endsWith("in 7 workspace files."));
 
         // Note:
         //   As the previous build was unstable the determination which warnings have changed is
         //   done based on the reference buil (#1)!!
         //   The same applies to step 4 to 6
 
-        assertThat(tsa.getResultLinkByXPathText("3 new open tasks"), is("tasksResult/new"));
-        assertThat(tsa.getWarningNumber(), is(6));
-        assertThat(tsa.getNewWarningNumber(), is(3));
-        assertThat(tsa.getNormalWarningNumber(), is(5));
-        assertThat(tsa.getLowWarningNumber(), is(1));
-        assertThat(tsa.getPluginResult(lastBuild),
+        assertThat(action.getResultLinkByXPathText("3 new open tasks"), is("tasksResult/new"));
+        assertThat(action.getWarningNumber(), is(6));
+        assertThat(action.getNewWarningNumber(), is(3));
+        assertThat(action.getNormalWarningNumber(), is(5));
+        assertThat(action.getLowWarningNumber(), is(1));
+        assertThat(action.getPluginResult(lastBuild),
                 is("Plug-in Result: UNSTABLE - 5 warnings of priority Normal exceed the threshold of 4 by 1 (Reference build: #1)"));
 
-        return j;
+        return job;
     }
 
     /**
@@ -747,40 +653,33 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
      * <p/>
      * So, the build status shall be UNSTABLE due to high priority threshold is exceeded by 1.
      *
-     * @param j                 the {@link org.jenkinsci.test.acceptance.po.FreeStyleJob} created in the Test
-     * @param buildConfigurator a {@link TasksFreestyleSettings}
-     *                          added to the Job
-     * @param tsa               a the {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerAction} object for
-     *                          the current job
+     * @param job    the {@link FreeStyleJob} created in the Test
+     * @param action a the {@link TaskScannerAction} object for the current job
      * @return The modified {@link org.jenkinsci.test.acceptance.po.FreeStyleJob}.
      */
+    private FreeStyleJob status_thresholds_step4(final FreeStyleJob job, final TaskScannerAction action) {
+        editJob(false, job, TasksFreestyleSettings.class, new AnalysisConfigurator<TasksFreestyleSettings>() {
+            @Override
+            public void configure(TasksFreestyleSettings settings) {
+                settings.setLowPriorityTags("@Deprecated,\\?\\?\\?"); // add tag "???"
+                settings.setHighPriorityTags("FIXME"); // add tag "FIXME"
+            }
+        });
 
-    private FreeStyleJob status_thresholds_step4(FreeStyleJob j, AnalysisConfigurator<TasksFreestyleSettings> buildConfigurator, TaskScannerAction tsa) {
-        buildConfigurator =
-                new AnalysisConfigurator<TasksFreestyleSettings>() {
-                    @Override
-                    public void configure(TasksFreestyleSettings settings) {
-                        settings.setLowPriorityTags("@Deprecated,\\?\\?\\?"); // add tag "???"
-                        settings.setHighPriorityTags("FIXME"); // add tag "FIXME"
-                    }
-                };
-
-        editJob(false, j, TasksFreestyleSettings.class, buildConfigurator);
-
-        final Build lastBuild = j.startBuild().shouldBeUnstable();
+        Build lastBuild = job.startBuild().shouldBeUnstable();
         lastBuild.open();
 
-        assertThat(tsa.getResultTextByXPathText("8 open tasks"), endsWith("in 7 workspace files."));
-        assertThat(tsa.getResultLinkByXPathText("5 new open tasks"), is("tasksResult/new"));
-        assertThat(tsa.getWarningNumber(), is(8));
-        assertThat(tsa.getNewWarningNumber(), is(5));
-        assertThat(tsa.getHighWarningNumber(), is(1));
-        assertThat(tsa.getNormalWarningNumber(), is(5));
-        assertThat(tsa.getLowWarningNumber(), is(2));
-        assertThat(tsa.getPluginResult(lastBuild),
+        assertThat(action.getResultTextByXPathText("8 open tasks"), endsWith("in 7 workspace files."));
+        assertThat(action.getResultLinkByXPathText("5 new open tasks"), is("tasksResult/new"));
+        assertThat(action.getWarningNumber(), is(8));
+        assertThat(action.getNewWarningNumber(), is(5));
+        assertThat(action.getHighWarningNumber(), is(1));
+        assertThat(action.getNormalWarningNumber(), is(5));
+        assertThat(action.getLowWarningNumber(), is(2));
+        assertThat(action.getPluginResult(lastBuild),
                 is("Plug-in Result: UNSTABLE - 1 warning of priority High exceeds the threshold of 0 by 1 (Reference build: #1)"));
 
-        return j;
+        return job;
     }
 
     /**
@@ -791,41 +690,35 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
      * <p/>
      * So, the build status shall be UNSTABLE due to total warnings threshold is exceeded by 5.
      *
-     * @param j                 the {@link org.jenkinsci.test.acceptance.po.FreeStyleJob} created in the Test
-     * @param buildConfigurator a {@link TasksFreestyleSettings}
-     *                          added to the Job
-     * @param tsa               a the {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerAction} object for
+     * @param job                 the {@link FreeStyleJob} created in the Test
+     * @param action               a the {@link TaskScannerAction} object for
      *                          the current job
      * @return The modified {@link org.jenkinsci.test.acceptance.po.FreeStyleJob}.
      */
-
-    private FreeStyleJob status_thresholds_step5(FreeStyleJob j, AnalysisConfigurator<TasksFreestyleSettings> buildConfigurator, TaskScannerAction tsa) {
-        buildConfigurator =
-                new AnalysisConfigurator<TasksFreestyleSettings>() {
-                    @Override
-                    public void configure(TasksFreestyleSettings settings) {
-                        settings.setNormalPriorityTags("TODO"); //remove tag "XXX"
-                    }
-                };
-
+    private FreeStyleJob status_thresholds_step5(final FreeStyleJob job, final TaskScannerAction action) {
         // add a second shell step to copy another folder
-        editJob("/tasks_plugin/fileset2", true, j, TasksFreestyleSettings.class, buildConfigurator);
+        editJob("/tasks_plugin/fileset2", true, job, TasksFreestyleSettings.class, new AnalysisConfigurator<TasksFreestyleSettings>() {
+            @Override
+            public void configure(TasksFreestyleSettings settings) {
+                settings.setNormalPriorityTags("TODO"); //remove tag "XXX"
+            }
+        });
 
-        final Build lastBuild = j.startBuild().shouldBeUnstable();
+        Build lastBuild = job.startBuild().shouldBeUnstable();
         lastBuild.open();
 
-        assertThat(tsa.getResultTextByXPathText("15 open tasks"), endsWith("in 17 workspace files."));
-        assertThat(tsa.getResultLinkByXPathText("12 new open tasks"), is("tasksResult/new"));
+        assertThat(action.getResultTextByXPathText("15 open tasks"), endsWith("in 17 workspace files."));
+        assertThat(action.getResultLinkByXPathText("12 new open tasks"), is("tasksResult/new"));
 
-        assertThat(tsa.getWarningNumber(), is(15));
-        assertThat(tsa.getNewWarningNumber(), is(12));
-        assertThat(tsa.getHighWarningNumber(), is(1));
-        assertThat(tsa.getNormalWarningNumber(), is(11));
-        assertThat(tsa.getLowWarningNumber(), is(3));
-        assertThat(tsa.getPluginResult(lastBuild),
+        assertThat(action.getWarningNumber(), is(15));
+        assertThat(action.getNewWarningNumber(), is(12));
+        assertThat(action.getHighWarningNumber(), is(1));
+        assertThat(action.getNormalWarningNumber(), is(11));
+        assertThat(action.getLowWarningNumber(), is(3));
+        assertThat(action.getPluginResult(lastBuild),
                 is("Plug-in Result: UNSTABLE - 15 warnings exceed the threshold of 10 by 5 (Reference build: #1)"));
 
-        return j;
+        return job;
     }
 
     /**
@@ -836,39 +729,32 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
      * <p/>
      * So, the build status shall be FAILED due to total warnings threshold is exceeded by 1.
      *
-     * @param j                 the {@link org.jenkinsci.test.acceptance.po.FreeStyleJob} created in the Test
-     * @param buildConfigurator a {@link TasksFreestyleSettings}
-     *                          added to the Job
-     * @param tsa               a the {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerAction} object for
-     *                          the current job
+     * @param job    the {@link FreeStyleJob} created in the Test
+     * @param action a the {@link TaskScannerAction} object for the current job
      * @return The modified {@link org.jenkinsci.test.acceptance.po.FreeStyleJob}.
      */
+    private FreeStyleJob status_thresholds_step6(final FreeStyleJob job, final TaskScannerAction action) {
+        editJob(false, job, TasksFreestyleSettings.class, new AnalysisConfigurator<TasksFreestyleSettings>() {
+            @Override
+            public void configure(TasksFreestyleSettings settings) {
+                settings.setIgnoreCase(true);
+            }
+        });
 
-    private FreeStyleJob status_thresholds_step6(FreeStyleJob j, AnalysisConfigurator<TasksFreestyleSettings> buildConfigurator, TaskScannerAction tsa) {
-        buildConfigurator =
-                new AnalysisConfigurator<TasksFreestyleSettings>() {
-                    @Override
-                    public void configure(TasksFreestyleSettings settings) {
-                        settings.setIgnoreCase(true);
-                    }
-                };
-
-        editJob(false, j, TasksFreestyleSettings.class, buildConfigurator);
-
-        final Build lastBuild = j.startBuild().shouldFail();
+        Build lastBuild = job.startBuild().shouldFail();
         lastBuild.open();
 
-        assertThat(tsa.getResultTextByXPathText("16 open tasks"), endsWith("in 17 workspace files."));
-        assertThat(tsa.getResultLinkByXPathText("13 new open tasks"), is("tasksResult/new"));
-        assertThat(tsa.getWarningNumber(), is(16));
-        assertThat(tsa.getNewWarningNumber(), is(13));
-        assertThat(tsa.getHighWarningNumber(), is(2));
-        assertThat(tsa.getNormalWarningNumber(), is(11));
-        assertThat(tsa.getLowWarningNumber(), is(3));
-        assertThat(tsa.getPluginResult(lastBuild),
+        assertThat(action.getResultTextByXPathText("16 open tasks"), endsWith("in 17 workspace files."));
+        assertThat(action.getResultLinkByXPathText("13 new open tasks"), is("tasksResult/new"));
+        assertThat(action.getWarningNumber(), is(16));
+        assertThat(action.getNewWarningNumber(), is(13));
+        assertThat(action.getHighWarningNumber(), is(2));
+        assertThat(action.getNormalWarningNumber(), is(11));
+        assertThat(action.getLowWarningNumber(), is(3));
+        assertThat(action.getPluginResult(lastBuild),
                 is("Plug-in Result: FAILED - 16 warnings exceed the threshold of 15 by 1 (Reference build: #1)"));
 
-        return j;
+        return job;
     }
 
     /**
@@ -882,15 +768,14 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
      * <p/>
      * So, the build status shall be SUCCESS as no threshold will be exceeded.
      *
-     * @param j   the {@link org.jenkinsci.test.acceptance.po.FreeStyleJob} created in the Test
-     * @param tsa a the {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerAction} object for the current
-     *            job
+     * @param job    the {@link org.jenkinsci.test.acceptance.po.FreeStyleJob} created in the Test
+     * @param action a the {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerAction} object for the current
+     *               job
      * @return The modified {@link org.jenkinsci.test.acceptance.po.FreeStyleJob}.
      */
-
-    private FreeStyleJob status_thresholds_step7(FreeStyleJob j, TaskScannerAction tsa) {
-        j.configure();
-        j.addShellStep("NEW=\"CLOSED\"\n" +
+    private FreeStyleJob status_thresholds_step7(final FreeStyleJob job, final TaskScannerAction action) {
+        job.configure();
+        job.addShellStep("NEW=\"CLOSED\"\n" +
                 "for t in \"todo\" \"TODO\" \"XXX\" \"fixme\" \"FIXME\" \"Deprecated\"\n" +
                 "do\n" +
                 "  OLD=$t\n" +
@@ -908,24 +793,24 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
                 "    fi\n" +
                 "  done\n" +
                 "done");
-        j.save();
+        job.save();
 
-        final Build lastBuild = buildJobWithSuccess(j);
+        Build lastBuild = buildJobWithSuccess(job);
         lastBuild.open();
 
-        assertThat(tsa.getResultTextByXPathText("1 open task"), endsWith("in 17 workspace files."));
-        assertThat(tsa.getResultLinkByXPathText("1 new open task"), is("tasksResult/new"));
-        assertThat(tsa.getResultLinkByXPathText("3 closed tasks"), is("tasksResult/fixed"));
-        assertThat(tsa.getWarningNumber(), is(1));
-        assertThat(tsa.getNewWarningNumber(), is(1));
-        assertThat(tsa.getFixedWarningNumber(), is(3));
-        assertThat(tsa.getHighWarningNumber(), is(0));
-        assertThat(tsa.getNormalWarningNumber(), is(0));
-        assertThat(tsa.getLowWarningNumber(), is(1));
-        assertThat(tsa.getPluginResult(lastBuild),
+        assertThat(action.getResultTextByXPathText("1 open task"), endsWith("in 17 workspace files."));
+        assertThat(action.getResultLinkByXPathText("1 new open task"), is("tasksResult/new"));
+        assertThat(action.getResultLinkByXPathText("3 closed tasks"), is("tasksResult/fixed"));
+        assertThat(action.getWarningNumber(), is(1));
+        assertThat(action.getNewWarningNumber(), is(1));
+        assertThat(action.getFixedWarningNumber(), is(3));
+        assertThat(action.getHighWarningNumber(), is(0));
+        assertThat(action.getNormalWarningNumber(), is(0));
+        assertThat(action.getLowWarningNumber(), is(1));
+        assertThat(action.getPluginResult(lastBuild),
                 is("Plug-in Result: SUCCESS - no threshold has been exceeded (Reference build: #1)"));
 
-        return j;
+        return job;
     }
 
     /**

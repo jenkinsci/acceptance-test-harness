@@ -5,13 +5,13 @@ import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.ListView;
 
 /**
- * The Checkstyle Column.
+ * A list view column showing the CheckStyle warnings count.
  *
  * @author Fabian Trampusch
  */
 @Describable("Number of Checkstyle warnings")
-public class CheckstyleListViewColumn extends AbstractListViewColumn {
-    public CheckstyleListViewColumn(ListView parent, String path) {
+public class CheckStyleColumn extends AbstractListViewColumn {
+    public CheckStyleColumn(final ListView parent, final String path) {
         super(parent, path);
     }
 }

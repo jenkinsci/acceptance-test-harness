@@ -6,7 +6,7 @@ import org.jenkinsci.test.acceptance.plugins.analysis_collector.*;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckStyleFreestyleSettings;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
-import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsFreestyleBuildSettings;
+import org.jenkinsci.test.acceptance.plugins.findbugs.FindBugsFreestyleSettings;
 import org.jenkinsci.test.acceptance.plugins.pmd.PmdFreestyleSettings;
 import org.jenkinsci.test.acceptance.plugins.tasks.TasksFreestyleSettings;
 import org.jenkinsci.test.acceptance.po.Build;
@@ -98,7 +98,7 @@ public class AnalysisCollectorPluginTest extends AbstractJUnitTest {
         FreeStyleJob job = jenkins.jobs.create();
         job.configure();
         job.copyResource(ANALYSIS_COLLECTOR_PLUGIN_RESOURCES + "/findbugs.xml");
-        job.addPublisher(FindbugsFreestyleBuildSettings.class);
+        job.addPublisher(FindBugsFreestyleSettings.class);
         AnalysisCollectorFreestyleBuildSettings analysis = job.addPublisher(AnalysisCollectorFreestyleBuildSettings.class);
         AnalysisConfigurator<AnalysisCollectorFreestyleBuildSettings> configurator = new AnalysisConfigurator<AnalysisCollectorFreestyleBuildSettings>() {
             @Override
@@ -279,7 +279,7 @@ public class AnalysisCollectorPluginTest extends AbstractJUnitTest {
         job.copyResource(resourceToCopy);
         job.addPublisher(CheckStyleFreestyleSettings.class);
         job.addPublisher(PmdFreestyleSettings.class);
-        job.addPublisher(FindbugsFreestyleBuildSettings.class);
+        job.addPublisher(FindBugsFreestyleSettings.class);
         TasksFreestyleSettings taskScannerSettings = job.addPublisher(TasksFreestyleSettings.class);
         AnalysisConfigurator<TasksFreestyleSettings> configurator = new AnalysisConfigurator<TasksFreestyleSettings>() {
             @Override

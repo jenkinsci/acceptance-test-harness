@@ -9,9 +9,9 @@ import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckStyleFreestyleSettings;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckStyleMavenSettings;
-import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleAction;
-import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleListViewColumn;
-import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckstyleWarningsPerProjectDashboardViewPortlet;
+import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckStyleAction;
+import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckStyleColumn;
+import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckStylePortlet;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.po.Build;
@@ -106,7 +106,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
         FreeStyleJob job = createFreeStyleJob();
         buildJobWithSuccess(job).open();
 
-        CheckstyleAction ca = new CheckstyleAction(job);
+        CheckStyleAction ca = new CheckStyleAction(job);
         assertThat(ca.getResultLinkByXPathText("776 warnings"), is("checkstyleResult"));
         assertThat(ca.getResultLinkByXPathText("776 new warnings"), is("checkstyleResult/new"));
         assertThat(ca.getWarningNumber(), is(776));
@@ -120,7 +120,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
         assertTypeTab(ca);
     }
 
-    private void assertFileTab(CheckstyleAction ca) {
+    private void assertFileTab(CheckStyleAction ca) {
         SortedMap<String, Integer> expectedFileDetails = new TreeMap<>();
         expectedFileDetails.put("JavaProvider.java", 18);
         expectedFileDetails.put("PluginImpl.java", 8);
@@ -132,7 +132,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
         assertThat(ca.getFileTabContents(), is(expectedFileDetails));
     }
 
-    private void assertCategoryTab(CheckstyleAction ca) {
+    private void assertCategoryTab(CheckStyleAction ca) {
         SortedMap<String, Integer> expectedCategories = new TreeMap<>();
         expectedCategories.put("Blocks", 28);
         expectedCategories.put("Checks", 123);
@@ -147,7 +147,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
         assertThat(ca.getCategoriesTabContents(), is(expectedCategories));
     }
 
-    private void assertTypeTab(CheckstyleAction ca) {
+    private void assertTypeTab(CheckStyleAction ca) {
         SortedMap<String, Integer> expectedTypes = new TreeMap<>();
         expectedTypes.put("AvoidInlineConditionalsCheck", 9);
         expectedTypes.put("AvoidStarImportCheck", 1);
@@ -200,7 +200,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
         Build lastBuild = buildJobWithSuccess(job);
         assertThatPageContainsCheckstyleResults(lastBuild);
         lastBuild.open();
-        CheckstyleAction ca = new CheckstyleAction(job);
+        CheckStyleAction ca = new CheckStyleAction(job);
         assertThat(ca.getResultLinkByXPathText("679 warnings"), is("checkstyleResult"));
         assertThat(ca.getResultLinkByXPathText("3 new warnings"), is("checkstyleResult/new"));
         assertThat(ca.getResultLinkByXPathText("97 fixed warnings"), is("checkstyleResult/fixed"));
@@ -276,7 +276,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
         Build lastBuild = buildJobWithSuccess(job);
         assertThatPageContainsCheckstyleResults(lastBuild);
         lastBuild.open();
-        CheckstyleAction checkstyle = new CheckstyleAction(job);
+        CheckStyleAction checkstyle = new CheckStyleAction(job);
         assertThat(checkstyle.getNewWarningNumber(), is(12));
 
         SortedMap<String, Integer> expectedContent = new TreeMap<>();
@@ -306,7 +306,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
         Build lastBuild = buildJobWithSuccess(job);
         assertThatPageContainsCheckstyleResults(lastBuild);
         lastBuild.open();
-        CheckstyleAction checkstyle = new CheckstyleAction(job);
+        CheckStyleAction checkstyle = new CheckStyleAction(job);
         assertThat(checkstyle.getNewWarningNumber(), is(12));
     }
 
@@ -362,7 +362,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
         MavenModuleSet job = createMavenJob();
         buildJobAndWait(job).shouldSucceed();
 
-        ListView view = addDashboardListViewColumn(CheckstyleListViewColumn.class);
+        ListView view = addDashboardListViewColumn(CheckStyleColumn.class);
         assertValidLink(job.name);
         view.delete();
     }
@@ -376,7 +376,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
         MavenModuleSet job = createMavenJob();
         buildJobAndWait(job).shouldSucceed();
 
-        DashboardView view = addDashboardViewAndBottomPortlet(CheckstyleWarningsPerProjectDashboardViewPortlet.class);
+        DashboardView view = addDashboardViewAndBottomPortlet(CheckStylePortlet.class);
         assertValidLink(job.name);
         view.delete();
     }
@@ -449,7 +449,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
         if (expectedNewWarnings > 0) {
             assertThatPageContainsCheckstyleResults(lastBuild);
             lastBuild.open();
-            CheckstyleAction checkstyle = new CheckstyleAction(job);
+            CheckStyleAction checkstyle = new CheckStyleAction(job);
             assertThat(checkstyle.getNewWarningNumber(), is(expectedNewWarnings));
         }
     }

@@ -16,9 +16,8 @@ import org.jenkinsci.test.acceptance.po.Describable;
  * @author Martin Ende
  */
 @Describable("Scan workspace for open tasks")
-public class TaskScannerMavenBuildSettings extends AbstractTaskScannerBuildSettings {
-
-    public TaskScannerMavenBuildSettings(MavenModuleSet parent, String path) {
+public class TasksMavenSettings extends AbstractTaskScannerBuildSettings {
+    public TasksMavenSettings(final MavenModuleSet parent, final String path) {
         super(parent, path);
     }
 }

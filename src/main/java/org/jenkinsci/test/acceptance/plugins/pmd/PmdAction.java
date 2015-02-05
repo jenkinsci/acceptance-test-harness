@@ -5,11 +5,11 @@ import org.jenkinsci.test.acceptance.po.ContainerPageObject;
 
 /**
  * Page object for Pmd action.
+ *
+ * @author Fabian Trampusch
  */
 public class PmdAction extends AnalysisAction {
-
-    public PmdAction(ContainerPageObject parent) {
+    public PmdAction(final ContainerPageObject parent) {
         super(parent, "pmd");
     }
-
 }

@@ -5,15 +5,13 @@ import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
 import org.jenkinsci.test.acceptance.po.Describable;
 
 /**
- * A Checkstyle portlet for {@link org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView}.
+ * A PMD portlet for {@link org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView}.
  *
  * @author Fabian Trampusch
  */
 @Describable("PMD warnings per project")
-public class PmdWarningsPerProjectDashboardViewPortlet extends AbstractDashboardViewPortlet {
-
-    public PmdWarningsPerProjectDashboardViewPortlet(DashboardView parent, String path) {
+public class PmdWarningsPortlet extends AbstractDashboardViewPortlet {
+    public PmdWarningsPortlet(final DashboardView parent, final String path) {
         super(parent, path);
     }
-
 }

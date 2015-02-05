@@ -6,11 +6,11 @@ import org.jenkinsci.test.acceptance.po.ContainerPageObject;
 
 /**
  * Page object for Findbugs action.
+ *
+ * @author Fabian Trampusch
  */
 public class FindbugsAction extends AnalysisAction {
-    
-    public FindbugsAction(ContainerPageObject parent) {
+    public FindbugsAction(final ContainerPageObject parent) {
         super(parent, "findbugs");
     }
-
 }

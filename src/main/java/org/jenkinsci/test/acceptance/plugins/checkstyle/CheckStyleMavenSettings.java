@@ -6,12 +6,12 @@ import org.jenkinsci.test.acceptance.po.Describable;
 
 /**
  * Checkstyle build settings for maven projects.
+ *
  * @author Fabian Trampusch
  */
 @Describable("Publish Checkstyle analysis results")
 public class CheckStyleMavenSettings extends AnalysisMavenSettings {
-
-    public CheckStyleMavenSettings(MavenModuleSet parent, String selectorPath) {
+    public CheckStyleMavenSettings(final MavenModuleSet parent, final String selectorPath) {
         super(parent, selectorPath);
     }
 }

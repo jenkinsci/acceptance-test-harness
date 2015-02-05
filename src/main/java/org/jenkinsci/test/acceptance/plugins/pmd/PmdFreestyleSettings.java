@@ -5,11 +5,13 @@ import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Job;
 
 /**
- * @author Kohsuke Kawaguchi
+ * PMD build settings for freestyle projects.
+ *
+ * @author Fabian Trampusch
  */
 @Describable("Publish PMD analysis results")
 public class PmdFreestyleSettings extends AnalysisFreestyleSettings {
-    public PmdFreestyleSettings(Job parent, String path) {
+    public PmdFreestyleSettings(final Job parent, final String path) {
         super(parent, path);
     }
 }
