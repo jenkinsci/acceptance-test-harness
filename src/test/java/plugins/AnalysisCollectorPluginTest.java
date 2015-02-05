@@ -8,7 +8,7 @@ import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckStyleFreestyleSetti
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
 import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsFreestyleBuildSettings;
 import org.jenkinsci.test.acceptance.plugins.pmd.PmdFreestyleSettings;
-import org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerFreestyleBuildSettings;
+import org.jenkinsci.test.acceptance.plugins.tasks.TasksFreestyleSettings;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
@@ -280,10 +280,10 @@ public class AnalysisCollectorPluginTest extends AbstractJUnitTest {
         job.addPublisher(CheckStyleFreestyleSettings.class);
         job.addPublisher(PmdFreestyleSettings.class);
         job.addPublisher(FindbugsFreestyleBuildSettings.class);
-        TaskScannerFreestyleBuildSettings taskScannerSettings = job.addPublisher(TaskScannerFreestyleBuildSettings.class);
-        AnalysisConfigurator<TaskScannerFreestyleBuildSettings> configurator = new AnalysisConfigurator<TaskScannerFreestyleBuildSettings>() {
+        TasksFreestyleSettings taskScannerSettings = job.addPublisher(TasksFreestyleSettings.class);
+        AnalysisConfigurator<TasksFreestyleSettings> configurator = new AnalysisConfigurator<TasksFreestyleSettings>() {
             @Override
-            public void configure(TaskScannerFreestyleBuildSettings settings) {
+            public void configure(TasksFreestyleSettings settings) {
                 settings.setHighPriorityTags("PRIO1");
                 settings.setNormalPriorityTags("PRIO2,TODO");
                 settings.setLowPriorityTags("PRIO3");

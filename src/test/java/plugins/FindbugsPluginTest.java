@@ -65,6 +65,7 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
 public class FindbugsPluginTest extends AbstractAnalysisTest {
     private static final String PATTERN_WITH_6_WARNINGS = "findbugsXml.xml";
     private static final String FILE_WITH_6_WARNINGS = "/findbugs_plugin/" + PATTERN_WITH_6_WARNINGS;
+    private static final String PLUGIN_ROOT = "/findbugs_plugin/";
 
     /**
      * Checks that the plug-in sends a mail after a build has been failed. The content of the mail
@@ -99,7 +100,7 @@ public class FindbugsPluginTest extends AbstractAnalysisTest {
      */
     @Test
     public void record_analysis() {
-        FreeStyleJob job = setUpFindbugsFreestyleJob();
+        FreeStyleJob job = createFreeStyleJob();
         Build lastBuild = buildJobWithSuccess(job);
 
         assertThat(lastBuild, hasAction("FindBugs Warnings"));
@@ -161,12 +162,10 @@ public class FindbugsPluginTest extends AbstractAnalysisTest {
      * Difference in whitespaces are ok.
      */
     @Test
-    public void xml_api_report_depth_0() throws IOException, SAXException, ParserConfigurationException {
-        FreeStyleJob job = setUpFindbugsFreestyleJob();
+    public void should_return_results_via_remote_api() throws IOException, SAXException, ParserConfigurationException {
+        FreeStyleJob job = createFreeStyleJob();
         Build build = buildJobWithSuccess(job);
-        String apiUrl = "findbugsResult/api/xml?depth=0";
-        String expectedXmlPath = "/findbugs_plugin/api_depth_0.xml";
-        assertXmlApiMatchesExpected(build, apiUrl, expectedXmlPath);
+        assertXmlApiMatchesExpected(build, "findbugsResult/api/xml?depth=0", PLUGIN_ROOT + "api_depth_0.xml");
     }
 
     /**
@@ -174,7 +173,7 @@ public class FindbugsPluginTest extends AbstractAnalysisTest {
      */
     @Test
     public void record_analysis_two_runs() {
-        FreeStyleJob job = setUpFindbugsFreestyleJob();
+        FreeStyleJob job = createFreeStyleJob();
         buildJobAndWait(job);
         editJob("/findbugs_plugin/forSecondRun/findbugsXml.xml", false, job);
 
@@ -197,8 +196,8 @@ public class FindbugsPluginTest extends AbstractAnalysisTest {
      * Runs job two times to check if the links of the graph are relative.
      */
     @Test @Bug("21723")
-    public void view_findbugs_report_job_graph_links() {
-        FreeStyleJob job = setUpFindbugsFreestyleJob();
+    public void should_have_relative_graph_links() {
+        FreeStyleJob job = createFreeStyleJob();
         buildJobAndWait(job);
         editJob("/findbugs_plugin/forSecondRun/findbugsXml.xml", false, job);
         buildJobWithSuccess(job);
@@ -291,7 +290,7 @@ public class FindbugsPluginTest extends AbstractAnalysisTest {
      */
     @Test
     public void record_analysis_build_on_slave() throws ExecutionException, InterruptedException {
-        FreeStyleJob job = setUpFindbugsFreestyleJob();
+        FreeStyleJob job = createFreeStyleJob();
 
         Node slave = makeASlaveAndConfigureJob(job);
 
@@ -342,7 +341,7 @@ public class FindbugsPluginTest extends AbstractAnalysisTest {
      *
      * @return The new Job
      */
-    private FreeStyleJob setUpFindbugsFreestyleJob() {
+    private FreeStyleJob createFreeStyleJob() {
         AnalysisConfigurator<FindbugsFreestyleBuildSettings> buildConfigurator = new AnalysisConfigurator<FindbugsFreestyleBuildSettings>() {
             @Override
             public void configure(FindbugsFreestyleBuildSettings settings) {

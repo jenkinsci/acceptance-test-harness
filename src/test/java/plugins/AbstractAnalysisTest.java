@@ -117,9 +117,9 @@ public abstract class AbstractAnalysisTest extends AbstractJUnitTest {
      * @return the new job
      */
     public <J extends Job, T extends AnalysisSettings & PostBuildStep> J setupJob(String resourceToCopy,
-                                                                                  Class<J> jobClass,
-                                                                                  Class<T> publisherBuildSettingsClass,
-                                                                                  AnalysisConfigurator<T> configurator) {
+            Class<J> jobClass,
+            Class<T> publisherBuildSettingsClass,
+            AnalysisConfigurator<T> configurator) {
         return setupJob(resourceToCopy, jobClass, publisherBuildSettingsClass, configurator, null);
     }
 
@@ -135,10 +135,10 @@ public abstract class AbstractAnalysisTest extends AbstractJUnitTest {
      * @return the new job
      */
     public <J extends Job, T extends AnalysisSettings & PostBuildStep> J setupJob(String resourceToCopy,
-                                                                                  Class<J> jobClass,
-                                                                                  Class<T> publisherBuildSettingsClass,
-                                                                                  AnalysisConfigurator<T> configurator,
-                                                                                  String goal) {
+            Class<J> jobClass,
+            Class<T> publisherBuildSettingsClass,
+            AnalysisConfigurator<T> configurator,
+            String goal) {
         if (jobClass.isAssignableFrom(MavenModuleSet.class)) {
             MavenInstallation.ensureThatMavenIsInstalled(jenkins);
         }
@@ -194,8 +194,8 @@ public abstract class AbstractAnalysisTest extends AbstractJUnitTest {
      * @return the edited job
      */
     public <J extends Job, T extends AnalysisSettings & PostBuildStep> J editJob(String newResourceToCopy,
-                                                                                 boolean isAdditionalResource,
-                                                                                 J job) {
+            boolean isAdditionalResource,
+            J job) {
         return edit(newResourceToCopy, isAdditionalResource, job, null, null);
     }
 
@@ -212,10 +212,10 @@ public abstract class AbstractAnalysisTest extends AbstractJUnitTest {
      * @return the edited job
      */
     public <J extends Job, T extends AnalysisSettings & PostBuildStep> J editJob(String newResourceToCopy,
-                                                                                 boolean isAdditionalResource,
-                                                                                 J job,
-                                                                                 Class<T> publisherBuildSettingsClass,
-                                                                                 AnalysisConfigurator<T> configurator) {
+            boolean isAdditionalResource,
+            J job,
+            Class<T> publisherBuildSettingsClass,
+            AnalysisConfigurator<T> configurator) {
         return edit(newResourceToCopy, isAdditionalResource, job, publisherBuildSettingsClass, configurator);
     }
 
@@ -230,9 +230,9 @@ public abstract class AbstractAnalysisTest extends AbstractJUnitTest {
      * @return the edited job
      */
     public <J extends Job, T extends AnalysisSettings & PostBuildStep> J editJob(boolean isAdditionalResource,
-                                                                                 J job,
-                                                                                 Class<T> publisherBuildSettingsClass,
-                                                                                 AnalysisConfigurator<T> configurator) {
+            J job,
+            Class<T> publisherBuildSettingsClass,
+            AnalysisConfigurator<T> configurator) {
         return edit(null, isAdditionalResource, job, publisherBuildSettingsClass, configurator);
     }
 
@@ -249,10 +249,10 @@ public abstract class AbstractAnalysisTest extends AbstractJUnitTest {
      * @return the edited job
      */
     private <J extends Job, T extends AnalysisSettings & PostBuildStep> J edit(String newResourceToCopy,
-                                                                               boolean isAdditionalResource,
-                                                                               J job,
-                                                                               Class<T> publisherBuildSettingsClass,
-                                                                               @CheckForNull AnalysisConfigurator<T> configurator) {
+            boolean isAdditionalResource,
+            J job,
+            Class<T> publisherBuildSettingsClass,
+            @CheckForNull AnalysisConfigurator<T> configurator) {
         job.configure();
 
         if (newResourceToCopy != null) {
@@ -312,9 +312,9 @@ public abstract class AbstractAnalysisTest extends AbstractJUnitTest {
      * @return The configured job.
      */
     public <T extends AnalysisMavenSettings> MavenModuleSet setupMavenJob(String resourceProjectDir,
-                                                                          String goal,
-                                                                          Class<T> codeStyleBuildSettings,
-                                                                          AnalysisConfigurator<T> configurator) {
+            String goal,
+            Class<T> codeStyleBuildSettings,
+            AnalysisConfigurator<T> configurator) {
         MavenInstallation.ensureThatMavenIsInstalled(jenkins);
 
         MavenModuleSet job = jenkins.jobs.create(MavenModuleSet.class);
@@ -371,14 +371,20 @@ public abstract class AbstractAnalysisTest extends AbstractJUnitTest {
      * @param apiUrl          The API-Url, declares which build API shall be called.
      * @param expectedXmlPath The Resource-Path to a file, which contains the expected XML
      */
-    protected void assertXmlApiMatchesExpected(Build build, String apiUrl, String expectedXmlPath) throws ParserConfigurationException, SAXException, IOException {
-        XMLUnit.setIgnoreWhitespace(true);
-        String xmlUrl = build.url(apiUrl).toString();
-        DocumentBuilder documentBuilder = DocumentBuilderFactoryImpl.newInstance().newDocumentBuilder();
-        Document actual = documentBuilder.parse(xmlUrl);
+    protected void assertXmlApiMatchesExpected(final Build build, final String apiUrl, final String expectedXmlPath) {
+        try {
+            XMLUnit.setIgnoreWhitespace(true);
+            String xmlUrl = build.url(apiUrl).toString();
+            DocumentBuilder documentBuilder = null;
+            documentBuilder = DocumentBuilderFactoryImpl.newInstance().newDocumentBuilder();
 
-        Document expected = documentBuilder.parse(resource(expectedXmlPath).asFile());
-        XMLAssert.assertXMLEqual(expected, actual);
+            Document actual = documentBuilder.parse(xmlUrl);
+            Document expected = documentBuilder.parse(resource(expectedXmlPath).asFile());
+            XMLAssert.assertXMLEqual(expected, actual);
+        }
+        catch (ParserConfigurationException | SAXException | IOException exception) {
+            throw new RuntimeException("Can't verify API XML", exception);
+        }
     }
 
     /**
@@ -460,6 +466,7 @@ public abstract class AbstractAnalysisTest extends AbstractJUnitTest {
      * Verifies that the source code of an affected file is correctly visualized. The specified tab is used to find the
      * file with the warning. On this tab the corresponding link is clicked and the source file should be shown in a new
      * page.
+     *
      * @param action          the action holding the results
      * @param file            the affected file that contains the warning
      * @param line            the affected line number

@@ -1,7 +1,5 @@
 package plugins;
 
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -26,7 +24,6 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-import org.xml.sax.SAXException;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
@@ -194,18 +191,10 @@ public class PmdPluginTest extends AbstractAnalysisTest {
      * Difference in whitespaces are ok.
      */
     @Test @Category(SmokeTest.class)
-    public void should_return_results_via_remote_api() throws IOException, SAXException, ParserConfigurationException {
-        FreeStyleJob job = createFreeStyleJob(FILE_WITH_9_WARNINGS, new AnalysisConfigurator<PmdFreestyleSettings>() {
-            @Override
-            public void configure(PmdFreestyleSettings settings) {
-                settings.pattern.set(PATTERN_WITH_9_WARNINGS);
-            }
-        });
-
+    public void should_return_results_via_remote_api() {
+        FreeStyleJob job = createFreeStyleJob();
         Build build = buildJobWithSuccess(job);
-        String apiUrl = "pmdResult/api/xml?depth=0";
-        String expectedXmlPath = PLUGIN_ROOT + "api_depth_0.xml";
-        assertXmlApiMatchesExpected(build, apiUrl, expectedXmlPath);
+        assertXmlApiMatchesExpected(build, "pmdResult/api/xml?depth=0", PLUGIN_ROOT + "api_depth_0.xml");
     }
 
     /**
@@ -237,7 +226,7 @@ public class PmdPluginTest extends AbstractAnalysisTest {
      * Runs job two times to check if the links of the graph are relative.
      */
     @Test @Bug("21723")
-    public void view_pmd_report_job_graph_links() {
+    public void should_have_relative_graph_links() {
         FreeStyleJob job = createFreeStyleJob();
         buildJobAndWait(job);
         editJob(PLUGIN_ROOT + "forSecondRun/pmd-warnings.xml", false, job);
