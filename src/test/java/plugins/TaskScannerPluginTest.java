@@ -27,18 +27,16 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
- Feature: Scan for open tasks
- In order to be able to collect and analyse open tasks.
- As a Jenkins user
- I want to install and configure Task Scanner plugin
-
-  @author Martin Ende
+ * Acceptance tests for the open tasks plugin.
+ *
+ * @author Martin Ende
+ * @author Ullrich Hafner
  */
 @WithPlugins("tasks")
 public class TaskScannerPluginTest extends AbstractAnalysisTest {
     /**
      * Checks that the plug-in sends a mail after a build has been failed. The content of the mail
-     * contains several tokens that should be expanded in the mail with the correct vaules.
+     * contains several tokens that should be expanded in the mail with the correct values.
      */
     @Test @WithPlugins("email-ext") @Bug("25501")
     public void should_send_mail_with_expanded_tokens() {
@@ -75,11 +73,9 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
      * files and providing the correct results.
      * The test builds the same job twice with and without case sensitivity.
      */
-
     @Test
     @Category(SmokeTest.class)
     public void single_task_tags_and_exclusion_pattern() throws Exception{
-        //do setup
         AnalysisConfigurator<TaskScannerFreestyleBuildSettings> buildConfigurator =
                 new AnalysisConfigurator<TaskScannerFreestyleBuildSettings>() {
                     @Override
@@ -96,12 +92,11 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
         FreeStyleJob j = setupJob("/tasks_plugin/fileset1", FreeStyleJob.class,
                                   TaskScannerFreestyleBuildSettings.class, buildConfigurator);
 
-        // as no threshold is defined to mark the build as FAILED or UNSTABLE, the build should succeed
         Build lastBuild = buildJobWithSuccess(j);
         assertThat(lastBuild, hasAction("Open Tasks"));
         assertThat(j, hasAction("Open Tasks"));
+
         lastBuild.open();
-        TaskScannerAction tsa = new TaskScannerAction(j);
 
         // The file set consists of 9 files, whereof
         //   - 2 file names match the exclusion pattern
@@ -112,32 +107,25 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
         //   - 1x high
         //   - 4x medium
         //   - 1x low
+        TaskScannerAction action = new TaskScannerAction(j);
+        assertThat(action.getResultLinkByXPathText("6 open tasks"), is("tasksResult"));
+        assertThat(action.getResultTextByXPathText("6 open tasks"), endsWith("in 7 workspace files."));
+        assertThat(action.getWarningNumber(), is(6));
+        assertThat(action.getHighWarningNumber(), is(1));
+        assertThat(action.getNormalWarningNumber(), is(4));
+        assertThat(action.getLowWarningNumber(), is(1));
 
-        assertThat(tsa.getResultLinkByXPathText("6 open tasks"), is("tasksResult"));
-        assertThat(tsa.getResultTextByXPathText("6 open tasks"), endsWith("in 7 workspace files."));
-        assertThat(tsa.getWarningNumber(), is(6));
-        assertThat(tsa.getHighWarningNumber(), is(1));
-        assertThat(tsa.getNormalWarningNumber(), is(4));
-        assertThat(tsa.getLowWarningNumber(), is(1));
+        assertFilesTabFS1E1(action);
+        assertTypesTabFS1E1(action);
+        assertWarningsTabFS1E1(action);
 
-        assertFilesTabFS1E1(tsa);
-        assertTypesTabFS1E1(tsa);
-        assertWarningsTabFS1E1(tsa);
-
-        // check the correct warning extraction for two examples:
-        //  - TSRDockerImage.java:84 properly wait for either cidfile to appear or process to exit
-        //  - TSRCleaner.java:40 @Deprecated without a text
-
-        assertWarningExtraction(tsa,"TSRDockerImage.java",84,"TODO",
+        assertWarningExtraction(action,"TSRDockerImage.java", 84, "TODO",
                                 "properly wait for either cidfile to appear or process to exit");
-        assertWarningExtraction(tsa,"TSRCleaner.java",40,"@Deprecated", "");
+        assertWarningExtraction(action,"TSRCleaner.java", 40, "@Deprecated", "");
 
-        //check that the correct line / task is displayed when following the link in the warnings tab
-        //assert contents of that line
-        assertThat(tsa.getLinkedSourceFileLineNumber("Warnings", "TSRDockerImage.java:84", "Normal Priority"), is(84));
-        assertThat(tsa.getLinkedSourceFileLineAsString("Warnings", "TSRDockerImage.java:84", "Normal Priority"), containsString("TODO"));
-        assertThat(tsa.getLinkedSourceFileLineAsString("Warnings", "TSRDockerImage.java:84", "Normal Priority"), endsWith("properly wait for either cidfile to appear or process to exit"));
-
+        verifySourceLine(action, "TSRDockerImage.java", 84,
+                "084         // TODO: properly wait for either cidfile to appear or process to exit",
+                "Normal Priority");
 
         // now disable case sensitivity and build again. Then the publisher shall also
         // find the high priority task in Ec2Provider.java:133.
@@ -155,21 +143,18 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
         lastBuild = buildJobWithSuccess(j);
 
         lastBuild.open();
-        assertThat(tsa.getResultLinkByXPathText("7 open tasks"), is("tasksResult"));
-        assertThat(tsa.getResultTextByXPathText("7 open tasks"), endsWith("in 7 workspace files."));
-        assertThat(tsa.getResultLinkByXPathText("1 new open task"), is("tasksResult/new"));
-        assertThat(tsa.getWarningNumber(), is(7));
-        assertThat(tsa.getNewWarningNumber(), is(1));
-        assertThat(tsa.getHighWarningNumber(), is(2));
-        assertThat(tsa.getNormalWarningNumber(), is(4));
-        assertThat(tsa.getLowWarningNumber(), is(1));
+        assertThat(action.getResultLinkByXPathText("7 open tasks"), is("tasksResult"));
+        assertThat(action.getResultTextByXPathText("7 open tasks"), endsWith("in 7 workspace files."));
+        assertThat(action.getResultLinkByXPathText("1 new open task"), is("tasksResult/new"));
+        assertThat(action.getWarningNumber(), is(7));
+        assertThat(action.getNewWarningNumber(), is(1));
+        assertThat(action.getHighWarningNumber(), is(2));
+        assertThat(action.getNormalWarningNumber(), is(4));
+        assertThat(action.getLowWarningNumber(), is(1));
 
-        lastBuild.visit(tsa.getNewWarningsUrlAsRelativePath());
-        assertThat(tsa.getResultLinkByXPathText("TSREc2Provider.java:133"), startsWith("source"));
+        lastBuild.visit(action.getNewWarningsUrlAsRelativePath());
+        assertThat(action.getResultLinkByXPathText("TSREc2Provider.java:133"), startsWith("source"));
     }
-
-
-
 
     /**
      * Builds a job and tests if the tasks api (with depth=0 parameter set) responds with the expected output.
@@ -177,7 +162,6 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
      */
     @Test
     public void xml_api_report_depth_0() throws IOException, SAXException, ParserConfigurationException {
-        //do setup
         AnalysisConfigurator<TaskScannerFreestyleBuildSettings> buildConfigurator =
                 new AnalysisConfigurator<TaskScannerFreestyleBuildSettings>() {
                     @Override
@@ -193,12 +177,8 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
 
         FreeStyleJob j = setupJob("/tasks_plugin/fileset1", FreeStyleJob.class,
                 TaskScannerFreestyleBuildSettings.class, buildConfigurator);
-
         Build build = buildJobWithSuccess(j);
-
-        final String apiUrl = "tasksResult/api/xml?depth=0";
-        final String expectedXmlPath = "/tasks_plugin/api_depth_0.xml";
-        assertXmlApiMatchesExpected(build, apiUrl, expectedXmlPath);
+        assertXmlApiMatchesExpected(build, "tasksResult/api/xml?depth=0", "/tasks_plugin/api_depth_0.xml");
     }
 
     /**
@@ -226,12 +206,12 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
     private void verifyRegularExpressionScannerResult(final Job job) {
         Build lastBuild = buildJobWithSuccess(job);
         lastBuild.open();
-        TaskScannerAction tsa = new TaskScannerAction(job);
+        TaskScannerAction action = new TaskScannerAction(job);
 
-        assertThat(tsa.getResultLinkByXPathText("5 open tasks"), is("tasksResult"));
-        assertThat(tsa.getResultTextByXPathText("5 open tasks"), endsWith("in 1 workspace file."));
-        assertThat(tsa.getWarningNumber(), is(5));
-        assertThat(tsa.getNormalWarningNumber(), is(5));
+        assertThat(action.getResultLinkByXPathText("5 open tasks"), is("tasksResult"));
+        assertThat(action.getResultTextByXPathText("5 open tasks"), endsWith("in 1 workspace file."));
+        assertThat(action.getWarningNumber(), is(5));
+        assertThat(action.getNormalWarningNumber(), is(5));
     }
 
     /**
@@ -267,8 +247,6 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
      */
     @Test
     public void multiple_task_tags() throws Exception{
-        //do basic setup
-        //do setup
         AnalysisConfigurator<TaskScannerFreestyleBuildSettings> buildConfigurator =
                 new AnalysisConfigurator<TaskScannerFreestyleBuildSettings>() {
                     @Override
@@ -285,7 +263,6 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
         FreeStyleJob j = setupJob("/tasks_plugin/fileset1", FreeStyleJob.class,
                 TaskScannerFreestyleBuildSettings.class, buildConfigurator);
 
-        // as no threshold is defined to mark the build as FAILED or UNSTABLE, the build should succeed
         Build lastBuild = buildJobWithSuccess(j);
         lastBuild.open();
         TaskScannerAction tsa = new TaskScannerAction(j);
@@ -494,24 +471,20 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
         assertThat(lastBuild, hasAction("Open Tasks"));
         assertThat(j, hasAction("Open Tasks"));
         lastBuild.open();
-        TaskScannerAction tsa = new TaskScannerAction(j);
+        TaskScannerAction action = new TaskScannerAction(j);
 
-        // The expected task priorities are:
-        //   - 1x high
-        //   - 1x medium
+        assertThat(action.getResultLinkByXPathText("2 open tasks"), is("tasksResult"));
+        assertThat(action.getResultTextByXPathText("2 open tasks"), endsWith("in 1 workspace file."));
+        assertThat(action.getWarningNumber(), is(2));
+        assertThat(action.getHighWarningNumber(), is(1));
+        assertThat(action.getNormalWarningNumber(), is(1));
 
-        assertThat(tsa.getResultLinkByXPathText("2 open tasks"), is("tasksResult"));
-        assertThat(tsa.getResultTextByXPathText("2 open tasks"), endsWith("in 1 workspace file."));
-        assertThat(tsa.getWarningNumber(), is(2));
-        assertThat(tsa.getHighWarningNumber(), is(1));
-        assertThat(tsa.getNormalWarningNumber(), is(1));
+        assertWarningExtraction(action,"TestTaskScanner.java", 5, "TODO", "пример комментария на русском");
 
-        // verify source code display in desired encoding
-        assertThat(tsa.getLinkedSourceFileLineAsString("Warnings", "TestTaskScanner.java:5", "Normal Priority"), endsWith("РїСЂРёРјРµСЂ РєРѕРјРјРµРЅС‚Р°СЂРёСЏ РЅР° СЂСѓСЃСЃРєРѕРј"));
-        assertThat(tsa.getLinkedSourceFileLineAsString("Warnings", "TestTaskScanner.java:4", "High Priority"), endsWith("С‚РµСЃС‚РёСЂРѕРІР°РЅРёРµ Jenkins"));
-
-        // verify extraction in Warnings tab uses desired encoding
-        assertWarningExtraction(tsa,"TestTaskScanner.java",5,"TODO","РїСЂРёРјРµСЂ РєРѕРјРјРµРЅС‚Р°СЂРёСЏ РЅР° СЂСѓСЃСЃРєРѕРј");
+        verifySourceLine(action, "TestTaskScanner.java", 4,
+                "4   //FIXME тестирование Jenkins", "High Priority");
+        verifySourceLine(action, "TestTaskScanner.java", 5,
+                "5   //TODO пример комментария на русском", "Normal Priority");
     }
 
     /**

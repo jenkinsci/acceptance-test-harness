@@ -34,6 +34,10 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
 
 /**
  * Acceptance tests for the CheckStyle plugin.
+ *
+ * @author Martin Kurz
+ * @author Fabian Trampusch
+ * @author Ullrich Hafner
  */
 @WithPlugins("checkstyle")
 public class CheckStylePluginTest extends AbstractAnalysisTest {
@@ -42,9 +46,9 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
     private static final String FILE_WITH_776_WARNINGS = CHECKSTYLE_PLUGIN_ROOT + PATTERN_WITH_776_WARNINGS;
     private static final String FILE_FOR_2ND_RUN = CHECKSTYLE_PLUGIN_ROOT + "forSecondRun/checkstyle-result.xml";
 
-    /**
+    /**\
      * Checks that the plug-in sends a mail after a build has been failed. The content of the mail contains several
-     * tokens that should be expanded in the mail with the correct vaules.
+     * tokens that should be expanded in the mail with the correct values.
      */
     @Test @Bug("25501") @WithPlugins("email-ext")
     public void should_send_mail_with_expanded_tokens() {
@@ -290,11 +294,10 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
         expectedContent.put("Main.java:24", 24);
         expectedContent.put("Main.java:27", 27);
         assertThat(checkstyle.getWarningsTabContents(), is(expectedContent));
-        // FIXME: Add source file checks
-// TODO decision of uhafner
-//        assertThat(checkstyle.getLinkedSourceFileLineNumber("Warnings", "Main.java:27", "High"), is(27));
-//        assertThat(checkstyle.getLinkedSourceFileLineAsString("Warnings", "Main.java:0", "High"), containsString("Missing package-info.java file."));
-//        assertThat(checkstyle.getLinkedSourceFileLineAsString("Warnings", "Main.java:6", "High"), endsWith("public static void main(String[] args) {"));
+
+        verifySourceLine(checkstyle, "Main.java", 27,
+                "27     public static int return8() {",
+                "Checks the Javadoc of a method or constructor.");
     }
 
     /**

@@ -34,6 +34,10 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
 
 /**
  * Acceptance tests for the PMD plugin.
+ *
+ * @author Martin Kurz
+ * @author Fabian Trampusch
+ * @author Ullrich Hafner
  */
 @WithPlugins("pmd")
 public class PmdPluginTest extends AbstractAnalysisTest {
@@ -45,7 +49,7 @@ public class PmdPluginTest extends AbstractAnalysisTest {
 
     /**
      * Checks that the plug-in sends a mail after a build has been failed. The content of the mail
-     * contains several tokens that should be expanded in the mail with the correct vaules.
+     * contains several tokens that should be expanded in the mail with the correct values.
      */
     @Test  @Bug("25501") @WithPlugins("email-ext")
     public void should_send_mail_with_expanded_tokens() {
@@ -291,10 +295,10 @@ public class PmdPluginTest extends AbstractAnalysisTest {
         SortedMap<String, Integer> expectedContent = new TreeMap<>();
         expectedContent.put("Main.java:9", 9);
         expectedContent.put("Main.java:13", 13);
-// TODO decision of uhafner
-//        assertThat(pmd.getWarningsTabContents(), is(expectedContent));
-//        assertThat(pmd.getLinkedSourceFileLineNumber("Warnings", "Main.java:9", "High"), is(9));
-//        assertThat(pmd.getLinkedSourceFileLineAsString("Warnings", "Main.java:13", "High"), endsWith("if(false) {"));
+
+        verifySourceLine(pmd, "Main.java", 13,
+                "13         if(false) {",
+                "Do not use if statements that are always true or always false.");
     }
 
     /**

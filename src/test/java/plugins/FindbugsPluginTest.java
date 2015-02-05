@@ -54,6 +54,13 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 
+/**
+ * Acceptance tests for the FindBugs plugin.
+ *
+ * @author Martin Kurz
+ * @author Fabian Trampusch
+ * @author Ullrich Hafner
+ */
 @WithPlugins("findbugs")
 public class FindbugsPluginTest extends AbstractAnalysisTest {
     private static final String PATTERN_WITH_6_WARNINGS = "findbugsXml.xml";
@@ -61,7 +68,7 @@ public class FindbugsPluginTest extends AbstractAnalysisTest {
 
     /**
      * Checks that the plug-in sends a mail after a build has been failed. The content of the mail
-     * contains several tokens that should be expanded in the mail with the correct vaules.
+     * contains several tokens that should be expanded in the mail with the correct values.
      */
     @Test @Bug("25501") @WithPlugins("email-ext")
     public void should_send_mail_with_expanded_tokens() {
@@ -210,7 +217,8 @@ public class FindbugsPluginTest extends AbstractAnalysisTest {
                 settings.pattern.set("target/findbugsXml.xml");
             }
         };
-        FreeStyleJob job = setupJob("/findbugs_plugin/sample_findbugs_project", FreeStyleJob.class, FindbugsFreestyleBuildSettings.class, buildConfigurator, "clean package findbugs:findbugs");
+        FreeStyleJob job = setupJob("/findbugs_plugin/sample_findbugs_project", FreeStyleJob.class,
+                FindbugsFreestyleBuildSettings.class, buildConfigurator, "clean package findbugs:findbugs");
 
         Build lastBuild = buildJobWithSuccess(job);
         assertThat(lastBuild, hasAction("FindBugs Warnings"));
@@ -218,9 +226,9 @@ public class FindbugsPluginTest extends AbstractAnalysisTest {
         FindbugsAction findbugs = new FindbugsAction(job);
         assertThat(findbugs.getNewWarningNumber(), is(1));
 
-// TODO decision of uhafner
-//        assertThat(findbugs.getLinkedSourceFileLineNumber("Details", "Main.java:18", "Normal"), is(18));
-//        assertThat(findbugs.getLinkedSourceFileLineAsString("Details", "Main.java:18", "Normal"), endsWith("if(o == null) {"));
+        verifySourceLine(findbugs, "Main.java", 18,
+                "18         if(o == null) {",
+                "Redundant nullcheck of o, which is known to be non-null in Main.main(String[])");
     }
 
     private MavenModuleSet setupSimpleMavenJob() {

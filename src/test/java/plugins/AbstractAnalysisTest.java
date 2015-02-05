@@ -13,6 +13,8 @@ import org.custommonkey.xmlunit.XMLAssert;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Resource;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisAction;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisAction.Tab;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisMavenSettings;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisSettings;
@@ -41,6 +43,8 @@ import org.xml.sax.SAXException;
 import com.google.inject.Inject;
 
 import static java.util.Collections.*;
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
 
 /**
@@ -450,5 +454,23 @@ public abstract class AbstractAnalysisTest extends AbstractJUnitTest {
         view.addBottomPortlet(portlet);
         view.save();
         return view;
+    }
+
+    /**
+     * Verifies that the source code of an affected file is correctly visualized. The specified tab is used to find the
+     * file with the warning. On this tab the corresponding link is clicked and the source file should be shown in a new
+     * page.
+     * @param action          the action holding the results
+     * @param file            the affected file that contains the warning
+     * @param line            the affected line number
+     * @param expectedContent the expected content of the source line (includes the line number)
+     * @param expectedToolTip a substring that should be part of the warning tool tip
+     */
+    protected void verifySourceLine(final AnalysisAction action, final String file, final int line,
+            final String expectedContent, final String expectedToolTip) {
+        Tab tabId = Tab.DETAILS;
+        assertThat(action.getLinkedSourceFileLineNumber(tabId, file, line), is(line));
+        assertThat(action.getLinkedSourceFileText(tabId, file, line), startsWith(expectedContent));
+        assertThat(action.getLinkedSourceFileToolTip(tabId, file, line), containsString(expectedToolTip));
     }
 }
