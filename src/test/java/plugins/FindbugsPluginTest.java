@@ -34,7 +34,7 @@ import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
-import org.jenkinsci.test.acceptance.plugins.findbugs.FindbugsAction;
+import org.jenkinsci.test.acceptance.plugins.findbugs.FindBugsAction;
 import org.jenkinsci.test.acceptance.plugins.findbugs.FindBugsColumn;
 import org.jenkinsci.test.acceptance.plugins.findbugs.FindBugsFreestyleSettings;
 import org.jenkinsci.test.acceptance.plugins.findbugs.FindBugsMavenSettings;
@@ -121,7 +121,7 @@ public class FindBugsPluginTest extends AbstractAnalysisTest {
         assertThatPageHasFindBugsResults(lastBuild);
         assertThatPageHasFindBugsResults(job);
         lastBuild.open();
-        FindbugsAction fa = new FindbugsAction(job);
+        FindBugsAction fa = new FindBugsAction(job);
         assertThat(fa.getResultLinkByXPathText("6 warnings"), is("findbugsResult"));
         assertThat(fa.getResultLinkByXPathText("6 new warnings"), is("findbugsResult/new"));
         assertThat(fa.getWarningNumber(), is(6));
@@ -137,14 +137,14 @@ public class FindBugsPluginTest extends AbstractAnalysisTest {
         assertWarningsTab(fa);
     }
 
-    private void assertFilesTab(FindbugsAction fa) {
+    private void assertFilesTab(FindBugsAction fa) {
         SortedMap<String, Integer> expectedContent = new TreeMap<>();
         expectedContent.put("SSHConnector.java", 1);
         expectedContent.put("SSHLauncher.java", 5);
         assertThat(fa.getFileTabContents(), is(expectedContent));
     }
 
-    private void assertCategoriesTab(FindbugsAction fa) {
+    private void assertCategoriesTab(FindBugsAction fa) {
         SortedMap<String, Integer> expectedContent = new TreeMap<>();
         expectedContent.put("BAD_PRACTICE", 1);
         expectedContent.put("CORRECTNESS", 3);
@@ -152,7 +152,7 @@ public class FindBugsPluginTest extends AbstractAnalysisTest {
         assertThat(fa.getCategoriesTabContents(), is(expectedContent));
     }
 
-    private void assertTypesTab(FindbugsAction fa) {
+    private void assertTypesTab(FindBugsAction fa) {
         SortedMap<String, Integer> expectedContent = new TreeMap<>();
         expectedContent.put("DE_MIGHT_IGNORE", 1);
         expectedContent.put("NP_NULL_ON_SOME_PATH", 1);
@@ -161,7 +161,7 @@ public class FindBugsPluginTest extends AbstractAnalysisTest {
         assertThat(fa.getTypesTabContents(), is(expectedContent));
     }
 
-    private void assertWarningsTab(FindbugsAction fa) {
+    private void assertWarningsTab(FindBugsAction fa) {
         SortedMap<String, Integer> expectedContent = new TreeMap<>();
         expectedContent.put("SSHConnector.java:138", 138);
         expectedContent.put("SSHLauncher.java:437", 437);
@@ -195,7 +195,7 @@ public class FindBugsPluginTest extends AbstractAnalysisTest {
         Build lastBuild = buildJobWithSuccess(job);
         assertThatPageHasFindBugsResults(lastBuild);
         lastBuild.open();
-        FindbugsAction fa = new FindbugsAction(job);
+        FindBugsAction fa = new FindBugsAction(job);
         assertThat(fa.getResultLinkByXPathText("5 warnings"), is("findbugsResult"));
         assertThat(fa.getResultLinkByXPathText("1 new warning"), is("findbugsResult/new"));
         assertThat(fa.getResultLinkByXPathText("2 fixed warnings"), is("findbugsResult/fixed"));
@@ -237,7 +237,7 @@ public class FindBugsPluginTest extends AbstractAnalysisTest {
         Build lastBuild = buildJobWithSuccess(job);
         assertThatPageHasFindBugsResults(lastBuild);
         lastBuild.open();
-        FindbugsAction findbugs = new FindbugsAction(job);
+        FindBugsAction findbugs = new FindBugsAction(job);
         assertThat(findbugs.getNewWarningNumber(), is(1));
 
         verifySourceLine(findbugs, "Main.java", 18,
@@ -263,7 +263,7 @@ public class FindBugsPluginTest extends AbstractAnalysisTest {
         Build lastBuild = buildJobWithSuccess(job);
         assertThatPageHasFindBugsResults(lastBuild);
         lastBuild.open();
-        FindbugsAction findbugs = new FindbugsAction(job);
+        FindBugsAction findbugs = new FindBugsAction(job);
         assertThat(findbugs.getNewWarningNumber(), is(1));
     }
 
