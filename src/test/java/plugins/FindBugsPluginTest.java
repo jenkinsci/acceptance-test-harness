@@ -63,7 +63,7 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
  * @author Ullrich Hafner
  */
 @WithPlugins("findbugs")
-public class FBPluginTest extends AbstractAnalysisTest {
+public class FindBugsPluginTest extends AbstractAnalysisTest {
     private static final String PATTERN_WITH_6_WARNINGS = "findbugsXml.xml";
     private static final String FILE_WITH_6_WARNINGS = "/findbugs_plugin/" + PATTERN_WITH_6_WARNINGS;
     private static final String PLUGIN_ROOT = "/findbugs_plugin/";

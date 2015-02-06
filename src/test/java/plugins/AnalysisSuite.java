@@ -19,7 +19,7 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 // TODO: Add tests for the dry plug-in
 @RunWith(Suite.class)
-@SuiteClasses({CheckStylePluginTest.class, FBPluginTest.class, PmdPluginTest.class, WarningsPluginTest.class,
+@SuiteClasses({CheckStylePluginTest.class, FindBugsPluginTest.class, PmdPluginTest.class, WarningsPluginTest.class,
         TaskScannerPluginTest.class, AnalysisCollectorPluginTest.class})
 public class AnalysisSuite {
 }
