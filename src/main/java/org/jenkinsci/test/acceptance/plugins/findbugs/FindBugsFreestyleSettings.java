@@ -27,6 +27,11 @@ import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisFreestyleSett
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Job;
 
+/**
+ * FindBugs build settings for freestyle projects.
+ *
+ * @author Fabian Trampusch
+ */
 @Describable("Publish FindBugs analysis results")
 public class FindBugsFreestyleSettings extends AnalysisFreestyleSettings {
     public FindBugsFreestyleSettings(final Job parent, final String path) {
