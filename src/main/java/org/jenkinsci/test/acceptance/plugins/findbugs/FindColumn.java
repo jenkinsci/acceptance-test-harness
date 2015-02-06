@@ -10,8 +10,8 @@ import org.jenkinsci.test.acceptance.po.ListView;
  * @author Fabian Trampusch
  */
 @Describable("Number of FindBugs warnings")
-public class FindBugsColumn extends AbstractListViewColumn {
-    public FindBugsColumn(final ListView parent, final String path) {
+public class FindColumn extends AbstractListViewColumn {
+    public FindColumn(final ListView parent, final String path) {
         super(parent, path);
     }
 }
