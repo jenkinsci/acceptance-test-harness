@@ -417,12 +417,12 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
         assertThat(action.getHighWarningNumber(), is(1));
         assertThat(action.getNormalWarningNumber(), is(1));
 
-        assertWarningExtraction(action, "TestTaskScanner.java", 5, "TODO", "пример комментария на русском");
+        assertWarningExtraction(action, "TestTaskScanner.java", 5, "TODO", "РїСЂРёРјРµСЂ РєРѕРјРјРµРЅС‚Р°СЂРёСЏ РЅР° СЂСѓСЃСЃРєРѕРј");
 
         verifySourceLine(action, "TestTaskScanner.java", 4,
-                "4   //FIXME тестирование Jenkins", "High Priority");
+                "4   //FIXME С‚РµСЃС‚РёСЂРѕРІР°РЅРёРµ Jenkins", "High Priority");
         verifySourceLine(action, "TestTaskScanner.java", 5,
-                "5   //TODO пример комментария на русском", "Normal Priority");
+                "5   //TODO РїСЂРёРјРµСЂ РєРѕРјРјРµРЅС‚Р°СЂРёСЏ РЅР° СЂСѓСЃСЃРєРѕРј", "Normal Priority");
     }
 
     /**
