@@ -8,8 +8,8 @@ import org.jenkinsci.test.acceptance.po.ContainerPageObject;
  *
  * @author Fabian Trampusch
  */
-public class CheckStyleAction extends AnalysisAction {
-    public CheckStyleAction(final ContainerPageObject parent) {
+public class ChecAction extends AnalysisAction {
+    public ChecAction(final ContainerPageObject parent) {
         super(parent, "checkstyle");
     }
 }
