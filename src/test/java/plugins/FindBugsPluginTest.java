@@ -344,7 +344,7 @@ public class FindBugsPluginTest extends AbstractAnalysisTest {
 
         assertThat(jenkins.all(warningsLinkMatcher).size(), is(1));
         WebElement link = jenkins.getElement(warningsLinkMatcher);
-        assertThat(link.getText().trim(), is("2"));
+        assertThat(link.getText().trim(), is("1"));
 
         link.click();
         assertThat(driver, hasContent("FindBugs Result"));
