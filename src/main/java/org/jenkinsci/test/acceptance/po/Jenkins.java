@@ -11,7 +11,6 @@ import java.util.logging.Level;
 
 import javax.inject.Inject;
 
-import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.guice.TestScope;
 
@@ -116,7 +115,8 @@ public class Jenkins extends Node {
         visit("restart");
         clickButton("Yes");
 
-        waitFor(driver, not(hasContent("Please wait")), 120);
+        waitFor(driver, not(hasContent("Please wait")), 180);
+
     }
 
     public JenkinsLogger getLogger(String name) {
