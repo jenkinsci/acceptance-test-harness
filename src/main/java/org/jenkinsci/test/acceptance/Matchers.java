@@ -5,6 +5,7 @@ import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisPlugin;
 import org.jenkinsci.test.acceptance.po.*;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -44,7 +45,14 @@ public class Matchers {
             }
 
             private String pageText(WebDriver item) {
-                return item.findElement(by.xpath("/html")).getText();
+                final By html = by.xpath("/html");
+
+                try {
+                    return item.findElement(html).getText();
+                } catch (StaleElementReferenceException ex) {
+                    // Retry once to avoid random failures in case of bad timing
+                    return item.findElement(html).getText();
+                }
             }
         };
     }
