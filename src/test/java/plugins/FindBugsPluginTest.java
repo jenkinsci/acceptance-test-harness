@@ -131,20 +131,20 @@ public class FindBugsPluginTest extends AbstractAnalysisTest {
         assertThat(fa.getNormalWarningNumber(), is(4));
         assertThat(fa.getLowWarningNumber(), is(0));
 
-        assertFilesTab(fa);
-        assertCategoriesTab(fa);
-        assertTypesTab(fa);
-        assertWarningsTab(fa);
+        assertThatFilesTabIsCorrectlyFilled(fa);
+        assertThatCategoriesTabIsCorrectlyFilled(fa);
+        assertThatTypesTabIsCorrectlyFilled(fa);
+        assertThatWarningsTabIsCorrectlyFilled(fa);
     }
 
-    private void assertFilesTab(FindBugsAction fa) {
+    private void assertThatFilesTabIsCorrectlyFilled(FindBugsAction fa) {
         SortedMap<String, Integer> expectedContent = new TreeMap<>();
         expectedContent.put("SSHConnector.java", 1);
         expectedContent.put("SSHLauncher.java", 5);
         assertThat(fa.getFileTabContents(), is(expectedContent));
     }
 
-    private void assertCategoriesTab(FindBugsAction fa) {
+    private void assertThatCategoriesTabIsCorrectlyFilled(FindBugsAction fa) {
         SortedMap<String, Integer> expectedContent = new TreeMap<>();
         expectedContent.put("BAD_PRACTICE", 1);
         expectedContent.put("CORRECTNESS", 3);
@@ -152,7 +152,7 @@ public class FindBugsPluginTest extends AbstractAnalysisTest {
         assertThat(fa.getCategoriesTabContents(), is(expectedContent));
     }
 
-    private void assertTypesTab(FindBugsAction fa) {
+    private void assertThatTypesTabIsCorrectlyFilled(FindBugsAction fa) {
         SortedMap<String, Integer> expectedContent = new TreeMap<>();
         expectedContent.put("DE_MIGHT_IGNORE", 1);
         expectedContent.put("NP_NULL_ON_SOME_PATH", 1);
@@ -161,7 +161,7 @@ public class FindBugsPluginTest extends AbstractAnalysisTest {
         assertThat(fa.getTypesTabContents(), is(expectedContent));
     }
 
-    private void assertWarningsTab(FindBugsAction fa) {
+    private void assertThatWarningsTabIsCorrectlyFilled(FindBugsAction fa) {
         SortedMap<String, Integer> expectedContent = new TreeMap<>();
         expectedContent.put("SSHConnector.java:138", 138);
         expectedContent.put("SSHLauncher.java:437", 437);

@@ -106,21 +106,21 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
         FreeStyleJob job = createFreeStyleJob();
         buildJobWithSuccess(job).open();
 
-        CheckStyleAction ca = new CheckStyleAction(job);
-        assertThat(ca.getResultLinkByXPathText("776 warnings"), is("checkstyleResult"));
-        assertThat(ca.getResultLinkByXPathText("776 new warnings"), is("checkstyleResult/new"));
-        assertThat(ca.getWarningNumber(), is(776));
-        assertThat(ca.getNewWarningNumber(), is(776));
-        assertThat(ca.getFixedWarningNumber(), is(0));
-        assertThat(ca.getHighWarningNumber(), is(776));
-        assertThat(ca.getNormalWarningNumber(), is(0));
-        assertThat(ca.getLowWarningNumber(), is(0));
-        assertFileTab(ca);
-        assertCategoryTab(ca);
-        assertTypeTab(ca);
+        CheckStyleAction action = new CheckStyleAction(job);
+        assertThat(action.getResultLinkByXPathText("776 warnings"), is("checkstyleResult"));
+        assertThat(action.getResultLinkByXPathText("776 new warnings"), is("checkstyleResult/new"));
+        assertThat(action.getWarningNumber(), is(776));
+        assertThat(action.getNewWarningNumber(), is(776));
+        assertThat(action.getFixedWarningNumber(), is(0));
+        assertThat(action.getHighWarningNumber(), is(776));
+        assertThat(action.getNormalWarningNumber(), is(0));
+        assertThat(action.getLowWarningNumber(), is(0));
+        assertThatFilesTabIsCorrectlyFilled(action);
+        assertThatCategoriesTabIsCorrectlyFilled(action);
+        assertThatTypesTabIsCorrectlyFilled(action);
     }
 
-    private void assertFileTab(CheckStyleAction ca) {
+    private void assertThatFilesTabIsCorrectlyFilled(CheckStyleAction ca) {
         SortedMap<String, Integer> expectedFileDetails = new TreeMap<>();
         expectedFileDetails.put("JavaProvider.java", 18);
         expectedFileDetails.put("PluginImpl.java", 8);
@@ -132,7 +132,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
         assertThat(ca.getFileTabContents(), is(expectedFileDetails));
     }
 
-    private void assertCategoryTab(CheckStyleAction ca) {
+    private void assertThatCategoriesTabIsCorrectlyFilled(CheckStyleAction ca) {
         SortedMap<String, Integer> expectedCategories = new TreeMap<>();
         expectedCategories.put("Blocks", 28);
         expectedCategories.put("Checks", 123);
@@ -147,7 +147,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
         assertThat(ca.getCategoriesTabContents(), is(expectedCategories));
     }
 
-    private void assertTypeTab(CheckStyleAction ca) {
+    private void assertThatTypesTabIsCorrectlyFilled(CheckStyleAction ca) {
         SortedMap<String, Integer> expectedTypes = new TreeMap<>();
         expectedTypes.put("AvoidInlineConditionalsCheck", 9);
         expectedTypes.put("AvoidStarImportCheck", 1);

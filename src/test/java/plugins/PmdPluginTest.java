@@ -152,12 +152,12 @@ public class PmdPluginTest extends AbstractAnalysisTest {
         assertThat(action.getHighWarningNumber(), is(0));
         assertThat(action.getNormalWarningNumber(), is(3));
         assertThat(action.getLowWarningNumber(), is(6));
-        assertFileTab(action);
-        assertTypeTab(action);
-        assertWarningsTab(action);
+        assertThatFilesTabIsCorrectlyFilled(action);
+        assertThatTypesTabIsCorrectlyFilled(action);
+        assertThatWarningsTabIsCorrectlyFilled(action);
     }
 
-    private void assertFileTab(PmdAction pa) {
+    private void assertThatFilesTabIsCorrectlyFilled(PmdAction pa) {
         SortedMap<String, Integer> expectedContent = new TreeMap<>();
         expectedContent.put("ChannelContentAPIClient.m", 6);
         expectedContent.put("ProductDetailAPIClient.m", 2);
@@ -165,14 +165,14 @@ public class PmdPluginTest extends AbstractAnalysisTest {
         assertThat(pa.getFileTabContents(), is(expectedContent));
     }
 
-    private void assertTypeTab(PmdAction pa) {
+    private void assertThatTypesTabIsCorrectlyFilled(PmdAction pa) {
         SortedMap<String, Integer> expectedContent = new TreeMap<>();
         expectedContent.put("long line", 6);
         expectedContent.put("unused method parameter", 3);
         assertThat(pa.getTypesTabContents(), is(expectedContent));
     }
 
-    private void assertWarningsTab(PmdAction pa) {
+    private void assertThatWarningsTabIsCorrectlyFilled(PmdAction pa) {
         SortedMap<String, Integer> expectedContent = new TreeMap<>();
         expectedContent.put("ChannelContentAPIClient.m:28", 28);
         expectedContent.put("ChannelContentAPIClient.m:28", 28);
