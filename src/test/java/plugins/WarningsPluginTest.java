@@ -2,6 +2,8 @@ package plugins;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.test.acceptance.junit.Bug;
@@ -45,7 +47,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest {
      * also verified (4, 6, and 2 warnings).
      */
     // TODO: run the job twice and check for the graphs
-    @Test @Bug("11225")
+    @Test @Bug({"11225", "26913"})
     public void should_report_warnings_per_axis() {
         String file = "matrix-warnings.txt";
         MatrixProject job = setupJob("/warnings_plugin/" + file, MatrixProject.class,
@@ -78,6 +80,36 @@ public class WarningsPluginTest extends AbstractAnalysisTest {
             assertThat(driver, hasContent(title + ": " + warningsPerAxis.get(axis.name)));
         }
 
+        assertThatConfigurationTabIsCorrectlyFilled(job);
+        assertThatFoldersTabIsCorrectlyFilled(job);
+        assertThatFilesTabIsCorrectlyFilled(job);
+    }
+
+    private void assertThatConfigurationTabIsCorrectlyFilled(final MatrixProject job) {
+        SortedMap<String, Integer> expectedConfigurationDetails = new TreeMap<>();
+        expectedConfigurationDetails.put("user_axis=one", 4);
+        expectedConfigurationDetails.put("user_axis=two", 6);
+        expectedConfigurationDetails.put("user_axis=three", 2);
+        WarningsAction action = new WarningsAction(job);
+        assertThat(action.getModulesTabContents(), is(expectedConfigurationDetails));
+    }
+
+    private void assertThatFoldersTabIsCorrectlyFilled(final MatrixProject job) {
+        SortedMap<String, Integer> expectedConfigurationDetails = new TreeMap<>();
+        expectedConfigurationDetails.put("axis/one", 4);
+        expectedConfigurationDetails.put("axis/two", 6);
+        expectedConfigurationDetails.put("axis/three", 2);
+        WarningsAction action = new WarningsAction(job);
+        assertThat(action.getPackagesTabContents(), is(expectedConfigurationDetails));
+    }
+
+    private void assertThatFilesTabIsCorrectlyFilled(final MatrixProject job) {
+        SortedMap<String, Integer> expectedConfigurationDetails = new TreeMap<>();
+        WarningsAction action = new WarningsAction(job);
+        expectedConfigurationDetails.put("FileOne.c", 4);
+        expectedConfigurationDetails.put("FileTwo.c", 6);
+        expectedConfigurationDetails.put("FileThree.c", 2);
+        assertThat(action.getFileTabContents(), is(expectedConfigurationDetails));
     }
 
     /**

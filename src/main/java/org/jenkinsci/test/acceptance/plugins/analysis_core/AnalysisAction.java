@@ -192,13 +192,35 @@ public abstract class AnalysisAction extends ContainerPageObject {
     }
 
     /**
-     * Returns the first two columns of the "Categories"-tab as key => value pairs, skipping the header and footer
+     * Returns the first two columns of the "Files"-tab as key => value pairs, skipping the header and footer
      * rows.
      *
      * @return a map of the first two columns. (first column => second column)
      */
     public SortedMap<String, Integer> getFileTabContents() {
         openTab(Tab.FILES);
+        return getContentsOfVisibleTable(true, true);
+    }
+
+    /**
+     * Returns the first two columns of the "Packages"-tab as key => value pairs, skipping the header and footer
+     * rows.
+     *
+     * @return a map of the first two columns. (first column => second column)
+     */
+    public SortedMap<String, Integer> getPackagesTabContents() {
+        openTab(Tab.PACKAGES);
+        return getContentsOfVisibleTable(true, true);
+    }
+
+    /**
+     * Returns the first two columns of the "Modules"-tab as key => value pairs, skipping the header and footer
+     * rows.
+     *
+     * @return a map of the first two columns. (first column => second column)
+     */
+    public SortedMap<String, Integer> getModulesTabContents() {
+        openTab(Tab.MODULES);
         return getContentsOfVisibleTable(true, true);
     }
 
@@ -374,6 +396,6 @@ public abstract class AnalysisAction extends ContainerPageObject {
     }
 
     public enum Tab {
-        FILES, PACKAGES, WARNINGS, DETAILS, FIXED, NEW, CATEGORIES, TYPES
+        MODULES, FILES, PACKAGES, WARNINGS, DETAILS, FIXED, NEW, CATEGORIES, TYPES
     }
 }
