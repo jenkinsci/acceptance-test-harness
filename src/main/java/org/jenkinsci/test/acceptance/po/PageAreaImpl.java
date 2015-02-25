@@ -20,18 +20,30 @@ public abstract class PageAreaImpl extends CapybaraPortingLayerImpl implements P
 
     private final PageObject page;
 
+    /**
+     * @param context Parent page object area is scoped to.
+     * @param path Absolute path to the area.
+     */
     protected PageAreaImpl(PageObject context, String path) {
         super(context.injector);
         this.path = path;
         this.page = context;
     }
 
-    protected PageAreaImpl(PageArea area, String relativePath) {
-        this(area.getPage(), area.getPath() + "/" + relativePath);
+    /**
+     * @param area Parent area new area is scoped to.
+     * @param path Absolute or relative path prefix, if absolute must be prefixed
+     * by {@code area.getPath()}. IOW, it needs to be <i>in</i> parent area.
+     */
+    protected PageAreaImpl(PageArea area, String path) {
+        this(area.getPage(), path.startsWith(area.getPath())
+                ? path
+                : area.getPage() + "/" + path
+        );
 
-        if (relativePath.startsWith("/")) {
+        if (path.startsWith("/") && !path.startsWith(area.getPath())) {
             throw new IllegalArgumentException(
-                    "Path is supposed to be relative to page area. Given: " + relativePath
+                    "Child area '" + path + "' is not part of its parent: " + area.getPath()
             );
         }
     }
