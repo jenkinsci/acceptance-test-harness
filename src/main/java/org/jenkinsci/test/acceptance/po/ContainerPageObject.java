@@ -71,7 +71,7 @@ public abstract class ContainerPageObject extends PageObject {
      * Makes sure that the browser is currently opening the configuration page.
      */
     public void ensureConfigPage() {
-        assertThat(driver.getCurrentUrl(), is(getConfigUrl().toExternalForm()));
+        assertThat("config page is open", driver.getCurrentUrl(), is(getConfigUrl().toExternalForm()));
     }
 
     public URL getConfigUrl() {
