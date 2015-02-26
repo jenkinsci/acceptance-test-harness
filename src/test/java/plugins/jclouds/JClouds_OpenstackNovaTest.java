@@ -23,37 +23,42 @@
  */
 package plugins.jclouds;
 
-import static org.junit.Assume.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 
+import javax.inject.Named;
+
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.TestActivation;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.jclouds.JCloudsCloud;
 import org.jenkinsci.test.acceptance.plugins.jclouds.JCloudsSlaveTemplate;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.JenkinsConfig;
-import org.junit.Before;
 import org.junit.Test;
 
+import com.google.inject.Inject;
+
 @WithPlugins("jclouds-jenkins")
+@TestActivation({"ENDPOINT", "IDENTITY", "CREDENTIAL"})
 public class JClouds_OpenstackNovaTest extends AbstractJUnitTest {
 
-    /* mandatory */
-    private static final String ENDPOINT = System.getProperty(JClouds_OpenstackNovaTest.class.getName() + ".ENDPOINT");
-    private static final String IDENTITY = System.getProperty(JClouds_OpenstackNovaTest.class.getName() + ".IDENTITY");
-    private static final String CREDENTIAL = System.getProperty(JClouds_OpenstackNovaTest.class.getName() + ".CREDENTIAL");
+    @Inject(optional = true) @Named("JClouds_OpenstackNovaTest.ENDPOINT")
+    public String ENDPOINT;
 
-    /* per test */
-    private static final String HARDWARE_ID = System.getProperty(JClouds_OpenstackNovaTest.class.getName() + ".HARDWARE_ID");
-    private static final String IMAGE_ID = System.getProperty(JClouds_OpenstackNovaTest.class.getName() + ".IMAGE_ID");
-    private static final String IMAGE_NAME_REGEX = System.getProperty(JClouds_OpenstackNovaTest.class.getName() + ".IMAGE_NAME_REGEX");
+    @Inject(optional = true) @Named("JClouds_OpenstackNovaTest.IDENTITY")
+    public String IDENTITY;
 
-    @Before
-    public void setUp() {
-        assumeNotNull(ENDPOINT);
-        assumeNotNull(IDENTITY);
-        assumeNotNull(CREDENTIAL);
-    }
+    @Inject(optional = true) @Named("JClouds_OpenstackNovaTest.CREDENTIAL")
+    public String CREDENTIAL;
+
+    @Inject(optional = true) @Named("JClouds_OpenstackNovaTest.HARDWARE_ID")
+    public String HARDWARE_ID;
+
+    @Inject(optional = true) @Named("JClouds_OpenstackNovaTest.IMAGE_ID")
+    public String IMAGE_ID;
+
+    @Inject(optional = true) @Named("JClouds_OpenstackNovaTest.IMAGE_NAME_REGEX")
+    public String IMAGE_NAME_REGEX;
 
     @Test
     public void testConnection() {
@@ -63,31 +68,37 @@ public class JClouds_OpenstackNovaTest extends AbstractJUnitTest {
         waitFor(driver, hasContent("Connection succeeded!"), 60);
     }
 
-    @Test
+    @Test @TestActivation("HARDWARE_ID")
     public void checkHardwareId() {
-        assumeTrue(HARDWARE_ID != null || IMAGE_ID != null || IMAGE_NAME_REGEX != null);
-
         jenkins.configure();
         JCloudsCloud cloud = addCloud(jenkins.getConfigPage());
         JCloudsSlaveTemplate template = cloud.addSlaveTemplate();
 
-        if(HARDWARE_ID != null) {
-            template.hardwareId(HARDWARE_ID);
-            template.checkHardwareId();
-            waitFor(driver, hasContent("Hardware Id is valid."), 60);
-        }
+        template.hardwareId(HARDWARE_ID);
+        template.checkHardwareId();
+        waitFor(driver, hasContent("Hardware Id is valid."), 60);
+    }
 
-        if(IMAGE_ID != null) {
-            template.imageId(IMAGE_ID);
-            template.checkImageId();
-            waitFor(driver, hasContent("Image Id is valid."), 60);
-        }
+    @Test @TestActivation("IMAGE_ID")
+    public void checkImageId() {
+        jenkins.configure();
+        JCloudsCloud cloud = addCloud(jenkins.getConfigPage());
+        JCloudsSlaveTemplate template = cloud.addSlaveTemplate();
 
-        if (IMAGE_NAME_REGEX != null) {
-            template.imageNameRegex(IMAGE_NAME_REGEX);
-            template.checkImageNameRegex();
-            waitFor(driver, hasContent("Image Name Regex is valid."), 60);
-        }
+        template.imageId(IMAGE_ID);
+        template.checkImageId();
+        waitFor(driver, hasContent("Image Id is valid."), 60);
+    }
+
+    @Test @TestActivation("IMAGE_NAME_REGEX")
+    public void checkImageNameRegex() {
+        jenkins.configure();
+        JCloudsCloud cloud = addCloud(jenkins.getConfigPage());
+        JCloudsSlaveTemplate template = cloud.addSlaveTemplate();
+
+        template.imageNameRegex(IMAGE_NAME_REGEX);
+        template.checkImageNameRegex();
+        waitFor(driver, hasContent("Image Name Regex is valid."), 60);
     }
 
     private JCloudsCloud addCloud(JenkinsConfig config) {

@@ -30,6 +30,7 @@ import java.util.Set;
 
 import org.jenkinsci.test.acceptance.guice.World;
 import org.junit.Assume;
+import org.junit.internal.AssumptionViolatedException;
 import org.junit.rules.MethodRule;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.Statement;
@@ -37,7 +38,7 @@ import org.junit.runners.model.Statement;
 import com.google.inject.Inject;
 
 /**
- * Test rule to filter arbitrary test subset.
+ * Test rule to filter tests to run.
  *
  * @author ogondza
  */
@@ -58,9 +59,34 @@ public class FilterRule implements MethodRule {
                     // Fail assumption if there is some reason to skip
                     Assume.assumeTrue(reason, reason == null);
                 }
+
+                applyActivtionProperties(method, target);
+
                 base.evaluate();
             }
         };
+    }
+
+    private static void applyActivtionProperties(final FrameworkMethod method, final Object target) {
+        TestActivation caseActivation = target.getClass().getAnnotation(TestActivation.class);
+        assumePropertyConfigured(caseActivation, target.getClass());
+        TestActivation methodActivation = method.getAnnotation(TestActivation.class);
+        assumePropertyConfigured(methodActivation, target.getClass());
+    }
+
+    private static void assumePropertyConfigured(TestActivation activation, Class<?> testClass) {
+        if (activation == null) return; // No activation - always run
+
+        String className = testClass.getSimpleName();
+
+        for (String property: activation.value()) {
+            String propertyName = className + "." + property;
+            if (System.getProperty(propertyName) == null) {
+                throw new AssumptionViolatedException("No propererty provided: " + propertyName);
+            }
+        }
+
+        return; // All properties provided - run
     }
 
     public static abstract class Filter {
