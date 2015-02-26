@@ -40,24 +40,24 @@ import com.google.inject.Inject;
 
 @WithPlugins("jclouds-jenkins")
 @TestActivation({"ENDPOINT", "IDENTITY", "CREDENTIAL"})
-public class JClouds_OpenstackNovaTest extends AbstractJUnitTest {
+public class JCloudsPluginTest extends AbstractJUnitTest {
 
-    @Inject(optional = true) @Named("JClouds_OpenstackNovaTest.ENDPOINT")
+    @Inject(optional = true) @Named("JCloudsPluginTest.ENDPOINT")
     public String ENDPOINT;
 
-    @Inject(optional = true) @Named("JClouds_OpenstackNovaTest.IDENTITY")
+    @Inject(optional = true) @Named("JCloudsPluginTest.IDENTITY")
     public String IDENTITY;
 
-    @Inject(optional = true) @Named("JClouds_OpenstackNovaTest.CREDENTIAL")
+    @Inject(optional = true) @Named("JCloudsPluginTest.CREDENTIAL")
     public String CREDENTIAL;
 
-    @Inject(optional = true) @Named("JClouds_OpenstackNovaTest.HARDWARE_ID")
+    @Inject(optional = true) @Named("JCloudsPluginTest.HARDWARE_ID")
     public String HARDWARE_ID;
 
-    @Inject(optional = true) @Named("JClouds_OpenstackNovaTest.IMAGE_ID")
+    @Inject(optional = true) @Named("JCloudsPluginTest.IMAGE_ID")
     public String IMAGE_ID;
 
-    @Inject(optional = true) @Named("JClouds_OpenstackNovaTest.IMAGE_NAME_REGEX")
+    @Inject(optional = true) @Named("JCloudsPluginTest.IMAGE_NAME_REGEX")
     public String IMAGE_NAME_REGEX;
 
     @Test
