@@ -25,29 +25,33 @@ package plugins;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+
+import javax.inject.Named;
+
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.TestActivation;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.beaker_builder.BeakerBuilder;
 import org.jenkinsci.test.acceptance.plugins.beaker_builder.BeakerGlobalConfig;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
-import org.junit.Assume;
 import org.junit.Test;
+
+import com.google.inject.Inject;
 
 /**
  * @author ogondza
  */
 @WithPlugins("beaker-builder")
+@TestActivation({"URL", "LOGIN", "PASSWORD"})
 public class BeakerBuilderPluginTest extends AbstractJUnitTest {
 
-    private static final String URL = System.getProperty("plugin.BeakerBuilderPluginTest.url");
-    private static final String LOGIN = System.getProperty("plugin.BeakerBuilderPluginTest.login");
-    private static final String PASSWORD = System.getProperty("plugin.BeakerBuilderPluginTest.password");
+    @Inject(optional = true) @Named("BeakerBuilderPluginTest.URL") private String URL;
+    @Inject(optional = true) @Named("BeakerBuilderPluginTest.LOGIN") private String LOGIN;
+    @Inject(optional = true) @Named("BeakerBuilderPluginTest.PASSWORD") private String PASSWORD;
 
     @Test
     public void runBeakerTask() {
-        Assume.assumeNotNull(URL, LOGIN, PASSWORD); // Skip if not defined
-
         setupGlobalConfig();
 
         FreeStyleJob job = jenkins.jobs.create();
