@@ -38,7 +38,7 @@ public abstract class PageAreaImpl extends CapybaraPortingLayerImpl implements P
     protected PageAreaImpl(PageArea area, String path) {
         this(area.getPage(), path.startsWith(area.getPath())
                 ? path
-                : area.getPage() + "/" + path
+                : area.getPath() + "/" + path
         );
 
         if (path.startsWith("/") && !path.startsWith(area.getPath())) {
