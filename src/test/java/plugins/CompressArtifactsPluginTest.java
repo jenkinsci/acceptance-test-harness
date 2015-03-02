@@ -25,11 +25,13 @@ package plugins;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 
 import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.Bug;
 import org.jenkinsci.test.acceptance.junit.Since;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.compress_artifacts.CompressingArtifactManager;
@@ -73,6 +75,33 @@ public class CompressArtifactsPluginTest extends AbstractJUnitTest {
         assertThat(build.getArtifacts(), hasSize(1));
         build.getArtifact(ARTIFACT_NAME).shouldHaveContent("content");
         assertThat(build, not(hasCompressedArtifacts()));
+    }
+
+    @Test @Bug("JENKINS-27042")
+    @WithPlugins("compress-artifacts")
+    public void archiveLargerThan4GInTotal() throws Exception {
+        configureArtifactCompression();
+
+        FreeStyleJob job = jenkins.jobs.create();
+        job.configure();
+        job.addPublisher(ArtifactArchiver.class).includes("*");
+        job.addBuildStep(ShellBuildStep.class).command( // Generate archive larger than 4G
+                "wget $JENKINS_URL/jnlpJars/jenkins-cli.jar -O stuff.jar; for i in {0..7000}; do cp -l stuff.jar stuff.${i}.jar; done"
+        );
+        job.save();
+
+        Build build = job.scheduleBuild().waitUntilFinished(10 * 60).shouldSucceed();
+
+        long length = Long.parseLong(jenkins.runScript(
+                "new FilePath(Jenkins.instance.getJob('%s').lastBuild.artifactsDir).parent.child('archive.zip').length()",
+                job.name
+        ));
+        assertThat(length, greaterThanOrEqualTo(4L * 1024 * 1024 * 1024));
+
+        build.getArtifact("stuff.jar").open();
+        for (int i = 1; i <= 70; i++) {
+            build.getArtifact("stuff." + i + "42.jar").open();
+        }
     }
 
     private void installCompressPlugin() {
