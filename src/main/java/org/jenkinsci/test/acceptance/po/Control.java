@@ -172,8 +172,8 @@ public class Control extends CapybaraPortingLayerImpl {
                             ");"
             );
 
-            WebElement context = menuButton.findElement(by.xpath("ancestor::*[contains(@class,'yui-menu-button')]/.."));
-            WebElement e = context.findElement(by.link(caption));
+            WebElement context = findElement(menuButton, by.xpath("ancestor::*[contains(@class,'yui-menu-button')]/.."));
+            WebElement e = findElement(context, by.link(caption));
             return e;
         }
     };
@@ -183,10 +183,20 @@ public class Control extends CapybaraPortingLayerImpl {
      */
     public void select(String option) {
         WebElement e = resolve();
-        e.findElement(by.option(option)).click();
+        findElement(e, by.option(option)).click();
 
         // move the focus away from the select control to fire onchange event
         e.sendKeys(Keys.TAB);
+    }
+
+    private WebElement findElement(WebElement context, By selector) {
+        try {
+            return context.findElement(selector);
+        } catch (NoSuchElementException x) {
+            // this is often the best place to set a breakpoint
+            String msg = String.format("Unable to locate %s in %s\n\n%s", selector, driver.getCurrentUrl(), driver.getPageSource());
+            throw new NoSuchElementException(msg, x);
+        }
     }
 
     public void select(Class<?> describable) {
