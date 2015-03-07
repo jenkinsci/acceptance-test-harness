@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import org.jenkinsci.test.acceptance.junit.Bug;
+import org.jvnet.hudson.test.Issue;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
@@ -34,7 +34,7 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
      * Checks that the plug-in sends a mail after a build has been failed. The content of the mail contains several
      * tokens that should be expanded in the mail with the correct values.
      */
-    @Test @WithPlugins("email-ext") @Bug("25501")
+    @Test @WithPlugins("email-ext") @Issue("JENKINS-25501")
     public void should_send_mail_with_expanded_tokens() {
         setUpMailer();
 
@@ -391,7 +391,7 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
      * Reproduces the observations described in JENKINS-22744.
      */
     // Note: In order to run this test in IntelliJ the encoding of the source needs to be set to windows-1251
-    @Test @Bug("22744")
+    @Test @Issue("JENKINS-22744")
     public void should_use_file_encoding_windows1251_when_parsing_files() throws Exception {
         FreeStyleJob j = createFreeStyleJob("/tasks_plugin/cp1251_files", new AnalysisConfigurator<TasksFreestyleSettings>() {
             @Override

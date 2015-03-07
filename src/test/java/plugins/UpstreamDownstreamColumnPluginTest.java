@@ -27,7 +27,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.junit.Bug;
+import org.jvnet.hudson.test.Issue;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.BuildTrigger;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
@@ -37,7 +37,7 @@ import org.junit.Test;
 @WithPlugins("upstream-downstream-view")
 public class UpstreamDownstreamColumnPluginTest extends AbstractJUnitTest {
 
-    @Test @Bug("JENKINS-25943")
+    @Test @Issue("JENKINS-25943")
     public void links_should_point_to_correct_location() {
         jenkins.jobs.create(FreeStyleJob.class, "in_no_view");
         FreeStyleJob inObservedView = jenkins.jobs.create(FreeStyleJob.class, "in_observed_view");

@@ -29,7 +29,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 
-import org.jenkinsci.test.acceptance.junit.Bug;
+import org.jvnet.hudson.test.Issue;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
@@ -72,7 +72,7 @@ public class FindBugsPluginTest extends AbstractAnalysisTest {
      * Checks that the plug-in sends a mail after a build has been failed. The content of the mail
      * contains several tokens that should be expanded in the mail with the correct values.
      */
-    @Test @Bug("25501") @WithPlugins("email-ext")
+    @Test @Issue("JENKINS-25501") @WithPlugins("email-ext")
     public void should_send_mail_with_expanded_tokens() {
         setUpMailer();
 
@@ -210,7 +210,7 @@ public class FindBugsPluginTest extends AbstractAnalysisTest {
     /**
      * Runs job two times to check if the links of the graph are relative.
      */
-    @Test @Bug("21723")
+    @Test @Issue("JENKINS-21723")
     public void should_have_relative_graph_links() {
         FreeStyleJob job = createFreeStyleJob();
         buildJobAndWait(job);

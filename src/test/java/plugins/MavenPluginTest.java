@@ -29,7 +29,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.junit.Bug;
+import org.jvnet.hudson.test.Issue;
 import org.jenkinsci.test.acceptance.junit.Native;
 import org.jenkinsci.test.acceptance.junit.Since;
 import org.jenkinsci.test.acceptance.plugins.mailer.Mailer;
@@ -172,7 +172,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
     }
 
     @Test
-    @Bug("JENKINS-10539")
+    @Issue("JENKINS-10539")
     @Since("1.527")
     public void preserve_backslash_in_property() {
         installSomeMaven(jenkins);
@@ -217,7 +217,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
         assertHasModule(job, "gid$module_b");
     }
 
-    @Test @Bug({"JENKINS-20209", "JENKINS-21045"})
+    @Test @Issue({"JENKINS-20209", "JENKINS-21045"})
     public void send_mail() throws Exception {
         jenkins.configure();
         mailer.setupDefaults();

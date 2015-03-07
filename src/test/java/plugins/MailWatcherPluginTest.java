@@ -27,7 +27,7 @@ import java.util.concurrent.Future;
 import java.util.regex.Pattern;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.junit.Bug;
+import org.jvnet.hudson.test.Issue;
 import org.jenkinsci.test.acceptance.junit.Since;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.mail_watcher.OnlineStatusNotification;
@@ -74,7 +74,7 @@ public class MailWatcherPluginTest extends AbstractJUnitTest {
         mail.assertMail(regex("Computer %s marked online", slave.getName()), "on@online.com");
     }
 
-    @Test @Bug("JENKINS-20538") @Since("1.571") @WithPlugins("mail-watcher-plugin@1.7")
+    @Test @Issue("JENKINS-20538") @Since("1.571") @WithPlugins("mail-watcher-plugin@1.7")
     public void notify_master_on_jenkins_restart() throws Exception {
         jenkins.configure();
         {

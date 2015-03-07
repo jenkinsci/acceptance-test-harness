@@ -11,12 +11,12 @@ import org.jenkinsci.test.acceptance.po.Login;
 import org.jenkinsci.test.acceptance.po.User;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.jvnet.hudson.test.Issue;
 
 import javax.inject.Inject;
 
 import static org.hamcrest.CoreMatchers.not;
 import static org.jenkinsci.test.acceptance.Matchers.*;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 
 
@@ -310,7 +310,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
      * working since ldap plugin version: 1.8
      */
     @Test
-    @Bug("JENKINS-18355")
+    @Issue("JENKINS-18355")
     public void resolve_display_name_with_defaults() {
         // Given
         useLdapAsSecurityRealm(createDefaults(ldap.get()));
@@ -332,7 +332,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
      * working since ldap plugin version: 1.8
      */
     @Test
-    @Bug("JENKINS-18355")
+    @Issue("JENKINS-18355")
     @Category(SmokeTest.class)
     public void custom_display_name() {
         // Given

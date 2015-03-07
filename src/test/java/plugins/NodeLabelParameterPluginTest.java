@@ -5,7 +5,7 @@ import com.google.inject.Inject;
 import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.junit.Bug;
+import org.jvnet.hudson.test.Issue;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.nodelabelparameter.LabelParameter;
@@ -396,7 +396,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
      */
     @Test
     @WithPlugins("text-finder")
-    @Bug("23129")
+    @Issue("JENKINS-23129")
     @Ignore("Until JENKINS-23129 is fixed")
     public void trigger_if_succeeds_with_failed_post_build_step() throws Exception {
         FreeStyleJob j = jenkins.jobs.create();
@@ -450,7 +450,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
      * Note that in this case the main build action is still completed with status SUCCESS.
      */
     @Test
-    @Bug("23129")
+    @Issue("JENKINS-23129")
     @Ignore("Until JENKINS-23129 is fixed")
     public void trigger_if_succeeds_with_unstable_post_build_step() throws Exception {
         FreeStyleJob j = jenkins.jobs.create();

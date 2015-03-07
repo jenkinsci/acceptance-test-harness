@@ -2,7 +2,7 @@ package plugins;
 
 import com.google.inject.Inject;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.junit.Bug;
+import org.jvnet.hudson.test.Issue;
 import org.jenkinsci.test.acceptance.junit.Since;
 import org.jenkinsci.test.acceptance.po.*;
 import org.jenkinsci.test.acceptance.slave.SlaveProvider;
@@ -153,7 +153,7 @@ public class MatrixPluginTest extends AbstractJUnitTest {
      * Then combination "run=no" should not be built in build 2
      */
     @Test
-    @Bug("JENKINS-7285")
+    @Issue("JENKINS-7285")
     @Since("1.515")
     public void use_job_parameters_in_combination_filters() {
         job.configure();

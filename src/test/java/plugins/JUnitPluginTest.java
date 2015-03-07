@@ -1,7 +1,7 @@
 package plugins;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.junit.Bug;
+import org.jvnet.hudson.test.Issue;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.JUnitPublisher;
@@ -94,7 +94,7 @@ public class JUnitPluginTest extends AbstractJUnitTest {
      * And "TestNG.testScore" error summary should match "expected:<42> but was:<2>"
      */
     @Test
-    @Bug("22833")
+    @Issue("JENKINS-22833")
     public void publish_rest_of_parameterized_tests() {
         FreeStyleJob j = jenkins.jobs.create();
         j.configure();

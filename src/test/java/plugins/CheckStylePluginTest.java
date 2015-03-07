@@ -3,7 +3,7 @@ package plugins;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import org.jenkinsci.test.acceptance.junit.Bug;
+import org.jvnet.hudson.test.Issue;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
@@ -47,7 +47,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
      * Checks that the plug-in sends a mail after a build has been failed. The content of the mail contains several
      * tokens that should be expanded in the mail with the correct values.
      */
-    @Test @Bug("25501") @WithPlugins("email-ext")
+    @Test @Issue("JENKINS-25501") @WithPlugins("email-ext")
     public void should_send_mail_with_expanded_tokens() {
         setUpMailer();
 
@@ -219,7 +219,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
     /**
      * Runs job two times to check if the links of the graph are relative.
      */
-    @Test @Bug("21723")
+    @Test @Issue("JENKINS-21723")
     public void should_have_relative_graph_links() throws Exception {
         FreeStyleJob job = createFreeStyleJob();
         buildJobAndWait(job);
@@ -232,7 +232,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
     /**
      * Runs a job with warning threshold configured once and validates that build is marked as unstable.
      */
-    @Test @Bug("19614")
+    @Test @Issue("JENKINS-19614")
     public void should_set_build_to_unstable_if_total_warnings_threshold_set() {
         FreeStyleJob job = createFreeStyleJob(FILE_WITH_776_WARNINGS, new AnalysisConfigurator<CheckStyleFreestyleSettings>() {
             @Override
@@ -357,7 +357,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
      * Sets up a list view with a warnings column. Builds a job and checks if the column shows the correct number of
      * warnings and provides a direct link to the actual warning results.
      */
-    @Test @Category(SmokeTest.class) @Bug("24436")
+    @Test @Category(SmokeTest.class) @Issue("JENKINS-24436")
     public void should_set_warnings_count_in_list_view_column() {
         MavenModuleSet job = createMavenJob();
         buildJobAndWait(job).shouldSucceed();
@@ -423,7 +423,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
      *     <li>Build 3: 1 new warning (SUCCESS since all warnings of previous build are fixed)</li>
      * </ol>
      */
-    @Test @Bug("13458")
+    @Test @Issue("JENKINS-13458")
     public void should_set_result_in_build_sequence_when_comparing_to_previous_build() {
         FreeStyleJob job = createFreeStyleJob();
 

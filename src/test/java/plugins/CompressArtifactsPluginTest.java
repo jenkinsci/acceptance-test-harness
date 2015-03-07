@@ -31,7 +31,7 @@ import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 
 import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.junit.Bug;
+import org.jvnet.hudson.test.Issue;
 import org.jenkinsci.test.acceptance.junit.Since;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.compress_artifacts.CompressingArtifactManager;
@@ -77,7 +77,7 @@ public class CompressArtifactsPluginTest extends AbstractJUnitTest {
         assertThat(build, not(hasCompressedArtifacts()));
     }
 
-    @Test @Bug("JENKINS-27042")
+    @Test @Issue("JENKINS-27042")
     @WithPlugins("compress-artifacts")
     public void archiveLargerThan4GInTotal() throws Exception {
         configureArtifactCompression();

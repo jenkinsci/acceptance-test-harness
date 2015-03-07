@@ -6,7 +6,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jenkinsci.test.acceptance.junit.Bug;
+import org.jvnet.hudson.test.Issue;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
@@ -47,7 +47,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest {
      * also verified (4, 6, and 2 warnings).
      */
     // TODO: run the job twice and check for the graphs
-    @Test @Bug({"11225", "26913"})
+    @Test @Issue({"JENKINS-11225", "JENKINS-26913"})
     public void should_report_warnings_per_axis() {
         String file = "matrix-warnings.txt";
         MatrixProject job = setupJob("/warnings_plugin/" + file, MatrixProject.class,
@@ -117,7 +117,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest {
      * tokens that should be expanded in the mail with the correct vaules.
      */
     @Test
-    @Bug("25501")
+    @Issue("JENKINS-25501")
     @Category(SmokeTest.class)
     @WithPlugins("email-ext")
     public void should_send_mail_with_expanded_tokens() {
@@ -209,7 +209,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest {
      * Build a job and check set up a dashboard list-view. Check, if the dashboard view shows correct warning count.
      */
     @Test
-    @Bug("23446")
+    @Issue("JENKINS-23446")
     public void build_a_matrix_project_and_check_if_dashboard_list_view_shows_correct_warnings() {
         MatrixProject job = setupJob(SEVERAL_PARSERS_FILE_FULL_PATH, MatrixProject.class,
                 WarningsBuildSettings.class, create3ParserConfiguration());
@@ -254,7 +254,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest {
      * Runs a job with warning threshold configured once and validates that build is marked as unstable.
      */
     @Test
-    @Bug("19614")
+    @Issue("JENKINS-19614")
     public void should_set_build_to_unstable_if_total_warnings_threshold_set() {
         AnalysisConfigurator<WarningsBuildSettings> buildConfiguration = new AnalysisConfigurator<WarningsBuildSettings>() {
             @Override

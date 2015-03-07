@@ -1,7 +1,7 @@
 package plugins;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.junit.Bug;
+import org.jvnet.hudson.test.Issue;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.plot.PlotPublisher;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
@@ -65,7 +65,7 @@ public class PlotPluginTest extends AbstractJUnitTest {
        Then the build should succeed
        And there should be a plot called "Some plot" in group "Plots"
      */
-    @Test @Bug({"JENKINS-18585","JENKINS-18674"})
+    @Test @Issue({"JENKINS-18585","JENKINS-18674"})
     public void postbuild_rendering_should_work() {
         job.configure();
         PlotPublisher pub = job.addPublisher(PlotPublisher.class);
