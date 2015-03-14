@@ -362,7 +362,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
         MavenModuleSet job = createMavenJob();
         buildJobAndWait(job).shouldSucceed();
 
-        ListView view = addDashboardListViewColumn(CheckStyleColumn.class);
+        ListView view = addListViewColumn(CheckStyleColumn.class);
         assertValidLink(job.name);
         view.delete();
     }

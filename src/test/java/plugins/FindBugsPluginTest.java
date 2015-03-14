@@ -322,7 +322,7 @@ public class FindBugsPluginTest extends AbstractAnalysisTest {
         MavenModuleSet job = createMavenJob();
         buildJobAndWait(job).shouldSucceed();
 
-        ListView view = addDashboardListViewColumn(FindBugsColumn.class);
+        ListView view = addListViewColumn(FindBugsColumn.class);
         assertValidLink(job.name);
         view.delete();
     }

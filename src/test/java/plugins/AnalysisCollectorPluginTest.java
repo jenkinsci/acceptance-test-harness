@@ -251,7 +251,6 @@ public class AnalysisCollectorPluginTest extends AbstractJUnitTest {
         job.startBuild().waitUntilFinished();
 
         DashboardView dashboard = jenkins.views.create(DashboardView.class, createRandomName());
-
         dashboard.configure();
         dashboard.matchAllJobs();
         WarningsPerProjectPortlet portlet = dashboard.addBottomPortlet(WarningsPerProjectPortlet.class);

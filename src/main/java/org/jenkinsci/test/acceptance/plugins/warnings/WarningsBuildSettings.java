@@ -8,7 +8,7 @@ import org.jenkinsci.test.acceptance.po.PageArea;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 
 /**
- * Settings of the warnigns plugin. There is no difference between freestyle and maven jobs.
+ * Settings of the warnings plugin. There is no difference between freestyle and maven jobs.
  */
 @Describable("Scan for compiler warnings")
 public class WarningsBuildSettings extends AnalysisFreestyleSettings {

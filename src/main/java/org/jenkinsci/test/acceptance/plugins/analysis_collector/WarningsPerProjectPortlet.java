@@ -1,7 +1,5 @@
 package org.jenkinsci.test.acceptance.plugins.analysis_collector;
 
-import org.hamcrest.Description;
-import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.AbstractDashboardViewPortlet;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
 import org.jenkinsci.test.acceptance.po.Control;
@@ -14,8 +12,8 @@ import org.jenkinsci.test.acceptance.po.Describable;
  */
 @Describable("Warnings per project")
 public class WarningsPerProjectPortlet extends AbstractDashboardViewPortlet {
-
     private AnalysisCollectorPluginArea pluginArea;
+
     private Control hideZeroWarningsProjects = control("canHideZeroWarningsProjects");
     private Control showImagesInTableHeader = control("useImages");
 

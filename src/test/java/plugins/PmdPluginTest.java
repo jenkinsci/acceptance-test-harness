@@ -359,7 +359,7 @@ public class PmdPluginTest extends AbstractAnalysisTest {
         MavenModuleSet job = createMavenJob();
         buildJobAndWait(job).shouldSucceed();
 
-        ListView view = addDashboardListViewColumn(PmdColumn.class);
+        ListView view = addListViewColumn(PmdColumn.class);
         assertValidLink(job.name);
         view.delete();
     }

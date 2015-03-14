@@ -193,45 +193,48 @@ public class WarningsPluginTest extends AbstractAnalysisTest {
     }
 
     /**
-     * Build a job and check set up a dashboard list-view. Check, if the dashboard view shows correct warning count.
+     * Sets up a list view with a warnings column. Builds a freestyle job and checks if the column shows the correct
+     * number of warnings and provides a direct link to the actual warning results.
      */
     @Test
-    public void build_a_freestyle_job_and_check_if_dashboard_list_view_shows_correct_warnings() {
+    public void should_set_warnings_count_in_list_view_column_for_freestyle_project() {
         FreeStyleJob job = setupJob(SEVERAL_PARSERS_FILE_FULL_PATH, FreeStyleJob.class,
                 WarningsBuildSettings.class, create3ParserConfiguration());
 
         catWarningsToConsole(job);
-
         buildJobAndWait(job).shouldSucceed();
 
-        verifyWarningsColumn(job);
+        ListView view = addListViewColumn(WarningsColumn.class);
+        assertValidLink(job.name);
+        view.delete();
     }
 
     /**
-     * Build a job and check set up a dashboard list-view. Check, if the dashboard view shows correct warning count.
+     * Sets up a list view with a warnings column. Builds a matrix job and checks if the column shows the correct number
+     * of warnings and provides a direct link to the actual warning results.
      */
-    @Test
-    @Issue("JENKINS-23446")
-    public void build_a_matrix_project_and_check_if_dashboard_list_view_shows_correct_warnings() {
+    @Test @Issue("23446")
+    public void should_set_warnings_count_in_list_view_column_for_matrix_project() {
         MatrixProject job = setupJob(SEVERAL_PARSERS_FILE_FULL_PATH, MatrixProject.class,
                 WarningsBuildSettings.class, create3ParserConfiguration());
 
         catWarningsToConsole(job);
-
         buildJobAndWait(job).shouldSucceed();
 
-        verifyWarningsColumn(job);
+        ListView view = addListViewColumn(WarningsColumn.class);
+        assertValidLink(job.name);
+        view.delete();
     }
 
-    private void verifyWarningsColumn(final Job job) {
-        ListView view = addDashboardListViewColumn(WarningsColumn.class);
+    private void assertValidLink(final String jobName) {
+        By warningsLinkMatcher = by.css("a[href$='job/" + jobName + "/warnings']");
 
-        By expectedDashboardLinkMatcher = by.css("a[href$='job/" + job.name + "/warnings']");
-        assertThat(jenkins.all(expectedDashboardLinkMatcher).size(), is(1));
-        WebElement dashboardLink = jenkins.getElement(expectedDashboardLinkMatcher);
-        assertThat(dashboardLink.getText().trim(), is(String.valueOf(TOTAL)));
+        assertThat(jenkins.all(warningsLinkMatcher).size(), is(1));
+        WebElement link = jenkins.getElement(warningsLinkMatcher);
+        assertThat(link.getText().trim(), is(String.valueOf(TOTAL)));
 
-        view.delete();
+        link.click();
+        assertThat(driver, hasContent("Aggregated Compiler Warnings"));
     }
 
     /**
@@ -239,7 +242,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest {
      * "MSBuild" if the console log contains multiple warnings of these types.
      */
     @Test
-    public void detect_warnings_of_multiple_compilers_in_console_matrix() {
+    public void should_detect_warnings_of_multiple_compilers_in_console_matrix() {
         MatrixProject job = setupJob(SEVERAL_PARSERS_FILE_FULL_PATH, MatrixProject.class,
                 WarningsBuildSettings.class, create3ParserConfiguration());
 
@@ -255,8 +258,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest {
     /**
      * Runs a job with warning threshold configured once and validates that build is marked as unstable.
      */
-    @Test
-    @Issue("JENKINS-19614")
+    @Test @Issue("19614")
     public void should_set_build_to_unstable_if_total_warnings_threshold_set() {
         AnalysisConfigurator<WarningsBuildSettings> buildConfiguration = new AnalysisConfigurator<WarningsBuildSettings>() {
             @Override
@@ -281,7 +283,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest {
      * "MSBuild" if the console log contains multiple warnings of these types.
      */
     @Test
-    public void detect_warnings_of_multiple_compilers_in_console_freestyle() {
+    public void should_detect_warnings_of_multiple_compilers_in_console_freestyle() {
         FreeStyleJob job = setupJob(SEVERAL_PARSERS_FILE_FULL_PATH, FreeStyleJob.class,
                 WarningsBuildSettings.class, create3ParserConfiguration());
 
@@ -312,7 +314,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest {
      * file with multiple warnings of these types is copied to the workspace.
      */
     @Test
-    public void detect_warnings_of_multiple_compilers_in_workspace() {
+    public void should_detect_warnings_of_multiple_compilers_in_workspace() {
         AnalysisConfigurator<WarningsBuildSettings> buildConfigurator = new AnalysisConfigurator<WarningsBuildSettings>() {
             @Override
             public void configure(WarningsBuildSettings settings) {
@@ -343,7 +345,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest {
      * Checks that the warnings plugin will be skipped if "Run always" is not checked.
      */
     @Test
-    public void skip_failed_builds() {
+    public void should_skip_failed_builds() {
         FreeStyleJob job = runBuildWithRunAlwaysOption(false);
         Build build = buildJobAndWait(job).shouldFail();
 

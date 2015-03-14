@@ -9,7 +9,6 @@ import org.jenkinsci.test.acceptance.po.PageAreaImpl;
  * @author Fabian Trampusch
  */
 public class AbstractDashboardViewPortlet extends PageAreaImpl {
-
     private Control name = control("name");
 
     protected AbstractDashboardViewPortlet(DashboardView parent, String path) {

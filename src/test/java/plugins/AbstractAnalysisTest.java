@@ -407,7 +407,7 @@ public abstract class AbstractAnalysisTest extends AbstractJUnitTest {
      * @param <T>         The concrete type of the ListViewColumn.
      * @return The ListView.
      */
-    protected <T extends ListViewColumn> ListView addDashboardListViewColumn(Class<T> columnClass) {
+    protected <T extends ListViewColumn> ListView addListViewColumn(Class<T> columnClass) {
         ListView view = createNewViewForAllJobs(ListView.class);
         view.addColumn(columnClass);
         view.save();
