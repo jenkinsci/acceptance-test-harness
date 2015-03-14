@@ -177,9 +177,9 @@ public abstract class AnalysisAction extends ContainerPageObject {
     }
 
     /**
-     * Returns a list of trimmed contens of a list of {@link org.openqa.selenium.WebElement}s.
+     * Returns a list of trimmed contents of a list of {@link org.openqa.selenium.WebElement}s.
      *
-     * @param elems the list whose contens shall be trimmed
+     * @param elems the list whose contents shall be trimmed
      * @return the trimmed strings as list
      */
     protected List<String> asTrimmedStringList(final List<WebElement> elems) {

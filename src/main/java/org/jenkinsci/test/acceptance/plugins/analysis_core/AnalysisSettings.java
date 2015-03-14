@@ -245,4 +245,15 @@ public abstract class AnalysisSettings extends PageAreaImpl implements PostBuild
             advanced.click();
         }
     }
+
+    /**
+     * Returns the repeatable add button for the specified property.
+     *
+     * @param propertyName the name of the repeatable property
+     * @return the selected repeatable add button
+     * @since 1.71 (analysis-core)
+     */
+    protected Control repeatableAddButton(final String propertyName) {
+        return control(by.xpath("//div[@id='" + propertyName + "']//button[contains(@path,'repeatable-add')]"));
+    }
 }

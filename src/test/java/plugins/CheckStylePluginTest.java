@@ -368,7 +368,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
     }
 
     /**
-     * Sets up a dashboard view with a warnings-per-project portlet. Builds a job and checks if the portlett shows the
+     * Sets up a dashboard view with a warnings-per-project portlet. Builds a job and checks if the portlet shows the
      * correct number of warnings and provides a direct link to the actual warning results.
      */
     @Test @WithPlugins("dashboard-view")

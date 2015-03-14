@@ -40,6 +40,11 @@ public class WarningsPluginTest extends AbstractAnalysisTest {
     /** Contains warnings for several parsers. */
     private static final String SEVERAL_PARSERS_FILE_FULL_PATH = "/warnings_plugin/" + SEVERAL_PARSERS_FILE_NAME;
 
+    private static final int JAVA_COUNT = 131;
+    private static final int JAVADOC_COUNT = 8;
+    private static final int MSBUILD_COUNT = 15;
+    private static final int TOTAL = JAVA_COUNT + JAVADOC_COUNT + MSBUILD_COUNT;
+
     /**
      * Build a matrix job with three configurations. For each configuration a different set of warnings will be parsed
      * with the same parser (GCC). After the successful build the total number of warnings at the root level should be
@@ -116,10 +121,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest {
      * Checks that the plug-in sends a mail after a build has been failed. The content of the mail contains several
      * tokens that should be expanded in the mail with the correct vaules.
      */
-    @Test
-    @Issue("JENKINS-25501")
-    @Category(SmokeTest.class)
-    @WithPlugins("email-ext")
+    @Test @Issue("25501") @Category(SmokeTest.class) @WithPlugins("email-ext")
     public void should_send_mail_with_expanded_tokens() {
         setUpMailer();
 
@@ -145,15 +147,15 @@ public class WarningsPluginTest extends AbstractAnalysisTest {
      * Checks that no warnings are reported if the build does nothing.
      */
     @Test
-    public void detect_no_errors_in_console_log_and_workspace_when_there_are_none() {
-        AnalysisConfigurator<WarningsBuildSettings> buildConfigurator = new AnalysisConfigurator<WarningsBuildSettings>() {
-            @Override
-            public void configure(WarningsBuildSettings settings) {
-                settings.addConsoleScanner("Maven");
-                settings.addWorkspaceFileScanner("Java Compiler (javac)", "**/*");
-            }
-        };
-        FreeStyleJob job = setupJob(null, FreeStyleJob.class, WarningsBuildSettings.class, buildConfigurator);
+    public void should_detect_no_errors_in_console_log_and_workspace_when_there_are_none() {
+        FreeStyleJob job = setupJob(null, FreeStyleJob.class, WarningsBuildSettings.class,
+                new AnalysisConfigurator<WarningsBuildSettings>() {
+                    @Override
+                    public void configure(WarningsBuildSettings settings) {
+                        settings.addConsoleScanner("Maven");
+                        settings.addWorkspaceFileScanner("Java Compiler (javac)", "**/*");
+                    }
+                });
 
         Build build = buildJobWithSuccess(job);
 
@@ -169,14 +171,14 @@ public class WarningsPluginTest extends AbstractAnalysisTest {
      * Checks that no warnings are reported if these are located in a different file.
      */
     @Test
-    public void do_not_detect_errors_in_ignored_parts_of_the_workspace() {
-        AnalysisConfigurator<WarningsBuildSettings> buildConfigurator = new AnalysisConfigurator<WarningsBuildSettings>() {
-            @Override
-            public void configure(WarningsBuildSettings settings) {
-                settings.addWorkspaceFileScanner("Maven", "no_errors_here.log");
-            }
-        };
-        FreeStyleJob job = setupJob(null, FreeStyleJob.class, WarningsBuildSettings.class, buildConfigurator);
+    public void should_not_detect_errors_in_ignored_parts_of_the_workspace() {
+        FreeStyleJob job = setupJob(null, FreeStyleJob.class, WarningsBuildSettings.class,
+                new AnalysisConfigurator<WarningsBuildSettings>() {
+                    @Override
+                    public void configure(WarningsBuildSettings settings) {
+                        settings.addWorkspaceFileScanner("Maven", "no_errors_here.log");
+                    }
+                });
 
         job.configure();
         job.addShellStep("mvn clean install > errors.log || true");
@@ -227,7 +229,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest {
         By expectedDashboardLinkMatcher = by.css("a[href$='job/" + job.name + "/warnings']");
         assertThat(jenkins.all(expectedDashboardLinkMatcher).size(), is(1));
         WebElement dashboardLink = jenkins.getElement(expectedDashboardLinkMatcher);
-        assertThat(dashboardLink.getText().trim(), is("154"));
+        assertThat(dashboardLink.getText().trim(), is(String.valueOf(TOTAL)));
 
         view.delete();
     }
@@ -247,7 +249,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest {
         job.addUserAxis("user_axis", "axis1 axis2 axis3");
         job.save();
 
-        verify3ParserResults(job);
+        verify3ParserResults(job, 3);
     }
 
     /**
@@ -285,7 +287,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest {
 
         catWarningsToConsole(job);
 
-        verify3ParserResults(job);
+        verify3ParserResults(job, 1);
     }
 
     private void catWarningsToConsole(final Job job) {
@@ -322,19 +324,19 @@ public class WarningsPluginTest extends AbstractAnalysisTest {
         FreeStyleJob job = setupJob(SEVERAL_PARSERS_FILE_FULL_PATH, FreeStyleJob.class,
                 WarningsBuildSettings.class, buildConfigurator);
 
-        verify3ParserResults(job);
+        verify3ParserResults(job, 1);
     }
 
-    private void verify3ParserResults(final Job job) {
+    private void verify3ParserResults(final Job job, final int numberOfRuns) {
         Build build = buildJobWithSuccess(job);
         assertThatActionExists(job, build, "Java Warnings");
         assertThatActionExists(job, build, "JavaDoc Warnings");
         assertThatActionExists(job, build, "MSBuild Warnings");
 
         build.open();
-        assertThat(driver, hasContent("Java Warnings: 131"));
-        assertThat(driver, hasContent("JavaDoc Warnings: 8"));
-        assertThat(driver, hasContent("MSBuild Warnings: 15"));
+        assertThat(driver, hasContent("Java Warnings: " + JAVA_COUNT * numberOfRuns));
+        assertThat(driver, hasContent("JavaDoc Warnings: " + JAVADOC_COUNT * numberOfRuns));
+        assertThat(driver, hasContent("MSBuild Warnings: " + MSBUILD_COUNT * numberOfRuns));
     }
 
     /**

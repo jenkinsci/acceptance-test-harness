@@ -12,44 +12,55 @@ import org.jenkinsci.test.acceptance.po.PageAreaImpl;
  */
 @Describable("Scan for compiler warnings")
 public class WarningsBuildSettings extends AnalysisFreestyleSettings {
-    private Control addConsoleLogScanner = control("repeatable-add");
-    private Control addWorkspaceFileScanner = control("repeatable-add[1]");
+    private static final String CONSOLE_PARSERS = "consoleParsers";
+    private static final String FILE_PARSERS = "parserConfigurations";
 
-    public WarningsBuildSettings(Job parent, String path) {
+    private Control consoleParsers = repeatableAddButton(CONSOLE_PARSERS);
+    private Control fileParsers = repeatableAddButton(FILE_PARSERS);
+
+    /**
+     * Creates a new instance of {@code WarningsBuildSettings}.
+     *
+     * @param parent the job containing the publisher
+     * @param path   the path to the page area
+     */
+    public WarningsBuildSettings(final Job parent, final String path) {
         super(parent, path);
     }
 
-    public void addConsoleScanner(String caption) {
-        addConsoleLogScanner.click();
+    public void addConsoleScanner(final String caption) {
+        consoleParsers.click();
         elasticSleep(1000);
-        String path = last(by.xpath("//div[@name='consoleParsers']")).getAttribute("path");
-
-        PageArea a = new PageAreaImpl(getPage(), path) {
-        };
-        a.control("parserName").select(caption);
+        PageArea repeatable = getRepeatableAreaOf(CONSOLE_PARSERS);
+        repeatable.control("parserName").select(caption);
     }
 
-    public void addWorkspaceFileScanner(String caption, String pattern) {
-        addWorkspaceFileScanner.click();
+    public void addWorkspaceFileScanner(final String caption, final String pattern) {
+        fileParsers.click();
         elasticSleep(1000);
-        String path = last(by.xpath("//div[@name='parserConfigurations']")).getAttribute("path");
 
-        PageArea a = new PageAreaImpl(getPage(), path) {
-        };
-        a.control("pattern").set(pattern);
-        a.control("parserName").select(caption);
+        PageArea repeatable = getRepeatableAreaOf(FILE_PARSERS);
+        repeatable.control("pattern").set(pattern);
+        repeatable.control("parserName").select(caption);
     }
 
-    public void addWarningsToInclude(String pattern){
+    private PageArea getRepeatableAreaOf(final String propertyName) {
+        String path = last(by.xpath("//div[@name='" + propertyName + "']")).getAttribute("path");
+
+        return new PageAreaImpl(WarningsBuildSettings.this.getPage(), path) {};
+    }
+
+    public void addWarningsToInclude(final String value) {
+        setPattern("include", value);
+    }
+
+    public void addWarningsToIgnore(final String value) {
+        setPattern("exclude", value);
+    }
+
+    private void setPattern(final String name, final String value) {
         ensureAdvancedClicked();
 
-        find(by.xpath("//input[@name='_.includePattern']")).sendKeys(pattern);
-    }
-
-
-    public void addWarningsToIgnore(String pattern){
-        ensureAdvancedClicked();
-
-        find(by.xpath("//input[@name='_.excludePattern']")).sendKeys(pattern);
+        find(by.xpath("//input[@name='_." + name + "Pattern']")).sendKeys(value);
     }
 }

@@ -314,9 +314,10 @@ public class FindBugsPluginTest extends AbstractAnalysisTest {
     }
 
     /**
-     * Build a job and check set up a dashboard list-view. Check, if the dashboard view shows correct warning count.
+     * Sets up a list view with a warnings column. Builds a job and checks if the column shows the correct number of
+     * warnings and provides a direct link to the actual warning results.
      */
-    @Test
+    @Test @Bug("24436")
     public void should_set_warnings_count_in_list_view_column() {
         MavenModuleSet job = createMavenJob();
         buildJobAndWait(job).shouldSucceed();
@@ -327,7 +328,8 @@ public class FindBugsPluginTest extends AbstractAnalysisTest {
     }
 
     /**
-     * Build a job and check set up a "dashboard"-style view. Check, if the dashboard view shows correct warning count.
+     * Sets up a dashboard view with a warnings-per-project portlet. Builds a job and checks if the portlet shows the
+     * correct number of warnings and provides a direct link to the actual warning results.
      */
     @Test @WithPlugins("dashboard-view")
     public void should_set_warnings_count_in_dashboard_portlet() {
