@@ -317,7 +317,7 @@ public class FindBugsPluginTest extends AbstractAnalysisTest {
      * Sets up a list view with a warnings column. Builds a job and checks if the column shows the correct number of
      * warnings and provides a direct link to the actual warning results.
      */
-    @Test @Bug("24436")
+    @Test @Issue("24436")
     public void should_set_warnings_count_in_list_view_column() {
         MavenModuleSet job = createMavenJob();
         buildJobAndWait(job).shouldSucceed();
