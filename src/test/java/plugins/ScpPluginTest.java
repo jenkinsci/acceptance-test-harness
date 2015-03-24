@@ -16,8 +16,6 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.IOException;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
@@ -28,25 +26,8 @@ public class ScpPluginTest extends AbstractJUnitTest {
     @Inject
     Docker docker;
 
-    @Native("docker")
-    /**
-     @native(docker)
-     Scenario: Configure a job with SCP publishing
-     Given I have installed the "scp" plugin
-     And a docker fixture "sshd"
-     And a job
-     When I configure docker fixture as SCP site with password
-     And I configure the job
-     And I copy resource "scp_plugin/lorem-ipsum-scp.txt" into workspace
-     And I publish "pmd.xml" with SCP plugin
-     And I save the job
-     And I build the job
-     Then the build should succeed
-     And SCP plugin should have published "lorem-ipsum-scp.txt" on docker fixture
-     */
-    @Test
-
-    public void configure_job_with_scp_password_publishing() throws IOException, InterruptedException {
+    @Test @Native("docker")
+    public void configure_job_with_scp_password_publishing() throws Exception {
         SshdContainer sshd = docker.start(SshdContainer.class);
         Resource cp_file = resource("/scp_plugin/lorem-ipsum-scp.txt");
 
@@ -80,25 +61,8 @@ public class ScpPluginTest extends AbstractJUnitTest {
     }
 
 
-    @Native("docker")
-    /**
-     @native(docker)
-     Scenario: Configure a job with SCP publishing
-     Given I have installed the "scp" plugin
-     And a docker fixture "sshd"
-     And a job
-     When I configure docker fixture as SCP site with key authentication
-     And I configure the job
-     And I copy resource "scp_plugin/lorem-ipsum-scp.txt" into workspace
-     And I publish "pmd.xml" with SCP plugin
-     And I save the job
-     And I build the job
-     Then the build should succeed
-     And SCP plugin should have published "lorem-ipsum-scp.txt" on docker fixture
-     */
-    @Test
-
-    public void configure_job_with_scp_key_publishing() throws IOException, InterruptedException {
+    @Test @Native("docker")
+    public void configure_job_with_scp_key_publishing() throws Exception {
         SshdContainer sshd = docker.start(SshdContainer.class);
         Resource cp_file = resource("/scp_plugin/lorem-ipsum-scp.txt");
 
