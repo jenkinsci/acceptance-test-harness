@@ -7,7 +7,7 @@ import java.net.URL;
 
 import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.docker.DockerImage;
-import org.jenkinsci.test.acceptance.docker.fixtures.WinstoneContainer;
+import org.jenkinsci.test.acceptance.docker.fixtures.JavaContainer;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.jenkinsci.utils.process.ProcessInputStream;
 
@@ -27,16 +27,16 @@ public class WinstoneDockerController extends LocalController {
     @Inject
     Docker docker;
 
-    private Class<? extends WinstoneContainer> fixtureType = WinstoneContainer.class;
+    private Class<? extends JavaContainer> fixtureType = JavaContainer.class;
     private String dockerImage;
 
-    private WinstoneContainer container;
+    private JavaContainer container;
 
     public WinstoneDockerController(File war) {
         super(war);
     }
 
-    public void setFixture(Class<? extends WinstoneContainer> fixtureType) {
+    public void setFixture(Class<? extends JavaContainer> fixtureType) {
         this.fixtureType = fixtureType;
     }
 
@@ -84,7 +84,7 @@ public class WinstoneDockerController extends LocalController {
         }
     }
 
-    public WinstoneContainer getContainer() {
+    public JavaContainer getContainer() {
         return container;
     }
 

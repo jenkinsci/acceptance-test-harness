@@ -27,7 +27,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.docker.fixtures.SshdContainer;
-import org.jenkinsci.test.acceptance.docker.fixtures.WinstoneContainer;
+import org.jenkinsci.test.acceptance.docker.fixtures.JavaContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Native;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
@@ -52,7 +52,7 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
 
     @Before public void setUp() {
         // Take advantage of preinstalled java
-        sshd = docker.start(WinstoneContainer.class);
+        sshd = docker.start(JavaContainer.class);
 
         slave = jenkins.slaves.create(DumbSlave.class);
         slave.setExecutors(1);
