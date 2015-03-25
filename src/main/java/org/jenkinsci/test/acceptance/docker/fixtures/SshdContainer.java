@@ -20,8 +20,8 @@ import static java.nio.file.attribute.PosixFilePermission.*;
  */
 @DockerFixture(id = "sshd", ports = 22, bindIp = "127.0.0.5")
 public class SshdContainer extends DockerContainer {
-    File privateKey;
-    File privateKeyEnc;
+    private File privateKey;
+    private File privateKeyEnc;
 
     /**
      * Get plaintext Private Key File
@@ -55,6 +55,14 @@ public class SshdContainer extends DockerContainer {
             }
         }
         return privateKeyEnc;
+    }
+
+    public String getPrivateKeyString() {
+        try {
+            return new String(Files.readAllBytes(getPrivateKey().toPath()));
+        } catch (IOException ex) {
+            throw new AssertionError(ex);
+        }
     }
 
     /**

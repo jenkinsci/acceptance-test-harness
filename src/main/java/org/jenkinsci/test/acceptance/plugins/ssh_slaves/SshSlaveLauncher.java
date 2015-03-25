@@ -23,4 +23,14 @@ public class SshSlaveLauncher extends ComputerLauncher {
 
         return new SshCredentialDialog(getPage(), "/credentials");
     }
+
+    public SshSlaveLauncher port(int port) {
+        ensureAdvancedOpen();
+        control("port").set(port);
+        return this;
+    }
+
+    private void ensureAdvancedOpen() {
+        control("advanced-button").click();
+    }
 }

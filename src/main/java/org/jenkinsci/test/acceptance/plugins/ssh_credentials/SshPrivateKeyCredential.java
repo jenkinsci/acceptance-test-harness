@@ -23,6 +23,11 @@ public class SshPrivateKeyCredential extends Credential {
         super(area, relativePath);
     }
 
+    public SshPrivateKeyCredential enterDirectly(String privateKey) {
+        selectEnterDirectly().privateKey.set(privateKey);
+        return this;
+    }
+
     public Direct selectEnterDirectly() {
         WebElement e = choose("Enter directly");
         return new Direct(getPage(), e.getAttribute("path"));
