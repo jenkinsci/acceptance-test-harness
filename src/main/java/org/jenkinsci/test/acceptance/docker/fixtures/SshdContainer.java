@@ -60,9 +60,9 @@ public class SshdContainer extends DockerContainer {
     /**
      * Gets the SSH command line via <b>unencrypted</b> key.
      */
-    public CommandBuilder ssh() throws IOException, InterruptedException {
+    public CommandBuilder ssh() {
         return new CommandBuilder("ssh")
-                .add("-p", port(22), "-o", "StrictHostKeyChecking=no", "-i", getPrivateKey(), "test@localhost");
+                .add("-p", port(22), "-o", "StrictHostKeyChecking=no", "-i", getPrivateKey(), "test@" + ipBound(22));
     }
 
 
