@@ -39,6 +39,9 @@ import java.lang.annotation.Target;
  * to run the test. Another use case is test interacting with predeployed
  * service.
  *
+ * Failing the activation criteria will skip the test but unlike JUnit assumptions
+ * it will happen before Jenkins boots up.
+ *
  * @author ogondza
  */
 @Retention(RUNTIME)
@@ -48,7 +51,7 @@ import java.lang.annotation.Target;
 public @interface TestActivation {
 
     /**
-     * @return Property names to read. First one that exists will be used.
+     * @return Property names that needs to be present to execute the test/test case.
      */
     String[] value();
 }
