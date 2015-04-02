@@ -65,9 +65,15 @@ public class Build extends ContainerPageObject {
     public Build waitUntilStarted(int timeout) {
         job.getJenkins().visit("");
         waitForCond(new Callable<Boolean>() {
+            private String build = Build.this.toString();
             @Override
             public Boolean call() {
                 return hasStarted();
+            }
+
+            @Override
+            public String toString() {
+                return "Build " + build + " started";
             }
         }, timeout);
         return this;
@@ -99,9 +105,15 @@ public class Build extends ContainerPageObject {
         visit("console");
 
         waitForCond(new Callable<Boolean>() {
+            private String build = Build.this.toString();
             @Override
             public Boolean call() {
                 return !isInProgress();
+            }
+
+            @Override
+            public String toString() {
+                return "Build " + build + " finished";
             }
         }, timeout);
         return this;
