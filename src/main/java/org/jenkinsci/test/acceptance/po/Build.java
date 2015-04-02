@@ -6,12 +6,14 @@ import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.Description;
 import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.Matchers;
+import org.jenkinsci.test.acceptance.junit.Wait;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -73,7 +75,7 @@ public class Build extends ContainerPageObject {
 
             @Override
             public String toString() {
-                return "Build " + build + " started";
+                return "Build " + build + " is started";
             }
         }, timeout);
         return this;
@@ -104,18 +106,19 @@ public class Build extends ContainerPageObject {
         // one can see what the build is doing
         visit("console");
 
-        waitForCond(new Callable<Boolean>() {
-            private String build = Build.this.toString();
-            @Override
-            public Boolean call() {
-                return !isInProgress();
-            }
+        waitFor().withMessage("Build %s is finished", this)
+                .withTimeout(timeout, TimeUnit.SECONDS)
+                .until(new Wait.Predicate<Boolean>() {
+                    @Override
+                    public Boolean apply() throws Exception {
+                        return !isInProgress();
+                    }
 
-            @Override
-            public String toString() {
-                return "Build " + build + " finished";
-            }
-        }, timeout);
+                    @Override
+                    public String diagnose(Throwable lastException, String message) {
+                        return "Console output:\n" + Build.this.getConsole() + "\n";
+                    }
+        });
         return this;
     }
 

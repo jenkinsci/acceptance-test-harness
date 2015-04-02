@@ -96,6 +96,10 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
         ;
     }
 
+    public Wait<CapybaraPortingLayer> waitFor() {
+        return waitFor((CapybaraPortingLayer) this);
+    }
+
     /**
      * Wait until the element that matches the given selector appears.
      */

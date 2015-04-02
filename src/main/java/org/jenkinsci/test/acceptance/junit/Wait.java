@@ -101,7 +101,9 @@ public class Wait<Subject> extends FluentWait<Subject> {
     protected RuntimeException timeoutException(String message, Throwable lastException) {
         if (predicate != null) {
             String diagnosis = predicate.diagnose(lastException, message);
-            message += ". " + diagnosis;
+            if (diagnosis != null && diagnosis != "") {
+                message += ". " + diagnosis;
+            }
         }
 
         return super.timeoutException(message, lastException);
