@@ -24,10 +24,8 @@
 package org.jenkinsci.test.acceptance.plugins.audit_trail;
 
 import org.apache.commons.io.IOUtils;
-import org.jenkinsci.test.acceptance.po.GlobalPluginConfiguration;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.JenkinsLogger;
-import org.jenkinsci.test.acceptance.po.PageArea;
 import org.openqa.selenium.WebElement;
 
 import java.io.IOException;
@@ -52,7 +50,7 @@ abstract public class AuditTrailLogger extends JenkinsLogger {
 
         final SystemLogger logger = new SystemLogger(jenkins);
 
-        logger.waitForCond(new Callable<WebElement>() {
+        logger.waitFor().until(new Callable<WebElement>() {
             @Override
             public WebElement call() throws Exception {
                 logger.open();

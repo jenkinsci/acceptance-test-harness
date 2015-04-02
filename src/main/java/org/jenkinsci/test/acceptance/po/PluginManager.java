@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
@@ -23,7 +25,9 @@ import com.google.common.base.Splitter;
 import com.google.inject.Inject;
 
 import hudson.util.VersionNumber;
+
 import java.util.logging.Logger;
+
 import org.openqa.selenium.WebElement;
 
 /**
@@ -219,13 +223,15 @@ public class PluginManager extends ContainerPageObject {
                 // plugin deployment happens asynchronously, so give it a few seconds
                 // for it to finish deploying
                 // TODO: Use better detection if this is actually necessary
+                // TODO: This is as good as Thread.sleep(5000) if we treat timeout as success
                 try {
-                    waitForCond(new Callable<Boolean>() {
-                        @Override
-                        public Boolean call() throws Exception {
-                            return isInstalled(specs);
-                        }
-                    }, 5);
+                    waitFor().withTimeout(4, TimeUnit.SECONDS)
+                            .until(new Callable<Boolean>() {
+                                @Override
+                                public Boolean call() throws Exception {
+                                    return isInstalled(specs);
+                                }
+                    },);
                 } catch (TimeoutException e) {
                     return true;
                 }

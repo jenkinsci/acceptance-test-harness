@@ -149,7 +149,7 @@ public class SshSlaveController extends SlaveController {
 
         final Select cId = new Select(s.find(by.input("_.credentialsId")));
         final String credentialName = String.format("%s (%s)", machine.getUser(), fingerprint);
-        s.waitForCond(new Callable<Object>() {
+        waitFor().until(new Callable<Object>() {
             @Override
             public Object call() throws Exception {
                 List<WebElement> options = cId.getOptions();

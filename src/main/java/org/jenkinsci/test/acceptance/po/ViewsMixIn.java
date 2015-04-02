@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.po;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.WebElement;
 
@@ -17,17 +18,20 @@ public class ViewsMixIn extends MixIn {
 
     public <T extends View> T create(final Class<T> type, String name) {
 
-        // Views contributed by plugins might need some extra time to appear
-        WebElement typeRadio = waitForCond(new Callable<WebElement>() {
-            @Override public WebElement call() throws Exception {
-                visit("newView");
-                return findCaption(type, new Finder<WebElement>() {
-                    @Override protected WebElement find(String caption) {
-                        return outer.find(by.radioButton(caption));
-                    }
-                });
+        final Finder<WebElement> finder = new Finder<WebElement>() {
+            @Override protected WebElement find(String caption) {
+                return outer.find(by.radioButton(caption));
             }
-        }, 5);
+        };
+
+        // Views contributed by plugins might need some extra time to appear
+        WebElement typeRadio = waitFor().withTimeout(5, TimeUnit.SECONDS)
+                .until(new Callable<WebElement>() {
+                    @Override public WebElement call() throws Exception {
+                        visit("newView");
+                        return findCaption(type, finder);
+                    }
+        });
 
         typeRadio.click();
 

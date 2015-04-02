@@ -2,8 +2,8 @@ package org.jenkinsci.test.acceptance.po;
 
 import java.util.List;
 import java.util.concurrent.Callable;
-
 import org.jenkinsci.test.acceptance.ByFactory;
+import org.jenkinsci.test.acceptance.junit.Wait;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
@@ -22,6 +22,10 @@ public interface CapybaraPortingLayer {
      */
     WebElement choose(String locator);
 
+    <T> Wait<T> waitFor(T subject);
+
+    Wait<CapybaraPortingLayer> waitFor();
+
     /**
      * Wait until the element that matches the given selector appears.
      */
@@ -39,8 +43,10 @@ public interface CapybaraPortingLayer {
      *
      * @param timeoutSec 0 if left to the default value
      */
+    @Deprecated
     <T> T waitForCond(Callable<T> block, int timeoutSec);
 
+    @Deprecated
     <T> T waitForCond(Callable<T> block);
 
     /** Wait until a matcher matches. */

@@ -26,6 +26,7 @@ package org.jenkinsci.test.acceptance.po;
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
 import org.jenkinsci.utils.process.CommandBuilder;
@@ -44,20 +45,15 @@ public abstract class ToolInstallation extends PageAreaImpl {
 
         jenkins.getPluginManager().checkForUpdates();
 
-        jenkins.waitForCond(new Callable<Boolean>() {
-            @Override
-            public Boolean call() throws Exception {
-                return hasUpdatesFor(jenkins, type);
-            }
-
-            @Override
-            public String toString() {
-                return String.format(
-                        "tool installer metadata for %s has arrived",
-                        type.getAnnotation(ToolInstallationPageObject.class).installer()
-                );
-            }
-        }, 60);
+        jenkins.waitFor()
+                .withMessage("tool installer metadata for %s has arrived", type.getAnnotation(ToolInstallationPageObject.class).installer())
+                .withTimeout(60, TimeUnit.SECONDS)
+                .until(new Callable<Boolean>() {
+                    @Override
+                    public Boolean call() throws Exception {
+                        return hasUpdatesFor(jenkins, type);
+                    }
+        });
     }
 
     private static boolean hasUpdatesFor(final Jenkins jenkins, Class<? extends ToolInstallation> type) {

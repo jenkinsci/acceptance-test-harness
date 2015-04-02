@@ -5,6 +5,7 @@ import org.openqa.selenium.WebElement;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 
@@ -57,14 +58,12 @@ public class JenkinsLogger extends PageObject {
     }
 
     public void waitForLogged(final Pattern pattern, final int timeout) {
-        waitForCond(new Callable<Boolean>() {
-            @Override public Boolean call() throws Exception {
-                return hasLogged(pattern);
-            }
-
-            @Override public String toString() {
-                return pattern.toString() + " to be logged";
-            }
-        }, timeout);
+        waitFor().withMessage("%s to be logged", pattern)
+                .withTimeout(timeout, TimeUnit.SECONDS)
+                .until(new Callable<Boolean>() {
+                    @Override public Boolean call() throws Exception {
+                        return hasLogged(pattern);
+                    }
+        });
     }
 }

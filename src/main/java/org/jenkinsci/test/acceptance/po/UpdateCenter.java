@@ -2,9 +2,11 @@ package org.jenkinsci.test.acceptance.po;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Iterables;
+
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 import static java.util.Arrays.*;
 
@@ -63,11 +65,14 @@ public class UpdateCenter extends ContainerPageObject {
      *      If the installation has failed
      */
     public void waitForInstallationToComplete(final String pluginShortName) throws InstallationFailedException {
-        waitForCond(new Callable<Boolean>() {
-            public Boolean call() throws Exception {
-                return isInstalled(pluginShortName);
-            }
-        },180);
+        waitFor().withMessage("Installation to complete")
+                .withTimeout(190, TimeUnit.SECONDS)
+                .until(new Callable<Boolean>() {
+                    @Override
+                    public Boolean call() throws Exception {
+                        return isInstalled(pluginShortName);
+                    }
+        });
     }
 
     public static class InstallationFailedException extends RuntimeException {

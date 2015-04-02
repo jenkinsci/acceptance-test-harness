@@ -87,7 +87,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         job.sandbox.check();
         job.save();
         final Build build = job.startBuild();
-        waitForCond(new Callable<Boolean>() {
+        waitFor().until(new Callable<Boolean>() {
             @Override public Boolean call() throws Exception {
                 return build.getConsole().contains("Ready to go?");
             }

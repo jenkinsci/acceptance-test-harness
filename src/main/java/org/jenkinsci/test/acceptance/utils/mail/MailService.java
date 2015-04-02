@@ -57,16 +57,12 @@ public abstract class MailService extends Assert {
     public void assertMail(final Pattern subject, String recipient, Pattern body) throws MessagingException, IOException {
         CapybaraPortingLayer hackish = new CapybaraPortingLayerImpl(null);
 
-        MimeMessage msg = hackish.waitForCond(new Callable<MimeMessage>() {
-            @Override
-            public MimeMessage call() throws Exception {
-                return getMail(subject);
-            }
-
-            @Override
-            public String toString() {
-                return "Email whose subject matches: "+subject;
-            }
+        MimeMessage msg = hackish.waitFor().withMessage("Email whose subject matches: %s", subject)
+                .until(new Callable<MimeMessage>() {
+                    @Override
+                    public MimeMessage call() throws Exception {
+                        return getMail(subject);
+                    }
         });
 
         String actualRecipients = Joiner.on(' ').join(msg.getRecipients(TO));

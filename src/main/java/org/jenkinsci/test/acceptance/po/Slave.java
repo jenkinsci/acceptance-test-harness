@@ -37,14 +37,11 @@ public class Slave extends Node {
      * @see #isOnline
      */
     public Slave waitUntilOnline() {
-        waitForCond(new Callable<Boolean>() {
-            @Override public Boolean call() throws Exception {
-                return isOnline();
-            }
-
-            @Override public String toString() {
-                return "Slave is online";
-            }
+        waitFor().withMessage("Slave is online")
+                .until(new Callable<Boolean>() {
+                    @Override public Boolean call() throws Exception {
+                        return isOnline();
+                    }
         });
         return this;
     }

@@ -3,6 +3,7 @@ package org.jenkinsci.test.acceptance.docker.fixtures;
 import hudson.plugins.jira.soap.JiraSoapService;
 import hudson.plugins.jira.soap.RemoteComment;
 import hudson.plugins.jira.soap.RemoteIssue;
+
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.jira.JIRA;
 import org.jenkinsci.test.acceptance.docker.DockerContainer;
@@ -10,6 +11,7 @@ import org.jenkinsci.test.acceptance.docker.DockerFixture;
 import org.jenkinsci.test.acceptance.po.CapybaraPortingLayer;
 
 import javax.xml.rpc.ServiceException;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketException;
@@ -17,6 +19,7 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 import static org.jenkinsci.test.acceptance.po.PageObject.*;
 
@@ -37,17 +40,19 @@ public class JiraContainer extends DockerContainer {
      * Wait until JIRA becomes up and running.
      */
     public void waitForReady(CapybaraPortingLayer p) {
-        p.waitForCond(new Callable<Boolean>() {
-            @Override
-            public Boolean call() throws Exception {
-                try {
-                    String s = IOUtils.toString(getURL().openStream());
-                    return s.contains("System Dashboard");
-                } catch (SocketException e) {
-                    return null;
-                }
-            }
-        },1500); // [INFO] jira started successfully in 1064s
+        p.waitFor().withMessage("Waiting for jira to come up")
+                .withTimeout(1500, TimeUnit.SECONDS) // [INFO] jira started successfully in 1064s
+                .until(new Callable<Boolean>() {
+                    @Override
+                    public Boolean call() throws Exception {
+                        try {
+                            String s = IOUtils.toString(getURL().openStream());
+                            return s.contains("System Dashboard");
+                        } catch (SocketException e) {
+                            return null;
+                        }
+                    }
+        });
     }
 
     /**
