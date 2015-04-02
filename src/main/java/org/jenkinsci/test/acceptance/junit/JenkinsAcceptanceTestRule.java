@@ -58,6 +58,7 @@ public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should us
                 try {
                     decorateWithRules(base).evaluate();
                 } catch (AssumptionViolatedException e) {
+                    System.out.printf("Skipping %s: %s%n", description.getDisplayName(), e.getMessage());
                     throw e;
                 } catch (Exception|AssertionError e) { // Errors and failures
                     controller.diagnose(e);
