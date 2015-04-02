@@ -6,15 +6,16 @@ import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 import org.hamcrest.StringDescription;
 import org.jenkinsci.test.acceptance.junit.Resource;
+import org.jenkinsci.test.acceptance.junit.Wait;
 import org.jenkinsci.test.acceptance.utils.ElasticTime;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -84,91 +85,74 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     }
 
     /**
+     * Default waiting object configured with default timing.
+     *
+     * @see {@link Wait}
+     */
+    public <T> Wait<T> waitFor(T subject) {
+        return new Wait<T>(subject)
+                .pollingEvery(time.milliseconds(500), TimeUnit.MILLISECONDS)
+                .withTimeout(time.seconds(120), TimeUnit.SECONDS)
+        ;
+    }
+
+    /**
      * Wait until the element that matches the given selector appears.
      */
     @Override
     public WebElement waitFor(final By selector, final int timeoutSec) {
-        return waitForCond(new Callable<WebElement>() {
-            @Override
-            public WebElement call() {
-                try {
-                    return find(selector);
-                } catch (NoSuchElementException e) {
-                    return null;
-                }
-            }
-
-            @Override
-            public String toString() {
-                return String.format("Element matching %s is present", selector.toString());
-            }
-        }, timeoutSec);
+        return waitFor(this).withMessage("Element matching %s is present", selector)
+                .withTimeout(timeoutSec, TimeUnit.SECONDS)
+                .ignoring(NoSuchElementException.class)
+                .until(new Callable<WebElement>() {
+                    @Override public WebElement call() {
+                        return find(selector);
+                    }
+        });
     }
 
     @Override
     public WebElement waitFor(final By selector) {
-        return waitFor(selector, 0);
+        return waitFor(this).withMessage("Element matching %s is present", selector)
+                .ignoring(NoSuchElementException.class)
+                .until(new Callable<WebElement>() {
+                    @Override public WebElement call() {
+                        return find(selector);
+                    }
+        });
     }
 
     /**
      * Repeated evaluate the given predicate until it returns true.
      * <p/>
      * If it times out, an exception will be thrown.
-     *
-     * @param timeoutSec 0 if left to the default value
      */
-    @Override
+    @Override @Deprecated
     public <T> T waitForCond(Callable<T> block, int timeoutSec) {
-        if (timeoutSec == 0) {
-            timeoutSec = 120;
-        }
-        try {
-            long endTime = System.currentTimeMillis() + time.seconds(timeoutSec);
-            while (System.currentTimeMillis() < endTime) {
-                T v = block.call();
-                if (isTrueish(v)) {
-                    return v;
-                }
-                sleep(500);
-            }
-            throw new TimeoutException("Failed to wait for condition: " + block);
-        } catch (RuntimeException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new Error("Failed to wait for condition: " + block, e);
-        }
+        return waitFor(this).withTimeout(timeoutSec, TimeUnit.SECONDS).until(block);
+    }
+
+    @Override @Deprecated
+    public <T> T waitForCond(Callable<T> block) {
+        return waitFor(this).until(block);
     }
 
     @Override public <T> void waitFor(final T item, final org.hamcrest.Matcher<T> matcher, int timeout) {
-        try {
-            waitForCond(new Callable<Boolean>() {
-                @Override public Boolean call() throws Exception {
-                    return matcher.matches(item);
-                }
+        StringDescription desc = new StringDescription();
+        matcher.describeTo(desc);
+        waitFor(driver).withMessage(desc.toString())
+                .withTimeout(timeout, TimeUnit.SECONDS)
+                .until(new Wait.Predicate<Boolean>() {
+                    @Override public Boolean apply() {
+                        return matcher.matches(item);
+                    }
 
-                @Override public String toString() {
-                    StringDescription desc = new StringDescription();
-                    matcher.describeTo(desc);
-                    return desc.toString();
-                }
-            }, timeout);
-        } catch (TimeoutException x) {
-            StringDescription desc = new StringDescription();
-            matcher.describeMismatch(item, desc);
-            throw new AssertionError(desc.toString(), x);
-        }
-    }
-
-    private boolean isTrueish(Object v) {
-        if (v instanceof Boolean) {
-            return (Boolean) v;
-        }
-        return v != null;
-    }
-
-    @Override
-    public <T> T waitForCond(Callable<T> block) {
-        return waitForCond(block, 0);
+                    @Override public String diagnose(Throwable lastException, String message) {
+                        StringDescription desc = new StringDescription();
+                        matcher.describeMismatch(item, desc);
+                        return desc.toString();
+                    }
+        });
     }
 
     /**
