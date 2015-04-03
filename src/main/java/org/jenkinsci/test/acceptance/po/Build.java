@@ -146,14 +146,12 @@ public class Build extends ContainerPageObject {
     }
 
     public String getConsole() {
-        // TODO this would more efficiently be done by directly fetching consoleText
         visit(getConsoleUrl());
 
-        List<WebElement> a = all(by.xpath("//pre"));
-        if (a.size() > 1) {
-            return find(by.xpath("//pre[@id='out']")).getText();
-        } else {
-            return a.get(0).getText();
+        try {
+            return IOUtils.toString(url("consoleFull").openStream());
+        } catch (IOException ex) {
+            throw new AssertionError(ex);
         }
     }
 
