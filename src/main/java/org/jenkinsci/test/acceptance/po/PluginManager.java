@@ -231,7 +231,7 @@ public class PluginManager extends ContainerPageObject {
                                 public Boolean call() throws Exception {
                                     return isInstalled(specs);
                                 }
-                    },);
+                    });
                 } catch (TimeoutException e) {
                     return true;
                 }
