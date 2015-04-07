@@ -90,7 +90,7 @@ class ArtifactoryPluginTest extends GebSpec {
         assertThat(log, containsString('Deploying artifact'))
 
         and:
-        assertThat(log, containsString("Deploying build info to: ${artifactory.getURL()}/api/build"))
+        assertThat(log, containsRegexp("Deploying build (info|descriptor) to: ${artifactory.getURL()}/api/build"))
     }
 
     def gradle_integration() {
