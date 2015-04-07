@@ -156,11 +156,13 @@ public class Build extends ContainerPageObject {
         }
     }
 
+    @Deprecated
     public Build shouldContainsConsoleOutput(String fragment) {
         assertThat(this.getConsole(), Matchers.containsRegexp(fragment, Pattern.MULTILINE));
         return this;
     }
 
+    @Deprecated
     public Build shouldNotContainsConsoleOutput(String fragment) {
         assertThat(this.getConsole(), not(Matchers.containsRegexp(fragment, Pattern.MULTILINE)));
         return this;

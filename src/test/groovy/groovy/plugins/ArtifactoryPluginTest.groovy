@@ -21,9 +21,7 @@ import static org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation.inst
  * Checks the successfully integration of Artifactory plugin.
  *
  * @author Eli Givoni
- *
  */
-
 @WithPlugins(['artifactory', 'gradle', 'maven-plugin'])
 @Native("docker")
 class ArtifactoryPluginTest extends GebSpec {
@@ -31,11 +29,7 @@ class ArtifactoryPluginTest extends GebSpec {
     @Inject
     DockerContainerHolder<ArtifactoryContainer> artifactoryContainer;
 
-    /**
-     @native (docker)
-      Test the plugin configuration and communication with Artifactory on the global jenkins config page.
-     */
-    def "Check config is persistence"() {
+    def check_config_is_persisted() {
         given:
         final ArtifactoryContainer artifactory = artifactoryContainer.get()
         waitForArtifactory(artifactory)
@@ -64,14 +58,9 @@ class ArtifactoryPluginTest extends GebSpec {
 
         then:
         errorConnectionFeedback.text().contains('Connection to http://localhost:4898 refused')
-
     }
 
-/**
- @native (docker)
-  Test the plugin records and deploy on a native maven build
- */
-    def "Maven integration"() {
+    def maven_integration() {
         given:
         installSomeMaven(jenkins);
         final ArtifactoryContainer artifactory = artifactoryContainer.get()
@@ -94,20 +83,17 @@ class ArtifactoryPluginTest extends GebSpec {
         build.shouldSucceed()
 
         and:
-        build.shouldContainsConsoleOutput('Initializing Artifactory Build-Info Recording')
+        def log = build.console
+        assertThat(log, containsString('Initializing Artifactory Build-Info Recording'))
 
         and:
-        build.shouldContainsConsoleOutput('Deploying artifact')
+        assertThat(log, containsString('Deploying artifact'))
 
         and:
-        build.shouldContainsConsoleOutput("Deploying build info to: ${artifactory.getURL()}/api/build")
+        assertThat(log, containsString("Deploying build info to: ${artifactory.getURL()}/api/build"))
     }
 
-/**
- @native (docker)
-  Test the plugin record and deploy on a freestyle gradle build
- */
-    def "Gradle integration"() {
+    def gradle_integration() {
         given:
         final ArtifactoryContainer artifactory = artifactoryContainer.get()
         waitForArtifactory(artifactory)
@@ -129,17 +115,17 @@ class ArtifactoryPluginTest extends GebSpec {
         build.shouldSucceed()
 
         and:
-        build.shouldContainsConsoleOutput('build artifactoryPublish')
+        def log = build.console
+        assertThat(log, containsString('build artifactoryPublish'))
 
         and:
-        build.shouldContainsConsoleOutput('[buildinfo]')
+        assertThat(log, containsString('[buildinfo]'))
 
         and:
-        build.shouldContainsConsoleOutput('Deploying artifact')
+        assertThat(log, containsString('Deploying artifact'))
 
         and:
-        build.shouldContainsConsoleOutput("Deploying build info to: ${artifactory.getURL()}/api/build")
-
+        assertThat(log, containsString("Deploying build info to: ${artifactory.getURL()}/api/build"))
     }
 
     def addArtifactory(ArtifactoryContainer artifactory) {
@@ -152,7 +138,7 @@ class ArtifactoryPluginTest extends GebSpec {
     }
 
     def waitForArtifactory(ArtifactoryContainer artifactory) {
-        jenkins.waitForCond(new Callable<Boolean>() {
+        jenkins.waitFor().withMessage("Artifactory is up").until(new Callable<Boolean>() {
             @Override
             public Boolean call() throws Exception {
                 try {
@@ -162,6 +148,6 @@ class ArtifactoryPluginTest extends GebSpec {
                     return null;
                 }
             }
-        }, 180);
+        });
     }
 }
