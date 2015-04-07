@@ -55,8 +55,11 @@ import java.util.logging.Logger;
 @Target({METHOD, TYPE})
 @Inherited
 @Documented
-@RuleAnnotation(value=WithPlugins.RuleImpl.class, /* must precede @WithCredentials if used */priority=-100)
+@RuleAnnotation(value=WithPlugins.RuleImpl.class, priority=WithPlugins.PRIORITY)
 public @interface WithPlugins {
+
+    public static final int PRIORITY = 10;
+
     /**
      * See {@link PluginManager.PluginSpec} for the syntax.
      */

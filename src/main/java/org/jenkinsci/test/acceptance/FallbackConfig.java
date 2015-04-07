@@ -178,8 +178,6 @@ public class FallbackConfig extends AbstractModule {
             if (f.getId().equalsIgnoreCase(type)) {
                 final JenkinsController c = f.create();
                 c.postConstruct(injector);
-                c.start();
-
                 return c;
             }
         }

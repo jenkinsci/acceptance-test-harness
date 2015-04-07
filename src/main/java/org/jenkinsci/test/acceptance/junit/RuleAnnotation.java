@@ -28,6 +28,16 @@ public @interface RuleAnnotation {
      */
     Class<? extends TestRule> value();
 
-    /** Optional ordering among rules. */
+    /**
+     * Optional ordering among rules.
+     *
+     * Annotation with <tt>priority >= 0</tt> are guaranteed to be run after
+     * Jenkins is up. Negative priorities are run before startup on best effort
+     * basis. (It might not happen before for ExistingJenkinsController,
+     * PooledJenkinsController and possibly others).
+     *
+     * Annotations that skips execution are encouraged to run before Jenkins is
+     * booted up to save time.
+     */
     int priority() default 0;
 }

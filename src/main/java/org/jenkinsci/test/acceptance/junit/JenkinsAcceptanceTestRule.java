@@ -30,9 +30,7 @@ import java.util.Set;
  * Add this rule to your Unit test class if you want to leverage this harness.
  *
  * <p>
- * This is the glue that connects JUnit to the logic of the test harness (but to support other test harnesses
- * like cucumber, we are trying to minimize what to put in here.)
- *
+ * This is the glue that connects JUnit to the logic of the test harness.
  *
  * @author Kohsuke Kawaguchi
  */
@@ -53,6 +51,8 @@ public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should us
 
                 injector.injectMembers(target);
                 injector.injectMembers(this);
+
+                controller.start(); // Make sure Jenkins is started at this point
 
                 System.out.println("=== Starting " + description.getDisplayName());
                 try {

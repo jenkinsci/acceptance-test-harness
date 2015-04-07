@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.junit;
 
 import com.google.inject.Inject;
+
 import org.jenkinsci.test.acceptance.plugins.credentials.ManagedCredentials;
 import org.jenkinsci.test.acceptance.plugins.credentials.UserPwdCredential;
 import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshPrivateKeyCredential;
@@ -40,7 +41,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Target({METHOD, TYPE})
 @Inherited
 @Documented
-@RuleAnnotation(WithCredentials.RuleImpl.class)
+@RuleAnnotation(value=WithCredentials.RuleImpl.class, priority = WithPlugins.PRIORITY + 1) // requires plugins
 public @interface WithCredentials {
 
     public static final int USERNAME_PASSWORD = 1;
