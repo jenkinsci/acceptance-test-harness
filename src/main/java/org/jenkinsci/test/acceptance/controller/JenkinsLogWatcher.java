@@ -79,6 +79,7 @@ public class JenkinsLogWatcher implements LogListenable, Closeable {
         reader.start();
     }
 
+    @Override
     public void close() throws IOException {
         if(pipe != null){
             pipe.close();
@@ -124,7 +125,7 @@ public class JenkinsLogWatcher implements LogListenable, Closeable {
         splitter.removeLogListener(l);
     }
 
-    public static final int DEFAULT_TIMEOUT = 300;//100 sec
+    public static final int DEFAULT_TIMEOUT = 360;
 
     public static final int TIMEOUT = System.getenv("STARTUP_TIME") != null && Integer.parseInt(System.getenv("STARTUP_TIME")) > 0
             ? Integer.parseInt(System.getenv("STARTUP_TIME")) : DEFAULT_TIMEOUT;
