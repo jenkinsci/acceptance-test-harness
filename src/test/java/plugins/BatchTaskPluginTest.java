@@ -10,6 +10,9 @@ import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.ShellBuildStep;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.NoSuchElementException;
+
+import com.google.common.base.Function;
 
 /**
  * Batch-task plugin test.
@@ -138,11 +141,19 @@ public class BatchTaskPluginTest extends AbstractJUnitTest {
     }
 
 
-    private void configureBatchTrigger(Job job, BatchTask task) {
+    private void configureBatchTrigger(Job job, final BatchTask task) {
         job.save(); // Needed to save configured batch tasks before configuring triggers
-        sleep(1000); // Configured tasks are sometimes missing immediately after save
-        job.configure();
-        job.addPublisher(BatchTaskTrigger.class).setTask(task);
+
+        // Configured tasks are sometimes missing immediately after save
+        job.waitFor(job)
+                .ignoring(NoSuchElementException.class)
+                .until(new Function<Job, Boolean>() {
+                    @Override public Boolean apply(Job job) {
+                        job.configure();
+                        job.addPublisher(BatchTaskTrigger.class).setTask(task);
+                        return true;
+                    }
+        });
     }
 
     private BatchTaskDeclaration addBatchTask(String name) {
