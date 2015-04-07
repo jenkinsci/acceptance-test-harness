@@ -66,7 +66,7 @@ public class Build extends ContainerPageObject {
 
     public Build waitUntilStarted(int timeout) {
         job.getJenkins().visit("");
-        waitFor().withMessage("Build %s is started", this)
+        waitFor().withMessage("Next build of %s is started", job)
                 .withTimeout(timeout, TimeUnit.SECONDS)
                 .until(new Callable<Boolean>() {
                     @Override
