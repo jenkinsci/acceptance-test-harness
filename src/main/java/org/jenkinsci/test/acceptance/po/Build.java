@@ -150,7 +150,7 @@ public class Build extends ContainerPageObject {
         visit(getConsoleUrl());
 
         try {
-            return IOUtils.toString(url("consoleFull").openStream());
+            return IOUtils.toString(url("consoleText").openStream());
         } catch (IOException ex) {
             throw new AssertionError(ex);
         }
