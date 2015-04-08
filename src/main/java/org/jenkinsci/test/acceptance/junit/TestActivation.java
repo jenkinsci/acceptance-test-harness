@@ -26,11 +26,15 @@ package org.jenkinsci.test.acceptance.junit;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
 import java.lang.annotation.Documented;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+
+import org.junit.internal.AssumptionViolatedException;
+import org.junit.rules.TestRule;
+import org.junit.runner.Description;
+import org.junit.runners.model.Statement;
 
 /**
  * Declare there is a property that needs to be provided to run the test.
@@ -48,10 +52,43 @@ import java.lang.annotation.Target;
 @Target({METHOD, TYPE})
 @Inherited
 @Documented
+@RuleAnnotation(value = TestActivation.RuleImpl.class, priority = -10)
 public @interface TestActivation {
 
     /**
      * @return Property names that needs to be present to execute the test/test case.
      */
     String[] value();
+
+    public class RuleImpl implements TestRule {
+        @Override
+        public Statement apply(final Statement base, final Description d) {
+            return new Statement() {
+                @Override
+                public void evaluate() throws Throwable {
+                    Class<?> testCase = d.getTestClass();
+                    check(d.getAnnotation(TestActivation.class), testCase);
+                    check(testCase.getAnnotation(TestActivation.class), testCase);
+
+                    base.evaluate();
+                }
+
+                private void check(TestActivation activation, Class<?> testClass) {
+                    if (activation == null) return; // No activation - always run
+
+                    String className = testClass.getSimpleName();
+
+                    for (String property: activation.value()) {
+                        String propertyName = className + "." + property;
+                        if (System.getProperty(propertyName) == null) {
+                            throw new AssumptionViolatedException("No propererty provided: " + propertyName);
+                        }
+                    }
+
+                    return; // All properties provided - run
+                }
+            };
+        }
+
+    }
 }
