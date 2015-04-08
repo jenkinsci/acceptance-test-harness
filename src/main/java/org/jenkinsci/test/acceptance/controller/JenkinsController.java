@@ -38,6 +38,19 @@ public abstract class JenkinsController implements IJenkinsController, AutoClean
             ? System.getenv("WORKSPACE")
             : new File(System.getProperty("user.dir"), "target").getPath();
 
+    public static final int STARTUP_TIMEOUT;
+    static {
+        int val = 360;
+        String envvar = System.getenv("STARTUP_TIME");
+        if (envvar != null) {
+            int timeout = Integer.parseInt(envvar);
+            if (timeout > 0) {
+                val = timeout;
+            }
+        }
+        STARTUP_TIMEOUT = val;
+    }
+
     protected static final String JENKINS_DEBUG_LOG = WORKSPACE + "/last_test.log";
 
     private boolean isRunning;

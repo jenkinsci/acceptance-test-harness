@@ -109,8 +109,7 @@ public class Jenkins extends Node {
         visit("restart");
         clickButton("Yes");
 
-        waitFor(driver, not(hasContent("Please wait")), 180);
-
+        waitFor(driver, not(hasContent("Please wait")), JenkinsController.STARTUP_TIMEOUT);
     }
 
     public JenkinsLogger getLogger(String name) {

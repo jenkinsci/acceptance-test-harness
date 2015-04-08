@@ -92,7 +92,7 @@ public class JenkinsLogWatcher implements LogListenable, Closeable {
      */
     public void waitTillReady() {
         try {
-            ready.get(TIMEOUT, SECONDS);
+            ready.get(JenkinsController.STARTUP_TIMEOUT, SECONDS);
         } catch (TimeoutException e) {
             if (portConflict.isDone())
                 throw new RuntimeException("Port conflict detected");
@@ -124,9 +124,4 @@ public class JenkinsLogWatcher implements LogListenable, Closeable {
     public void removeLogListener(LogListener l) {
         splitter.removeLogListener(l);
     }
-
-    public static final int DEFAULT_TIMEOUT = 360;
-
-    public static final int TIMEOUT = System.getenv("STARTUP_TIME") != null && Integer.parseInt(System.getenv("STARTUP_TIME")) > 0
-            ? Integer.parseInt(System.getenv("STARTUP_TIME")) : DEFAULT_TIMEOUT;
 }
