@@ -37,7 +37,8 @@ public @interface RuleAnnotation {
      * PooledJenkinsController and possibly others).
      *
      * Annotations that skips execution are encouraged to run before Jenkins is
-     * booted up to save time.
+     * booted up to save time. Note, that these implementations can not inject
+     * Jenkins for obvious reasons.
      */
     int priority() default 0;
 }

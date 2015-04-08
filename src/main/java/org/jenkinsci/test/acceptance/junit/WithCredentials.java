@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.junit;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 
 import org.jenkinsci.test.acceptance.plugins.credentials.ManagedCredentials;
 import org.jenkinsci.test.acceptance.plugins.credentials.UserPwdCredential;
@@ -55,13 +56,15 @@ public @interface WithCredentials {
     public class RuleImpl implements TestRule {
 
         @Inject
-        Jenkins jenkins;
+        Injector injector;
 
         @Override
         public Statement apply(final Statement base, final Description d) {
             return new Statement() {
+                private Jenkins jenkins;
                 @Override
                 public void evaluate() throws Throwable {
+                    jenkins = injector.getInstance(Jenkins.class);
                     enterCredentials(d.getAnnotation(WithCredentials.class));
                     enterCredentials(d.getTestClass().getAnnotation(WithCredentials.class));
 

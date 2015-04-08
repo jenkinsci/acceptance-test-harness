@@ -9,11 +9,7 @@ import java.net.URL;
 import java.util.Map;
 import java.util.logging.Level;
 
-import javax.inject.Inject;
-
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
-import org.jenkinsci.test.acceptance.guice.TestScope;
-
 import com.google.inject.Injector;
 
 /**
@@ -24,7 +20,6 @@ import com.google.inject.Injector;
  *
  * @author Kohsuke Kawaguchi
  */
-@TestScope
 public class Jenkins extends Node {
     private VersionNumber version;
 
@@ -32,7 +27,7 @@ public class Jenkins extends Node {
     public final ViewsMixIn views;
     public final SlavesMixIn slaves;
 
-    public Jenkins(Injector injector, URL url) {
+    private Jenkins(Injector injector, URL url) {
         super(injector,url);
         getVersion();
         jobs = new JobsMixIn(this);
@@ -40,7 +35,6 @@ public class Jenkins extends Node {
         slaves = new SlavesMixIn(this);
     }
 
-    @Inject
     public Jenkins(Injector injector, JenkinsController controller) {
         this(injector, startAndGetUrl(controller));
     }

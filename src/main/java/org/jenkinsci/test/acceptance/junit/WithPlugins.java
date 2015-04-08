@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.junit;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.name.Named;
 
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
@@ -23,6 +24,7 @@ import java.lang.annotation.Target;
 
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
+
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Logger;
@@ -70,7 +72,7 @@ public @interface WithPlugins {
         private static final Logger LOGGER = Logger.getLogger(WithPlugins.class.getName());
 
         @Inject
-        Jenkins jenkins;
+        Injector injector;
 
         @Inject
         JenkinsController controller;
@@ -84,8 +86,10 @@ public @interface WithPlugins {
         @Override
         public Statement apply(final Statement base, final Description d) {
             return new Statement() {
+                private Jenkins jenkins;
                 @Override
                 public void evaluate() throws Throwable {
+                    jenkins = injector.getInstance(Jenkins.class);
                     Set<String> plugins = new TreeSet<>();
                     boolean restartRequired = installPlugins(d.getAnnotation(WithPlugins.class), plugins);
                     restartRequired |= installPlugins(d.getTestClass().getAnnotation(WithPlugins.class), plugins);

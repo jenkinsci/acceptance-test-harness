@@ -81,7 +81,7 @@ public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should us
                 });
                 // Make sure Jenkins is started between -1 and 0
                 rules.put(0, new LinkedHashSet<TestRule>());
-                rules.get(0).add(jenkinsBoot());
+                rules.get(0).add(jenkinsBoot(rules));
 
                 for (Class<? extends  Annotation> a : annotations) {
                     RuleAnnotation r = a.getAnnotation(RuleAnnotation.class);
@@ -108,14 +108,20 @@ public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should us
                 }
             }
 
-            private TestRule jenkinsBoot() {
+            private TestRule jenkinsBoot(final TreeMap<Integer, Set<TestRule>> rules) {
                 return new TestRule() {
                     @Override
                     public Statement apply(final Statement base, Description description) {
                         return new Statement() {
                             @Override public void evaluate() throws Throwable {
                                 controller.start();
+                                // Now it is safe to inject Jenkins
                                 injector.injectMembers(target);
+                                for (Set<TestRule> rg: rules.values()) {
+                                    for (TestRule rule: rg) {
+                                        injector.injectMembers(rule);
+                                    }
+                                }
                                 base.evaluate();
                             }
                         };
