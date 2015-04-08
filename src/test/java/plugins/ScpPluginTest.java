@@ -1,13 +1,14 @@
 package plugins;
 
 import com.google.inject.Inject;
+
 import org.apache.commons.io.FileUtils;
 import org.hamcrest.CoreMatchers;
 import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.docker.fixtures.SshdContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.junit.Native;
 import org.jenkinsci.test.acceptance.junit.Resource;
+import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.scp.ScpGlobalConfig;
 import org.jenkinsci.test.acceptance.plugins.scp.ScpGlobalConfig.Site;
@@ -16,6 +17,7 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
 
 import java.io.File;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
@@ -26,7 +28,7 @@ public class ScpPluginTest extends AbstractJUnitTest {
     @Inject
     Docker docker;
 
-    @Test @Native("docker")
+    @Test @WithDocker
     public void configure_job_with_scp_password_publishing() throws Exception {
         SshdContainer sshd = docker.start(SshdContainer.class);
         Resource cp_file = resource("/scp_plugin/lorem-ipsum-scp.txt");
@@ -61,7 +63,7 @@ public class ScpPluginTest extends AbstractJUnitTest {
     }
 
 
-    @Test @Native("docker")
+    @Test @WithDocker
     public void configure_job_with_scp_key_publishing() throws Exception {
         SshdContainer sshd = docker.start(SshdContainer.class);
         Resource cp_file = resource("/scp_plugin/lorem-ipsum-scp.txt");

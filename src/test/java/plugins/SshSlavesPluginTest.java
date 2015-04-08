@@ -29,7 +29,7 @@ import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.docker.fixtures.SshdContainer;
 import org.jenkinsci.test.acceptance.docker.fixtures.JavaContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.junit.Native;
+import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.credentials.UserPwdCredential;
 import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshCredentialDialog;
@@ -43,7 +43,7 @@ import org.junit.Test;
 import com.google.inject.Inject;
 
 @WithPlugins("ssh-slaves")
-@Native("docker")
+@WithDocker
 public class SshSlavesPluginTest extends AbstractJUnitTest {
     @Inject private Docker docker;
 

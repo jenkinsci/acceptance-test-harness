@@ -27,7 +27,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.*;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.junit.Native;
+import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.docker_build_step.DockerBuildStep;
 import org.jenkinsci.test.acceptance.plugins.docker_build_step.DockerCommand;
@@ -44,7 +44,7 @@ import org.junit.Test;
 import com.google.inject.Inject;
 
 @WithPlugins("docker-build-step")
-@Native("docker")
+@WithDocker
 public class DockerBuildStepTest extends AbstractJUnitTest {
 
     @Inject

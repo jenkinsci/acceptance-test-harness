@@ -1,13 +1,14 @@
 package plugins;
 
 import com.google.inject.Inject;
+
 import org.apache.commons.io.FileUtils;
 import org.hamcrest.CoreMatchers;
 import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.docker.DockerContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.junit.Native;
 import org.jenkinsci.test.acceptance.junit.Resource;
+import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.plugins.publish_over.PublishGlobalConfig;
 import org.jenkinsci.test.acceptance.plugins.publish_over.PublishGlobalPublisher;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
@@ -34,7 +35,7 @@ import static org.hamcrest.Matchers.is;
  *
  * @author Tobias Meyer
  */
-@Native("docker")
+@WithDocker
 public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
     @Inject
     Docker docker;

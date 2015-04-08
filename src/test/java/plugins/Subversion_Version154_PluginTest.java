@@ -1,11 +1,13 @@
 package plugins;
 
 import com.google.inject.Inject;
+
 import hudson.util.VersionNumber;
+
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.SvnContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.junit.Native;
+import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.subversion.SubversionCredentialUserPwd;
 import org.jenkinsci.test.acceptance.plugins.subversion.SubversionPluginTestException;
@@ -26,7 +28,7 @@ import static org.junit.Assume.assumeTrue;
  * @author Matthias Karl
  */
 @WithPlugins("subversion")
-@Native("docker")
+@WithDocker
 @Deprecated
 public class Subversion_Version154_PluginTest extends AbstractJUnitTest {
     @Inject

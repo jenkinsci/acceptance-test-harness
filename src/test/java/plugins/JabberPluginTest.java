@@ -1,12 +1,13 @@
 package plugins;
 
 import com.google.inject.Inject;
+
 import org.apache.commons.io.FileUtils;
 import org.hamcrest.CoreMatchers;
 import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.docker.fixtures.JabberContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.junit.Native;
+import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.jabber.JabberGlobalConfig;
 import org.jenkinsci.test.acceptance.plugins.jabber.JabberGlobalConfig.AdvancedConfig;
@@ -37,7 +38,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
  *
  */
 @WithPlugins("jabber")
-@Native("docker")
+@WithDocker
 @Ignore
 public class JabberPluginTest extends AbstractJUnitTest {
     @Inject

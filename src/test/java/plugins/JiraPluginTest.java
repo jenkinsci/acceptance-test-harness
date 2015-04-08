@@ -1,11 +1,13 @@
 package plugins;
 
 import com.google.inject.Inject;
+
 import hudson.plugins.jira.soap.RemoteComment;
+
 import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.docker.fixtures.JiraContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.junit.Native;
+import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.git.GitRepo;
 import org.jenkinsci.test.acceptance.plugins.git.GitScm;
@@ -75,7 +77,7 @@ public class JiraPluginTest extends AbstractJUnitTest {
      * And JIRA ABC-1 ticket has comment from admin that refers to the build
      */
     @Test
-    @Native("docker")
+    @WithDocker
     public void jira_ticket_gets_updated_with_a_build_link() throws Exception {
         JiraContainer jira = docker.start(JiraContainer.class);
         jira.waitForReady(this);

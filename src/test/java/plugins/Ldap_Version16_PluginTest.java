@@ -1,11 +1,11 @@
 package plugins;
 
 import hudson.util.VersionNumber;
-import org.hamcrest.CoreMatchers;
+
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.LdapContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.junit.Native;
+import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.plugins.ldap.LdapDetails;
 import org.jenkinsci.test.acceptance.po.*;
 import org.junit.Before;
@@ -26,7 +26,7 @@ import static org.junit.Assume.*;
  * @deprecated This test will possibly run against an outdated version of the ldap plugin. This test suite also may become obsolete if a newer version of the ldap plugin gets bundled with jenkins core.
  */
 @Deprecated
-@Native("docker")
+@WithDocker
 public class Ldap_Version16_PluginTest extends AbstractJUnitTest {
 
     @Inject
