@@ -81,7 +81,9 @@ public @interface TestActivation {
                     for (String property: activation.value()) {
                         String propertyName = className + "." + property;
                         if (System.getProperty(propertyName) == null) {
-                            throw new AssumptionViolatedException("No propererty provided: " + propertyName);
+                            throw new AssumptionViolatedException(
+                                    "Required property not provided: " + propertyName
+                            );
                         }
                     }
 
@@ -89,6 +91,5 @@ public @interface TestActivation {
                 }
             };
         }
-
     }
 }
