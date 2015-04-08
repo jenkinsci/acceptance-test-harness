@@ -79,9 +79,6 @@ public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should us
                         return o2 - o1;
                     }
                 });
-                // Make sure Jenkins is started between -1 and 0
-                rules.put(0, new LinkedHashSet<TestRule>());
-                rules.get(0).add(jenkinsBoot(rules));
 
                 for (Class<? extends  Annotation> a : annotations) {
                     RuleAnnotation r = a.getAnnotation(RuleAnnotation.class);
@@ -93,6 +90,12 @@ public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should us
                         rules.get(prio).add(injector.getInstance(r.value()));
                     }
                 }
+
+                // Make sure Jenkins is started between -1 and 0
+                if (rules.get(0) == null) {
+                    rules.put(0, new LinkedHashSet<TestRule>());
+                }
+                rules.get(0).add(jenkinsBoot(rules));
 
                 for (Set<TestRule> rulesGroup: rules.values()) {
                     for (TestRule rule: rulesGroup) {
