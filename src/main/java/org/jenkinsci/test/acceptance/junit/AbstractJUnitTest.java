@@ -21,10 +21,7 @@ import java.net.ServerSocket;
 public class AbstractJUnitTest extends CapybaraPortingLayerImpl {
 
     @Rule
-    public MethodRuleChain rules = MethodRuleChain
-            .outerRule(new FilterRule()) // Filtering should run before standard setup
-            .around(new JenkinsAcceptanceTestRule())
-    ;
+    public JenkinsAcceptanceTestRule rules = new JenkinsAcceptanceTestRule();
 
     /**
      * Jenkins under test.

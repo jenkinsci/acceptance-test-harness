@@ -30,8 +30,8 @@ import java.util.Set;
 
 import org.jenkinsci.test.acceptance.guice.World;
 import org.junit.Assume;
-import org.junit.rules.MethodRule;
-import org.junit.runners.model.FrameworkMethod;
+import org.junit.rules.TestRule;
+import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
 import com.google.inject.Inject;
@@ -41,10 +41,10 @@ import com.google.inject.Inject;
  *
  * @author ogondza
  */
-public class FilterRule implements MethodRule {
+public class FilterRule implements TestRule {
 
     @Override
-    public Statement apply(final Statement base, final FrameworkMethod method, final Object target) {
+    public Statement apply(final Statement base, final Description description) {
         return new Statement() {
 
             @Inject(optional = true)
@@ -54,7 +54,7 @@ public class FilterRule implements MethodRule {
             public void evaluate() throws Throwable {
                 World.get().getInjector().injectMembers(this);
                 if (filter != null) {
-                    String reason = filter.whySkip(base, method, target);
+                    String reason = filter.whySkip(base, description);
                     // Fail assumption if there is some reason to skip
                     Assume.assumeTrue(reason, reason == null);
                 }
@@ -68,20 +68,20 @@ public class FilterRule implements MethodRule {
         /**
          * @return null if test should be run, the reason why not otherwise.
          */
-        public abstract String whySkip(Statement base, FrameworkMethod method, Object target);
+        public abstract String whySkip(Statement base, Description description);
 
-        public static <T extends Annotation> Set<T> getAnnotations(FrameworkMethod method, Object target, Class<T> type) {
+        public static <T extends Annotation> Set<T> getAnnotations(Description description, Class<T> type) {
             Set<T> annotations = new HashSet<T>();
-            annotations.add(method.getAnnotation(type));
-            annotations.add(target.getClass().getAnnotation(type));
+            annotations.add(description.getAnnotation(type));
+            annotations.add(description.getTestClass().getAnnotation(type));
             annotations.remove(null);
             return annotations;
         }
 
-        public static Set<Annotation> getAnnotations(FrameworkMethod method, Object target) {
+        public static Set<Annotation> getAnnotations(Description description) {
             Set<Annotation> annotations = new HashSet<Annotation>();
-            annotations.addAll(Arrays.asList(method.getAnnotations()));
-            annotations.addAll(Arrays.asList(target.getClass().getAnnotations()));
+            annotations.addAll(description.getAnnotations());
+            annotations.addAll(Arrays.asList(description.getTestClass().getAnnotations()));
             return annotations;
         }
     }

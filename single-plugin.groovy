@@ -3,7 +3,7 @@
 // 'TEST_ONLY_PLUGINS=git,envinject' run all tests that require git or envinject
 // using WithPlugins annotations
 
-import org.junit.runners.model.FrameworkMethod;
+import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
 import org.jenkinsci.test.acceptance.junit.FilterRule.Filter;
@@ -15,8 +15,8 @@ import java.lang.annotation.Annotation;
 bind Filter toInstance new FilterImpl();
 
 class FilterImpl extends Filter {
-    public String whySkip(Statement base, FrameworkMethod method, Object target) {
-        for (annot in getAnnotations(method, target, WithPlugins.class)) {
+    public String whySkip(Statement base, Description desc) {
+        for (annot in getAnnotations(desc, WithPlugins.class)) {
             for (value in annot.value()) {
                 if (testOnlyPlugins().contains(new PluginSpec(value).name)) {
                     return null;

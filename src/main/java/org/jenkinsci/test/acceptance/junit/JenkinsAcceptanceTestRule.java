@@ -96,6 +96,7 @@ public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should us
                     rules.put(0, new LinkedHashSet<TestRule>());
                 }
                 rules.get(0).add(jenkinsBoot(rules));
+                rules.get(0).add(new FilterRule()); // TODO Autowire this with negative priority
 
                 for (Set<TestRule> rulesGroup: rules.values()) {
                     for (TestRule rule: rulesGroup) {
