@@ -15,13 +15,12 @@ import org.openqa.selenium.WebDriver;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * Runs Guice container that houses {@link JenkinsController}, {@link WebDriver}, and so on.
@@ -49,10 +48,7 @@ public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should us
 
                 world.startTestScope(description.getDisplayName());
 
-                injector.injectMembers(target);
                 injector.injectMembers(this);
-
-                controller.start(); // Make sure Jenkins is started at this point
 
                 System.out.println("=== Starting " + description.getDisplayName());
                 try {
@@ -76,23 +72,32 @@ public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should us
                 collectAnnotationTypes(method.getMethod(), annotations);
                 collectAnnotationTypes(target.getClass(), annotations);
 
-                Description testDescription = Description.createTestDescription(target.getClass(), method.getName(), method.getAnnotations());
-                List<RuleAnnotation> ruleAnnotations = new ArrayList<>();
+                TreeMap<Integer, Set<TestRule>> rules = new TreeMap<Integer, Set<TestRule>>(new Comparator<Integer>() {
+                    @Override
+                    public int compare(Integer o1, Integer o2) {
+                        // Reversed since we apply the TestRule inside out:
+                        return o2 - o1;
+                    }
+                });
+                // Make sure Jenkins is started between -1 and 0
+                rules.put(0, new LinkedHashSet<TestRule>());
+                rules.get(0).add(jenkinsBoot());
+
                 for (Class<? extends  Annotation> a : annotations) {
                     RuleAnnotation r = a.getAnnotation(RuleAnnotation.class);
                     if (r!=null) {
-                        ruleAnnotations.add(r);
+                        int prio = r.priority();
+                        if (rules.get(prio) == null) {
+                            rules.put(prio, new LinkedHashSet<TestRule>());
+                        }
+                        rules.get(prio).add(injector.getInstance(r.value()));
                     }
                 }
-                Collections.sort(ruleAnnotations, new Comparator<RuleAnnotation>() {
-                    @Override public int compare(RuleAnnotation r1, RuleAnnotation r2) {
-                        // Reversed since we apply the TestRule inside out:
-                        return r2.priority() - r1.priority();
+
+                for (Set<TestRule> rulesGroup: rules.values()) {
+                    for (TestRule rule: rulesGroup) {
+                        body = rule.apply(body, description);
                     }
-                });
-                for (RuleAnnotation r : ruleAnnotations) {
-                    TestRule tr = injector.getInstance(r.value());
-                    body = tr.apply(body,testDescription);
                 }
                 return body;
             }
@@ -101,6 +106,21 @@ public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should us
                 for (Annotation a : e.getAnnotations()) {
                     types.add(a.annotationType());
                 }
+            }
+
+            private TestRule jenkinsBoot() {
+                return new TestRule() {
+                    @Override
+                    public Statement apply(final Statement base, Description description) {
+                        return new Statement() {
+                            @Override public void evaluate() throws Throwable {
+                                controller.start();
+                                injector.injectMembers(target);
+                                base.evaluate();
+                            }
+                        };
+                    }
+                };
             }
         };
     }
