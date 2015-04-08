@@ -5,7 +5,7 @@ import org.jenkinsci.test.acceptance.docker.DockerContainerHolder
 import org.jenkinsci.test.acceptance.docker.fixtures.ArtifactoryContainer
 import org.jenkinsci.test.acceptance.geb.GebSpec
 import org.jenkinsci.test.acceptance.global.GlobalConfigurationPage
-import org.jenkinsci.test.acceptance.junit.Native
+import org.jenkinsci.test.acceptance.junit.WithDocker
 import org.jenkinsci.test.acceptance.junit.WithPlugins
 import org.jenkinsci.test.acceptance.plugins.artifactory.ArtifactoryPublisher
 import org.jenkinsci.test.acceptance.plugins.gradle.GradleStep
@@ -22,8 +22,8 @@ import static org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation.inst
  *
  * @author Eli Givoni
  */
-@WithPlugins(['artifactory', 'gradle', 'maven-plugin'])
-@Native("docker")
+@WithPlugins('artifactory')
+@WithDocker
 class ArtifactoryPluginTest extends GebSpec {
 
     @Inject
@@ -60,6 +60,7 @@ class ArtifactoryPluginTest extends GebSpec {
         errorConnectionFeedback.text().contains('Connection to http://localhost:4898 refused')
     }
 
+    @WithPlugins('maven-plugin')
     def maven_integration() {
         given:
         installSomeMaven(jenkins);
@@ -93,6 +94,7 @@ class ArtifactoryPluginTest extends GebSpec {
         assertThat(log, containsRegexp("Deploying build (info|descriptor) to: ${artifactory.getURL()}/api/build"))
     }
 
+    @WithPlugins('gradle')
     def gradle_integration() {
         given:
         final ArtifactoryContainer artifactory = artifactoryContainer.get()
