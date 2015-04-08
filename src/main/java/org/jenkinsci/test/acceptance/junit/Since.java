@@ -1,7 +1,10 @@
 package org.jenkinsci.test.acceptance.junit;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
+
 import hudson.util.VersionNumber;
+
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.junit.Assume;
 import org.junit.rules.TestRule;
@@ -31,7 +34,7 @@ public @interface Since {
 
     public class RuleImpl implements TestRule {
         @Inject
-        Jenkins jenkins;
+        Injector injector;
 
         @Override
         public Statement apply(final Statement base, final Description d) {
@@ -46,7 +49,7 @@ public @interface Since {
 
                 private void check(Since s) {
                     if (s!=null) {
-                        VersionNumber actual = jenkins.getVersion();
+                        VersionNumber actual = injector.getInstance(Jenkins.class).getVersion();
                         VersionNumber expected = new VersionNumber(s.value());
                         System.out.printf("Version check: actual=%s, expected=%s\n",actual,expected);
                         Assume.assumeTrue("Requires "+s.value(), actual.compareTo(expected)>=0);
