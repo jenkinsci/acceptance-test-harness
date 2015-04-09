@@ -61,7 +61,7 @@ public class Build extends ContainerPageObject {
     }
 
     public Build waitUntilStarted() {
-        return waitUntilStarted(0);
+        return waitUntilStarted(120);
     }
 
     public Build waitUntilStarted(int timeout) {
