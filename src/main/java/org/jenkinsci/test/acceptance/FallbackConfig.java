@@ -132,7 +132,7 @@ public class FallbackConfig extends AbstractModule {
      * Creates a {@link WebDriver} for each test, then make sure to clean it up at the end.
      */
     @Provides @TestScope
-    public WebDriver createWebDriver(TestCleaner cleaner, TestName testName) throws IOException {
+    public WebDriver createWebDriver(TestCleaner cleaner, TestName testName, ElasticTime time) throws IOException {
         WebDriver base = createWebDriver(testName);
         Dimension oldSize = base.manage().window().getSize();
         if (oldSize.height < 768 || oldSize.width < 1024) {
@@ -143,7 +143,6 @@ public class FallbackConfig extends AbstractModule {
         d.register(new SanityChecker());
         d.register(new Scroller());
 
-        ElasticTime time = new ElasticTime();
         try {
             d.manage().timeouts().pageLoadTimeout(time.seconds(30), TimeUnit.MILLISECONDS);
             d.manage().timeouts().implicitlyWait(time.seconds(1), TimeUnit.MILLISECONDS);
@@ -158,6 +157,11 @@ public class FallbackConfig extends AbstractModule {
             }
         });
         return d;
+    }
+
+    @Provides
+    public ElasticTime getElasticTime() {
+        return new ElasticTime();
     }
 
     /**

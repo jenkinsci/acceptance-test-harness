@@ -43,7 +43,8 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     @Inject
     public Injector injector;
 
-    protected static final ElasticTime time = new ElasticTime();
+    @Inject
+    protected ElasticTime time;
 
     /**
      * Some subtypes are constructed via Guice, in which case injection is done by outside this class.
@@ -89,13 +90,15 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
      *
      * @see {@link Wait}
      */
+    @Override
     public <T> Wait<T> waitFor(T subject) {
-        return new Wait<T>(subject)
-                .pollingEvery(time.milliseconds(500), TimeUnit.MILLISECONDS)
-                .withTimeout(time.seconds(120), TimeUnit.SECONDS)
+        return new Wait<T>(subject, time)
+                .pollingEvery(500, TimeUnit.MILLISECONDS)
+                .withTimeout(120, TimeUnit.SECONDS)
         ;
     }
 
+    @Override
     public Wait<CapybaraPortingLayer> waitFor() {
         return waitFor((CapybaraPortingLayer) this);
     }
@@ -353,7 +356,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     /**
      * Thread.sleep that masks exception.
      */
-    public static void sleep(long ms) {
+    public void sleep(long ms) {
         try {
             Thread.sleep(ms);
         } catch (InterruptedException e) {
@@ -361,7 +364,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
         }
     }
 
-    public static void elasticSleep(long ms) {
+    public void elasticSleep(long ms) {
         sleep(time.milliseconds(ms));
     }
 

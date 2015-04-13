@@ -29,7 +29,7 @@ public class JenkinsLogger extends PageObject {
 
         for (Entry<String, Level> e : levels.entrySet()) {
             j.clickButton("Add");
-            elasticSleep(1000);
+            j.elasticSleep(1000);
             j.last(by.input("_.name")).sendKeys(e.getKey());
             WebElement o = j.last(by.input("level"))
                     .findElement(by.option(e.getValue().getName()));

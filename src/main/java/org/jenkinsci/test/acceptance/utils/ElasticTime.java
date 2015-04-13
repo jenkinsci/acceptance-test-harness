@@ -34,7 +34,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class ElasticTime {
 
-    private final long concurrency = Integer.parseInt(System.getProperty("forkCount", "1"));
+    private final int concurrency = Integer.parseInt(System.getProperty("forkCount", "1"));
 
     public long seconds(long secs) {
         return milliseconds(TimeUnit.SECONDS.toMillis(secs));
