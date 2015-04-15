@@ -36,7 +36,7 @@ import java.util.TreeMap;
 public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should use TestRule instead
     @Override
     public Statement apply(final Statement base, final FrameworkMethod method, final Object target) {
-        final Description description = Description.createTestDescription(method.getMethod().getDeclaringClass(), method.getName(), method.getAnnotations());
+        final Description description = Description.createTestDescription(target.getClass(), method.getName(), method.getAnnotations());
         return new Statement() {
             @Inject JenkinsController controller;
             @Inject Injector injector;
