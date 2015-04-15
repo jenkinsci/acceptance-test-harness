@@ -2,22 +2,18 @@ package core;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Native;
+import org.jenkinsci.test.acceptance.junit.TestActivation;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.JdkInstallation;
 import org.jenkinsci.test.acceptance.po.ToolInstallation;
 import org.junit.Test;
 
-import static org.junit.Assume.*;
-import static org.hamcrest.CoreMatchers.*;
-
 public class JdkTest extends AbstractJUnitTest {
 
-    @Test
+    @Test @TestActivation({"ORACLE_LOGIN", "ORACLE_PASSWORD"})
     public void autoinstallJdk() {
         final String login = System.getenv("ORACLE_LOGIN");
         final String passwd = System.getenv("ORACLE_PASSWORD");
-        assumeThat(login, not(nullValue()));
-        assumeThat(passwd, not(nullValue()));
 
         ToolInstallation.waitForUpdates(jenkins, JdkInstallation.class);
 
