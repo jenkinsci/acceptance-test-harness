@@ -17,30 +17,20 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
  */
 @WithPlugins("publish-over-cifs")
 public class CIFSPublishPluginTest extends GlobalPublishPluginTest {
-    /**
-     * Creates & Returns a SMBContainer for the CIF Tests
-     * @return SMBContainer
-     */
-    protected  DockerContainer createPublisherContainer()
-    {
+
+    @Override
+    protected DockerContainer createPublisherContainer() {
         return docker.start(SMBContainer.class);
     }
 
-    /**
-     * Creates and returns a CifsGlobalConfig.GlobalSite for the CIF Test
-     * @return CifsGlobalConfig.GlobalSite
-     */
-    protected  PublishGlobalConfig.GlobalSite createGlobalConfig()
-    {
+    @Override
+    protected PublishGlobalConfig.GlobalSite createGlobalConfig() {
         return new CifsGlobalConfig(jenkins).addSite();
     }
 
-    /**
-     * Creates and returns a PublishGlobalPublisher  for the CIF Test
-     * @return PublishGlobalPublisher
-     */
-    protected  PublishGlobalPublisher addGlobalPublisher(FreeStyleJob j){
-        return  j.addPublisher(CifsPublisher.class);
+    @Override
+    protected PublishGlobalPublisher addGlobalPublisher(FreeStyleJob j) {
+        return j.addPublisher(CifsPublisher.class);
     }
 
     /**
@@ -50,6 +40,7 @@ public class CIFSPublishPluginTest extends GlobalPublishPluginTest {
      * @param serverName Name to Access Instance
      * @param dock       Docker Instance of the Server
      */
+    @Override
     protected void configurePublisher(String serverName, DockerContainer dock) {
         jenkins.configure();
         CifsGlobalConfig.CifSite s = new CifsGlobalConfig(jenkins).addSite();
@@ -65,5 +56,4 @@ public class CIFSPublishPluginTest extends GlobalPublishPluginTest {
         }
         jenkins.save();
     }
-
 }

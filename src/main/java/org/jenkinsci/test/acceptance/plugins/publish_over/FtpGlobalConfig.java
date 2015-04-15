@@ -2,7 +2,6 @@ package org.jenkinsci.test.acceptance.plugins.publish_over;
 
 import javax.inject.Inject;
 
-import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.po.*;
 
 /**
@@ -14,6 +13,7 @@ public class FtpGlobalConfig extends PublishGlobalConfig {
         super(jenkins, "/jenkins-plugins-publish_over_ftp-BapFtpPublisherPlugin");
     }
 
+    @Override
     public FtpSite addSite() {
         add.click();
         String p = last(by.xpath(".//div[@name='instance'][starts-with(@path,'/jenkins-plugins-publish_over_ftp-BapFtpPublisherPlugin/')]")).getAttribute("path");

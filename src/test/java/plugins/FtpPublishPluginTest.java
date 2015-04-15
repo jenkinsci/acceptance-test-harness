@@ -18,32 +18,19 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 @WithPlugins("publish-over-ftp")
 public class FtpPublishPluginTest extends GlobalPublishPluginTest {
 
-
-    /**
-     * Creates & Returns a FtpdContainer for the SMB Tests
-     * @return FtpdContainer
-     */
-    protected DockerContainer createPublisherContainer()
-    {
+    @Override
+    protected DockerContainer createPublisherContainer() {
         return docker.start(FtpdContainer.class);
     }
 
-    /**
-     * Creates and returns a FtpGlobalConfig.GlobalSite for the FTP Test
-     * @return FtpGlobalConfig.GlobalSite
-     */
-    protected  PublishGlobalConfig.GlobalSite createGlobalConfig()
-    {
+    @Override
+    protected PublishGlobalConfig.GlobalSite createGlobalConfig() {
         return new FtpGlobalConfig(jenkins).addSite();
     }
 
-    /**
-     * Creates and returns a PublishGlobalPublisher  for the FTP Test
-     * @return PublishGlobalPublisher
-     */
-    protected  PublishGlobalPublisher addGlobalPublisher(FreeStyleJob j)
-    {
-        return  j.addPublisher(FtpPublisher.class);
+    @Override
+    protected PublishGlobalPublisher addGlobalPublisher(FreeStyleJob j) {
+        return j.addPublisher(FtpPublisher.class);
     }
 
     /**
@@ -53,6 +40,7 @@ public class FtpPublishPluginTest extends GlobalPublishPluginTest {
      * @param serverName Name to Access Instance
      * @param dock       Docker Instance of the Server
      */
+    @Override
     protected void configurePublisher(String serverName, DockerContainer dock) {
         jenkins.configure();
         FtpSite s = new FtpGlobalConfig(jenkins).addSite();
