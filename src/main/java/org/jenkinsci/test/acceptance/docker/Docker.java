@@ -167,8 +167,10 @@ public class Docker {
     /**
      * Starts a container of the specific fixture type.
      * This builds an image if need be.
+     *
+     * @see DockerContainerHolder
      */
-    public <T extends DockerContainer> T start(Class<T> fixture, CommandBuilder options, CommandBuilder cmd) {
+    /*package*/ <T extends DockerContainer> T start(Class<T> fixture, CommandBuilder options, CommandBuilder cmd) {
         try {
             return build(fixture).start(fixture, options, cmd, portOffset);
         } catch (InterruptedException | IOException e) {
@@ -176,7 +178,10 @@ public class Docker {
         }
     }
 
-    public <T extends DockerContainer> T start(Class<T> fixture) {
+    /**
+     * @see DockerContainerHolder
+     */
+    /*package*/ <T extends DockerContainer> T start(Class<T> fixture) {
         return start(fixture, null, null);
     }
 

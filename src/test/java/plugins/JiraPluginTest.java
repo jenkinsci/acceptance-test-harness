@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 
 import hudson.plugins.jira.soap.RemoteComment;
 
-import org.jenkinsci.test.acceptance.docker.Docker;
+import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.JiraContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithDocker;
@@ -27,10 +27,10 @@ import static org.junit.Assert.fail;
  * As a Jenkins developer
  * I want JIRA issues to be updated when a new build is made
  */
-@WithPlugins({"jira", "git"})
+@WithPlugins({"jira", "git"}) @WithDocker
 public class JiraPluginTest extends AbstractJUnitTest {
     @Inject
-    Docker docker;
+    DockerContainerHolder<JiraContainer> docker;
 
     GitRepo git;
 
@@ -77,9 +77,8 @@ public class JiraPluginTest extends AbstractJUnitTest {
      * And JIRA ABC-1 ticket has comment from admin that refers to the build
      */
     @Test
-    @WithDocker
     public void jira_ticket_gets_updated_with_a_build_link() throws Exception {
-        JiraContainer jira = docker.start(JiraContainer.class);
+        JiraContainer jira = docker.get();
         jira.waitForReady(this);
         jira.createProject("ABC");
         jira.createIssue("ABC");
@@ -118,5 +117,4 @@ public class JiraPluginTest extends AbstractJUnitTest {
         }
         fail("Comment back to Jenkins not found");
     }
-
 }

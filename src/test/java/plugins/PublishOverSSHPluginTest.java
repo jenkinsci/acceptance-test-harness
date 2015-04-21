@@ -1,9 +1,10 @@
 package plugins;
 
 import com.google.inject.Inject;
+
 import org.apache.commons.io.FileUtils;
 import org.hamcrest.CoreMatchers;
-import org.jenkinsci.test.acceptance.docker.Docker;
+import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.SshdContainer;
 import org.jenkinsci.test.acceptance.junit.*;
 import org.jenkinsci.test.acceptance.plugins.publish_over.PublishOverSSHGlobalConfig;
@@ -25,13 +26,12 @@ import static org.hamcrest.MatcherAssert.assertThat;
 /**
  * Feature: Tests for SSH plugin
  * @author jenky-hm
- *
  */
 @WithPlugins("publish-over-ssh")
 @WithDocker
 public class PublishOverSSHPluginTest extends AbstractJUnitTest {
     @Inject
-    private Docker docker;
+    private DockerContainerHolder<SshdContainer> docker;
 
     private final String password = "jenkins-ci";
 
@@ -54,7 +54,6 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
                 // for disabling exec global
                 cc.disableAllExecGlobal.check();
             }
-
         }
     }
 
@@ -67,7 +66,6 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
                 // for disabling exec global
                 cc.disableAllExecGlobal.check();
             }
-
         }
     }
 
@@ -80,19 +78,17 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
                 // for disabling exec global
                 cc.disableAllExecGlobal.check();
             }
-
         }
     }
 
     /*helper method for creating a common config with key as text and a noExec Flag*/
-    private void commonConfigPassword(String password, boolean disbaleAllowAccess) throws IOException {
+    private void commonConfigPassword(String password, boolean disbaleAllowAccess) {
         CommonConfig cc = new PublishOverSSHGlobalConfig(jenkins).setCommonConfig(); {
             cc.encryptedPassphrase.set(password);
             if(disbaleAllowAccess){
                 // for disabling exec global
                 cc.disableAllExecGlobal.check();
             }
-
         }
     }
 
@@ -103,7 +99,6 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
             is.hostname.set(sshd.ipBound(22));
             is.username.set(userName);
             is.remoteRootDir.set(rootDir);
-
         }
         return is;
     }
@@ -113,17 +108,6 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
         AdvancedConfig ac = is.addAdvancedConfig(); {
             ac.port.set(sshd.port(22));
             ac.timeout.set(timeout);
-        }
-    }
-
-    /*helper method for creating a advanced config no exec*/
-    private void advancedConfigNoExec(InstanceSite is, SshdContainer sshd){
-        AdvancedConfig ac = is.addAdvancedConfig(); {
-            ac.port.set(sshd.port(22));
-            ac.timeout.set(timeout);
-
-            // for disabling exec per instance
-            ac.disableAllExecInstance.check();
         }
     }
 
@@ -173,8 +157,8 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
      And SSH plugin should have published "lorem-ipsum-scp.txt" on docker fixture
      */
     @Test
-    public void ssh_key_path_and_no_password_publishing() throws IOException, InterruptedException {
-        SshdContainer sshd = docker.start(SshdContainer.class);
+    public void ssh_key_path_and_no_password_publishing() throws IOException {
+        SshdContainer sshd = docker.get();
         Resource cp_file = resource(resourceFilePath);
         File sshFile = sshd.getPrivateKey();
 
@@ -214,8 +198,8 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
      */
     @Test
     @Category(SmokeTest.class)
-    public void ssh_key_path_and_key_password_publishing() throws IOException, InterruptedException {
-        SshdContainer sshd = docker.start(SshdContainer.class);
+    public void ssh_key_path_and_key_password_publishing() throws IOException {
+        SshdContainer sshd = docker.get();
         Resource cp_file = resource(resourceFilePath);
         File sshFile = sshd.getEncryptedPrivateKey();
 
@@ -250,8 +234,8 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
      And SSH plugin should have published "lorem-ipsum-scp.txt" on docker fixture
      */
     @Test
-    public void ssh_key_text_and_no_password_publishing() throws IOException, InterruptedException {
-        SshdContainer sshd = docker.start(SshdContainer.class);
+    public void ssh_key_text_and_no_password_publishing() throws IOException {
+        SshdContainer sshd = docker.get();
         Resource cp_file = resource(resourceFilePath);
 
         FreeStyleJob j = jenkins.jobs.create();
@@ -286,8 +270,8 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
      And SSH plugin should have published "lorem-ipsum-scp.txt" on docker fixture
      */
     @Test
-    public void ssh_password_publishing() throws IOException, InterruptedException {
-        SshdContainer sshd = docker.start(SshdContainer.class);
+    public void ssh_password_publishing() throws IOException {
+        SshdContainer sshd = docker.get();
         Resource cp_file = resource(resourceFilePath);
         File sshFile = sshd.getPrivateKey();
 
@@ -323,8 +307,8 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
      And SSH plugin should have create with exec "testecho" on docker fixture
      */
     @Test
-    public void ssh_key_path_and_key_password_and_exec_publishing() throws IOException, InterruptedException {
-        SshdContainer sshd = docker.start(SshdContainer.class);
+    public void ssh_key_path_and_key_password_and_exec_publishing() throws IOException {
+        SshdContainer sshd = docker.get();
         Resource cp_file = resource(resourceFilePath);
         File sshFile = sshd.getEncryptedPrivateKey();
 
@@ -343,7 +327,5 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
         sshd.cp(tempCopyFileEcho, tempPath);
         assertThat(FileUtils.readFileToString(new File(tempCopyFile)), CoreMatchers.is(cp_file.asText()));
         assertThat(FileUtils.readFileToString(new File(tempCopyFileEcho)), CoreMatchers.is("i was here\n"));
-
     }
-
 }

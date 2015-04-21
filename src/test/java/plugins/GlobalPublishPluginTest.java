@@ -6,6 +6,7 @@ import org.apache.commons.io.FileUtils;
 import org.hamcrest.CoreMatchers;
 import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.docker.DockerContainer;
+import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.junit.WithDocker;
@@ -36,11 +37,13 @@ import static org.hamcrest.Matchers.is;
  * @author Tobias Meyer
  */
 @WithDocker
-public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
+public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends AbstractJUnitTest {
     @Inject
     Docker docker;
     @Inject
     SlaveProvider slaves;
+    @Inject
+    DockerContainerHolder<T> container;
 
     /**
      * Helper method to create a temporary empty directory
@@ -55,13 +58,6 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
         temp.deleteOnExit();
         return (temp);
     }
-
-    /**
-     * Creates & Returns the instance of the corresponding Docker Container for this publisher.
-     *
-     * @return a DockerContainer
-     */
-    protected abstract DockerContainer createPublisherContainer();
 
     /**
      * Creates the global Config for the test.
@@ -104,8 +100,8 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
      */
 
     @Test
-    public void publish_resources() throws IOException, InterruptedException {
-        DockerContainer dock = createPublisherContainer();
+    public void publish_resources() throws IOException {
+        DockerContainer dock = container.get();
         Resource cpFile = resource("/ftp_plugin/odes.txt");
 
         FreeStyleJob j = jenkins.jobs.create();
@@ -144,7 +140,7 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
 
     @Test
     public void publish_jenkins_variables() throws IOException {
-        DockerContainer dock = createPublisherContainer();
+        DockerContainer dock = container.get();
         Resource cpFile = resource("/ftp_plugin/odes.txt");
         String randomName = jenkins.jobs.createRandomName();
         String randomPath = "/tmp/" + randomName + "/";
@@ -184,8 +180,8 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
      */
 
     @Test
-    public void publish_resources_and_remove_prefix() throws IOException, InterruptedException {
-        DockerContainer dock = createPublisherContainer();
+    public void publish_resources_and_remove_prefix() throws IOException {
+        DockerContainer dock = container.get();
         Resource cpDir = resource("/ftp_plugin/");
         Resource test = resource("/ftp_plugin/prefix_/test.txt");
         FreeStyleJob j = jenkins.jobs.create();
@@ -224,8 +220,8 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
      */
 
     @Test
-    public void publish_resources_with_excludes() throws IOException, InterruptedException {
-        DockerContainer dock = createPublisherContainer();
+    public void publish_resources_with_excludes() {
+        DockerContainer dock = container.get();
         Resource cpDir = resource("/ftp_plugin/");
 
         FreeStyleJob j = jenkins.jobs.create();
@@ -261,8 +257,8 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
      */
 
     @Test
-    public void publish_with_default_pattern() throws IOException, InterruptedException {
-        DockerContainer dock = createPublisherContainer();
+    public void publish_with_default_pattern() {
+        DockerContainer dock = container.get();
         Resource cpDir = resource("/ftp_plugin/");
 
         FreeStyleJob j = jenkins.jobs.create();
@@ -300,8 +296,8 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
      */
 
     @Test
-    public void publish_with_own_pattern() throws IOException, InterruptedException {
-        DockerContainer dock = createPublisherContainer();
+    public void publish_with_own_pattern() {
+        DockerContainer dock = container.get();
         Resource cpDir = resource("/ftp_plugin/");
 
         FreeStyleJob j = jenkins.jobs.create();
@@ -340,8 +336,8 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
      */
 
     @Test
-    public void publish_with_default_exclude() throws IOException, InterruptedException {
-        DockerContainer dock = createPublisherContainer();
+    public void publish_with_default_exclude() {
+        DockerContainer dock = container.get();
         Resource cpTxt = resource("/ftp_plugin/odes.txt");
 
         FreeStyleJob j = jenkins.jobs.create();
@@ -380,8 +376,8 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
      */
 
     @Test
-    public void publish_with_no_default_exclude() throws IOException, InterruptedException {
-        DockerContainer dock = createPublisherContainer();
+    public void publish_with_no_default_exclude() {
+        DockerContainer dock = container.get();
         Resource cpTxt = resource("/ftp_plugin/odes.txt");
 
         FreeStyleJob j = jenkins.jobs.create();
@@ -421,8 +417,8 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
      */
 
     @Test
-    public void publish_with_empty_directory() throws IOException, InterruptedException {
-        DockerContainer dock = createPublisherContainer();
+    public void publish_with_empty_directory() throws IOException {
+        DockerContainer dock = container.get();
         Resource cpTxt = resource("/ftp_plugin/odes.txt");
         File tmpDir = createTempDirectory();
         File nestedEmptyDir = new File(tmpDir + "/empty");
@@ -463,8 +459,8 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
      */
 
     @Test
-    public void publish_without_empty_directory() throws IOException, InterruptedException {
-        DockerContainer dock = createPublisherContainer();
+    public void publish_without_empty_directory() throws IOException {
+        DockerContainer dock = container.get();
         Resource cpTxt = resource("/ftp_plugin/odes.txt");
         File tmpDir = createTempDirectory();
         File nestedEmptyDir = new File(tmpDir + "/empty");
@@ -505,8 +501,8 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
      */
 
     @Test  @Ignore
-    public void publish_without_flatten_files() throws IOException, InterruptedException {
-        DockerContainer dock = createPublisherContainer();
+    public void publish_without_flatten_files() {
+        DockerContainer dock = container.get();
         Resource cpDir = resource("/ftp_plugin/");
 
         FreeStyleJob j = jenkins.jobs.create();
@@ -541,8 +537,8 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
      */
 
     @Test
-    public void publish_with_flatten_files() throws IOException, InterruptedException {
-        DockerContainer dock = createPublisherContainer();
+    public void publish_with_flatten_files() {
+        DockerContainer dock = container.get();
         Resource cpDir = resource("/ftp_plugin/");
 
         FreeStyleJob j = jenkins.jobs.create();
@@ -577,8 +573,8 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
      */
 
     @Test
-    public void publish_with_date_format() throws IOException, InterruptedException {
-        DockerContainer dock = createPublisherContainer();
+    public void publish_with_date_format() {
+        DockerContainer dock = container.get();
         Resource cpTxt = resource("/ftp_plugin/odes.txt");
 
         FreeStyleJob j = jenkins.jobs.create();
@@ -619,8 +615,8 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
      */
 
     @Test
-    public void publish_with_clean_remote() throws IOException, InterruptedException {
-        DockerContainer dock = createPublisherContainer();
+    public void publish_with_clean_remote() {
+        DockerContainer dock = container.get();
         Resource cpTxt = resource("/ftp_plugin/odes.txt");
         FreeStyleJob j = jenkins.jobs.create();
         configurePublisher("asd", dock);
@@ -658,8 +654,8 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
      * And publisher plugin should have published odes.txt,odes2.txt,odes3.txt on docker fixture
      */
     @Test
-    public void publish_multiple_sets() throws IOException, InterruptedException {
-        DockerContainer dock = createPublisherContainer();
+    public void publish_multiple_sets() {
+        DockerContainer dock = container.get();
         Resource cpTxt = resource("/ftp_plugin/odes.txt");
 
         FreeStyleJob j = jenkins.jobs.create();
@@ -704,9 +700,9 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
      * And publisher plugin should have published my set of files at all docker fixtures
      */
     @Test @Ignore
-    public void publish_multiple_servers() throws IOException, InterruptedException {
-        DockerContainer dock = createPublisherContainer();
-        DockerContainer dock2 = createPublisherContainer();
+    public void publish_multiple_servers() {
+        DockerContainer dock = container.get();
+        DockerContainer dock2 = injector.getInstance(DockerContainerHolder.class).get();
         Resource cpTxt = resource("/ftp_plugin/odes.txt");
 
         FreeStyleJob j = jenkins.jobs.create();
@@ -750,7 +746,7 @@ public abstract class GlobalPublishPluginTest extends AbstractJUnitTest {
 
     @Test
     public void publish_slave_resourses() throws IOException, InterruptedException, ExecutionException {
-        DockerContainer dock = createPublisherContainer();
+        DockerContainer dock = container.get();
         Resource cpFile = resource("/ftp_plugin/odes.txt");
 
         Slave s = slaves.get().install(jenkins).get();

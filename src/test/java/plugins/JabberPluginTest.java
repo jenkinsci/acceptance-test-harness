@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 
 import org.apache.commons.io.FileUtils;
 import org.hamcrest.CoreMatchers;
-import org.jenkinsci.test.acceptance.docker.Docker;
+import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.JabberContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithDocker;
@@ -35,14 +35,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
  * using the hostname if the FQDN could not be resolved, *
  *
  * @author jenky-hm
- *
  */
 @WithPlugins("jabber")
 @WithDocker
 @Ignore
 public class JabberPluginTest extends AbstractJUnitTest {
     @Inject
-    private Docker docker;
+    private DockerContainerHolder<JabberContainer> docker;
 
     private final String jabberIdString = "jenkins-ci@localhost/master";
     private final String jabberPasswordString = "jenkins-pw";
@@ -71,7 +70,7 @@ public class JabberPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void jabber_notification_success_publishing() throws IOException, InterruptedException {
-        JabberContainer jabber = docker.start(JabberContainer.class);
+        JabberContainer jabber = docker.get();
         //Resource cp_file = resource(resourceFilePath);
         //File sshFile = sshd.getPrivateKey();
 
@@ -107,7 +106,6 @@ public class JabberPluginTest extends AbstractJUnitTest {
             Publishers publisher = jp.setPublisher();
             elasticSleep(10000);
             publisher.targets.set(confRoom);
-
         }
         j.save();
         j.startBuild().shouldSucceed();
@@ -115,5 +113,4 @@ public class JabberPluginTest extends AbstractJUnitTest {
         File logfile = jabber.getLogbotLogFile();
         assertThat(FileUtils.readFileToString(logfile), CoreMatchers.containsString("SUCCESS"));
     }
-
 }

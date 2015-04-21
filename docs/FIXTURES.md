@@ -11,7 +11,7 @@ defined in `./fixtures/*`
 
 ## Running/skipping Docker tests
 
-JUnit Tests that require docker fixtures are marked with `@Native("docker")` annotation.
+JUnit Tests that require docker fixtures are marked with `@WithDocker` annotation.
 Cucumber tests are likewise annotated with `@native(docker)` annotation.
 If docker is not installed when you run tests, these tests are automatically skipped.
 

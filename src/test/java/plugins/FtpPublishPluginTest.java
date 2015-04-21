@@ -16,12 +16,7 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
  * @author Tobias Meyer
  */
 @WithPlugins("publish-over-ftp")
-public class FtpPublishPluginTest extends GlobalPublishPluginTest {
-
-    @Override
-    protected DockerContainer createPublisherContainer() {
-        return docker.start(FtpdContainer.class);
-    }
+public class FtpPublishPluginTest extends GlobalPublishPluginTest<FtpdContainer> {
 
     @Override
     protected PublishGlobalConfig.GlobalSite createGlobalConfig() {

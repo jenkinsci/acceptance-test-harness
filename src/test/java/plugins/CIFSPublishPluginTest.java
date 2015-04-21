@@ -16,12 +16,7 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
  * @author Tobias Meyer
  */
 @WithPlugins("publish-over-cifs")
-public class CIFSPublishPluginTest extends GlobalPublishPluginTest {
-
-    @Override
-    protected DockerContainer createPublisherContainer() {
-        return docker.start(SMBContainer.class);
-    }
+public class CIFSPublishPluginTest extends GlobalPublishPluginTest<SMBContainer> {
 
     @Override
     protected PublishGlobalConfig.GlobalSite createGlobalConfig() {

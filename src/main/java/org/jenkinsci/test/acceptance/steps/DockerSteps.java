@@ -3,13 +3,17 @@ package org.jenkinsci.test.acceptance.steps;
 import cucumber.api.java.After;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
+
 import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.docker.DockerContainer;
+import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.SshdContainer;
 import org.jenkinsci.utils.process.CommandBuilder;
 
+import com.google.inject.Injector;
+
 import javax.inject.Inject;
-import java.io.IOException;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -24,11 +28,13 @@ public class DockerSteps extends AbstractSteps {
 
     @Inject
     Docker docker;
+    @Inject
+    Injector injector;
 
     @Given("^a docker fixture \"([^\"]*)\"$")
     public void a_docker_fixture(String name) throws Throwable {
         Class<? extends DockerContainer> f = docker.findFixture(name);
-        container = docker.start(f);
+        container = injector.getInstance(DockerContainerHolder.class).get();
         containers.put(name,container);
     }
 
@@ -38,7 +44,7 @@ public class DockerSteps extends AbstractSteps {
     }
 
     @After
-    public void cleanUp() throws IOException, InterruptedException {
+    public void cleanUp() {
         for (Entry<String, DockerContainer> e : containers.entrySet()) {
             System.out.println("Shutting down: "+e.getKey());
             e.getValue().close();

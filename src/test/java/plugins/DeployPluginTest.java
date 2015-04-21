@@ -1,7 +1,7 @@
 package plugins;
 
 import org.apache.commons.io.IOUtils;
-import org.jenkinsci.test.acceptance.docker.Docker;
+import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.Tomcat7Container;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithDocker;
@@ -31,7 +31,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class DeployPluginTest extends AbstractJUnitTest {
 
     @Inject
-    Docker docker;
+    DockerContainerHolder<Tomcat7Container> docker;
 
     /**
      * @native(docker) Scenario: Deploy sample webapp to Tomcat7
@@ -63,7 +63,7 @@ public class DeployPluginTest extends AbstractJUnitTest {
     @Test
     public void deploy_sample_webapp_to_tomcat7() throws IOException {
 
-        Tomcat7Container f = docker.start(Tomcat7Container.class);
+        Tomcat7Container f = docker.get();
 
         FreeStyleJob j = jenkins.jobs.create();
         j.configure();
@@ -98,5 +98,4 @@ public class DeployPluginTest extends AbstractJUnitTest {
         URL url = new URL(f.getUrl(), "/test/");
         return IOUtils.toString(url.openStream());
     }
-
 }
