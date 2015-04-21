@@ -49,6 +49,7 @@ public class TestLifecycle implements Scope {
         return testScopeObjects.get().values();
     }
 
+    @Override
     public <T> Provider<T> scope(final Key<T> key, final Provider<T> base) {
         return new Provider<T>() {
             @Override

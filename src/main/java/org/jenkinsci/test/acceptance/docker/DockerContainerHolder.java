@@ -7,7 +7,6 @@ import org.jenkinsci.test.acceptance.guice.TestCleaner;
 import org.jenkinsci.test.acceptance.guice.TestScope;
 
 import javax.inject.Provider;
-import java.io.Closeable;
 import java.io.IOException;
 
 /**
@@ -16,7 +15,7 @@ import java.io.IOException;
  * @author Kohsuke Kawaguchi
  */
 @TestScope
-public class DockerContainerHolder<T extends DockerContainer> implements Provider<T>, Closeable, AutoCleaned {
+public class DockerContainerHolder<T extends DockerContainer> implements Provider<T>, AutoCleaned {
     @Inject
     TypeLiteral<T> type;
 
@@ -28,6 +27,7 @@ public class DockerContainerHolder<T extends DockerContainer> implements Provide
     /**
      * Lazily starts a container and returns the instance.
      */
+    @Override
     public synchronized T get() {
         if (container==null)
             container = docker.start((Class<T>)type.getRawType());

@@ -89,7 +89,8 @@ public class World extends AbstractModule {
     /**
      * Runs at the end of JVM session to clean up.
      */
-    private final Thread cleaner = new Thread() {
+    private final Thread cleaner = new Thread("World cleaner thread") {
+        @Override
         public void run() {
             Injector i = INSTANCE.getInjector();
 
