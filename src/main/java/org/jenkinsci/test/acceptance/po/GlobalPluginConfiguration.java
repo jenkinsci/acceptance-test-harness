@@ -14,7 +14,7 @@ import org.openqa.selenium.WebElement;
  * @author Kohsuke Kawaguchi
  */
 public class GlobalPluginConfiguration extends PageAreaImpl {
-    public GlobalPluginConfiguration(PageObject context, String pluginShortName) {
+    public GlobalPluginConfiguration(JenkinsConfig context, String pluginShortName) {
         super(context, toPathName(context.driver,pluginShortName));
     }
 

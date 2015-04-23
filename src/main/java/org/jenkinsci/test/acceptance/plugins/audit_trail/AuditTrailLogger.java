@@ -103,7 +103,7 @@ abstract public class AuditTrailLogger extends JenkinsLogger {
             );
 
             jenkins.configure();
-            AuditTrailGlobalConfiguration area = new AuditTrailGlobalConfiguration(jenkins);
+            AuditTrailGlobalConfiguration area = new AuditTrailGlobalConfiguration(jenkins.getConfigPage());
             area.addLogger.selectDropdownMenu("Log file");
 
             area.control("loggers/log").set(logfile);

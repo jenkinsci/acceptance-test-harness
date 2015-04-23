@@ -24,11 +24,11 @@
 package org.jenkinsci.test.acceptance.plugins.ownership;
 
 import org.jenkinsci.test.acceptance.po.GlobalPluginConfiguration;
-import org.jenkinsci.test.acceptance.po.PageObject;
+import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 
 public class OwnershipGlobalConfig extends GlobalPluginConfiguration {
 
-    public OwnershipGlobalConfig(PageObject context) {
+    public OwnershipGlobalConfig(JenkinsConfig context) {
         super(context, "ownership");
     }
 
