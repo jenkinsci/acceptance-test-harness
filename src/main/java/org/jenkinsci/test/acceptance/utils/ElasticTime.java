@@ -34,13 +34,24 @@ import java.util.concurrent.TimeUnit;
  */
 public class ElasticTime {
 
+    /**
+     * Amount of threads executing concurrently. Time is slowed down proportionally.
+     */
     private final int concurrency = Integer.parseInt(System.getProperty("forkCount", "1"));
+
+    /**
+     * Relative performance difference compared to reference environment.
+     *
+     * Default is 1.0 (no difference). Use >1 in case of slower environment, <1 in case of faster one.
+     */
+    private final double factor = Double.parseDouble(System.getProperty("ElasticTime.factor", "1.0"));
 
     public long seconds(long secs) {
         return milliseconds(TimeUnit.SECONDS.toMillis(secs));
     }
 
     public long milliseconds(long ms) {
-        return ms * concurrency;
+        double coeficient = concurrency * factor;
+        return Math.round(ms * coeficient);
     }
 }
