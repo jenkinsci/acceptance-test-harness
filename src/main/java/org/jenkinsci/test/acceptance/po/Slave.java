@@ -1,10 +1,11 @@
 package org.jenkinsci.test.acceptance.po;
 
-import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 
 import org.jenkinsci.test.acceptance.Matcher;
+import org.jenkinsci.test.acceptance.junit.Wait;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
+
 import com.google.common.base.Joiner;
 
 /**
@@ -38,12 +39,22 @@ public class Slave extends Node {
      */
     public Slave waitUntilOnline() {
         waitFor().withMessage("Slave is online")
-                .until(new Callable<Boolean>() {
-                    @Override public Boolean call() throws Exception {
+                .until(new Wait.Predicate<Boolean>() {
+                    @Override public Boolean apply() {
                         return isOnline();
+                    }
+
+                    @Override
+                    public String diagnose(Throwable lastException, String message) {
+                        return "Slave log:\n" + getLog();
                     }
         });
         return this;
+    }
+
+    public String getLog() {
+        visit("log");
+        return find(by.css("pre#out pre")).getText();
     }
 
     public boolean isOffline() {

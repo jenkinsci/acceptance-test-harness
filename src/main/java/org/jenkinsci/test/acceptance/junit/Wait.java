@@ -127,7 +127,11 @@ public class Wait<Subject> extends FluentWait<Subject> {
 
         public abstract Return apply() throws Exception;
 
-        /** @see {@link Wait#timeoutException} */
+        /**
+         * Create additional text description on the failure.
+         *
+         * Both lastException and message will be reported separately.
+         */
         public abstract String diagnose(Throwable lastException, String message);
     }
 
