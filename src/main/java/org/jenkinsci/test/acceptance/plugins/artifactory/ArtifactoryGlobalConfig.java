@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright (c) 2014 Red Hat, Inc.
+ * Copyright (c) 2015 Red Hat, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,25 +21,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.test.acceptance.plugins.gradle;
+package org.jenkinsci.test.acceptance.plugins.artifactory;
 
-import org.jenkinsci.test.acceptance.po.Jenkins;
+import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.JenkinsConfig;
-import org.jenkinsci.test.acceptance.po.ToolInstallation;
-import org.jenkinsci.test.acceptance.po.ToolInstallationPageObject;
+import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 
-@ToolInstallationPageObject(name="Gradle", installer="hudson.plugins.gradle.GradleInstaller")
-public class GradleInstallation extends ToolInstallation {
-    public GradleInstallation(JenkinsConfig context, String path) {
-        super(context, path);
+public class ArtifactoryGlobalConfig extends PageAreaImpl {
+
+    public ArtifactoryGlobalConfig(JenkinsConfig context) {
+        super(context, "/org-jfrog-hudson-ArtifactoryBuilder");
     }
 
-    public static void installGradle(Jenkins jenkins, String name, String version) {
-        waitForUpdates(jenkins, GradleInstallation.class);
-        jenkins.configure();
-        GradleInstallation gradle = jenkins.getConfigPage().addTool(GradleInstallation.class);
-        gradle.name.set(name);
-        gradle.installVersion(version);
-        jenkins.save();
+    public Server addServer() {
+        control("repeatable-add").click();
+        return new Server(this, "artifactoryServer");
+    }
+
+    public static class Server extends PageAreaImpl {
+        public final Control url = control("artifactoryUrl");
+        public final Control username = control("deployerCredentials/username");
+        public final Control password = control("deployerCredentials/password");
+        public final Control testConnectionButton =  control("validate-button");
+        public final Control goodConnectionFeedback = control("div.ok");
+        public final Control errorConnectionFeedback = control("div.error");
+
+        protected Server(ArtifactoryGlobalConfig area, String path) {
+            super(area, path);
+        }
     }
 }

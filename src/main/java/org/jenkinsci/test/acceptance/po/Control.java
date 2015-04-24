@@ -216,6 +216,10 @@ public class Control extends CapybaraPortingLayerImpl {
         resolve().sendKeys(res.asFile().getAbsolutePath());
     }
 
+    public String text() {
+        return resolve().getText();
+    }
+
     /**
      * Determines whether an object is existing on the current page
      * @return TRUE if it exists

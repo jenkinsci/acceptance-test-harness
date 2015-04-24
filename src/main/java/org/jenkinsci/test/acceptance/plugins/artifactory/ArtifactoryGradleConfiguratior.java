@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright (c) 2014 Red Hat, Inc.
+ * Copyright (c) 2015 Red Hat, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,25 +21,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.test.acceptance.plugins.gradle;
+package org.jenkinsci.test.acceptance.plugins.artifactory;
 
-import org.jenkinsci.test.acceptance.po.Jenkins;
-import org.jenkinsci.test.acceptance.po.JenkinsConfig;
-import org.jenkinsci.test.acceptance.po.ToolInstallation;
-import org.jenkinsci.test.acceptance.po.ToolInstallationPageObject;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
-@ToolInstallationPageObject(name="Gradle", installer="hudson.plugins.gradle.GradleInstaller")
-public class GradleInstallation extends ToolInstallation {
-    public GradleInstallation(JenkinsConfig context, String path) {
-        super(context, path);
+import org.jenkinsci.test.acceptance.po.Job;
+import org.jenkinsci.test.acceptance.po.PageAreaImpl;
+
+public class ArtifactoryGradleConfiguratior extends PageAreaImpl {
+
+    public ArtifactoryGradleConfiguratior(Job context) {
+        super(context, "/org-jfrog-hudson-gradle-ArtifactoryGradleConfigurator");
+        control("").check();
     }
 
-    public static void installGradle(Jenkins jenkins, String name, String version) {
-        waitForUpdates(jenkins, GradleInstallation.class);
-        jenkins.configure();
-        GradleInstallation gradle = jenkins.getConfigPage().addTool(GradleInstallation.class);
-        gradle.name.set(name);
-        gradle.installVersion(version);
-        jenkins.save();
+    public void refresh() {
+        control("details/validate-button").click();
+        waitFor(driver, hasContent("Items refreshed successfully"), 10);
     }
 }

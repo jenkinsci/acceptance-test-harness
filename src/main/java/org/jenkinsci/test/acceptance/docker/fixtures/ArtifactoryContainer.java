@@ -11,9 +11,12 @@ import java.net.URL;
 @DockerFixture(id = "artifactory", ports = 8081)
 public class ArtifactoryContainer extends DockerContainer {
 
-
-    public URL getURL() throws MalformedURLException {
-        return new URL("http://" + ipBound(8081) + ":" + port(8081) + "/artifactory");
+    public URL getURL() {
+        try {
+            return new URL("http://" + ipBound(8081) + ":" + port(8081) + "/artifactory");
+        } catch (MalformedURLException ex) {
+            throw new AssertionError(ex);
+        }
     }
 
     /**

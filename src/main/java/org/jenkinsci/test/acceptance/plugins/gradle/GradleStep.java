@@ -27,6 +27,7 @@ import org.jenkinsci.test.acceptance.po.*;
 
 @Describable("Invoke Gradle script")
 public class GradleStep extends AbstractStep implements BuildStep {
+    public final Control name = control("");
     public final Control file = control("buildFile");
     public final Control dir = control("rootBuildScriptDir");
     public final Control switches = control("switches");
