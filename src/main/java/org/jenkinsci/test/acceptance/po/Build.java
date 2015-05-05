@@ -156,12 +156,18 @@ public class Build extends ContainerPageObject {
         }
     }
 
+    /**
+     * @deprecated Use {@link org.jenkinsci.test.acceptance.Matchers#containsRegexp} instead.
+     */
     @Deprecated
     public Build shouldContainsConsoleOutput(String fragment) {
         assertThat(this.getConsole(), Matchers.containsRegexp(fragment, Pattern.MULTILINE));
         return this;
     }
 
+    /**
+     * @deprecated Use @link{@link org.hamcrest.Matchers#not}({@link org.jenkinsci.test.acceptance.Matchers#containsRegexp}) instead.
+     */
     @Deprecated
     public Build shouldNotContainsConsoleOutput(String fragment) {
         assertThat(this.getConsole(), not(Matchers.containsRegexp(fragment, Pattern.MULTILINE)));
