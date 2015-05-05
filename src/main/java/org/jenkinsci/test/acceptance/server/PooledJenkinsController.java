@@ -58,7 +58,7 @@ public class PooledJenkinsController extends JenkinsController implements LogLis
     }
 
     private boolean connect() throws IOException {
-        if (conn !=null)      return false;
+        if (conn != null)      return false;
 
         UnixSocketAddress address = new UnixSocketAddress(socket);
         conn = UnixSocketChannel.open(address);
@@ -69,6 +69,7 @@ public class PooledJenkinsController extends JenkinsController implements LogLis
 
         try {
             controller = (IJenkinsController)channel.waitForRemoteProperty("controller");
+            controller.start();
             url = controller.getUrl();
 
             splitter.addLogListener(new LogPrinter(getLogId()));
@@ -89,9 +90,7 @@ public class PooledJenkinsController extends JenkinsController implements LogLis
 
     @Override
     public void startNow() throws IOException {
-        if (!connect()) {
-            controller.start();
-        }
+        connect();
     }
 
     @Override
