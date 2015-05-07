@@ -33,7 +33,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
 
-@WithPlugins("support-core@2.22")
+@WithPlugins("support-core")
 public class SupportCorePluginTest extends AbstractJUnitTest {
 
     @Issue("JENKINS-27669")
