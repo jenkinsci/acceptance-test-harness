@@ -27,12 +27,6 @@ import static org.hamcrest.MatcherAssert.*;
  * @author Kohsuke Kawaguchi
  */
 public class Build extends ContainerPageObject {
-    public void delete() {
-        visit("confirmDelete");
-        waitFor(by.xpath("//span[@name='Submit']"));
-        find(by.xpath("//button")).click();
-    }
-
     public enum Result {SUCCESS, UNSTABLE, FAILURE, ABORTED, NOT_BUILT}
 
     public final Job job;
@@ -64,6 +58,12 @@ public class Build extends ContainerPageObject {
             return type.cast(this);
         }
         return newInstance(type, job, url);
+    }
+
+    public void delete() {
+        visit("confirmDelete");
+        waitFor(by.xpath("//span[@name='Submit']"));
+        find(by.xpath("//button")).click();
     }
 
     public Build waitUntilStarted() {
