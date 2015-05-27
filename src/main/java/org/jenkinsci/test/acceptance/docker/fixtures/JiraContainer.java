@@ -81,7 +81,7 @@ public class JiraContainer extends DockerContainer {
         issue.setProject(key);
         issue.setSummary(summary);
         issue.setDescription(description);
-        issue.setType("1");
+        issue.setType("3"); // Task
         svc.createIssue(token, issue);
     }
 
