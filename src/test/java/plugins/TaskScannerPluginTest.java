@@ -3,24 +3,25 @@ package plugins;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 
-import org.jvnet.hudson.test.Issue;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerAction;
-import org.jenkinsci.test.acceptance.plugins.tasks.TasksMavenSettings;
 import org.jenkinsci.test.acceptance.plugins.tasks.TasksFreestyleSettings;
+import org.jenkinsci.test.acceptance.plugins.tasks.TasksMavenSettings;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.jvnet.hudson.test.Issue;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
-import static org.junit.Assert.*;
 
 /**
  * Acceptance tests for the open tasks plugin.
@@ -34,7 +35,9 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
      * Checks that the plug-in sends a mail after a build has been failed. The content of the mail contains several
      * tokens that should be expanded in the mail with the correct values.
      */
-    @Test @WithPlugins("email-ext") @Issue("JENKINS-25501")
+    @Test
+    @WithPlugins("email-ext")
+    @Issue("JENKINS-25501")
     public void should_send_mail_with_expanded_tokens() {
         setUpMailer();
 
@@ -54,7 +57,7 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
         configureEmailNotification(job, "Tasks: ${TASKS_RESULT}",
                 "Tasks: ${TASKS_COUNT}-${TASKS_FIXED}-${TASKS_NEW}");
 
-        job.startBuild().shouldFail();
+        buildFailingJob(job);
 
         verifyReceivedMail("Tasks: FAILURE", "Tasks: 6-0-6");
     }
@@ -86,13 +89,14 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
      * excluding files and providing the correct results. The test builds the same job twice with and without case
      * sensitivity.
      */
-    @Test @Category(SmokeTest.class)
+    @Test
+    @Category(SmokeTest.class)
     public void should_find_single_task_tags_with_exclusion_pattern() {
         FreeStyleJob job = createFreeStyleJob();
 
-        Build lastBuild = buildJobWithSuccess(job);
-        assertThat(lastBuild, hasAction("Open Tasks"));
-        assertThat(job, hasAction("Open Tasks"));
+        Build lastBuild = buildSuccessfulJob(job);
+
+        assertThatTasksResultExists(job, lastBuild);
 
         lastBuild.open();
 
@@ -106,8 +110,11 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
         //   - 4x medium
         //   - 1x low
         TaskScannerAction action = new TaskScannerAction(job);
-        assertThat(action.getResultLinkByXPathText("6 open tasks"), is("tasksResult"));
-        assertThat(action.getResultTextByXPathText("6 open tasks"), endsWith("in 7 workspace files."));
+
+        assertThatOpenTaskCountLinkIs(action, 6, 7);
+
+        action.open();
+
         assertThat(action.getWarningNumber(), is(6));
         assertThat(action.getHighWarningNumber(), is(1));
         assertThat(action.getNormalWarningNumber(), is(4));
@@ -135,12 +142,15 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
             }
         });
 
-        lastBuild = buildJobWithSuccess(job);
+        lastBuild = buildSuccessfulJob(job);
+
         lastBuild.open();
 
-        assertThat(action.getResultLinkByXPathText("7 open tasks"), is("tasksResult"));
-        assertThat(action.getResultTextByXPathText("7 open tasks"), endsWith("in 7 workspace files."));
-        assertThat(action.getResultLinkByXPathText("1 new open task"), is("tasksResult/new"));
+        assertThatOpenTaskCountLinkIs(action, 7, 7);
+        assertThatNewOpenTaskCountLinkIs(action, 1);
+
+        action.open();
+
         assertThat(action.getWarningNumber(), is(7));
         assertThat(action.getNewWarningNumber(), is(1));
         assertThat(action.getHighWarningNumber(), is(2));
@@ -151,6 +161,31 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
         assertThat(action.getResultLinkByXPathText("TSREc2Provider.java:133"), startsWith("source"));
     }
 
+    private void assertThatTasksResultExists(final Job job, final Build lastBuild) {
+        String actionName = "Open Tasks";
+        assertThat(lastBuild, hasAction(actionName));
+        assertThat(job, hasAction(actionName));
+        assertThat(job.getLastBuild(), hasAction(actionName));
+    }
+
+    private void assertThatOpenTaskCountLinkIs(final TaskScannerAction action, final int numberOfTasks, final int numberOfFiles) {
+        String linkText = numberOfTasks + " open task" + plural(numberOfTasks);
+        assertThat(action.getResultLinkByXPathText(linkText),
+                is("tasksResult"));
+        assertThat(action.getResultTextByXPathText(linkText),
+                endsWith("in " + numberOfFiles+ " workspace file" + plural(numberOfFiles) + "."));
+    }
+
+    private void assertThatNewOpenTaskCountLinkIs(final TaskScannerAction action, final int numberOfNewTasks) {
+        String linkText = numberOfNewTasks + " new open task" + plural(numberOfNewTasks);
+        assertThat(action.getResultLinkByXPathText(linkText), is("tasksResult/new"));
+    }
+
+    private void assertThatClosedTaskCountLinkIs(final TaskScannerAction action, final int numberOfClosedTasks) {
+        String linkText = numberOfClosedTasks + " closed task" + plural(numberOfClosedTasks);
+        assertThat(action.getResultLinkByXPathText(linkText), is("tasksResult/fixed"));
+    }
+
     /**
      * Builds a job and tests if the tasks api (with depth=0 parameter set) responds with the expected output.
      * Difference in whitespaces are ok.
@@ -158,7 +193,9 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
     @Test
     public void should_return_results_via_remote_api() {
         FreeStyleJob job = createFreeStyleJob();
-        Build build = buildJobWithSuccess(job);
+
+        Build build = buildSuccessfulJob(job);
+
         assertXmlApiMatchesExpected(build, "tasksResult/api/xml?depth=0", "/tasks_plugin/api_depth_0.xml");
     }
 
@@ -205,12 +242,15 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
     }
 
     private void verifyRegularExpressionScannerResult(final Job job) {
-        Build lastBuild = buildJobWithSuccess(job);
+        Build lastBuild = buildSuccessfulJob(job);
         lastBuild.open();
+
         TaskScannerAction action = new TaskScannerAction(job);
 
-        assertThat(action.getResultLinkByXPathText("5 open tasks"), is("tasksResult"));
-        assertThat(action.getResultTextByXPathText("5 open tasks"), endsWith("in 1 workspace file."));
+        assertThatOpenTaskCountLinkIs(action, 5, 1);
+
+        action.open();
+
         assertThat(action.getWarningNumber(), is(5));
         assertThat(action.getNormalWarningNumber(), is(5));
     }
@@ -234,8 +274,10 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
             }
         });
 
-        Build lastBuild = buildJobWithSuccess(job);
+        Build lastBuild = buildSuccessfulJob(job);
+
         lastBuild.open();
+
         TaskScannerAction action = new TaskScannerAction(job);
 
         // The file set consists of 9 files, whereof
@@ -248,8 +290,10 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
         //   - 4x medium
         //   - 1x low
 
-        assertThat(action.getResultLinkByXPathText("8 open tasks"), is("tasksResult"));
-        assertThat(action.getResultTextByXPathText("8 open tasks"), endsWith("in 7 workspace files."));
+        assertThatOpenTaskCountLinkIs(action, 8, 7);
+
+        action.open();
+
         assertThat(action.getWarningNumber(), is(8));
         assertThat(action.getHighWarningNumber(), is(3));
         assertThat(action.getNormalWarningNumber(), is(4));
@@ -267,12 +311,15 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
             }
         });
 
-        lastBuild = buildJobWithSuccess(job);
+        lastBuild = buildSuccessfulJob(job);
 
         lastBuild.open();
-        assertThat(action.getResultLinkByXPathText("10 open tasks"), is("tasksResult"));
-        assertThat(action.getResultTextByXPathText("10 open tasks"), endsWith("in 7 workspace files."));
-        assertThat(action.getResultLinkByXPathText("2 new open tasks"), is("tasksResult/new"));
+
+        assertThatOpenTaskCountLinkIs(action, 10, 7);
+        assertThatNewOpenTaskCountLinkIs(action, 2);
+
+        action.open();
+
         assertThat(action.getWarningNumber(), is(10));
         assertThat(action.getNewWarningNumber(), is(2));
         assertThat(action.getHighWarningNumber(), is(3));
@@ -302,7 +349,7 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
                 settings.setIgnoreCase(false);
             }
         });
-        buildJobWithSuccess(job);
+        buildSuccessfulJob(job);
 
         // this time we do not check the task scanner output as the result is the same
         // as for single_task_tags_and_exclusion_pattern
@@ -310,9 +357,11 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
 
         editJob("/tasks_plugin/fileset1_less", false, job);
 
-        Build lastBuild = buildJobWithSuccess(job);
+        Build lastBuild = buildSuccessfulJob(job);
+
         lastBuild.open();
-        TaskScannerAction tsa = new TaskScannerAction(job);
+
+        TaskScannerAction action = new TaskScannerAction(job);
 
         // In the first build the task priorities were
         //   - 1x high
@@ -324,16 +373,18 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
         //
         // --> we expect 3 closed tasks (1x high, 1x normal, 1x low)
 
-        assertThat(tsa.getResultLinkByXPathText("3 open tasks"), is("tasksResult"));
-        assertThat(tsa.getResultTextByXPathText("3 open tasks"), endsWith("in 7 workspace files."));
-        assertThat(tsa.getResultLinkByXPathText("3 closed tasks"), is("tasksResult/fixed"));
-        assertThat(tsa.getWarningNumber(), is(3));
-        assertThat(tsa.getFixedWarningNumber(), is(3));
-        assertThat(tsa.getHighWarningNumber(), is(0));
-        assertThat(tsa.getNormalWarningNumber(), is(3));
-        assertThat(tsa.getLowWarningNumber(), is(0));
+        assertThatOpenTaskCountLinkIs(action, 3, 7);
+        assertThatClosedTaskCountLinkIs(action, 3);
 
-        assertFixedTab(tsa);
+        action.open();
+
+        assertThat(action.getWarningNumber(), is(3));
+        assertThat(action.getFixedWarningNumber(), is(3));
+        assertThat(action.getHighWarningNumber(), is(0));
+        assertThat(action.getNormalWarningNumber(), is(3));
+        assertThat(action.getLowWarningNumber(), is(0));
+
+        assertFixedTab(action);
     }
 
     /**
@@ -358,11 +409,11 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
         job.addShellStep("exit 1"); //ensures the FAILURE status of the main build
         job.save();
 
-        Build lastBuild = job.startBuild().shouldFail();
+        Build lastBuild = buildFailingJob(job);
 
         // the task scanner activity shall be skipped due to the failed main build
         // so we have to search for the particular console output
-        lastBuild.shouldContainsConsoleOutput(".*\\[TASKS\\] Skipping publisher since build result is FAILURE");
+        assertThatConsoleContains(lastBuild, ".*\\[TASKS\\] Skipping publisher since build result is FAILURE");
 
         // now activate "Run always"
         editJob(false, job, TasksFreestyleSettings.class, new AnalysisConfigurator<TasksFreestyleSettings>() {
@@ -372,28 +423,36 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
             }
         });
 
-        lastBuild = job.startBuild().shouldFail();
+        lastBuild = buildFailingJob(job);
+
         lastBuild.open();
 
         TaskScannerAction action = new TaskScannerAction(job);
 
         // as the failed result is now ignored, we expect 2 open tasks, both
         // of high priority and both considered as new warnings.
-        assertThat(action.getResultLinkByXPathText("2 open tasks"), is("tasksResult"));
-        assertThat(action.getResultTextByXPathText("2 open tasks"), endsWith("in 7 workspace files."));
-        assertThat(action.getResultLinkByXPathText("2 new open tasks"), is("tasksResult/new"));
+        assertThatOpenTaskCountLinkIs(action, 2, 7);
+        assertThatNewOpenTaskCountLinkIs(action, 2);
+
+        action.open();
+
         assertThat(action.getWarningNumber(), is(2));
         assertThat(action.getHighWarningNumber(), is(2));
     }
 
+    private void assertThatConsoleContains(final Build lastBuild, final String regexp) {
+        assertThat(lastBuild.getConsole(), containsRegexp(regexp, Pattern.MULTILINE));
+    }
+
     /**
-     * Check the correct treatment and display of tasks in files with windows-1251 (a.k.a. cp1251) encoding.
-     * Reproduces the observations described in JENKINS-22744.
+     * Check the correct treatment and display of tasks in files with windows-1251 (a.k.a. cp1251) encoding. Reproduces
+     * the observations described in JENKINS-22744.
      */
     // Note: In order to run this test in IntelliJ the encoding of the source needs to be set to windows-1251
-    @Test @Issue("JENKINS-22744")
+    @Test
+    @Issue("JENKINS-22744")
     public void should_use_file_encoding_windows1251_when_parsing_files() throws Exception {
-        FreeStyleJob j = createFreeStyleJob("/tasks_plugin/cp1251_files", new AnalysisConfigurator<TasksFreestyleSettings>() {
+        FreeStyleJob job = createFreeStyleJob("/tasks_plugin/cp1251_files", new AnalysisConfigurator<TasksFreestyleSettings>() {
             @Override
             public void configure(TasksFreestyleSettings settings) {
                 settings.setPattern("**/*.java");
@@ -405,14 +464,18 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
             }
         });
 
-        Build lastBuild = buildJobWithSuccess(j);
-        assertThat(lastBuild, hasAction("Open Tasks"));
-        assertThat(j, hasAction("Open Tasks"));
-        lastBuild.open();
-        TaskScannerAction action = new TaskScannerAction(j);
+        Build lastBuild = buildSuccessfulJob(job);
 
-        assertThat(action.getResultLinkByXPathText("2 open tasks"), is("tasksResult"));
-        assertThat(action.getResultTextByXPathText("2 open tasks"), endsWith("in 1 workspace file."));
+        assertThatTasksResultExists(job, lastBuild);
+
+        lastBuild.open();
+
+        TaskScannerAction action = new TaskScannerAction(job);
+
+        assertThatOpenTaskCountLinkIs(action, 2, 1);
+
+        action.open();
+
         assertThat(action.getWarningNumber(), is(2));
         assertThat(action.getHighWarningNumber(), is(1));
         assertThat(action.getNormalWarningNumber(), is(1));
@@ -445,23 +508,27 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
                 });
 
         // as one of the unit tests fail, the build should be unstable
-        Build lastBuild = job.startBuild().shouldBeUnstable();
-        assertThat(lastBuild, hasAction("Open Tasks"));
-        assertThat(job, hasAction("Open Tasks"));
+        Build lastBuild = buildUnstableJob(job);
+
+        assertThatTasksResultExists(job, lastBuild);
+
         lastBuild.open();
-        TaskScannerAction tsa = new TaskScannerAction(job);
+
+        TaskScannerAction action = new TaskScannerAction(job);
 
         // The expected task priorities are:
         //   - 1x high
         //   - 1x medium
         //   - 1x low
 
-        assertThat(tsa.getResultLinkByXPathText("3 open tasks"), is("tasksResult"));
-        assertThat(tsa.getResultTextByXPathText("3 open tasks"), endsWith("in 1 workspace file."));
-        assertThat(tsa.getWarningNumber(), is(3));
-        assertThat(tsa.getHighWarningNumber(), is(1));
-        assertThat(tsa.getNormalWarningNumber(), is(1));
-        assertThat(tsa.getLowWarningNumber(), is(1));
+        assertThatOpenTaskCountLinkIs(action, 3, 1);
+
+        action.open();
+
+        assertThat(action.getWarningNumber(), is(3));
+        assertThat(action.getHighWarningNumber(), is(1));
+        assertThat(action.getNormalWarningNumber(), is(1));
+        assertThat(action.getLowWarningNumber(), is(1));
 
         // re-configure the job and set a threshold to mark the build as failed
         editJob(false, job, TasksMavenSettings.class, new AnalysisConfigurator<TasksMavenSettings>() {
@@ -474,19 +541,22 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
         });
 
         // as the threshold for high priority warnings is exceeded, the build should be marked as failed
-        lastBuild = job.startBuild().shouldFail();
-        assertThat(lastBuild, hasAction("Open Tasks"));
-        assertThat(job, hasAction("Open Tasks"));
+        lastBuild = buildFailingJob(job);
+
+        assertThatTasksResultExists(job, lastBuild);
+
         lastBuild.open();
 
         //check build result text
-        assertThat(tsa.getPluginResult(lastBuild),
+        assertThat(action.getPluginResult(lastBuild),
                 is("Plug-in Result: FAILED - 1 warning of priority High exceeds the threshold of 0 by 1 (Reference build: #1)"));
 
+        action.open();
+
         //no change in warning counts expected
-        assertThat(tsa.getHighWarningNumber(), is(1));
-        assertThat(tsa.getNormalWarningNumber(), is(1));
-        assertThat(tsa.getLowWarningNumber(), is(1));
+        assertThat(action.getHighWarningNumber(), is(1));
+        assertThat(action.getNormalWarningNumber(), is(1));
+        assertThat(action.getLowWarningNumber(), is(1));
     }
 
     /**
@@ -551,16 +621,17 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
      * @return The modified {@link org.jenkinsci.test.acceptance.po.FreeStyleJob}.
      */
     private FreeStyleJob status_thresholds_step1(final FreeStyleJob job, final TaskScannerAction action) {
-        Build lastBuild = buildJobWithSuccess(job);
+        Build lastBuild = buildSuccessfulJob(job);
+
         lastBuild.open();
 
-        assertThat(action.getResultTextByXPathText("3 open tasks"), endsWith("in 7 workspace files."));
-        assertThat(action.getResultLinkByXPathText("3 new open tasks"), is("tasksResult/new"));
+        assertThatOpenTaskCountLinkIs(action, 3, 7);
+        assertThatNewOpenTaskCountLinkIs(action, 3);
+
+        action.open();
+
         assertThat(action.getWarningNumber(), is(3));
-
-        // Note:
-        //   high warning is omitted in summary table because no high prio tag is defined.
-
+        // Note: high warning is omitted in summary table because no high prio tag is defined.
         assertThat(action.getNormalWarningNumber(), is(3));
         assertThat(action.getLowWarningNumber(), is(0));
         assertThat(action.getPluginResult(lastBuild), is("Plug-in Result: SUCCESS - no threshold has been exceeded"));
@@ -588,11 +659,15 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
             }
         });
 
-        Build lastBuild = job.startBuild().shouldBeUnstable();
+        Build lastBuild = buildUnstableJob(job);
+
         lastBuild.open();
 
-        assertThat(action.getResultTextByXPathText("6 open tasks"), endsWith("in 7 workspace files."));
-        assertThat(action.getResultLinkByXPathText("3 new open tasks"), is("tasksResult/new"));
+        assertThatOpenTaskCountLinkIs(action, 6, 7);
+        assertThatNewOpenTaskCountLinkIs(action, 3);
+
+        action.open();
+
         assertThat(action.getWarningNumber(), is(6));
         assertThat(action.getNewWarningNumber(), is(3));
         assertThat(action.getNormalWarningNumber(), is(4));
@@ -624,17 +699,21 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
             }
         });
 
-        Build lastBuild = job.startBuild().shouldBeUnstable();
+        Build lastBuild = buildUnstableJob(job);
+
         lastBuild.open();
 
-        assertThat(action.getResultTextByXPathText("6 open tasks"), endsWith("in 7 workspace files."));
+        assertThatOpenTaskCountLinkIs(action, 6, 7);
+        assertThatNewOpenTaskCountLinkIs(action, 3);
 
         // Note:
         //   As the previous build was unstable the determination which warnings have changed is
         //   done based on the reference buil (#1)!!
         //   The same applies to step 4 to 6
-
         assertThat(action.getResultLinkByXPathText("3 new open tasks"), is("tasksResult/new"));
+
+        action.open();
+
         assertThat(action.getWarningNumber(), is(6));
         assertThat(action.getNewWarningNumber(), is(3));
         assertThat(action.getNormalWarningNumber(), is(5));
@@ -666,11 +745,15 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
             }
         });
 
-        Build lastBuild = job.startBuild().shouldBeUnstable();
+        Build lastBuild = buildUnstableJob(job);
+
         lastBuild.open();
 
-        assertThat(action.getResultTextByXPathText("8 open tasks"), endsWith("in 7 workspace files."));
-        assertThat(action.getResultLinkByXPathText("5 new open tasks"), is("tasksResult/new"));
+        assertThatOpenTaskCountLinkIs(action, 8, 7);
+        assertThatNewOpenTaskCountLinkIs(action, 5);
+
+        action.open();
+
         assertThat(action.getWarningNumber(), is(8));
         assertThat(action.getNewWarningNumber(), is(5));
         assertThat(action.getHighWarningNumber(), is(1));
@@ -690,9 +773,8 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
      * <p/>
      * So, the build status shall be UNSTABLE due to total warnings threshold is exceeded by 5.
      *
-     * @param job                 the {@link FreeStyleJob} created in the Test
-     * @param action               a the {@link TaskScannerAction} object for
-     *                          the current job
+     * @param job    the {@link FreeStyleJob} created in the Test
+     * @param action a the {@link TaskScannerAction} object for the current job
      * @return The modified {@link org.jenkinsci.test.acceptance.po.FreeStyleJob}.
      */
     private FreeStyleJob status_thresholds_step5(final FreeStyleJob job, final TaskScannerAction action) {
@@ -704,11 +786,14 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
             }
         });
 
-        Build lastBuild = job.startBuild().shouldBeUnstable();
+        Build lastBuild = buildUnstableJob(job);
+
         lastBuild.open();
 
-        assertThat(action.getResultTextByXPathText("15 open tasks"), endsWith("in 17 workspace files."));
-        assertThat(action.getResultLinkByXPathText("12 new open tasks"), is("tasksResult/new"));
+        assertThatOpenTaskCountLinkIs(action, 15, 17);
+        assertThatNewOpenTaskCountLinkIs(action, 12);
+
+        action.open();
 
         assertThat(action.getWarningNumber(), is(15));
         assertThat(action.getNewWarningNumber(), is(12));
@@ -741,11 +826,15 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
             }
         });
 
-        Build lastBuild = job.startBuild().shouldFail();
+        Build lastBuild = buildFailingJob(job);
+
         lastBuild.open();
 
-        assertThat(action.getResultTextByXPathText("16 open tasks"), endsWith("in 17 workspace files."));
-        assertThat(action.getResultLinkByXPathText("13 new open tasks"), is("tasksResult/new"));
+        assertThatOpenTaskCountLinkIs(action, 16, 17);
+        assertThatNewOpenTaskCountLinkIs(action, 13);
+
+        action.open();
+
         assertThat(action.getWarningNumber(), is(16));
         assertThat(action.getNewWarningNumber(), is(13));
         assertThat(action.getHighWarningNumber(), is(2));
@@ -795,12 +884,16 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
                 "done");
         job.save();
 
-        Build lastBuild = buildJobWithSuccess(job);
+        Build lastBuild = buildSuccessfulJob(job);
+
         lastBuild.open();
 
-        assertThat(action.getResultTextByXPathText("1 open task"), endsWith("in 17 workspace files."));
-        assertThat(action.getResultLinkByXPathText("1 new open task"), is("tasksResult/new"));
-        assertThat(action.getResultLinkByXPathText("3 closed tasks"), is("tasksResult/fixed"));
+        assertThatOpenTaskCountLinkIs(action, 1, 17);
+        assertThatNewOpenTaskCountLinkIs(action, 1);
+        assertThatClosedTaskCountLinkIs(action, 3);
+
+        action.open();
+
         assertThat(action.getWarningNumber(), is(1));
         assertThat(action.getNewWarningNumber(), is(1));
         assertThat(action.getFixedWarningNumber(), is(3));

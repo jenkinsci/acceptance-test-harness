@@ -3,7 +3,6 @@ package plugins;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import org.jvnet.hudson.test.Issue;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
@@ -17,11 +16,13 @@ import org.jenkinsci.test.acceptance.plugins.pmd.PmdWarningsPortlet;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Build.Result;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.ListView;
 import org.jenkinsci.test.acceptance.po.Node;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.jvnet.hudson.test.Issue;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
@@ -80,12 +81,9 @@ public class PmdPluginTest extends AbstractAnalysisTest {
             }
         });
 
-        Build lastBuild = buildJobWithSuccess(job);
-        assertThatBuildHasNoWarnings(lastBuild);
-    }
+        Build lastBuild = buildSuccessfulJob(job);
 
-    private void assertThatBuildHasNoWarnings(final Build lastBuild) {
-        assertThat(lastBuild.open(), hasContent("0 warnings"));
+        assertThatBuildHasNoWarnings(lastBuild);
     }
 
     private FreeStyleJob createFreeStyleJob() {
@@ -122,7 +120,8 @@ public class PmdPluginTest extends AbstractAnalysisTest {
         job.addShellStep("false");
         job.save();
 
-        Build lastBuild = job.startBuild().waitUntilFinished().shouldFail();
+        Build lastBuild = buildFailingJob(job);
+
         assertThatBuildHasNoWarnings(lastBuild);
     }
 
@@ -138,41 +137,47 @@ public class PmdPluginTest extends AbstractAnalysisTest {
             }
         });
 
-        Build lastBuild = buildJobWithSuccess(job);
-        assertThatPageHasPmdResults(lastBuild);
+        Build lastBuild = buildSuccessfulJob(job);
+
+        assertThatPmdResultExists(job, lastBuild);
 
         lastBuild.open();
 
         PmdAction action = new PmdAction(job);
-        assertThat(action.getResultLinkByXPathText("9 warnings"), is("pmdResult"));
-        assertThat(action.getResultLinkByXPathText("9 new warnings"), is("pmdResult/new"));
+
+        assertThatWarningsCountInSummaryIs(action, 9);
+        assertThatNewWarningsCountInSummaryIs(action, 9);
+
+        action.open();
+
         assertThat(action.getWarningNumber(), is(9));
         assertThat(action.getNewWarningNumber(), is(9));
         assertThat(action.getFixedWarningNumber(), is(0));
         assertThat(action.getHighWarningNumber(), is(0));
         assertThat(action.getNormalWarningNumber(), is(3));
         assertThat(action.getLowWarningNumber(), is(6));
+
         assertThatFilesTabIsCorrectlyFilled(action);
         assertThatTypesTabIsCorrectlyFilled(action);
         assertThatWarningsTabIsCorrectlyFilled(action);
     }
 
-    private void assertThatFilesTabIsCorrectlyFilled(PmdAction pa) {
+    private void assertThatFilesTabIsCorrectlyFilled(PmdAction action) {
         SortedMap<String, Integer> expectedContent = new TreeMap<>();
         expectedContent.put("ChannelContentAPIClient.m", 6);
         expectedContent.put("ProductDetailAPIClient.m", 2);
         expectedContent.put("ViewAllHoldingsAPIClient.m", 1);
-        assertThat(pa.getFileTabContents(), is(expectedContent));
+        assertThat(action.getFileTabContents(), is(expectedContent));
     }
 
-    private void assertThatTypesTabIsCorrectlyFilled(PmdAction pa) {
+    private void assertThatTypesTabIsCorrectlyFilled(PmdAction action) {
         SortedMap<String, Integer> expectedContent = new TreeMap<>();
         expectedContent.put("long line", 6);
         expectedContent.put("unused method parameter", 3);
-        assertThat(pa.getTypesTabContents(), is(expectedContent));
+        assertThat(action.getTypesTabContents(), is(expectedContent));
     }
 
-    private void assertThatWarningsTabIsCorrectlyFilled(PmdAction pa) {
+    private void assertThatWarningsTabIsCorrectlyFilled(PmdAction action) {
         SortedMap<String, Integer> expectedContent = new TreeMap<>();
         expectedContent.put("ChannelContentAPIClient.m:28", 28);
         expectedContent.put("ChannelContentAPIClient.m:28", 28);
@@ -183,7 +188,7 @@ public class PmdPluginTest extends AbstractAnalysisTest {
         expectedContent.put("ProductDetailAPIClient.m:37", 37);
         expectedContent.put("ProductDetailAPIClient.m:38", 38);
         expectedContent.put("ViewAllHoldingsAPIClient.m:23", 23);
-        assertThat(pa.getWarningsTabContents(), is(expectedContent));
+        assertThat(action.getWarningsTabContents(), is(expectedContent));
     }
 
     /**
@@ -193,7 +198,9 @@ public class PmdPluginTest extends AbstractAnalysisTest {
     @Test @Category(SmokeTest.class)
     public void should_return_results_via_remote_api() {
         FreeStyleJob job = createFreeStyleJob();
-        Build build = buildJobWithSuccess(job);
+
+        Build build = buildSuccessfulJob(job);
+
         assertXmlApiMatchesExpected(build, "pmdResult/api/xml?depth=0", PLUGIN_ROOT + "api_depth_0.xml");
     }
 
@@ -204,16 +211,22 @@ public class PmdPluginTest extends AbstractAnalysisTest {
     public void should_report_new_and_fixed_warnings_in_consecutive_builds() {
         FreeStyleJob job = createFreeStyleJob();
         buildJobAndWait(job);
-
         editJob(PLUGIN_ROOT + "forSecondRun/pmd-warnings.xml", false, job);
-        Build lastBuild = buildJobWithSuccess(job);
-        assertThatPageHasPmdResults(lastBuild);
+
+        Build lastBuild = buildSuccessfulJob(job);
+
+        assertThatPmdResultExists(job, lastBuild);
+
         lastBuild.open();
 
         PmdAction action = new PmdAction(job);
-        assertThat(action.getResultLinkByXPathText("8 warnings"), is("pmdResult"));
-        assertThat(action.getResultLinkByXPathText("1 new warning"), is("pmdResult/new"));
-        assertThat(action.getResultLinkByXPathText("1 fixed warning"), is("pmdResult/fixed"));
+
+        assertThatWarningsCountInSummaryIs(action, 8);
+        assertThatNewWarningsCountInSummaryIs(action, 1);
+        assertThatFixedWarningsCountInSummaryIs(action, 1);
+
+        action.open();
+
         assertThat(action.getWarningNumber(), is(8));
         assertThat(action.getNewWarningNumber(), is(1));
         assertThat(action.getFixedWarningNumber(), is(1));
@@ -230,7 +243,8 @@ public class PmdPluginTest extends AbstractAnalysisTest {
         FreeStyleJob job = createFreeStyleJob();
         buildJobAndWait(job);
         editJob(PLUGIN_ROOT + "forSecondRun/pmd-warnings.xml", false, job);
-        buildJobWithSuccess(job);
+
+        buildSuccessfulJob(job);
 
         assertAreaLinksOfJobAreLike(job, "pmd");
     }
@@ -250,7 +264,7 @@ public class PmdPluginTest extends AbstractAnalysisTest {
             }
         });
 
-        buildJobAndWait(job).shouldBeUnstable();
+        buildUnstableJob(job);
     }
 
     private MavenModuleSet createMavenJob() {
@@ -274,18 +288,25 @@ public class PmdPluginTest extends AbstractAnalysisTest {
                 settings.pattern.set("target/pmd.xml");
             }
         };
-        FreeStyleJob job = setupJob(PLUGIN_ROOT + "sample_pmd_project", FreeStyleJob.class, PmdFreestyleSettings.class, buildConfigurator, "clean package pmd:pmd"
-        );
-        Build lastBuild = buildJobWithSuccess(job);
-        assertThatPageHasPmdResults(lastBuild);
+        FreeStyleJob job = setupJob(PLUGIN_ROOT + "sample_pmd_project", FreeStyleJob.class,
+                PmdFreestyleSettings.class, buildConfigurator, "clean package pmd:pmd");
+
+        Build lastBuild = buildSuccessfulJob(job);
+
+        assertThatPmdResultExists(job, lastBuild);
+
         lastBuild.open();
-        PmdAction pmd = new PmdAction(job);
-        assertThat(pmd.getNewWarningNumber(), is(2));
+
+        PmdAction action = new PmdAction(job);
+        action.open();
+
+        assertThat(action.getNewWarningNumber(), is(2));
+
         SortedMap<String, Integer> expectedContent = new TreeMap<>();
         expectedContent.put("Main.java:9", 9);
         expectedContent.put("Main.java:13", 13);
 
-        verifySourceLine(pmd, "Main.java", 13,
+        verifySourceLine(action, "Main.java", 13,
                 "13         if(false) {",
                 "Do not use if statements that are always true or always false.");
     }
@@ -296,15 +317,24 @@ public class PmdPluginTest extends AbstractAnalysisTest {
     @Test
     public void should_retrieve_results_from_maven_job() {
         MavenModuleSet job = createMavenJob();
-        Build lastBuild = buildJobWithSuccess(job);
-        assertThatPageHasPmdResults(lastBuild);
+
+        Build lastBuild = buildSuccessfulJob(job);
+
+        assertThatPmdResultExists(job, lastBuild);
+
         lastBuild.open();
-        PmdAction pmd = new PmdAction(job);
-        assertThat(pmd.getNewWarningNumber(), is(2));
+
+        PmdAction action = new PmdAction(job);
+        action.open();
+
+        assertThat(action.getNewWarningNumber(), is(2));
     }
 
-    private void assertThatPageHasPmdResults(final PageObject page) {
-        assertThat(page, hasAction("PMD Warnings"));
+    private void assertThatPmdResultExists(final Job job, final PageObject build) {
+        String actionName = "PMD Warnings";
+        assertThat(job, hasAction(actionName));
+        assertThat(job.getLastBuild(), hasAction(actionName));
+        assertThat(build, hasAction(actionName));
     }
 
     /**
@@ -318,6 +348,7 @@ public class PmdPluginTest extends AbstractAnalysisTest {
                 settings.setBuildUnstableTotalAll("0");
             }
         });
+
         buildJobAndWait(job).shouldBeUnstable();
     }
 
@@ -332,6 +363,7 @@ public class PmdPluginTest extends AbstractAnalysisTest {
                 settings.setBuildFailedTotalAll("0");
             }
         });
+
         buildJobAndWait(job).shouldFail();
     }
 
@@ -343,11 +375,11 @@ public class PmdPluginTest extends AbstractAnalysisTest {
     public void should_retrieve_results_from_slave() throws Exception {
         FreeStyleJob job = createFreeStyleJob();
         Node slave = makeASlaveAndConfigureJob(job);
+
         Build build = buildJobOnSlaveWithSuccess(job, slave);
 
         assertThat(build.getNode(), is(slave));
-        assertThatPageHasPmdResults(build);
-        assertThatPageHasPmdResults(job);
+        assertThatPmdResultExists(job, build);
     }
 
     /**
@@ -360,6 +392,7 @@ public class PmdPluginTest extends AbstractAnalysisTest {
         buildJobAndWait(job).shouldSucceed();
 
         ListView view = addListViewColumn(PmdColumn.class);
+
         assertValidLink(job.name);
         view.delete();
     }
@@ -374,6 +407,7 @@ public class PmdPluginTest extends AbstractAnalysisTest {
         buildJobAndWait(job).shouldSucceed();
 
         DashboardView view = addDashboardViewAndBottomPortlet(PmdWarningsPortlet.class);
+
         assertValidLink(job.name);
         view.delete();
     }
@@ -444,10 +478,14 @@ public class PmdPluginTest extends AbstractAnalysisTest {
         Build lastBuild = buildJobAndWait(job).shouldBe(expectedResult);
 
         if (expectedNewWarnings > 0) {
-            assertThatPageHasPmdResults(lastBuild);
+            assertThatPmdResultExists(job, lastBuild);
+
             lastBuild.open();
-            PmdAction pmd = new PmdAction(job);
-            assertThat(pmd.getNewWarningNumber(), is(expectedNewWarnings));
+
+            PmdAction action = new PmdAction(job);
+            action.open();
+
+            assertThat(action.getNewWarningNumber(), is(expectedNewWarnings));
         }
     }
 }

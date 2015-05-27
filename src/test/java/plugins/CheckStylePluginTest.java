@@ -3,25 +3,26 @@ package plugins;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import org.jvnet.hudson.test.Issue;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
-import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckStyleFreestyleSettings;
-import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckStyleMavenSettings;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckStyleAction;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckStyleColumn;
+import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckStyleFreestyleSettings;
+import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckStyleMavenSettings;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckStylePortlet;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Build.Result;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.ListView;
 import org.jenkinsci.test.acceptance.po.Node;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.jvnet.hudson.test.Issue;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
@@ -43,7 +44,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
     private static final String FILE_WITH_776_WARNINGS = CHECKSTYLE_PLUGIN_ROOT + PATTERN_WITH_776_WARNINGS;
     private static final String FILE_FOR_2ND_RUN = CHECKSTYLE_PLUGIN_ROOT + "forSecondRun/checkstyle-result.xml";
 
-    /**\
+    /**
      * Checks that the plug-in sends a mail after a build has been failed. The content of the mail contains several
      * tokens that should be expanded in the mail with the correct values.
      */
@@ -62,7 +63,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
         configureEmailNotification(job, "Checkstyle: ${CHECKSTYLE_RESULT}",
                 "Checkstyle: ${CHECKSTYLE_COUNT}-${CHECKSTYLE_FIXED}-${CHECKSTYLE_NEW}");
 
-        job.startBuild().shouldFail();
+        buildFailingJob(job);
 
         verifyReceivedMail("Checkstyle: FAILURE", "Checkstyle: 776-0-776");
     }
@@ -91,10 +92,10 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
     @Test
     public void should_collect_warnings_in_build() {
         FreeStyleJob job = createFreeStyleJob();
-        buildJobWithSuccess(job);
 
-        assertThatPageContainsCheckstyleResults(job.getLastBuild());
-        assertThatPageContainsCheckstyleResults(job);
+        Build lastBuild = buildSuccessfulJob(job);
+
+        assertThatCheckStyleResultExists(job, lastBuild);
     }
 
     /**
@@ -104,17 +105,23 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
     @Test
     public void should_report_details_in_different_tabs() {
         FreeStyleJob job = createFreeStyleJob();
-        buildJobWithSuccess(job).open();
+
+        buildSuccessfulJob(job).open();
 
         CheckStyleAction action = new CheckStyleAction(job);
-        assertThat(action.getResultLinkByXPathText("776 warnings"), is("checkstyleResult"));
-        assertThat(action.getResultLinkByXPathText("776 new warnings"), is("checkstyleResult/new"));
+
+        assertThatWarningsCountInSummaryIs(action, 776);
+        assertThatNewWarningsCountInSummaryIs(action, 776);
+
+        action.open();
+
         assertThat(action.getWarningNumber(), is(776));
         assertThat(action.getNewWarningNumber(), is(776));
         assertThat(action.getFixedWarningNumber(), is(0));
         assertThat(action.getHighWarningNumber(), is(776));
         assertThat(action.getNormalWarningNumber(), is(0));
         assertThat(action.getLowWarningNumber(), is(0));
+
         assertThatFilesTabIsCorrectlyFilled(action);
         assertThatCategoriesTabIsCorrectlyFilled(action);
         assertThatTypesTabIsCorrectlyFilled(action);
@@ -185,36 +192,67 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
     @Test
     public void should_return_results_via_remote_api() {
         FreeStyleJob job = createFreeStyleJob();
-        Build build = buildJobWithSuccess(job);
+
+        Build build = buildSuccessfulJob(job);
+
         assertXmlApiMatchesExpected(build, "checkstyleResult/api/xml?depth=0", CHECKSTYLE_PLUGIN_ROOT + "api_depth_0.xml");
     }
 
     /**
-     * Runs job two times to check if new and fixed warnings are displayed.
+     * Runs job two times to check if new and fixed warnings are displayed. Afterwards, the first build
+     * is deleted and Jenkins is restarted. Then the results of the second build are validated again: the detail
+     * pages should then show the same results (see JENKINS-24940).
      */
-    @Test
+    @Test @Issue("24940")
     public void should_report_new_and_fixed_warnings_in_consecutive_builds() {
         FreeStyleJob job = createFreeStyleJob();
-        buildJobAndWait(job);
+        Build firstBuild = buildJobAndWait(job);
         editJob(FILE_FOR_2ND_RUN, false, job);
-        Build lastBuild = buildJobWithSuccess(job);
-        assertThatPageContainsCheckstyleResults(lastBuild);
+
+        Build lastBuild = buildSuccessfulJob(job);
+
+        assertThatCheckStyleResultExists(job, lastBuild);
+
         lastBuild.open();
-        CheckStyleAction ca = new CheckStyleAction(job);
-        assertThat(ca.getResultLinkByXPathText("679 warnings"), is("checkstyleResult"));
-        assertThat(ca.getResultLinkByXPathText("3 new warnings"), is("checkstyleResult/new"));
-        assertThat(ca.getResultLinkByXPathText("97 fixed warnings"), is("checkstyleResult/fixed"));
-        assertThat(ca.getWarningNumber(), is(679));
-        assertThat(ca.getNewWarningNumber(), is(3));
-        assertThat(ca.getFixedWarningNumber(), is(97));
-        assertThat(ca.getHighWarningNumber(), is(679));
-        assertThat(ca.getNormalWarningNumber(), is(0));
-        assertThat(ca.getLowWarningNumber(), is(0));
+
+        verifyWarningCounts(job);
+
+        // FIXME: uncomment if JENKINS-24940 has been released
+//        firstBuild.delete();
+//        jenkins.restart();
+//        lastBuild.open();
+//
+//        verifyWarningCounts(job);
     }
 
-    private void assertThatPageContainsCheckstyleResults(final PageObject page) {
-        assertThat(page, hasAction("Checkstyle Warnings"));
+    private void verifyWarningCounts(final FreeStyleJob job) {
+        CheckStyleAction action = new CheckStyleAction(job);
+
+        assertThatWarningsCountInSummaryIs(action, 679);
+        assertThatNewWarningsCountInSummaryIs(action, 3);
+        assertThatFixedWarningsCountInSummaryIs(action, 97);
+
+        action.open();
+
+        assertThat(action.getWarningNumber(), is(679));
+        assertThat(action.getNewWarningNumber(), is(3));
+        assertThat(action.getFixedWarningNumber(), is(97));
+        assertThat(action.getHighWarningNumber(), is(679));
+        assertThat(action.getNormalWarningNumber(), is(0));
+        assertThat(action.getLowWarningNumber(), is(0));
+
+        clickLink("3"); // FIXME: navigation to details should be simpler
+        assertThat(action.getHighWarningNumber(), is(3));
+        assertThat(action.getNormalWarningNumber(), is(0));
+        assertThat(action.getLowWarningNumber(), is(0));
     }
+
+    private void assertThatCheckStyleResultExists(final Job job, final PageObject build) {
+            String actionName = "Checkstyle Warnings";
+            assertThat(job, hasAction(actionName));
+            assertThat(job.getLastBuild(), hasAction(actionName));
+            assertThat(build, hasAction(actionName));
+        }
 
     /**
      * Runs job two times to check if the links of the graph are relative.
@@ -224,7 +262,8 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
         FreeStyleJob job = createFreeStyleJob();
         buildJobAndWait(job);
         editJob(FILE_FOR_2ND_RUN, false, job);
-        buildJobWithSuccess(job);
+
+        buildSuccessfulJob(job);
 
         assertAreaLinksOfJobAreLike(job, "checkstyle");
     }
@@ -273,10 +312,16 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
         FreeStyleJob job = setupJob(CHECKSTYLE_PLUGIN_ROOT + "sample_checkstyle_project", FreeStyleJob.class,
                 CheckStyleFreestyleSettings.class, buildConfigurator, "clean package checkstyle:checkstyle"
         );
-        Build lastBuild = buildJobWithSuccess(job);
-        assertThatPageContainsCheckstyleResults(lastBuild);
+
+        Build lastBuild = buildSuccessfulJob(job);
+
+        assertThatCheckStyleResultExists(job, lastBuild);
+
         lastBuild.open();
+
         CheckStyleAction checkstyle = new CheckStyleAction(job);
+        checkstyle.open();
+
         assertThat(checkstyle.getNewWarningNumber(), is(12));
 
         SortedMap<String, Integer> expectedContent = new TreeMap<>();
@@ -303,10 +348,16 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
     @Test
     public void should_retrieve_results_from_maven_job() {
         MavenModuleSet job = createMavenJob();
-        Build lastBuild = buildJobWithSuccess(job);
-        assertThatPageContainsCheckstyleResults(lastBuild);
+
+        Build lastBuild = buildSuccessfulJob(job);
+
+        assertThatCheckStyleResultExists(job, lastBuild);
+
         lastBuild.open();
+
         CheckStyleAction checkstyle = new CheckStyleAction(job);
+        checkstyle.open();
+
         assertThat(checkstyle.getNewWarningNumber(), is(12));
     }
 
@@ -321,6 +372,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
                 settings.setBuildUnstableTotalAll("0");
             }
         });
+
         buildJobAndWait(job).shouldBeUnstable();
     }
 
@@ -335,6 +387,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
                 settings.setBuildFailedTotalAll("0");
             }
         });
+
         buildJobAndWait(job).shouldFail();
     }
 
@@ -346,11 +399,11 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
     public void should_retrieve_results_from_slave() throws Exception {
         FreeStyleJob job = createFreeStyleJob();
         Node slave = makeASlaveAndConfigureJob(job);
-        Build build = buildJobOnSlaveWithSuccess(job, slave);
 
-        assertThat(build.getNode(), is(slave));
-        assertThatPageContainsCheckstyleResults(job.getLastBuild());
-        assertThatPageContainsCheckstyleResults(job);
+        Build lastBuild = buildJobOnSlaveWithSuccess(job, slave);
+
+        assertThat(lastBuild.getNode(), is(slave));
+        assertThatCheckStyleResultExists(job, lastBuild);
     }
 
     /**
@@ -360,6 +413,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
     @Test @Category(SmokeTest.class) @Issue("JENKINS-24436")
     public void should_set_warnings_count_in_list_view_column() {
         MavenModuleSet job = createMavenJob();
+
         buildJobAndWait(job).shouldSucceed();
 
         ListView view = addListViewColumn(CheckStyleColumn.class);
@@ -374,6 +428,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
     @Test @WithPlugins("dashboard-view")
     public void should_set_warnings_count_in_dashboard_portlet() {
         MavenModuleSet job = createMavenJob();
+
         buildJobAndWait(job).shouldSucceed();
 
         DashboardView view = addDashboardViewAndBottomPortlet(CheckStylePortlet.class);
@@ -447,9 +502,11 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
         Build lastBuild = buildJobAndWait(job).shouldBe(expectedResult);
 
         if (expectedNewWarnings > 0) {
-            assertThatPageContainsCheckstyleResults(lastBuild);
+            assertThatCheckStyleResultExists(job, lastBuild);
             lastBuild.open();
+
             CheckStyleAction checkstyle = new CheckStyleAction(job);
+            checkstyle.open();
             assertThat(checkstyle.getNewWarningNumber(), is(expectedNewWarnings));
         }
     }

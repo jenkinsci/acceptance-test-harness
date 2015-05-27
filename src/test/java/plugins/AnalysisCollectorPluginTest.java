@@ -1,6 +1,5 @@
 package plugins;
 
-import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisCollectorAction;
 import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisCollectorColumn;
@@ -24,8 +23,8 @@ import org.openqa.selenium.WebElement;
 import static org.hamcrest.CoreMatchers.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 import static org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisPlugin.*;
-import static org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView.hasWarningsFor;
-import static org.jenkinsci.test.acceptance.po.PageObject.*;
+import static org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView.*;
+import static org.jenkinsci.test.acceptance.po.PageObject.createRandomName;
 import static org.junit.Assert.*;
 
 /**
@@ -35,7 +34,7 @@ import static org.junit.Assert.*;
  * @author Ullrich Hafner
  */
 @WithPlugins({"analysis-collector", "checkstyle", "pmd", "findbugs", "tasks", "warnings"})
-public class AnalysisCollectorPluginTest extends AbstractJUnitTest {
+public class AnalysisCollectorPluginTest extends AbstractAnalysisTest {
     private static final String ANALYSIS_COLLECTOR_PLUGIN_RESOURCES = "/analysis_collector_plugin";
     private static final String XPATH_LISTVIEW_WARNING_TD = "//table[@id='projectstatus']/tbody/tr[2]/td[last()-1]";
 
@@ -65,23 +64,25 @@ public class AnalysisCollectorPluginTest extends AbstractJUnitTest {
     public void should_collect_warnings_of_all_tools() {
         FreeStyleJob job = createJob(ANALYSIS_COLLECTOR_PLUGIN_RESOURCES, true);
 
-        Build lastBuild = job.startBuild().waitUntilFinished();
+        Build lastBuild = buildSuccessfulJob(job);
 
         assertThat(job, hasAction("Static Analysis Warnings"));
         assertThat(lastBuild, hasAction("Static Analysis Warnings"));
 
-        AnalysisCollectorAction result = new AnalysisCollectorAction(job);
-        assertThat(result.getWarningNumber(), is(TOTAL));
-        assertThat(result.getNewWarningNumber(), is(TOTAL));
+        AnalysisCollectorAction action = new AnalysisCollectorAction(job);
+        action.open();
+
+        assertThat(action.getWarningNumber(), is(TOTAL));
+        assertThat(action.getNewWarningNumber(), is(TOTAL));
 
         int high = CHECKSTYLE_HIGH + FINDBUGS_HIGH + PMD_HIGH + TASKS_HIGH + WARNINGS_HIGH;
-        assertThat(result.getHighWarningNumber(), is(high));
+        assertThat(action.getHighWarningNumber(), is(high));
 
         int low = CHECKSTYLE_LOW + FINDBUGS_LOW + PMD_LOW + TASKS_LOW + WARNINGS_LOW;
-        assertThat(result.getLowWarningNumber(), is(low));
+        assertThat(action.getLowWarningNumber(), is(low));
 
         int normal = TOTAL - low - high;
-        assertThat(result.getNormalWarningNumber(), is(normal));
+        assertThat(action.getNormalWarningNumber(), is(normal));
     }
 
     /**
@@ -92,23 +93,22 @@ public class AnalysisCollectorPluginTest extends AbstractJUnitTest {
     @Test
     public void should_compute_all_new_open_tasks() {
         FreeStyleJob job = createJob(ANALYSIS_COLLECTOR_PLUGIN_RESOURCES + "/Tasks.java", true);
+        buildSuccessfulJob(job);
 
-        job.startBuild().waitUntilFinished();
-
-        // copy new resource
         job.configure();
         job.copyResource(ANALYSIS_COLLECTOR_PLUGIN_RESOURCES + "/Tasks2.java");
         job.save();
 
-        // start second build
-        job.startBuild().waitUntilFinished();
+        buildSuccessfulJob(job);
 
-        AnalysisCollectorAction result = new AnalysisCollectorAction(job);
-        assertThat(result.getWarningNumber(), is(8));
-        assertThat(result.getHighWarningNumber(), is(2));
-        assertThat(result.getNormalWarningNumber(), is(4));
-        assertThat(result.getLowWarningNumber(), is(2));
-        assertThat(result.getNewWarningNumber(), is(4));
+        AnalysisCollectorAction action = new AnalysisCollectorAction(job);
+        action.open();
+
+        assertThat(action.getWarningNumber(), is(8));
+        assertThat(action.getHighWarningNumber(), is(2));
+        assertThat(action.getNormalWarningNumber(), is(4));
+        assertThat(action.getLowWarningNumber(), is(2));
+        assertThat(action.getNewWarningNumber(), is(4));
     }
 
     /**
@@ -132,13 +132,13 @@ public class AnalysisCollectorPluginTest extends AbstractJUnitTest {
         configurator.configure(analysis);
         job.save();
 
-        job.startBuild().waitUntilFinished().shouldBeUnstable();
+        buildUnstableJob(job);
     }
 
     /**
-     * Verifies that the plugin only collects warnings of the checked plugins. The test starts with a build that collects
-     * the warnings of all available tools. Then subsequently a new build is started with one tool removed until no
-     * tool is checked anymore.
+     * Verifies that the plugin only collects warnings of the checked plugins. The test starts with a build that
+     * collects the warnings of all available tools. Then subsequently a new build is started with one tool removed
+     * until no tool is checked anymore.
      */
     @Test
     public void should_collect_warnings_of_selected_tools_only() {
@@ -146,24 +146,25 @@ public class AnalysisCollectorPluginTest extends AbstractJUnitTest {
 
         int remaining = TOTAL;
 
-        AnalysisCollectorAction result = deselectPluginAndBuild(CHECKSTYLE, job);
+        AnalysisCollectorAction action = deselectPluginAndBuild(CHECKSTYLE, job);
+
         remaining -= CHECKSTYLE_ALL;
-        assertThat(result.getWarningNumber(), is(remaining));
+        assertThat(action.getWarningNumber(), is(remaining));
 
-        result = deselectPluginAndBuild(FINDBUGS, job);
+        action = deselectPluginAndBuild(FINDBUGS, job);
         remaining -= FINDBUGS_ALL;
-        assertThat(result.getWarningNumber(), is(remaining));
+        assertThat(action.getWarningNumber(), is(remaining));
 
-        result = deselectPluginAndBuild(PMD, job);
+        action = deselectPluginAndBuild(PMD, job);
         remaining -= PMD_ALL;
-        assertThat(result.getWarningNumber(), is(remaining));
+        assertThat(action.getWarningNumber(), is(remaining));
 
-        result = deselectPluginAndBuild(TASKS, job);
+        action = deselectPluginAndBuild(TASKS, job);
         remaining -= TASKS_ALL;
-        assertThat(result.getWarningNumber(), is(remaining));
+        assertThat(action.getWarningNumber(), is(remaining));
 
-        result = deselectPluginAndBuild(WARNINGS, job);
-        assertThat(result.getWarningNumber(), is(0));
+        action = deselectPluginAndBuild(WARNINGS, job);
+        assertThat(action.getWarningNumber(), is(0));
     }
 
     /**
@@ -174,7 +175,7 @@ public class AnalysisCollectorPluginTest extends AbstractJUnitTest {
     @Test
     public void should_show_job_summary_with_warnings_per_tool() {
         FreeStyleJob job = createJob(ANALYSIS_COLLECTOR_PLUGIN_RESOURCES, true);
-        job.startBuild().waitUntilFinished();
+        buildSuccessfulJob(job);
 
         assertThat(job,
                 allOf(
@@ -190,22 +191,13 @@ public class AnalysisCollectorPluginTest extends AbstractJUnitTest {
 
     /**
      * Sets up a list view with a warnings column. Builds a job and checks if the column shows the correct number of
-     * warnings and provides a direct link to the actual warning results.
-     */
-    /**
-     * Scenario: Custom list view column shows number of warnings
-     * Given I have a job with artifacts of static analysis tools
-     * And this artifacts are published by their corresponding plugins
-     * And the resources of the job contain warnings
-     * And this job is included in a custom list view with added column "Number of warnings"
-     * When I start a build
-     * Then the list view will show the correct number of total warnings
-     * And the mouse-over tooltip will show the correct number of warnings per checked plugin
+     * warnings and provides a direct link to the actual warning results. Also verifies that the mouse-over tooltip will
+     * show the correct number of warnings per checked plugin.
      */
     @Test
     public void should_set_warnings_count_in_list_view_column() {
         FreeStyleJob job = createJob(ANALYSIS_COLLECTOR_PLUGIN_RESOURCES, true);
-        job.startBuild().waitUntilFinished();
+        buildSuccessfulJob(job);
 
         ListView view = jenkins.views.create(ListView.class, createRandomName());
         view.configure();
@@ -245,10 +237,11 @@ public class AnalysisCollectorPluginTest extends AbstractJUnitTest {
      * correct number of warnings. Then one of the tools is deselected. The portlet should then show only the remaining
      * number of warnings.
      */
-    @Test @WithPlugins("dashboard-view")
+    @Test
+    @WithPlugins("dashboard-view")
     public void should_aggregate_warnings_in_dashboard_portlet() {
         FreeStyleJob job = createJob(ANALYSIS_COLLECTOR_PLUGIN_RESOURCES, true);
-        job.startBuild().waitUntilFinished();
+        buildSuccessfulJob(job);
 
         DashboardView dashboard = jenkins.views.create(DashboardView.class, createRandomName());
         dashboard.configure();
@@ -280,7 +273,9 @@ public class AnalysisCollectorPluginTest extends AbstractJUnitTest {
         publisher.checkCollectedPlugin(plugin, false);
         job.save();
         job.startBuild().waitUntilFinished();
-        return new AnalysisCollectorAction(job);
+        AnalysisCollectorAction action = new AnalysisCollectorAction(job);
+        action.open();
+        return action;
     }
 
     private FreeStyleJob createJob(final String resourceToCopy, final boolean addAnalysisPublisher) {

@@ -5,8 +5,6 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import org.apache.commons.lang3.StringUtils;
-import org.jvnet.hudson.test.Issue;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
@@ -21,6 +19,7 @@ import org.jenkinsci.test.acceptance.po.MatrixConfiguration;
 import org.jenkinsci.test.acceptance.po.MatrixProject;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.jvnet.hudson.test.Issue;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
@@ -68,7 +67,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest {
         job.addShellStep("cat " + file + "| grep $user_axis");
         job.save();
 
-        Build build = buildJobAndWait(job).shouldSucceed();
+        Build build = buildSuccessfulJob(job);
 
         String title = "GNU C Compiler Warnings";
         assertThatActionExists(job, build, title);
@@ -138,7 +137,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest {
         configureEmailNotification(job, "Warnings: ${WARNINGS_RESULT}",
                 "Warnings: ${WARNINGS_COUNT}-${WARNINGS_FIXED}-${WARNINGS_NEW}");
 
-        job.startBuild().shouldFail();
+        buildFailingJob(job);
 
         verifyReceivedMail("Warnings: FAILURE", "Warnings: 131-0-131");
     }
@@ -157,12 +156,13 @@ public class WarningsPluginTest extends AbstractAnalysisTest {
                     }
                 });
 
-        Build build = buildJobWithSuccess(job);
+        Build build = buildSuccessfulJob(job);
 
         assertThatActionIsMissing(job, build, "Java Warnings");
         assertThatActionIsMissing(job, build, "Maven Warnings");
 
         build.open();
+
         assertThat(driver, hasContent("Java Warnings: 0"));
         assertThat(driver, hasContent("Maven Warnings: 0"));
     }
@@ -184,7 +184,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest {
         job.addShellStep("mvn clean install > errors.log || true");
         job.save();
 
-        Build build = buildJobWithSuccess(job);
+        Build build = buildSuccessfulJob(job);
 
         assertThatActionIsMissing(job, build, "Maven Warnings");
 
@@ -200,11 +200,11 @@ public class WarningsPluginTest extends AbstractAnalysisTest {
     public void should_set_warnings_count_in_list_view_column_for_freestyle_project() {
         FreeStyleJob job = setupJob(SEVERAL_PARSERS_FILE_FULL_PATH, FreeStyleJob.class,
                 WarningsBuildSettings.class, create3ParserConfiguration());
-
         catWarningsToConsole(job);
-        buildJobAndWait(job).shouldSucceed();
+        buildSuccessfulJob(job);
 
         ListView view = addListViewColumn(WarningsColumn.class);
+
         assertValidLink(job.name);
         view.delete();
     }
@@ -217,11 +217,11 @@ public class WarningsPluginTest extends AbstractAnalysisTest {
     public void should_set_warnings_count_in_list_view_column_for_matrix_project() {
         MatrixProject job = setupJob(SEVERAL_PARSERS_FILE_FULL_PATH, MatrixProject.class,
                 WarningsBuildSettings.class, create3ParserConfiguration());
-
         catWarningsToConsole(job);
         buildJobAndWait(job).shouldSucceed();
 
         ListView view = addListViewColumn(WarningsColumn.class);
+
         assertValidLink(job.name);
         view.delete();
     }
@@ -275,7 +275,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest {
                 WarningsBuildSettings.class, buildConfiguration);
 
         catWarningsToConsole(job);
-        buildJobAndWait(job).shouldBeUnstable();
+        buildUnstableJob(job);
     }
 
     /**
@@ -330,7 +330,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest {
     }
 
     private void verify3ParserResults(final Job job, final int numberOfRuns) {
-        Build build = buildJobWithSuccess(job);
+        Build build = buildSuccessfulJob(job);
         assertThatActionExists(job, build, "Java Warnings");
         assertThatActionExists(job, build, "JavaDoc Warnings");
         assertThatActionExists(job, build, "MSBuild Warnings");
@@ -356,6 +356,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest {
     }
 
     private void assertThatActionIsMissing(final FreeStyleJob job, final Build build, final String parser) {
+        assertThat(job, not(hasAction(parser)));
         assertThat(build, not(hasAction(parser)));
         assertThat(job.getLastBuild(), not(hasAction("Java Warnings")));
     }
@@ -364,15 +365,16 @@ public class WarningsPluginTest extends AbstractAnalysisTest {
      * Checks that the warnings plugin will not skip build results if "Run always" is checked.
      */
     @Test
-    public void do_not_skip_failed_builds_with_option_run_always() {
+    public void should_not_skip_failed_builds_with_option_run_always() {
         FreeStyleJob job = runBuildWithRunAlwaysOption(true);
         Build build = buildJobAndWait(job).shouldFail();
 
         assertThatActionExists(job, build, "Java Warnings");
 
         WarningsAction action = new WarningsAction(job);
-        assertThatWarningsCountIs(action, 131);
-        assertThatNewWarningsCountIs(action, 131);
+
+        assertThatWarningsCountInSummaryIs(action, 131);
+        assertThatNewWarningsCountInSummaryIs(action, 131);
     }
 
     private FreeStyleJob runBuildWithRunAlwaysOption(final boolean canRunOnFailed) {
@@ -398,7 +400,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest {
      * 1 Maven Warning.
      */
     @Test
-    public void detect_errors_in_console_log() {
+    public void should_detect_errors_in_console_log() {
         AnalysisConfigurator<WarningsBuildSettings> buildConfigurator = new AnalysisConfigurator<WarningsBuildSettings>() {
             @Override
             public void configure(WarningsBuildSettings settings) {
@@ -412,12 +414,15 @@ public class WarningsPluginTest extends AbstractAnalysisTest {
         job.addShellStep("mvn clean install || true");
         job.save();
 
-        Build build = buildJobWithSuccess(job);
+        Build build = buildSuccessfulJob(job);
         assertThatActionExists(job, build, "Maven Warnings");
 
         WarningsAction action = new WarningsAction(job);
-        assertThatWarningsCountIs(action, 1);
-        assertThatNewWarningsCountIs(action, 1);
+
+        assertThatWarningsCountInSummaryIs(action, 1);
+        assertThatNewWarningsCountInSummaryIs(action, 1);
+
+        action.open();
 
         assertThat(action.getNewWarningNumber(), is(1));
         assertThat(action.getWarningNumber(), is(1));
@@ -428,8 +433,9 @@ public class WarningsPluginTest extends AbstractAnalysisTest {
     }
 
     private void assertThatActionExists(final Job job, final Build build, final String parser) {
-        assertThat(build, hasAction(parser));
         assertThat(job.getLastBuild(), hasAction(parser));
+        assertThat(job, hasAction(parser));
+        assertThat(build, hasAction(parser));
     }
 
     /**
@@ -438,7 +444,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest {
      * (from a file that contains 9 warnings).
      */
     @Test
-    public void skip_warnings_in_ignored_parts() {
+    public void should_skip_warnings_in_ignored_parts() {
         AnalysisConfigurator<WarningsBuildSettings> buildConfigurator = new AnalysisConfigurator<WarningsBuildSettings>() {
             @Override
             public void configure(WarningsBuildSettings settings) {
@@ -450,12 +456,13 @@ public class WarningsPluginTest extends AbstractAnalysisTest {
         FreeStyleJob job = setupJob(WARNINGS_FILE_FOR_INCLUDE_EXCLUDE_TESTS, FreeStyleJob.class,
                 WarningsBuildSettings.class, buildConfigurator);
 
-        Build build = buildJobWithSuccess(job);
+        Build build = buildSuccessfulJob(job);
         assertThatActionExists(job, build, "Java Warnings");
 
         WarningsAction action = new WarningsAction(job);
-        assertThatWarningsCountIs(action, 4);
-        assertThatNewWarningsCountIs(action, 4);
+
+        assertThatWarningsCountInSummaryIs(action, 4);
+        assertThatNewWarningsCountInSummaryIs(action, 4);
     }
 
     /**
@@ -464,7 +471,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest {
      * contains 9 warnings).
      */
     @Test
-    public void include_warnings_specified_in_included_parts() {
+    public void should_include_warnings_specified_in_included_parts() {
         AnalysisConfigurator<WarningsBuildSettings> buildConfigurator = new AnalysisConfigurator<WarningsBuildSettings>() {
             @Override
             public void configure(WarningsBuildSettings settings) {
@@ -474,12 +481,15 @@ public class WarningsPluginTest extends AbstractAnalysisTest {
         };
         FreeStyleJob job = setupJob(WARNINGS_FILE_FOR_INCLUDE_EXCLUDE_TESTS, FreeStyleJob.class,
                 WarningsBuildSettings.class, buildConfigurator);
-        Build build = buildJobWithSuccess(job);
+        Build build = buildSuccessfulJob(job);
         assertThatActionExists(job, build, "Java Warnings");
 
         WarningsAction action = new WarningsAction(job);
-        assertThatWarningsCountIs(action, 5);
-        assertThatNewWarningsCountIs(action, 5);
+
+        assertThatWarningsCountInSummaryIs(action, 5);
+        assertThatNewWarningsCountInSummaryIs(action, 5);
+
+        action.open();
 
         assertThat(action.getWarningNumber(), is(5));
         assertThat(action.getNewWarningNumber(), is(5));
@@ -487,19 +497,5 @@ public class WarningsPluginTest extends AbstractAnalysisTest {
         assertThat(action.getHighWarningNumber(), is(0));
         assertThat(action.getNormalWarningNumber(), is(5));
         assertThat(action.getLowWarningNumber(), is(0));
-    }
-
-    private void assertThatWarningsCountIs(final WarningsAction action, final int numberOfWarnings) {
-        assertThat(action.getResultLinkByXPathText(numberOfWarnings + " warning" + plural(numberOfWarnings)),
-                containsRegexp("warnings.*Result"));
-    }
-
-    private String plural(final int numberOfWarnings) {
-        return numberOfWarnings == 1 ? StringUtils.EMPTY : "s";
-    }
-
-    private void assertThatNewWarningsCountIs(final WarningsAction action, final int numberOfNewWarnings) {
-        assertThat(action.getResultLinkByXPathText(numberOfNewWarnings + " new warning" + plural(numberOfNewWarnings)),
-                containsRegexp("warnings.*Result/new"));
     }
 }

@@ -29,6 +29,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 
+import org.jenkinsci.test.acceptance.po.Job;
 import org.jvnet.hudson.test.Issue;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
@@ -87,7 +88,7 @@ public class FindBugsPluginTest extends AbstractAnalysisTest {
         configureEmailNotification(job, "FindBugs: ${FINDBUGS_RESULT}",
                 "FindBugs: ${FINDBUGS_COUNT}-${FINDBUGS_FIXED}-${FINDBUGS_NEW}");
 
-        job.startBuild().shouldFail();
+        buildFailingJob(job);
 
         verifyReceivedMail("FindBugs: FAILURE", "FindBugs: 6-0-6");
     }
@@ -116,52 +117,58 @@ public class FindBugsPluginTest extends AbstractAnalysisTest {
     @Test
     public void should_find_warnings_in_freestyle_job() {
         FreeStyleJob job = createFreeStyleJob();
-        Build lastBuild = buildJobWithSuccess(job);
 
-        assertThatPageHasFindBugsResults(lastBuild);
-        assertThatPageHasFindBugsResults(job);
+        Build lastBuild = buildSuccessfulJob(job);
+
+        assertThatFindBugsResultExists(job, lastBuild);
+
         lastBuild.open();
-        FindBugsAction fa = new FindBugsAction(job);
-        assertThat(fa.getResultLinkByXPathText("6 warnings"), is("findbugsResult"));
-        assertThat(fa.getResultLinkByXPathText("6 new warnings"), is("findbugsResult/new"));
-        assertThat(fa.getWarningNumber(), is(6));
-        assertThat(fa.getNewWarningNumber(), is(6));
-        assertThat(fa.getFixedWarningNumber(), is(0));
-        assertThat(fa.getHighWarningNumber(), is(2));
-        assertThat(fa.getNormalWarningNumber(), is(4));
-        assertThat(fa.getLowWarningNumber(), is(0));
 
-        assertThatFilesTabIsCorrectlyFilled(fa);
-        assertThatCategoriesTabIsCorrectlyFilled(fa);
-        assertThatTypesTabIsCorrectlyFilled(fa);
-        assertThatWarningsTabIsCorrectlyFilled(fa);
+        FindBugsAction action = new FindBugsAction(job);
+
+        assertThatWarningsCountInSummaryIs(action, 6);
+        assertThatNewWarningsCountInSummaryIs(action, 6);
+
+        action.open();
+
+        assertThat(action.getWarningNumber(), is(6));
+        assertThat(action.getNewWarningNumber(), is(6));
+        assertThat(action.getFixedWarningNumber(), is(0));
+        assertThat(action.getHighWarningNumber(), is(2));
+        assertThat(action.getNormalWarningNumber(), is(4));
+        assertThat(action.getLowWarningNumber(), is(0));
+
+        assertThatFilesTabIsCorrectlyFilled(action);
+        assertThatCategoriesTabIsCorrectlyFilled(action);
+        assertThatTypesTabIsCorrectlyFilled(action);
+        assertThatWarningsTabIsCorrectlyFilled(action);
     }
 
-    private void assertThatFilesTabIsCorrectlyFilled(FindBugsAction fa) {
+    private void assertThatFilesTabIsCorrectlyFilled(FindBugsAction action) {
         SortedMap<String, Integer> expectedContent = new TreeMap<>();
         expectedContent.put("SSHConnector.java", 1);
         expectedContent.put("SSHLauncher.java", 5);
-        assertThat(fa.getFileTabContents(), is(expectedContent));
+        assertThat(action.getFileTabContents(), is(expectedContent));
     }
 
-    private void assertThatCategoriesTabIsCorrectlyFilled(FindBugsAction fa) {
+    private void assertThatCategoriesTabIsCorrectlyFilled(FindBugsAction action) {
         SortedMap<String, Integer> expectedContent = new TreeMap<>();
         expectedContent.put("BAD_PRACTICE", 1);
         expectedContent.put("CORRECTNESS", 3);
         expectedContent.put("STYLE", 2);
-        assertThat(fa.getCategoriesTabContents(), is(expectedContent));
+        assertThat(action.getCategoriesTabContents(), is(expectedContent));
     }
 
-    private void assertThatTypesTabIsCorrectlyFilled(FindBugsAction fa) {
+    private void assertThatTypesTabIsCorrectlyFilled(FindBugsAction action) {
         SortedMap<String, Integer> expectedContent = new TreeMap<>();
         expectedContent.put("DE_MIGHT_IGNORE", 1);
         expectedContent.put("NP_NULL_ON_SOME_PATH", 1);
         expectedContent.put("NP_NULL_PARAM_DEREF", 2);
         expectedContent.put("REC_CATCH_EXCEPTION", 2);
-        assertThat(fa.getTypesTabContents(), is(expectedContent));
+        assertThat(action.getTypesTabContents(), is(expectedContent));
     }
 
-    private void assertThatWarningsTabIsCorrectlyFilled(FindBugsAction fa) {
+    private void assertThatWarningsTabIsCorrectlyFilled(FindBugsAction action) {
         SortedMap<String, Integer> expectedContent = new TreeMap<>();
         expectedContent.put("SSHConnector.java:138", 138);
         expectedContent.put("SSHLauncher.java:437", 437);
@@ -169,7 +176,7 @@ public class FindBugsPluginTest extends AbstractAnalysisTest {
         expectedContent.put("SSHLauncher.java:960", 960);
         expectedContent.put("SSHLauncher.java:960", 960);
         expectedContent.put("SSHLauncher.java:971", 971);
-        assertThat(fa.getWarningsTabContents(), is(expectedContent));
+        assertThat(action.getWarningsTabContents(), is(expectedContent));
     }
 
     /**
@@ -179,7 +186,9 @@ public class FindBugsPluginTest extends AbstractAnalysisTest {
     @Test
     public void should_return_results_via_remote_api() throws IOException, SAXException, ParserConfigurationException {
         FreeStyleJob job = createFreeStyleJob();
-        Build build = buildJobWithSuccess(job);
+
+        Build build = buildSuccessfulJob(job);
+
         assertXmlApiMatchesExpected(build, "findbugsResult/api/xml?depth=0", PLUGIN_ROOT + "api_depth_0.xml");
     }
 
@@ -192,19 +201,26 @@ public class FindBugsPluginTest extends AbstractAnalysisTest {
         buildJobAndWait(job);
         editJob("/findbugs_plugin/forSecondRun/findbugsXml.xml", false, job);
 
-        Build lastBuild = buildJobWithSuccess(job);
-        assertThatPageHasFindBugsResults(lastBuild);
+        Build lastBuild = buildSuccessfulJob(job);
+
+        assertThatFindBugsResultExists(job, lastBuild);
+
         lastBuild.open();
-        FindBugsAction fa = new FindBugsAction(job);
-        assertThat(fa.getResultLinkByXPathText("5 warnings"), is("findbugsResult"));
-        assertThat(fa.getResultLinkByXPathText("1 new warning"), is("findbugsResult/new"));
-        assertThat(fa.getResultLinkByXPathText("2 fixed warnings"), is("findbugsResult/fixed"));
-        assertThat(fa.getWarningNumber(), is(5));
-        assertThat(fa.getNewWarningNumber(), is(1));
-        assertThat(fa.getFixedWarningNumber(), is(2));
-        assertThat(fa.getHighWarningNumber(), is(3));
-        assertThat(fa.getNormalWarningNumber(), is(2));
-        assertThat(fa.getLowWarningNumber(), is(0));
+
+        FindBugsAction action = new FindBugsAction(job);
+
+        assertThatWarningsCountInSummaryIs(action, 5);
+        assertThatNewWarningsCountInSummaryIs(action, 1);
+        assertThatFixedWarningsCountInSummaryIs(action, 2);
+
+        action.open();
+
+        assertThat(action.getWarningNumber(), is(5));
+        assertThat(action.getNewWarningNumber(), is(1));
+        assertThat(action.getFixedWarningNumber(), is(2));
+        assertThat(action.getHighWarningNumber(), is(3));
+        assertThat(action.getNormalWarningNumber(), is(2));
+        assertThat(action.getLowWarningNumber(), is(0));
     }
 
     /**
@@ -215,7 +231,8 @@ public class FindBugsPluginTest extends AbstractAnalysisTest {
         FreeStyleJob job = createFreeStyleJob();
         buildJobAndWait(job);
         editJob("/findbugs_plugin/forSecondRun/findbugsXml.xml", false, job);
-        buildJobWithSuccess(job);
+
+        buildSuccessfulJob(job);
 
         assertAreaLinksOfJobAreLike(job, "findbugs");
     }
@@ -234,13 +251,18 @@ public class FindBugsPluginTest extends AbstractAnalysisTest {
         FreeStyleJob job = setupJob("/findbugs_plugin/sample_findbugs_project", FreeStyleJob.class,
                 FindBugsFreestyleSettings.class, buildConfigurator, "clean package findbugs:findbugs");
 
-        Build lastBuild = buildJobWithSuccess(job);
-        assertThatPageHasFindBugsResults(lastBuild);
-        lastBuild.open();
-        FindBugsAction findbugs = new FindBugsAction(job);
-        assertThat(findbugs.getNewWarningNumber(), is(1));
+        Build lastBuild = buildSuccessfulJob(job);
 
-        verifySourceLine(findbugs, "Main.java", 18,
+        assertThatFindBugsResultExists(job, lastBuild);
+
+        lastBuild.open();
+
+        FindBugsAction action = new FindBugsAction(job);
+        action.open();
+
+        assertThat(action.getNewWarningNumber(), is(1));
+
+        verifySourceLine(action, "Main.java", 18,
                 "18         if(o == null) {",
                 "Redundant nullcheck of o, which is known to be non-null in Main.main(String[])");
     }
@@ -260,11 +282,17 @@ public class FindBugsPluginTest extends AbstractAnalysisTest {
     @Test @Category(SmokeTest.class)
     public void should_retrieve_results_from_maven_job() {
         MavenModuleSet job = createMavenJob();
-        Build lastBuild = buildJobWithSuccess(job);
-        assertThatPageHasFindBugsResults(lastBuild);
+
+        Build lastBuild = buildSuccessfulJob(job);
+
+        assertThatFindBugsResultExists(job, lastBuild);
+
         lastBuild.open();
-        FindBugsAction findbugs = new FindBugsAction(job);
-        assertThat(findbugs.getNewWarningNumber(), is(1));
+
+        FindBugsAction action = new FindBugsAction(job);
+        action.open();
+
+        assertThat(action.getNewWarningNumber(), is(1));
     }
 
     /**
@@ -278,6 +306,7 @@ public class FindBugsPluginTest extends AbstractAnalysisTest {
                 settings.setBuildUnstableTotalAll("0");
             }
         });
+
         buildJobAndWait(job).shouldBeUnstable();
     }
 
@@ -292,6 +321,7 @@ public class FindBugsPluginTest extends AbstractAnalysisTest {
                 settings.setBuildFailedTotalAll("0");
             }
         });
+
         buildJobAndWait(job).shouldFail();
     }
 
@@ -302,15 +332,19 @@ public class FindBugsPluginTest extends AbstractAnalysisTest {
     public void should_retrieve_results_from_slave() throws ExecutionException, InterruptedException {
         FreeStyleJob job = createFreeStyleJob();
         Node slave = makeASlaveAndConfigureJob(job);
+
         Build lastBuild = buildJobOnSlaveWithSuccess(job, slave);
 
         assertThat(lastBuild.getNode(), is(slave));
-        assertThatPageHasFindBugsResults(lastBuild);
-        assertThatPageHasFindBugsResults(job);
+        assertThatFindBugsResultExists(job, lastBuild);
+        assertThatFindBugsResultExists(job, job);
     }
 
-    private void assertThatPageHasFindBugsResults(final PageObject page) {
-        assertThat(page, hasAction("FindBugs Warnings"));
+    private void assertThatFindBugsResultExists(final Job job, final PageObject build) {
+        String actionName = "FindBugs Warnings";
+        assertThat(job, hasAction(actionName));
+        assertThat(job.getLastBuild(), hasAction(actionName));
+        assertThat(build, hasAction(actionName));
     }
 
     /**
@@ -323,6 +357,7 @@ public class FindBugsPluginTest extends AbstractAnalysisTest {
         buildJobAndWait(job).shouldSucceed();
 
         ListView view = addListViewColumn(FindBugsColumn.class);
+
         assertValidLink(job.name);
         view.delete();
     }
@@ -334,9 +369,10 @@ public class FindBugsPluginTest extends AbstractAnalysisTest {
     @Test @WithPlugins("dashboard-view")
     public void should_set_warnings_count_in_dashboard_portlet() {
         MavenModuleSet job = createMavenJob();
-        buildJobAndWait(job).shouldSucceed();
+        buildSuccessfulJob(job);
 
         DashboardView view = addDashboardViewAndBottomPortlet(FindBugsPortlet.class);
+
         assertValidLink(job.name);
         view.delete();
     }

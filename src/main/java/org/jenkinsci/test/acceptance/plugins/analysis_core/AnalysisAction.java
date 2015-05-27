@@ -38,6 +38,15 @@ public abstract class AnalysisAction extends ContainerPageObject {
     }
 
     /**
+     * Returns the plug-in name this action belongs to.
+     *
+     * @return  plug-in ID
+     */
+    public String getPlugin() {
+        return plugin;
+    }
+
+    /**
      * Getter of the url for high prio Warnings.
      *
      * @return Url for high prio Warnings
@@ -137,7 +146,6 @@ public abstract class AnalysisAction extends ContainerPageObject {
      * @return The searched number
      */
     private int getIntByXPath(String xPath) {
-        open();
         return asInt(find(by.xpath(xPath)));
     }
 

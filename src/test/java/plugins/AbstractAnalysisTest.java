@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.xerces.jaxp.DocumentBuilderFactoryImpl;
 import org.custommonkey.xmlunit.XMLAssert;
 import org.custommonkey.xmlunit.XMLUnit;
@@ -45,6 +46,7 @@ import com.google.inject.Inject;
 import static java.util.Collections.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.jenkinsci.test.acceptance.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
@@ -343,13 +345,33 @@ public abstract class AbstractAnalysisTest extends AbstractJUnitTest {
     }
 
     /**
-     * Build Job successfully once.
+     * Builds the job and waits until the job has been finished. The build result must be SUCCESS.
      *
-     * @param job Job to build
-     * @return The made build
+     * @param job the job to build
+     * @return the successful build
      */
-    public Build buildJobWithSuccess(Job job) {
+    public Build buildSuccessfulJob(Job job) {
         return buildJobAndWait(job).shouldSucceed();
+    }
+
+    /**
+     * Builds the job and waits until the job has been finished. The build result must be FAILURE.
+     *
+     * @param job the job to build
+     * @return the failed build
+     */
+    protected Build buildFailingJob(final Job job) {
+        return buildJobAndWait(job).shouldFail();
+    }
+
+    /**
+     * Builds the job and waits until the job has been finished. The build result must be UNSTABLE.
+     *
+     * @param job the job to build
+     * @return the unstable build
+     */
+    protected Build buildUnstableJob(final Job job) {
+        return buildJobAndWait(job).shouldBeUnstable();
     }
 
     /**
@@ -479,5 +501,56 @@ public abstract class AbstractAnalysisTest extends AbstractJUnitTest {
         assertThat(action.getLinkedSourceFileLineNumber(tabId, file, line), is(line));
         assertThat(action.getLinkedSourceFileText(tabId, file, line), startsWith(expectedContent));
         assertThat(action.getLinkedSourceFileToolTip(tabId, file, line), containsString(expectedToolTip));
+    }
+
+    /**
+     * Verifies that in the summary page of the specified action there is a link that references all warnings. The link
+     * label contains the specified number of warnings.
+     *
+     * @param action the action to check
+     * @param numberOfWarnings the number of warnings
+     */
+    protected void assertThatWarningsCountInSummaryIs(final AnalysisAction action, final int numberOfWarnings) {
+        assertThatLinkReferencesNumberOfWarnings(action, numberOfWarnings, " warning", "");
+    }
+
+    /**
+     * Verifies that in the summary page of the specified action there is a link that references the new warnings. The
+     * link label contains the specified number of new warnings.
+     *
+     * @param action the action to check
+     * @param numberOfNewWarnings the number of new warnings
+     */
+    protected void assertThatNewWarningsCountInSummaryIs(final AnalysisAction action, final int numberOfNewWarnings) {
+        assertThatLinkReferencesNumberOfWarnings(action, numberOfNewWarnings, " new warning", "/new");
+    }
+
+    /**
+     * Verifies that in the summary page of the specified action there is a link that references the fixed warnings. The
+     * link label contains the specified number of fixed warnings.
+     *
+     * @param action                the action to check
+     * @param numberOfFixedWarnings the number of fixed warnings
+     */
+    protected void assertThatFixedWarningsCountInSummaryIs(final AnalysisAction action, final int numberOfFixedWarnings) {
+        assertThatLinkReferencesNumberOfWarnings(action, numberOfFixedWarnings, " fixed warning", "/fixed");
+    }
+
+    private void assertThatLinkReferencesNumberOfWarnings(final AnalysisAction action, final int numberOfWarnings, final String linkText, final String url) {
+        assertThat(action.getResultLinkByXPathText(numberOfWarnings + linkText + plural(numberOfWarnings)),
+                containsRegexp(action.getPlugin() + ".*Result"));
+    }
+
+    protected String plural(final int numberOfWarnings) {
+        return numberOfWarnings == 1 ? StringUtils.EMPTY : "s";
+    }
+
+    /**
+     * Verifies that the specified build contains no warnings.
+     *
+     * @param build the build to verify
+     */
+    protected void assertThatBuildHasNoWarnings(final Build build) {
+        assertThat(build.open(), hasContent("0 warnings"));
     }
 }
