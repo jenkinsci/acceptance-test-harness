@@ -87,7 +87,7 @@ public class DockerImage {
             File logfile = new File(cidFile+".log");
             tmplog.renameTo(logfile);
 
-            System.out.printf("Launching Docker container %s: logfile is at %s\n", cid, logfile);
+            System.out.printf("Launching Docker container `%s`: logfile is at %s\n", docker.toString(), logfile);
 
             try {
                 T t = type.newInstance();
