@@ -68,7 +68,7 @@ public class JenkinsLogWatcher implements LogListenable, Closeable {
         splitter.addLogListener(watcher);
         reader = new Thread(new LogReader(pipe,splitter),"Log reader: "+id);
 
-        ready = watcher.watch(Pattern.compile(" Completed initialization"));
+        ready = watcher.watch(Pattern.compile("Jenkins is fully up and running"));
         portConflict = watcher.watch(Pattern.compile("java.net.BindException: Address already in use"));
     }
 
