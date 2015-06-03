@@ -1,7 +1,8 @@
 package org.jenkinsci.test.acceptance.plugins.pmd;
 
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisAction;
-import org.jenkinsci.test.acceptance.po.ContainerPageObject;
+import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.po.Job;
 
 /**
  * Page object for PMD action.
@@ -9,7 +10,13 @@ import org.jenkinsci.test.acceptance.po.ContainerPageObject;
  * @author Fabian Trampusch
  */
 public class PmdAction extends AnalysisAction {
-    public PmdAction(final ContainerPageObject parent) {
-        super(parent, "pmd");
+    private static final String PLUGIN = "pmd";
+
+    public PmdAction(final Build parent) {
+        super(parent, PLUGIN);
+    }
+
+    public PmdAction(final Job parent) {
+        super(parent, PLUGIN);
     }
 }

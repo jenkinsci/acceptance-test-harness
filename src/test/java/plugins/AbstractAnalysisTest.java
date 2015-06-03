@@ -38,6 +38,7 @@ import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.po.View;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.jenkinsci.test.acceptance.utils.mail.MailService;
+import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -51,8 +52,41 @@ import static org.junit.Assert.*;
 
 /**
  * Base class for tests of the static analysis plug-ins.
+ *
+ * @param  <P> the type of the project action
+ *
+ * @author Martin Ende
+ * @author Martin Kurz
+ * @author Fabian Trampusch
+ * @author Ullrich Hafner
  */
-public abstract class AbstractAnalysisTest extends AbstractJUnitTest {
+public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends AbstractJUnitTest {
+    /**
+     * Builds a freestyle job with an enabled publisher of the plug-in under test.
+     * Verifies that the project action from the job redirects to the result
+     * of the last build.
+     */
+    @Test
+    public void should_navigate_to_result_action_from_job() {
+        FreeStyleJob job = createFreeStyleJob();
+        buildSuccessfulJob(job);
+
+        AnalysisAction action = createProjectAction(job);
+        action.open();
+
+        assertThat(action.getCurrentUrl(), endsWith("Result/"));
+    }
+
+    protected abstract P createProjectAction(final FreeStyleJob job);
+
+    /**
+     * Creates a freestyle job that has an enabled publisher of the plug-in under test. The job
+     * is expected to run with build status SUCCESS.
+     *
+     * @return the created freestyle job
+     */
+    protected abstract FreeStyleJob createFreeStyleJob();
+
     /** Configuration of the mailing in Jenkins global configuration screen. */
     @Inject
     private MailerGlobalConfig mailer;
@@ -538,7 +572,7 @@ public abstract class AbstractAnalysisTest extends AbstractJUnitTest {
 
     private void assertThatLinkReferencesNumberOfWarnings(final AnalysisAction action, final int numberOfWarnings, final String linkText, final String url) {
         assertThat(action.getResultLinkByXPathText(numberOfWarnings + linkText + plural(numberOfWarnings)),
-                containsRegexp(action.getPlugin() + ".*Result"));
+                containsRegexp(action.getResultUrl()));
     }
 
     protected String plural(final int numberOfWarnings) {

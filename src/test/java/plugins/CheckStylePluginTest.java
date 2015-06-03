@@ -38,11 +38,16 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
  * @author Ullrich Hafner
  */
 @WithPlugins("checkstyle")
-public class CheckStylePluginTest extends AbstractAnalysisTest {
+public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction> {
     private static final String PATTERN_WITH_776_WARNINGS = "checkstyle-result.xml";
     private static final String CHECKSTYLE_PLUGIN_ROOT = "/checkstyle_plugin/";
     private static final String FILE_WITH_776_WARNINGS = CHECKSTYLE_PLUGIN_ROOT + PATTERN_WITH_776_WARNINGS;
     private static final String FILE_FOR_2ND_RUN = CHECKSTYLE_PLUGIN_ROOT + "forSecondRun/checkstyle-result.xml";
+
+    @Override
+    protected CheckStyleAction createProjectAction(final FreeStyleJob job) {
+        return new CheckStyleAction(job);
+    }
 
     /**
      * Checks that the plug-in sends a mail after a build has been failed. The content of the mail contains several
@@ -68,7 +73,8 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
         verifyReceivedMail("Checkstyle: FAILURE", "Checkstyle: 776-0-776");
     }
 
-    private FreeStyleJob createFreeStyleJob() {
+    @Override
+    protected FreeStyleJob createFreeStyleJob() {
         AnalysisConfigurator<CheckStyleFreestyleSettings> buildConfigurator = new AnalysisConfigurator<CheckStyleFreestyleSettings>() {
             @Override
             public void configure(CheckStyleFreestyleSettings settings) {
@@ -106,9 +112,10 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
     public void should_report_details_in_different_tabs() {
         FreeStyleJob job = createFreeStyleJob();
 
-        buildSuccessfulJob(job).open();
+        Build build = buildSuccessfulJob(job);
+        build.open();
 
-        CheckStyleAction action = new CheckStyleAction(job);
+        CheckStyleAction action = new CheckStyleAction(build);
 
         assertThatWarningsCountInSummaryIs(action, 776);
         assertThatNewWarningsCountInSummaryIs(action, 776);
@@ -226,7 +233,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
     }
 
     private void verifyWarningCounts(final FreeStyleJob job) {
-        CheckStyleAction action = new CheckStyleAction(job);
+        CheckStyleAction action = new CheckStyleAction(job.getLastBuild());
 
         assertThatWarningsCountInSummaryIs(action, 679);
         assertThatNewWarningsCountInSummaryIs(action, 3);
@@ -241,18 +248,19 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
         assertThat(action.getNormalWarningNumber(), is(0));
         assertThat(action.getLowWarningNumber(), is(0));
 
-        clickLink("3"); // FIXME: navigation to details should be simpler
+        action.openNew();
+
         assertThat(action.getHighWarningNumber(), is(3));
         assertThat(action.getNormalWarningNumber(), is(0));
         assertThat(action.getLowWarningNumber(), is(0));
     }
 
     private void assertThatCheckStyleResultExists(final Job job, final PageObject build) {
-            String actionName = "Checkstyle Warnings";
-            assertThat(job, hasAction(actionName));
-            assertThat(job.getLastBuild(), hasAction(actionName));
-            assertThat(build, hasAction(actionName));
-        }
+        String actionName = "Checkstyle Warnings";
+        assertThat(job, hasAction(actionName));
+        assertThat(job.getLastBuild(), hasAction(actionName));
+        assertThat(build, hasAction(actionName));
+    }
 
     /**
      * Runs job two times to check if the links of the graph are relative.
@@ -313,13 +321,13 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
                 CheckStyleFreestyleSettings.class, buildConfigurator, "clean package checkstyle:checkstyle"
         );
 
-        Build lastBuild = buildSuccessfulJob(job);
+        Build build = buildSuccessfulJob(job);
 
-        assertThatCheckStyleResultExists(job, lastBuild);
+        assertThatCheckStyleResultExists(job, build);
 
-        lastBuild.open();
+        build.open();
 
-        CheckStyleAction checkstyle = new CheckStyleAction(job);
+        CheckStyleAction checkstyle = new CheckStyleAction(build);
         checkstyle.open();
 
         assertThat(checkstyle.getNewWarningNumber(), is(12));
@@ -349,13 +357,13 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
     public void should_retrieve_results_from_maven_job() {
         MavenModuleSet job = createMavenJob();
 
-        Build lastBuild = buildSuccessfulJob(job);
+        Build build = buildSuccessfulJob(job);
 
-        assertThatCheckStyleResultExists(job, lastBuild);
+        assertThatCheckStyleResultExists(job, build);
 
-        lastBuild.open();
+        build.open();
 
-        CheckStyleAction checkstyle = new CheckStyleAction(job);
+        CheckStyleAction checkstyle = new CheckStyleAction(build);
         checkstyle.open();
 
         assertThat(checkstyle.getNewWarningNumber(), is(12));
@@ -499,13 +507,13 @@ public class CheckStylePluginTest extends AbstractAnalysisTest {
 
         editJob(CHECKSTYLE_PLUGIN_ROOT + fileName, false, job,
                 CheckStyleFreestyleSettings.class, buildConfigurator);
-        Build lastBuild = buildJobAndWait(job).shouldBe(expectedResult);
+        Build build = buildJobAndWait(job).shouldBe(expectedResult);
 
         if (expectedNewWarnings > 0) {
-            assertThatCheckStyleResultExists(job, lastBuild);
-            lastBuild.open();
+            assertThatCheckStyleResultExists(job, build);
+            build.open();
 
-            CheckStyleAction checkstyle = new CheckStyleAction(job);
+            CheckStyleAction checkstyle = new CheckStyleAction(build);
             checkstyle.open();
             assertThat(checkstyle.getNewWarningNumber(), is(expectedNewWarnings));
         }

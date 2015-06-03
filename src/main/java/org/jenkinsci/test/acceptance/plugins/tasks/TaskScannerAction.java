@@ -6,7 +6,7 @@ import java.util.NoSuchElementException;
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisAction;
 import org.jenkinsci.test.acceptance.po.Build;
-import org.jenkinsci.test.acceptance.po.ContainerPageObject;
+import org.jenkinsci.test.acceptance.po.Job;
 import org.openqa.selenium.WebElement;
 
 /**
@@ -15,8 +15,14 @@ import org.openqa.selenium.WebElement;
  * @author Martin Ende
  */
 public class TaskScannerAction extends AnalysisAction {
-    public TaskScannerAction(final ContainerPageObject parent) {
-        super(parent, "tasks");
+    private static final String PLUGIN = "tasks";
+
+    public TaskScannerAction(final Build parent) {
+        super(parent, PLUGIN);
+    }
+
+    public TaskScannerAction(final Job parent) {
+        super(parent, PLUGIN);
     }
 
     /**

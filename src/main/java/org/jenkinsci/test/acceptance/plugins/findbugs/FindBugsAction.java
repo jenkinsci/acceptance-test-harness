@@ -1,8 +1,8 @@
 package org.jenkinsci.test.acceptance.plugins.findbugs;
 
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisAction;
-
-import org.jenkinsci.test.acceptance.po.ContainerPageObject;
+import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.po.Job;
 
 /**
  * Page object for FindBugs action.
@@ -10,7 +10,13 @@ import org.jenkinsci.test.acceptance.po.ContainerPageObject;
  * @author Fabian Trampusch
  */
 public class FindBugsAction extends AnalysisAction {
-    public FindBugsAction(final ContainerPageObject parent) {
-        super(parent, "findbugs");
+    private static final String PLUGIN = "findbugs";
+
+    public FindBugsAction(final Build parent) {
+        super(parent, PLUGIN);
+    }
+
+    public FindBugsAction(final Job parent) {
+        super(parent, PLUGIN);
     }
 }

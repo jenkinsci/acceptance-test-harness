@@ -64,10 +64,15 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
  * @author Ullrich Hafner
  */
 @WithPlugins("findbugs")
-public class FindBugsPluginTest extends AbstractAnalysisTest {
+public class FindBugsPluginTest extends AbstractAnalysisTest<FindBugsAction> {
     private static final String PATTERN_WITH_6_WARNINGS = "findbugsXml.xml";
     private static final String FILE_WITH_6_WARNINGS = "/findbugs_plugin/" + PATTERN_WITH_6_WARNINGS;
     private static final String PLUGIN_ROOT = "/findbugs_plugin/";
+
+    @Override
+    protected FindBugsAction createProjectAction(final FreeStyleJob job) {
+        return new FindBugsAction(job);
+    }
 
     /**
      * Checks that the plug-in sends a mail after a build has been failed. The content of the mail
@@ -93,7 +98,8 @@ public class FindBugsPluginTest extends AbstractAnalysisTest {
         verifyReceivedMail("FindBugs: FAILURE", "FindBugs: 6-0-6");
     }
 
-    private FreeStyleJob createFreeStyleJob() {
+    @Override
+    protected FreeStyleJob createFreeStyleJob() {
         return createFreeStyleJob(new AnalysisConfigurator<FindBugsFreestyleSettings>() {
             @Override
             public void configure(FindBugsFreestyleSettings settings) {
@@ -118,13 +124,13 @@ public class FindBugsPluginTest extends AbstractAnalysisTest {
     public void should_find_warnings_in_freestyle_job() {
         FreeStyleJob job = createFreeStyleJob();
 
-        Build lastBuild = buildSuccessfulJob(job);
+        Build build = buildSuccessfulJob(job);
 
-        assertThatFindBugsResultExists(job, lastBuild);
+        assertThatFindBugsResultExists(job, build);
 
-        lastBuild.open();
+        build.open();
 
-        FindBugsAction action = new FindBugsAction(job);
+        FindBugsAction action = new FindBugsAction(build);
 
         assertThatWarningsCountInSummaryIs(action, 6);
         assertThatNewWarningsCountInSummaryIs(action, 6);
@@ -201,13 +207,13 @@ public class FindBugsPluginTest extends AbstractAnalysisTest {
         buildJobAndWait(job);
         editJob("/findbugs_plugin/forSecondRun/findbugsXml.xml", false, job);
 
-        Build lastBuild = buildSuccessfulJob(job);
+        Build build = buildSuccessfulJob(job);
 
-        assertThatFindBugsResultExists(job, lastBuild);
+        assertThatFindBugsResultExists(job, build);
 
-        lastBuild.open();
+        build.open();
 
-        FindBugsAction action = new FindBugsAction(job);
+        FindBugsAction action = new FindBugsAction(build);
 
         assertThatWarningsCountInSummaryIs(action, 5);
         assertThatNewWarningsCountInSummaryIs(action, 1);
@@ -251,13 +257,13 @@ public class FindBugsPluginTest extends AbstractAnalysisTest {
         FreeStyleJob job = setupJob("/findbugs_plugin/sample_findbugs_project", FreeStyleJob.class,
                 FindBugsFreestyleSettings.class, buildConfigurator, "clean package findbugs:findbugs");
 
-        Build lastBuild = buildSuccessfulJob(job);
+        Build build = buildSuccessfulJob(job);
 
-        assertThatFindBugsResultExists(job, lastBuild);
+        assertThatFindBugsResultExists(job, build);
 
-        lastBuild.open();
+        build.open();
 
-        FindBugsAction action = new FindBugsAction(job);
+        FindBugsAction action = new FindBugsAction(build);
         action.open();
 
         assertThat(action.getNewWarningNumber(), is(1));
@@ -283,13 +289,13 @@ public class FindBugsPluginTest extends AbstractAnalysisTest {
     public void should_retrieve_results_from_maven_job() {
         MavenModuleSet job = createMavenJob();
 
-        Build lastBuild = buildSuccessfulJob(job);
+        Build build = buildSuccessfulJob(job);
 
-        assertThatFindBugsResultExists(job, lastBuild);
+        assertThatFindBugsResultExists(job, build);
 
-        lastBuild.open();
+        build.open();
 
-        FindBugsAction action = new FindBugsAction(job);
+        FindBugsAction action = new FindBugsAction(build);
         action.open();
 
         assertThat(action.getNewWarningNumber(), is(1));

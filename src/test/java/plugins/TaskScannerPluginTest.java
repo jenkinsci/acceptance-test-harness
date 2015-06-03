@@ -30,7 +30,12 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
  * @author Ullrich Hafner
  */
 @WithPlugins("tasks")
-public class TaskScannerPluginTest extends AbstractAnalysisTest {
+public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerAction> {
+    @Override
+    protected TaskScannerAction createProjectAction(final FreeStyleJob job) {
+        return new TaskScannerAction(job);
+    }
+
     /**
      * Checks that the plug-in sends a mail after a build has been failed. The content of the mail contains several
      * tokens that should be expanded in the mail with the correct values.
@@ -62,7 +67,8 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
         verifyReceivedMail("Tasks: FAILURE", "Tasks: 6-0-6");
     }
 
-    private FreeStyleJob createFreeStyleJob() {
+    @Override
+    protected FreeStyleJob createFreeStyleJob() {
         return createFreeStyleJob(new AnalysisConfigurator<TasksFreestyleSettings>() {
             @Override
             public void configure(TasksFreestyleSettings settings) {
@@ -94,11 +100,11 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
     public void should_find_single_task_tags_with_exclusion_pattern() {
         FreeStyleJob job = createFreeStyleJob();
 
-        Build lastBuild = buildSuccessfulJob(job);
+        Build build = buildSuccessfulJob(job);
 
-        assertThatTasksResultExists(job, lastBuild);
+        assertThatTasksResultExists(job, build);
 
-        lastBuild.open();
+        build.open();
 
         // The file set consists of 9 files, whereof
         //   - 2 file names match the exclusion pattern
@@ -109,7 +115,7 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
         //   - 1x high
         //   - 4x medium
         //   - 1x low
-        TaskScannerAction action = new TaskScannerAction(job);
+        TaskScannerAction action = new TaskScannerAction(build);
 
         assertThatOpenTaskCountLinkIs(action, 6, 7);
 
@@ -142,9 +148,11 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
             }
         });
 
-        lastBuild = buildSuccessfulJob(job);
+        build = buildSuccessfulJob(job);
 
-        lastBuild.open();
+        build.open();
+
+        action = new TaskScannerAction(build);
 
         assertThatOpenTaskCountLinkIs(action, 7, 7);
         assertThatNewOpenTaskCountLinkIs(action, 1);
@@ -157,7 +165,7 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
         assertThat(action.getNormalWarningNumber(), is(4));
         assertThat(action.getLowWarningNumber(), is(1));
 
-        lastBuild.visit(action.getNewWarningsUrlAsRelativePath());
+        build.visit(action.getNewWarningsUrlAsRelativePath());
         assertThat(action.getResultLinkByXPathText("TSREc2Provider.java:133"), startsWith("source"));
     }
 
@@ -242,10 +250,10 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
     }
 
     private void verifyRegularExpressionScannerResult(final Job job) {
-        Build lastBuild = buildSuccessfulJob(job);
-        lastBuild.open();
+        Build build = buildSuccessfulJob(job);
+        build.open();
 
-        TaskScannerAction action = new TaskScannerAction(job);
+        TaskScannerAction action = new TaskScannerAction(build);
 
         assertThatOpenTaskCountLinkIs(action, 5, 1);
 
@@ -274,11 +282,11 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
             }
         });
 
-        Build lastBuild = buildSuccessfulJob(job);
+        Build build = buildSuccessfulJob(job);
 
-        lastBuild.open();
+        build.open();
 
-        TaskScannerAction action = new TaskScannerAction(job);
+        TaskScannerAction action = new TaskScannerAction(build);
 
         // The file set consists of 9 files, whereof
         //   - 2 file names match the exclusion pattern
@@ -311,9 +319,11 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
             }
         });
 
-        lastBuild = buildSuccessfulJob(job);
+        build = buildSuccessfulJob(job);
 
-        lastBuild.open();
+        build.open();
+
+        action = new TaskScannerAction(build);
 
         assertThatOpenTaskCountLinkIs(action, 10, 7);
         assertThatNewOpenTaskCountLinkIs(action, 2);
@@ -357,11 +367,11 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
 
         editJob("/tasks_plugin/fileset1_less", false, job);
 
-        Build lastBuild = buildSuccessfulJob(job);
+        Build build = buildSuccessfulJob(job);
 
-        lastBuild.open();
+        build.open();
 
-        TaskScannerAction action = new TaskScannerAction(job);
+        TaskScannerAction action = new TaskScannerAction(build);
 
         // In the first build the task priorities were
         //   - 1x high
@@ -409,11 +419,11 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
         job.addShellStep("exit 1"); //ensures the FAILURE status of the main build
         job.save();
 
-        Build lastBuild = buildFailingJob(job);
+        Build build = buildFailingJob(job);
 
         // the task scanner activity shall be skipped due to the failed main build
         // so we have to search for the particular console output
-        assertThatConsoleContains(lastBuild, ".*\\[TASKS\\] Skipping publisher since build result is FAILURE");
+        assertThatConsoleContains(build, ".*\\[TASKS\\] Skipping publisher since build result is FAILURE");
 
         // now activate "Run always"
         editJob(false, job, TasksFreestyleSettings.class, new AnalysisConfigurator<TasksFreestyleSettings>() {
@@ -423,11 +433,11 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
             }
         });
 
-        lastBuild = buildFailingJob(job);
+        build = buildFailingJob(job);
 
-        lastBuild.open();
+        build.open();
 
-        TaskScannerAction action = new TaskScannerAction(job);
+        TaskScannerAction action = new TaskScannerAction(build);
 
         // as the failed result is now ignored, we expect 2 open tasks, both
         // of high priority and both considered as new warnings.
@@ -464,13 +474,13 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
             }
         });
 
-        Build lastBuild = buildSuccessfulJob(job);
+        Build build = buildSuccessfulJob(job);
 
-        assertThatTasksResultExists(job, lastBuild);
+        assertThatTasksResultExists(job, build);
 
-        lastBuild.open();
+        build.open();
 
-        TaskScannerAction action = new TaskScannerAction(job);
+        TaskScannerAction action = new TaskScannerAction(build);
 
         assertThatOpenTaskCountLinkIs(action, 2, 1);
 
@@ -508,13 +518,13 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
                 });
 
         // as one of the unit tests fail, the build should be unstable
-        Build lastBuild = buildUnstableJob(job);
+        Build build = buildUnstableJob(job);
 
-        assertThatTasksResultExists(job, lastBuild);
+        assertThatTasksResultExists(job, build);
 
-        lastBuild.open();
+        build.open();
 
-        TaskScannerAction action = new TaskScannerAction(job);
+        TaskScannerAction action = new TaskScannerAction(build);
 
         // The expected task priorities are:
         //   - 1x high
@@ -541,14 +551,14 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
         });
 
         // as the threshold for high priority warnings is exceeded, the build should be marked as failed
-        lastBuild = buildFailingJob(job);
+        build = buildFailingJob(job);
 
-        assertThatTasksResultExists(job, lastBuild);
+        assertThatTasksResultExists(job, build);
 
-        lastBuild.open();
+        build.open();
 
         //check build result text
-        assertThat(action.getPluginResult(lastBuild),
+        assertThat(action.getPluginResult(build),
                 is("Plug-in Result: FAILED - 1 warning of priority High exceeds the threshold of 0 by 1 (Reference build: #1)"));
 
         action.open();
@@ -593,7 +603,7 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest {
             }
         });
 
-        TaskScannerAction action = new TaskScannerAction(job);
+        TaskScannerAction action = new TaskScannerAction(job.getLastBuild());
 
         // In order to increase readability each step has been placed in a separate
         // private function

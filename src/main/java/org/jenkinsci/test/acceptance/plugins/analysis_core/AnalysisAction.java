@@ -9,7 +9,9 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.ContainerPageObject;
+import org.jenkinsci.test.acceptance.po.Job;
 import org.openqa.selenium.WebElement;
 
 /**
@@ -18,23 +20,39 @@ import org.openqa.selenium.WebElement;
  * @author Martin Kurz
  */
 public abstract class AnalysisAction extends ContainerPageObject {
-    protected final ContainerPageObject parent;
-
-    /**
-     * Holds the current plugin.
-     */
+    private final ContainerPageObject parent;
     private final String plugin;
 
     /**
-     * Constructor for a action.
+     * Creates a new instance of a static analysis action.
+     *
+     * @param parent Parent container page object
+     * @param plugin plug-in name
+     */
+    public AnalysisAction(final Build parent, final String plugin) {
+        this(plugin + "Result", parent);
+    }
+
+    /**
+     * Creates a new instance of a static analysis action.
      *
      * @param parent Parent container page object
      * @param plugin Path to plugin without / at the end
      */
-    public AnalysisAction(ContainerPageObject parent, String plugin) {
-        super(parent, parent.url(plugin + '/'));
+    public AnalysisAction(final Job parent, final String plugin) {
+        this(plugin, parent);
+    }
+
+    /**
+     * Constructor for a action.
+     *
+     * @param url path to plugin action without / at the end
+     * @param parent parent container page object
+     */
+    public AnalysisAction(String url, ContainerPageObject parent) {
+        super(parent, parent.url(url + '/'));
         this.parent = parent;
-        this.plugin = plugin;
+        plugin = url;
     }
 
     /**
@@ -42,7 +60,7 @@ public abstract class AnalysisAction extends ContainerPageObject {
      *
      * @return  plug-in ID
      */
-    public String getPlugin() {
+    public String getResultUrl() {
         return plugin;
     }
 
@@ -52,7 +70,7 @@ public abstract class AnalysisAction extends ContainerPageObject {
      * @return Url for high prio Warnings
      */
     public URL getHighPrioUrl() {
-        return parent.url(plugin + "Result/HIGH");
+        return parent.url(plugin + "/HIGH");
     }
 
     /**
@@ -61,7 +79,7 @@ public abstract class AnalysisAction extends ContainerPageObject {
      * @return String for new Warnings page
      */
     public String getNewWarningsUrlAsRelativePath() {
-        return plugin + "Result/new";
+        return plugin + "/new";
     }
 
     /**
@@ -341,6 +359,14 @@ public abstract class AnalysisAction extends ContainerPageObject {
     protected void openTab(final Tab id) {
         open();
         find(by.xpath(".//A[@href]/em/div[@id='" + id.name().toLowerCase(Locale.ENGLISH) + "']")).click();
+    }
+
+
+    /**
+     * Opens the details page that show the new warnings.
+     */
+    public void openNew() {
+        visit("new");
     }
 
     /**

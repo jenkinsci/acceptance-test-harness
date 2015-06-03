@@ -1,14 +1,22 @@
 package org.jenkinsci.test.acceptance.plugins.analysis_collector;
 
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisAction;
-import org.jenkinsci.test.acceptance.po.ContainerPageObject;
+import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.po.Job;
 
 /**
- * PO for Static Analysis results (analysis-collector).
+ * Page object for static analysis collector action.
+ *
  * @author Michael Prankl
  */
 public class AnalysisCollectorAction extends AnalysisAction {
-    public AnalysisCollectorAction(ContainerPageObject parent) {
-        super(parent, "analysis");
+    private static final String PLUGIN = "analysis";
+
+    public AnalysisCollectorAction(final Build parent) {
+        super(parent, PLUGIN);
+    }
+
+    public AnalysisCollectorAction(final Job parent) {
+        super(parent, PLUGIN);
     }
 }

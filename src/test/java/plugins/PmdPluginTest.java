@@ -38,12 +38,17 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
  * @author Ullrich Hafner
  */
 @WithPlugins("pmd")
-public class PmdPluginTest extends AbstractAnalysisTest {
+public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
     private static final String PLUGIN_ROOT = "/pmd_plugin/";
     private static final String PATTERN_WITHOUT_WARNINGS = "pmd.xml";
     private static final String FILE_WITHOUT_WARNINGS = PLUGIN_ROOT + PATTERN_WITHOUT_WARNINGS;
     private static final String PATTERN_WITH_9_WARNINGS = "pmd-warnings.xml";
     private static final String FILE_WITH_9_WARNINGS = PLUGIN_ROOT + PATTERN_WITH_9_WARNINGS;
+
+    @Override
+    protected PmdAction createProjectAction(final FreeStyleJob job) {
+        return new PmdAction(job);
+    }
 
     /**
      * Checks that the plug-in sends a mail after a build has been failed. The content of the mail
@@ -86,7 +91,8 @@ public class PmdPluginTest extends AbstractAnalysisTest {
         assertThatBuildHasNoWarnings(lastBuild);
     }
 
-    private FreeStyleJob createFreeStyleJob() {
+    @Override
+    protected FreeStyleJob createFreeStyleJob() {
         return createFreeStyleJob(FILE_WITH_9_WARNINGS, new AnalysisConfigurator<PmdFreestyleSettings>() {
             @Override
             public void configure(PmdFreestyleSettings settings) {
@@ -137,13 +143,13 @@ public class PmdPluginTest extends AbstractAnalysisTest {
             }
         });
 
-        Build lastBuild = buildSuccessfulJob(job);
+        Build build = buildSuccessfulJob(job);
 
-        assertThatPmdResultExists(job, lastBuild);
+        assertThatPmdResultExists(job, build);
 
-        lastBuild.open();
+        build.open();
 
-        PmdAction action = new PmdAction(job);
+        PmdAction action = new PmdAction(build);
 
         assertThatWarningsCountInSummaryIs(action, 9);
         assertThatNewWarningsCountInSummaryIs(action, 9);
@@ -213,13 +219,13 @@ public class PmdPluginTest extends AbstractAnalysisTest {
         buildJobAndWait(job);
         editJob(PLUGIN_ROOT + "forSecondRun/pmd-warnings.xml", false, job);
 
-        Build lastBuild = buildSuccessfulJob(job);
+        Build build = buildSuccessfulJob(job);
 
-        assertThatPmdResultExists(job, lastBuild);
+        assertThatPmdResultExists(job, build);
 
-        lastBuild.open();
+        build.open();
 
-        PmdAction action = new PmdAction(job);
+        PmdAction action = new PmdAction(build);
 
         assertThatWarningsCountInSummaryIs(action, 8);
         assertThatNewWarningsCountInSummaryIs(action, 1);
@@ -291,13 +297,13 @@ public class PmdPluginTest extends AbstractAnalysisTest {
         FreeStyleJob job = setupJob(PLUGIN_ROOT + "sample_pmd_project", FreeStyleJob.class,
                 PmdFreestyleSettings.class, buildConfigurator, "clean package pmd:pmd");
 
-        Build lastBuild = buildSuccessfulJob(job);
+        Build build = buildSuccessfulJob(job);
 
-        assertThatPmdResultExists(job, lastBuild);
+        assertThatPmdResultExists(job, build);
 
-        lastBuild.open();
+        build.open();
 
-        PmdAction action = new PmdAction(job);
+        PmdAction action = new PmdAction(build);
         action.open();
 
         assertThat(action.getNewWarningNumber(), is(2));
@@ -318,13 +324,13 @@ public class PmdPluginTest extends AbstractAnalysisTest {
     public void should_retrieve_results_from_maven_job() {
         MavenModuleSet job = createMavenJob();
 
-        Build lastBuild = buildSuccessfulJob(job);
+        Build build = buildSuccessfulJob(job);
 
-        assertThatPmdResultExists(job, lastBuild);
+        assertThatPmdResultExists(job, build);
 
-        lastBuild.open();
+        build.open();
 
-        PmdAction action = new PmdAction(job);
+        PmdAction action = new PmdAction(build);
         action.open();
 
         assertThat(action.getNewWarningNumber(), is(2));
@@ -475,14 +481,14 @@ public class PmdPluginTest extends AbstractAnalysisTest {
 
         editJob(PLUGIN_ROOT + fileName, false, job,
                 PmdFreestyleSettings.class, buildConfigurator);
-        Build lastBuild = buildJobAndWait(job).shouldBe(expectedResult);
+        Build build = buildJobAndWait(job).shouldBe(expectedResult);
 
         if (expectedNewWarnings > 0) {
-            assertThatPmdResultExists(job, lastBuild);
+            assertThatPmdResultExists(job, build);
 
-            lastBuild.open();
+            build.open();
 
-            PmdAction action = new PmdAction(job);
+            PmdAction action = new PmdAction(build);
             action.open();
 
             assertThat(action.getNewWarningNumber(), is(expectedNewWarnings));

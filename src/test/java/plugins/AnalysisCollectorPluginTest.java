@@ -34,7 +34,7 @@ import static org.junit.Assert.*;
  * @author Ullrich Hafner
  */
 @WithPlugins({"analysis-collector", "checkstyle", "pmd", "findbugs", "tasks", "warnings"})
-public class AnalysisCollectorPluginTest extends AbstractAnalysisTest {
+public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCollectorAction> {
     private static final String ANALYSIS_COLLECTOR_PLUGIN_RESOURCES = "/analysis_collector_plugin";
     private static final String XPATH_LISTVIEW_WARNING_TD = "//table[@id='projectstatus']/tbody/tr[2]/td[last()-1]";
 
@@ -57,19 +57,24 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest {
     private static final int TASKS_LOW = 2;
     private static final int WARNINGS_LOW = 0;
 
+    @Override
+    protected AnalysisCollectorAction createProjectAction(final FreeStyleJob job) {
+        return new AnalysisCollectorAction(job);
+    }
+
     /**
      * Verifies that the plugin correctly collects and aggregates the warnings of all participating plugins.
      */
     @Test
     public void should_collect_warnings_of_all_tools() {
-        FreeStyleJob job = createJob(ANALYSIS_COLLECTOR_PLUGIN_RESOURCES, true);
+        FreeStyleJob job = createFreeStyleJob();
 
-        Build lastBuild = buildSuccessfulJob(job);
+        Build build = buildSuccessfulJob(job);
 
         assertThat(job, hasAction("Static Analysis Warnings"));
-        assertThat(lastBuild, hasAction("Static Analysis Warnings"));
+        assertThat(build, hasAction("Static Analysis Warnings"));
 
-        AnalysisCollectorAction action = new AnalysisCollectorAction(job);
+        AnalysisCollectorAction action = new AnalysisCollectorAction(build);
         action.open();
 
         assertThat(action.getWarningNumber(), is(TOTAL));
@@ -99,9 +104,9 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest {
         job.copyResource(ANALYSIS_COLLECTOR_PLUGIN_RESOURCES + "/Tasks2.java");
         job.save();
 
-        buildSuccessfulJob(job);
+        Build build = buildSuccessfulJob(job);
 
-        AnalysisCollectorAction action = new AnalysisCollectorAction(job);
+        AnalysisCollectorAction action = new AnalysisCollectorAction(build);
         action.open();
 
         assertThat(action.getWarningNumber(), is(8));
@@ -142,7 +147,7 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest {
      */
     @Test
     public void should_collect_warnings_of_selected_tools_only() {
-        FreeStyleJob job = createJob(ANALYSIS_COLLECTOR_PLUGIN_RESOURCES, true);
+        FreeStyleJob job = createFreeStyleJob();
 
         int remaining = TOTAL;
 
@@ -174,7 +179,7 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest {
      */
     @Test
     public void should_show_job_summary_with_warnings_per_tool() {
-        FreeStyleJob job = createJob(ANALYSIS_COLLECTOR_PLUGIN_RESOURCES, true);
+        FreeStyleJob job = createFreeStyleJob();
         buildSuccessfulJob(job);
 
         assertThat(job,
@@ -189,6 +194,11 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest {
         assertThat(job, not(hasAnalysisWarningsFor(DRY)));
     }
 
+    @Override
+    protected FreeStyleJob createFreeStyleJob() {
+        return createJob(ANALYSIS_COLLECTOR_PLUGIN_RESOURCES, true);
+    }
+
     /**
      * Sets up a list view with a warnings column. Builds a job and checks if the column shows the correct number of
      * warnings and provides a direct link to the actual warning results. Also verifies that the mouse-over tooltip will
@@ -196,7 +206,7 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest {
      */
     @Test
     public void should_set_warnings_count_in_list_view_column() {
-        FreeStyleJob job = createJob(ANALYSIS_COLLECTOR_PLUGIN_RESOURCES, true);
+        FreeStyleJob job = createFreeStyleJob();
         buildSuccessfulJob(job);
 
         ListView view = jenkins.views.create(ListView.class, createRandomName());
@@ -240,7 +250,7 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest {
     @Test
     @WithPlugins("dashboard-view")
     public void should_aggregate_warnings_in_dashboard_portlet() {
-        FreeStyleJob job = createJob(ANALYSIS_COLLECTOR_PLUGIN_RESOURCES, true);
+        FreeStyleJob job = createFreeStyleJob();
         buildSuccessfulJob(job);
 
         DashboardView dashboard = jenkins.views.create(DashboardView.class, createRandomName());
@@ -272,8 +282,8 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest {
         AnalysisCollectorFreestyleBuildSettings publisher = job.getPublisher(AnalysisCollectorFreestyleBuildSettings.class);
         publisher.checkCollectedPlugin(plugin, false);
         job.save();
-        job.startBuild().waitUntilFinished();
-        AnalysisCollectorAction action = new AnalysisCollectorAction(job);
+        Build build = buildSuccessfulJob(job);
+        AnalysisCollectorAction action = new AnalysisCollectorAction(build);
         action.open();
         return action;
     }
