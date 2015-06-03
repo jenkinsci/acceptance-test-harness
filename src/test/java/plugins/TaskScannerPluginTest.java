@@ -121,10 +121,10 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
 
         action.open();
 
-        assertThat(action.getWarningNumber(), is(6));
-        assertThat(action.getHighWarningNumber(), is(1));
-        assertThat(action.getNormalWarningNumber(), is(4));
-        assertThat(action.getLowWarningNumber(), is(1));
+        assertThat(action.getNumberOfWarnings(), is(6));
+        assertThat(action.getNumberOfWarningsWithHighPriority(), is(1));
+        assertThat(action.getNumberOfWarningsWithNormalPriority(), is(4));
+        assertThat(action.getNumberOfWarningsWithLowPriority(), is(1));
 
         assertFilesTabFS1E1(action);
         assertTypesTabFS1E1(action);
@@ -159,13 +159,14 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
 
         action.open();
 
-        assertThat(action.getWarningNumber(), is(7));
-        assertThat(action.getNewWarningNumber(), is(1));
-        assertThat(action.getHighWarningNumber(), is(2));
-        assertThat(action.getNormalWarningNumber(), is(4));
-        assertThat(action.getLowWarningNumber(), is(1));
+        assertThat(action.getNumberOfWarnings(), is(7));
+        assertThat(action.getNumberOfNewWarnings(), is(1));
+        assertThat(action.getNumberOfWarningsWithHighPriority(), is(2));
+        assertThat(action.getNumberOfWarningsWithNormalPriority(), is(4));
+        assertThat(action.getNumberOfWarningsWithLowPriority(), is(1));
 
-        build.visit(action.getNewWarningsUrlAsRelativePath());
+        action.openNew();
+
         assertThat(action.getResultLinkByXPathText("TSREc2Provider.java:133"), startsWith("source"));
     }
 
@@ -259,8 +260,8 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
 
         action.open();
 
-        assertThat(action.getWarningNumber(), is(5));
-        assertThat(action.getNormalWarningNumber(), is(5));
+        assertThat(action.getNumberOfWarnings(), is(5));
+        assertThat(action.getNumberOfWarningsWithNormalPriority(), is(5));
     }
 
     /**
@@ -302,10 +303,10 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
 
         action.open();
 
-        assertThat(action.getWarningNumber(), is(8));
-        assertThat(action.getHighWarningNumber(), is(3));
-        assertThat(action.getNormalWarningNumber(), is(4));
-        assertThat(action.getLowWarningNumber(), is(1));
+        assertThat(action.getNumberOfWarnings(), is(8));
+        assertThat(action.getNumberOfWarningsWithHighPriority(), is(3));
+        assertThat(action.getNumberOfWarningsWithNormalPriority(), is(4));
+        assertThat(action.getNumberOfWarningsWithLowPriority(), is(1));
 
         // now add further task tags. Then the publisher shall also
         // find the second priority task in TSRDockerImage.java (line 102) amd
@@ -330,11 +331,11 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
 
         action.open();
 
-        assertThat(action.getWarningNumber(), is(10));
-        assertThat(action.getNewWarningNumber(), is(2));
-        assertThat(action.getHighWarningNumber(), is(3));
-        assertThat(action.getNormalWarningNumber(), is(5));
-        assertThat(action.getLowWarningNumber(), is(2));
+        assertThat(action.getNumberOfWarnings(), is(10));
+        assertThat(action.getNumberOfNewWarnings(), is(2));
+        assertThat(action.getNumberOfWarningsWithHighPriority(), is(3));
+        assertThat(action.getNumberOfWarningsWithNormalPriority(), is(5));
+        assertThat(action.getNumberOfWarningsWithLowPriority(), is(2));
 
         assertFilesTabFS1E2(action);
         assertTypesTabFS1E2(action);
@@ -388,11 +389,11 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
 
         action.open();
 
-        assertThat(action.getWarningNumber(), is(3));
-        assertThat(action.getFixedWarningNumber(), is(3));
-        assertThat(action.getHighWarningNumber(), is(0));
-        assertThat(action.getNormalWarningNumber(), is(3));
-        assertThat(action.getLowWarningNumber(), is(0));
+        assertThat(action.getNumberOfWarnings(), is(3));
+        assertThat(action.getNumberOfFixedWarnings(), is(3));
+        assertThat(action.getNumberOfWarningsWithHighPriority(), is(0));
+        assertThat(action.getNumberOfWarningsWithNormalPriority(), is(3));
+        assertThat(action.getNumberOfWarningsWithLowPriority(), is(0));
 
         assertFixedTab(action);
     }
@@ -446,8 +447,8 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
 
         action.open();
 
-        assertThat(action.getWarningNumber(), is(2));
-        assertThat(action.getHighWarningNumber(), is(2));
+        assertThat(action.getNumberOfWarnings(), is(2));
+        assertThat(action.getNumberOfWarningsWithHighPriority(), is(2));
     }
 
     private void assertThatConsoleContains(final Build lastBuild, final String regexp) {
@@ -486,9 +487,9 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
 
         action.open();
 
-        assertThat(action.getWarningNumber(), is(2));
-        assertThat(action.getHighWarningNumber(), is(1));
-        assertThat(action.getNormalWarningNumber(), is(1));
+        assertThat(action.getNumberOfWarnings(), is(2));
+        assertThat(action.getNumberOfWarningsWithHighPriority(), is(1));
+        assertThat(action.getNumberOfWarningsWithNormalPriority(), is(1));
 
         assertWarningExtraction(action, "TestTaskScanner.java", 5, "TODO", "пример комментария на русском");
 
@@ -535,10 +536,10 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
 
         action.open();
 
-        assertThat(action.getWarningNumber(), is(3));
-        assertThat(action.getHighWarningNumber(), is(1));
-        assertThat(action.getNormalWarningNumber(), is(1));
-        assertThat(action.getLowWarningNumber(), is(1));
+        assertThat(action.getNumberOfWarnings(), is(3));
+        assertThat(action.getNumberOfWarningsWithHighPriority(), is(1));
+        assertThat(action.getNumberOfWarningsWithNormalPriority(), is(1));
+        assertThat(action.getNumberOfWarningsWithLowPriority(), is(1));
 
         // re-configure the job and set a threshold to mark the build as failed
         editJob(false, job, TasksMavenSettings.class, new AnalysisConfigurator<TasksMavenSettings>() {
@@ -564,9 +565,9 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
         action.open();
 
         //no change in warning counts expected
-        assertThat(action.getHighWarningNumber(), is(1));
-        assertThat(action.getNormalWarningNumber(), is(1));
-        assertThat(action.getLowWarningNumber(), is(1));
+        assertThat(action.getNumberOfWarningsWithHighPriority(), is(1));
+        assertThat(action.getNumberOfWarningsWithNormalPriority(), is(1));
+        assertThat(action.getNumberOfWarningsWithLowPriority(), is(1));
     }
 
     /**
@@ -640,10 +641,10 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
 
         action.open();
 
-        assertThat(action.getWarningNumber(), is(3));
+        assertThat(action.getNumberOfWarnings(), is(3));
         // Note: high warning is omitted in summary table because no high prio tag is defined.
-        assertThat(action.getNormalWarningNumber(), is(3));
-        assertThat(action.getLowWarningNumber(), is(0));
+        assertThat(action.getNumberOfWarningsWithNormalPriority(), is(3));
+        assertThat(action.getNumberOfWarningsWithLowPriority(), is(0));
         assertThat(action.getPluginResult(lastBuild), is("Plug-in Result: SUCCESS - no threshold has been exceeded"));
 
         return job;
@@ -678,10 +679,10 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
 
         action.open();
 
-        assertThat(action.getWarningNumber(), is(6));
-        assertThat(action.getNewWarningNumber(), is(3));
-        assertThat(action.getNormalWarningNumber(), is(4));
-        assertThat(action.getLowWarningNumber(), is(2));
+        assertThat(action.getNumberOfWarnings(), is(6));
+        assertThat(action.getNumberOfNewWarnings(), is(3));
+        assertThat(action.getNumberOfWarningsWithNormalPriority(), is(4));
+        assertThat(action.getNumberOfWarningsWithLowPriority(), is(2));
         assertThat(action.getPluginResult(lastBuild),
                 is("Plug-in Result: UNSTABLE - 2 warnings of priority Low exceed the threshold of 1 by 1 (Reference build: #1)"));
 
@@ -724,10 +725,10 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
 
         action.open();
 
-        assertThat(action.getWarningNumber(), is(6));
-        assertThat(action.getNewWarningNumber(), is(3));
-        assertThat(action.getNormalWarningNumber(), is(5));
-        assertThat(action.getLowWarningNumber(), is(1));
+        assertThat(action.getNumberOfWarnings(), is(6));
+        assertThat(action.getNumberOfNewWarnings(), is(3));
+        assertThat(action.getNumberOfWarningsWithNormalPriority(), is(5));
+        assertThat(action.getNumberOfWarningsWithLowPriority(), is(1));
         assertThat(action.getPluginResult(lastBuild),
                 is("Plug-in Result: UNSTABLE - 5 warnings of priority Normal exceed the threshold of 4 by 1 (Reference build: #1)"));
 
@@ -764,11 +765,11 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
 
         action.open();
 
-        assertThat(action.getWarningNumber(), is(8));
-        assertThat(action.getNewWarningNumber(), is(5));
-        assertThat(action.getHighWarningNumber(), is(1));
-        assertThat(action.getNormalWarningNumber(), is(5));
-        assertThat(action.getLowWarningNumber(), is(2));
+        assertThat(action.getNumberOfWarnings(), is(8));
+        assertThat(action.getNumberOfNewWarnings(), is(5));
+        assertThat(action.getNumberOfWarningsWithHighPriority(), is(1));
+        assertThat(action.getNumberOfWarningsWithNormalPriority(), is(5));
+        assertThat(action.getNumberOfWarningsWithLowPriority(), is(2));
         assertThat(action.getPluginResult(lastBuild),
                 is("Plug-in Result: UNSTABLE - 1 warning of priority High exceeds the threshold of 0 by 1 (Reference build: #1)"));
 
@@ -805,11 +806,11 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
 
         action.open();
 
-        assertThat(action.getWarningNumber(), is(15));
-        assertThat(action.getNewWarningNumber(), is(12));
-        assertThat(action.getHighWarningNumber(), is(1));
-        assertThat(action.getNormalWarningNumber(), is(11));
-        assertThat(action.getLowWarningNumber(), is(3));
+        assertThat(action.getNumberOfWarnings(), is(15));
+        assertThat(action.getNumberOfNewWarnings(), is(12));
+        assertThat(action.getNumberOfWarningsWithHighPriority(), is(1));
+        assertThat(action.getNumberOfWarningsWithNormalPriority(), is(11));
+        assertThat(action.getNumberOfWarningsWithLowPriority(), is(3));
         assertThat(action.getPluginResult(lastBuild),
                 is("Plug-in Result: UNSTABLE - 15 warnings exceed the threshold of 10 by 5 (Reference build: #1)"));
 
@@ -845,11 +846,11 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
 
         action.open();
 
-        assertThat(action.getWarningNumber(), is(16));
-        assertThat(action.getNewWarningNumber(), is(13));
-        assertThat(action.getHighWarningNumber(), is(2));
-        assertThat(action.getNormalWarningNumber(), is(11));
-        assertThat(action.getLowWarningNumber(), is(3));
+        assertThat(action.getNumberOfWarnings(), is(16));
+        assertThat(action.getNumberOfNewWarnings(), is(13));
+        assertThat(action.getNumberOfWarningsWithHighPriority(), is(2));
+        assertThat(action.getNumberOfWarningsWithNormalPriority(), is(11));
+        assertThat(action.getNumberOfWarningsWithLowPriority(), is(3));
         assertThat(action.getPluginResult(lastBuild),
                 is("Plug-in Result: FAILED - 16 warnings exceed the threshold of 15 by 1 (Reference build: #1)"));
 
@@ -904,12 +905,12 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
 
         action.open();
 
-        assertThat(action.getWarningNumber(), is(1));
-        assertThat(action.getNewWarningNumber(), is(1));
-        assertThat(action.getFixedWarningNumber(), is(3));
-        assertThat(action.getHighWarningNumber(), is(0));
-        assertThat(action.getNormalWarningNumber(), is(0));
-        assertThat(action.getLowWarningNumber(), is(1));
+        assertThat(action.getNumberOfWarnings(), is(1));
+        assertThat(action.getNumberOfNewWarnings(), is(1));
+        assertThat(action.getNumberOfFixedWarnings(), is(3));
+        assertThat(action.getNumberOfWarningsWithHighPriority(), is(0));
+        assertThat(action.getNumberOfWarningsWithNormalPriority(), is(0));
+        assertThat(action.getNumberOfWarningsWithLowPriority(), is(1));
         assertThat(action.getPluginResult(lastBuild),
                 is("Plug-in Result: SUCCESS - no threshold has been exceeded (Reference build: #1)"));
 

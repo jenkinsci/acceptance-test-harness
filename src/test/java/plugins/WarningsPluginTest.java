@@ -435,12 +435,12 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
 
         action.open();
 
-        assertThat(action.getNewWarningNumber(), is(1));
-        assertThat(action.getWarningNumber(), is(1));
-        assertThat(action.getFixedWarningNumber(), is(0));
-        assertThat(action.getHighWarningNumber(), is(1));
-        assertThat(action.getNormalWarningNumber(), is(0));
-        assertThat(action.getLowWarningNumber(), is(0));
+        assertThat(action.getNumberOfNewWarnings(), is(1));
+        assertThat(action.getNumberOfWarnings(), is(1));
+        assertThat(action.getNumberOfFixedWarnings(), is(0));
+        assertThat(action.getNumberOfWarningsWithHighPriority(), is(1));
+        assertThat(action.getNumberOfWarningsWithNormalPriority(), is(0));
+        assertThat(action.getNumberOfWarningsWithLowPriority(), is(0));
     }
 
     private void assertThatActionExists(final Job job, final Build build, final String parser) {
@@ -498,11 +498,11 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
 
         action.open();
 
-        assertThat(action.getWarningNumber(), is(5));
-        assertThat(action.getNewWarningNumber(), is(5));
-        assertThat(action.getFixedWarningNumber(), is(0));
-        assertThat(action.getHighWarningNumber(), is(0));
-        assertThat(action.getNormalWarningNumber(), is(5));
-        assertThat(action.getLowWarningNumber(), is(0));
+        assertThat(action.getNumberOfWarnings(), is(5));
+        assertThat(action.getNumberOfNewWarnings(), is(5));
+        assertThat(action.getNumberOfFixedWarnings(), is(0));
+        assertThat(action.getNumberOfWarningsWithHighPriority(), is(0));
+        assertThat(action.getNumberOfWarningsWithNormalPriority(), is(5));
+        assertThat(action.getNumberOfWarningsWithLowPriority(), is(0));
     }
 }

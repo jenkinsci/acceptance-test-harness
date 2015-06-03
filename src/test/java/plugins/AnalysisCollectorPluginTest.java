@@ -77,17 +77,17 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
         AnalysisCollectorAction action = new AnalysisCollectorAction(build);
         action.open();
 
-        assertThat(action.getWarningNumber(), is(TOTAL));
-        assertThat(action.getNewWarningNumber(), is(TOTAL));
+        assertThat(action.getNumberOfWarnings(), is(TOTAL));
+        assertThat(action.getNumberOfNewWarnings(), is(TOTAL));
 
         int high = CHECKSTYLE_HIGH + FINDBUGS_HIGH + PMD_HIGH + TASKS_HIGH + WARNINGS_HIGH;
-        assertThat(action.getHighWarningNumber(), is(high));
+        assertThat(action.getNumberOfWarningsWithHighPriority(), is(high));
 
         int low = CHECKSTYLE_LOW + FINDBUGS_LOW + PMD_LOW + TASKS_LOW + WARNINGS_LOW;
-        assertThat(action.getLowWarningNumber(), is(low));
+        assertThat(action.getNumberOfWarningsWithLowPriority(), is(low));
 
         int normal = TOTAL - low - high;
-        assertThat(action.getNormalWarningNumber(), is(normal));
+        assertThat(action.getNumberOfWarningsWithNormalPriority(), is(normal));
     }
 
     /**
@@ -109,11 +109,11 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
         AnalysisCollectorAction action = new AnalysisCollectorAction(build);
         action.open();
 
-        assertThat(action.getWarningNumber(), is(8));
-        assertThat(action.getHighWarningNumber(), is(2));
-        assertThat(action.getNormalWarningNumber(), is(4));
-        assertThat(action.getLowWarningNumber(), is(2));
-        assertThat(action.getNewWarningNumber(), is(4));
+        assertThat(action.getNumberOfWarnings(), is(8));
+        assertThat(action.getNumberOfWarningsWithHighPriority(), is(2));
+        assertThat(action.getNumberOfWarningsWithNormalPriority(), is(4));
+        assertThat(action.getNumberOfWarningsWithLowPriority(), is(2));
+        assertThat(action.getNumberOfNewWarnings(), is(4));
     }
 
     /**
@@ -154,22 +154,22 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
         AnalysisCollectorAction action = deselectPluginAndBuild(CHECKSTYLE, job);
 
         remaining -= CHECKSTYLE_ALL;
-        assertThat(action.getWarningNumber(), is(remaining));
+        assertThat(action.getNumberOfWarnings(), is(remaining));
 
         action = deselectPluginAndBuild(FINDBUGS, job);
         remaining -= FINDBUGS_ALL;
-        assertThat(action.getWarningNumber(), is(remaining));
+        assertThat(action.getNumberOfWarnings(), is(remaining));
 
         action = deselectPluginAndBuild(PMD, job);
         remaining -= PMD_ALL;
-        assertThat(action.getWarningNumber(), is(remaining));
+        assertThat(action.getNumberOfWarnings(), is(remaining));
 
         action = deselectPluginAndBuild(TASKS, job);
         remaining -= TASKS_ALL;
-        assertThat(action.getWarningNumber(), is(remaining));
+        assertThat(action.getNumberOfWarnings(), is(remaining));
 
         action = deselectPluginAndBuild(WARNINGS, job);
-        assertThat(action.getWarningNumber(), is(0));
+        assertThat(action.getNumberOfWarnings(), is(0));
     }
 
     /**

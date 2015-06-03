@@ -1,6 +1,5 @@
 package org.jenkinsci.test.acceptance.plugins.analysis_core;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -43,14 +42,9 @@ public abstract class AnalysisAction extends ContainerPageObject {
         this(plugin, parent);
     }
 
-    /**
-     * Constructor for a action.
-     *
-     * @param url path to plugin action without / at the end
-     * @param parent parent container page object
-     */
-    public AnalysisAction(String url, ContainerPageObject parent) {
+    private AnalysisAction(String url, ContainerPageObject parent) {
         super(parent, parent.url(url + '/'));
+
         this.parent = parent;
         plugin = url;
     }
@@ -65,75 +59,65 @@ public abstract class AnalysisAction extends ContainerPageObject {
     }
 
     /**
-     * Getter of the url for high prio Warnings.
+     * Returns the number of warnings.
      *
-     * @return Url for high prio Warnings
+     * @return number of warnings
      */
-    public URL getHighPrioUrl() {
-        return parent.url(plugin + "/HIGH");
+    public int getNumberOfWarnings() {
+        return getSummaryCellXPath("all");
     }
 
     /**
-     * Getter of the relative path for new Warnings page.
+     * Returns the number of new warnings.
      *
-     * @return String for new Warnings page
+     * @return number of new warnings
      */
-    public String getNewWarningsUrlAsRelativePath() {
-        return plugin + "/new";
+    public int getNumberOfNewWarnings() {
+        return getSummaryCellXPath("new");
     }
 
     /**
-     * Getter of all warnings.
+     * Returns the number of fixed warnings.
      *
-     * @return Number of warnings
+     * @return number of fixed warnings
      */
-    public int getWarningNumber() {
-        return getIntByXPath("//table[@id='summary']/tbody/tr/td[@class='pane'][1]");
+    public int getNumberOfFixedWarnings() {
+        return getSummaryCellXPath("fixed");
+    }
+
+    private int getSummaryCellXPath(final String element) {
+        return getIntByXPath("//td[@id='" + element + "']");
     }
 
     /**
-     * Getter of new warnings.
+     * Returns the number of warnings with high priority.
      *
-     * @return Number of new warnings
+     * @return number of warnings with high priority
      */
-    public int getNewWarningNumber() {
-        return getIntByXPath("//table[@id='summary']/tbody/tr/td[@class='pane'][2]");
-    }
-
-    /**
-     * Getter of fixed warnings.
-     *
-     * @return Number of fixed warnings
-     */
-    public int getFixedWarningNumber() {
-        return getIntByXPath("//table[@id='summary']/tbody/tr/td[@class='pane'][3]");
-    }
-
-    /**
-     * Getter of high warnings.
-     *
-     * @return Number of high warnings
-     */
-    public int getHighWarningNumber() {
+    public int getNumberOfWarningsWithHighPriority() {
         return getPriorityWarningNumber("HIGH");
     }
 
     /**
-     * Getter of normal warnings.
+     * Returns the number of warnings with normal priority.
      *
-     * @return Number of normal warnings
+     * @return number of warnings with normal priority
      */
-    public int getNormalWarningNumber() {
+    public int getNumberOfWarningsWithNormalPriority() {
         return getPriorityWarningNumber("NORMAL");
     }
 
     /**
-     * Getter of low warnings.
+     * Returns the number of warnings with low priority.
      *
-     * @return Number of low warnings.
+     * @return number of warnings with low priority
      */
-    public int getLowWarningNumber() {
+    public int getNumberOfWarningsWithLowPriority() {
         return getPriorityWarningNumber("LOW");
+    }
+
+    private int getPriorityWarningNumber(final String priority) {
+        return getIntByXPath("//div[@id='" + priority + "']");
     }
 
     /**
@@ -143,18 +127,8 @@ public abstract class AnalysisAction extends ContainerPageObject {
      * @return Href-value of link with given text
      */
     public String getResultLinkByXPathText(final String linkText) {
-        final String htmlElement = find(by.xpath(".//A[text() = '" + linkText + "']")).getAttribute("outerHTML");
+        String htmlElement = find(by.xpath(".//A[text() = '" + linkText + "']")).getAttribute("outerHTML");
         return StringUtils.substringBetween(htmlElement, "\"");
-    }
-
-    /**
-     * Getter for warning counts of a certain priority
-     *
-     * @param priority the desired priority whose number of warnings shall be extracted (LOW, NORMAL, HIGH)
-     * @return number of warnings of that priority
-     */
-    private int getPriorityWarningNumber(String priority) {
-        return getIntByXPath("//table[@id='analysis.summary']/tbody/tr/td[@class='pane']/div[@id='" + priority + "']");
     }
 
     /**
@@ -282,6 +256,16 @@ public abstract class AnalysisAction extends ContainerPageObject {
     }
 
     /**
+     * Returns the number of fixed warnings by counting the number of rows in the 'fixed' warnings table.
+     *
+     * @return the number of fixed warnings
+     */
+    // TODO: actually the content of each row should be validated
+    public int getNumberOfRowsInFixedWarningsTable() {
+        return getVisibleTableRows(true, false, find(by.xpath("//table[@id='fixed']"))).size();
+    }
+
+    /**
      * Returns the first two columns of the "Fixed"-tab as key => value pairs, skipping the header row.
      *
      * @return a map of the first two columns. (first column => second column)
@@ -305,6 +289,10 @@ public abstract class AnalysisAction extends ContainerPageObject {
 
     protected List<WebElement> getVisibleTableRows(boolean removeHeader, boolean removeFooter) {
         WebElement table = find(by.xpath("//div[@id='statistics']/div/div/table"));
+        return getVisibleTableRows(removeHeader, removeFooter, table);
+    }
+
+    private List<WebElement> getVisibleTableRows(final boolean removeHeader, final boolean removeFooter, final WebElement table) {
         final List<WebElement> immediateChildRows = table.findElements(by.xpath("./tbody/tr"));
 
         if (removeHeader) {
@@ -367,6 +355,13 @@ public abstract class AnalysisAction extends ContainerPageObject {
      */
     public void openNew() {
         visit("new");
+    }
+
+    /**
+     * Opens the details page that show the fixed warnings.
+     */
+    public void openFixed() {
+        visit("fixed");
     }
 
     /**

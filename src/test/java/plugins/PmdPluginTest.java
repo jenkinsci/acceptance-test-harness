@@ -156,12 +156,12 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
 
         action.open();
 
-        assertThat(action.getWarningNumber(), is(9));
-        assertThat(action.getNewWarningNumber(), is(9));
-        assertThat(action.getFixedWarningNumber(), is(0));
-        assertThat(action.getHighWarningNumber(), is(0));
-        assertThat(action.getNormalWarningNumber(), is(3));
-        assertThat(action.getLowWarningNumber(), is(6));
+        assertThat(action.getNumberOfWarnings(), is(9));
+        assertThat(action.getNumberOfNewWarnings(), is(9));
+        assertThat(action.getNumberOfFixedWarnings(), is(0));
+        assertThat(action.getNumberOfWarningsWithHighPriority(), is(0));
+        assertThat(action.getNumberOfWarningsWithNormalPriority(), is(3));
+        assertThat(action.getNumberOfWarningsWithLowPriority(), is(6));
 
         assertThatFilesTabIsCorrectlyFilled(action);
         assertThatTypesTabIsCorrectlyFilled(action);
@@ -211,20 +211,32 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
     }
 
     /**
-     * Runs job two times to check if new and fixed warnings are displayed.
+     * Runs job two times to check if new and fixed warnings are displayed. Afterwards, the first build
+     * is deleted and Jenkins is restarted. Then the results of the second build are validated again: the detail
+     * pages should then show the same results (see JENKINS-24940).
      */
-    @Test
+    @Test @Issue("24940")
     public void should_report_new_and_fixed_warnings_in_consecutive_builds() {
         FreeStyleJob job = createFreeStyleJob();
-        buildJobAndWait(job);
+        Build firstBuild = buildJobAndWait(job);
         editJob(PLUGIN_ROOT + "forSecondRun/pmd-warnings.xml", false, job);
 
-        Build build = buildSuccessfulJob(job);
+        Build lastBuild = buildSuccessfulJob(job);
 
-        assertThatPmdResultExists(job, build);
+        assertThatPmdResultExists(job, lastBuild);
 
-        build.open();
+        lastBuild.open();
 
+        verifyWarningCounts(lastBuild);
+
+        firstBuild.delete();
+        jenkins.restart();
+        lastBuild.open();
+
+        verifyWarningCounts(lastBuild);
+    }
+
+    private void verifyWarningCounts(final Build build) {
         PmdAction action = new PmdAction(build);
 
         assertThatWarningsCountInSummaryIs(action, 8);
@@ -233,12 +245,22 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
 
         action.open();
 
-        assertThat(action.getWarningNumber(), is(8));
-        assertThat(action.getNewWarningNumber(), is(1));
-        assertThat(action.getFixedWarningNumber(), is(1));
-        assertThat(action.getHighWarningNumber(), is(0));
-        assertThat(action.getNormalWarningNumber(), is(2));
-        assertThat(action.getLowWarningNumber(), is(6));
+        assertThat(action.getNumberOfWarnings(), is(8));
+        assertThat(action.getNumberOfNewWarnings(), is(1));
+        assertThat(action.getNumberOfFixedWarnings(), is(1));
+        assertThat(action.getNumberOfWarningsWithHighPriority(), is(0));
+        assertThat(action.getNumberOfWarningsWithNormalPriority(), is(2));
+        assertThat(action.getNumberOfWarningsWithLowPriority(), is(6));
+
+        action.openNew();
+
+        assertThat(action.getNumberOfWarningsWithHighPriority(), is(0));
+        assertThat(action.getNumberOfWarningsWithNormalPriority(), is(0));
+        assertThat(action.getNumberOfWarningsWithLowPriority(), is(1));
+
+        action.openFixed();
+
+        assertThat(action.getNumberOfRowsInFixedWarningsTable(), is(1));
     }
 
     /**
@@ -306,7 +328,7 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
         PmdAction action = new PmdAction(build);
         action.open();
 
-        assertThat(action.getNewWarningNumber(), is(2));
+        assertThat(action.getNumberOfNewWarnings(), is(2));
 
         SortedMap<String, Integer> expectedContent = new TreeMap<>();
         expectedContent.put("Main.java:9", 9);
@@ -333,7 +355,7 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
         PmdAction action = new PmdAction(build);
         action.open();
 
-        assertThat(action.getNewWarningNumber(), is(2));
+        assertThat(action.getNumberOfNewWarnings(), is(2));
     }
 
     private void assertThatPmdResultExists(final Job job, final PageObject build) {
@@ -491,7 +513,7 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
             PmdAction action = new PmdAction(build);
             action.open();
 
-            assertThat(action.getNewWarningNumber(), is(expectedNewWarnings));
+            assertThat(action.getNumberOfNewWarnings(), is(expectedNewWarnings));
         }
     }
 }

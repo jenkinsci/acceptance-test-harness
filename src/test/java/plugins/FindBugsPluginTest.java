@@ -137,12 +137,12 @@ public class FindBugsPluginTest extends AbstractAnalysisTest<FindBugsAction> {
 
         action.open();
 
-        assertThat(action.getWarningNumber(), is(6));
-        assertThat(action.getNewWarningNumber(), is(6));
-        assertThat(action.getFixedWarningNumber(), is(0));
-        assertThat(action.getHighWarningNumber(), is(2));
-        assertThat(action.getNormalWarningNumber(), is(4));
-        assertThat(action.getLowWarningNumber(), is(0));
+        assertThat(action.getNumberOfWarnings(), is(6));
+        assertThat(action.getNumberOfNewWarnings(), is(6));
+        assertThat(action.getNumberOfFixedWarnings(), is(0));
+        assertThat(action.getNumberOfWarningsWithHighPriority(), is(2));
+        assertThat(action.getNumberOfWarningsWithNormalPriority(), is(4));
+        assertThat(action.getNumberOfWarningsWithLowPriority(), is(0));
 
         assertThatFilesTabIsCorrectlyFilled(action);
         assertThatCategoriesTabIsCorrectlyFilled(action);
@@ -199,20 +199,32 @@ public class FindBugsPluginTest extends AbstractAnalysisTest<FindBugsAction> {
     }
 
     /**
-     * Runs job two times to check if new and fixed warnings are displayed.
+     * Runs job two times to check if new and fixed warnings are displayed. Afterwards, the first build
+     * is deleted and Jenkins is restarted. Then the results of the second build are validated again: the detail
+     * pages should then show the same results (see JENKINS-24940).
      */
-    @Test
+    @Test @Issue("24940")
     public void should_report_new_and_fixed_warnings_in_consecutive_builds() {
         FreeStyleJob job = createFreeStyleJob();
-        buildJobAndWait(job);
+        Build firstBuild = buildJobAndWait(job);
         editJob("/findbugs_plugin/forSecondRun/findbugsXml.xml", false, job);
 
-        Build build = buildSuccessfulJob(job);
+        Build lastBuild = buildSuccessfulJob(job);
 
-        assertThatFindBugsResultExists(job, build);
+        assertThatFindBugsResultExists(job, lastBuild);
 
-        build.open();
+        lastBuild.open();
 
+        verifyWarningCounts(lastBuild);
+
+        firstBuild.delete();
+        jenkins.restart();
+        lastBuild.open();
+
+        verifyWarningCounts(lastBuild);
+    }
+
+    private void verifyWarningCounts(final Build build) {
         FindBugsAction action = new FindBugsAction(build);
 
         assertThatWarningsCountInSummaryIs(action, 5);
@@ -221,12 +233,22 @@ public class FindBugsPluginTest extends AbstractAnalysisTest<FindBugsAction> {
 
         action.open();
 
-        assertThat(action.getWarningNumber(), is(5));
-        assertThat(action.getNewWarningNumber(), is(1));
-        assertThat(action.getFixedWarningNumber(), is(2));
-        assertThat(action.getHighWarningNumber(), is(3));
-        assertThat(action.getNormalWarningNumber(), is(2));
-        assertThat(action.getLowWarningNumber(), is(0));
+        assertThat(action.getNumberOfWarnings(), is(5));
+        assertThat(action.getNumberOfNewWarnings(), is(1));
+        assertThat(action.getNumberOfFixedWarnings(), is(2));
+        assertThat(action.getNumberOfWarningsWithHighPriority(), is(3));
+        assertThat(action.getNumberOfWarningsWithNormalPriority(), is(2));
+        assertThat(action.getNumberOfWarningsWithLowPriority(), is(0));
+
+        action.openNew();
+
+        assertThat(action.getNumberOfWarningsWithHighPriority(), is(1));
+        assertThat(action.getNumberOfWarningsWithNormalPriority(), is(0));
+        assertThat(action.getNumberOfWarningsWithLowPriority(), is(0));
+
+        action.openFixed();
+
+        assertThat(action.getNumberOfRowsInFixedWarningsTable(), is(2));
     }
 
     /**
@@ -266,7 +288,7 @@ public class FindBugsPluginTest extends AbstractAnalysisTest<FindBugsAction> {
         FindBugsAction action = new FindBugsAction(build);
         action.open();
 
-        assertThat(action.getNewWarningNumber(), is(1));
+        assertThat(action.getNumberOfNewWarnings(), is(1));
 
         verifySourceLine(action, "Main.java", 18,
                 "18         if(o == null) {",
@@ -298,7 +320,7 @@ public class FindBugsPluginTest extends AbstractAnalysisTest<FindBugsAction> {
         FindBugsAction action = new FindBugsAction(build);
         action.open();
 
-        assertThat(action.getNewWarningNumber(), is(1));
+        assertThat(action.getNumberOfNewWarnings(), is(1));
     }
 
     /**

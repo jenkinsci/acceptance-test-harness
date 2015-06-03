@@ -122,12 +122,12 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
 
         action.open();
 
-        assertThat(action.getWarningNumber(), is(776));
-        assertThat(action.getNewWarningNumber(), is(776));
-        assertThat(action.getFixedWarningNumber(), is(0));
-        assertThat(action.getHighWarningNumber(), is(776));
-        assertThat(action.getNormalWarningNumber(), is(0));
-        assertThat(action.getLowWarningNumber(), is(0));
+        assertThat(action.getNumberOfWarnings(), is(776));
+        assertThat(action.getNumberOfNewWarnings(), is(776));
+        assertThat(action.getNumberOfFixedWarnings(), is(0));
+        assertThat(action.getNumberOfWarningsWithHighPriority(), is(776));
+        assertThat(action.getNumberOfWarningsWithNormalPriority(), is(0));
+        assertThat(action.getNumberOfWarningsWithLowPriority(), is(0));
 
         assertThatFilesTabIsCorrectlyFilled(action);
         assertThatCategoriesTabIsCorrectlyFilled(action);
@@ -222,18 +222,17 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
 
         lastBuild.open();
 
-        verifyWarningCounts(job);
+        verifyWarningCounts(lastBuild);
 
-        // FIXME: uncomment if JENKINS-24940 has been released
-//        firstBuild.delete();
-//        jenkins.restart();
-//        lastBuild.open();
-//
-//        verifyWarningCounts(job);
+        firstBuild.delete();
+        jenkins.restart();
+        lastBuild.open();
+
+        verifyWarningCounts(lastBuild);
     }
 
-    private void verifyWarningCounts(final FreeStyleJob job) {
-        CheckStyleAction action = new CheckStyleAction(job.getLastBuild());
+    private void verifyWarningCounts(final Build build) {
+        CheckStyleAction action = new CheckStyleAction(build);
 
         assertThatWarningsCountInSummaryIs(action, 679);
         assertThatNewWarningsCountInSummaryIs(action, 3);
@@ -241,18 +240,22 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
 
         action.open();
 
-        assertThat(action.getWarningNumber(), is(679));
-        assertThat(action.getNewWarningNumber(), is(3));
-        assertThat(action.getFixedWarningNumber(), is(97));
-        assertThat(action.getHighWarningNumber(), is(679));
-        assertThat(action.getNormalWarningNumber(), is(0));
-        assertThat(action.getLowWarningNumber(), is(0));
+        assertThat(action.getNumberOfWarnings(), is(679));
+        assertThat(action.getNumberOfNewWarnings(), is(3));
+        assertThat(action.getNumberOfFixedWarnings(), is(97));
+        assertThat(action.getNumberOfWarningsWithHighPriority(), is(679));
+        assertThat(action.getNumberOfWarningsWithNormalPriority(), is(0));
+        assertThat(action.getNumberOfWarningsWithLowPriority(), is(0));
 
         action.openNew();
 
-        assertThat(action.getHighWarningNumber(), is(3));
-        assertThat(action.getNormalWarningNumber(), is(0));
-        assertThat(action.getLowWarningNumber(), is(0));
+        assertThat(action.getNumberOfWarningsWithHighPriority(), is(3));
+        assertThat(action.getNumberOfWarningsWithNormalPriority(), is(0));
+        assertThat(action.getNumberOfWarningsWithLowPriority(), is(0));
+
+        action.openFixed();
+
+        assertThat(action.getNumberOfRowsInFixedWarningsTable(), is(97));
     }
 
     private void assertThatCheckStyleResultExists(final Job job, final PageObject build) {
@@ -330,7 +333,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
         CheckStyleAction checkstyle = new CheckStyleAction(build);
         checkstyle.open();
 
-        assertThat(checkstyle.getNewWarningNumber(), is(12));
+        assertThat(checkstyle.getNumberOfNewWarnings(), is(12));
 
         SortedMap<String, Integer> expectedContent = new TreeMap<>();
         expectedContent.put("Main.java:0", 0);
@@ -366,7 +369,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
         CheckStyleAction checkstyle = new CheckStyleAction(build);
         checkstyle.open();
 
-        assertThat(checkstyle.getNewWarningNumber(), is(12));
+        assertThat(checkstyle.getNumberOfNewWarnings(), is(12));
     }
 
     /**
@@ -460,20 +463,20 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
      * set to zero, e.g. a new warning should mark a build as unstable.
      * <p/>
      * <ol>
-     *     <li>Build 1: 1 new warning (SUCCESS since no reference build is set)</li>
-     *     <li>Build 2: 2 new warnings (UNSTABLE since threshold is reached)</li>
-     *     <li>Build 3: 1 new warning (UNSTABLE since still one warning is new based on delta with reference build)</li>
-     *     <li>Build 4: 1 new warning (SUCCESS since there are no warnings)</li>
+     *     <li>Build 1: 1 new, 0 fixed (SUCCESS since no reference build is set)</li>
+     *     <li>Build 2: 2 new, 0 fixed (UNSTABLE since threshold is reached)</li>
+     *     <li>Build 3: 1 new, 2 fixed (UNSTABLE since still one warning is new based on delta with reference build)</li>
+     *     <li>Build 4: 0 new, 1 fixed (SUCCESS since there are no warnings)</li>
      * </ol>
      */
     @Test
     public void should_set_result_in_build_sequence_when_comparing_to_reference_build() {
         FreeStyleJob job = createFreeStyleJob();
 
-        runBuild(job, 1, Result.SUCCESS, 1, false);
-        runBuild(job, 2, Result.UNSTABLE, 2, false);
-        runBuild(job, 3, Result.UNSTABLE, 1, false);
-        runBuild(job, 4, Result.SUCCESS, 0, false);
+        runBuild(job, 1, Result.SUCCESS, 1, 0, false);
+        runBuild(job, 2, Result.UNSTABLE, 2, 0, false);
+        runBuild(job, 3, Result.UNSTABLE, 1, 1, false);
+        runBuild(job, 4, Result.SUCCESS, 0, 0, false);
     }
 
     /**
@@ -490,13 +493,15 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
     public void should_set_result_in_build_sequence_when_comparing_to_previous_build() {
         FreeStyleJob job = createFreeStyleJob();
 
-        runBuild(job, 1, Result.SUCCESS, 1, true);
-        runBuild(job, 2, Result.UNSTABLE, 2, true);
-        runBuild(job, 3, Result.SUCCESS, 0, true);
+        runBuild(job, 1, Result.SUCCESS, 1, 0, true);
+        runBuild(job, 2, Result.UNSTABLE, 2, 0, true);
+        runBuild(job, 3, Result.SUCCESS, 0, 2, true);
+        runBuild(job, 4, Result.SUCCESS, 0, 1, true);
     }
 
-    private void runBuild(final FreeStyleJob job, final int number, final Result expectedResult, final int expectedNewWarnings, final boolean usePreviousAsReference) {
-        final String fileName = "checkstyle-result-build" + number + ".xml";
+    private void runBuild(final FreeStyleJob job, final int buildNumber, final Result expectedResult,
+            final int expectedNewWarnings, final int expectedFixedWarnings, final boolean usePreviousAsReference) {
+        final String fileName = "checkstyle-result-build" + buildNumber + ".xml";
         AnalysisConfigurator<CheckStyleFreestyleSettings> buildConfigurator = new AnalysisConfigurator<CheckStyleFreestyleSettings>() {
             @Override
             public void configure(CheckStyleFreestyleSettings settings) {
@@ -515,7 +520,8 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
 
             CheckStyleAction checkstyle = new CheckStyleAction(build);
             checkstyle.open();
-            assertThat(checkstyle.getNewWarningNumber(), is(expectedNewWarnings));
+            assertThat(checkstyle.getNumberOfNewWarnings(), is(expectedNewWarnings));
+            assertThat(checkstyle.getNumberOfFixedWarnings(), is(expectedFixedWarnings));
         }
     }
 }
