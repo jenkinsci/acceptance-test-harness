@@ -21,7 +21,6 @@ import org.jvnet.hudson.test.Issue;
 
 @WithPlugins("xvnc")
 public class XvncPluginTest extends AbstractJUnitTest {
-    FreeStyleJob job;
 
     @Inject DockerContainerHolder<XvncSlaveContainer> containerHolder;
 
@@ -30,15 +29,18 @@ public class XvncPluginTest extends AbstractJUnitTest {
         Slave slave = containerHolder.get().connect(jenkins);
         slave.setLabels("xvnc");
         slave.save();
-        job = jenkins.jobs.create(FreeStyleJob.class);
+    }
+    
+    private FreeStyleJob createJob() {
+        FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class);
         job.configure();
         job.setLabelExpression("xvnc");
-        job.save();
+        return job;
     }
 
     @Test
     public void run_xvnc_during_the_build() {
-        job.configure();
+        FreeStyleJob job = createJob();
         new XvncJobConfig(job).useXvnc();
         job.save();
 
@@ -48,7 +50,7 @@ public class XvncPluginTest extends AbstractJUnitTest {
 
     @Test
     public void take_screenshot_at_the_end_of_the_build() {
-        job.configure();
+        FreeStyleJob job = createJob();
         new XvncJobConfig(job).useXvnc().takeScreenshot();
         job.save();
 
@@ -66,7 +68,7 @@ public class XvncPluginTest extends AbstractJUnitTest {
         ;
         jenkins.save();
 
-        job.configure();
+        FreeStyleJob job = createJob();
         new XvncJobConfig(job).useXvnc();
         job.save();
 
@@ -75,14 +77,14 @@ public class XvncPluginTest extends AbstractJUnitTest {
         assertThat(build, usedDisplayNumber(42));
     }
 
-    @WithPlugins({"xvnc@1.22-SNAPSHOT"/*TODO*/, "workflow-aggregator@1.8"})
+    @WithPlugins({"xvnc@1.22", "workflow-aggregator@1.8"})
     @Issue("JENKINS-26477")
     @Test public void workflow() {
-        WorkflowJob flow = jenkins.jobs.create(WorkflowJob.class);
-        flow.script.set("node('xvnc') {wrap([$class: 'Xvnc', takeScreenshot: true, useXauthority: true]) {sh 'xmessage hello &'}}");
-        flow.sandbox.check();
-        flow.save();
-        Build build = flow.startBuild().shouldSucceed();
+        WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
+        job.script.set("node('xvnc') {wrap([$class: 'Xvnc', takeScreenshot: true, useXauthority: true]) {sh 'xmessage hello &'}}");
+        job.sandbox.check();
+        job.save();
+        Build build = job.startBuild().shouldSucceed();
         assertThat(build.getConsole(), containsString("+ xmessage hello"));
         assertThat(build, runXvnc());
         assertThat(build, tookScreenshot());
