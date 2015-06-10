@@ -14,12 +14,14 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.XvncSlaveContainer;
+import org.jenkinsci.test.acceptance.junit.WithDocker;
 import static org.jenkinsci.test.acceptance.plugins.xvnc.XvncJobConfig.*;
 import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.jvnet.hudson.test.Issue;
 
 @WithPlugins("xvnc")
+@WithDocker
 public class XvncPluginTest extends AbstractJUnitTest {
 
     @Inject DockerContainerHolder<XvncSlaveContainer> containerHolder;
