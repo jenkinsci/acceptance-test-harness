@@ -11,10 +11,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.XvncSlaveContainer;
 import static org.jenkinsci.test.acceptance.plugins.xvnc.XvncJobConfig.*;
 import org.jenkinsci.test.acceptance.po.Slave;
+import org.jenkinsci.test.acceptance.po.WorkflowJob;
+import org.jvnet.hudson.test.Issue;
 
 @WithPlugins("xvnc")
 public class XvncPluginTest extends AbstractJUnitTest {
@@ -71,4 +74,19 @@ public class XvncPluginTest extends AbstractJUnitTest {
         assertThat(build, runXvnc());
         assertThat(build, usedDisplayNumber(42));
     }
+
+    @WithPlugins({"xvnc@1.22-SNAPSHOT"/*TODO*/, "workflow-aggregator@1.8"})
+    @Issue("JENKINS-26477")
+    @Test public void workflow() {
+        WorkflowJob flow = jenkins.jobs.create(WorkflowJob.class);
+        flow.script.set("node('xvnc') {wrap([$class: 'Xvnc', takeScreenshot: true, useXauthority: true]) {sh 'xmessage hello &'}}");
+        flow.sandbox.check();
+        flow.save();
+        Build build = flow.startBuild().shouldSucceed();
+        assertThat(build.getConsole(), containsString("+ xmessage hello"));
+        assertThat(build, runXvnc());
+        assertThat(build, tookScreenshot());
+        build.getArtifact("screenshot.jpg").assertThatExists(true); // TODO should this be moved into tookScreenshot?
+    }
+
 }
