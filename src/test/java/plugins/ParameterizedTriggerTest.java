@@ -34,11 +34,12 @@ import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.StringParameter;
 import org.junit.Test;
+import org.jvnet.hudson.test.Issue;
 
 @WithPlugins("parameterized-trigger")
 public class ParameterizedTriggerTest extends AbstractJUnitTest {
 
-    @Test @WithPlugins("compress-artifacts")
+    @Test @WithPlugins("compress-artifacts") @Issue("JENKINS-28980")
     public void triggerWithNonStandardArchiver() {
         CompressingArtifactManager.setup(jenkins);
 
