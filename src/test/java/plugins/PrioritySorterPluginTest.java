@@ -84,10 +84,10 @@ public class PrioritySorterPluginTest extends AbstractJUnitTest {
         priority.configure();
         Group low = priority.addGroup();
         low.priority.select("1");
-        low.view.select("prioritized");
+        low.byView("prioritized");
         Group high = priority.addGroup();
         high.priority.select("5");
-        high.view.select("normal");
+        high.byView("normal");
         priority.save();
 
         Build p1b = p1.scheduleBuild();

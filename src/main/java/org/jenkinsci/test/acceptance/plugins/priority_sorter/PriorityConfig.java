@@ -24,6 +24,7 @@
 package org.jenkinsci.test.acceptance.plugins.priority_sorter;
 
 import org.jenkinsci.test.acceptance.po.*;
+import org.openqa.selenium.NoSuchElementException;
 
 @ActionPageObject("advanced-build-queue")
 public class PriorityConfig extends Action {
@@ -40,7 +41,7 @@ public class PriorityConfig extends Action {
     public Group addGroup() {
         control("/repeatable-add").click();
         elasticSleep(1000);
-        String prefix = last(by.name("view")).getAttribute("path").replace("/view", "");
+        String prefix = last(by.name("jobGroup")).getAttribute("path");
         return new Group(this, prefix);
     }
 
@@ -53,7 +54,6 @@ public class PriorityConfig extends Action {
     }
 
     public static class Group extends PageAreaImpl {
-        public final Control view = control("view");
         public final Control priority = control("priority");
 
         private Group(PriorityConfig context, String path) {
@@ -63,6 +63,16 @@ public class PriorityConfig extends Action {
         public void pattern(String pattern) {
             control("useJobFilter").check();
             control("useJobFilter/jobPattern").set(pattern);
+        }
+
+        public void byView(String name) {
+            try {
+                control("view").set(name);
+                return;
+            } catch (NoSuchElementException ex) {}
+
+            control("").select("Jobs included in a View");
+            control("jobGroupStrategy/viewName").select(name);
         }
     }
 }
