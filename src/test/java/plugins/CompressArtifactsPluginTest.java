@@ -38,7 +38,6 @@ import org.jenkinsci.test.acceptance.plugins.compress_artifacts.CompressingArtif
 import org.jenkinsci.test.acceptance.po.ArtifactArchiver;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
-import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.jenkinsci.test.acceptance.po.ShellBuildStep;
 import org.junit.Test;
 
@@ -50,7 +49,7 @@ public class CompressArtifactsPluginTest extends AbstractJUnitTest {
     @Test
     @WithPlugins("compress-artifacts")
     public void archive_compressed_artifacts() {
-        configureArtifactCompression();
+        CompressingArtifactManager.setup(jenkins);
         Build build = generateArtifact();
 
         assertThat(build.getArtifacts(), hasSize(1));
@@ -69,7 +68,7 @@ public class CompressArtifactsPluginTest extends AbstractJUnitTest {
         build.getArtifact(ARTIFACT_NAME).shouldHaveContent("content");
         assertThat(build, not(hasCompressedArtifacts()));
 
-        configureArtifactCompression();
+        CompressingArtifactManager.setup(jenkins);
 
         // Works after configuration
         assertThat(build.getArtifacts(), hasSize(1));
@@ -80,7 +79,7 @@ public class CompressArtifactsPluginTest extends AbstractJUnitTest {
     @Test @Issue("JENKINS-27042")
     @WithPlugins("compress-artifacts")
     public void archiveLargerThan4GInTotal() throws Exception {
-        configureArtifactCompression();
+        CompressingArtifactManager.setup(jenkins);
 
         FreeStyleJob job = jenkins.jobs.create();
         job.configure();
@@ -108,13 +107,6 @@ public class CompressArtifactsPluginTest extends AbstractJUnitTest {
         @SuppressWarnings("deprecation")
         boolean restart = jenkins.getPluginManager().installPlugins("compress-artifacts");
         if (restart) jenkins.restart();
-    }
-
-    private void configureArtifactCompression() {
-        JenkinsConfig config = jenkins.getConfigPage();
-        config.configure();
-        config.addArtifactManager(CompressingArtifactManager.class);
-        config.save();
     }
 
     private Build generateArtifact() {

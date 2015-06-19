@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright (c) 2014 Red Hat, Inc.
+ * Copyright (c) 2015 Red Hat, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,25 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.test.acceptance.plugins.compress_artifacts;
+package org.jenkinsci.test.acceptance.plugins.parameterized_trigger;
 
-import org.jenkinsci.test.acceptance.po.ArtifactManagement;
-import org.jenkinsci.test.acceptance.po.Jenkins;
-import org.jenkinsci.test.acceptance.po.JenkinsConfig;
-import org.jenkinsci.test.acceptance.po.ArtifactManagement.Factory;
+import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 
-@Describable("Compress Artifacts")
-public class CompressingArtifactManager extends Factory {
+@Describable("Parameters from properties file")
+public class FileBuildParameters extends BuildParameters {
+    public final Control file = control("propertiesFile");
+    public final Control failIfMissing = control("failTriggerOnMissing");
 
-    public CompressingArtifactManager(ArtifactManagement management, String relativePath) {
-        super(management, relativePath);
-    }
-
-    public static void setup(Jenkins jenkins) {
-        JenkinsConfig config = jenkins.getConfigPage();
-        config.configure();
-        config.addArtifactManager(CompressingArtifactManager.class);
-        config.save();
+    public FileBuildParameters(TriggerConfig area, String path) {
+        super(area, path);
     }
 }

@@ -1,9 +1,9 @@
 package org.jenkinsci.test.acceptance.plugins.parameterized_trigger;
 
 import org.jenkinsci.test.acceptance.po.AbstractStep;
-import org.jenkinsci.test.acceptance.po.BuildStep;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Job;
+import org.jenkinsci.test.acceptance.po.PostBuildStep;
 import org.openqa.selenium.WebElement;
 
 import java.util.List;
@@ -11,8 +11,8 @@ import java.util.List;
 /**
  * @author Kohsuke Kawaguchi
  */
-@Describable("Trigger/call builds on other projects")
-public class ParameterizedTrigger extends AbstractStep implements BuildStep {
+@Describable("Trigger parameterized build on other projects")
+public class ParameterizedTrigger extends AbstractStep implements PostBuildStep {
 
     public ParameterizedTrigger(Job parent, String path) {
         super(parent, path);
