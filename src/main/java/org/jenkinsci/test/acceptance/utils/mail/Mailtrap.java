@@ -6,9 +6,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.test.acceptance.ByFactory;
 import org.jenkinsci.test.acceptance.guice.TestScope;
+import org.jenkinsci.test.acceptance.plugins.email_ext.GlobalConfig;
 import org.jenkinsci.test.acceptance.plugins.mailer.MailerGlobalConfig;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.PageObject;
+
 import javax.mail.Address;
 import javax.mail.MessagingException;
 import javax.mail.Session;
@@ -35,7 +37,8 @@ import java.util.regex.Pattern;
 @TestScope
 public class Mailtrap extends MailService {
     // these default values is the account that the project "owns".
-
+    private static final int PORT = 2525;
+    private static final String HOST = "mailtrap.io";
     private String MAILBOX = "19251ad93afaab19b";
     private String PASSWORD = "c9039d1f090624";
     private String TOKEN = "2c04434bd66dfc37c130171f9d061af2";
@@ -68,12 +71,12 @@ public class Mailtrap extends MailService {
     public void setup(Jenkins jenkins) {
         jenkins.configure();
         MailerGlobalConfig config = new MailerGlobalConfig(jenkins);
-        config.smtpServer.set("mailtrap.io");
+        config.smtpServer.set(HOST);
         config.advancedButton.click();
         config.useSMTPAuth.check();
         config.smtpAuthUserName.set(MAILBOX);
         config.smtpAuthPassword.set(PASSWORD);
-        config.smtpPort.set("2525");
+        config.smtpPort.set(PORT);
 
         // Fingerprint to identify message sent from this test run
         config.replyToAddress.set(fingerprint);
@@ -84,8 +87,11 @@ public class Mailtrap extends MailService {
         if (jenkins.getPluginManager().isInstalled("email-ext")) {
             // For whatever reason this needs new config page opened
             jenkins.configure();
-            String emailextPath = "/hudson-plugins-emailext-ExtendedEmailPublisher/ext_mailer_default_replyto";
-            jenkins.getConfigPage().control(emailextPath).set(fingerprint);
+            GlobalConfig ext = new GlobalConfig(jenkins.getConfigPage());
+            ext.smtpServer(HOST);
+            ext.auth(MAILBOX, PASSWORD);
+            ext.smtpPort(PORT);
+            ext.replyTo(fingerprint);
             jenkins.save();
         }
     }
