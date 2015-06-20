@@ -4,7 +4,6 @@ import com.google.inject.Inject;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.email_ext.EmailExtPublisher;
-import org.jenkinsci.test.acceptance.plugins.mailer.MailerGlobalConfig;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.utils.mail.MailService;
@@ -22,8 +21,6 @@ import java.util.regex.Pattern;
  */
 @WithPlugins("email-ext")
 public class EmailExtPluginTest extends AbstractJUnitTest {
-    @Inject
-    private MailerGlobalConfig mailer;
 
     @Inject
     private MailService mail;
@@ -49,9 +46,7 @@ public class EmailExtPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void build() throws MessagingException, IOException {
-        jenkins.configure();
-        mailer.setupDefaults();
-        jenkins.save();
+        mail.setup(jenkins);
 
         FreeStyleJob job = jenkins.jobs.create();
         job.configure();

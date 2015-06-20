@@ -3,9 +3,10 @@ package org.jenkinsci.test.acceptance.utils.mail;
 import com.google.common.base.Joiner;
 
 import org.jenkinsci.test.acceptance.guice.World;
-import org.jenkinsci.test.acceptance.plugins.mailer.MailerGlobalConfig;
+import org.jenkinsci.test.acceptance.junit.Wait;
 import org.jenkinsci.test.acceptance.po.CapybaraPortingLayer;
 import org.jenkinsci.test.acceptance.po.CapybaraPortingLayerImpl;
+import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.junit.Assert;
 
 import javax.mail.MessagingException;
@@ -15,7 +16,6 @@ import javax.mail.internet.MimeMultipart;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 
 import static javax.mail.Message.RecipientType.*;
@@ -34,11 +34,12 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
  * @see docs/EMAIL.md
  */
 public abstract class MailService extends Assert {
+
     /**
      * Set up the Jenkins configuration to use the mail delivery service
      * encapsulated by this object.
      */
-    public abstract void setup(MailerGlobalConfig config);
+    public abstract void setup(Jenkins config);
 
     /**
      * All the emails sent in the test.
@@ -59,12 +60,8 @@ public abstract class MailService extends Assert {
         CapybaraPortingLayer hackish = new CapybaraPortingLayerImpl(World.get().getInjector());
 
         MimeMessage msg = hackish.waitFor().withMessage("Email whose subject matches: %s", subject)
-                .until(new Callable<MimeMessage>() {
-                    @Override
-                    public MimeMessage call() throws Exception {
-                        return getMail(subject);
-                    }
-        });
+                .until(new MailArrives(subject))
+        ;
 
         String actualRecipients = Joiner.on(' ').join(msg.getRecipients(TO));
         assertThat("recipient", actualRecipients, is(recipient));
@@ -96,5 +93,32 @@ public abstract class MailService extends Assert {
             throw new AssertionError(ex);
         }
         return os.toString();
+    }
+
+    private final class MailArrives extends Wait.Predicate<MimeMessage> {
+        private final Pattern subject;
+
+        private MailArrives(Pattern subject) {
+            this.subject = subject;
+        }
+
+        @Override
+        public MimeMessage apply() throws Exception {
+            return getMail(subject);
+        }
+
+        @Override
+        public String diagnose(Throwable lastException, String message) {
+            try {
+                List<MimeMessage> mails = getAllMails();
+                StringBuilder sb = new StringBuilder("Received messages ").append(mails.size()).append(":\n");
+                for (MimeMessage m: mails) {
+                    sb.append('\t').append(m.getSubject()).append('\n');
+                }
+                return sb.toString();
+            } catch (IOException|MessagingException ex) {
+                return "Unable to diagnose " + ex.getMessage();
+            }
+        }
     }
 }

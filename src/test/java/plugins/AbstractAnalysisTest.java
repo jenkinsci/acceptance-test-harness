@@ -22,7 +22,6 @@ import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisSettings;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.AbstractDashboardViewPortlet;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
 import org.jenkinsci.test.acceptance.plugins.email_ext.EmailExtPublisher;
-import org.jenkinsci.test.acceptance.plugins.mailer.MailerGlobalConfig;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenBuildStep;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
@@ -87,10 +86,6 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      */
     protected abstract FreeStyleJob createFreeStyleJob();
 
-    /** Configuration of the mailing in Jenkins global configuration screen. */
-    @Inject
-    private MailerGlobalConfig mailer;
-
     /** Mock that verifies that mails have been sent by Jenkins email-ext plugin. */
     @Inject
     private MailService mail;
@@ -103,9 +98,7 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      * Configures the mailer with default values required for the mock.
      */
     protected void setUpMailer() {
-        jenkins.configure();
-        mailer.setupDefaults();
-        jenkins.save();
+        mail.setup(jenkins);
     }
 
     /**

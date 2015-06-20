@@ -31,7 +31,6 @@ import org.jvnet.hudson.test.Issue;
 import org.jenkinsci.test.acceptance.junit.Since;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.mail_watcher.OnlineStatusNotification;
-import org.jenkinsci.test.acceptance.plugins.mailer.MailerGlobalConfig;
 import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.jenkinsci.test.acceptance.utils.mail.MailService;
@@ -43,9 +42,6 @@ import com.google.inject.Inject;
 public class MailWatcherPluginTest extends AbstractJUnitTest {
 
     @Inject
-    private MailerGlobalConfig mailer;
-
-    @Inject
     private MailService mail;
 
     @Inject
@@ -55,9 +51,7 @@ public class MailWatcherPluginTest extends AbstractJUnitTest {
     public void notify_slave_on_restart() throws Exception {
         Future<Slave> futureSlave = slaveController.install(jenkins);
 
-        jenkins.configure();
-        mailer.setupDefaults();
-        jenkins.save();
+        mail.setup(jenkins);
 
         Slave slave = futureSlave.get();
         slave.configure();
@@ -76,10 +70,10 @@ public class MailWatcherPluginTest extends AbstractJUnitTest {
 
     @Test @Issue("JENKINS-20538") @Since("1.571") @WithPlugins("mail-watcher-plugin@1.7")
     public void notify_master_on_jenkins_restart() throws Exception {
+        mail.setup(jenkins);
+
         jenkins.configure();
         {
-            mailer.setupDefaults();
-
             OnlineStatusNotification notification = new OnlineStatusNotification(jenkins);
             notification.onOnline("on@online.com");
             notification.onOffline("on@offline.com");

@@ -33,7 +33,6 @@ import org.jvnet.hudson.test.Issue;
 import org.jenkinsci.test.acceptance.junit.Native;
 import org.jenkinsci.test.acceptance.junit.Since;
 import org.jenkinsci.test.acceptance.plugins.mailer.Mailer;
-import org.jenkinsci.test.acceptance.plugins.mailer.MailerGlobalConfig;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenBuild;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenBuildStep;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation;
@@ -55,9 +54,6 @@ import static org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation.*;
 public class MavenPluginTest extends AbstractJUnitTest {
 
     private static final String GENERATE = "archetype:generate -DarchetypeGroupId=org.apache.maven.archetypes -DgroupId=com.mycompany.app -DartifactId=my-app -Dversion=1.0 -B";
-
-    @Inject
-    MailerGlobalConfig mailer;
 
     @Inject
     MailService mail;
@@ -219,9 +215,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
 
     @Test @Issue({"JENKINS-20209", "JENKINS-21045"})
     public void send_mail() throws Exception {
-        jenkins.configure();
-        mailer.setupDefaults();
-        jenkins.save();
+        mail.setup(jenkins);
 
         MavenModuleSet job = jenkins.jobs.create(MavenModuleSet.class);
         job.configure();

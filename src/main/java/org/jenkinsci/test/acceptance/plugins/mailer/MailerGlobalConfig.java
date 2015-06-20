@@ -32,13 +32,6 @@ public class MailerGlobalConfig extends PageAreaImpl {
         super(jenkins, "/hudson-tasks-Mailer");
     }
 
-    /**
-     * Set up the configuration to use the shared mailtrap.io account.
-     */
-    public void setupDefaults() {
-        mailService.setup(this);
-    }
-
     public void sendTestMail(String recipient) {
         control(by.path(getPath() + '/')).check();
 

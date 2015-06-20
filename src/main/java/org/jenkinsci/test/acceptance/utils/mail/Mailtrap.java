@@ -7,9 +7,8 @@ import org.apache.commons.io.IOUtils;
 import org.jenkinsci.test.acceptance.ByFactory;
 import org.jenkinsci.test.acceptance.guice.TestScope;
 import org.jenkinsci.test.acceptance.plugins.mailer.MailerGlobalConfig;
+import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.PageObject;
-import org.openqa.selenium.WebElement;
-
 import javax.mail.Address;
 import javax.mail.MessagingException;
 import javax.mail.Session;
@@ -44,14 +43,11 @@ public class Mailtrap extends MailService {
 
     /**
      * Unique ID for this test run.
-     *
-     * This is also the email address that emails should be sent to, if you want
-     * to test emails.
      */
-    public final String recipient;
+    public final String fingerprint;
 
     public Mailtrap() {
-        recipient = PageObject.createRandomName() + "@" + MAILBOX + ".com";
+        fingerprint = PageObject.createRandomName() + "@" + MAILBOX + ".com";
     }
 
     /**
@@ -69,7 +65,9 @@ public class Mailtrap extends MailService {
      * Set up the configuration to use the shared mailtrap.io account.
      */
     @Override
-    public void setup(MailerGlobalConfig config) {
+    public void setup(Jenkins jenkins) {
+        jenkins.configure();
+        MailerGlobalConfig config = new MailerGlobalConfig(jenkins);
         config.smtpServer.set("mailtrap.io");
         config.advancedButton.click();
         config.useSMTPAuth.check();
@@ -78,12 +76,18 @@ public class Mailtrap extends MailService {
         config.smtpPort.set("2525");
 
         // Fingerprint to identify message sent from this test run
-        config.replyToAddress.set(recipient);
+        config.replyToAddress.set(fingerprint);
+
+        jenkins.save();
 
         // Set for email-ext plugin as well if available
-        WebElement e = config.getElement(by.path("/hudson-plugins-emailext-ExtendedEmailPublisher/ext_mailer_default_replyto"));
-        if (e!=null)
-            e.sendKeys(recipient);
+        if (jenkins.getPluginManager().isInstalled("email-ext")) {
+            // For whatever reason this needs new config page opened
+            jenkins.configure();
+            String emailextPath = "/hudson-plugins-emailext-ExtendedEmailPublisher/ext_mailer_default_replyto";
+            jenkins.getConfigPage().control(emailextPath).set(fingerprint);
+            jenkins.save();
+        }
     }
 
     /**
@@ -130,7 +134,7 @@ public class Mailtrap extends MailService {
             Address[] r = m.getReplyTo();
             if (r==null)    return false;
             for (Address a : r) {
-                if (a.toString().contains(recipient))
+                if (a.toString().contains(fingerprint))
                     return true;
             }
             return false;

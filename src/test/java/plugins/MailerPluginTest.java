@@ -28,9 +28,7 @@ public class MailerPluginTest extends AbstractJUnitTest {
 
     @Before
     public void setup() {
-        jenkins.configure();
-        mailer.setupDefaults();
-        jenkins.save();
+        mail.setup(jenkins);
     }
 
     /**
