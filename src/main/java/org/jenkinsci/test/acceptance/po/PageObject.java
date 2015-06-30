@@ -100,4 +100,9 @@ public abstract class PageObject extends CapybaraPortingLayerImpl {
     public Control control(By selector) {
         return new Control(injector, selector);
     }
+
+    @Override
+    public String toString() {
+        return String.format("%s(%s)", getClass().getSimpleName(), url);
+    }
 }
