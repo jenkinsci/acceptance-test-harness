@@ -14,10 +14,6 @@ import org.hamcrest.Description;
 import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.Wait;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-
 import com.fasterxml.jackson.databind.JsonNode;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -201,18 +197,17 @@ public class Build extends ContainerPageObject {
         return result.name();
     }
 
-    public Artifact getArtifact(String artifact) {
-        return new Artifact(this, artifact);
+    public Artifact getArtifact(String path) {
+        return new Artifact(this, path);
     }
 
     public List<Artifact> getArtifacts() {
-        WebDriver artifact = visit(url("artifact"));
-        List<WebElement> fileList = artifact.findElements(By.cssSelector("table.fileList td:nth-child(2) a"));
+        JsonNode data = getJson("tree=artifacts[*]").get("artifacts");
         List<Artifact> list = new LinkedList<>();
-        for (WebElement el : fileList) {
-            if ("a".equalsIgnoreCase(el.getTagName())) {
-                list.add(getArtifact(el.getText()));
-            }
+        for (JsonNode e: data) {
+            list.add(getArtifact(
+                    e.get("relativePath").asText()
+            ));
         }
         return list;
     }
