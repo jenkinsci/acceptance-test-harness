@@ -50,12 +50,12 @@ import org.jenkinsci.test.acceptance.po.ShellBuildStep;
 import org.junit.Test;
 
 @Since("1.532") // No artifact managers before 1.532
+@WithPlugins("compress-artifacts")
 public class CompressArtifactsPluginTest extends AbstractJUnitTest {
 
     private static final String ARTIFACT_NAME = "the.artifact";
 
     @Test
-    @WithPlugins("compress-artifacts")
     public void archive_compressed_artifacts() {
         CompressingArtifactManager.setup(jenkins);
         Build build = generateArtifact();
@@ -68,8 +68,6 @@ public class CompressArtifactsPluginTest extends AbstractJUnitTest {
     @Test
     public void access_uncompressed_artifact_after_plugin_was_installed() {
         Build build = generateArtifact();
-
-        installCompressPlugin();
 
         // Works after installation
         assertThat(build.getArtifacts(), hasSize(1));
@@ -85,7 +83,6 @@ public class CompressArtifactsPluginTest extends AbstractJUnitTest {
     }
 
     @Test @Issue("JENKINS-27042")
-    @WithPlugins("compress-artifacts")
     public void archiveLargerThan4GInTotal() throws Exception {
         CompressingArtifactManager.setup(jenkins);
 
@@ -112,7 +109,7 @@ public class CompressArtifactsPluginTest extends AbstractJUnitTest {
     }
 
     @Test @Issue("JENKINS-27558")
-    @WithPlugins({"compress-artifacts", "maven-plugin"})
+    @WithPlugins("maven-plugin")
     public void archiveMavenProject() {
         MavenInstallation.installSomeMaven(jenkins);
 
@@ -145,12 +142,6 @@ public class CompressArtifactsPluginTest extends AbstractJUnitTest {
         }
         assertEquals("Artifacts differs", lhsArtifacts.size(), rhs.getArtifacts().size());
         assertThat("No artifacts", lhsArtifacts.size(), greaterThan(0));
-    }
-
-    private void installCompressPlugin() {
-        @SuppressWarnings("deprecation")
-        boolean restart = jenkins.getPluginManager().installPlugins("compress-artifacts");
-        if (restart) jenkins.restart();
     }
 
     private Build generateArtifact() {
