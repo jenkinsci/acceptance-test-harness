@@ -51,7 +51,7 @@ public class EmmaResultsPage extends PageObject {
         find(by.link("Coverage Report")).click();
 
         // Extract the result data and verify.
-        String content = find(by.css("div#main-panel-content")).getText();
+        String content = find(by.id("main-panel")).getText();
         Pattern p = Pattern.compile("\\d+(?:[,.]\\d+)");
         Matcher m = p.matcher(content);
         List<String> l = new ArrayList<String>(NO_RESULT_CELLS);
