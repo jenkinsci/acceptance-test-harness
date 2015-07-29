@@ -1,0 +1,17 @@
+#cloud-config
+disable_root: 0
+ssh_pwauth: True
+password: ath
+chpasswd: { expire: False }
+
+users:
+  - name: root
+    lock-passwd: false
+    inactive: false
+    system: false
+
+runcmd:
+  - [ "set", "-x" ]
+  - [ "mkdir", "/usr/local/java/" ] # Location searched by ssh-slaves plugin, though not controlled by it
+  - [ "curl", "-L", "-o", "/usr/local/java/java.tar.gz", "http://download.oracle.com/otn-pub/java/jdk/8u51-b16/jdk-8u51-linux-x64.tar.gz", "-H", "Cookie: oraclelicense=accept-securebackup-cookie" ]
+  - [ "tar", "xf", "/usr/local/java/java.tar.gz", "-C",  "/usr/local/java/", "--strip-components=1" ]

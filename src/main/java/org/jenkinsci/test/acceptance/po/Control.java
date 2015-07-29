@@ -212,6 +212,18 @@ public class Control extends CapybaraPortingLayerImpl {
         select(element);
     }
 
+    public void choose(Class<?> describable) {
+        String element = findCaption(describable, new Finder<String>() {
+            @Override
+            protected String find(String caption) {
+                final By xpath = by.xpath("//input[@type = 'radio' and @value = '%s']", caption);
+                return Control.this.getElement(xpath) != null ? caption : null;
+            }
+        });
+
+        choose(element);
+    }
+
     public void upload(Resource res) {
         resolve().sendKeys(res.asFile().getAbsolutePath());
     }
