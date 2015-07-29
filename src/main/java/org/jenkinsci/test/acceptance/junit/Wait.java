@@ -74,6 +74,8 @@ public class Wait<Subject> extends FluentWait<Subject> {
             public Return apply(Subject input) {
                 try {
                     return isTrue.call();
+                } catch (RuntimeException ex) {
+                    throw ex;
                 } catch (Exception ex) {
                     throw new AssertionError(ex);
                 }
@@ -92,6 +94,8 @@ public class Wait<Subject> extends FluentWait<Subject> {
             public Return apply(Subject input) {
                 try {
                     return isTrue.apply();
+                } catch (RuntimeException ex) {
+                    throw ex;
                 } catch (Exception ex) {
                     throw new AssertionError(ex);
                 }
