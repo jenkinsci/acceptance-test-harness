@@ -49,19 +49,17 @@ public class CodeMirror extends PageAreaImpl {
         // can't use find() because it wants a visible element
         driver.findElement(by.xpath("//*[@path='%s']", getPath()));    // wait until the element in question appears in DOM
 
-        executeScript(script, String.format("//*[@path='%s']", getPath()), content);
+        executeScript(script, String.format("//*[@path='%s']/following-sibling::div", getPath()), content);
     }
 
     private static final String script =
-            "textarea = document.evaluate(" +
+                    "cmElem = document.evaluate(" +
                     "        arguments[0], document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null" +
                     ").singleNodeValue;" +
-                    "codemirror = textarea.codemirrorObject;" +
+                    "codemirror = cmElem.CodeMirror;" +
                     "if (codemirror == null) {" +
-                    "    console.log('creating');" +
-                    "    codemirror = CodeMirror.fromTextArea(textarea);" +
+                    "    console.log('CodeMirror object not cound!');" +
                     "}" +
                     "codemirror.setValue(arguments[1]);" +
-                    // This is necessary to avoid random content loss in GroovyPluginTest#use_custom_groovy_version
                     "codemirror.save();";
 }
