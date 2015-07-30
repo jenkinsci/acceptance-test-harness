@@ -98,7 +98,8 @@ public class Build extends ContainerPageObject {
     }
 
     public Build waitUntilFinished(int timeout) {
-        waitUntilStarted();
+        // Strictly speaking we should reduce the timeout for completion by the time we waited for build to start.
+        waitUntilStarted(timeout);
 
         // while waiting, hit the console page, so that during the interactive development
         // one can see what the build is doing
