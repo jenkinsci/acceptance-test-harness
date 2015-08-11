@@ -99,6 +99,7 @@ public class JenkinsControllerPoolProcess {
                     while (true) {
                         lifecycle.startTestScope();
                         JenkinsController c = f.createController(injector,factories);
+                        c.start();
                         queue.put(new QueueItem(c,lifecycle.export()));
                     }
                 } catch (Throwable e) {
