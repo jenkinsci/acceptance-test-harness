@@ -58,7 +58,7 @@ public class CodeMirror extends PageAreaImpl {
                     ").singleNodeValue;" +
                     "codemirror = cmElem.CodeMirror;" +
                     "if (codemirror == null) {" +
-                    "    console.log('CodeMirror object not cound!');" +
+                    "    console.log('CodeMirror object not found!');" +
                     "}" +
                     "codemirror.setValue(arguments[1]);" +
                     "codemirror.save();";
