@@ -132,10 +132,16 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
             "  }\n" +
             "}\n" +
             "parallel branches");
-        // TODO when staticMethod org.codehaus.groovy.runtime.ScriptBytecodeAdapter compareLessThan java.lang.Object java.lang.Object is preapproved: job.sandbox.check();
+        // TODO when https://github.com/jenkinsci/script-security-plugin/pull/21 is released, add a corresponding version to @WithPlugins and: job.sandbox.check();
         job.save();
         Build build = job.startBuild();
-        assertTrue(build.isSuccess() || build.isUnstable()); // again this project is designed to have occasional test failures
+        try {
+            build.shouldSucceed();
+        } catch (AssertionError x) {
+            // again this project is designed to have occasional test failures
+            // TODO if resultIs were public and there were a disjunction combinator for Matcher we could use it here
+            build.shouldBeUnstable();
+        }
         build.shouldContainsConsoleOutput("No record available"); // first run
         build = job.startBuild();
         assertTrue(build.isSuccess() || build.isUnstable());
