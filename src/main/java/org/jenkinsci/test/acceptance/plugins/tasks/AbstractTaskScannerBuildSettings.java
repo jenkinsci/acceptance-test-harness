@@ -28,15 +28,15 @@ public abstract class AbstractTaskScannerBuildSettings extends AnalysisSettings 
 
     protected Control shouldDetectModules = control("shouldDetectModules");
 
-    protected Control buildUnstableNewAll = control("canComputeNew/unstableNewAll");
-    protected Control buildUnstableNewHigh = control("canComputeNew/unstableNewHigh");
-    protected Control buildUnstableNewNormal = control("canComputeNew/unstableNewNormal");
-    protected Control buildUnstableNewLow = control("canComputeNew/unstableNewLow");
-    protected Control buildFailedNewHigh = control("canComputeNew/failedNewHigh");
-    protected Control buildFailedNewNormal = control("canComputeNew/failedNewNormal");
-    protected Control buildFailedNewLow = control("canComputeNew/failedNewLow");
+    protected Control buildUnstableNewAll = control("unstableNewAll");
+    protected Control buildUnstableNewHigh = control("unstableNewHigh");
+    protected Control buildUnstableNewNormal = control("unstableNewNormal");
+    protected Control buildUnstableNewLow = control("unstableNewLow");
+    protected Control buildFailedNewHigh = control("failedNewHigh");
+    protected Control buildFailedNewNormal = control("failedNewNormal");
+    protected Control buildFailedNewLow = control("failedNewLow");
 
-    protected Control useStableBuildAsReference = control("canComputeNew/useStableBuildAsReference");
+    protected Control useStableBuildAsReference = control("useStableBuildAsReference");
 
     public AbstractTaskScannerBuildSettings(Job parent, String path) { super(parent, path); }
 
