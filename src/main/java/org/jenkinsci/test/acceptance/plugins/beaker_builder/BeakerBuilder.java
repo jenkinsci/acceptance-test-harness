@@ -37,7 +37,6 @@ public class BeakerBuilder extends AbstractStep implements BuildStep {
 
     public BeakerBuilder fileXml(String jobName, String jobPath) {
         control("jobSource[on]").check();
-        control("jobSource[on]/jobName").set(jobName);
         control("jobSource[on]/jobPath").set(jobPath);
         return this;
     }
