@@ -132,7 +132,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
             "  }\n" +
             "}\n" +
             "parallel branches");
-        // TODO when https://github.com/jenkinsci/script-security-plugin/pull/21 is released, add a corresponding version to @WithPlugins and: job.sandbox.check();
+        // TODO add "script-security@1.15" to @WithPlugins when released and: job.sandbox.check();
         job.save();
         Build build = job.startBuild();
         try {
