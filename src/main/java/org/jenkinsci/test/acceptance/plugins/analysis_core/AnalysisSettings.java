@@ -33,10 +33,10 @@ public abstract class AnalysisSettings extends PageAreaImpl implements PostBuild
     protected Control buildFailedTotalLow = control("failedTotalLow");
 
     protected Control canComputeNew = control("canComputeNew");
-    protected Control newWarningsThresholdFailed = control("canComputeNew/failedNewAll");
-    protected Control newWarningsThresholdUnstable = control("canComputeNew/unstableNewAll");
-    protected Control useDeltaValues = control("canComputeNew/useDeltaValues");
-    protected Control usePreviousBuild = control("canComputeNew/usePreviousBuildAsReference");
+    protected Control newWarningsThresholdFailed = control("failedNewAll", "canComputeNew/failedNewAll");
+    protected Control newWarningsThresholdUnstable = control("unstableNewAll", "canComputeNew/unstableNewAll");
+    protected Control useDeltaValues = control("useDeltaValues", "canComputeNew/useDeltaValues");
+    protected Control usePreviousBuild = control("usePreviousBuildAsReference", "canComputeNew/usePreviousBuildAsReference");
 
     /**
      * Creates a new instance of {@link AnalysisSettings}.
