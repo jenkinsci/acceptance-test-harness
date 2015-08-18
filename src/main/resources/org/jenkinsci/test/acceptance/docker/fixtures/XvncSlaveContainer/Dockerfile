@@ -8,7 +8,8 @@ RUN mkdir /tmp/.X11-unix && chmod 1777 /tmp/.X11-unix/
 ENV XAUTHORITY /home/jenkins/.Xauthority
 
 USER jenkins
-RUN mkdir /home/jenkins/.vnc && (echo jenkins; echo jenkins) | vncpasswd /home/jenkins/.vnc/passwd
+WORKDIR /home/jenkins/
+RUN mkdir .vnc && (echo jenkins; echo jenkins) | vncpasswd .vnc/passwd
 # Default content includes x-window-manager, which is not installed, plus other stuff we do not need (vncconfig, x-terminal-emulator, etc.):
-RUN touch /home/jenkins/.vnc/xstartup && chmod a+x /home/jenkins/.vnc/xstartup
+RUN touch .vnc/xstartup && chmod a+x .vnc/xstartup
 USER root
