@@ -63,4 +63,24 @@ The `@DockerFixture` bindIp allows you to bind the accessible ports of the docke
 A fixture also needs to define `Dockerfile` in the resources directory. If a fixture class is
 `org/acme/FooContainer.java`, then the docker file must be located at `org/acme/FooContainer/Dockerfile`.
 
+In case of inner classes, dollar sign ( $ ) is replaced with a slash ( / ).
+
+You can also set custom location of `Dockerfile` by using `dockerfile` attribute from`@DockerFixture` annotation.
+A simple example might be:
+
+```java
+@DockerFixture(id="test", ports="8080", dockerfile="org/acme/fixture/test")
+publicclass TestContainer extends DockerContainer {
+//...
+}
+```
+
+In this case the docker file must be located at `org/ame/fixture/test` instead of the default location.
+
+dockerfile attribute can contain three kind of values:
+* File based: file:///tmp/fixture/test which resolves Dockerfile from file location.
+* Classpath based: `classpath://org/acme/fixture/test which resolves Dockerfile from classpath location.
+* No schema provided which by default uses the classpath ones.
+
+
 
