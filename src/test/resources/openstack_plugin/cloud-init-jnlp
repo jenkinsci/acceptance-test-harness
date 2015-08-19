@@ -1,0 +1,19 @@
+#cloud-config
+disable_root: 0
+ssh_pwauth: True
+password: ath
+chpasswd: { expire: False }
+
+users:
+  - name: root
+    lock-passwd: false
+    inactive: false
+    system: false
+
+runcmd:
+  - [ "set", "-x" ]
+  - [ "mkdir", "/usr/local/java/" ]
+  - [ "curl", "-L", "-o", "/usr/local/java/java.tar.gz", "http://download.oracle.com/otn-pub/java/jdk/8u51-b16/jdk-8u51-linux-x64.tar.gz", "-H", "Cookie: oraclelicense=accept-securebackup-cookie" ]
+  - [ "tar", "xf", "/usr/local/java/java.tar.gz", "-C",  "/usr/local/java/", "--strip-components=1" ]
+  - [ "curl", "-L", "-o", "/tmp/slave.jar", "${SLAVE_JAR_URL}" ]
+  - [ "sh", "-c", "/usr/local/java/bin/java -jar /tmp/slave.jar -jnlpUrl ${SLAVE_JNLP_URL} &" ]

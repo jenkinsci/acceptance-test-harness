@@ -23,12 +23,9 @@
  */
 package org.jenkinsci.test.acceptance.plugins.openstack;
 
-import java.util.List;
-
 import org.jenkinsci.test.acceptance.po.Cloud;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.PageObject;
-import org.openqa.selenium.WebElement;
 
 /**
  * Openstack Cloud.
@@ -75,11 +72,10 @@ public class OpenstackCloud extends Cloud {
 
     public OpenstackSlaveTemplate addSlaveTemplate() {
         control("repeatable-add").click();
-        List<WebElement> all = all(by.name("templates"));
-        final String fullPath = all.get(all.size()-1).getAttribute("path");
+        sleep(500); // Wait for template to appear
+        final String newPath = last(by.name("templates")).getAttribute("path");
 
-        //assert fullPath.startsWith(getPath());
-
-        return new OpenstackSlaveTemplate(this, fullPath);
+        assert newPath.startsWith(getPath());
+        return new OpenstackSlaveTemplate(this, newPath);
     }
 }

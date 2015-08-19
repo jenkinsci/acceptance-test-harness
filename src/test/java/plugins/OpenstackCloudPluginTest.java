@@ -101,8 +101,26 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
     @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {"root", "/openstack_plugin/unsafe"})
     @TestActivation({"HARDWARE_ID", "IMAGE_ID", "KEY_PAIR_NAME"})
     public void provisionSshSlave() {
-        configureCloudInit();
-        configureProvisioning("label");
+        configureCloudInit("cloud-init");
+        configureProvisioning("SSH", "label");
+
+        FreeStyleJob job = jenkins.jobs.create();
+        job.configure();
+        job.setLabelExpression("label");
+        job.save();
+        Build build = job.scheduleBuild().waitUntilFinished(240).shouldSucceed();
+
+        nodes.add(build.getNode());
+    }
+
+    // The test will fail when test host is not reachable from openstack machine for obvious reasons
+    @Test // @Since("openstack-cloud@1.9") JENKINS-29996
+    @WithPlugins({"config-file-provider", "ssh-slaves"})
+    @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {"root", "/openstack_plugin/unsafe"})
+    @TestActivation({"HARDWARE_ID", "IMAGE_ID", "KEY_PAIR_NAME"})
+    public void provisionJnlpSlave() {
+        configureCloudInit("cloud-init-jnlp");
+        configureProvisioning("JNLP", "label");
 
         FreeStyleJob job = jenkins.jobs.create();
         job.configure();
@@ -118,8 +136,8 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
     @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {"root", "/openstack_plugin/unsafe"})
     @TestActivation({"HARDWARE_ID", "IMAGE_ID", "KEY_PAIR_NAME"})
     public void scheduleMatrixWithoutLabel() {
-        configureCloudInit();
-        configureProvisioning("label");
+        configureCloudInit("cloud-init-jnlp");
+        configureProvisioning("SSH", "label");
         jenkins.configure();
         jenkins.getConfigPage().numExecutors.set(0);
         jenkins.save();
@@ -145,16 +163,16 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
         ;
     }
 
-    private void configureCloudInit() {
+    private void configureCloudInit(String cloudInitName) {
         ConfigFileProvider fileProvider = new ConfigFileProvider(jenkins);
         UserDataConfig cloudInit = fileProvider.addFile(UserDataConfig.class);
         cloudInit.open();
         cloudInit.name(CLOUD_INIT_NAME);
-        cloudInit.content(resource("/openstack_plugin/cloud-init").asText());
+        cloudInit.content(resource("/openstack_plugin/" + cloudInitName).asText());
         cloudInit.save();
     }
 
-    private void configureProvisioning(String labels) {
+    private void configureProvisioning(String type, String labels) {
         jenkins.configure();
         OpenstackCloud cloud = addCloud(jenkins.getConfigPage()).associateFloatingIp();
         OpenstackSlaveTemplate template = cloud.addSlaveTemplate();
@@ -164,6 +182,7 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
         template.hardwareId(HARDWARE_ID);
         template.imageId(IMAGE_ID);
         template.credentials("root");
+        template.slaveType(type);
         template.userData(CLOUD_INIT_NAME);
         template.keyPair(KEY_PAIR_NAME);
         jenkins.save();
