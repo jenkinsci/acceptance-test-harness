@@ -45,9 +45,12 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
 /**
+ *
+ * Tests for {@link DockerFixture}
+ *
  * @author asotobueno
  */
-public class DockerTest {
+public class DockerFixtureTest {
 
     @Rule
     public final TemporaryFolder folder = new TemporaryFolder();
