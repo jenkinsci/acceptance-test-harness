@@ -32,9 +32,6 @@ import java.util.jar.JarFile;
 @Singleton
 public class Docker {
 
-    private static final String FILE_SCHEMA = "file://";
-    private static final String CLASSPATH_SCHEMA = "classpath://";
-
     /**
      * Command to invoke docker.
      */
@@ -130,34 +127,17 @@ public class Docker {
     void copyDockerfileDirectory(Class<? extends DockerContainer> fixture, DockerFixture f, File dir)
             throws IOException {
         String dockerfilePath = resolveDockerfileLocation(fixture, f);
-
-        if(dockerfilePath.startsWith(FILE_SCHEMA)) {
-
-            String dockerfileLocation = dockerfilePath.substring(dockerfilePath.indexOf(FILE_SCHEMA) + FILE_SCHEMA.length());
-            copyDockerfileDirectoryFromDisk(dir, dockerfileLocation);
-
-        } else {
-
-            String dockerfileLocation = dockerfilePath;
-            if(dockerfilePath.startsWith(CLASSPATH_SCHEMA)) {
-                dockerfileLocation = dockerfilePath.substring(
-                        dockerfilePath.indexOf(CLASSPATH_SCHEMA) + CLASSPATH_SCHEMA.length());
-            }
-            copyDockerfileDirectoryFromClasspath(fixture, dockerfileLocation, dir);
-
-        }
+        copyDockerfileDirectoryFromClasspath(fixture, dockerfilePath, dir);
     }
 
-    private void copyDockerfileDirectoryFromDisk(File dir, String dockerfileLocation) throws IOException {
-        File dockerfileDirectory = new File(dockerfileLocation);
-
-        if(dockerfileDirectory.exists() && dockerfileDirectory.isDirectory()) {
-            copyFile(dir, dockerfileDirectory.toURI().toURL());
+    private String resolveDockerfileLocation(Class<? extends DockerContainer> fixture, DockerFixture f) {
+        String prefix = null;
+        if(isSpecificDockerfileLocationSet(f)) {
+            prefix = f.dockerfile().replace('.', '/').replace('$', '/');
         } else {
-            throw new IllegalArgumentException(
-                    String.format("Provided location %s does not exist or it is not a directory", dockerfileDirectory)
-            );
+            prefix = fixture.getName().replace('.', '/').replace('$', '/');
         }
+        return prefix;
     }
 
     private void copyDockerfileDirectoryFromClasspath(Class<? extends DockerContainer> fixture, String dockerfileLocation, File dir) throws IOException {
@@ -176,16 +156,6 @@ public class Docker {
             // Dockerfile is not packaged into a jar file, so copy locally
             copyDockerfileDirectoryFromLocal(dockerfileLocation, dir);
         }
-    }
-
-    private String resolveDockerfileLocation(Class<? extends DockerContainer> fixture, DockerFixture f) {
-        String prefix = null;
-        if(isSpecificDockerfileLocationSet(f)) {
-            prefix = f.dockerfile().replace('.', '/').replace('$', '/');
-        } else {
-            prefix = fixture.getName().replace('.', '/').replace('$', '/');
-        }
-        return prefix;
     }
 
     private boolean isSpecificDockerfileLocationSet(DockerFixture f) {

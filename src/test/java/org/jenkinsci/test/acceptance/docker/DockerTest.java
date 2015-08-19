@@ -69,54 +69,6 @@ public class DockerTest {
     }
 
     @Test
-    public void should_load_fixture_from_location_when_using_classpath_schema() throws IOException {
-        File outputDir = folder.newFolder();
-        Docker docker = new Docker();
-        docker.copyDockerfileDirectory(CustomClasspathTestContainer.class, CustomClasspathTestContainer.class.getAnnotation(DockerFixture.class), outputDir);
-        assertThat(new File(outputDir, "Dockerfile").exists(), is(true));
-    }
-
-    @Test
-    public void should_load_fixture_from_location_when_using_file_schema() throws IOException {
-        final File dockerfileDirectory = folder.newFolder();
-        FileUtils.writeStringToFile(new File(dockerfileDirectory, "Dockerfile"), "FROM java:8-jre");
-
-        File outputDir = folder.newFolder();
-        Docker docker = new Docker();
-        DockerFixture annotation = new DockerFixture() {
-
-            @Override
-            public Class<? extends Annotation> annotationType() {
-                return DockerFixture.class;
-            }
-
-            @Override
-            public String id() {
-                return "test";
-            }
-
-            @Override
-            public int[] ports() {
-                return new int[]{8080};
-            }
-
-            @Override
-            public String bindIp() {
-                return "127.0.0.1";
-            }
-
-            @Override
-            public String dockerfile() {
-                return "file://" + dockerfileDirectory.getAbsolutePath();
-            }
-        };
-
-        docker.copyDockerfileDirectory(CustomFileTestContainer.class, annotation, outputDir);
-        assertThat(new File(outputDir, "Dockerfile").exists(), is(true));
-    }
-
-
-    @Test
     public void should_load_fixture_from_default_jar() throws IOException, ClassNotFoundException {
 
         //Creates a jar file with required content
@@ -166,14 +118,6 @@ public class DockerTest {
         Docker docker = new Docker();
         docker.copyDockerfileDirectory(clazz, CustomTestJarContainer.class.getAnnotation(DockerFixture.class), outputDir);
         assertThat(new File(outputDir, "Dockerfile").exists(), is(true));
-    }
-
-    @DockerFixture(id="test", ports = 8080, dockerfile = "classpath://test")
-    public static class CustomClasspathTestContainer extends DockerContainer {
-    }
-
-    @DockerFixture(id="test", ports = 8080, dockerfile = "file://calculateatruntime")
-    public static class CustomFileTestContainer extends DockerContainer {
     }
 
     @DockerFixture(id="test", ports = 8080, dockerfile = "test")

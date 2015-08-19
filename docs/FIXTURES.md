@@ -75,12 +75,8 @@ publicclass TestContainer extends DockerContainer {
 }
 ```
 
-In this case the docker file must be located at `org/ame/fixture/test` instead of the default location.
+In this case the docker file must be located at classpath and in `org/ame/fixture/test` instead of the default location.
 
-dockerfile attribute can contain three kind of values:
-* File based: file:///tmp/fixture/test which resolves Dockerfile from file location.
-* Classpath based: `classpath://org/acme/fixture/test which resolves Dockerfile from classpath location.
-* No schema provided which by default uses the classpath ones.
 
 
 
