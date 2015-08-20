@@ -51,11 +51,6 @@ public @interface DockerFixture {
      *  If this attribute is present, Dockerfile file specified in the attribute
      *  is used as Dockerfile fixture.
      * </p>
-     * <p>
-     *  The location can be expressed in terms of file location (file:///a/b/Dockerfile)
-     *  or classpath location (classpath://a/b/Dockerfile).
-     *  In case of not specifying schema, classpath schema is assumed.
-     * </p>
      */
     String dockerfile() default "";
 }

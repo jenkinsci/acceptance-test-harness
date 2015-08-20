@@ -159,7 +159,7 @@ public class Docker {
     }
 
     private boolean isSpecificDockerfileLocationSet(DockerFixture f) {
-        return f.dockerfile() != null && !"".equals(f.dockerfile().trim());
+        return !f.dockerfile().isEmpty();
     }
 
     private void copyDockerfileDirectoryFromPackaged(File jar, String fixtureLocation, File outputDirectory) throws IOException {
