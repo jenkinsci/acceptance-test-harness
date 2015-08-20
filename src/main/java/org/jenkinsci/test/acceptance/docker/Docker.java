@@ -133,11 +133,11 @@ public class Docker {
     private String resolveDockerfileLocation(Class<? extends DockerContainer> fixture, DockerFixture f) {
         String prefix = null;
         if(isSpecificDockerfileLocationSet(f)) {
-            prefix = f.dockerfile().replace('.', '/').replace('$', '/');
+            prefix = f.dockerfile();
         } else {
-            prefix = fixture.getName().replace('.', '/').replace('$', '/');
+            prefix = fixture.getName();
         }
-        return prefix;
+        return prefix.replace('.', '/').replace('$', '/');
     }
 
     private void copyDockerfileDirectoryFromClasspath(Class<? extends DockerContainer> fixture, String dockerfileLocation, File dir) throws IOException {
