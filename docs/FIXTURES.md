@@ -70,7 +70,7 @@ A simple example might be:
 
 ```java
 @DockerFixture(id="test", ports="8080", dockerfileFolder="org/acme/fixture/test")
-publicclass TestContainer extends DockerContainer {
+public class TestContainer extends DockerContainer {
 //...
 }
 ```
