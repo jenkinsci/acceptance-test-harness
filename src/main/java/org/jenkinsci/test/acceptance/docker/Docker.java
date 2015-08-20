@@ -133,7 +133,7 @@ public class Docker {
     private String resolveDockerfileLocation(Class<? extends DockerContainer> fixture, DockerFixture f) {
         String prefix = null;
         if(isSpecificDockerfileLocationSet(f)) {
-            prefix = f.dockerfile();
+            prefix = f.dockerfileFolder();
         } else {
             prefix = fixture.getName();
         }
@@ -159,7 +159,7 @@ public class Docker {
     }
 
     private boolean isSpecificDockerfileLocationSet(DockerFixture f) {
-        return !f.dockerfile().isEmpty();
+        return !f.dockerfileFolder().isEmpty();
     }
 
     private void copyDockerfileDirectoryFromPackaged(File jar, String fixtureLocation, File outputDirectory) throws IOException {

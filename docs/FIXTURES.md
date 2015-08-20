@@ -65,11 +65,11 @@ A fixture also needs to define `Dockerfile` in the resources directory. If a fix
 
 In case of inner classes, dollar sign ( $ ) is replaced with a slash ( / ).
 
-You can also set custom location of `Dockerfile` by using `dockerfile` attribute from`@DockerFixture` annotation.
+You can also set custom location of `Dockerfile` by using `dockerfileFolder` attribute from`@DockerFixture` annotation.
 A simple example might be:
 
 ```java
-@DockerFixture(id="test", ports="8080", dockerfile="org/acme/fixture/test")
+@DockerFixture(id="test", ports="8080", dockerfileFolder="org/acme/fixture/test")
 publicclass TestContainer extends DockerContainer {
 //...
 }

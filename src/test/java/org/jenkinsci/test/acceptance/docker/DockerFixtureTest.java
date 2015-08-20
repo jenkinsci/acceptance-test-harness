@@ -23,8 +23,6 @@
  */
 package org.jenkinsci.test.acceptance.docker;
 
-import org.apache.commons.io.FileUtils;
-import org.hamcrest.core.Is;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.StringAsset;
 import org.jboss.shrinkwrap.api.exporter.ZipExporter;
@@ -35,11 +33,8 @@ import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -123,7 +118,7 @@ public class DockerFixtureTest {
         assertThat(new File(outputDir, "Dockerfile").exists(), is(true));
     }
 
-    @DockerFixture(id="test", ports = 8080, dockerfile = "test")
+    @DockerFixture(id="test", ports = 8080, dockerfileFolder = "test")
     public static class CustomTestContainer extends DockerContainer {
     }
 
@@ -135,7 +130,7 @@ public class DockerFixtureTest {
     public static class TestJarContainer extends DockerContainer {
     }
 
-    @DockerFixture(id="testjar", ports = 8080, dockerfile = "test")
+    @DockerFixture(id="testjar", ports = 8080, dockerfileFolder = "test")
     public static class CustomTestJarContainer extends DockerContainer {
     }
 }

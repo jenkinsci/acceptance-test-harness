@@ -48,9 +48,9 @@ public @interface DockerFixture {
      *  and at the same package as DockerContainer subtype.
      * </p>
      * <p>
-     *  If this attribute is present, Dockerfile file specified in the attribute
-     *  is used as Dockerfile fixture.
+     *  If this attribute is present, Dockerfile folder specified in the attribute
+     *  is used as Dockerfile fixture place.
      * </p>
      */
-    String dockerfile() default "";
+    String dockerfileFolder() default "";
 }
