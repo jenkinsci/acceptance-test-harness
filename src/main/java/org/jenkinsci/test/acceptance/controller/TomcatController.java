@@ -77,7 +77,7 @@ public class TomcatController extends LocalController {
     @Override
     public URL getUrl() {
         try {
-            return new URL("http://127.0.0.1:8080/jenkins/");
+            return new URL("http://" + getSutHostName() + ":8080/jenkins/");
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }

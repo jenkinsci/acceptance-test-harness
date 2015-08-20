@@ -66,7 +66,7 @@ public class WinstoneController extends LocalController {
     @Override
     public URL getUrl() {
         try {
-            return new URL(String.format("http://127.0.0.1:%s/",httpPort));
+            return new URL(String.format("http://" + getSutHostName() + ":%s/",httpPort));
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }

@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import static java.lang.System.*;
+
 import org.jenkinsci.utils.process.CommandBuilder;
 
 /**
@@ -398,6 +399,21 @@ public abstract class LocalController extends JenkinsController implements LogLi
         } catch (IOException ex) {
             return false;
         }
+    }
+
+    /**
+     * Hostname to use when accessing Jenkins.
+     *
+     * Useful to override with public hostname/IP when external clients needs to talk back to Jenkins.
+     *
+     * @return "127.0.0.1" unless overridden via JENKINS_LOCAL_HOSTNAME env var.
+     */
+    protected String getSutHostName() {
+        String name = System.getenv("JENKINS_LOCAL_HOSTNAME");
+        if (name == null || name.isEmpty()) {
+            name = "127.0.0.1";
+        }
+        return name;
     }
 
     private static final Logger LOGGER = Logger.getLogger(LocalController.class.getName());
