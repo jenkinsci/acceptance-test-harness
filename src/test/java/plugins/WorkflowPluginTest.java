@@ -43,7 +43,7 @@ import org.junit.Test;
 /**
  * Roughly follows <a href="https://github.com/jenkinsci/workflow-plugin/blob/master/TUTORIAL.md">the tutorial</a>.
  */
-@WithPlugins("workflow-aggregator@1.1")
+@WithPlugins("workflow-aggregator@1.10-SNAPSHOT") // TODO 1.10 when https://github.com/jenkinsci/workflow-plugin/pull/186 is released
 public class WorkflowPluginTest extends AbstractJUnitTest {
 
     @Inject private SlaveController slaveController;
@@ -103,7 +103,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         assertThat(driver, hasContent("All Tests"));
     }
 
-    @WithPlugins({"parallel-test-executor@1.6", "junit@1.3", "git@2.3"})
+    @WithPlugins({"parallel-test-executor@1.6", "junit@1.3", "git@2.3", "script-security@1.15"})
     @Native("mvn")
     @Test public void parallelTests() throws Exception {
         for (int i = 0; i < 3; i++) {
@@ -112,8 +112,9 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
         job.script.set(
             "node('master') {\n" +
+            // TODO could be switched to multibranch, in which case this initial `node` is unnecessary, and each branch can just `checkout scm`
             "  git url: 'https://github.com/jenkinsci/parallel-test-executor-plugin-sample.git'\n" +
-            "  archive 'pom.xml, src/'\n" +
+            "  stash 'sources'\n" +
             "}\n" +
             "def splits = splitTests([$class: 'CountDrivenParallelism', size: 3])\n" +
             "def branches = [:]\n" +
@@ -122,7 +123,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
             "  branches[\"split${i}\"] = {\n" +
             "    node('!master') {\n" +
             "      sh 'rm -rf *'\n" +
-            "      unarchive mapping: ['pom.xml' : '.', 'src/' : '.']\n" +
+            "      unstash 'sources'\n" +
             "      writeFile file: 'exclusions.txt', text: exclusions.join(\"\\n\")\n" +
             // Do not bother with ${tool 'M3'}; would take too long to unpack Maven on all slaves.
             // TODO would be useful for ToolInstallation to support the URL installer, hosting the tool ZIP ourselves somewhere cached.
@@ -132,7 +133,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
             "  }\n" +
             "}\n" +
             "parallel branches");
-        // TODO add "script-security@1.15" to @WithPlugins when released and: job.sandbox.check();
+        job.sandbox.check();
         job.save();
         Build build = job.startBuild();
         try {
