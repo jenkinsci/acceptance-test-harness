@@ -68,11 +68,8 @@ public abstract class LocalController extends JenkinsController implements LogLi
     public static abstract class LocalFactoryImpl implements JenkinsControllerFactory {
     }
 
-    /**
-     * @param war
-     *      Where is the jenkins.war file to be tested?
-     */
-    protected LocalController() {
+    protected LocalController(Injector i) {
+        super(i);
         try {
             tempDir = File.createTempFile("jenkins", "home", new File(WORKSPACE));
             tempDir.delete();

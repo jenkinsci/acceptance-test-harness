@@ -26,7 +26,9 @@ import javax.inject.Named;
 public class JBossController extends LocalController {
     private final File jbossHome;
 
-    public JBossController(@Named("jbossHome") File jbossHome) {
+    @Inject
+    public JBossController(Injector i, @Named("jbossHome") File jbossHome) {
+        super(i);
         if(!jbossHome.isDirectory()){
             throw new RuntimeException("Invalid JBoss Home: "+jbossHome.getAbsolutePath());
         }

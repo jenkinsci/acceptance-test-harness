@@ -6,12 +6,16 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.jenkinsci.test.acceptance.guice.AutoCleaned;
+import org.jenkinsci.test.acceptance.guice.World;
 
 import com.cloudbees.sdk.extensibility.ExtensionPoint;
 import com.google.inject.Injector;
@@ -28,15 +32,10 @@ import com.google.inject.Injector;
  */
 @ExtensionPoint // TODO is it not the JenkinsControllerFactory that is the extension point?
 public abstract class JenkinsController implements IJenkinsController, AutoCleaned {
-    /**
-     * directory on the computer where this code is running that points to a directory
-     * where test code can place log files, cache files, etc.
-     * Note that this directory might not exist on the Jenkins master, since it can be
-     * running on a separate computer.
-     */
-    protected static final String WORKSPACE = System.getenv("WORKSPACE") != null
-            ? System.getenv("WORKSPACE")
-            : new File(System.getProperty("user.dir"), "target").getPath();
+
+    @Inject @Named("WORKSPACE")
+    protected String WORKSPACE;
+    protected String JENKINS_DEBUG_LOG;
 
     public static final int STARTUP_TIMEOUT;
     static {
@@ -51,13 +50,13 @@ public abstract class JenkinsController implements IJenkinsController, AutoClean
         STARTUP_TIMEOUT = val;
     }
 
-    protected static final String JENKINS_DEBUG_LOG = WORKSPACE + "/last_test.log";
-
     private boolean isRunning;
 
     protected final OutputStream logger;
 
-    protected JenkinsController() {
+    protected JenkinsController(Injector i) {
+        i.injectMembers(this);
+        JENKINS_DEBUG_LOG  = WORKSPACE + "/last_test.log";
         if(FileUtils.fileExists(JENKINS_DEBUG_LOG)){
             FileUtils.removePath(JENKINS_DEBUG_LOG);
         }

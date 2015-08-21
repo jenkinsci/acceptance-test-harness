@@ -1,6 +1,8 @@
 package org.jenkinsci.test.acceptance.machine;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
+
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.RemoteJenkinsController;
 import org.jenkinsci.test.acceptance.Ssh;
@@ -35,6 +37,9 @@ public class RemoteJenkinsProvider extends JenkinsProvider {
 
     @Inject
     private TestCleaner cleaner;
+
+    @Inject
+    private Injector injector;
 
     @Inject
     public RemoteJenkinsProvider(MachineProvider provider, JenkinsResolver jenkinsResolver, SshKeyPair keyPair) {
@@ -79,7 +84,7 @@ public class RemoteJenkinsProvider extends JenkinsProvider {
 
             ssh.executeRemoteCommand(String.format("cp %s %s", path, pluginDir));
         }
-        return new RemoteJenkinsController(machine, jenkinsHome,jenkinsWar,privateKeyFile);
+        return new RemoteJenkinsController(injector, machine, jenkinsHome,jenkinsWar,privateKeyFile);
     }
 
     private String newJenkinsHome(){

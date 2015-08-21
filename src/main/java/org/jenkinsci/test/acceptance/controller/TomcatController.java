@@ -25,7 +25,9 @@ public class TomcatController extends LocalController {
 
     protected final File catalinaHome;
 
-    public TomcatController(@Named("tomcatHome") File catalinaHome) {
+    @Inject
+    public TomcatController(Injector i, @Named("tomcatHome") File catalinaHome) {
+        super(i);
         if (!catalinaHome.isDirectory()) {
             throw new RuntimeException("Invalid CATALINA_HOME: " + catalinaHome.getAbsolutePath());
         }

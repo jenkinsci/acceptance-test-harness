@@ -42,7 +42,9 @@ public class WinstoneController extends LocalController {
     private final int httpPort;
     private final int controlPort;
 
-    public WinstoneController() {
+    @Inject
+    public WinstoneController(Injector i) {
+        super(i);
         httpPort = randomLocalPort();
         controlPort = randomLocalPort();
     }

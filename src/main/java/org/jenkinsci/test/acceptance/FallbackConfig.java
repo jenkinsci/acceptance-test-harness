@@ -175,7 +175,7 @@ public class FallbackConfig extends AbstractModule {
             type = System.getenv("TYPE");
         if (type==null) {
             if (JenkinsControllerPoolProcess.SOCKET.exists() && !JenkinsControllerPoolProcess.MAIN)
-                return new PooledJenkinsController(JenkinsControllerPoolProcess.SOCKET);
+                return new PooledJenkinsController(injector);
             else
                 type = "winstone";
         }
@@ -209,6 +209,12 @@ public class FallbackConfig extends AbstractModule {
         return resolvedArtifact.getArtifact().getFile();
     }
 
+    /**
+     * directory on the computer where this code is running that points to a directory
+     * where test code can place log files, cache files, etc.
+     * Note that this directory might not exist on the Jenkins master, since it can be
+     * running on a separate computer.
+     */
     @Provides @Named("WORKSPACE")
     public String getWorkspace() {
         String ws = System.getenv("WORKSPACE");

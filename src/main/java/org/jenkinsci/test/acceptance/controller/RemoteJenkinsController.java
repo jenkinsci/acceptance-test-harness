@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.controller;
 
 import jnr.ffi.LibraryLoader;
+
 import org.codehaus.plexus.util.FileUtils;
 import org.jenkinsci.test.acceptance.Ssh;
 import org.jenkinsci.test.acceptance.machine.Machine;
@@ -10,6 +11,8 @@ import org.jenkinsci.utils.process.ProcessInputStream;
 import org.jenkinsci.utils.process.ProcessUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.inject.Injector;
 
 import java.io.File;
 import java.io.IOException;
@@ -49,7 +52,8 @@ public class RemoteJenkinsController extends JenkinsController {
     private final File logFile;
     private final File privateKeyLocation;
 
-    public RemoteJenkinsController(Machine machine, String jenkinsHome, String jenkinsWar, File privateKeyLocation) {
+    public RemoteJenkinsController(Injector i, Machine machine, String jenkinsHome, String jenkinsWar, File privateKeyLocation) {
+        super(i);
         this.machine = machine;
         this.jenkinsHome = jenkinsHome;
         this.jenkinsWarLocation = jenkinsWar;
@@ -159,7 +163,4 @@ public class RemoteJenkinsController extends JenkinsController {
     }
 
     private static final Logger localLogger = LoggerFactory.getLogger(RemoteJenkinsController.class);
-
-
-
 }

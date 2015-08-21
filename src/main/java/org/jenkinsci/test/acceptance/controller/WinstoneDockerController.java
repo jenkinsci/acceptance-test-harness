@@ -40,6 +40,11 @@ public class WinstoneDockerController extends LocalController {
         this.dockerImage = img;
     }
 
+    @Inject
+    public WinstoneDockerController(Injector i) {
+        super(i);
+    }
+
     @Override
     public ProcessInputStream startProcess() throws IOException {
         try {
