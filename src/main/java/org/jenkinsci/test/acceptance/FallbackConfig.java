@@ -222,14 +222,29 @@ public class FallbackConfig extends AbstractModule {
         return new File(System.getProperty("user.dir"), "target").getPath();
     }
 
+    /**
+     * Get the file with Jenkins to run.
+     *
+     * The file will exist on machine where tests run.
+     */
     @Provides @Named("jenkins.war")
-    public File getJenkinsWar() {
-        String jenkinsWar = System.getenv("JENKINS_WAR");
+    public File getJenkinsWar(RepositorySystem repositorySystem, RepositorySystemSession repositorySystemSession) {
         try {
-            return IOUtil.firstExisting(false, jenkinsWar, getWorkspace() + "/jenkins.war", "./jenkins.war");
+            return IOUtil.firstExisting(false, System.getenv("JENKINS_WAR"), getWorkspace() + "/jenkins.war", "./jenkins.war");
         } catch (IOException ex) {
-            throw new Error("Could not find jenkins.war, maybe you forgot to set JENKINS_WAR env var?", ex);
+            // Fall-through
         }
+
+        String version = System.getenv("JENKINS_VERSION");
+        if (version != null && !version.isEmpty()) {
+            ArtifactResolverUtil resolverUtil = new ArtifactResolverUtil(repositorySystem, repositorySystemSession);
+            ArtifactResult resolvedArtifact = resolverUtil.resolve(new DefaultArtifact("org.jenkins-ci.main", "jenkins-war", "war", version));
+            return resolvedArtifact.getArtifact().getFile();
+        }
+
+        // TODO add support for 'lts', 'lts-rc', 'latest' and 'latest-rc'
+
+        throw new Error("Could not find jenkins.war, use JENKINS_WAR or JENKINS_VERSION to specify it?");
     }
 
     /**

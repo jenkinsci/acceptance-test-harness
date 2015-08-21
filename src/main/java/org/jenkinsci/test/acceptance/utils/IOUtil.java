@@ -25,10 +25,9 @@ package org.jenkinsci.test.acceptance.utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 import javax.annotation.Nonnull;
-
-import com.google.common.base.Joiner;
 
 public class IOUtil {
 
@@ -47,6 +46,6 @@ public class IOUtil {
             }
         }
 
-        throw new IOException("None of the paths exist: " + Joiner.on(", ").join(candidatePaths));
+        throw new IOException("None of the paths exist: " + Arrays.asList(candidatePaths).toString());
     }
 }
