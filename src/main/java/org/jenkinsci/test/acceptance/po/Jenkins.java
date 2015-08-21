@@ -57,6 +57,9 @@ public class Jenkins extends Node {
         String text;
         try {
             text = url.openConnection().getHeaderField("X-Jenkins");
+            if (text == null) {
+                throw new AssertionError("Application running on " + url + " does not seem to be Jenkins");
+            }
         } catch (IOException ex) {
             throw new AssertionError(ex);
         }
