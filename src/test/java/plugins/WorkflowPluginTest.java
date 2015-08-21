@@ -43,11 +43,11 @@ import org.junit.Test;
 /**
  * Roughly follows <a href="https://github.com/jenkinsci/workflow-plugin/blob/master/TUTORIAL.md">the tutorial</a>.
  */
-@WithPlugins("workflow-aggregator@1.10-SNAPSHOT") // TODO 1.10 when https://github.com/jenkinsci/workflow-plugin/pull/186 is released
 public class WorkflowPluginTest extends AbstractJUnitTest {
 
     @Inject private SlaveController slaveController;
 
+    @WithPlugins("workflow-aggregator@1.1")
     @Test public void helloWorld() throws Exception {
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
         job.script.set("echo 'hello from Workflow'");
@@ -56,7 +56,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         job.startBuild().shouldSucceed().shouldContainsConsoleOutput("hello from Workflow");
     }
 
-    @WithPlugins({"junit@1.3", "git@2.3"})
+    @WithPlugins({"workflow-aggregator@1.1", "junit@1.3", "git@2.3"})
     @Test public void linearFlow() throws Exception {
         MavenInstallation.installMaven(jenkins, "M3", "3.1.0");
         final DumbSlave slave = (DumbSlave) slaveController.install(jenkins).get();
@@ -103,7 +103,8 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         assertThat(driver, hasContent("All Tests"));
     }
 
-    @WithPlugins({"parallel-test-executor@1.6", "junit@1.3", "git@2.3", "script-security@1.15"})
+    // TODO 1.10 when https://github.com/jenkinsci/workflow-plugin/pull/186 is released
+    @WithPlugins({"workflow-aggregator@1.10-SNAPSHOT", "parallel-test-executor@1.6", "junit@1.3", "git@2.3", "script-security@1.15"})
     @Native("mvn")
     @Test public void parallelTests() throws Exception {
         for (int i = 0; i < 3; i++) {
