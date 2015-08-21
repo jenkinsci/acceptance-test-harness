@@ -26,6 +26,7 @@ import org.jenkinsci.test.acceptance.server.PooledJenkinsController;
 import org.jenkinsci.test.acceptance.slave.LocalSlaveProvider;
 import org.jenkinsci.test.acceptance.slave.SlaveProvider;
 import org.jenkinsci.test.acceptance.utils.ElasticTime;
+import org.jenkinsci.test.acceptance.utils.IOUtil;
 import org.jenkinsci.test.acceptance.utils.SauceLabsConnection;
 import org.jenkinsci.test.acceptance.utils.aether.ArtifactResolverUtil;
 import org.jenkinsci.test.acceptance.utils.mail.MailService;
@@ -206,6 +207,23 @@ public class FallbackConfig extends AbstractModule {
         ArtifactResolverUtil resolverUtil = new ArtifactResolverUtil(repositorySystem, repositorySystemSession);
         ArtifactResult resolvedArtifact = resolverUtil.resolve(new DefaultArtifact("org.jenkins-ci.plugins", "form-element-path", "hpi", "1.4"));
         return resolvedArtifact.getArtifact().getFile();
+    }
+
+    @Provides @Named("WORKSPACE")
+    public String getWorkspace() {
+        String ws = System.getenv("WORKSPACE");
+        if (ws != null) return ws;
+        return new File(System.getProperty("user.dir"), "target").getPath();
+    }
+
+    @Provides @Named("jenkins.war")
+    public File getJenkinsWar() {
+        String jenkinsWar = System.getenv("JENKINS_WAR");
+        try {
+            return IOUtil.firstExisting(false, jenkinsWar, getWorkspace() + "/jenkins.war", "./jenkins.war");
+        } catch (IOException ex) {
+            throw new Error("Could not find jenkins.war, maybe you forgot to set JENKINS_WAR env var?", ex);
+        }
     }
 
     /**

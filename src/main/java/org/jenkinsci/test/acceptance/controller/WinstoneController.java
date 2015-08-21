@@ -7,7 +7,11 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import com.google.common.base.Splitter;
+import com.google.inject.Injector;
+
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.jenkinsci.utils.process.ProcessInputStream;
@@ -38,9 +42,7 @@ public class WinstoneController extends LocalController {
     private final int httpPort;
     private final int controlPort;
 
-    public WinstoneController(final File warFile) {
-        super(warFile);
-
+    public WinstoneController() {
         httpPort = randomLocalPort();
         controlPort = randomLocalPort();
     }
@@ -79,6 +81,8 @@ public class WinstoneController extends LocalController {
 
     @Extension
     public static class FactoryImpl extends LocalFactoryImpl {
+        @Inject Injector i;
+
         @Override
         public String getId() {
             return "winstone";
@@ -86,7 +90,7 @@ public class WinstoneController extends LocalController {
 
         @Override
         public JenkinsController create() {
-            return new WinstoneController(getWarFile());
+            return i.getInstance(WinstoneController.class);
         }
     }
 }

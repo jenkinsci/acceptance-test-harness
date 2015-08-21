@@ -174,30 +174,4 @@ public abstract class JenkinsController implements IJenkinsController, AutoClean
      * @param cause Failure cause
      */
     public void diagnose(Throwable cause) throws IOException {}
-
-    /**
-     * Downloads the latest version of the form-element-path plugin that we use for testing.
-     *
-     * @deprecated is automatically resolved for each {@link JenkinsController}.
-     */
-    @Deprecated
-    public static File downloadPathElement() {
-        String source = "http://updates.jenkins-ci.org/latest/form-element-path.hpi";
-        File target = new File(WORKSPACE,"path-element.hpi");
-        if (!target.exists()) {
-            try(FileOutputStream fos = new FileOutputStream(target)) {
-                HttpClient client = new HttpClient();
-                GetMethod get = new GetMethod(source);
-                get.setFollowRedirects(true);
-                int status = client.executeMethod(get);
-                if (status != 200) {
-                    throw new RuntimeException("Failed to get form-element-path.hpi: " + get.getResponseBodyAsString());
-                }
-                IOUtil.copy(get.getResponseBodyAsStream(), fos);
-            } catch (IOException e) {
-                throw new RuntimeException(String.format("Failed to open %s for write operation", target), e);
-            }
-        }
-        return target;
-    }
 }

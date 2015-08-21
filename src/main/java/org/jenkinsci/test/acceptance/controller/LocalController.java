@@ -38,7 +38,8 @@ public abstract class LocalController extends JenkinsController implements LogLi
     /**
      * jenkins.war. Subject under test.
      */
-    protected final File war;
+    @Inject @Named("jenkins.war")
+    protected /*final*/ File war;
 
     /**
      * JENKINS_HOME directory for jenkins.war to be launched.
@@ -65,45 +66,13 @@ public abstract class LocalController extends JenkinsController implements LogLi
      * Partial implementation of {@link JenkinsControllerFactory} for subtypes.
      */
     public static abstract class LocalFactoryImpl implements JenkinsControllerFactory {
-        /**
-         * Determines the location of the war file.
-         */
-        protected File getWarFile() {
-            String jenkinsWar = getenv("JENKINS_WAR");
-            File warFile = firstExisting(false, jenkinsWar, WORKSPACE + "/jenkins.war", "./jenkins.war");
-            if (warFile == null || !warFile.isFile()) {
-                if (StringUtils.isBlank(jenkinsWar)) {
-                    throw new RuntimeException(
-                            "Could not find jenkins.war, maybe you forgot to set JENKINS_WAR env var?");
-                }
-                throw new RuntimeException(
-                        "jenkins.war doesn't exist in " + jenkinsWar
-                                + ", maybe you forgot to set JENKINS_WAR env var?");
-            }
-            return warFile;
-        }
-
-        protected final File firstExisting(boolean directory, String... candidatePaths) {
-            for (String path: candidatePaths) {
-                if (path == null) continue;
-                File f = new File(path);
-                if (directory ? f.isDirectory() : f.isFile()) {
-                    return f;
-                }
-            }
-            return null;
-        }
     }
 
     /**
      * @param war
      *      Where is the jenkins.war file to be tested?
      */
-    protected LocalController(File war) {
-        this.war = war;
-        if (!war.exists())
-            throw new RuntimeException("Invalid path to jenkins.war specified: "+war);
-
+    protected LocalController() {
         try {
             tempDir = File.createTempFile("jenkins", "home", new File(WORKSPACE));
             tempDir.delete();
