@@ -76,6 +76,12 @@ public class OpenstackSlaveTemplate extends PageAreaImpl {
         return this;
     }
 
+    public OpenstackSlaveTemplate slaveType(String type) {
+        ensureAdvancedOpened();
+        control("slaveType").select(type);
+        return this;
+    }
+
     public OpenstackSlaveTemplate userData(String name) {
         ensureAdvancedOpened();
         control("userDataId").select(name);
