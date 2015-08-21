@@ -27,6 +27,7 @@ import java.util.jar.JarFile;
  * Use this subsystem by injecting this class into your test.
  *
  * @author Kohsuke Kawaguchi
+ * @author asotobueno
  */
 @Singleton
 public class Docker {
@@ -111,44 +112,7 @@ public class Docker {
             dir.delete();
             dir.mkdirs();
             try {
-                File jar = null;
-                try {
-                    jar = Which.jarFile(fixture);
-                } catch (IllegalArgumentException e) {
-                    // fall through
-                }
-
-                if (jar!=null && jar.isFile()) {
-                    // files are packaged into a war. extract them
-                    String prefix = fixture.getName().replace('.', '/') + "/";
-                    try (JarFile j = new JarFile(jar)) {
-                        Enumeration<JarEntry> e = j.entries();
-                        while (e.hasMoreElements()) {
-                            JarEntry je = e.nextElement();
-                            if (je.getName().startsWith(prefix)) {
-                                File dst = new File(dir, je.getName().substring(prefix.length()));
-                                if (je.isDirectory()) {
-                                    dst.mkdirs();
-                                } else {
-                                    try (InputStream in = j.getInputStream(je)) {
-                                        FileUtils.copyInputStreamToFile(in, dst);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    // Dockerfile is not packaged into a jar file, so copy locally
-                    URL resourceDir = classLoader.getResource(fixture.getName().replace('.', '/'));
-                    File dockerFileDir;
-                    try {
-                        dockerFileDir = new File(resourceDir.toURI());
-                    } catch (URISyntaxException e) {
-                        dockerFileDir = new File(resourceDir.getPath());
-                    }
-                    FileUtils.copyDirectory(dockerFileDir, dir);
-                }
-
+                copyDockerfileDirectory(fixture, f, dir);
                 return build("jenkins/" + f.id(), dir);
             } finally {
                 FileUtils.deleteDirectory(dir);
@@ -156,6 +120,80 @@ public class Docker {
         } catch (InterruptedException | IOException e) {
             throw new IOException("Failed to build image: " + fixture, e);
         }
+    }
+
+    //package scope for testing purposes. Ideally we should encapsulate Docker interactions so they can be mocked
+    // and call public method.
+    void copyDockerfileDirectory(Class<? extends DockerContainer> fixture, DockerFixture f, File dir)
+            throws IOException {
+        String dockerfilePath = resolveDockerfileLocation(fixture, f);
+        copyDockerfileDirectoryFromClasspath(fixture, dockerfilePath, dir);
+    }
+
+    private String resolveDockerfileLocation(Class<? extends DockerContainer> fixture, DockerFixture f) {
+        String prefix = null;
+        if(isSpecificDockerfileLocationSet(f)) {
+            prefix = f.dockerfileFolder();
+        } else {
+            prefix = fixture.getName();
+        }
+        return prefix.replace('.', '/').replace('$', '/');
+    }
+
+    private void copyDockerfileDirectoryFromClasspath(Class<? extends DockerContainer> fixture, String dockerfileLocation, File dir) throws IOException {
+        File jar = null;
+        try {
+            jar = Which.jarFile(fixture);
+        } catch (IllegalArgumentException e) {
+            // fall through
+        }
+
+        if (jar!=null && jar.isFile()) {
+            // files are packaged into a jar/war. extract them
+            dockerfileLocation += "/";
+            copyDockerfileDirectoryFromPackaged(jar, dockerfileLocation, dir);
+        } else {
+            // Dockerfile is not packaged into a jar file, so copy locally
+            copyDockerfileDirectoryFromLocal(dockerfileLocation, dir);
+        }
+    }
+
+    private boolean isSpecificDockerfileLocationSet(DockerFixture f) {
+        return !f.dockerfileFolder().isEmpty();
+    }
+
+    private void copyDockerfileDirectoryFromPackaged(File jar, String fixtureLocation, File outputDirectory) throws IOException {
+        try (JarFile j = new JarFile(jar)) {
+            Enumeration<JarEntry> e = j.entries();
+            while (e.hasMoreElements()) {
+                JarEntry je = e.nextElement();
+                if (je.getName().startsWith(fixtureLocation)) {
+                    File dst = new File(outputDirectory, je.getName().substring(fixtureLocation.length()));
+                    if (je.isDirectory()) {
+                        dst.mkdirs();
+                    } else {
+                        try (InputStream in = j.getInputStream(je)) {
+                            FileUtils.copyInputStreamToFile(in, dst);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private void copyDockerfileDirectoryFromLocal(String fixtureLocation, File outputDirectory) throws IOException {
+        URL resourceDir = classLoader.getResource(fixtureLocation);
+        copyFile(outputDirectory, resourceDir);
+    }
+
+    private void copyFile(File outputDirectory, URL resourceDir) throws IOException {
+        File dockerFileDir;
+        try {
+            dockerFileDir = new File(resourceDir.toURI());
+        } catch (URISyntaxException e) {
+            dockerFileDir = new File(resourceDir.getPath());
+        }
+        FileUtils.copyDirectory(dockerFileDir, outputDirectory);
     }
 
     private String getDockerFileHash(File dockerFileDir) {

@@ -13,6 +13,7 @@ import static java.lang.annotation.RetentionPolicy.*;
  * Annotates {@link DockerContainer} subtype that exposes fixture-specific methods.
  *
  * @author Kohsuke Kawaguchi
+ * @author asotobueno
  */
 @Target(TYPE)
 @Retention(RUNTIME)
@@ -38,4 +39,18 @@ public @interface DockerFixture {
      * Ip address to bind to
      */
     String bindIp() default "127.0.0.1";
+
+    /**
+     * Path of Dockerfile file.
+     *
+     * <p>
+     *  By default Dockerfile fixture should be placed in the resource directory
+     *  and at the same package as DockerContainer subtype.
+     * </p>
+     * <p>
+     *  If this attribute is present, Dockerfile folder specified in the attribute
+     *  is used as Dockerfile fixture place.
+     * </p>
+     */
+    String dockerfileFolder() default "";
 }
