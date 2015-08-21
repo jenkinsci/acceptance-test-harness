@@ -48,8 +48,6 @@ public abstract class LocalController extends JenkinsController implements LogLi
 
     protected JenkinsLogWatcher logWatcher;
 
-    private static final Map<String,String> options = new HashMap<>();
-
     private final Thread shutdownHook = new Thread() {
         @Override
         public void run() {
@@ -61,18 +59,6 @@ public abstract class LocalController extends JenkinsController implements LogLi
 
     @Inject @Named("form-element-path.hpi")
     private File formElementPathPlugin;
-
-    static{
-        String warLocation = getenv("JENKINS_WAR");
-        if(warLocation == null){
-            warLocation = WORKSPACE;
-        }
-        options.put("JENKINS_WAR", warLocation);
-        String silent = getenv("silent") != null && getenv("silent").equalsIgnoreCase("true") ? "true" : "false";
-        options.put("silent", silent);
-        options.put("pattern", getenv("pattern"));
-        options.put("log_pattern", getenv("log_pattern"));
-    }
 
     /**
      * Partial implementation of {@link JenkinsControllerFactory} for subtypes.
