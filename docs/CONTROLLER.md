@@ -12,33 +12,51 @@ section describes them.
 
 For more sophisticated customization, see [WIRING.md](WIRING.md).
 
-## Winstone controller (TYPE=winstone)
-This controller runs Jenkins via `java -jar jenkins.war` on the same host where the test is run.
-The behaviour of this controller can be customized through the following environment variables.
+## Local family controllers
+All local controllers run both test harness and Jenkins under test on local machine. Common environment variables for local controllers:
 
-* `JENKINS_JAVA_HOME` the JVM home to use for running Jenkins. If not specified, the first of `JAVA_HOME`, or the JVM
-   used to launch the tests will be used.
 * `JENKINS_WAR` the path to `jenkins.war` to be tested. If not specified, the first of `WORKSPACE/jenkins.war` followed
     by `$(pwd)/jenkins.war` that is a file will be selected.
-* `INTERACTIVE` keep browser session opened after failed scenario for interactive investigation.
+* `JENKINS_VERSION` specifies Jenkins core version to use. This is an alternative to `JENKINS_WAR`.
+* `JENKINS_JAVA_HOME` the JVM home to use for running Jenkins. If not specified, the first of `JAVA_HOME`, or the JVM
+   used to launch the tests will be used.
+* `JENKINS_JAVA_OPTS` Adds additional options to the java process like `-Xms=XXm -Xmx=XXXm`.
 * `PLUGINS_DIR` a directory of plugins to be loaded on Jenkins startup. If this is not specified, the first existing
     directory from the following list will be used: a `plugins` directory as a sibling to the resolved `jenkins.war`,
     `WORKSPACE/plugins` and `$(pwd)/plugins`. If the environment variable `NEVER_REPLACE_EXISTING_PLUGINS` is set
     then plugins will never be overwritten with newer versions during test.
-* `JENKINS_JAVA_OPTS` Adds additional options to the java process like `-Xms=XXm -Xmx=XXXm`.     
+* `INTERACTIVE` keep browser session opened after failed scenario for interactive investigation.
 
-This is the default controller.
+### Winstone controller (TYPE=winstone)
+This controller runs Jenkins via `java -jar jenkins.war` on the same host where the test is run. This is the default controller.
 
-## Winstone Docker controller (TYPE=winstone_docker)
+### Winstone Docker controller (TYPE=winstone_docker)
 This controller runs Jenkins via `java -jar jenkins.war` much like the Winstone controller, except
 that it launches Winstone inside a docker container. This allows users to better control the environment
 in which Jenkins runs in, without incurring the overhead of Vagrant.
 
-* `JENKINS_WAR` the path to `jenkins.war` to be tested.
 * `DOCKER_IMAGE` the docker container image name (or image ID) to run Jenkins in.
 
 The ability to specify the docker image is particularly useful to ensure that tests are run against
 the consistent version of JDK and build tools.
+
+### Tomcat controller (TYPE=tomcat)
+This controller deploys Jenkins inside Tomcat and run the test with it. This controller requires a functioning Tomcat installation listening on port 8080, on the same system that the tests run. During the test, Jenkins is deployed here, and Tomcat gets started/stopped.
+
+The behaviour of this controller can be customized through the following environment variables.
+
+* `CATALINA_HOME` The directory in which Tomcat is already installed. If this is not specified, the first existing
+    directory from the following list will be used: a `tomcat` directory as a sibling to the resolved `jenkins.war`,
+    `WORKSPACE/tomcat` and `$(pwd)/tomcat`.
+
+### JBoss controller (TYPE=jboss)
+Similar to the above Tomcat controller except it uses JBoss.
+
+The behaviour of this controller can be customized through the following environment variables.
+
+* `JBOSS_HOME` The directory in which JBoss is already installed.  If this is not specified, the first existing
+    directory from the following list will be used: a `jboss` directory as a sibling to the resolved `jenkins.war`,
+    `WORKSPACE/jboss` and `$(pwd)/jboss`.
 
 ## 'Existing Jenkins' controller (TYPE=existing)
 This controller assumes that you already have a Jenkins instance somewhere that you want the tests to run in.
@@ -51,32 +69,6 @@ The behaviour of this controller can be customized through the following environ
 
 This controller is useful when you want to debug Jenkins while you run a test. It can be also used during
 iterative test development to execute tests quickly.
-
-## Tomcat controller (TYPE=tomcat)
-This controller deploys Jenkins inside Tomcat and run the test with it. This controller requires a functioning Tomcat installation listening on port 8080, on the same system that the tests run. During the test, Jenkins is deployed here, and Tomcat gets started/stopped.
-
-The behaviour of this controller can be customized through the following environment variables.
-
-* `JENKINS_JAVA_HOME` see above
-* `JENKINS_WAR` see above
-* `INTERACTIVE` see above
-* `PLUGINS_DIR` see above
-* `CATALINA_HOME` The directory in which Tomcat is already installed. If this is not specified, the first existing
-    directory from the following list will be used: a `tomcat` directory as a sibling to the resolved `jenkins.war`,
-    `WORKSPACE/tomcat` and `$(pwd)/tomcat`.
-
-## JBoss controller (TYPE=jboss)
-Similar to the above Tomcat controller except it uses JBoss.
-
-The behaviour of this controller can be customized through the following environment variables.
-
-* `JENKINS_JAVA_HOME` see above
-* `JENKINS_WAR` see above
-* `INTERACTIVE` see above
-* `PLUGINS_DIR` see above
-* `JBOSS_HOME` The directory in which JBoss is already installed.  If this is not specified, the first existing
-    directory from the following list will be used: a `jboss` directory as a sibling to the resolved `jenkins.war`,
-    `WORKSPACE/jboss` and `$(pwd)/jboss`.
 
 ## Vagrant family of controllers
 There's a family of controllers who uses Vagrant to launch a virtual machine, then launch jenkins.war inside.

@@ -244,7 +244,7 @@ public class FallbackConfig extends AbstractModule {
 
         // TODO add support for 'lts', 'lts-rc', 'latest' and 'latest-rc'
 
-        throw new Error("Could not find jenkins.war, use JENKINS_WAR or JENKINS_VERSION to specify it?");
+        throw new Error("Could not find jenkins.war, use JENKINS_WAR or JENKINS_VERSION to specify it.");
     }
 
     /**
