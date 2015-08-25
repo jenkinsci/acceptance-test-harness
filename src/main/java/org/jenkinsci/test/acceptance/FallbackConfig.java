@@ -26,6 +26,7 @@ import org.jenkinsci.test.acceptance.server.PooledJenkinsController;
 import org.jenkinsci.test.acceptance.slave.LocalSlaveProvider;
 import org.jenkinsci.test.acceptance.slave.SlaveProvider;
 import org.jenkinsci.test.acceptance.utils.ElasticTime;
+import org.jenkinsci.test.acceptance.utils.IOUtil;
 import org.jenkinsci.test.acceptance.utils.SauceLabsConnection;
 import org.jenkinsci.test.acceptance.utils.aether.ArtifactResolverUtil;
 import org.jenkinsci.test.acceptance.utils.mail.MailService;
@@ -174,7 +175,7 @@ public class FallbackConfig extends AbstractModule {
             type = System.getenv("TYPE");
         if (type==null) {
             if (JenkinsControllerPoolProcess.SOCKET.exists() && !JenkinsControllerPoolProcess.MAIN)
-                return new PooledJenkinsController(JenkinsControllerPoolProcess.SOCKET);
+                return new PooledJenkinsController(injector);
             else
                 type = "winstone";
         }
@@ -206,6 +207,44 @@ public class FallbackConfig extends AbstractModule {
         ArtifactResolverUtil resolverUtil = new ArtifactResolverUtil(repositorySystem, repositorySystemSession);
         ArtifactResult resolvedArtifact = resolverUtil.resolve(new DefaultArtifact("org.jenkins-ci.plugins", "form-element-path", "hpi", "1.4"));
         return resolvedArtifact.getArtifact().getFile();
+    }
+
+    /**
+     * directory on the computer where this code is running that points to a directory
+     * where test code can place log files, cache files, etc.
+     * Note that this directory might not exist on the Jenkins master, since it can be
+     * running on a separate computer.
+     */
+    @Provides @Named("WORKSPACE")
+    public String getWorkspace() {
+        String ws = System.getenv("WORKSPACE");
+        if (ws != null) return ws;
+        return new File(System.getProperty("user.dir"), "target").getPath();
+    }
+
+    /**
+     * Get the file with Jenkins to run.
+     *
+     * The file will exist on machine where tests run.
+     */
+    @Provides @Named("jenkins.war")
+    public File getJenkinsWar(RepositorySystem repositorySystem, RepositorySystemSession repositorySystemSession) {
+        try {
+            return IOUtil.firstExisting(false, System.getenv("JENKINS_WAR"), getWorkspace() + "/jenkins.war", "./jenkins.war");
+        } catch (IOException ex) {
+            // Fall-through
+        }
+
+        String version = System.getenv("JENKINS_VERSION");
+        if (version != null && !version.isEmpty()) {
+            ArtifactResolverUtil resolverUtil = new ArtifactResolverUtil(repositorySystem, repositorySystemSession);
+            ArtifactResult resolvedArtifact = resolverUtil.resolve(new DefaultArtifact("org.jenkins-ci.main", "jenkins-war", "war", version));
+            return resolvedArtifact.getArtifact().getFile();
+        }
+
+        // TODO add support for 'lts', 'lts-rc', 'latest' and 'latest-rc'
+
+        throw new Error("Could not find jenkins.war, use JENKINS_WAR or JENKINS_VERSION to specify it.");
     }
 
     /**

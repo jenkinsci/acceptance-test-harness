@@ -6,12 +6,16 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.jenkinsci.test.acceptance.guice.AutoCleaned;
+import org.jenkinsci.test.acceptance.guice.World;
 
 import com.cloudbees.sdk.extensibility.ExtensionPoint;
 import com.google.inject.Injector;
@@ -28,15 +32,10 @@ import com.google.inject.Injector;
  */
 @ExtensionPoint // TODO is it not the JenkinsControllerFactory that is the extension point?
 public abstract class JenkinsController implements IJenkinsController, AutoCleaned {
-    /**
-     * directory on the computer where this code is running that points to a directory
-     * where test code can place log files, cache files, etc.
-     * Note that this directory might not exist on the Jenkins master, since it can be
-     * running on a separate computer.
-     */
-    protected static final String WORKSPACE = System.getenv("WORKSPACE") != null
-            ? System.getenv("WORKSPACE")
-            : new File(System.getProperty("user.dir"), "target").getPath();
+
+    @Inject @Named("WORKSPACE")
+    protected String WORKSPACE;
+    protected String JENKINS_DEBUG_LOG;
 
     public static final int STARTUP_TIMEOUT;
     static {
@@ -51,13 +50,13 @@ public abstract class JenkinsController implements IJenkinsController, AutoClean
         STARTUP_TIMEOUT = val;
     }
 
-    protected static final String JENKINS_DEBUG_LOG = WORKSPACE + "/last_test.log";
-
     private boolean isRunning;
 
     protected final OutputStream logger;
 
-    protected JenkinsController() {
+    protected JenkinsController(Injector i) {
+        i.injectMembers(this);
+        JENKINS_DEBUG_LOG  = WORKSPACE + "/last_test.log";
         if(FileUtils.fileExists(JENKINS_DEBUG_LOG)){
             FileUtils.removePath(JENKINS_DEBUG_LOG);
         }
@@ -174,30 +173,4 @@ public abstract class JenkinsController implements IJenkinsController, AutoClean
      * @param cause Failure cause
      */
     public void diagnose(Throwable cause) throws IOException {}
-
-    /**
-     * Downloads the latest version of the form-element-path plugin that we use for testing.
-     *
-     * @deprecated is automatically resolved for each {@link JenkinsController}.
-     */
-    @Deprecated
-    public static File downloadPathElement() {
-        String source = "http://updates.jenkins-ci.org/latest/form-element-path.hpi";
-        File target = new File(WORKSPACE,"path-element.hpi");
-        if (!target.exists()) {
-            try(FileOutputStream fos = new FileOutputStream(target)) {
-                HttpClient client = new HttpClient();
-                GetMethod get = new GetMethod(source);
-                get.setFollowRedirects(true);
-                int status = client.executeMethod(get);
-                if (status != 200) {
-                    throw new RuntimeException("Failed to get form-element-path.hpi: " + get.getResponseBodyAsString());
-                }
-                IOUtil.copy(get.getResponseBodyAsStream(), fos);
-            } catch (IOException e) {
-                throw new RuntimeException(String.format("Failed to open %s for write operation", target), e);
-            }
-        }
-        return target;
-    }
 }

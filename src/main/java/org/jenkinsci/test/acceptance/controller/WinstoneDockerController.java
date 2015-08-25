@@ -32,16 +32,17 @@ public class WinstoneDockerController extends LocalController {
 
     private JavaContainer container;
 
-    public WinstoneDockerController(File war) {
-        super(war);
-    }
-
     public void setFixture(Class<? extends JavaContainer> fixtureType) {
         this.fixtureType = fixtureType;
     }
 
     public void setDockerImage(String img) {
         this.dockerImage = img;
+    }
+
+    @Inject
+    public WinstoneDockerController(Injector i) {
+        super(i);
     }
 
     @Override
@@ -109,8 +110,7 @@ public class WinstoneDockerController extends LocalController {
 
         @Override
         public WinstoneDockerController create() {
-            WinstoneDockerController c = new WinstoneDockerController(getWarFile());
-            injector.injectMembers(c);
+            WinstoneDockerController c = injector.getInstance(WinstoneDockerController.class);
             String img = System.getenv("DOCKER_IMAGE");
             if (img!=null)
                 c.setDockerImage(img);

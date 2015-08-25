@@ -1,12 +1,15 @@
 package org.jenkinsci.test.acceptance.server;
 
 import com.cloudbees.sdk.extensibility.Extension;
+import com.google.inject.Injector;
+
 import hudson.remoting.Callable;
 import hudson.remoting.Channel;
 import hudson.remoting.Channel.Mode;
 import hudson.remoting.ChannelBuilder;
 import jnr.unixsocket.UnixSocketAddress;
 import jnr.unixsocket.UnixSocketChannel;
+
 import org.jenkinsci.remoting.RoleChecker;
 import org.jenkinsci.test.acceptance.controller.IJenkinsController;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
@@ -22,8 +25,11 @@ import java.net.URL;
 import java.util.concurrent.Executors;
 
 import static java.lang.System.*;
+
 import java.util.LinkedList;
 import java.util.List;
+
+import javax.inject.Inject;
 
 /**
  * {@link JenkinsController} that talks to {@link JenkinsControllerPoolProcess} over Unix domain socket.
@@ -39,12 +45,10 @@ public class PooledJenkinsController extends JenkinsController implements LogLis
     private IJenkinsController controller;
     private final List<byte[]> toUnpack = new LinkedList<>();
 
-    public PooledJenkinsController(File socket) {
-        this.socket = socket;
-    }
-
-    public PooledJenkinsController() {
-        this(JenkinsControllerPoolProcess.SOCKET);
+    @Inject
+    public PooledJenkinsController(Injector i) {
+        super(i);
+        this.socket = JenkinsControllerPoolProcess.SOCKET;
     }
 
     @Override
@@ -148,6 +152,8 @@ public class PooledJenkinsController extends JenkinsController implements LogLis
 
     @Extension
     public static class FactoryImpl extends LocalFactoryImpl {
+        @Inject Injector i;
+
         @Override
         public String getId() {
             return "pool";
@@ -155,7 +161,7 @@ public class PooledJenkinsController extends JenkinsController implements LogLis
 
         @Override
         public JenkinsController create() {
-            return new PooledJenkinsController();
+            return i.getInstance(PooledJenkinsController.class);
         }
     }
 

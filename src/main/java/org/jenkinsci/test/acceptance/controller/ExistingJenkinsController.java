@@ -1,10 +1,11 @@
 package org.jenkinsci.test.acceptance.controller;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.inject.Inject;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -17,6 +18,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
 import com.cloudbees.sdk.extensibility.Extension;
+import com.google.inject.Injector;
 
 /**
  * Run test against existing Jenkins instance.
@@ -27,7 +29,8 @@ public class ExistingJenkinsController extends JenkinsController {
     private final URL uploadUrl;
     private final URL url;
 
-    public ExistingJenkinsController(String url) {
+    public ExistingJenkinsController(Injector i, String url) {
+        super(i);
         try {
             this.url = new URL(url);
             this.uploadUrl = new URL(url + "/pluginManager/api/xml");
@@ -91,6 +94,8 @@ public class ExistingJenkinsController extends JenkinsController {
 
     @Extension
     public static class FactoryImpl implements JenkinsControllerFactory {
+        @Inject Injector i;
+
         @Override
         public String getId() {
             return "existing";
@@ -101,7 +106,7 @@ public class ExistingJenkinsController extends JenkinsController {
             String url = System.getenv("JENKINS_URL");
             if (url==null)  url = "http://localhost:8080/";
 
-            return new ExistingJenkinsController(url);
+            return new ExistingJenkinsController(i, url);
         }
     }
 }

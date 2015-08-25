@@ -1,8 +1,12 @@
 package org.jenkinsci.test.acceptance.controller;
 
 import com.cloudbees.sdk.extensibility.Extension;
+import com.google.inject.AbstractModule;
+import com.google.inject.Injector;
+import com.google.inject.Provides;
+
 import org.codehaus.plexus.util.FileUtils;
-import org.codehaus.plexus.util.StringUtils;
+import org.jenkinsci.test.acceptance.utils.IOUtil;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.jenkinsci.utils.process.ProcessInputStream;
 
@@ -10,6 +14,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+
+import javax.inject.Inject;
+import javax.inject.Named;
 
 /**
  * Launches Jenkins in JBoss.
@@ -19,8 +26,9 @@ import java.net.URL;
 public class JBossController extends LocalController {
     private final File jbossHome;
 
-    public JBossController(File war, File jbossHome) {
-        super(war);
+    @Inject
+    public JBossController(Injector i, @Named("jbossHome") File jbossHome) {
+        super(i);
         if(!jbossHome.isDirectory()){
             throw new RuntimeException("Invalid JBoss Home: "+jbossHome.getAbsolutePath());
         }
@@ -82,6 +90,8 @@ public class JBossController extends LocalController {
 
     @Extension
     public static class FactoryImpl extends LocalFactoryImpl {
+        @Inject Injector i;
+
         @Override
         public String getId() {
             return "jboss";
@@ -89,20 +99,27 @@ public class JBossController extends LocalController {
 
         @Override
         public JBossController create() {
-            return new JBossController(getWarFile(), getJBossHome());
+            return i.createChildInjector(i.getInstance(ModuleImpl.class)).getInstance(JBossController.class);
         }
 
-        protected File getJBossHome() {
-            String jbossHome = System.getenv("JBOSS_HOME");
-            File home = firstExisting(true, jbossHome,
-                    new File(getWarFile().getParentFile(), "jboss").getAbsolutePath(), "./jboss");
-            if (home == null || !home.isDirectory()) {
-                if (StringUtils.isBlank(jbossHome)) {
-                    throw new AssertionError("Cannot find JBoss home, maybe you forgot to set JBOSS_HOME env var? ");
+        public static final class ModuleImpl extends AbstractModule {
+
+            @Provides @Named("jbossHome")
+            public File jbossHome(@Named("jenkins.war") File warFile) {
+                try {
+                    return IOUtil.firstExisting(true,
+                            System.getenv("JBOSS_HOME"),
+                            new File(warFile.getParentFile(), "jboss").getAbsolutePath(),
+                            "./jboss"
+                    );
+                } catch (IOException ex) {
+                    throw new AssertionError("Cannot find JBoss home, maybe you forgot to set JBOSS_HOME env var?", ex);
                 }
-                throw new AssertionError(jbossHome + " doesn't exist, maybe you forgot to set JBOSS_HOME env var? ");
             }
-            return home;
+
+            @Override
+            protected void configure() {
+            }
         }
     }
 }

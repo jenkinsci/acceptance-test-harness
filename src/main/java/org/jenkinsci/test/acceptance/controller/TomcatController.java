@@ -5,12 +5,18 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.codehaus.plexus.util.FileUtils;
-import org.codehaus.plexus.util.StringUtils;
+import org.jenkinsci.test.acceptance.utils.IOUtil;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.jenkinsci.utils.process.ProcessInputStream;
 
 import com.cloudbees.sdk.extensibility.Extension;
+import com.google.inject.AbstractModule;
+import com.google.inject.Injector;
+import com.google.inject.Provides;
 
 /**
  * @author: Vivek Pandey
@@ -19,8 +25,9 @@ public class TomcatController extends LocalController {
 
     protected final File catalinaHome;
 
-    public TomcatController(File war, File catalinaHome) {
-        super(war);
+    @Inject
+    public TomcatController(Injector i, @Named("tomcatHome") File catalinaHome) {
+        super(i);
         if (!catalinaHome.isDirectory()) {
             throw new RuntimeException("Invalid CATALINA_HOME: " + catalinaHome.getAbsolutePath());
         }
@@ -85,6 +92,8 @@ public class TomcatController extends LocalController {
 
     @Extension
     public static class FactoryImpl extends LocalFactoryImpl {
+        @Inject Injector i;
+
         @Override
         public String getId() {
             return "tomcat";
@@ -92,22 +101,27 @@ public class TomcatController extends LocalController {
 
         @Override
         public TomcatController create() {
-            return new TomcatController(getWarFile(), getTomcatHome());
+            return i.createChildInjector(i.getInstance(ModuleImpl.class)).getInstance(TomcatController.class);
         }
 
-        protected File getTomcatHome() {
-            String catalinaHome = System.getenv("CATALINA_HOME");
-            File home = firstExisting(true, catalinaHome,
-                    new File(getWarFile().getParentFile(), "tomcat").getAbsolutePath(), "./tomcat");
-            if (home == null || !home.isDirectory()) {
-                if (StringUtils.isBlank(catalinaHome)) {
-                    throw new AssertionError(
-                            "Cannot find Tomcat home, maybe you forgot to set CATALINA_HOME env var? ");
+        public static final class ModuleImpl extends AbstractModule {
+
+            @Provides @Named("tomcatHome")
+            public File tomcatHome(@Named("jenkins.war") File warFile) {
+                try {
+                    return IOUtil.firstExisting(true,
+                            System.getenv("CATALINA_HOME"),
+                            new File(warFile.getParentFile(), "tomcat").getAbsolutePath(),
+                            "./tomcat"
+                    );
+                } catch (IOException ex) {
+                    throw new AssertionError("Cannot find Tomcat home, maybe you forgot to set CATALINA_HOME env var?", ex);
                 }
-                throw new AssertionError(
-                        catalinaHome + " doesn't exist, maybe you forgot to set CATALINA_HOME env var? ");
             }
-            return home;
+
+            @Override
+            protected void configure() {
+            }
         }
     }
 }
