@@ -97,7 +97,6 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
     }
 
     @Test
-    @WithPlugins({"config-file-provider", "ssh-slaves"})
     @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {"root", "/openstack_plugin/unsafe"})
     @TestActivation({"HARDWARE_ID", "IMAGE_ID", "KEY_PAIR_NAME"})
     public void provisionSshSlave() {
@@ -114,8 +113,7 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
     }
 
     // The test will fail when test host is not reachable from openstack machine for obvious reasons
-    @Test // @Since("openstack-cloud@1.9") JENKINS-29996
-    @WithPlugins({"config-file-provider", "ssh-slaves"})
+    @Test // @WithPlugins("openstack-cloud@1.9") JENKINS-29996
     @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {"root", "/openstack_plugin/unsafe"})
     @TestActivation({"HARDWARE_ID", "IMAGE_ID", "KEY_PAIR_NAME"})
     public void provisionJnlpSlave() {
@@ -132,7 +130,6 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
     }
 
     @Test @Issue("JENKINS-29998")
-    @WithPlugins({"config-file-provider", "ssh-slaves"})
     @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {"root", "/openstack_plugin/unsafe"})
     @TestActivation({"HARDWARE_ID", "IMAGE_ID", "KEY_PAIR_NAME"})
     public void scheduleMatrixWithoutLabel() {

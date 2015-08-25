@@ -74,7 +74,6 @@ public class LocalOverrideUpdateCenterMetadataDecoratorImpl implements UpdateCen
             m.name = main.getValue("Short-Name");
             m.version = main.getValue("Plugin-Version");
             m.gav = main.getValue("Group-Id")+":"+m.name+":"+m.version;
-            m.url = jpi.toURL();
             m.override = jpi;
             String dep = main.getValue("Plugin-Dependencies");
             if (dep!=null) {
