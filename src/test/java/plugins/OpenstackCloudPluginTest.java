@@ -134,7 +134,7 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
     @TestActivation({"HARDWARE_ID", "IMAGE_ID", "KEY_PAIR_NAME"})
     public void scheduleMatrixWithoutLabel() {
         configureCloudInit("cloud-init-jnlp");
-        configureProvisioning("SSH", "label");
+        configureProvisioning("JNLP", "label");
         jenkins.configure();
         jenkins.getConfigPage().numExecutors.set(0);
         jenkins.save();
