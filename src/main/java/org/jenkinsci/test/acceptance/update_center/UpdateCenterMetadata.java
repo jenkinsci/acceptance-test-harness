@@ -4,12 +4,13 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.ProvidedBy;
 
+import hudson.util.VersionNumber;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,24 +54,50 @@ public class UpdateCenterMetadata {
     }
 
     /**
-     * Find all the transitive dependency plugins of the given plugins, in the order of installation
+     * Find all the transitive dependency plugins of the given plugins, in the order of installation.
+     *
+     * Resolved plugins set should satisfy required versions including Jenkins version.
+     *
+     * @throws UnableToResolveDependencies When there requested plugin version can not be installed.
      */
-    public List<PluginMetadata> transitiveDependenciesOf(Collection<String> names) {
-        List<PluginMetadata> r = new ArrayList<>();
-        for (String n : names)
-            transitiveDependenciesOf(n, r);
-        return r;
+    public List<PluginMetadata> transitiveDependenciesOf(VersionNumber jenkins, Map<String, String> names) throws UnableToResolveDependencies {
+        List<PluginMetadata> set = new ArrayList<>();
+        for (Map.Entry<String, String> n : names.entrySet()) {
+            PluginMetadata p = plugins.get(n.getKey());
+            if (p==null) throw new IllegalArgumentException("No such plugin " + n.getKey());
+            if (p.requiredCore().isNewerThan(jenkins)) {
+                throw new UnableToResolveDependencies(String.format(
+                        "Unable to install %s plugin because of core dependency. Requeried: %s Used: %s",
+                        p, p.requiredCore(), jenkins
+                ));
+            }
+
+            transitiveDependenciesOf(jenkins, p, n.getValue(), set);
+        }
+        return set;
     }
 
-    private void transitiveDependenciesOf(String n, List<PluginMetadata> r) {
-        PluginMetadata p = plugins.get(n);
-        if (p==null)    return;
+    private void transitiveDependenciesOf(VersionNumber jenkins, PluginMetadata p, String v, List<PluginMetadata> set) {
+        for (Dependency d : p.dependencies) {
+            if (d.optional) continue;
+            transitiveDependenciesOf(jenkins, plugins.get(d.name), d.version, set);
+        }
 
-        for (Dependency d : p.dependencies)
-            if (!d.optional)
-                transitiveDependenciesOf(d.name, r);
+        if (!set.contains(p)) {
+            PluginMetadata use = p;
+            if (use.requiredCore().isNewerThan(jenkins)) {
+                // If latest version is too new for current Jenkins, use the declared one
+                use = p.versionOf(v);
+            }
 
-        if (!r.contains(p))
-            r.add(p);
+            set.add(use);
+        }
+    }
+
+    public static class UnableToResolveDependencies extends RuntimeException {
+
+        public UnableToResolveDependencies(String format) {
+            super(format);
+        }
     }
 }

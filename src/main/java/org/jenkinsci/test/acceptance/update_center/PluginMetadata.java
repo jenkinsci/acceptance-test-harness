@@ -1,8 +1,9 @@
 package org.jenkinsci.test.acceptance.update_center;
 
+import hudson.util.VersionNumber;
+
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
@@ -33,11 +34,11 @@ import static org.apache.http.entity.ContentType.*;
 public class PluginMetadata {
     private static final Logger LOGGER = LoggerFactory.getLogger(PluginMetadata.class);
     public String name, version, gav;
+    public String requiredCore;
     public List<Dependency> dependencies;
-    public URL url;
 
     /**
-     * If non-null, use this file instead of the one pointed by {@link #url} or {@link #gav}.
+     * If non-null, use this file instead of the one pointed by {@link #gav}.
      */
     public File override;
 
@@ -84,9 +85,23 @@ public class PluginMetadata {
         return r.getArtifact().getFile();
     }
 
+    public VersionNumber requiredCore() {
+        return new VersionNumber(requiredCore);
+    }
+
+    public PluginMetadata versionOf(String v) {
+        if (v == null) throw new IllegalArgumentException();
+
+        PluginMetadata ret = new PluginMetadata();
+        ret.name = name;
+        ret.version = v;
+        ret.gav = gav;
+        ret.requiredCore = requiredCore;
+        return ret;
+    }
+
     @Override
     public String toString() {
         return super.toString() + "[" + name + "," + version + "]";
     }
-
 }

@@ -4,11 +4,11 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.name.Named;
 
-import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.Plugin;
 import org.jenkinsci.test.acceptance.po.PluginManager;
 import org.jenkinsci.test.acceptance.po.PluginManager.PluginSpec;
+import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata.UnableToResolveDependencies;
 import org.jenkinsci.test.acceptance.utils.pluginreporter.ExercisedPluginsReporter;
 import org.junit.internal.AssumptionViolatedException;
 import org.junit.rules.TestRule;
@@ -74,9 +74,6 @@ public @interface WithPlugins {
         @Inject
         Injector injector;
 
-        @Inject
-        JenkinsController controller;
-
         @Inject @Named("ExercisedPluginReporter")
         ExercisedPluginsReporter pluginReporter;
 
@@ -105,7 +102,8 @@ public @interface WithPlugins {
                     }
                     base.evaluate();
                 }
-                @SuppressWarnings("deprecation")
+
+
                 private boolean installPlugins(WithPlugins wp, Set<String> plugins) {
                     if (wp == null) return false;
 
@@ -118,14 +116,14 @@ public @interface WithPlugins {
 
                         switch (pm.installationStatus(c)) {
                         case NOT_INSTALLED:
-                            restartRequired |= pm.installPlugins(c);
+                            restartRequired |= doInstall(pm, c);
                             break;
                         case OUTDATED:
                             if (neverReplaceExistingPlugins) {
                                 throw new AssumptionViolatedException(String.format(
                                         "Test requires %s plugin", c));
                             } else {
-                                restartRequired |= pm.installPlugins(c);
+                                restartRequired |= doInstall(pm, c);
                             }
                         break;
                         default:
@@ -133,6 +131,15 @@ public @interface WithPlugins {
                         }
                     }
                     return restartRequired;
+                }
+
+                @SuppressWarnings("deprecation")
+                private boolean doInstall(PluginManager pm, String c) {
+                    try {
+                        return pm.installPlugins(c);
+                    } catch (UnableToResolveDependencies ex) {
+                        throw new AssumptionViolatedException("Unable to install required plugins", ex);
+                    }
                 }
             };
         }

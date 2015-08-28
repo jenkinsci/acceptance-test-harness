@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -19,6 +20,7 @@ import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.UpdateCenter.InstallationFailedException;
 import org.jenkinsci.test.acceptance.update_center.PluginMetadata;
 import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata;
+import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata.UnableToResolveDependencies;
 import org.openqa.selenium.TimeoutException;
 
 import com.google.common.base.Splitter;
@@ -134,7 +136,7 @@ public class PluginManager extends ContainerPageObject {
      * @return true if {@link Jenkins#restart} is required
      */
     @Deprecated
-    public boolean installPlugins(final String... specs) {
+    public boolean installPlugins(final String... specs) throws UnableToResolveDependencies {
         boolean changed = false;
         boolean restartRequired = false;
         final Map<String, String> candidates = getMapShortNamesVersion(specs);
@@ -154,24 +156,21 @@ public class PluginManager extends ContainerPageObject {
             if (!someChangeRequired) {
                 return false;
             }
-            for (PluginMetadata newPlugin : ucmd.get().transitiveDependenciesOf(candidates.keySet())) {
+            List<PluginMetadata> pluginToBeInstalled = ucmd.get().transitiveDependenciesOf(jenkins.getVersion(), candidates);
+            for (PluginMetadata newPlugin : pluginToBeInstalled) {
                 final String name = newPlugin.name;
                 String claimedVersion = candidates.get(name);
                 if (claimedVersion == null) { // a dependency
                     claimedVersion = newPlugin.version;
                 }
-                String currentSpec;
-                if (StringUtils.isNotEmpty(claimedVersion)) {
-                    currentSpec = name + "@" + claimedVersion;
-                }
-                else {
-                    currentSpec = name;
-                }
-
+                final String currentSpec = StringUtils.isNotEmpty(claimedVersion)
+                    ? name + "@" + claimedVersion
+                    : name
+                ;
                 InstallationStatus status = installationStatus(currentSpec);
                 if (status != InstallationStatus.UP_TO_DATE) {
                     try {
-                        newPlugin.uploadTo(jenkins, injector, null);
+                        newPlugin.uploadTo(jenkins, injector, newPlugin.version);
                         changed = true;
                         restartRequired |= status == InstallationStatus.OUTDATED;
                         try {
