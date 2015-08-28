@@ -73,6 +73,7 @@ public class LocalOverrideUpdateCenterMetadataDecoratorImpl implements UpdateCen
             Attributes main = j.getManifest().getMainAttributes();
             m.name = main.getValue("Short-Name");
             m.version = main.getValue("Plugin-Version");
+            m.requiredCore = main.getValue("Jenkins-Version");
             m.gav = main.getValue("Group-Id")+":"+m.name+":"+m.version;
             m.override = jpi;
             String dep = main.getValue("Plugin-Dependencies");
