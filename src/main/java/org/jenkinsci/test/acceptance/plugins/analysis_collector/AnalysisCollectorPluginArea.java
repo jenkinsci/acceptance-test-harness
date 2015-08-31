@@ -10,12 +10,12 @@ import org.jenkinsci.test.acceptance.po.PageObject;
  */
 public class AnalysisCollectorPluginArea extends PageAreaImpl {
 
-    public final Control isCheckstyleActivated = control("isCheckStyleActivated");
-    public final Control isDryActivated = control("isDryActivated");
-    public final Control isPmdActivated = control("isPmdActivated");
-    public final Control isOpenTasksActivated = control("isOpenTasksActivated");
-    public final Control isWarningsActivated = control("isWarningsActivated");
-    public final Control isFindbugsActivated = control("isFindBugsActivated");
+    public final Control isCheckstyleActivated = control("checkStyleActivated", "isCheckStyleActivated");
+    public final Control isDryActivated = control("dryActivated", "isDryActivated");
+    public final Control isPmdActivated = control("pmdActivated", "isPmdActivated");
+    public final Control isOpenTasksActivated = control("openTasksActivated", "isOpenTasksActivated");
+    public final Control isWarningsActivated = control("warningsActivated", "isWarningsActivated");
+    public final Control isFindbugsActivated = control("findBugsActivated", "isFindBugsActivated");
 
     protected AnalysisCollectorPluginArea(PageObject parent, String path) {
         super(parent, path);
