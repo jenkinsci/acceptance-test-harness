@@ -14,8 +14,10 @@ import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.net.ServerSocket;
@@ -225,7 +227,7 @@ public abstract class LocalController extends JenkinsController implements LogLi
             if(getenv("INTERACTIVE") != null && getenv("INTERACTIVE").equals("true")){
                 out.println("Commencing interactive debugging. Browser session was kept open.");
                 out.println("Press return to proceed.");
-                in.read();
+                new BufferedReader(new InputStreamReader(System.in)).readLine();
             }else{
                 out.println("It looks like the test failed/errored, so here's the console from Jenkins:");
                 out.println("--------------------------------------------------------------------------");

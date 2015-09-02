@@ -35,7 +35,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
@@ -75,7 +74,7 @@ public class DockerFixtureTest {
                 .addClasses(DockerContainer.class, DockerFixture.class)
                 .addAsResource(
                         new StringAsset("FROM java:8-jre"),
-                        "/org/jenkinsci/test/acceptance/docker/DockerTest/TestJarContainer/Dockerfile"
+                        "/org/jenkinsci/test/acceptance/docker/DockerFixtureTest/TestJarContainer/Dockerfile"
                 );
         File jarDirectory = folder.newFolder();
         File jarFile = new File(jarDirectory, "test.jar");
@@ -83,7 +82,7 @@ public class DockerFixtureTest {
 
         //Creates a class loader that depends on the system one loading the jar. Jars are isolated from the test ones.
         ClassLoader classloader = new URLClassLoader(new URL[]{jarFile.toURI().toURL()}, null);
-        Class<? extends DockerContainer> clazz = (Class<? extends DockerContainer>) Class.forName("org.jenkinsci.test.acceptance.docker.DockerTest$TestJarContainer", true, classloader);
+        Class<? extends DockerContainer> clazz = (Class<? extends DockerContainer>) Class.forName("org.jenkinsci.test.acceptance.docker.DockerFixtureTest$TestJarContainer", true, classloader);
 
         //Executes the test
         File outputDir = folder.newFolder();
@@ -109,7 +108,7 @@ public class DockerFixtureTest {
 
         //Creates a class loader that depends on the system one loading the jar. Jars are isolated from the test ones.
         ClassLoader classloader = new URLClassLoader(new URL[]{jarFile.toURI().toURL()}, null);
-        Class<? extends DockerContainer> clazz = (Class<? extends DockerContainer>) Class.forName("org.jenkinsci.test.acceptance.docker.DockerTest$CustomTestJarContainer", true, classloader);
+        Class<? extends DockerContainer> clazz = (Class<? extends DockerContainer>) Class.forName("org.jenkinsci.test.acceptance.docker.DockerFixtureTest$CustomTestJarContainer", true, classloader);
 
         //Executes the test
         File outputDir = folder.newFolder();
