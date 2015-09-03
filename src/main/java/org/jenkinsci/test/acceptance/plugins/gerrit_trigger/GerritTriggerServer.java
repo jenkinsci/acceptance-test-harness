@@ -78,7 +78,7 @@ public class GerritTriggerServer extends PageObject {
         } catch (NoSuchElementException e) {
             add.click();
             codeReview.set("Code-Review");
-            codeReviewD.set("Code Review");
+            codeReviewD.set("New Code Review");
             add.click();
             verified.set("Verified");
             verifiedD.set("Verified");
@@ -90,8 +90,8 @@ public class GerritTriggerServer extends PageObject {
             try {
                 HttpURLConnection c = (HttpURLConnection) new URL(url + "/wakeup").openConnection();
                 c.setRequestMethod("GET");
-                c.setConnectTimeout(3000);
-                c.setReadTimeout(3000);
+                c.setConnectTimeout(10000);
+                c.setReadTimeout(10000);
                 assertThat(c.getResponseCode(), is(equalTo(200)));
             } catch (IOException ioe) {
                 fail(ioe.getMessage());

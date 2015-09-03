@@ -26,6 +26,8 @@ package org.jenkinsci.test.acceptance.plugins.gerrit_trigger;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.PageObject;
+import org.openqa.selenium.By;
+import org.openqa.selenium.support.ui.Select;
 
 /**
  * Page Object for Gerrit Trigger test-job (configuration) page.
@@ -43,6 +45,9 @@ public class GerritTriggerJob extends PageObject {
     public final Control failRev = control("/com-sonyericsson-hudson-plugins-gerrit-trigger-hudsontrigger-GerritTrigger/gerritBuildFailedCodeReviewValue");
     public final Control project = control("/com-sonyericsson-hudson-plugins-gerrit-trigger-hudsontrigger-GerritTrigger/gerritProjects/pattern");
     public final Control branch = control("/com-sonyericsson-hudson-plugins-gerrit-trigger-hudsontrigger-GerritTrigger/gerritProjects/branches/pattern");
+    public final Control triggerOnAdd = control("/com-sonyericsson-hudson-plugins-gerrit-trigger-hudsontrigger-GerritTrigger/hetero-list-add[triggerOnEvents]");
+    public final Control commentAddedTriggerVerdictCategory = control("/com-sonyericsson-hudson-plugins-gerrit-trigger-hudsontrigger-GerritTrigger/triggerOnEvents/verdictCategory");
+    public final Control commentAddedTriggerApprovalValue = control("/com-sonyericsson-hudson-plugins-gerrit-trigger-hudsontrigger-GerritTrigger/triggerOnEvents/commentAddedTriggerApprovalValue");
 
     public GerritTriggerJob(Jenkins jenkins,String jobName) {
         super(jenkins.injector,jenkins.url("job/"+jobName+"/configure"));
@@ -51,10 +56,27 @@ public class GerritTriggerJob extends PageObject {
 
     /**
      * Saves harness' gerrit-trigger test-job configuration.
+     * @param eventToTriggerOn event to trigger on
      */
-    public void saveTestJobConfig() {
+    public void saveTestJobConfig(EventToTriggerOn eventToTriggerOn) {
         if(!event.resolve().isSelected()) event.click();
         server.select(this.getClass().getPackage().getName());
+
+        String displayName = eventToTriggerOn.getDisplayName();
+        switch (eventToTriggerOn) {
+            case PatchsetCreated: case RefUpdated: case ChangeMerged: case DraftPublished:
+                triggerOnAdd.selectDropdownMenu(displayName);
+                break;
+
+            case CommentAdded:
+                triggerOnAdd.selectDropdownMenu(displayName);
+                commentAddedTriggerVerdictCategory.select("Code-Review");
+                commentAddedTriggerApprovalValue.set("-2");
+                break;
+
+            default:
+                throw new IllegalArgumentException("not supported event to trigger on: " + displayName);
+        }
         advanced.click();
         passVerif.set("1");
         failVerif.set("-1");
@@ -63,5 +85,26 @@ public class GerritTriggerJob extends PageObject {
         project.set(GerritTriggerEnv.get().getProject());
         branch.set("master");
         clickButton("Save");
+    }
+
+    /**
+     * represents the options of events to trigger on for Gerrit-Trigger plugin
+     */
+    public enum EventToTriggerOn {
+        ChangeAbandoned("Change Abandoned"), ChangeMerged("Change Merged"), ChangeRestored(
+            "Change Restored"),
+        CommentAdded("Comment Added"), CommentAddedContainsRegularExpression(
+            "Comment Added Contains Regular Expression"),
+        DraftPublished("Draft Published"), PatchsetCreated("Patchset Created"), RefUpdated(
+            "Ref Updated");
+        private String displayName;
+
+        EventToTriggerOn(String displayName) {
+            this.displayName = displayName;
+        }
+
+        public String getDisplayName() {
+            return displayName;
+        }
     }
 }
