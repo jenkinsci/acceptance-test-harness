@@ -36,6 +36,11 @@ public class TaskScannerAction extends AnalysisAction {
         return StringUtils.substringBefore(htmlElement, "\n");
     }
 
+    @Override
+    public String getAnnotationName() {
+        return "open task";
+    }
+
     /**
      * This method gets a certain task's entry in the "Warnings"-tab specified by a key.
      *

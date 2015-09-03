@@ -424,6 +424,10 @@ public abstract class AnalysisAction extends ContainerPageObject {
         return asInt(getLinkedSourceFileLine(tabId, fileName, line).findElement(by.tagName("a")));
     }
 
+    public String getAnnotationName() {
+        return "warning";
+    }
+
     public enum Tab {
         MODULES, FILES, PACKAGES, WARNINGS, DETAILS, FIXED, NEW, CATEGORIES, TYPES
     }

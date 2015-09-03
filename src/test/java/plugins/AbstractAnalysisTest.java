@@ -69,27 +69,27 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
     /**
      * Builds a freestyle job with an enabled publisher of the plug-in under test.
      * Verifies that the project action from the job redirects to the result
-     * of the last build.
+     * of the last build. The the correct number of warnings in the project overview
+     * and result details view are verified.
      */
     @Test
     public void should_navigate_to_result_action_from_job() {
         FreeStyleJob job = createFreeStyleJob();
         Build build = buildSuccessfulJob(job);
 
+        AnalysisAction resultAction = createResultAction(build);
         AnalysisAction projectAction = createProjectAction(job);
-
         projectAction.open();
-        assertThat(projectAction.getCurrentUrl(), endsWith("Result/"));
-//
-//        AnalysisAction resultAction = createResultAction(build);
-//        assertThatWarningsCountInSummaryIs(resultAction, getNumberOfWarnings());
-//        assertThatNewWarningsCountInSummaryIs(resultAction, getNumberOfWarnings());
-//
-//        resultAction.open();
-//
-//        assertThat(resultAction.getNumberOfWarnings(), is(getNumberOfWarnings()));
-//        assertThat(resultAction.getNumberOfNewWarnings(), is(getNumberOfWarnings()));
-//        assertThat(resultAction.getNumberOfFixedWarnings(), is(0));
+        assertThat(projectAction.getCurrentUrl(), containsRegexp(resultAction.getUrl()));
+
+        assertThat(resultAction.getNumberOfWarnings(), is(getNumberOfWarnings()));
+        assertThat(resultAction.getNumberOfNewWarnings(), is(getNumberOfWarnings()));
+        assertThat(resultAction.getNumberOfFixedWarnings(), is(0));
+
+        build.open();
+
+        assertThatWarningsCountInSummaryIs(resultAction, getNumberOfWarnings());
+        assertThatNewWarningsCountInSummaryIs(resultAction, getNumberOfWarnings());
     }
 
     /**
@@ -600,7 +600,7 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      * @param numberOfWarnings the number of warnings
      */
     protected void assertThatWarningsCountInSummaryIs(final AnalysisAction action, final int numberOfWarnings) {
-        assertThatLinkReferencesNumberOfWarnings(action, numberOfWarnings, " warning", "");
+        assertThatLinkReferencesNumberOfWarnings(action, numberOfWarnings, "", "");
     }
 
     /**
@@ -611,7 +611,7 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      * @param numberOfNewWarnings the number of new warnings
      */
     protected void assertThatNewWarningsCountInSummaryIs(final AnalysisAction action, final int numberOfNewWarnings) {
-        assertThatLinkReferencesNumberOfWarnings(action, numberOfNewWarnings, " new warning", "/new");
+        assertThatLinkReferencesNumberOfWarnings(action, numberOfNewWarnings, "new ", "/new");
     }
 
     /**
@@ -622,11 +622,11 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      * @param numberOfFixedWarnings the number of fixed warnings
      */
     protected void assertThatFixedWarningsCountInSummaryIs(final AnalysisAction action, final int numberOfFixedWarnings) {
-        assertThatLinkReferencesNumberOfWarnings(action, numberOfFixedWarnings, " fixed warning", "/fixed");
+        assertThatLinkReferencesNumberOfWarnings(action, numberOfFixedWarnings, "fixed ", "/fixed");
     }
 
     private void assertThatLinkReferencesNumberOfWarnings(final AnalysisAction action, final int numberOfWarnings, final String linkText, final String url) {
-        assertThat(action.getResultLinkByXPathText(numberOfWarnings + linkText + plural(numberOfWarnings)),
+        assertThat(action.getResultLinkByXPathText(numberOfWarnings + " " + linkText + action.getAnnotationName() + plural(numberOfWarnings)),
                 containsRegexp(action.getUrl()));
     }
 
