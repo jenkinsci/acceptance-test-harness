@@ -68,10 +68,31 @@ public class FindBugsPluginTest extends AbstractAnalysisTest<FindBugsAction> {
     private static final String PATTERN_WITH_6_WARNINGS = "findbugsXml.xml";
     private static final String FILE_WITH_6_WARNINGS = "/findbugs_plugin/" + PATTERN_WITH_6_WARNINGS;
     private static final String PLUGIN_ROOT = "/findbugs_plugin/";
+    private static final int TOTAL_NUMBER_OF_WARNINGS = 6;
 
     @Override
     protected FindBugsAction createProjectAction(final FreeStyleJob job) {
         return new FindBugsAction(job);
+    }
+
+    @Override
+    protected FindBugsAction createResultAction(final Build build) {
+        return new FindBugsAction(build);
+    }
+
+    @Override
+    protected FreeStyleJob createFreeStyleJob() {
+        return createFreeStyleJob(new AnalysisConfigurator<FindBugsFreestyleSettings>() {
+            @Override
+            public void configure(FindBugsFreestyleSettings settings) {
+                settings.pattern.set(PATTERN_WITH_6_WARNINGS);
+            }
+        });
+    }
+
+    @Override
+    protected int getNumberOfWarnings() {
+        return TOTAL_NUMBER_OF_WARNINGS;
     }
 
     /**
@@ -98,16 +119,6 @@ public class FindBugsPluginTest extends AbstractAnalysisTest<FindBugsAction> {
         verifyReceivedMail("FindBugs: FAILURE", "FindBugs: 6-0-6");
     }
 
-    @Override
-    protected FreeStyleJob createFreeStyleJob() {
-        return createFreeStyleJob(new AnalysisConfigurator<FindBugsFreestyleSettings>() {
-            @Override
-            public void configure(FindBugsFreestyleSettings settings) {
-                settings.pattern.set(PATTERN_WITH_6_WARNINGS);
-            }
-        });
-    }
-
     private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<FindBugsFreestyleSettings> buildConfigurator) {
         return createFreeStyleJob(FILE_WITH_6_WARNINGS, buildConfigurator);
     }
@@ -132,13 +143,13 @@ public class FindBugsPluginTest extends AbstractAnalysisTest<FindBugsAction> {
 
         FindBugsAction action = new FindBugsAction(build);
 
-        assertThatWarningsCountInSummaryIs(action, 6);
-        assertThatNewWarningsCountInSummaryIs(action, 6);
+        assertThatWarningsCountInSummaryIs(action, TOTAL_NUMBER_OF_WARNINGS);
+        assertThatNewWarningsCountInSummaryIs(action, TOTAL_NUMBER_OF_WARNINGS);
 
         action.open();
 
-        assertThat(action.getNumberOfWarnings(), is(6));
-        assertThat(action.getNumberOfNewWarnings(), is(6));
+        assertThat(action.getNumberOfWarnings(), is(TOTAL_NUMBER_OF_WARNINGS));
+        assertThat(action.getNumberOfNewWarnings(), is(TOTAL_NUMBER_OF_WARNINGS));
         assertThat(action.getNumberOfFixedWarnings(), is(0));
         assertThat(action.getNumberOfWarningsWithHighPriority(), is(2));
         assertThat(action.getNumberOfWarningsWithNormalPriority(), is(4));
@@ -249,20 +260,6 @@ public class FindBugsPluginTest extends AbstractAnalysisTest<FindBugsAction> {
         action.openFixed();
 
         assertThat(action.getNumberOfRowsInFixedWarningsTable(), is(2));
-    }
-
-    /**
-     * Runs job two times to check if the links of the graph are relative.
-     */
-    @Test @Issue("JENKINS-21723")
-    public void should_have_relative_graph_links() {
-        FreeStyleJob job = createFreeStyleJob();
-        buildJobAndWait(job);
-        editJob("/findbugs_plugin/forSecondRun/findbugsXml.xml", false, job);
-
-        buildSuccessfulJob(job);
-
-        assertAreaLinksOfJobAreLike(job, "findbugs");
     }
 
     /**

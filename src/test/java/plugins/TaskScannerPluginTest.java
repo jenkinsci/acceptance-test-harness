@@ -36,6 +36,31 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
         return new TaskScannerAction(job);
     }
 
+    @Override
+    protected TaskScannerAction createResultAction(final Build build) {
+        return new TaskScannerAction(build);
+    }
+
+    @Override
+    protected FreeStyleJob createFreeStyleJob() {
+        return createFreeStyleJob(new AnalysisConfigurator<TasksFreestyleSettings>() {
+            @Override
+            public void configure(TasksFreestyleSettings settings) {
+                settings.setPattern("**/*.java");
+                settings.setExcludePattern("**/*Test.java");
+                settings.setHighPriorityTags("FIXME");
+                settings.setNormalPriorityTags("TODO");
+                settings.setLowPriorityTags("@Deprecated");
+                settings.setIgnoreCase(false);
+            }
+        });
+    }
+
+    @Override
+    protected int getNumberOfWarnings() {
+        return 6;
+    }
+
     /**
      * Checks that the plug-in sends a mail after a build has been failed. The content of the mail contains several
      * tokens that should be expanded in the mail with the correct values.
@@ -65,21 +90,6 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
         buildFailingJob(job);
 
         verifyReceivedMail("Tasks: FAILURE", "Tasks: 6-0-6");
-    }
-
-    @Override
-    protected FreeStyleJob createFreeStyleJob() {
-        return createFreeStyleJob(new AnalysisConfigurator<TasksFreestyleSettings>() {
-            @Override
-            public void configure(TasksFreestyleSettings settings) {
-                settings.setPattern("**/*.java");
-                settings.setExcludePattern("**/*Test.java");
-                settings.setHighPriorityTags("FIXME");
-                settings.setNormalPriorityTags("TODO");
-                settings.setLowPriorityTags("@Deprecated");
-                settings.setIgnoreCase(false);
-            }
-        });
     }
 
     private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<TasksFreestyleSettings> buildConfigurator) {

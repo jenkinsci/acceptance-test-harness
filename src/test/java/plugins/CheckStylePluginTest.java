@@ -43,10 +43,32 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
     private static final String CHECKSTYLE_PLUGIN_ROOT = "/checkstyle_plugin/";
     private static final String FILE_WITH_776_WARNINGS = CHECKSTYLE_PLUGIN_ROOT + PATTERN_WITH_776_WARNINGS;
     private static final String FILE_FOR_2ND_RUN = CHECKSTYLE_PLUGIN_ROOT + "forSecondRun/checkstyle-result.xml";
+    private static final int TOTAL_NUMBER_OF_WARNINGS = 776;
 
     @Override
     protected CheckStyleAction createProjectAction(final FreeStyleJob job) {
         return new CheckStyleAction(job);
+    }
+
+    @Override
+    protected CheckStyleAction createResultAction(final Build build) {
+        return new CheckStyleAction(build);
+    }
+
+    @Override
+    protected FreeStyleJob createFreeStyleJob() {
+        AnalysisConfigurator<CheckStyleFreestyleSettings> buildConfigurator = new AnalysisConfigurator<CheckStyleFreestyleSettings>() {
+            @Override
+            public void configure(CheckStyleFreestyleSettings settings) {
+                settings.pattern.set(PATTERN_WITH_776_WARNINGS);
+            }
+        };
+        return createFreeStyleJob(buildConfigurator);
+    }
+
+    @Override
+    protected int getNumberOfWarnings() {
+        return TOTAL_NUMBER_OF_WARNINGS;
     }
 
     /**
@@ -71,17 +93,6 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
         buildFailingJob(job);
 
         verifyReceivedMail("Checkstyle: FAILURE", "Checkstyle: 776-0-776");
-    }
-
-    @Override
-    protected FreeStyleJob createFreeStyleJob() {
-        AnalysisConfigurator<CheckStyleFreestyleSettings> buildConfigurator = new AnalysisConfigurator<CheckStyleFreestyleSettings>() {
-            @Override
-            public void configure(CheckStyleFreestyleSettings settings) {
-                settings.pattern.set(PATTERN_WITH_776_WARNINGS);
-            }
-        };
-        return createFreeStyleJob(buildConfigurator);
     }
 
     private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<CheckStyleFreestyleSettings> buildConfigurator) {
@@ -117,15 +128,15 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
 
         CheckStyleAction action = new CheckStyleAction(build);
 
-        assertThatWarningsCountInSummaryIs(action, 776);
-        assertThatNewWarningsCountInSummaryIs(action, 776);
+        assertThatWarningsCountInSummaryIs(action, TOTAL_NUMBER_OF_WARNINGS);
+        assertThatNewWarningsCountInSummaryIs(action, TOTAL_NUMBER_OF_WARNINGS);
 
         action.open();
 
-        assertThat(action.getNumberOfWarnings(), is(776));
-        assertThat(action.getNumberOfNewWarnings(), is(776));
+        assertThat(action.getNumberOfWarnings(), is(TOTAL_NUMBER_OF_WARNINGS));
+        assertThat(action.getNumberOfNewWarnings(), is(TOTAL_NUMBER_OF_WARNINGS));
         assertThat(action.getNumberOfFixedWarnings(), is(0));
-        assertThat(action.getNumberOfWarningsWithHighPriority(), is(776));
+        assertThat(action.getNumberOfWarningsWithHighPriority(), is(TOTAL_NUMBER_OF_WARNINGS));
         assertThat(action.getNumberOfWarningsWithNormalPriority(), is(0));
         assertThat(action.getNumberOfWarningsWithLowPriority(), is(0));
 
@@ -263,20 +274,6 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
         assertThat(job, hasAction(actionName));
         assertThat(job.getLastBuild(), hasAction(actionName));
         assertThat(build, hasAction(actionName));
-    }
-
-    /**
-     * Runs job two times to check if the links of the graph are relative.
-     */
-    @Test @Issue("JENKINS-21723")
-    public void should_have_relative_graph_links() throws Exception {
-        FreeStyleJob job = createFreeStyleJob();
-        buildJobAndWait(job);
-        editJob(FILE_FOR_2ND_RUN, false, job);
-
-        buildSuccessfulJob(job);
-
-        assertAreaLinksOfJobAreLike(job, "checkstyle");
     }
 
     /**

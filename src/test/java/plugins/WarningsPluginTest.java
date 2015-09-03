@@ -49,6 +49,28 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         return new WarningsAction(job);
     }
 
+    @Override
+    protected WarningsAction createResultAction(final Build build) {
+        return new WarningsAction(build);
+    }
+
+    @Override
+    protected FreeStyleJob createFreeStyleJob() {
+        FreeStyleJob job = createFreeStyleJob(new AnalysisConfigurator<WarningsBuildSettings>() {
+            @Override
+            public void configure(WarningsBuildSettings settings) {
+                settings.addConsoleScanner("Java Compiler (javac)");
+            }
+        });
+        catWarningsToConsole(job);
+        return job;
+    }
+
+    @Override
+    protected int getNumberOfWarnings() {
+        return 131;
+    }
+
     /**
      * Build a matrix job with three configurations. For each configuration a different set of warnings will be parsed
      * with the same parser (GCC). After the successful build the total number of warnings at the root level should be
@@ -187,10 +209,10 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
     @Test
     public void should_not_detect_errors_in_ignored_parts_of_the_workspace() {
         FreeStyleJob job = createNoFilesFreeStyleJob(new AnalysisConfigurator<WarningsBuildSettings>() {
-                    @Override
-                    public void configure(WarningsBuildSettings settings) {
-                        settings.addWorkspaceFileScanner("Maven", "no_errors_here.log");
-                    }
+            @Override
+            public void configure(WarningsBuildSettings settings) {
+                settings.addWorkspaceFileScanner("Maven", "no_errors_here.log");
+            }
         });
 
         job.configure();
@@ -211,7 +233,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
      */
     @Test
     public void should_set_warnings_count_in_list_view_column_for_freestyle_project() {
-        FreeStyleJob job = createFreeStyleJob();
+        FreeStyleJob job = createFreeStyleJobWith3Parsers();
         catWarningsToConsole(job);
         buildSuccessfulJob(job);
 
@@ -297,15 +319,14 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
      */
     @Test
     public void should_detect_warnings_of_multiple_compilers_in_console_freestyle() {
-        FreeStyleJob job = createFreeStyleJob();
+        FreeStyleJob job = createFreeStyleJobWith3Parsers();
 
         catWarningsToConsole(job);
 
         verify3ParserResults(job, 1);
     }
 
-    @Override
-    protected FreeStyleJob createFreeStyleJob() {
+    private FreeStyleJob createFreeStyleJobWith3Parsers() {
         return createFreeStyleJob(create3ParserConfiguration());
     }
 

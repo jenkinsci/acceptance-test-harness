@@ -21,7 +21,7 @@ public class WarningsAction extends AnalysisAction {
     }
 
     @Override
-    public String getResultUrl() {
-        return super.getResultUrl().replace(PLUGIN, PLUGIN + ".*");
+    public String getUrl() {
+        return super.getUrl().replace(PLUGIN, PLUGIN + ".*");
     }
 }

@@ -62,6 +62,21 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
         return new AnalysisCollectorAction(job);
     }
 
+    @Override
+    protected AnalysisCollectorAction createResultAction(final Build build) {
+        return new AnalysisCollectorAction(build);
+    }
+
+    @Override
+    protected FreeStyleJob createFreeStyleJob() {
+        return createJob(ANALYSIS_COLLECTOR_PLUGIN_RESOURCES, true);
+    }
+
+    @Override
+    protected int getNumberOfWarnings() {
+        return TOTAL;
+    }
+
     /**
      * Verifies that the plugin correctly collects and aggregates the warnings of all participating plugins.
      */
@@ -192,11 +207,6 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
                 )
         );
         assertThat(job, not(hasAnalysisWarningsFor(DRY)));
-    }
-
-    @Override
-    protected FreeStyleJob createFreeStyleJob() {
-        return createJob(ANALYSIS_COLLECTOR_PLUGIN_RESOURCES, true);
     }
 
     /**

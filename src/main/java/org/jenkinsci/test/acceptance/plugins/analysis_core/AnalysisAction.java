@@ -50,11 +50,11 @@ public abstract class AnalysisAction extends ContainerPageObject {
     }
 
     /**
-     * Returns the plug-in name this action belongs to.
+     * Returns the URL of this action.
      *
-     * @return  plug-in ID
+     * @return  URL of this action
      */
-    public String getResultUrl() {
+    public String getUrl() {
         return plugin;
     }
 

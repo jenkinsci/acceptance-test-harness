@@ -44,10 +44,31 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
     private static final String FILE_WITHOUT_WARNINGS = PLUGIN_ROOT + PATTERN_WITHOUT_WARNINGS;
     private static final String PATTERN_WITH_9_WARNINGS = "pmd-warnings.xml";
     private static final String FILE_WITH_9_WARNINGS = PLUGIN_ROOT + PATTERN_WITH_9_WARNINGS;
+    private static final int TOTAL_NUMBER_OF_WARNINGS = 9;
 
     @Override
     protected PmdAction createProjectAction(final FreeStyleJob job) {
         return new PmdAction(job);
+    }
+
+    @Override
+    protected PmdAction createResultAction(final Build build) {
+        return new PmdAction(build);
+    }
+
+    @Override
+    protected FreeStyleJob createFreeStyleJob() {
+        return createFreeStyleJob(FILE_WITH_9_WARNINGS, new AnalysisConfigurator<PmdFreestyleSettings>() {
+            @Override
+            public void configure(PmdFreestyleSettings settings) {
+                settings.pattern.set(PATTERN_WITH_9_WARNINGS);
+            }
+        });
+    }
+
+    @Override
+    protected int getNumberOfWarnings() {
+        return TOTAL_NUMBER_OF_WARNINGS;
     }
 
     /**
@@ -89,16 +110,6 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
         Build lastBuild = buildSuccessfulJob(job);
 
         assertThatBuildHasNoWarnings(lastBuild);
-    }
-
-    @Override
-    protected FreeStyleJob createFreeStyleJob() {
-        return createFreeStyleJob(FILE_WITH_9_WARNINGS, new AnalysisConfigurator<PmdFreestyleSettings>() {
-            @Override
-            public void configure(PmdFreestyleSettings settings) {
-                settings.pattern.set(PATTERN_WITH_9_WARNINGS);
-            }
-        });
     }
 
     private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<PmdFreestyleSettings> buildConfigurator) {
@@ -151,13 +162,13 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
 
         PmdAction action = new PmdAction(build);
 
-        assertThatWarningsCountInSummaryIs(action, 9);
-        assertThatNewWarningsCountInSummaryIs(action, 9);
+        assertThatWarningsCountInSummaryIs(action, TOTAL_NUMBER_OF_WARNINGS);
+        assertThatNewWarningsCountInSummaryIs(action, TOTAL_NUMBER_OF_WARNINGS);
 
         action.open();
 
-        assertThat(action.getNumberOfWarnings(), is(9));
-        assertThat(action.getNumberOfNewWarnings(), is(9));
+        assertThat(action.getNumberOfWarnings(), is(TOTAL_NUMBER_OF_WARNINGS));
+        assertThat(action.getNumberOfNewWarnings(), is(TOTAL_NUMBER_OF_WARNINGS));
         assertThat(action.getNumberOfFixedWarnings(), is(0));
         assertThat(action.getNumberOfWarningsWithHighPriority(), is(0));
         assertThat(action.getNumberOfWarningsWithNormalPriority(), is(3));
@@ -264,20 +275,6 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
     }
 
     /**
-     * Runs job two times to check if the links of the graph are relative.
-     */
-    @Test @Issue("JENKINS-21723")
-    public void should_have_relative_graph_links() {
-        FreeStyleJob job = createFreeStyleJob();
-        buildJobAndWait(job);
-        editJob(PLUGIN_ROOT + "forSecondRun/pmd-warnings.xml", false, job);
-
-        buildSuccessfulJob(job);
-
-        assertAreaLinksOfJobAreLike(job, "pmd");
-    }
-
-    /**
      * Runs a job with warning threshold configured once and validates that build is marked as unstable.
      */
     @Test @Issue("JENKINS-19614")
@@ -331,7 +328,7 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
         assertThat(action.getNumberOfNewWarnings(), is(2));
 
         SortedMap<String, Integer> expectedContent = new TreeMap<>();
-        expectedContent.put("Main.java:9", 9);
+        expectedContent.put("Main.java:9", TOTAL_NUMBER_OF_WARNINGS);
         expectedContent.put("Main.java:13", 13);
 
         verifySourceLine(action, "Main.java", 13,

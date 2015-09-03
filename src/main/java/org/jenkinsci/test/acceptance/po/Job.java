@@ -8,7 +8,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -362,21 +361,31 @@ public class Job extends ContainerPageObject {
     }
 
     /**
-     * Getter for all area links.
+     * Returns the relevant information of the trend graph image map. A trend graph shows for each build three
+     * values: the number of warnings for priority HIGH, NORMAL, and LOW. These results are returned in a map.
+     * The key is the URL to the warnings results of each build (and priority). The value is the number of warnings
+     * for each result.
      *
-     * @return All found area links found
+     * @param url the URL of the graph to look at
+     * @return the content of the trend graph
      */
-    public List<String> getAreaLinks() {
+    public Map<String, Integer> getTrendGraphContent(final String url) {
         open();
-        final List<String> links = new ArrayList();
-        final Collection<WebElement> areas = all(by.xpath(".//div/map/area"));
-        final Pattern pattern = Pattern.compile("href=\"(.*?)\"");
-        for (WebElement area : areas) {
-            final Matcher matcher = pattern.matcher(area.getAttribute("outerHTML"));
-            if (matcher.find()) {
-                links.add(matcher.group(1));
+
+        Map<String, Integer> links = new HashMap<String, Integer>();
+        Pattern resultLink = Pattern.compile("href=\"(.*" + url +".*)\"");
+        Pattern warningsCount = Pattern.compile("title=\"(\\d+).*\"");
+        for (WebElement area : all(by.xpath(".//div/map/area"))) {
+            String outerHtml = area.getAttribute("outerHTML");
+            Matcher linkMatcher = resultLink.matcher(outerHtml);
+            if (linkMatcher.find()) {
+                Matcher countMatcher = warningsCount.matcher(outerHtml);
+                if (countMatcher.find()) {
+                    links.put(linkMatcher.group(1), Integer.valueOf(countMatcher.group(1)));
+                }
             }
         }
+
         return links;
     }
 

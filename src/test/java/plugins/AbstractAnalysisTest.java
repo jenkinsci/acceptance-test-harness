@@ -5,6 +5,10 @@ import javax.mail.MessagingException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 
@@ -38,6 +42,7 @@ import org.jenkinsci.test.acceptance.po.View;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.jenkinsci.test.acceptance.utils.mail.MailService;
 import org.junit.Test;
+import org.jvnet.hudson.test.Issue;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -45,9 +50,8 @@ import com.google.inject.Inject;
 
 import static java.util.Collections.*;
 import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.MatcherAssert.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
-import static org.junit.Assert.*;
 
 /**
  * Base class for tests of the static analysis plug-ins.
@@ -60,6 +64,8 @@ import static org.junit.Assert.*;
  * @author Ullrich Hafner
  */
 public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends AbstractJUnitTest {
+    private static final List<String> PRIORITIES = Arrays.asList("HIGH", "LOW", "NORMAL");
+
     /**
      * Builds a freestyle job with an enabled publisher of the plug-in under test.
      * Verifies that the project action from the job redirects to the result
@@ -68,15 +74,76 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
     @Test
     public void should_navigate_to_result_action_from_job() {
         FreeStyleJob job = createFreeStyleJob();
+        Build build = buildSuccessfulJob(job);
+
+        AnalysisAction projectAction = createProjectAction(job);
+
+        projectAction.open();
+        assertThat(projectAction.getCurrentUrl(), endsWith("Result/"));
+//
+//        AnalysisAction resultAction = createResultAction(build);
+//        assertThatWarningsCountInSummaryIs(resultAction, getNumberOfWarnings());
+//        assertThatNewWarningsCountInSummaryIs(resultAction, getNumberOfWarnings());
+//
+//        resultAction.open();
+//
+//        assertThat(resultAction.getNumberOfWarnings(), is(getNumberOfWarnings()));
+//        assertThat(resultAction.getNumberOfNewWarnings(), is(getNumberOfWarnings()));
+//        assertThat(resultAction.getNumberOfFixedWarnings(), is(0));
+    }
+
+    /**
+     * Builds a freestyle job with an enabled publisher of the plug-in under test two times in a row.
+     * Verifies that afterwards a trend graph exists that contains 6 relative
+     * links to the plug-in results (one for each priority and build).
+     */
+    @Test @Issue("JENKINS-21723")
+    public void should_have_trend_graph_with_relative_links() {
+        FreeStyleJob job = createFreeStyleJob();
+        buildJobAndWait(job);
         buildSuccessfulJob(job);
 
         AnalysisAction action = createProjectAction(job);
-        action.open();
 
-        assertThat(action.getCurrentUrl(), endsWith("Result/"));
+        assertThatProjectPageTrendIsCorrect(job, action);
     }
 
+    private void assertThatProjectPageTrendIsCorrect(final FreeStyleJob job, final AnalysisAction action) {
+        Map<String, Integer> trend = job.getTrendGraphContent(action.getUrl());
+        assertThat(trend.size(), is(6));
+
+        List<String> expectedUrls = new ArrayList<>();
+        expectedUrls.addAll(trend.keySet());
+        sort(expectedUrls);
+
+        int index = 0;
+        for (int build = 1; build <= 2; build++) {
+            int sum = 0;
+            for (String priority : PRIORITIES) {
+                String expectedUrl = String.format("%d/%sResult/%s", build, action.getUrl(), priority);
+                String url = expectedUrls.get(index++);
+                assertThat(url, containsRegexp(expectedUrl));
+                sum += trend.get(url);
+            }
+            assertThat(sum, is(getNumberOfWarnings()));
+        }
+    }
+
+    /**
+     * Creates a specific project action of the plug-in under test.
+     *
+     * @param job the job containing this action
+     * @return the created action
+     */
     protected abstract P createProjectAction(final FreeStyleJob job);
+
+    /**
+     * Creates a specific result action of the plug-in under test.
+     *
+     * @param build the build containing the results for this action
+     * @return the created action
+     */
+    protected abstract P createResultAction(final Build build);
 
     /**
      * Creates a freestyle job that has an enabled publisher of the plug-in under test. The job
@@ -85,6 +152,14 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      * @return the created freestyle job
      */
     protected abstract FreeStyleJob createFreeStyleJob();
+
+    /**
+     * Returns the number of warnings that the created freestyle job should produce.
+     *
+     * @return total number of warnings
+     * @see #createFreeStyleJob()
+     */
+    protected abstract int getNumberOfWarnings();
 
     /** Mock that verifies that mails have been sent by Jenkins email-ext plugin. */
     @Inject
@@ -437,19 +512,6 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
     }
 
     /**
-     * Checks if the area links of jobs matches the regular expression.
-     *
-     * @param job    job to check the area links
-     * @param plugin URL of the corresponding plug-in
-     */
-    public void assertAreaLinksOfJobAreLike(Job job, String plugin) {
-        Pattern pattern = Pattern.compile("^\\d+/" + plugin + "Result/(HIGH|NORMAL|LOW)");
-        for (String currentLink : job.getAreaLinks()) {
-            assertTrue("Link should be relative", pattern.matcher(currentLink).matches());
-        }
-    }
-
-    /**
      * Creates a new view and adds the given column to the view.
      *
      * @param columnClass The ListViewColumn that should bee added.
@@ -565,7 +627,7 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
 
     private void assertThatLinkReferencesNumberOfWarnings(final AnalysisAction action, final int numberOfWarnings, final String linkText, final String url) {
         assertThat(action.getResultLinkByXPathText(numberOfWarnings + linkText + plural(numberOfWarnings)),
-                containsRegexp(action.getResultUrl()));
+                containsRegexp(action.getUrl()));
     }
 
     protected String plural(final int numberOfWarnings) {
