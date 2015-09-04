@@ -43,6 +43,8 @@ import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.jenkinsci.test.acceptance.utils.mail.MailService;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -56,8 +58,7 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
 /**
  * Base class for tests of the static analysis plug-ins.
  *
- * @param  <P> the type of the project action
- *
+ * @param <P> the type of the project action
  * @author Martin Ende
  * @author Martin Kurz
  * @author Fabian Trampusch
@@ -67,10 +68,9 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
     private static final List<String> PRIORITIES = Arrays.asList("HIGH", "LOW", "NORMAL");
 
     /**
-     * Builds a freestyle job with an enabled publisher of the plug-in under test.
-     * Verifies that the project action from the job redirects to the result
-     * of the last build. The the correct number of warnings in the project overview
-     * and result details view are verified.
+     * Builds a freestyle job with an enabled publisher of the plug-in under test. Verifies that the project action from
+     * the job redirects to the result of the last build. The the correct number of warnings in the project overview and
+     * result details view are verified.
      */
     @Test
     public void should_navigate_to_result_action_from_job() {
@@ -79,6 +79,7 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
 
         AnalysisAction resultAction = createResultAction(build);
         AnalysisAction projectAction = createProjectAction(job);
+
         projectAction.open();
         assertThat(projectAction.getCurrentUrl(), containsRegexp(resultAction.getUrl()));
 
@@ -87,17 +88,17 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
         assertThat(resultAction.getNumberOfFixedWarnings(), is(0));
 
         build.open();
-
         assertThatWarningsCountInSummaryIs(resultAction, getNumberOfWarnings());
         assertThatNewWarningsCountInSummaryIs(resultAction, getNumberOfWarnings());
     }
 
     /**
-     * Builds a freestyle job with an enabled publisher of the plug-in under test two times in a row.
-     * Verifies that afterwards a trend graph exists that contains 6 relative
-     * links to the plug-in results (one for each priority and build).
+     * Builds a freestyle job with an enabled publisher of the plug-in under test two times in a row. Verifies that
+     * afterwards a trend graph exists that contains 6 relative links to the plug-in results (one for each priority and
+     * build).
      */
-    @Test @Issue("JENKINS-21723")
+    @Test
+    @Issue({"JENKINS-21723", "JENKINS-29900"})
     public void should_have_trend_graph_with_relative_links() {
         FreeStyleJob job = createFreeStyleJob();
         buildJobAndWait(job);
@@ -105,10 +106,29 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
 
         AnalysisAction action = createProjectAction(job);
 
-        assertThatProjectPageTrendIsCorrect(job, action);
+        verifyTrendGraphOveriew(job, action);
+        verifyTrendGraphDetails(job, action);
     }
 
-    private void assertThatProjectPageTrendIsCorrect(final FreeStyleJob job, final AnalysisAction action) {
+    private void verifyTrendGraphOveriew(final FreeStyleJob job, final AnalysisAction action) {
+        job.open();
+        assertThatProjectPageTrendIsCorrect(job, action, "");
+    }
+
+    private void verifyTrendGraphDetails(final FreeStyleJob job, final AnalysisAction action) {
+        List<WebElement> graphLinks = job.all(By.linkText("Enlarge"));
+        // We need to skip analysis collector here since the graph link is overlapped with footer.
+        // see also JENKINS-30304.
+        // TODO: enable if JENKINS-30304 has been fixed
+        if (graphLinks.size() == 1) {
+            graphLinks.get(0).click();
+            assertThatProjectPageTrendIsCorrect(job, action, "../../");
+        }
+    }
+
+    private void assertThatProjectPageTrendIsCorrect(final FreeStyleJob job, final AnalysisAction action, final String prefix) {
+        elasticSleep(500);
+
         Map<String, Integer> trend = job.getTrendGraphContent(action.getUrl());
         assertThat(trend.size(), is(6));
 
@@ -120,7 +140,7 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
         for (int build = 1; build <= 2; build++) {
             int sum = 0;
             for (String priority : PRIORITIES) {
-                String expectedUrl = String.format("%d/%sResult/%s", build, action.getUrl(), priority);
+                String expectedUrl = String.format("^%s%d/%sResult/%s$", prefix, build, action.getUrl(), priority);
                 String url = expectedUrls.get(index++);
                 assertThat(url, containsRegexp(expectedUrl));
                 sum += trend.get(url);
@@ -146,8 +166,8 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
     protected abstract P createResultAction(final Build build);
 
     /**
-     * Creates a freestyle job that has an enabled publisher of the plug-in under test. The job
-     * is expected to run with build status SUCCESS.
+     * Creates a freestyle job that has an enabled publisher of the plug-in under test. The job is expected to run with
+     * build status SUCCESS.
      *
      * @return the created freestyle job
      */
@@ -596,7 +616,7 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      * Verifies that in the summary page of the specified action there is a link that references all warnings. The link
      * label contains the specified number of warnings.
      *
-     * @param action the action to check
+     * @param action           the action to check
      * @param numberOfWarnings the number of warnings
      */
     protected void assertThatWarningsCountInSummaryIs(final AnalysisAction action, final int numberOfWarnings) {
@@ -607,7 +627,7 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      * Verifies that in the summary page of the specified action there is a link that references the new warnings. The
      * link label contains the specified number of new warnings.
      *
-     * @param action the action to check
+     * @param action              the action to check
      * @param numberOfNewWarnings the number of new warnings
      */
     protected void assertThatNewWarningsCountInSummaryIs(final AnalysisAction action, final int numberOfNewWarnings) {
