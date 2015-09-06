@@ -106,11 +106,11 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
 
         AnalysisAction action = createProjectAction(job);
 
-        verifyTrendGraphOveriew(job, action);
+        verifyTrendGraphOverview(job, action);
         verifyTrendGraphDetails(job, action);
     }
 
-    private void verifyTrendGraphOveriew(final FreeStyleJob job, final AnalysisAction action) {
+    private void verifyTrendGraphOverview(final FreeStyleJob job, final AnalysisAction action) {
         job.open();
         assertThatProjectPageTrendIsCorrect(job, action, "");
     }

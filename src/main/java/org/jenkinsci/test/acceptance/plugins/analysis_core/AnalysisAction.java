@@ -19,6 +19,7 @@ import org.openqa.selenium.WebElement;
  * @author Martin Kurz
  */
 public abstract class AnalysisAction extends ContainerPageObject {
+    private final String pluginUrl;
     private final ContainerPageObject parent;
     private final String plugin;
 
@@ -29,7 +30,7 @@ public abstract class AnalysisAction extends ContainerPageObject {
      * @param plugin plug-in name
      */
     public AnalysisAction(final Build parent, final String plugin) {
-        this(plugin + "Result", parent);
+        this(plugin + "Result", plugin, parent);
     }
 
     /**
@@ -39,12 +40,22 @@ public abstract class AnalysisAction extends ContainerPageObject {
      * @param plugin Path to plugin without / at the end
      */
     public AnalysisAction(final Job parent, final String plugin) {
-        this(plugin, parent);
+        this(plugin, plugin, parent);
     }
 
-    private AnalysisAction(String url, ContainerPageObject parent) {
+    /**
+     * Returns the parent of this action.
+     *
+     * @return the parent
+     */
+    protected ContainerPageObject getParent() {
+        return parent;
+    }
+
+    private AnalysisAction(final String url, final String pluginUrl, final ContainerPageObject parent) {
         super(parent, parent.url(url + '/'));
 
+        this.pluginUrl = pluginUrl;
         this.parent = parent;
         plugin = url;
     }
@@ -426,6 +437,10 @@ public abstract class AnalysisAction extends ContainerPageObject {
 
     public String getAnnotationName() {
         return "warning";
+    }
+
+    public GraphConfigurationView configureTrendGraphForUser() {
+        return new GraphConfigurationView(parent, pluginUrl);
     }
 
     public enum Tab {

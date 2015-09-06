@@ -19,4 +19,9 @@ public class AnalysisCollectorAction extends AnalysisAction {
     public AnalysisCollectorAction(final Job parent) {
         super(parent, PLUGIN);
     }
+
+    @Override
+    public AnalysisGraphConfigurationView configureTrendGraphForUser() {
+        return new AnalysisGraphConfigurationView(getParent());
+    }
 }
