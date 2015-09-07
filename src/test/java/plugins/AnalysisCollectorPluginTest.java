@@ -362,9 +362,9 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
         AnalysisConfigurator<WarningsBuildSettings> warningsConfigurator = new AnalysisConfigurator<WarningsBuildSettings>() {
             @Override
             public void configure(WarningsBuildSettings settings) {
-                settings.addWorkspaceFileScanner("Java Compiler (javac)", "**/*");
-                settings.addWorkspaceFileScanner("JavaDoc Tool", "**/*");
-                settings.addWorkspaceFileScanner("MSBuild", "**/*");
+                settings.addWorkspaceScanner("Java Compiler (javac)", "**/*");
+                settings.addWorkspaceScanner("JavaDoc Tool", "**/*");
+                settings.addWorkspaceScanner("MSBuild", "**/*");
             }
         };
         warningsConfigurator.configure(warningsSettings);

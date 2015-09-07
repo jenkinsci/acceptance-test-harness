@@ -1,9 +1,12 @@
 package org.jenkinsci.test.acceptance.plugins.analysis_core;
 
+import java.util.List;
+
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.PostBuildStep;
+import org.openqa.selenium.WebElement;
 
 /**
  * Job settings for all static analysis plug-ins.
@@ -11,7 +14,6 @@ import org.jenkinsci.test.acceptance.po.PostBuildStep;
  * @author Fabian Trampusch
  */
 public abstract class AnalysisSettings extends PageAreaImpl implements PostBuildStep {
-
     protected Control advanced = control("advanced-button");
 
     protected Control canRunOnFailed = control("canRunOnFailed");
@@ -251,9 +253,18 @@ public abstract class AnalysisSettings extends PageAreaImpl implements PostBuild
      *
      * @param propertyName the name of the repeatable property
      * @return the selected repeatable add button
-     * @since 1.71 (analysis-core)
      */
-    protected Control repeatableAddButton(final String propertyName) {
+    protected Control findRepeatableAddButtonFor(final String propertyName) {
         return control(by.xpath("//div[@id='" + propertyName + "']//button[contains(@path,'repeatable-add')]"));
+    }
+
+    /**
+     * Returns the repeatable delete buttons for the specified property.
+     *
+     * @param propertyName the name of the repeatable property
+     * @return the selected repeatable delete buttons
+     */
+    protected List<WebElement> findRepeatableDeleteButtonsFor(final String propertyName) {
+        return all(by.xpath("//div[@id='" + propertyName + "']//button[contains(@path,'repeatable-delete')]"));
     }
 }

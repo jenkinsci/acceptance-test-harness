@@ -59,7 +59,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         FreeStyleJob job = createFreeStyleJob(new AnalysisConfigurator<WarningsBuildSettings>() {
             @Override
             public void configure(WarningsBuildSettings settings) {
-                settings.addConsoleScanner("Java Compiler (javac)");
+                settings.addConsoleParser("Java Compiler (javac)");
             }
         });
         catWarningsToConsole(job);
@@ -85,7 +85,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
                 WarningsBuildSettings.class, new AnalysisConfigurator<WarningsBuildSettings>() {
                     @Override
                     public void configure(WarningsBuildSettings settings) {
-                        settings.addConsoleScanner("GNU C Compiler 4 (gcc)");
+                        settings.addConsoleParser("GNU C Compiler 4 (gcc)");
                     }
                 });
 
@@ -154,17 +154,26 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         FreeStyleJob job = createFreeStyleJob(new AnalysisConfigurator<WarningsBuildSettings>() {
             @Override
             public void configure(WarningsBuildSettings settings) {
-                settings.addWorkspaceFileScanner("Java Compiler (javac)", "**/*");
+                settings.addWorkspaceScanner("Java Compiler (javac)", "**/*");
+                settings.addWorkspaceScanner("MSBuild", "**/*");
+            }
+        });
+        buildSuccessfulJob(job);
+
+        editJob(job, WarningsBuildSettings.class, new AnalysisConfigurator<WarningsBuildSettings>() {
+            @Override
+            public void configure(WarningsBuildSettings settings) {
+                settings.addWorkspaceScanner("JavaDoc Tool", "**/*");
+                settings.setExcludePattern(".*Catalyst.*");
                 settings.setBuildFailedTotalAll("0");
             }
         });
-
         configureEmailNotification(job, "Warnings: ${WARNINGS_RESULT}",
                 "Warnings: ${WARNINGS_COUNT}-${WARNINGS_FIXED}-${WARNINGS_NEW}");
 
         buildFailingJob(job);
 
-        verifyReceivedMail("Warnings: FAILURE", "Warnings: 131-0-131");
+        verifyReceivedMail("Warnings: FAILURE", "Warnings: 147-7-8");
     }
 
     private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<WarningsBuildSettings> buildConfigurator) {
@@ -183,8 +192,8 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         FreeStyleJob job = createNoFilesFreeStyleJob(new AnalysisConfigurator<WarningsBuildSettings>() {
             @Override
             public void configure(WarningsBuildSettings settings) {
-                settings.addConsoleScanner("Maven");
-                settings.addWorkspaceFileScanner("Java Compiler (javac)", "**/*");
+                settings.addConsoleParser("Maven");
+                settings.addWorkspaceScanner("Java Compiler (javac)", "**/*");
             }
         });
 
@@ -211,7 +220,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         FreeStyleJob job = createNoFilesFreeStyleJob(new AnalysisConfigurator<WarningsBuildSettings>() {
             @Override
             public void configure(WarningsBuildSettings settings) {
-                settings.addWorkspaceFileScanner("Maven", "no_errors_here.log");
+                settings.addWorkspaceScanner("Maven", "no_errors_here.log");
             }
         });
 
@@ -300,9 +309,9 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         FreeStyleJob job = createFreeStyleJob(new AnalysisConfigurator<WarningsBuildSettings>() {
             @Override
             public void configure(WarningsBuildSettings settings) {
-                settings.addConsoleScanner("Java Compiler (javac)");
-                settings.addConsoleScanner("JavaDoc Tool");
-                settings.addConsoleScanner("MSBuild");
+                settings.addConsoleParser("Java Compiler (javac)");
+                settings.addConsoleParser("JavaDoc Tool");
+                settings.addConsoleParser("MSBuild");
                 settings.setBuildUnstableTotalAll("0");
                 settings.setNewWarningsThresholdFailed("0");
                 settings.setUseDeltaValues(true);
@@ -340,9 +349,9 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         return new AnalysisConfigurator<WarningsBuildSettings>() {
             @Override
             public void configure(WarningsBuildSettings settings) {
-                settings.addConsoleScanner("Java Compiler (javac)");
-                settings.addConsoleScanner("JavaDoc Tool");
-                settings.addConsoleScanner("MSBuild");
+                settings.addConsoleParser("Java Compiler (javac)");
+                settings.addConsoleParser("JavaDoc Tool");
+                settings.addConsoleParser("MSBuild");
             }
         };
     }
@@ -356,9 +365,9 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         FreeStyleJob job = createFreeStyleJob(new AnalysisConfigurator<WarningsBuildSettings>() {
             @Override
             public void configure(WarningsBuildSettings settings) {
-                settings.addWorkspaceFileScanner("Java Compiler (javac)", "**/*");
-                settings.addWorkspaceFileScanner("JavaDoc Tool", "**/*");
-                settings.addWorkspaceFileScanner("MSBuild", "**/*");
+                settings.addWorkspaceScanner("Java Compiler (javac)", "**/*");
+                settings.addWorkspaceScanner("JavaDoc Tool", "**/*");
+                settings.addWorkspaceScanner("MSBuild", "**/*");
             }
         });
 
@@ -417,7 +426,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         FreeStyleJob job = createFreeStyleJob(new AnalysisConfigurator<WarningsBuildSettings>() {
             @Override
             public void configure(WarningsBuildSettings settings) {
-                settings.addWorkspaceFileScanner("Java Compiler (javac)", "**/*");
+                settings.addWorkspaceScanner("Java Compiler (javac)", "**/*");
                 settings.setCanRunOnFailed(canRunOnFailed);
             }
         });
@@ -438,7 +447,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         FreeStyleJob job = createNoFilesFreeStyleJob(new AnalysisConfigurator<WarningsBuildSettings>() {
             @Override
             public void configure(WarningsBuildSettings settings) {
-                settings.addConsoleScanner("Maven");
+                settings.addConsoleParser("Maven");
             }
         });
 
@@ -480,9 +489,9 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         FreeStyleJob job = createFreeStyleJob(WARNINGS_FILE_FOR_INCLUDE_EXCLUDE_TESTS, new AnalysisConfigurator<WarningsBuildSettings>() {
             @Override
             public void configure(WarningsBuildSettings settings) {
-                settings.addWorkspaceFileScanner("Java Compiler (javac)", "**/*");
-                settings.addWarningsToInclude(".*/.*");
-                settings.addWarningsToIgnore(".*/ignore1/.*, .*/ignore2/.*, .*/default/.*");
+                settings.addWorkspaceScanner("Java Compiler (javac)", "**/*");
+                settings.setIncludePattern(".*/.*");
+                settings.setExcludePattern(".*/ignore1/.*, .*/ignore2/.*, .*/default/.*");
             }
         });
 
@@ -505,8 +514,8 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         FreeStyleJob job = createFreeStyleJob(WARNINGS_FILE_FOR_INCLUDE_EXCLUDE_TESTS, new AnalysisConfigurator<WarningsBuildSettings>() {
             @Override
             public void configure(WarningsBuildSettings settings) {
-                settings.addWorkspaceFileScanner("Java Compiler (javac)", "**/*");
-                settings.addWarningsToInclude(".*/include*/.*, .*/default/.*");
+                settings.addWorkspaceScanner("Java Compiler (javac)", "**/*");
+                settings.setIncludePattern(".*/include*/.*, .*/default/.*");
             }
         });
         Build build = buildSuccessfulJob(job);

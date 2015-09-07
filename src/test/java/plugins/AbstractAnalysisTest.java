@@ -347,6 +347,22 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      * Provides the ability to edit an existing job by changing or adding the resource to copy and/or by changing the
      * configuration of a publisher
      *
+     * @param job                         the job to be changed
+     * @param publisherBuildSettingsClass the type of the publisher to be modified
+     * @param configurator                the new configuration of the publisher
+     * @return the edited job
+     */
+    public <J extends Job, T extends AnalysisSettings & PostBuildStep> J editJob(
+            final J job,
+            Class<T> publisherBuildSettingsClass,
+            AnalysisConfigurator<T> configurator) {
+        return edit(null, false, job, publisherBuildSettingsClass, configurator);
+    }
+
+    /**
+     * Provides the ability to edit an existing job by changing or adding the resource to copy and/or by changing the
+     * configuration of a publisher
+     *
      * @param isAdditionalResource        decides whether the old resource is kept (FALSE) or deleted (TRUE)
      * @param job                         the job to be changed
      * @param publisherBuildSettingsClass the type of the publisher to be modified
@@ -390,17 +406,14 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
             addResourceToJob(job, newResourceToCopy);
         }
 
-        //change the configuration of the publisher
+        // change the configuration of the publisher
         if (configurator != null) {
-
             if (job instanceof MavenModuleSet) {
                 configurator.configure(((MavenModuleSet) job).getBuildSettings(publisherBuildSettingsClass));
             }
             else if (job instanceof FreeStyleJob) {
                 configurator.configure(job.getPublisher(publisherBuildSettingsClass));
             }
-
-
         }
 
         job.save();
