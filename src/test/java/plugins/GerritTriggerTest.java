@@ -70,9 +70,9 @@ import static org.junit.Assume.assumeTrue;
 public class GerritTriggerTest extends AbstractJUnitTest {
     private static final Logger LOGGER = Logger.getLogger(GerritTriggerTest.class.getName());
 
-    private static final String USER = GerritTriggerEnv.get().getGerritUser();
-    private static final String HOST_NAME = GerritTriggerEnv.get().getHostName();
-    private static final String PROJECT = GerritTriggerEnv.get().getProject();
+    // Instantiating this will cause AssumptionViolatedException to be throws when properties are not declared
+    GerritTriggerEnv env = new GerritTriggerEnv();
+
     @Before
     public void setUpLogger() {
         LOGGER.setLevel(Level.ALL);
@@ -143,7 +143,7 @@ public class GerritTriggerTest extends AbstractJUnitTest {
         dir.delete();//result !needed
         assertTrue(dir.mkdir());
 
-        assertThat(logProcessBuilderIssues(new ProcessBuilder("git", "clone", "ssh://" + USER + "@" + HOST_NAME + ":29418/" + PROJECT, jobName).directory(dir), "git clone").exitValue(), is(equalTo(0)));
+        assertThat(logProcessBuilderIssues(new ProcessBuilder("git", "clone", "ssh://" + env.getGerritUser() + "@" + env.getHostName() + ":29418/" + env.getProject(), jobName).directory(dir), "git clone").exitValue(), is(equalTo(0)));
 
         File file = new File(dir+"/"+jobName,jobName);
         file.delete();//result !needed
@@ -157,7 +157,7 @@ public class GerritTriggerTest extends AbstractJUnitTest {
         if (!hooksDir.exists()) {
             assertTrue(hooksDir.mkdir());
         }
-        assertThat(logProcessBuilderIssues(new ProcessBuilder("scp", "-p", "-P", "29418", USER + "@" + HOST_NAME + ":hooks/commit-msg", ".git/hooks/").directory(dir), "scp commit-msg").exitValue(), is(equalTo(0)));
+        assertThat(logProcessBuilderIssues(new ProcessBuilder("scp", "-p", "-P", "29418", env.getGerritUser() + "@" + env.getHostName() + ":hooks/commit-msg", ".git/hooks/").directory(dir), "scp commit-msg").exitValue(), is(equalTo(0)));
         assertThat(logProcessBuilderIssues(new ProcessBuilder("git", "commit", "-m", jobName).directory(dir), "git commit").exitValue(), is(equalTo(0)));
         return dir;
     }
@@ -375,7 +375,7 @@ public class GerritTriggerTest extends AbstractJUnitTest {
         String commitID = stringFrom(logProcessBuilderIssues(gitLog1Pb, "git log"));
         ProcessBuilder gitLog2Pb = new ProcessBuilder("git","log","-1").directory(dir);
         String changeID = valueFrom(stringFrom(logProcessBuilderIssues(gitLog2Pb, "git log")),".+Change-Id:(.+)");
-        assertThat(logProcessBuilderIssues(new ProcessBuilder("ssh", "-p", "29418", USER + "@" + HOST_NAME, "gerrit", "review", commitID, "--publish").directory(dir), "git publish").exitValue(), is(equalTo(0)));
+        assertThat(logProcessBuilderIssues(new ProcessBuilder("ssh", "-p", "29418", env.getGerritUser() + "@" + env.getHostName(), "gerrit", "review", commitID, "--publish").directory(dir), "git publish").exitValue(), is(equalTo(0)));
         return changeID;
     }
 
@@ -422,15 +422,15 @@ public class GerritTriggerTest extends AbstractJUnitTest {
         ProcessBuilder gitLog2Pb = new ProcessBuilder("git","log","-1").directory(dir);
         String changeID = valueFrom(stringFrom(logProcessBuilderIssues(gitLog2Pb, "git log")), ".+Change-Id:(.+)");
 
-        assertThat(logProcessBuilderIssues(new ProcessBuilder("ssh", "-p", "29418", USER + "@" + HOST_NAME, "gerrit", "review", commitID, "--verified 1").directory(dir), "gerrit verify").exitValue(), is(equalTo(0)));
-        assertThat(logProcessBuilderIssues(new ProcessBuilder("ssh", "-p", "29418", USER + "@" + HOST_NAME, "gerrit", "review", commitID, "--code-review 2").directory(dir), "gerrit code review").exitValue(), is(equalTo(0)));
-        assertThat(logProcessBuilderIssues(new ProcessBuilder("ssh", "-p", "29418", USER + "@" + HOST_NAME, "gerrit", "review", commitID, "--submit").directory(dir), "gerrit merge").exitValue(), is(equalTo(0)));
+        assertThat(logProcessBuilderIssues(new ProcessBuilder("ssh", "-p", "29418", env.getGerritUser() + "@" + env.getHostName(), "gerrit", "review", commitID, "--verified 1").directory(dir), "gerrit verify").exitValue(), is(equalTo(0)));
+        assertThat(logProcessBuilderIssues(new ProcessBuilder("ssh", "-p", "29418", env.getGerritUser() + "@" + env.getHostName(), "gerrit", "review", commitID, "--code-review 2").directory(dir), "gerrit code review").exitValue(), is(equalTo(0)));
+        assertThat(logProcessBuilderIssues(new ProcessBuilder("ssh", "-p", "29418", env.getGerritUser() + "@" + env.getHostName(), "gerrit", "review", commitID, "--submit").directory(dir), "gerrit merge").exitValue(), is(equalTo(0)));
         return changeID;
     }
 
     private void addComment(String commitId) throws InterruptedException,IOException {
         assertThat(logProcessBuilderIssues(new ProcessBuilder("ssh", "-p", "29418",
-                        USER + "@" + HOST_NAME, "gerrit", "review", commitId, "--code-review -2"),
+                        env.getGerritUser() + "@" + env.getHostName(), "gerrit", "review", commitId, "--code-review -2"),
                 "ssh gerrit --code-review").exitValue(), is(equalTo(0)));
     }
 

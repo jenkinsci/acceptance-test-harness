@@ -40,7 +40,7 @@ public class GerritTriggerEnv {
     //
     private boolean noProxy;
 
-    private GerritTriggerEnv() {
+    public GerritTriggerEnv() {
         gerritUser = getEnv("gtGerrituser");
         hostName = getEnv("gtHostname");
         project = getEnv("gtProject");
