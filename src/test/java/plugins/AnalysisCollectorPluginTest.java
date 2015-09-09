@@ -1,9 +1,12 @@
 package plugins;
 
+import java.util.Map;
+
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisCollectorAction;
 import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisCollectorColumn;
 import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisCollectorFreestyleBuildSettings;
+import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisGraphConfigurationView;
 import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisPlugin;
 import org.jenkinsci.test.acceptance.plugins.analysis_collector.WarningsPerProjectPortlet;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
@@ -18,14 +21,15 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.ListView;
 import org.junit.Test;
+import org.jvnet.hudson.test.Issue;
 import org.openqa.selenium.WebElement;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 import static org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisPlugin.*;
 import static org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView.*;
 import static org.jenkinsci.test.acceptance.po.PageObject.createRandomName;
-import static org.junit.Assert.*;
 
 /**
  * Acceptance tests for the Static Code Analysis Collector (analysis-collector) plug-in.
@@ -75,6 +79,44 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
     @Override
     protected int getNumberOfWarnings() {
         return TOTAL;
+    }
+
+    /**
+     * Verifies that no other trend graphs are shown if configured in the graph configuration screen per user.
+     */
+    @Test @Issue("JENKINS-30270")
+    public void should_deactivate_all_other_trend_graphs() {
+        FreeStyleJob job = createFreeStyleJob();
+
+        buildSuccessfulJob(job);
+        buildSuccessfulJob(job);
+
+        job.open();
+        elasticSleep(500);
+
+        assertThatNumberOfGraphsIs(job, 48);
+
+        AnalysisCollectorAction action = new AnalysisCollectorAction(job);
+        AnalysisGraphConfigurationView view = action.configureTrendGraphForUser();
+
+        deactivateOtherTrendGraphs(view, true);
+
+        assertThatNumberOfGraphsIs(job, 6);
+
+        deactivateOtherTrendGraphs(view, false);
+
+        assertThatNumberOfGraphsIs(job, 48);
+    }
+
+    private void deactivateOtherTrendGraphs(final AnalysisGraphConfigurationView view, final boolean shouldDisable) {
+        view.open();
+        view.deactiveOtherTrendGraphs(shouldDisable);
+        view.save();
+    }
+
+    private void assertThatNumberOfGraphsIs(final FreeStyleJob job, final int expectedCount) {
+        Map<String, Integer> trends = job.getTrendGraphContent(".*");
+        assertThat(trends.size(), is(expectedCount));
     }
 
     /**
@@ -320,9 +362,9 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
         AnalysisConfigurator<WarningsBuildSettings> warningsConfigurator = new AnalysisConfigurator<WarningsBuildSettings>() {
             @Override
             public void configure(WarningsBuildSettings settings) {
-                settings.addWorkspaceFileScanner("Java Compiler (javac)", "**/*");
-                settings.addWorkspaceFileScanner("JavaDoc Tool", "**/*");
-                settings.addWorkspaceFileScanner("MSBuild", "**/*");
+                settings.addWorkspaceScanner("Java Compiler (javac)", "**/*");
+                settings.addWorkspaceScanner("JavaDoc Tool", "**/*");
+                settings.addWorkspaceScanner("MSBuild", "**/*");
             }
         };
         warningsConfigurator.configure(warningsSettings);

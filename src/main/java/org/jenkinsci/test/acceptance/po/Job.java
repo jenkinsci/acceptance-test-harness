@@ -370,8 +370,6 @@ public class Job extends ContainerPageObject {
      * @return the content of the trend graph
      */
     public Map<String, Integer> getTrendGraphContent(final String url) {
-        open();
-
         Map<String, Integer> links = new HashMap<String, Integer>();
         Pattern resultLink = Pattern.compile("href=\"(.*" + url +".*)\"");
         Pattern warningsCount = Pattern.compile("title=\"(\\d+).*\"");

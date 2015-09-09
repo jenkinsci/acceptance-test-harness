@@ -1,11 +1,14 @@
 package org.jenkinsci.test.acceptance.plugins.warnings;
 
+import java.util.List;
+
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisFreestyleSettings;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.PageArea;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
+import org.openqa.selenium.WebElement;
 
 /**
  * Settings of the warnings plugin. There is no difference between freestyle and maven jobs.
@@ -15,8 +18,11 @@ public class WarningsBuildSettings extends AnalysisFreestyleSettings {
     private static final String CONSOLE_PARSERS = "consoleParsers";
     private static final String FILE_PARSERS = "parserConfigurations";
 
-    private Control consoleParsers = repeatableAddButton(CONSOLE_PARSERS);
-    private Control fileParsers = repeatableAddButton(FILE_PARSERS);
+    private Control consoleParsers = findRepeatableAddButtonFor(CONSOLE_PARSERS);
+    private Control fileParsers = findRepeatableAddButtonFor(FILE_PARSERS);
+
+    private Control includePattern = control("includePattern");
+    private Control excludePattern = control("excludePattern");
 
     /**
      * Creates a new instance of {@code WarningsBuildSettings}.
@@ -28,14 +34,30 @@ public class WarningsBuildSettings extends AnalysisFreestyleSettings {
         super(parent, path);
     }
 
-    public void addConsoleScanner(final String caption) {
-        consoleParsers.click();
-        elasticSleep(1000);
-        PageArea repeatable = getRepeatableAreaOf(CONSOLE_PARSERS);
-        repeatable.control("parserName").select(caption);
+    public void clearConsoleScanners() {
+        removeParsersFor(CONSOLE_PARSERS);
     }
 
-    public void addWorkspaceFileScanner(final String caption, final String pattern) {
+    public void clearWorkspaceScanners() {
+        removeParsersFor(FILE_PARSERS);
+    }
+
+    private void removeParsersFor(final String propertyName) {
+        List<WebElement> deleteButtons = findRepeatableDeleteButtonsFor(propertyName);
+        for (WebElement deleteButton : deleteButtons) {
+            deleteButton.click();
+        }
+    }
+
+    public void addConsoleParser(final String parserName) {
+        consoleParsers.click();
+        elasticSleep(1000);
+
+        PageArea repeatable = getRepeatableAreaOf(CONSOLE_PARSERS);
+        repeatable.control("parserName").select(parserName);
+    }
+
+    public void addWorkspaceScanner(final String caption, final String pattern) {
         fileParsers.click();
         elasticSleep(1000);
 
@@ -50,17 +72,23 @@ public class WarningsBuildSettings extends AnalysisFreestyleSettings {
         return new PageAreaImpl(WarningsBuildSettings.this.getPage(), path) {};
     }
 
-    public void addWarningsToInclude(final String value) {
-        setPattern("include", value);
-    }
-
-    public void addWarningsToIgnore(final String value) {
-        setPattern("exclude", value);
-    }
-
-    private void setPattern(final String name, final String value) {
+    /**
+     * Defines the files to remove from all found warnings.
+     *
+     * @param pattern the pattern of files to exclude from the results
+     */
+    public void setExcludePattern(final String pattern) {
         ensureAdvancedClicked();
+        excludePattern.set(pattern);
+    }
 
-        find(by.xpath("//input[@name='_." + name + "Pattern']")).sendKeys(value);
+    /**
+     * Defines the files to include from all found warnings.
+     *
+     * @param pattern the pattern of files to include from the results
+     */
+    public void setIncludePattern(final String pattern) {
+        ensureAdvancedClicked();
+        includePattern.set(pattern);
     }
 }
