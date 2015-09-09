@@ -5,7 +5,7 @@ import java.util.Map;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisCollectorAction;
 import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisCollectorColumn;
-import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisCollectorFreestyleBuildSettings;
+import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisCollectorSettings;
 import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisGraphConfigurationView;
 import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisPlugin;
 import org.jenkinsci.test.acceptance.plugins.analysis_collector.WarningsPerProjectPortlet;
@@ -184,10 +184,10 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
         job.copyResource(ANALYSIS_COLLECTOR_PLUGIN_RESOURCES + "/findbugs.xml");
         job.addPublisher(FindBugsFreestyleSettings.class);
 
-        AnalysisCollectorFreestyleBuildSettings analysis = job.addPublisher(AnalysisCollectorFreestyleBuildSettings.class);
-        AnalysisConfigurator<AnalysisCollectorFreestyleBuildSettings> configurator = new AnalysisConfigurator<AnalysisCollectorFreestyleBuildSettings>() {
+        AnalysisCollectorSettings analysis = job.addPublisher(AnalysisCollectorSettings.class);
+        AnalysisConfigurator<AnalysisCollectorSettings> configurator = new AnalysisConfigurator<AnalysisCollectorSettings>() {
             @Override
-            public void configure(AnalysisCollectorFreestyleBuildSettings settings) {
+            public void configure(AnalysisCollectorSettings settings) {
                 settings.setBuildUnstableTotalAll("5");
             }
         };
@@ -331,7 +331,7 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
 
     private AnalysisCollectorAction deselectPluginAndBuild(AnalysisPlugin plugin, Job job) {
         job.configure();
-        AnalysisCollectorFreestyleBuildSettings publisher = job.getPublisher(AnalysisCollectorFreestyleBuildSettings.class);
+        AnalysisCollectorSettings publisher = job.getPublisher(AnalysisCollectorSettings.class);
         publisher.checkCollectedPlugin(plugin, false);
         job.save();
         Build build = buildSuccessfulJob(job);
@@ -351,7 +351,7 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
         addAndConfigureWarningsPublisher(job);
 
         if (addAnalysisPublisher) {
-            job.addPublisher(AnalysisCollectorFreestyleBuildSettings.class);
+            job.addPublisher(AnalysisCollectorSettings.class);
         }
         job.save();
         return job;

@@ -56,9 +56,12 @@ import static org.hamcrest.MatcherAssert.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 
 /**
- * Base class for tests of the static analysis plug-ins.
+ * Base class for tests of the static analysis plug-ins. Contains several generic test cases that run for all
+ * participating plug-ins. Additionally, serveral helper methods are available for the concrete test cases of a
+ * plug-in.
  *
  * @param <P> the type of the project action
+ *
  * @author Martin Ende
  * @author Martin Kurz
  * @author Fabian Trampusch
@@ -66,6 +69,56 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
  */
 public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends AbstractJUnitTest {
     private static final List<String> PRIORITIES = Arrays.asList("HIGH", "LOW", "NORMAL");
+
+    /**
+     * Builds a freestyle job with an enabled publisher of the plug-in under test. Sets the thresholds for the trend
+     * report so that a health of 0-19% is evaluated for the plug-in under test (shown as tool tip in the Jenkins
+     * main view).
+     * TODO: Add different health percentages
+     */
+    @Test @Issue("JENKINS-28360")
+    public void should_show_build_health() {
+        FreeStyleJob job = createFreeStyleJob();
+
+        AnalysisAction projectAction = createProjectAction(job);
+        editJob(job, projectAction, new AnalysisConfigurator<AnalysisSettings>() {
+            @Override
+            public void configure(final AnalysisSettings settings) {
+                settings.setBuildHealthyThreshold(0);
+                settings.setBuildUnhealthyThreshold(getNumberOfWarnings());
+            }
+        });
+
+        buildSuccessfulJob(job);
+
+        jenkins.open();
+
+        List<WebElement> healthElements = all(by.xpath("//div[@class='healthReportDetails']//tr"));
+        assertThat(healthElements.size(), is(3));
+
+        String expectedText = String.format("%s: %d %s%s found.", projectAction.getName(), getNumberOfWarnings(),
+                projectAction.getAnnotationName(), plural(getNumberOfWarnings()));
+        assertThatHealthReportIs(healthElements.get(1), expectedText, "00to19");
+        assertThatHealthReportIs(healthElements.get(2), "Build stability: No recent builds failed.", "80plus");
+    }
+
+    // First td contains icon, second td contains text
+    private void assertThatHealthReportIs(final WebElement healthReportTable, final String expectedText, final String expectedIconName) {
+        List<WebElement> descriptions = healthReportTable.findElements(By.xpath("td"));
+
+        assertThat(getDescriptionValue(descriptions, 0), containsString(expectedIconName + " "));
+        assertThat(getDescriptionValue(descriptions, 1), is(expectedText));
+    }
+
+    private String getDescriptionValue(final List<WebElement> descriptions, final int index) {
+        return descriptions.get(index).getAttribute("innerHTML");
+    }
+
+    private void editJob(final Job job, final AnalysisAction action, @CheckForNull final AnalysisConfigurator<AnalysisSettings> configurator) {
+        job.configure();
+        configurator.configure(job.getPublisher(action.getFreeStyleSettings()));
+        job.save();
+    }
 
     /**
      * Builds a freestyle job with an enabled publisher of the plug-in under test. Verifies that the project action from
@@ -388,11 +441,9 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      * @param configurator                the new configuration of the publisher
      * @return the edited job
      */
-    private <J extends Job, T extends AnalysisSettings & PostBuildStep> J edit(String newResourceToCopy,
-            boolean isAdditionalResource,
-            J job,
-            Class<T> publisherBuildSettingsClass,
-            @CheckForNull AnalysisConfigurator<T> configurator) {
+    private <J extends Job, T extends AnalysisSettings & PostBuildStep> J edit(
+            @CheckForNull final String newResourceToCopy, final boolean isAdditionalResource,
+            final J job, final Class<T> publisherBuildSettingsClass, @CheckForNull AnalysisConfigurator<T> configurator) {
         job.configure();
 
         if (newResourceToCopy != null) {
@@ -408,12 +459,7 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
 
         // change the configuration of the publisher
         if (configurator != null) {
-            if (job instanceof MavenModuleSet) {
-                configurator.configure(((MavenModuleSet) job).getBuildSettings(publisherBuildSettingsClass));
-            }
-            else if (job instanceof FreeStyleJob) {
-                configurator.configure(job.getPublisher(publisherBuildSettingsClass));
-            }
+            configurator.configure(job.getPublisher(publisherBuildSettingsClass));
         }
 
         job.save();

@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.plugins.pmd;
 
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisAction;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisSettings;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Job;
 
@@ -18,5 +19,15 @@ public class PmdAction extends AnalysisAction {
 
     public PmdAction(final Job parent) {
         super(parent, PLUGIN);
+    }
+
+    @Override
+    public String getName() {
+        return "PMD";
+    }
+
+    @Override
+    public Class<? extends AnalysisSettings> getFreeStyleSettings() {
+        return PmdFreestyleSettings.class;
     }
 }

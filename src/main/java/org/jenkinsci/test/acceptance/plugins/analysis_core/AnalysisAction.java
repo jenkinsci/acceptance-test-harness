@@ -61,6 +61,20 @@ public abstract class AnalysisAction extends ContainerPageObject {
     }
 
     /**
+     * Returns the human readable name of the plug-in under test.
+     *
+     * @return the plug-in name
+     */
+    public abstract String getName();
+
+    /**
+     * Returns the class of the page object of the analysis settings used to configure the plug-in.
+     *
+     * @return the class of the freestyle publisher page object
+     */
+    public abstract Class<? extends AnalysisSettings> getFreeStyleSettings();
+
+    /**
      * Returns the URL of this action.
      *
      * @return  URL of this action

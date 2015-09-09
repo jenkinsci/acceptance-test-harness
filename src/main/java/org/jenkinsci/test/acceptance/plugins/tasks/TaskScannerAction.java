@@ -5,6 +5,7 @@ import java.util.NoSuchElementException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisAction;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisSettings;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.openqa.selenium.WebElement;
@@ -23,6 +24,16 @@ public class TaskScannerAction extends AnalysisAction {
 
     public TaskScannerAction(final Job parent) {
         super(parent, PLUGIN);
+    }
+
+    @Override
+    public String getName() {
+        return "Task Scanner";
+    }
+
+    @Override
+    public Class<? extends AnalysisSettings> getFreeStyleSettings() {
+        return TasksFreestyleSettings.class;
     }
 
     /**

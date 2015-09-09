@@ -8,7 +8,7 @@ import org.jenkinsci.test.acceptance.po.Job;
  * @author Michael Prankl
  */
 @Describable("Publish combined analysis results")
-public class AnalysisCollectorFreestyleBuildSettings extends AnalysisFreestyleSettings {
+public class AnalysisCollectorSettings extends AnalysisFreestyleSettings {
 
     private AnalysisCollectorPluginArea pluginArea;
 
@@ -18,7 +18,7 @@ public class AnalysisCollectorFreestyleBuildSettings extends AnalysisFreestyleSe
      * @param parent       the job currently being configured.
      * @param selectorPath the selector path used as prefix.
      */
-    public AnalysisCollectorFreestyleBuildSettings(Job parent, String selectorPath) {
+    public AnalysisCollectorSettings(Job parent, String selectorPath) {
         super(parent, selectorPath);
         this.pluginArea = new AnalysisCollectorPluginArea(parent, selectorPath);
     }

@@ -54,16 +54,20 @@ public abstract class AnalysisSettings extends PageAreaImpl implements PostBuild
 
     /**
      * Sets the threshold in percent after which a build is marked as stable.
+     *
+     * @param threshold number of warnings threshold to get a healthy build
      */
-    public void setBuildHealthyThreshold(String threshold) {
+    public void setBuildHealthyThreshold(final int threshold) {
         ensureAdvancedClicked();
         buildHealthyThreshold.set(threshold);
     }
 
     /**
      * Sets the threshold in percent after which a build is marked as stable.
+     *
+     * @param threshold number of warnings threshold to get an unhealthy build
      */
-    public void setBuildUnhealthyThreshold(String threshold) {
+    public void setBuildUnhealthyThreshold(final int threshold) {
         ensureAdvancedClicked();
         buildUnhealthyThreshold.set(threshold);
     }

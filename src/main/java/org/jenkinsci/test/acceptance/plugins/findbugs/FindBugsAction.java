@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.plugins.findbugs;
 
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisAction;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisSettings;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Job;
 
@@ -18,5 +19,15 @@ public class FindBugsAction extends AnalysisAction {
 
     public FindBugsAction(final Job parent) {
         super(parent, PLUGIN);
+    }
+
+    @Override
+    public String getName() {
+        return "FindBugs";
+    }
+
+    @Override
+    public Class<? extends AnalysisSettings> getFreeStyleSettings() {
+        return FindBugsFreestyleSettings.class;
     }
 }
