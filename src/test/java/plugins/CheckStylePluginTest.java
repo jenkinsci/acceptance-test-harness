@@ -351,6 +351,35 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
     }
 
     /**
+     * Builds a multi-module maven project and checks that warnings are grouped by module.
+     */
+    // TODO: Check module details
+    @Test
+    public void should_group_warnings_by_module() {
+        MavenModuleSet job = setupMavenJob(CHECKSTYLE_PLUGIN_ROOT + "maven_multi_module",
+                "clean package checkstyle:checkstyle", CheckStyleMavenSettings.class, null);
+        Node slave = createSlaveForJob(job);
+        Build build = buildSuccessfulJobOnSlave(job, slave);
+
+        assertThatCheckStyleResultExists(job, build);
+
+        build.open();
+
+        CheckStyleAction checkstyle = new CheckStyleAction(build);
+        checkstyle.open();
+
+        assertThat(checkstyle.getNumberOfNewWarnings(), is(24));
+        assertThatModulesTabIsCorrectlyFilled(checkstyle);
+    }
+
+    private void assertThatModulesTabIsCorrectlyFilled(final CheckStyleAction checkstyle) {
+        SortedMap<String, Integer> expectedConfigurationDetails = new TreeMap<>();
+        expectedConfigurationDetails.put("module1", 12);
+        expectedConfigurationDetails.put("module2", 12);
+        assertThat(checkstyle.getModulesTabContents(), is(expectedConfigurationDetails));
+    }
+
+    /**
      * Builds a maven project and checks if new warning are displayed.
      */
     @Test
@@ -406,9 +435,9 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
     @Test
     public void should_retrieve_results_from_slave() throws Exception {
         FreeStyleJob job = createFreeStyleJob();
-        Node slave = makeASlaveAndConfigureJob(job);
+        Node slave = createSlaveForJob(job);
 
-        Build lastBuild = buildJobOnSlaveWithSuccess(job, slave);
+        Build lastBuild = buildSuccessfulJobOnSlave(job, slave);
 
         assertThat(lastBuild.getNode(), is(slave));
         assertThatCheckStyleResultExists(job, lastBuild);

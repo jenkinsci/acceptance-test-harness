@@ -356,9 +356,9 @@ public class FindBugsPluginTest extends AbstractAnalysisTest<FindBugsAction> {
     @Test
     public void should_retrieve_results_from_slave() throws ExecutionException, InterruptedException {
         FreeStyleJob job = createFreeStyleJob();
-        Node slave = makeASlaveAndConfigureJob(job);
+        Node slave = createSlaveForJob(job);
 
-        Build lastBuild = buildJobOnSlaveWithSuccess(job, slave);
+        Build lastBuild = buildSuccessfulJobOnSlave(job, slave);
 
         assertThat(lastBuild.getNode(), is(slave));
         assertThatFindBugsResultExists(job, lastBuild);

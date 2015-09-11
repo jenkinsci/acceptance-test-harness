@@ -9,7 +9,6 @@ import org.jenkinsci.test.acceptance.po.Job;
  */
 @Describable("Publish combined analysis results")
 public class AnalysisCollectorSettings extends AnalysisFreestyleSettings {
-
     private AnalysisCollectorPluginArea pluginArea;
 
     /**

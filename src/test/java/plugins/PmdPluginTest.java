@@ -399,9 +399,9 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
     @Test
     public void should_retrieve_results_from_slave() throws Exception {
         FreeStyleJob job = createFreeStyleJob();
-        Node slave = makeASlaveAndConfigureJob(job);
+        Node slave = createSlaveForJob(job);
 
-        Build build = buildJobOnSlaveWithSuccess(job, slave);
+        Build build = buildSuccessfulJobOnSlave(job, slave);
 
         assertThat(build.getNode(), is(slave));
         assertThatPmdResultExists(job, build);

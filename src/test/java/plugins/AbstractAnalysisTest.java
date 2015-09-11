@@ -468,19 +468,22 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
 
 
     /**
-     * Generates a slave and configure job to run on slave
+     * Creates a slave and configures thes specified job to run on that slave.
      *
-     * @param job Job to run on slave
-     * @return Generated slave
-     * @throws ExecutionException   if computation of slave threw an exception
-     * @throws InterruptedException if thread was interrupted while waiting
+     * @param job job to run on slave
+     * @return created slave
      */
-    public Slave makeASlaveAndConfigureJob(Job job) throws ExecutionException, InterruptedException {
-        Slave slave = slaveController.install(jenkins).get();
-        job.configure();
-        job.setLabelExpression(slave.getName());
-        job.save();
-        return slave;
+    public Slave createSlaveForJob(final Job job) {
+        try {
+            Slave slave = slaveController.install(jenkins).get();
+            job.configure();
+            job.setLabelExpression(slave.getName());
+            job.save();
+            return slave;
+        }
+        catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException("Can't create Slave", e);
+        }
     }
 
     /**
@@ -503,6 +506,7 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
         MavenModuleSet job = jenkins.jobs.create(MavenModuleSet.class);
         job.copyDir(resource(resourceProjectDir));
         job.goals.set(goal);
+
 
         T buildSettings = job.addBuildSettings(codeStyleBuildSettings);
 
@@ -556,13 +560,13 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
     }
 
     /**
-     * Build Job and wait until finished.
+     * Builds the job on the specified slave and waits until the job has been finished. The build result must be SUCCESS.
      *
-     * @param job   Job to build
-     * @param slave Slave to run job on
-     * @return The made build
+     * @param job   the job to build
+     * @param slave the slave to run the job on
+     * @return the successful build
      */
-    public Build buildJobOnSlaveWithSuccess(FreeStyleJob job, Node slave) {
+    public Build buildSuccessfulJobOnSlave(final Job job, final Node slave) {
         return job.startBuild(singletonMap("slavename", slave.getName())).shouldSucceed();
     }
 
