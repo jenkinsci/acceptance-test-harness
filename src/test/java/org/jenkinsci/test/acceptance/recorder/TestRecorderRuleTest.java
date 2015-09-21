@@ -98,4 +98,28 @@ public class TestRecorderRuleTest {
         outputFile.delete();
     }
 
+    @Test
+    public void shouldNotRecordWhenRecorderIsDisabled() {
+        String oldValue = System.getProperty("RECORDER_DISABLED");
+        System.setProperty("RECORDER_DISABLED", "true");
+
+        TestRecorderRule testRecorderRule = new TestRecorderRule();
+        Description shouldNotRecordSuccessTestExecutionByDefault = Description.createTestDescription("org.jenkinsci.test.acceptance.recorder.TestRecorderRuleTest", "shouldNotRecordSuccessTestExecutionByDefault");
+        testRecorderRule.starting(shouldNotRecordSuccessTestExecutionByDefault);
+
+        System.out.println("Hello World");
+
+        //testRecorderRule.succeeded(shouldNotRecordSuccessTestExecutionByDefault);
+        testRecorderRule.finished(shouldNotRecordSuccessTestExecutionByDefault);
+
+        File outputFile = new File("target", "org.jenkinsci.test.acceptance.recorder.TestRecorderRuleTest-shouldNotRecordSuccessTestExecutionByDefault.mov");
+        assertThat(outputFile.exists(), is(false));
+
+        //Clean the field
+        if(oldValue != null) {
+            System.setProperty("RECORDER_DISABLED", oldValue);
+        }
+        outputFile.delete();
+    }
+
 }

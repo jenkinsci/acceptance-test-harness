@@ -54,7 +54,9 @@ public class TestRecorderRule extends TestWatcher {
 
     @Override
     protected void starting(Description description) {
-        startRecording(description);
+        if(!isRecorderDisabled()) {
+            startRecording(description);
+        }
     }
 
     private void startRecording(Description des) {
@@ -103,6 +105,10 @@ public class TestRecorderRule extends TestWatcher {
     @Override
     protected void finished(Description description) {
         stopRecording();
+    }
+
+    private boolean isRecorderDisabled() {
+        return Boolean.getBoolean("RECORDER_DISABLED");
     }
 
     private boolean saveAllExecutions() {
