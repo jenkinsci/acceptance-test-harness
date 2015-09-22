@@ -1,26 +1,3 @@
-/*
- * The MIT License
- *
- * Copyright (c) 2014 Red Hat, Inc.
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
 package org.jenkinsci.test.acceptance.recorder;
 
 import org.junit.rules.TestRule;
@@ -32,6 +9,8 @@ import org.monte.media.FormatKeys;
 import org.monte.media.VideoFormatKeys;
 import org.monte.media.math.Rational;
 import org.monte.screenrecorder.ScreenRecorder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.io.File;
@@ -44,11 +23,13 @@ import java.util.concurrent.TimeUnit;
  */
 public class TestRecorderRule extends TestWatcher {
 
+    private static final Logger logger = LoggerFactory.getLogger(TestRecorderRule.class);
 
     private static final int MAX_RECORDING_TIME_SECS = 120000;
     private static final int FRAME_RATE_PER_SEC = 60;
     private static final int BIT_DEPTH = 16;
     private static final float QUALITY_RATIO = 0.97f;
+    public static final String TARGET = "target";
 
     private JUnitScreenRecorder screenRecorder;
 
@@ -65,7 +46,7 @@ public class TestRecorderRule extends TestWatcher {
                 .getDefaultScreenDevice()
                 .getDefaultConfiguration();
 
-        File movieFolder = new File("target");
+        File movieFolder = new File(TARGET);
 
         String mimeType = FormatKeys.MIME_QUICKTIME;
         String videoFormatName = VideoFormatKeys.ENCODING_QUICKTIME_ANIMATION;
@@ -86,17 +67,19 @@ public class TestRecorderRule extends TestWatcher {
                             outputFormatForScreenCapture, null, null, movieFolder, des);
             this.screenRecorder.start();
         } catch (IOException e) {
-            throw new IllegalArgumentException("Exception starting test recording.", e);
+            logger.warn("Exception starting test recording {}", e);
         } catch (AWTException e) {
-            throw new IllegalArgumentException("Exception starting test recording.", e);
+            logger.warn("Exception starting test recording {}", e);
         }
     }
 
     @Override
     protected void succeeded(Description description) {
         if (this.screenRecorder != null) {
-            stopRecording();
-            if(!saveAllExecutions()) {
+            if (saveAllExecutions()) {
+                stopRecordingWithFinalWaiting();
+            } else {
+                stopRecording();
                 this.screenRecorder.removeMovieFile();
             }
         }
@@ -104,7 +87,7 @@ public class TestRecorderRule extends TestWatcher {
 
     @Override
     protected void finished(Description description) {
-        stopRecording();
+        stopRecordingWithFinalWaiting();
     }
 
     private boolean isRecorderDisabled() {
@@ -116,16 +99,31 @@ public class TestRecorderRule extends TestWatcher {
     }
 
     private void stopRecording() {
+        stopRecording(false);
+    }
+
+    private void stopRecordingWithFinalWaiting() {
+        stopRecording(true);
+    }
+
+    private void stopRecording(boolean waitTime) {
         if (this.screenRecorder != null && this.screenRecorder.getState() == ScreenRecorder.State.RECORDING) {
             try {
-                TimeUnit.SECONDS.sleep(1);
+                if (waitTime) {
+                    waitUntilLastFramesAreRecorded();
+                }
                 screenRecorder.stop();
             } catch (IOException e) {
-                throw new IllegalArgumentException("Exception stopping test recording.", e);
+                logger.warn("Exception stoping test recording {}.", e);
             } catch (InterruptedException e) {
-                throw new IllegalArgumentException("Exception stopping test recording.", e);
+                logger.warn("Exception stoping test recording {}.", e);
             }
         }
+    }
+
+    private void waitUntilLastFramesAreRecorded() throws InterruptedException {
+        //Values below 500 milliseconds result in no recording latest frames.
+        TimeUnit.MILLISECONDS.sleep(500);
     }
 
     private Format getFileFormat(String mimeType) {
@@ -142,7 +140,7 @@ public class TestRecorderRule extends TestWatcher {
                 VideoFormatKeys.HeightKey, outputDimension.height,
                 VideoFormatKeys.DepthKey, bitDepth, FormatKeys.FrameRateKey, Rational.valueOf(screenRate),
                 VideoFormatKeys.QualityKey, quality,
-                FormatKeys.KeyFrameIntervalKey, screenRate * 10 // one keyframe per 10 seconds
+                FormatKeys.KeyFrameIntervalKey, screenRate * 5 // one keyframe per 5 seconds
         );
     }
 }
