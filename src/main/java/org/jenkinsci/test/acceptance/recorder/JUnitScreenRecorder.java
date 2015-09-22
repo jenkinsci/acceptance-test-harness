@@ -7,10 +7,15 @@ import org.monte.screenrecorder.ScreenRecorder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.*;
+import java.awt.GraphicsConfiguration;
+import java.awt.Rectangle;
+import java.awt.AWTException;
 import java.io.File;
 import java.io.IOException;
 
+/**
+ * Custom Screen Recorder that allow to rename video output file.
+ */
 public class JUnitScreenRecorder extends ScreenRecorder {
 
     private static final Logger logger = LoggerFactory.getLogger(JUnitScreenRecorder.class);
@@ -27,12 +32,12 @@ public class JUnitScreenRecorder extends ScreenRecorder {
     }
 
     protected File createMovieFile(Format fileFormat) throws IOException {
-        if(!this.movieFolder.exists()) {
+        if (!this.movieFolder.exists()) {
             if (!this.movieFolder.mkdirs()) {
                 logger.warn("Directory {} could not be created. mkdirs operation returned false.", this.movieFolder);
             }
         } else {
-            if(!this.movieFolder.isDirectory()) {
+            if (!this.movieFolder.isDirectory()) {
                 logger.warn("{} is not a directory.", this.movieFolder);
             }
         }
@@ -43,7 +48,7 @@ public class JUnitScreenRecorder extends ScreenRecorder {
 
     public void removeMovieFile() {
         final File output = generateOutput(this.format);
-        if(output.exists()) {
+        if (output.exists()) {
             output.delete();
         }
     }

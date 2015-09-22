@@ -1,9 +1,7 @@
 package org.jenkinsci.test.acceptance.recorder;
 
-import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
 import org.monte.media.Format;
 import org.monte.media.FormatKeys;
 import org.monte.media.VideoFormatKeys;
@@ -12,7 +10,10 @@ import org.monte.screenrecorder.ScreenRecorder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.*;
+import java.awt.GraphicsEnvironment;
+import java.awt.GraphicsConfiguration;
+import java.awt.Dimension;
+import java.awt.AWTException;
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -35,7 +36,7 @@ public class TestRecorderRule extends TestWatcher {
 
     @Override
     protected void starting(Description description) {
-        if(!isRecorderDisabled()) {
+        if (!isRecorderDisabled()) {
             startRecording(description);
         }
     }
@@ -122,7 +123,7 @@ public class TestRecorderRule extends TestWatcher {
     }
 
     private void waitUntilLastFramesAreRecorded() throws InterruptedException {
-        //Values below 500 milliseconds result in no recording latest frames.
+        //Values below 500 milliseconds result in no recording last frames.
         TimeUnit.MILLISECONDS.sleep(500);
     }
 

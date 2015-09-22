@@ -1,17 +1,12 @@
 package org.jenkinsci.test.acceptance.recorder;
 
-import org.hamcrest.core.Is;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.RuleChain;
-import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 
 import java.io.File;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 
 public class TestRecorderRuleTest {
 
@@ -32,6 +27,7 @@ public class TestRecorderRuleTest {
         //Clean the field
         outputFile.delete();
     }
+
     @Test
     public void shouldRecordFailingTestExecutionByDefault() {
 
@@ -69,7 +65,7 @@ public class TestRecorderRuleTest {
         assertThat(outputFile.exists(), is(true));
 
         //Clean the field
-        if(oldValue != null) {
+        if (oldValue != null) {
             System.setProperty("RECORDER_SAVE_ALL", oldValue);
         } else {
             System.clearProperty("RECORDER_SAVE_ALL");
@@ -95,7 +91,7 @@ public class TestRecorderRuleTest {
         assertThat(outputFile.exists(), is(false));
 
         //Clean the field
-        if(oldValue != null) {
+        if (oldValue != null) {
             System.setProperty("RECORDER_DISABLED", oldValue);
         } else {
             System.clearProperty("RECORDER_DISABLED");
