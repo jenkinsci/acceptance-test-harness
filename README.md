@@ -24,9 +24,14 @@ it's own sandboxed workspace.
 All executed tests are screen recorded by default, but only videos of failing tests are persited to `target` directory.
 By default, video file is named with the fully qualified test class name, minus sign (-) and the test method name.
 
-If you want to persist all videos, the ones that succeeded too, you can set `RECORDER_SAVE_ALL` Java system property to true.
+You can configure what is persisted by using an environment variable or a Java system property called `RECORDER`.
+Possible values are:
 
-If you want to completely disable recording, you can set `RECORDER_DISABLED` Java system property to true.
+* off
+* failuresOnly
+* always
+
+Environment variable takes precedence over Java system property.
 
 ## Further Reading
 

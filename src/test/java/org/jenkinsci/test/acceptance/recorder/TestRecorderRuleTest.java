@@ -49,8 +49,9 @@ public class TestRecorderRuleTest {
 
     @Test
     public void shouldRecordSuccessTestExecutionWhenSaveAll() {
-        String oldValue = System.getProperty("RECORDER_SAVE_ALL");
-        System.setProperty("RECORDER_SAVE_ALL", "true");
+
+        //Since configured recorder option is static we need to set it manually in each test.
+        TestRecorderRule.RECORDER_OPTION = TestRecorderRule.ALWAYS;
 
         TestRecorderRule testRecorderRule = new TestRecorderRule();
         Description shouldNotRecordSuccessTestExecutionByDefault = Description.createTestDescription("org.jenkinsci.test.acceptance.recorder.TestRecorderRuleTest", "shouldRecordSuccessTestExecutionWhenSaveAll");
@@ -64,19 +65,15 @@ public class TestRecorderRuleTest {
         File outputFile = new File("target", "org.jenkinsci.test.acceptance.recorder.TestRecorderRuleTest-shouldRecordSuccessTestExecutionWhenSaveAll.mov");
         assertThat(outputFile.exists(), is(true));
 
-        //Clean the field
-        if (oldValue != null) {
-            System.setProperty("RECORDER_SAVE_ALL", oldValue);
-        } else {
-            System.clearProperty("RECORDER_SAVE_ALL");
-        }
+        TestRecorderRule.RECORDER_OPTION = TestRecorderRule.FAILURES;
         outputFile.delete();
     }
 
     @Test
     public void shouldNotRecordWhenRecorderIsDisabled() {
-        String oldValue = System.getProperty("RECORDER_DISABLED");
-        System.setProperty("RECORDER_DISABLED", "true");
+
+        //Since configured recorder option is static we need to set it manually in each test.
+        TestRecorderRule.RECORDER_OPTION = TestRecorderRule.OFF;
 
         TestRecorderRule testRecorderRule = new TestRecorderRule();
         Description shouldNotRecordSuccessTestExecutionByDefault = Description.createTestDescription("org.jenkinsci.test.acceptance.recorder.TestRecorderRuleTest", "shouldNotRecordWhenRecorderIsDisabled");
@@ -91,11 +88,7 @@ public class TestRecorderRuleTest {
         assertThat(outputFile.exists(), is(false));
 
         //Clean the field
-        if (oldValue != null) {
-            System.setProperty("RECORDER_DISABLED", oldValue);
-        } else {
-            System.clearProperty("RECORDER_DISABLED");
-        }
+        TestRecorderRule.RECORDER_OPTION = TestRecorderRule.FAILURES;
         outputFile.delete();
     }
 

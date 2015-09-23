@@ -1,5 +1,6 @@
 package org.jenkinsci.test.acceptance.recorder;
 
+import org.jenkinsci.test.acceptance.utils.SystemEnvironmentVariables;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 import org.monte.media.Format;
@@ -30,13 +31,23 @@ public class TestRecorderRule extends TestWatcher {
     private static final int FRAME_RATE_PER_SEC = 60;
     private static final int BIT_DEPTH = 16;
     private static final float QUALITY_RATIO = 0.97f;
-    public static final String TARGET = "target";
+
+    private static final String TARGET = "target";
+    static final String OFF = "off";
+
+    static final String FAILURES = "failuresOnly";
+    static final String ALWAYS = "always";
+
+    private static final String DEFAULT_MODE = FAILURES;
+
+    static String RECORDER_OPTION = SystemEnvironmentVariables
+            .getEnvironmentOrPropertyVariable("RECORDER", DEFAULT_MODE).trim();
 
     private JUnitScreenRecorder screenRecorder;
 
     @Override
     protected void starting(Description description) {
-        if (!isRecorderDisabled()) {
+        if (isRecorderEnabled()) {
             startRecording(description);
         }
     }
@@ -91,12 +102,12 @@ public class TestRecorderRule extends TestWatcher {
         stopRecordingWithFinalWaiting();
     }
 
-    private boolean isRecorderDisabled() {
-        return Boolean.getBoolean("RECORDER_DISABLED");
+    private boolean isRecorderEnabled() {
+        return !OFF.equals(RECORDER_OPTION);
     }
 
     private boolean saveAllExecutions() {
-        return Boolean.getBoolean("RECORDER_SAVE_ALL");
+        return ALWAYS.equals(RECORDER_OPTION);
     }
 
     private void stopRecording() {
