@@ -7,23 +7,21 @@ package org.jenkinsci.test.acceptance.utils;
  */
 public class SystemEnvironmentVariables {
 
-    public static final String getPropertyVariable(String property, String def) {
-        return System.getProperty(property, def);
-    }
+    public static final String getPropertyVariableOrEnvironment(String property, String def) {
 
-    public static final String getEnvironmentVariable(String property) {
-        return System.getenv(property);
-    }
+        String propertyValue = System.getProperty(property);
 
-    public static final String getEnvironmentOrPropertyVariable(String property, String def) {
+        if (propertyValue == null) {
 
-        String environmentVariable = getEnvironmentVariable(property);
+            String envValue = System.getenv(property);
+            if (envValue == null) {
+                return def;
+            }
 
-        if (environmentVariable == null) {
-            return getPropertyVariable(property, def);
+            return envValue;
+        } else {
+            return propertyValue;
         }
-
-        return environmentVariable;
 
     }
 

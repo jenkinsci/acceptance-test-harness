@@ -31,7 +31,7 @@ Possible values are:
 * failuresOnly
 * always
 
-Environment variable takes precedence over Java system property.
+Java system property takes precedence over environment variable.
 
 ## Further Reading
 

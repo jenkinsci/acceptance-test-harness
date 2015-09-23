@@ -41,7 +41,7 @@ public class TestRecorderRule extends TestWatcher {
     private static final String DEFAULT_MODE = FAILURES;
 
     static String RECORDER_OPTION = SystemEnvironmentVariables
-            .getEnvironmentOrPropertyVariable("RECORDER", DEFAULT_MODE).trim();
+            .getPropertyVariableOrEnvironment("RECORDER", DEFAULT_MODE).trim();
 
     private JUnitScreenRecorder screenRecorder;
 
