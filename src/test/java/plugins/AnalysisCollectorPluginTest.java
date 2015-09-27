@@ -13,6 +13,7 @@ import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckStyleFreestyleSettings;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
 import org.jenkinsci.test.acceptance.plugins.findbugs.FindBugsFreestyleSettings;
+import org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation;
 import org.jenkinsci.test.acceptance.plugins.pmd.PmdFreestyleSettings;
 import org.jenkinsci.test.acceptance.plugins.tasks.TasksFreestyleSettings;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsBuildSettings;
@@ -20,6 +21,7 @@ import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.ListView;
+import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
 import org.openqa.selenium.WebElement;
@@ -29,7 +31,6 @@ import static org.hamcrest.MatcherAssert.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 import static org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisPlugin.*;
 import static org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView.*;
-import static org.jenkinsci.test.acceptance.po.PageObject.createRandomName;
 
 /**
  * Acceptance tests for the Static Code Analysis Collector (analysis-collector) plug-in.
@@ -327,6 +328,36 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
         dashboard.save();
         dashboard.open();
         assertThat(dashboard, not(hasWarningsFor(job, TASKS, TASKS_ALL)));
+    }
+
+    @Test
+    @WithPlugins({"git@2.4.0", "workflow-aggregator@1.10"})
+    public void should_compute_annotations_on_workflow() {
+        MavenInstallation.installMaven(jenkins, "M3", "3.3.3");
+        WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
+        // TODO: Job.copyResource(String) does not work for WorkflowJob, since it does not owns
+        // a workspace but the build does (actually it could own 0..N workspaces).
+        job.script.set(
+            "node {\n" +
+            "  git 'https://github.com/amuniz/maven-helloworld.git'\n" +
+            "  def mvnHome = tool 'M3'\n" +
+            "  sh \"${mvnHome}/bin/mvn -B -Dmaven.test.failure.ignore verify\"\n" +
+            "  step([$class: 'FindBugsPublisher', pattern: '**/findbugsXml.xml'])\n" +
+            "  step([$class: 'CheckStylePublisher'])\n" +
+            "  step([$class: 'AnalysisPublisher'])\n" +
+            "}");
+        job.sandbox.check();
+        job.save();
+        final Build build = job.startBuild();
+        build.shouldSucceed();
+
+        assertThat(build, hasAction("Static Analysis Warnings"));
+
+        AnalysisCollectorAction action = new AnalysisCollectorAction(build);
+        action.open();
+
+        assertThat(action.getNumberOfWarnings(), is(17)); // 1 from FB and 16 from CS
+        assertThat(action.getNumberOfNewWarnings(), is(17));
     }
 
     private AnalysisCollectorAction deselectPluginAndBuild(AnalysisPlugin plugin, Job job) {
