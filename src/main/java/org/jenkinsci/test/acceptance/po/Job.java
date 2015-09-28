@@ -165,6 +165,10 @@ public class Job extends ContainerPageObject {
      * base64 and put it as a heredoc in the shell script.
      */
     public void copyResource(Resource resource, String fileName) {
+        addShellStep(copyResourceShell(resource, fileName));
+    }
+
+    protected String copyResourceShell(Resource resource, String fileName) {
         try (InputStream in = resource.asInputStream()) {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
 
@@ -173,8 +177,8 @@ public class Job extends ContainerPageObject {
             }
 
             // fileName can include path portion like foo/bar/zot
-            addShellStep(String.format("(mkdir -p %1$s || true) && rm -r %1$s && base64 --decode << ENDOFFILE | gunzip > %1$s \n%2$s\nENDOFFILE",
-                    fileName, new String(Base64.encodeBase64Chunked(out.toByteArray()))));
+            return String.format("(mkdir -p %1$s || true) && rm -r %1$s && base64 --decode << ENDOFFILE | gunzip > %1$s \n%2$s\nENDOFFILE",
+                    fileName, new String(Base64.encodeBase64Chunked(out.toByteArray())));
         } catch (IOException e) {
             throw new AssertionError(e);
         }
