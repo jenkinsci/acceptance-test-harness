@@ -2,6 +2,7 @@ package org.jenkinsci.test.acceptance.junit;
 
 import org.jenkinsci.test.acceptance.po.CapybaraPortingLayerImpl;
 import org.jenkinsci.test.acceptance.po.Jenkins;
+import org.jenkinsci.test.acceptance.recorder.TestRecorderRule;
 import org.junit.Rule;
 import org.openqa.selenium.WebDriver;
 
@@ -19,6 +20,9 @@ import java.net.ServerSocket;
  * @author Kohsuke Kawaguchi
  */
 public class AbstractJUnitTest extends CapybaraPortingLayerImpl {
+
+    @Rule
+    public TestRecorderRule testRecorderRule = new TestRecorderRule();
 
     @Rule
     public JenkinsAcceptanceTestRule rules = new JenkinsAcceptanceTestRule();

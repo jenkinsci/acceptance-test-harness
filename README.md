@@ -21,6 +21,18 @@ Set `BROWSER=chrome` and install http://code.google.com/p/chromedriver/downloads
 There is a bit of a delay since we bring up Jenkins for every single test, with
 it's own sandboxed workspace.
 
+All executed tests are screen recorded by default, but only videos of failing tests are persited to `target` directory.
+By default, video file is named with the fully qualified test class name, minus sign (-) and the test method name.
+
+You can configure what is persisted by using an environment variable or a Java system property called `RECORDER`.
+Possible values are:
+
+* off
+* failuresOnly
+* always
+
+Java system property takes precedence over environment variable.
+
 ## Further Reading
 
 ### Running tests
