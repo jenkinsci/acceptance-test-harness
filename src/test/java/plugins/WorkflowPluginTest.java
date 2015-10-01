@@ -103,8 +103,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         assertThat(driver, hasContent("All Tests"));
     }
 
-    // TODO 1.10 when https://github.com/jenkinsci/workflow-plugin/pull/186 is released
-    @WithPlugins({"workflow-aggregator@1.10-SNAPSHOT", "parallel-test-executor@1.6", "junit@1.3", "git@2.3", "script-security@1.15"})
+    @WithPlugins({"workflow-aggregator@1.10", "parallel-test-executor@1.6", "junit@1.3", "git@2.3", "script-security@1.15"})
     @Native("mvn")
     @Test public void parallelTests() throws Exception {
         for (int i = 0; i < 3; i++) {
