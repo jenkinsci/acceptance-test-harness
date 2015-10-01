@@ -30,6 +30,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Native;
+import org.jenkinsci.test.acceptance.junit.Wait;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation;
 import org.jenkinsci.test.acceptance.po.Artifact;
@@ -87,9 +88,12 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         job.sandbox.check();
         job.save();
         final Build build = job.startBuild();
-        waitFor().until(new Callable<Boolean>() {
-            @Override public Boolean call() throws Exception {
+        waitFor().until(new Wait.Predicate<Boolean>() {
+            @Override public Boolean apply() throws Exception {
                 return build.getConsole().contains("Ready to go?");
+            }
+            @Override public String diagnose(Throwable lastException, String message) {
+                return "Console output:\n" + build.getConsole() + "\n";
             }
         });
         build.shouldContainsConsoleOutput("Building version 1.0-SNAPSHOT");
