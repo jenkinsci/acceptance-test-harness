@@ -76,7 +76,9 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
             "    echo \"Building version ${v}\"\n" +
             "  }\n" +
             "  def mvnHome = tool 'M3'\n" +
-            "  sh \"${mvnHome}/bin/mvn -B -Dmaven.test.failure.ignore verify\"\n" +
+            "  withEnv([\"PATH+MAVEN=${mvnHome}/bin\", \"M2_HOME=${mvnHome}\"]) {\n" +
+            "    sh 'mvn -B -Dmaven.test.failure.ignore verify'\n" +
+            "  }\n" +
             "  input 'Ready to go?'\n" +
             "  step([$class: 'ArtifactArchiver', artifacts: '**/target/*.jar', fingerprint: true])\n" +
             "  step([$class: 'JUnitResultArchiver', testResults: '**/target/surefire-reports/TEST-*.xml'])\n" +
