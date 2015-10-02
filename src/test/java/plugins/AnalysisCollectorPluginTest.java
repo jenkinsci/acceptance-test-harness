@@ -20,6 +20,7 @@ import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.ListView;
+import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
 import org.openqa.selenium.WebElement;
@@ -29,7 +30,6 @@ import static org.hamcrest.MatcherAssert.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 import static org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisPlugin.*;
 import static org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView.*;
-import static org.jenkinsci.test.acceptance.po.PageObject.createRandomName;
 
 /**
  * Acceptance tests for the Static Code Analysis Collector (analysis-collector) plug-in.
@@ -327,6 +327,32 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
         dashboard.save();
         dashboard.open();
         assertThat(dashboard, not(hasWarningsFor(job, TASKS, TASKS_ALL)));
+    }
+
+    @Test
+    @WithPlugins("workflow-aggregator")
+    public void should_compute_annotations_on_workflow() {
+        WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
+        job.script.set(
+            "node {\n" +
+               job.copyResourceStep(ANALYSIS_COLLECTOR_PLUGIN_RESOURCES + "/checkstyle-result.xml") +
+               job.copyResourceStep(ANALYSIS_COLLECTOR_PLUGIN_RESOURCES +"/findbugs.xml") +
+            "  step([$class: 'FindBugsPublisher', pattern: '**/findbugs.xml'])\n" +
+            "  step([$class: 'CheckStylePublisher'])\n" +
+            "  step([$class: 'AnalysisPublisher'])\n" +
+            "}");
+        job.sandbox.check();
+        job.save();
+        final Build build = job.startBuild();
+        build.shouldSucceed();
+
+        assertThat(build, hasAction("Static Analysis Warnings"));
+
+        AnalysisCollectorAction action = new AnalysisCollectorAction(build);
+        action.open();
+
+        assertThat(action.getNumberOfWarnings(), is(FINDBUGS_ALL + CHECKSTYLE_ALL));
+        assertThat(action.getNumberOfNewWarnings(), is(FINDBUGS_ALL + CHECKSTYLE_ALL));
     }
 
     private AnalysisCollectorAction deselectPluginAndBuild(AnalysisPlugin plugin, Job job) {

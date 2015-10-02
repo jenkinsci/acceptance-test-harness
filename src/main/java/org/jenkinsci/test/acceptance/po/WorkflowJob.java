@@ -26,6 +26,7 @@ package org.jenkinsci.test.acceptance.po;
 
 import com.google.inject.Injector;
 import java.net.URL;
+import org.jenkinsci.test.acceptance.junit.Resource;
 
 @Describable("org.jenkinsci.plugins.workflow.job.WorkflowJob")
 public class WorkflowJob extends Job {
@@ -36,5 +37,10 @@ public class WorkflowJob extends Job {
 
     public final Control script = control("/definition/script");
     public final Control sandbox = control("/definition/sandbox");
+
+    public String copyResourceStep(String filePath) {
+        final Resource res = resource(filePath);
+        return String.format("sh '''%s'''%n", copyResourceShell(res, res.getName()));
+    }
 
 }
