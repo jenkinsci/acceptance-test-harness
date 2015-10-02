@@ -49,7 +49,9 @@ import com.google.inject.Inject;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
+import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import static org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation.*;
+import org.jenkinsci.test.acceptance.plugins.tasks.TasksMavenSettings;
 
 public class MavenPluginTest extends AbstractJUnitTest {
 
@@ -246,4 +248,20 @@ public class MavenPluginTest extends AbstractJUnitTest {
         find(by.xpath("//a[@href='%s/']", name)).click();
         assertThat(driver.getCurrentUrl(), equalTo(build.module(name).url.toExternalForm()));
     }
+
+    @Issue("JENKINS-22252")
+    @WithPlugins({"maven-plugin@2.12", "tasks"})
+    @Test
+    public void useWithTasks() throws InterruptedException {
+        MavenInstallation.installMaven(jenkins, "Maven 3.2.x", "3.2.1");
+        MavenModuleSet job = jenkins.jobs.create(MavenModuleSet.class);
+        job.configure();
+        job.copyDir(resource("/maven_plugin/multimodule/"));
+        job.goals.set("package");
+        job.addBuildSettings(TasksMavenSettings.class);
+        job.save();
+        Build build = job.startBuild().shouldSucceed();
+        assertThat(build.getConsole(), not(containsString("IllegalAccessError")));
+    }
+
 }
