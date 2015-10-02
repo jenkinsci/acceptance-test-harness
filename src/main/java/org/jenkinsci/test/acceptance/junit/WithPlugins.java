@@ -31,25 +31,24 @@ import java.util.logging.Logger;
 
 /**
  * Indicates that a test requires the presence of the specified plugins.
- * <p/>
- * Example: @WithPlugin("subversion")
+ *
+ * Example: <tt>@WithPlugin("subversion")</tt>
  * <p/>
  * One can specify a specific minimum version after the plugin name with a suffixed '@'.
  * <p/>
- * Example: @WithPlugin("subversion@1.54")
- * <p/>
- * The annotation guarantees that the plugin is installed in required or later version. If required version is not
- * available in update center, the test will fail. If the plugin is already installed but not in correct version then
+ * Example: <tt>@WithPlugin("subversion@1.54")</tt>
+ *
+ * The latter example declares that running the test with older version is pointless, typically because of missing feature.
+ *
+ * The annotation guarantees that the plugin is installed in required or later version.
+ * If the plugin is already installed but not in correct version then
  * the environment variable NEVER_REPLACE_EXISTING_PLUGINS is evaluated:
  * <ul>
  *     <li>if the environment variable is set then the test will be skipped.</li>
- *     <li>if the environment variable is undefined then the installed version of the plugin is overwritten with
- *     the latest version of the plugin.</li>
+ *     <li>if the environment variable is undefined then the installed version
+ *     of the plugin is overwritten with the latest version of the plugin. If
+ *     required version is not available in update center, the test will fail.</li>
 *  </ul>
- * <p/>
- * When running tests, this annotation triggers {@link JenkinsAcceptanceTestRule} to install all the plugins.
- * <p/>
- * We also want to use this to filter tests, especially for non-destructive tests.
  *
  * @author Kohsuke Kawaguchi
  */

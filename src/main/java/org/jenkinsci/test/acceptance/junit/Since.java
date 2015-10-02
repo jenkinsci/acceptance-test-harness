@@ -20,7 +20,9 @@ import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
 
 /**
- * Version number of Jenkins that the test applies to.
+ * Minimal Jenkins version required to run the test.
+ *
+ * Declares that running the test with older version is pointless, typically because of missing feature.
  *
  * @author Oliver Gondza
  */
