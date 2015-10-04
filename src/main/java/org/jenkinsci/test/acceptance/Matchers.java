@@ -1,5 +1,6 @@
 package org.jenkinsci.test.acceptance;
 
+import org.apache.commons.io.IOUtils;
 import org.hamcrest.Description;
 import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisPlugin;
 import org.jenkinsci.test.acceptance.po.*;
@@ -9,8 +10,12 @@ import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.util.List;
 import java.util.regex.Pattern;
+
+import javax.annotation.CheckForNull;
 
 /**
  * Hamcrest matchers.
@@ -125,19 +130,41 @@ public class Matchers {
         };
     }
 
-    public static Matcher<ContainerPageObject> pageObjectExists() {
-        return new Matcher<ContainerPageObject>("Page object exists") {
+    public static Matcher<PageObject> pageObjectExists() {
+        return new Matcher<PageObject>("Page object exists") {
+            private @CheckForNull HttpURLConnection conn; // Store for later defect localization
             @Override
-            public void describeMismatchSafely(ContainerPageObject item, Description desc) {
+            public void describeMismatchSafely(PageObject item, Description desc) {
                 desc.appendText(item.url.toString()).appendText(" does not exist");
             }
 
             @Override
-            public boolean matchesSafely(ContainerPageObject item) {
+            public boolean matchesSafely(PageObject item) {
                 try {
-                    item.getJson();
+                    conn = (HttpURLConnection) item.url.openConnection();
+                    IOUtils.toByteArray(conn.getInputStream());
                     return true;
-                } catch (RuntimeException ex) {
+                } catch (IOException e) {
+                    return false;
+                }
+            }
+        };
+    }
+
+    public static Matcher<PageObject> pageObjectDoesNotExist() {
+        return new Matcher<PageObject>("Page object exists") {
+            private @CheckForNull HttpURLConnection conn; // Store for later defect localization
+            @Override
+            public void describeMismatchSafely(PageObject item, Description desc) {
+                desc.appendText(item.url.toString()).appendText(" does exist");
+            }
+
+            @Override
+            public boolean matchesSafely(PageObject item) {
+                try {
+                    conn = (HttpURLConnection) item.url.openConnection();
+                    return conn.getResponseCode() == 404;
+                } catch (IOException e) {
                     return false;
                 }
             }

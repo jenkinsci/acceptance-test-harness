@@ -1,7 +1,6 @@
 package org.jenkinsci.test.acceptance.po;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,6 +17,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
+import static org.jenkinsci.test.acceptance.Matchers.pageObjectDoesNotExist;
+import static org.jenkinsci.test.acceptance.Matchers.pageObjectExists;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -267,22 +268,12 @@ public class Build extends ContainerPageObject {
      * Does this object exist?
      */
     public void shouldExist() {
-        try {
-            IOUtils.toByteArray(url.openStream());
-        } catch (IOException e) {
-            throw new AssertionError(e);
-        }
+        assertThat(this, pageObjectExists());
     }
 
     public void shouldNotExist() {
-        try {
-            HttpURLConnection con = (HttpURLConnection) url.openConnection();
-            assertThat(con.getResponseCode(), is(404));
-        } catch (IOException e) {
-            throw new AssertionError(e);
-        }
+        assertThat(this, pageObjectDoesNotExist());
     }
-
 
     public Changes getChanges() {
         final URL changesUrl = url("changes");
