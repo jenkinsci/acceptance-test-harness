@@ -33,8 +33,7 @@ public class ProjectDescriptionSetterPluginTest extends AbstractJUnitTest {
         FreeStyleJob j = jenkins.jobs.create();
         j.configure();
         j.addShellStep("echo 'Project description setter test' > desc.txt");
-        ProjectDescriptionSetter w = new ProjectDescriptionSetter(j);
-        w.enable.check();
+        ProjectDescriptionSetter w = j.addBuildWrapper(ProjectDescriptionSetter.class);
         w.filename.set("desc.txt");
         j.save();
 

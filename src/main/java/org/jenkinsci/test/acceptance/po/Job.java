@@ -158,6 +158,13 @@ public class Job extends ContainerPageObject {
         return step;
     }
 
+    public <T extends BuildWrapper> T addBuildWrapper(Class<T> type) {
+        ensureConfigPage();
+        T wrapper = newInstance(type, this);
+        wrapper.enable.check();
+        return wrapper;
+    }
+
     /**
      * Adds a shell step that copies a resource inside the test project into a file on the build machine.
      * <p/>
