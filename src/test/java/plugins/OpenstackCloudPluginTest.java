@@ -30,7 +30,6 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.inject.Named;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
@@ -38,12 +37,13 @@ import org.jenkinsci.test.acceptance.junit.TestActivation;
 import org.jenkinsci.test.acceptance.junit.WithCredentials;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.config_file_provider.ConfigFileProvider;
+import org.jenkinsci.test.acceptance.plugins.openstack.OpenstackBuildWrapper;
 import org.jenkinsci.test.acceptance.plugins.openstack.OpenstackCloud;
+import org.jenkinsci.test.acceptance.plugins.openstack.OpenstackOneOffSlave;
 import org.jenkinsci.test.acceptance.plugins.openstack.OpenstackSlaveTemplate;
 import org.jenkinsci.test.acceptance.plugins.openstack.UserDataConfig;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
-import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.jenkinsci.test.acceptance.po.MatrixBuild;
 import org.jenkinsci.test.acceptance.po.MatrixProject;
@@ -60,6 +60,9 @@ import com.google.inject.Inject;
 public class OpenstackCloudPluginTest extends AbstractJUnitTest {
 
     private static final String CLOUD_INIT_NAME = "cloudInit";
+    private static final String CLOUD_NAME = "OSCloud";
+    private static final String CLOUD_DEFAULT_TEMPLATE = "ath-integration-test";
+    private static final int PROVISIONING_TIMEOUT = 240;
 
     @Inject(optional = true) @Named("OpenstackCloudPluginTest.ENDPOINT")
     public String ENDPOINT;
@@ -107,7 +110,7 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
         job.configure();
         job.setLabelExpression("label");
         job.save();
-        Build build = job.scheduleBuild().waitUntilFinished(240).shouldSucceed();
+        Build build = job.scheduleBuild().waitUntilFinished(PROVISIONING_TIMEOUT).shouldSucceed();
 
         nodes.add(build.getNode());
     }
@@ -124,12 +127,13 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
         job.configure();
         job.setLabelExpression("label");
         job.save();
-        Build build = job.scheduleBuild().waitUntilFinished(240).shouldSucceed();
+        Build build = job.scheduleBuild().waitUntilFinished(PROVISIONING_TIMEOUT).shouldSucceed();
 
         nodes.add(build.getNode());
     }
 
     @Test @Issue("JENKINS-29998")
+    // TODO JENKINS-30784: Not not bother with credentials for jnlp slaves
     @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {"root", "/openstack_plugin/unsafe"})
     @TestActivation({"HARDWARE_ID", "IMAGE_ID", "KEY_PAIR_NAME"})
     public void scheduleMatrixWithoutLabel() {
@@ -143,7 +147,7 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
         job.configure();
         job.save();
 
-        MatrixBuild pb = job.scheduleBuild().waitUntilFinished(240).shouldSucceed().as(MatrixBuild.class);
+        MatrixBuild pb = job.scheduleBuild().waitUntilFinished(PROVISIONING_TIMEOUT).shouldSucceed().as(MatrixBuild.class);
         assertThat(pb.getNode(), equalTo((Node) jenkins));
         MatrixRun cb = pb.getConfiguration("default");
         assertThat(cb.getNode(), not(equalTo((Node) jenkins)));
@@ -151,9 +155,45 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
         nodes.add(cb.getNode());
     }
 
+    @Test
+    @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {"root", "/openstack_plugin/unsafe"})
+    @TestActivation({"HARDWARE_ID", "IMAGE_ID", "KEY_PAIR_NAME"})
+    public void usePerBuildInstance() {
+        configureCloudInit("cloud-init-jnlp");
+        configureProvisioning("JNLP", "unused");
+
+        FreeStyleJob job = jenkins.jobs.create();
+        job.configure();
+        OpenstackBuildWrapper bw = job.addBuildWrapper(OpenstackBuildWrapper.class);
+        bw.cloud(CLOUD_NAME);
+        bw.template(CLOUD_DEFAULT_TEMPLATE);
+        bw.count(1);
+        job.addShellStep("ping -c 1 \"$JCLOUDS_IPS\"");
+        job.save();
+
+        job.scheduleBuild().waitUntilFinished(PROVISIONING_TIMEOUT).shouldSucceed();
+    }
+
+    @Test
+    @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {"root", "/openstack_plugin/unsafe"})
+    @TestActivation({"HARDWARE_ID", "IMAGE_ID", "KEY_PAIR_NAME"})
+    public void useSingleUseSlave() {
+        configureCloudInit("cloud-init-jnlp");
+        configureProvisioning("JNLP", "label");
+
+        FreeStyleJob job = jenkins.jobs.create();
+        job.configure();
+        job.setLabelExpression("label");
+        job.addBuildWrapper(OpenstackOneOffSlave.class);
+        job.save();
+
+        Build build = job.scheduleBuild().waitUntilFinished(PROVISIONING_TIMEOUT).shouldSucceed();
+        assertThat(build.getNode(), pageObjectDoesNotExist());
+    }
+
     private OpenstackCloud addCloud(JenkinsConfig config) {
         return config.addCloud(OpenstackCloud.class)
-                .profile(Jenkins.createRandomName())
+                .profile(CLOUD_NAME)
                 .endpoint(ENDPOINT)
                 .identity(IDENTITY)
                 .credential(CREDENTIAL)
@@ -174,7 +214,7 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
         OpenstackCloud cloud = addCloud(jenkins.getConfigPage()).associateFloatingIp();
         OpenstackSlaveTemplate template = cloud.addSlaveTemplate();
 
-        template.name("ath-integration-test");
+        template.name(CLOUD_DEFAULT_TEMPLATE);
         template.labels(labels);
         template.hardwareId(HARDWARE_ID);
         template.imageId(IMAGE_ID);
