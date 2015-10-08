@@ -94,6 +94,12 @@ public class OpenstackSlaveTemplate extends PageAreaImpl {
         return this;
     }
 
+    public OpenstackSlaveTemplate fsRoot(String path) {
+        ensureAdvancedOpened();
+        control("fsRoot").set(path);
+        return this;
+    }
+
     private boolean advanced = false;
     private void ensureAdvancedOpened() {
         if (advanced) return;

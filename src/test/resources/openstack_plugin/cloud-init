@@ -1,14 +1,18 @@
 #cloud-config
 disable_root: 0
 ssh_pwauth: True
-password: ath
-chpasswd: { expire: False }
+chpasswd:
+    list: |
+        jenkins:ath
+    expire: False
 
 users:
-  - name: root
+  - name: jenkins
     lock-passwd: false
     inactive: false
     system: false
+    ssh-authorized-keys:
+        - ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA2lEVMvqBVd8DzYyTuQpIHqBJBIzM3vh/aoHEHPu1uy5akmz51ty1Xg5w6cWx7EFE48rgvGxTC8CzpADPGqzmiyCHW2n3+OZhm41n2YEBSdxWeOUTN7+7VMs51R4Awo9E2v6m0c4uppgkLm5yONSBBlJ0/1f5ixyKT8GLIilhc+DQo1WgMnP6LorwLGq2TdowncZUr3+2ZAl8Y2mrjwRWnUvM+g3Njnp8HHfCYsJwTGW8jkMlu4kN2hsRlnDm1UUIylXMJYVNmUczh3euRMV1KLGchcebDl0M1JiOn4+s6RorHSEh2uxsLCNY4bIE7t92kvCoZAPreLsGINAdOPQdrw== unsafe
 
 runcmd:
   - [ "set", "-x" ]

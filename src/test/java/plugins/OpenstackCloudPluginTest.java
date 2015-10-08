@@ -110,7 +110,7 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
     }
 
     @Test
-    @WithCredentials(credentialType = WithCredentials.USERNAME_PASSWORD, values = {MACHINE_USERNAME, "ATH"})
+    @WithCredentials(credentialType = WithCredentials.USERNAME_PASSWORD, values = {MACHINE_USERNAME, "ath"})
     @TestActivation({"HARDWARE_ID", "IMAGE_ID", "KEY_PAIR_NAME"})
     public void provisionSshSlaveWithPasswdAuth() {
         configureCloudInit("cloud-init");
@@ -125,6 +125,7 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
 
     // The test will fail when test host is not reachable from openstack machine for obvious reasons
     @Test // @WithPlugins("openstack-cloud@1.9") JENKINS-29996
+    // TODO JENKINS-30784: Do not bother with credentials for jnlp slaves
     @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {MACHINE_USERNAME, "/openstack_plugin/unsafe"})
     @TestActivation({"HARDWARE_ID", "IMAGE_ID", "KEY_PAIR_NAME"})
     public void provisionJnlpSlave() {
@@ -139,12 +140,11 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
     }
 
     @Test @Issue("JENKINS-29998")
-    // TODO JENKINS-30784: Not not bother with credentials for jnlp slaves
     @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {MACHINE_USERNAME, "/openstack_plugin/unsafe"})
     @TestActivation({"HARDWARE_ID", "IMAGE_ID", "KEY_PAIR_NAME"})
     public void scheduleMatrixWithoutLabel() {
-        configureCloudInit("cloud-init-jnlp");
-        configureProvisioning("JNLP", "label");
+        configureCloudInit("cloud-init");
+        configureProvisioning("SSH", "label");
         jenkins.configure();
         jenkins.getConfigPage().numExecutors.set(0);
         jenkins.save();
@@ -163,8 +163,8 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
     @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {MACHINE_USERNAME, "/openstack_plugin/unsafe"})
     @TestActivation({"HARDWARE_ID", "IMAGE_ID", "KEY_PAIR_NAME"})
     public void usePerBuildInstance() {
-        configureCloudInit("cloud-init-jnlp");
-        configureProvisioning("JNLP", "unused");
+        configureCloudInit("cloud-init");
+        configureProvisioning("SSH", "unused");
 
         FreeStyleJob job = jenkins.jobs.create();
         job.configure();
@@ -183,8 +183,8 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
     @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {MACHINE_USERNAME, "/openstack_plugin/unsafe"})
     @TestActivation({"HARDWARE_ID", "IMAGE_ID", "KEY_PAIR_NAME"})
     public void useSingleUseSlave() {
-        configureCloudInit("cloud-init-jnlp");
-        configureProvisioning("JNLP", "label");
+        configureCloudInit("cloud-init");
+        configureProvisioning("SSH", "label");
 
         FreeStyleJob job = jenkins.jobs.create();
         job.configure();
@@ -193,7 +193,7 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
         job.save();
 
         Build build = job.scheduleBuild().waitUntilFinished(PROVISIONING_TIMEOUT).shouldSucceed();
-        assertThat(build.getNode(), pageObjectDoesNotExist());
+        waitFor(build.getNode(), pageObjectDoesNotExist(), 60);
     }
 
     private OpenstackCloud addCloud(JenkinsConfig config) {
@@ -227,6 +227,7 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
         template.slaveType(type);
         template.userData(CLOUD_INIT_NAME);
         template.keyPair(KEY_PAIR_NAME);
+        template.fsRoot("/tmp/jenkins");
         jenkins.save();
     }
 }
