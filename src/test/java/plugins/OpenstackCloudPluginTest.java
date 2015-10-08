@@ -84,7 +84,7 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
     @After
     public void tearDown() {
         // Terminate all nodes
-        jenkins.runScript("Jenkins.instance.nodes.each { it.tarminate() }");
+        jenkins.runScript("Jenkins.instance.nodes.each { it.terminate() }");
     }
 
     @Test
