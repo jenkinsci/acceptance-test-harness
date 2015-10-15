@@ -11,6 +11,7 @@ import java.util.logging.Level;
 
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import com.google.inject.Injector;
+import org.openqa.selenium.TimeoutException;
 
 /**
  * Top-level object that acts as an entry point to various systems.
@@ -112,7 +113,14 @@ public class Jenkins extends Node {
         visit("restart");
         clickButton("Yes");
 
-        waitFor(driver, not(hasContent("Please wait")), JenkinsController.STARTUP_TIMEOUT);
+        try {
+            waitFor(driver, not(hasContent("Please wait")), JenkinsController.STARTUP_TIMEOUT);
+        }catch(TimeoutException e) {
+            //Let's try to avoid false negatives or not auto refresh
+            visit(driver.getCurrentUrl());
+            //we wait 10 seconds for refresh things.
+            waitFor(driver, hasContent("New Item"), 10);
+        }
     }
 
     public JenkinsLogger getLogger(String name) {
