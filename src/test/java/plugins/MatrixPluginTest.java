@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jvnet.hudson.test.Issue;
 import org.jenkinsci.test.acceptance.junit.Since;
+import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.*;
 import org.jenkinsci.test.acceptance.slave.SlaveProvider;
 import org.junit.Before;
@@ -16,11 +17,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThan;
 
-/**
- * Feature: Use multi configuration job
- * As a Jenkins user
- * I want to configure and run multi configuration jobs
- */
+@WithPlugins("matrix-project")
 public class MatrixPluginTest extends AbstractJUnitTest {
     MatrixProject job;
 

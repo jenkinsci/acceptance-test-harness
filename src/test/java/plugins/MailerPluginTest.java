@@ -2,6 +2,7 @@ package plugins;
 
 import com.google.inject.Inject;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.mailer.Mailer;
 import org.jenkinsci.test.acceptance.plugins.mailer.MailerGlobalConfig;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
@@ -13,12 +14,7 @@ import javax.mail.MessagingException;
 import java.io.IOException;
 import java.util.regex.Pattern;
 
-/**
- Feature: Notify users via email
-   In order to have all contributors informed
-   As a Jenkins project manager
-   I want to send and configure mail notifications
- */
+@WithPlugins("mailer")
 public class MailerPluginTest extends AbstractJUnitTest {
     @Inject
     MailerGlobalConfig mailer;

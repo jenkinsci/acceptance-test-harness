@@ -1,6 +1,7 @@
 package plugins;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jvnet.hudson.test.Issue;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
@@ -19,6 +20,7 @@ import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 /**
  * @author Kohsuke Kawaguchi
  */
+@WithPlugins("junit")
 public class JUnitPluginTest extends AbstractJUnitTest {
     /**
      * Scenario: Publish test result which passed

@@ -53,6 +53,7 @@ import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import static org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation.*;
 import org.jenkinsci.test.acceptance.plugins.tasks.TasksMavenSettings;
 
+@WithPlugins("maven-plugin")
 public class MavenPluginTest extends AbstractJUnitTest {
 
     private static final String GENERATE = "archetype:generate -DarchetypeGroupId=org.apache.maven.archetypes -DgroupId=com.mycompany.app -DartifactId=my-app -Dversion=1.0 -B";
