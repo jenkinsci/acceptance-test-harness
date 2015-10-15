@@ -2,6 +2,8 @@ package org.jenkinsci.test.acceptance.po;
 
 import static org.hamcrest.Matchers.not;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+import static org.jenkinsci.test.acceptance.Matchers.hasElement;
+
 import hudson.util.VersionNumber;
 
 import java.io.IOException;
@@ -11,6 +13,7 @@ import java.util.logging.Level;
 
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import com.google.inject.Injector;
+import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
 
 /**
@@ -115,11 +118,13 @@ public class Jenkins extends Node {
 
         try {
             waitFor(driver, not(hasContent("Please wait")), JenkinsController.STARTUP_TIMEOUT);
+            throw new TimeoutException();
         }catch(TimeoutException e) {
             //Let's try to avoid false negatives or not auto refresh
             visit(driver.getCurrentUrl());
             //we wait 10 seconds for refresh things.
-            waitFor(driver, hasContent("New Item"), 10);
+            //breadcrumbBarAnchor is only present when the Jenkins is ready
+            waitFor(driver, hasElement(By.className("breadcrumbBarAnchor")), 10);
         }
     }
 
