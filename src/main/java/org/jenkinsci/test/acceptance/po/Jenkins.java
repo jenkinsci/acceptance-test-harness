@@ -118,7 +118,6 @@ public class Jenkins extends Node {
 
         try {
             waitFor(driver, not(hasContent("Please wait")), JenkinsController.STARTUP_TIMEOUT);
-            throw new TimeoutException();
         }catch(TimeoutException e) {
             //Let's try to avoid false negatives or not auto refresh
             visit(driver.getCurrentUrl());
