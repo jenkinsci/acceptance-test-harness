@@ -9,7 +9,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import org.hamcrest.StringDescription;
-import org.jenkinsci.test.acceptance.junit.FailureDiagnostics;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.junit.Wait;
 import org.jenkinsci.test.acceptance.utils.ElasticTime;
@@ -46,8 +45,6 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
 
     @Inject
     protected ElasticTime time;
-
-    @Inject FailureDiagnostics diagnostics;
 
     /**
      * Some subtypes are constructed via Guice, in which case injection is done by outside this class.
@@ -203,8 +200,6 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
             throw new NoSuchElementException("Unable to locate visible " + selector + " in " + driver.getCurrentUrl());
         } catch (NoSuchElementException x) {
             // this is often the best place to set a breakpoint
-            diagnostics.write("last-page.html", driver.getPageSource());
-
             // Page url is not resent in otherwise verbose message
             String msg = String.format("Unable to locate %s in %s", selector, driver.getCurrentUrl());
             throw new NoSuchElementException(msg, x);
@@ -236,7 +231,8 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
 
         } catch (NoSuchElementException x) {
             // this is often the best place to set a breakpoint
-            String msg = String.format("Unable to locate %s in %s\n\n%s", selector, driver.getCurrentUrl(), driver.getPageSource());
+            // Page url is not resent in otherwise verbose message
+            String msg = String.format("Unable to locate %s in %s", selector, driver.getCurrentUrl());
             throw new NoSuchElementException(msg, x);
         }
     }

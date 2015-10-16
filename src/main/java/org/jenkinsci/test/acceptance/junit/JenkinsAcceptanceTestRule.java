@@ -12,6 +12,7 @@ import org.junit.runner.Description;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.Statement;
 import org.jvnet.hudson.annotation_indexer.Index;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 
 import java.io.IOException;
@@ -42,6 +43,8 @@ public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should us
         return new Statement() {
             @Inject JenkinsController controller;
             @Inject Injector injector;
+            @Inject FailureDiagnostics diagnostics;
+            @Inject WebDriver driver;
 
             @Override
             public void evaluate() throws Throwable {
@@ -60,6 +63,9 @@ public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should us
                     e.printStackTrace();
                     throw e;
                 } catch (Exception|AssertionError e) { // Errors and failures
+                    if (e instanceof NoSuchElementException) {
+                        diagnostics.write("last-page.html", driver.getPageSource());
+                    }
                     controller.diagnose(e);
                     throw e;
                 } finally {
