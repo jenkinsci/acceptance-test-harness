@@ -18,7 +18,7 @@ import com.google.inject.Inject;
  *
  * @author ogondza
  */
-@GlobalRule
+@GlobalRule(priority = Integer.MIN_VALUE) // Make sure diagnostics are available for all other rules
 @TestScope
 public class FailureDiagnostics extends TestWatcher {
 

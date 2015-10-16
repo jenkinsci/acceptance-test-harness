@@ -82,7 +82,7 @@ public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should us
                     @Override
                     public int compare(Integer o1, Integer o2) {
                         // Reversed since we apply the TestRule inside out:
-                        return o2 - o1;
+                        return Integer.compare(o2, o1);
                     }
                 });
 
