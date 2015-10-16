@@ -1,5 +1,7 @@
 package org.jenkinsci.test.acceptance.recorder;
 
+import org.jenkinsci.test.acceptance.junit.FailureDiagnostics;
+import org.jenkinsci.test.acceptance.junit.GlobalRule;
 import org.jenkinsci.test.acceptance.utils.SystemEnvironmentVariables;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
@@ -15,14 +17,16 @@ import java.awt.GraphicsEnvironment;
 import java.awt.GraphicsConfiguration;
 import java.awt.Dimension;
 import java.awt.AWTException;
-import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+
+import javax.inject.Inject;
 
 /**
  * JUnit Rule that before executing a test it starts a recording current screen
  * and after the test is executed, it stops recording.
  */
+@GlobalRule
 public class TestRecorderRule extends TestWatcher {
 
     private static final Logger logger = LoggerFactory.getLogger(TestRecorderRule.class);
@@ -32,7 +36,6 @@ public class TestRecorderRule extends TestWatcher {
     private static final int BIT_DEPTH = 16;
     private static final float QUALITY_RATIO = 0.97f;
 
-    private static final String TARGET = "target";
     static final String OFF = "off";
 
     static final String FAILURES = "failuresOnly";
@@ -43,7 +46,13 @@ public class TestRecorderRule extends TestWatcher {
     static String RECORDER_OPTION = SystemEnvironmentVariables
             .getPropertyVariableOrEnvironment("RECORDER", DEFAULT_MODE).trim();
 
+    private final FailureDiagnostics diagnostics;
     private JUnitScreenRecorder screenRecorder;
+
+    @Inject
+    public TestRecorderRule(FailureDiagnostics diag) {
+        this.diagnostics = diag;
+    }
 
     @Override
     protected void starting(Description description) {
@@ -57,8 +66,6 @@ public class TestRecorderRule extends TestWatcher {
                 .getLocalGraphicsEnvironment()
                 .getDefaultScreenDevice()
                 .getDefaultConfiguration();
-
-        File movieFolder = new File(TARGET);
 
         String mimeType = FormatKeys.MIME_QUICKTIME;
         String videoFormatName = VideoFormatKeys.ENCODING_QUICKTIME_ANIMATION;
@@ -76,7 +83,7 @@ public class TestRecorderRule extends TestWatcher {
         try {
             this.screenRecorder = new JUnitScreenRecorder
                     (gc, gc.getBounds(), getFileFormat(mimeType),
-                            outputFormatForScreenCapture, null, null, movieFolder, des);
+                            outputFormatForScreenCapture, null, null, diagnostics);
             this.screenRecorder.start();
         } catch (IOException e) {
             logger.warn("Exception starting test recording {}", e);

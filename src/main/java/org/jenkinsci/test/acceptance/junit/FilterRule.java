@@ -41,6 +41,7 @@ import com.google.inject.Inject;
  *
  * @author ogondza
  */
+@GlobalRule(priority = -1) // Run before Jenkins is started
 public class FilterRule implements TestRule {
 
     @Override
