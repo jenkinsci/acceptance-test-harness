@@ -74,15 +74,12 @@ public class FailureDiagnostics extends TestWatcher {
 
     @Override
     protected void succeeded(Description description) {
-        System.out.println("CLOSED " + dir);
         // Delete the directory if no diagnostics information written
         if (dir.exists()) {
-            System.out.println("exists");
             String[] files = dir.list();
             // Some diagnostic tools can produce data even though test succeeded
             // TODO introduce single switch for all diagnostic tools (yes/no/failure only)?
             if (files != null && files.length == 0) {
-                System.out.println("purge");
                 try {
                     FileUtils.deleteDirectory(dir);
                 } catch (IOException e) {
