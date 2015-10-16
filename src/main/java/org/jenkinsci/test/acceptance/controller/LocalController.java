@@ -228,10 +228,6 @@ public abstract class LocalController extends JenkinsController implements LogLi
                 out.println("Commencing interactive debugging. Browser session was kept open.");
                 out.println("Press return to proceed.");
                 new BufferedReader(new InputStreamReader(System.in)).readLine();
-            }else{
-                out.println("It looks like the test failed/errored, so here's the console from Jenkins:");
-                out.println("--------------------------------------------------------------------------");
-                out.println(FileUtils.readFileToString(logFile));
             }
         } catch (IOException e) {
             throw new Error(e);
