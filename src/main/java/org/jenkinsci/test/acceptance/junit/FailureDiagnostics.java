@@ -1,8 +1,8 @@
 package org.jenkinsci.test.acceptance.junit;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
-
 import org.codehaus.plexus.util.FileUtils;
 import org.jenkinsci.test.acceptance.guice.TestName;
 import org.jenkinsci.test.acceptance.guice.TestScope;
@@ -11,10 +11,10 @@ import org.junit.runner.Description;
 import com.google.inject.Inject;
 
 /**
- * Attach diagnostics file related to a test failure.
+ * Attach diagnostic file related to a test failure.
  *
  * The harness can attach any number of diagnostic files to be stored in /target/diagnostics/$TEST_NAME/.
- * The same 'kind' of diagnostics information is expected to use the same file/subdir name.
+ * The same 'kind' of diagnostic information is expected to use the same file/subdir name.
  *
  * @author ogondza
  */
@@ -30,9 +30,9 @@ public class FailureDiagnostics extends TestWatcher {
     }
 
     /**
-     * Get test specific diagnostics directory.
+     * Get test specific diagnostic directory.
      */
-    public File getDir() {
+    private File getDir() {
         if (!dir.exists()) {
             if (!dir.mkdirs()) {
                 throw new Error("Directory " + dir + " could not be created. mkdirs operation returned false.");
@@ -50,6 +50,26 @@ public class FailureDiagnostics extends TestWatcher {
      */
     public File touch(String filename) {
         return new File(getDir(), filename);
+    }
+
+    /**
+     * Write string in diagnostic file.
+     *
+     * @param filename Name of the file
+     * @param content Content to write.
+     */
+    public void write(String filename, String content) {
+        FileWriter writer = null;
+        try {
+            try {
+                writer = new FileWriter(touch(filename));
+                writer.write(content);
+            } finally {
+                if (writer != null) writer.close();
+            }
+        } catch (IOException e) {
+            new Error(e);
+        }
     }
 
     @Override
