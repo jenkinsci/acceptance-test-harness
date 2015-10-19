@@ -11,6 +11,13 @@ import javax.inject.Provider;
 public class TestName implements Provider<String> {
     /*package*/ String testName;
 
+    public TestName() {
+    }
+
+    public TestName(String testName) {
+        this.testName = testName;
+    }
+
     @Override
     public String get() {
         return testName;

@@ -46,9 +46,13 @@ public class TestRecorderRule extends TestWatcher {
     static String RECORDER_OPTION = SystemEnvironmentVariables
             .getPropertyVariableOrEnvironment("RECORDER", DEFAULT_MODE).trim();
 
-    @Inject
     private FailureDiagnostics diagnostics;
     private JUnitScreenRecorder screenRecorder;
+
+    @Inject
+    public TestRecorderRule(FailureDiagnostics diagnostics) {
+        this.diagnostics = diagnostics;
+    }
 
     @Override
     protected void starting(Description description) {
