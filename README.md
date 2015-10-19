@@ -44,6 +44,7 @@ Java system property takes precedence over environment variable.
 * [Prelaunch JUT](docs/PRELAUNCH.md)
 * [Obtaining a report of plugins that were exercised](docs/EXERCISEDPLUGINSREPORTER.md)
 * [Testing unreleased plugin](docs/LOCALPLUGIN.md)
+* [Investigation](docs/INVESTIGATION.md)
 * Selecting tests based on plugins they cover (TODO)
 
 ### Writing tests

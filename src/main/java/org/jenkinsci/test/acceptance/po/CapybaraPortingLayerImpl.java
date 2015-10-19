@@ -200,7 +200,8 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
             throw new NoSuchElementException("Unable to locate visible " + selector + " in " + driver.getCurrentUrl());
         } catch (NoSuchElementException x) {
             // this is often the best place to set a breakpoint
-            String msg = String.format("Unable to locate %s in %s\n\n%s", selector, driver.getCurrentUrl(), driver.getPageSource());
+            // Page url is not resent in otherwise verbose message
+            String msg = String.format("Unable to locate %s in %s", selector, driver.getCurrentUrl());
             throw new NoSuchElementException(msg, x);
         }
     }
@@ -230,7 +231,8 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
 
         } catch (NoSuchElementException x) {
             // this is often the best place to set a breakpoint
-            String msg = String.format("Unable to locate %s in %s\n\n%s", selector, driver.getCurrentUrl(), driver.getPageSource());
+            // Page url is not resent in otherwise verbose message
+            String msg = String.format("Unable to locate %s in %s", selector, driver.getCurrentUrl());
             throw new NoSuchElementException(msg, x);
         }
     }

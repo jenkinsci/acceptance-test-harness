@@ -6,10 +6,13 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.plexus.util.Expand;
 import org.codehaus.plexus.util.StringUtils;
+import org.jenkinsci.test.acceptance.junit.FailureDiagnostics;
 import org.jenkinsci.test.acceptance.log.LogListenable;
 import org.jenkinsci.test.acceptance.log.LogListener;
 import org.jenkinsci.utils.process.ProcessInputStream;
+import org.openqa.selenium.TimeoutException;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -63,6 +66,9 @@ public abstract class LocalController extends JenkinsController implements LogLi
 
     @Inject @Named("form-element-path.hpi")
     private File formElementPathPlugin;
+
+    @Inject
+    private Injector injector;
 
     /**
      * Partial implementation of {@link JenkinsControllerFactory} for subtypes.
@@ -199,7 +205,7 @@ public abstract class LocalController extends JenkinsController implements LogLi
     public abstract ProcessInputStream startProcess() throws IOException;
 
     @Override
-    public void startNow() throws IOException{
+    public void startNow() throws IOException {
         this.process = startProcess();
         Runtime.getRuntime().addShutdownHook(shutdownHook);
 
@@ -222,20 +228,26 @@ public abstract class LocalController extends JenkinsController implements LogLi
 
     @Override
     public void diagnose(Throwable cause) {
-        try {
-            cause.printStackTrace(out);
-            if(getenv("INTERACTIVE") != null && getenv("INTERACTIVE").equals("true")){
-                out.println("Commencing interactive debugging. Browser session was kept open.");
-                out.println("Press return to proceed.");
-                new BufferedReader(new InputStreamReader(System.in)).readLine();
-            }else{
-                out.println("It looks like the test failed/errored, so here's the console from Jenkins:");
-                out.println("--------------------------------------------------------------------------");
-                out.println(FileUtils.readFileToString(logFile));
+
+        if (cause instanceof TimeoutException) {
+            FailureDiagnostics diagnostics = injector.getInstance(FailureDiagnostics.class);
+            String td = getThreaddump();
+            if (td != null) {
+                diagnostics.write("threaddump.log", td);
             }
-        } catch (IOException e) {
-            throw new Error(e);
         }
+
+        if(getenv("INTERACTIVE") != null && getenv("INTERACTIVE").equals("true")){
+            cause.printStackTrace(out);
+            out.println("Commencing interactive debugging. Browser session was kept open.");
+            out.println("Press return to proceed.");
+            try {
+                new BufferedReader(new InputStreamReader(System.in)).readLine();
+            } catch (IOException e) {
+                throw new Error(e);
+            }
+        }
+
     }
 
     @Override
@@ -295,12 +307,26 @@ public abstract class LocalController extends JenkinsController implements LogLi
         return randomLocalPort(-1,-1);
     }
 
-    private void diagnoseFailedLoad(Exception cause) {
+    private void diagnoseFailedLoad(Exception cause) throws IOException {
+        String td = getThreaddump();
+        if (td != null) {
+            IOException ex = new IOException(cause.getMessage() + "\n\n" + td);
+            ex.setStackTrace(cause.getStackTrace());
+            cause = ex;
+        }
+
+        throw (cause instanceof IOException)
+                ? (IOException) cause
+                : new IOException("Jenkins failed to load", cause)
+        ;
+    }
+
+    private @CheckForNull String getThreaddump() {
         Process proc = process.getProcess();
 
         try {
             int val = proc.exitValue();
-            new RuntimeException("Jenkins died loading. Exit code " + val, cause);
+            return null; // already dead
         } catch (IllegalThreadStateException _) {
             // Process alive
         }
@@ -313,9 +339,7 @@ public abstract class LocalController extends JenkinsController implements LogLi
             pidField = clazz.getDeclaredField("pid");
             pidField.setAccessible(true);
         } catch (Exception e) {
-            LinkageError x = new LinkageError();
-            x.initCause(e);
-            throw x;
+            return null; // Unable to inspect
         }
 
         if (clazz.isAssignableFrom(proc.getClass())) {
@@ -331,21 +355,17 @@ public abstract class LocalController extends JenkinsController implements LogLi
                 if (jstack.waitFor() == 0) {
                     StringWriter writer = new StringWriter();
                     IOUtils.copy(jstack.getInputStream(), writer);
-                    RuntimeException ex = new RuntimeException(
-                            cause.getMessage() + "\n\n" + writer.toString()
-                    );
-                    ex.setStackTrace(cause.getStackTrace());
-                    throw ex;
+                    return writer.toString();
                 }
             } catch (IOException | InterruptedException e) {
                 throw new AssertionError(e);
             }
         }
 
-        throw new Error(cause);
+        return null;
     }
 
-    private boolean  isFreePort(int port){
+    private boolean isFreePort(int port){
         try {
             ServerSocket ss = new ServerSocket(port);
             ss.close();

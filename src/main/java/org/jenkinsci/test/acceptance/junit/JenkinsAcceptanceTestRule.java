@@ -11,8 +11,11 @@ import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.Statement;
+import org.jvnet.hudson.annotation_indexer.Index;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.util.Collection;
@@ -40,6 +43,8 @@ public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should us
         return new Statement() {
             @Inject JenkinsController controller;
             @Inject Injector injector;
+            @Inject FailureDiagnostics diagnostics;
+            @Inject WebDriver driver;
 
             @Override
             public void evaluate() throws Throwable {
@@ -58,6 +63,9 @@ public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should us
                     e.printStackTrace();
                     throw e;
                 } catch (Exception|AssertionError e) { // Errors and failures
+                    if (e instanceof NoSuchElementException) {
+                        diagnostics.write("last-page.html", driver.getPageSource());
+                    }
                     controller.diagnose(e);
                     throw e;
                 } finally {
@@ -69,35 +77,23 @@ public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should us
              * Look for annotations on a test and honor {@link RuleAnnotation}s in them.
              */
             private Statement decorateWithRules(Statement body) {
-                Set<Class<? extends Annotation>> annotations = new HashSet<>();
-                collectAnnotationTypes(method.getMethod(), annotations);
-                collectAnnotationTypes(target.getClass(), annotations);
 
                 TreeMap<Integer, Set<TestRule>> rules = new TreeMap<Integer, Set<TestRule>>(new Comparator<Integer>() {
                     @Override
                     public int compare(Integer o1, Integer o2) {
                         // Reversed since we apply the TestRule inside out:
-                        return o2 - o1;
+                        return Integer.compare(o2, o1);
                     }
                 });
 
-                for (Class<? extends  Annotation> a : annotations) {
-                    RuleAnnotation r = a.getAnnotation(RuleAnnotation.class);
-                    if (r!=null) {
-                        int prio = r.priority();
-                        if (rules.get(prio) == null) {
-                            rules.put(prio, new LinkedHashSet<TestRule>());
-                        }
-                        rules.get(prio).add(injector.getInstance(r.value()));
-                    }
-                }
+                collectRuleAnnotations(method, target, rules);
+                collectGlobalRules(rules);
 
                 // Make sure Jenkins is started between -1 and 0
                 if (rules.get(0) == null) {
                     rules.put(0, new LinkedHashSet<TestRule>());
                 }
                 rules.get(0).add(jenkinsBoot(rules));
-                rules.get(0).add(new FilterRule()); // TODO Autowire this with negative priority
 
                 for (Set<TestRule> rulesGroup: rules.values()) {
                     for (TestRule rule: rulesGroup) {
@@ -107,10 +103,46 @@ public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should us
                 return body;
             }
 
+            private void collectGlobalRules(TreeMap<Integer, Set<TestRule>> rules) {
+                Iterable<Class> impls;
+                try {
+                    impls = Index.list(GlobalRule.class, getClass().getClassLoader(), Class.class);
+                } catch (IOException e) {
+                    throw new Error("Unable to collect global annotations", e);
+                }
+
+                for (Class<?> rule: impls) {
+                    if (!TestRule.class.isAssignableFrom(rule)) {
+                        throw new Error("GlobalRule is applicable for TestRules only");
+                    }
+
+                    addRule(rules, rule.getAnnotation(GlobalRule.class).priority(), (Class<? extends TestRule>) rule);
+                }
+            }
+
+            private void collectRuleAnnotations(final FrameworkMethod method, final Object target, TreeMap<Integer, Set<TestRule>> rules) {
+                Set<Class<? extends Annotation>> annotations = new HashSet<>();
+                collectAnnotationTypes(method.getMethod(), annotations);
+                collectAnnotationTypes(target.getClass(), annotations);
+                for (Class<? extends  Annotation> a : annotations) {
+                    RuleAnnotation r = a.getAnnotation(RuleAnnotation.class);
+                    if (r!=null) {
+                        addRule(rules, r.priority(), r.value());
+                    }
+                }
+            }
+
             private void collectAnnotationTypes(AnnotatedElement e, Collection<Class<? extends Annotation>> types) {
                 for (Annotation a : e.getAnnotations()) {
                     types.add(a.annotationType());
                 }
+            }
+
+            private void addRule(TreeMap<Integer, Set<TestRule>> rules, int prio, Class<? extends TestRule> impl) {
+                if (rules.get(prio) == null) {
+                    rules.put(prio, new LinkedHashSet<TestRule>());
+                }
+                rules.get(prio).add(injector.getInstance(impl));
             }
 
             private TestRule jenkinsBoot(final TreeMap<Integer, Set<TestRule>> rules) {
