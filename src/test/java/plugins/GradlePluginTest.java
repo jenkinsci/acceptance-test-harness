@@ -49,7 +49,8 @@ public class GradlePluginTest extends AbstractJUnitTest {
 
         job.startBuild().shouldSucceed()
                 .shouldContainsConsoleOutput("Hello world!")
-                .shouldContainsConsoleOutput("gradle --quiet")
+                //reg expression gradle[\w\\/"]* --quiet
+                .shouldContainsConsoleOutput("gradle[\\w\\\\/\"]* --quiet")
         ;
     }
 
