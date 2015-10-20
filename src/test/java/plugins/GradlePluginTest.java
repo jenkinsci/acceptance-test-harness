@@ -49,7 +49,7 @@ public class GradlePluginTest extends AbstractJUnitTest {
 
         job.startBuild().shouldSucceed()
                 .shouldContainsConsoleOutput("Hello world!")
-                .shouldContainsConsoleOutput("gradle --quiet")
+                .shouldContainsConsoleOutput("gradle.* --quiet")
         ;
     }
 
