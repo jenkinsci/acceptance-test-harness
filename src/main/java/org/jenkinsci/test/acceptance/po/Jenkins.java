@@ -2,19 +2,22 @@ package org.jenkinsci.test.acceptance.po;
 
 import static org.hamcrest.Matchers.not;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
-import static org.jenkinsci.test.acceptance.Matchers.hasElement;
-
 import hudson.util.VersionNumber;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
+import org.hamcrest.MatcherAssert;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
+
+import com.google.common.base.Predicate;
 import com.google.inject.Injector;
-import org.openqa.selenium.By;
-import org.openqa.selenium.TimeoutException;
+
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebDriver;
 
 /**
  * Top-level object that acts as an entry point to various systems.
@@ -116,15 +119,21 @@ public class Jenkins extends Node {
         visit("restart");
         clickButton("Yes");
 
-        try {
-            waitFor(driver, not(hasContent("Please wait")), JenkinsController.STARTUP_TIMEOUT);
-        }catch(TimeoutException e) {
-            //Let's try to avoid false negatives or not auto refresh
-            visit(driver.getCurrentUrl());
-            //we wait 10 seconds for refresh things.
-            //breadcrumbBarAnchor is only present when the Jenkins is ready
-            waitFor(driver, hasElement(By.className("breadcrumbBarAnchor")), 10);
-        }
+        // Poll until we have the real page
+        waitFor(driver).withTimeout(JenkinsController.STARTUP_TIMEOUT, TimeUnit.SECONDS)
+                .ignoring(
+                        AssertionError.class, // Still waiting
+                        NoSuchElementException.class // No page served at all
+                )
+                .until(new Predicate<WebDriver>() {
+                    @Override
+                    public boolean apply(WebDriver driver) {
+                        visit(driver.getCurrentUrl()); // the page sometimes does not reload (fast enough)
+                        MatcherAssert.assertThat(driver, not(hasContent("Please wait")));
+                        return true;
+                    }
+                })
+        ;
     }
 
     public JenkinsLogger getLogger(String name) {
