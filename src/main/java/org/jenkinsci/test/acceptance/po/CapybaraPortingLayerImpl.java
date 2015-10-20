@@ -12,10 +12,12 @@ import org.hamcrest.StringDescription;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.junit.Wait;
 import org.jenkinsci.test.acceptance.utils.ElasticTime;
+import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.UnhandledAlertException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -74,7 +76,16 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
      * @param url URL relative to the context path of Jenkins, such as "/about" or "/job/foo/configure".
      */
     protected final WebDriver visit(URL url) {
-        driver.get(url.toExternalForm());
+        try {
+            driver.get(url.toExternalForm());
+        } catch (UnhandledAlertException e) {
+            //In case of trying to navigate to a page and in current page there is a form with data,
+            //An alert might be shown.
+            final Alert alert = driver.switchTo().alert();
+            if (alert != null) {
+                alert.accept();
+            }
+        }
         return driver;
     }
 
