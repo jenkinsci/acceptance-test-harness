@@ -120,6 +120,7 @@ public class JUnitPluginTest extends AbstractJUnitTest {
     }
 
     private void assertMessage(String test, String msg) {
+        elasticSleep(1000);
         toggle(test);
         elasticSleep(1000); // Try to wait a bit to ajax to fetch the content
         assertThat(driver, hasContent(msg));
