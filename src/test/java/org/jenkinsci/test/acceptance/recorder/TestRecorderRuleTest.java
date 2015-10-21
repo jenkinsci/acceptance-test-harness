@@ -125,7 +125,7 @@ public class TestRecorderRuleTest {
         final String envVar = System.getenv("RECORDER");
         final String recorder = System.getProperty("RECORDER");
 
-        if ((envVar != null && !"".equals(envVar)) || (recorder != null && !"".equals(recorder))) {
+        if ((envVar != null && !envVar.isEmpty()) || (recorder != null && !recorder.isEmpty())) {
             System.setProperty("RECORDER", TestRecorderRule.FAILURES);
             return recorder;
         }
