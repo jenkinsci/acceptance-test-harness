@@ -36,7 +36,7 @@ import org.jenkinsci.test.acceptance.po.Job;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.*;
@@ -73,8 +73,8 @@ public class GerritTriggerTest extends AbstractJUnitTest {
     // Instantiating this will cause AssumptionViolatedException to be throws when properties are not declared
     GerritTriggerEnv env = new GerritTriggerEnv();
 
-    @Before
-    public void setUpLogger() {
+    @BeforeClass
+    public static void setUpLogger() {
         LOGGER.setLevel(Level.ALL);
         LOGGER.setUseParentHandlers(false);
         ConsoleHandler handler = new ConsoleHandler();
@@ -143,7 +143,9 @@ public class GerritTriggerTest extends AbstractJUnitTest {
         dir.delete();//result !needed
         assertTrue(dir.mkdir());
 
-        assertThat(logProcessBuilderIssues(new ProcessBuilder("git", "clone", "ssh://" + env.getGerritUser() + "@" + env.getHostName() + ":29418/" + env.getProject(), jobName).directory(dir), "git clone").exitValue(), is(equalTo(0)));
+        assertThat(logProcessBuilderIssues(new ProcessBuilder("git", "clone", "ssh://" + env.getGerritUser()
+                + "@" + env.getHostName() + ":29418/"
+                + env.getProject(), jobName).directory(dir), "git clone").exitValue(), is(equalTo(0)));
 
         File file = new File(dir+"/"+jobName,jobName);
         file.delete();//result !needed
@@ -179,10 +181,10 @@ public class GerritTriggerTest extends AbstractJUnitTest {
         String hN = GerritTriggerEnv.get().getHostName();
         ProcessBuilder curlProcess;
         if(GerritTriggerEnv.get().getNoProxy()) {
-            curlProcess = new ProcessBuilder("curl","-w","%{http_code}","--noproxy",hN,"-n","https://"+hN+"/a/changes/"+changeId+"/revisions/current/review");
+            curlProcess = new ProcessBuilder("curl","-k","-w","%{http_code}","--noproxy",hN,"-n","https://"+hN+"/a/changes/"+changeId+"/revisions/current/review");
             return logProcessBuilderIssues(curlProcess, "curl");
         }
-        curlProcess = new ProcessBuilder("curl","-n","https://"+hN+"/a/changes/"+changeId+"/revisions/current/review");
+        curlProcess = new ProcessBuilder("curl","-k","-n","https://"+hN+"/a/changes/"+changeId+"/revisions/current/review");
         return logProcessBuilderIssues(curlProcess, "curl");
     }
 
