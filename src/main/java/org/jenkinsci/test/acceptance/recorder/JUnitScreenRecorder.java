@@ -15,6 +15,8 @@ import java.io.IOException;
  */
 public class JUnitScreenRecorder extends ScreenRecorder {
 
+    private static String JUNIT_ATTACHMENT = "[[ATTACHMENT|%s]]";
+
     private FailureDiagnostics diag;
     private Format format;
 
@@ -29,6 +31,8 @@ public class JUnitScreenRecorder extends ScreenRecorder {
     @Override
     protected File createMovieFile(Format fileFormat) throws IOException {
         final File f = generateOutput(fileFormat);
+        //https://wiki.jenkins-ci.org/display/JENKINS/JUnit+Attachments+Plugin#JUnitAttachmentsPlugin-ByprintingoutthefilenameinaformatthatJenkinswillunderstand
+        System.out.println(String.format(JUNIT_ATTACHMENT, f.getAbsolutePath()));
         return f;
     }
 

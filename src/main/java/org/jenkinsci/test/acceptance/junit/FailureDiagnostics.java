@@ -22,6 +22,8 @@ import com.google.inject.Inject;
 @TestScope
 public class FailureDiagnostics extends TestWatcher {
 
+    private static String JUNIT_ATTACHMENT = "[[ATTACHMENT|%s]]";
+
     private final File dir;
 
     @Inject
@@ -84,6 +86,19 @@ public class FailureDiagnostics extends TestWatcher {
                     FileUtils.deleteDirectory(dir);
                 } catch (IOException e) {
                     // Nah
+                }
+            }
+        }
+    }
+
+    @Override
+    public void failed(Throwable e, Description description) {
+        if (dir.exists()) {
+            File[] files = dir.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    //https://wiki.jenkins-ci.org/display/JENKINS/JUnit+Attachments+Plugin#JUnitAttachmentsPlugin-ByprintingoutthefilenameinaformatthatJenkinswillunderstand
+                    System.out.println(String.format(JUNIT_ATTACHMENT, file.getAbsolutePath()));
                 }
             }
         }
