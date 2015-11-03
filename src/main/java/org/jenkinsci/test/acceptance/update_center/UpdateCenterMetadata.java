@@ -79,8 +79,15 @@ public class UpdateCenterMetadata {
 
     private void transitiveDependenciesOf(VersionNumber jenkins, PluginMetadata p, String v, List<PluginMetadata> set) {
         for (Dependency d : p.dependencies) {
-            if (d.optional) continue;
-            transitiveDependenciesOf(jenkins, plugins.get(d.name), d.version, set);
+            if (d.optional) {
+                continue;
+            }
+            PluginMetadata dependencyMetadata = plugins.get(d.name);
+            if (dependencyMetadata != null) {
+                transitiveDependenciesOf(jenkins, dependencyMetadata, d.version, set);
+            } else {
+                throw new UnableToResolveDependencies(String.format("Unable to resolve dependency %s of plugin %s.", d, p));
+            }
         }
 
         if (!set.contains(p)) {

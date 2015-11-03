@@ -19,4 +19,9 @@ public class Dependency {
     public PluginMetadata get() {
         return owner.plugins.get(name);
     }
+
+    @Override
+    public String toString() {
+        return "[" + name + "," + version + "]";
+    }    
 }
