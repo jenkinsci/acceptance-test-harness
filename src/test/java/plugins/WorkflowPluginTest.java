@@ -28,11 +28,13 @@ import java.util.concurrent.Callable;
 import javax.inject.Inject;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Native;
 import org.jenkinsci.test.acceptance.junit.Wait;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation;
+import org.jenkinsci.test.acceptance.po.ACEEditor;
 import org.jenkinsci.test.acceptance.po.Artifact;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.DumbSlave;
@@ -40,6 +42,8 @@ import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import static org.junit.Assert.*;
 import org.junit.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.support.ui.Select;
 
 /**
  * Roughly follows <a href="https://github.com/jenkinsci/workflow-plugin/blob/master/TUTORIAL.md">the tutorial</a>.
@@ -155,4 +159,39 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         build.shouldContainsConsoleOutput("divided into 3 sets");
     }
 
+    @WithPlugins({"workflow-aggregator"}) // TODO: Update to 1.11
+    @Test public void helloWorldWithACEEditor() throws Exception {
+        WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
+        ACEEditor aceEditor = new ACEEditor("#workflow-editor", driver);
+
+        aceEditor.set("echo 'hello from Workflow'");
+        job.sandbox.check();
+        job.save();
+        
+        job.startBuild().shouldSucceed().shouldContainsConsoleOutput("hello from Workflow");
+        
+        // TODO: shouldContainsConsoleOutput was deprecated. Why?
+        // It provides a clear benefit as the proposed alternative is horrible.
+    }
+
+
+    @WithPlugins({"workflow-aggregator"}) // TODO: Update to 1.11
+    @Test public void selectSampleFlow() throws Exception {
+        WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
+        ACEEditor aceEditor = new ACEEditor("#workflow-editor", driver);
+        
+        aceEditor.waitForRenderOf("#workflow-editor-wrapper .samples select");
+        
+        Select select = new Select(driver.findElement(By.cssSelector("#workflow-editor-wrapper .samples select")));
+        select.selectByValue("hello");
+
+        job.sandbox.check();
+        job.save();
+        
+        // If the following assert fails, check did the samples (in the Workflow editor) change and fix to match.
+        job.startBuild().shouldSucceed().shouldContainsConsoleOutput("Hello World 2");
+        
+        // TODO: shouldContainsConsoleOutput was deprecated. Why?
+        // It provides a clear benefit as the proposed alternative is horrible.
+    }    
 }
