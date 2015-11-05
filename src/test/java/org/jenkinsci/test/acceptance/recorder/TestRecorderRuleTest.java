@@ -18,22 +18,24 @@ public class TestRecorderRuleTest {
 
         final String oldMode = updateRecorderToDefaultOption();
 
-        Description desc = description("shouldNotRecordSuccessTestExecutionByDefault");
-        TestRecorderRule testRecorderRule = rule(desc);
-        testRecorderRule.starting(desc);
+        try {
+            Description desc = description("shouldNotRecordSuccessTestExecutionByDefault");
+            TestRecorderRule testRecorderRule = rule(desc);
+            testRecorderRule.starting(desc);
 
-        System.out.println("Hello World");
+            System.out.println("Hello World");
 
-        testRecorderRule.succeeded(desc);
-        testRecorderRule.finished(desc);
+            testRecorderRule.succeeded(desc);
+            testRecorderRule.finished(desc);
 
-        File outputFile = outputFile(desc);
-        assertThat(outputFile.exists(), is(false));
+            File outputFile = outputFile(desc);
+            assertThat(outputFile.exists(), is(false));
 
-        //Clean the field
-        outputFile.delete();
-
-        restoreRecorderOption(oldMode);
+            //Clean the field
+            outputFile.delete();
+        } finally {
+            restoreRecorderOption(oldMode);
+        }
     }
 
     @Test
@@ -41,22 +43,24 @@ public class TestRecorderRuleTest {
 
         final String oldValue = updateRecorderToDefaultOption();
 
-        Description desc = description("shouldRecordFailingTestExecutionByDefault");
-        TestRecorderRule testRecorderRule = rule(desc);
-        testRecorderRule.starting(desc);
+        try {
+            Description desc = description("shouldRecordFailingTestExecutionByDefault");
+            TestRecorderRule testRecorderRule = rule(desc);
+            testRecorderRule.starting(desc);
 
-        System.out.println("Good Bye World");
-        //succeeded is not called since a failure is simulated
-        //testRecorderRule.succeeded(shouldNotRecordSuccessTestExecutionByDefault);
-        testRecorderRule.finished(desc);
+            System.out.println("Good Bye World");
+            //succeeded is not called since a failure is simulated
+            //testRecorderRule.succeeded(shouldNotRecordSuccessTestExecutionByDefault);
+            testRecorderRule.finished(desc);
 
-        File outputFile = outputFile(desc);
-        assertThat(outputFile.exists(), is(true));
+            File outputFile = outputFile(desc);
+            assertThat(outputFile.exists(), is(true));
 
-        //Clean the field
-        outputFile.delete();
-
-        restoreRecorderOption(oldValue);
+            //Clean the field
+            outputFile.delete();
+        } finally {
+            restoreRecorderOption(oldValue);
+        }
 
     }
 
@@ -64,49 +68,52 @@ public class TestRecorderRuleTest {
     public void shouldRecordSuccessTestExecutionWhenSaveAll() {
 
         final String oldValue = updateRecorderToDefaultOption();
+        try {
+            //Since configured recorder option is static we need to set it manually in each test.
+            TestRecorderRule.RECORDER_OPTION = TestRecorderRule.ALWAYS;
 
-        //Since configured recorder option is static we need to set it manually in each test.
-        TestRecorderRule.RECORDER_OPTION = TestRecorderRule.ALWAYS;
+            Description desc = description("shouldRecordSuccessTestExecutionWhenSaveAll");
+            TestRecorderRule testRecorderRule = rule(desc);
+            testRecorderRule.starting(desc);
 
-        Description desc = description("shouldRecordSuccessTestExecutionWhenSaveAll");
-        TestRecorderRule testRecorderRule = rule(desc);
-        testRecorderRule.starting(desc);
+            System.out.println("Hello World");
 
-        System.out.println("Hello World");
+            testRecorderRule.succeeded(desc);
+            testRecorderRule.finished(desc);
 
-        testRecorderRule.succeeded(desc);
-        testRecorderRule.finished(desc);
+            File outputFile = outputFile(desc);
+            assertThat(outputFile.exists(), is(true));
 
-        File outputFile = outputFile(desc);
-        assertThat(outputFile.exists(), is(true));
-
-        TestRecorderRule.RECORDER_OPTION = TestRecorderRule.FAILURES;
-        outputFile.delete();
-
-        restoreRecorderOption(oldValue);
+            TestRecorderRule.RECORDER_OPTION = TestRecorderRule.FAILURES;
+            outputFile.delete();
+        } finally {
+            restoreRecorderOption(oldValue);
+        }
     }
 
     @Test
     public void shouldNotRecordWhenRecorderIsDisabled() {
 
-        //Since configured recorder option is static we need to set it manually in each test.
-        TestRecorderRule.RECORDER_OPTION = TestRecorderRule.OFF;
+        try {
+            //Since configured recorder option is static we need to set it manually in each test.
+            TestRecorderRule.RECORDER_OPTION = TestRecorderRule.OFF;
 
-        Description desc = description("shouldNotRecordWhenRecorderIsDisabled");
-        TestRecorderRule testRecorderRule = rule(desc);
-        testRecorderRule.starting(desc);
+            Description desc = description("shouldNotRecordWhenRecorderIsDisabled");
+            TestRecorderRule testRecorderRule = rule(desc);
+            testRecorderRule.starting(desc);
 
-        System.out.println("Hello World");
+            System.out.println("Hello World");
 
-        //testRecorderRule.succeeded(shouldNotRecordSuccessTestExecutionByDefault);
-        testRecorderRule.finished(desc);
+            //testRecorderRule.succeeded(shouldNotRecordSuccessTestExecutionByDefault);
+            testRecorderRule.finished(desc);
 
-        File outputFile = outputFile(desc);
-        assertThat(outputFile.exists(), is(false));
-
-        //Clean the field
-        TestRecorderRule.RECORDER_OPTION = TestRecorderRule.FAILURES;
-        outputFile.delete();
+            File outputFile = outputFile(desc);
+            assertThat(outputFile.exists(), is(false));
+            outputFile.delete();
+        } finally {
+            //Clean the field
+            TestRecorderRule.RECORDER_OPTION = TestRecorderRule.FAILURES;
+        }
     }
 
     private Description description(String method) {
