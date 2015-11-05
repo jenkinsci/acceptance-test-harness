@@ -212,7 +212,7 @@ public class Docker {
         try {
             return build(fixture).start(fixture, options, cmd, portOffset);
         } catch (InterruptedException | IOException e) {
-            throw new AssertionError("Failed to start container " + fixture, e);
+            throw new AssertionError("Failed to start container " + fixture.getName(), e);
         }
     }
 
