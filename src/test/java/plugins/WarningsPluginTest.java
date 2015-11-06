@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
@@ -111,6 +112,15 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
             assertThat(driver, hasContent(title + ": " + warningsPerAxis.get(axis.name)));
         }
 
+        // sometimes the details is not refreshed yet (https://cloudbees.atlassian.net/browse/CJP-3668) 
+        // so let's add an sleep and a refresh 
+
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+            //we can ignore this.
+        }
+        driver.navigate().refresh();
         assertThatConfigurationTabIsCorrectlyFilled(job);
         assertThatFoldersTabIsCorrectlyFilled(job);
         assertThatFilesTabIsCorrectlyFilled(job);
