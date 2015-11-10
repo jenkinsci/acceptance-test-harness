@@ -38,13 +38,17 @@ public class ACEEditor extends JavaScriptWidget {
         super(driver);
         this.cssSelector = cssSelector;
     }
-    
+
+    public void waitForRenderOf() {
+        waitForRenderOf(cssSelector + " .ace_text-input");
+    }
+
     public void set(@Nonnull String editorContent) {
         
         // Make sure the editor is fully rendered first i.e. wait for
         // the ace_text-input element to have been added.
-        waitForRenderOf(cssSelector + " .ace_text-input");
-        
+        waitForRenderOf();
+
         // Now we can set the editor content.
         executeScript(
                 "var targets = document.getElementsBySelector(arguments[0]);" +
