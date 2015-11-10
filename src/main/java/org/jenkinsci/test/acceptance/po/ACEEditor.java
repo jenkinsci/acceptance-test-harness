@@ -39,7 +39,7 @@ public class ACEEditor extends JavaScriptWidget {
         this.cssSelector = cssSelector;
     }
 
-    public void waitForRenderOf() {
+    public void waitForRender() {
         waitForRenderOf(cssSelector + " .ace_text-input");
     }
 
@@ -47,18 +47,18 @@ public class ACEEditor extends JavaScriptWidget {
         
         // Make sure the editor is fully rendered first i.e. wait for
         // the ace_text-input element to have been added.
-        waitForRenderOf();
+        waitForRender();
 
         // Now we can set the editor content.
         executeScript(
                 "var targets = document.getElementsBySelector(arguments[0]);" +
-                "if (!targets || targets.length === 0) {" +
-                "    throw '**** Failed to find ACE Editor target object on page. Selector: ' + arguments[0];" +
-                "}" +
-                "if (!targets[0].aceEditor) {" +
-                "    throw '**** Selected ACE Editor target object is not an active ACE Editor. Selector: ' + arguments[0];" +
-                "}" +
-                "targets[0].aceEditor.setValue(arguments[1]);", 
+                        "if (!targets || targets.length === 0) {" +
+                        "    throw '**** Failed to find ACE Editor target object on page. Selector: ' + arguments[0];" +
+                        "}" +
+                        "if (!targets[0].aceEditor) {" +
+                        "    throw '**** Selected ACE Editor target object is not an active ACE Editor. Selector: ' + arguments[0];" +
+                        "}" +
+                        "targets[0].aceEditor.setValue(arguments[1]);",
                 cssSelector, editorContent);
     }
 }
