@@ -478,6 +478,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-release-plugin</artifactId>
+        <version>2.5.3</version>
         <configuration>
           <!--
             tests are used to test Jenkins, not the acceptance test harness,
