@@ -47,8 +47,12 @@ public class PooledJenkinsController extends JenkinsController implements LogLis
 
     @Inject
     public PooledJenkinsController(Injector i) {
+        this(i, JenkinsControllerPoolProcess.SOCKET);
+    }
+
+    public PooledJenkinsController(Injector i, File socket) {
         super(i);
-        this.socket = JenkinsControllerPoolProcess.SOCKET;
+        this.socket = socket;
     }
 
     @Override
