@@ -26,7 +26,12 @@ package org.jenkinsci.test.acceptance.po;
 
 import com.google.inject.Injector;
 import java.net.URL;
+import javax.annotation.Nonnull;
 import org.jenkinsci.test.acceptance.junit.Resource;
+import org.junit.Assert;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebDriver;
 
 @Describable("org.jenkinsci.plugins.workflow.job.WorkflowJob")
 public class WorkflowJob extends Job {
@@ -35,7 +40,60 @@ public class WorkflowJob extends Job {
         super(injector, url, name);
     }
 
-    public final Control script = control("/definition/script");
+    public final Control script = new Control(this, "/definition/script") {
+        @Override
+        public void set(String text) {
+            try {
+                super.set(text);
+            } catch (NoSuchElementException x) {
+                // As of JENKINS-28769, the textarea is set display: none due to the ACE editor, so CapybaraPortingLayerImpl.find, called by super.resolve, calls isDisplayed and fails.
+                // Anyway we cannot use the web driver to interact with the hidden textarea.
+                // Some code cannibalized from #45:
+                String cssSelector = "#workflow-editor";
+                waitForRenderOf(cssSelector + " .ace_text-input", driver);
+                executeScript(
+                    "var targets = document.getElementsBySelector(arguments[0]);" +
+                            "if (!targets || targets.length === 0) {" +
+                            "    throw '**** Failed to find ACE Editor target object on page. Selector: ' + arguments[0];" +
+                            "}" +
+                            "if (!targets[0].aceEditor) {" +
+                            "    throw '**** Selected ACE Editor target object is not an active ACE Editor. Selector: ' + arguments[0];" +
+                            "}" +
+                            "targets[0].aceEditor.setValue(arguments[1]);",
+                    cssSelector, text);
+            }
+        }
+    };
+    private static void waitForRenderOf(@Nonnull String cssSelector, @Nonnull WebDriver driver) {
+        long start = System.currentTimeMillis();
+        while (System.currentTimeMillis() < start + 10000) {
+            if (isRendered(cssSelector, driver)) {
+                return;
+            }
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                break;
+            }
+        }
+        Assert.fail("Timed out waiting on '" + cssSelector + "' to be rendered.");
+    }
+    private static boolean isRendered(@Nonnull String cssSelector, @Nonnull WebDriver driver) {
+        assertIsJavaScriptExecutor(driver);
+        return (boolean) ((JavascriptExecutor)driver).executeScript(
+                "var targets = document.getElementsBySelector(arguments[0]);" +
+                        "if (!targets || targets.length === 0) {" +
+                        "    return false;" +
+                        "} else {" +
+                        "    return true;" +
+                        "}", cssSelector);
+    }
+    private static void assertIsJavaScriptExecutor(WebDriver driver) {
+        if (!(driver instanceof JavascriptExecutor)) {
+            throw new IllegalArgumentException("WebDriver type " + driver.getClass().getName() + " does not implement JavascriptExecutor.");
+        }
+    }
+
     public final Control sandbox = control("/definition/sandbox");
 
     public String copyResourceStep(String filePath) {
