@@ -13,6 +13,7 @@ import org.jenkinsci.test.acceptance.plugins.warnings.WarningsAction;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsBuildSettings;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsColumn;
 import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.po.CapybaraPortingLayerImpl;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.ListView;
@@ -115,11 +116,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         // sometimes the details is not refreshed yet (https://issues.jenkins-ci.org/browse/JENKINS-31431) 
         // so let's add an sleep and a refresh 
 
-        try {
-            TimeUnit.SECONDS.sleep(1);
-        } catch (InterruptedException e) {
-            //we can ignore this.
-        }
+        sleep(1000);
         driver.navigate().refresh();
         assertThatConfigurationTabIsCorrectlyFilled(job);
         assertThatFoldersTabIsCorrectlyFilled(job);
