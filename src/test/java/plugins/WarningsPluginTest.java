@@ -112,7 +112,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
             assertThat(driver, hasContent(title + ": " + warningsPerAxis.get(axis.name)));
         }
 
-        // sometimes the details is not refreshed yet (https://cloudbees.atlassian.net/browse/CJP-3668) 
+        // sometimes the details is not refreshed yet (https://issues.jenkins-ci.org/browse/JENKINS-31431) 
         // so let's add an sleep and a refresh 
 
         try {
