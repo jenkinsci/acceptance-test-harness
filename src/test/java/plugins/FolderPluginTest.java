@@ -28,7 +28,7 @@ import org.hamcrest.MatcherAssert;
 import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.po.FolderJob;
+import org.jenkinsci.test.acceptance.po.FolderItem;
 import org.junit.Test;
 
 /**
@@ -48,15 +48,10 @@ public class FolderPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void createFolder() {
-        // 1 - Create job
-        final FolderJob job = jenkins.jobs.create(FolderJob.class, F01);
-        // 2 - Save job
+        final FolderItem job = jenkins.jobs.create(FolderItem.class, F01);
         job.save();
-        // 3 - Go to main page.
         jenkins.open();
-        // 4 - Go to job page.
         job.open();
-        // Ensure the folder name is correct.
         MatcherAssert.assertThat(driver, Matchers.hasContent(F01));
     }
 }

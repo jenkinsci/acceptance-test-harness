@@ -29,12 +29,12 @@ import java.net.URL;
 import com.google.inject.Injector;
 
 /**
- * Job representing a folder.
+ * Top level item representing a folder.
  */
 @Describable("com.cloudbees.hudson.plugins.folder.Folder")
-public class FolderJob extends Job {
+public class FolderItem extends TopLevelItem {
 
-    public FolderJob(Injector injector, URL url, String name) {
+    public FolderItem(Injector injector, URL url, String name) {
         super(injector, url, name);
     }
 
