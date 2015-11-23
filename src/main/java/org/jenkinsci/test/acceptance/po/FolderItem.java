@@ -33,9 +33,11 @@ import com.google.inject.Injector;
  */
 @Describable("com.cloudbees.hudson.plugins.folder.Folder")
 public class FolderItem extends TopLevelItem {
+    public final JobsMixIn jobs;
 
     public FolderItem(Injector injector, URL url, String name) {
         super(injector, url, name);
+        jobs = new JobsMixIn(this);
     }
 
 }
