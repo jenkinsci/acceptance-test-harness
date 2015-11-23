@@ -16,7 +16,7 @@ public class JobsMixIn extends MixIn {
         super(context);
     }
 
-    public <T extends Job> T create(Class<T> type, String name) {
+    public <T extends TopLevelItem> T create(Class<T> type, String name) {
         visit("newJob");
         fillIn("name", name);
 
@@ -48,7 +48,7 @@ public class JobsMixIn extends MixIn {
         return j;
     }
 
-    public <T extends Job> T get(Class<T> type, String name) {
+    public <T extends TopLevelItem> T get(Class<T> type, String name) {
         return newInstance(type, injector, url("job/%s/", name), name);
     }
 
@@ -56,7 +56,7 @@ public class JobsMixIn extends MixIn {
         return create(FreeStyleJob.class);
     }
 
-    public <T extends Job> T create(Class<T> type) {
+    public <T extends TopLevelItem> T create(Class<T> type) {
         return create(type, createRandomName());
     }
 

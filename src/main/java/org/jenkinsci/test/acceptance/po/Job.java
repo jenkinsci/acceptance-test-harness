@@ -32,14 +32,11 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
 
 /**
  * Job Page object superclass.
- * <p/>
- * Use {@link Describable} annotation to register an implementation.
+ * As with other {@link TopLevelItem}s, use {@link Describable} annotation to register an implementation.
  *
  * @author Kohsuke Kawaguchi
  */
-public class Job extends ContainerPageObject {
-    public String name;
-
+public class Job extends TopLevelItem {
     public List<Parameter> getParameters() {
         return parameters;
     }
@@ -53,24 +50,7 @@ public class Job extends ContainerPageObject {
     private final Control assignedLabel = control("/hasSlaveAffinity/assignedLabelString", "/label");
 
     public Job(Injector injector, URL url, String name) {
-        super(injector, url);
-        this.name = name;
-    }
-
-    public void setName(String name) {
-        ensureConfigPage();
-        this.name = name;
-        control("/name").set(name);
-    }
-
-    /**
-     * "Casts" this object into a subtype by creating the specified type.
-     */
-    public <T extends Job> T as(Class<T> type) {
-        if (type.isInstance(this)) {
-            return type.cast(this);
-        }
-        return newInstance(type, injector, url, name);
+        super(injector, url, name);
     }
 
     public <T extends Scm> T useScm(Class<T> type) {
@@ -117,6 +97,7 @@ public class Job extends ContainerPageObject {
      * If a publisher of a class is requested which has not been added previously
      * this will result in a {@link java.util.NoSuchElementException}.
      */
+    @SuppressWarnings("unchecked") // The check is performed in the method
     public <T extends PostBuildStep> T getPublisher(Class<T> type) {
         for (PostBuildStep p : publishers) {
             if (type.isAssignableFrom(p.getClass()))
@@ -362,11 +343,6 @@ public class Job extends ContainerPageObject {
         assertThat(noOfNodes, is(1));
     }
 
-    @Override
-    public String toString() {
-        return name;
-    }
-
     public ScmPolling pollScm() {
         return new ScmPolling(this);
     }
@@ -396,21 +372,5 @@ public class Job extends ContainerPageObject {
         }
 
         return links;
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        if (other == null) return false;
-        if (this == other) return true;
-
-        if (!(other instanceof Job)) return false;
-
-        Job rhs = (Job) other;
-        return this.name.equals(rhs.name);
-    }
-
-    @Override
-    public int hashCode() {
-        return getClass().hashCode() ^ url.hashCode();
     }
 }
