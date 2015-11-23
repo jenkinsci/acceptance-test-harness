@@ -4,7 +4,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.common.base.Objects;
 import com.google.inject.Injector;
 
 /**
@@ -59,11 +58,11 @@ public abstract class TopLevelItem extends ContainerPageObject {
         // Keep identity based on class and url, as in hashCode before.
         // Shouldn't be url alone?
         TopLevelItem rhs = (TopLevelItem) other;
-        return getClass().equals(rhs.getClass()) && Objects.equal(url, rhs.url);
+        return getClass().equals(rhs.getClass()) && url.toExternalForm().equals(rhs.url.toExternalForm());
     }
 
     @Override
     public int hashCode() {
-        return getClass().hashCode() ^ url.hashCode();
+        return getClass().hashCode() ^ url.toExternalForm().hashCode();
     }
 }
