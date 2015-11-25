@@ -4,7 +4,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.common.base.Objects;
 import com.google.inject.Injector;
 
 /**
@@ -56,14 +55,15 @@ public abstract class TopLevelItem extends ContainerPageObject {
         if (!(other instanceof TopLevelItem)) return false;
         
         // Equals and hashCode must be consistent with each other.
-        // Keep identity based on class and url, as in hashCode before.
-        // Shouldn't be url alone?
+        // We use URL only as the concrete class may not be detected, e.g. when obtaining a job
+        // from a BuildHistory
+        // TODO: equality checking in the presence of views.
         TopLevelItem rhs = (TopLevelItem) other;
-        return getClass().equals(rhs.getClass()) && Objects.equal(url, rhs.url);
+        return url.toExternalForm().equals(rhs.url.toExternalForm());
     }
 
     @Override
     public int hashCode() {
-        return getClass().hashCode() ^ url.hashCode();
+        return url.toExternalForm().hashCode();
     }
 }

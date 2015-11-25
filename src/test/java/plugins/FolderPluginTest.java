@@ -38,12 +38,22 @@ import org.junit.Test;
 public class FolderPluginTest extends AbstractJUnitTest {
     /** Test folder name. */
     private static final String F01 = "F01";
+    /** Test folder name. */
+    private static final String F02 = "F02";
+    
+    /**
+     * Checks that a folder exists and has the provided name.
+     */
+    private void checkFolder(FolderItem folder, String name) {
+        folder.open();
+        MatcherAssert.assertThat(driver, Matchers.hasContent(name));
+    }
     
     /**
      * First simple test scenario: Folder creation (JENKINS-31648).
      * <ol>
-     * <li>We create a folder named "F01".
-     * <li>We check the folder exists and we can enter it.
+     * <li>We create a folder named "F01".</li>
+     * <li>We check the folder exists and we can enter it.</li>
      * </ol>
      */
     @Test
@@ -51,7 +61,30 @@ public class FolderPluginTest extends AbstractJUnitTest {
         final FolderItem job = jenkins.jobs.create(FolderItem.class, F01);
         job.save();
         jenkins.open();
-        job.open();
-        MatcherAssert.assertThat(driver, Matchers.hasContent(F01));
+        checkFolder(job, F01);
+    }
+    
+    /**
+     * Simple folder hierarchy test scenario: Folder creation (JENKINS-31648).
+     * <ol>
+     * <li>We create a folder named "F01".</li>
+     * <li>We check the folder exists and we can enter it.</li>
+     * <li>We create a folder name "F02" inside "F01" and check it.</li>
+     * <li>We visit "F01" and the root page, create a folder named "F01" inside the existing "F01" one and check it.
+     * </ol>
+     */
+    @Test
+    public void createFolderHierarchy() {
+        final FolderItem parent = jenkins.jobs.create(FolderItem.class, F01);
+        parent.save();
+        checkFolder(parent, F01);
+        final FolderItem child1 = parent.jobs.create(FolderItem.class, F02);
+        child1.save();
+        checkFolder(child1, F02);
+        parent.open();
+        jenkins.open();
+        final FolderItem child2 = parent.jobs.create(FolderItem.class, F01);
+        child2.save();
+        checkFolder(child2, F01);
     }
 }
