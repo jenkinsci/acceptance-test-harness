@@ -63,7 +63,7 @@ public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should us
                     e.printStackTrace();
                     throw e;
                 } catch (Exception|AssertionError e) { // Errors and failures
-                    if (e instanceof NoSuchElementException) {
+                    if (causedBy(e, NoSuchElementException.class) != null) {
                         diagnostics.write("last-page.html", driver.getPageSource());
                     }
                     controller.diagnose(e);
@@ -71,6 +71,16 @@ public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should us
                 } finally {
                     world.endTestScope();
                 }
+            }
+
+            /**
+             * Detect the outermost exception of given type.
+             */
+            private Throwable causedBy(Throwable caught, Class<? extends Throwable> type) {
+                for (Throwable cur = caught; cur != null; cur = cur.getCause()) {
+                    if (type.isAssignableFrom(caught.getClass())) return cur;
+                }
+                return null;
             }
 
             /**
