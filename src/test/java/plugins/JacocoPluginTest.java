@@ -9,6 +9,8 @@ import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.junit.Test;
 import org.jenkinsci.test.acceptance.plugins.jacoco.JacocoPublisher;
 import org.jenkinsci.test.acceptance.plugins.jacoco.JacocoResultPage;
+import org.jenkinsci.test.acceptance.plugins.maven.MavenBuildStep;
+import org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 
@@ -20,8 +22,10 @@ public class JacocoPluginTest extends AbstractJUnitTest {
 
     @Test
     public void checkSuccessfulExecutionAndsummary() {
+        MavenInstallation.installSomeMaven(jenkins);
         FreeStyleJob job = jenkins.jobs.create();
         job.copyDir(resource("/jacoco/test"));
+        job.addBuildStep(MavenBuildStep.class).targets.set("clean package");;
         JacocoPublisher publisher = job.addPublisher(JacocoPublisher.class);
         publisher.changeBuildStatus.check();
         job.save();
