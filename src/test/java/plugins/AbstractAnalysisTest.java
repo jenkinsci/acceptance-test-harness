@@ -170,13 +170,8 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
 
     private void verifyTrendGraphDetails(final FreeStyleJob job, final AnalysisAction action) {
         List<WebElement> graphLinks = job.all(By.linkText("Enlarge"));
-        // We need to skip analysis collector here since the graph link is overlapped with footer.
-        // see also JENKINS-30304.
-        // TODO: enable if JENKINS-30304 has been fixed
-        if (graphLinks.size() == 1) {
-            graphLinks.get(0).click();
-            assertThatProjectPageTrendIsCorrect(job, action, "../../");
-        }
+        graphLinks.get(graphLinks.size() - 1).click();
+        assertThatProjectPageTrendIsCorrect(job, action, "../../");
     }
 
     private void assertThatProjectPageTrendIsCorrect(final FreeStyleJob job, final AnalysisAction action, final String prefix) {
