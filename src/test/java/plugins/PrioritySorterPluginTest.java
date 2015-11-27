@@ -76,22 +76,23 @@ public class PrioritySorterPluginTest extends AbstractJUnitTest {
         FreeStyleJob p1 = jenkins.views.create(ListView.class, "prioritized").jobs.create(FreeStyleJob.class, "P1");
         tieToLabel(p1, LABEL);
 
+        PriorityConfig priority = jenkins.action(PriorityConfig.class);
+        priority.configure();
+        final Group low = priority.addGroup();
+        low.priority.select("5");
+        low.byView("normal");
+        final Group high = priority.addGroup();
+        high.priority.select("1");
+        high.byView("prioritized");
+        priority.save();
+
+        Build p2b = p2.scheduleBuild();
+        Build p1b = p1.scheduleBuild();
+
+        // Set label after scheduling build so the test is deterministic
         slave.configure();
         slave.setLabels(LABEL);
         slave.save();
-
-        PriorityConfig priority = jenkins.action(PriorityConfig.class);
-        priority.configure();
-        Group low = priority.addGroup();
-        low.priority.select("1");
-        low.byView("prioritized");
-        Group high = priority.addGroup();
-        high.priority.select("5");
-        high.byView("normal");
-        priority.save();
-
-        Build p1b = p1.scheduleBuild();
-        Build p2b = p2.scheduleBuild();
 
         p1b.shouldSucceed();
         p2b.shouldSucceed();
