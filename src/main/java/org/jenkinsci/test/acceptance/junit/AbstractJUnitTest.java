@@ -21,7 +21,7 @@ import java.net.ServerSocket;
 public class AbstractJUnitTest extends CapybaraPortingLayerImpl {
 
     @Rule
-    public JenkinsAcceptanceTestRule rules = new JenkinsAcceptanceTestRule();
+    public JenkinsAcceptanceTestRule rules = new JenkinsAcceptanceTestRule(this);
 
     /**
      * Jenkins under test.

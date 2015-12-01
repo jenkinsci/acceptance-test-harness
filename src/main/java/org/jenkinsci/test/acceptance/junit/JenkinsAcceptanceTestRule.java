@@ -18,6 +18,7 @@ import org.openqa.selenium.WebDriver;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -36,10 +37,34 @@ import java.util.TreeMap;
  *
  * @author Kohsuke Kawaguchi
  */
-public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should use TestRule instead
+public class JenkinsAcceptanceTestRule implements TestRule {
+    /** Test class. */
+    private final Class<?> testClass;
+    /** Test instance. */
+    private final Object target;
+
+    /** Constructor. */
+    public JenkinsAcceptanceTestRule(Object target) {
+        this.target = target;
+        this.testClass = target.getClass();
+    }
+
+    /** @return the test method or {@code null} if not applied to a method. */
+    private Method getMethod(Description description) {
+        try {
+            final String methodName = description.getMethodName();
+            if (methodName != null) {
+                return description.getTestClass().getMethod(methodName);
+            }
+        } catch(NoSuchMethodException e) {
+            // Should not happen
+        }
+        return null;
+    }
     @Override
-    public Statement apply(final Statement base, final FrameworkMethod method, final Object target) {
-        final Description description = Description.createTestDescription(target.getClass(), method.getName(), method.getAnnotations());
+    public Statement apply(final Statement base, final Description description) {
+        final Method method = getMethod(description);
+
         return new Statement() {
             @Inject JenkinsController controller;
             @Inject Injector injector;
@@ -96,7 +121,7 @@ public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should us
                     }
                 });
 
-                collectRuleAnnotations(method, target, rules);
+                collectRuleAnnotations(rules);
                 collectGlobalRules(rules);
 
                 // Make sure Jenkins is started between -1 and 0
@@ -130,10 +155,10 @@ public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should us
                 }
             }
 
-            private void collectRuleAnnotations(final FrameworkMethod method, final Object target, TreeMap<Integer, Set<TestRule>> rules) {
+            private void collectRuleAnnotations(TreeMap<Integer, Set<TestRule>> rules) {
                 Set<Class<? extends Annotation>> annotations = new HashSet<>();
-                collectAnnotationTypes(method.getMethod(), annotations);
-                collectAnnotationTypes(target.getClass(), annotations);
+                collectAnnotationTypes(method, annotations);
+                collectAnnotationTypes(testClass, annotations);
                 for (Class<? extends  Annotation> a : annotations) {
                     RuleAnnotation r = a.getAnnotation(RuleAnnotation.class);
                     if (r!=null) {
