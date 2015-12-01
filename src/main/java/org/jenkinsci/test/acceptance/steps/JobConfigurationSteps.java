@@ -1,13 +1,12 @@
 package org.jenkinsci.test.acceptance.steps;
 
-import cucumber.api.PendingException;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.When;
 import hudson.util.VersionNumber;
+import javax.inject.Inject;
 import org.jenkinsci.test.acceptance.po.ArtifactArchiver;
 import org.jenkinsci.test.acceptance.po.StringParameter;
-
-import javax.inject.Inject;
+import org.openqa.selenium.NoSuchElementException;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -41,7 +40,12 @@ public class JobConfigurationSteps extends AbstractSteps {
 
     @And("^I set (\\d+) builds? to keep$")
     public void I_set_builds_to_keep(int n) throws Throwable {
-        check("logrotate");
+        try {
+            check(find(by.path("/properties/jenkins-model-BuildDiscarderProperty/specified")));
+        } catch (NoSuchElementException x) { // 1.636-
+            check("logrotate");
+        }
+        // TODO cleaner to look for /properties/jenkins-model-BuildDiscarderProperty/numToKeepStr
         String name = jenkins.getVersion().compareTo(new VersionNumber("1.503"))<0 ? "logrotate_nums" : "_.numToKeepStr";
         find(by.xpath("//input[@name='%s']",name)).sendKeys(String.valueOf(n));
     }
