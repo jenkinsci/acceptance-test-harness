@@ -45,6 +45,7 @@ Java system property takes precedence over environment variable.
 * [Obtaining a report of plugins that were exercised](docs/EXERCISEDPLUGINSREPORTER.md)
 * [Testing unreleased plugin](docs/LOCALPLUGIN.md)
 * [Investigation](docs/INVESTIGATION.md)
+* [Running tests against Selenium Grid] (docs/SELENIUM-GRID.md)
 * Selecting tests based on plugins they cover (TODO)
 
 ### Writing tests

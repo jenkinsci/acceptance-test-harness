@@ -9,7 +9,8 @@ by using the `BROWSER` environment variable. The following values are available:
  * `safari`
  * `htmlunit`
  * `phantomjs`
-
+ * `seleniumGrid`
+ 
 Therefore, to run tests with Safari, you'd execute:
 
     export BROWSER=safari
