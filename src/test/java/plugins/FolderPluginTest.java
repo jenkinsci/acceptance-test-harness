@@ -30,10 +30,13 @@ import org.jenkinsci.test.acceptance.junit.AbstractClassBasedJUnitTest;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.FolderItem;
+import org.jenkinsci.test.acceptance.po.PageObject;
 import org.junit.Assert;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
+
+import static org.jenkinsci.test.acceptance.po.PageObject.createRandomName;
 
 /**
  * Acceptance tests for the CloudBees Folder Plugins.
@@ -41,14 +44,6 @@ import org.junit.runners.MethodSorters;
 @WithPlugins("cloudbees-folder")
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class FolderPluginTest extends AbstractClassBasedJUnitTest {
-    /** Test folder name. */
-    private static final String F01 = "F01";
-    /** Test folder name. */
-    private static final String F02 = "F02";
-
-    /** First test folder. */;
-    private static FolderItem f01;
-
     /**
      * Checks that a folder exists and has the provided name.
      */
@@ -60,38 +55,41 @@ public class FolderPluginTest extends AbstractClassBasedJUnitTest {
     /**
      * First simple test scenario: Folder creation (JENKINS-31648).
      * <ol>
-     * <li>We create a folder named "F01".</li>
+     * <li>We create a folder.</li>
      * <li>We check the folder exists and we can enter it.</li>
      * </ol>
      */
     @Test
     public void test001CreateFolder() {
-        final FolderItem job = jenkins.jobs.create(FolderItem.class, F01);
+        final String name = createRandomName();
+        final FolderItem job = jenkins.jobs.create(FolderItem.class, name);
         job.save();
         jenkins.open();
-        checkFolder(job, F01);
-        f01 = job;
+        checkFolder(job, name);
     }
     
     /**
      * Simple folder hierarchy test scenario: Folder creation (JENKINS-31698).
      * <ol>
-     * <li>We start with the folder created in the previous test.</li>
+     * <li>We create a first level folder (we'll call it F01 in the description).</li>
      * <li>We check the folder exists and we can enter it.</li>
-     * <li>We create a folder name "F02" inside "F01" and check it.</li>
-     * <li>We visit "F01" and the root page, create a folder named "F01" inside the existing "F01" one and check it.
+     * <li>We create a folder name with a different name inside F01 step and check it.</li>
+     * <li>We visit F01 and the root page, create a folder named with the same name as F01 inside it and check it.
      * </ol>
      */
     @Test
     public void test002CreateFolderHierarchy() {
-        Assert.assertNotNull(f01);
-        final FolderItem child1 = f01.jobs.create(FolderItem.class, F02);
+        final String parentName = createRandomName();
+        final FolderItem parent = jenkins.jobs.create(FolderItem.class, parentName);
+        parent.save();
+        final String childName = createRandomName();
+        final FolderItem child1 = parent.jobs.create(FolderItem.class, childName);
         child1.save();
-        checkFolder(child1, F02);
-        f01.open();
+        checkFolder(child1, childName);
+        parent.open();
         jenkins.open();
-        final FolderItem child2 = f01.jobs.create(FolderItem.class, F01);
+        final FolderItem child2 = parent.jobs.create(FolderItem.class, parentName);
         child2.save();
-        checkFolder(child2, F01);
+        checkFolder(child2, parentName);
     }
 }
