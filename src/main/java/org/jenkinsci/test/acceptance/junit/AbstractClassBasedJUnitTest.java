@@ -14,7 +14,7 @@ import java.net.ServerSocket;
  *
  * @author Andres Rodriguez
  */
-public class AbstractClassBasedJUnitTest extends AbstractATHTest {
+public class AbstractClassBasedJUnitTest extends CapybaraPortingLayerImpl {
 
     @ClassRule
     public static JenkinsAcceptanceTestRule rules = JenkinsAcceptanceTestRule.classRule();
@@ -32,5 +32,6 @@ public class AbstractClassBasedJUnitTest extends AbstractATHTest {
     public static WebDriver driver;
 
     public AbstractClassBasedJUnitTest() {
+        super(null);
     }
 }

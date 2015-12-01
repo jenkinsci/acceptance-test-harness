@@ -5,6 +5,7 @@ import hudson.util.VersionNumber;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.LdapContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.Tests;
 import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.plugins.ldap.LdapDetails;
 import org.jenkinsci.test.acceptance.po.*;
@@ -127,7 +128,7 @@ public class Ldap_Version16_PluginTest extends AbstractJUnitTest {
         GlobalSecurityConfig security = new GlobalSecurityConfig(jenkins);
         security.configure();
         LdapSecurityRealm realm = security.useRealm(LdapSecurityRealm.class);
-        int freePort = findAvailablePort();
+        int freePort = Tests.findAvailablePort();
         LdapDetails notRunningLdap = new LdapDetails("localhost", freePort, "cn=admin,dc=jenkins-ci,dc=org", "root", "dc=jenkins-ci,dc=org");
         realm.configure(notRunningLdap);
         security.save();
@@ -206,7 +207,7 @@ public class Ldap_Version16_PluginTest extends AbstractJUnitTest {
         GlobalSecurityConfig securityConfig = new GlobalSecurityConfig(jenkins);
         securityConfig.configure();
         LdapSecurityRealm realm = securityConfig.useRealm(LdapSecurityRealm.class);
-        int freePort = this.findAvailablePort();
+        int freePort = Tests.findAvailablePort();
         LdapDetails ldapDetails = new LdapDetails("", 0, ldapContainer.getManagerDn(), ldapContainer.getManagerPassword(), ldapContainer.getRootDn());
         // Fallback-Config: primary server is not running, alternative server is running docker fixture
         ldapDetails.setHostWithPort("localhost:" + freePort + " localhost:" + ldapContainer.getPort());
