@@ -1,8 +1,10 @@
 package org.jenkinsci.test.acceptance.junit;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
+import com.google.inject.Module;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.guice.World;
 import org.junit.internal.AssumptionViolatedException;
@@ -31,39 +33,53 @@ import java.util.TreeMap;
  *
  * <p>
  * Add this rule to your Unit test class if you want to leverage this harness.
- *
+ * </p>
  * <p>
  * This is the glue that connects JUnit to the logic of the test harness.
- *
+ * </p>
  * @author Kohsuke Kawaguchi
  */
 public class JenkinsAcceptanceTestRule implements TestRule {
-    /** Test class. */
-    private final Class<?> testClass;
+    /** Singleton instance to use as a {@link org.junit.ClassRule}. */
+    private static final JenkinsAcceptanceTestRule CLASS_RULE = new JenkinsAcceptanceTestRule();
+
+    /** @return A instance to use as a {@link org.junit.ClassRule}. */
+    public static JenkinsAcceptanceTestRule classRule() {
+        return CLASS_RULE;
+    }
+
     /** Test instance. */
     private final Object target;
 
     /** Constructor. */
     public JenkinsAcceptanceTestRule(Object target) {
         this.target = target;
-        this.testClass = target.getClass();
+    }
+
+    /** Private constructor needed when used as {@link org.junit.ClassRule}. */
+    private JenkinsAcceptanceTestRule() {
+        this.target = null;
     }
 
     /** @return the test method or {@code null} if not applied to a method. */
     private Method getMethod(Description description) {
-        try {
-            final String methodName = description.getMethodName();
-            if (methodName != null) {
-                return description.getTestClass().getMethod(methodName);
+        final String methodName = description.getMethodName();
+        if (methodName != null) {
+            final Class<?> testClass = description.getTestClass();
+            try {
+                return testClass.getMethod(methodName);
+            } catch(NoSuchMethodException e) {
+                // Should not happen
+                throw new AssertionError(String.format("Method [%s] not found in class [%s]", methodName, testClass));
             }
-        } catch(NoSuchMethodException e) {
-            // Should not happen
         }
         return null;
     }
     @Override
     public Statement apply(final Statement base, final Description description) {
         final Method method = getMethod(description);
+        final Class<?> testClass = description.getTestClass();
+        System.err.printf("Method %s - Class %s\n", method, testClass);
 
         return new Statement() {
             @Inject JenkinsController controller;
@@ -157,7 +173,9 @@ public class JenkinsAcceptanceTestRule implements TestRule {
 
             private void collectRuleAnnotations(TreeMap<Integer, Set<TestRule>> rules) {
                 Set<Class<? extends Annotation>> annotations = new HashSet<>();
-                collectAnnotationTypes(method, annotations);
+                if (method != null) {
+                    collectAnnotationTypes(method, annotations);
+                }
                 collectAnnotationTypes(testClass, annotations);
                 for (Class<? extends  Annotation> a : annotations) {
                     RuleAnnotation r = a.getAnnotation(RuleAnnotation.class);
@@ -188,7 +206,7 @@ public class JenkinsAcceptanceTestRule implements TestRule {
                             @Override public void evaluate() throws Throwable {
                                 controller.start();
                                 // Now it is safe to inject Jenkins
-                                injector.injectMembers(target);
+                                injectTarget();
                                 for (Set<TestRule> rg: rules.values()) {
                                     for (TestRule rule: rg) {
                                         injector.injectMembers(rule);
@@ -199,6 +217,21 @@ public class JenkinsAcceptanceTestRule implements TestRule {
                         };
                     }
                 };
+            }
+
+            /** Performs injection at the object level if a method rule or class level otherwise. */
+            private void injectTarget() {
+                if (target != null) {
+                    injector.injectMembers(target);
+                } else {
+                    final Module child = new AbstractModule() {
+                        @Override
+                        protected void configure() {
+                            requestStaticInjection(testClass);
+                        }
+                    };
+                    injector.createChildInjector(child);
+                }
             }
         };
     }
