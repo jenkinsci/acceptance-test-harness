@@ -14,7 +14,7 @@ import java.net.ServerSocket;
  *
  * @author Andres Rodriguez
  */
-public class AbstractClassBasedJUnitTest extends CapybaraPortingLayerImpl {
+public class AbstractClassBasedJUnitTest extends AbstractATHTest {
 
     @ClassRule
     public static JenkinsAcceptanceTestRule rules = JenkinsAcceptanceTestRule.classRule();
@@ -32,20 +32,5 @@ public class AbstractClassBasedJUnitTest extends CapybaraPortingLayerImpl {
     public static WebDriver driver;
 
     public AbstractClassBasedJUnitTest() {
-        super(null);
-    }
-
-    /**
-     * @return finds an unused, available port on the test machine
-     */
-    public int findAvailablePort() {
-        // use port 65000 as fallback (but maybe there is something running)
-        int port = 65000;
-        try (ServerSocket s = new ServerSocket(0)) {
-            port = s.getLocalPort();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return port;
     }
 }
