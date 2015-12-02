@@ -79,7 +79,6 @@ public class JenkinsAcceptanceTestRule implements TestRule {
     public Statement apply(final Statement base, final Description description) {
         final Method method = getMethod(description);
         final Class<?> testClass = description.getTestClass();
-        System.err.printf("Method %s - Class %s\n", method, testClass);
 
         return new Statement() {
             @Inject JenkinsController controller;
@@ -230,6 +229,7 @@ public class JenkinsAcceptanceTestRule implements TestRule {
                             requestStaticInjection(testClass);
                         }
                     };
+                    // Static injection is performed at injector creation time.
                     injector.createChildInjector(child);
                 }
             }
