@@ -295,7 +295,7 @@ public class Job extends TopLevelItem {
 
         WebElement div;
         try {
-            div = find(by.path("/properties/hudson-model-ParametersDefinitionProperty/parameterDefinitions"));
+            div = last(by.xpath("//div[starts-with(@path,'/properties/hudson-model-ParametersDefinitionProperty/parameterDefinitions')]"));
         } catch (org.openqa.selenium.NoSuchElementException x) { // 1.636-
             div = last(by.xpath("//div[@name='parameter']"));
         }
