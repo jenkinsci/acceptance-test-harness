@@ -19,6 +19,9 @@ public class AbstractClassBasedJUnitTest extends CapybaraPortingLayerImpl {
     @ClassRule
     public static JenkinsAcceptanceTestRule rules = JenkinsAcceptanceTestRule.classRule();
 
+    /** Method {@link RuleAnnotation}s are forbidden. */
+    public final NoMethodRuleAnnotationRule noMethodRuleAnnotations = NoMethodRuleAnnotationRule.rule();
+
     /**
      * Jenkins under test.
      */
