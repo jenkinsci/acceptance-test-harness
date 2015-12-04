@@ -1,4 +1,4 @@
-# Acceptance tests for Jenkins
+# Acceptance Tests for Jenkins
 
 A project to flesh out some of the [manual test cases for Jenkins
 LTS](https://wiki.jenkins-ci.org/display/JENKINS/LTS+RC+Testing) in an automated fashion.
