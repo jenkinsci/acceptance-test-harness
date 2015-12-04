@@ -61,6 +61,8 @@ public class EmmaPluginTest extends AbstractJUnitTest {
 
         // In the maven build step an Emma goal is added to enable coverage reporting.
         MavenBuildStep mbs = job.addBuildStep(MavenBuildStep.class);
+        mbs.properties("jacoco.version=0.7.5.201505241946");
+
         mbs.targets.set("clean emma:emma package");
         EmmaPublisher ep = job.addPublisher(EmmaPublisher.class);
         ep.setReportingThresholds(100, 70, 80, 80, 80, 0, 0, 0, 0, 0);
