@@ -90,7 +90,7 @@ public class CompressArtifactsPluginTest extends AbstractJUnitTest {
         job.configure();
         job.addPublisher(ArtifactArchiver.class).includes("*");
         job.addBuildStep(ShellBuildStep.class).command( // Generate archive larger than 4G
-                "wget $JENKINS_URL/jnlpJars/jenkins-cli.jar -O stuff.jar; for i in {0..7000}; do cp -l stuff.jar stuff.${i}.jar; done"
+                "#!/bin/bash\nwget $JENKINS_URL/jnlpJars/jenkins-cli.jar -O stuff.jar; for i in {0..7000}; do cp -l stuff.jar stuff.${i}.jar; done"
         );
         job.save();
 
