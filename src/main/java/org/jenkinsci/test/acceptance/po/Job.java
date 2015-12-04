@@ -278,13 +278,9 @@ public class Job extends TopLevelItem {
     public <T extends Parameter> T addParameter(Class<T> type) {
         ensureConfigPage();
 
-        WebElement checkbox;
-        try {
-            checkbox = find(by.path("/properties/hudson-model-ParametersDefinitionProperty/specified"));
-        } catch (org.openqa.selenium.NoSuchElementException x) { // 1.636-
-            checkbox = find(by.xpath("//input[@name='parameterized']"));
-        }
-        check(checkbox);
+        control("/properties/hudson-model-ParametersDefinitionProperty/specified",
+                "/properties/hudson-model-ParametersDefinitionProperty/parameterized" // 1.636-
+        ).check();
 
         control(by.xpath("//button[text()='Add Parameter']")).selectDropdownMenu(type);
 
@@ -293,13 +289,8 @@ public class Job extends TopLevelItem {
 
         elasticSleep(500);
 
-        WebElement div;
-        try {
-            div = find(by.path("/properties/hudson-model-ParametersDefinitionProperty/parameterDefinitions"));
-        } catch (org.openqa.selenium.NoSuchElementException x) { // 1.636-
-            div = last(by.xpath("//div[@name='parameter']"));
-        }
-        String path = div.getAttribute("path");
+        // 1.636-: …/parameter (or …/parameter[1] etc.); 1.637+: …/parameterDefinitions
+        String path = last(by.xpath("//div[starts-with(@path,'/properties/hudson-model-ParametersDefinitionProperty/parameter')]")).getAttribute("path");
 
         T p = newInstance(type, this, path);
         parameters.add(p);
