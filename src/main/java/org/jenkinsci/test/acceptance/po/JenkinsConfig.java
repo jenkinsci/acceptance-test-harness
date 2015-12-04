@@ -53,6 +53,11 @@ public class JenkinsConfig extends PageObject {
         return new ArtifactManagement(this).add(type);
     }
 
+    public void clearArtifactManagers() {
+        jenkins.ensureConfigPage();
+        new ArtifactManagement(this).clear();
+    }
+
     public <T extends Cloud> T addCloud(Class<T> type) {
         jenkins.ensureConfigPage();
 

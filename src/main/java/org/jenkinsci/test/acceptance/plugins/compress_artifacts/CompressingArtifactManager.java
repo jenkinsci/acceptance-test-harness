@@ -39,6 +39,7 @@ public class CompressingArtifactManager extends Factory {
     public static void setup(Jenkins jenkins) {
         JenkinsConfig config = jenkins.getConfigPage();
         config.configure();
+        config.clearArtifactManagers();
         config.addArtifactManager(CompressingArtifactManager.class);
         config.save();
     }

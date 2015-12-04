@@ -23,6 +23,8 @@
  */
 package org.jenkinsci.test.acceptance.po;
 
+import org.openqa.selenium.NoSuchElementException;
+
 /**
  * Global page area to configure Artifact management.
  *
@@ -40,6 +42,16 @@ public class ArtifactManagement extends PageAreaImpl {
         control("hetero-list-add[artifactManagerFactories]").selectDropdownMenu(impl);
         String factoryPath = last(by.xpath("//div[@name='%s']", "artifactManagerFactories")).getAttribute("path");
         return newInstance(impl, this, factoryPath.substring(path("").toString().length()));
+    }
+
+    public void clear() {
+        try {
+            while (true) {
+                control("artifactManagerFactories/repeatable-delete").click();
+            }
+        } catch (NoSuchElementException ignored) {
+            //done no more buttons to push
+        }
     }
 
     public static class Factory extends PageAreaImpl {
