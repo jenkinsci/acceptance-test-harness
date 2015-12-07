@@ -20,13 +20,13 @@ public abstract class AbstractSteps extends CapybaraPortingLayerImpl {
      * Implicit contextual Jenkins instance.
      */
     @Inject
-    Jenkins jenkins;
+    protected Jenkins jenkins;
 
     /**
      * Contextual variables.
      */
     @Inject
-    Context my;
+    protected Context my;
 
     protected AbstractSteps() {
         super(null);
