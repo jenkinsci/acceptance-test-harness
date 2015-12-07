@@ -1,5 +1,7 @@
 # Acceptance tests for Jenkins
 
+[![Join the chat at https://gitter.im/jenkinsci/acceptance-test-harness](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/jenkinsci/acceptance-test-harness?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 A project to flesh out some of the [manual test cases for Jenkins
 LTS](https://wiki.jenkins-ci.org/display/JENKINS/LTS+RC+Testing) in an automated fashion.
 
