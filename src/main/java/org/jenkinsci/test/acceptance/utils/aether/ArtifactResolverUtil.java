@@ -27,6 +27,10 @@ package org.jenkinsci.test.acceptance.utils.aether;
 import java.io.File;
 import java.util.Arrays;
 
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+import javax.inject.Inject;
+
 import org.apache.maven.settings.Settings;
 import org.apache.maven.settings.building.DefaultSettingsBuilderFactory;
 import org.apache.maven.settings.building.DefaultSettingsBuildingRequest;
@@ -58,6 +62,7 @@ public class ArtifactResolverUtil {
     private RepositorySystem repoSystem;
     private RepositorySystemSession repoSystemSession;
 
+    @Inject
     public ArtifactResolverUtil(RepositorySystem rs, RepositorySystemSession rss) {
         repoSystem = rs;
         repoSystemSession = rss;
@@ -65,11 +70,11 @@ public class ArtifactResolverUtil {
 
     /**
      * @param gav The "groupId artifactId version" to be resolved
-     * @param version The version of the artifact you want to resolve
+     * @param version The version of the artifact you want to resolve, optional.
      *
      * @return artifact resolution result
      */
-    public ArtifactResult resolve(String gav, String version) {
+    public ArtifactResult resolve(@Nonnull String gav, @CheckForNull String version) {
         return resolve(makeArtifact(gav, version));
     }
 
