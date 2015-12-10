@@ -5,6 +5,7 @@ import hudson.util.VersionNumber;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
@@ -18,15 +19,14 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.eclipse.aether.RepositorySystem;
-import org.eclipse.aether.RepositorySystemSession;
+import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.eclipse.aether.resolution.ArtifactResult;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.utils.aether.ArtifactResolverUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.inject.Injector;
 
 import static org.apache.http.entity.ContentType.*;
@@ -37,15 +37,26 @@ import static org.apache.http.entity.ContentType.*;
  * @author Kohsuke Kawaguchi
  */
 public class PluginMetadata {
-    private static final Logger LOGGER = LoggerFactory.getLogger(PluginMetadata.class);
-    public String name, version, gav;
-    public String requiredCore;
-    public List<Dependency> dependencies;
+    private final String name;
+    private String version;
+    private final String gav;
+    private final String requiredCore;
+    private final List<Dependency> dependencies;
 
-    /**
-     * If non-null, use this file instead of the one pointed by {@link #gav}.
-     */
-    public File override;
+    @JsonCreator
+    public PluginMetadata(
+            @JsonProperty("name") String name,
+            @JsonProperty("gav") String gav,
+            @JsonProperty("version") String version,
+            @JsonProperty("requiredCore") String requiredCore,
+            @JsonProperty("dependencies") List<Dependency> dependencies
+    ) {
+        this.name = name;
+        this.gav = gav;
+        this.version = version;
+        this.requiredCore = requiredCore;
+        this.dependencies = dependencies;
+    }
 
     void init(UpdateCenterMetadata parent) {
         for (Dependency d : dependencies) {
@@ -53,70 +64,13 @@ public class PluginMetadata {
         }
     }
 
-    public PluginMetadata() {}
-
-    /**
-     * Extract plugin metadata from a jpi/hpi file.
-     */
-    public PluginMetadata(@Nonnull File jpi) {
-        final String OPTIONAL = ";resolution:=optional";
-
-        dependencies = new ArrayList<Dependency>();
-        try (JarFile j = new JarFile(jpi)) {
-            Attributes main = j.getManifest().getMainAttributes();
-            name = main.getValue("Short-Name");
-            version = trimVersion(main.getValue("Plugin-Version"));
-            requiredCore = main.getValue("Jenkins-Version");
-            gav = main.getValue("Group-Id")+":"+name+":"+version;
-            override = jpi;
-            String dep = main.getValue("Plugin-Dependencies");
-            if (dep!=null) {
-                for (String token : dep.split(",")) {
-                    Dependency d = new Dependency();
-                    d.optional = token.endsWith(OPTIONAL);
-                    if(d.optional)
-                        token = token.substring(0, token.length()-OPTIONAL.length());
-                    String[] tokens = token.split(":");
-                    if (tokens.length != 2) {
-                        System.err.println("Bad token ‘" + token + "’ from ‘" + dep + "’ in " + jpi);
-                        continue;
-                    }
-                    d.name = tokens[0];
-                    d.version = tokens[1];
-                    dependencies.add(d);
-                }
-            }
-        } catch (IOException e) {
-            throw new AssertionError("Failed to parse metadata of "+jpi,e);
-        }
-    }
-
-    /**
-     * Snapshot builds often look like "Plugin-Version: 1.0-SNAPSHOT (private-08/21/2014 15:21-kohsuke)"
-     * so trim off the build ID portion and just get "1.0-SNAPSHOT"
-     */
-    private String trimVersion(@Nonnull String version) {
-        int idx = version.indexOf(" ");
-        return idx > 0
-            ? version.substring(0, idx)
-            : version
-        ;
-    }
-
-    /**
-     * @param jenkins
-     * @param i
-     * @param version The version of the plugin you want to upload
-     * @throws ArtifactResolutionException
-     * @throws IOException
-     */
     public void uploadTo(Jenkins jenkins, Injector i, String version) throws ArtifactResolutionException, IOException {
         HttpClient httpclient = new DefaultHttpClient();
 
         HttpPost post = new HttpPost(jenkins.url("pluginManager/uploadPlugin").toExternalForm());
         File f = resolve(i, version);
         HttpEntity e = MultipartEntityBuilder.create()
-                .addBinaryBody("name", f, APPLICATION_OCTET_STREAM, name + ".jpi")
+                .addBinaryBody("name", f, APPLICATION_OCTET_STREAM, getName() + ".jpi")
                 .build();
         post.setEntity(e);
 
@@ -130,33 +84,127 @@ public class PluginMetadata {
     }
 
     public File resolve(Injector i, String version) {
-        if (override!=null) return override;
+        DefaultArtifact artifact = getDefaultArtifact();
+        if (version != null) {
+            artifact.setVersion(version);
+        }
 
-        RepositorySystem rs = i.getInstance(RepositorySystem.class);
-        RepositorySystemSession rss = i.getInstance(RepositorySystemSession.class);
-
-        ArtifactResolverUtil resolverUtil = new ArtifactResolverUtil(rs, rss);
-        ArtifactResult r = resolverUtil.resolve(gav, version);
+        ArtifactResolverUtil resolverUtil = i.getInstance(ArtifactResolverUtil.class);
+        ArtifactResult r = resolverUtil.resolve(artifact);
         return r.getArtifact().getFile();
+    }
+
+    public DefaultArtifact getDefaultArtifact() {
+        String[] t = gav.split(":");
+        String gavVersion;
+        if (getVersion() == null) {
+            gavVersion = t[2];
+        } else {
+            gavVersion = getVersion();
+        }
+        return new DefaultArtifact(t[0], t[1], "hpi", gavVersion);
     }
 
     public VersionNumber requiredCore() {
         return new VersionNumber(requiredCore);
     }
 
-    public PluginMetadata versionOf(String v) {
+    public void setVersion(@Nonnull String v) {
         if (v == null) throw new IllegalArgumentException();
 
-        PluginMetadata ret = new PluginMetadata();
-        ret.name = name;
-        ret.version = v;
-        ret.gav = gav;
-        ret.requiredCore = requiredCore;
-        return ret;
+        version = v;
     }
 
     @Override
     public String toString() {
-        return super.toString() + "[" + name + "," + version + "]";
+        return getClass().getSimpleName() + "[" + getName() + "," + getVersion() + "]";
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public List<Dependency> getDependencies() {
+        return Collections.unmodifiableList(dependencies);
+    }
+
+    /**
+     * Use local file instead of what is configured.
+     *
+     * @author ogondza
+     */
+    public static final class LocalOverride extends PluginMetadata {
+        private static final String OPTIONAL = ";resolution:=optional";
+
+        private @Nonnull File override;
+
+        /**
+         * Extract plugin metadata from a jpi/hpi file.
+         */
+        public static LocalOverride create(@Nonnull File jpi) {
+
+            List<Dependency> dependencies = new ArrayList<Dependency>();
+            try (JarFile j = new JarFile(jpi)) {
+                Attributes main = j.getManifest().getMainAttributes();
+                String name = main.getValue("Short-Name");
+                String version = trimVersion(main.getValue("Plugin-Version"));
+                String requiredCore = main.getValue("Jenkins-Version");
+                String gav = main.getValue("Group-Id")+":"+name+":"+version;
+                String dep = main.getValue("Plugin-Dependencies");
+                if (dep!=null) {
+                    for (String token : dep.split(",")) {
+                        Dependency d = new Dependency();
+                        d.optional = token.endsWith(OPTIONAL);
+                        if(d.optional)
+                            token = token.substring(0, token.length()-OPTIONAL.length());
+                        String[] tokens = token.split(":");
+                        if (tokens.length != 2) {
+                            System.err.println("Bad token ‘" + token + "’ from ‘" + dep + "’ in " + jpi);
+                            continue;
+                        }
+                        d.name = tokens[0];
+                        d.version = tokens[1];
+                        dependencies.add(d);
+                    }
+                }
+
+                return new LocalOverride(name, gav, version, requiredCore, dependencies, jpi);
+            } catch (IOException e) {
+                throw new AssertionError("Failed to parse metadata of "+jpi,e);
+            }
+        }
+
+        public LocalOverride(
+                String name, String gav, String version, String requiredCore, List<Dependency> dependencies, File override
+        ) {
+            super(name, gav, version, requiredCore, dependencies);
+            this.override = override;
+        }
+
+        /**
+         * Snapshot builds often look like "Plugin-Version: 1.0-SNAPSHOT (private-08/21/2014 15:21-kohsuke)"
+         * so trim off the build ID portion and just get "1.0-SNAPSHOT"
+         */
+        private static String trimVersion(@Nonnull String version) {
+            int idx = version.indexOf(" ");
+            return idx > 0
+                ? version.substring(0, idx)
+                : version
+            ;
+        }
+
+        @Override
+        public File resolve(Injector i, String version) {
+            return override;
+        }
+
+        @Override
+        public String toString() {
+            return getClass().getSimpleName() + "[" + getName() + "," + override.getAbsolutePath() + "]";
+        }
     }
 }

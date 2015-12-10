@@ -78,7 +78,7 @@ public class UpdateCenterMetadata {
     }
 
     private void transitiveDependenciesOf(VersionNumber jenkins, PluginMetadata p, String v, List<PluginMetadata> set) {
-        for (Dependency d : p.dependencies) {
+        for (Dependency d : p.getDependencies()) {
             if (d.optional) continue;
             transitiveDependenciesOf(jenkins, plugins.get(d.name), d.version, set);
         }
@@ -87,7 +87,7 @@ public class UpdateCenterMetadata {
             PluginMetadata use = p;
             if (use.requiredCore().isNewerThan(jenkins)) {
                 // If latest version is too new for current Jenkins, use the declared one
-                use = p.versionOf(v);
+                p.setVersion(v);
             }
 
             set.add(use);

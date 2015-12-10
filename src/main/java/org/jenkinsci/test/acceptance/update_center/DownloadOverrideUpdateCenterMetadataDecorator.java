@@ -20,8 +20,8 @@ public class DownloadOverrideUpdateCenterMetadataDecorator implements UpdateCent
             if (key.endsWith(".version")) {
                 String name = key.substring(0, key.length() - 8);
                 String version = e.getValue();
-                PluginMetadata plugin = ucm.plugins.get(name).versionOf(version);
-                ucm.plugins.put(name, plugin);
+                PluginMetadata plugin = ucm.plugins.get(name);
+                plugin.setVersion(version);
             }
         }
     }
