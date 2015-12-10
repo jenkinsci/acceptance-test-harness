@@ -9,6 +9,7 @@ by using the `BROWSER` environment variable. The following values are available:
  * `safari`
  * `htmlunit`
  * `phantomjs`
+ * `saucelabs`
 
 Therefore, to run tests with Safari, you'd execute:
 
@@ -19,8 +20,6 @@ Therefore, to run tests with Safari, you'd execute:
     BROWSER=safari mvn install
 
 See `FallbackConfig.java` for how the browser is selected.
-
-TODO: port over Sauce OnDemand support.
 
 ## Advanced Browser Configuration
 [This test harness internally uses Guice](GUICE.md) to wire tests, and that is how we control
