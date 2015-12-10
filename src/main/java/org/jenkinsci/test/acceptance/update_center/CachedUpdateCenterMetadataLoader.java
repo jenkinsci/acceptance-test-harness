@@ -45,7 +45,7 @@ public class CachedUpdateCenterMetadataLoader implements Provider<UpdateCenterMe
             }
             return metadata;
         } catch (IOException e) {
-            throw new AssertionError("Failed to parse update center data of "+url+" at "+cache);
+            throw new AssertionError("Failed to parse update center data of "+url+" at "+cache, e);
         }
     }
 }

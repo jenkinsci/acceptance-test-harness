@@ -158,10 +158,10 @@ public class PluginManager extends ContainerPageObject {
             }
             List<PluginMetadata> pluginToBeInstalled = ucmd.get().transitiveDependenciesOf(jenkins.getVersion(), candidates);
             for (PluginMetadata newPlugin : pluginToBeInstalled) {
-                final String name = newPlugin.name;
+                final String name = newPlugin.getName();
                 String claimedVersion = candidates.get(name);
                 if (claimedVersion == null) { // a dependency
-                    claimedVersion = newPlugin.version;
+                    claimedVersion = newPlugin.getVersion();
                 }
                 final String currentSpec = StringUtils.isNotEmpty(claimedVersion)
                     ? name + "@" + claimedVersion
@@ -170,7 +170,7 @@ public class PluginManager extends ContainerPageObject {
                 InstallationStatus status = installationStatus(currentSpec);
                 if (status != InstallationStatus.UP_TO_DATE) {
                     try {
-                        newPlugin.uploadTo(jenkins, injector, newPlugin.version);
+                        newPlugin.uploadTo(jenkins, injector, newPlugin.getVersion());
                         changed = true;
                         restartRequired |= status == InstallationStatus.OUTDATED;
                         try {
