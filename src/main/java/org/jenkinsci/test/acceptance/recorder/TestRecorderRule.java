@@ -31,7 +31,6 @@ public class TestRecorderRule extends TestWatcher {
 
     private static final Logger logger = LoggerFactory.getLogger(TestRecorderRule.class);
 
-    private static final int MAX_RECORDING_TIME_SECS = 120000;
     private static final int FRAME_RATE_PER_SEC = 60;
     private static final int BIT_DEPTH = 16;
     private static final float QUALITY_RATIO = 0.97f;
