@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
@@ -12,6 +13,7 @@ import org.jenkinsci.test.acceptance.plugins.warnings.WarningsAction;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsBuildSettings;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsColumn;
 import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.po.CapybaraPortingLayerImpl;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.ListView;
@@ -111,6 +113,11 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
             assertThat(driver, hasContent(title + ": " + warningsPerAxis.get(axis.name)));
         }
 
+        // sometimes the details is not refreshed yet (https://issues.jenkins-ci.org/browse/JENKINS-31431) 
+        // so let's add an sleep and a refresh 
+
+        sleep(1000);
+        driver.navigate().refresh();
         assertThatConfigurationTabIsCorrectlyFilled(job);
         assertThatFoldersTabIsCorrectlyFilled(job);
         assertThatFilesTabIsCorrectlyFilled(job);
