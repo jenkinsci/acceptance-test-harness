@@ -62,29 +62,31 @@ public class TestRecorderRule extends TestWatcher {
     }
 
     private void startRecording(Description des) {
-        GraphicsConfiguration gc = GraphicsEnvironment
-                .getLocalGraphicsEnvironment()
-                .getDefaultScreenDevice()
-                .getDefaultConfiguration();
-
-        String mimeType = FormatKeys.MIME_QUICKTIME;
-        String videoFormatName = VideoFormatKeys.ENCODING_QUICKTIME_ANIMATION;
-        String compressorName = VideoFormatKeys.COMPRESSOR_NAME_QUICKTIME_ANIMATION;
-        Dimension outputDimension = gc.getBounds().getSize();
-        int bitDepth = BIT_DEPTH;
-        float quality = QUALITY_RATIO;
-        int screenRate = FRAME_RATE_PER_SEC;
-        long maxRecordingTime = MAX_RECORDING_TIME_SECS;
-
-        Format outputFormatForScreenCapture = getOutputFormatForScreenCapture(videoFormatName,
-                compressorName, outputDimension,
-                bitDepth, quality, screenRate);
-
         try {
+            GraphicsConfiguration gc = GraphicsEnvironment
+                    .getLocalGraphicsEnvironment()
+                    .getDefaultScreenDevice()
+                    .getDefaultConfiguration();
+
+            String mimeType = FormatKeys.MIME_QUICKTIME;
+            String videoFormatName = VideoFormatKeys.ENCODING_QUICKTIME_ANIMATION;
+            String compressorName = VideoFormatKeys.COMPRESSOR_NAME_QUICKTIME_ANIMATION;
+            Dimension outputDimension = gc.getBounds().getSize();
+            int bitDepth = BIT_DEPTH;
+            float quality = QUALITY_RATIO;
+            int screenRate = FRAME_RATE_PER_SEC;
+
+            Format outputFormatForScreenCapture = getOutputFormatForScreenCapture(videoFormatName,
+                    compressorName, outputDimension,
+                    bitDepth, quality, screenRate);
+
             this.screenRecorder = new JUnitScreenRecorder
                     (gc, gc.getBounds(), getFileFormat(mimeType),
                             outputFormatForScreenCapture, null, null, diagnostics);
             this.screenRecorder.start();
+        } catch (UnsupportedOperationException e) {
+            // E.g. java.awt.HeadlessException
+            logger.warn("Exception starting test recording {}", e);
         } catch (IOException e) {
             logger.warn("Exception starting test recording {}", e);
         } catch (AWTException e) {
