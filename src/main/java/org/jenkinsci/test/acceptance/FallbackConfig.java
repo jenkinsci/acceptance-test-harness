@@ -230,7 +230,7 @@ public class FallbackConfig extends AbstractModule {
     @Provides @Named("jenkins.war")
     public File getJenkinsWar(RepositorySystem repositorySystem, RepositorySystemSession repositorySystemSession) {
         try {
-            return IOUtil.firstExisting(false, System.getenv("JENKINS_WAR"), getWorkspace() + "/jenkins.war", "./jenkins.war");
+            return IOUtil.firstExisting(false, System.getenv("JENKINS_WAR"));
         } catch (IOException ex) {
             // Fall-through
         }
@@ -243,6 +243,13 @@ public class FallbackConfig extends AbstractModule {
         }
 
         // TODO add support for 'lts', 'lts-rc', 'latest' and 'latest-rc'
+
+        try {
+            // Lowest priority of all
+            return IOUtil.firstExisting(false, getWorkspace() + "/jenkins.war", "./jenkins.war");
+        } catch (IOException ex) {
+            // Fall-through
+        }
 
         throw new Error("Could not find jenkins.war, use JENKINS_WAR or JENKINS_VERSION to specify it.");
     }
