@@ -56,8 +56,7 @@ public class EmmaPluginTest extends AbstractJUnitTest {
 
         job = jenkins.jobs.create();
         job.configure();
-        // Reuse Jacoco test files.
-        job.copyDir(resource("/jacoco/test"));
+        job.copyDir(resource("/emma/test"));
 
         // In the maven build step an Emma goal is added to enable coverage reporting.
         MavenBuildStep mbs = job.addBuildStep(MavenBuildStep.class);
