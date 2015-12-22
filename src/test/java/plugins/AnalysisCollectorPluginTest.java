@@ -1,7 +1,9 @@
 package plugins;
 
+import java.util.List;
 import java.util.Map;
 
+import org.jenkinsci.test.acceptance.junit.Since;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisCollectorAction;
 import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisCollectorColumn;
@@ -9,6 +11,7 @@ import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisCollecto
 import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisGraphConfigurationView;
 import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisPlugin;
 import org.jenkinsci.test.acceptance.plugins.analysis_collector.WarningsPerProjectPortlet;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisAction;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckStyleFreestyleSettings;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
@@ -23,6 +26,7 @@ import org.jenkinsci.test.acceptance.po.ListView;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -79,6 +83,29 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
     @Override
     protected int getNumberOfWarnings() {
         return TOTAL;
+    }
+
+    /**
+     * Builds a freestyle job. Verifies that afterwards a trend graph exists for each of the participating plug-ins.
+     * Finally, the collector trend graph is verified that contains 6 relative links to the
+     * plug-in results (one for each priority and build).
+     */
+    @Test
+    @Issue("JENKINS-30304") @Since("1.640")
+    public void should_have_clickable_trend_details() {
+        FreeStyleJob job = createFreeStyleJob();
+        buildJobAndWait(job);
+        buildSuccessfulJob(job);
+        job.open();
+
+        AnalysisAction action = createProjectAction(job);
+
+        List<WebElement> graphLinks = job.all(By.linkText("Enlarge"));
+        assertThat(graphLinks.size(), is(8));
+
+        // Last link is the summary
+        graphLinks.get(graphLinks.size() - 1).click();
+        assertThatProjectPageTrendIsCorrect(job, action, "../../");
     }
 
     /**

@@ -158,13 +158,13 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
         buildSuccessfulJob(job);
 
         AnalysisAction action = createProjectAction(job);
+        job.open();
 
         verifyTrendGraphOverview(job, action);
         verifyTrendGraphDetails(job, action);
     }
 
     private void verifyTrendGraphOverview(final FreeStyleJob job, final AnalysisAction action) {
-        job.open();
         assertThatProjectPageTrendIsCorrect(job, action, "");
     }
 
@@ -179,7 +179,7 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
         }
     }
 
-    private void assertThatProjectPageTrendIsCorrect(final FreeStyleJob job, final AnalysisAction action, final String prefix) {
+    protected void assertThatProjectPageTrendIsCorrect(final FreeStyleJob job, final AnalysisAction action, final String prefix) {
         elasticSleep(500);
 
         Map<String, Integer> trend = job.getTrendGraphContent(action.getUrl());
