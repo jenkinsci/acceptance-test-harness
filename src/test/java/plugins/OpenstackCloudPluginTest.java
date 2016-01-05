@@ -89,10 +89,12 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
 
     @Test
     public void testConnection() {
-        jenkins.configure();
-        OpenstackCloud cloud = addCloud(jenkins.getConfigPage());
+        JenkinsConfig config = jenkins.getConfigPage();
+        config.configure();
+        OpenstackCloud cloud = addCloud(config);
         cloud.testConnection();
         waitFor(driver, hasContent("Connection succeeded!"), 60);
+        config.save(); // Do not leave the modified form open to avoid warnings
     }
 
     @Test
