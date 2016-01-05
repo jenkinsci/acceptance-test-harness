@@ -43,7 +43,7 @@ Java system property takes precedence over environment variable.
 * [Using a http proxy](docs/USING-A-HTTP-PROXY.md)
 * [Prelaunch JUT](docs/PRELAUNCH.md)
 * [Obtaining a report of plugins that were exercised](docs/EXERCISEDPLUGINSREPORTER.md)
-* [Testing unreleased plugin](docs/LOCALPLUGIN.md)
+* [Managing the versions of Jenkins and plugins](docs/SUT-VERSIONS.md)
 * [Investigation](docs/INVESTIGATION.md)
 * Selecting tests based on plugins they cover (TODO)
 
