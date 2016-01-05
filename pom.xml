@@ -27,7 +27,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <selenium.version>2.45.0</selenium.version>
+    <selenium.version>2.48.2</selenium.version>
     <aether.version>0.9.0.v20140226</aether.version>
     <maven.version>3.1.0</maven.version>
     <groovy.version>2.3.1</groovy.version>
@@ -79,6 +79,12 @@
       <groupId>org.eclipse.aether</groupId>
       <artifactId>aether-transport-http</artifactId>
       <version>${aether.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpclient</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
@@ -106,11 +112,6 @@
       <groupId>org.eclipse.sisu</groupId>
       <artifactId>org.eclipse.sisu.plexus</artifactId>
       <version>0.2.0</version>
-    </dependency>
-    <dependency><!-- to align the version of Apache HttpClient between jclouds and Aether -->
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpclient</artifactId>
-      <version>4.3.3</version>
     </dependency>
 
     <!-- Cucumber -->
