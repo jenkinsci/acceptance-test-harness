@@ -38,7 +38,7 @@ import static org.apache.http.entity.ContentType.*;
  */
 public class PluginMetadata {
     private final String name;
-    private String version;
+    private final String version;
     private final String gav;
     private final String requiredCore;
     private final List<Dependency> dependencies;
@@ -109,10 +109,10 @@ public class PluginMetadata {
         return new VersionNumber(requiredCore);
     }
 
-    public void setVersion(@Nonnull String v) {
+    public PluginMetadata withVersion(@Nonnull String v) {
         if (v == null) throw new IllegalArgumentException();
 
-        version = v;
+        return new PluginMetadata(name, gav, v, requiredCore, dependencies);
     }
 
     @Override

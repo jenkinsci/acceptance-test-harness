@@ -15,16 +15,9 @@ For more sophisticated customization, see [WIRING.md](WIRING.md).
 ## Local family controllers
 All local controllers run both test harness and Jenkins under test on local machine. Common environment variables for local controllers:
 
-* `JENKINS_WAR` the path to `jenkins.war` to be tested. If not specified, the first of `WORKSPACE/jenkins.war` followed
-    by `$(pwd)/jenkins.war` that is a file will be selected.
-* `JENKINS_VERSION` specifies Jenkins core version to use. This is an alternative to `JENKINS_WAR`.
 * `JENKINS_JAVA_HOME` the JVM home to use for running Jenkins. If not specified, the first of `JAVA_HOME`, or the JVM
    used to launch the tests will be used.
 * `JENKINS_JAVA_OPTS` Adds additional options to the java process like `-Xms=XXm -Xmx=XXXm`.
-* `PLUGINS_DIR` a directory of plugins to be loaded on Jenkins startup. If this is not specified, the first existing
-    directory from the following list will be used: a `plugins` directory as a sibling to the resolved `jenkins.war`,
-    `WORKSPACE/plugins` and `$(pwd)/plugins`. If the environment variable `NEVER_REPLACE_EXISTING_PLUGINS` is set
-    then plugins will never be overwritten with newer versions during test.
 * `INTERACTIVE` keep browser session opened after failed scenario for interactive investigation.
 
 ### Winstone controller (TYPE=winstone)
