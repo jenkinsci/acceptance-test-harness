@@ -294,7 +294,11 @@ public class Build extends ContainerPageObject {
         if (!(other instanceof Build)) return false;
 
         Build rhs = (Build) other;
-        return getNumber() == rhs.getNumber() && job.equals(rhs.job);
+        // There is a problem comparing jobs for equality as there is no nice
+        // way to access its full name. The default implementation assumes that
+        // POs are equal iff they share the same URL which is not true for jobs inside view.
+        // return getNumber() == rhs.getNumber() && job.equals(rhs.job);
+        return getJson().get("fullDisplayName").equals(rhs.getJson().get("fullDisplayName"));
     }
 
     @Override

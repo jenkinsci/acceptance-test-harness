@@ -11,6 +11,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.not;
 
+import java.util.Set;
+
 public class BuildHistoryTest extends AbstractJUnitTest {
 
     @Test
@@ -42,8 +44,8 @@ public class BuildHistoryTest extends AbstractJUnitTest {
         FreeStyleJob outOfViewJob = jenkins.jobs.create(FreeStyleJob.class, "not_in_view");
         Build outOfViewBuild = outOfViewJob.startBuild().waitUntilFinished();
 
-        BuildHistory history = view.getBuildHistory();
-        assertThat(history.getBuilds(), contains(inViewBuild));
-        assertThat(history.getBuilds(), not(contains(outOfViewBuild)));
+        Set<Build> history = view.getBuildHistory().getBuilds();
+        assertThat(history, contains(inViewBuild));
+        assertThat(history, not(contains(outOfViewBuild)));
     }
 }
