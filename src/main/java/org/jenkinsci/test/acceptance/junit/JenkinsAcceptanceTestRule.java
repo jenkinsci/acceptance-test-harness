@@ -78,7 +78,7 @@ public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should us
              */
             private Throwable causedBy(Throwable caught, Class<? extends Throwable> type) {
                 for (Throwable cur = caught; cur != null; cur = cur.getCause()) {
-                    if (type.isAssignableFrom(caught.getClass())) return cur;
+                    if (type.isAssignableFrom(cur.getClass())) return cur;
                 }
                 return null;
             }
