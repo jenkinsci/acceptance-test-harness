@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.hamcrest.Description;
 import org.jenkinsci.test.acceptance.Matcher;
 import org.openqa.selenium.WebElement;
 
@@ -62,6 +63,11 @@ public class BuildHistory extends PageObject {
             @Override
             public boolean matchesSafely(BuildHistory item) {
                 return !item.getBuildsOf(job).isEmpty();
+            }
+
+            @Override
+            public void describeMismatchSafely(BuildHistory item, Description mismatchDescription) {
+                mismatchDescription.appendValueList("Build history: ", ",", ".", item.getBuilds());
             }
         };
     }
