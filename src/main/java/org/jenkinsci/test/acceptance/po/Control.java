@@ -194,7 +194,7 @@ public class Control extends CapybaraPortingLayerImpl {
             return context.findElement(selector);
         } catch (NoSuchElementException x) {
             // this is often the best place to set a breakpoint
-            String msg = String.format("Unable to locate %s in %s\n\n%s", selector, driver.getCurrentUrl(), driver.getPageSource());
+            String msg = String.format("Unable to locate %s in %s", selector, driver.getCurrentUrl());
             throw new NoSuchElementException(msg, x);
         }
     }
