@@ -10,6 +10,9 @@ by using the `BROWSER` environment variable. The following values are available:
  * `htmlunit`
  * `phantomjs`
  * `saucelabs`
+ * `remote-webdriver-firefox` 
+        _(Needs `REMOTE_WEBDRIVER_URL` to also be set to the url of the remote, for example `http://0.0.0.0:32779/wd/hub`
+          when using something like [selenium/standalone-firefox-debug](https://hub.docker.com/r/selenium/standalone-firefox-debug/))_
 
 Therefore, to run tests with Safari, you'd execute:
 
