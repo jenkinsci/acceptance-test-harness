@@ -27,6 +27,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.junit.Assert.assertEquals;
+
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Named;
 
@@ -47,6 +50,7 @@ import org.jenkinsci.test.acceptance.po.MatrixBuild;
 import org.jenkinsci.test.acceptance.po.MatrixProject;
 import org.jenkinsci.test.acceptance.po.MatrixRun;
 import org.jenkinsci.test.acceptance.po.Node;
+import org.jenkinsci.test.acceptance.po.Slave;
 import org.junit.After;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
@@ -196,6 +200,31 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
 
         Build build = job.scheduleBuild().waitUntilFinished(PROVISIONING_TIMEOUT).shouldSucceed();
         waitFor(build.getNode(), pageObjectDoesNotExist(), 60);
+    }
+
+    @Test
+    @WithCredentials(credentialType = WithCredentials.USERNAME_PASSWORD, values = {MACHINE_USERNAME, "ath"})
+    @TestActivation({"HARDWARE_ID", "IMAGE_ID", "KEY_PAIR_NAME"})
+    public void sshSlaveShouldSurviveRestart() {
+        configureCloudInit("cloud-init");
+        configureProvisioning("SSH", "label");
+
+        FreeStyleJob job = jenkins.jobs.create();
+        job.configure();
+        job.setLabelExpression("label");
+        job.addShellStep("uname -a");
+        job.save();
+        Node created = job.scheduleBuild().waitUntilFinished(PROVISIONING_TIMEOUT).shouldSucceed().getNode();
+
+        jenkins.restart();
+
+        Node reconnected = job.scheduleBuild().waitUntilFinished(PROVISIONING_TIMEOUT).shouldSucceed().getNode();
+
+        assertEquals(created, reconnected);
+
+        Slave slave = ((Slave) reconnected);
+        slave.delete();
+        waitFor(slave).withMessage("Openstack slave to be deleted").withTimeout(6, TimeUnit.MINUTES).until(pageObjectDoesNotExist());
     }
 
     private OpenstackCloud addCloud(JenkinsConfig config) {

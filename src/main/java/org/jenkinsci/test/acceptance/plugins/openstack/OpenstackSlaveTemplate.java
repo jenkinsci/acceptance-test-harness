@@ -50,8 +50,7 @@ public class OpenstackSlaveTemplate extends PageAreaImpl {
     }
 
     public OpenstackSlaveTemplate hardwareId(final String value) {
-       // Wait until the select populates
-        waitFor().ignoring(NoSuchElementException.class).until(new Callable<Boolean>() {
+        waitFor().withMessage("Hardware ID select populates").ignoring(NoSuchElementException.class).until(new Callable<Boolean>() {
             @Override public Boolean call() throws Exception {
                 control("hardwareId").select(value);
                 return true;
@@ -61,8 +60,7 @@ public class OpenstackSlaveTemplate extends PageAreaImpl {
     }
 
     public OpenstackSlaveTemplate imageId(final String value) {
-        // Wait until the select populates
-        waitFor().ignoring(NoSuchElementException.class).until(new Callable<Boolean>() {
+        waitFor().withMessage("Image ID select populates").ignoring(NoSuchElementException.class).until(new Callable<Boolean>() {
             @Override public Boolean call() throws Exception {
                 control("imageId").select(value);
                 return true;

@@ -130,6 +130,12 @@ public class Slave extends Node {
         }
     }
 
+    public void delete() {
+        open();
+        clickLink("Delete Slave");
+        clickButton("Yes");
+    }
+
     /**
      * If the slave is offline, this method will launch the slave agent.
      */
