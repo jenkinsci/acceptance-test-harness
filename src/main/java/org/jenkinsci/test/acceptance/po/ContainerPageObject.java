@@ -165,7 +165,6 @@ public abstract class ContainerPageObject extends PageObject {
         if (!(other instanceof ContainerPageObject)) return false;
 
         ContainerPageObject rhs = (ContainerPageObject) other;
-        System.out.printf("%s != %s%n", this.url.toExternalForm(), rhs.url.toExternalForm());
         return this.url.toExternalForm().equals(rhs.url.toExternalForm());
     }
 

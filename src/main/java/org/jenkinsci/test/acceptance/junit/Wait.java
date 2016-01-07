@@ -26,6 +26,8 @@ package org.jenkinsci.test.acceptance.junit;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
+import org.hamcrest.Matcher;
+import org.hamcrest.StringDescription;
 import org.jenkinsci.test.acceptance.utils.ElasticTime;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.Sleeper;
@@ -84,6 +86,20 @@ public class Wait<Subject> extends FluentWait<Subject> {
             @Override
             public String toString() {
               return isTrue.toString();
+            }
+        });
+    }
+
+    public void until(final Matcher<? super Subject> matcher) {
+        until(new Predicate<Boolean>() {
+            @Override public Boolean apply() throws Exception {
+                return matcher.matches(input);
+            }
+
+            @Override public String diagnose(Throwable lastException, String message) {
+                StringDescription desc = new StringDescription();
+                matcher.describeMismatch(input, desc);
+                return desc.toString();
             }
         });
     }

@@ -153,22 +153,14 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
         return waitFor(this).until(block);
     }
 
-    @Override public <T> void waitFor(final T item, final org.hamcrest.Matcher<T> matcher, int timeout) {
+    @Override
+    public <MatcherT, SubjectT extends MatcherT> void waitFor(SubjectT item, org.hamcrest.Matcher<MatcherT> matcher, final int timeout) {
         StringDescription desc = new StringDescription();
         matcher.describeTo(desc);
-        waitFor(driver).withMessage(desc.toString())
+        waitFor(item).withMessage(desc.toString())
                 .withTimeout(timeout, TimeUnit.SECONDS)
-                .until(new Wait.Predicate<Boolean>() {
-                    @Override public Boolean apply() {
-                        return matcher.matches(item);
-                    }
-
-                    @Override public String diagnose(Throwable lastException, String message) {
-                        StringDescription desc = new StringDescription();
-                        matcher.describeMismatch(item, desc);
-                        return desc.toString();
-                    }
-        });
+                .until(matcher)
+        ;
     }
 
     /**
