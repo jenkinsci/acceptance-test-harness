@@ -10,6 +10,9 @@ by using the `BROWSER` environment variable. The following values are available:
  * `htmlunit`
  * `phantomjs`
  * `saucelabs`
+ * `remote-webdriver-firefox` 
+        _(Needs `REMOTE_WEBDRIVER_URL` to also be set to the url of the remote, for example `http://0.0.0.0:32779/wd/hub`
+          when using something like [selenium/standalone-firefox-debug](https://hub.docker.com/r/selenium/standalone-firefox-debug/))_
 
 Therefore, to run tests with Safari, you'd execute:
 
@@ -48,4 +51,15 @@ will go to a separate display. For example, on Ubuntu you can run `vncserver`, t
     ...
     New 'X' desktop is elf:1
     $ DISPLAY=elf:1 mvn test 
+    
+## Example on using remote web driver
+
+Non tested pseudo bash example
+
+    docker run -d -P selenium/standalone-firefox-debug > containerId.txt
+    export WEBDRIVER_CONTAINER_ID=$(cat containerId.txt)
+    export BROWSER=remote-webdriver-firefox
+    export REMOTE_WEBDRIVER_URL=http://$(docker port $WEBDRIVER_CONTAINER_ID 4444)/wd/hub
+    export JENKINS_LOCAL_HOSTNAME=$(ip -4 addr show docker0 | grep -Po 'inet \K[\d.]+')
+    mvn test
 
