@@ -17,6 +17,7 @@ import java.awt.GraphicsEnvironment;
 import java.awt.GraphicsConfiguration;
 import java.awt.Dimension;
 import java.awt.AWTException;
+import java.awt.HeadlessException;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
@@ -45,6 +46,7 @@ public class TestRecorderRule extends TestWatcher {
     static String RECORDER_OPTION = SystemEnvironmentVariables
             .getPropertyVariableOrEnvironment("RECORDER", DEFAULT_MODE).trim();
 
+    private boolean headless = false;
     private FailureDiagnostics diagnostics;
     private JUnitScreenRecorder screenRecorder;
 
@@ -83,8 +85,10 @@ public class TestRecorderRule extends TestWatcher {
                     (gc, gc.getBounds(), getFileFormat(mimeType),
                             outputFormatForScreenCapture, null, null, diagnostics);
             this.screenRecorder.start();
+        } catch (HeadlessException e) {
+            logger.warn("Test recorder does not work with Headless mode");
+            this.headless = true;
         } catch (UnsupportedOperationException e) {
-            // E.g. java.awt.HeadlessException
             logger.warn("Exception starting test recording {}", e);
         } catch (IOException e) {
             logger.warn("Exception starting test recording {}", e);
@@ -95,7 +99,7 @@ public class TestRecorderRule extends TestWatcher {
 
     @Override
     protected void succeeded(Description description) {
-        if (this.screenRecorder != null) {
+        if (this.screenRecorder != null && !this.headless) {
             if (saveAllExecutions()) {
                 stopRecordingWithFinalWaiting();
             } else {
@@ -127,7 +131,7 @@ public class TestRecorderRule extends TestWatcher {
     }
 
     private void stopRecording(boolean waitTime) {
-        if (this.screenRecorder != null && this.screenRecorder.getState() == ScreenRecorder.State.RECORDING) {
+        if (this.screenRecorder != null && !this.headless && this.screenRecorder.getState() == ScreenRecorder.State.RECORDING) {
             try {
                 if (waitTime) {
                     waitUntilLastFramesAreRecorded();
