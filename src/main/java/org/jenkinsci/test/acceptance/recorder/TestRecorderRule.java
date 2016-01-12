@@ -13,7 +13,11 @@ import org.monte.screenrecorder.ScreenRecorder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.*;
+import java.awt.GraphicsEnvironment;
+import java.awt.GraphicsConfiguration;
+import java.awt.Dimension;
+import java.awt.AWTException;
+import java.awt.HeadlessException;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
