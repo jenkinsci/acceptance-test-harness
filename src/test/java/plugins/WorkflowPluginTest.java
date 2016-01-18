@@ -102,6 +102,9 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         jenkins.restart();
         visit(build.getConsoleUrl());
         clickLink("Proceed");
+        // Default 120s timeout of Build.waitUntilFinished sometimes expires waiting for RetentionStrategy.Always to tick (after initial failure of CommandLauncher.launch: EOFException: unexpected stream termination):
+        slave.waitUntilOnline();
+        // Can also fail due to double loading of build as per JENKINS-22767:
         assertTrue(build.isSuccess() || build.isUnstable()); // tests in this project are currently designed to fail at random, so either is OK
         new Artifact(build, "target/simple-maven-project-with-tests-1.0-SNAPSHOT.jar").assertThatExists(true);
         build.open();
