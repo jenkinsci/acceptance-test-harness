@@ -1,7 +1,11 @@
 package plugins;
 
 import com.google.inject.Inject;
+
+import java.util.regex.Pattern;
+
 import org.hamcrest.CoreMatchers;
+import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.SvnContainer;
 import org.jenkinsci.test.acceptance.junit.*;
@@ -9,6 +13,7 @@ import org.jenkinsci.test.acceptance.plugins.subversion.SubversionPluginTestExce
 import org.jenkinsci.test.acceptance.plugins.subversion.SubversionScm;
 import org.jenkinsci.test.acceptance.plugins.subversion.SubversionSvmAdvanced;
 import org.jenkinsci.test.acceptance.plugins.subversion.SvnRepositoryBrowserWebSvn;
+import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Changes;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
@@ -23,7 +28,7 @@ import static org.junit.Assert.*;
  *
  * @author Matthias Karl
  */
-@WithPlugins("subversion@2.3")
+@WithPlugins("subversion@2.5.7")
 @WithDocker
 public class SubversionPluginTest extends AbstractJUnitTest {
     @Inject
@@ -49,7 +54,8 @@ public class SubversionPluginTest extends AbstractJUnitTest {
         f.addShellStep("test -d .svn");
         f.save();
 
-        f.startBuild().shouldSucceed().shouldContainsConsoleOutput("test -d .svn");
+        Build b = f.startBuild().shouldSucceed();
+        assertThat(b.getConsole(), Matchers.containsRegexp("test -d .svn", Pattern.MULTILINE));
     }
 
     /**
@@ -70,7 +76,8 @@ public class SubversionPluginTest extends AbstractJUnitTest {
         f.useScm(SubversionScm.class).url.set(svnContainer.getUrlUnsaveRepoAtRevision(revision));
         f.save();
 
-        f.startBuild().shouldSucceed().shouldContainsConsoleOutput("At revision " + revision);
+        Build b = f.startBuild().shouldSucceed();
+        assertThat(b.getConsole(), Matchers.containsRegexp("At revision " + revision, Pattern.MULTILINE));
     }
 
     /**
@@ -96,8 +103,8 @@ public class SubversionPluginTest extends AbstractJUnitTest {
 
         f.startBuild().shouldSucceed();
 
-        f.startBuild().shouldSucceed()
-                .shouldContainsConsoleOutput("Checking out " + svnContainer.getUrlUnsaveRepo());
+        Build b = f.startBuild().shouldSucceed();
+        assertThat(b.getConsole(), Matchers.containsRegexp("Checking out " + svnContainer.getUrlUnsaveRepo(), Pattern.MULTILINE));
     }
 
     /**
@@ -125,7 +132,8 @@ public class SubversionPluginTest extends AbstractJUnitTest {
         subversionScm.credentials.select(SvnContainer.USER);
         f.save();
 
-        f.startBuild().shouldSucceed().shouldContainsConsoleOutput("test -d .svn");
+        Build b = f.startBuild().shouldSucceed();
+        assertThat(b.getConsole(), Matchers.containsRegexp("test -d .svn", Pattern.MULTILINE));
     }
 
 
@@ -153,7 +161,8 @@ public class SubversionPluginTest extends AbstractJUnitTest {
         subversionScm.credentials.select(SvnContainer.USER);
         f.save();
 
-        f.startBuild().shouldSucceed().shouldContainsConsoleOutput("test -d .svn");
+        Build b = f.startBuild().shouldSucceed();
+        assertThat(b.getConsole(), Matchers.containsRegexp("test -d .svn", Pattern.MULTILINE));
     }
 
 
@@ -185,6 +194,8 @@ public class SubversionPluginTest extends AbstractJUnitTest {
 
         f.configure();
         f.removeFirstBuildStep();
+        // Sleep for 500ms to give time to DOM to regenerate
+        f.elasticSleep(500);
         f.addShellStep("! test -f unversioned.txt");
         f.save();
         f.startBuild().shouldSucceed();
