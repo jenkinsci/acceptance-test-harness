@@ -3,6 +3,7 @@ package plugins;
 import com.google.inject.Inject;
 
 import org.hamcrest.CoreMatchers;
+import org.hamcrest.Matchers;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.SvnContainer;
 import org.jenkinsci.test.acceptance.junit.*;
@@ -52,7 +53,7 @@ public class SubversionPluginTest extends AbstractJUnitTest {
         f.save();
 
         Build b = f.startBuild().shouldSucceed();
-        assertTrue(b.getConsole().contains("test -d .svn"));
+        assertThat(b.getConsole(), Matchers.containsString("test -d .svn"));
     }
 
     /**
@@ -74,7 +75,7 @@ public class SubversionPluginTest extends AbstractJUnitTest {
         f.save();
 
         Build b = f.startBuild().shouldSucceed();
-        assertTrue(b.getConsole().contains("At revision " + revision));
+        assertThat(b.getConsole(), Matchers.containsString("At revision " + revision));
     }
 
     /**
@@ -101,7 +102,7 @@ public class SubversionPluginTest extends AbstractJUnitTest {
         f.startBuild().shouldSucceed();
 
         Build b = f.startBuild().shouldSucceed();
-        assertTrue(b.getConsole().contains("Checking out " + svnContainer.getUrlUnsaveRepo()));
+        assertThat(b.getConsole(), Matchers.containsString("Checking out " + svnContainer.getUrlUnsaveRepo()));
     }
 
     /**
@@ -130,7 +131,7 @@ public class SubversionPluginTest extends AbstractJUnitTest {
         f.save();
 
         Build b = f.startBuild().shouldSucceed();
-        assertTrue(b.getConsole().contains("test -d .svn"));
+        assertThat(b.getConsole(), Matchers.containsString("test -d .svn"));
     }
 
 
@@ -159,7 +160,7 @@ public class SubversionPluginTest extends AbstractJUnitTest {
         f.save();
 
         Build b = f.startBuild().shouldSucceed();
-        assertTrue(b.getConsole().contains("test -d .svn"));
+        assertThat(b.getConsole(), Matchers.containsString("test -d .svn"));
     }
 
 
