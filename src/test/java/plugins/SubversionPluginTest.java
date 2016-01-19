@@ -2,10 +2,7 @@ package plugins;
 
 import com.google.inject.Inject;
 
-import java.util.regex.Pattern;
-
 import org.hamcrest.CoreMatchers;
-import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.SvnContainer;
 import org.jenkinsci.test.acceptance.junit.*;
@@ -28,7 +25,7 @@ import static org.junit.Assert.*;
  *
  * @author Matthias Karl
  */
-@WithPlugins("subversion@2.5.7")
+@WithPlugins("subversion@2.3")
 @WithDocker
 public class SubversionPluginTest extends AbstractJUnitTest {
     @Inject
@@ -55,7 +52,7 @@ public class SubversionPluginTest extends AbstractJUnitTest {
         f.save();
 
         Build b = f.startBuild().shouldSucceed();
-        assertThat(b.getConsole(), Matchers.containsRegexp("test -d .svn", Pattern.MULTILINE));
+        assertTrue(b.getConsole().contains("test -d .svn"));
     }
 
     /**
@@ -77,7 +74,7 @@ public class SubversionPluginTest extends AbstractJUnitTest {
         f.save();
 
         Build b = f.startBuild().shouldSucceed();
-        assertThat(b.getConsole(), Matchers.containsRegexp("At revision " + revision, Pattern.MULTILINE));
+        assertTrue(b.getConsole().contains("At revision " + revision));
     }
 
     /**
@@ -104,7 +101,7 @@ public class SubversionPluginTest extends AbstractJUnitTest {
         f.startBuild().shouldSucceed();
 
         Build b = f.startBuild().shouldSucceed();
-        assertThat(b.getConsole(), Matchers.containsRegexp("Checking out " + svnContainer.getUrlUnsaveRepo(), Pattern.MULTILINE));
+        assertTrue(b.getConsole().contains("Checking out " + svnContainer.getUrlUnsaveRepo()));
     }
 
     /**
@@ -133,7 +130,7 @@ public class SubversionPluginTest extends AbstractJUnitTest {
         f.save();
 
         Build b = f.startBuild().shouldSucceed();
-        assertThat(b.getConsole(), Matchers.containsRegexp("test -d .svn", Pattern.MULTILINE));
+        assertTrue(b.getConsole().contains("test -d .svn"));
     }
 
 
@@ -162,7 +159,7 @@ public class SubversionPluginTest extends AbstractJUnitTest {
         f.save();
 
         Build b = f.startBuild().shouldSucceed();
-        assertThat(b.getConsole(), Matchers.containsRegexp("test -d .svn", Pattern.MULTILINE));
+        assertTrue(b.getConsole().contains("test -d .svn"));
     }
 
 
