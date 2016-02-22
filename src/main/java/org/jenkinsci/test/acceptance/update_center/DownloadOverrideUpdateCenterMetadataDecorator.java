@@ -11,7 +11,6 @@ import org.jenkinsci.test.acceptance.utils.aether.ArtifactResolverUtil;
  */
 @Extension
 public class DownloadOverrideUpdateCenterMetadataDecorator implements UpdateCenterMetadataDecorator {
-    @Inject ArtifactResolverUtil resolver;
 
     @Override
     public void decorate(UpdateCenterMetadata ucm) {
@@ -22,6 +21,7 @@ public class DownloadOverrideUpdateCenterMetadataDecorator implements UpdateCent
                 String version = e.getValue();
 
                 PluginMetadata original = ucm.plugins.get(name);
+                if (original == null) throw new IllegalArgumentException("Plugin does not exists in update center: " + name);
                 ucm.plugins.put(name, original.withVersion(version));
             }
         }

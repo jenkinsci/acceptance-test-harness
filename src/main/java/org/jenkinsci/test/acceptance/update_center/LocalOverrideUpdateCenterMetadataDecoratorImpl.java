@@ -53,7 +53,9 @@ public class LocalOverrideUpdateCenterMetadataDecoratorImpl implements UpdateCen
             }
         }
         for (Map.Entry<String,String> e : System.getenv().entrySet()) {
-            if (e.getKey().endsWith(".jpi")) {
+            String name = e.getKey();
+            if (name.endsWith(".jpi")) {
+                if (ucm.plugins.get(name) == null) throw new IllegalArgumentException("Plugin does not exists in update center: " + name);
                 PluginMetadata m = PluginMetadata.LocalOverride.create(new File(e.getValue()));
                 ucm.plugins.put(m.getName(), m);
             }
