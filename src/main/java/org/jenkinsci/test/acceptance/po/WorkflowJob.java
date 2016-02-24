@@ -49,7 +49,7 @@ public class WorkflowJob extends Job {
                 // As of JENKINS-28769, the textarea is set display: none due to the ACE editor, so CapybaraPortingLayerImpl.find, called by super.resolve, calls isDisplayed and fails.
                 // Anyway we cannot use the web driver to interact with the hidden textarea.
                 // Some code cannibalized from #45:
-                String cssSelector = "#workflow-editor";
+                String cssSelector = "#workflow-editor-1";
                 waitForRenderOf(cssSelector + " .ace_text-input", driver);
                 executeScript(
                     "var targets = document.getElementsBySelector(arguments[0]);" +
