@@ -5,6 +5,7 @@ import org.jenkinsci.utils.process.CommandBuilder;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 
 /**
  * Container image, a template to launch virtual machines from.
@@ -12,10 +13,14 @@ import java.io.IOException;
  * @author Kohsuke Kawaguchi
  */
 public class DockerImage {
+
+    public static final String DEFAULT_DOCKER_HOST = "127.0.0.1";
     public final String tag;
+    DockerHostResolver dockerHostResolver;
 
     public DockerImage(String tag) {
         this.tag = tag;
+        dockerHostResolver = new DockerHostResolver();
     }
 
     public <T extends DockerContainer> T start(Class<T> type, CommandBuilder options, CommandBuilder cmd,int portOffset) throws InterruptedException, IOException {
@@ -29,7 +34,7 @@ public class DockerImage {
     }
 
     public <T extends DockerContainer> T start(Class<T> type, int[] ports, CommandBuilder options, CommandBuilder cmd) throws InterruptedException, IOException {
-        return start(type,ports,0,"127.0.0.1",options,cmd);
+        return start(type,ports,0, getDockerHost(),options,cmd);
     }
     /**
      * Starts a container from this image.
@@ -107,8 +112,26 @@ public class DockerImage {
         }
     }
 
+    // package for tests
+    String getDockerHost() {
+        final String dockerHostEnvironmentVariable = dockerHostResolver.getDockerHostEnvironmentVariable();
+        return dockerHostEnvironmentVariable != null ? getIp(dockerHostEnvironmentVariable) : DEFAULT_DOCKER_HOST;
+    }
+
+    private String getIp(String uri) {
+        final URI dockerHost = URI.create(uri);
+        final String host = dockerHost.getHost();
+        return host != null ? host : DEFAULT_DOCKER_HOST;
+    }
+
     @Override
     public String toString() {
         return "DockerImage: "+tag;
+    }
+
+    static class DockerHostResolver {
+        public String getDockerHostEnvironmentVariable() {
+            return System.getenv("DOCKER_HOST");
+        }
     }
 }
