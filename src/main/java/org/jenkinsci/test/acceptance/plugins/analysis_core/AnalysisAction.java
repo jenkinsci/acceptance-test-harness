@@ -281,6 +281,16 @@ public abstract class AnalysisAction extends ContainerPageObject {
     }
 
     /**
+     * Returns the first two columns of the "Warnings"-tab as key => value pairs, skipping the header row.
+     *
+     * @return a map of the first two columns. (first column => second column)
+     */
+    public SortedMap<String, String> getWarningsTabContentsAsStrings() {
+        openTab(Tab.WARNINGS);
+        return mapTableCellsKeyValue(String.class, getVisibleTableRows(true, false));
+    }
+
+    /**
      * Returns the number of fixed warnings by counting the number of rows in the 'fixed' warnings table.
      *
      * @return the number of fixed warnings
@@ -434,6 +444,7 @@ public abstract class AnalysisAction extends ContainerPageObject {
 
     private void selectWarning(final String fileName, final int line) {
         find(by.xpath(".//A[text() = '" + fileName + ":" + line + "']")).click();
+        elasticSleep(500);
     }
 
     /**

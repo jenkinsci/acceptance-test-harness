@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
@@ -32,11 +33,12 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
  */
 @WithPlugins("warnings")
 public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
+    private static final String RESOURCES = "/warnings_plugin/";
     /** Contains warnings for Javac parser. Warnings have file names preset for include/exclude filter tests. */
-    private static final String WARNINGS_FILE_FOR_INCLUDE_EXCLUDE_TESTS = "/warnings_plugin/warningsForRegEx.txt";
+    private static final String WARNINGS_FILE_FOR_INCLUDE_EXCLUDE_TESTS = RESOURCES + "warningsForRegEx.txt";
     private static final String SEVERAL_PARSERS_FILE_NAME = "warningsAll.txt";
     /** Contains warnings for several parsers. */
-    private static final String SEVERAL_PARSERS_FILE_FULL_PATH = "/warnings_plugin/" + SEVERAL_PARSERS_FILE_NAME;
+    private static final String SEVERAL_PARSERS_FILE_FULL_PATH = RESOURCES + SEVERAL_PARSERS_FILE_NAME;
 
     private static final int JAVA_COUNT = 131;
     private static final int JAVADOC_COUNT = 8;
@@ -71,6 +73,80 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
     }
 
     /**
+     */
+    @Test @Issue("JENKINS-32150") @WithPlugins("analysis-core@1.76")
+    public void should_resolve_workspace_files() {
+        FreeStyleJob job = createFreeStyleJob(RESOURCES + "jenkins-32150", new AnalysisConfigurator<WarningsBuildSettings>() {
+            @Override
+            public void configure(WarningsBuildSettings settings) {
+                settings.addWorkspaceScanner("Clang (LLVM based)", "**/compile-log.txt");
+                settings.setCanResolveRelativePaths(true);
+            }
+        });
+
+        Build build = buildSuccessfulJob(job);
+
+        assertThatActionExists(job, build, "LLVM/Clang Warnings");
+
+        build.open();
+        int count = 10;
+        assertThat(driver, hasContent("LLVM/Clang Warnings: " + count));
+
+        WarningsAction action = new WarningsAction(build);
+
+        assertThatWarningsCountInSummaryIs(action, count);
+        assertThatNewWarningsCountInSummaryIs(action, count);
+
+        action.open();
+
+        assertThat(action.getNumberOfWarnings(), is(count));
+        assertThat(action.getNumberOfNewWarnings(), is(count));
+        assertThat(action.getNumberOfFixedWarnings(), is(0));
+        assertThat(action.getNumberOfWarningsWithHighPriority(), is(0));
+        assertThat(action.getNumberOfWarningsWithNormalPriority(), is(count));
+        assertThat(action.getNumberOfWarningsWithLowPriority(), is(0));
+
+        assertThatFilesTabIsCorrectlyFilled(action);
+        assertThatWarningsTabIsCorrectlyFilled(action);
+
+        verifySourceLine(action, "file-in-subdir.txt", 2,
+                "02 EXAMPLE IN SUBDIR",
+                "Some other warning");
+        verifySourceLine(action, "file.txt", 6,
+                "06 EXAMPLE",
+                "Some warning SECOND");
+        // Since multi-file-in-subdir.txt is contained twice in the workspace no source code is resolved
+        verifySourceLine(action, "multi-file-in-subdir.txt", 3,
+                "03 Is the file 'multi-file-in-subdir.txt' contained more than once in your workspace?",
+                "Another warning");
+    }
+
+    private void assertThatFilesTabIsCorrectlyFilled(WarningsAction ca) {
+        SortedMap<String, Integer> expectedFileDetails = new TreeMap<>();
+        expectedFileDetails.put("file-in-subdir.txt", 4);
+        expectedFileDetails.put("file.txt", 2);
+        expectedFileDetails.put("multi-file-in-subdir.txt", 2);
+        expectedFileDetails.put("multi-file-in-subdir.txt", 2); // FIXME: list and not map
+        assertThat(ca.getFileTabContents(), is(expectedFileDetails));
+    }
+
+    private void assertThatWarningsTabIsCorrectlyFilled(WarningsAction ca) {
+        SortedMap<String, String> expectedWarnings = new TreeMap<>();
+        expectedWarnings.put("multi-file-in-subdir.txt:5", "..");
+        expectedWarnings.put("multi-file-in-subdir.txt:10", "..");
+        expectedWarnings.put("file-in-subdir.txt:2", "directory-a");
+        expectedWarnings.put("file-in-subdir.txt:4", "directory-a");
+        expectedWarnings.put("file-in-subdir.txt:7", "directory-a");
+        expectedWarnings.put("file-in-subdir.txt:9", "directory-a");
+        expectedWarnings.put("file.txt:1", "-");
+        expectedWarnings.put("file.txt:6", "-");
+        expectedWarnings.put("multi-file-in-subdir.txt:3", "-");
+        expectedWarnings.put("multi-file-in-subdir.txt:8", "-");
+
+        assertThat(ca.getWarningsTabContentsAsStrings(), is(expectedWarnings));
+    }
+
+    /**
      * Build a matrix job with three configurations. For each configuration a different set of warnings will be parsed
      * with the same parser (GCC). After the successful build the total number of warnings at the root level should be
      * set to 12 (sum of all three configurations). Moreover, for each configuration the total number of warnings is
@@ -80,7 +156,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
     @Test @Issue({"JENKINS-11225", "JENKINS-26913"})
     public void should_report_warnings_per_axis() {
         String file = "matrix-warnings.txt";
-        MatrixProject job = setupJob("/warnings_plugin/" + file, MatrixProject.class,
+        MatrixProject job = setupJob(RESOURCES + file, MatrixProject.class,
                 WarningsBuildSettings.class, new AnalysisConfigurator<WarningsBuildSettings>() {
                     @Override
                     public void configure(WarningsBuildSettings settings) {
