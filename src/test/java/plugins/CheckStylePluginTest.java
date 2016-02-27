@@ -13,6 +13,8 @@ import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckStyleMavenSettings;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckStylePortlet;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
+import org.jenkinsci.test.acceptance.plugins.parameterized_trigger.BuildTriggerConfig;
+import org.jenkinsci.test.acceptance.plugins.parameterized_trigger.TriggerCallBuildStep;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Build.Result;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
@@ -71,6 +73,27 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
         return TOTAL_NUMBER_OF_WARNINGS;
     }
 
+    @Test @WithPlugins("parameterized-trigger") @Issue("JENKINS-33162")
+    public void should_return_from_triggered_subjob() {
+        FreeStyleJob checkstyleJob = createFreeStyleJob(new AnalysisConfigurator<CheckStyleFreestyleSettings>() {
+            @Override
+            public void configure(CheckStyleFreestyleSettings settings) {
+                settings.pattern.set(PATTERN_WITH_776_WARNINGS);
+            }
+        });
+
+        FreeStyleJob trigger = jenkins.jobs.create();
+        trigger.configure();
+        TriggerCallBuildStep step = trigger.addBuildStep(TriggerCallBuildStep.class);
+        BuildTriggerConfig config = step.getBuildTriggerConfig(0);
+        config.projects.set(checkstyleJob.name);
+        config.block.click();
+        trigger.save();
+
+        trigger.startBuild().shouldSucceed();
+        Build downstream = checkstyleJob.build(1);
+        downstream.shouldSucceed();
+    }
     /**
      * Checks that the plug-in sends a mail after a build has been failed. The content of the mail contains several
      * tokens that should be expanded in the mail with the correct values.
