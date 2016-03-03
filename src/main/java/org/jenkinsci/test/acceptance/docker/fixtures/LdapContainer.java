@@ -10,11 +10,11 @@ import org.jenkinsci.test.acceptance.docker.DockerFixture;
  *
  * @author Michael Prankl
  */
-@DockerFixture(id = "ldap", ports = {389, 636}, bindIp = "192.168.99.100")
+@DockerFixture(id = "ldap", ports = {389, 636})
 public class LdapContainer extends DockerContainer {
 
     public String getHost() {
-        return "192.168.99.100";
+        return "127.0.0.1";
     }
 
     public int getPort() {
