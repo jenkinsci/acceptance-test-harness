@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.po;
 
 import org.jenkinsci.test.acceptance.plugins.ldap.LdapDetails;
+import org.jenkinsci.test.acceptance.plugins.ldap.LdapEnvironmentVariable;
 import org.jenkinsci.test.acceptance.plugins.ldap.LdapGroupMembershipStrategy;
 import org.openqa.selenium.WebElement;
 
@@ -30,6 +31,7 @@ public class LdapSecurityRealm<T extends LdapGroupMembershipStrategy> extends Se
     protected final Control groupMembershipFilter = control("groupMembershipFilter");
     protected final Control disableLdapEmailResolver = control("disableMailAddressResolver");
     protected final Control enableCache = control("cache");
+    protected final Control addEnvVariableButton = control("repeatable-add");
     /**
      * since version 1.8
      */
@@ -72,14 +74,25 @@ public class LdapSecurityRealm<T extends LdapGroupMembershipStrategy> extends Se
         disableLdapEmailResolver.check(ldapDetails.isDisableLdapEmailResolver());
         if (ldapDetails.isEnableCache()) {
             enableCache.check(true);
-            control("cache/size[" + ldapDetails.getCacheSize() + "]").check(true);
-            control("cache/ttl[" + ldapDetails.getCacheTTL() + "]").check(true);
+            control("cache/size").select(String.valueOf(ldapDetails.getCacheSize()));
+            control("cache/ttl").select(String.valueOf(ldapDetails.getCacheTTL()));
         }
         if (ldapDetails.getDisplayNameAttributeName() != null) {
             displayNameAttributeName.set(ldapDetails.getDisplayNameAttributeName());
         }
         if (ldapDetails.getMailAddressAttributeName() != null) {
             mailAddressAttributeName.set(ldapDetails.getMailAddressAttributeName());
+        }
+        if (ldapDetails.getEnvironmentVariables() != null && !ldapDetails.getEnvironmentVariables().isEmpty()) {
+            int i = 0;
+            String envVarSelector;
+            for (LdapEnvironmentVariable envVariable : ldapDetails.getEnvironmentVariables()) {
+                addEnvVariableButton.click();
+                envVarSelector = i == 0 ? "" : "[" + i + "]";
+                control("/environmentProperties" + envVarSelector + "/name").set(envVariable.getName());
+                control("/environmentProperties" + envVarSelector + "/value").set(envVariable.getValue());
+                i++;
+            }
         }
     }
 

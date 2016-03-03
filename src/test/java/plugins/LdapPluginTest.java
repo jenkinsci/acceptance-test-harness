@@ -1,9 +1,11 @@
 package plugins;
 
+import org.hamcrest.Matchers;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.LdapContainer;
 import org.jenkinsci.test.acceptance.junit.*;
 import org.jenkinsci.test.acceptance.plugins.ldap.LdapDetails;
+import org.jenkinsci.test.acceptance.plugins.ldap.LdapEnvironmentVariable;
 import org.jenkinsci.test.acceptance.plugins.ldap.SearchForGroupsLdapGroupMembershipStrategy;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
 import org.jenkinsci.test.acceptance.po.LdapSecurityRealm;
@@ -16,7 +18,12 @@ import org.jvnet.hudson.test.Issue;
 import javax.inject.Inject;
 
 import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.jenkinsci.test.acceptance.Matchers.*;
+
+import java.io.IOException;
+import java.util.NoSuchElementException;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 
 
@@ -53,6 +60,16 @@ public class LdapPluginTest extends AbstractJUnitTest {
     private LdapDetails createDefaults(LdapContainer ldapContainer) {
         return new LdapDetails(ldapContainer.getHost(), ldapContainer.getPort(), ldapContainer.getManagerDn(), ldapContainer.getManagerPassword(), ldapContainer.getRootDn());
     }
+    
+    /**
+     * Creates default ldap connection details without manager credentials from a running docker LdapContainer.
+     * 
+     * @param ldapContainer
+     * @return default ldap connection details without the manager credentials
+     */
+    private LdapDetails createDefaultsWithoutManagerCred(LdapContainer ldapContainer) {
+        return new LdapDetails(ldapContainer.getHost(), ldapContainer.getPort(), "", "", ldapContainer.getRootDn());
+    }
 
     /**
      * Scenario: Login with ldap uid and password
@@ -65,6 +82,24 @@ public class LdapPluginTest extends AbstractJUnitTest {
     public void login_ok() {
         // Given
         useLdapAsSecurityRealm(createDefaults(ldap.get()));
+        // When
+        Login login = jenkins.login();
+        login.doLogin("jenkins", "root");
+        // Then
+        assertThat(jenkins, hasLoggedInUser("jenkins"));
+    }
+
+    /**
+     * Scenario: Login with ldap uid and password
+     * Given I have a docker fixture "ldap" that allows anonymous binding
+     * And Jenkins is using ldap as security realm
+     * When I login with user "jenkins" and password "root" without manager credentials
+     * Then I will be successfully logged on as user "jenkins"
+     */
+    @Test
+    public void login_ok_anonymous_binding() {
+        // Given
+        useLdapAsSecurityRealm(createDefaultsWithoutManagerCred(ldap.get()));
         // When
         Login login = jenkins.login();
         login.doLogin("jenkins", "root");
@@ -187,6 +222,30 @@ public class LdapPluginTest extends AbstractJUnitTest {
         // Then
         assertThat(jenkins, hasLoggedInUser("jenkins@jenkins-ci.org"));
     }
+    
+    /**
+     * Scenario: login with email address
+     * Given I have a docker fixture "ldap"
+     * And Jenkins is using ldap as security realm with user search filter "invalid={0}"
+     * When I login with email "jenkins@jenkins-ci.org" and password "root"
+     * Or when I login with user "jenkins" and password "root"
+     * Then I will not be able to log in
+     */
+    @Test
+    public void invalid_user_search_filter() {
+        // Given
+        useLdapAsSecurityRealm(createDefaults(ldap.get()).userSearchFilter("invalid={0}"));
+        // When
+        Login login = jenkins.login();
+        login.doLogin("jenkins@jenkins-ci.org", "root");
+        // Then
+        assertThat(jenkins, not(hasLoggedInUser("jenkins@jenkins-ci.org")));
+        // When
+        login = jenkins.login();
+        login.doLogin("jenkins", "root");
+        // Then
+        assertThat(jenkins, not(hasLoggedInUser("jenkins")));
+    }
 
     /**
      * Scenario: fallback to alternate server
@@ -205,7 +264,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
         int freePort = this.findAvailablePort();
         LdapDetails ldapDetails = new LdapDetails("", 0, ldapContainer.getManagerDn(), ldapContainer.getManagerPassword(), ldapContainer.getRootDn());
         // Fallback-Config: primary server is not running, alternative server is running docker fixture
-        ldapDetails.setHostWithPort("localhost:" + freePort + " localhost:" + ldapContainer.getPort());
+        ldapDetails.setHostWithPort(ldapContainer.getHost()+":" + freePort + " " + ldapContainer.getHost() + ":" + ldapContainer.getPort());
         realm.configure(ldapDetails);
         securityConfig.save();
 
@@ -239,6 +298,72 @@ public class LdapPluginTest extends AbstractJUnitTest {
         assertThat(u, mailAddressIs("jenkins@jenkins-ci.org"));
     }
 
+    /**
+     * Scenario: do not resolve email address
+     * Given I have a docker fixture "ldap"
+     * And Jenkins is using ldap as security realm and resolve email address is disabled
+     * When I login with user "jenkins" and password "root"
+     * Then I will be logged on as user "jenkins"
+     * And there will not be any resolved email address"
+     */
+    @Test
+    public void do_not_resolve_email() {
+        // Given
+        LdapDetails details = createDefaults(ldap.get());
+        details.setDisableLdapEmailResolver(true);
+        useLdapAsSecurityRealm(details);
+        // When
+        Login login = jenkins.login();
+        login.doLogin("jenkins", "root");
+        // Then
+        assertThat(jenkins, hasLoggedInUser("jenkins"));
+        User u = new User(jenkins, "jenkins");
+        assertThat(u.mail(), nullValue());
+    }
+    
+   /**
+   * Scenario: do not resolve email address
+   * Given I have a docker fixture "ldap"
+   * And Jenkins is using ldap as security realm and cache is enabled
+   * When I login with user "jenkins" and password "root"
+   * Then I will be logged on as user "jenkins"
+   * Nothing much can be tested here apart from being able to use the security realm with the option activated
+   */
+    @Test
+    public void enable_cache() throws IOException {
+        // Given
+        LdapDetails details = createDefaults(ldap.get());
+        details.setEnableCache(true);
+        useLdapAsSecurityRealm(details);
+        // When
+        Login login = jenkins.login();
+        login.doLogin("jenkins", "root");
+        // Then
+        assertThat(jenkins, hasLoggedInUser("jenkins"));
+    }
+    
+    /**
+     * Scenario: can use environment variables
+     * Given I have a docker fixture "ldap"
+     * And Jenkins is using ldap as security realm and the java.naming.ldap.typesOnly env var is se to true
+     * When I login with user "jenkins" and password "root"
+     * Then I will not be logged on as user "jenkins" because the values for the LDAP attributes
+     * have not been sent as defined in the environment variable.
+     */
+    @Test
+    public void use_environment_varibales() {
+        // Given
+        LdapDetails details = createDefaultsWithoutManagerCred(ldap.get());
+        details.addEnvironmentVariable(new LdapEnvironmentVariable("java.naming.ldap.typesOnly", "true"));
+        useLdapAsSecurityRealm(details);
+        // When
+        Login login = jenkins.login();
+        login.doLogin("jenkins", "root");
+        // Then
+        assertThat(jenkins, not(hasLoggedInUser("jenkins")));
+        assertThat(getElement(by.tagName("pre")).getText(), Matchers.containsString("NoSuchElementException"));
+    }
+   
     /**
      * Scenario: resolve group memberships of user with default configuration
      * Given I have a docker fixture "ldap"
@@ -353,7 +478,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
      * Then "jenkins" will not be member of groups "ldap1" and "ldap2"
      */
     @Test
-    public void custom_group_membership_filter() {
+    public void custom_invalid_group_membership_filter() {
         // Given
         useLdapAsSecurityRealm(createDefaults(ldap.get()).groupMembershipStrategy(SearchForGroupsLdapGroupMembershipStrategy.class).groupMembershipStrategyParam("(member={0})"));
         // When
@@ -364,7 +489,27 @@ public class LdapPluginTest extends AbstractJUnitTest {
         assertThat(userJenkins, not(isMemberOf("ldap1")));
         assertThat(userJenkins, not(isMemberOf("ldap2")));
     }
-
+    
+    /**
+     * Scenario: using "search for groups containing user" strategy with group correct membership filter leads to user belonging to right groups
+     * Given I have a docker fixture "ldap"
+     * And Jenkins is using ldap as security realm with group membership filter "(memberUid={1})"
+     * When I login with user "jenkins" and password "root"
+     * Then "jenkins" will be member of groups "ldap1" and "ldap2"
+     */
+    @Test
+    public void custom_valid_group_membership_filter() {
+        // Given
+        useLdapAsSecurityRealm(createDefaults(ldap.get()).groupMembershipStrategy(SearchForGroupsLdapGroupMembershipStrategy.class).groupMembershipStrategyParam("memberUid={1}"));
+        // When
+        Login login = jenkins.login();
+        login.doLogin("jenkins", "root");
+        User userJenkins = new User(jenkins, "jenkins");
+        // Then
+        assertThat(userJenkins, isMemberOf("ldap1"));
+        assertThat(userJenkins, isMemberOf("ldap2"));
+    }
+    
     /**
      * Scenario: use a custom mail filter (gn instead of mail)
      * Given I have a docker fixture "ldap"

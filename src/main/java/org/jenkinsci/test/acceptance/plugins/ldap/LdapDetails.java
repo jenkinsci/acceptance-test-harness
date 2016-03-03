@@ -1,5 +1,8 @@
 package org.jenkinsci.test.acceptance.plugins.ldap;
 
+import java.util.LinkedList;
+import java.util.List;
+
 /**
  * POJO for LDAP server connection, credential and configuration details.
  *
@@ -25,7 +28,7 @@ public class LdapDetails<T extends LdapGroupMembershipStrategy> {
     private String displayNameAttributeName;
     private Class<T> groupMembershipStrategy;
     private String groupMembershipStrategyParam;
-
+    private List<LdapEnvironmentVariable> environmentVariables;
 
     public LdapDetails(String host, int port, String managerDn, String managerPassword, String rootDn) {
         this.setHost(host);
@@ -267,5 +270,20 @@ public class LdapDetails<T extends LdapGroupMembershipStrategy> {
     public LdapDetails groupMembershipStrategy(Class<T> groupMembershipStrategy) {
         setGroupMembershipStrategy(groupMembershipStrategy);
         return this;
+    }
+
+    public List<LdapEnvironmentVariable> getEnvironmentVariables() {
+        return environmentVariables;
+    }
+
+    public void setEnvironmentVariables(List<LdapEnvironmentVariable> environmentVariables) {
+        this.environmentVariables = environmentVariables;
+    }
+    
+    public void addEnvironmentVariable(LdapEnvironmentVariable environmentVariable) {
+        if (this.environmentVariables == null) {
+            this.environmentVariables = new LinkedList<LdapEnvironmentVariable>();
+        }
+        this.environmentVariables.add(environmentVariable);
     }
 }
