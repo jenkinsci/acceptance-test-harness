@@ -17,6 +17,7 @@ public abstract class AnalysisSettings extends PageAreaImpl implements PostBuild
     protected Control advanced = control("advanced-button");
 
     protected Control canRunOnFailed = control("canRunOnFailed");
+    protected Control canResolveRelativePaths = control("canResolveRelativePaths");
 
     protected Control buildHealthyThreshold = control("healthy");
     protected Control buildUnhealthyThreshold = control("unHealthy");
@@ -241,6 +242,16 @@ public abstract class AnalysisSettings extends PageAreaImpl implements PostBuild
     public void setCanRunOnFailed(boolean canRun) {
         ensureAdvancedClicked();
         canRunOnFailed.check(canRun);
+    }
+
+     /**
+     * Decides if the code analyzer should resolve relative paths.
+     *
+     * @param canResolve build if true.
+     */
+    public void setCanResolveRelativePaths(boolean canResolve) {
+        ensureAdvancedClicked();
+        canResolveRelativePaths.check(canResolve);
     }
 
     /**
