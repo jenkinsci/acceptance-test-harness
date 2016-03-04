@@ -89,6 +89,17 @@ public class LdapPluginTest extends AbstractJUnitTest {
         assertThat(jenkins, hasLoggedInUser("jenkins"));
     }
 
+    @Test
+    public void login_ok_anonymous_binding() {
+        // Given
+        useLdapAsSecurityRealm(createDefaultsWithoutManagerCred(ldap.get()));
+        // When
+        Login login = jenkins.login();
+        login.doLogin("jenkins", "root");
+        // Then
+        assertThat(jenkins, hasLoggedInUser("jenkins"));
+    }
+
     /**
      * Scenario: Login with ldap uid and a wrong password
      * Given I have a docker fixture "ldap"
@@ -205,14 +216,6 @@ public class LdapPluginTest extends AbstractJUnitTest {
         assertThat(jenkins, hasLoggedInUser("jenkins@jenkins-ci.org"));
     }
     
-    /**
-     * Scenario: login with email address
-     * Given I have a docker fixture "ldap"
-     * And Jenkins is using ldap as security realm with user search filter "invalid={0}"
-     * When I login with email "jenkins@jenkins-ci.org" and password "root"
-     * Or when I login with user "jenkins" and password "root"
-     * Then I will not be able to log in
-     */
     @Test
     public void invalid_user_search_filter() {
         // Given
@@ -280,14 +283,6 @@ public class LdapPluginTest extends AbstractJUnitTest {
         assertThat(u, mailAddressIs("jenkins@jenkins-ci.org"));
     }
 
-    /**
-     * Scenario: do not resolve email address
-     * Given I have a docker fixture "ldap"
-     * And Jenkins is using ldap as security realm and resolve email address is disabled
-     * When I login with user "jenkins" and password "root"
-     * Then I will be logged on as user "jenkins"
-     * And there will not be any resolved email address"
-     */
     @Test
     public void do_not_resolve_email() {
         // Given
@@ -303,14 +298,6 @@ public class LdapPluginTest extends AbstractJUnitTest {
         assertThat(u.mail(), nullValue());
     }
     
-   /**
-   * Scenario: do not resolve email address
-   * Given I have a docker fixture "ldap"
-   * And Jenkins is using ldap as security realm and cache is enabled
-   * When I login with user "jenkins" and password "root"
-   * Then I will be logged on as user "jenkins"
-   * Nothing much can be tested here apart from being able to use the security realm with the option activated
-   */
     @Test
     public void enable_cache() throws IOException {
         // Given
@@ -324,14 +311,6 @@ public class LdapPluginTest extends AbstractJUnitTest {
         assertThat(jenkins, hasLoggedInUser("jenkins"));
     }
     
-    /**
-     * Scenario: can use environment variables
-     * Given I have a docker fixture "ldap"
-     * And Jenkins is using ldap as security realm and the java.naming.ldap.typesOnly env var is se to true
-     * When I login with user "jenkins" and password "root"
-     * Then I will not be logged on as user "jenkins" because the values for the LDAP attributes
-     * have not been sent as defined in the environment variable.
-     */
     @Test
     public void use_environment_varibales() {
         // Given
@@ -471,13 +450,6 @@ public class LdapPluginTest extends AbstractJUnitTest {
         assertThat(userJenkins, not(isMemberOf("ldap2")));
     }
     
-    /**
-     * Scenario: using "search for groups containing user" strategy with group correct membership filter leads to user belonging to right groups
-     * Given I have a docker fixture "ldap"
-     * And Jenkins is using ldap as security realm with group membership filter "(memberUid={1})"
-     * When I login with user "jenkins" and password "root"
-     * Then "jenkins" will be member of groups "ldap1" and "ldap2"
-     */
     @Test
     public void custom_valid_group_membership_filter() {
         // Given
