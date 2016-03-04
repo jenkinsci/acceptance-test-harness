@@ -695,6 +695,26 @@
         </plugins>
       </build>
     </profile>
+    <profile>
+      <id>RECORDER</id>
+      <activation>
+        <property>
+          <name>RECORDER</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <environmentVariables>
+                  <RECORDER>${RECORDER}</RECORDER>
+              </environmentVariables>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
     <!-- TODO could be laboriously repeated for $TYPE, $DISPLAY, etc. (seems Maven provides no generic way to do this) -->
 
     <profile>

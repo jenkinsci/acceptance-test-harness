@@ -15,15 +15,26 @@ public class GitContainer extends DockerContainer {
     private static final String REPO_DIR = "/home/git/gitRepo";
     public static final String REPO_NAME = "gitRepo";
 
+    public String host() {
+        return ipBound(22);
+    }
+    
     public int port() {
         return port(22);
     }
 
     public URL getUrl() throws IOException {
-        return new URL("http://localhost:" + port(22));
+        return new URL("http://" + host() + ":" + port());
     }
 
+    /** URL visible from the host. */
     public String getRepoUrl() {
-        return "ssh://git@localhost:" + port(22) + REPO_DIR;
+        return "ssh://git@" + host() + ":" + port() + REPO_DIR;
     }
+
+    /** URL visible from other Docker containers. */
+    public String getRepoUrlInsideDocker() throws IOException {
+        return "ssh://git@" + getIpAddress() + REPO_DIR;
+    }
+
 }
