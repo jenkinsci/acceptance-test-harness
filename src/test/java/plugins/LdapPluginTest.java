@@ -90,24 +90,6 @@ public class LdapPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     * Scenario: Login with ldap uid and password
-     * Given I have a docker fixture "ldap" that allows anonymous binding
-     * And Jenkins is using ldap as security realm
-     * When I login with user "jenkins" and password "root" without manager credentials
-     * Then I will be successfully logged on as user "jenkins"
-     */
-    @Test
-    public void login_ok_anonymous_binding() {
-        // Given
-        useLdapAsSecurityRealm(createDefaultsWithoutManagerCred(ldap.get()));
-        // When
-        Login login = jenkins.login();
-        login.doLogin("jenkins", "root");
-        // Then
-        assertThat(jenkins, hasLoggedInUser("jenkins"));
-    }
-
-    /**
      * Scenario: Login with ldap uid and a wrong password
      * Given I have a docker fixture "ldap"
      * And Jenkins is using ldap as security realm
@@ -361,7 +343,6 @@ public class LdapPluginTest extends AbstractJUnitTest {
         login.doLogin("jenkins", "root");
         // Then
         assertThat(jenkins, not(hasLoggedInUser("jenkins")));
-        assertThat(getElement(by.tagName("pre")).getText(), Matchers.containsString("NoSuchElementException"));
     }
    
     /**
