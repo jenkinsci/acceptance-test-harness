@@ -169,7 +169,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
     }
 
     @WithDocker
-    @WithPlugins({"workflow-aggregator@1.14", "docker-workflow@1.14-SNAPSHOT", "git", "ssh-agent@1.10-SNAPSHOT"})
+    @WithPlugins({"workflow-aggregator@1.14", "docker-workflow@1.4", "git", "ssh-agent@1.10"})
     @WithCredentials(credentialType=WithCredentials.SSH_USERNAME_PRIVATE_KEY, values={"git", "/org/jenkinsci/test/acceptance/docker/fixtures/GitContainer/unsafe"}, id="gitcreds")
     @Issue("JENKINS-27152")
     @Test public void sshGitInsideDocker() throws Exception {
