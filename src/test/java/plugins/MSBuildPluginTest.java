@@ -104,8 +104,9 @@ public class MSBuildPluginTest extends AbstractJUnitTest {
         // Job should run successfully
         Build b = job.scheduleBuild();
         b.shouldSucceed();
-        assertThat(b.getConsole(), Matchers.containsString("Build succeeded."));
-        assertThat(b.getConsole(), Matchers.containsString("Done building project"));
+        String console = b.getConsole();
+        assertThat(console, Matchers.containsString("Build succeeded."));
+        assertThat(console, Matchers.containsString("Done Building Project"));
     }
     
     @Test
@@ -125,7 +126,8 @@ public class MSBuildPluginTest extends AbstractJUnitTest {
         // Job should run successfully
         Build b = job.scheduleBuild();
         b.shouldSucceed();
-        assertThat(b.getConsole(), Matchers.containsString("Build succeeded."));
-        assertThat(b.getConsole(), Matchers.containsString("Done building project"));
+        String console = b.getConsole();
+        assertThat(console, Matchers.containsString("Build succeeded."));
+        assertThat(console, Matchers.containsString("Done Building Project"));
     }
 }
