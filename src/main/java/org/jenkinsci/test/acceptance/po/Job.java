@@ -20,7 +20,9 @@ import java.util.zip.GZIPOutputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.codehaus.plexus.util.Base64;
+import org.jenkinsci.test.acceptance.controller.RemoteJenkinsController;
 import org.jenkinsci.test.acceptance.junit.Resource;
+import org.junit.internal.AssumptionViolatedException;
 import org.openqa.selenium.WebElement;
 import org.zeroturnaround.zip.ZipUtil;
 
@@ -198,6 +200,10 @@ public class Job extends TopLevelItem {
             byte[] archive = IOUtils.toByteArray(new FileInputStream(tmp));
 
             if (SystemUtils.IS_OS_WINDOWS) {
+                if (controller instanceof RemoteJenkinsController) {
+                    // TODO: Make it work for RemoteJenkinsController like in Unix (below)
+                    throw new AssumptionViolatedException("Copying files in Windows if a RemoteJenkinsController is in use is not yet supported. Test will be skipped.");
+                }
                 addBatchStep("xcopy " + file.getAbsolutePath() + " %cd% /E");
             } else {
                 addShellStep(String.format(

@@ -9,6 +9,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import org.hamcrest.StringDescription;
+import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.junit.Wait;
 import org.jenkinsci.test.acceptance.utils.ElasticTime;
@@ -43,6 +44,12 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     @Inject
     public Injector injector;
 
+    /**
+     * The controller that starts/stops Jenkins
+     */
+    @Inject
+    public JenkinsController controller;
+    
     @Inject
     protected ElasticTime time;
 
