@@ -3,6 +3,7 @@ package org.jenkinsci.test.acceptance.po;
 import java.io.File;
 import java.io.IOException;
 
+import org.apache.commons.lang.SystemUtils;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.jenkinsci.utils.process.CommandBuilder;
 
@@ -42,20 +43,45 @@ public class DumbSlave extends Slave {
      * call this in the context of the config UI.
      */
     public void asLocal() {
-        assertCurl();
-        File jar = new File("/tmp/slave"+createRandomName()+".jar");
-        String command = String.format(
-                "sh -c 'curl -s -o %1$s %2$sjnlpJars/slave.jar && java -jar %1$s'",
-                jar, url("../../")
-        );
+        assertCurlOrPowershellv3Plus();
+        File tmpDir = new File(System.getProperty("java.io.tmpdir"));
+        File jar = new File(tmpDir, "slave"+createRandomName()+".jar");
+        String command;
+        if (SystemUtils.IS_OS_UNIX) {
+            command = String.format(
+                    "sh -c 'curl -s -o %1$s %2$sjnlpJars/slave.jar && java -jar %1$s'",
+                    jar, url("../../")
+            );
+        }
+        else {
+            // windows
+            command = String.format("powershell -command \"& { " +
+                                                               "try { " +
+                                                                  "Invoke-WebRequest %2$sjnlpJars/slave.jar -OutFile %1$s " +
+                                                               "} catch { " +
+                                                                  "echo 'download of slave jar failed'; " +
+                                                                  "exit 2 "+
+                                                               "} " +
+                                                               "java -jar %1$s "+
+                                                              "}\"",
+                                    jar, url("../../")
+                                   );
+        }
         setLauncher(CommandSlaveLauncher.class).command(command);
     }
 
-    // TODO: check if the installation could be achieved without curl
-    private void assertCurl() {
+    private void assertCurlOrPowershellv3Plus() {
         try {
-            if (new CommandBuilder("which", "curl").system() != 0) {
-                throw new IllegalStateException("curl is required to run tests that run on local slaves.");
+            if (SystemUtils.IS_OS_UNIX) {
+                if (new CommandBuilder("which", "curl").system() != 0) {
+                    throw new IllegalStateException("curl is required to run tests that run on local slaves.");
+                }
+            }
+            else {
+                if (new CommandBuilder("powershell -command \"& { Invoke-WebRequest }\"").system() != 0) {
+                    // Invoke-WebRequest was introduced in version 3.
+                    throw new IllegalStateException("powershell version 3 or higher is required to run tests that run on local slaves.");
+                }
             }
         }
         catch (IOException | InterruptedException e) {
