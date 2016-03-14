@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.docker;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.SystemUtils;
 import org.jenkinsci.utils.process.CommandBuilder;
 
 import java.io.File;
@@ -65,7 +66,7 @@ public class DockerImage {
         File tmplog = File.createTempFile("docker", "log"); // initially create a log file here
 
         Process p = docker.build()
-                .redirectInput(new File("/dev/null"))
+                .redirectInput(new File(SystemUtils.IS_OS_WINDOWS ? "NUL" : "/dev/null"))
                 .redirectErrorStream(true)
                 .redirectOutput(tmplog)
                 .start();
