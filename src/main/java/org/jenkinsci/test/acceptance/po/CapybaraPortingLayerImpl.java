@@ -44,11 +44,6 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     @Inject
     public Injector injector;
 
-    /**
-     * The controller that starts/stops Jenkins
-     */
-    @Inject
-    public JenkinsController controller;
     
     @Inject
     protected ElasticTime time;

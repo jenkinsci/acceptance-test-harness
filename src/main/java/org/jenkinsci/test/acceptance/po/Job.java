@@ -17,9 +17,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
 
+import javax.inject.Inject;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.codehaus.plexus.util.Base64;
+import org.jenkinsci.test.acceptance.controller.JenkinsController;
+import org.jenkinsci.test.acceptance.controller.LocalController;
 import org.jenkinsci.test.acceptance.controller.RemoteJenkinsController;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.junit.internal.AssumptionViolatedException;
@@ -44,6 +48,12 @@ public class Job extends TopLevelItem {
         return parameters;
     }
 
+    /**
+     * The controller that starts/stops Jenkins
+     */
+    @Inject
+    public JenkinsController controller;
+    
     private List<Parameter> parameters = new ArrayList<>();
 
     // TODO these controls (and some methods) actually belong in a subclass corresponding to AbstractProject
@@ -200,9 +210,9 @@ public class Job extends TopLevelItem {
             byte[] archive = IOUtils.toByteArray(new FileInputStream(tmp));
 
             if (SystemUtils.IS_OS_WINDOWS) {
-                if (controller instanceof RemoteJenkinsController) {
+                if (!(controller instanceof LocalController)) {
                     // TODO: Make it work for RemoteJenkinsController like in Unix (below)
-                    throw new AssumptionViolatedException("Copying files in Windows if a RemoteJenkinsController is in use is not yet supported. Test will be skipped.");
+                    throw new AssumptionViolatedException("Copying files in Windows is only supported if a LocalController is in use. Test will be skipped.");
                 }
                 addBatchStep("xcopy " + file.getAbsolutePath() + " %cd% /E");
             } else {

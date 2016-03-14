@@ -17,11 +17,16 @@ import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
 /**
- * Indicates that the test must be run on a machine running 
- * one of the operating systems provided
  * 
- * If the test is not running on na accepted operating system 
- * the test will be skipped before Jenkins boots up
+ * Indicates that the test and Jenkins instance must be running 
+ * on one of the operating systems provided. If this condition is not
+ * met, this test will be skipped.
+ * 
+ * <p>
+ * This check can only be <strong>trusted to do its job correctly</strong> when tests 
+ * are being run with a LocalController. When using a different controller, 
+ * the machine running Jenkins can be different from the one running the tests so
+ * the test may pass or fail when it should not.
  */
 @Retention(RUNTIME)
 @Target({METHOD, TYPE})
@@ -44,9 +49,9 @@ public @interface WithOS {
            return new Statement() {
             @Override
             public void evaluate() throws Throwable {
-                Class<?> testCase = d.getTestClass();
-                check(d.getAnnotation(WithOS.class), testCase);
-                check(testCase.getAnnotation(WithOS.class), testCase);
+                Class<?> testSuite = d.getTestClass();
+                check(d.getAnnotation(WithOS.class), testSuite);
+                check(testSuite.getAnnotation(WithOS.class), testSuite);
 
                 base.evaluate();
             }
@@ -54,7 +59,7 @@ public @interface WithOS {
             private void check(WithOS withos, Class<?> testCase) {
                 if (withos == null) return;
                 
-                String errorMsg = "Test must be run on a machine running any of the following operating systems: " + Arrays.toString(withos.os());
+                String errorMsg = "Test and Jenkins instance must be running on any of the following operating systems: " + Arrays.toString(withos.os());
                 for (OS _os : withos.os()) {
                     switch (_os) {
                     case LINUX:
