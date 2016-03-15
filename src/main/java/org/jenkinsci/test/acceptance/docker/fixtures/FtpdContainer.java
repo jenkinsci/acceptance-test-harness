@@ -3,8 +3,10 @@ package org.jenkinsci.test.acceptance.docker.fixtures;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
+import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.docker.DockerContainer;
 import org.jenkinsci.test.acceptance.docker.DockerFixture;
+import org.jenkinsci.test.acceptance.docker.DynamicDockerContainer;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -18,7 +20,7 @@ import java.io.IOException;
  * @author Tobias Meyer
  */
 @DockerFixture(id = "ftpd", ports = {21, 7050, 7051, 7052, 7053, 7054, 7055}, bindIp = "127.0.0.2")
-public class FtpdContainer extends DockerContainer implements IPasswordDockerContainer {
+public class FtpdContainer extends DynamicDockerContainer implements IPasswordDockerContainer {
     private FTPClient ftpClient;
 
     private final String username = "test";
@@ -58,7 +60,7 @@ public class FtpdContainer extends DockerContainer implements IPasswordDockerCon
      */
     public Boolean ftpConnect() {
         try {
-            ftpClient.connect(ipBound(21), port(21));
+            ftpClient.connect(getIpAddress(), port(21));
             ftpClient.enterLocalPassiveMode();
             ftpClient.setRemoteVerificationEnabled(false);
 
