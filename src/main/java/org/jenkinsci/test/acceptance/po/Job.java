@@ -24,7 +24,6 @@ import org.apache.commons.lang.SystemUtils;
 import org.codehaus.plexus.util.Base64;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.LocalController;
-import org.jenkinsci.test.acceptance.controller.RemoteJenkinsController;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.junit.internal.AssumptionViolatedException;
 import org.openqa.selenium.WebElement;
