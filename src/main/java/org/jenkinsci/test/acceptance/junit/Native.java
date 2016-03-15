@@ -80,8 +80,7 @@ public @interface Native {
                         for (String dirName : dirsInPath) {
                             File dir = new File(dirName);
                             if (dir.isDirectory()) {
-                                List<String> files = Arrays.asList(dir.list());
-                                supportedCmds.addAll(files);
+                                supportedCmds.addAll(Arrays.asList(dir.list()));
                             }
                         }
                     }
