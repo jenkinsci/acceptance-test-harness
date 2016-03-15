@@ -44,10 +44,13 @@ import org.jenkinsci.test.acceptance.po.DumbSlave;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import static org.junit.Assert.*;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.jvnet.hudson.test.Issue;
+
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Roughly follows <a href="https://github.com/jenkinsci/workflow-plugin/blob/master/TUTORIAL.md">the tutorial</a>.
@@ -69,6 +72,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
 
     @WithPlugins({"workflow-aggregator@1.1", "junit@1.3", "git@2.3"})
     @Test public void linearFlow() throws Exception {
+        assumeTrue("This test requires a restartable Jenkins", jenkins.canRestart());
         MavenInstallation.installMaven(jenkins, "M3", "3.1.0");
         final DumbSlave slave = (DumbSlave) slaveController.install(jenkins).get();
         slave.configure(new Callable<Void>() {

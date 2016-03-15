@@ -22,12 +22,14 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.*;
-
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Logger;
+
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.*;
+
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Indicates that a test requires the presence of the specified plugins.
@@ -91,6 +93,7 @@ public @interface WithPlugins {
                     restartRequired |= installPlugins(d.getTestClass().getAnnotation(WithPlugins.class), plugins);
                     LOGGER.info("for " + d + " asked to install " + plugins + "; restartRequired? " + restartRequired);
                     if (restartRequired) {
+                        assumeTrue("This test requires a restartable Jenkins", jenkins.canRestart());
                         jenkins.restart();
                     }
                     for (String name : plugins) {

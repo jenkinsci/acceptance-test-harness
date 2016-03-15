@@ -29,6 +29,7 @@ import org.openqa.selenium.WebElement;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Acceptance tests for the PMD plugin.
@@ -228,6 +229,7 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
      */
     @Test @Issue("24940")
     public void should_report_new_and_fixed_warnings_in_consecutive_builds() {
+        assumeTrue("This test requires a restartable Jenkins", jenkins.canRestart());
         FreeStyleJob job = createFreeStyleJob();
         Build firstBuild = buildJobAndWait(job);
         editJob(PLUGIN_ROOT + "forSecondRun/pmd-warnings.xml", false, job);

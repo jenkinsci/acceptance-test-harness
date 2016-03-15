@@ -3,6 +3,8 @@ package org.jenkinsci.test.acceptance.steps;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 
+import static org.junit.Assume.assumeTrue;
+
 /**
  * @author Kohsuke Kawaguchi
  */
@@ -11,6 +13,7 @@ public class PluginSteps extends AbstractSteps {
     @Given("^I have installed the \"([^\"]*)\" plugin( from the update center)?$")
     public void I_have_installed_the_plugin(String name) throws Throwable {
         if (my.jenkins.getPluginManager().installPlugins(name)) {
+            assumeTrue("This test requires a restartable Jenkins", my.jenkins.canRestart());
             my.jenkins.restart();
         }
     }

@@ -33,6 +33,8 @@ import org.junit.Test;
 import org.openqa.selenium.WebElement;
 import java.util.concurrent.ExecutionException;
 
+import static org.junit.Assume.assumeTrue;
+
 /**
  * Feature: Uninstall plugin test
  * @author Orjan Percy <orjan.percy@sonymobile.com>
@@ -48,6 +50,7 @@ public class UninstallPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void gerrit_uninstall_plugin() throws InterruptedException, ExecutionException {
+        assumeTrue("This test requires a restartable Jenkins", jenkins.canRestart());
         jenkins.getPluginManager().visit("installed");
         check(find(by.url("plugin/gerrit-trigger")), false);
         WebElement form = find(by.action("plugin/gerrit-trigger/uninstall"));

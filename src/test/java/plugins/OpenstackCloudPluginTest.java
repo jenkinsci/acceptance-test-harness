@@ -57,6 +57,8 @@ import org.jvnet.hudson.test.Issue;
 
 import com.google.inject.Inject;
 
+import static org.junit.Assume.assumeTrue;
+
 @WithPlugins("openstack-cloud")
 @TestActivation({"ENDPOINT", "IDENTITY", "CREDENTIAL"})
 public class OpenstackCloudPluginTest extends AbstractJUnitTest {
@@ -206,6 +208,7 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
     @WithCredentials(credentialType = WithCredentials.USERNAME_PASSWORD, values = {MACHINE_USERNAME, "ath"})
     @TestActivation({"HARDWARE_ID", "IMAGE_ID", "KEY_PAIR_NAME"})
     public void sshSlaveShouldSurviveRestart() {
+        assumeTrue("This test requires a restartable Jenkins", jenkins.canRestart());
         configureCloudInit("cloud-init");
         configureProvisioning("SSH", "label");
 
