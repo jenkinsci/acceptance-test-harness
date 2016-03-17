@@ -33,7 +33,7 @@ public class OpenstackBuildWrapper extends BuildWrapper {
     }
 
     public void cloud(String name) {
-        control("instancesToRun/cloudName").select(name);;
+        control("instancesToRun/cloudName").select(name);
     }
 
     public void template(String name) {
