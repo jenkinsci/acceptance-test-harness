@@ -85,9 +85,10 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
     @Inject(optional = true) @Named("OpenstackCloudPluginTest.KEY_PAIR_NAME")
     public String KEY_PAIR_NAME;
 
-    @After
+    @After // Terminate all nodes
     public void tearDown() {
-        // Terminate all nodes
+        // We have never left the config - no nodes to terminate
+        if (getCurrentUrl().endsWith("/configure")) return;
         jenkins.runScript("Jenkins.instance.nodes.each { it.terminate() }");
     }
 
@@ -98,7 +99,6 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
         OpenstackCloud cloud = addCloud(config);
         cloud.testConnection();
         waitFor(driver, hasContent("Connection succeeded!"), 60);
-        config.save(); // Do not leave the modified form open to avoid warnings
     }
 
     @Test
