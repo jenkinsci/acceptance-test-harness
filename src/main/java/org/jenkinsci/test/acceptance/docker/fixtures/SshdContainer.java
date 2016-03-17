@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.docker.fixtures;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.SystemUtils;
 import org.jenkinsci.test.acceptance.docker.DockerContainer;
 import org.jenkinsci.test.acceptance.docker.DockerFixture;
 import org.jenkinsci.utils.process.CommandBuilder;
@@ -32,7 +33,9 @@ public class SshdContainer extends DockerContainer {
                 privateKey = File.createTempFile("ssh", "key");
                 privateKey.deleteOnExit();
                 FileUtils.copyURLToFile(resource("unsafe").url, privateKey);
-                Files.setPosixFilePermissions(privateKey.toPath(), EnumSet.of(OWNER_READ));
+                if (SystemUtils.IS_OS_UNIX) {
+                    Files.setPosixFilePermissions(privateKey.toPath(), EnumSet.of(OWNER_READ));
+                }
             } catch (IOException e) {
                 throw new RuntimeException("Not able to get the plaintext SSH key file. Missing file, wrong file permissions?!");
             }
@@ -49,7 +52,9 @@ public class SshdContainer extends DockerContainer {
                 privateKeyEnc = File.createTempFile("ssh_enc", "key");
                 privateKeyEnc.deleteOnExit();
                 FileUtils.copyURLToFile(resource("unsafe_enc_key").url, privateKeyEnc);
-                Files.setPosixFilePermissions(privateKeyEnc.toPath(), EnumSet.of(OWNER_READ));
+                if (SystemUtils.IS_OS_UNIX) {
+                    Files.setPosixFilePermissions(privateKeyEnc.toPath(), EnumSet.of(OWNER_READ));
+                }
             } catch (IOException e) {
                 throw new RuntimeException("Not able to get the encrypted SSH key file. Missing file, wrong file permissions?!");
             }
