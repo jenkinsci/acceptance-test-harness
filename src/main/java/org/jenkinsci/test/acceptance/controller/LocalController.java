@@ -10,6 +10,7 @@ import org.jenkinsci.test.acceptance.junit.FailureDiagnostics;
 import org.jenkinsci.test.acceptance.log.LogListenable;
 import org.jenkinsci.test.acceptance.log.LogListener;
 import org.jenkinsci.utils.process.ProcessInputStream;
+import org.junit.runners.model.MultipleFailureException;
 import org.openqa.selenium.TimeoutException;
 
 import javax.annotation.CheckForNull;
@@ -237,8 +238,17 @@ public abstract class LocalController extends JenkinsController implements LogLi
             }
         }
 
-        if(getenv("INTERACTIVE") != null && getenv("INTERACTIVE").equals("true")){
-            cause.printStackTrace(out);
+        if (getenv("INTERACTIVE") != null && getenv("INTERACTIVE").equals("true")) {
+            if (cause instanceof MultipleFailureException) {
+                System.out.println("Multiple exceptions occurred:");
+                for (Throwable c : ((MultipleFailureException) cause).getFailures()) {
+                    out.println();
+                    c.printStackTrace(out);
+                    out.println();
+                }
+            } else {
+                cause.printStackTrace(out);
+            }
             out.println("Commencing interactive debugging. Browser session was kept open.");
             out.println("Press return to proceed.");
             try {
