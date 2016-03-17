@@ -10,8 +10,6 @@ import org.jvnet.hudson.annotation_indexer.Indexed;
 /**
  * Annotation used to register implementations to be discovered automatically.
  * <p/>
- * The annotation accepts several values as possible alternatives. First that exists will be used.
- * <p/>
  * Note that different services creating an instances have different conventions concerning both the values of this
  * annotation as well as the class interface. In some cases, descriptions are visual labels used in UI, but it can as
  * well be an internal identifier such as Jenkins class name. Compare {@link Describable} annotations for {@link
@@ -29,6 +27,8 @@ import org.jvnet.hudson.annotation_indexer.Indexed;
 public @interface Describable {
     /**
      * Descriptions.
+     *
+     * The annotation accepts several values as possible alternatives. First that exists will be used.
      */
     String[] value();
 }

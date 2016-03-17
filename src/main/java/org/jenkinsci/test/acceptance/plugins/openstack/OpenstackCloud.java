@@ -32,7 +32,7 @@ import org.jenkinsci.test.acceptance.po.PageObject;
  *
  * @author ogondza
  */
-@Describable("Cloud (Openstack)")
+@Describable({"Cloud (OpenStack)", "Cloud (Openstack)"})
 public class OpenstackCloud extends Cloud {
 
     public OpenstackCloud(PageObject context, String path) {
