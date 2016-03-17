@@ -31,6 +31,7 @@ import org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.FreeStyleMultiBranchJob;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.ListView;
 import org.jenkinsci.test.acceptance.po.ListViewColumn;
@@ -352,7 +353,8 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
 
     private <J extends Job> boolean isFreeStyleOrMatrixJob(final Class<J> jobClass) {
         return jobClass.isAssignableFrom(FreeStyleJob.class)
-                || jobClass.isAssignableFrom((MatrixProject.class));
+                || jobClass.isAssignableFrom(MatrixProject.class)
+                || jobClass.isAssignableFrom(FreeStyleMultiBranchJob.class);
     }
 
     /**
