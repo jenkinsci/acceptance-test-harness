@@ -42,6 +42,7 @@ import org.openqa.selenium.UnsupportedCommandException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.firefox.FirefoxBinary;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxProfile;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
@@ -95,7 +96,9 @@ public class FallbackConfig extends AbstractModule {
 
             profile.setPreference(LANGUAGE_SELECTOR, "en");
 
-            return new FirefoxDriver(profile);
+            FirefoxBinary binary = new FirefoxBinary();
+            binary.setEnvironmentProperty("DISPLAY", getBrowserDisplay());
+            return new FirefoxDriver(binary, profile);
         case "ie":
         case "iexplore":
         case "iexplorer":
@@ -141,6 +144,19 @@ public class FallbackConfig extends AbstractModule {
         default:
             throw new Error("Unrecognized browser type: "+browser);
         }
+    }
+
+    /**
+     * Get display number to run browser on.
+     *
+     * Custom property <tt></>BROWSER_DISPLAY</tt> has the preference. If not provided <tt>DISPLAY</tt> is used.
+     */
+    private String getBrowserDisplay() {
+        String d = System.getenv("BROWSER_DISPLAY");
+        if (d != null) return d;
+
+        d = System.getenv("DISPLAY");
+        return d;
     }
 
     /**
