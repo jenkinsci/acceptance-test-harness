@@ -22,7 +22,6 @@ public class SvnContainer extends DockerContainer {
 
     private static final String PROTOCOL_HTTP = "http://";
     private static final String PROTOCOL_SVN = "svn://";
-    private static final String LOCALHOST = "localhost:";
     private static final String UNSAVE_REPO = "/svn";
     private static final String User_PWD_SAVE_REPO = "/svn_pwd";
     private static final String WEB_SVN = "/websvn/listing.php?repname=svn";
@@ -34,7 +33,7 @@ public class SvnContainer extends DockerContainer {
      * @throws SubversionPluginTestException e
      */
     public URL getHttpUrl() throws SubversionPluginTestException {
-        String url = PROTOCOL_HTTP + LOCALHOST + port(80);
+        String url = PROTOCOL_HTTP + ipBound(80) + ':' + port(80);
         return createUrl(url);
     }
 
@@ -45,7 +44,7 @@ public class SvnContainer extends DockerContainer {
      * @throws SubversionPluginTestException e
      */
     public URI getSvnUrl() throws SubversionPluginTestException {
-        String url = PROTOCOL_SVN + LOCALHOST + port(3690);
+        String url = PROTOCOL_SVN + ipBound(80) + ':' + port(3690);
         return createUri(url);
     }
 
