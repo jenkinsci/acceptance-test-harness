@@ -29,6 +29,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.SystemUtils;
 import org.jenkinsci.utils.process.CommandBuilder;
 
 /**
@@ -87,16 +88,28 @@ public abstract class ToolInstallation extends PageAreaImpl {
             new File(home, "bin").mkdirs();
             home.deleteOnExit();
 
-            final String path = new CommandBuilder("which", binary).popen().asText().trim();
-            final String code = String.format(
-                    "#!/bin/sh\nexport %s=\nexec %s \"$@\"\n",
-                    homeEnvName, path
-            );
+            if (SystemUtils.IS_OS_UNIX) {
+                final String path = new CommandBuilder("which", binary).popen().asText().trim();
+                final String code = String.format(
+                        "#!/bin/sh\nexport %s=\nexec %s \"$@\"\n",
+                        homeEnvName, path
+                );
 
-            final File command = new File(home, "bin/" + binary);
-            FileUtils.writeStringToFile(command, code);
-            command.setExecutable(true);
-
+                final File command = new File(home, "bin/" + binary);
+                FileUtils.writeStringToFile(command, code);
+                command.setExecutable(true);
+            }
+            else {
+                String path = new CommandBuilder("where.exe", binary).popen().asText().trim();
+                // where will return all matches and we only want the first.
+                path = path.replaceAll("\r\n.*", "");
+                final String code = String.format("set %s=\r\ncall %s %%*\r\n",
+                                                  homeEnvName, path
+                                          );
+                final File command = new File(home, "bin/" + binary + ".cmd");
+                FileUtils.writeStringToFile(command, code);
+                command.setExecutable(true);
+            }
             return home.getAbsolutePath();
         }
         catch (IOException ex) {
