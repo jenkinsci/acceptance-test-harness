@@ -136,7 +136,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
         step.useLocalRepository();
         job.save();
 
-        job.startBuild().shouldSucceed().shouldContainsConsoleOutput("-Dmaven.repo.local=([^\\n]*)/.repository");
+        job.startBuild().shouldSucceed().shouldContainsConsoleOutput("-Dmaven.repo.local=([^\\n]*)[/\\\\].repository");
     }
 
     @Test
