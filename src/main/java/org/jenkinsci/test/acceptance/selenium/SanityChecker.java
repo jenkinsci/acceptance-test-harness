@@ -29,6 +29,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.events.AbstractWebDriverEventListener;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 
 /**
  * Make sure there are no exceptions shown after user interaction.
@@ -85,6 +86,8 @@ public class SanityChecker extends AbstractWebDriverEventListener {
      * and reduces the overhead of {@link SanityChecker}.
      */
     private boolean isFastPath(WebDriver driver) {
+        //let serve alert
+        if(ExpectedConditions.alertIsPresent()!=null) return true;
         final String pageSource = driver.getPageSource();
         return !(pageSource.contains("Oops!") || pageSource.contains("Try POSTing"));
     }
