@@ -249,7 +249,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
         int freePort = this.findAvailablePort();
         LdapDetails ldapDetails = new LdapDetails("", 0, ldapContainer.getManagerDn(), ldapContainer.getManagerPassword(), ldapContainer.getRootDn());
         // Fallback-Config: primary server is not running, alternative server is running docker fixture
-        ldapDetails.setHostWithPort(ldapContainer.getHost()+":" + freePort + " " + ldapContainer.getHost() + ":" + ldapContainer.getPort());
+        ldapDetails.setHostWithPort("localhost:" + freePort + " " + ldapContainer.getHost() + ":" + ldapContainer.getPort());
         realm.configure(ldapDetails);
         securityConfig.save();
 
