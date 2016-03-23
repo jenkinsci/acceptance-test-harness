@@ -31,9 +31,6 @@ import org.jenkinsci.test.acceptance.docker.fixtures.JavaContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.plugins.credentials.UserPwdCredential;
-import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshCredentialDialog;
-import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshPrivateKeyCredential;
 import org.jenkinsci.test.acceptance.plugins.ssh_slaves.SshSlaveLauncher;
 import org.jenkinsci.test.acceptance.po.DumbSlave;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
@@ -58,35 +55,68 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
     }
 
     @Test public void connectWithPassword() {
-        SshSlaveLauncher launcher = slave.setLauncher(SshSlaveLauncher.class);
-        launcher.host.set(sshd.ipBound(22));
-        launcher.port(sshd.port(22));
-
-        SshCredentialDialog dia = launcher.addCredential();
-        UserPwdCredential cred = dia.select(UserPwdCredential.class);
-        cred.username.set("test");
-        cred.password.set("test");
-        cred.add();
+        configureDefaultSSHSlaveLauncher().pwdCredentials("test", "test");
         slave.save();
 
         verify();
     }
 
     @Test public void connectWithKey() {
-        SshSlaveLauncher launcher = slave.setLauncher(SshSlaveLauncher.class);
-        launcher.host.set(sshd.ipBound(22));
-        launcher.port(sshd.port(22));
-
-        SshCredentialDialog dia = launcher.addCredential();
-        SshPrivateKeyCredential cred = dia.select(SshPrivateKeyCredential.class);
-        cred.username.set("test");
-        cred.enterDirectly(sshd.getPrivateKeyString());
-        cred.add();
+        configureDefaultSSHSlaveLauncher().keyCredentials("test", sshd.getPrivateKeyString());
         slave.save();
 
         verify();
     }
 
+    @Test public void unableToConnectWrongPort() {
+        configureSSHSlaveLauncher(sshd.ipBound(22), 1234).pwdCredentials("test", "test");
+        slave.save();
+        
+        verifyLog("Connection refused");
+    }
+    
+    
+    @Test public void unableToConnectWrongCredentials() {
+        configureDefaultSSHSlaveLauncher().pwdCredentials("unexsisting", "unexsisting");
+        slave.save();
+        
+        verifyLog("Authentication failed");
+    }
+    
+    @Test public void customJavaPath() {
+        SshSlaveLauncher launcher = configureDefaultSSHSlaveLauncher().pwdCredentials("test", "test");
+        
+        launcher.javaPath.set("/usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java");
+        slave.save();
+    
+        verifyLog("java-8-openjdk-amd64");
+        verify();
+    }
+    
+    @Test public void jvmOptions() {
+        String option = "-XX:-PrintGC";
+        
+        SshSlaveLauncher launcher = configureDefaultSSHSlaveLauncher().pwdCredentials("test", "test");
+        
+        launcher.jvmOptions.set(option);
+        slave.save();
+        
+        verifyLog(option);
+        verify();
+    }
+    
+    @Test public void customStartup() {
+        SshSlaveLauncher launcher = configureDefaultSSHSlaveLauncher().pwdCredentials("test", "test");
+        
+        launcher.prefixCmd.set("sh -c \"");
+        launcher.suffixCmd.set("\"");
+        slave.save();
+        
+        
+        verifyLog("sh -c \"cd \"/tmp/" + slave.getName() + "\" && java  -jar slave.jar\"");
+        verify();
+    }
+        
     private void verify() {
         slave.waitUntilOnline();
         assertTrue(slave.isOnline());
@@ -98,5 +128,21 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
         job.addShellStep("test $USER = test");
         job.save();
         job.startBuild().shouldSucceed();
+    }
+    
+    private void verifyLog(String message) {
+        elasticSleep(3000);
+        assertTrue(slave.getLog().contains(message));
+    }
+    
+    private SshSlaveLauncher configureDefaultSSHSlaveLauncher() {
+        return configureSSHSlaveLauncher(sshd.ipBound(22), sshd.port(22));
+    }
+    
+    private SshSlaveLauncher configureSSHSlaveLauncher(String host, int port) {
+        SshSlaveLauncher launcher = slave.setLauncher(SshSlaveLauncher.class);
+        launcher.host.set(host);
+        launcher.port(port);
+        return launcher;
     }
 }
