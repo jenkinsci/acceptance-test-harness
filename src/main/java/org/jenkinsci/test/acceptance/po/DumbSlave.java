@@ -78,7 +78,7 @@ public class DumbSlave extends Slave {
                 }
             }
             else {
-                if (new CommandBuilder("powershell -command \"& { Invoke-WebRequest }\"").system() != 0) {
+                if (new CommandBuilder("powershell -command \"& { Invoke-WebRequest -?}\"").system() != 0) {
                     // Invoke-WebRequest was introduced in version 3.
                     throw new IllegalStateException("powershell version 3 or higher is required to run tests that run on local slaves.");
                 }
