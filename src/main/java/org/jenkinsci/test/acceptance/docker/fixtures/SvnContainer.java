@@ -44,7 +44,7 @@ public class SvnContainer extends DockerContainer {
      * @throws SubversionPluginTestException e
      */
     public URI getSvnUrl() throws SubversionPluginTestException {
-        String url = PROTOCOL_SVN + ipBound(80) + ':' + port(3690);
+        String url = PROTOCOL_SVN + ipBound(3690) + ':' + port(3690);
         return createUri(url);
     }
 
