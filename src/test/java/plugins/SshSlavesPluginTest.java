@@ -63,6 +63,8 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
 
     @Test public void connectWithKey() {
         configureDefaultSSHSlaveLauncher().keyCredentials("test", sshd.getPrivateKeyString());
+        // To avoid test flakiness
+        elasticSleep(1000);
         slave.save();
 
         verify();
@@ -72,6 +74,8 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
         configureSSHSlaveLauncher(sshd.ipBound(22), 1234).pwdCredentials("test", "test");
         slave.save();
         
+        // Wait for connection attempt to fail
+        elasticSleep(3000);
         verifyLog("Connection refused");
     }
     
@@ -80,6 +84,8 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
         configureDefaultSSHSlaveLauncher().pwdCredentials("unexsisting", "unexsisting");
         slave.save();
         
+        // Wait for connection attempt to fail
+        elasticSleep(3000);
         verifyLog("Authentication failed");
     }
     
@@ -89,8 +95,8 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
         launcher.javaPath.set("/usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java");
         slave.save();
     
-        verifyLog("java-8-openjdk-amd64");
         verify();
+        verifyLog("java-8-openjdk-amd64");
     }
     
     @Test public void jvmOptions() {
@@ -101,8 +107,8 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
         launcher.jvmOptions.set(option);
         slave.save();
         
-        verifyLog(option);
         verify();
+        verifyLog(option);
     }
     
     @Test public void customStartup() {
@@ -113,8 +119,8 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
         slave.save();
         
         
-        verifyLog("sh -c \"cd \"/tmp/" + slave.getName() + "\" && java  -jar slave.jar\"");
         verify();
+        verifyLog("sh -c \"cd \"/tmp/" + slave.getName() + "\" && java  -jar slave.jar\"");
     }
         
     private void verify() {
@@ -131,7 +137,6 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
     }
     
     private void verifyLog(String message) {
-        elasticSleep(3000);
         assertTrue(slave.getLog().contains(message));
     }
     

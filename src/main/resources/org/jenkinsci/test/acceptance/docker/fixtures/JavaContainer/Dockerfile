@@ -21,5 +21,4 @@ RUN echo deb http://archive.ubuntu.com/ubuntu precise universe >> /etc/apt/sourc
 RUN apt-get install --no-install-recommends -y software-properties-common
 RUN add-apt-repository ppa:openjdk-r/ppa
 RUN apt-get update
-RUN apt-get install --no-install-recommends -y openjdk-8-jdk
-RUN apt-get install --no-install-recommends -y openjdk-7-jdk curl wget ant maven
+RUN apt-get install --no-install-recommends -y openjdk-8-jdk openjdk-7-jdk curl wget ant maven
