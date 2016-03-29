@@ -74,19 +74,22 @@ public @interface Native {
                     String path = System.getenv("PATH");
                     if (path != null) {
                         // Get all directories in PATH
-                        String[] dirsInPath = SystemUtils.IS_OS_WINDOWS ? path.split(";") : path.split(":");
+                        String[] dirsInPath = path.split(File.pathSeparator);
                         
                         // Iterate over PATH directories to get all supported commands
                         for (String dirName : dirsInPath) {
                             File dir = new File(dirName);
                             if (dir.isDirectory()) {
-                                supportedCmds.addAll(Arrays.asList(dir.list()));
+                                String[] filesInDir = dir.list();
+                                if (filesInDir != null) {
+                                    supportedCmds.addAll(Arrays.asList(filesInDir));
+                                }
                             }
                         }
                     }
                     // An cmd is not Native if it cannot be found in the PATH
                     for (String cmd : n.value()) {
-                        if (!supportedCmds.contains(cmd)) {
+                        if (!supportedCmds.contains(cmd) && !supportedCmds.contains(cmd + ".bat") && !supportedCmds.contains(cmd + ".exe")) {
                             throw new AssumptionViolatedException(cmd + " is needed for the test but doesn't exist in the system.");
                         }
                     }
