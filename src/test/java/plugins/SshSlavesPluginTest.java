@@ -25,6 +25,10 @@ package plugins;
 
 import static org.junit.Assert.assertTrue;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+
+import org.hamcrest.Matcher;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.SshdContainer;
 import org.jenkinsci.test.acceptance.docker.fixtures.JavaContainer;
@@ -32,11 +36,13 @@ import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.ssh_slaves.SshSlaveLauncher;
+import org.jenkinsci.test.acceptance.po.CapybaraPortingLayer;
 import org.jenkinsci.test.acceptance.po.DumbSlave;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.google.common.base.Predicate;
 import com.google.inject.Inject;
 
 @WithPlugins("ssh-slaves")
@@ -55,16 +61,18 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
     }
 
     @Test public void connectWithPassword() {
-        configureDefaultSSHSlaveLauncher().pwdCredentials("test", "test");
+        configureDefaultSSHSlaveLauncher()
+            .pwdCredentials("test", "test")
+            .waitForCredentialVisible();
         slave.save();
 
         verify();
     }
 
     @Test public void connectWithKey() {
-        configureDefaultSSHSlaveLauncher().keyCredentials("test", sshd.getPrivateKeyString());
-        // To avoid test flakiness
-        elasticSleep(1000);
+        configureDefaultSSHSlaveLauncher()
+            .keyCredentials("test", sshd.getPrivateKeyString())
+            .waitForCredentialVisible();
         slave.save();
 
         verify();
@@ -75,18 +83,15 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
         slave.save();
         
         // Wait for connection attempt to fail
-        elasticSleep(3000);
-        verifyLog("Connection refused");
+        waitForLogMessage("Connection refused");
     }
-    
     
     @Test public void unableToConnectWrongCredentials() {
         configureDefaultSSHSlaveLauncher().pwdCredentials("unexsisting", "unexsisting");
         slave.save();
         
         // Wait for connection attempt to fail
-        elasticSleep(3000);
-        verifyLog("Authentication failed");
+        waitForLogMessage("Authentication failed");
     }
     
     @Test public void customJavaPath() {
@@ -136,6 +141,14 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
         job.startBuild().shouldSucceed();
     }
     
+    private void waitForLogMessage(final String message) {
+        waitFor().withTimeout(5, TimeUnit.SECONDS).until(new Callable<Boolean>() {
+            @Override
+            public Boolean call() throws Exception {
+                return slave.getLog().contains(message);
+            }
+        });
+    }
     private void verifyLog(String message) {
         assertTrue(slave.getLog().contains(message));
     }

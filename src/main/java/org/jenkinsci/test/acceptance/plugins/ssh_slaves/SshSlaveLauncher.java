@@ -1,5 +1,8 @@
 package org.jenkinsci.test.acceptance.plugins.ssh_slaves;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+
 import org.jenkinsci.test.acceptance.plugins.credentials.UserPwdCredential;
 import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshCredentialDialog;
 import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshPrivateKeyCredential;
@@ -22,6 +25,8 @@ public class SshSlaveLauncher extends ComputerLauncher {
     public final Control javaPath = control("javaPath");
     public final Control jvmOptions = control("jvmOptions");
         
+    private String credentialUsername;
+    
     public SshSlaveLauncher(PageObject context, String path) {
         super(context, path);
     }
@@ -55,6 +60,7 @@ public class SshSlaveLauncher extends ComputerLauncher {
         cred.username.set(username);
         cred.password.set(password);
         cred.add();
+        credentialUsername = username;
         return this;
     }
 
@@ -71,6 +77,20 @@ public class SshSlaveLauncher extends ComputerLauncher {
         cred.username.set(username);
         cred.enterDirectly(key);
         cred.add();
+        credentialUsername = username;
         return this;
+    }
+
+    /**
+     * Once a credential has been created for a given slave, this method can be used 
+     * to check whether it has already been rendered in the dropdown.
+     */
+    public void waitForCredentialVisible() {
+        waitFor().withTimeout(5, TimeUnit.SECONDS).until(new Callable<Boolean>() {
+            @Override
+            public Boolean call() throws Exception {
+                return credentialsId.resolve().getText().contains(credentialUsername);
+            }
+        });
     }
 }
