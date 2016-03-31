@@ -1,5 +1,6 @@
 package org.jenkinsci.test.acceptance.junit;
 
+import org.apache.commons.lang.SystemUtils;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.junit.internal.AssumptionViolatedException;
 import org.junit.rules.TestRule;
@@ -46,8 +47,15 @@ public @interface Native {
                 private void verifyNativeCommandPresent(Native n) throws IOException, InterruptedException {
                     if (n==null)        return;
                     for (String cmd : n.value()) {
-                        if (new CommandBuilder("which",cmd).system()!=0) {
-                            throw new AssumptionViolatedException(cmd + " is needed for the test but doesn't exist in the system");
+                        if (SystemUtils.IS_OS_WINDOWS) {
+                            if (new CommandBuilder("where",cmd).system()!=0) {
+                                throw new AssumptionViolatedException(cmd + " is needed for the test but doesn't exist in the system");
+                            }
+                        }
+                        else {
+                            if (new CommandBuilder("which",cmd).system()!=0) {
+                                throw new AssumptionViolatedException(cmd + " is needed for the test but doesn't exist in the system");
+                            }
                         }
                     }
                 }

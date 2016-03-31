@@ -3,6 +3,7 @@ package org.jenkinsci.test.acceptance.po;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
 /**
@@ -22,7 +23,15 @@ public class JobsMixIn extends MixIn {
 
         findCaption(type, new Finder<WebElement>() {
             @Override protected WebElement find(String caption) {
-                return outer.find(by.radioButton(caption));
+                try {
+                    // Jenkins 2.0 introduced a new "new item" page, which listed
+                    // the item types differently and did away with the radio buttons.
+                    String normalizedCaption = caption.replace('.', '_');
+                    return outer.find(by.css("li." + normalizedCaption));
+                } catch (NoSuchElementException e) {
+                    // Jenkins 1.x item type selection was by radio button.
+                    return outer.find(by.radioButton(caption));
+                }
             }
         }).click();
 

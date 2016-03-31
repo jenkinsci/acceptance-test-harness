@@ -20,6 +20,7 @@ import static org.junit.Assert.fail;
  * @author Vivek Pandey
  */
 public class CreateSlaveTest extends AbstractJUnitTest {
+    @WithPlugins("ssh-slaves")
     @Test
     @Since("1.560")
     public void newSlave() {
@@ -63,7 +64,7 @@ public class CreateSlaveTest extends AbstractJUnitTest {
         s.save();
     }
 
-    @WithPlugins("ssh-credentials@1.0")
+    @WithPlugins({"ssh-credentials@1.0", "ssh-slaves"})
     @Test
     public void newSlaveWithExistingCredential() {
 

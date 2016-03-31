@@ -55,6 +55,8 @@ import org.xml.sax.SAXException;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.junit.Assume.assumeTrue;
+
 
 /**
  * Acceptance tests for the FindBugs plugin.
@@ -216,6 +218,7 @@ public class FindBugsPluginTest extends AbstractAnalysisTest<FindBugsAction> {
      */
     @Test @Issue("24940")
     public void should_report_new_and_fixed_warnings_in_consecutive_builds() {
+        assumeTrue("This test requires a restartable Jenkins", jenkins.canRestart());
         FreeStyleJob job = createFreeStyleJob();
         Build firstBuild = buildJobAndWait(job);
         editJob("/findbugs_plugin/forSecondRun/findbugsXml.xml", false, job);

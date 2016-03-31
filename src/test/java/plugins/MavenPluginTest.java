@@ -120,7 +120,19 @@ public class MavenPluginTest extends AbstractJUnitTest {
 
     private String localMavenVersion() {
         final Pattern pattern = Pattern.compile("Apache Maven .*");
-        final Matcher matcher = pattern.matcher(jenkins.runScript("'mvn --version'.execute().text"));
+        String output = jenkins.runScript("try {\n"
+                                        + "  return 'mvn --version'.execute().text\n"
+                                        + "} catch (IOException ignored) {}\n"  
+                                        // mimic PATHEXT as BAT comes before CMD
+                                        + "try {\n"
+                                        + "  return 'mvn.bat --version'.execute().text\n"
+                                        + "} catch (IOException ignored) {}\n"
+                                        + "try {\n"
+                                        + "  return 'mvn.cmd --version'.execute().text\n"
+                                        + "} catch (IOException e) { throw e}\n"
+                                        );
+        System.out.println(output);
+        final Matcher matcher = pattern.matcher(output);
         matcher.find();
         return matcher.group(0);
     }
@@ -136,7 +148,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
         step.useLocalRepository();
         job.save();
 
-        job.startBuild().shouldSucceed().shouldContainsConsoleOutput("-Dmaven.repo.local=([^\\n]*)/.repository");
+        job.startBuild().shouldSucceed().shouldContainsConsoleOutput("-Dmaven.repo.local=([^\\n]*)[/\\\\].repository");
     }
 
     @Test

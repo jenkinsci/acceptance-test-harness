@@ -1,6 +1,6 @@
 package org.jenkinsci.test.acceptance.plugins.ssh_credentials;
 
-import org.jenkinsci.test.acceptance.plugins.credentials.Credential;
+import org.jenkinsci.test.acceptance.plugins.credentials.BaseStandardCredentials;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
@@ -11,9 +11,8 @@ import org.openqa.selenium.WebElement;
  * @author Kohsuke Kawaguchi
  */
 @Describable("SSH Username with private key")
-public class SshPrivateKeyCredential extends Credential {
+public class SshPrivateKeyCredential extends BaseStandardCredentials {
     public final Control username = control("username");
-    public final Control description = control("description");
 
     public SshPrivateKeyCredential(PageObject context, String path) {
         super(context, path);
@@ -41,10 +40,4 @@ public class SshPrivateKeyCredential extends Credential {
         }
     }
 
-    /**
-     * Adds this credential and close the dialog.
-     */
-    public void add() {
-        find(by.id("credentials-add-submit-button")).click();
-    }
 }

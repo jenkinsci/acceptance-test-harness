@@ -20,4 +20,12 @@ public abstract class Credential extends PageAreaImpl {
     protected Credential(PageArea area, String relativePath) {
         super(area, relativePath);
     }
+
+    /**
+     * Adds this credential and close the dialog.
+     */
+    public void add() {
+        find(by.id("credentials-add-submit-button")).click();
+    }
+
 }

@@ -20,6 +20,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.jenkinsci.test.acceptance.po.Slave.runBuildsInOrder;
 
+import static org.junit.Assume.assumeTrue;
+
 /**
  * @author Kohsuke Kawaguchi
  */
@@ -34,6 +36,7 @@ public class PrioritySorterPluginTest extends AbstractJUnitTest {
 
     @Before
     public void setUp() throws Exception {
+        assumeTrue("This test requires a restartable Jenkins", jenkins.canRestart());
         jenkins.restart(); // Priority sorter plugin needs this
         slave = slaves.install(jenkins).get();
     }

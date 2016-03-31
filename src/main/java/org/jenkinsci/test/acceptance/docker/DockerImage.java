@@ -1,10 +1,13 @@
 package org.jenkinsci.test.acceptance.docker;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.SystemUtils;
+import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.utils.process.CommandBuilder;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.URI;
 
 /**
@@ -16,16 +19,26 @@ public class DockerImage {
 
     public static final String DEFAULT_DOCKER_HOST = "127.0.0.1";
     public final String tag;
-    DockerHostResolver dockerHostResolver;
+    static DockerHostResolver dockerHostResolver = new DockerHostResolver();
 
     public DockerImage(String tag) {
         this.tag = tag;
-        dockerHostResolver = new DockerHostResolver();
     }
 
-    public <T extends DockerContainer> T start(Class<T> type, CommandBuilder options, CommandBuilder cmd,int portOffset) throws InterruptedException, IOException {
+    public <T extends DockerContainer> T start(Class<T> type, CommandBuilder options, CommandBuilder cmd, int portOffset) throws InterruptedException, IOException {
         DockerFixture f = type.getAnnotation(DockerFixture.class);
-        return start(type,f.ports(),portOffset,f.bindIp(),options,cmd);
+
+        String addr = f.bindIp();
+        if (!DockerFixture.DEFAULT_DOCKER_IP.equals(f.bindIp())) {
+            // specifying an address will only work if the docker host is on localhost.
+            if (InetAddress.getByName(getDockerHost()).isLoopbackAddress()) {
+                return start(type, f.ports(), portOffset, f.bindIp(), options, cmd);
+            }
+            else {
+                throw new AssertionError("Test would fail as docker requires local networks on a remote machine - Hint use `@WithDocker(localOnly=true)´ or do not specify a bindIp in " + type.getName());
+            }
+        }
+        return start(type, f.ports(), portOffset, getDockerHost(), options, cmd);
     }
 
     public <T extends DockerContainer> T start(Class<T> type, CommandBuilder options, CommandBuilder cmd) throws InterruptedException, IOException {
@@ -36,6 +49,7 @@ public class DockerImage {
     public <T extends DockerContainer> T start(Class<T> type, int[] ports, CommandBuilder options, CommandBuilder cmd) throws InterruptedException, IOException {
         return start(type,ports,0, getDockerHost(),options,cmd);
     }
+
     /**
      * Starts a container from this image.
      */
@@ -65,7 +79,7 @@ public class DockerImage {
         File tmplog = File.createTempFile("docker", "log"); // initially create a log file here
 
         Process p = docker.build()
-                .redirectInput(new File("/dev/null"))
+                .redirectInput(new File(SystemUtils.IS_OS_WINDOWS ? "NUL" : "/dev/null"))
                 .redirectErrorStream(true)
                 .redirectOutput(tmplog)
                 .start();
@@ -112,13 +126,16 @@ public class DockerImage {
         }
     }
 
-    // package for tests
-    String getDockerHost() {
+    /**
+     * Get the string representation of the docker host as set by DOCKER_HOST environment variable or the localhost address if it is not set (or is a socket).
+     * @return an IP Address or hostname of the docker host 
+     */
+    public static String getDockerHost() {
         final String dockerHostEnvironmentVariable = dockerHostResolver.getDockerHostEnvironmentVariable();
         return dockerHostEnvironmentVariable != null ? getIp(dockerHostEnvironmentVariable) : DEFAULT_DOCKER_HOST;
     }
 
-    private String getIp(String uri) {
+    private static String getIp(String uri) {
         final URI dockerHost = URI.create(uri);
         final String host = dockerHost.getHost();
         return host != null ? host : DEFAULT_DOCKER_HOST;

@@ -33,6 +33,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 
+import org.apache.commons.lang.SystemUtils;
 import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jvnet.hudson.test.Issue;
@@ -44,6 +45,7 @@ import org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.po.Artifact;
 import org.jenkinsci.test.acceptance.po.ArtifactArchiver;
+import org.jenkinsci.test.acceptance.po.BatchCommandBuildStep;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.ShellBuildStep;
@@ -89,9 +91,25 @@ public class CompressArtifactsPluginTest extends AbstractJUnitTest {
         FreeStyleJob job = jenkins.jobs.create();
         job.configure();
         job.addPublisher(ArtifactArchiver.class).includes("*");
-        job.addBuildStep(ShellBuildStep.class).command( // Generate archive larger than 4G
+        if (SystemUtils.IS_OS_UNIX) {
+            job.addBuildStep(ShellBuildStep.class).command( // Generate archive larger than 4G
                 "#!/bin/bash\nwget $JENKINS_URL/jnlpJars/jenkins-cli.jar -O stuff.jar; for i in {0..7000}; do cp -l stuff.jar stuff.${i}.jar; done"
-        );
+                                            );
+        }
+        else {
+            // On windows although we could create hard links this would exceed the number of hard links you can create for a given file. 
+            // and sparse files compress too well. 
+            //job.addBuildStep(BatchCommandBuildStep.class).command("for /l %%x in (0, 1, 7000) do fsutil file createnew stuff.%%x.jar 819200");
+            job.addBuildStep(BatchCommandBuildStep.class).command("powershell -command \"& { " +
+                                            "try { " +
+                                            "  Invoke-WebRequest %JENKINS_URL%/jnlpJars/jenkins-cli.jar -OutFile stuff.jar " +
+                                            "} catch { " +
+                                            "  echo 'download of jenkins-cli.jar failed'; " +
+                                            "  exit 2 "+
+                                            "}}\n " +
+                                            "for /l %%x in (0, 1, 7000) do cp stuff.jar stuff.%%x.jar\n");
+
+        }
         job.save();
 
         Build build = job.scheduleBuild().waitUntilFinished(10 * 60).shouldSucceed();
@@ -101,11 +119,6 @@ public class CompressArtifactsPluginTest extends AbstractJUnitTest {
                 job.name
         ));
         assertThat(length, greaterThanOrEqualTo(4L * 1024 * 1024 * 1024));
-
-        build.getArtifact("stuff.jar").open();
-        for (int i = 1; i <= 70; i++) {
-            build.getArtifact("stuff." + i + "42.jar").open();
-        }
     }
 
     @Test @Issue("JENKINS-27558")
@@ -146,7 +159,12 @@ public class CompressArtifactsPluginTest extends AbstractJUnitTest {
 
     private Build generateArtifact() {
         FreeStyleJob job = jenkins.jobs.create();
-        job.addBuildStep(ShellBuildStep.class).command("echo 'content' > " + ARTIFACT_NAME);
+        if (SystemUtils.IS_OS_UNIX) {
+            job.addBuildStep(ShellBuildStep.class).command("echo 'content' > " + ARTIFACT_NAME);
+        }
+        else {
+            job.addBuildStep(BatchCommandBuildStep.class).command("echo 'content' > " + ARTIFACT_NAME);
+        }
         job.addPublisher(ArtifactArchiver.class).includes(ARTIFACT_NAME);
         job.save();
 

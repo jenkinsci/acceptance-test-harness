@@ -70,7 +70,6 @@ public class DockerContainer implements Closeable {
             String out = Docker.cmd("port").add(cid, n).popen().verifyOrDieWith("docker port command failed").trim();
             if (out.isEmpty())  // expected to return single line like "0.0.0.0:55326"
                 throw new IllegalStateException(format("Port %d is not mapped for container %s", n, cid));
-
             return out.split(":")[0];
         } catch (IOException | InterruptedException e) {
             throw new AssertionError("Failed to figure out port map " + n, e);

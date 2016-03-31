@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright (c) 2015 Red Hat, Inc.
+ * Copyright 2016 CloudBees, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,21 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.test.acceptance.po;
 
-/**
- * Launch slave executing command on master.
- *
- * @author ogondza
- */
-@Describable({"Launch slave via execution of command on the Master", "Launch agent via execution of command on the Master"})
-public class CommandSlaveLauncher extends ComputerLauncher {
-    public CommandSlaveLauncher(PageObject context, String path) {
+package org.jenkinsci.test.acceptance.plugins.credentials;
+
+import org.jenkinsci.test.acceptance.po.Control;
+import org.jenkinsci.test.acceptance.po.PageArea;
+import org.jenkinsci.test.acceptance.po.PageObject;
+
+public abstract class BaseStandardCredentials extends Credential {
+
+    public final Control description = control("description");
+
+    protected BaseStandardCredentials(PageObject context, String path) {
         super(context, path);
     }
 
-    public CommandSlaveLauncher command(String command) {
-        control("command").set(command);
-        return null;
+    protected BaseStandardCredentials(PageArea area, String relativePath) {
+        super(area, relativePath);
     }
+
+    public void setId(String id) {
+        control("advanced-button").click();
+        control("id").set(id);
+    }
+
 }

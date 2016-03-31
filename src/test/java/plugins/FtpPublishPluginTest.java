@@ -1,8 +1,11 @@
 package plugins;
 
+import java.io.IOException;
+
 import org.jenkinsci.test.acceptance.docker.DockerContainer;
 import org.jenkinsci.test.acceptance.docker.fixtures.FtpdContainer;
 import org.jenkinsci.test.acceptance.docker.fixtures.IPasswordDockerContainer;
+import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.publish_over.*;
 import org.jenkinsci.test.acceptance.plugins.publish_over.FtpGlobalConfig.FtpSite;
@@ -16,6 +19,7 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
  * @author Tobias Meyer
  */
 @WithPlugins("publish-over-ftp")
+@WithDocker(localOnly=true)
 public class FtpPublishPluginTest extends GlobalPublishPluginTest<FtpdContainer> {
 
     @Override
@@ -41,7 +45,14 @@ public class FtpPublishPluginTest extends GlobalPublishPluginTest<FtpdContainer>
         FtpSite s = new FtpGlobalConfig(jenkins).addSite();
         {
             s.name.set(serverName);
-            s.hostname.set(dock.ipBound(21));
+            try { 
+                //s.hostname.set(dock.getIpAddress());}
+                s.hostname.set(dock.ipBound(21));
+                if (false) throw new IOException("bogus");
+            }
+            catch (IOException ex) {
+                throw new AssertionError("Failed to obtain the docker containers IP address.", ex);
+            }
             s.port.set(dock.port(21));
             if(dock instanceof IPasswordDockerContainer) {
                 s.username.set(((IPasswordDockerContainer)dock).getUsername());

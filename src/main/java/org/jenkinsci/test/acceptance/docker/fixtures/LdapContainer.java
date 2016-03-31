@@ -14,7 +14,7 @@ import org.jenkinsci.test.acceptance.docker.DockerFixture;
 public class LdapContainer extends DockerContainer {
 
     public String getHost() {
-        return "127.0.0.1";
+        return ipBound(389);
     }
 
     public int getPort() {

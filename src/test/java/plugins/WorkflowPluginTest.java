@@ -28,10 +28,15 @@ import java.util.concurrent.Callable;
 import javax.inject.Inject;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
+import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Native;
 import org.jenkinsci.test.acceptance.junit.Wait;
+import org.jenkinsci.test.acceptance.junit.WithCredentials;
+import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.plugins.git.GitRepo;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation;
 import org.jenkinsci.test.acceptance.po.Artifact;
 import org.jenkinsci.test.acceptance.po.Build;
@@ -39,7 +44,13 @@ import org.jenkinsci.test.acceptance.po.DumbSlave;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import static org.junit.Assert.*;
+
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import org.jvnet.hudson.test.Issue;
+
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Roughly follows <a href="https://github.com/jenkinsci/workflow-plugin/blob/master/TUTORIAL.md">the tutorial</a>.
@@ -47,6 +58,8 @@ import org.junit.Test;
 public class WorkflowPluginTest extends AbstractJUnitTest {
 
     @Inject private SlaveController slaveController;
+    @Inject DockerContainerHolder<GitContainer> gitServer;
+    @Rule public TemporaryFolder tmp = new TemporaryFolder();
 
     @WithPlugins("workflow-aggregator@1.1")
     @Test public void helloWorld() throws Exception {
@@ -59,6 +72,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
 
     @WithPlugins({"workflow-aggregator@1.1", "junit@1.3", "git@2.3"})
     @Test public void linearFlow() throws Exception {
+        assumeTrue("This test requires a restartable Jenkins", jenkins.canRestart());
         MavenInstallation.installMaven(jenkins, "M3", "3.1.0");
         final DumbSlave slave = (DumbSlave) slaveController.install(jenkins).get();
         slave.configure(new Callable<Void>() {
@@ -156,6 +170,33 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         build = job.startBuild();
         assertTrue(build.isSuccess() || build.isUnstable());
         build.shouldContainsConsoleOutput("divided into 3 sets");
+    }
+
+    @WithDocker
+    @WithPlugins({"workflow-aggregator@1.14", "docker-workflow@1.4", "git", "ssh-agent@1.10"})
+    @WithCredentials(credentialType=WithCredentials.SSH_USERNAME_PRIVATE_KEY, values={"git", "/org/jenkinsci/test/acceptance/docker/fixtures/GitContainer/unsafe"}, id="gitcreds")
+    @Issue("JENKINS-27152")
+    @Test public void sshGitInsideDocker() throws Exception {
+        // Pending https://github.com/jenkinsci/docker-workflow-plugin/pull/31 (and additional APIs in DockerFixture etc.)
+        // it is not possible to run this on a bind-mounted Docker slave, so we cannot verify that paths are local to the slave.
+        GitContainer container = gitServer.get();
+        String host = container.host();
+        int port = container.port();
+        GitRepo repo = new GitRepo();
+        repo.commit("Initial commit");
+        repo.transferToDockerContainer(host, port);
+        WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
+        job.script.set(
+            "node {ws('" + tmp.getRoot() + "') {\n" + // TODO UNIX_PATH_MAX workaround
+            "  docker.image('cloudbees/java-build-tools').inside {\n" +
+            "    git url: '" + container.getRepoUrlInsideDocker() + "', credentialsId: 'gitcreds'\n" +
+            "    sh 'mkdir ~/.ssh && echo StrictHostKeyChecking no > ~/.ssh/config'\n" +
+            "    sshagent(['gitcreds']) {sh 'ls -l $SSH_AUTH_SOCK && git pull origin master'}\n" +
+            "  }\n" +
+            "}}");
+        job.sandbox.check();
+        job.save();
+        job.startBuild().shouldSucceed();
     }
 
 }

@@ -57,6 +57,8 @@ import org.jvnet.hudson.test.Issue;
 
 import com.google.inject.Inject;
 
+import static org.junit.Assume.assumeTrue;
+
 @WithPlugins("openstack-cloud")
 @TestActivation({"ENDPOINT", "IDENTITY", "CREDENTIAL"})
 public class OpenstackCloudPluginTest extends AbstractJUnitTest {
@@ -85,9 +87,10 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
     @Inject(optional = true) @Named("OpenstackCloudPluginTest.KEY_PAIR_NAME")
     public String KEY_PAIR_NAME;
 
-    @After
+    @After // Terminate all nodes
     public void tearDown() {
-        // Terminate all nodes
+        // We have never left the config - no nodes to terminate
+        if (getCurrentUrl().endsWith("/configure")) return;
         jenkins.runScript("Jenkins.instance.nodes.each { it.terminate() }");
     }
 
@@ -98,7 +101,6 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
         OpenstackCloud cloud = addCloud(config);
         cloud.testConnection();
         waitFor(driver, hasContent("Connection succeeded!"), 60);
-        config.save(); // Do not leave the modified form open to avoid warnings
     }
 
     @Test
@@ -206,6 +208,7 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
     @WithCredentials(credentialType = WithCredentials.USERNAME_PASSWORD, values = {MACHINE_USERNAME, "ath"})
     @TestActivation({"HARDWARE_ID", "IMAGE_ID", "KEY_PAIR_NAME"})
     public void sshSlaveShouldSurviveRestart() {
+        assumeTrue("This test requires a restartable Jenkins", jenkins.canRestart());
         configureCloudInit("cloud-init");
         configureProvisioning("SSH", "label");
 

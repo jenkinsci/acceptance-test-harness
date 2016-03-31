@@ -20,6 +20,7 @@ import java.net.URL;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import org.jenkinsci.test.acceptance.plugins.credentials.BaseStandardCredentials;
 
 /**
  * Indicates that a test requires credentials.
@@ -53,6 +54,9 @@ public @interface WithCredentials {
 
     String[] values();
 
+    /** Optional ID to specify. */
+    String id() default "";
+
     public class RuleImpl implements TestRule {
 
         @Inject
@@ -76,14 +80,14 @@ public @interface WithCredentials {
                         switch (wp.credentialType()) {
                             case USERNAME_PASSWORD:
                                 if (wp.values().length == 2) {
-                                    addUsernamePasswordCredentials(wp.values()[0], wp.values()[1]);
+                                    addUsernamePasswordCredentials(wp.values()[0], wp.values()[1], wp.id());
                                 } else {
                                     throw new RuntimeException("@WithCredentials: Wrong amount of values. Expected username,password. ");
                                 }
                                 break;
                             case SSH_USERNAME_PRIVATE_KEY:
                                 if (wp.values().length == 2) {
-                                    addSshUsernamePrivateKeyCredentials(wp.values()[0], wp.values()[1]);
+                                    addSshUsernamePrivateKeyCredentials(wp.values()[0], wp.values()[1], wp.id());
                                 } else {
                                     throw new RuntimeException("@WithCredentials: Wrong amount of values. Expected username,sshKeyPath.");
                                 }
@@ -100,12 +104,13 @@ public @interface WithCredentials {
                  * @param username ssh username
                  * @param sshKeyPath path to the ssh key
                  */
-                private void addSshUsernamePrivateKeyCredentials(String username, String sshKeyPath) {
+                private void addSshUsernamePrivateKeyCredentials(String username, String sshKeyPath, String id) {
                     ManagedCredentials c = new ManagedCredentials(jenkins);
                     c.open();
                     SshPrivateKeyCredential sc = c.add(SshPrivateKeyCredential.class);
                     sc.username.set(username);
                     sc.selectEnterDirectly().privateKey.set(resource(sshKeyPath).asText());
+                    maybeSetId(sc, id);
                     c.save();
                 }
 
@@ -114,15 +119,21 @@ public @interface WithCredentials {
                  * @param username username
                  * @param password password
                  */
-                private void addUsernamePasswordCredentials(String username, String password) {
+                private void addUsernamePasswordCredentials(String username, String password, String id) {
                     final ManagedCredentials c = new ManagedCredentials(jenkins);
                     c.open();
                     final UserPwdCredential upc = c.add(UserPwdCredential.class);
                     upc.username.set(username);
                     upc.password.set(password);
+                    maybeSetId(upc, id);
                     c.save();
                 }
 
+                private void maybeSetId(BaseStandardCredentials creds, String id) {
+                    if (!id.isEmpty()) {
+                        creds.setId(id);
+                    }
+                }
 
                 /**
                  * Obtains a resource in a wrapper.
