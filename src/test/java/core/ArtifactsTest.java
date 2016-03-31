@@ -1,6 +1,8 @@
 package core;
 
 import com.google.inject.Inject;
+
+import org.apache.commons.lang.SystemUtils;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.po.*;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
@@ -35,15 +37,21 @@ public class ArtifactsTest extends AbstractJUnitTest {
     /**
      * Tests archiving a large file.
      * {@link #LARGE_FILE_GB} GB in size.
-     * Assumes some type of linux slave with available disk space.
+     * Assumes there is enough disk space.
      */
     @Test
     public void test_large_file() {
         job.configure();
         job.setLabelExpression(slave.getName());
-        job.addShellStep("#!/bin/bash\n" +
-                "dd if=/dev/zero of=" + LARGE_FILE_GB + "GB-${BUILD_NUMBER}-file.txt bs=" + LARGE_FILE_GB + "M count=1000\n" +
-                "ls -l");
+        if (SystemUtils.IS_OS_WINDOWS) {
+            job.addBatchStep("fsutil file createnew " + LARGE_FILE_GB + "GB-%BUILD_NUMBER%-file.txt " + (LARGE_FILE_GB * 1000 * 1000) + "\n" +
+                             "dir");
+        }
+        else {
+            job.addShellStep("#!/bin/bash\n" +
+                             "dd if=/dev/zero of=" + LARGE_FILE_GB + "GB-${BUILD_NUMBER}-file.txt bs=" + LARGE_FILE_GB + "M count=1000\n" +
+                             "ls -l");
+        }
         ArtifactArchiver archiver = job.addPublisher(ArtifactArchiver.class);
         archiver.includes("*-file.txt");
         job.save();
@@ -56,25 +64,34 @@ public class ArtifactsTest extends AbstractJUnitTest {
     /**
      * Tests archiving a number of small files.
      * Creates and archives {@link #NO_SMALL_FILES} files each 1KB in size.
-     * Assumes some type of linux slave with available disk space.
+     * Assumes there is enough disk space.
      */
     @Test
     public void test_many_small_files() {
         job.configure();
         job.setLabelExpression(slave.getName());
-        job.addShellStep("#!/bin/bash\n" +
-                "rm ./job*.txt\n" +
-                "for i in {1.." + NO_SMALL_FILES + "}\n" +
-                "do\n" +
-                " dd if=/dev/zero of=job-${BUILD_NUMBER}-file-$i.txt bs=1k count=1\n" +
-                "done\n" +
-                "ls -l");
+        if (SystemUtils.IS_OS_WINDOWS) {
+            job.addBatchStep("del /F /Q job*.txt\n" + 
+                             "for /l %%x in (1, 1, " + NO_SMALL_FILES +") do fsutil file createnew job-%BUILD_NUMBER%-file-%%x.txt 1000\n" +
+                             "dir");
+
+        }
+        else {
+            job.addShellStep("#!/bin/bash\n" +
+                    "rm ./job*.txt\n" +
+                    "for i in {1.." + NO_SMALL_FILES + "}\n" +
+                    "do\n" +
+                    " dd if=/dev/zero of=job-${BUILD_NUMBER}-file-$i.txt bs=1k count=1\n" +
+                    "done\n" +
+                    "ls -l");
+        }
         ArtifactArchiver archiver = job.addPublisher(ArtifactArchiver.class);
         archiver.includes("*-file*.txt");
         job.save();
         Build build = job.scheduleBuild().waitUntilFinished();
         List<Artifact> artifacts = build.getArtifacts();
         assertThat(artifacts, is(notNullValue()));
-        assertThat(artifacts.size(), is(equalTo(NO_SMALL_FILES)));
+        assertThat("Incorrect number of artifacts", artifacts.size(), is(equalTo(NO_SMALL_FILES)));
     }
+
 }

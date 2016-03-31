@@ -20,6 +20,9 @@ import static java.lang.annotation.RetentionPolicy.*;
 @Indexed
 @Inherited
 public @interface DockerFixture {
+
+    public static final String DEFAULT_DOCKER_IP = "";
+    
     /**
      * Unique ID of this fixture. Used from cucumber, etc. to find this annotation.
      */
@@ -37,8 +40,12 @@ public @interface DockerFixture {
 
     /**
      * Ip address to bind to
+     * @deprecated this assumes you have network knowledge of the running ATH environment which you can not possibly have.
+     *             Docker may be running on a remote machine and as such any address (e.g. <code>127.0.0.5<code>)
+     *             you specify may not be reachable.
      */
-    String bindIp() default "127.0.0.1";
+    @Deprecated
+    String bindIp() default DEFAULT_DOCKER_IP;
 
     /**
      * Path of Dockerfile file.
@@ -53,4 +60,5 @@ public @interface DockerFixture {
      * </p>
      */
     String dockerfileFolder() default "";
+
 }

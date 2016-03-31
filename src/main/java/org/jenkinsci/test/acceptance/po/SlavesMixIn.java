@@ -1,5 +1,7 @@
 package org.jenkinsci.test.acceptance.po;
 
+import java.io.File;
+
 /**
  * Mix-in for slaves.
  *
@@ -42,13 +44,14 @@ public class SlavesMixIn extends MixIn {
     }
 
     private String remoteFs(String name) {
-        String base = "/tmp/";
+        String base = System.getProperty("java.io.tmpdir");
         if (System.getenv("SLAVE_FS_BASE") != null) {
             base = System.getenv("SLAVE_FS_BASE");
-            if (!base.endsWith("/")) {
-                base += "/";
-            }
         }
+        if (!(base.endsWith("\\") || base.endsWith("/"))) {
+            base += File.separatorChar;
+        }
+
         return base + name;
     }
 }

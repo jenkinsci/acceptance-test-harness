@@ -31,7 +31,10 @@ import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.junit.Test;
 import org.openqa.selenium.WebElement;
+
 import java.util.concurrent.ExecutionException;
+
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Feature: Uninstall plugin test
@@ -48,11 +51,11 @@ public class UninstallPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void gerrit_uninstall_plugin() throws InterruptedException, ExecutionException {
+        assumeTrue("This test requires a restartable Jenkins", jenkins.canRestart());
         jenkins.getPluginManager().visit("installed");
         check(find(by.url("plugin/gerrit-trigger")), false);
         WebElement form = find(by.action("plugin/gerrit-trigger/uninstall"));
-        WebElement uninstall = form.findElement(by.input("Uninstall"));
-        uninstall.click();
+        form.submit();
         jenkins.restart();
         Slave s = slaves.install(jenkins).get();
         s.waitUntilOnline();

@@ -38,6 +38,8 @@ import org.junit.Test;
 
 import com.google.inject.Inject;
 
+import static org.junit.Assume.assumeTrue;
+
 @WithPlugins("mail-watcher-plugin")
 public class MailWatcherPluginTest extends AbstractJUnitTest {
 
@@ -49,6 +51,7 @@ public class MailWatcherPluginTest extends AbstractJUnitTest {
 
     @Test
     public void notify_slave_on_restart() throws Exception {
+        assumeTrue("This test requires a restartable Jenkins", jenkins.canRestart());
         Future<Slave> futureSlave = slaveController.install(jenkins);
 
         mail.setup(jenkins);
@@ -70,6 +73,7 @@ public class MailWatcherPluginTest extends AbstractJUnitTest {
 
     @Test @Issue("JENKINS-20538") @Since("1.571") @WithPlugins("mail-watcher-plugin@1.7")
     public void notify_master_on_jenkins_restart() throws Exception {
+        assumeTrue("This test requires a restartable Jenkins", jenkins.canRestart());
         mail.setup(jenkins);
 
         jenkins.configure();
