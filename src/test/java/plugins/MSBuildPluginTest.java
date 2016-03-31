@@ -1,8 +1,9 @@
 package plugins;
 
 import static org.junit.Assert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 
-import org.hamcrest.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Native;
 import org.jenkinsci.test.acceptance.junit.WithOS;
@@ -56,8 +57,19 @@ public class MSBuildPluginTest extends AbstractJUnitTest {
         // Job should run successfully
         Build b = job.scheduleBuild();
         b.shouldSucceed();
-        assertThat(b.getConsole(), Matchers.containsString("Build succeeded."));
-        assertThat(b.getConsole(), Matchers.not(Matchers.containsString("Done building project \"project.proj\".")));
+        assertThat(b.getConsole(), containsString("Build succeeded."));
+        assertThat(b.getConsole(), not(containsString("Done building project \"project.proj\".")));
+    }
+    
+    @Test
+    public void buildWithDefaultProjTest() {
+        FreeStyleJob job = msBuildJob("/msbuild_plugin/projProject/", "", null);
+        
+        // Job should run successfully
+        Build b = job.scheduleBuild();
+        b.shouldSucceed();
+        assertThat(b.getConsole(), containsString("Build succeeded."));
+        assertThat(b.getConsole(), not(containsString("Done building project \"project.proj\".")));
     }
 
     @Test
@@ -68,8 +80,8 @@ public class MSBuildPluginTest extends AbstractJUnitTest {
         Build b = job.scheduleBuild();
         b.shouldSucceed();
         String console = b.getConsole();
-        assertThat(console, Matchers.containsString("Build succeeded."));
-        assertThat(console, Matchers.containsString("Done Building Project"));
+        assertThat(console, containsString("Build succeeded."));
+        assertThat(console, containsString("Done Building Project"));
     }
     
     @Test
@@ -79,7 +91,7 @@ public class MSBuildPluginTest extends AbstractJUnitTest {
         // Job should run successfully
         Build b = job.scheduleBuild();
         b.shouldSucceed();
-        assertThat(b.getConsole(), Matchers.containsString("Build succeeded."));
+        assertThat(b.getConsole(), containsString("Build succeeded."));
     }
     
     @Test
@@ -90,7 +102,7 @@ public class MSBuildPluginTest extends AbstractJUnitTest {
         Build b = job.scheduleBuild();
         b.shouldSucceed();
         String console = b.getConsole();
-        assertThat(console, Matchers.containsString("Build succeeded."));
-        assertThat(console, Matchers.containsString("Done Building Project"));
+        assertThat(console, containsString("Build succeeded."));
+        assertThat(console, containsString("Done Building Project"));
     }
 }
