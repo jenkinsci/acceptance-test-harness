@@ -25,8 +25,6 @@ public class SshSlaveLauncher extends ComputerLauncher {
     public final Control javaPath = control("javaPath");
     public final Control jvmOptions = control("jvmOptions");
         
-    private String credentialUsername;
-    
     public SshSlaveLauncher(PageObject context, String path) {
         super(context, path);
     }
@@ -60,7 +58,7 @@ public class SshSlaveLauncher extends ComputerLauncher {
         cred.username.set(username);
         cred.password.set(password);
         cred.add();
-        credentialUsername = username;
+        waitForCredentialVisible(username);
         return this;
     }
 
@@ -77,7 +75,7 @@ public class SshSlaveLauncher extends ComputerLauncher {
         cred.username.set(username);
         cred.enterDirectly(key);
         cred.add();
-        credentialUsername = username;
+        waitForCredentialVisible(username);
         return this;
     }
 
@@ -85,11 +83,11 @@ public class SshSlaveLauncher extends ComputerLauncher {
      * Once a credential has been created for a given slave, this method can be used 
      * to check whether it has already been rendered in the dropdown.
      */
-    public void waitForCredentialVisible() {
+    private void waitForCredentialVisible(final String credUsername) {
         waitFor().withTimeout(5, TimeUnit.SECONDS).until(new Callable<Boolean>() {
             @Override
             public Boolean call() throws Exception {
-                return credentialsId.resolve().getText().contains(credentialUsername);
+                return credentialsId.resolve().getText().contains(credUsername);
             }
         });
     }

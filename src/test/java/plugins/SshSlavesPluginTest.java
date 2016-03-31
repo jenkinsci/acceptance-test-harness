@@ -28,7 +28,6 @@ import static org.junit.Assert.assertTrue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-import org.hamcrest.Matcher;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.SshdContainer;
 import org.jenkinsci.test.acceptance.docker.fixtures.JavaContainer;
@@ -36,13 +35,11 @@ import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.ssh_slaves.SshSlaveLauncher;
-import org.jenkinsci.test.acceptance.po.CapybaraPortingLayer;
 import org.jenkinsci.test.acceptance.po.DumbSlave;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.google.common.base.Predicate;
 import com.google.inject.Inject;
 
 @WithPlugins("ssh-slaves")
@@ -62,8 +59,7 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
 
     @Test public void connectWithPassword() {
         configureDefaultSSHSlaveLauncher()
-            .pwdCredentials("test", "test")
-            .waitForCredentialVisible();
+            .pwdCredentials("test", "test");
         slave.save();
 
         verify();
@@ -71,8 +67,7 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
 
     @Test public void connectWithKey() {
         configureDefaultSSHSlaveLauncher()
-            .keyCredentials("test", sshd.getPrivateKeyString())
-            .waitForCredentialVisible();
+            .keyCredentials("test", sshd.getPrivateKeyString());
         slave.save();
 
         verify();
