@@ -290,7 +290,9 @@ public abstract class LocalController extends JenkinsController implements LogLi
         if (javaHome != null) {
             env.put("JAVA_HOME", javaHome.getAbsolutePath());
         }
-        env.put("jenkins.install.state", "TEST");
+        // Fake the install state to being an UPGRADE, forcing install of
+        // the detached plugins.
+        env.put("jenkins.install.state", "UPGRADE");
         return env;
     }
 
