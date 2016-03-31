@@ -150,12 +150,6 @@ public class Job extends TopLevelItem {
         step.command(shell);
         return step;
     }
-    
-    private BatchBuildStep addBatchStep(String batch) {
-        BatchBuildStep step = addBuildStep(BatchBuildStep.class);
-        step.command(batch);
-        return step;
-    }
 
     public BatchCommandBuildStep addBatchStep(String batch) {
         BatchCommandBuildStep step = addBuildStep(BatchCommandBuildStep.class);
