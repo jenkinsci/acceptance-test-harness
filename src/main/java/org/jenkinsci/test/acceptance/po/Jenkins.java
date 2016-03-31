@@ -18,6 +18,7 @@ import com.google.inject.Injector;
 
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 
 /**
  * Top-level object that acts as an entry point to various systems.
@@ -113,6 +114,16 @@ public class Jenkins extends Node {
      */
     public PluginManager getPluginManager() {
         return new PluginManager(this);
+    }
+
+    /** 
+     * Some tests require they restart Jenkins - but depending on how the SUT is launched this is not always possible
+     * so tests that require this should wrap this call in an {@link org.junit.Assume#assumeTrue(String, boolean)}
+     * @return true if the Jenkins under test can restart itself.
+     */
+    public boolean canRestart() {
+        visit("restart");
+        return getElement(by.button("Yes")) != null;
     }
 
     public void restart() {

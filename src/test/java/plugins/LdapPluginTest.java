@@ -12,6 +12,10 @@ import org.jenkinsci.test.acceptance.po.User;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+
+import geb.waiting.WaitTimeoutException;
 
 import javax.inject.Inject;
 
@@ -114,9 +118,10 @@ public class LdapPluginTest extends AbstractJUnitTest {
      * When I configure Jenkins to use a not running ldap host as security realm
      * Then Jenkins will tell me he cannot connect to "ldap"
      * And I will not be able to login with user "jenkins" and password "root"
+     * @throws InterruptedException 
      */
     @Test
-    public void login_no_ldap() {
+    public void login_no_ldap() throws InterruptedException {
         // Given
         // don't start docker fixture here
         // When
@@ -128,7 +133,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
         realm.configure(notRunningLdap);
         security.save();
         // Then
-        assertThat(security.open(), hasContent("Unable to connect to localhost:" + freePort));
+        waitFor(security.open(), hasContent("Unable to connect to localhost:" + freePort), 5);
         Login login = jenkins.login();
         login.doLogin("jenkins", "root");
         assertThat(jenkins, not(hasLoggedInUser("jenkins")));
@@ -205,7 +210,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
         int freePort = this.findAvailablePort();
         LdapDetails ldapDetails = new LdapDetails("", 0, ldapContainer.getManagerDn(), ldapContainer.getManagerPassword(), ldapContainer.getRootDn());
         // Fallback-Config: primary server is not running, alternative server is running docker fixture
-        ldapDetails.setHostWithPort("localhost:" + freePort + " localhost:" + ldapContainer.getPort());
+        ldapDetails.setHostWithPort("localhost:" + freePort + ' ' + ldapContainer.getHost() + ':' + ldapContainer.getPort());
         realm.configure(ldapDetails);
         securityConfig.save();
 

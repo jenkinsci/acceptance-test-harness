@@ -20,6 +20,10 @@ RUN echo "rsa_cert_file=/etc/ssl/private/vsftpd.pem" >> /etc/myftp.conf
 RUN echo "pasv_enable=YES" >> /etc/myftp.conf
 RUN echo "pasv_min_port=7050" >> /etc/myftp.conf
 RUN echo "pasv_max_port=7055" >> /etc/myftp.conf
+# To enable passv mode through NAT (for remote docker) we need to set the 
+# passv_address to the address that docker will use to port forward
+# RUN echo "pasv_address=@@DOCKER_HOST@@" >> /etc/myftpd.conf
+# however DockerCOntainer has no way to specify the port offset so this will just not work..
 RUN mkdir -p /var/run/vsftpd/empty
 
 # create a test user

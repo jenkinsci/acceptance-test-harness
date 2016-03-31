@@ -157,6 +157,12 @@ public class Job extends TopLevelItem {
         return step;
     }
 
+    public BatchCommandBuildStep addBatchStep(String batch) {
+        BatchCommandBuildStep step = addBuildStep(BatchCommandBuildStep.class);
+        step.command(batch);
+        return step;
+    }
+
     public <T extends BuildWrapper> T addBuildWrapper(Class<T> type) {
         ensureConfigPage();
         T wrapper = newInstance(type, this);

@@ -33,7 +33,7 @@ public class JiraContainer extends DockerContainer {
     private String token;
 
     public URL getURL() throws MalformedURLException {
-        return new URL("http://localhost:"+port(2990)+"/jira/");
+        return new URL("http://" + ipBound(2990) + ':' +port(2990)+"/jira/");
     }
 
     /**

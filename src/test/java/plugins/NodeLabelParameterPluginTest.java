@@ -2,6 +2,7 @@ package plugins;
 
 import com.google.inject.Inject;
 
+import org.apache.commons.lang.SystemUtils;
 import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
@@ -363,8 +364,12 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         p.runIfSuccess.check();
 
         //ensure the main build fails by using a shell exit command
-        j.addShellStep("exit 1");
-
+        if (SystemUtils.IS_OS_WINDOWS) {
+            j.addBatchStep("exit 1");
+        }
+        else {
+            j.addShellStep("exit 1");
+        }
         j.save();
 
         // select both slaves for this build

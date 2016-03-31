@@ -72,4 +72,8 @@ public class JenkinsConfig extends PageObject {
     public void setJenkinsUrl(String url) {
         control("/jenkins-model-JenkinsLocationConfiguration/url").set(url);
     }
+    
+    public void setShell(String path) {
+        control("/hudson-tasks-Shell/shell").set(path);
+    }
 }

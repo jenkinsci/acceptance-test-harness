@@ -50,9 +50,10 @@ public class OpenstackSlaveTemplate extends PageAreaImpl {
     }
 
     public OpenstackSlaveTemplate hardwareId(final String value) {
+        ensureAdvancedOpened();
         waitFor().withMessage("Hardware ID select populates").ignoring(NoSuchElementException.class).until(new Callable<Boolean>() {
             @Override public Boolean call() throws Exception {
-                control("hardwareId").select(value);
+                control("slaveOptions/hardwareId", "hardwareId").select(value);
                 return true;
             }
         });
@@ -60,9 +61,10 @@ public class OpenstackSlaveTemplate extends PageAreaImpl {
     }
 
     public OpenstackSlaveTemplate imageId(final String value) {
+        ensureAdvancedOpened();
         waitFor().withMessage("Image ID select populates").ignoring(NoSuchElementException.class).until(new Callable<Boolean>() {
             @Override public Boolean call() throws Exception {
-                control("imageId").select(value);
+                control("slaveOptions/imageId", "imageId").select(value);
                 return true;
             }
         });
@@ -70,31 +72,32 @@ public class OpenstackSlaveTemplate extends PageAreaImpl {
     }
 
     public OpenstackSlaveTemplate credentials(String value) {
-        control("credentialsId").select(value);
+        ensureAdvancedOpened();
+        control("slaveOptions/credentialsId", "credentialsId").select(value);
         return this;
     }
 
     public OpenstackSlaveTemplate slaveType(String type) {
         ensureAdvancedOpened();
-        control("slaveType").select(type);
+        control("slaveOptions/slaveType", "slaveType").select(type);
         return this;
     }
 
     public OpenstackSlaveTemplate userData(String name) {
         ensureAdvancedOpened();
-        control("userDataId").select(name);
+        control("slaveOptions/userDataId", "userDataId").select(name);
         return this;
     }
 
     public OpenstackSlaveTemplate keyPair(String name) {
         ensureAdvancedOpened();
-        control("keyPairName").set(name);
+        control("slaveOptions/keyPairName", "keyPairName").set(name);
         return this;
     }
 
     public OpenstackSlaveTemplate fsRoot(String path) {
         ensureAdvancedOpened();
-        control("fsRoot").set(path);
+        control("slaveOptions/fsRoot", "fsRoot").set(path);
         return this;
     }
 

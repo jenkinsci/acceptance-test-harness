@@ -16,7 +16,7 @@ import org.jenkinsci.test.acceptance.junit.WithPlugins;
  */
 @WithPlugins("credentials@1.5")
 public class CredentialsTest extends AbstractJUnitTest {
-    @Test
+    @Test @WithPlugins("ssh-credentials")
     public void createSshKeys() {
         final ManagedCredentials c = new ManagedCredentials(jenkins);
 

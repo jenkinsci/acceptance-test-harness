@@ -22,6 +22,7 @@ import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.ListView;
 import org.jenkinsci.test.acceptance.po.Node;
 import org.jenkinsci.test.acceptance.po.PageObject;
+import org.junit.Assume;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
@@ -31,6 +32,8 @@ import org.openqa.selenium.WebElement;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
+
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Acceptance tests for the CheckStyle plugin.
@@ -246,6 +249,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
      */
     @Test @Issue("24940")
     public void should_report_new_and_fixed_warnings_in_consecutive_builds() {
+        assumeTrue("This test requires a restartable Jenkins", jenkins.canRestart());
         FreeStyleJob job = createFreeStyleJob();
         Build firstBuild = buildJobAndWait(job);
         editJob(FILE_FOR_2ND_RUN, false, job);

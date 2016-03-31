@@ -98,7 +98,7 @@ public class Docker {
     }
 
     public DockerImage build(Class<? extends DockerContainer> fixture) throws IOException, InterruptedException {
-        if (fixture.getSuperclass() != DockerContainer.class) {
+        if (fixture.getSuperclass() != DockerContainer.class && fixture.getSuperclass() != DynamicDockerContainer.class) {
             build((Class) fixture.getSuperclass()); // build the base image first
         }
 
@@ -155,6 +155,16 @@ public class Docker {
         } else {
             // Dockerfile is not packaged into a jar file, so copy locally
             copyDockerfileDirectoryFromLocal(dockerfileLocation, dir);
+        }
+        // if the fixture is dynamic (needs to know something about our environment then process it.
+        if (DynamicDockerContainer.class.isAssignableFrom(fixture)) {
+            try {
+                DynamicDockerContainer newInstance = (DynamicDockerContainer) fixture.newInstance();
+                newInstance.process(new File(dir, "Dockerfile"));
+            }
+            catch (InstantiationException | IllegalAccessException ex) {
+                throw new IOException("Could not transfrom Dockerfile", ex);
+            }
         }
     }
 

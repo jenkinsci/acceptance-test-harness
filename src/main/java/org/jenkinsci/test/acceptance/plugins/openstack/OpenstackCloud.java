@@ -26,13 +26,16 @@ package org.jenkinsci.test.acceptance.plugins.openstack;
 import org.jenkinsci.test.acceptance.po.Cloud;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.PageObject;
+import org.openqa.selenium.NoSuchElementException;
+
+import java.util.concurrent.Callable;
 
 /**
  * Openstack Cloud.
  *
  * @author ogondza
  */
-@Describable("Cloud (Openstack)")
+@Describable({"Cloud (OpenStack)", "Cloud (Openstack)"})
 public class OpenstackCloud extends Cloud {
 
     public OpenstackCloud(PageObject context, String path) {
@@ -61,7 +64,17 @@ public class OpenstackCloud extends Cloud {
 
     public OpenstackCloud associateFloatingIp() {
         control("advanced-button").click();
-        control("floatingIps").check();
+        try {
+            // Prior 2.1
+            control("floatingIps").check();
+        } catch (NoSuchElementException ex) {
+            waitFor().withMessage("Floating IP pool select populates").ignoring(NoSuchElementException.class).until(new Callable<Boolean>() {
+                @Override public Boolean call() throws Exception {
+                    control("slaveOptions/floatingIpPool", "floatingIpPool").select("public");
+                    return true;
+                }
+            });
+        }
         return this;
     }
 

@@ -41,7 +41,7 @@ public class CIFSPublishPluginTest extends GlobalPublishPluginTest<SMBContainer>
         CifsGlobalConfig.CifSite s = new CifsGlobalConfig(jenkins).addSite();
         {
             s.name.set(serverName);
-            s.hostname.set("localhost");
+            s.hostname.set(dock.ipBound(139));
             s.port.set(dock.port(139));
             if(dock instanceof IPasswordDockerContainer) {
                 s.username.set(((IPasswordDockerContainer)dock).getUsername());

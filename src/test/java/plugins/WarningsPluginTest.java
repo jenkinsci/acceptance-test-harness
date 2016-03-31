@@ -13,6 +13,7 @@ import org.jenkinsci.test.acceptance.plugins.warnings.WarningsBuildSettings;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsColumn;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.FreeStyleMultiBranchJob;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.ListView;
 import org.jenkinsci.test.acceptance.po.MatrixConfiguration;
@@ -73,6 +74,27 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
     }
 
     /**
+     * Creates a multi-branch freestyle job (without any branch options set). Configures three warnings parsers.
+     * Currently no build is started yet.
+     */
+    @Test @Issue("JENKINS-33582") @WithPlugins("multi-branch-project-plugin")
+    public void should_find_warnings_in_multi_branch_project() {
+        setupJob(SEVERAL_PARSERS_FILE_FULL_PATH, FreeStyleMultiBranchJob.class,
+                WarningsBuildSettings.class, new AnalysisConfigurator<WarningsBuildSettings>() {
+                    @Override
+                    public void configure(WarningsBuildSettings settings) {
+                        settings.addWorkspaceScanner("Java Compiler (javac)", "**/*");
+                        settings.addWorkspaceScanner("MSBuild", "**/*");
+                        settings.addWorkspaceScanner("JavaDoc Tool", "**/*");
+                    }
+                });
+
+        // TODO: run a build and verify the results
+    }
+
+    /**
+     * Verifies that Jenkins scans the workspace for all available files to resolve relative paths
+     * of files with warnings when the option 'resolve-relative-paths' is enabled.
      */
     @Test @Issue("JENKINS-32150") @WithPlugins("analysis-core@1.76")
     public void should_resolve_workspace_files() {
