@@ -179,8 +179,32 @@ public abstract class LocalController extends JenkinsController implements LogLi
             } finally {
                 template.delete();
             }
+            installDetachedPlugins();
         } catch (Exception e) {
             throw new IOException(e.getMessage(), e);
+        }
+    }
+
+    private void installDetachedPlugins() throws Exception {
+        File expandedWarDir = new File(tempDir, "war");
+
+        // Expand the war file so we can get the detached plugins from it.
+        Expand expand = new Expand();
+        expand.setSrc(war);
+        expand.setOverwrite(true);
+        expand.setDest(expandedWarDir);
+        expand.execute();
+
+        // Copy the detached plugins into the plugin dir
+        File pluginsDir = new File(tempDir, "plugins");
+        File detachedPluginsDir = new File(expandedWarDir, "WEB-INF/detached-plugins");
+        File[] detachedPlugins = detachedPluginsDir.listFiles();
+        for (File detachedPlugin : detachedPlugins) {
+            String pluginName = detachedPlugin.getName().replace(".hpi", "").replace(".jpi", "");
+
+            if (!new File(pluginsDir, pluginName + ".hpi").exists() && !new File(pluginsDir, pluginName + ".jpi").exists()) {
+                FileUtils.copyFile(detachedPlugin, new File(pluginsDir, detachedPlugin.getName()));
+            }
         }
     }
 
@@ -290,9 +314,7 @@ public abstract class LocalController extends JenkinsController implements LogLi
         if (javaHome != null) {
             env.put("JAVA_HOME", javaHome.getAbsolutePath());
         }
-        // Fake the install state to being an UPGRADE, forcing install of
-        // the detached plugins.
-        env.put("jenkins.install.state", "UPGRADE");
+        env.put("jenkins.install.state", "TEST");
         return env;
     }
 
