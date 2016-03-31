@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
+import hudson.util.VersionNumber;
 import org.apache.commons.io.FileUtils;
 import org.jenkinsci.utils.process.CommandBuilder;
 
@@ -63,8 +64,44 @@ public abstract class ToolInstallation extends PageAreaImpl {
         ));
     }
 
-    public ToolInstallation(JenkinsConfig context, String path) {
-        super(context, path);
+    public static <T extends ToolInstallation> T addTool(Jenkins jenkins, Class<T> type) {
+        ConfigurablePageObject page = getPageObject(jenkins);
+        page.configure();
+
+        String name = type.getAnnotation(ToolInstallationPageObject.class).name();
+
+        page.clickButton("Add " + name);
+        page.elasticSleep(100);
+        String path = page.find(by.button("Delete " + name)).getAttribute("path");
+        String prefix = path.substring(0, path.length() - 18);
+
+        return page.newInstance(type, jenkins, prefix);
+    }
+
+    public static <T extends ToolInstallation> void installTool(Jenkins jenkins, Class<T> type, String name, String version) {
+        waitForUpdates(jenkins, type);
+
+        ConfigurablePageObject tools = getPageObject(jenkins);
+        tools.configure();
+        T maven = addTool(jenkins, type);
+        maven.name.set(name);
+        maven.installVersion(version);
+        tools.save();
+    }
+
+    public ToolInstallation(Jenkins jenkins, String path) {
+        super(getPageObject(jenkins), path);
+    }
+
+    protected static ConfigurablePageObject getPageObject(Jenkins jenkins) {
+        return jenkins.getVersion().isOlderThan(new VersionNumber("2"))
+                ? new JenkinsConfig(jenkins)
+                : new GlobalToolConfig(jenkins);
+    }
+
+    @Override
+    public ConfigurablePageObject getPage() {
+        return (ConfigurablePageObject) super.getPage();
     }
 
     public ToolInstallation installVersion(String version) {

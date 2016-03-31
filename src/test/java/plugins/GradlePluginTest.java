@@ -37,7 +37,7 @@ public class GradlePluginTest extends AbstractJUnitTest {
 
     @Test
     public void run_gradle_scirpt() {
-        install("gradle-1.5", "1.5");
+        GradleInstallation.installGradle(jenkins, "gradle-1.5", "1.5");
 
         FreeStyleJob job = jenkins.jobs.create();
         job.copyResource(resource("/gradle_plugin/script.gradle"), "build.gradle");
@@ -54,8 +54,8 @@ public class GradlePluginTest extends AbstractJUnitTest {
     }
 
     @Test
-    public void run_gradle_scirpt_in_dir() {
-        install("gradle-1.5", "1.5");
+    public void run_gradle_script_in_dir() {
+        GradleInstallation.installGradle(jenkins, "gradle-1.5", "1.5");
 
         FreeStyleJob job = jenkins.jobs.create();
         job.copyResource(resource("/gradle_plugin/script.gradle"), "gradle/hello.gradle");
@@ -67,15 +67,5 @@ public class GradlePluginTest extends AbstractJUnitTest {
         job.save();
 
         job.startBuild().shouldSucceed().shouldContainsConsoleOutput("Hello world!");
-    }
-
-    private void install(String name, String version) {
-        ToolInstallation.waitForUpdates(jenkins, GradleInstallation.class);
-        JenkinsConfig global = jenkins.getConfigPage();
-        global.configure();
-        ToolInstallation tool = global.addTool(GradleInstallation.class);
-        tool.name.set(name);
-        tool.installVersion(version);
-        global.save();
     }
 }

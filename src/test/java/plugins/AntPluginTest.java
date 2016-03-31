@@ -7,6 +7,7 @@ import org.jenkinsci.test.acceptance.plugins.ant.AntBuildStep;
 import org.jenkinsci.test.acceptance.plugins.ant.AntInstallation;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.ToolInstallation;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -66,11 +67,10 @@ public class AntPluginTest extends AbstractJUnitTest {
     public void locallyInstalledAnt() {
         String expectedVersion = localAntVersion();
 
-        jenkins.configure();
-        AntInstallation ant = jenkins.getConfigPage().addTool(AntInstallation.class);
+        AntInstallation ant = ToolInstallation.addTool(jenkins, AntInstallation.class);
         ant.name.set("native_ant");
         ant.useNative();
-        jenkins.save();
+        ant.getPage().save();
 
         job.configure();
         job.copyResource(resource("ant/echo-helloworld.xml"), "build.xml");

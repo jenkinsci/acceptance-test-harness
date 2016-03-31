@@ -30,16 +30,11 @@ import org.jenkinsci.test.acceptance.po.ToolInstallationPageObject;
 
 @ToolInstallationPageObject(name="Gradle", installer="hudson.plugins.gradle.GradleInstaller")
 public class GradleInstallation extends ToolInstallation {
-    public GradleInstallation(JenkinsConfig context, String path) {
+    public GradleInstallation(Jenkins context, String path) {
         super(context, path);
     }
 
     public static void installGradle(Jenkins jenkins, String name, String version) {
-        waitForUpdates(jenkins, GradleInstallation.class);
-        jenkins.configure();
-        GradleInstallation gradle = jenkins.getConfigPage().addTool(GradleInstallation.class);
-        gradle.name.set(name);
-        gradle.installVersion(version);
-        jenkins.save();
+        installTool(jenkins, GradleInstallation.class, name, version);
     }
 }

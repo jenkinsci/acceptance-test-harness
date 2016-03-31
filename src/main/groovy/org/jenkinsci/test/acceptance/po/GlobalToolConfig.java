@@ -23,29 +23,33 @@
  */
 package org.jenkinsci.test.acceptance.po;
 
-@ToolInstallationPageObject(installer = "hudson.tools.JDKInstaller", name = "JDK")
-public class JdkInstallation extends ToolInstallation {
 
-    public JdkInstallation(Jenkins context, String path) {
-        super(context, path);
+import java.net.URL;
+
+/**
+ * Global tools configuration UI.
+ *
+ * Introduced in Jenkins 2.0.
+ */
+public class GlobalToolConfig extends ContainerPageObject {
+
+    public GlobalToolConfig(Jenkins context) {
+        super(context, context.url("configureTools/"));
     }
 
     @Override
-    public ToolInstallation installVersion(String version) {
-        super.installVersion(version);
-        control("properties/hudson-tools-InstallSourceProperty/installers/acceptLicense").check();
-        return this;
+    public URL getConfigUrl() {
+        return url;
     }
 
-    public void setCredentials(String login, String password) {
-        getPage().visit("descriptorByName/hudson.tools.JDKInstaller/enterCredential");
-        find(by.input("username")).sendKeys(login);
-        find(by.input("password")).sendKeys(password);
-        clickButton("OK");
-        clickButton("Close");
-    }
+    public <T extends ToolInstallation> T addTool(Class<T> type) {
+        String name = type.getAnnotation(ToolInstallationPageObject.class).name();
 
-    public void useNative() {
-        installedIn(fakeHome("java", "JAVA_HOME"));
+        clickButton("Add " + name);
+        elasticSleep(100);
+        String path = find(by.button("Delete " + name)).getAttribute("path");
+        String prefix = path.substring(0, path.length() - 18);
+
+        return newInstance(type, this, prefix);
     }
 }

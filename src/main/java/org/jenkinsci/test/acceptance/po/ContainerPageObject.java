@@ -25,7 +25,7 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
  *
  * @author Kohsuke Kawaguchi
  */
-public abstract class ContainerPageObject extends PageObject {
+public abstract class ContainerPageObject extends ConfigurablePageObject {
     protected ContainerPageObject(Injector injector, URL url) {
         super(injector, url);
         if (!url.toExternalForm().endsWith("/")) {
@@ -33,54 +33,12 @@ public abstract class ContainerPageObject extends PageObject {
         }
     }
 
-    protected ContainerPageObject(PageObject context, URL url) {
-        this(context.injector, url);
-    }
-
-    public void configure(Closure body) {
-        configure();
-        body.call(this);
-        save();
-    }
-
-    public <T> T configure(Callable<T> body) {
-        try {
-            configure();
-            T v = body.call();
-            save();
-            return v;
-        } catch (Exception e) {
-            throw new AssertionError(e);
-        }
-    }
-
-    /**
-     * Open configuration page if not yet opened.
-     *
-     * @see #getConfigUrl()
-     */
-    public void configure() {
-        if (driver.getCurrentUrl().equals(getConfigUrl().toExternalForm())) {
-            return;
-        }
-        visit(getConfigUrl());
-        elasticSleep(1000); // configure page requires some time to load
-    }
-
-    /**
-     * Makes sure that the browser is currently opening the configuration page.
-     */
-    public void ensureConfigPage() {
-        assertThat("config page is open", driver.getCurrentUrl(), is(getConfigUrl().toExternalForm()));
-    }
-
     public URL getConfigUrl() {
         return url("configure");
     }
 
-    public void save() {
-        clickButton("Save");
-        assertThat(driver, not(hasContent("This page expects a form submission")));
+    protected ContainerPageObject(PageObject context, URL url) {
+        this(context.injector, url);
     }
 
     public URL getJsonApiUrl() {
