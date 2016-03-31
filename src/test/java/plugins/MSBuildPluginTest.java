@@ -5,6 +5,7 @@ import static org.junit.Assert.assertThat;
 import org.hamcrest.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Native;
+import org.jenkinsci.test.acceptance.junit.WithOS;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.msbuild.MSBuildStep;
 import org.jenkinsci.test.acceptance.po.Build;
@@ -20,6 +21,7 @@ import org.junit.Test;
  */
 @WithPlugins("msbuild")
 @Native({"MSBuild"})
+@WithOS(os = {WithOS.OS.WINDOWS})
 public class MSBuildPluginTest extends AbstractJUnitTest {
 
     /**
