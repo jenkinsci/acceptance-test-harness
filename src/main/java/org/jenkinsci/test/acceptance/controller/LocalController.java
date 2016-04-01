@@ -198,12 +198,18 @@ public abstract class LocalController extends JenkinsController implements LogLi
         // Copy the detached plugins into the plugin dir
         File pluginsDir = new File(tempDir, "plugins");
         File detachedPluginsDir = new File(expandedWarDir, "WEB-INF/detached-plugins");
-        File[] detachedPlugins = detachedPluginsDir.listFiles();
-        for (File detachedPlugin : detachedPlugins) {
-            String pluginName = detachedPlugin.getName().replace(".hpi", "").replace(".jpi", "");
+        if (detachedPluginsDir.isDirectory()) {
+            File[] detachedPlugins = detachedPluginsDir.listFiles();
+            if (detachedPlugins != null) {
+                for (File detachedPlugin : detachedPlugins) {
+                    String pluginName = detachedPlugin.getName().replace(".hpi", "").replace(".jpi", "");
 
-            if (!new File(pluginsDir, pluginName + ".hpi").exists() && !new File(pluginsDir, pluginName + ".jpi").exists()) {
-                FileUtils.copyFile(detachedPlugin, new File(pluginsDir, detachedPlugin.getName()));
+                    // Only copy in the HPI file if it doesn't already exist in the plugins dir
+                    // (checking for both .hpi and .jpi).
+                    if (!new File(pluginsDir, pluginName + ".hpi").exists() && !new File(pluginsDir, pluginName + ".jpi").exists()) {
+                        FileUtils.copyFile(detachedPlugin, new File(pluginsDir, detachedPlugin.getName()));
+                    }
+                }
             }
         }
     }
