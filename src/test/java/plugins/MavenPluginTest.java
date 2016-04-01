@@ -29,6 +29,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.po.JdkInstallation;
+import org.jenkinsci.test.acceptance.po.ToolInstallation;
 import org.jvnet.hudson.test.Issue;
 import org.jenkinsci.test.acceptance.junit.Native;
 import org.jenkinsci.test.acceptance.junit.Since;
@@ -98,11 +100,10 @@ public class MavenPluginTest extends AbstractJUnitTest {
     @Test
     @Native("mvn")
     public void use_native_maven() {
-        jenkins.configure();
-        MavenInstallation maven = jenkins.getConfigPage().addTool(MavenInstallation.class);
+        MavenInstallation maven = ToolInstallation.addTool(jenkins, MavenInstallation.class);
         maven.name.set("native_maven");
         maven.useNative();
-        jenkins.save();
+        maven.getPage().save();
 
         String expectedVersion = localMavenVersion();
 

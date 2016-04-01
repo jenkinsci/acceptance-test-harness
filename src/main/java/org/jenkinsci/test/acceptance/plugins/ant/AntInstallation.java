@@ -32,15 +32,10 @@ import org.jenkinsci.test.acceptance.po.ToolInstallationPageObject;
 public class AntInstallation extends ToolInstallation {
 
     public static void install(Jenkins jenkins, String name, String version) {
-        waitForUpdates(jenkins, AntInstallation.class);
-        jenkins.configure();
-        AntInstallation maven = jenkins.getConfigPage().addTool(AntInstallation.class);
-        maven.name.set(name);
-        maven.installVersion(version);
-        jenkins.save();
+        installTool(jenkins, AntInstallation.class, name, version);
     }
 
-    public AntInstallation(JenkinsConfig context, String path) {
+    public AntInstallation(Jenkins context, String path) {
         super(context, path);
     }
 

@@ -3,6 +3,7 @@ package core;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Native;
 import org.jenkinsci.test.acceptance.junit.TestActivation;
+import org.jenkinsci.test.acceptance.plugins.groovy.GroovyInstallation;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.JdkInstallation;
 import org.jenkinsci.test.acceptance.po.ToolInstallation;
@@ -17,11 +18,10 @@ public class JdkTest extends AbstractJUnitTest {
 
         ToolInstallation.waitForUpdates(jenkins, JdkInstallation.class);
 
-        jenkins.configure();
-        JdkInstallation jdk = jenkins.getConfigPage().addTool(JdkInstallation.class);
+        JdkInstallation jdk = ToolInstallation.addTool(jenkins, JdkInstallation.class);
         jdk.name.set("jdk_1.7.0");
         jdk.installVersion("jdk-7u11-oth-JPR");
-        jenkins.save();
+        jdk.getPage().save();
 
         jdk.setCredentials(login, passwd);
 
@@ -42,11 +42,10 @@ public class JdkTest extends AbstractJUnitTest {
     public void usePreinstalledJdk() {
         String expectedVersion = localJavaVersion();
 
-        jenkins.configure();
-        JdkInstallation jdk = jenkins.getConfigPage().addTool(JdkInstallation.class);
+        JdkInstallation jdk = ToolInstallation.addTool(jenkins, JdkInstallation.class);
         jdk.name.set("preinstalled");
         jdk.useNative();
-        jenkins.save();
+        jdk.getPage().save();
 
         FreeStyleJob job = jenkins.jobs.create();
         job.configure();

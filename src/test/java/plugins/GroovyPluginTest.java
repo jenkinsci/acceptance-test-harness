@@ -29,11 +29,13 @@ import java.util.regex.Pattern;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Native;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.plugins.ant.AntInstallation;
 import org.jenkinsci.test.acceptance.plugins.groovy.GroovyInstallation;
 import org.jenkinsci.test.acceptance.plugins.groovy.GroovyStep;
 import org.jenkinsci.test.acceptance.plugins.groovy.SystemGroovyStep;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.ToolInstallation;
 import org.junit.Test;
 
 @WithPlugins("groovy")
@@ -109,11 +111,10 @@ public class GroovyPluginTest extends AbstractJUnitTest {
 
     @Test @Native("groovy")
     public void use_native_groovy() {
-        jenkins.configure();
-        GroovyInstallation groovy = jenkins.getConfigPage().addTool(GroovyInstallation.class);
+        GroovyInstallation groovy = ToolInstallation.addTool(jenkins, GroovyInstallation.class);
         groovy.name.set("local-groovy");
         groovy.useNative();
-        jenkins.save();
+        groovy.getPage().save();
 
         configureJob();
         final GroovyStep step = job.addBuildStep(GroovyStep.class);

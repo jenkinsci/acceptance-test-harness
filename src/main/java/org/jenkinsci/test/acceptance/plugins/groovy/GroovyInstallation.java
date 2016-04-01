@@ -38,15 +38,10 @@ public class GroovyInstallation extends ToolInstallation {
     }
 
     public static void installGroovy(Jenkins jenkins, String name, String version) {
-        waitForUpdates(jenkins, GroovyInstallation.class);
-        jenkins.configure();
-        GroovyInstallation groovy = jenkins.getConfigPage().addTool(GroovyInstallation.class);
-        groovy.name.set(name);
-        groovy.installVersion(version);
-        jenkins.save();
+        ToolInstallation.installTool(jenkins, GroovyInstallation.class, name, version);
     }
 
-    public GroovyInstallation(JenkinsConfig context, String path) {
+    public GroovyInstallation(Jenkins context, String path) {
         super(context, path);
     }
 

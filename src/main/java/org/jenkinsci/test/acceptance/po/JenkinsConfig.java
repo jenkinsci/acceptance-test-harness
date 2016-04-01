@@ -6,6 +6,7 @@ import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 import org.openqa.selenium.WebElement;
 
+import java.net.URL;
 import java.util.List;
 
 /**
@@ -13,7 +14,7 @@ import java.util.List;
  *
  * @author Kohsuke Kawaguchi
  */
-public class JenkinsConfig extends PageObject {
+public class JenkinsConfig extends ConfigurablePageObject {
     public final Jenkins jenkins;
 
     public final Control numExecutors = control("/jenkins-model-MasterBuildConfiguration/numExecutors");
@@ -25,26 +26,9 @@ public class JenkinsConfig extends PageObject {
         this.jenkins = jenkins;
     }
 
-    public void configure() {
-        jenkins.configure();
-    }
-
-    public void save() {
-        clickButton("Save");
-        assertThat(driver, not(hasContent("This page expects a form submission")));
-    }
-
-    public <T extends ToolInstallation> T addTool(Class<T> type) {
-        jenkins.ensureConfigPage();
-
-        String name = type.getAnnotation(ToolInstallationPageObject.class).name();
-
-        clickButton("Add " + name);
-        elasticSleep(100);
-        String path = find(by.button("Delete " + name)).getAttribute("path");
-        String prefix = path.substring(0, path.length() - 18);
-
-        return newInstance(type, this, prefix);
+    @Override
+    public URL getConfigUrl() {
+        return url;
     }
 
     public <T extends ArtifactManagement.Factory> T addArtifactManager(Class<T> type) {
