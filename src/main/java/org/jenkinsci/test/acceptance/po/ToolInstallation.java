@@ -95,7 +95,10 @@ public abstract class ToolInstallation extends PageAreaImpl {
     }
 
     protected static ConfigurablePageObject getPageObject(Jenkins jenkins) {
-        return jenkins.getVersion().isOlderThan(new VersionNumber("2"))
+        // TODO: change to jenkins.getVersion().isOlderThan(new VersionNumber("2")) after 2.0 is released.
+        // yeah, you could do a number of things here e.g. isNewerThan("1.1000") etc,
+        // but this is fine as it's temporary.
+        return jenkins.getVersion().toString().startsWith("1.")
                 ? new JenkinsConfig(jenkins)
                 : new GlobalToolConfig(jenkins);
     }
