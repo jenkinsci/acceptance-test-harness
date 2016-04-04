@@ -69,6 +69,7 @@ public class OwnershipPluginTest extends AbstractJUnitTest {
         FreeStyleJob job = jenkins.jobs.create();
         job.save();
 
+        elasticSleep(1000);
         assertThat(job, ownedBy(user));
     }
 
