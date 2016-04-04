@@ -57,7 +57,7 @@ public class JobConfigHistoryPluginTest extends AbstractJUnitTest {
         assertThat(all(by.xpath("//tr//a[contains(text(),'(RAW)')]")).size(), is(greaterThan(2)));
     }
 
-    @Test @Issue("JENKINS-24410")
+    @Test @Issue("JENKINS-24410") @WithPlugins("matrix-project")
     public void track_change_in_matrix_project() {
         MatrixProject job = jenkins.jobs.create(MatrixProject.class);
 
