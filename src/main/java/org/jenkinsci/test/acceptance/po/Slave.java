@@ -142,7 +142,7 @@ public class Slave extends Node {
     public void launchSlaveAgent() {
         if (isOffline()) {
             open();
-            clickButton("Launch slave agent");
+            clickButton("Launch agent");
         }
     }
 }
