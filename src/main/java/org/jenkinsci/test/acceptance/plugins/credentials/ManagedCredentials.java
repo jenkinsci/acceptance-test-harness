@@ -12,6 +12,7 @@ import org.jenkinsci.test.acceptance.po.Jenkins;
  */
 public class ManagedCredentials extends ContainerPageObject {
     public final Control addButton = control("/domainCredentials/hetero-list-add[credentials]");
+    public final Control addDomainButton = control("/repeatable-add");
 
     public ManagedCredentials(Jenkins j) {
         super(j, j.url("credentials/"));
@@ -25,6 +26,38 @@ public class ManagedCredentials extends ContainerPageObject {
 
         String path = last(by.xpath("//div[@name='credentials']")).getAttribute("path");
 
+        return newInstance(type, this, path);
+    }
+
+    /**
+     * Adds a new domain
+     */
+    public Domain addDomain() {
+        addDomainButton.click();
+       
+        elasticSleep(1000);
+        String path = last(by.xpath("//div[@name='domainCredentials']")).getAttribute("path");
+        
+        return newInstance(Domain.class, this, path);
+    }
+    
+    /**
+     * Gets a credential by the credential id
+     */
+    public <T extends Credential> T get(Class<T> type, String id) {
+        String path = findIfNotVisible(by.input(id)).findElement(by.ancestor("div")).getAttribute("path");
+        return newInstance(type, this, path);
+    }
+
+    public <T extends Credential> T get(Class<T> type, String domainName, String id) {
+        // Find domain div
+        String path = findIfNotVisible(by.input(domainName))
+                .findElement(by.ancestor("div"))
+                // Find credential div inside domain div
+               .findElement(by.input(id))
+               .findElement(by.ancestor("div"))
+               .getAttribute("path");
+        
         return newInstance(type, this, path);
     }
 }

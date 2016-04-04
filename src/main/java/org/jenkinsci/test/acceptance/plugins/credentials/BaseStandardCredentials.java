@@ -31,6 +31,8 @@ import org.jenkinsci.test.acceptance.po.PageObject;
 public abstract class BaseStandardCredentials extends Credential {
 
     public final Control description = control("description");
+    public final Control scope = control("scope");
+    public final Control delete = control("repeatable-delete");
 
     protected BaseStandardCredentials(PageObject context, String path) {
         super(context, path);
