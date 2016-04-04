@@ -1,5 +1,7 @@
 package org.jenkinsci.test.acceptance.plugins.credentials;
 
+import java.util.concurrent.Callable;
+
 import org.jenkinsci.test.acceptance.po.ContainerPageObject;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Jenkins;
@@ -35,7 +37,13 @@ public class ManagedCredentials extends ContainerPageObject {
     public Domain addDomain() {
         addDomainButton.click();
        
-        elasticSleep(1000);
+        // Wait for element present to avoid errors
+        waitFor().until(new Callable<Boolean>() {
+            @Override
+            public Boolean call() throws Exception {
+                return last(by.xpath("//div[@name='domainCredentials']")).getAttribute("path") != null;
+            }
+        });
         String path = last(by.xpath("//div[@name='domainCredentials']")).getAttribute("path");
         
         return newInstance(Domain.class, this, path);

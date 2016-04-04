@@ -19,10 +19,10 @@ import static org.junit.Assert.fail;
  */
 @WithPlugins("credentials@1.5")
 public class CredentialsTest extends AbstractJUnitTest {
-    private final static String GLOBAL_SCOPE = "GLOBAL";
-    private final static String SYSTEM_SCOPE = "SYSTEM";
+    private static final String GLOBAL_SCOPE = "GLOBAL";
+    private static final String SYSTEM_SCOPE = "SYSTEM";
     
-    private final static String USERNAME_INPUT = "_.username";
+    private static final String USERNAME_INPUT = "_.username";
     private static final String PRIVATE_KEY_INPUT = "_.privateKey";
     
     private static final String CRED_ID = "ID";

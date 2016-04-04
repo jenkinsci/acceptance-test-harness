@@ -9,8 +9,8 @@ import org.jenkinsci.test.acceptance.po.PageObject;
 @Describable("Credential Domain")
 public class Domain extends PageAreaImpl {
 
-    public Control name = control("/domain/name");
-    public Control description = control("/domain/description");
+    public final Control name = control("/domain/name");
+    public final Control description = control("/domain/description");
     public final Control addCredentialButton = control("/hetero-list-add[credentials]");
     public final Control addSpecificationButton = control("/domain/hetero-list-add[specifications]");
     
@@ -21,16 +21,9 @@ public class Domain extends PageAreaImpl {
     public Domain(PageArea area, String relativePath) {
         super(area, relativePath);
     }
-
-    /**
-     * Add a domain
-     */
-    public void add() {
-        find(by.button("Add Domain")).click();
-    }
     
     /**
-     * Adds a new credential and bind it to the page ae object.
+     * Adds a new credential under the scope of this domain
      */
     public <T extends Credential> T addCredential(Class<T> type) {
         addCredentialButton.selectDropdownMenu(type);
