@@ -23,7 +23,9 @@
  */
 package core;
 
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
@@ -50,7 +52,7 @@ public class JenkinsDatabaseSecurityRealmTest extends AbstractJUnitTest {
 
         User user = realm.signup("jenkins-acceptance-tests-user");
 
-        assertTrue("User should exist", !new User(jenkins, "jenkins-acceptance-tests-userx").mail().isEmpty());
+        assertThat(new User(jenkins, "jenkins-acceptance-tests-user").mail(), startsWith("jenkins-acceptance-tests-user"));
 
         jenkins.login().doLogin(user);
 
