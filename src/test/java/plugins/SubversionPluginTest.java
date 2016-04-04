@@ -194,7 +194,7 @@ public class SubversionPluginTest extends AbstractJUnitTest {
         f.removeFirstBuildStep();
         // Sleep for 500ms to give time to DOM to regenerate
         f.elasticSleep(500);
-        f.addShellStep("! test -f unversioned.txt");
+        f.addShellStep("test ! -f unversioned.txt");
         f.save();
         f.startBuild().shouldSucceed();
     }
