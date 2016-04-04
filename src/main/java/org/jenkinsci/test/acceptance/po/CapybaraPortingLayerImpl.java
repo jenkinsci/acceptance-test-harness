@@ -170,26 +170,19 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
      * @see #getElement(org.openqa.selenium.By)         if you don't want to see an exception
      */
     @Override
-    public WebElement find(By selector) {
+    public WebElement find(final By selector) {
         try {
-            long endTime = System.currentTimeMillis() + time.seconds(1);
-            while (System.currentTimeMillis() <= endTime) {
-                WebElement e = driver.findElement(selector);
-                if (isDisplayed(e)) {
-                    return e;
-                }
-
-                for (WebElement f : driver.findElements(selector)) {
-                    if (isDisplayed(f)) {
-                        return f;
+            // Wait for the element to become visible
+            return waitFor().withTimeout(time.seconds(1), TimeUnit.SECONDS).until(new Callable<WebElement>() {
+                @Override public WebElement call() throws Exception {
+                    WebElement element = driver.findElement(selector);
+                    if (element != null && isDisplayed(element)) {
+                        return element;
+                    } else {
+                        return null;
                     }
                 }
-
-                // give a bit more chance for the element to become visible
-                elasticSleep(100);
-            }
-
-            throw new NoSuchElementException("Unable to locate visible " + selector + " in " + driver.getCurrentUrl());
+            });
         } catch (NoSuchElementException x) {
             // this is often the best place to set a breakpoint
             // Page url is not resent in otherwise verbose message
@@ -207,20 +200,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     @Override
     public WebElement findIfNotVisible(By selector) {
         try {
-            long endTime = System.currentTimeMillis() + time.seconds(1);
-            WebElement e = null;
-            while (System.currentTimeMillis() <= endTime) {
-                e = driver.findElement(selector);
-
-                // give a bit more chance for the element to become visible
-                elasticSleep(100);
-
-            }
-            if (e == null) {
-                throw new NoSuchElementException("Unable to locate visible " + selector + " in " + driver.getCurrentUrl());
-            }
-            return e;
-
+            return driver.findElement(selector);
         } catch (NoSuchElementException x) {
             // this is often the best place to set a breakpoint
             // Page url is not resent in otherwise verbose message
