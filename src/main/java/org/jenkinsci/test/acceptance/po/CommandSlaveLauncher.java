@@ -28,7 +28,7 @@ package org.jenkinsci.test.acceptance.po;
  *
  * @author ogondza
  */
-@Describable({"Launch slave via execution of command on the Master", "Launch agent via execution of command on the Master"})
+@Describable({"Launch slave via execution of command on the Master", "Launch agent via execution of command on the master"})
 public class CommandSlaveLauncher extends ComputerLauncher {
     public CommandSlaveLauncher(PageObject context, String path) {
         super(context, path);
