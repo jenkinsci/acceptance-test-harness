@@ -76,7 +76,6 @@ public class JobsMixIn extends MixIn {
     public void copy(String from, String to) {
         visit("newJob");
         fillIn("name",to);
-        check(find(by.radioButton("copy")));
         fillIn("from",from);
         clickButton("OK");
     }
