@@ -55,9 +55,6 @@ public class GerritTriggerNewServer extends PageObject {
     }
 
     private void avoidOccasional404FromNonReadyGerritUI() {
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e1) {
-        }
+        elasticSleep(1000);
     }
 }

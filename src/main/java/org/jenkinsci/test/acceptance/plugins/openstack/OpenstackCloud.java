@@ -85,7 +85,7 @@ public class OpenstackCloud extends Cloud {
 
     public OpenstackSlaveTemplate addSlaveTemplate() {
         control("repeatable-add").click();
-        sleep(500); // Wait for template to appear
+        elasticSleep(500); // Wait for template to appear
         final String newPath = last(by.name("templates")).getAttribute("path");
 
         assert newPath.startsWith(getPath());
