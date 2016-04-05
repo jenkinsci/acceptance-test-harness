@@ -24,6 +24,8 @@
 
 package org.jenkinsci.test.acceptance.plugins.credentials;
 
+import java.util.concurrent.Callable;
+
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.PageArea;
 import org.jenkinsci.test.acceptance.po.PageObject;
@@ -31,6 +33,8 @@ import org.jenkinsci.test.acceptance.po.PageObject;
 public abstract class BaseStandardCredentials extends Credential {
 
     public final Control description = control("description");
+    public final Control scope = control("scope");
+    private final Control delete = control("repeatable-delete");
 
     protected BaseStandardCredentials(PageObject context, String path) {
         super(context, path);
@@ -43,6 +47,30 @@ public abstract class BaseStandardCredentials extends Credential {
     public void setId(String id) {
         control("advanced-button").click();
         control("id").set(id);
+    }
+    
+    /**
+     * Clicks the delete credential button and wait until it is not present anymore
+     */
+    public void delete() {
+        delete.click();
+        // Wait for element not present to avoid errors
+        waitFor().until(new Callable<Boolean>() {
+            
+            @Override
+            public Boolean call() throws Exception {
+                return !isPresent();
+            }
+        });
+    }
+    
+    /**
+     * If the delete button is present, the credential still exists in the page.
+     * 
+     * @return true if the credential is present in the page. False otherwise.
+     */
+    private boolean isPresent() {
+        return this.delete.exists();
     }
 
 }
