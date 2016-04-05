@@ -21,7 +21,6 @@ public class CredentialsTest extends AbstractJUnitTest {
     private static final String GLOBAL_SCOPE = "GLOBAL";
     private static final String SYSTEM_SCOPE = "SYSTEM";
     
-    private static final String CRED_ID = "ID";
     private static final String CRED_USER = "user";
     private static final String CRED_PWD = "password";
     
@@ -33,7 +32,6 @@ public class CredentialsTest extends AbstractJUnitTest {
         final SshPrivateKeyCredential sc = c.add(SshPrivateKeyCredential.class);
         sc.username.set(CRED_USER);
         sc.selectEnterDirectly().privateKey.set(CRED_PWD);
-        sc.setId(CRED_ID);
         c.save();
 
         //now verify
@@ -46,7 +44,7 @@ public class CredentialsTest extends AbstractJUnitTest {
         final ManagedCredentials c = new ManagedCredentials(jenkins);
 
         c.open();
-        final UserPwdCredential upc = createUserPwdCredential(c.add(UserPwdCredential.class), CRED_ID, CRED_USER, CRED_PWD, null, null);
+        final UserPwdCredential upc = createUserPwdCredential(c.add(UserPwdCredential.class), CRED_USER, CRED_PWD, null, null);
         c.save();
 
         //now verify
@@ -69,7 +67,7 @@ public class CredentialsTest extends AbstractJUnitTest {
 
         // Create credential
         c.open();
-        final UserPwdCredential upc = createUserPwdCredential(c.add(UserPwdCredential.class), CRED_ID, CRED_USER, CRED_PWD, "Descr", systemScope);
+        final UserPwdCredential upc = createUserPwdCredential(c.add(UserPwdCredential.class), CRED_USER, CRED_PWD, "Descr", systemScope);
         c.save();
 
         // verify credential was created
@@ -102,7 +100,7 @@ public class CredentialsTest extends AbstractJUnitTest {
         Domain d = c.addDomain();
         d.name.set(domainName);
         d.description.set("domain description");
-        final UserPwdCredential credInDomain = createUserPwdCredential(d.addCredential(UserPwdCredential.class), CRED_ID, CRED_USER, CRED_PWD, "descr", SYSTEM_SCOPE);
+        final UserPwdCredential credInDomain = createUserPwdCredential(d.addCredential(UserPwdCredential.class), CRED_USER, CRED_PWD, "descr", SYSTEM_SCOPE);
         c.save();
         
         verifyValueForElement(credInDomain.username, CRED_USER);
@@ -136,12 +134,12 @@ public class CredentialsTest extends AbstractJUnitTest {
         Domain d = c.addDomain();
         d.name.set(domainName);
         d.description.set("domain description");
-        final UserPwdCredential credInDomain = createUserPwdCredential(d.addCredential(UserPwdCredential.class), CRED_ID, domainCredUser, CRED_PWD, "descr", SYSTEM_SCOPE);
+        final UserPwdCredential credInDomain = createUserPwdCredential(d.addCredential(UserPwdCredential.class), domainCredUser, CRED_PWD, "descr", SYSTEM_SCOPE);
         c.save();
         
         // Create global domain credential
         c.open();
-        final UserPwdCredential globalCred = createUserPwdCredential(c.add(UserPwdCredential.class), CRED_ID, globalCredUser, CRED_PWD, "descr", SYSTEM_SCOPE);
+        final UserPwdCredential globalCred = createUserPwdCredential(c.add(UserPwdCredential.class), globalCredUser, CRED_PWD, "descr", SYSTEM_SCOPE);
         c.save();
         
         jenkins.visit("credentials");
@@ -164,17 +162,13 @@ public class CredentialsTest extends AbstractJUnitTest {
      * Populates a UserPwdCredential with the values passed as parameter
      * 
      * @param c The credential
-     * @param id (optional) The id of the credential
      * @param user The username
      * @param pwd The password
      * @param descr (optional) The description of the credential
      * @param systemScope (optional) The scope of the credential
      * @return
      */
-    private UserPwdCredential createUserPwdCredential(final UserPwdCredential c, String id, String user, String pwd, String descr, String scope) {
-        if (id != null && !id.isEmpty()) {
-            c.setId(id);
-        }
+    private UserPwdCredential createUserPwdCredential(final UserPwdCredential c, String user, String pwd, String descr, String scope) {
         if (descr != null && !descr.isEmpty()) {
             c.description.set(descr);
         }
