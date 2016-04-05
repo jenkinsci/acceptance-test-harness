@@ -5,14 +5,13 @@ import org.jenkinsci.test.acceptance.plugins.credentials.Domain;
 import org.jenkinsci.test.acceptance.plugins.credentials.ManagedCredentials;
 import org.jenkinsci.test.acceptance.plugins.credentials.UserPwdCredential;
 import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshPrivateKeyCredential;
+import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.junit.Test;
-import org.openqa.selenium.NoSuchElementException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertFalse;
 
 /**
  * @author Vivek Pandey
@@ -21,9 +20,6 @@ import static org.junit.Assert.fail;
 public class CredentialsTest extends AbstractJUnitTest {
     private static final String GLOBAL_SCOPE = "GLOBAL";
     private static final String SYSTEM_SCOPE = "SYSTEM";
-    
-    private static final String USERNAME_INPUT = "_.username";
-    private static final String PRIVATE_KEY_INPUT = "_.privateKey";
     
     private static final String CRED_ID = "ID";
     private static final String CRED_USER = "user";
@@ -41,8 +37,8 @@ public class CredentialsTest extends AbstractJUnitTest {
         c.save();
 
         //now verify
-        verifyInputValue(CRED_ID, USERNAME_INPUT, CRED_USER);
-        verifyInputValue(CRED_ID, PRIVATE_KEY_INPUT, CRED_PWD);
+        verifyValueForElement(sc.username, CRED_USER);
+        verifyValueForElement(sc.selectEnterDirectly().privateKey, CRED_PWD);
     }
 
     @Test
@@ -50,15 +46,12 @@ public class CredentialsTest extends AbstractJUnitTest {
         final ManagedCredentials c = new ManagedCredentials(jenkins);
 
         c.open();
-        final UserPwdCredential upc = c.add(UserPwdCredential.class);
-        upc.username.set(CRED_USER);
-        upc.password.set(CRED_PWD);
-        upc.setId(CRED_ID);
+        final UserPwdCredential upc = createUserPwdCredential(c.add(UserPwdCredential.class), CRED_ID, CRED_USER, CRED_PWD, null, null);
         c.save();
 
         //now verify
         jenkins.visit("credentials");
-        verifyInputValue(CRED_ID, USERNAME_INPUT, CRED_USER);
+        verifyValueForElement(upc.username, CRED_USER);
     }
     
     @Test
@@ -76,37 +69,30 @@ public class CredentialsTest extends AbstractJUnitTest {
 
         // Create credential
         c.open();
-        UserPwdCredential upc = c.add(UserPwdCredential.class);
-        upc.username.set(CRED_USER);
-        upc.password.set(CRED_PWD);
-        upc.description.set("Credential description");
-        upc.scope.select(systemScope);
-        upc.setId(CRED_ID);
+        final UserPwdCredential upc = createUserPwdCredential(c.add(UserPwdCredential.class), CRED_ID, CRED_USER, CRED_PWD, "Descr", systemScope);
         c.save();
 
         // verify credential was created
-        verifyInputValue(CRED_ID, USERNAME_INPUT, CRED_USER);
+        verifyValueForElement(upc.username, CRED_USER);
         
         // Update credential
         c.open();
-        upc = c.get(UserPwdCredential.class, CRED_ID);
         final String usernameModified = CRED_USER + "-Modified";
         upc.username.set(usernameModified);
         c.save();
         
         // verify credential was updated
-        verifyInputValue(CRED_ID, USERNAME_INPUT, usernameModified);
+        verifyValueForElement(upc.username, usernameModified);
         
         // Remove credential 
         c.open();
-        upc = c.get(UserPwdCredential.class, CRED_ID);
-        upc.delete.click();
+        upc.delete();
         c.save();
         
         // verify credential is not present
-        verifyCredentialNotPresent(CRED_ID);
+        verifyElementNotPresent(upc.username);
     }
-    
+
     @Test
     public void manageDomainCredentialsTest() {
         final String domainName = "domain";
@@ -116,112 +102,88 @@ public class CredentialsTest extends AbstractJUnitTest {
         Domain d = c.addDomain();
         d.name.set(domainName);
         d.description.set("domain description");
-        UserPwdCredential credInDomain = d.addCredential(UserPwdCredential.class);
-        credInDomain.username.set(CRED_USER);
-        credInDomain.password.set("cPwd");
-        credInDomain.description.set("cDesc");
-        credInDomain.scope.select(SYSTEM_SCOPE);
-        credInDomain.setId(CRED_ID);
+        final UserPwdCredential credInDomain = createUserPwdCredential(d.addCredential(UserPwdCredential.class), CRED_ID, CRED_USER, CRED_PWD, "descr", SYSTEM_SCOPE);
         c.save();
         
-        verifyInputValueInDomain(domainName, CRED_ID, USERNAME_INPUT, CRED_USER);
+        verifyValueForElement(credInDomain.username, CRED_USER);
         
         // Update credential inside the domain
         c.open();
-        credInDomain = c.get(UserPwdCredential.class, domainName, CRED_ID);
         String credUserModified = CRED_USER + "-Modified";
         credInDomain.username.set(credUserModified);
         c.save();
         
-        verifyInputValueInDomain(domainName, CRED_ID, USERNAME_INPUT, credUserModified);
+        verifyValueForElement(credInDomain.username, credUserModified);
         
         // Remove credential 
         c.open();
-        credInDomain = c.get(UserPwdCredential.class, domainName, CRED_ID);
-        credInDomain.delete.click();
+        credInDomain.delete();
         c.save();
         
         // verify credential is not present
-        verifyCredentialNotPresent(domainName, CRED_ID);
+        verifyElementNotPresent(credInDomain.username);
+    }
+    
+    @Test
+    public void domainScopedAndGlobalDomainCredentialsTest() {
+        final String domainName = "domain";
+        final String domainCredUser = "domainUser";
+        final String globalCredUser = "globalUser";
+        
+        // Create domain and credential inside the domain
+        final ManagedCredentials c = new ManagedCredentials(jenkins);
+        c.open();
+        Domain d = c.addDomain();
+        d.name.set(domainName);
+        d.description.set("domain description");
+        final UserPwdCredential credInDomain = createUserPwdCredential(d.addCredential(UserPwdCredential.class), CRED_ID, domainCredUser, CRED_PWD, "descr", SYSTEM_SCOPE);
+        c.save();
+        
+        // Create global domain credential
+        c.open();
+        final UserPwdCredential globalCred = createUserPwdCredential(c.add(UserPwdCredential.class), CRED_ID, globalCredUser, CRED_PWD, "descr", SYSTEM_SCOPE);
+        c.save();
+        
+        jenkins.visit("credentials");
+        verifyValueForElement(credInDomain.username, domainCredUser);
+        verifyValueForElement(globalCred.username, globalCredUser);
+    }
+
+    
+    private void verifyValueForElement(Control element, String expected) {
+        jenkins.visit("credentials");
+        assertThat(element.resolve().getAttribute("value"), equalTo(expected));
+    }
+    
+    private void verifyElementNotPresent(Control element) {
+        jenkins.visit("credentials");
+        assertFalse(element.exists());
     }
 
     /**
-     * Verifies that a given input for a given credential id 
-     * is equals to the value expected. If there are two credentials
-     * with the same id (that should not happen), the first one is verified.
+     * Populates a UserPwdCredential with the values passed as parameter
      * 
-     * @param credId
-     * @param inputId
-     * @param expected
+     * @param c The credential
+     * @param id (optional) The id of the credential
+     * @param user The username
+     * @param pwd The password
+     * @param descr (optional) The description of the credential
+     * @param systemScope (optional) The scope of the credential
+     * @return
      */
-    private void verifyInputValue(String credId, String inputId, String expected) {
-        jenkins.visit("credentials");
-        // Find credential div
-        String actual = findIfNotVisible(by.input(credId))
-                        .findElement(by.ancestor("div"))
-                        // Find input to verify inside credential div
-                        .findElement(by.input(inputId))
-                        .getAttribute("value");
-        assertThat(actual, equalTo(expected));
-    }
-    
-    /**
-     * Verifies that a given credential is not present in the entire credentials page
-     * 
-     * @param credId
-     */
-    private void verifyCredentialNotPresent(String credId) {
-        assertThat(getElement(by.input(credId)), nullValue());        
-    }
-    
-    /**
-     * Verifies that a given input for a given credential id 
-     * is equals to the value expected under the scope of a given domain.
-     * If there are two credentials with the same id in the same domain,
-     * the first one is verified.
-     *
-     * @param domainName
-     * @param credId
-     * @param inputId
-     * @param expected
-     */
-    private void verifyInputValueInDomain(String domainName, String credId, String inputId, String expected) {
-        jenkins.visit("credentials");
+    private UserPwdCredential createUserPwdCredential(final UserPwdCredential c, String id, String user, String pwd, String descr, String scope) {
+        if (id != null && !id.isEmpty()) {
+            c.setId(id);
+        }
+        if (descr != null && !descr.isEmpty()) {
+            c.description.set(descr);
+        }
+        if (scope != null && !scope.isEmpty()) {
+            c.scope.select(scope);
+        }
         
-        // Find domain div
-        String actual = findIfNotVisible(by.input(domainName))
-                        .findElement(by.ancestor("div"))
-                         // Find credential div inside domain div
-                        .findElement(by.input(credId))
-                        .findElement(by.ancestor("div"))
-                         // Find input with inputId passed
-                        .findElement(by.input(inputId))
-                        .getAttribute("value");
-        
-        assertThat(actual, equalTo(expected));
-    }
-    
-    /**
-     * Verifies that a given credential is not present under the scope of a given domain.
-     * 
-     * @param domainName
-     * @param credId
-     */
-    private void verifyCredentialNotPresent(String domainName, String credId) {
-       try {
-           // Find domain div
-            findIfNotVisible(by.input(domainName))
-           .findElement(by.ancestor("div"))
-            // Find credential div inside domain div
-           .findElement(by.input(credId))
-           .findElement(by.ancestor("div"))
-           // Find input with credential id passed as parameter
-           .findElement(by.input(credId));
-       } catch (NoSuchElementException e) {
-           // If element is not found, verification is correct
-           return;
-       }
-       // If element was found, fail
-       fail();
+        c.username.set(user);
+        c.password.set(pwd);
+        return c;
     }
 }
