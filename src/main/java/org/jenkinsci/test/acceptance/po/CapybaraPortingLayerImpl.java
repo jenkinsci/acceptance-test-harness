@@ -16,6 +16,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -173,7 +174,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     public WebElement find(final By selector) {
         try {
             // Wait for the element to become visible
-            return waitFor().withTimeout(time.seconds(1), TimeUnit.SECONDS).until(new Callable<WebElement>() {
+            return waitFor().withTimeout(time.seconds(1), TimeUnit.MILLISECONDS).until(new Callable<WebElement>() {
                 @Override public WebElement call() throws Exception {
                     WebElement element = driver.findElement(selector);
                     if (element != null && isDisplayed(element)) {
@@ -183,7 +184,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
                     }
                 }
             });
-        } catch (NoSuchElementException x) {
+        } catch (NoSuchElementException|TimeoutException x) {
             // this is often the best place to set a breakpoint
             // Page url is not resent in otherwise verbose message
             String msg = String.format("Unable to locate %s in %s", selector, driver.getCurrentUrl());
