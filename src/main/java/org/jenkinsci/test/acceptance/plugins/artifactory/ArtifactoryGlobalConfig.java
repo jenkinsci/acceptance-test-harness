@@ -40,8 +40,8 @@ public class ArtifactoryGlobalConfig extends PageAreaImpl {
 
     public static class Server extends PageAreaImpl {
         public final Control url = control("artifactoryUrl");
-        public final Control username = control("deployerCredentials/username");
-        public final Control password = control("deployerCredentials/password");
+        public final Control username = control("deployerCredentialsConfig/username");
+        public final Control password = control("deployerCredentialsConfig/password");
         public final Control testConnectionButton =  control("validate-button");
         public final Control goodConnectionFeedback = control("div.ok");
         public final Control errorConnectionFeedback = control("div.error");
