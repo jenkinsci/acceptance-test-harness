@@ -176,12 +176,10 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
             // Wait for the element to become visible
             return waitFor().withTimeout(time.seconds(1), TimeUnit.MILLISECONDS).until(new Callable<WebElement>() {
                 @Override public WebElement call() throws Exception {
-                    WebElement element = driver.findElement(selector);
-                    if (element != null && isDisplayed(element)) {
-                        return element;
-                    } else {
-                        return null;
+                    for (WebElement element : driver.findElements(selector)) {
+                        if (isDisplayed(element)) return element;
                     }
+                    return null;
                 }
             });
         } catch (NoSuchElementException|TimeoutException x) {
