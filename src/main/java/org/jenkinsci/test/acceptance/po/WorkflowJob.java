@@ -26,6 +26,8 @@ package org.jenkinsci.test.acceptance.po;
 
 import com.google.inject.Injector;
 import java.net.URL;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.junit.Assert;
@@ -50,7 +52,7 @@ public class WorkflowJob extends Job {
                 // Anyway we cannot use the web driver to interact with the hidden textarea.
                 // Some code cannibalized from #45:
                 String cssSelector = "#workflow-editor-1";
-                waitForRenderOf(cssSelector + " .ace_text-input", driver);
+                waitForRenderOf(cssSelector + " .ace_text-input", getJenkins());
                 executeScript(
                     "var targets = document.getElementsBySelector(arguments[0]);" +
                             "if (!targets || targets.length === 0) {" +
@@ -64,34 +66,24 @@ public class WorkflowJob extends Job {
             }
         }
     };
-    private static void waitForRenderOf(@Nonnull String cssSelector, @Nonnull WebDriver driver) {
-        long start = System.currentTimeMillis();
-        while (System.currentTimeMillis() < start + 10000) {
-            if (isRendered(cssSelector, driver)) {
-                return;
-            }
-            try {
-                Thread.sleep(200);
-            } catch (InterruptedException e) {
-                break;
-            }
-        }
-        Assert.fail("Timed out waiting on '" + cssSelector + "' to be rendered.");
+    private static void waitForRenderOf(@Nonnull final String cssSelector, @Nonnull final Jenkins jenkins) {
+        jenkins.waitFor().withMessage("Timed out waiting on '" + cssSelector + "' to be rendered.")
+                .withTimeout(jenkins.time.seconds(10), TimeUnit.SECONDS)
+                .until(new Callable<Boolean>() {
+                    @Override public Boolean call() throws Exception {
+                        return isRendered(cssSelector, jenkins);
+                    }
+                })
+        ;
     }
-    private static boolean isRendered(@Nonnull String cssSelector, @Nonnull WebDriver driver) {
-        assertIsJavaScriptExecutor(driver);
-        return (boolean) ((JavascriptExecutor)driver).executeScript(
+    private static boolean isRendered(@Nonnull String cssSelector, @Nonnull Jenkins jenkins) {
+        return (boolean) jenkins.executeScript(
                 "var targets = document.getElementsBySelector(arguments[0]);" +
                         "if (!targets || targets.length === 0) {" +
                         "    return false;" +
                         "} else {" +
                         "    return true;" +
                         "}", cssSelector);
-    }
-    private static void assertIsJavaScriptExecutor(WebDriver driver) {
-        if (!(driver instanceof JavascriptExecutor)) {
-            throw new IllegalArgumentException("WebDriver type " + driver.getClass().getName() + " does not implement JavascriptExecutor.");
-        }
     }
 
     public final Control sandbox = control("/definition/sandbox");

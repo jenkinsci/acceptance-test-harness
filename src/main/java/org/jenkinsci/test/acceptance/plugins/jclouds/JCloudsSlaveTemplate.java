@@ -38,7 +38,7 @@ public class JCloudsSlaveTemplate extends PageAreaImpl {
 
     public JCloudsSlaveTemplate hardwareId(String value) {
         control("useHardwareId[true]").check();
-        sleep(5000); // wait for select to populate
+        elasticSleep(5000); // wait for select to populate
         control("hardwareId").select(value);
         return this;
     }
@@ -50,7 +50,7 @@ public class JCloudsSlaveTemplate extends PageAreaImpl {
 
     public JCloudsSlaveTemplate imageId(String value) {
         control("imageSelectionOption[imageId]").check();
-        sleep(100);
+        elasticSleep(100);
         control("imageId").set(value);
         return this;
     }
@@ -62,7 +62,7 @@ public class JCloudsSlaveTemplate extends PageAreaImpl {
 
     public JCloudsSlaveTemplate imageNameRegex(String value) {
         control("imageSelectionOption[imageNameRegex]").check();
-        sleep(100);
+        elasticSleep(100);
         control("imageNameRegex").set(value);
         return this;
     }

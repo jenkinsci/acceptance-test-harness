@@ -16,6 +16,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -170,27 +171,18 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
      * @see #getElement(org.openqa.selenium.By)         if you don't want to see an exception
      */
     @Override
-    public WebElement find(By selector) {
+    public WebElement find(final By selector) {
         try {
-            long endTime = System.currentTimeMillis() + time.seconds(1);
-            while (System.currentTimeMillis() <= endTime) {
-                WebElement e = driver.findElement(selector);
-                if (isDisplayed(e)) {
-                    return e;
-                }
-
-                for (WebElement f : driver.findElements(selector)) {
-                    if (isDisplayed(f)) {
-                        return f;
+            // Wait for the element to become visible
+            return waitFor().withTimeout(time.seconds(1), TimeUnit.MILLISECONDS).until(new Callable<WebElement>() {
+                @Override public WebElement call() throws Exception {
+                    for (WebElement element : driver.findElements(selector)) {
+                        if (isDisplayed(element)) return element;
                     }
+                    return null;
                 }
-
-                // give a bit more chance for the element to become visible
-                elasticSleep(100);
-            }
-
-            throw new NoSuchElementException("Unable to locate visible " + selector + " in " + driver.getCurrentUrl());
-        } catch (NoSuchElementException x) {
+            });
+        } catch (NoSuchElementException|TimeoutException x) {
             // this is often the best place to set a breakpoint
             // Page url is not resent in otherwise verbose message
             String msg = String.format("Unable to locate %s in %s", selector, driver.getCurrentUrl());
@@ -207,20 +199,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     @Override
     public WebElement findIfNotVisible(By selector) {
         try {
-            long endTime = System.currentTimeMillis() + time.seconds(1);
-            WebElement e = null;
-            while (System.currentTimeMillis() <= endTime) {
-                e = driver.findElement(selector);
-
-                // give a bit more chance for the element to become visible
-                elasticSleep(100);
-
-            }
-            if (e == null) {
-                throw new NoSuchElementException("Unable to locate visible " + selector + " in " + driver.getCurrentUrl());
-            }
-            return e;
-
+            return driver.findElement(selector);
         } catch (NoSuchElementException x) {
             // this is often the best place to set a breakpoint
             // Page url is not resent in otherwise verbose message
