@@ -37,6 +37,7 @@ public class GitRepo implements Closeable {
     public GitRepo() throws IOException, InterruptedException {
         dir = initDir();
         git("init");
+        setIdentity(dir);
     }
 
     /**
@@ -45,6 +46,13 @@ public class GitRepo implements Closeable {
     public GitRepo(String url) throws IOException, InterruptedException {
         dir = initDir();
         git("clone", url, ".");
+        setIdentity(dir);
+    }
+
+    /** Configures and identity for the repo, just in case global config is not set. */
+    private void setIdentity(File dir) throws IOException, InterruptedException {
+        gitDir(dir, "config", "user.name", "Jenkins-ATH");
+        gitDir(dir, "config", "user.email", "jenkins-ath@example.org");
     }
 
     private File initDir() throws IOException {
@@ -126,6 +134,7 @@ public class GitRepo implements Closeable {
         submoduleDir.mkdir();
 
         gitDir(submoduleDir, "init");
+        setIdentity(submoduleDir);
         try (FileWriter o = new FileWriter(new File(submoduleDir, "foo"), true)) {
             o.write("more");
         }
