@@ -17,9 +17,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
 
+import javax.inject.Inject;
+
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.SystemUtils;
 import org.codehaus.plexus.util.Base64;
+import org.jenkinsci.test.acceptance.controller.JenkinsController;
+import org.jenkinsci.test.acceptance.controller.LocalController;
 import org.jenkinsci.test.acceptance.junit.Resource;
+import org.junit.internal.AssumptionViolatedException;
 import org.openqa.selenium.WebElement;
 import org.zeroturnaround.zip.ZipUtil;
 
@@ -41,6 +47,12 @@ public class Job extends TopLevelItem {
         return parameters;
     }
 
+    /**
+     * The controller that starts/stops Jenkins
+     */
+    @Inject
+    public JenkinsController controller;
+    
     private List<Parameter> parameters = new ArrayList<>();
 
     // TODO these controls (and some methods) actually belong in a subclass corresponding to AbstractProject
@@ -185,6 +197,8 @@ public class Job extends TopLevelItem {
     /**
      * "Copy" any file from the System into the Workspace using a zipFIle.
      *
+     * Differentiates when the file is being run on Windows or Unix based machines.
+     * 
      * @param file
      */
     public void copyFile(File file) {
@@ -194,10 +208,18 @@ public class Job extends TopLevelItem {
             ZipUtil.pack(file, tmp);
             byte[] archive = IOUtils.toByteArray(new FileInputStream(tmp));
 
-            addShellStep(String.format(
-                    "base64 --decode << ENDOFFILE > archive.zip && unzip -o archive.zip \n%s\nENDOFFILE",
-                    new String(Base64.encodeBase64Chunked(archive))
-            ));
+            if (SystemUtils.IS_OS_WINDOWS) {
+                if (!(controller instanceof LocalController)) {
+                    // TODO: Make it work for RemoteJenkinsController like in Unix (below)
+                    throw new AssumptionViolatedException("Copying files in Windows is only supported if a LocalController is in use. Test will be skipped.");
+                }
+                addBatchStep("xcopy " + file.getAbsolutePath() + " %cd% /E");
+            } else {
+                addShellStep(String.format(
+                        "base64 --decode << ENDOFFILE > archive.zip && unzip -o archive.zip \n%s\nENDOFFILE",
+                        new String(Base64.encodeBase64Chunked(archive))
+                ));
+            }
         } catch (IOException e) {
             throw new AssertionError(e);
         } finally {
