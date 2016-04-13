@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.po.JdkInstallation;
 import org.jenkinsci.test.acceptance.po.ToolInstallation;
@@ -74,10 +75,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
         step.targets.set("-version");
         job.save();
 
-        job.startBuild().shouldSucceed()
-                .shouldContainsConsoleOutput("Apache Maven 3.0.4")
-                .shouldContainsConsoleOutput("Unpacking http://archive.apache.org/dist/maven/binaries/apache-maven-3.0.4-bin.zip")
-        ;
+        job.startBuild().shouldSucceed().shouldContainsConsoleOutput("Apache Maven 3.0.4");
     }
 
     @Test
@@ -91,10 +89,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
         step.targets.set("-version");
         job.save();
 
-        job.startBuild().shouldSucceed()
-                .shouldContainsConsoleOutput("Apache Maven 2.2.1")
-                .shouldContainsConsoleOutput("Unpacking http://archive.apache.org/dist/maven/binaries/apache-maven-2.2.1-bin.zip")
-        ;
+        job.startBuild().shouldSucceed().shouldContainsConsoleOutput("Apache Maven 2.2.1");
     }
 
     @Test
