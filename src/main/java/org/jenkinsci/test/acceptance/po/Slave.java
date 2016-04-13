@@ -7,6 +7,7 @@ import org.jenkinsci.test.acceptance.junit.Wait;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 
 import com.google.common.base.Joiner;
+import org.openqa.selenium.NoSuchElementException;
 
 /**
  * A slave page object.
@@ -142,7 +143,11 @@ public class Slave extends Node {
     public void launchSlaveAgent() {
         if (isOffline()) {
             open();
-            clickButton("Launch agent");
+            try {
+                clickButton("Launch agent");
+            } catch (NoSuchElementException ex) {
+                clickButton("Launch slave agent");
+            }
         }
     }
 }
