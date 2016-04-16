@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 package plugins;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
@@ -31,6 +32,7 @@ import org.jenkinsci.test.acceptance.plugins.mock_security_realm.MockSecurityRea
 import org.jenkinsci.test.acceptance.plugins.script_security.ScriptApproval;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
+import org.junit.Before;
 import org.junit.Test;
 
 @WithPlugins({"script-security", "mock-security-realm", "matrix-auth", "groovy-postbuild"})
@@ -44,8 +46,8 @@ public class ScriptSecurityPluginTest extends AbstractJUnitTest {
         jenkins.login().doLogin(user);
     }
 
-    @Test
-    public void scriptNeedsApproval() throws Exception {
+    @Before
+    public void setUp() {
         final GlobalSecurityConfig security = new GlobalSecurityConfig(jenkins);
         security.open();
         {
@@ -56,25 +58,48 @@ public class ScriptSecurityPluginTest extends AbstractJUnitTest {
             mas.addUser(USER).developer();
         }
         security.save();
+    }
+
+    private FreeStyleJob createFailedJob(String script, boolean sandbox) {
         final FreeStyleJob job;
         login(USER);
         {
             job = jenkins.jobs.create();
             job.configure();
-            job.addPublisher(GroovyPostBuildStep.class).setScript("def a = 4").setSandbox(false).setBehavior(GroovyPostBuildStep.FAILED);
+            job.addPublisher(GroovyPostBuildStep.class).setScript(script).setSandbox(sandbox).setBehavior(GroovyPostBuildStep.FAILED);
             job.save();
             job.scheduleBuild().shouldFail(); // Script not approved
         }
+        return job;
+    }
+
+    private void shouldSucceed(FreeStyleJob job) {
+        login(USER);
+        job.scheduleBuild().shouldSucceed();
+    }
+
+    @Test
+    public void scriptNeedsApproval() throws Exception {
+        final FreeStyleJob job = createFailedJob("def a = 4", false);
         login(ADMIN);
         {
             ScriptApproval sa = new ScriptApproval(jenkins);
             sa.open();
             sa.find(job.name).approve();
         }
-        login(USER);
+        shouldSucceed(job); // Script approved
+    }
+
+    @Test
+    public void signatureNeedsApproval() throws Exception {
+        final FreeStyleJob job = createFailedJob("def h = java.lang.System.identityHashCode(0)", true);
+        login(ADMIN);
         {
-            job.scheduleBuild().shouldSucceed(); // Script approved
+            ScriptApproval sa = new ScriptApproval(jenkins);
+            sa.open();
+            sa.findSignature("identityHashCode").approve();
         }
+        shouldSucceed(job); // Script approved
     }
 
 }

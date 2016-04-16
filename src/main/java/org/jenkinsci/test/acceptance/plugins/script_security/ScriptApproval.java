@@ -27,4 +27,16 @@ public class ScriptApproval extends PageObject {
         throw new NoSuchElementException(context);
     }
 
+    /**
+     * Finds a pending method signature that includes the given text in the signature itself.
+     */
+    public PendingSignature findSignature(String context) {
+        for (WebElement e : all(by.xpath(".//div[starts-with(@id,'s-')]"))) {
+            if (e.findElement(by.tagName("code")).getText().contains(context)) {
+                return new PendingSignature(injector,e);
+            }
+        }
+        throw new NoSuchElementException(context);
+    }
+
 }
