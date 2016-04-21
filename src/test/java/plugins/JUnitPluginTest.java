@@ -128,7 +128,7 @@ public class JUnitPluginTest extends AbstractJUnitTest {
     }
 
     private void toggle(String test) {
-        List<WebElement> elements = all(by.xpath("//a[text()='%s']/../a[starts-with(@href, 'javascript')]", test));
+        List<WebElement> elements = all(by.xpath("//a[text()='%s']/../a[@onclick]", test));
 
         for (Iterator<WebElement> itr = elements.iterator(); itr.hasNext(); ) {
             WebElement e = itr.next();
