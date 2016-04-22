@@ -9,6 +9,7 @@ import org.jenkinsci.test.acceptance.po.JUnitPublisher;
 import org.junit.Test;
 import org.openqa.selenium.WebElement;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -88,12 +89,12 @@ public class JUnitPluginTest extends AbstractJUnitTest {
      * And I build the job
      * Then the build should be unstable
      * And I visit build action named "Test Result"
-     * And "JUnit.testScore[0]" error summary should match "expected:<42> but was:<0>"
-     * And "JUnit.testScore[1]" error summary should match "expected:<42> but was:<1>"
-     * And "JUnit.testScore[2]" error summary should match "expected:<42> but was:<2>"
-     * And "TestNG.testScore" error summary should match "expected:<42> but was:<0>"
-     * And "TestNG.testScore" error summary should match "expected:<42> but was:<1>"
-     * And "TestNG.testScore" error summary should match "expected:<42> but was:<2>"
+     * And "JUnit.testScore[0]" test page should contain "expected:<42> but was:<0>"
+     * And "JUnit.testScore[1]" test page should contain "expected:<42> but was:<1>"
+     * And "JUnit.testScore[2]" test page should contain "expected:<42> but was:<2>"
+     * And "TestNG.testScore" test page should contain "expected:<42> but was:<0>"
+     * And "TestNG.testScore" test page should contain "expected:<42> but was:<1>"
+     * And "TestNG.testScore" test page should contain "expected:<42> but was:<2>"
      */
     @Test
     @Issue("JENKINS-22833")
@@ -119,28 +120,21 @@ public class JUnitPluginTest extends AbstractJUnitTest {
         assertMessage("TestNG.testScore", "expected:<42> but was:<2>");
     }
 
-    private void assertMessage(String test, String msg) {
-        elasticSleep(1000);
-        toggle(test);
-        elasticSleep(1000); // Try to wait a bit to ajax to fetch the content
-        assertThat(driver, hasContent(msg));
-        toggle(test);
-    }
-
-    private void toggle(String test) {
-        List<WebElement> elements = all(by.xpath("//a[text()='%s']/../a[@onclick]", test));
-
-        for (Iterator<WebElement> itr = elements.iterator(); itr.hasNext(); ) {
-            WebElement e = itr.next();
-            if (!e.isDisplayed()) {
-                itr.remove();
-            }
-        }
-
-        assertThat("No test with given name", elements.isEmpty(), equalTo(false));
-
+    private void assertMessage(String test, String content) {
+        // Given that there may be several tests with the same name, we assert
+        // that at least one of the pages have the requested content
+        final List<WebElement> elements = all(by.xpath("//a[text()='%s']", test));
+        final List<String> testPages = new ArrayList<String>(elements.size());
         for (WebElement e : elements) {
-            e.click();
+            testPages.add(e.getAttribute("href"));
         }
+        boolean found = false;
+        for (String page : testPages) {
+            driver.get(page);
+            found = hasContent(content).matchesSafely(driver);
+            driver.navigate().back();
+            if (found) break;
+        }
+        assertThat("No test found with given content", found);
     }
 }
