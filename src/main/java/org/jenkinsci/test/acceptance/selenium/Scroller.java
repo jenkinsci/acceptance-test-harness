@@ -1,7 +1,7 @@
 package org.jenkinsci.test.acceptance.selenium;
 
-import org.apache.commons.io.IOUtils;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Point;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.events.AbstractWebDriverEventListener;
@@ -61,10 +61,12 @@ import java.io.IOException;
  * @author Kohsuke Kawaguchi
  */
 public class Scroller extends AbstractWebDriverEventListener {
-    private final String scrollJs;
+    /** Horizontal margin to use when scrolling to the element. */
+    private static final int MARGIN_X = Integer.getInteger("SCROLL_MARGIN_X", 200);
+    /** Vertical margin to use when scrolling to the element. */
+    private static final int MARGIN_Y = Integer.getInteger("SCROLL_MARGIN_Y", 200);
 
     public Scroller() throws IOException {
-        scrollJs = IOUtils.toString(Scroller.class.getResourceAsStream("scroller.js"));
     }
 
     @Override
@@ -77,8 +79,19 @@ public class Scroller extends AbstractWebDriverEventListener {
         scrollIntoView(element, driver);
     }
 
+    /**
+     * To scroll the element to the view, we scroll the element to the top-edge of the screen.
+     * A (configurable) margin is left to account for decorations.
+     * Alternatives based on `scrollToView` and {@link org.openqa.selenium.interactions.Actions#moveToElement}
+     * were tested but did not solve JENKINS-34411.
+     * @param e Element to scroll to view.
+     * @param driver Driver instance.
+     */
     private void scrollIntoView(WebElement e, WebDriver driver) {
-        int eYCoord = e.getLocation().getY();
-        ((JavascriptExecutor)driver).executeScript(scrollJs, eYCoord);
+        final Point p = e.getLocation();
+        final int x = p.getX();
+        final int y = p.getY();
+        final String script = String.format("window.scrollTo(%d, %d);", p.getX() - MARGIN_X, p.getY() - MARGIN_Y);
+        ((JavascriptExecutor)driver).executeScript(script);
     }
 }
