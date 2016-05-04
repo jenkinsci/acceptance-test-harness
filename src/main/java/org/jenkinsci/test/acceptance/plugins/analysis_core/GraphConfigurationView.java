@@ -18,6 +18,10 @@ public class GraphConfigurationView extends ContainerPageObject {
     private final Control parameterValue = control("/parameterValue");
     private final Control useBuildDateAsDomain = control("/useBuildDateAsDomain");
     private final Control fixed = control("/graphType[FIXED]");
+    private final Control priority = control("/graphType[PRIORITY]");
+    private final Control totals = control("/graphType[TOTALS]");
+    private final Control difference = control("/graphType[DIFFERENCE]");
+    private final Control none = control("/graphType[NONE]");
 
     public GraphConfigurationView(final ContainerPageObject parent, final String plugin) {
         super(parent, parent.url("%s/configure/", plugin));
@@ -36,5 +40,9 @@ public class GraphConfigurationView extends ContainerPageObject {
 
         elasticSleep(1000); // trend graphs take some time to compute...
         return open;
+    }
+
+    public void deactivateTrend() {
+        none.click();
     }
 }

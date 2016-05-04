@@ -23,6 +23,7 @@ import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisAction.Tab;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisMavenSettings;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisSettings;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.GraphConfigurationView;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.AbstractDashboardViewPortlet;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
 import org.jenkinsci.test.acceptance.plugins.email_ext.EmailExtPublisher;
@@ -154,13 +155,9 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
     @Test
     @Issue({"JENKINS-21723", "JENKINS-29900"})
     public void should_have_trend_graph_with_relative_links() {
-        FreeStyleJob job = createFreeStyleJob();
-        buildJobAndWait(job);
-        buildSuccessfulJob(job);
+        FreeStyleJob job = buildJobTwoTimesInARow();
 
         AnalysisAction action = createProjectAction(job);
-        job.open();
-
         verifyTrendGraphOverview(job, action);
         verifyTrendGraphDetails(job, action);
     }
@@ -196,6 +193,52 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
             }
             assertThat(sum, is(getNumberOfWarnings()));
         }
+    }
+
+    /**
+     * Runs the test case {@link #should_have_trend_graph_with_relative_links} with a job that contains a space in the
+     * name. Then the trend is deactivated in the trend configuration view: now the trend should be replaced with a link
+     * to re-enable the trend. Finally, this link is clicked in order open the trend configuration again.
+     */
+    @Test
+    @Issue({"JENKINS-25917", "JENKINS-32377"})
+    public void should_store_trend_selection_in_cookie() {
+        FreeStyleJob job = buildJobTwoTimesInARow();
+
+        // FIXME: renaming of a job does change the name but not the URL
+        // job.configure();
+        // job.setName(job.name.replace("_", " "));
+        // job.save();
+        // clickButton("Yes");
+
+        AnalysisAction action = createProjectAction(job);
+        verifyTrendGraphOverview(job, action);
+
+        deactivateTrendGraph(job, action);
+    }
+
+    private FreeStyleJob buildJobTwoTimesInARow() {
+        FreeStyleJob job = createFreeStyleJob();
+        buildJobAndWait(job);
+        buildSuccessfulJob(job);
+        job.open();
+        return job;
+    }
+
+    private void deactivateTrendGraph(final FreeStyleJob job, final AnalysisAction action) {
+        GraphConfigurationView view = action.configureTrendGraphForUser();
+
+        view.open();
+        view.deactivateTrend();
+        view.save();
+
+        List<WebElement> enableLinks = job.all(By.partialLinkText("Enable"));
+        assertThat(enableLinks.size(), is(1));
+
+        enableLinks.get(0).click();
+        elasticSleep(500);
+
+        assertThat(getCurrentUrl(), endsWith(action.getUrl() + "/configure/"));
     }
 
     /**
