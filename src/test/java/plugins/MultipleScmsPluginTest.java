@@ -44,7 +44,7 @@ public class MultipleScmsPluginTest extends AbstractJUnitTest {
         git.localDir("git-project");
 
         SubversionScm svn = scms.addScm(SubversionScm.class);
-        svn.url.set("https://svn.jenkins-ci.org/trunk/jenkins/test-projects/model-ant-project/");
+        svn.url.set("http://svn.apache.org/repos/asf/ant/core/trunk/");
         svn.local.set("svn-project");
 
         job.addShellStep("test -d svn-project/.svn && test -f git-project/pom.xml");
