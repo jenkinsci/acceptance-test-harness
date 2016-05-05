@@ -226,6 +226,9 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
     }
 
     private void deactivateTrendGraph(final FreeStyleJob job, final AnalysisAction action) {
+        if ("warnings.*".equals(action.getUrl())) {
+            return; // FIXME: see JENKINS-34635
+        }
         GraphConfigurationView view = action.configureTrendGraphForUser();
 
         view.open();
