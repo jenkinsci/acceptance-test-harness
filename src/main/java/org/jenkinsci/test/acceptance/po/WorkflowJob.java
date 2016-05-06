@@ -33,6 +33,7 @@ import org.jenkinsci.test.acceptance.junit.Resource;
 import org.junit.Assert;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 
 @Describable("org.jenkinsci.plugins.workflow.job.WorkflowJob")
@@ -51,8 +52,12 @@ public class WorkflowJob extends Job {
                 // As of JENKINS-28769, the textarea is set display: none due to the ACE editor, so CapybaraPortingLayerImpl.find, called by super.resolve, calls isDisplayed and fails.
                 // Anyway we cannot use the web driver to interact with the hidden textarea.
                 // Some code cannibalized from #45:
-                String cssSelector = "#workflow-editor-1";
-                waitForRenderOf(cssSelector + " .ace_text-input", getJenkins());
+                String cssSelector;
+                try {
+                    cssSelector = waitFor("#workflow-editor-1");
+                } catch(TimeoutException e) {
+                    cssSelector = waitFor("#workflow-editor");
+                }
                 executeScript(
                     "var targets = document.getElementsBySelector(arguments[0]);" +
                             "if (!targets || targets.length === 0) {" +
@@ -65,10 +70,15 @@ public class WorkflowJob extends Job {
                     cssSelector, text);
             }
         }
+
+        private String waitFor(@Nonnull final String selector) {
+            waitForRenderOf(selector + " .ace_text-input", getJenkins());
+            return selector;
+        }
     };
     private static void waitForRenderOf(@Nonnull final String cssSelector, @Nonnull final Jenkins jenkins) {
         jenkins.waitFor().withMessage("Timed out waiting on '" + cssSelector + "' to be rendered.")
-                .withTimeout(jenkins.time.seconds(10), TimeUnit.SECONDS)
+                .withTimeout(10, TimeUnit.SECONDS)
                 .until(new Callable<Boolean>() {
                     @Override public Boolean call() throws Exception {
                         return isRendered(cssSelector, jenkins);
