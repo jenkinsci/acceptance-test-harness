@@ -11,11 +11,11 @@ import org.jenkinsci.test.acceptance.po.Job;
 @Describable("Run unit tests with MSTest")
 public class MSTestRunnerBuildStep extends AbstractStep implements BuildStep  {
 
-    private final Control testFilesControl = control("testFiles");
-    private final Control categoriesControl = control("categories");
-    private final Control resultFileControl = control("resultFile");
-    private final Control cmdLineArgsControl = control("cmdLineArgs");
-    private final Control continueOnFailControl = control("continueOnFail");
+    public final Control testFilesControl = control("testFiles");
+    public final Control categoriesControl = control("categories");
+    public final Control resultFileControl = control("resultFile");
+    public final Control cmdLineArgsControl = control("cmdLineArgs");
+    public final Control continueOnFailControl = control("continueOnFail");
     
     public MSTestRunnerBuildStep(Job parent, String path) {
         super(parent, path);
