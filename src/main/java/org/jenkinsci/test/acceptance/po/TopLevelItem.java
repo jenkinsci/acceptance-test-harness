@@ -1,5 +1,7 @@
 package org.jenkinsci.test.acceptance.po;
 
+import javax.annotation.CheckReturnValue;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,10 +28,28 @@ public abstract class TopLevelItem extends ContainerPageObject {
         this.name = name;
     }
 
-    public void setName(String name) {
-        ensureConfigPage();
-        this.name = name;
-        control("/name").set(name);
+    /**
+     * Renames the job. Opens the configuration section, sets the name and saves the form. Finally the rename is
+     * confirmed.
+     *
+     * @param newName the new name of the job
+     * @return the renamed job (with new URL)
+     */
+    @CheckReturnValue
+    public <T extends TopLevelItem> T renameTo(final String newName) {
+        configure();
+        String oldName = name;
+        control("/name").set(newName);
+        save();
+        clickButton("Yes");
+
+        try {
+            return (T) newInstance(getClass(),
+                    injector, new URL(url.toExternalForm().replace(oldName, newName)), newName);
+        }
+        catch (MalformedURLException e) {
+            throw new AssertionError("Not a valid url: " + newName, e);
+        }
     }
 
     /**

@@ -23,16 +23,15 @@
  */
 package core;
 
-import static org.jenkinsci.test.acceptance.po.View.containsJob;
-import static org.hamcrest.MatcherAssert.assertThat;
-
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.ListView;
 import org.junit.Test;
 
-public class ViewTest extends AbstractJUnitTest {
+import static org.hamcrest.MatcherAssert.*;
+import static org.jenkinsci.test.acceptance.po.View.*;
 
+public class ViewTest extends AbstractJUnitTest {
     @Test
     public void renameJob() {
         FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class, "original_name");
@@ -43,10 +42,7 @@ public class ViewTest extends AbstractJUnitTest {
 
         assertThat(view, containsJob(job));
 
-        job.configure();
-        job.setName("new_name");
-        job.save();
-        clickButton("Yes"); // confirm rename
+        job = job.renameTo("new_name");
 
         assertThat(view, containsJob(job));
     }
