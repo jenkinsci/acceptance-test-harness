@@ -18,6 +18,7 @@ import org.custommonkey.xmlunit.XMLAssert;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Resource;
+import org.jenkinsci.test.acceptance.junit.Since;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisAction;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisAction.Tab;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
@@ -201,15 +202,12 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      * to re-enable the trend. Finally, this link is clicked in order open the trend configuration again.
      */
     @Test
-    @Issue({"JENKINS-25917", "JENKINS-32377"})
+    @Issue({"JENKINS-25917", "JENKINS-32377"}) @Since("2.0")
     public void should_store_trend_selection_in_cookie() {
         FreeStyleJob job = buildJobTwoTimesInARow();
 
-        // FIXME: renaming of a job does change the name but not the URL
-        // job.configure();
-        // job.setName(job.name.replace("_", " "));
-        // job.save();
-        // clickButton("Yes");
+        assertThat(job.name, containsString("_"));
+        job = job.renameTo(job.name.replace("_", " "));
 
         AnalysisAction action = createProjectAction(job);
         verifyTrendGraphOverview(job, action);
