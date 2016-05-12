@@ -46,8 +46,14 @@ public class ArtifactManagement extends PageAreaImpl {
 
     public void clear() {
         try {
-            while (true) {
+            while (control("artifactManagerFactories/repeatable-delete").exists()) {
                 control("artifactManagerFactories/repeatable-delete").click();
+                // We allow slow Javascripts to remove the deleted element before we click again (JENKINS-32569)
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException ex) {
+                    // just ignore and continue the cycle
+                }
             }
         } catch (NoSuchElementException ignored) {
             //done no more buttons to push
