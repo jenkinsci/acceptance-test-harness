@@ -26,6 +26,7 @@ package org.jenkinsci.test.acceptance.selenium;
 import java.util.List;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.UnhandledAlertException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.events.AbstractWebDriverEventListener;
@@ -85,7 +86,13 @@ public class SanityChecker extends AbstractWebDriverEventListener {
      * and reduces the overhead of {@link SanityChecker}.
      */
     private boolean isFastPath(WebDriver driver) {
-        final String pageSource = driver.getPageSource();
-        return !(pageSource.contains("Oops!") || pageSource.contains("Try POSTing"));
+        try {
+            final String pageSource = driver.getPageSource();
+            return !(pageSource.contains("Oops!") || pageSource.contains("Try POSTing"));
+        } catch (UnhandledAlertException ex) {
+            // If alert is expected we can not check sanity and should leave it alone for test to handle. If it is not
+            // expected, the code is likely going to fail anyway but it is better to do on less surprising place
+            return true;
+        }
     }
 }
