@@ -25,8 +25,10 @@ package org.jenkinsci.test.acceptance.plugins.openstack;
 
 import java.util.concurrent.Callable;
 
+import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebDriverException;
 
 /**
  * Single slave template of JClouds cloud.
@@ -91,7 +93,12 @@ public class OpenstackSlaveTemplate extends PageAreaImpl {
 
     public OpenstackSlaveTemplate keyPair(String name) {
         ensureAdvancedOpened();
-        control("slaveOptions/keyPairName", "keyPairName").set(name);
+        Control control = control("slaveOptions/keyPairName", "keyPairName");
+        try {
+            control.select(name);
+        } catch (WebDriverException ex) {
+            control.set(name);
+        }
         return this;
     }
 
