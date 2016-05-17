@@ -87,6 +87,9 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
     @Inject(optional = true) @Named("OpenstackCloudPluginTest.KEY_PAIR_NAME")
     public String KEY_PAIR_NAME;
 
+    @Inject(optional = true) @Named("OpenstackCloudPluginTest.FIP_POOL_NAME")
+    public String FIP_POOL_NAME;
+
     @After // Terminate all nodes
     public void tearDown() {
         // We have never left the config - no nodes to terminate
@@ -250,7 +253,7 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
 
     private void configureProvisioning(String type, String labels) {
         jenkins.configure();
-        OpenstackCloud cloud = addCloud(jenkins.getConfigPage()).associateFloatingIp();
+        OpenstackCloud cloud = addCloud(jenkins.getConfigPage()).associateFloatingIp(FIP_POOL_NAME);
         OpenstackSlaveTemplate template = cloud.addSlaveTemplate();
 
         template.name(CLOUD_DEFAULT_TEMPLATE);

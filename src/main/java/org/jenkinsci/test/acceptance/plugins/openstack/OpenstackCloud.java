@@ -62,7 +62,7 @@ public class OpenstackCloud extends Cloud {
         return this;
     }
 
-    public OpenstackCloud associateFloatingIp() {
+    public OpenstackCloud associateFloatingIp(final String pool) {
         control("advanced-button").click();
         try {
             // Prior 2.1
@@ -70,7 +70,7 @@ public class OpenstackCloud extends Cloud {
         } catch (NoSuchElementException ex) {
             waitFor().withMessage("Floating IP pool select populates").ignoring(NoSuchElementException.class).until(new Callable<Boolean>() {
                 @Override public Boolean call() throws Exception {
-                    control("slaveOptions/floatingIpPool", "floatingIpPool").select("public");
+                    control("slaveOptions/floatingIpPool", "floatingIpPool").select(pool);
                     return true;
                 }
             });
