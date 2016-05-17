@@ -43,7 +43,7 @@ public class OpenstackCloud extends Cloud {
     }
 
     public OpenstackCloud profile(String value) {
-        control("profile").set(value);
+        control("name", "profile").set(value);
         return this;
     }
 
