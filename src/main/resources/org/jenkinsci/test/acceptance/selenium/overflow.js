@@ -1,4 +1,4 @@
-var css = 'html body * { overflow: visible !important }',
+var css = '* { overflow: visible !important }',
     head = document.head || document.getElementsByTagName('head')[0],
     style = document.createElement('style');
 
