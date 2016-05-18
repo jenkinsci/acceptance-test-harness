@@ -37,7 +37,8 @@ public class OpenstackBuildWrapper extends BuildWrapper {
     }
 
     public void template(String name) {
-        control("instancesToRun/templateName").select(name);
+        control("instancesToRun/useSelectTemplates[false]").check();
+        control("instancesToRun/manualTemplateName").set(name);
     }
 
     public void count(int count) {
