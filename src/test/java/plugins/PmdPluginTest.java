@@ -20,6 +20,7 @@ import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.ListView;
 import org.jenkinsci.test.acceptance.po.Node;
 import org.jenkinsci.test.acceptance.po.PageObject;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
@@ -28,8 +29,9 @@ import org.openqa.selenium.WebElement;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.text.IsEmptyString.isEmptyString;
 import static org.jenkinsci.test.acceptance.Matchers.*;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.Assume.*;
 
 /**
  * Acceptance tests for the PMD plugin.
@@ -70,6 +72,42 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
     @Override
     protected int getNumberOfWarnings() {
         return TOTAL_NUMBER_OF_WARNINGS;
+    }
+
+    /**
+     * Verifies the validation of the ant pattern input field. The workspace is populated with several pmd files. Then,
+     * different patterns are provided that all should match.
+     */
+    @Test @Issue({"JENKINS-34759", "JENKINS-34760"}) @Ignore("Until JENKINS-34759 JENKINS-34760 has been fixed in core.")
+    public void should_show_no_warnings_for_correct_ant_patterns() {
+        FreeStyleJob job = createFreeStyleJob();
+
+        AnalysisConfigurator<PmdFreestyleSettings> buildConfigurator = new AnalysisConfigurator<PmdFreestyleSettings>() {
+            @Override
+            public void configure(PmdFreestyleSettings settings) {
+                settings.pattern.set(PATTERN_WITHOUT_WARNINGS);
+            }
+        };
+
+        editJob(PLUGIN_ROOT, false, job,
+                PmdFreestyleSettings.class, buildConfigurator);
+        buildSuccessfulJob(job);
+
+        validatePattern(job, "pmd.xml,not-here.xml");
+        validatePattern(job, "not-here.xml,pmd.xml");
+        validatePattern(job, "pmd.xml not-here.xml");
+    }
+
+    private void validatePattern(final FreeStyleJob job, final String pattern) {
+        AnalysisConfigurator<PmdFreestyleSettings> buildConfigurator = new AnalysisConfigurator<PmdFreestyleSettings>() {
+            @Override
+            public void configure(PmdFreestyleSettings settings) {
+                String validationMessage = settings.validatePattern(pattern);
+                assertThat(validationMessage, isEmptyString());
+            }
+        };
+        editJob(PLUGIN_ROOT, false, job,
+                PmdFreestyleSettings.class, buildConfigurator);
     }
 
     /**
