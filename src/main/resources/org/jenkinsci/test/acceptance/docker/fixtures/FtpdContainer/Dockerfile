@@ -5,8 +5,7 @@
 FROM ubuntu
 
 # install FTP
-RUN apt-get update
-RUN apt-get install -y vsftpd
+RUN apt-get update && apt-get install -y vsftpd
 RUN echo "local_enable=YES" >> /etc/myftp.conf
 RUN echo "write_enable=YES" >> /etc/myftp.conf
 RUN echo "listen=YES" >> /etc/myftp.conf

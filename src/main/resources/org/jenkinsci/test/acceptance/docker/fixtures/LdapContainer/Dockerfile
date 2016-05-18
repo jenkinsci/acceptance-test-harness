@@ -18,10 +18,8 @@ CMD ["/sbin/my_init"]
 
 # Configure apt
 RUN echo 'deb http://us.archive.ubuntu.com/ubuntu/ precise universe' >> /etc/apt/sources.list
-RUN apt-get -y update
-
 # Install slapd
-RUN LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get install -y slapd
+RUN LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get -y update && apt-get install -y slapd
 
 # Default configuration: can be overridden at the docker command line
 ENV LDAP_ROOTPASS jenkins
