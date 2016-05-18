@@ -10,7 +10,6 @@ import org.jenkinsci.test.acceptance.plugins.mock_security_realm.MockSecurityRea
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
 import org.junit.Test;
-import org.jvnet.hudson.test.Issue;
 
 import static org.jenkinsci.test.acceptance.plugins.matrix_auth.MatrixRow.*;
 import static org.junit.Assert.assertNotNull;
@@ -109,37 +108,5 @@ public class MatrixAuthPluginTest extends AbstractJUnitTest {
         // bob should see this job
         jenkins.login().doLogin("bob");
         assertNotNull(getElement(by.href("job/"+j.name+"/")));
-    }
-
-
-    /**
-     * In the context JENKINS-34411, the permissions out of view would not be activated,
-     * so the job creation would fail.
-     */
-    @Test
-    @Issue("JENKINS-34411")
-    public void developer() throws Exception {
-        GlobalSecurityConfig sc = new GlobalSecurityConfig(jenkins);
-        sc.open();
-        {
-            MockSecurityRealm ms = sc.useRealm(MockSecurityRealm.class);
-            ms.configure("alice","bob");
-
-            MatrixAuthorizationStrategy mas = sc.useAuthorizationStrategy(MatrixAuthorizationStrategy.class);
-
-            MatrixRow a = mas.addUser("alice");
-            a.admin();
-
-            MatrixRow bob = mas.addUser("bob");
-            bob.developer();
-        }
-        sc.save();
-
-        jenkins.login().doLogin("bob");
-
-        // just create the job without configuring
-        FreeStyleJob j = jenkins.jobs.create();
-        jenkins.open();
-        j.open();
     }
 }
