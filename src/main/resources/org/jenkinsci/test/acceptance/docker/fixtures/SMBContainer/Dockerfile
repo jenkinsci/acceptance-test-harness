@@ -5,14 +5,12 @@
 FROM ubuntu
 
 RUN echo "deb http://archive.ubuntu.com/ubuntu precise main universe" > /etc/apt/sources.list
-RUN apt-get update
+RUN apt-get update && apt-get -y install samba
 
 RUN useradd test -d /home/test -s /bin/bash && \
         mkdir -p /home/test && \
         chown test /home/test && \
         echo "test:test" | chpasswd
-
-RUN apt-get install -y samba
 
 RUN echo "workgroup = WORKGROUP" >> /etc/mysmb.conf
 RUN echo "restrict anonymous = no" >> /etc/mysmb.conf

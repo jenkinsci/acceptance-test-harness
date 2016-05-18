@@ -5,8 +5,7 @@
 FROM ubuntu
 
 # install SSHD
-RUN apt-get update
-RUN apt-get install -y openssh-server
+RUN apt-get update -y && apt-get install -y openssh-server
 RUN mkdir -p /var/run/sshd
 
 # create a test user

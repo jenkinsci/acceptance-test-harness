@@ -4,8 +4,7 @@
 
 # TODO have to inline SshdContainer/Dockerfile since 'FROM jenkins/sshd' does not work: jenkins/sshd is not pushed to the Docker registry, so we cannot build against it
 FROM ubuntu
-RUN apt-get update
-RUN apt-get install -y openssh-server
+RUN apt-get update && apt-get install -y openssh-server
 RUN mkdir -p /var/run/sshd
 RUN useradd test -d /home/test && \
     mkdir -p /home/test/.ssh && \

@@ -1,9 +1,8 @@
 # Sets up
 FROM ubuntu:precise
-RUN apt-get update
+RUN apt-get update && apt-get install -y wget
 
 # Install Subversion 1.8 and Apache
-RUN apt-get install -y wget
 RUN echo 'deb http://archive.ubuntu.com/ubuntu precise main universe' >> /etc/apt/sources.list
 RUN sh -c 'echo "deb http://opensource.wandisco.com/ubuntu precise svn18" >> /etc/apt/sources.list.d/WANdisco.list'
 RUN wget -q http://opensource.wandisco.com/wandisco-debian.gpg -O- | apt-key add -

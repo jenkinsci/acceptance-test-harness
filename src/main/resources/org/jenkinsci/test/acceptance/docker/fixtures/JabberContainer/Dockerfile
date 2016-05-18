@@ -6,11 +6,9 @@ FROM ubuntu:latest
 
 # Needed for supervisord
 RUN echo "deb http://archive.ubuntu.com/ubuntu precise main universe" > /etc/apt/sources.list
-RUN apt-get update
-RUN apt-get upgrade -y
-
 # install prosody
-RUN LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get install -y prosody
+RUN LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y prosody
+RUN apt-get upgrade -y
 
 # configure prosody
 RUN sed -i -e 's/admins = { }/admins = { "admin@localhost" }/g' /etc/prosody/prosody.cfg.lua
