@@ -3,7 +3,7 @@
 #
 #    The initial password is 'admin:admin'
 # 
-FROM ubuntu
+FROM ubuntu:xenial
 
 # base package installation
 RUN apt-get update -y && apt-get install -y apt-transport-https && echo "deb https://sdkrepo.atlassian.com/debian/ stable contrib" >> /etc/apt/sources.list && apt-get update
