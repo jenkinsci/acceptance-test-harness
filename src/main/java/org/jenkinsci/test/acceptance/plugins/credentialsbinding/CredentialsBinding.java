@@ -4,6 +4,7 @@ import org.jenkinsci.test.acceptance.po.ContainerPageObject;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.PageArea;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
+import org.openqa.selenium.NoSuchElementException;
 
 /**
  * Represents a credential binding in the job configuration page.
@@ -27,6 +28,11 @@ public class CredentialsBinding extends PageAreaImpl {
      * @return true if there are no credentials, false otherwise
      */
     public boolean noCredentials() {
-        return getElement(by.tagName("options")) == null;
+        try {
+            credentialId.resolve().findElement(by.tagName("option"));
+            return false;
+        } catch (NoSuchElementException ex){
+            return true;
+        }
     }
 }
