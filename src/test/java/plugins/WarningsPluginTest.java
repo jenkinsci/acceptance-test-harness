@@ -8,6 +8,7 @@ import java.util.TreeMap;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
+import org.jenkinsci.test.acceptance.plugins.envinject.EnvInjectConfig;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsAction;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsBuildSettings;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsColumn;
@@ -71,6 +72,33 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
     @Override
     protected int getNumberOfWarnings() {
         return 131;
+    }
+
+    /**
+     * Verifies that environment variables are expanded in the file name pattern.
+     */
+    @Test @Issue("JENKINS-34157") @WithPlugins("envinject")
+    public void should_resolve_environment_variables() {
+        FreeStyleJob job = createFreeStyleJob(RESOURCES + "jenkins-32150", new AnalysisConfigurator<WarningsBuildSettings>() {
+            @Override
+            public void configure(WarningsBuildSettings settings) {
+                settings.addWorkspaceScanner("Clang (LLVM based)", "${ENV_PREFIX}/compile-log.txt");
+                settings.setCanResolveRelativePaths(true);
+            }
+        });
+
+        job.configure();
+        new EnvInjectConfig.Environment(job).properties.sendKeys("ENV_PREFIX=**");
+        job.save();
+
+        Build build = buildSuccessfulJob(job);
+        assertThatActionExists(job, build, "LLVM/Clang Warnings");
+
+        build.open();
+        int count = 10;
+        assertThat(driver, hasContent("LLVM/Clang Warnings: " + count));
+
+        assertThat(build.getConsole(), containsString("[WARNINGS] Parsing warnings in files '**/compile-log.txt' with parser Clang (LLVM based)"));
     }
 
     /**
