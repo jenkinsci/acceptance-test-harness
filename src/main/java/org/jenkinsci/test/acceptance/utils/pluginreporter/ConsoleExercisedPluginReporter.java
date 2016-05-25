@@ -33,6 +33,6 @@ public class ConsoleExercisedPluginReporter implements ExercisedPluginsReporter 
 
     @Override
     public void log(String testName, String pluginName, String pluginVersion) {
-        System.out.println("Plugin " + pluginName + "/" + pluginVersion + " is installed");
+        System.out.println("Plugin " + pluginName + "@" + pluginVersion + " is installed");
     }
 }
