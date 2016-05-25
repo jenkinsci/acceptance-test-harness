@@ -23,7 +23,6 @@ import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.ListView;
 import org.jenkinsci.test.acceptance.po.Node;
 import org.jenkinsci.test.acceptance.po.PageObject;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
@@ -79,7 +78,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
     /**
      * Verifies that environment variables are expanded in the file name pattern.
      */
-    @Test @Issue("JENKINS-30735") @WithPlugins("envinject") @Ignore("Until analysis-core 1.77 has been released")
+    @Test @Issue("JENKINS-30735") @WithPlugins({"envinject", "analysis-core@1.77", "checkstyle@3.46"})
     public void should_resolve_environment_variables() {
         FreeStyleJob job = createFreeStyleJob(new AnalysisConfigurator<CheckStyleFreestyleSettings>() {
             @Override

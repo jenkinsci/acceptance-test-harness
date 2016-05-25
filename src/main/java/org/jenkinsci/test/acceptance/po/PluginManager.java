@@ -4,7 +4,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Named;
 import javax.inject.Provider;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -13,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
@@ -21,16 +21,14 @@ import org.jenkinsci.test.acceptance.po.UpdateCenter.InstallationFailedException
 import org.jenkinsci.test.acceptance.update_center.PluginMetadata;
 import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata;
 import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata.UnableToResolveDependencies;
+import org.junit.internal.AssumptionViolatedException;
 import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebElement;
 
 import com.google.common.base.Splitter;
 import com.google.inject.Inject;
 
 import hudson.util.VersionNumber;
-
-import java.util.logging.Logger;
-
-import org.openqa.selenium.WebElement;
 
 /**
  * Page object for plugin manager.
@@ -160,8 +158,9 @@ public class PluginManager extends ContainerPageObject {
             for (PluginMetadata newPlugin : pluginToBeInstalled) {
                 final String name = newPlugin.getName();
                 String claimedVersion = candidates.get(name);
+                String availableVersion = newPlugin.getVersion();
                 if (claimedVersion == null) { // a dependency
-                    claimedVersion = newPlugin.getVersion();
+                    claimedVersion = availableVersion;
                 }
                 final String currentSpec = StringUtils.isNotEmpty(claimedVersion)
                     ? name + "@" + claimedVersion
@@ -170,7 +169,11 @@ public class PluginManager extends ContainerPageObject {
                 InstallationStatus status = installationStatus(currentSpec);
                 if (status != InstallationStatus.UP_TO_DATE) {
                     try {
-                        newPlugin.uploadTo(jenkins, injector, newPlugin.getVersion());
+                        if (new VersionNumber(claimedVersion).compareTo(new VersionNumber(availableVersion)) > 0) {
+                            throw new AssumptionViolatedException(
+                                    name + " has version " + availableVersion + " but " + claimedVersion + " was requested");
+                        }
+                        newPlugin.uploadTo(jenkins, injector, availableVersion);
                         changed = true;
                         restartRequired |= status == InstallationStatus.OUTDATED;
                         try {
