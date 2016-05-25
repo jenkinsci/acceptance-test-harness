@@ -12,6 +12,7 @@ import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckStyleFreestyleSetti
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckStyleMavenSettings;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckStylePortlet;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
+import org.jenkinsci.test.acceptance.plugins.envinject.EnvInjectConfig;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.plugins.parameterized_trigger.BuildTriggerConfig;
 import org.jenkinsci.test.acceptance.plugins.parameterized_trigger.TriggerCallBuildStep;
@@ -22,7 +23,6 @@ import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.ListView;
 import org.jenkinsci.test.acceptance.po.Node;
 import org.jenkinsci.test.acceptance.po.PageObject;
-import org.junit.Assume;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
@@ -32,8 +32,7 @@ import org.openqa.selenium.WebElement;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
-
-import static org.junit.Assume.assumeTrue;
+import static org.junit.Assume.*;
 
 /**
  * Acceptance tests for the CheckStyle plugin.
@@ -74,6 +73,32 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
     @Override
     protected int getNumberOfWarnings() {
         return TOTAL_NUMBER_OF_WARNINGS;
+    }
+
+    /**
+     * Verifies that environment variables are expanded in the file name pattern.
+     */
+    @Test @Issue("JENKINS-30735") @WithPlugins("envinject")
+    public void should_resolve_environment_variables() {
+        FreeStyleJob job = createFreeStyleJob(new AnalysisConfigurator<CheckStyleFreestyleSettings>() {
+            @Override
+            public void configure(CheckStyleFreestyleSettings settings) {
+                settings.pattern.set("checkstyle${ENV_DASH}result.xml");
+            }
+        });
+
+        job.configure();
+        new EnvInjectConfig.Environment(job).properties.sendKeys("ENV_DASH=-");
+        job.save();
+
+        Build build = buildSuccessfulJob(job);
+        assertThatCheckStyleResultExists(job, build);
+
+        CheckStyleAction action = new CheckStyleAction(job);
+        assertThatWarningsCountInSummaryIs(action, TOTAL_NUMBER_OF_WARNINGS);
+        assertThatNewWarningsCountInSummaryIs(action, TOTAL_NUMBER_OF_WARNINGS);
+
+        assertThat(build.getConsole(), containsString("[CHECKSTYLE] Finding all files that match the pattern checkstyle-result.xml"));
     }
 
     @Test @WithPlugins("parameterized-trigger") @Issue("JENKINS-33162")
