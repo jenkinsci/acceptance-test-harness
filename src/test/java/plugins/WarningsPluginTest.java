@@ -19,6 +19,7 @@ import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.ListView;
 import org.jenkinsci.test.acceptance.po.MatrixConfiguration;
 import org.jenkinsci.test.acceptance.po.MatrixProject;
+import org.jenkinsci.test.acceptance.po.Node;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
@@ -95,7 +96,9 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         new EnvInjectConfig.Environment(job).properties.sendKeys("ENV_PREFIX=**");
         job.save();
 
-        Build build = buildSuccessfulJob(job);
+        Node slave = createSlaveForJob(job);
+
+        Build build = buildSuccessfulJobOnSlave(job, slave);
         assertThatActionExists(job, build, "LLVM/Clang Warnings");
 
         build.open();
