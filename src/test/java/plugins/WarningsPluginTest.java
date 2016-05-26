@@ -117,8 +117,8 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         assertThat(driver, hasContent("LLVM/Clang Warnings: " + count));
 
         assertThat(build.getConsole(), containsString("[WARNINGS] Parsing warnings in files '**/compile-log.txt' with parser Clang (LLVM based)"));
-        assertThat(build.getConsole(), containsString("[WARNINGS] Parsing warnings in files '1/nothing'"));
-        assertThat(build.getConsole(), containsString("[WARNINGS] Parsing warnings in files '1_master\\ND4\\ReleaseTools\\Build\\Log\\warning.log'"));
+        assertThat(build.getConsole(), containsRegexp("\\[WARNINGS\\] Parsing warnings in files '[\\d]+/nothing'"));
+        assertThat(build.getConsole(), containsRegexp("\\[WARNINGS\\] Parsing warnings in files '[\\d]+_master\\\\ND4\\\\ReleaseTools\\\\Build\\\\Log\\\\warning.log'"));
     }
 
     /**
