@@ -20,6 +20,7 @@ import org.jenkinsci.test.acceptance.po.ListView;
 import org.jenkinsci.test.acceptance.po.MatrixConfiguration;
 import org.jenkinsci.test.acceptance.po.MatrixProject;
 import org.jenkinsci.test.acceptance.po.Node;
+import org.jenkinsci.test.acceptance.po.StringParameter;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
@@ -87,18 +88,28 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         FreeStyleJob job = createFreeStyleJob(RESOURCES + "jenkins-32150", new AnalysisConfigurator<WarningsBuildSettings>() {
             @Override
             public void configure(WarningsBuildSettings settings) {
-                settings.addWorkspaceScanner(CLANG, "${ENV_PREFIX}/compile-log.txt");
+                settings.addWorkspaceScanner(CLANG, "${ENV_PREFIX}/${PARAMETER}");
                 settings.addWorkspaceScanner(JAVA_COMPILER, "${BUILD_NUMBER}/nothing");
+                settings.addWorkspaceScanner(JAVA_DOC, "${BUILD_NUMBER}_${Reference}\\ND4\\ReleaseTools\\Build\\Log\\warning.log");
             }
         });
 
         job.configure();
         new EnvInjectConfig.Environment(job).properties.sendKeys("ENV_PREFIX=**");
+        String parameter = "PARAMETER";
+        job.addParameter(StringParameter.class).setName(parameter);
+        String reference = "Reference";
+        job.addParameter(StringParameter.class).setName(reference);
         job.save();
 
         Node slave = createSlaveForJob(job);
 
-        Build build = buildSuccessfulJobOnSlave(job, slave);
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("slavename", slave.getName());
+        parameters.put(parameter, "compile-log.txt");
+        parameters.put(reference, "master");
+
+        Build build = job.startBuild(parameters).shouldSucceed();
         assertThatActionExists(job, build, "LLVM/Clang Warnings");
 
         build.open();
@@ -106,7 +117,8 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         assertThat(driver, hasContent("LLVM/Clang Warnings: " + count));
 
         assertThat(build.getConsole(), containsString("[WARNINGS] Parsing warnings in files '**/compile-log.txt' with parser Clang (LLVM based)"));
-        assertThat(build.getConsole(), containsString("[WARNINGS] Parsing warnings in files '1/nothing"));
+        assertThat(build.getConsole(), containsString("[WARNINGS] Parsing warnings in files '1/nothing'"));
+        assertThat(build.getConsole(), containsString("[WARNINGS] Parsing warnings in files '1_master\\ND4\\ReleaseTools\\Build\\Log\\warning.log'"));
     }
 
     /**
