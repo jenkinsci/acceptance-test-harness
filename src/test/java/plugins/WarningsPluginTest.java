@@ -21,6 +21,7 @@ import org.jenkinsci.test.acceptance.po.MatrixConfiguration;
 import org.jenkinsci.test.acceptance.po.MatrixProject;
 import org.jenkinsci.test.acceptance.po.Node;
 import org.jenkinsci.test.acceptance.po.StringParameter;
+import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
@@ -78,6 +79,57 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
     @Override
     protected int getNumberOfWarnings() {
         return 131;
+    }
+
+    @Test
+    @WithPlugins("workflow-aggregator") @Issue("32191")
+    public void should_find_warnings_without_sleep() {
+        WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
+        job.script.set(
+                "node {\n" +
+                        "    writeFile(file: \"a.c\", text: '''\n" +
+                        "#include <sys/types.h>\n" +
+                        "#include <stdlib.h>\n" +
+                        "\n" +
+                        "void\n" +
+                        "func1(void)\n" +
+                        "{\n" +
+                        "}\n" +
+                        "\n" +
+                        "int\n" +
+                        "main(int argc, char *argv[])\n" +
+                        "{\n" +
+                        "    char *a;\n" +
+                        "    int64_t *b;\n" +
+                        "    b = (int64_t *)a;\n" +
+                        "    printf(\"Hi\");\n" +
+                        "    printf(NULL);\n" +
+                        "    printf(\"%s %d\\\\n\", \"35\");\n" +
+                        "    func1();\n" +
+                        "}\n" +
+                        "'''\n" +
+                        "    )\n" +
+                        "    sh \"cc -Wall -W -Wcast-align -o output a.c\"\n" +
+                        "    step([$class: 'WarningsPublisher',\n" +
+                        "         canComputeNew: false,\n" +
+                        "         canResolveRelativePaths: false,\n" +
+                        "         consoleParsers: [[parserName: 'Clang (LLVM based)']],\n" +
+                        "         defaultEncoding: '',\n" +
+                        "         excludePattern: '',\n" +
+                        "         healthy: '',\n" +
+                        "         includePattern: '',\n" +
+                        "         messagesPattern: '',\n" +
+                        "         unHealthy: ''])\n" +
+                        "}\n");
+        job.sandbox.check();
+        job.save();
+        Build build = job.startBuild();
+        build.shouldSucceed();
+
+        assertThat(job.getLastBuild(), hasAction("LLVM/Clang Warnings"));
+        build.open();
+        int count = 6;
+        assertThat(driver, hasContent("LLVM/Clang Warnings: " + count));
     }
 
     /**
