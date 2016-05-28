@@ -81,6 +81,10 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         return 131;
     }
 
+    /**
+     * Runs a pipeline script that compiles a file with some warnings. The warnings plug-in should find all
+     * 6 warnings.
+     */
     @Test
     @WithPlugins("workflow-aggregator") @Issue("32191")
     public void should_find_warnings_without_sleep() {
