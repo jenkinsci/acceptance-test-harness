@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
@@ -132,8 +133,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
 
         assertThat(job.getLastBuild(), hasAction("LLVM/Clang Warnings"));
         build.open();
-        int count = 6;
-        assertThat(driver, hasContent("LLVM/Clang Warnings: " + count));
+        assertThat(driver, hasContent(Pattern.compile("LLVM/Clang Warnings: [1-9][0-9]*"))); // some warnings, number depends on actual compiler version
     }
 
     /**
