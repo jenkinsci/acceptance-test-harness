@@ -141,23 +141,25 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
      * Scenario: Run on several slaves
      * Given I have installed the "nodelabelparameter" plugin
      * And a job
-     * And a slave named "slave42"
+     * And a slave named "slave1"
+     * And a slave named "slave2"
      * When I configure the job
      * And I add node parameter "slavename"
      * And I allow multiple nodes
      * And I enable concurrent builds
      * And I save the job
      * And I build the job with parameter
-     * | slavename | slave42, master |
+     * | slavename | slave1, slave2 |
      * Then the job should have 2 builds
-     * And  the job should be built on "master"
-     * And  the job should be built on "slave42"
+     * And  the job should be built on "slave1"
+     * And  the job should be built on "slave2"
      */
     @Test
     public void run_on_several_slaves() throws Exception {
         FreeStyleJob j = jenkins.jobs.create();
 
-        Slave s = slave.install(jenkins).get();
+        Slave s1 = slave.install(jenkins).get();
+        Slave s2 = slave.install(jenkins).get();
 
         j.configure();
         NodeParameter p = j.addParameter(NodeParameter.class);
@@ -166,14 +168,14 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         j.concurrentBuild.check();
         j.save();
 
-        j.startBuild(singletonMap("slavename", s.getName() + ",master")).shouldSucceed();
+        j.startBuild(singletonMap("slavename", s1.getName() + "," + s2.getName())).shouldSucceed();
 
         assertThat(j.getNextBuildNumber(), is(3));
 
         j.getLastBuild().waitUntilFinished();
 
-        assertThat(jenkins.getBuildHistory(), containsBuildOf(j));
-        assertThat(s.getBuildHistory(), containsBuildOf(j));
+        assertThat(s1.getBuildHistory(), containsBuildOf(j));
+        assertThat(s2.getBuildHistory(), containsBuildOf(j));
     }
 
     /**
@@ -496,7 +498,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
 
     /**
      * This test is intended to check that two created slaves are added to the
-     * node restriction box. Additionally, when selecting a slave and master as
+     * node restriction box. Additionally, when selecting the 2 slaves as
      * nodes in the restriction panel, only those should be available for the
      * build.
      */
@@ -515,8 +517,8 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         assertThat("Amount of possible nodes does not match", p.getPossibleNodesOptions().size(), is(4));
 
         p.allowMultiple.check();
-        p.allowedNodes.select("master");
         p.allowedNodes.select(s1.getName());
+        p.allowedNodes.select(s2.getName());
 
         j.concurrentBuild.check();
         j.save();
@@ -528,12 +530,12 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         visit(j.getBuildUrl());
         List<String> slaves = p.applicableNodes();
         assertThat("Amount of selectable nodes", slaves.size(), is(2));
-        assertThat(slaves, containsInAnyOrder("master", s1.getName()));
+        assertThat(slaves, containsInAnyOrder(s1.getName(), s2.getName()));
 
-        j.startBuild(singletonMap("slavename", s1.getName() + ",master")).waitUntilFinished();
+        j.startBuild(singletonMap("slavename", s1.getName() + "," + s2.getName())).waitUntilFinished();
 
-        assertThat(jenkins.getBuildHistory(), containsBuildOf(j));
         assertThat(s1.getBuildHistory(), containsBuildOf(j));
+        assertThat(s2.getBuildHistory(), containsBuildOf(j));
 
         assertThat(j.getNextBuildNumber(), is(3));
     }
