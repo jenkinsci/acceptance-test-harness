@@ -63,25 +63,6 @@ public class AntPluginTest extends AbstractJUnitTest {
         );
     }
 
-    @Test @Native("ant")
-    public void locallyInstalledAnt() {
-        String expectedVersion = localAntVersion();
-
-        AntInstallation ant = ToolInstallation.addTool(jenkins, AntInstallation.class);
-        ant.name.set("native_ant");
-        ant.useNative();
-        ant.getPage().save();
-
-        job.configure();
-        job.copyResource(resource("ant/echo-helloworld.xml"), "build.xml");
-        AntBuildStep step = job.addBuildStep(AntBuildStep.class);
-        step.antName.select("native_ant");
-        step.targets.set("-version");
-        job.save();
-
-        job.startBuild().shouldSucceed().shouldContainsConsoleOutput(Pattern.quote(expectedVersion));
-    }
-
     private Build buildHelloWorld(final String name) {
         job.configure(new Callable<Object>() {
             @Override public Object call() {
@@ -95,9 +76,5 @@ public class AntPluginTest extends AbstractJUnitTest {
         });
 
         return job.startBuild().shouldSucceed().shouldContainsConsoleOutput("Hello World");
-    }
-
-    private String localAntVersion() {
-        return jenkins.runScript("'ant -version'.execute().text");
     }
 }
