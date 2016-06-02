@@ -154,7 +154,7 @@ public class PluginManager extends ContainerPageObject {
             if (!someChangeRequired) {
                 return false;
             }
-            List<PluginMetadata> pluginToBeInstalled = ucmd.get().transitiveDependenciesOf(jenkins.getVersion(), candidates);
+            List<PluginMetadata> pluginToBeInstalled = ucmd.get().transitiveDependenciesOf(jenkins, candidates);
             for (PluginMetadata newPlugin : pluginToBeInstalled) {
                 final String name = newPlugin.getName();
                 String claimedVersion = candidates.get(name);
