@@ -77,6 +77,7 @@ public class JobsMixIn extends MixIn {
         visit("newJob");
         fillIn("name",to);
         fillIn("from",from);
+        choose("copy");
         clickButton("OK");
     }
 }
