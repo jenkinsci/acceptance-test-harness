@@ -90,6 +90,8 @@ public class FallbackConfig extends AbstractModule {
         switch (browser) {
         case "firefox":
             FirefoxProfile profile = new FirefoxProfile();
+            profile.setAlwaysLoadNoFocusLib(true);
+
             profile.setPreference(LANGUAGE_SELECTOR, "en");
 
             return new FirefoxDriver(profile);
