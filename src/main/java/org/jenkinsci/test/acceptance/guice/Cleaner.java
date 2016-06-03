@@ -3,8 +3,8 @@ package org.jenkinsci.test.acceptance.guice;
 import org.junit.runners.model.Statement;
 
 import java.io.Closeable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.concurrent.Callable;
 
 /**
@@ -16,10 +16,10 @@ import java.util.concurrent.Callable;
  * @author Kohsuke Kawaguchi
  */
 public class Cleaner {
-    private final List<Statement> tasks = new ArrayList<>();
+    private final Deque<Statement> tasks = new ArrayDeque<>();
 
     public void addTask(Statement stmt) {
-        tasks.add(stmt);
+        tasks.push(stmt);
     }
 
     public void addTask(final Runnable r) {
