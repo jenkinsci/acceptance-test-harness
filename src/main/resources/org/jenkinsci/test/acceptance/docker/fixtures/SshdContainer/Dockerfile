@@ -2,7 +2,7 @@
 # Runs sshd and allow the 'test' user to login
 #
 
-FROM ubuntu
+FROM ubuntu:xenial
 
 # install SSHD
 RUN apt-get update -y && apt-get install -y openssh-server
