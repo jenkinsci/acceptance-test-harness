@@ -179,18 +179,18 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
         Map<String, Integer> trend = job.getTrendGraphContent(action.getUrl());
         assertThat(trend.size(), is(6));
 
-        List<String> expectedUrls = new ArrayList<>();
-        expectedUrls.addAll(trend.keySet());
-        sort(expectedUrls);
+        List<String> actualUrls = new ArrayList<>();
+        actualUrls.addAll(trend.keySet());
+        sort(actualUrls);
 
         int index = 0;
         for (int build = 1; build <= 2; build++) {
             int sum = 0;
             for (String priority : PRIORITIES) {
                 String expectedUrl = String.format("^%s%d/%sResult/%s$", prefix, build, action.getUrl(), priority);
-                String url = expectedUrls.get(index++);
-                assertThat(url, containsRegexp(expectedUrl));
-                sum += trend.get(url);
+                String actualUrl = actualUrls.get(index++);
+                assertThat(actualUrl, containsRegexp(expectedUrl));
+                sum += trend.get(actualUrl);
             }
             assertThat(sum, is(getNumberOfWarnings()));
         }
