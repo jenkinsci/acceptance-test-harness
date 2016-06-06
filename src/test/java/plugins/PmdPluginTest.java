@@ -257,7 +257,7 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
 
         Build build = buildSuccessfulJob(job);
 
-        assertXmlApiMatchesExpected(build, "pmdResult/api/xml?depth=0", PLUGIN_ROOT + "api_depth_0.xml");
+        assertXmlApiMatchesExpected(build, "pmdResult/api/xml?depth=0", PLUGIN_ROOT + "api_depth_0.xml", true);
     }
 
     /**

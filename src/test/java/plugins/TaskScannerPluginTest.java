@@ -215,7 +215,7 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
 
         Build build = buildSuccessfulJob(job);
 
-        assertXmlApiMatchesExpected(build, "tasksResult/api/xml?depth=0", "/tasks_plugin/api_depth_0.xml");
+        assertXmlApiMatchesExpected(build, "tasksResult/api/xml?depth=0", "/tasks_plugin/api_depth_0.xml", true);
     }
 
     /**

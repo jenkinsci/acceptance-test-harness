@@ -264,7 +264,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
 
         Build build = buildSuccessfulJob(job);
 
-        assertXmlApiMatchesExpected(build, "checkstyleResult/api/xml?depth=0", CHECKSTYLE_PLUGIN_ROOT + "api_depth_0.xml");
+        assertXmlApiMatchesExpected(build, "checkstyleResult/api/xml?depth=0", CHECKSTYLE_PLUGIN_ROOT + "api_depth_0.xml", true);
     }
 
     /**

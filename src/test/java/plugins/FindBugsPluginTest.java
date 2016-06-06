@@ -208,7 +208,7 @@ public class FindBugsPluginTest extends AbstractAnalysisTest<FindBugsAction> {
 
         Build build = buildSuccessfulJob(job);
 
-        assertXmlApiMatchesExpected(build, "findbugsResult/api/xml?depth=0", PLUGIN_ROOT + "api_depth_0.xml");
+        assertXmlApiMatchesExpected(build, "findbugsResult/api/xml?depth=0", PLUGIN_ROOT + "api_depth_0.xml", true);
     }
 
     /**
