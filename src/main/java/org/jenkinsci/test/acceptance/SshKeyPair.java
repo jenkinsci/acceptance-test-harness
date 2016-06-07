@@ -3,7 +3,7 @@ package org.jenkinsci.test.acceptance;
 import com.google.inject.ProvidedBy;
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.openssl.PEMReader;
+import org.bouncycastle.openssl.PEMParser;
 import org.jvnet.hudson.crypto.RSAPublicKeyUtil;
 
 import javax.inject.Inject;
@@ -55,7 +55,7 @@ public class SshKeyPair {
     public String getFingerprint() throws IOException, GeneralSecurityException {
         Security.addProvider(new BouncyCastleProvider());
         Reader r = new BufferedReader(new StringReader(FileUtils.readFileToString(privateKey)));
-        PEMReader pem = new PEMReader(r);
+        PEMParser pem = new PEMParser(r);
 
         KeyPair pair = (KeyPair) pem.readObject();
         return RSAPublicKeyUtil.getEC2FingerPrint(pair.getPublic());

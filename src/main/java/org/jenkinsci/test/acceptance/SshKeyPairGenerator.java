@@ -1,7 +1,7 @@
 package org.jenkinsci.test.acceptance;
 
 import org.apache.xerces.impl.dv.util.Base64;
-import org.bouncycastle.openssl.PEMWriter;
+import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.jvnet.hudson.crypto.RSAPublicKeyUtil;
 
 import javax.inject.Provider;
@@ -48,7 +48,7 @@ public class SshKeyPairGenerator implements Provider<SshKeyPair>, com.google.inj
         KeyPair kp = gen.generateKeyPair();
 
         // write out the private key
-        try (PEMWriter w = new PEMWriter(new FileWriter(privateKey), "SunJCE")) {
+        try (JcaPEMWriter w = new JcaPEMWriter(new FileWriter(privateKey))) {
             w.writeObject(kp);
         }
         // private key needs to be access restricted
