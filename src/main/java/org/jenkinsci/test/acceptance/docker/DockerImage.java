@@ -57,6 +57,7 @@ public class DockerImage {
         CommandBuilder docker = Docker.cmd("run");
         File cidFile = File.createTempFile("docker", "cid");
         cidFile.delete();
+        cidFile.deleteOnExit();
         docker.add("--cidfile="+cidFile);//strange behaviour in some docker version cidfile needs to come before
 
         for (int p : ports)
