@@ -10,8 +10,8 @@ import org.jenkinsci.test.acceptance.po.PageObject;
  */
 @Describable("Username with password")
 public class UserPwdCredential extends BaseStandardCredentials {
-    public final Control username = control("username");
-    public final Control password = control("password");
+    public final Control username = control(by.name("_.username"));
+    public final Control password = control(by.name("_.password"));
 
     public UserPwdCredential(PageObject context, String path) {
         super(context, path);

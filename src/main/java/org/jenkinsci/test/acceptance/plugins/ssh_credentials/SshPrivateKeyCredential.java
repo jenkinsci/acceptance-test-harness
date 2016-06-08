@@ -12,7 +12,7 @@ import org.openqa.selenium.WebElement;
  */
 @Describable("SSH Username with private key")
 public class SshPrivateKeyCredential extends BaseStandardCredentials {
-    public final Control username = control("username");
+    public final Control username = control(by.name("_.username"));
 
     public SshPrivateKeyCredential(PageObject context, String path) {
         super(context, path);
@@ -33,7 +33,7 @@ public class SshPrivateKeyCredential extends BaseStandardCredentials {
     }
 
     public static class Direct extends PageAreaImpl {
-        public final Control privateKey = control("privateKey");
+        public final Control privateKey = control(by.name("_.privateKey"));
 
         public Direct(PageObject parent, String path) {
             super(parent, path);

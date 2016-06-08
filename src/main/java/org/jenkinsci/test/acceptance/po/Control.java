@@ -4,6 +4,7 @@ import org.jenkinsci.test.acceptance.junit.Resource;
 import org.openqa.selenium.*;
 
 import com.google.inject.Injector;
+import org.openqa.selenium.support.ui.Select;
 
 import javax.annotation.Nullable;
 
@@ -175,6 +176,42 @@ public class Control extends CapybaraPortingLayerImpl {
             WebElement context = findElement(menuButton, by.xpath("ancestor::*[contains(@class,'yui-menu-button')]/.."));
             WebElement e = findElement(context, by.link(caption));
             return e;
+        }
+    };
+
+    /**
+     * For alternative use when the 'yui-menu-button' doesn't exist.
+     * @param type
+     */
+    public void selectDropdownMenuAlt(Class type) {
+        click();
+        findCaption(type,findDropDownMenuItemBySelector).click();
+        elasticSleep(1000);
+    }
+
+    private Finder<WebElement> findDropDownMenuItemBySelector = new Finder<WebElement>() {
+        @Override
+        protected WebElement find(String caption) {
+            WebElement menuButton = resolve();
+
+            // With enough implementations registered the one we are looking for might
+            // require scrolling in menu to become visible. This dirty hack stretch
+            // yui menu so that all the items are visible.
+            executeScript("" +
+                    "YAHOO.util.Dom.batch(" +
+                    "    document.querySelector('.yui-menu-body-scrolled')," +
+                    "    function (el) {" +
+                    "        el.style.height = 'auto';" +
+                    "        YAHOO.util.Dom.removeClass(el, 'yui-menu-body-scrolled');" +
+                    "    }" +
+                    ");"
+            );
+
+            Select context = new Select(findElement(menuButton, by.xpath("ancestor-or-self::*[contains(@class,'setting-input dropdownList')]")));
+            context.selectByVisibleText(caption);
+            WebElement e = context.getFirstSelectedOption();
+            return e;
+
         }
     };
 

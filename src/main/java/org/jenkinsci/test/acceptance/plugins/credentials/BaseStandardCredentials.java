@@ -32,9 +32,12 @@ import org.jenkinsci.test.acceptance.po.PageObject;
 
 public abstract class BaseStandardCredentials extends Credential {
 
-    public final Control description = control("description");
-    public final Control scope = control("scope");
-    private final Control delete = control("repeatable-delete");
+    //public final Control description = control("description");
+    //public final Control scope = control("scope");
+    private final Control delete = control("repeatable-delete"); //TO REMOVE - no longer possible
+
+    public final Control description = control(by.name("_.description"));
+    public final Control scope = control(by.name("_.scope"));
 
     protected BaseStandardCredentials(PageObject context, String path) {
         super(context, path);
@@ -45,12 +48,13 @@ public abstract class BaseStandardCredentials extends Credential {
     }
 
     public void setId(String id) {
-        control("advanced-button").click();
-        control("id").set(id);
+        //control("advanced-button").click();
+        control(by.name("_.id")).set(id);
     }
     
     /**
      * Clicks the delete credential button and wait until it is not present anymore
+     * TO REMOVE - not possible with new credentials
      */
     public void delete() {
         delete.click();
@@ -66,6 +70,8 @@ public abstract class BaseStandardCredentials extends Credential {
     
     /**
      * If the delete button is present, the credential still exists in the page.
+     *
+     * TO REMOVE -> not possible anymore; alternatively use ManagedCredentials
      * 
      * @return true if the credential is present in the page. False otherwise.
      */

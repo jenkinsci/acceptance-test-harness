@@ -1,22 +1,21 @@
 package core;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.plugins.credentials.Domain;
-import org.jenkinsci.test.acceptance.plugins.credentials.ManagedCredentials;
-import org.jenkinsci.test.acceptance.plugins.credentials.UserPwdCredential;
+import org.jenkinsci.test.acceptance.plugins.credentials.*;
 import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshPrivateKeyCredential;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertFalse;
 
 /**
  * @author Vivek Pandey
  */
-@WithPlugins("credentials@1.5")
+//@WithPlugins("credentials@1.5")
+@WithPlugins("credentials@2.0.7")
 public class CredentialsTest extends AbstractJUnitTest {
     private static final String GLOBAL_SCOPE = "GLOBAL";
     private static final String SYSTEM_SCOPE = "SYSTEM";
@@ -25,101 +24,116 @@ public class CredentialsTest extends AbstractJUnitTest {
     private static final String CRED_PWD = "password";
     
     @Test @WithPlugins("ssh-credentials")
-    public void createSshKeys() {
-        final ManagedCredentials c = new ManagedCredentials(jenkins);
+    public void createSshKeys() throws Exception {
+        CredentialsPage cp = new CredentialsPage(jenkins, "_");
 
-        c.open();
-        final SshPrivateKeyCredential sc = c.add(SshPrivateKeyCredential.class);
+        cp.open();
+        SshPrivateKeyCredential sc = cp.add(SshPrivateKeyCredential.class);
         sc.username.set(CRED_USER);
         sc.selectEnterDirectly().privateKey.set(CRED_PWD);
-        c.save();
+        sc.description.set("ssh_creds");
+        cp.create();
 
         //now verify
-        verifyValueForElement(sc.username, CRED_USER);
-        verifyValueForElement(sc.selectEnterDirectly().privateKey, CRED_PWD);
+        final ManagedCredentials c = new ManagedCredentials(jenkins);
+        String href = c.credentialById("ssh_creds");
+        cp.setConfigUrl(href);
+        verifyValueForCredential(cp, sc.username, CRED_USER);
+        verifyValueForCredential(cp, sc.selectEnterDirectly().privateKey, CRED_PWD);
+
     }
 
     @Test
     public void createUserPwd() {
-        final ManagedCredentials c = new ManagedCredentials(jenkins);
-
-        c.open();
-        final UserPwdCredential upc = createUserPwdCredential(c.add(UserPwdCredential.class), CRED_USER, CRED_PWD, null, null);
-        c.save();
-
-        //now verify
-        jenkins.visit("credentials");
-        verifyValueForElement(upc.username, CRED_USER);
+        // Create credential inside the domain
+        CredentialsPage cp = new CredentialsPage(jenkins, "_");
+        cp.open();
+        UserPwdCredential credInDomain = createUserPwdCredential(cp.add(UserPwdCredential.class), CRED_USER, CRED_PWD, "descr", SYSTEM_SCOPE);
+        cp.create();
+        ManagedCredentials mc = new ManagedCredentials(jenkins, "_");
+        verifyValueInDomain("_", mc.checkIfCredentialsExist("descr"), CRED_USER);
     }
     
     @Test
-    public void manageSystemScopedCredentialsTest() {
+    public void manageSystemScopedCredentialsTest() throws Exception {
         createUpdateDeleteTest(SYSTEM_SCOPE);
     }
 
     @Test
-    public void manageGlobalScopedCredentialsTest() {
+    public void manageGlobalScopedCredentialsTest() throws Exception {
         createUpdateDeleteTest(GLOBAL_SCOPE);
     }
     
-    private void createUpdateDeleteTest(String systemScope) {
-        final ManagedCredentials c = new ManagedCredentials(jenkins);
+    private void createUpdateDeleteTest(String systemScope) throws Exception {
+        final ManagedCredentials c = new ManagedCredentials(jenkins, "_");
 
         // Create credential
-        c.open();
-        final UserPwdCredential upc = createUserPwdCredential(c.add(UserPwdCredential.class), CRED_USER, CRED_PWD, "Descr", systemScope);
-        c.save();
+        CredentialsPage cp = new CredentialsPage(jenkins, "_");
+        cp.open();
+        UserPwdCredential upc = createUserPwdCredential(cp.add(UserPwdCredential.class), CRED_USER, CRED_PWD, systemScope, systemScope);
+        cp.create();
 
         // verify credential was created
-        verifyValueForElement(upc.username, CRED_USER);
+        c.open();
+        verifyValueInDomain("_", c.checkIfCredentialsExist(systemScope), CRED_USER);
         
         // Update credential
-        c.open();
-        final String usernameModified = CRED_USER + "-Modified";
-        upc.username.set(usernameModified);
-        c.save();
+        String href = c.credentialById(systemScope);
+        cp.setConfigUrl(href);
+        cp.configure();
+        String credUserModified = CRED_USER + "-Modified";
+        upc.username.set(credUserModified);
+        cp.save();
         
         // verify credential was updated
-        verifyValueForElement(upc.username, usernameModified);
+        c.open();
+        verifyValueInDomain("_", c.checkIfCredentialsExist(systemScope), credUserModified);
         
         // Remove credential 
-        c.open();
-        upc.delete();
-        c.save();
+        cp.delete();
         
         // verify credential is not present
-        verifyElementNotPresent(upc.username);
+        verifyCredentialNotPresent("_", upc.username);
     }
 
     @Test
-    public void manageDomainCredentialsTest() {
+    public void manageDomainCredentialsTest() throws Exception {
+        final ManagedCredentials mc = new ManagedCredentials(jenkins);
+
         final String domainName = "domain";
-        // Create domain and credential inside the domain
-        final ManagedCredentials c = new ManagedCredentials(jenkins);
-        c.open();
-        Domain d = c.addDomain();
+        // Create domain
+        final DomainPage dp = new DomainPage(jenkins);
+        dp.open();
+        Domain d = dp.addDomain();
         d.name.set(domainName);
         d.description.set("domain description");
-        final UserPwdCredential credInDomain = createUserPwdCredential(d.addCredential(UserPwdCredential.class), CRED_USER, CRED_PWD, "descr", SYSTEM_SCOPE);
-        c.save();
-        
-        verifyValueForElement(credInDomain.username, CRED_USER);
-        
+        dp.save();
+
+        verifyValueForElement(mc.checkSystemPage(domainName), domainName);
+
+        // Create credential inside the domain
+        CredentialsPage cp = new CredentialsPage(jenkins, domainName);
+        cp.open();
+        UserPwdCredential credInDomain = createUserPwdCredential(cp.add(UserPwdCredential.class), CRED_USER, CRED_PWD, "descr", SYSTEM_SCOPE);
+        cp.create();
+        ManagedCredentials listed = new ManagedCredentials(jenkins, domainName);
+        verifyValueInDomain(domainName, listed.checkIfCredentialsExist("descr"), CRED_USER);
+
         // Update credential inside the domain
-        c.open();
+        String href = listed.credentialById("descr");
+        cp.setConfigUrl(href);
+        cp.configure();
         String credUserModified = CRED_USER + "-Modified";
         credInDomain.username.set(credUserModified);
-        c.save();
-        
-        verifyValueForElement(credInDomain.username, credUserModified);
-        
+        cp.save();
+        listed.open();
+        verifyValueInDomain(domainName, listed.checkIfCredentialsExist("descr"), credUserModified);
+
         // Remove credential 
-        c.open();
-        credInDomain.delete();
-        c.save();
+        cp.delete();
         
         // verify credential is not present
-        verifyElementNotPresent(credInDomain.username);
+        verifyCredentialNotPresent(domainName, credInDomain.username);
     }
     
     @Test
@@ -129,32 +143,57 @@ public class CredentialsTest extends AbstractJUnitTest {
         final String globalCredUser = "globalUser";
         
         // Create domain and credential inside the domain
-        final ManagedCredentials c = new ManagedCredentials(jenkins);
-        c.open();
-        Domain d = c.addDomain();
+        final DomainPage dp = new DomainPage(jenkins);
+        dp.open();
+        Domain d = dp.addDomain();
         d.name.set(domainName);
         d.description.set("domain description");
-        final UserPwdCredential credInDomain = createUserPwdCredential(d.addCredential(UserPwdCredential.class), domainCredUser, CRED_PWD, "descr", SYSTEM_SCOPE);
-        c.save();
-        
+        dp.save();
+
+        CredentialsPage cp = new CredentialsPage(jenkins, domainName);
+        cp.open();
+        UserPwdCredential credInDomain = createUserPwdCredential(cp.add(UserPwdCredential.class), domainCredUser, CRED_PWD, "descr", SYSTEM_SCOPE);
+        cp.create();
+        ManagedCredentials listed = new ManagedCredentials(jenkins, domainName);
+        verifyValueInDomain(domainName, listed.checkIfCredentialsExist("descr"), domainCredUser);
+
+
         // Create global domain credential
-        c.open();
-        final UserPwdCredential globalCred = createUserPwdCredential(c.add(UserPwdCredential.class), globalCredUser, CRED_PWD, "descr", SYSTEM_SCOPE);
-        c.save();
-        
-        jenkins.visit("credentials");
-        verifyValueForElement(credInDomain.username, domainCredUser);
-        verifyValueForElement(globalCred.username, globalCredUser);
+        CredentialsPage cp2 = new CredentialsPage(jenkins, "_");
+        cp2.open();
+        UserPwdCredential globalCred = createUserPwdCredential(cp2.add(UserPwdCredential.class), globalCredUser, CRED_PWD, "descr", SYSTEM_SCOPE);
+        cp2.create();
+        ManagedCredentials global = new ManagedCredentials(jenkins, "_");
+
+        verifyValueInDomain(domainName, listed.checkIfCredentialsExist("descr"), domainCredUser);
+        verifyValueInDomain("_", global.checkIfCredentialsExist("descr"), globalCredUser);
     }
 
-    
     private void verifyValueForElement(Control element, String expected) {
-        jenkins.visit("credentials");
-        assertThat(element.resolve().getAttribute("value"), equalTo(expected));
+        jenkins.visit("credentials/store/system/");
+        assert(element.exists());
+        assertThat(element.resolve().getText(), containsString(expected));
+    }
+    /**
+     * Only used to check the value of credentials.  Values can only be accessed through the CredentialsPage/update.
+     * Must set up the configUrl before calling this method.
+     * @param element
+     * @param expected
+     */
+    private void verifyValueForCredential(CredentialsPage cp, Control element, String expected) {
+        cp.configure();
+        assert(element.exists());
+        assertThat(element.resolve().getAttribute("value"), containsString(expected));
+    }
+
+    private void verifyValueInDomain(String domain, Control element, String expected) {
+        jenkins.visit("credentials/store/system/domain/"+domain);
+        assert(element.exists());
+        assertThat(element.resolve().getText(), containsString(expected));
     }
     
-    private void verifyElementNotPresent(Control element) {
-        jenkins.visit("credentials");
+    private void verifyCredentialNotPresent(String domain, Control element) {
+        jenkins.visit("credentials/store/system/domain/"+domain);
         assertFalse(element.exists());
     }
 
@@ -165,7 +204,7 @@ public class CredentialsTest extends AbstractJUnitTest {
      * @param user The username
      * @param pwd The password
      * @param descr (optional) The description of the credential
-     * @param systemScope (optional) The scope of the credential
+     * @param scope (optional) The scope of the credential
      * @return
      */
     private UserPwdCredential createUserPwdCredential(final UserPwdCredential c, String user, String pwd, String descr, String scope) {
