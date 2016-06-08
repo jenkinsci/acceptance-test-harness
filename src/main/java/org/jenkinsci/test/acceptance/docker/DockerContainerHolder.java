@@ -5,6 +5,7 @@ import com.google.inject.TypeLiteral;
 import org.jenkinsci.test.acceptance.guice.AutoCleaned;
 import org.jenkinsci.test.acceptance.guice.TestCleaner;
 import org.jenkinsci.test.acceptance.guice.TestScope;
+import org.jenkinsci.test.acceptance.junit.FailureDiagnostics;
 
 import javax.inject.Provider;
 import java.io.IOException;
@@ -21,6 +22,9 @@ public class DockerContainerHolder<T extends DockerContainer> implements Provide
 
     @Inject
     Docker docker;
+
+    @Inject
+    private FailureDiagnostics diag;
 
     T container;
 
@@ -41,6 +45,7 @@ public class DockerContainerHolder<T extends DockerContainer> implements Provide
     public void close() throws IOException {
         if (container!=null) {
             container.close();
+            diag.archvie("docker-" + container.getClass().getSimpleName() + ".log", container.getLogfile());
             container = null;
         }
     }

@@ -3,6 +3,8 @@ package org.jenkinsci.test.acceptance.junit;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+
+import com.google.common.io.Files;
 import org.codehaus.plexus.util.FileUtils;
 import org.jenkinsci.test.acceptance.guice.TestName;
 import org.jenkinsci.test.acceptance.guice.TestScope;
@@ -69,6 +71,17 @@ public class FailureDiagnostics extends TestWatcher {
             } finally {
                 if (writer != null) writer.close();
             }
+        } catch (IOException e) {
+            new Error(e);
+        }
+    }
+
+    /**
+     * Copy existing file to diagnostics directory.
+     */
+    public void archvie(String targetFilename, File source) {
+        try {
+            Files.copy(source, touch(targetFilename));
         } catch (IOException e) {
             new Error(e);
         }
