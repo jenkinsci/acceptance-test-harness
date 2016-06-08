@@ -1,5 +1,6 @@
 package org.jenkinsci.test.acceptance.po;
 
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import org.jenkinsci.test.acceptance.Matcher;
@@ -39,7 +40,7 @@ public class Slave extends Node {
      * @see #isOnline
      */
     public Slave waitUntilOnline() {
-        waitFor().withMessage("Slave is online")
+        waitFor().withTimeout(5, TimeUnit.MINUTES).withMessage("Slave is online")
                 .until(new Wait.Predicate<Boolean>() {
                     @Override public Boolean apply() {
                         return isOnline();

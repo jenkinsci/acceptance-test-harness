@@ -34,6 +34,15 @@ public class CreateSlaveTest extends AbstractJUnitTest {
         // with a FS root and executors
         final DumbSlave s = jenkins.slaves.create(DumbSlave.class);
         {
+            // This is needed to try to bring the "Add" button
+            // into view. Note that when running with vnc
+            // you also need to update ~/.vnc/config with:
+            // geometry=1920x1080
+            // OR
+            // set the global config vnc command to include:
+            // -geometry 1920x1080
+            this.driver.manage().window().maximize();
+
             SshSlaveLauncher l = s.setLauncher(SshSlaveLauncher.class);
 
             String username = "user1";

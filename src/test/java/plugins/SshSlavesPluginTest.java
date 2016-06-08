@@ -55,6 +55,8 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
 
         slave = jenkins.slaves.create(DumbSlave.class);
         slave.setExecutors(1);
+
+        this.driver.manage().window().maximize();
     }
 
     @Test public void connectWithPassword() {
@@ -156,6 +158,8 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
         SshSlaveLauncher launcher = slave.setLauncher(SshSlaveLauncher.class);
         launcher.host.set(host);
         launcher.port(port);
+        launcher.retries.set("2");
+        launcher.timeout.set("30");
         return launcher;
     }
 }
