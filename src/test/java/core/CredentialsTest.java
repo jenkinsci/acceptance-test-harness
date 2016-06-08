@@ -24,7 +24,7 @@ public class CredentialsTest extends AbstractJUnitTest {
     
     @Test @WithPlugins("ssh-credentials")
     public void createSshKeys() throws Exception {
-        CredentialsPage cp = new CredentialsPage(jenkins, "_");
+        CredentialsPage cp = new CredentialsPage(jenkins, ManagedCredentials.DEFAULT_DOMAIN);
 
         cp.open();
         SshPrivateKeyCredential sc = cp.add(SshPrivateKeyCredential.class);
@@ -45,12 +45,12 @@ public class CredentialsTest extends AbstractJUnitTest {
     @Test
     public void createUserPwd() {
         // Create credential inside the domain
-        CredentialsPage cp = new CredentialsPage(jenkins, "_");
+        CredentialsPage cp = new CredentialsPage(jenkins, ManagedCredentials.DEFAULT_DOMAIN);
         cp.open();
         UserPwdCredential credInDomain = createUserPwdCredential(cp.add(UserPwdCredential.class), CRED_USER, CRED_PWD, "descr", SYSTEM_SCOPE);
         cp.create();
-        ManagedCredentials mc = new ManagedCredentials(jenkins, "_");
-        verifyValueInDomain("_", mc.checkIfCredentialsExist("descr"), CRED_USER);
+        ManagedCredentials mc = new ManagedCredentials(jenkins, ManagedCredentials.DEFAULT_DOMAIN);
+        verifyValueInDomain(ManagedCredentials.DEFAULT_DOMAIN, mc.checkIfCredentialsExist("descr"), CRED_USER);
     }
     
     @Test
@@ -64,17 +64,17 @@ public class CredentialsTest extends AbstractJUnitTest {
     }
     
     private void createUpdateDeleteTest(String systemScope) throws Exception {
-        final ManagedCredentials c = new ManagedCredentials(jenkins, "_");
+        final ManagedCredentials c = new ManagedCredentials(jenkins, ManagedCredentials.DEFAULT_DOMAIN);
 
         // Create credential
-        CredentialsPage cp = new CredentialsPage(jenkins, "_");
+        CredentialsPage cp = new CredentialsPage(jenkins, ManagedCredentials.DEFAULT_DOMAIN);
         cp.open();
         UserPwdCredential upc = createUserPwdCredential(cp.add(UserPwdCredential.class), CRED_USER, CRED_PWD, systemScope, systemScope);
         cp.create();
 
         // verify credential was created
         c.open();
-        verifyValueInDomain("_", c.checkIfCredentialsExist(systemScope), CRED_USER);
+        verifyValueInDomain(ManagedCredentials.DEFAULT_DOMAIN, c.checkIfCredentialsExist(systemScope), CRED_USER);
         
         // Update credential
         String href = c.credentialById(systemScope);
@@ -86,13 +86,13 @@ public class CredentialsTest extends AbstractJUnitTest {
         
         // verify credential was updated
         c.open();
-        verifyValueInDomain("_", c.checkIfCredentialsExist(systemScope), credUserModified);
+        verifyValueInDomain(ManagedCredentials.DEFAULT_DOMAIN, c.checkIfCredentialsExist(systemScope), credUserModified);
         
         // Remove credential 
         cp.delete();
         
         // verify credential is not present
-        verifyCredentialNotPresent("_", upc.username);
+        verifyCredentialNotPresent(ManagedCredentials.DEFAULT_DOMAIN, upc.username);
     }
 
     @Test
@@ -158,14 +158,14 @@ public class CredentialsTest extends AbstractJUnitTest {
 
 
         // Create global domain credential
-        CredentialsPage cp2 = new CredentialsPage(jenkins, "_");
+        CredentialsPage cp2 = new CredentialsPage(jenkins, ManagedCredentials.DEFAULT_DOMAIN);
         cp2.open();
         UserPwdCredential globalCred = createUserPwdCredential(cp2.add(UserPwdCredential.class), globalCredUser, CRED_PWD, "descr", SYSTEM_SCOPE);
         cp2.create();
-        ManagedCredentials global = new ManagedCredentials(jenkins, "_");
+        ManagedCredentials global = new ManagedCredentials(jenkins, ManagedCredentials.DEFAULT_DOMAIN);
 
         verifyValueInDomain(domainName, listed.checkIfCredentialsExist("descr"), domainCredUser);
-        verifyValueInDomain("_", global.checkIfCredentialsExist("descr"), globalCredUser);
+        verifyValueInDomain(ManagedCredentials.DEFAULT_DOMAIN, global.checkIfCredentialsExist("descr"), globalCredUser);
     }
 
     private void verifyValueForElement(Control element, String expected) {
