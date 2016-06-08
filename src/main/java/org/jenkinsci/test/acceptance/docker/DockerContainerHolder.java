@@ -45,11 +45,11 @@ public class DockerContainerHolder<T extends DockerContainer> implements Provide
     public synchronized T get() {
         if (container==null) {
             Class<T> fixture = (Class<T>) type.getRawType();
-            File buildlog = diag.touch("docker-" + fixture.getSimpleName() + ".start.log");
+            File buildlog = diag.touch("docker-" + fixture.getSimpleName() + ".build.log");
             File runlog = diag.touch("docker-" + fixture.getSimpleName() + ".run.log");
             try {
                 System.out.println("Setting up docker container for " + fixture.getSimpleName());
-                container = docker.build(fixture, buildlog).start(fixture).withPortOffset(portOffset).start();
+                container = docker.build(fixture, buildlog).start(fixture).withPortOffset(portOffset).withLog(runlog).start();
             } catch (InterruptedException | IOException e) {
                 throw new AssertionError("Failed to start container " + fixture.getName(), e);
             }
@@ -64,7 +64,6 @@ public class DockerContainerHolder<T extends DockerContainer> implements Provide
     public void close() throws IOException {
         if (container!=null) {
             container.close();
-            diag.archvie("docker-" + container.getClass().getSimpleName() + ".log", container.getLogfile());
             container = null;
         }
     }

@@ -91,12 +91,15 @@ public class DockerImage {
         docker.add(tag);
         docker.add(starter.args);
 
-        File tmplog = File.createTempFile("docker", "log"); // initially create a log file here
+        File logfile = starter.log;
+        if (logfile == null) {
+            logfile = new File(cidFile + ".log");
+        }
 
         Process p = docker.build()
                 .redirectInput(new File(SystemUtils.IS_OS_WINDOWS ? "NUL" : "/dev/null"))
                 .redirectErrorStream(true)
-                .redirectOutput(tmplog)
+                .redirectOutput(logfile)
                 .start();
 
         // TODO: properly wait for either cidfile to appear or process to exit
@@ -105,7 +108,7 @@ public class DockerImage {
         if (cidFile.exists()) {
             try {
                 p.exitValue();
-                throw new IOException("docker died unexpectedly: "+docker+"\n"+FileUtils.readFileToString(tmplog));
+                throw new IOException("docker died unexpectedly: "+docker+"\n"+FileUtils.readFileToString(logfile));
             } catch (IllegalThreadStateException e) {
                 //Docker is still running okay.
             }
@@ -114,10 +117,6 @@ public class DockerImage {
                 Thread.sleep(500);
                 cid = FileUtils.readFileToString(cidFile);
             } while (cid==null || cid.length()==0);
-
-            // rename the log file to match the container name
-            File logfile = new File(cidFile+".log");
-            tmplog.renameTo(logfile);
 
             System.out.printf("Launching Docker container `%s`: logfile is at %s\n", docker.toString(), logfile);
 
@@ -132,9 +131,9 @@ public class DockerImage {
         } else {
             try {
                 p.exitValue();
-                throw new IOException("docker died unexpectedly: "+docker+"\n"+FileUtils.readFileToString(tmplog));
+                throw new IOException("docker died unexpectedly: "+docker+"\n"+FileUtils.readFileToString(logfile));
             } catch (IllegalThreadStateException e) {
-                throw new IOException("docker didn't leave CID file yet still running. Huh?: "+docker+"\n"+FileUtils.readFileToString(tmplog));
+                throw new IOException("docker didn't leave CID file yet still running. Huh?: "+docker+"\n"+FileUtils.readFileToString(logfile));
             }
         }
     }
@@ -174,6 +173,7 @@ public class DockerImage {
         private String ipAddress = getDockerHost();
         private int portOffset = 0;
         private int[] ports;
+        private File log;
 
         public Starter(Class<T> type, DockerImage image) {
             this.type = type;
@@ -207,6 +207,11 @@ public class DockerImage {
         // TODO do not abuse CommandBuilder
         public @Nonnull Starter<T> withArgs(CommandBuilder args) {
             this.args = args;
+            return this;
+        }
+
+        public @Nonnull Starter<T> withLog(File log) {
+            this.log = log;
             return this;
         }
 
