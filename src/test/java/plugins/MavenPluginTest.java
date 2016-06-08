@@ -93,47 +93,6 @@ public class MavenPluginTest extends AbstractJUnitTest {
     }
 
     @Test
-    @Native("mvn")
-    public void use_native_maven() {
-        MavenInstallation maven = ToolInstallation.addTool(jenkins, MavenInstallation.class);
-        maven.name.set("native_maven");
-        maven.useNative();
-        maven.getPage().save();
-
-        String expectedVersion = localMavenVersion();
-
-        FreeStyleJob job = jenkins.jobs.create();
-        job.configure();
-        MavenBuildStep step = job.addBuildStep(MavenBuildStep.class);
-        step.version.select("native_maven");
-        step.targets.set("--version");
-        job.save();
-
-        Build build = job.startBuild().shouldSucceed();
-
-        build.shouldContainsConsoleOutput(Pattern.quote(expectedVersion));
-    }
-
-    private String localMavenVersion() {
-        final Pattern pattern = Pattern.compile("Apache Maven .*");
-        String output = jenkins.runScript("try {\n"
-                                        + "  return 'mvn --version'.execute().text\n"
-                                        + "} catch (IOException ignored) {}\n"  
-                                        // mimic PATHEXT as BAT comes before CMD
-                                        + "try {\n"
-                                        + "  return 'mvn.bat --version'.execute().text\n"
-                                        + "} catch (IOException ignored) {}\n"
-                                        + "try {\n"
-                                        + "  return 'mvn.cmd --version'.execute().text\n"
-                                        + "} catch (IOException e) { throw e}\n"
-                                        );
-        System.out.println(output);
-        final Matcher matcher = pattern.matcher(output);
-        matcher.find();
-        return matcher.group(0);
-    }
-
-    @Test
     public void use_local_maven_repo() {
         installSomeMaven(jenkins);
 
