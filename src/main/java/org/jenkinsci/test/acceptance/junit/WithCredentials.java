@@ -3,6 +3,7 @@ package org.jenkinsci.test.acceptance.junit;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
+import org.jenkinsci.test.acceptance.plugins.credentials.CredentialsPage;
 import org.jenkinsci.test.acceptance.plugins.credentials.ManagedCredentials;
 import org.jenkinsci.test.acceptance.plugins.credentials.UserPwdCredential;
 import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshPrivateKeyCredential;
@@ -43,6 +44,7 @@ import org.jenkinsci.test.acceptance.plugins.credentials.BaseStandardCredentials
 @Target({METHOD, TYPE})
 @Inherited
 @Documented
+@WithPlugins("credentials@2.0.7")
 @RuleAnnotation(value=WithCredentials.RuleImpl.class, priority = WithPlugins.PRIORITY + 1) // requires plugins
 public @interface WithCredentials {
 
@@ -105,13 +107,13 @@ public @interface WithCredentials {
                  * @param sshKeyPath path to the ssh key
                  */
                 private void addSshUsernamePrivateKeyCredentials(String username, String sshKeyPath, String id) {
-                    ManagedCredentials c = new ManagedCredentials(jenkins);
-                    c.open();
-                    SshPrivateKeyCredential sc = c.add(SshPrivateKeyCredential.class);
+                    CredentialsPage cp = new CredentialsPage(jenkins, ManagedCredentials.DEFAULT_DOMAIN);
+                    cp.open();
+                    SshPrivateKeyCredential sc = cp.add(SshPrivateKeyCredential.class);
                     sc.username.set(username);
                     sc.selectEnterDirectly().privateKey.set(resource(sshKeyPath).asText());
                     maybeSetId(sc, id);
-                    c.save();
+                    cp.create();
                 }
 
                 /**
@@ -120,13 +122,13 @@ public @interface WithCredentials {
                  * @param password password
                  */
                 private void addUsernamePasswordCredentials(String username, String password, String id) {
-                    final ManagedCredentials c = new ManagedCredentials(jenkins);
+                    CredentialsPage c = new CredentialsPage(jenkins, ManagedCredentials.DEFAULT_DOMAIN);
                     c.open();
                     final UserPwdCredential upc = c.add(UserPwdCredential.class);
                     upc.username.set(username);
                     upc.password.set(password);
                     maybeSetId(upc, id);
-                    c.save();
+                    c.create();
                 }
 
                 private void maybeSetId(BaseStandardCredentials creds, String id) {

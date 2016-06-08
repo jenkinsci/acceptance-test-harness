@@ -17,13 +17,19 @@ package core;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Since;
+import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.plugins.credentials.CredentialsPage;
 import org.jenkinsci.test.acceptance.plugins.credentials.ManagedCredentials;
 import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshCredentialDialog;
 import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshPrivateKeyCredential;
 import org.jenkinsci.test.acceptance.plugins.ssh_slaves.SshSlaveLauncher;
+import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.DumbSlave;
 import org.junit.Test;
 import org.openqa.selenium.NoSuchElementException;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 
 /**
  * @author Vivek Pandey
@@ -72,26 +78,30 @@ public class TSRCreateSlaveTest extends AbstractJUnitTest {
     }
 
     @Test
-    public void newSlaveWithExistingCredential(){
+    @WithPlugins("credentials@2.0.7")
+    public void newSlaveWithExistingCredential() throws Exception{
 
         String username = "xyz";
         String description = "SSH Key setup";
         String privateKey = "1212121122121212";
 
-        ManagedCredentials c = new ManagedCredentials(jenkins);
+        CredentialsPage c = new CredentialsPage(jenkins, "_");
         c.open();
-        {
+
             SshPrivateKeyCredential sc = c.add(SshPrivateKeyCredential.class);
             sc.username.set(username);
             sc.description.set(description);
             sc.selectEnterDirectly().privateKey.set(privateKey);
-        }
-        c.save();
+
+        c.create();
 
         //now verify
         c.open();
-        assertEquals(find(by.input("_.username")).getAttribute("value"), username);
-        assertEquals(find(by.input("_.privateKey")).getText(), privateKey);
+        ManagedCredentials mc = new ManagedCredentials(jenkins);
+        String href = mc.credentialById("ssh_creds");
+        c.setConfigUrl(href);
+        verifyValueForCredential(c, sc.username, username);
+        verifyValueForCredential(c, sc.selectEnterDirectly().privateKey, privateKey);
 
         // Just to make sure the dumb slave is set up properly, we should seed it
         // with a FS root and executors
@@ -102,4 +112,9 @@ public class TSRCreateSlaveTest extends AbstractJUnitTest {
         l.credentialsId.select(String.format("%s (%s)", username, description));
     }
 
+    private void verifyValueForCredential(CredentialsPage cp, Control element, String expected) {
+        cp.configure();
+        assert(element.exists());
+        assertThat(element.resolve().getAttribute("value"), containsString(expected));
+    }
 }

@@ -14,7 +14,6 @@ import static org.junit.Assert.assertFalse;
 /**
  * @author Vivek Pandey
  */
-//@WithPlugins("credentials@1.5")
 @WithPlugins("credentials@2.0.7")
 public class CredentialsTest extends AbstractJUnitTest {
     private static final String GLOBAL_SCOPE = "GLOBAL";

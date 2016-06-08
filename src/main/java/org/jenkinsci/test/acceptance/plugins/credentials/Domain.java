@@ -20,17 +20,4 @@ public class Domain extends PageAreaImpl {
     public Domain(DomainPage context, String path) {
         super(context, path);
     }
-
-    /**
-     * Adds a new credential under the scope of this domain
-     * TO REMOVE -> overriden by new ManagedCredentials
-     */
-    public <T extends Credential> T addCredential(Class<T> type) {
-        addCredentialButton.selectDropdownMenu(type);
-
-        String path = last(by.name("credentials")).getAttribute("path");
-
-        return newInstance(type, this, path);
-    }
-
 }
