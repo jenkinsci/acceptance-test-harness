@@ -29,6 +29,8 @@ import org.jvnet.hudson.test.Issue;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+import hudson.util.VersionNumber;
+
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
@@ -264,7 +266,8 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
 
         Build build = buildSuccessfulJob(job);
 
-        assertXmlApiMatchesExpected(build, "checkstyleResult/api/xml?depth=0", CHECKSTYLE_PLUGIN_ROOT + "api_depth_0.xml", true);
+        boolean is2xLine = !jenkins.getVersion().isOlderThan(new VersionNumber("2.0"));
+        assertXmlApiMatchesExpected(build, "checkstyleResult/api/xml?depth=0", CHECKSTYLE_PLUGIN_ROOT + (is2xLine ? "api_depth_0-2_x.xml" : "api_depth_0.xml"), false);
     }
 
     /**

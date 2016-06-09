@@ -19,6 +19,8 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
 
+import hudson.util.VersionNumber;
+
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
@@ -215,7 +217,8 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
 
         Build build = buildSuccessfulJob(job);
 
-        assertXmlApiMatchesExpected(build, "tasksResult/api/xml?depth=0", "/tasks_plugin/api_depth_0.xml", true);
+        boolean is2xLine = !jenkins.getVersion().isOlderThan(new VersionNumber("2.0"));
+        assertXmlApiMatchesExpected(build, "tasksResult/api/xml?depth=0", "/tasks_plugin/" + (is2xLine ? "api_depth_0-2_x.xml" : "api_depth_0.xml"), false);
     }
 
     /**
