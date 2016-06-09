@@ -148,9 +148,13 @@ public class FallbackConfig extends AbstractModule {
     @Provides @TestScope
     public WebDriver createWebDriver(TestCleaner cleaner, TestName testName, ElasticTime time) throws IOException {
         WebDriver base = createWebDriver(testName);
+
+        // Make sue the window have minimal resolution set, even when out of the visible screen. Try maximizing first so
+        // it has a chance to fit the screen nicely if big enough.
+        base.manage().window().maximize();
         Dimension oldSize = base.manage().window().getSize();
-        if (oldSize.height < 768 || oldSize.width < 1024) {
-            base.manage().window().setSize(new Dimension(1024, 768));
+        if (oldSize.height < 960 || oldSize.width < 1280) {
+            base.manage().window().setSize(new Dimension(1280, 960));
         }
 
         final EventFiringWebDriver d = new EventFiringWebDriver(base);
