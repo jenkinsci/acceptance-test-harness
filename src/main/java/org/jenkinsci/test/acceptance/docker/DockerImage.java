@@ -96,46 +96,41 @@ public class DockerImage {
             logfile = new File(cidFile + ".log");
         }
 
+        System.out.printf("Launching Docker container `%s`: logfile is at %s\n", docker.toString(), logfile);
+
         Process p = docker.build()
-                .redirectInput(new File(SystemUtils.IS_OS_WINDOWS ? "NUL" : "/dev/null"))
+                .redirectInput(new File(SystemUtils.IS_OS_WINDOWS ? "NUL": "/dev/null"))
                 .redirectErrorStream(true)
                 .redirectOutput(logfile)
                 .start();
 
-        // TODO: properly wait for either cidfile to appear or process to exit
-        Thread.sleep(1000);
+        String cid = waitForCid(docker, cidFile, logfile, p);
 
-        if (cidFile.exists()) {
+        try {
+            T t = type.newInstance();
+            t.init(cid, p, logfile);
+            return t;
+        } catch (ReflectiveOperationException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    private String waitForCid(CommandBuilder docker, File cidFile, File logfile, Process p) throws InterruptedException, IOException {
+        for (int i = 0; i < 10; i++) {
+            Thread.sleep(500);
+
+            String cid = FileUtils.readFileToString(cidFile);
+            if (cid != null && cid.length() != 0) return cid;
+
             try {
                 p.exitValue();
-                throw new IOException("docker died unexpectedly: "+docker+"\n"+FileUtils.readFileToString(logfile));
+                throw new IOException("docker died unexpectedly: "+docker+"\n"+ FileUtils.readFileToString(logfile));
             } catch (IllegalThreadStateException e) {
                 //Docker is still running okay.
             }
-            String cid;
-            do {
-                Thread.sleep(500);
-                cid = FileUtils.readFileToString(cidFile);
-            } while (cid==null || cid.length()==0);
-
-            System.out.printf("Launching Docker container `%s`: logfile is at %s\n", docker.toString(), logfile);
-
-            try {
-                T t = type.newInstance();
-                t.init(cid,p,logfile);
-                return t;
-            } catch (ReflectiveOperationException e) {
-                throw new AssertionError(e);
-            }
-
-        } else {
-            try {
-                p.exitValue();
-                throw new IOException("docker died unexpectedly: "+docker+"\n"+FileUtils.readFileToString(logfile));
-            } catch (IllegalThreadStateException e) {
-                throw new IOException("docker didn't leave CID file yet still running. Huh?: "+docker+"\n"+FileUtils.readFileToString(logfile));
-            }
         }
+
+        throw new IOException("docker didn't leave CID file yet still running. Huh?: "+docker+"\n"+FileUtils.readFileToString(logfile));
     }
 
     /**

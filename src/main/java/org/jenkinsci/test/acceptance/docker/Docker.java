@@ -91,15 +91,22 @@ public class Docker {
             return new DockerImage(full);
         }
 
-        ProcessBuilder buildCmd = cmd("build").add("-t", full, dir).build();
+        CommandBuilder buildCmd = cmd("build").add("-t", full, dir);
+        ProcessBuilder processBuilder = buildCmd.build();
         if (log != null) {
-            buildCmd.redirectError(log).redirectOutput(log);
+            processBuilder.redirectError(log).redirectOutput(log);
         } else {
-            buildCmd.redirectError(ProcessBuilder.Redirect.INHERIT).redirectOutput(ProcessBuilder.Redirect.INHERIT);
+            processBuilder.redirectError(ProcessBuilder.Redirect.INHERIT).redirectOutput(ProcessBuilder.Redirect.INHERIT);
         }
 
-        if (buildCmd.start().waitFor() != 0) {
-            throw new Error("Failed to start image: " + tag);
+        StringBuilder sb = new StringBuilder("Building Docker image `").append(buildCmd.toString()).append("`");
+        if (log != null) {
+            sb.append(": logfile is at ").append(log);
+        }
+        System.out.println(sb.toString());
+
+        if (processBuilder.start().waitFor() != 0) {
+            throw new Error("Failed to build image: " + tag);
         }
         return new DockerImage(full);
     }

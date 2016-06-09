@@ -48,7 +48,6 @@ public class DockerContainerHolder<T extends DockerContainer> implements Provide
             File buildlog = diag.touch("docker-" + fixture.getSimpleName() + ".build.log");
             File runlog = diag.touch("docker-" + fixture.getSimpleName() + ".run.log");
             try {
-                System.out.println("Setting up docker container for " + fixture.getSimpleName());
                 container = docker.build(fixture, buildlog).start(fixture).withPortOffset(portOffset).withLog(runlog).start();
             } catch (InterruptedException | IOException e) {
                 throw new AssertionError("Failed to start container " + fixture.getName(), e);
