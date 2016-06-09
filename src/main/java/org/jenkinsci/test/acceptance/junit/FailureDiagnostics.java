@@ -76,17 +76,6 @@ public class FailureDiagnostics extends TestWatcher {
         }
     }
 
-    /**
-     * Copy existing file to diagnostics directory.
-     */
-    public void archvie(String targetFilename, File source) {
-        try {
-            Files.copy(source, touch(targetFilename));
-        } catch (IOException e) {
-            new Error(e);
-        }
-    }
-
     @Override
     protected void succeeded(Description description) {
         // Delete the directory if no diagnostics information written
