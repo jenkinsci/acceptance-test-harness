@@ -49,6 +49,7 @@ import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.phantomjs.PhantomJSDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.remote.UnreachableBrowserException;
 import org.openqa.selenium.safari.SafariDriver;
 import org.openqa.selenium.support.events.EventFiringWebDriver;
 
@@ -171,7 +172,16 @@ public class FallbackConfig extends AbstractModule {
         cleaner.addTask(new Statement() {
             @Override
             public void evaluate() throws Throwable {
-                d.quit();
+                try {
+                    d.quit();
+                } catch (UnreachableBrowserException ex) {
+                    System.err.println("Browser died already");
+                    ex.printStackTrace();
+                }
+            }
+
+            @Override public String toString() {
+                return "Close WebDriver after test";
             }
         });
         return d;
