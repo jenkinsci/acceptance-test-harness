@@ -14,6 +14,10 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.xerces.jaxp.DocumentBuilderFactoryImpl;
+import org.custommonkey.xmlunit.Diff;
+import org.custommonkey.xmlunit.Difference;
+import org.custommonkey.xmlunit.DifferenceConstants;
+import org.custommonkey.xmlunit.DifferenceListener;
 import org.custommonkey.xmlunit.XMLAssert;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
@@ -618,8 +622,9 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      * @param build           The build, whose api shall be called.
      * @param apiUrl          The API-Url, declares which build API shall be called.
      * @param expectedXmlPath The Resource-Path to a file, which contains the expected XML
+     * @param ignoreAttributesDiffs whether to ignore attribute differences
      */
-    protected void assertXmlApiMatchesExpected(final Build build, final String apiUrl, final String expectedXmlPath) {
+    protected void assertXmlApiMatchesExpected(final Build build, final String apiUrl, final String expectedXmlPath, final boolean ignoreAttributesDiffs) {
         try {
             XMLUnit.setIgnoreWhitespace(true);
             String xmlUrl = build.url(apiUrl).toString();
@@ -628,7 +633,11 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
 
             Document actual = documentBuilder.parse(xmlUrl);
             Document expected = documentBuilder.parse(resource(expectedXmlPath).asFile());
-            XMLAssert.assertXMLEqual(expected, actual);
+            Diff diff =new Diff(expected, actual);
+            if (ignoreAttributesDiffs) {
+                diff.overrideDifferenceListener(new IgnoreAttributesDifferenceListener());
+            }
+            XMLAssert.assertXMLEqual(diff, true);
         }
         catch (ParserConfigurationException | SAXException | IOException exception) {
             throw new RuntimeException("Can't verify API XML", exception);
@@ -765,5 +774,28 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      */
     protected void assertThatBuildHasNoWarnings(final Build build) {
         assertThat(build.open(), hasContent("0 warnings"));
+    }
+    
+    /**
+     * Difference listener that overrides the default one if attributes related different 
+     * need to be ignored.
+     */
+    public static class IgnoreAttributesDifferenceListener implements DifferenceListener {
+        
+        private static final int[] IGNORE = new int[] {
+                DifferenceConstants.ATTR_NAME_NOT_FOUND_ID,
+                DifferenceConstants.ELEMENT_NUM_ATTRIBUTES_ID
+            };
+        
+        @Override
+        public int differenceFound(Difference difference) {
+            return Arrays.binarySearch(IGNORE, difference.getId()) >= 0
+                    ? RETURN_IGNORE_DIFFERENCE_NODES_SIMILAR
+                    : RETURN_ACCEPT_DIFFERENCE;
+        }
+
+        @Override
+        public void skippedComparison(org.w3c.dom.Node control, org.w3c.dom.Node test) {
+        }
     }
 }

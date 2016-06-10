@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<findBugsResult _class="hudson.plugins.findbugs.FindBugsResult">
+   <module />
+   <newSuccessfulHighScore>false</newSuccessfulHighScore>
+   <newWarning _class="hudson.plugins.findbugs.parser.Bug" />
+   <newWarning _class="hudson.plugins.findbugs.parser.Bug" />
+   <newWarning _class="hudson.plugins.findbugs.parser.Bug" />
+   <newWarning _class="hudson.plugins.findbugs.parser.Bug" />
+   <newWarning _class="hudson.plugins.findbugs.parser.Bug" />
+   <newWarning _class="hudson.plugins.findbugs.parser.Bug" />
+   <newZeroWarningsHighScore>false</newZeroWarningsHighScore>
+   <numberOfFixedWarnings>0</numberOfFixedWarnings>
+   <numberOfHighPriorityWarnings>2</numberOfHighPriorityWarnings>
+   <numberOfLowPriorityWarnings>0</numberOfLowPriorityWarnings>
+   <numberOfNewWarnings>6</numberOfNewWarnings>
+   <numberOfNormalPriorityWarnings>4</numberOfNormalPriorityWarnings>
+   <numberOfWarnings>6</numberOfWarnings>
+   <pluginResult>SUCCESS</pluginResult>
+   <successfulHighScore>0</successfulHighScore>
+   <successfulSinceBuild>0</successfulSinceBuild>
+   <successfulSinceDate>0</successfulSinceDate>
+   <warning _class="hudson.plugins.findbugs.parser.Bug" />
+   <warning _class="hudson.plugins.findbugs.parser.Bug" />
+   <warning _class="hudson.plugins.findbugs.parser.Bug" />
+   <warning _class="hudson.plugins.findbugs.parser.Bug" />
+   <warning _class="hudson.plugins.findbugs.parser.Bug" />
+   <warning _class="hudson.plugins.findbugs.parser.Bug" />
+   <warningsDelta>6</warningsDelta>
+   <zeroWarningsHighScore>0</zeroWarningsHighScore>
+   <zeroWarningsSinceBuild>0</zeroWarningsSinceBuild>
+   <zeroWarningsSinceDate>0</zeroWarningsSinceDate>
+</findBugsResult>
