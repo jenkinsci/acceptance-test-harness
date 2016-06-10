@@ -111,7 +111,7 @@ public class DockerImage {
             t.init(cid, p, logfile);
             return t;
         } catch (ReflectiveOperationException e) {
-            throw new AssertionError(e);
+            throw new Error(e);
         }
     }
 
