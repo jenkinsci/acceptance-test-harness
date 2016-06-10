@@ -5,8 +5,11 @@ import com.google.inject.TypeLiteral;
 import org.jenkinsci.test.acceptance.guice.AutoCleaned;
 import org.jenkinsci.test.acceptance.guice.TestCleaner;
 import org.jenkinsci.test.acceptance.guice.TestScope;
+import org.jenkinsci.test.acceptance.junit.FailureDiagnostics;
 
+import javax.inject.Named;
 import javax.inject.Provider;
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -22,15 +25,34 @@ public class DockerContainerHolder<T extends DockerContainer> implements Provide
     @Inject
     Docker docker;
 
+    @Inject
+    private FailureDiagnostics diag;
+
     T container;
+
+    /**
+     * Injecting a portOffset will force the binding of dockerPorts to local Ports with an offset
+     * (e.g. bind docker 22 to localhost port 40022,
+     */
+    @Inject(optional = true)
+    @Named("dockerPortOffset")
+    private int portOffset = 0;
 
     /**
      * Lazily starts a container and returns the instance.
      */
     @Override
     public synchronized T get() {
-        if (container==null)
-            container = docker.start((Class<T>)type.getRawType());
+        if (container==null) {
+            Class<T> fixture = (Class<T>) type.getRawType();
+            File buildlog = diag.touch("docker-" + fixture.getSimpleName() + ".build.log");
+            File runlog = diag.touch("docker-" + fixture.getSimpleName() + ".run.log");
+            try {
+                container = docker.build(fixture, buildlog).start(fixture).withPortOffset(portOffset).withLog(runlog).start();
+            } catch (InterruptedException | IOException e) {
+                throw new Error("Failed to start container " + fixture.getName(), e);
+            }
+        }
         return container;
     }
 

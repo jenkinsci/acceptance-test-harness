@@ -62,7 +62,7 @@ public class WinstoneDockerController extends LocalController {
             else
                 img = docker.build(fixtureType);
 
-            container = img.start(fixtureType, opts, null);
+            container = img.start(fixtureType).withOptions(opts).start();
 
             CommandBuilder cmds = new CommandBuilder();
             cmds.add("java");

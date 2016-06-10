@@ -3,6 +3,8 @@ package org.jenkinsci.test.acceptance.junit;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+
+import com.google.common.io.Files;
 import org.codehaus.plexus.util.FileUtils;
 import org.jenkinsci.test.acceptance.guice.TestName;
 import org.jenkinsci.test.acceptance.guice.TestScope;

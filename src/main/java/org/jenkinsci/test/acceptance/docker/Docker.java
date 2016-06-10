@@ -7,6 +7,7 @@ import org.jenkinsci.test.acceptance.utils.SHA1Sum;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.jvnet.hudson.annotation_indexer.Index;
 
+import javax.annotation.CheckForNull;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.File;
@@ -41,18 +42,6 @@ public class Docker {
 
     private static List<String> dockerCmd;// = Arrays.asList("docker");
 
-    /**
-     * Injecting a portOffset will force the binding of dockerPorts to local Ports with an offset
-     * (e.g. bind docker 22 to localhost port 40022,
-     */
-    @Inject(optional = true)
-    @Named("dockerPortOffset")
-    private static int portOffset = 0;
-
-    public int getPortOffset() {
-        return portOffset;
-    }
-
     @Inject(optional = true)
     public ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
@@ -82,6 +71,17 @@ public class Docker {
      * @param dir   Directory that contains Dockerfile
      */
     public DockerImage build(String image, File dir) throws IOException, InterruptedException {
+        return build(image, dir, null);
+    }
+
+    /**
+     * Builds a docker image.
+     *
+     * @param image Name of the image to be built.
+     * @param dir   Directory that contains Dockerfile
+     * @param log   Log file to store image building output
+     */
+    public DockerImage build(String image, File dir, @CheckForNull File log) throws IOException, InterruptedException {
         // compute tag from the content of Dockerfile
         String tag = getDockerFileHash(dir);
         String full = image + ":" + tag;
@@ -91,13 +91,31 @@ public class Docker {
             return new DockerImage(full);
         }
 
-        if (cmd("build").add("-t", full, dir).system() != 0) {
+        CommandBuilder buildCmd = cmd("build").add("-t", full, dir);
+        ProcessBuilder processBuilder = buildCmd.build();
+        if (log != null) {
+            processBuilder.redirectError(log).redirectOutput(log);
+        } else {
+            processBuilder.redirectError(ProcessBuilder.Redirect.INHERIT).redirectOutput(ProcessBuilder.Redirect.INHERIT);
+        }
+
+        StringBuilder sb = new StringBuilder("Building Docker image `").append(buildCmd.toString()).append("`");
+        if (log != null) {
+            sb.append(": logfile is at ").append(log);
+        }
+        System.out.println(sb.toString());
+
+        if (processBuilder.start().waitFor() != 0) {
             throw new Error("Failed to build image: " + tag);
         }
         return new DockerImage(full);
     }
 
     public DockerImage build(Class<? extends DockerContainer> fixture) throws IOException, InterruptedException {
+        return build(fixture, null);
+    }
+
+    public DockerImage build(Class<? extends DockerContainer> fixture, File log) throws IOException, InterruptedException {
         if (fixture.getSuperclass() != DockerContainer.class && fixture.getSuperclass() != DynamicDockerContainer.class) {
             build((Class) fixture.getSuperclass()); // build the base image first
         }
@@ -113,7 +131,7 @@ public class Docker {
             dir.mkdirs();
             try {
                 copyDockerfileDirectory(fixture, f, dir);
-                return build("jenkins/" + f.id(), dir);
+                return build("jenkins/" + f.id(), dir, log);
             } finally {
                 FileUtils.deleteDirectory(dir);
             }
@@ -210,27 +228,6 @@ public class Docker {
         File dockerFile = new File(dockerFileDir, "Dockerfile");
         SHA1Sum dockerFileHash = new SHA1Sum(dockerFile);
         return dockerFileHash.getSha1String().substring(0, 12);
-    }
-
-    /**
-     * Starts a container of the specific fixture type.
-     * This builds an image if need be.
-     *
-     * @see DockerContainerHolder
-     */
-    /*package*/ <T extends DockerContainer> T start(Class<T> fixture, CommandBuilder options, CommandBuilder cmd) {
-        try {
-            return build(fixture).start(fixture, options, cmd, portOffset);
-        } catch (InterruptedException | IOException e) {
-            throw new AssertionError("Failed to start container " + fixture.getName(), e);
-        }
-    }
-
-    /**
-     * @see DockerContainerHolder
-     */
-    /*package*/ <T extends DockerContainer> T start(Class<T> fixture) {
-        return start(fixture, null, null);
     }
 
     /**
