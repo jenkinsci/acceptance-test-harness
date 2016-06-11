@@ -51,32 +51,5 @@ public abstract class BaseStandardCredentials extends Credential {
         //control("advanced-button").click();
         control(by.name("_.id")).set(id);
     }
-    
-    /**
-     * Clicks the delete credential button and wait until it is not present anymore
-     * TO REMOVE - not possible with new credentials
-     */
-    public void delete() {
-        delete.click();
-        // Wait for element not present to avoid errors
-        waitFor().until(new Callable<Boolean>() {
-            
-            @Override
-            public Boolean call() throws Exception {
-                return !isPresent();
-            }
-        });
-    }
-    
-    /**
-     * If the delete button is present, the credential still exists in the page.
-     *
-     * TO REMOVE -> not possible anymore; alternatively use ManagedCredentials
-     * 
-     * @return true if the credential is present in the page. False otherwise.
-     */
-    private boolean isPresent() {
-        return this.delete.exists();
-    }
 
 }
