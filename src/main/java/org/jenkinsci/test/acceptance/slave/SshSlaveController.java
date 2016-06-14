@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import org.jenkinsci.test.acceptance.SshKeyPair;
 import org.jenkinsci.test.acceptance.machine.Machine;
+import org.jenkinsci.test.acceptance.plugins.credentials.CredentialsPage;
 import org.jenkinsci.test.acceptance.plugins.credentials.ManagedCredentials;
 import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshPrivateKeyCredential;
 import org.jenkinsci.test.acceptance.po.DumbSlave;
@@ -58,13 +59,13 @@ public class SshSlaveController extends SlaveController {
 
         try {
             credential.open();
-            if (credential.getElement(By.xpath(String.format("//input[@name='_.username'][@value='%s']"
-                    +"/../../..//input[@name='_.description'][@value='%s']", machine.getUser(), fingerprint))) == null) {
-                SshPrivateKeyCredential sc = credential.add(SshPrivateKeyCredential.class);
+            if (credential.checkIfCredentialsExist(fingerprint) == null) {
+                CredentialsPage cp = new CredentialsPage(j, ManagedCredentials.DEFAULT_DOMAIN);
+                SshPrivateKeyCredential sc = cp.add(SshPrivateKeyCredential.class);
                 sc.username.set(machine.getUser());
                 sc.description.set(fingerprint);
                 sc.selectEnterDirectly().privateKey.set(keyPair.readPrivateKey());
-                credential.save();
+                cp.create();
             }
         } catch (IOException e) {
             throw new AssertionError(e);
