@@ -1,5 +1,6 @@
 package org.jenkinsci.test.acceptance.plugins.ssh_slaves;
 
+import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshCredentialDialog;
 import org.jenkinsci.test.acceptance.plugins.ssh_slaves.SshSlaveLauncher;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.openqa.selenium.WebElement;
@@ -13,11 +14,11 @@ public class SshSlaveLauncher2 extends SshSlaveLauncher {
     }
 
     @Override
-    public org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshSlaveLauncher addCredential() {
+    public SshCredentialDialog addCredential() {
         self().findElement(by.button("Add")).click();
         elasticSleep(500);
         control(by.xpath("//*[@id=\"yui-gen2\"]")).click();
-        return new org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshSlaveLauncher(getPage(), "/credentials");
+        return new SshCredentialDialog(getPage(), "/credentials");
     }
 
 }
