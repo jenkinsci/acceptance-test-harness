@@ -1,7 +1,6 @@
 package org.jenkinsci.test.acceptance.plugins.ssh_slaves;
 
 import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshCredentialDialog;
-import org.jenkinsci.test.acceptance.plugins.ssh_slaves.SshSlaveLauncher;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.openqa.selenium.WebElement;
 
