@@ -1,57 +1,32 @@
 package org.jenkinsci.test.acceptance;
 
-import javax.inject.Named;
-
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.lang.StringUtils;
+import javax.inject.Named;
+
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.resolution.ArtifactResult;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.JenkinsControllerFactory;
-import org.jenkinsci.test.acceptance.guice.TestCleaner;
-import org.jenkinsci.test.acceptance.guice.TestName;
 import org.jenkinsci.test.acceptance.guice.TestScope;
 import org.jenkinsci.test.acceptance.po.Jenkins;
-import org.jenkinsci.test.acceptance.selenium.SanityChecker;
-import org.jenkinsci.test.acceptance.selenium.Scroller;
 import org.jenkinsci.test.acceptance.server.JenkinsControllerPoolProcess;
 import org.jenkinsci.test.acceptance.server.PooledJenkinsController;
 import org.jenkinsci.test.acceptance.slave.LocalSlaveProvider;
 import org.jenkinsci.test.acceptance.slave.SlaveProvider;
 import org.jenkinsci.test.acceptance.utils.ElasticTime;
 import org.jenkinsci.test.acceptance.utils.IOUtil;
-import org.jenkinsci.test.acceptance.utils.SauceLabsConnection;
 import org.jenkinsci.test.acceptance.utils.aether.ArtifactResolverUtil;
 import org.jenkinsci.test.acceptance.utils.mail.MailService;
 import org.jenkinsci.test.acceptance.utils.mail.Mailtrap;
+import org.jenkinsci.test.acceptance.utils.pluginreporter.ConsoleExercisedPluginReporter;
 import org.jenkinsci.test.acceptance.utils.pluginreporter.ExercisedPluginsReporter;
 import org.jenkinsci.test.acceptance.utils.pluginreporter.TextFileExercisedPluginReporter;
-import org.jenkinsci.test.acceptance.utils.pluginreporter.ConsoleExercisedPluginReporter;
-import org.junit.runners.model.Statement;
-import org.openqa.selenium.Dimension;
-import org.openqa.selenium.UnsupportedCommandException;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.firefox.FirefoxProfile;
-import org.openqa.selenium.htmlunit.HtmlUnitDriver;
-import org.openqa.selenium.ie.InternetExplorerDriver;
-import org.openqa.selenium.phantomjs.PhantomJSDriver;
-import org.openqa.selenium.remote.DesiredCapabilities;
-import org.openqa.selenium.remote.RemoteWebDriver;
-import org.openqa.selenium.remote.UnreachableBrowserException;
-import org.openqa.selenium.safari.SafariDriver;
-import org.openqa.selenium.support.events.EventFiringWebDriver;
 
 import com.cloudbees.sdk.extensibility.ExtensionList;
 import com.google.inject.AbstractModule;
@@ -66,13 +41,6 @@ import com.google.inject.Provides;
  * @author Kohsuke Kawaguchi
  */
 public class FallbackConfig extends AbstractModule {
-    /** Browser property to set the default locale. */
-    private static final String LANGUAGE_SELECTOR = "intl.accept_languages";
-
-    /**
-     * PhantomJS browser property to set the default locale.
-     */
-    private static final String LANGUAGE_SELECTOR_PHANTOMJS = "phantomjs.page.customHeaders.Accept-Language";
 
     @Override
     protected void configure() {
@@ -81,110 +49,9 @@ public class FallbackConfig extends AbstractModule {
 
         // default email service provider
         bind(MailService.class).to(Mailtrap.class);
-    }
 
-    private WebDriver createWebDriver(TestName testName) throws IOException {
-        String browser = System.getenv("BROWSER");
-        if (browser==null) browser = "firefox";
-        browser = browser.toLowerCase(Locale.ENGLISH);
-
-        switch (browser) {
-        case "firefox":
-            FirefoxProfile profile = new FirefoxProfile();
-            profile.setAlwaysLoadNoFocusLib(true);
-
-            profile.setPreference(LANGUAGE_SELECTOR, "en");
-
-            return new FirefoxDriver(profile);
-        case "ie":
-        case "iexplore":
-        case "iexplorer":
-            return new InternetExplorerDriver();
-        case "chrome":
-            Map<String, String> prefs = new HashMap<String, String>();
-            prefs.put(LANGUAGE_SELECTOR, "en");
-            ChromeOptions options = new ChromeOptions();
-            options.setExperimentalOption("prefs", prefs);
-
-            return new ChromeDriver(options);
-        case "safari":
-            return new SafariDriver();
-        case "htmlunit":
-            return new HtmlUnitDriver(true);
-        case "saucelabs":
-        case "saucelabs-firefox":
-            DesiredCapabilities caps = DesiredCapabilities.firefox();
-            caps.setCapability("version", "29");
-            caps.setCapability("platform", "Windows 7");
-            caps.setCapability("name", testName.get());
-
-            // if running inside Jenkins, expose build ID
-            String tag = System.getenv("BUILD_TAG");
-            if (tag!=null)
-                caps.setCapability("build", tag);
-
-            return new SauceLabsConnection().createWebDriver(caps);
-        case "phantomjs":
-            DesiredCapabilities capabilities = DesiredCapabilities.phantomjs();
-            capabilities.setCapability(LANGUAGE_SELECTOR, "en");
-            capabilities.setCapability(LANGUAGE_SELECTOR_PHANTOMJS, "en");
-            return new PhantomJSDriver(capabilities);
-        case "remote-webdriver-firefox":
-            String u = System.getenv("REMOTE_WEBDRIVER_URL");
-            if (StringUtils.isBlank(u)) {
-                throw new Error("remote-webdriver-firefox requires REMOTE_WEBDRIVER_URL to be set");
-            }
-            return new RemoteWebDriver(
-                    new URL(u), //http://192.168.99.100:4444/wd/hub
-                    DesiredCapabilities.firefox());
-
-        default:
-            throw new Error("Unrecognized browser type: "+browser);
-        }
-    }
-
-    /**
-     * Creates a {@link WebDriver} for each test, then make sure to clean it up at the end.
-     */
-    @Provides @TestScope
-    public WebDriver createWebDriver(TestCleaner cleaner, TestName testName, ElasticTime time) throws IOException {
-        WebDriver base = createWebDriver(testName);
-
-        // Make sue the window have minimal resolution set, even when out of the visible screen. Try maximizing first so
-        // it has a chance to fit the screen nicely if big enough.
-        base.manage().window().maximize();
-        Dimension oldSize = base.manage().window().getSize();
-        if (oldSize.height < 960 || oldSize.width < 1280) {
-            base.manage().window().setSize(new Dimension(1280, 960));
-        }
-
-        final EventFiringWebDriver d = new EventFiringWebDriver(base);
-        d.register(new SanityChecker());
-        d.register(new Scroller());
-
-        try {
-            d.manage().timeouts().pageLoadTimeout(time.seconds(30), TimeUnit.MILLISECONDS);
-            d.manage().timeouts().implicitlyWait(time.seconds(1), TimeUnit.MILLISECONDS);
-        } catch (UnsupportedCommandException e) {
-            // sauce labs RemoteWebDriver doesn't support this
-            System.out.println(base + " doesn't support page load timeout");
-        }
-        cleaner.addTask(new Statement() {
-            @Override
-            public void evaluate() throws Throwable {
-                try {
-                    d.quit();
-                } catch (UnreachableBrowserException ex) {
-                    System.err.println("Browser died already");
-                    ex.printStackTrace();
-                }
-            }
-
-            @Override public String toString() {
-                return "Close WebDriver after test";
-            }
-        });
-        return d;
+        // WebDriver provider
+        bind(WebDriver.class).toProvider(WebDriverProvider.class).in(TestScope.class);
     }
 
     @Provides
