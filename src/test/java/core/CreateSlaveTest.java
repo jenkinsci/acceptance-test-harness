@@ -3,6 +3,7 @@ package core;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Since;
 import org.jenkinsci.test.acceptance.plugins.credentials.ManagedCredentials2;
+import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshCredentialDialog;
 import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshSlaveLauncher;
 import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshPrivateKeyCredential;
 import org.jenkinsci.test.acceptance.po.DumbSlave;
@@ -49,7 +50,7 @@ public class CreateSlaveTest extends AbstractJUnitTest {
                 //ignore
             }
 
-            SshSlaveLauncher f = l.addCredential();
+            SshCredentialDialog f = l.addCredential();
             {
                 SshPrivateKeyCredential sc = f.select(SshPrivateKeyCredential.class);
                 sc.description.set(description);
