@@ -93,12 +93,12 @@ public class CompressArtifactsPluginTest extends AbstractJUnitTest {
         job.addPublisher(ArtifactArchiver.class).includes("*");
         if (SystemUtils.IS_OS_UNIX) {
             job.addBuildStep(ShellBuildStep.class).command( // Generate archive larger than 4G
-                "#!/bin/bash\nwget $JENKINS_URL/jnlpJars/jenkins-cli.jar -O stuff.jar; for i in {0..7000}; do cp -l stuff.jar stuff.${i}.jar; done"
+                "#!/bin/bash\nwget $JENKINS_URL/jnlpJars/jenkins-cli.jar -O stuff.jar; for i in {0..7000}; do cp stuff.jar stuff.${i}.jar; done"
                                             );
         }
         else {
-            // On windows although we could create hard links this would exceed the number of hard links you can create for a given file. 
-            // and sparse files compress too well. 
+            // On windows although we could create hard links this would exceed the number of hard links you can create for a given file.
+            // and sparse files compress too well.
             //job.addBuildStep(BatchCommandBuildStep.class).command("for /l %%x in (0, 1, 7000) do fsutil file createnew stuff.%%x.jar 819200");
             job.addBuildStep(BatchCommandBuildStep.class).command("powershell -command \"& { " +
                                             "try { " +

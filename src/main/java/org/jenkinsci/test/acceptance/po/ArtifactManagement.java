@@ -24,6 +24,7 @@
 package org.jenkinsci.test.acceptance.po;
 
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.StaleElementReferenceException;
 
 /**
  * Global page area to configure Artifact management.
@@ -45,12 +46,12 @@ public class ArtifactManagement extends PageAreaImpl {
     }
 
     public void clear() {
-        try {
-            while (true) {
+        while (control("artifactManagerFactories/repeatable-delete").exists()) {
+            try {
                 control("artifactManagerFactories/repeatable-delete").click();
+            } catch (NoSuchElementException | StaleElementReferenceException e) {
+                // control of race condition, the element might have been deleted but selenium cache not updated?
             }
-        } catch (NoSuchElementException ignored) {
-            //done no more buttons to push
         }
     }
 
