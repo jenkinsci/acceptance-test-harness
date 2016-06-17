@@ -1,5 +1,6 @@
 package plugins;
 
+import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.matrix_auth.MatrixAuthorizationStrategy;
@@ -14,12 +15,20 @@ import org.junit.Test;
 import static org.jenkinsci.test.acceptance.plugins.matrix_auth.MatrixRow.*;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
+
+import javax.inject.Inject;
 
 /**
  * @author Kohsuke Kawaguchi
  */
 @WithPlugins({"matrix-auth","mock-security-realm"})
 public class MatrixAuthPluginTest extends AbstractJUnitTest {
+
+    @Inject
+    private JenkinsController controller;
+
     /**
      * Test scenario:
      *
@@ -48,17 +57,27 @@ public class MatrixAuthPluginTest extends AbstractJUnitTest {
         jenkins.login().doLogin("alice");
 
         FreeStyleJob j = jenkins.jobs.create();
+
         j.save();
+
+        jenkins.logout();
 
         // if we login as Bob, he shouldn't see the job
         jenkins.login().doLogin("bob");
-        assertNull(getElement(by.href("job/"+j.name+"/")));
 
-        // contorl assertion: alice shoudl see the link
+        // check for job's existence
+        driver.get(controller.getUrl() + "job/" + j.name + "/");
+
+        assertFalse(driver.getTitle().contains(j.name));
+
+        jenkins.logout();
+
+        // control assertion: alice should see the link
         jenkins.login().doLogin("alice");
-        assertNotNull(getElement(by.href("job/"+j.name+"/")));
 
-        // TODO: variant of href that takes laxed match
+        driver.get(controller.getUrl() + ("job/" + j.name + "/"));
+
+        assertTrue(driver.getTitle().contains(j.name));
     }
 
     /**
@@ -88,10 +107,17 @@ public class MatrixAuthPluginTest extends AbstractJUnitTest {
         // just create the job without configuring
         FreeStyleJob j = jenkins.jobs.create();
 
+        jenkins.logout();
+
         // bob shouldn't be able to see it without adding a permission for him
         jenkins.login().doLogin("bob");
-        assertNull(getElement(by.href("job/"+j.name+"/")));
 
+        // check for job's existence
+        driver.get(controller.getUrl() + ("job/" + j.name + "/"));
+
+        assertFalse(driver.getTitle().contains(j.name));
+
+        jenkins.logout();
 
         // alice will expose this job to bob
         jenkins.login().doLogin("alice");
@@ -104,9 +130,14 @@ public class MatrixAuthPluginTest extends AbstractJUnitTest {
         }
         j.save();
 
+        jenkins.logout();
 
         // bob should see this job
         jenkins.login().doLogin("bob");
-        assertNotNull(getElement(by.href("job/"+j.name+"/")));
+
+        // check for job's existence
+        driver.get(controller.getUrl() + ("job/" + j.name + "/"));
+
+        assertTrue(driver.getTitle().contains(j.name));
     }
 }
