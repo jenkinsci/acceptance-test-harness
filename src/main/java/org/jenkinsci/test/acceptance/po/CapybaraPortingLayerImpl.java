@@ -24,6 +24,7 @@ import com.google.common.base.Joiner;
 import com.google.inject.Injector;
 
 import static java.util.Arrays.*;
+import org.openqa.selenium.interactions.Actions;
 
 /**
  * For assisting porting from Capybara.
@@ -245,9 +246,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
      */
     @Override
     public void check(WebElement e) {
-        if (!e.isSelected()) {
-            e.click();
-        }
+        check(e, true);
     }
 
     /**
@@ -257,6 +256,11 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     public void check(WebElement e, boolean state) {
         if (e.isSelected() != state) {
             e.click();
+        }
+        // It seems like Selenium sometimes has issues when trying to click elements that are out of view.
+        // We use the following javascript as a workaraound if the previous click failed.
+        if (e.isSelected() != state) {
+            executeScript("arguments[0].click();", e);
         }
     }
 
