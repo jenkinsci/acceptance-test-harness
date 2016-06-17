@@ -24,7 +24,6 @@ import com.google.common.base.Joiner;
 import com.google.inject.Injector;
 
 import static java.util.Arrays.*;
-import org.openqa.selenium.interactions.Actions;
 
 /**
  * For assisting porting from Capybara.
