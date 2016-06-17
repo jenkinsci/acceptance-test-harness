@@ -93,7 +93,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     */
     public void waitTillEnabledAndClick(String caption, int timeout, TimeUnit timeoutTimeUnit) {
         final WebElement e = find(by.button(caption));
-        waitFor().withTimeout(timeout,timeoutTimeUnit)
+        waitFor().withTimeout(timeout, timeoutTimeUnit)
                 .until(new Callable<Object>() {
                     @Override
                     public Object call() throws Exception {
