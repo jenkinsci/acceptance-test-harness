@@ -34,9 +34,8 @@ public class JobsMixIn extends MixIn {
                 }
             }
         }).click();
-        elasticSleep(3000);
 
-        clickButton("OK");
+        waitTillEnabledAndClick("OK", 3, TimeUnit.SECONDS);
 
         final T j = get(type, name);
 
@@ -81,4 +80,6 @@ public class JobsMixIn extends MixIn {
         choose("copy");
         clickButton("OK");
     }
+
+
 }
