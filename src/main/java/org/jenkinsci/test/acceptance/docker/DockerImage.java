@@ -117,7 +117,7 @@ public class DockerImage {
 
     private String waitForCid(CommandBuilder docker, File cidFile, File logfile, Process p) throws InterruptedException, IOException {
         for (int i = 0; i < 10; i++) {
-            Thread.sleep(500);
+            Thread.sleep(1000);
 
             String cid = FileUtils.readFileToString(cidFile);
             if (cid != null && cid.length() != 0) return cid;
