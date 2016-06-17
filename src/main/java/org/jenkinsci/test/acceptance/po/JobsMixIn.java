@@ -34,6 +34,7 @@ public class JobsMixIn extends MixIn {
                 }
             }
         }).click();
+        elasticSleep(3000);
 
         clickButton("OK");
 
