@@ -91,16 +91,19 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     * @param caption The button's text
     * @param timeout The time to wait for the button to become enabled, in seconds
     */
-    public void waitTillEnabledAndClick(String caption, int timeout, TimeUnit timeoutTimeUnit) {
-        final WebElement e = find(by.button(caption));
+    public void waitTillEnabledAndClick(final String caption, int timeout, TimeUnit timeoutTimeUnit)  {
         waitFor().withTimeout(timeout, timeoutTimeUnit)
                 .until(new Callable<Object>() {
                     @Override
                     public Object call() throws Exception {
-                        return e.isEnabled();
+                        WebElement e = find(by.button(caption));
+                        if (e.isEnabled()) {
+                            e.click();
+                            return true;
+                        }
+                        return false;
                     }
                 });
-        e.click();
     }
 
     /**
@@ -249,6 +252,25 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
             return null;
         }
         return all.get(0);
+    }
+
+    /**
+     * Works like  {@link #getElement(org.openqa.selenium.By)} but it waits some time for it to exist
+     *
+     * @param selector The selector for the element to get
+     * @param timeoutSec The maximun time to wait for the element to appear in seconds
+     * @return The finded element or null if not found in the specified time
+     */
+    public WebElement waitAndGetElement(By selector, int timeoutSec) {
+        WebElement element = getElement(selector);
+        if(element != null) {
+            return element;
+        }
+        try {
+            return waitFor(selector, timeoutSec);
+        } catch (Exception ex) {
+            return null;
+        }
     }
 
     @Override
