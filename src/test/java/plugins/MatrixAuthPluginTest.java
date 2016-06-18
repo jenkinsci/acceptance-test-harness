@@ -52,13 +52,11 @@ public class MatrixAuthPluginTest extends AbstractJUnitTest {
 
         // if we login as Bob, he shouldn't see the job
         jenkins.login().doLogin("bob");
-        elasticSleep(2000);
-        assertNull(getElement(by.href("job/"+j.name+"/")));
+        assertNull(waitAndGetElement(by.href("job/"+j.name+"/"), 2));
 
         // contorl assertion: alice shoudl see the link
         jenkins.login().doLogin("alice");
-        elasticSleep(2000);
-        assertNotNull(getElement(by.href("job/"+j.name+"/")));
+        assertNotNull(waitAndGetElement(by.href("job/"+j.name+"/"), 2));
 
         // TODO: variant of href that takes laxed match
     }
@@ -92,13 +90,11 @@ public class MatrixAuthPluginTest extends AbstractJUnitTest {
 
         // bob shouldn't be able to see it without adding a permission for him
         jenkins.login().doLogin("bob");
-        elasticSleep(2000);
-        assertNull(getElement(by.href("job/"+j.name+"/")));
+        assertNull(waitAndGetElement(by.href("job/"+j.name+"/"), 2));
 
 
         // alice will expose this job to bob
         jenkins.login().doLogin("alice");
-        elasticSleep(2000);
         j.configure();
         {
             ProjectMatrixProperty p = new ProjectMatrixProperty(j);
@@ -111,7 +107,7 @@ public class MatrixAuthPluginTest extends AbstractJUnitTest {
 
         // bob should see this job
         jenkins.login().doLogin("bob");
-        elasticSleep(2000);
-        assertNotNull(getElement(by.href("job/"+j.name+"/")));
+        assertNotNull(waitAndGetElement(by.href("job/"+j.name+"/"), 2));
     }
+
 }
