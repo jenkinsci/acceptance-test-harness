@@ -35,7 +35,7 @@ public class JobsMixIn extends MixIn {
             }
         }).click();
 
-        waitTillEnabledAndClick("OK", 3, TimeUnit.SECONDS);
+        waitTillEnabledAndClick("OK", 10, TimeUnit.SECONDS);
 
         final T j = get(type, name);
 
