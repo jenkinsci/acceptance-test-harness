@@ -4,6 +4,7 @@ import org.apache.commons.io.IOUtils;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.ArtifactoryContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.DockerTest;
 import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.artifactory.ArtifactoryGlobalConfig;
@@ -19,6 +20,7 @@ import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.junit.Test;
 
 import com.google.inject.Inject;
+import org.junit.experimental.categories.Category;
 
 import java.io.IOException;
 import java.util.concurrent.Callable;
@@ -33,6 +35,7 @@ import static org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation.inst
  * Checks the successfully integration of Artifactory plugin.
  */
 @WithPlugins("artifactory")
+@Category(DockerTest.class)
 @WithDocker
 public class ArtifactoryPluginTest extends AbstractJUnitTest {
 

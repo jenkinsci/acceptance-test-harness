@@ -7,6 +7,7 @@ import org.hamcrest.CoreMatchers;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.SshdContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.DockerTest;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
@@ -15,6 +16,7 @@ import org.jenkinsci.test.acceptance.plugins.scp.ScpGlobalConfig.Site;
 import org.jenkinsci.test.acceptance.plugins.scp.ScpPublisher;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.io.File;
 
@@ -23,7 +25,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 /**
  * Feature: Tests for SCP plugin
  */
-@WithPlugins("scp") @WithDocker
+@WithPlugins("scp")
+@Category(DockerTest.class)
+@WithDocker
 public class ScpPluginTest extends AbstractJUnitTest {
     @Inject
     DockerContainerHolder<SshdContainer> docker;

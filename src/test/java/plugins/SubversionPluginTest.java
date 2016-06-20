@@ -27,6 +27,7 @@ import static org.junit.Assert.*;
  * @author Matthias Karl
  */
 @WithPlugins("subversion@2.3")
+@Category(DockerTest.class)
 @WithDocker
 public class SubversionPluginTest extends AbstractJUnitTest {
     @Inject

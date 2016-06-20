@@ -2,6 +2,7 @@ package plugins;
 
 import com.google.inject.Inject;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.DockerTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.xvnc.XvncGlobalJobConfig;
 import org.jenkinsci.test.acceptance.plugins.xvnc.XvncJobConfig;
@@ -18,9 +19,11 @@ import org.jenkinsci.test.acceptance.junit.WithDocker;
 import static org.jenkinsci.test.acceptance.plugins.xvnc.XvncJobConfig.*;
 import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
+import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
 
 @WithPlugins("xvnc")
+@Category(DockerTest.class)
 @WithDocker
 public class XvncPluginTest extends AbstractJUnitTest {
 

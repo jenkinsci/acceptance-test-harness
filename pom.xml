@@ -629,9 +629,7 @@
           <plugin>
             <artifactId>maven-surefire-plugin</artifactId>
             <configuration>
-              <environmentVariables>
-                <CONFIG>docker-only.groovy</CONFIG>
-              </environmentVariables>
+              <groups>org.jenkinsci.test.acceptance.junit.DockerTest</groups>
             </configuration>
           </plugin>
         </plugins>
