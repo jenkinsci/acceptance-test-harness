@@ -10,6 +10,7 @@ import org.jenkinsci.test.acceptance.po.ComputerLauncher;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.PageObject;
+import org.openqa.selenium.WebElement;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -30,7 +31,24 @@ public class SshSlaveLauncher extends ComputerLauncher {
     }
 
     public SshCredentialDialog addCredential() {
-        self().findElement(by.button("Add")).click();
+
+        if (getElement(by.xpath("//span[contains(@class,'credentials-add')]")) == null) {
+
+            String providerXpathExpr = "//div[contains(@class,'credentials-add-menu-items')]"
+                    + "/div[@class='bd']/ul[@class='first-of-type']/li[contains(@class, 'yuimenuitem')]"
+                    + "/span[contains(@class,'yuimenuitemlabel') and contains(text(), 'Jenkins')]";
+
+            self().findElement(by.xpath("//button[@class='credentials-add-menu']")).click();
+
+            for (WebElement menuItem : self().findElements(by.xpath(providerXpathExpr))) {
+                if (menuItem.isDisplayed()) {
+                    menuItem.click();
+                    break;
+                }
+            }
+        } else {
+            self().findElement(by.button("Add")).click();
+        }
 
         return new SshCredentialDialog(getPage(), "/credentials");
     }
