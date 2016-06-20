@@ -32,9 +32,9 @@ public class SshSlaveLauncher extends ComputerLauncher {
 
     public SshCredentialDialog addCredential() {
 
-        if (getElement(by.xpath("//button[@class='credentials-add']")) == null) {
+        if (getElement(by.xpath("//span[contains(@class,'credentials-add')]")) == null) {
 
-            String providerXpathExpr = "//div[@id='yui-gen2']"
+            String providerXpathExpr = "//div[contains(@class,'credentials-add-menu-items')]"
                     + "/div[@class='bd']/ul[@class='first-of-type']/li[contains(@class, 'yuimenuitem')]"
                     + "/span[contains(@class,'yuimenuitemlabel') and contains(text(), 'Jenkins')]";
 
