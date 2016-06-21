@@ -50,6 +50,7 @@ public abstract class View extends ContainerPageObject {
     public void delete() {
         configure();
         clickLink("Delete View");
+        elasticSleep(1000);
         clickButton("Yes");
     }
 
