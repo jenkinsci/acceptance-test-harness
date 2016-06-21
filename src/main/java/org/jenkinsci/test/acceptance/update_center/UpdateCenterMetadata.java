@@ -15,6 +15,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jenkinsci.test.acceptance.po.Jenkins;
+
 /**
  * Databinding for Update Center metadata
  *
@@ -55,17 +57,19 @@ public class UpdateCenterMetadata {
 
     /**
      * Find all the transitive dependency plugins of the given plugins, in the order of installation.
-     *
+     * 
      * Resolved plugins set should satisfy required versions including Jenkins version.
+     * 
+     * Transitive dependencies will not be included if there is an already valid version of the plugin installed.
      *
      * @throws UnableToResolveDependencies When there requested plugin version can not be installed.
      */
-    public List<PluginMetadata> transitiveDependenciesOf(VersionNumber jenkins, Map<String, String> names) throws UnableToResolveDependencies {
+    public List<PluginMetadata> transitiveDependenciesOf(Jenkins jenkins, Map<String, String> names) throws UnableToResolveDependencies {
         List<PluginMetadata> set = new ArrayList<>();
         for (Map.Entry<String, String> n : names.entrySet()) {
             PluginMetadata p = plugins.get(n.getKey());
             if (p==null) throw new IllegalArgumentException("No such plugin " + n.getKey());
-            if (p.requiredCore().isNewerThan(jenkins)) {
+            if (p.requiredCore().isNewerThan(jenkins.getVersion())) {
                 throw new UnableToResolveDependencies(String.format(
                         "Unable to install %s plugin because of core dependency. Requeried: %s Used: %s",
                         p, p.requiredCore(), jenkins
@@ -77,20 +81,38 @@ public class UpdateCenterMetadata {
         return set;
     }
 
-    private void transitiveDependenciesOf(VersionNumber jenkins, PluginMetadata p, String v, List<PluginMetadata> result) {
+    private void transitiveDependenciesOf(Jenkins jenkins, PluginMetadata p, String v, List<PluginMetadata> result) {
         for (Dependency d : p.getDependencies()) {
-            if (d.optional) continue;
+            if (d.optional || !shouldBeIncluded(jenkins, d)) continue;
             transitiveDependenciesOf(jenkins, plugins.get(d.name), d.version, result);
         }
 
         if (!result.contains(p)) {
             PluginMetadata use = p;
-            if (use.requiredCore().isNewerThan(jenkins)) {
+            if (use.requiredCore().isNewerThan(jenkins.getVersion())) {
                 // If latest version is too new for current Jenkins, use the declared one
                 result.add(p.withVersion(v));
             } else {
                 result.add(use);
             }
+        }
+    }
+
+    /**
+     * Assess whether the dependency actually needs to be installed or upgraded.
+     * 
+     * @param jenkins top-level jenkins object
+     * @param d the dependency
+     * @return true if the dependency should be installed/upgraded. Otherwise, false.
+     */
+    private boolean shouldBeIncluded(Jenkins jenkins, Dependency d) {
+        try {
+            VersionNumber installedVersion = jenkins.getPlugin(d.name).getVersion();
+            VersionNumber requiredVersion = new VersionNumber(d.version);
+            return installedVersion.isOlderThan(requiredVersion);
+        } catch (IllegalArgumentException ex) {
+            // Plugin not installed
+            return true;
         }
     }
 
