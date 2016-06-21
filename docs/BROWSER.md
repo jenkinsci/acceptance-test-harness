@@ -10,7 +10,7 @@ by using the `BROWSER` environment variable. The following values are available:
  * `htmlunit`
  * `phantomjs`
  * `saucelabs`
- * `remote-webdriver-firefox` 
+ * `remote-webdriver-firefox`
         _(Needs `REMOTE_WEBDRIVER_URL` to also be set to the url of the remote, for example `http://0.0.0.0:32779/wd/hub`
           when using something like [selenium/standalone-firefox-debug](https://hub.docker.com/r/selenium/standalone-firefox-debug/))_
 
@@ -41,17 +41,11 @@ For example,
 See [WIRING.md](WIRING.md) for details of where to put this.
 
 ## Avoid focus steal with Xvnc on Linux
-If you select a real GUI browser, such as Firefox, browser window will pop up left and right during tests,
-making it practically unusable for you to use your computer.
+If you select a real GUI browser, such as Firefox, browser window will pop up left and right during tests, making it practically unusable for you to use your computer. There is a script to run vnc server and propage the display number to the test suite.
 
-To prevent this, you can use [Xvnc](http://www.hep.phy.cam.ac.uk/vnc_docs/xvnc.html), so that the browser under the test
-will go to a separate display. For example, on Ubuntu you can run `vncserver`, then run tests like the following:
+    $ . vnc.sh
+    $ mvn test
 
-    $ vncserver    
-    ...
-    New 'X' desktop is elf:1
-    $ DISPLAY=elf:1 mvn test 
-    
 ## Example on using remote web driver
 
 Non tested pseudo bash example
