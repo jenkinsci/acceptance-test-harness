@@ -71,7 +71,7 @@ public class CreateSlaveTest extends AbstractJUnitTest {
     @Test
     public void newSlaveWithExistingCredential() throws Exception {
         String username = "xyz";
-        String description = "SSH Key setup";
+        String description = "ssh_creds";
         String privateKey = "1212121122121212";
 
         CredentialsPage c = new CredentialsPage(jenkins, "_");
@@ -85,7 +85,6 @@ public class CreateSlaveTest extends AbstractJUnitTest {
         c.create();
 
         //now verify
-        c.open();
         ManagedCredentials mc = new ManagedCredentials(jenkins);
         String href = mc.credentialById("ssh_creds");
         c.setConfigUrl(href);
