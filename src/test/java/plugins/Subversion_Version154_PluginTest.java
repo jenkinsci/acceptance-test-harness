@@ -7,6 +7,7 @@ import hudson.util.VersionNumber;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.SvnContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.DockerTest;
 import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.subversion.SubversionCredentialUserPwd;
@@ -15,6 +16,7 @@ import org.jenkinsci.test.acceptance.plugins.subversion.SubversionScm;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import static org.junit.Assume.assumeTrue;
 
@@ -28,6 +30,7 @@ import static org.junit.Assume.assumeTrue;
  * @author Matthias Karl
  */
 @WithPlugins("subversion")
+@Category(DockerTest.class)
 @WithDocker
 @Deprecated
 public class Subversion_Version154_PluginTest extends AbstractJUnitTest {

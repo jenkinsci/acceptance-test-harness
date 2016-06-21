@@ -37,6 +37,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
  *
  * @author Michael Prankl
  */
+@Category(DockerTest.class)
 @WithDocker
 @WithPlugins("ldap@1.10")
 public class LdapPluginTest extends AbstractJUnitTest {

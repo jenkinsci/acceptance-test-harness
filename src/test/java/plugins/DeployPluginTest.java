@@ -6,6 +6,7 @@ import org.apache.commons.lang.SystemUtils;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.Tomcat7Container;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.DockerTest;
 import org.jenkinsci.test.acceptance.junit.Native;
 import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
@@ -16,6 +17,7 @@ import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.jenkinsci.test.acceptance.po.ShellBuildStep;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import javax.inject.Inject;
 
@@ -32,6 +34,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
  * I want to automate the delivery of web applications
  */
 @WithPlugins("deploy")
+@Category(DockerTest.class)
 @WithDocker
 public class DeployPluginTest extends AbstractJUnitTest {
 

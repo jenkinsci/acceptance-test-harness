@@ -8,6 +8,7 @@ import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.docker.DockerContainer;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.DockerTest;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.plugins.publish_over.PublishGlobalConfig;
@@ -17,6 +18,7 @@ import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.slave.SlaveProvider;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,6 +38,7 @@ import static org.hamcrest.Matchers.is;
  *
  * @author Tobias Meyer
  */
+@Category(DockerTest.class)
 @WithDocker
 public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends AbstractJUnitTest {
     @Inject

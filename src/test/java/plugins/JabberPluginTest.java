@@ -7,6 +7,7 @@ import org.hamcrest.CoreMatchers;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.JabberContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.DockerTest;
 import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.jabber.JabberGlobalConfig;
@@ -18,6 +19,7 @@ import org.jenkinsci.test.acceptance.plugins.jabber.JabberPublisher.Publishers;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,6 +39,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
  * @author jenky-hm
  */
 @WithPlugins("jabber")
+@Category(DockerTest.class)
 @WithDocker
 @Ignore
 public class JabberPluginTest extends AbstractJUnitTest {

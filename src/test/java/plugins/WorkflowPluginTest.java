@@ -31,6 +31,7 @@ import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.DockerTest;
 import org.jenkinsci.test.acceptance.junit.Native;
 import org.jenkinsci.test.acceptance.junit.Wait;
 import org.jenkinsci.test.acceptance.junit.WithCredentials;
@@ -47,6 +48,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.rules.TemporaryFolder;
 import org.jvnet.hudson.test.Issue;
 
@@ -172,6 +174,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         build.shouldContainsConsoleOutput("divided into 3 sets");
     }
 
+    @Category(DockerTest.class)
     @WithDocker
     @WithPlugins({"workflow-aggregator@1.14", "docker-workflow@1.4", "git", "ssh-agent@1.10"})
     @WithCredentials(credentialType=WithCredentials.SSH_USERNAME_PRIVATE_KEY, values={"git", "/org/jenkinsci/test/acceptance/docker/fixtures/GitContainer/unsafe"}, id="gitcreds")

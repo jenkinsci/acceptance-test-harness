@@ -5,11 +5,13 @@ import java.io.IOException;
 import org.jenkinsci.test.acceptance.docker.DockerContainer;
 import org.jenkinsci.test.acceptance.docker.fixtures.FtpdContainer;
 import org.jenkinsci.test.acceptance.docker.fixtures.IPasswordDockerContainer;
+import org.jenkinsci.test.acceptance.junit.DockerTest;
 import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.publish_over.*;
 import org.jenkinsci.test.acceptance.plugins.publish_over.FtpGlobalConfig.FtpSite;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.junit.experimental.categories.Category;
 
 /**
  * Feature: Tests for FTP plugin
@@ -19,6 +21,7 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
  * @author Tobias Meyer
  */
 @WithPlugins("publish-over-ftp")
+@Category(DockerTest.class)
 @WithDocker(localOnly=true)
 public class FtpPublishPluginTest extends GlobalPublishPluginTest<FtpdContainer> {
 

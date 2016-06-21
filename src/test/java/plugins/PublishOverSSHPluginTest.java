@@ -28,6 +28,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
  * @author jenky-hm
  */
 @WithPlugins("publish-over-ssh")
+@Category(DockerTest.class)
 @WithDocker
 public class PublishOverSSHPluginTest extends AbstractJUnitTest {
     @Inject

@@ -7,6 +7,7 @@ import hudson.plugins.jira.soap.RemoteComment;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.JiraContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.DockerTest;
 import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.git.GitRepo;
@@ -18,6 +19,7 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import static org.junit.Assert.fail;
 
@@ -27,7 +29,9 @@ import static org.junit.Assert.fail;
  * As a Jenkins developer
  * I want JIRA issues to be updated when a new build is made
  */
-@WithPlugins({"jira", "git"}) @WithDocker
+@WithPlugins({"jira", "git"})
+@Category(DockerTest.class)
+@WithDocker
 public class JiraPluginTest extends AbstractJUnitTest {
     @Inject
     DockerContainerHolder<JiraContainer> docker;
