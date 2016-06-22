@@ -14,6 +14,7 @@ import org.junit.Test;
 import static org.jenkinsci.test.acceptance.plugins.matrix_auth.MatrixRow.*;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -48,15 +49,24 @@ public class MatrixAuthPluginTest extends AbstractJUnitTest {
         jenkins.login().doLogin("alice");
 
         FreeStyleJob j = jenkins.jobs.create();
+
         j.save();
 
         // if we login as Bob, he shouldn't see the job
         jenkins.login().doLogin("bob");
-        assertNull(waitAndGetElement(by.href("job/"+j.name+"/"), 2));
+
+        //wait for main panel to appear to make sure page is rendered
+        waitFor(by.id("main-panel"));
+
+        assertNull(getElement(by.href("job/"+j.name+"/")));
 
         // contorl assertion: alice shoudl see the link
         jenkins.login().doLogin("alice");
-        assertNotNull(waitAndGetElement(by.href("job/"+j.name+"/"), 2));
+
+        //wait for main panel to appear to make sure page is rendered
+        waitFor(by.id("main-panel"));
+
+        assertNotNull(getElement(by.href("job/"+j.name+"/")));
 
         // TODO: variant of href that takes laxed match
     }
@@ -90,7 +100,12 @@ public class MatrixAuthPluginTest extends AbstractJUnitTest {
 
         // bob shouldn't be able to see it without adding a permission for him
         jenkins.login().doLogin("bob");
-        assertNull(waitAndGetElement(by.href("job/"+j.name+"/"), 2));
+
+        //wait for main panel to appear to make sure page is rendered
+        waitFor(by.id("main-panel"));
+
+        //check that the project is visible
+        assertNull(getElement(by.href("job/"+j.name+"/")));
 
 
         // alice will expose this job to bob
@@ -107,7 +122,12 @@ public class MatrixAuthPluginTest extends AbstractJUnitTest {
 
         // bob should see this job
         jenkins.login().doLogin("bob");
-        assertNotNull(waitAndGetElement(by.href("job/"+j.name+"/"), 2));
+
+        //wait for project status table to appear to make sure page is rendered
+        waitFor(by.id("main-panel"));
+
+        //Check that project now is visible
+        assertTrue("The list of jobs should be bigger than zero", all(by.href("job/"+j.name+"/")).size() > 0);
     }
 
 }
