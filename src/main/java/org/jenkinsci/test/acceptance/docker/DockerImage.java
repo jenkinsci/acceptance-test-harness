@@ -131,7 +131,7 @@ public class DockerImage {
             return output.trim();
         }
 
-        throw new IOException("docker didn't output a container id, yet is still running. Huh?: "+docker+"\n"+IOUtils.toString(p.getInputStream()));
+        throw new IOException("docker didn't output a container id or have a non-zero exit status. Huh?: "+docker);
     }
 
     /**
