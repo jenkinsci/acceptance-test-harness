@@ -82,7 +82,6 @@ public class DockerImage {
         cidFile.delete();
         cidFile.deleteOnExit();
         docker.add("--cidfile="+cidFile);//strange behaviour in some docker version cidfile needs to come before
-
         for (int p : starter.ports) {
             docker.add("-p", starter.getPortMapping(p));
         }
@@ -117,7 +116,7 @@ public class DockerImage {
 
     private String waitForCid(CommandBuilder docker, File cidFile, File logfile, Process p) throws InterruptedException, IOException {
         for (int i = 0; i < 10; i++) {
-            Thread.sleep(1000);
+            Thread.sleep(500);
 
             String cid = FileUtils.readFileToString(cidFile);
             if (cid != null && cid.length() != 0) return cid;

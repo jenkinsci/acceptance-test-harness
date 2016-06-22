@@ -47,10 +47,31 @@ public class DockerContainerHolder<T extends DockerContainer> implements Provide
             Class<T> fixture = (Class<T>) type.getRawType();
             File buildlog = diag.touch("docker-" + fixture.getSimpleName() + ".build.log");
             File runlog = diag.touch("docker-" + fixture.getSimpleName() + ".run.log");
-            try {
-                container = docker.build(fixture, buildlog).start(fixture).withPortOffset(portOffset).withLog(runlog).start();
-            } catch (InterruptedException | IOException e) {
-                throw new Error("Failed to start container " + fixture.getName(), e);
+            Exception launchException = null;
+            boolean keepTrying = true;
+            int i = 0;
+            for (; i < 5 && keepTrying; i++) {
+                try {
+                    container = docker.build(fixture, buildlog).start(fixture).withPortOffset(portOffset).withLog(runlog).start();
+                    launchException = null;
+                    break;
+                } catch (InterruptedException | IOException e) {
+                    launchException = e;
+                    // Only keep trying if the error is cidFile related.
+                    if (!e.getMessage().contains("docker didn't leave CID file")) {
+                        keepTrying = false;
+                    }
+                }
+                try {
+                    // If we've got this far, that means there was a failure - sleep for 5 seconds and try again.
+                    Thread.sleep(5000);
+                } catch (InterruptedException e2) {
+                    // Swallow it
+                }
+            }
+
+            if (launchException != null) {
+                throw new Error("Failed to start container after " + i + " tries - " + fixture.getName(), launchException);
             }
         }
         return container;
