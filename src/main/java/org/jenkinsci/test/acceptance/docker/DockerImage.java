@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.docker;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.jenkinsci.utils.process.CommandBuilder;
 
@@ -78,10 +79,7 @@ public class DockerImage {
 
     private <T extends DockerContainer> T start(Starter starter, Class<T> type) throws InterruptedException, IOException {
         CommandBuilder docker = Docker.cmd("run");
-        File cidFile = File.createTempFile("docker", "cid");
-        cidFile.delete();
-        cidFile.deleteOnExit();
-        docker.add("--cidfile="+cidFile);//strange behaviour in some docker version cidfile needs to come before
+        docker.add("-d");
         for (int p : starter.ports) {
             docker.add("-p", starter.getPortMapping(p));
         }
@@ -91,45 +89,56 @@ public class DockerImage {
         docker.add(starter.args);
 
         File logfile = starter.log;
-        if (logfile == null) {
-            logfile = new File(cidFile + ".log");
-        }
 
-        System.out.printf("Launching Docker container `%s`: logfile is at %s\n", docker.toString(), logfile);
+        System.out.printf("Launching Docker container `%s`: logfile will be at %s\n", docker.toString(), logfile);
 
         Process p = docker.build()
+                .redirectInput(new File(SystemUtils.IS_OS_WINDOWS ? "NUL": "/dev/null"))
+                .redirectErrorStream(true)
+                .start();
+
+
+        String cid = waitForCid(docker, p);
+
+        Process logProcess = Docker.cmd("logs")
+                .add("-f")
+                .add(cid)
+                .build()
                 .redirectInput(new File(SystemUtils.IS_OS_WINDOWS ? "NUL": "/dev/null"))
                 .redirectErrorStream(true)
                 .redirectOutput(logfile)
                 .start();
 
-        String cid = waitForCid(docker, cidFile, logfile, p);
-
         try {
             T t = type.newInstance();
-            t.init(cid, p, logfile);
+            t.init(cid, logProcess, logfile);
             return t;
         } catch (ReflectiveOperationException e) {
             throw new Error(e);
         }
     }
 
-    private String waitForCid(CommandBuilder docker, File cidFile, File logfile, Process p) throws InterruptedException, IOException {
+    private String waitForCid(CommandBuilder docker, Process p) throws InterruptedException, IOException {
         for (int i = 0; i < 10; i++) {
             Thread.sleep(500);
 
-            String cid = FileUtils.readFileToString(cidFile);
-            if (cid != null && cid.length() != 0) return cid;
+            String output = IOUtils.toString(p.getInputStream());
 
             try {
-                p.exitValue();
-                throw new IOException("docker died unexpectedly: "+docker+"\n"+ FileUtils.readFileToString(logfile));
+                if (p.exitValue() != 0) {
+                    throw new IOException("docker died unexpectedly: " + docker + "\n" + output);
+                }
             } catch (IllegalThreadStateException e) {
-                //Docker is still running okay.
+                // Docker is still launching, so we move on.
             }
+
+            if (output != null && output.length() != 0) {
+                return output.trim();
+            }
+
         }
 
-        throw new IOException("docker didn't leave CID file yet still running. Huh?: "+docker+"\n"+FileUtils.readFileToString(logfile));
+        throw new IOException("docker didn't leave CID file yet still running. Huh?: "+docker+"\n"+IOUtils.toString(p.getInputStream()));
     }
 
     /**
