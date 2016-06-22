@@ -184,8 +184,7 @@ public class Control extends CapybaraPortingLayerImpl {
      * @param type
      */
     public void selectDropdownMenuAlt(Class type) {
-        click();
-        findCaption(type,findDropDownMenuItemBySelector).click();
+        findCaption(type,findDropDownMenuItemBySelector);
         elasticSleep(1000);
     }
 
