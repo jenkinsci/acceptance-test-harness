@@ -138,7 +138,7 @@ public class DockerImage {
 
         }
 
-        throw new IOException("docker didn't leave CID file yet still running. Huh?: "+docker+"\n"+IOUtils.toString(p.getInputStream()));
+        throw new IOException("docker didn't output a container id, yet is still running. Huh?: "+docker+"\n"+IOUtils.toString(p.getInputStream()));
     }
 
     /**
