@@ -11,7 +11,7 @@ import org.kohsuke.randname.RandomNameGenerator
 class AddUserPage extends Page {
 
     static url = "securityRealm/addUser"
-    static at = { title == "Create User [Jenkins]" }
+    static at = { $("form", action: endsWith("createAccountByAdmin")).size() == 1 }
     static content = {
         username { $("input[path='/username']") }
         password { $("input[path='/password1']") }
