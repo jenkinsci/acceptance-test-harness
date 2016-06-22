@@ -254,25 +254,6 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
         return all.get(0);
     }
 
-    /**
-     * Works like  {@link #getElement(org.openqa.selenium.By)} but it waits some time for it to exist
-     *
-     * @param selector The selector for the element to get
-     * @param timeoutSec The maximun time to wait for the element to appear in seconds
-     * @return The finded element or null if not found in the specified time
-     */
-    public WebElement waitAndGetElement(By selector, int timeoutSec) {
-        WebElement element = getElement(selector);
-        if(element != null) {
-            return element;
-        }
-        try {
-            return waitFor(selector, timeoutSec);
-        } catch (Exception ex) {
-            return null;
-        }
-    }
-
     @Override
     public void fillIn(String formFieldName, Object value) {
         WebElement e = find(By.name(formFieldName));
