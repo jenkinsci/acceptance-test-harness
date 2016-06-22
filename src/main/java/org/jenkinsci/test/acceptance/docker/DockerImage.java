@@ -119,23 +119,16 @@ public class DockerImage {
     }
 
     private String waitForCid(CommandBuilder docker, Process p) throws InterruptedException, IOException {
-        for (int i = 0; i < 10; i++) {
-            Thread.sleep(500);
+        p.waitFor();
 
-            String output = IOUtils.toString(p.getInputStream());
+        String output = IOUtils.toString(p.getInputStream());
 
-            try {
-                if (p.exitValue() != 0) {
-                    throw new IOException("docker died unexpectedly: " + docker + "\n" + output);
-                }
-            } catch (IllegalThreadStateException e) {
-                // Docker is still launching, so we move on.
-            }
+        if (p.exitValue() != 0) {
+            throw new IOException("docker died unexpectedly: " + docker + "\n" + output);
+        }
 
-            if (output != null && output.length() != 0) {
-                return output.trim();
-            }
-
+        if (output != null && output.length() != 0) {
+            return output.trim();
         }
 
         throw new IOException("docker didn't output a container id, yet is still running. Huh?: "+docker+"\n"+IOUtils.toString(p.getInputStream()));
