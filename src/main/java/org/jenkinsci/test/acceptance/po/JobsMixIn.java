@@ -35,7 +35,11 @@ public class JobsMixIn extends MixIn {
             }
         }).click();
 
+        //Sometimes we need to give some time to ok button to become enabled
         waitTillEnabledAndClick("OK", 10, TimeUnit.SECONDS);
+
+        //sometimes job creation is not fast enough, so make sure it's finished before continue
+        waitFor(by.name("config"));
 
         final T j = get(type, name);
 
