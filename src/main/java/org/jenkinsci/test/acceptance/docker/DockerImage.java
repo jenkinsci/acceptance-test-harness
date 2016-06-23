@@ -119,11 +119,10 @@ public class DockerImage {
     }
 
     private String waitForCid(CommandBuilder docker, Process p) throws InterruptedException, IOException {
-        p.waitFor();
 
         String output = IOUtils.toString(p.getInputStream());
 
-        if (p.exitValue() != 0) {
+        if (p.waitFor() != 0) {
             throw new IOException("docker died unexpectedly: " + docker + "\n" + output);
         }
 

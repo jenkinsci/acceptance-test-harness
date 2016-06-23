@@ -74,14 +74,15 @@ public class Docker {
     public boolean isContainerRunning(String container) throws IOException, InterruptedException {
         ProcessBuilder pBuilder = cmd("ps").add("-q", "--filter", "\"id=" + container + '"').build();
         Process psProcess = pBuilder.start();
-        psProcess.waitFor();
-        if (psProcess.exitValue() == 0) {
-            String psOutput = IOUtils.toString(psProcess.getInputStream());
-            if (psOutput.contains(container)) {
-                return true;
-            }
-        }
 
+        String psOutput = IOUtils.toString(psProcess.getInputStream());
+        int pExit = psProcess.waitFor();
+        if (pExit == 0) {
+            return psOutput.contains(container);
+        }
+        // docker command errored - and it does not do this if there is no match.
+        System.err.println("docker ps failed with code: " + pExit + 
+                          (psOutput != null ? " and output: " + psOutput : " and provided no output"));
         return false;
     }
 
