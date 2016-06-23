@@ -56,7 +56,7 @@ public class MatrixAuthPluginTest extends AbstractJUnitTest {
         jenkins.login().doLogin("bob");
 
         // wait for main panel to appear to make sure page is rendered
-        waitFor(by.id("main-panel"), 3);
+        waitFor(by.id("main-panel"), 10);
 
         assertNull(getElement(by.href("job/"+j.name+"/")));
 
@@ -64,7 +64,7 @@ public class MatrixAuthPluginTest extends AbstractJUnitTest {
         jenkins.login().doLogin("alice");
 
         // wait for main panel to appear to make sure page is rendered
-        waitFor(by.id("main-panel"), 3);
+        waitFor(by.id("main-panel"), 10);
 
         assertNotNull(getElement(by.href("job/"+j.name+"/")));
 
@@ -102,7 +102,7 @@ public class MatrixAuthPluginTest extends AbstractJUnitTest {
         jenkins.login().doLogin("bob");
 
         // wait for main panel to appear to make sure page is rendered
-        waitFor(by.id("main-panel"), 3);
+        waitFor(by.id("main-panel"), 10);
 
         // check that the project is visible
         assertNull(getElement(by.href("job/"+j.name+"/")));
@@ -124,7 +124,7 @@ public class MatrixAuthPluginTest extends AbstractJUnitTest {
         jenkins.login().doLogin("bob");
 
         // wait for main panel to appear to make sure page is rendered
-        waitFor(by.id("main-panel"), 3);
+        waitFor(by.id("main-panel"), 10);
 
         // Check that project now is visible
         assertTrue("The list of jobs should be bigger than zero", all(by.href("job/"+j.name+"/")).size() > 0);
