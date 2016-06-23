@@ -55,16 +55,16 @@ public class MatrixAuthPluginTest extends AbstractJUnitTest {
         // if we login as Bob, he shouldn't see the job
         jenkins.login().doLogin("bob");
 
-        //wait for main panel to appear to make sure page is rendered
-        waitFor(by.id("main-panel"));
+        // wait for main panel to appear to make sure page is rendered
+        waitFor(by.id("main-panel"), 3);
 
         assertNull(getElement(by.href("job/"+j.name+"/")));
 
         // contorl assertion: alice shoudl see the link
         jenkins.login().doLogin("alice");
 
-        //wait for main panel to appear to make sure page is rendered
-        waitFor(by.id("main-panel"));
+        // wait for main panel to appear to make sure page is rendered
+        waitFor(by.id("main-panel"), 3);
 
         assertNotNull(getElement(by.href("job/"+j.name+"/")));
 
@@ -101,10 +101,10 @@ public class MatrixAuthPluginTest extends AbstractJUnitTest {
         // bob shouldn't be able to see it without adding a permission for him
         jenkins.login().doLogin("bob");
 
-        //wait for main panel to appear to make sure page is rendered
-        waitFor(by.id("main-panel"));
+        // wait for main panel to appear to make sure page is rendered
+        waitFor(by.id("main-panel"), 3);
 
-        //check that the project is visible
+        // check that the project is visible
         assertNull(getElement(by.href("job/"+j.name+"/")));
 
 
@@ -123,10 +123,10 @@ public class MatrixAuthPluginTest extends AbstractJUnitTest {
         // bob should see this job
         jenkins.login().doLogin("bob");
 
-        //wait for project status table to appear to make sure page is rendered
-        waitFor(by.id("main-panel"));
+        // wait for main panel to appear to make sure page is rendered
+        waitFor(by.id("main-panel"), 3);
 
-        //Check that project now is visible
+        // Check that project now is visible
         assertTrue("The list of jobs should be bigger than zero", all(by.href("job/"+j.name+"/")).size() > 0);
     }
 
