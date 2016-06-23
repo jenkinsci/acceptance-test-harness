@@ -3,6 +3,7 @@ package org.jenkinsci.test.acceptance.docker;
 import com.google.inject.Inject;
 import hudson.remoting.Which;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.jenkinsci.test.acceptance.utils.SHA1Sum;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.jvnet.hudson.annotation_indexer.Index;
@@ -62,6 +63,27 @@ public class Docker {
         } catch (InterruptedException | IOException e) {
             return false;
         }
+    }
+
+    /**
+     * Checks if a given container is currently running.
+     *
+     * @param container Container id
+     * @return false if the container is not running, true otherwise
+     */
+    public boolean isContainerRunning(String container) throws IOException, InterruptedException {
+        ProcessBuilder pBuilder = cmd("ps").add("-q", "--filter", "\"id=" + container + '"').build();
+        Process psProcess = pBuilder.start();
+
+        String psOutput = IOUtils.toString(psProcess.getInputStream());
+        int pExit = psProcess.waitFor();
+        if (pExit == 0) {
+            return psOutput.contains(container);
+        }
+        // docker command errored - and it does not do this if there is no match.
+        System.err.println("docker ps failed with code: " + pExit + 
+                          (psOutput != null ? " and output: " + psOutput : " and provided no output"));
+        return false;
     }
 
     /**

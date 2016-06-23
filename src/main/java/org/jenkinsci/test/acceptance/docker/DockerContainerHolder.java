@@ -50,7 +50,7 @@ public class DockerContainerHolder<T extends DockerContainer> implements Provide
             try {
                 container = docker.build(fixture, buildlog).start(fixture).withPortOffset(portOffset).withLog(runlog).start();
             } catch (InterruptedException | IOException e) {
-                throw new Error("Failed to start container " + fixture.getName(), e);
+                throw new Error("Failed to start container - " + fixture.getName(), e);
             }
         }
         return container;
