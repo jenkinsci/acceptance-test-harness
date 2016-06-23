@@ -123,7 +123,8 @@ public class DockerImage {
         String output = IOUtils.toString(p.getInputStream());
 
         if (p.waitFor() != 0) {
-            throw new IOException("docker died unexpectedly: " + docker + "\n" + output);
+            throw new IOException("docker died unexpectedly with return code " + p.exitValue() + 
+                                   " : " + docker + "\n" + output);
         }
 
         if (output != null && output.length() != 0) {
