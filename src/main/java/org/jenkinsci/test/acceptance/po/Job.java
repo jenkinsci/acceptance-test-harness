@@ -274,6 +274,7 @@ public class Job extends TopLevelItem {
     }
 
     public Build scheduleBuild(Map<String, ?> params) {
+        visit("");
         int nb = getJson().get("nextBuildNumber").intValue();
         if (parameters.isEmpty()) {
             clickLink("Build Now");
