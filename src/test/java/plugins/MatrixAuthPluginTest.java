@@ -47,28 +47,20 @@ public class MatrixAuthPluginTest extends AbstractJUnitTest {
         sc.save();
 
         jenkins.login().doLogin("alice");
-
         FreeStyleJob j = jenkins.jobs.create();
-
         j.save();
+        jenkins.logout();
 
         // if we login as Bob, he shouldn't see the job
         jenkins.login().doLogin("bob");
+        driver.get(jenkins.getCurrentUrl() + "job/" + j.name + "/");
+        assertTrue(driver.getTitle().contains("404"));
+        jenkins.logout();
 
-        // wait for main panel to appear to make sure page is rendered
-        waitFor(by.id("main-panel"), 10);
-
-        assertNull(getElement(by.href("job/"+j.name+"/")));
-
-        // contorl assertion: alice shoudl see the link
+        // control assertion: alice should see the job
         jenkins.login().doLogin("alice");
-
-        // wait for main panel to appear to make sure page is rendered
-        waitFor(by.id("main-panel"), 10);
-
-        assertNotNull(getElement(by.href("job/"+j.name+"/")));
-
-        // TODO: variant of href that takes laxed match
+        driver.get(jenkins.getCurrentUrl() + "job/" + j.name + "/");
+        assertTrue(driver.getTitle().contains(j.name));
     }
 
     /**
