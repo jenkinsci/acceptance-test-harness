@@ -85,6 +85,27 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
         e.click();
     }
 
+   /**
+    * Waits till the specified button is enabled and clicks it
+    *
+    * @param caption The button's text
+    * @param timeout The time to wait for the button to become enabled, in seconds
+    */
+    public void waitTillEnabledAndClick(final String caption, int timeout, TimeUnit timeoutTimeUnit)  {
+        waitFor().withTimeout(timeout, timeoutTimeUnit)
+                .until(new Callable<Object>() {
+                    @Override
+                    public Object call() throws Exception {
+                        WebElement e = find(by.button(caption));
+                        if (e.isEnabled()) {
+                            e.click();
+                            return true;
+                        }
+                        return false;
+                    }
+                });
+    }
+
     /**
      * Select radio button by its name, id, or label text.
      */
