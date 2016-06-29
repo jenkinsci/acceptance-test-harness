@@ -133,7 +133,12 @@ public class Slave extends Node {
 
     public void delete() {
         open();
-        clickLink("Delete Slave");
+        try {
+            clickLink("Delete Agent");
+        } catch (NoSuchElementException ex) {
+            clickLink("Delete Slave");
+        }
+
         clickButton("Yes");
     }
 
