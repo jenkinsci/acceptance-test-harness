@@ -84,7 +84,13 @@ public class UpdateCenterMetadata {
     private void transitiveDependenciesOf(Jenkins jenkins, PluginMetadata p, String v, List<PluginMetadata> result) {
         for (Dependency d : p.getDependencies()) {
             if (d.optional || !shouldBeIncluded(jenkins, d)) continue;
-            transitiveDependenciesOf(jenkins, plugins.get(d.name), d.version, result);
+            PluginMetadata depMetaData = plugins.get(d.name);
+            if (depMetaData==null) {
+                throw new UnableToResolveDependencies(
+                    String.format("Unable to install dependency '%s' for '%s': plugin not found", depMetaData, p)
+                );
+            }
+            transitiveDependenciesOf(jenkins, depMetaData, d.version, result);
         }
 
         if (!result.contains(p)) {
