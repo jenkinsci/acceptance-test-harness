@@ -57,6 +57,7 @@ import org.jvnet.hudson.test.Issue;
 
 import com.google.inject.Inject;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
 @WithPlugins("openstack-cloud")
@@ -204,7 +205,7 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
         job.save();
 
         Build build = job.scheduleBuild().waitUntilFinished(PROVISIONING_TIMEOUT).shouldSucceed();
-        waitFor(build.getNode(), pageObjectDoesNotExist(), 60);
+        assertTrue(build.getNode().isTemporarillyOffline());
     }
 
     @Test

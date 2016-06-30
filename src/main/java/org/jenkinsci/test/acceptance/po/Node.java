@@ -67,4 +67,8 @@ public abstract class Node extends ContainerPageObject {
     public BuildHistory getBuildHistory() {
         return new BuildHistory(this);
     }
+
+    public boolean isTemporarillyOffline() {
+        return getJson().get("temporarilyOffline").asBoolean();
+    }
 }
