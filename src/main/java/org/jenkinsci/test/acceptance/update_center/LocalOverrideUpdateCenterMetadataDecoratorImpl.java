@@ -36,7 +36,7 @@ public class LocalOverrideUpdateCenterMetadataDecoratorImpl implements UpdateCen
                         Version ucVersion = versionScheme.parseVersion(artifact.getVersion());
                         NodeList versions = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(metadata).getElementsByTagName("version");
                         for (int i = 0; i < versions.getLength(); i++) {
-                            String version = ((Element) versions.item(i)).getTextContent();
+                            String version = versions.item(i).getTextContent();
                             if (version.endsWith("-SNAPSHOT") && versionScheme.parseVersion(version).compareTo(ucVersion) > 0) {
                                 File hpi = new File(new File(artifactDir, version), artifact.getArtifactId() + "-" + version + ".hpi");
                                 if (hpi.isFile()) {
@@ -57,7 +57,9 @@ public class LocalOverrideUpdateCenterMetadataDecoratorImpl implements UpdateCen
             if (name.endsWith(".jpi")) {
                 name = name.replace(".jpi", "");
                 if (ucm.plugins.get(name) == null) throw new IllegalArgumentException("Plugin does not exists in update center: " + name);
-                PluginMetadata m = PluginMetadata.LocalOverride.create(new File(e.getValue()));
+                File file = new File(e.getValue());
+                if (!file.exists()) throw new IllegalArgumentException("Plugin file for " + name + " does not exist: " + file.getAbsolutePath());
+                PluginMetadata m = PluginMetadata.LocalOverride.create(file);
                 ucm.plugins.put(m.getName(), m);
             }
         }
