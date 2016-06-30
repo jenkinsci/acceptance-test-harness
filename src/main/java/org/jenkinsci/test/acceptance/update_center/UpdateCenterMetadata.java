@@ -85,7 +85,7 @@ public class UpdateCenterMetadata {
         for (Dependency d : p.getDependencies()) {
             if (d.optional || !shouldBeIncluded(jenkins, d)) continue;
             PluginMetadata depMetaData = plugins.get(d.name);
-            if (depMetaData==null) {
+            if (depMetaData == null) {
                 throw new UnableToResolveDependencies(
                     String.format("Unable to install dependency '%s' for '%s': plugin not found", depMetaData, p)
                 );
