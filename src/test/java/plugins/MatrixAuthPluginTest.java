@@ -13,8 +13,6 @@ import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
 import org.junit.Test;
 
 import static org.jenkinsci.test.acceptance.plugins.matrix_auth.MatrixRow.*;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 
@@ -66,18 +64,14 @@ public class MatrixAuthPluginTest extends AbstractJUnitTest {
         jenkins.login().doLogin("bob");
 
         // check for job's existence
-        driver.get(controller.getUrl() + "job/" + j.name + "/");
-
-        assertFalse(driver.getTitle().contains(j.name));
+        assertFalse(j.open().getTitle().contains(j.name));
 
         jenkins.logout();
 
         // control assertion: alice should see the link
         jenkins.login().doLogin("alice");
 
-        driver.get(controller.getUrl() + ("job/" + j.name + "/"));
-
-        assertTrue(driver.getTitle().contains(j.name));
+        assertTrue(j.open().getTitle().contains(j.name));
     }
 
     /**
@@ -113,9 +107,7 @@ public class MatrixAuthPluginTest extends AbstractJUnitTest {
         jenkins.login().doLogin("bob");
 
         // check for job's existence
-        driver.get(controller.getUrl() + ("job/" + j.name + "/"));
-
-        assertFalse(driver.getTitle().contains(j.name));
+        assertFalse(j.open().getTitle().contains(j.name));
 
         jenkins.logout();
 
@@ -135,9 +127,6 @@ public class MatrixAuthPluginTest extends AbstractJUnitTest {
         // bob should see this job
         jenkins.login().doLogin("bob");
 
-        // check for job's existence
-        driver.get(controller.getUrl() + ("job/" + j.name + "/"));
-
-        assertTrue(driver.getTitle().contains(j.name));
+        assertTrue(j.open().getTitle().contains(j.name));
     }
 }
