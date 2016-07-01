@@ -11,6 +11,7 @@ import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.publish_over.*;
 import org.jenkinsci.test.acceptance.plugins.publish_over.FtpGlobalConfig.FtpSite;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
 /**

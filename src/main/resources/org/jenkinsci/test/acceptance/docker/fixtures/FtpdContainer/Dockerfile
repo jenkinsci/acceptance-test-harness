@@ -2,7 +2,7 @@
 # Runs sshd and allow the 'test' user to login
 #
 
-FROM ubuntu
+FROM ubuntu:trusty
 
 # install FTP
 RUN apt-get update && apt-get install -y vsftpd
@@ -19,10 +19,11 @@ RUN echo "rsa_cert_file=/etc/ssl/private/vsftpd.pem" >> /etc/myftp.conf
 RUN echo "pasv_enable=YES" >> /etc/myftp.conf
 RUN echo "pasv_min_port=7050" >> /etc/myftp.conf
 RUN echo "pasv_max_port=7055" >> /etc/myftp.conf
-# To enable passv mode through NAT (for remote docker) we need to set the 
+# To enable passv mode through NAT (for remote docker) we need to set the
 # passv_address to the address that docker will use to port forward
-# RUN echo "pasv_address=@@DOCKER_HOST@@" >> /etc/myftpd.conf
+RUN echo "pasv_address=localhost" >> /etc/myftpd.conf
 # however DockerCOntainer has no way to specify the port offset so this will just not work..
+# unless the container and host ports match exactly
 RUN mkdir -p /var/run/vsftpd/empty
 
 # create a test user
@@ -33,4 +34,3 @@ RUN useradd test -d /home/test -s /bin/bash && \
 
 # run VSFTPD
 CMD /usr/sbin/vsftpd /etc/myftp.conf
-
