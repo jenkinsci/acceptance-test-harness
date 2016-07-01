@@ -20,8 +20,7 @@ public class TriggerCallBuildStep extends AbstractStep implements BuildStep {
     }
 
     public BuildTriggerConfig getBuildTriggerConfig(int index) {
-        WebElement e = self().findElements(by.name("configs")).get(index);
-        return wrap(e);
+        return new BuildTriggerConfig(this, getPath("configs", index));
     }
 
     /**
@@ -30,14 +29,11 @@ public class TriggerCallBuildStep extends AbstractStep implements BuildStep {
      * Note that newly added trigger has one entry in there by default.
      */
     public BuildTriggerConfig addTriggerConfig() {
-        find(by.button("Add trigger...")).click();
-
-        List<WebElement> all = self().findElements(by.name("configs"));
-        return wrap(all.get(all.size() - 1));
-    }
-
-    private BuildTriggerConfig wrap(WebElement e) {
-        return new BuildTriggerConfig(this,
-                e.getAttribute("path").substring(getPath().length() + 1));
+        String path = createPageArea("configs", new Runnable() {
+            @Override public void run() {
+                clickButton("Add trigger...");
+            }
+        });
+        return new BuildTriggerConfig(this, path);
     }
 }

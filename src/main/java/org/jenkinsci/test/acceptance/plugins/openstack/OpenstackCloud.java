@@ -23,11 +23,19 @@
  */
 package org.jenkinsci.test.acceptance.plugins.openstack;
 
+import com.google.common.base.Function;
+import org.jenkinsci.test.acceptance.po.CapybaraPortingLayer;
 import org.jenkinsci.test.acceptance.po.Cloud;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.PageObject;
+import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebElement;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 /**
@@ -84,11 +92,12 @@ public class OpenstackCloud extends Cloud {
     }
 
     public OpenstackSlaveTemplate addSlaveTemplate() {
-        control("repeatable-add").click();
-        elasticSleep(500); // Wait for template to appear
-        final String newPath = last(by.name("templates")).getAttribute("path");
+        String newPath = createPageArea("templates", new Runnable() {
+            @Override public void run() {
+                control("repeatable-add").click();
+            }
+        });
 
-        assert newPath.startsWith(getPath());
         return new OpenstackSlaveTemplate(this, newPath);
     }
 }

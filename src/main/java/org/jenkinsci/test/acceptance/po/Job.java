@@ -120,14 +120,14 @@ public class Job extends TopLevelItem {
 
     }
 
-    private <T extends Step> T addStep(Class<T> type, String section) {
+    private <T extends Step> T addStep(final Class<T> type, final String section) {
         ensureConfigPage();
 
-        control(by.path("/hetero-list-add[%s]", section)).selectDropdownMenu(type);
-        elasticSleep(1000); // it takes some time until the element is visible
-        WebElement last = last(by.xpath("//div[@name='%s']", section));
-        String path = last.getAttribute("path");
-
+        String path = createPageArea('/' + section, new Runnable() {
+            @Override public void run() {
+                control(by.path("/hetero-list-add[%s]", section)).selectDropdownMenu(type);
+            }
+        });
         return newInstance(type, this, path);
     }
 

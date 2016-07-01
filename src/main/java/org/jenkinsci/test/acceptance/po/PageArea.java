@@ -1,7 +1,10 @@
 package org.jenkinsci.test.acceptance.po;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
+
+import javax.annotation.Nonnull;
 
 /**
  * @author christian.fritz
@@ -36,6 +39,29 @@ public interface PageArea extends CapybaraPortingLayer, Control.Owner {
     WebElement self();
 
     String getPath();
+    String getPath(String rel);
+    String getPath(String rel, int index);
 
     PageObject getPage();
+
+    /**
+     * Capture path attribute of newly created form chunk upon invoking action.
+     *
+     * Consider "Add" button in page area with path "/foo" that is supposed to create new page area with path "/foo/bar"
+     * or "/foo/bar[n]". There are several problems with the straightforward approach:
+     *  - Created area may or may not be the first one of its kind so figuring the "path" is nontrivial.
+     *  - The area may can take a while to render so waiting is needed.
+     *  - Even after the markup appears, it can take a while for "path" attribute is added.
+     *
+     * This method properly wait until the new path is known. To be used as:
+     *
+     *  String barPath = fooArea.createPageArea("bar", () -> control("add-button").click());
+     *  new FooBarArea(fooArea, barPath);
+     *
+     * @param name Name of the surrounding div which will the next segment in path. Given the area is "/builder" and we are
+     *             about to construct /builder/shell[3], the relative prefix is "shell".
+     * @param action An action that triggers the page area creation. Clicking the button, etc.
+     * @return The surrounding path of the area, exception thrown when not able to find out.
+     */
+    @Nonnull String createPageArea(String name, Runnable action) throws TimeoutException;
 }

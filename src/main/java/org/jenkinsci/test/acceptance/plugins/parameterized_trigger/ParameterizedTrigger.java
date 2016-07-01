@@ -19,8 +19,7 @@ public class ParameterizedTrigger extends AbstractStep implements PostBuildStep 
     }
 
     public TriggerConfig getTriggerConfig(int index) {
-        WebElement e = self().findElements(by.name("configs")).get(index);
-        return wrap(e);
+        return new TriggerConfig(this, getPath("configs", index));
     }
 
     /**
@@ -29,13 +28,11 @@ public class ParameterizedTrigger extends AbstractStep implements PostBuildStep 
      * Note that newly added trigger has one entry in there by default.
      */
     public TriggerConfig addTriggerConfig() {
-        find(by.button("Add trigger...")).click();
-
-        List<WebElement> all = self().findElements(by.name("configs"));
-        return wrap(all.get(all.size()-1));
-    }
-
-    private TriggerConfig wrap(WebElement e) {
-        return new TriggerConfig(this,e.getAttribute("path").substring(getPath().length()+1));
+        String path = createPageArea("configs", new Runnable() {
+            @Override public void run() {
+                clickButton("Add trigger...");
+            }
+        });
+        return new TriggerConfig(this, path);
     }
 }
