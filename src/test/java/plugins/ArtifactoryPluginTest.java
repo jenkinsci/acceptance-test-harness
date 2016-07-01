@@ -59,7 +59,7 @@ public class ArtifactoryPluginTest extends AbstractJUnitTest {
 
         server.url.set("http://localhost:4898/blabla");
         server.testConnectionButton.click();
-        waitFor(driver, hasContent("Connection to http://localhost:4898 refused"), 10);
+        waitFor(driver, hasContent("Error occurred while requesting version information: Connection refused"), 10);
     }
 
     @Test @WithPlugins("maven-plugin")
