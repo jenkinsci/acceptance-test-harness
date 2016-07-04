@@ -1,6 +1,5 @@
 package plugins;
 
-import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.matrix_auth.MatrixAuthorizationStrategy;
@@ -16,17 +15,11 @@ import static org.jenkinsci.test.acceptance.plugins.matrix_auth.MatrixRow.*;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 
-import javax.inject.Inject;
-
 /**
  * @author Kohsuke Kawaguchi
  */
 @WithPlugins({"matrix-auth","mock-security-realm"})
 public class MatrixAuthPluginTest extends AbstractJUnitTest {
-
-    @Inject
-    private JenkinsController controller;
-
     /**
      * Test scenario:
      *
