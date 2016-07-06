@@ -11,6 +11,8 @@ import javax.inject.Named;
 import javax.inject.Provider;
 import java.io.File;
 import java.io.IOException;
+import org.jenkinsci.test.acceptance.docker.DockerImage.Starter;
+import org.jenkinsci.test.acceptance.docker.fixtures.FtpdContainer;
 
 /**
  * Inject this object to automate the cleanup of a running container at the end of the test case.
@@ -36,7 +38,7 @@ public class DockerContainerHolder<T extends DockerContainer> implements Provide
      */
     @Inject(optional = true)
     @Named("dockerPortOffset")
-    private int portOffset = 0;
+    private Integer portOffset;
 
     /**
      * Lazily starts a container and returns the instance.
@@ -48,7 +50,11 @@ public class DockerContainerHolder<T extends DockerContainer> implements Provide
             File buildlog = diag.touch("docker-" + fixture.getSimpleName() + ".build.log");
             File runlog = diag.touch("docker-" + fixture.getSimpleName() + ".run.log");
             try {
-                container = docker.build(fixture, buildlog).start(fixture).withPortOffset(portOffset).withLog(runlog).start();
+                Starter<T> containerStarter = docker.build(fixture, buildlog).start(fixture);
+                if (portOffset != null) {
+                    containerStarter.withPortOffset(portOffset);
+                }
+                container = containerStarter.withLog(runlog).start();
             } catch (InterruptedException | IOException e) {
                 throw new Error("Failed to start container - " + fixture.getName(), e);
             }
@@ -61,7 +67,7 @@ public class DockerContainerHolder<T extends DockerContainer> implements Provide
      */
     @Override
     public void close() throws IOException {
-        if (container!=null) {
+        if (container != null) {
             container.close();
             container = null;
         }
