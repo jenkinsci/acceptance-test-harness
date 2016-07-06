@@ -24,6 +24,7 @@ import org.junit.experimental.categories.Category;
 
 import java.io.IOException;
 import java.util.concurrent.Callable;
+import java.util.regex.Pattern;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -59,7 +60,7 @@ public class ArtifactoryPluginTest extends AbstractJUnitTest {
 
         server.url.set("http://localhost:4898/blabla");
         server.testConnectionButton.click();
-        waitFor(driver, hasContent("Error occurred while requesting version information: Connection refused"), 10);
+        waitFor(driver, hasContent(Pattern.compile("Error occurred while requesting version information: Connection( to http://localhost:4898)* refused")), 10);
     }
 
     @Test @WithPlugins("maven-plugin")
