@@ -39,7 +39,9 @@ public class AntInstallation extends ToolInstallation {
         super(context, path);
     }
 
-    public void useNative() {
-        installedIn(fakeHome("ant", "ANT_HOME"));
+    public String useNative() {
+        String antHome = fakeHome("ant", "ANT_HOME");
+        installedIn(antHome);
+        return antHome;
     }
 }
