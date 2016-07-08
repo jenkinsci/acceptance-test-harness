@@ -33,7 +33,7 @@ public class FreeStyleMultiBranchJob extends Job {
         ensureConfigPage();
 
         control(by.path("/projectFactory/hetero-list-add[%s]", section)).selectDropdownMenu(type);
-        elasticSleep(1000); // it takes some time until the element is visible
+        waitFor(by.xpath("//div[@name='%s']", section), 3); // it takes some time until the element is visible
         WebElement last = last(by.xpath("//div[@name='%s']", section));
         String path = last.getAttribute("path");
 
