@@ -274,15 +274,12 @@ public class Job extends TopLevelItem {
     }
 
     public Build scheduleBuild(Map<String, ?> params) {
+        open();
         int nb = getJson().get("nextBuildNumber").intValue();
-        visit(getBuildUrl());
-
-        // if the security is enabled, GET request above will fail
-        if (driver.getTitle().contains("Form post required")) {
-            find(by.button("Proceed")).click();
-        }
-
-        if (!parameters.isEmpty()) {
+        if (parameters.isEmpty()) {
+            clickLink("Build Now");
+        } else {
+            clickLink("Build with Parameters");
             for (Parameter def : parameters) {
                 Object v = params.get(def.getName());
                 if (v != null) {
