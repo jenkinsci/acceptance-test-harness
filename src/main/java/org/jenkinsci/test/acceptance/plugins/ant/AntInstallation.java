@@ -24,7 +24,6 @@
 package org.jenkinsci.test.acceptance.plugins.ant;
 
 import org.jenkinsci.test.acceptance.po.Jenkins;
-import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.jenkinsci.test.acceptance.po.ToolInstallation;
 import org.jenkinsci.test.acceptance.po.ToolInstallationPageObject;
 
@@ -40,7 +39,10 @@ public class AntInstallation extends ToolInstallation {
     }
 
     public String useNative() {
-        String antHome = fakeHome("ant", "ANT_HOME");
+        String antHome = System.getenv("ANT_HOME");
+        if (antHome.trim().isEmpty()) {
+            antHome =  fakeHome("ant", "ANT_HOME");
+        }
         installedIn(antHome);
         return antHome;
     }
