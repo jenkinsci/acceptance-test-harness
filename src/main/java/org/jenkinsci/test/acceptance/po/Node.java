@@ -44,6 +44,8 @@ public abstract class Node extends ContainerPageObject {
     public abstract String getName();
 
     public void setExecutors(int n) {
+        // On high Res screens the UI redraws, so best wait for numExecutors to be present
+        waitFor(by.path("/numExecutors"));
         control("/numExecutors").set(n);
     }
 
