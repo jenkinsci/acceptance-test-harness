@@ -78,6 +78,13 @@ public class Jenkins extends Node {
 
         return version = new VersionNumber(text);
     }
+    
+    /**
+     * Tells if Jenkins version under test is 1.X
+     */
+    public boolean isJenkins1X() {
+        return getVersion().isOlderThan(new VersionNumber("2.0"));
+    }
 
     /**
      * Access global configuration page.
