@@ -2,9 +2,7 @@ package org.jenkinsci.test.acceptance.po;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
-import static org.jenkinsci.test.acceptance.po.CapybaraPortingLayer.by;
-
-import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 /**
@@ -71,6 +69,9 @@ public class JobsMixIn extends MixIn {
         if (getJenkins().isJenkins1X()) { 
             // no radio buttons on Jenkins 2.X
             choose("copy");
+        } else {
+            // a bit hacky: send a tab to enable the OK button
+            find(By.name("from")).sendKeys("\t");
         }
         clickButton("OK");
     }
