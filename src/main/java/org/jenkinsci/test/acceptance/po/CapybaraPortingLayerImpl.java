@@ -12,6 +12,7 @@ import org.hamcrest.StringDescription;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.junit.Wait;
 import org.jenkinsci.test.acceptance.utils.ElasticTime;
+import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
@@ -355,6 +356,12 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
         check(find(by.checkbox(locator)));
     }
 
+    @Override
+    public void confirmAlert() {
+        Alert promptAlert = driver.switchTo().alert();
+        promptAlert.accept();
+    }
+    
     /**
      * Thread.sleep that masks exception.
      */
