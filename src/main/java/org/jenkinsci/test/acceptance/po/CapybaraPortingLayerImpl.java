@@ -24,6 +24,8 @@ import org.openqa.selenium.WebElement;
 import com.google.common.base.Joiner;
 import com.google.inject.Injector;
 import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import static java.util.Arrays.*;
 
@@ -357,8 +359,9 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     }
 
     @Override
-    public void confirmAlert() {
-        Alert promptAlert = driver.switchTo().alert();
+    public void confirmAlert(int timeout) {
+        WebDriverWait wait = new WebDriverWait(driver, timeout);
+        Alert promptAlert = wait.until(ExpectedConditions.alertIsPresent());
         promptAlert.accept();
     }
 
