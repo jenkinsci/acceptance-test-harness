@@ -27,6 +27,7 @@ import org.jenkinsci.test.acceptance.controller.LocalController;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.junit.internal.AssumptionViolatedException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.zeroturnaround.zip.ZipUtil;
 
 import com.google.inject.Injector;
@@ -415,8 +416,6 @@ public class Job extends TopLevelItem {
     public void delete() {
         this.open();
         clickLink("Delete Project");
-        // We need to wait a little for the alert to appear
-        elasticSleep(500);
-        confirmAlert();
+        confirmAlert(2);
     }
 }
