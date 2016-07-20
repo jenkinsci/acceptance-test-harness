@@ -361,7 +361,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
         Alert promptAlert = driver.switchTo().alert();
         promptAlert.accept();
     }
-    
+
     /**
      * Thread.sleep that masks exception.
      */
