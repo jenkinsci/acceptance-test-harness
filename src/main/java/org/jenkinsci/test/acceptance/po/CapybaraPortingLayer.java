@@ -134,4 +134,9 @@ public interface CapybaraPortingLayer {
      * Checks the specified checkbox.
      */
     void check(String locator);
+
+    /**
+     *  Confirms an alert
+     */
+    void confirmAlert();
 }
