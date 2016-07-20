@@ -408,4 +408,15 @@ public class Job extends TopLevelItem {
 
         return links;
     }
+
+    /**
+     * Deletes the current job
+     */
+    public void delete() {
+        this.open();
+        clickLink("Delete Project");
+        // We need to wait a little for the alert to appear
+        elasticSleep(500);
+        confirmAlert();
+    }
 }
