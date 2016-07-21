@@ -37,6 +37,15 @@ public @interface DockerFixture {
      * be retried at runtime via {@link DockerContainer#port(int)}.
      */
     int[] ports() default {};
+    
+    /**
+     * Map container ports to host ports exactly.
+     * 
+     * <p>
+     * If true, no random ephemeral ports will be used, but an exact matching of
+     * container and host ports.
+     */
+    boolean matchHostPorts() default false;
 
     /**
      * Ip address to bind to

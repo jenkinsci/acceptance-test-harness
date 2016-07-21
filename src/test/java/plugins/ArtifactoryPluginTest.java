@@ -24,6 +24,7 @@ import org.junit.experimental.categories.Category;
 
 import java.io.IOException;
 import java.util.concurrent.Callable;
+import java.util.regex.Pattern;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -59,7 +60,7 @@ public class ArtifactoryPluginTest extends AbstractJUnitTest {
 
         server.url.set("http://localhost:4898/blabla");
         server.testConnectionButton.click();
-        waitFor(driver, hasContent("Connection to http://localhost:4898 refused"), 10);
+        waitFor(driver, hasContent(Pattern.compile("Error occurred while requesting version information: Connection( to http://localhost:4898)* refused")), 10);
     }
 
     @Test @WithPlugins("maven-plugin")
@@ -92,15 +93,15 @@ public class ArtifactoryPluginTest extends AbstractJUnitTest {
         waitForArtifactory(artifactory);
         configureArtifactory(artifactory);
 
-        GradleInstallation.installGradle(jenkins, "gradle 1.12", "1.12");
+        GradleInstallation.installGradle(jenkins, "gradle 2.0", "2.0");
 
         FreeStyleJob job = jenkins.jobs.create();
         job.copyDir(resource("/artifactory_plugin/quickstart"));
         ArtifactoryGradleConfiguratior gradleConfig = new ArtifactoryGradleConfiguratior(job);
         gradleConfig.refresh();
         GradleStep gradle = job.addBuildStep(GradleStep.class);
-        gradle.name.select("gradle 1.12");
-        gradle.tasks.set("build");
+        gradle.name.select("gradle 2.0");
+        gradle.tasks.set("build"); // gradle.tasks.set("build --stacktrace --debug");
         job.save();
 
         Build build = job.startBuild().shouldSucceed();

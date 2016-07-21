@@ -70,6 +70,8 @@ public class Slave extends Node {
         return new Matcher<Slave>("slave run build in order: %s", Joiner.on(' ').join(jobs)) {
             @Override public boolean matchesSafely(Slave slave) {
                 slave.visit("builds");
+                //Jobs table may take a little to be populated, give it some time
+                slave.elasticSleep(2000);
                 String list = slave.find(by.id("projectStatus")).getText();
 
                 StringBuilder sb = new StringBuilder(".*");

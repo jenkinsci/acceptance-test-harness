@@ -2,8 +2,7 @@ package org.jenkinsci.test.acceptance.po;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
-
-import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 /**
@@ -21,21 +20,11 @@ public class JobsMixIn extends MixIn {
         visit("newJob");
         fillIn("name", name);
 
-        findCaption(type, new Finder<WebElement>() {
-            @Override protected WebElement find(String caption) {
-                try {
-                    // Jenkins 2.0 introduced a new "new item" page, which listed
-                    // the item types differently and did away with the radio buttons.
-                    String normalizedCaption = caption.replace('.', '_');
-                    return outer.find(by.css("li." + normalizedCaption));
-                } catch (NoSuchElementException e) {
-                    // Jenkins 1.x item type selection was by radio button.
-                    return outer.find(by.radioButton(caption));
-                }
-            }
-        }).click();
+        findCaption(type, getFinder()).click();
 
         clickButton("OK");
+        // Sometimes job creation is not fast enough, so make sure it's finished before continue
+        waitFor(by.name("config"), 10);
 
         final T j = get(type, name);
 
@@ -77,7 +66,33 @@ public class JobsMixIn extends MixIn {
         visit("newJob");
         fillIn("name",to);
         fillIn("from",from);
-        choose("copy");
+        if (getJenkins().isJenkins1X()) { 
+            // no radio buttons on Jenkins 2.X
+            choose("copy");
+        } else {
+            // a bit hacky: send a tab to enable the OK button
+            find(By.name("from")).sendKeys("\t");
+        }
         clickButton("OK");
+    }
+    
+    // Jenkins 1.x item type selection was by radio button.
+    final Finder<WebElement> finder1X = new Finder<WebElement>() {
+        @Override protected WebElement find(String caption) {
+            return outer.find(by.radioButton(caption));
+        }
+    };
+    
+    // Jenkins 2.0 introduced a new "new item" page, which listed
+    // the item types differently and did away with the radio buttons.
+    final Finder<WebElement> finder2X = new Finder<WebElement>() {
+        @Override protected WebElement find(String caption) {
+            String normalizedCaption = caption.replace('.', '_');
+            return outer.find(by.css("li." + normalizedCaption));
+        }
+    };
+    
+    private Finder<WebElement> getFinder() {
+        return getJenkins().isJenkins1X() ? finder1X : finder2X;
     }
 }

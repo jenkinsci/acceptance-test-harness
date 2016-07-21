@@ -12,6 +12,7 @@ import org.hamcrest.StringDescription;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.junit.Wait;
 import org.jenkinsci.test.acceptance.utils.ElasticTime;
+import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
@@ -22,6 +23,9 @@ import org.openqa.selenium.WebElement;
 
 import com.google.common.base.Joiner;
 import com.google.inject.Injector;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import static java.util.Arrays.*;
 
@@ -82,7 +86,23 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     @Override
     public void clickButton(String text) {
         WebElement e = find(by.button(text));
-        e.click();
+        /*
+         * YUI sticky buttons present some problems when scroll to them, also if you have a sticky button
+         * you should not need to scroll to use them
+         */
+        boolean isStickyButton = false;
+        WebElement stickyContainer = getElement(by.id("bottom-sticker"));
+        if (stickyContainer != null) {
+            JavascriptExecutor je = (JavascriptExecutor)driver;
+            isStickyButton = (boolean)je.executeScript("return arguments[0].contains(arguments[1])", stickyContainer, e);
+        }
+        if (isStickyButton) {
+            Actions builder = new Actions(driver);
+            builder.moveToElement(e).click(e);
+            builder.perform();
+        } else {
+            e.click();
+        }
     }
 
     /**
@@ -245,9 +265,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
      */
     @Override
     public void check(WebElement e) {
-        if (!e.isSelected()) {
-            e.click();
-        }
+        check(e, true);
     }
 
     /**
@@ -257,6 +275,11 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     public void check(WebElement e, boolean state) {
         if (e.isSelected() != state) {
             e.click();
+        }
+        // It seems like Selenium sometimes has issues when trying to click elements that are out of view.
+        // We use the following javascript as a workaraound if the previous click failed.
+        if (e.isSelected() != state) {
+            executeScript("arguments[0].click();", e);
         }
     }
 
@@ -333,6 +356,13 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     @Override
     public void check(String locator) {
         check(find(by.checkbox(locator)));
+    }
+
+    @Override
+    public void confirmAlert(int timeout) {
+        WebDriverWait wait = new WebDriverWait(driver, timeout);
+        Alert promptAlert = wait.until(ExpectedConditions.alertIsPresent());
+        promptAlert.accept();
     }
 
     /**

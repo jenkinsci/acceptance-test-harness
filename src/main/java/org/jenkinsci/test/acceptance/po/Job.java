@@ -27,6 +27,7 @@ import org.jenkinsci.test.acceptance.controller.LocalController;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.junit.internal.AssumptionViolatedException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.zeroturnaround.zip.ZipUtil;
 
 import com.google.inject.Injector;
@@ -274,15 +275,12 @@ public class Job extends TopLevelItem {
     }
 
     public Build scheduleBuild(Map<String, ?> params) {
+        open();
         int nb = getJson().get("nextBuildNumber").intValue();
-        visit(getBuildUrl());
-
-        // if the security is enabled, GET request above will fail
-        if (driver.getTitle().contains("Form post required")) {
-            find(by.button("Proceed")).click();
-        }
-
-        if (!parameters.isEmpty()) {
+        if (parameters.isEmpty()) {
+            clickLink("Build Now");
+        } else {
+            clickLink("Build with Parameters");
             for (Parameter def : parameters) {
                 Object v = params.get(def.getName());
                 if (v != null) {
@@ -410,5 +408,14 @@ public class Job extends TopLevelItem {
         }
 
         return links;
+    }
+
+    /**
+     * Deletes the current job
+     */
+    public void delete() {
+        this.open();
+        clickLink("Delete Project");
+        confirmAlert(2);
     }
 }
