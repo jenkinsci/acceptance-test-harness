@@ -28,6 +28,13 @@ public abstract class Parameter extends PageAreaImpl {
         return this;
     }
 
+    /**
+     * Sets this objects name property without modifying the UI
+     */
+    void setNameProperty(String name) {
+        this.name = name;
+    }
+
     public Parameter setDescription(String v) {
         control("description").set(v);
         return this;

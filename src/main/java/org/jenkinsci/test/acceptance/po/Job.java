@@ -499,9 +499,7 @@ public class Job extends TopLevelItem {
                     for (String value : captions) {
                         if (elementText.contains(value)) {
                             Parameter param = newInstance(paramClass, Job.this, paramElement.getAttribute("path"));
-                            param.setName(param.control("name").resolve().getAttribute("value"));
-                            param.setDefault(param.control("defaultValue").text());
-                            param.setDescription(param.control("description").text());
+                            param.setNameProperty(param.control("name").resolve().getAttribute("value"));
                             parameters.add(param);
                         }
                     }
