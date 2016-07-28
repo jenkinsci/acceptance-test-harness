@@ -58,6 +58,8 @@ public class CopyJobTest extends AbstractJUnitTest {
         String kxml = driver.getPageSource();
 
         assertThat(jxml, is(kxml));
+        assertTrue(k.getParameters().size() > 0);
         assertTrue(k.getParameters().size() == j.getParameters().size());
+        assertTrue(k.getParameters().get(0).getName().equals(j.getParameters().get(0).getName()));
     }
 }
