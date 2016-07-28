@@ -490,7 +490,7 @@ public class Job extends TopLevelItem {
             fillJobParams(Arrays.asList(paramClasses));
         }
 
-        private void fillJobParams(List<Class<? extends Parameter>> paramClasses) {
+        protected void fillJobParams(List<Class<? extends Parameter>> paramClasses) {
             List<WebElement> paramElements = driver.findElements(by.xpath("//div[starts-with(@path,'/properties/hudson-model-ParametersDefinitionProperty/parameter')]"));
             for (WebElement paramElement : paramElements) {
                 String elementText = paramElement.getText();
