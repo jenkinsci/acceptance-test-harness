@@ -38,6 +38,7 @@ import cucumber.api.DataTable;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.jenkinsci.test.acceptance.Matchers.by;
 
 /**
  * Job Page object superclass.
@@ -46,8 +47,25 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
  * @author Kohsuke Kawaguchi
  */
 public class Job extends TopLevelItem {
-    private JobParameterHelper jobParamHelper = new JobParameterHelper();
     public List<Parameter> getParameters() {
+        if(parameters.isEmpty()) {
+            configure();
+            List<WebElement> paramElements = driver.findElements(by.xpath("//div[starts-with(@path,'/properties/hudson-model-ParametersDefinitionProperty/parameter')]"));
+            for (WebElement paramElement : paramElements) {
+                List<Class<? extends Parameter>> currentParamClasses = new LinkedList<>(Parameter.all());
+                for (Class<? extends Parameter> paramClass : currentParamClasses) {
+                    String[] captions = paramClass.getAnnotation(Describable.class).value();
+                    for (String value : captions) {
+                        if (value.equals(paramElement.getAttribute("descriptorId"))) {
+                            Parameter param = newInstance(paramClass, this, paramElement.getAttribute("path"));
+                            param.setNameProperty(param.control("name").resolve().getAttribute("value"));
+                            parameters.add(param);
+                        }
+                    }
+                }
+            }
+        }
+
         return parameters;
     }
 
@@ -421,91 +439,5 @@ public class Job extends TopLevelItem {
         clickLink("Delete Project");
         confirmAlert(2);
     }
-
-    /**
-     * Loads all existing build parameters of the specified type into this Job object. Useful is this Job has been copied/moved or promoted
-     * @param paramClasses The {@link org.jenkinsci.test.acceptance.po.Parameter} subtypes to load
-     */
-    public void loadExistingBuildParameters(Class<? extends Parameter>... paramClasses) {
-        ensureConfigPage();
-        jobParamHelper.loadJobParams(paramClasses);
-    }
-
-    /**
-     * Loads all existing build parameters of any type inside the scanningPaths into this Job object. Useful is this Job
-     * has been copied/moved or promoted
-     * @param scanningPaths The packages to scan for {@link org.jenkinsci.test.acceptance.po.Parameter} subtypes to load
-     */
-    public void loadExistingBuildParameters(String... scanningPaths) {
-        ensureConfigPage();
-        jobParamHelper.loadJobParams(scanningPaths);
-    }
-
-
-    /**
-     * Helper class to fill the Job`s PO build parameters from the existing ones in the config UI, usefull when a Job
-     * has been copied, moved or promoted.
-     *
-     * Since the number and type of params is variable this class needs to known in advance the types of the parameters
-     * to load (for example {@link org.jenkinsci.test.acceptance.po.StringParameter}) or perform a classpath scan for
-     * {@link org.jenkinsci.test.acceptance.po.Parameter} subtypes before loading them.
-     */
-    protected class JobParameterHelper {
-
-        /**
-         * Scans the given packages for {@link org.jenkinsci.test.acceptance.po.Parameter} subtypes. It only scans for
-         * top level classes, that is no nested classes are included in the scan results.
-         * This implementation does not perform any type of catching of the results, is responsability of the caller
-         * to do that if neccesary.
-         *
-         * @param paths The package names to scan for {@link org.jenkinsci.test.acceptance.po.Parameter} subtypes
-         * @return A list of all the {@link org.jenkinsci.test.acceptance.po.Parameter} subtypes found in the given
-         * packages
-         */
-        public List<Class<? extends Parameter>> scan(String... paths) {
-            List<Class<? extends Parameter>> parametersClasses = new LinkedList<>();
-            try {
-                for (String path : paths) {
-                    List<ClassPath.ClassInfo> paramClasses = ClassPath.from(Parameter.class.getClassLoader()).getTopLevelClasses(path).asList();
-                    for (ClassPath.ClassInfo info : paramClasses) {
-                        Class<?> clazz = info.load();
-                        if (!clazz.equals(Parameter.class) && Parameter.class.isAssignableFrom(clazz)) {
-                            parametersClasses.add((Class<? extends Parameter>)clazz);
-                        }
-                    }
-                }
-                return parametersClasses;
-            } catch (IOException e) {
-                throw new Error(e);
-            }
-
-        }
-
-        public void loadJobParams(String... pathsToScan) {
-            List<Class<? extends Parameter>> paramClasses = scan(pathsToScan);
-            fillJobParams(paramClasses);
-        }
-
-        public void loadJobParams(Class<? extends Parameter>... paramClasses) {
-            fillJobParams(Arrays.asList(paramClasses));
-        }
-
-        protected void fillJobParams(List<Class<? extends Parameter>> paramClasses) {
-            List<WebElement> paramElements = driver.findElements(by.xpath("//div[starts-with(@path,'/properties/hudson-model-ParametersDefinitionProperty/parameter')]"));
-            for (WebElement paramElement : paramElements) {
-                String elementText = paramElement.getText();
-                for (Class<? extends Parameter> paramClass : paramClasses) {
-                    String[] captions = paramClass.getAnnotation(Describable.class).value();
-                    for (String value : captions) {
-                        if (elementText.contains(value)) {
-                            Parameter param = newInstance(paramClass, Job.this, paramElement.getAttribute("path"));
-                            param.setNameProperty(param.control("name").resolve().getAttribute("value"));
-                            parameters.add(param);
-                        }
-                    }
-                }
-
-            }
-        }
-    }
+    
 }
