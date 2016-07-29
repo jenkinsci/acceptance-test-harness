@@ -7,7 +7,7 @@ import org.jenkinsci.test.acceptance.po.Parameter;
 /**
  * @author Kohsuke Kawaguchi
  */
-@Describable("Label")
+@Describable({"Label", "org.jvnet.jenkins.plugins.nodelabelparameter.LabelParameterDefinition"})
 public class LabelParameter extends Parameter {
     public LabelParameter(Job job, String path) {
         super(job, path);
