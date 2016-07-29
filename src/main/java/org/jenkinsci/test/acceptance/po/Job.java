@@ -439,5 +439,4 @@ public class Job extends TopLevelItem {
         clickLink("Delete Project");
         confirmAlert(2);
     }
-    
 }
