@@ -14,6 +14,7 @@ import java.util.List;
  *
  * @author Kohsuke Kawaguchi
  */
+//TODO remove the caption value from @Describable once the addParameter method can ignore it
 public abstract class Parameter extends PageAreaImpl {
     private static List<Class<? extends Parameter>> subtypes = new LinkedList<>();
 
