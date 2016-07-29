@@ -2,6 +2,7 @@ package core;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.Parameter;
 import org.jenkinsci.test.acceptance.po.StringParameter;
 import org.junit.Test;
 
@@ -45,12 +46,12 @@ public class CopyJobTest extends AbstractJUnitTest {
         j.configure();
         j.addParameter(StringParameter.class).setName("Param1").setDefault("");
         j.addParameter(StringParameter.class).setName("Param2").setDefault("");
+        assertTrue(Parameter.all().size() > 0);
         j.save();
         jenkins.jobs.copy(j, "simple-job-copy");
         assertThat(driver, hasContent("simple-job-copy"));
 
         FreeStyleJob k = jenkins.jobs.get(FreeStyleJob.class, "simple-job-copy");
-        k.loadExistingBuildParameters(StringParameter.class);
         j.visit("config.xml");
         String jxml = driver.getPageSource();
 
