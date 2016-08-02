@@ -47,7 +47,7 @@ public class UninstallPluginTest extends AbstractJUnitTest {
     @Inject
     private SlaveController slaves;
 
-    // Uninstall a plugin (gerrit-trigger), restart jenkins and verify that the plugin is not installed
+    /** Uninstall a plugin (gerrit-trigger), restart jenkins and verify that the plugin is not installed */
     @Test
     public void gerrit_uninstall_plugin() throws InterruptedException, ExecutionException {
         assumeTrue("This test requires a restartable Jenkins", jenkins.canRestart());
