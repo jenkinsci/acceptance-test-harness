@@ -16,9 +16,6 @@ public class PublishOverSSHPublisher extends AbstractStep implements PostBuildSt
     public final Control advancedServer = control("advanced-button");
 
     public final Control delete = control("repeatable-delete");
-    // is used to count how many publishers were added
-    private static int publisherCounter = 1;
-
 
     public Publishers setPublishers() {
         String p = last(by.xpath(".//div[@name='publishers'][starts-with(@path,'%s/publishers')]", getPath())).getAttribute("path");
@@ -26,10 +23,12 @@ public class PublishOverSSHPublisher extends AbstractStep implements PostBuildSt
     }
 
     public Publishers addPublishers() {
-        addServer.click();
-        String p = last(by.xpath(".//div[@name='publishers[" + publisherCounter + "]'][starts-with(@path,'%s/publishers[" + publisherCounter + "]')]", getPath())).getAttribute("path");
-        publisherCounter++;
-        return new Publishers(getPage(), p);
+        String path = createPageArea("publishers", new Runnable() {
+            @Override public void run() {
+                addServer.click();
+            }
+        });
+        return new Publishers(getPage(), path);
     }
 
     public class Publishers extends PageAreaImpl {
@@ -47,11 +46,13 @@ public class PublishOverSSHPublisher extends AbstractStep implements PostBuildSt
         }
 
         public TransferSet addTransferSet() {
-            addTransferSet.click();
-            String p = last(by.xpath(".//div[@name='transfers'][starts-with(@path,'%s/transfers')]", getPath())).getAttribute("path");
-            return new TransferSet(getPage(), p);
+            String path = createPageArea("transfers", new Runnable() {
+                @Override public void run() {
+                    addTransferSet.click();
+                }
+            });
+            return new TransferSet(getPage(), path);
         }
-
     }
 
     public static class TransferSet extends PageAreaImpl {
@@ -68,7 +69,5 @@ public class PublishOverSSHPublisher extends AbstractStep implements PostBuildSt
         public final Control execCommand = control("execCommand");
         // more options for individual transfers
         public final Control advancedTransfer = control("advanced-button");
-
     }
-
 }

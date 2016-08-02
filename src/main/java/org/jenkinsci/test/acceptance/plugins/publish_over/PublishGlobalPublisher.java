@@ -41,9 +41,12 @@ public abstract class PublishGlobalPublisher extends AbstractStep  implements Po
      * @return GlobalPublishSite of the added Server
      */
     public GlobalPublishSite addServer() {
-        add.click();
-        String p = last(by.xpath(".//div[@name='publishers'][starts-with(@path,'%s/publishers')]", getPath())).getAttribute("path");
-        return createPublishSite(p);
+        String path = createPageArea("publishers", new Runnable() {
+            @Override public void run() {
+                add.click();
+            }
+        });
+        return createPublishSite(path);
     }
 
     /**
@@ -103,9 +106,12 @@ public abstract class PublishGlobalPublisher extends AbstractStep  implements Po
          * @return GlobalTransferArea describing the transfer area
          */
         public GlobalTransferArea addTransferSet() {
-            add.click();
-            String p = last(by.xpath(".//div[@name='transfers'][starts-with(@path,'%s/transfers')]", getPath())).getAttribute("path");
-            return createTransferArea(p);
+            String path = createPageArea("transfers", new Runnable() {
+                @Override public void run() {
+                    add.click();
+                }
+            });
+            return createTransferArea(path);
         }
     }
 

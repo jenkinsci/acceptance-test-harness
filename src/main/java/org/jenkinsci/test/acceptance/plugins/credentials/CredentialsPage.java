@@ -26,10 +26,12 @@ public class CredentialsPage extends ConfigurablePageObject {
         super(j, j.url("credentials/store/system/domain/"+domainName+"/newCredentials"));
     }
 
-    public <T extends Credential> T add(Class<T> type) {
-        addButton.selectDropdownMenuAlt(type);
-        String path = find(by.name("credentials")).getAttribute("path");
-
+    public <T extends Credential> T add(final Class<T> type) {
+        String path = createPageArea("credentials", new Runnable() {
+            @Override public void run() {
+                addButton.selectDropdownMenuAlt(type);
+            }
+        });
         return newInstance(type, this, path);
     }
 

@@ -12,7 +12,6 @@ import java.util.List;
  */
 @Describable("hudson.matrix.MatrixProject")
 public class MatrixProject extends Job {
-    // config page objects
     public final Control addAxis = control(by.button("Add axis"));
     public final Control runSequentially = control("/executionStrategy/runSequentially");
 
@@ -33,11 +32,14 @@ public class MatrixProject extends Job {
         a.valueString.set(value);
     }
 
-    public <T extends Axis> T addAxis(Class<T> type) {
+    public <T extends Axis> T addAxis(final Class<T> type) {
         ensureConfigPage();
+        String path = createPageArea("axis", new Runnable() {
+            @Override public void run() {
+                addAxis.selectDropdownMenu(type);
+            }
+        });
 
-        addAxis.selectDropdownMenu(type);
-        String path = last(by.xpath("//div[@name='axis']")).getAttribute("path");
         return newInstance(type,this,path);
     }
 

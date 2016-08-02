@@ -14,9 +14,12 @@ public class ScpPublisher extends AbstractStep implements PostBuildStep {
     public final Control add = control("repeatable-add");
 
     public Site add() {
-        add.click();
-        String p = last(by.xpath(".//div[@name='entries'][starts-with(@path,'%s/entries')]", getPath())).getAttribute("path");
-        return new Site(getPage(), p);
+        String path = createPageArea("entries", new Runnable() {
+            @Override public void run() {
+                add.click();
+            }
+        });
+        return new Site(getPage(), path);
     }
 
     public static class Site extends PageAreaImpl {

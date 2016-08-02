@@ -1,6 +1,5 @@
 package org.jenkinsci.test.acceptance.plugins.publish_over;
 
-import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
@@ -13,11 +12,7 @@ import javax.inject.Inject;
  * @author Tobias Meyer
  */
 public abstract class PublishGlobalConfig extends PageAreaImpl {
-    @Inject
-    JenkinsController controller;
-    /**
-     * Add Button for one Server
-     */
+
     public final Control add = control("repeatable-add");
 
     @Inject
@@ -30,9 +25,12 @@ public abstract class PublishGlobalConfig extends PageAreaImpl {
      * @return
      */
     public GlobalSite addSite() {
-        add.click();
-        String p = last(by.xpath(".//div[@name='instance'][starts-with(@path,'"+getPath()+"/')]")).getAttribute("path");
-        return new GlobalSite(getPage(), p);
+        String path = createPageArea("instance", new Runnable() {
+            @Override public void run() {
+                add.click();
+            }
+        });
+        return new GlobalSite(getPage(), path);
     }
 
     /**

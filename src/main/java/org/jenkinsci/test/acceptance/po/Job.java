@@ -88,6 +88,7 @@ public class Job extends TopLevelItem {
         return addStep(type, "builder");
     }
 
+    // TODO move this functionality to page area itself
     public void removeFirstBuildStep() {
         removeFirstStep("builder");
     }

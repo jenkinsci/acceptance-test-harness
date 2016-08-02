@@ -55,11 +55,12 @@ public class SubversionScm extends Scm {
         return this.newInstance(type, this.injector, urlOfCredentialPage, driver.getWindowHandle());
     }
 
-
-    public <T extends SvnRepositoryBrowser> T useRepositoryBrowser(Class<T> type) {
-        final String[] nameOfRepositoryBrowser = type.getAnnotation(Describable.class).value();
-        repositoryBrowser.select(nameOfRepositoryBrowser[0]);
-        String path = repositoryBrowser.resolve().getAttribute("path");
+    public <T extends SvnRepositoryBrowser> T useRepositoryBrowser(final Class<T> type) {
+        String path = createPageArea("configs", new Runnable() {
+            @Override public void run() {
+                repositoryBrowser.selectDropdownMenu(type);
+            }
+        });
         return this.newInstance(type, this, this.getPage().url(path));
     }
 
@@ -68,10 +69,7 @@ public class SubversionScm extends Scm {
         return this.newInstance(SubversionSvmAdvanced.class, this.getPage(), this.getPage().url);
     }
 
-
     public SubversionScm(Job job, String path) {
         super(job, path);
     }
-
-
 }

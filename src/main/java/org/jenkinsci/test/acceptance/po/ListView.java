@@ -26,10 +26,12 @@ public class ListView extends View {
      * @param <T>  The type of the new dashboard column.
      * @return The new dashboard column.
      */
-    public <T extends ListViewColumn> T addColumn(Class<T> type) {
-        Control addColumns = control("/hetero-list-add[columns]");
-        addColumns.selectDropdownMenu(type);
-        String path = last(by.css("[name='columns']")).getAttribute("path");
+    public <T extends ListViewColumn> T addColumn(final Class<T> type) {
+        String path = createPageArea("columns", new Runnable() {
+            @Override public void run() {
+                control("/hetero-list-add[columns]").selectDropdownMenu(type);
+            }
+        });
         T col = newInstance(type, this, path);
         columns.add(col);
         return col;

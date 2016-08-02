@@ -32,11 +32,12 @@ public class HtmlPublisher extends AbstractStep implements PostBuildStep {
     }
 
     public Report addDir(String dir) {
-        control("repeatable-add").click();
-        elasticSleep(1000);
-
-        String path = last(by.input("_.reportDir")).getAttribute("path");
-        Report report = new Report(parent, path.substring(0, path.length() - 10));
+        String path = createPageArea("dirs", new Runnable() {
+            @Override public void run() {
+                control("repeatable-add").click();
+            }
+        });
+        Report report = new Report(parent, path);
         report.dir.set(dir);
         return report;
     }

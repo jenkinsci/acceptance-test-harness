@@ -121,7 +121,7 @@ public abstract class PageObject extends CapybaraPortingLayerImpl {
      *
      * This method properly wait until the new path is known. To be used as:
      *
-     *  String barPath = fooArea.createPageArea("bar", () -> control("add-button").click());
+     *  String barPath = fooArea.createPageArea("/bar", () -> control("add-button").click());
      *  new FooBarArea(fooArea, barPath);
      *
      * @param pathPrefix Prefix of the expected path. The path is always absolute.

@@ -13,20 +13,19 @@ public class BatchTaskDeclaration extends PageAreaImpl {
     private String name;
     private final Job job;
 
-    public static BatchTaskDeclaration add(Job job, String name) {
-        WebElement checkbox = job.find(by.path(PREFIX));
-        if (!checkbox.isSelected()) {
-            checkbox.click();
-        }
-        else {
-            job.clickButton("Add another task...");
-            job.elasticSleep(1000);
-        }
+    public static BatchTaskDeclaration add(final Job job, String name) {
+        String path = job.createPageArea(PREFIX + "/t", new Runnable() {
+            @Override public void run() {
+                WebElement checkbox = job.find(by.path(PREFIX));
+                if (!checkbox.isSelected()) {
+                    checkbox.click();
+                } else {
+                    job.clickButton("Add another task...");
+                }
+            }
+        });
 
-        String p = job.last(by.input("batch-task.name")).getAttribute("path");
-        String path_prefix = p.substring(0, p.length() - 5); // trim off '/name'
-
-        BatchTaskDeclaration b = new BatchTaskDeclaration(job, path_prefix);
+        BatchTaskDeclaration b = new BatchTaskDeclaration(job, path);
         b.setName(name);
         return b;
     }

@@ -1,6 +1,5 @@
 package org.jenkinsci.test.acceptance.plugins.publish_over;
 
-import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
@@ -12,8 +11,6 @@ import javax.inject.Inject;
  * @author jenky-hm
  */
 public class PublishOverSSHGlobalConfig extends PageAreaImpl {
-    @Inject
-    JenkinsController controller;
 
     public final Control add = control("repeatable-add");
 
@@ -43,9 +40,12 @@ public class PublishOverSSHGlobalConfig extends PageAreaImpl {
     }
 
     public InstanceSite addInstanceSite() {
-        add.click();
-        String p = last(by.xpath(".//div[@name='instance'][starts-with(@path,'/jenkins-plugins-publish_over_ssh-BapSshPublisherPlugin/')]")).getAttribute("path");
-        return new InstanceSite(getPage(), p);
+        String path = createPageArea("instance", new Runnable() {
+            @Override public void run() {
+                add.click();
+            }
+        });
+        return new InstanceSite(getPage(), path);
     }
 
     public static class InstanceSite extends PageAreaImpl {
@@ -63,9 +63,12 @@ public class PublishOverSSHGlobalConfig extends PageAreaImpl {
         public final Control addAdvancedConfig = control("advanced-button");
 
         public AdvancedConfig addAdvancedConfig() {
-            addAdvancedConfig.click();
-            String p = last(by.xpath(".//div[@name='instance'][starts-with(@path,'/jenkins-plugins-publish_over_ssh-BapSshPublisherPlugin/')]")).getAttribute("path");
-            return new AdvancedConfig(getPage(), p);
+            String path = createPageArea("instance", new Runnable() {
+                @Override public void run() {
+                    addAdvancedConfig.click();
+                }
+            });
+            return new AdvancedConfig(getPage(), path);
         }
 
         public final Control validate = control("validate-button");

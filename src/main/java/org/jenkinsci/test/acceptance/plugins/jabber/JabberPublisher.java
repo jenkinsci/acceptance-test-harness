@@ -20,7 +20,7 @@ public class JabberPublisher extends AbstractStep implements PostBuildStep {
             super(parent, path);
         }
 
-        public final Control targets= control("targets");
+        public final Control targets = control("targets");
 
     }
 }

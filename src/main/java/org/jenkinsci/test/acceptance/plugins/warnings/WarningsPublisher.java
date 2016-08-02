@@ -16,9 +16,11 @@ public class WarningsPublisher extends AbstractStep implements PostBuildStep {
     }
 
     public void addConsoleScanner(String caption) {
-        addConsoleLogScanner.click();
-        elasticSleep(1000);
-        String path = last(by.xpath("//div[@name='consoleParsers']")).getAttribute("path");
+        String path = createPageArea("consoleParsers", new Runnable() {
+            @Override public void run() {
+                addConsoleLogScanner.click();
+            }
+        });
 
         PageArea a = new PageAreaImpl(getPage(), path) {
         };
@@ -26,9 +28,11 @@ public class WarningsPublisher extends AbstractStep implements PostBuildStep {
     }
 
     public void addWorkspaceFileScanner(String caption, String pattern) {
-        addWorkspaceFileScanner.click();
-        elasticSleep(1000);
-        String path = last(by.xpath("//div[@name='parserConfigurations']")).getAttribute("path");
+        String path = createPageArea("parserConfigurations", new Runnable() {
+            @Override public void run() {
+                addWorkspaceFileScanner.click();
+            }
+        });
 
         PageArea a = new PageAreaImpl(getPage(), path) {
         };
