@@ -82,9 +82,9 @@ public class PluginManager extends ContainerPageObject {
         // We use the button itself to detect when the page has changed, which happens after the refresh has been done
         final WebElement button = find(by.button("Check now"));
         clickButton("Check now");
-        waitFor().withTimeout(30, TimeUnit.SECONDS).until(new Callable<Object>() {
+        waitFor().withTimeout(30, TimeUnit.SECONDS).until(new Callable<Boolean>() {
             @Override
-            public Object call() throws Exception {
+            public Boolean call() throws Exception {
                 try {
                     button.findElement(by.id("it does not matter"));
                 } catch(StaleElementReferenceException e) {
