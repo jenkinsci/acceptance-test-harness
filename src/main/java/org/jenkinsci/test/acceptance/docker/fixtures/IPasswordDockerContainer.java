@@ -1,8 +1,5 @@
 package org.jenkinsci.test.acceptance.docker.fixtures;
 
-import org.jenkinsci.test.acceptance.docker.DockerContainer;
-import org.jenkinsci.test.acceptance.docker.DockerFixture;
-
 /**
  * gets username and password for a service on a docker container
  *

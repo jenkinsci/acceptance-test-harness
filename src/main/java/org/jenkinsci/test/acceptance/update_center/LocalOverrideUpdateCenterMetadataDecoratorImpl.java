@@ -9,7 +9,6 @@ import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.util.version.GenericVersionScheme;
 import org.eclipse.aether.version.Version;
 import org.eclipse.aether.version.VersionScheme;
-import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 /**

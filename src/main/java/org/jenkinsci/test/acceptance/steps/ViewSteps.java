@@ -1,7 +1,6 @@
 package org.jenkinsci.test.acceptance.steps;
 
 import cucumber.api.java.en.And;
-import org.jenkinsci.test.acceptance.ByFactory;
 
 /**
  * @author Kohsuke Kawaguchi

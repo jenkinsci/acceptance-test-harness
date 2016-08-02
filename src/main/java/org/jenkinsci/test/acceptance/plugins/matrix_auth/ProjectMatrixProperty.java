@@ -2,7 +2,6 @@ package org.jenkinsci.test.acceptance.plugins.matrix_auth;
 
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.PageArea;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 
 /**

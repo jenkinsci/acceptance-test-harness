@@ -2,11 +2,8 @@ package org.jenkinsci.test.acceptance.plugins.credentials;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.List;
 
 import org.jenkinsci.test.acceptance.po.*;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.Select;
 
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;

@@ -12,7 +12,6 @@ import javax.inject.Provider;
 import java.io.File;
 import java.io.IOException;
 import org.jenkinsci.test.acceptance.docker.DockerImage.Starter;
-import org.jenkinsci.test.acceptance.docker.fixtures.FtpdContainer;
 
 /**
  * Inject this object to automate the cleanup of a running container at the end of the test case.
