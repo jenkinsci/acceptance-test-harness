@@ -14,24 +14,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.jenkinsci.test.acceptance.Matchers.hasAction;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
-/**
- * Feature: Test Javadoc plugin
- */
 @WithPlugins("javadoc")
 public class JavadocPluginTest extends AbstractJUnitTest {
-    /**
-     * Scenario: Publish javadoc from freestyle job
-     * Given a Maven
-     * And a job
-     * When I configure the job
-     * And I add build steps to generate javadoc
-     * And I add a Publish javadoc post build step with path "my-app/target/site/apidocs/"
-     * And I save the job
-     * And I build the job
-     * Then the build should succeed
-     * And the job should have "Javadoc" action
-     * And the javadoc should display "com.mycompany.app"
-     */
+
     @Test
     public void publish_javadoc_from_freestyle_job() {
         FreeStyleJob job = jenkins.jobs.create();
@@ -43,17 +28,6 @@ public class JavadocPluginTest extends AbstractJUnitTest {
         assertJavadoc(job);
     }
 
-    /**
-     * Scenario: Publish javadoc from matrix job
-     * Given a Maven
-     * And a matrix job
-     * When I configure the job
-     * And I add build steps to generate javadoc
-     * And I add a Publish javadoc post build step with path "my-app/target/site/apidocs/"
-     * And I save the job
-     * And I build the job
-     * Then javadoc should display "com.mycompany.app" for default configuration
-     */
     @Test
     public void publish_javadoc_from_matrix_job() {
         MatrixProject job = jenkins.jobs.create(MatrixProject.class);

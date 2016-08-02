@@ -34,6 +34,7 @@ import org.openqa.selenium.WebElement;
 
 import java.util.concurrent.ExecutionException;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assume.assumeTrue;
 
 /**
@@ -46,9 +47,7 @@ public class UninstallPluginTest extends AbstractJUnitTest {
     @Inject
     private SlaveController slaves;
 
-    /**
-     * Scenario: Uninstall a plugin (gerrit-trigger), restart jenkins and verify that the plugin is not installed
-     */
+    // Uninstall a plugin (gerrit-trigger), restart jenkins and verify that the plugin is not installed
     @Test
     public void gerrit_uninstall_plugin() throws InterruptedException, ExecutionException {
         assumeTrue("This test requires a restartable Jenkins", jenkins.canRestart());
@@ -61,6 +60,6 @@ public class UninstallPluginTest extends AbstractJUnitTest {
         s.waitUntilOnline();
         jenkins.getPluginManager().visit("installed");
         WebElement trigger = find(by.url("plugin/gerrit-trigger"));
-        assert(!trigger.isSelected());
+        assertFalse(trigger.isSelected());
     }
 }

@@ -14,11 +14,6 @@ import org.junit.Test;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 
-/**
- * Plugin test for Ant.
- *
- * Also acting as an example for writing tests in plain-old JUnit.
- */
 @SuppressWarnings("CdiInjectionPointsInspection")
 @WithPlugins("ant")
 public class AntPluginTest extends AbstractJUnitTest {
@@ -34,26 +29,6 @@ public class AntPluginTest extends AbstractJUnitTest {
         buildHelloWorld(null);
     }
 
-    /**
-     Scenario: Add Auto-Installed Ant
-       Given I have installed the "ant" plugin
-       And I have Ant "1.8.4" auto-installation named "ant_1.8.4" configured
-       And a job
-       When I add an Ant build step for "ant_1.8.4"
-         """
-           <project default="hello">
-             <target name="hello">
-               <echo message="Hello World"/>
-             </target>
-           </project>
-         """
-       And I build the job
-       Then the build should succeed
-       And console output should contain
-           """
-           Unpacking http://archive.apache.org/dist/ant/binaries/apache-ant-1.8.4-bin.zip
-           """
-     */
     @Test
     public void autoInstallAnt() {
         AntInstallation.install(jenkins, "ant_1.8.4", "1.8.4");

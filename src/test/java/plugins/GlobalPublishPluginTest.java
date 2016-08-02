@@ -85,23 +85,6 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
      */
     protected abstract void configurePublisher(String serverName, DockerContainer dock);
 
-    /**
-     * @native(docker) Scenario: Configure a job with publisher publishing
-     * Given I have installed the "publisher" plugin
-     * And a docker fixture "dock"
-     * And a job
-     * When I configure docker fixture as publisher host
-     * And I configure the job with one publisher Transfer Set
-     * And I configure the Transfer Set
-     * With Source Files "odes.txt"
-     * And With Remote Directory myfolder/
-     * And I copy resource "odes.txt" into workspace
-     * And I save the job
-     * And I build the job
-     * Then the build should succeed
-     * And CIFS plugin should have published "odes.txt" on docker fixture
-     */
-
     @Test
     public void publish_resources() throws IOException {
         DockerContainer dock = container.get();
@@ -123,23 +106,6 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
         assertThat(dock.cp("/tmp/odes.txt", "/tmp/"), is(true));
         assertThat(FileUtils.readFileToString(new File("/tmp/odes.txt")), CoreMatchers.is(cpFile.asText()));
     }
-
-    /**
-     * @native(docker) Scenario: Configure a job with publisher publishing
-     * Given I have installed the "publisher" plugin
-     * And a docker fixture "dock"
-     * And a job
-     * When I configure docker fixture as publisher host
-     * And I configure the job with one publisher Transfer Set
-     * And I configure the Transfer Set
-     * With Source Files "odes.txt"
-     * And With Remote Directory "/tmp/${JOB_NAME}"
-     * And I copy resource "odes.txt" into workspace
-     * And I save the job
-     * And I build the job
-     * Then the build should succeed
-     * And publisher plugin should have published "odes.txt" on docker fixture
-     */
 
     @Test
     public void publish_jenkins_variables() throws IOException {
@@ -165,23 +131,6 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
         assertThat(FileUtils.readFileToString(new File("/tmp/odes.txt")), CoreMatchers.is(cpFile.asText()));
     }
 
-    /**
-     * @native(docker) Scenario: Configure a job with publisher publishing
-     * Given I have installed the "publisher" plugin
-     * And a docker fixture "dock"
-     * And a job
-     * When I configure docker fixture as publisher site
-     * And I configure the job with one publisher Transfer Set
-     * And I configure the Transfer Set
-     * With Source Files "prefix_/test.txt"
-     * And With Remote Directory /tmp/
-     * And With remove prefix
-     * And I save the job
-     * And I build the job
-     * Then the build should succeed
-     * And publisher plugin should have published "test.txt" on docker fixture
-     */
-
     @Test
     public void publish_resources_and_remove_prefix() throws IOException {
         DockerContainer dock = container.get();
@@ -202,25 +151,6 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
         assertThat(dock.cp("/tmp/test.txt", "/tmp"), is(true));
         assertThat(FileUtils.readFileToString(new File("/tmp/test.txt")), CoreMatchers.is(test.asText()));
     }
-
-    /**
-     * @native(docker) Scenario: Configure a job with publisher publishing
-     * Given I have installed the "publisher" plugin
-     * And a resources Directory "prefix_/"
-     * With the file ".exclude"
-     * And a docker fixture "dock"
-     * And a job
-     * When I configure docker fixture as publisher site
-     * And I configure the job with one publisher Transfer Set
-     * And I configure the Transfer Set
-     * With Source Files  "prefix_/"
-     * And With exclude ".exclude"
-     * And I copy resources "prefix_/" into workspace
-     * And I save the job
-     * And I build the job
-     * Then the build should succeed
-     * And publisher plugin should have published "prefix_/" without the ".exclude" on docker fixture
-     */
 
     @Test
     public void publish_resources_with_excludes() {
@@ -243,22 +173,6 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
         assertThat(!dock.cp("/tmp/prefix_/.exclude", "/tmp"), is(true));
     }
 
-    /**
-     * @native(docker) Scenario: Configure a job with publisher publishing
-     * Given I have installed the "publisher" plugin
-     * And a docker fixture "dock"
-     * And a job
-     * When I configure docker fixture as publisher site
-     * And I configure the job with one publisher Transfer Set
-     * And I configure the Transfer Set
-     * With Source Files "prefix_/test.txt,odes.txt"
-     * And I copy resources "prefix_/test.txt,odes.txt"  into workspace
-     * And I save the job
-     * And I build the job
-     * Then the build should succeed
-     * And publisher plugin should have published "prefix_/test.txt" and "odes.txt"
-     */
-
     @Test
     public void publish_with_default_pattern() {
         DockerContainer dock = container.get();
@@ -280,23 +194,6 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
         assertThat(new File("/tmp/test.txt").exists(), is(true));
         assertThat(new File("/tmp/odes.txt").exists(), is(true));
     }
-
-    /**
-     * @native(docker) Scenario: Configure a job with publisher publishing
-     * Given I have installed the "publisher" plugin
-     * And a docker fixture "dock"
-     * And a job
-     * When I configure docker fixture as publisher site
-     * And I configure the job with one publisher Transfer Set
-     * And I configure the Transfer Set
-     * With Source Files "te,st.txt;odes.txt"
-     * And With Pattern separator [;]+
-     * And I copy resources "te,st.txt,odes.txt"  into workspace
-     * And I save the job
-     * And I build the job
-     * Then the build should succeed
-     * And publisher plugin should have published "te,st.txt" and "odes.txt"
-     */
 
     @Test
     public void publish_with_own_pattern() {
@@ -321,23 +218,6 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
         assertThat(new File("/tmp/odes.txt").exists(), is(true));
     }
 
-    /**
-     * @native(docker) Scenario: Configure a job with publisher publishing
-     * Given I have installed the "publisher" plugin
-     * And a docker fixture "dock"
-     * And a job
-     * When I configure docker fixture as publisher site
-     * And I configure the job with one publisher Transfer Set
-     * And I configure the Transfer Set
-     * With Source Files ".svn,.git,odes.txt"  with publisher plugin
-     * And I copy resources "odes.txt" as "odes.txt,.svn,.git" into workspace
-     * And I save the job
-     * And I build the job
-     * Then the build should succeed
-     * And publisher plugin should have published "odes.txt"
-     * And publisher plugin should have not published  ".svn,.git"
-     */
-
     @Test
     public void publish_with_default_exclude() {
         DockerContainer dock = container.get();
@@ -360,23 +240,6 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
         assertThat(!dock.cp("/tmp/.svn", "/tmp/"), is(true));
         assertThat(!dock.cp("/tmp/CVS", "/tmp/"), is(true));
     }
-
-    /**
-     * @native(docker) Scenario: Configure a job with publisher publishing
-     * Given I have installed the "publisher" plugin
-     * And a docker fixture "dock"
-     * And a job
-     * When I configure docker fixture as publisher site
-     * And I configure the job with one publisher Transfer Set
-     * And I configure the Transfer Set
-     * With Source Files ".svn,.git,odes.txt"  with publisher plugin
-     * And With No default excludes checked
-     * And I copy resources "odes.txt" as "odes.txt,.svn,.git" into workspace
-     * And I save the job
-     * And I build the job
-     * Then the build should succeed
-     * And publisher plugin should have published  .svn/,.git"
-     */
 
     @Test
     public void publish_with_no_default_exclude() {
@@ -401,23 +264,6 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
         assertThat(dock.cp("/tmp/.svn", "/tmp/"), is(true));
         assertThat(dock.cp("/tmp/CVS", "/tmp/"), is(true));
     }
-
-    /**
-     * @native(docker) Scenario: Configure a job with publisher publishing
-     * Given I have installed the "publisher" plugin
-     * And a docker fixture "dock"
-     * And a job
-     * When I configure docker fixture as publisher site
-     * And I configure the job with one publisher Transfer Set
-     * And I configure the Transfer Set
-     * With Source Files "empty/,odes.txt" with publisher plugin
-     * And With Make empty dirs  Checked
-     * And I create the directory "empty/" into workspace
-     * And I save the job
-     * And I build the job
-     * Then the build should succeed
-     * And publisher plugin should have published  "empty/" and "odes.txt"
-     */
 
     @Test
     public void publish_with_empty_directory() throws IOException {
@@ -445,22 +291,6 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
         assertThat(dock.cp("/tmp/empty", "/tmp/"), is(true));
     }
 
-    /**
-     * @native(docker) Scenario: Configure a job with publisher publishing
-     * Given I have installed the "publisher" plugin
-     * And a docker fixture "dock"
-     * And a job
-     * When I configure docker fixture as publisher site
-     * And I configure the job with one publisher Transfer Set
-     * And I configure the Transfer Set
-     * With Source Files "empty/,odes.txt" with publisher plugin
-     * And I create the directory "empty/" into workspace
-     * And I save the job
-     * And I build the job
-     * Then the build should succeed
-     * And publisher plugin should have not published "empty/" and "odes.txt"
-     */
-
     @Test
     public void publish_without_empty_directory() throws IOException {
         DockerContainer dock = container.get();
@@ -487,22 +317,6 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
         assertThat(!dock.cp("/tmp/dockertmp/empty", "/tmp/"), is(true));
     }
 
-    /**
-     * @native(docker) Scenario: Configure a job with publisher publishing
-     * Given I have installed the "publisher" plugin
-     * And a docker fixture "dock"
-     * And a job
-     * When I configure docker fixture as publisher site
-     * And I configure the job with one publisher Transfer Set
-     * And I configure the Transfer Set
-     * With SourceFiles "odes.txt" and "flat\odes.txt" with publisher plugin
-     * And I copy resources "ftp_plugin/"
-     * And I save the job
-     * And I build the job
-     * Then the build should succeed
-     * And publisher plugin should have published "odes.txt" and "flat/odes.txt"
-     */
-
     @Test  @Ignore
     public void publish_without_flatten_files() {
         DockerContainer dock = container.get();
@@ -523,22 +337,6 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
         assertThat(dock.cp("/tmp/odes.txt", "/tmp/"), is(true));
     }
 
-    /**
-     * @native(docker) Scenario: Configure a job with publisher publishing
-     * Given I have installed the "publisher" plugin
-     * And a docker fixture "dock"
-     * And a job
-     * When I configure docker fixture as publisher site
-     * And I configure the job with one publisher Transfer Set
-     * And I configure the Transfer Set
-     * With SourceFiles "odes.txt" and "flat\odes.txt" with publisher plugin
-     * And With Flatten files Checked
-     * And I copy resources "ftp_plugin/"
-     * And I save the job
-     * And I build the job
-     * Then the build should fail
-     */
-
     @Test
     public void publish_with_flatten_files() {
         DockerContainer dock = container.get();
@@ -557,23 +355,6 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
         j.save();
         j.startBuild().shouldBeUnstable();
     }
-
-    /**
-     * @native(docker) Scenario: Configure a job with publisher publishing
-     * Given I have installed the "publisher" plugin
-     * And a docker fixture "dock"
-     * And a job
-     * When I configure docker fixture as publisher site
-     * And I configure the job with one publisher Transfer Set
-     * And I configure the Transfer Set
-     * With SourceFiles "odes.txt" with publisher plugin
-     * And With Remote directory  is a date format Checked "yyyyMMddHH"
-     * And I copy resources "odes.txt" into workspace
-     * And I save the job
-     * And I build the job
-     * Then the build should succeed
-     * And publisher plugin should have published "odes.txt" under 'yyyyMMddHH'
-     */
 
     @Test
     public void publish_with_date_format() {
@@ -599,24 +380,6 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
         assertThat(new File("/tmp/odes.txt").exists(), is(true));
     }
 
-    /**
-     * @native(docker) Scenario: Configure a job with publisher publishing
-     * Given I have installed the "publisher" plugin
-     * And a docker fixture "dock"
-     * And I Upload "oldfile.txt" to the publisher Server
-     * And a job
-     * And I configure the job with one publisher Transfer Set
-     * And I configure the Transfer Set
-     * With SourceFiles "myresources" with publisher plugin
-     * And With Clean remote
-     * And I copy resources "myresources" into workspace
-     * And I save the job
-     * And I build the job
-     * Then the build should succeed
-     * And publisher plugin should have published "myresources"
-     * And the RemoteDIR should not contain "old.txt"
-     */
-
     @Test
     public void publish_with_clean_remote() {
         DockerContainer dock = container.get();
@@ -637,25 +400,6 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
         assertThat(!dock.cp("/tmp/old.txt", "/tmp/"), is(true));
     }
 
-    /**
-     * @native(docker) Scenario: Configure a job with publisher publishing
-     * Given I have installed the "publisher" plugin
-     * And a docker fixture "dock"
-     * And a job
-     * When I configure docker fixture as publisher site
-     * And I configure the job with three publisher Transfer Sets
-     * And I configure the Transfer Set 1
-     * With SourceFiles  odes.txt
-     * And I configure the Transfer Set 2
-     * With SourceFiles  odes2.txt
-     * And I configure the Transfer Set 3
-     * With SourceFiles  odes3.txt
-     * And I copy resources odes.txt,odes2.txt,odes3.txt into workspace
-     * And I save the job
-     * And I build the job
-     * Then the build should succeed
-     * And publisher plugin should have published odes.txt,odes2.txt,odes3.txt on docker fixture
-     */
     @Test
     public void publish_multiple_sets() {
         DockerContainer dock = container.get();
@@ -681,27 +425,6 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
         assertThat(dock.cp("/tmp/odes3.txt", "/tmp/"), is(true));
     }
 
-    /**
-     * @native(docker) Scenario: Configure a job with publisher publishing
-     * Given I have installed the "publisher" plugin
-     * And 2 docker fixtures "dock"
-     * And a job
-     * When I configure docker docker1 as publisher site
-     * And I configure docker  docker2 as publisher site
-     * And I configure the job with docker1 Server
-     * And one publisher Transfer Set
-     * And I configure the Transfer Set
-     * With SourceFiles odes.txt
-     * And I Add Server docker2
-     * And one publisher Transfer Set
-     * And I configure the Transfer Set
-     * With SourceFiles odes.txt
-     * And I copy resources odes.txt  into workspace
-     * And I save the job
-     * And I build the job
-     * Then the build should succeed
-     * And publisher plugin should have published my set of files at all docker fixtures
-     */
     @Test @Ignore
     public void publish_multiple_servers() {
         DockerContainer dock = container.get();
@@ -728,24 +451,6 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
         assertThat(dock.cp("/tmp/odes.txt", "/tmp/dockertmp2"), is(true));
 
     }
-
-    /**
-     * @native(docker) Scenario: Configure a job with publisher publishing
-     * Given I have installed the "publisher" plugin
-     * And a docker fixture "dock"
-     * And a ssh slave
-     * And a job
-     * When I configure docker fixture as publisher host
-     * And I configure the job with one publisher Transfer Set
-     * And I configure the Transfer Set
-     * With Source Files "odes.txt"
-     * And With Remote Directory myfolder/
-     * And I copy resource "odes.txt" into workspace
-     * And I save the job
-     * And I build the job
-     * Then the build should succeed
-     * And publisher plugin should have published "odes.txt" on docker fixture
-     */
 
     @Test
     public void publish_slave_resourses() throws IOException, InterruptedException, ExecutionException {
