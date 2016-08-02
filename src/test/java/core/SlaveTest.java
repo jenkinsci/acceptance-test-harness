@@ -33,7 +33,6 @@ import org.junit.Test;
 import java.util.concurrent.ExecutionException;
 
 /**
- * Feature: Slave management tests.
  * @author Orjan Percy <orjan.percy@sonymobile.com>
  */
 public class SlaveTest extends AbstractJUnitTest {
@@ -46,9 +45,7 @@ public class SlaveTest extends AbstractJUnitTest {
         slave = slaveController.install(jenkins).get();
     }
 
-    /**
-     * Scenario: Bring slave offline and then online.
-     */
+    /** Bring slave offline and then online. */
     @Test
     public void slave_offline_online() {
         slave.markOffline("Test - slave goes offline.");
@@ -57,9 +54,7 @@ public class SlaveTest extends AbstractJUnitTest {
         assert(slave.isOnline());
     }
 
-    /**
-     * Scenario: Disconnect a slave, logout - login and then reconnect the slave.
-     */
+    /** Disconnect a slave, logout - login and then reconnect the slave. */
     @Test
     public void slave_disconnect_reconnect() throws ExecutionException, InterruptedException {
         slave.disconnect("Test - slave is disconnected");

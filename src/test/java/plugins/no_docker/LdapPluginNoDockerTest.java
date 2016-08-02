@@ -34,6 +34,7 @@ import org.jenkinsci.test.acceptance.po.LdapSecurityRealm;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import plugins.LdapPluginTest;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.jenkinsci.test.acceptance.Matchers.hasLoggedInUser;
@@ -66,8 +67,10 @@ import static org.jenkinsci.test.acceptance.Matchers.hasLoggedInUser;
  * Test(s) disables security once over.
  *
  * @author Bowen.Cheng@ericsson.com
+ * @deprecated Use {@link LdapPluginTest} instead.
  */
 @WithPlugins("ldap@1.10")
+@Deprecated
 public class LdapPluginNoDockerTest extends AbstractJUnitTest {
 
     private SecurityDisabler securityDisabler;
@@ -79,44 +82,16 @@ public class LdapPluginNoDockerTest extends AbstractJUnitTest {
         securityDisabler = new SecurityDisabler(jenkins);
     }
 
-    /**
-     * Scenario1: user can log-in to Jenkins as admin after LDAP security configured-<br>
-     * Given a Jenkins instance<br>
-     *  And an LDAP plugin version 1.10 (or greater)<br>
-     *  And an LDAP security configuration that is matrix-based (project)<br>
-     *  And a user added to that matrix so she can Administer<br>
-     * When I save such an LDAP security configuration<br>
-     * Then that user can log-in to that Jenkins as admin.
-     */
     @Test
     public void user_can_login_to_Jenkins_as_admin_after_LDAP_security_configured() {
         userCanLoginToJenkinsAsAdmin(LdapEnv.getLdapEnv().getUser());
     }
 
-    /**
-     * Scenario2: user can log-in to Jenkins as admin group member after LDAP security configured-<br>
-     * Given a Jenkins instance<br>
-     *  And an LDAP plugin version 1.10 (or greater)<br>
-     *  And an LDAP security configuration that is matrix-based (project)<br>
-     *  And a group added to that matrix so its members can Administer<br>
-     *  And a user being a member of that group<br>
-     * When I save such an LDAP security configuration<br>
-     * Then that user can log-in to that Jenkins as admin.
-     */
     @Test
     public void user_can_login_to_Jenkins_as_admin_group_member_after_AD_security_configured() {
         userCanLoginToJenkinsAsAdmin(ldapEnv.getGroup());
     }
 
-    /**
-     * Scenario3: user wannabe cannot log-in to Jenkins after LDAP security configured-<br>
-     * Given a Jenkins instance<br>
-     *  And an LDAP plugin version 1.10 (or greater)<br>
-     *  And an LDAP security configuration that is matrix-based (project)<br>
-     *  And a wannabe added to that matrix thinking he can Administer<br>
-     * When I save such an LDAP security configuration<br>
-     * Then that user wannabe cannot log-in to that Jenkins at all.
-     */
     @Test
     public void wannabe_cannot_login_to_Jenkins_after_LDAP_security_configured() {
         userCanLoginToJenkinsAsAdmin(ldapEnv.getUser());

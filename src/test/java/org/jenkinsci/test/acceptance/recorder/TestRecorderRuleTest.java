@@ -2,7 +2,6 @@ package org.jenkinsci.test.acceptance.recorder;
 
 import org.jenkinsci.test.acceptance.guice.TestName;
 import org.jenkinsci.test.acceptance.junit.FailureDiagnostics;
-import org.jenkinsci.test.acceptance.utils.SystemEnvironmentVariables;
 import org.junit.Test;
 import org.junit.runner.Description;
 

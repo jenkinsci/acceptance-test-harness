@@ -1,7 +1,6 @@
 package org.jenkinsci.test.acceptance.plugins.ldap;
 
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
-import org.jenkinsci.test.acceptance.po.PageArea;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 
 /**

@@ -18,7 +18,6 @@ import com.google.inject.Injector;
 
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 
 /**
  * Top-level object that acts as an entry point to various systems.

@@ -19,8 +19,6 @@ import com.google.inject.Inject;
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
 
-import java.io.IOException;
-
 /**
  * Indicates the docker is necessary to run the test.
  *

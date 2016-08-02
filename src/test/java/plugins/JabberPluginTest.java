@@ -27,7 +27,6 @@ import java.io.IOException;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
- * Feature: Tests for Jabber plugin
  * This test case is set to @Ignore because the Jabber Plugin is not able to connect to conference.localhost
  * because DNS resolution issues. These issues arise because of the used Smack API
  *      (http://www.igniterealtime.org/projects/smack/index.jsp)
@@ -41,7 +40,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 @WithPlugins("jabber")
 @Category(DockerTest.class)
 @WithDocker
-@Ignore
+@Ignore("TODO: Bring this back to life or remove from testsuite")
 public class JabberPluginTest extends AbstractJUnitTest {
     @Inject
     private DockerContainerHolder<JabberContainer> docker;
@@ -56,21 +55,6 @@ public class JabberPluginTest extends AbstractJUnitTest {
     //private final String confRoom = "*test@127.0.0.1";
     private final String confRoom = "test@conference.localhost";
 
-    /**
-     @native(docker)
-     Scenario: Configure a job with jabber notification
-     Given I have installed the "jabber" plugin
-     And a docker fixture "jabber"
-     And a job
-     When I configure docker fixture as Jabber server
-     And I configure the jenkins to use a jid and password
-     And I configure the jenkins to use a the test chatroom
-     And I configure the job to use a shell step
-     And I save the job
-     And I build the job
-     Then the build should succeed
-     And Jabber plugin should have notified the users in test chatroom on docker fixture
-     */
     @Test
     public void jabber_notification_success_publishing() throws IOException, InterruptedException {
         JabberContainer jabber = docker.get();

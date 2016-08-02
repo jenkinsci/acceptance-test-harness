@@ -142,21 +142,6 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
         }
     }
 
-    /**
-     @native(docker)
-     Scenario: Configure a job with over ssh publishing
-     Given I have installed the "publish-over-ssh" plugin
-     And a docker fixture "sshd"
-     And a job
-     When I configure docker fixture as SSH site
-     And I configure the job to use a unsecure keyfile without passphrase
-     And I copy resource "scp_plugin/lorem-ipsum-scp.txt" into workspace
-     And I publish "lorem-ipsum-scp.txt" with SSH plugin
-     And I save the job
-     And I build the job
-     Then the build should succeed
-     And SSH plugin should have published "lorem-ipsum-scp.txt" on docker fixture
-     */
     @Test
     public void ssh_key_path_and_no_password_publishing() throws IOException {
         SshdContainer sshd = docker.get();
@@ -182,21 +167,6 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
         assertThat(FileUtils.readFileToString(new File(tempCopyFile)), CoreMatchers.is(cp_file.asText()));
     }
 
-    /**
-     @native(docker)
-     Scenario: Configure a job with over ssh publishing
-     Given I have installed the "publish-over-ssh" plugin
-     And a docker fixture "sshd"
-     And a job
-     When I configure docker fixture as SSH site
-     And I configure the job to use a unsecure keyfile with passphrase
-     And I copy resource "scp_plugin/lorem-ipsum-scp.txt" into workspace
-     And I publish "lorem-ipsum-scp.txt" with SSH plugin
-     And I save the job
-     And I build the job
-     Then the build should succeed
-     And SSH plugin should have published "lorem-ipsum-scp.txt" on docker fixture
-     */
     @Test
     @Category(SmokeTest.class)
     public void ssh_key_path_and_key_password_publishing() throws IOException {
@@ -219,21 +189,6 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
         assertThat(FileUtils.readFileToString(new File(tempCopyFile)), CoreMatchers.is(cp_file.asText()));
     }
 
-    /**
-     @native(docker)
-     Scenario: Configure a job with over ssh publishing
-     Given I have installed the "publish-over-ssh" plugin
-     And a docker fixture "sshd"
-     And a job
-     When I configure docker fixture as SSH site
-     And I configure the job to use a unsecure key in a text field without passphrase
-     And I copy resource "scp_plugin/lorem-ipsum-scp.txt" into workspace
-     And I publish "lorem-ipsum-scp.txt" with SSH plugin
-     And I save the job
-     And I build the job
-     Then the build should succeed
-     And SSH plugin should have published "lorem-ipsum-scp.txt" on docker fixture
-     */
     @Test
     public void ssh_key_text_and_no_password_publishing() throws IOException {
         SshdContainer sshd = docker.get();
@@ -254,22 +209,6 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
         assertThat(FileUtils.readFileToString(new File(tempCopyFile)), CoreMatchers.is(cp_file.asText()));
     }
 
-
-    /**
-     @native(docker)
-     Scenario: Configure a job with over ssh publishing
-     Given I have installed the "publish-over-ssh" plugin
-     And a docker fixture "sshd"
-     And a job
-     When I configure docker fixture as SSH site
-     And I configure the job to use a password
-     And I copy resource "scp_plugin/lorem-ipsum-scp.txt" into workspace
-     And I publish "lorem-ipsum-scp.txt" with SSH plugin
-     And I save the job
-     And I build the job
-     Then the build should succeed
-     And SSH plugin should have published "lorem-ipsum-scp.txt" on docker fixture
-     */
     @Test
     public void ssh_password_publishing() throws IOException {
         SshdContainer sshd = docker.get();
@@ -291,22 +230,6 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
         assertThat(FileUtils.readFileToString(new File(tempCopyFile)), CoreMatchers.is(cp_file.asText()));
     }
 
-    /**
-     @native(docker)
-     Scenario: Configure a job with over ssh publishing
-     Given I have installed the "publish-over-ssh" plugin
-     And a docker fixture "sshd"
-     And a job
-     When I configure docker fixture as SSH site
-     And I configure the job to use a unsecure keyfile with passphrase
-     And I copy resource "scp_plugin/lorem-ipsum-scp.txt" into workspace
-     And I publish "lorem-ipsum-scp.txt" with SSH plugin
-     And I save the job
-     And I build the job
-     Then the build should succeed
-     And SSH plugin should have published "lorem-ipsum-scp.txt" on docker fixture
-     And SSH plugin should have create with exec "testecho" on docker fixture
-     */
     @Test
     public void ssh_key_path_and_key_password_and_exec_publishing() throws IOException {
         SshdContainer sshd = docker.get();

@@ -69,47 +69,16 @@ public class ActiveDirectoryTest extends AbstractJUnitTest {
         securityDisabler = new SecurityDisabler(jenkins);
     }
 
-    /**
-     * Scenario1: user can log-in to Jenkins as admin after AD security configured-<br>
-     * Given a Jenkins instance<br>
-     * And an active-directory plugin version 1.38 (or greater)<br>
-     * And an AD security configuration that is matrix-based (project)<br>
-     * And a user added to that matrix so she can Administer<br>
-     * When test button succeeded<br>
-     * And I save such an AD security configuration<br>
-     * Then that user can log-in to that Jenkins as admin.
-     */
     @Test
     public void user_can_login_to_Jenkins_as_admin_after_AD_security_configured() {
         userCanLoginToJenkinsAsAdmin(ActiveDirectoryEnv.get().getUser());
     }
 
-    /**
-     * Scenario2: user can log-in to Jenkins as admin group member after AD security configured-<br>
-     * Given a Jenkins instance<br>
-     * And an active-directory plugin version 1.38 (or greater)<br>
-     * And an AD security configuration that is matrix-based (project)<br>
-     * And a group added to that matrix so its members can Administer<br>
-     * And a user being a member of that group<br>
-     * When test button succeeded<br>
-     * And I save such an AD security configuration<br>
-     * Then that user can log-in to that Jenkins as admin.
-     */
     @Test
     public void user_can_login_to_Jenkins_as_admin_group_member_after_AD_security_configured() {
         userCanLoginToJenkinsAsAdmin(ActiveDirectoryEnv.get().getGroup());
     }
 
-    /**
-     * Scenario3: user wannabe cannot log-in to Jenkins after AD security configured-<br>
-     * Given a Jenkins instance<br>
-     * And an active-directory plugin version 1.38 (or greater)<br>
-     * And an AD security configuration that is matrix-based (project)<br>
-     * And a wannabe added to that matrix thinking he can Administer<br>
-     * When test button succeeded<br>
-     * And I save such an AD security configuration<br>
-     * Then that user wannabe cannot log-in to that Jenkins at all.
-     */
     @Test
     public void wannabe_cannot_login_to_Jenkins_after_AD_security_configured() {
         userCanLoginToJenkinsAsAdmin(ActiveDirectoryEnv.get().getUser());

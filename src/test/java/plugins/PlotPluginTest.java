@@ -8,12 +8,6 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Before;
 import org.junit.Test;
 
-/**
- Feature: Adds Plotting support
-   In order to be able to visualize build metrics
-   As a Jenkins user
-   I want to configure and generate various plots
- */
 @WithPlugins("plot")
 public class PlotPluginTest extends AbstractJUnitTest {
 
@@ -24,19 +18,6 @@ public class PlotPluginTest extends AbstractJUnitTest {
         job = jenkins.jobs.create();
     }
 
-    /**
-     Scenario: Generate simple plot
-       Given I have installed the "plot" plugin
-       And a job
-       When I configure the job
-       And I copy resource "plot_plugin/plot.csv" into workspace
-       And I add plot "My plot" in group "My group"
-       And I configure csv data source "plot.csv"
-       And I save the job
-       And I build the job
-       Then the build should succeed
-       And there should be a plot called "My plot" in group "My group"
-     */
     @Test
     public void generate_simple_plot() {
         job.configure();
@@ -51,20 +32,6 @@ public class PlotPluginTest extends AbstractJUnitTest {
         assertThatBuildHasPlot("My plot","My group");
     }
 
-    /**
-     Scenario: Post-build rendering should work
-       Given I have installed the "plot" plugin
-       And a job
-       When I configure the job
-       And I add plot "Some plot" in group "Plots"
-       And I save the job
-       And I configure the job
-       And I configure csv data source "plot.csv"
-       And I save the job
-       And I build the job
-       Then the build should succeed
-       And there should be a plot called "Some plot" in group "Plots"
-     */
     @Test @Issue({"JENKINS-18585","JENKINS-18674"})
     public void postbuild_rendering_should_work() {
         job.configure();

@@ -1,7 +1,6 @@
 package org.jenkinsci.test.acceptance;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.util.Modules;
 import org.jenkinsci.groovy.binder.GroovyWiringModule;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.guice.AdditionalBinderDsl;

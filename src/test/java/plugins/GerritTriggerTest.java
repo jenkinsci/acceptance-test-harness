@@ -83,16 +83,6 @@ public class GerritTriggerTest extends AbstractJUnitTest {
         LOGGER.addHandler(handler);
     }
 
-    /**
-     * Scenario: Gerrit has its Change review flags checked after Jenkins set them-<br>
-     * Given a Jenkins instance<br>
-     * And a gerrit-trigger plugin<br>
-     * And an existing Gerrit instance configured in that Jenkins<br>
-     * When I push a Change that builds successfully for review<br>
-     * Then Jenkins does build it successfully indeed<br>
-     * And Jenkins sets the Change review flags accordingly towards Gerrit<br>
-     * And Gerrit then consider these flags as checked.
-     */
     @Test
     public void gerrit_has_review_flags_checked_after_jenkins_set_them() {
         assumeTrue(new File(GerritTriggerEnv.get().getUserHome(), ".netrc").exists());
@@ -253,14 +243,6 @@ public class GerritTriggerTest extends AbstractJUnitTest {
         }
     }
 
-    /**
-     * Scenario: build is triggered after ref is updated<br>
-     * Given a Jenkins instance<br>
-     * And a gerrit-trigger plugin<br>
-     * And an existing Gerrit instance configured in that Jenkins<br>
-     * When I push a Change to Gerrit<br>
-     * Then Jenkins does build it successfully indeed<br>
-     */
     @Test
     public void build_is_triggered_after_ref_is_updated() {
         GerritTriggerNewServer newServer = new GerritTriggerNewServer(jenkins);
@@ -297,14 +279,6 @@ public class GerritTriggerTest extends AbstractJUnitTest {
         return valueFrom(stringFrom(logProcessBuilderIssues(gitLog1Pb, "git log")),".+Change-Id:(.+)");
     }
 
-    /**
-     * Scenario: build is triggered after comment is added<br>
-     * Given a Jenkins instance<br>
-     * And a gerrit-trigger plugin<br>
-     * And an existing Gerrit instance configured in that Jenkins<br>
-     * When I add a comment to a code review<br>
-     * Then Jenkins does build it successfully indeed<br>
-     */
     @Test
     public void build_is_triggered_after_comment_is_added() {
         assumeTrue(new File(GerritTriggerEnv.get().getUserHome(),".netrc").exists());
@@ -333,14 +307,6 @@ public class GerritTriggerTest extends AbstractJUnitTest {
         }
     }
 
-    /**
-     * Scenario: build is triggered after a draft is published<br>
-     * Given a Jenkins instance<br>
-     * And a gerrit-trigger plugin<br>
-     * And an existing Gerrit instance configured in that Jenkins<br>
-     * When I publish a new draft<br>
-     * Then Jenkins does build it successfully<br>
-     */
     @Test
     public void gerrit_trigger_build_when_draft_published() {
         assumeTrue(new File(GerritTriggerEnv.get().getUserHome(),".netrc").exists());
@@ -381,14 +347,6 @@ public class GerritTriggerTest extends AbstractJUnitTest {
         return changeID;
     }
 
-    /**
-     * Scenario: build is triggered after a change is merged<br>
-     * Given a Jenkins instance<br>
-     * And a gerrit-trigger plugin<br>
-     * And an existing Gerrit instance configured in that Jenkins<br>
-     * When I merge a new change<br>
-     * Then Jenkins does build it successfully<br>
-     */
     @Test
     public void gerrit_trigger_build_when_changes_merged() {
         assumeTrue(new File(GerritTriggerEnv.get().getUserHome(), ".netrc").exists());

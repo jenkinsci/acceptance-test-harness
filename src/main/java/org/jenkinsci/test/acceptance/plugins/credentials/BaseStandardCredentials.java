@@ -24,8 +24,6 @@
 
 package org.jenkinsci.test.acceptance.plugins.credentials;
 
-import java.util.concurrent.Callable;
-
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.PageArea;
 import org.jenkinsci.test.acceptance.po.PageObject;
