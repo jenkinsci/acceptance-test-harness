@@ -22,6 +22,7 @@ import org.jenkinsci.test.acceptance.update_center.PluginMetadata;
 import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata;
 import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata.UnableToResolveDependencies;
 import org.junit.internal.AssumptionViolatedException;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 
@@ -77,7 +78,22 @@ public class PluginManager extends ContainerPageObject {
      */
     public void checkForUpdates() {
         visit("advanced");
+        // The check now button is a POST with a redirect to the same page.
+        // We use the button itself to detect when the page has changed, which happens after the refresh has been done
+        final WebElement button = find(by.button("Check now"));
         clickButton("Check now");
+        waitFor().withTimeout(30, TimeUnit.SECONDS).until(new Callable<Object>() {
+            @Override
+            public Object call() throws Exception {
+                try {
+                    button.findElement(by.id("it does not matter"));
+                } catch(StaleElementReferenceException e) {
+                    return true; // we are in another page now
+                } catch(Exception e) {
+                }
+                return false;
+            }
+        });
         updated = true;
     }
 
