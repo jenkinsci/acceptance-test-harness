@@ -88,10 +88,10 @@ public class PluginManager extends ContainerPageObject {
                 try {
                     button.findElement(by.id("it does not matter"));
                 } catch(StaleElementReferenceException e) {
-                    return true; // we are in another page now
+                    return Boolean.TRUE; // we are in another page now
                 } catch(Exception e) {
                 }
-                return false;
+                return Boolean.FALSE;
             }
         });
         updated = true;
