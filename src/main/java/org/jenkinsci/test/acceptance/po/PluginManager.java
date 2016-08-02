@@ -76,8 +76,8 @@ public class PluginManager extends ContainerPageObject {
      * Force update the plugin update center metadata.
      */
     public void checkForUpdates() {
-        visit("checkUpdates");
-        waitFor(by.xpath("//span[@id='completionMarker' and text()='Done']"));
+        visit("advanced");
+        clickButton("Check now");
         updated = true;
     }
 
