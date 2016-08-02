@@ -5,14 +5,12 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.base.Function;
 import org.kohsuke.randname.RandomNameGenerator;
 import org.openqa.selenium.By;
-import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 

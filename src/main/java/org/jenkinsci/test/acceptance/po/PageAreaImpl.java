@@ -1,13 +1,10 @@
 package org.jenkinsci.test.acceptance.po;
 
-import com.google.common.base.Function;
 import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.List;
 
 /**
  * Special kind of page object that maps to a portion of a page with multiple INPUT controls.

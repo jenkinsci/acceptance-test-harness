@@ -23,19 +23,11 @@
  */
 package org.jenkinsci.test.acceptance.plugins.openstack;
 
-import com.google.common.base.Function;
-import org.jenkinsci.test.acceptance.po.CapybaraPortingLayer;
 import org.jenkinsci.test.acceptance.po.Cloud;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.PageObject;
-import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.TimeoutException;
-import org.openqa.selenium.WebElement;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.List;
 import java.util.concurrent.Callable;
 
 /**
