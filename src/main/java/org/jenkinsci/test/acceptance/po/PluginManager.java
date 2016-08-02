@@ -14,6 +14,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
+import com.google.common.base.Predicate;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
@@ -78,20 +79,27 @@ public class PluginManager extends ContainerPageObject {
      */
     public void checkForUpdates() {
         visit("advanced");
-        // The check now button is a POST with a redirect to the same page.
+        // The check now button is a form submit (POST) with a redirect to the same page only if the check is successful.
         // We use the button itself to detect when the page has changed, which happens after the refresh has been done
-        final WebElement button = find(by.button("Check now"));
+        // And we check for the presence of the button again
         clickButton("Check now");
-        waitFor().withTimeout(30, TimeUnit.SECONDS).until(new Callable<Boolean>() {
+        waitFor(find(by.button("Check now"))).withTimeout(30, TimeUnit.SECONDS).until(new Predicate<WebElement>() {
+            // The wait criteria is: we have left the current page and returned to the same one
             @Override
-            public Boolean call() throws Exception {
+            public boolean apply(@Nullable WebElement webElement) {
                 try {
-                    button.findElement(by.id("it does not matter"));
-                } catch(StaleElementReferenceException e) {
-                    return Boolean.TRUE; // we are in another page now
+                    try {
+                        // We interact with the element just to detect if it is stale
+                        webElement.findElement(by.id("it does not matter"));
+                    } catch(StaleElementReferenceException e) {
+                        // with this exception we know we've left the original page
+                        // we look for an element in the page to check for success
+                        find(by.button("Check now"));
+                        return true;
+                    }
                 } catch(Exception e) {
                 }
-                return Boolean.FALSE;
+                return true;
             }
         });
         updated = true;
