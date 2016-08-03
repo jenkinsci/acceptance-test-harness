@@ -79,6 +79,7 @@ public class PluginManager extends ContainerPageObject {
      */
     public void checkForUpdates() {
         visit("advanced");
+        final String current = getCurrentUrl();
         // The check now button is a form submit (POST) with a redirect to the same page only if the check is successful.
         // We use the button itself to detect when the page has changed, which happens after the refresh has been done
         // And we check for the presence of the button again
@@ -94,8 +95,9 @@ public class PluginManager extends ContainerPageObject {
                     } catch(StaleElementReferenceException e) {
                         // with this exception we know we've left the original page
                         // we look for an element in the page to check for success
-                        find(by.button("Check now"));
-                        return true;
+                        if (current.equals(getCurrentUrl())) {
+                            return true;
+                        }
                     }
                 } catch(Exception e) {
                 }
