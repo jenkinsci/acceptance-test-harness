@@ -97,7 +97,10 @@ public class FallbackConfig extends AbstractModule {
             profile.setPreference(LANGUAGE_SELECTOR, "en");
 
             FirefoxBinary binary = new FirefoxBinary();
-            binary.setEnvironmentProperty("DISPLAY", getBrowserDisplay());
+            String display = getBrowserDisplay();
+            if (display != null) {
+                binary.setEnvironmentProperty("DISPLAY", display);
+            }
             return new FirefoxDriver(binary, profile);
         case "ie":
         case "iexplore":
