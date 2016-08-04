@@ -14,6 +14,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
+import com.google.common.base.Predicate;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
@@ -22,6 +23,7 @@ import org.jenkinsci.test.acceptance.update_center.PluginMetadata;
 import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata;
 import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata.UnableToResolveDependencies;
 import org.junit.internal.AssumptionViolatedException;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 
@@ -76,8 +78,32 @@ public class PluginManager extends ContainerPageObject {
      * Force update the plugin update center metadata.
      */
     public void checkForUpdates() {
-        visit("checkUpdates");
-        waitFor(by.xpath("//span[@id='completionMarker' and text()='Done']"));
+        visit("advanced");
+        final String current = getCurrentUrl();
+        // The check now button is a form submit (POST) with a redirect to the same page only if the check is successful.
+        // We use the button itself to detect when the page has changed, which happens after the refresh has been done
+        // And we check for the presence of the button again
+        clickButton("Check now");
+        waitFor(find(by.button("Check now"))).withTimeout(30, TimeUnit.SECONDS).until(new Predicate<WebElement>() {
+            // The wait criteria is: we have left the current page and returned to the same one
+            @Override
+            public boolean apply(@Nullable WebElement webElement) {
+                try {
+                    try {
+                        // We interact with the element just to detect if it is stale
+                        webElement.findElement(by.id("it does not matter"));
+                    } catch(StaleElementReferenceException e) {
+                        // with this exception we know we've left the original page
+                        // we look for an element in the page to check for success
+                        if (current.equals(getCurrentUrl())) {
+                            return true;
+                        }
+                    }
+                } catch(Exception e) {
+                }
+                return true;
+            }
+        });
         updated = true;
     }
 
