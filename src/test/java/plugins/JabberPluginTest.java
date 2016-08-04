@@ -40,7 +40,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 @WithPlugins("jabber")
 @Category(DockerTest.class)
 @WithDocker
-@Ignore // TODO bring this back to life or remove from testsuite
+@Ignore("TODO: Bring this back to life or remove from testsuite")
 public class JabberPluginTest extends AbstractJUnitTest {
     @Inject
     private DockerContainerHolder<JabberContainer> docker;

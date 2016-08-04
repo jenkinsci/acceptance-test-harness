@@ -1,11 +1,13 @@
 #!/bin/bash
 
+# $ eval $(./vnc.sh)
+
 display=":42"
 if [ ! -z "$1" ]; then
   display=":$1"
 fi
 
-vncserver $display
-vncviewer $display &
+vncserver $display > /dev/null
+vncviewer $display > /dev/null &
 
-export BROWSER_DISPLAY=$display
+echo export BROWSER_DISPLAY=$display

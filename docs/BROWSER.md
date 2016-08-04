@@ -41,9 +41,9 @@ For example,
 See [WIRING.md](WIRING.md) for details of where to put this.
 
 ## Avoid focus steal with Xvnc on Linux
-If you select a real GUI browser, such as Firefox, browser window will pop up left and right during tests, making it practically unusable for you to use your computer. There is a script to run vnc server and propage the display number to the test suite.
+If you select a real GUI browser, such as Firefox, browser window will pop up left and right during tests, making it practically unusable for you to use your computer. There is a script to run vnc server and propage the display number to the test suite using dedicated variable `BROWSER_DISPLAY`.
 
-    $ . vnc.sh
+    $ eval "$(./vnc.sh)"
     $ mvn test
 
 ## Example on using remote web driver
