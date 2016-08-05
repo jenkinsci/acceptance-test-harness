@@ -15,6 +15,7 @@ import org.jenkinsci.test.acceptance.docker.fixtures.JavaContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.plugins.credentials.CredentialsPage;
 import org.jenkinsci.test.acceptance.plugins.credentials.ManagedCredentials;
 import org.jenkinsci.test.acceptance.plugins.foreman_node_sharing.ForemanSharedNodeCloudPageArea;
 import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshPrivateKeyCredential;
@@ -23,6 +24,11 @@ import org.jenkinsci.test.acceptance.po.DumbSlave;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.JenkinsConfig;
+import org.jenkinsci.test.acceptance.po.LabelAxis;
+import org.jenkinsci.test.acceptance.po.LabelExpressionAxis;
+import org.jenkinsci.test.acceptance.po.MatrixBuild;
+import org.jenkinsci.test.acceptance.po.MatrixProject;
+import org.jenkinsci.test.acceptance.po.MatrixRun;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -55,12 +61,13 @@ public class ForemanNodeSharingPluginTest extends AbstractJUnitTest {
         foreman = docker.get();
         sshslave = docker2.get();
 
-        final ManagedCredentials c = new ManagedCredentials(jenkins);
+        CredentialsPage c = new CredentialsPage(jenkins, "_");
         c.open();
+
         final SshPrivateKeyCredential sc = c.add(SshPrivateKeyCredential.class);
         sc.username.set("test");
         sc.selectEnterDirectly().privateKey.set(sshslave.getPrivateKeyString());
-        c.save();
+        c.create();
 
         //CS IGNORE MagicNumber FOR NEXT 2 LINES. REASON: Mock object.
         elasticSleep(6000);
@@ -73,6 +80,28 @@ public class ForemanNodeSharingPluginTest extends AbstractJUnitTest {
         cloud = addCloud(jenkins.getConfigPage());
         //CS IGNORE MagicNumber FOR NEXT 2 LINES. REASON: Mock object.
         elasticSleep(10000);
+
+    }
+
+    /**
+     * Test a matrix job
+     */
+    @Test
+    @WithPlugins("matrix-project")
+    public void testMatrixJob() {
+        jenkins.save();
+        MatrixProject job = jenkins.jobs.create(MatrixProject.class);
+        job.configure();
+        LabelExpressionAxis a = job.addAxis(LabelExpressionAxis.class);
+        a.values.set("label1");
+
+        job.addUserAxis("X", "1 2 3 4 5");
+        job.save();
+
+        MatrixBuild b = job.startBuild().waitUntilFinished(240).as(MatrixBuild.class);
+        for (MatrixRun config: b.getConfigurations()) {
+        	config.shouldSucceed();
+        }
 
     }
 
