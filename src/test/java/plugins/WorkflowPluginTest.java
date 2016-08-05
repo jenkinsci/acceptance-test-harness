@@ -72,7 +72,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         job.startBuild().shouldSucceed().shouldContainsConsoleOutput("hello from Workflow");
     }
 
-    @WithPlugins({"workflow-aggregator@1.1", "junit@1.3", "git@2.3"})
+    @WithPlugins({"workflow-aggregator@2.0", "workflow-cps@2.10", "workflow-basic-steps@2.1", "junit@1.15", "git@2.3"})
     @Test public void linearFlow() throws Exception {
         assumeTrue("This test requires a restartable Jenkins", jenkins.canRestart());
         MavenInstallation.installMaven(jenkins, "M3", "3.1.0");
@@ -86,7 +86,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
         job.script.set(
             "node('remote') {\n" +
-            "  git url: 'https://github.com/jglick/simple-maven-project-with-tests.git'\n" +
+            "  git 'https://github.com/jglick/simple-maven-project-with-tests.git'\n" +
             "  def v = version()\n" +
             "  if (v) {\n" +
             "    echo \"Building version ${v}\"\n" +
@@ -96,8 +96,8 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
             "    sh 'mvn -B -Dmaven.test.failure.ignore verify'\n" +
             "  }\n" +
             "  input 'Ready to go?'\n" +
-            "  step([$class: 'ArtifactArchiver', artifacts: '**/target/*.jar', fingerprint: true])\n" +
-            "  step([$class: 'JUnitResultArchiver', testResults: '**/target/surefire-reports/TEST-*.xml'])\n" +
+            "  step([$class: 'ArtifactArchiver', artifacts: '**/target/*.jar', fingerprint: true])\n" + // TODO Jenkins 2.2+: archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
+            "  junit '**/target/surefire-reports/TEST-*.xml'\n" +
             "}\n" +
             "def version() {\n" +
             "  def matcher = readFile('pom.xml') =~ '<version>(.+)</version>'\n" +
@@ -120,15 +120,20 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         clickLink("Proceed");
         // Default 120s timeout of Build.waitUntilFinished sometimes expires waiting for RetentionStrategy.Always to tick (after initial failure of CommandLauncher.launch: EOFException: unexpected stream termination):
         slave.waitUntilOnline();
-        // Can also fail due to double loading of build as per JENKINS-22767:
-        assertTrue(build.isSuccess() || build.isUnstable()); // tests in this project are currently designed to fail at random, so either is OK
+        try {
+            build.shouldSucceed();
+        } catch (AssertionError x) {
+            // Tests in this project are currently designed to fail at random, so either status is OK.
+            // TODO if resultIs were public and there were a disjunction combinator for Matcher we could use it here.
+            build.shouldBeUnstable();
+        }
         new Artifact(build, "target/simple-maven-project-with-tests-1.0-SNAPSHOT.jar").assertThatExists(true);
         build.open();
         clickLink("Test Result");
         assertThat(driver, hasContent("All Tests"));
     }
 
-    @WithPlugins({"workflow-aggregator@1.10", "parallel-test-executor@1.6", "junit@1.3", "git@2.3", "script-security@1.15"})
+    @WithPlugins({"workflow-aggregator@2.0", "workflow-cps@2.10", "workflow-basic-steps@2.1", "parallel-test-executor@1.9", "junit@1.15", "git@2.3"})
     @Native("mvn")
     @Test public void parallelTests() throws Exception {
         for (int i = 0; i < 3; i++) {
@@ -138,10 +143,10 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         job.script.set(
             "node('master') {\n" +
             // TODO could be switched to multibranch, in which case this initial `node` is unnecessary, and each branch can just `checkout scm`
-            "  git url: 'https://github.com/jenkinsci/parallel-test-executor-plugin-sample.git'\n" +
+            "  git 'https://github.com/jenkinsci/parallel-test-executor-plugin-sample.git'\n" +
             "  stash 'sources'\n" +
             "}\n" +
-            "def splits = splitTests([$class: 'CountDrivenParallelism', size: 3])\n" +
+            "def splits = splitTests count(3)\n" +
             "def branches = [:]\n" +
             "for (int i = 0; i < splits.size(); i++) {\n" +
             "  def exclusions = splits.get(i);\n" +
@@ -153,7 +158,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
             // Do not bother with ${tool 'M3'}; would take too long to unpack Maven on all slaves.
             // TODO would be useful for ToolInstallation to support the URL installer, hosting the tool ZIP ourselves somewhere cached.
             "      sh 'mvn -B -Dmaven.test.failure.ignore test'\n" +
-            "      step([$class: 'JUnitResultArchiver', testResults: 'target/surefire-reports/*.xml'])\n" +
+            "      junit 'target/surefire-reports/*.xml'\n" +
             "    }\n" +
             "  }\n" +
             "}\n" +
@@ -163,14 +168,16 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         Build build = job.startBuild();
         try {
             build.shouldSucceed();
-        } catch (AssertionError x) {
-            // again this project is designed to have occasional test failures
-            // TODO if resultIs were public and there were a disjunction combinator for Matcher we could use it here
+        } catch (AssertionError x) { // cf. linearFlow
             build.shouldBeUnstable();
         }
         build.shouldContainsConsoleOutput("No record available"); // first run
         build = job.startBuild();
-        assertTrue(build.isSuccess() || build.isUnstable());
+        try {
+            build.shouldSucceed();
+        } catch (AssertionError x) {
+            build.shouldBeUnstable();
+        }
         build.shouldContainsConsoleOutput("divided into 3 sets");
     }
 
