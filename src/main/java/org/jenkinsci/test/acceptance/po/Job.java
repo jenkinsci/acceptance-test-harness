@@ -298,6 +298,7 @@ public class Job extends TopLevelItem {
     public Build scheduleBuild(Map<String, ?> params) {
         open();
         int nb = getJson().get("nextBuildNumber").intValue();
+        List<Parameter> parameters = getParameters();
         if (parameters.isEmpty()) {
             clickLink("Build Now");
         } else {
