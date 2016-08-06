@@ -22,6 +22,21 @@ public class JobsMixIn extends MixIn {
 
         findCaption(type, getFinder()).click();
 
+        // since 2.7, a bug in Firefox webdriver may prevent the blur event from triggering
+        // properly, so we manually execute a blur event here, see: JENKINS-37232
+        try {
+            executeScript(
+                "var obj = document.getElementById('name');"
+                + "var ev = document.createEvent('MouseEvents');"
+                + "ev.initEvent('blur', true, false);"
+                + "obj.dispatchEvent(ev);"
+                + "return true;");
+        } catch(Exception e) {
+            // This should rarely fail on modern browsers,
+            // we don't really care if it does since Firefox was 
+            // the only one that seemed to exhibit the issue
+        }
+
         clickButton("OK");
         // Sometimes job creation is not fast enough, so make sure it's finished before continue
         waitFor(by.name("config"), 10);
