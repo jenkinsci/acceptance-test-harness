@@ -24,6 +24,7 @@ public class JobsMixIn extends MixIn {
 
         // since 2.7, a bug in Firefox webdriver may prevent the blur event from triggering
         // properly, so we manually execute a blur event here, see: JENKINS-37232
+        // See: https://github.com/seleniumhq/selenium-google-code-issue-archive/issues/7346
         try {
             executeScript(
                 "var obj = document.getElementById('name');"
@@ -31,7 +32,7 @@ public class JobsMixIn extends MixIn {
                 + "ev.initEvent('blur', true, false);"
                 + "obj.dispatchEvent(ev);"
                 + "return true;");
-        } catch(Exception e) {
+        } catch (Exception e) {
             // This should rarely fail on modern browsers,
             // we don't really care if it does since Firefox was 
             // the only one that seemed to exhibit the issue
