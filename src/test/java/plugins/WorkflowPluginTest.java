@@ -72,7 +72,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         job.startBuild().shouldSucceed().shouldContainsConsoleOutput("hello from Workflow");
     }
 
-    @WithPlugins({"workflow-aggregator@2.0", "workflow-cps@2.10", "workflow-basic-steps@2.1", "junit@1.15", "git@2.3"})
+    @WithPlugins({"workflow-aggregator@2.0", "workflow-cps@2.10", "workflow-basic-steps@2.1", "junit@1.18", "git@2.3"})
     @Test public void linearFlow() throws Exception {
         assumeTrue("This test requires a restartable Jenkins", jenkins.canRestart());
         MavenInstallation.installMaven(jenkins, "M3", "3.1.0");
@@ -133,7 +133,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         assertThat(driver, hasContent("All Tests"));
     }
 
-    @WithPlugins({"workflow-aggregator@2.0", "workflow-cps@2.10", "workflow-basic-steps@2.1", "parallel-test-executor@1.9", "junit@1.15", "git@2.3"})
+    @WithPlugins({"workflow-aggregator@2.0", "workflow-cps@2.10", "workflow-basic-steps@2.1", "parallel-test-executor@1.9", "junit@1.18", "git@2.3"})
     @Native("mvn")
     @Test public void parallelTests() throws Exception {
         for (int i = 0; i < 3; i++) {
