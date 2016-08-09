@@ -283,6 +283,17 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
         }
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public void blur(WebElement e) {
+        executeScript(
+            "var obj = arguments[0];"
+            + "var ev = document.createEvent('MouseEvents');"
+            + "ev.initEvent('blur', true, false);"
+            + "obj.dispatchEvent(ev);"
+            + "return true;", e);
+    }
+
     /**
      * Finds all the elements that match the selector.
      * <p/>
