@@ -26,12 +26,7 @@ public class JobsMixIn extends MixIn {
         // properly, so we manually execute a blur event here, see: JENKINS-37232
         // See: https://github.com/seleniumhq/selenium-google-code-issue-archive/issues/7346
         try {
-            executeScript(
-                "var obj = document.getElementById('name');"
-                + "var ev = document.createEvent('MouseEvents');"
-                + "ev.initEvent('blur', true, false);"
-                + "obj.dispatchEvent(ev);"
-                + "return true;");
+            blur(find(By.name("name")));
         } catch (Exception e) {
             // This should rarely fail on modern browsers,
             // we don't really care if it does since Firefox was 
