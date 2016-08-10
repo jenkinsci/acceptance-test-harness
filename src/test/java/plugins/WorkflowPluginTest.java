@@ -116,10 +116,10 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         });
         build.shouldContainsConsoleOutput("Building version 1.0-SNAPSHOT");
         jenkins.restart();
+        // Default 120s timeout of Build.waitUntilFinished sometimes expires waiting for RetentionStrategy.Always to tick (after initial failure of CommandLauncher.launch: EOFException: unexpected stream termination):
+        slave.waitUntilOnline(); // TODO rather wait for build output: "Ready to run"
         visit(build.getConsoleUrl());
         clickLink("Proceed");
-        // Default 120s timeout of Build.waitUntilFinished sometimes expires waiting for RetentionStrategy.Always to tick (after initial failure of CommandLauncher.launch: EOFException: unexpected stream termination):
-        slave.waitUntilOnline();
         try {
             build.shouldSucceed();
         } catch (AssertionError x) {
