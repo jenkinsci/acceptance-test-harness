@@ -67,7 +67,7 @@ public class BeakerBuilderPluginTest extends AbstractJUnitTest {
         job.save();
 
         Build build = job.scheduleBuild().waitUntilFinished(60*60*60);
-        assertThat(build.getConsole(), containsString("Job successfuly submitted to Beaker"));
+        assertThat(build.getConsole(), containsString("Job successfully submitted to Beaker"));
         build.shouldSucceed();
     }
 
