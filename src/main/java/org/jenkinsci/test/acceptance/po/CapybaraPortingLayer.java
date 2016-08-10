@@ -87,6 +87,11 @@ public interface CapybaraPortingLayer {
     void check(WebElement e, boolean state);
 
     /**
+     * Sends a blur event to the provided element
+     */
+    void blur(WebElement e);
+
+    /**
      * Finds all the elements that match the selector.
      * <p/>
      * <p/>
