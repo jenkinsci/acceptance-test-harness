@@ -41,6 +41,7 @@ public class ExternalWorkspaceManagerPluginTest extends AbstractJUnitTest {
     public void setUp() throws Exception {
         // temporary, until the plugin is released!
         jenkins.getPluginManager().installPlugin(new File("/Users/alexsomai/workspace/external-workspace-manager/target/external-workspace-manager.hpi"));
+        jenkins.getPluginManager().installPlugin(new File("/Users/alexsomai/workspace/run-selector-plugin/target/run-selector.hpi"));
 
         MavenInstallation.installMaven(jenkins, "M3", "3.1.0");
 
@@ -53,25 +54,21 @@ public class ExternalWorkspaceManagerPluginTest extends AbstractJUnitTest {
 
     @Test
     public void shareWorkspaceOneJobTwoNodes() throws Exception {
-        WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
-        job.script.set(String.format("" +
-                        "def extWorkspace = exwsAllocate diskPoolId: '%s' \n" +
-                        "node ('linux') { \n" +
-                        "   exws (extWorkspace) { \n" +
-                        "       git 'https://github.com/alexsomai/dummy-hello-world.git' \n" +
-                        "       def mvnHome = tool 'M3'\n" +
-                        "       sh \"${mvnHome}/bin/mvn clean install -DskipTests\" \n" +
-                        "   } \n" +
-                        "} \n" +
-                        "node ('test') { \n" +
-                        "   exws (extWorkspace) { \n" +
-                        "       def mvnHome = tool 'M3' \n" +
-                        "       sh \"${mvnHome}/bin/mvn test\" \n" +
-                        "   } \n" +
-                        "}"
-                , DISK_POOL_ID));
-        job.sandbox.uncheck();
-        job.save();
+        WorkflowJob job = createWorkflowJob(String.format("" +
+                "def extWorkspace = exwsAllocate '%s' \n" +
+                "node ('linux') { \n" +
+                "   exws (extWorkspace) { \n" +
+                "       git 'https://github.com/alexsomai/dummy-hello-world.git' \n" +
+                "       def mvnHome = tool 'M3'\n" +
+                "       sh \"${mvnHome}/bin/mvn clean install -DskipTests\" \n" +
+                "   } \n" +
+                "} \n" +
+                "node ('test') { \n" +
+                "   exws (extWorkspace) { \n" +
+                "       def mvnHome = tool 'M3' \n" +
+                "       sh \"${mvnHome}/bin/mvn test\" \n" +
+                "   } \n" +
+                "}", DISK_POOL_ID));
 
         Build build = job.startBuild();
         build.shouldSucceed();
@@ -82,6 +79,43 @@ public class ExternalWorkspaceManagerPluginTest extends AbstractJUnitTest {
         assertThat(exwsAllocateText, containsString(String.format("Disk Pool ID: %s", DISK_POOL_ID)));
         assertThat(exwsAllocateText, containsString("Disk ID: disk1"));
         assertThat(exwsAllocateText, containsString(String.format("Complete Path on Disk: %s/%s", job.name, build.getNumber())));
+    }
+
+    @Test
+    public void shareWorkspaceTwoJobsTwoNodes() throws Exception {
+        WorkflowJob upstreamJob = createWorkflowJob(String.format("" +
+                "def extWorkspace = exwsAllocate '%s' \n" +
+                "node ('linux') { \n" +
+                "   exws (extWorkspace) { \n" +
+                "       git 'https://github.com/alexsomai/dummy-hello-world.git' \n" +
+                "       def mvnHome = tool 'M3'\n" +
+                "       sh \"${mvnHome}/bin/mvn clean install -DskipTests\" \n" +
+                "   } \n" +
+                "}", DISK_POOL_ID));
+
+        Build upstreamBuild = upstreamJob.startBuild();
+        upstreamBuild.shouldSucceed();
+        assertThat(upstreamBuild.getConsole(), containsString(String.format("Running in %s/%s/%s", fakeMountingPoint, upstreamJob.name, upstreamBuild.getNumber())));
+
+        WorkflowJob downstreamJob = createWorkflowJob(String.format("" +
+                "def run = selectRun '%s' \n" +
+                "def extWorkspace = exwsAllocate selectedRun: run \n" +
+                "node ('test') { \n" +
+                "   exws (extWorkspace) { \n" +
+                "       def mvnHome = tool 'M3' \n" +
+                "       sh \"${mvnHome}/bin/mvn test\" \n" +
+                "   } \n" +
+                "}", upstreamJob.name));
+
+        Build downstreamBuild = downstreamJob.startBuild();
+        downstreamBuild.shouldSucceed();
+        assertThat(downstreamBuild.getConsole(), containsString(String.format("Running in %s/%s/%s", fakeMountingPoint, upstreamJob.name, upstreamBuild.getNumber())));
+
+        downstreamBuild.visit("exwsAllocate");
+        String exwsAllocateText = driver.findElement(By.id("main-panel")).getText();
+        assertThat(exwsAllocateText, containsString(String.format("Disk Pool ID: %s", DISK_POOL_ID)));
+        assertThat(exwsAllocateText, containsString("Disk ID: disk1"));
+        assertThat(exwsAllocateText, containsString(String.format("Complete Path on Disk: %s/%s", upstreamJob.name, upstreamBuild.getNumber())));
     }
 
     private void setUpGlobalConfig() {
@@ -100,5 +134,14 @@ public class ExternalWorkspaceManagerPluginTest extends AbstractJUnitTest {
         ExternalNodeConfig nodeConfig = new ExternalNodeConfig(linuxSlave);
         nodeConfig.setConfig(DISK_POOL_ID, "disk1", "disk2", fakeMountingPoint);
         linuxSlave.save();
+    }
+
+    private WorkflowJob createWorkflowJob(String script) {
+        WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
+        job.script.set(script);
+        job.sandbox.uncheck();
+        job.save();
+
+        return job;
     }
 }
