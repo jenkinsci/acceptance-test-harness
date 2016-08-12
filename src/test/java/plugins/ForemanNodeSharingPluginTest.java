@@ -70,7 +70,7 @@ public class ForemanNodeSharingPluginTest extends AbstractJUnitTest {
         c.create();
 
         //CS IGNORE MagicNumber FOR NEXT 2 LINES. REASON: Mock object.
-        elasticSleep(6000);
+        elasticSleep(10000);
 
         if (populateForeman(foreman.getUrl().toString()+"/api/v2", sshslave.getCid(), labelExpression) != 0) {
             throw new Exception("failed to populate foreman");
@@ -134,10 +134,6 @@ public class ForemanNodeSharingPluginTest extends AbstractJUnitTest {
     public void testProvision() throws Exception {
         jenkins.save();
 
-        DumbSlave slave = jenkins.slaves.create(DumbSlave.class, "ignore-this-slave++needed-to-enable-job-labels");
-        slave.setExecutors(1);
-        slave.save();
-
         FreeStyleJob job = createAndConfigureJob();
 
         Build b = job.scheduleBuild();
@@ -154,10 +150,6 @@ public class ForemanNodeSharingPluginTest extends AbstractJUnitTest {
     @Test
     public void testProvisionAfterRestart() throws Exception {
         jenkins.save();
-
-        DumbSlave slave = jenkins.slaves.create(DumbSlave.class, "ignore-this-slave++needed-to-enable-job-labels");
-        slave.setExecutors(1);
-        slave.save();
 
         FreeStyleJob job = createAndConfigureJob();
 
