@@ -4,7 +4,7 @@ import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.PageObject;
 
 /**
- * Helper class for interacting with External lWorkspace Manager Plugin node config page.
+ * Helper class for interacting with External Workspace Manager Plugin node config page.
  *
  * @author Alexandru Somai
  */

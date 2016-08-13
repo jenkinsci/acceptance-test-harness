@@ -19,6 +19,10 @@ import org.openqa.selenium.By;
 import java.io.File;
 import java.util.concurrent.ExecutionException;
 
+import static org.apache.commons.io.FileUtils.listFiles;
+import static org.apache.commons.io.filefilter.FileFilterUtils.directoryFileFilter;
+import static org.apache.commons.io.filefilter.FileFilterUtils.fileFileFilter;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.Assert.assertThat;
 
@@ -27,7 +31,7 @@ import static org.junit.Assert.assertThat;
  *
  * @author Alexandru Somai
  */
-@WithPlugins({"workflow-aggregator", "job-restrictions", "git"})
+@WithPlugins({"workflow-aggregator", "job-restrictions", "git", "ws-cleanup"})
 public class ExternalWorkspaceManagerPluginTest extends AbstractJUnitTest {
 
     @ClassRule
@@ -59,7 +63,7 @@ public class ExternalWorkspaceManagerPluginTest extends AbstractJUnitTest {
                 "node ('linux') { \n" +
                 "   exws (extWorkspace) { \n" +
                 "       git 'https://github.com/alexsomai/dummy-hello-world.git' \n" +
-                "       def mvnHome = tool 'M3'\n" +
+                "       def mvnHome = tool 'M3' \n" +
                 "       sh \"${mvnHome}/bin/mvn clean install -DskipTests\" \n" +
                 "   } \n" +
                 "} \n" +
@@ -88,7 +92,7 @@ public class ExternalWorkspaceManagerPluginTest extends AbstractJUnitTest {
                 "node ('linux') { \n" +
                 "   exws (extWorkspace) { \n" +
                 "       git 'https://github.com/alexsomai/dummy-hello-world.git' \n" +
-                "       def mvnHome = tool 'M3'\n" +
+                "       def mvnHome = tool 'M3' \n" +
                 "       sh \"${mvnHome}/bin/mvn clean install -DskipTests\" \n" +
                 "   } \n" +
                 "}", DISK_POOL_ID));
@@ -116,6 +120,29 @@ public class ExternalWorkspaceManagerPluginTest extends AbstractJUnitTest {
         assertThat(exwsAllocateText, containsString(String.format("Disk Pool ID: %s", DISK_POOL_ID)));
         assertThat(exwsAllocateText, containsString("Disk ID: disk1"));
         assertThat(exwsAllocateText, containsString(String.format("Complete Path on Disk: %s/%s", upstreamJob.name, upstreamBuild.getNumber())));
+    }
+
+    @Test
+    public void externalWorkspaceCleanup() throws Exception {
+        WorkflowJob job = createWorkflowJob(String.format("" +
+                "def extWorkspace = exwsAllocate diskPoolId: '%s' \n" +
+                "node ('linux') { \n" +
+                "	exws (extWorkspace) { \n" +
+                "		try { \n" +
+                "           git 'https://github.com/alexsomai/dummy-hello-world.git' \n" +
+                "           def mvnHome = tool 'M3' \n" +
+                "           sh \"${mvnHome}/bin/mvn clean install -DskipTests\" \n" +
+                "		} finally { \n" +
+                "			step ([$class: 'WsCleanup']) \n" +
+                "		} \n" +
+                "	} \n" +
+                "}", DISK_POOL_ID));
+
+        Build build = job.startBuild();
+        build.shouldSucceed();
+        assertThat(build.getConsole(), containsString(String.format("Running in %s/%s/%s", fakeMountingPoint, job.name, build.getNumber())));
+        assertThat(build.getConsole(), containsString("[WS-CLEANUP] Deleting project workspace...[WS-CLEANUP] done"));
+        assertThat(listFiles(tmp.getRoot(), fileFileFilter(), directoryFileFilter()), hasSize(0));
     }
 
     private void setUpGlobalConfig() {
