@@ -142,7 +142,6 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
                         "         messagesPattern: '',\n" +
                         "         unHealthy: ''])\n" +
                         "}\n");
-        job.sandbox.check();
         job.save();
         Build build = job.startBuild();
         build.shouldSucceed();
