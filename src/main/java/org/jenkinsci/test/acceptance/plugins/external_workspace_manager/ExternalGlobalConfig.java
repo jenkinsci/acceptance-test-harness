@@ -14,7 +14,8 @@ public class ExternalGlobalConfig extends PageAreaImpl {
         super(context, "/org-jenkinsci-plugins-ewm-steps-ExwsAllocateStep");
     }
 
-    public void addDiskPool(String diskPoolId, String diskOneId, String diskTwoId) {
+    public void addDiskPool(String diskPoolId, String diskOneId, String diskTwoId,
+                            String mountToDiskOne, String mountToDiskTwo) {
         // add disk pool
         control("repeatable-add").click();
         control("diskPools/diskPoolId").set(diskPoolId);
@@ -22,11 +23,11 @@ public class ExternalGlobalConfig extends PageAreaImpl {
         // add first disk
         control("diskPools/repeatable-add").click();
         control("diskPools/disks/diskId").set(diskOneId);
-        control("diskPools/disks/masterMountPoint").set("/fake-mount-point-1");
+        control("diskPools/disks/masterMountPoint").set(mountToDiskOne);
 
         // add second disk
         control("diskPools/repeatable-add").click();
         control("diskPools/disks[1]/diskId").set(diskTwoId);
-        control("diskPools/disks[1]/masterMountPoint").set("/fake-mount-point-2");
+        control("diskPools/disks[1]/masterMountPoint").set(mountToDiskTwo);
     }
 }

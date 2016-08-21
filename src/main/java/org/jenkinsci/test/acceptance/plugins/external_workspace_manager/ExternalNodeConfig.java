@@ -17,16 +17,17 @@ public class ExternalNodeConfig extends PageAreaImpl {
     public void setConfig(String diskPoolId, String diskOneId, String diskTwoId, String fakeMountingPoint) {
         // set disk pool
         control("").click();
-        control("diskPoolRefId").set(diskPoolId);
+        control("repeatable-add").click();
+        control("nodeDiskPools/diskPoolRefId").set(diskPoolId);
 
         // add first disk
-        control("repeatable-add").click();
-        control("diskNodes/diskRefId").set(diskOneId);
-        control("diskNodes/localRootPath").set(fakeMountingPoint);
+        control("nodeDiskPools/repeatable-add").click();
+        control("nodeDiskPools/nodeDisks/diskRefId").set(diskOneId);
+        control("nodeDiskPools/nodeDisks/localRootPath").set(fakeMountingPoint);
 
         // add second disk
-        control("repeatable-add").click();
-        control("diskNodes[1]/diskRefId").set(diskTwoId);
-        control("diskNodes[1]/localRootPath").set(fakeMountingPoint);
+        control("nodeDiskPools/repeatable-add").click();
+        control("nodeDiskPools/nodeDisks[1]/diskRefId").set(diskTwoId);
+        control("nodeDiskPools/nodeDisks[1]/localRootPath").set(fakeMountingPoint);
     }
 }

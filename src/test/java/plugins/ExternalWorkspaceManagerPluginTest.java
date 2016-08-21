@@ -16,12 +16,11 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.openqa.selenium.By;
 
-import java.io.File;
 import java.util.concurrent.ExecutionException;
 
 import static org.apache.commons.io.FileUtils.listFiles;
 import static org.apache.commons.io.filefilter.FileFilterUtils.directoryFileFilter;
-import static org.apache.commons.io.filefilter.FileFilterUtils.fileFileFilter;
+import static org.apache.commons.io.filefilter.FileFilterUtils.nameFileFilter;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.Assert.assertThat;
@@ -31,29 +30,29 @@ import static org.junit.Assert.assertThat;
  *
  * @author Alexandru Somai
  */
-@WithPlugins({"workflow-aggregator", "job-restrictions", "git", "ws-cleanup"})
+@WithPlugins({"workflow-aggregator", "external-workspace-manager", "run-selector", "ws-cleanup", "git"})
 public class ExternalWorkspaceManagerPluginTest extends AbstractJUnitTest {
 
     @ClassRule
     public static TemporaryFolder tmp = new TemporaryFolder();
 
     private static final String DISK_POOL_ID = "diskpool1";
+    private static final String DISK_ONE = "disk1";
+    private static final String DISK_TWO = "disk2";
+    private static final String MOUNT_FROM_MASTER_TO_DISK_ONE = "/fake-mount-point-1";
+    private static final String MOUNT_FROM_MASTER_TO_DISK_TWO = "/fake-mount-point-2";
 
-    private String fakeMountingPoint;
+    private String fakeNodeMountingPoint;
 
     @Before
     public void setUp() throws Exception {
-        // temporary, until the plugin is released!
-        jenkins.getPluginManager().installPlugin(new File("/Users/alexsomai/workspace/external-workspace-manager/target/external-workspace-manager.hpi"));
-        jenkins.getPluginManager().installPlugin(new File("/Users/alexsomai/workspace/run-selector-plugin/target/run-selector.hpi"));
-
         MavenInstallation.installMaven(jenkins, "M3", "3.1.0");
 
         setUpGlobalConfig();
 
-        fakeMountingPoint = tmp.newFolder().getAbsolutePath();
-        setUpNode("linux", fakeMountingPoint);
-        setUpNode("test", fakeMountingPoint);
+        fakeNodeMountingPoint = tmp.newFolder().getAbsolutePath();
+        setUpNode("linux", fakeNodeMountingPoint);
+        setUpNode("test", fakeNodeMountingPoint);
     }
 
     @Test
@@ -76,13 +75,9 @@ public class ExternalWorkspaceManagerPluginTest extends AbstractJUnitTest {
 
         Build build = job.startBuild();
         build.shouldSucceed();
-        assertThat(build.getConsole(), containsString(String.format("Running in %s/%s/%s", fakeMountingPoint, job.name, build.getNumber())));
+        assertThat(build.getConsole(), containsString(String.format("Running in %s/%s/%s", fakeNodeMountingPoint, job.name, build.getNumber())));
 
-        build.visit("exwsAllocate");
-        String exwsAllocateText = driver.findElement(By.id("main-panel")).getText();
-        assertThat(exwsAllocateText, containsString(String.format("Disk Pool ID: %s", DISK_POOL_ID)));
-        assertThat(exwsAllocateText, containsString("Disk ID: disk1"));
-        assertThat(exwsAllocateText, containsString(String.format("Complete Path on Disk: %s/%s", job.name, build.getNumber())));
+        verifyExternalWorkspacesAction(job.name, build);
     }
 
     @Test
@@ -99,7 +94,8 @@ public class ExternalWorkspaceManagerPluginTest extends AbstractJUnitTest {
 
         Build upstreamBuild = upstreamJob.startBuild();
         upstreamBuild.shouldSucceed();
-        assertThat(upstreamBuild.getConsole(), containsString(String.format("Running in %s/%s/%s", fakeMountingPoint, upstreamJob.name, upstreamBuild.getNumber())));
+        assertThat(upstreamBuild.getConsole(), containsString(String.format("Running in %s/%s/%s", fakeNodeMountingPoint, upstreamJob.name, upstreamBuild.getNumber())));
+        verifyExternalWorkspacesAction(upstreamJob.name, upstreamBuild);
 
         WorkflowJob downstreamJob = createWorkflowJob(String.format("" +
                 "def run = selectRun '%s' \n" +
@@ -113,25 +109,18 @@ public class ExternalWorkspaceManagerPluginTest extends AbstractJUnitTest {
 
         Build downstreamBuild = downstreamJob.startBuild();
         downstreamBuild.shouldSucceed();
-        assertThat(downstreamBuild.getConsole(), containsString(String.format("Running in %s/%s/%s", fakeMountingPoint, upstreamJob.name, upstreamBuild.getNumber())));
-
-        downstreamBuild.visit("exwsAllocate");
-        String exwsAllocateText = driver.findElement(By.id("main-panel")).getText();
-        assertThat(exwsAllocateText, containsString(String.format("Disk Pool ID: %s", DISK_POOL_ID)));
-        assertThat(exwsAllocateText, containsString("Disk ID: disk1"));
-        assertThat(exwsAllocateText, containsString(String.format("Complete Path on Disk: %s/%s", upstreamJob.name, upstreamBuild.getNumber())));
+        assertThat(downstreamBuild.getConsole(), containsString(String.format("Running in %s/%s/%s", fakeNodeMountingPoint, upstreamJob.name, upstreamBuild.getNumber())));
+        verifyExternalWorkspacesAction(upstreamJob.name, upstreamBuild);
     }
 
     @Test
     public void externalWorkspaceCleanup() throws Exception {
         WorkflowJob job = createWorkflowJob(String.format("" +
-                "def extWorkspace = exwsAllocate diskPoolId: '%s' \n" +
+                "def extWorkspace = exwsAllocate '%s' \n" +
                 "node ('linux') { \n" +
                 "	exws (extWorkspace) { \n" +
                 "		try { \n" +
-                "           git 'https://github.com/alexsomai/dummy-hello-world.git' \n" +
-                "           def mvnHome = tool 'M3' \n" +
-                "           sh \"${mvnHome}/bin/mvn clean install -DskipTests\" \n" +
+                "           writeFile file: 'foobar.txt', text: 'any' \n" +
                 "		} finally { \n" +
                 "			step ([$class: 'WsCleanup']) \n" +
                 "		} \n" +
@@ -140,15 +129,15 @@ public class ExternalWorkspaceManagerPluginTest extends AbstractJUnitTest {
 
         Build build = job.startBuild();
         build.shouldSucceed();
-        assertThat(build.getConsole(), containsString(String.format("Running in %s/%s/%s", fakeMountingPoint, job.name, build.getNumber())));
+        assertThat(build.getConsole(), containsString(String.format("Running in %s/%s/%s", fakeNodeMountingPoint, job.name, build.getNumber())));
         assertThat(build.getConsole(), containsString("[WS-CLEANUP] Deleting project workspace...[WS-CLEANUP] done"));
-        assertThat(listFiles(tmp.getRoot(), fileFileFilter(), directoryFileFilter()), hasSize(0));
+        assertThat(listFiles(tmp.getRoot(), nameFileFilter("foobar.txt"), directoryFileFilter()), hasSize(0));
     }
 
     private void setUpGlobalConfig() {
         jenkins.configure();
         ExternalGlobalConfig globalConfig = new ExternalGlobalConfig(jenkins.getConfigPage());
-        globalConfig.addDiskPool(DISK_POOL_ID, "disk1", "disk2");
+        globalConfig.addDiskPool(DISK_POOL_ID, DISK_ONE, DISK_TWO, MOUNT_FROM_MASTER_TO_DISK_ONE, MOUNT_FROM_MASTER_TO_DISK_TWO);
         jenkins.save();
     }
 
@@ -159,16 +148,25 @@ public class ExternalWorkspaceManagerPluginTest extends AbstractJUnitTest {
         linuxSlave.setLabels(label);
 
         ExternalNodeConfig nodeConfig = new ExternalNodeConfig(linuxSlave);
-        nodeConfig.setConfig(DISK_POOL_ID, "disk1", "disk2", fakeMountingPoint);
+        nodeConfig.setConfig(DISK_POOL_ID, DISK_ONE, DISK_TWO, fakeMountingPoint);
         linuxSlave.save();
     }
 
     private WorkflowJob createWorkflowJob(String script) {
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
         job.script.set(script);
-        job.sandbox.uncheck();
         job.save();
 
         return job;
+    }
+
+    private void verifyExternalWorkspacesAction(String jobName, Build build) {
+        build.visit("exwsAllocate");
+        String exwsAllocateText = driver.findElement(By.id("main-panel")).getText();
+        assertThat(exwsAllocateText, containsString(String.format("Disk Pool ID: %s", DISK_POOL_ID)));
+        assertThat(exwsAllocateText, containsString(String.format("Disk ID: %s", DISK_ONE)));
+        assertThat(exwsAllocateText, containsString(String.format("Workspace path on %s: %s/%s", DISK_ONE, jobName, build.getNumber())));
+        assertThat(exwsAllocateText, containsString(String.format("Complete workspace path on %s (from Jenkins master): %s/%s/%s",
+                DISK_ONE, MOUNT_FROM_MASTER_TO_DISK_ONE, jobName, build.getNumber())));
     }
 }
