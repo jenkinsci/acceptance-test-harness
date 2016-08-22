@@ -1,7 +1,7 @@
 package org.jenkinsci.test.acceptance.plugins.external_workspace_manager;
 
+import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
-import org.jenkinsci.test.acceptance.po.PageObject;
 
 /**
  * Helper class for interacting with External Workspace Manager Plugin global config page.
@@ -10,7 +10,7 @@ import org.jenkinsci.test.acceptance.po.PageObject;
  */
 public class ExternalGlobalConfig extends PageAreaImpl {
 
-    public ExternalGlobalConfig(PageObject context) {
+    public ExternalGlobalConfig(JenkinsConfig context) {
         super(context, "/org-jenkinsci-plugins-ewm-steps-ExwsAllocateStep");
     }
 

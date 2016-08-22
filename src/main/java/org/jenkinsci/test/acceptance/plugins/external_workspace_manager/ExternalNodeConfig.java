@@ -1,7 +1,7 @@
 package org.jenkinsci.test.acceptance.plugins.external_workspace_manager;
 
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
-import org.jenkinsci.test.acceptance.po.PageObject;
+import org.jenkinsci.test.acceptance.po.Slave;
 
 /**
  * Helper class for interacting with External Workspace Manager Plugin node config page.
@@ -10,7 +10,7 @@ import org.jenkinsci.test.acceptance.po.PageObject;
  */
 public class ExternalNodeConfig extends PageAreaImpl {
 
-    public ExternalNodeConfig(PageObject context) {
+    public ExternalNodeConfig(Slave context) {
         super(context, "/nodeProperties/org-jenkinsci-plugins-ewm-nodes-ExternalWorkspaceProperty");
     }
 
