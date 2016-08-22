@@ -63,13 +63,17 @@ public class ExternalWorkspaceManagerPluginTest extends AbstractJUnitTest {
                 "   exws (extWorkspace) { \n" +
                 "       git 'https://github.com/alexsomai/dummy-hello-world.git' \n" +
                 "       def mvnHome = tool 'M3' \n" +
-                "       sh \"${mvnHome}/bin/mvn clean install -DskipTests\" \n" +
+                "       withEnv([\"PATH+MAVEN=${mvnHome}/bin\", \"M2_HOME=${mvnHome}\"]) { \n" +
+                "           sh 'mvn clean install -DskipTests' \n" +
+                "       } \n" +
                 "   } \n" +
                 "} \n" +
                 "node ('test') { \n" +
                 "   exws (extWorkspace) { \n" +
                 "       def mvnHome = tool 'M3' \n" +
-                "       sh \"${mvnHome}/bin/mvn test\" \n" +
+                "       withEnv([\"PATH+MAVEN=${mvnHome}/bin\", \"M2_HOME=${mvnHome}\"]) { \n" +
+                "           sh 'mvn test' \n" +
+                "       } \n" +
                 "   } \n" +
                 "}", DISK_POOL_ID));
 
@@ -88,7 +92,9 @@ public class ExternalWorkspaceManagerPluginTest extends AbstractJUnitTest {
                 "   exws (extWorkspace) { \n" +
                 "       git 'https://github.com/alexsomai/dummy-hello-world.git' \n" +
                 "       def mvnHome = tool 'M3' \n" +
-                "       sh \"${mvnHome}/bin/mvn clean install -DskipTests\" \n" +
+                "       withEnv([\"PATH+MAVEN=${mvnHome}/bin\", \"M2_HOME=${mvnHome}\"]) { \n" +
+                "           sh 'mvn clean install -DskipTests' \n" +
+                "       } \n" +
                 "   } \n" +
                 "}", DISK_POOL_ID));
 
@@ -103,7 +109,9 @@ public class ExternalWorkspaceManagerPluginTest extends AbstractJUnitTest {
                 "node ('test') { \n" +
                 "   exws (extWorkspace) { \n" +
                 "       def mvnHome = tool 'M3' \n" +
-                "       sh \"${mvnHome}/bin/mvn test\" \n" +
+                "       withEnv([\"PATH+MAVEN=${mvnHome}/bin\", \"M2_HOME=${mvnHome}\"]) { \n" +
+                "           sh 'mvn test' \n" +
+                "       } \n" +
                 "   } \n" +
                 "}", upstreamJob.name));
 
