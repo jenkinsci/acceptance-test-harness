@@ -42,6 +42,11 @@ public class Jenkins extends Node {
         slaves = new SlavesMixIn(this);
     }
 
+    @Override
+    public Jenkins getJenkins() {
+        return this;
+    }
+
     public Jenkins(Injector injector, JenkinsController controller) {
         this(injector, startAndGetUrl(controller));
     }
