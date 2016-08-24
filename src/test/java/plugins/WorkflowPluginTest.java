@@ -30,6 +30,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
+import org.jenkinsci.test.acceptance.docker.fixtures.SvnContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.DockerTest;
 import org.jenkinsci.test.acceptance.junit.Native;
@@ -45,14 +46,12 @@ import org.jenkinsci.test.acceptance.po.DumbSlave;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import static org.junit.Assert.*;
-
+import static org.junit.Assume.*;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.rules.TemporaryFolder;
 import org.jvnet.hudson.test.Issue;
-
-import static org.junit.Assume.assumeTrue;
 
 /**
  * Roughly follows <a href="https://github.com/jenkinsci/workflow-plugin/blob/master/TUTORIAL.md">the tutorial</a>.
@@ -61,6 +60,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
 
     @Inject private SlaveController slaveController;
     @Inject DockerContainerHolder<GitContainer> gitServer;
+    @Inject DockerContainerHolder<SvnContainer> svn;
     @Rule public TemporaryFolder tmp = new TemporaryFolder();
 
     @WithPlugins("workflow-aggregator@1.1")
@@ -207,6 +207,23 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         job.sandbox.check();
         job.save();
         job.startBuild().shouldSucceed();
+    }
+
+    /** Pipeline analogue of {@link SubversionPluginTest#build_has_changes}. */
+    @Category(DockerTest.class)
+    @WithDocker
+    @WithPlugins({"workflow-cps@2.12", "workflow-job@2.5", "workflow-durable-task-step@2.4", "subversion@2.6"})
+    @Test public void subversion() throws Exception {
+        final SvnContainer svnContainer = svn.get();
+        WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
+        job.script.set("node {svn '" + svnContainer.getUrlUnsaveRepoAtRevision(1) + "'}");
+        job.save();
+        job.startBuild().shouldSucceed();
+        job.configure();
+        job.script.set("node {svn '" + svnContainer.getUrlUnsaveRepoAtRevision(2) + "'}");
+        job.save();
+        Build b2 = job.startBuild().shouldSucceed();
+        assertTrue(b2.getChanges().hasChanges());
     }
 
 }
