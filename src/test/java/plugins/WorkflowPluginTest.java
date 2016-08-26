@@ -35,6 +35,7 @@ import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.LocalController;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
+import org.jenkinsci.test.acceptance.docker.fixtures.SvnContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.DockerTest;
 import org.jenkinsci.test.acceptance.junit.Native;
@@ -49,15 +50,13 @@ import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.DumbSlave;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
-
-import org.junit.Assume;
+import static org.junit.Assert.*;
+import static org.junit.Assume.*;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.rules.TemporaryFolder;
 import org.jvnet.hudson.test.Issue;
-
-import static org.junit.Assume.assumeTrue;
 
 /**
  * Roughly follows <a href="https://github.com/jenkinsci/workflow-plugin/blob/master/TUTORIAL.md">the tutorial</a>.
@@ -66,6 +65,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
 
     @Inject private SlaveController slaveController;
     @Inject DockerContainerHolder<GitContainer> gitServer;
+    @Inject DockerContainerHolder<SvnContainer> svn;
     @Rule public TemporaryFolder tmp = new TemporaryFolder();
     @Inject JenkinsController controller;
 
@@ -218,7 +218,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
     @WithPlugins({"workflow-cps-global-lib@2.3-SNAPSHOT", "workflow-basic-steps@2.1", "workflow-job@2.5"})
     @Issue("JENKINS-26192")
     @Test public void grapeLibrary() throws Exception {
-        Assume.assumeThat("TODO otherwise we would need to set up SSH access to push via Git, which seems an awful hassle", controller, instanceOf(LocalController.class));
+        assumeThat("TODO otherwise we would need to set up SSH access to push via Git, which seems an awful hassle", controller, instanceOf(LocalController.class));
         File workflowLibs = /* WorkflowLibRepository.workspace() */ new File(((LocalController) controller).getJenkinsHome(), "workflow-libs");
         // Cf. GrapeTest.useBinary using JenkinsRule:
         FileUtils.write(new File(workflowLibs, "src/pkg/Lists.groovy"),
@@ -231,6 +231,23 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         job.sandbox.check();
         job.save();
         assertThat(job.startBuild().shouldSucceed().getConsole(), containsString("got []"));
+    }
+
+    /** Pipeline analogue of {@link SubversionPluginTest#build_has_changes}. */
+    @Category(DockerTest.class)
+    @WithDocker
+    @WithPlugins({"workflow-cps@2.12", "workflow-job@2.5", "workflow-durable-task-step@2.4", "subversion@2.6"})
+    @Test public void subversion() throws Exception {
+        final SvnContainer svnContainer = svn.get();
+        WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
+        job.script.set("node {svn '" + svnContainer.getUrlUnsaveRepoAtRevision(1) + "'}");
+        job.save();
+        job.startBuild().shouldSucceed();
+        job.configure();
+        job.script.set("node {svn '" + svnContainer.getUrlUnsaveRepoAtRevision(2) + "'}");
+        job.save();
+        Build b2 = job.startBuild().shouldSucceed();
+        assertTrue(b2.getChanges().hasChanges());
     }
 
 }

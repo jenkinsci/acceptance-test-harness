@@ -32,7 +32,10 @@ public abstract class ContainerPageObject extends ConfigurablePageObject {
     }
 
     protected ContainerPageObject(PageObject context, URL url) {
-        this(context.injector, url);
+        super(context, url);
+        if (!url.toExternalForm().endsWith("/")) {
+            throw new IllegalArgumentException("URL should end with '/': " + url);
+        }
     }
 
     public URL getJsonApiUrl() {
