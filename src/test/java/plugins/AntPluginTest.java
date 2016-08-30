@@ -34,7 +34,7 @@ public class AntPluginTest extends AbstractJUnitTest {
         AntInstallation.install(jenkins, "ant_1.8.4", "1.8.4");
 
         buildHelloWorld("ant_1.8.4").shouldContainsConsoleOutput(
-                "Unpacking http://archive.apache.org/dist/ant/binaries/apache-ant-1.8.4-bin.zip"
+                "Unpacking (http|https)://archive.apache.org/dist/ant/binaries/apache-ant-1.8.4-bin.zip"
         );
     }
 
