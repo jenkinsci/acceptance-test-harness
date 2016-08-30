@@ -17,6 +17,10 @@ import java.util.regex.Pattern;
 @SuppressWarnings("CdiInjectionPointsInspection")
 @WithPlugins("ant")
 public class AntPluginTest extends AbstractJUnitTest {
+
+    public static final String INSTALL_VERSION_1_8 = "1.8.4";
+    public static final String INSTALL_NAME_1_8 = "ant_" + INSTALL_VERSION_1_8;
+
     FreeStyleJob job;
 
     @Before
@@ -31,10 +35,10 @@ public class AntPluginTest extends AbstractJUnitTest {
 
     @Test
     public void autoInstallAnt() {
-        AntInstallation.install(jenkins, "ant_1.8.4", "1.8.4");
+        AntInstallation.install(jenkins, INSTALL_NAME_1_8, INSTALL_VERSION_1_8);
 
-        buildHelloWorld("ant_1.8.4").shouldContainsConsoleOutput(
-                "Unpacking http://archive.apache.org/dist/ant/binaries/apache-ant-1.8.4-bin.zip"
+        buildHelloWorld(INSTALL_NAME_1_8).shouldContainsConsoleOutput(
+            "Unpacking (http|https)://archive.apache.org/dist/ant/binaries/apache-ant-" + INSTALL_VERSION_1_8 + "-bin.zip"
         );
     }
 
