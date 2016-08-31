@@ -9,10 +9,10 @@ ENVIRONMENT_ID=1
 ARCH="x86_64"
 ARCHID=1
 
-OPERATINGSYSTEM="Fedora"
-OPERATINGSYSTEM_ID=1
-MAJOR="23"
-MINOR=""
+OPERATINGSYSTEM="Red Hat"
+OPERATINGSYSTEM_ID=10
+MAJOR="7"
+MINOR="2"
 
 PARTITION="Kickstart default"
 PTABLE_ID=7
@@ -22,9 +22,7 @@ MEDIA_ID=3
 HOSTGROUP="test-group"
 HOSTGROUP_ID=1
 
-HOST_ID=1
-
-MACADDRESS="50:7b:9d:4d:f1:39"
+MACADDRESS="50:7b:9d:4d:f1:$(date +%S)"
 JENKINS_SLAVE_REMOTEFS_ROOT="/tmp/remoteFSRoot"
 
 USER="admin" 
@@ -52,6 +50,12 @@ if [ -z "$4" ] ; then
   EXAMPLE_LABEL="label1 aix"
 else
   EXAMPLE_LABEL="$4"
+fi
+
+if [ -z "$5" ] ; then
+  HOST_ID=1
+else
+  HOST_ID="$5"
 fi
 
 domainCreateString="{ \"domain\": { \"name\": \"$DOMAIN\" } }"

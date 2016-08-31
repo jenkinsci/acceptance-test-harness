@@ -16,15 +16,12 @@ import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.credentials.CredentialsPage;
-import org.jenkinsci.test.acceptance.plugins.credentials.ManagedCredentials;
 import org.jenkinsci.test.acceptance.plugins.foreman_node_sharing.ForemanSharedNodeCloudPageArea;
 import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshPrivateKeyCredential;
 import org.jenkinsci.test.acceptance.po.Build;
-import org.jenkinsci.test.acceptance.po.DumbSlave;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.JenkinsConfig;
-import org.jenkinsci.test.acceptance.po.LabelAxis;
 import org.jenkinsci.test.acceptance.po.LabelExpressionAxis;
 import org.jenkinsci.test.acceptance.po.MatrixBuild;
 import org.jenkinsci.test.acceptance.po.MatrixProject;
@@ -41,14 +38,16 @@ import com.google.inject.Inject;
 @WithPlugins("foreman-node-sharing")
 @WithDocker
 public class ForemanNodeSharingPluginTest extends AbstractJUnitTest {
-    @Inject private DockerContainerHolder<ForemanContainer> docker;
-    @Inject private DockerContainerHolder<JavaContainer> docker2;
+    @Inject private DockerContainerHolder<ForemanContainer> dockerForeman;
+    @Inject private DockerContainerHolder<JavaContainer> docker1;
 
     private ForemanContainer foreman = null;
-    private JavaContainer sshslave = null;
+    private JavaContainer sshslave1 = null;
     private ForemanSharedNodeCloudPageArea cloud = null;
-    private String labelExpression = "label1 aix";
-    private String jobLabelExpression = "label1 && aix";
+    private String labelExpression1 = "label1 aix";
+    private String labelExpression2 = "label2";
+    private String jobLabelExpression1 = "label1 && aix";
+    private String jobLabelExpression2 = labelExpression2;
 
     private static final int FOREMAN_CLOUD_INIT_WAIT = 180;
     private static final int PROVISION_TIMEOUT = 240;
@@ -58,21 +57,26 @@ public class ForemanNodeSharingPluginTest extends AbstractJUnitTest {
      * @throws Exception if occurs.
      */
     @Before public void setUp() throws Exception {
-        foreman = docker.get();
-        sshslave = docker2.get();
+        foreman = dockerForeman.get();
+        sshslave1 = docker1.get();
 
         CredentialsPage c = new CredentialsPage(jenkins, "_");
         c.open();
 
         final SshPrivateKeyCredential sc = c.add(SshPrivateKeyCredential.class);
         sc.username.set("test");
-        sc.selectEnterDirectly().privateKey.set(sshslave.getPrivateKeyString());
+        sc.selectEnterDirectly().privateKey.set(sshslave1.getPrivateKeyString());
         c.create();
 
         //CS IGNORE MagicNumber FOR NEXT 2 LINES. REASON: Mock object.
         elasticSleep(10000);
 
-        if (populateForeman(foreman.getUrl().toString()+"/api/v2", sshslave.getCid(), labelExpression) != 0) {
+        if (populateForeman(foreman.getUrl().toString()+"/api/v2", sshslave1.getCid(),
+                sshslave1.getIpAddress(), labelExpression1, "1") != 0) {
+            throw new Exception("failed to populate foreman");
+        }
+        if (populateForeman(foreman.getUrl().toString()+"/api/v2", "dummy",
+                "9.9.9.9", labelExpression2, "2") != 0) {
             throw new Exception("failed to populate foreman");
         }
 
@@ -123,7 +127,7 @@ public class ForemanNodeSharingPluginTest extends AbstractJUnitTest {
     @Test
     public void testCheckForCompatible() throws IOException {
         cloud.checkForCompatibleHosts();
-        waitFor(driver, hasContent(sshslave.getCid()), FOREMAN_CLOUD_INIT_WAIT);
+        waitFor(driver, hasContent(sshslave1.getCid()), FOREMAN_CLOUD_INIT_WAIT);
     }
 
     /**
@@ -134,12 +138,12 @@ public class ForemanNodeSharingPluginTest extends AbstractJUnitTest {
     public void testProvision() throws Exception {
         jenkins.save();
 
-        FreeStyleJob job = createAndConfigureJob();
+        FreeStyleJob job1 = createAndConfigureJob(jobLabelExpression1);
+        FreeStyleJob job2 = createAndConfigureJob(jobLabelExpression2);
 
-        Build b = job.scheduleBuild();
-        b.waitUntilFinished(PROVISION_TIMEOUT);
-
-        jenkins.runScript("Jenkins.instance.nodes.each { it.terminate() }");
+        Build b1 = job1.scheduleBuild();
+        job2.scheduleBuild();
+        b1.waitUntilFinished(PROVISION_TIMEOUT);
 
     }
 
@@ -151,13 +155,13 @@ public class ForemanNodeSharingPluginTest extends AbstractJUnitTest {
     public void testProvisionAfterRestart() throws Exception {
         jenkins.save();
 
-        FreeStyleJob job = createAndConfigureJob();
+        FreeStyleJob job1 = createAndConfigureJob(jobLabelExpression1);
+        FreeStyleJob job2 = createAndConfigureJob(jobLabelExpression2);
 
-        Build b = job.scheduleBuild();
+        Build b = job1.scheduleBuild();
+        job2.scheduleBuild();
         jenkins.restart();
         b.waitUntilFinished(PROVISION_TIMEOUT);
-
-        jenkins.runScript("Jenkins.instance.nodes.each { it.terminate() }");
 
     }
 
@@ -165,9 +169,9 @@ public class ForemanNodeSharingPluginTest extends AbstractJUnitTest {
      * Create and configure Test job.
      * @return FreeStyleJob.
      */
-    private FreeStyleJob createAndConfigureJob() {
+    private FreeStyleJob createAndConfigureJob(String label) {
         FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class);
-        job.setLabelExpression(jobLabelExpression);
+        job.setLabelExpression(label);
         job.addShellStep("sleep 15");
         job.save();
         return job;
@@ -178,12 +182,14 @@ public class ForemanNodeSharingPluginTest extends AbstractJUnitTest {
      * @param server Foreman server url.
      * @param hostToCreate host name for creation.
      * @param labels list of labels to add to host.
+     * @param hostID id of host.
      * @return exit code of script execution.
      * @throws URISyntaxException if occurs.
      * @throws IOException if occurs.
      * @throws InterruptedException if occurs.
      */
-    private int populateForeman(String server, String hostToCreate, String labels) throws
+    private int populateForeman(String server, String hostToCreate, String ipAddress,
+                                String labels, String hostID) throws
         URISyntaxException, IOException, InterruptedException {
 
         URL script =
@@ -196,8 +202,9 @@ public class ForemanNodeSharingPluginTest extends AbstractJUnitTest {
         ProcessBuilder pb = new ProcessBuilder("/bin/bash", tempScriptFile.getAbsolutePath(),
                 server,
                 hostToCreate,
-                sshslave.getIpAddress(),
-                labels);
+                ipAddress,
+                labels,
+                hostID);
 
         pb.directory(tempScriptFile.getParentFile());
         pb.redirectOutput(Redirect.INHERIT);
