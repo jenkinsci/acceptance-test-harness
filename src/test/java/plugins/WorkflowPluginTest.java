@@ -24,10 +24,15 @@
 
 package plugins;
 
+import java.io.File;
 import java.util.concurrent.Callable;
 import javax.inject.Inject;
+import org.apache.commons.io.FileUtils;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+import org.jenkinsci.test.acceptance.controller.JenkinsController;
+import org.jenkinsci.test.acceptance.controller.LocalController;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
 import org.jenkinsci.test.acceptance.docker.fixtures.SvnContainer;
@@ -62,6 +67,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
     @Inject DockerContainerHolder<GitContainer> gitServer;
     @Inject DockerContainerHolder<SvnContainer> svn;
     @Rule public TemporaryFolder tmp = new TemporaryFolder();
+    @Inject JenkinsController controller;
 
     @WithPlugins("workflow-aggregator@1.1")
     @Test public void helloWorld() throws Exception {
@@ -207,6 +213,24 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         job.sandbox.check();
         job.save();
         job.startBuild().shouldSucceed();
+    }
+
+    @WithPlugins({"workflow-cps-global-lib@2.3-SNAPSHOT", "workflow-basic-steps@2.1", "workflow-job@2.5"})
+    @Issue("JENKINS-26192")
+    @Test public void grapeLibrary() throws Exception {
+        assumeThat("TODO otherwise we would need to set up SSH access to push via Git, which seems an awful hassle", controller, instanceOf(LocalController.class));
+        File workflowLibs = /* WorkflowLibRepository.workspace() */ new File(((LocalController) controller).getJenkinsHome(), "workflow-libs");
+        // Cf. GrapeTest.useBinary using JenkinsRule:
+        FileUtils.write(new File(workflowLibs, "src/pkg/Lists.groovy"),
+            "package pkg\n" +
+            "@Grab('commons-primitives:commons-primitives:1.0')\n" +
+            "import org.apache.commons.collections.primitives.ArrayIntList\n" +
+            "static def arrayInt() {new ArrayIntList()}");
+        WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
+        job.script.set("echo(/got ${pkg.Lists.arrayInt()}/)");
+        job.sandbox.check();
+        job.save();
+        assertThat(job.startBuild().shouldSucceed().getConsole(), containsString("got []"));
     }
 
     /** Pipeline analogue of {@link SubversionPluginTest#build_has_changes}. */
