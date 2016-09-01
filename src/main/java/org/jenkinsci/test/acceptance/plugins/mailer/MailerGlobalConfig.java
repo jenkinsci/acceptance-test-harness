@@ -39,6 +39,6 @@ public class MailerGlobalConfig extends PageAreaImpl {
         new Control(getPage(),"/hudson-tasks-Mailer//sendTestMailTo").set(recipient);
         new Control(getPage(),"/hudson-tasks-Mailer//validate-button").click();
 
-        waitFor(driver, hasContent("Email was successfully sent"), 10);
+        waitFor(driver, hasContent("Email was successfully sent"), 30);
     }
 }
