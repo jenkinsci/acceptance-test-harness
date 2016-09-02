@@ -16,11 +16,14 @@ import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckStyleFreestyleSettings;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
 import org.jenkinsci.test.acceptance.plugins.findbugs.FindBugsFreestyleSettings;
+import org.jenkinsci.test.acceptance.plugins.matrix_auth.MatrixAuthorizationStrategy;
+import org.jenkinsci.test.acceptance.plugins.mock_security_realm.MockSecurityRealm;
 import org.jenkinsci.test.acceptance.plugins.pmd.PmdFreestyleSettings;
 import org.jenkinsci.test.acceptance.plugins.tasks.TasksFreestyleSettings;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsBuildSettings;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.ListView;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
@@ -361,8 +364,21 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
     }
 
     @Test
-    @WithPlugins("workflow-aggregator")
+    @WithPlugins({"workflow-aggregator", "mock-security-realm", "matrix-auth", "groovy-postbuild"})
     public void should_compute_annotations_on_workflow() {
+        // execute as admin so we don't have problems with script-security in the future
+        final String ADMIN = "admin";
+        final GlobalSecurityConfig security = new GlobalSecurityConfig(jenkins);
+        security.open();
+        {
+            MockSecurityRealm realm = security.useRealm(MockSecurityRealm.class);
+            realm.configure(ADMIN);
+            MatrixAuthorizationStrategy mas = security.useAuthorizationStrategy(MatrixAuthorizationStrategy.class);
+            mas.addUser(ADMIN).admin();
+        }
+        security.save();
+        jenkins.login().doLogin(ADMIN);
+
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
         job.script.set(
             "node {\n" +
@@ -372,7 +388,6 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
             "  step([$class: 'CheckStylePublisher'])\n" +
             "  step([$class: 'AnalysisPublisher'])\n" +
             "}");
-        job.sandbox.check();
         job.save();
         final Build build = job.startBuild();
         build.shouldSucceed();
