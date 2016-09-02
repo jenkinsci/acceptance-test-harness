@@ -10,12 +10,15 @@ import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
 import org.jenkinsci.test.acceptance.plugins.envinject.EnvInjectConfig;
+import org.jenkinsci.test.acceptance.plugins.matrix_auth.MatrixAuthorizationStrategy;
+import org.jenkinsci.test.acceptance.plugins.mock_security_realm.MockSecurityRealm;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsAction;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsBuildSettings;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsColumn;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.FreeStyleMultiBranchJob;
+import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.ListView;
 import org.jenkinsci.test.acceptance.po.MatrixConfiguration;
@@ -87,8 +90,21 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
      * 6 warnings.
      */
     @Test
-    @WithPlugins("workflow-aggregator") @Issue("32191")
+    @WithPlugins({"workflow-aggregator", "mock-security-realm", "matrix-auth", "groovy-postbuild"}) @Issue("32191")
     public void should_find_warnings_without_sleep() {
+        // execute as admin so we don't have problems with script-security in the future
+        final String ADMIN = "admin";
+        final GlobalSecurityConfig security = new GlobalSecurityConfig(jenkins);
+        security.open();
+        {
+            MockSecurityRealm realm = security.useRealm(MockSecurityRealm.class);
+            realm.configure(ADMIN);
+            MatrixAuthorizationStrategy mas = security.useAuthorizationStrategy(MatrixAuthorizationStrategy.class);
+            mas.addUser(ADMIN).admin();
+        }
+        security.save();
+        jenkins.login().doLogin(ADMIN);
+
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
         job.script.set(
                 "node {\n" +
@@ -126,7 +142,6 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
                         "         messagesPattern: '',\n" +
                         "         unHealthy: ''])\n" +
                         "}\n");
-        job.sandbox.check();
         job.save();
         Build build = job.startBuild();
         build.shouldSucceed();
