@@ -17,6 +17,7 @@ public class DeleteJobTest extends AbstractJUnitTest {
 
         j.delete();
 
+        elasticSleep(1000); // wait for delete to complete.
         assertThat(j,pageObjectDoesNotExist());
     }
 }
