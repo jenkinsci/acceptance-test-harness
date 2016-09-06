@@ -9,7 +9,8 @@ ENVIRONMENT_ID=1
 ARCH="x86_64"
 ARCHID=1
 
-OPERATINGSYSTEM="Red Hat"
+OPERATINGSYSTEM="RedHat"
+OPERATINGSYSTEMFAMILY="Redhat"
 OPERATINGSYSTEM_ID=10
 MAJOR="7"
 MINOR="2"
@@ -25,8 +26,8 @@ HOSTGROUP_ID=1
 MACADDRESS="50:7b:9d:4d:f1:$(date +%S)"
 JENKINS_SLAVE_REMOTEFS_ROOT="/tmp/remoteFSRoot"
 
-USER="admin" 
-PASS="changeme" 
+USER="admin"
+PASS="changeme"
 
 if [ -z "$1" ] ; then
   FOREMAN_URL="http://localhost:32768/api/v2"
@@ -62,7 +63,7 @@ domainCreateString="{ \"domain\": { \"name\": \"$DOMAIN\" } }"
 
 envCreateString="{ \"environment\": { \"name\": \"$ENVIRONMENT\" } }"
 
-osCreateString="{ \"operatingsystem\": { \"name\": \"$OPERATINGSYSTEM\", \"major\": \"$MAJOR\", \"minor\": \"$MINOR\", \"architecture_ids\":  $ARCHID, \"ptable_ids\": $PTABLE_ID, \"medium_ids\": $MEDIA_ID    } }"
+osCreateString="{ \"operatingsystem\": { \"name\": \"$OPERATINGSYSTEM\", \"major\": \"$MAJOR\", \"minor\": \"$MINOR\", \"architecture_ids\":  $ARCHID, \"medium_ids\": $MEDIA_ID, \"family\": \"$OPERATINGSYSTEMFAMILY\"  } }"
 
 hostGroupCreateString="{ \"hostgroup\": {  \"name\": \"$HOSTGROUP\", \"environment_id\": $ENVIRONMENT_ID, \"domain_id\": $DOMAIN_ID, \"architecture_id\":  $ARCHID, \"operatingsystem_id\": $OPERATINGSYSTEM_ID, \"medium_id\": $MEDIA_ID, \"ptable_id\": $PTABLE_ID, \"root_pass\": \"scottscott\" } }"
 
