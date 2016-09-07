@@ -41,7 +41,7 @@ public abstract class TopLevelItem extends ContainerPageObject {
         String oldName = name;
         control("/name").set(newName);
         save();
-        clickButton("Yes");
+        waitFor(by.button("Yes")).click();
 
         try {
             return (T) newInstance(getClass(),
