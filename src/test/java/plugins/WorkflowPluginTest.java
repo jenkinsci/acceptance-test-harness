@@ -215,7 +215,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         job.startBuild().shouldSucceed();
     }
 
-    @WithPlugins({"workflow-cps-global-lib@2.3-SNAPSHOT", "workflow-basic-steps@2.1", "workflow-job@2.5"})
+    @WithPlugins({"workflow-cps-global-lib@2.3", "workflow-basic-steps@2.1", "workflow-job@2.5"})
     @Issue("JENKINS-26192")
     @Test public void grapeLibrary() throws Exception {
         assumeThat("TODO otherwise we would need to set up SSH access to push via Git, which seems an awful hassle", controller, instanceOf(LocalController.class));
