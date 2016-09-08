@@ -65,6 +65,10 @@ public class Job extends TopLevelItem {
         super(injector, url, name);
     }
 
+    public Job(PageObject context, URL url, String name) {
+        super(context, url, name);
+    }
+    
     public <T extends Scm> T useScm(Class<T> type) {
         ensureConfigPage();
 

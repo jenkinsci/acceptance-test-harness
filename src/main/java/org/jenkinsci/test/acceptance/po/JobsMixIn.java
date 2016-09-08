@@ -58,7 +58,14 @@ public class JobsMixIn extends MixIn {
     }
 
     public <T extends TopLevelItem> T get(Class<T> type, String name) {
-        return newInstance(type, injector, url("job/%s/", name), name);
+        try {
+            assert getContext() != null;
+            return newInstance(type, getContext(), url("job/%s/", name), name);
+        } catch (AssertionError e) {
+            // will get here either if the contructor with 'context' parameter
+            // was not found or if we have no context
+            return newInstance(type, injector, url("job/%s/", name), name);
+        }
     }
 
     public FreeStyleJob create() {
