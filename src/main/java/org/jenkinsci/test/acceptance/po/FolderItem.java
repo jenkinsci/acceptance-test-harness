@@ -39,5 +39,10 @@ public class FolderItem extends TopLevelItem {
         super(injector, url, name);
         jobs = new JobsMixIn(this);
     }
+    
+    public FolderItem(PageObject context, URL url, String name) {
+        super(context, url, name);
+        jobs = new JobsMixIn(this);
+    }
 
 }

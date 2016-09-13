@@ -1,5 +1,6 @@
 package org.jenkinsci.test.acceptance.po;
 
+import java.net.URL;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import org.openqa.selenium.By;
@@ -58,7 +59,23 @@ public class JobsMixIn extends MixIn {
     }
 
     public <T extends TopLevelItem> T get(Class<T> type, String name) {
+        if (contextAvailable() && typeAcceptsContext(type)) {
+            return newInstance(type, getContext(), url("job/%s/", name), name);
+        }
         return newInstance(type, injector, url("job/%s/", name), name);
+    }
+
+    private <T extends TopLevelItem> boolean typeAcceptsContext(Class<T> type) {
+        try {
+            type.getConstructor(PageObject.class, URL.class, String.class);
+            return true;
+        } catch (NoSuchMethodException e) {
+            return false;
+        }
+    }
+
+    private boolean contextAvailable() {
+        return getContext() != null;
     }
 
     public FreeStyleJob create() {
