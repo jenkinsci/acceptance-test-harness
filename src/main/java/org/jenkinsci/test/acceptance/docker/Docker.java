@@ -114,11 +114,11 @@ public class Docker {
         }
 
         CommandBuilder buildCmd = cmd("build").add("-t", full, dir);
-        ProcessBuilder processBuilder = buildCmd.build();
+        ProcessBuilder processBuilder = buildCmd.build().redirectErrorStream(true);
         if (log != null) {
-            processBuilder.redirectError(log).redirectOutput(log);
+            processBuilder.redirectOutput(log);
         } else {
-            processBuilder.redirectError(ProcessBuilder.Redirect.INHERIT).redirectOutput(ProcessBuilder.Redirect.INHERIT);
+            processBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
         }
 
         StringBuilder sb = new StringBuilder("Building Docker image `").append(buildCmd.toString()).append("`");
@@ -127,8 +127,9 @@ public class Docker {
         }
         System.out.println(sb.toString());
 
-        if (processBuilder.start().waitFor() != 0) {
-            throw new Error("Failed to build image: " + tag);
+        int exit = processBuilder.start().waitFor();
+        if (exit != 0) {
+            throw new Error("Failed to build image (" + exit + "): " + tag);
         }
         return new DockerImage(full);
     }
@@ -233,6 +234,7 @@ public class Docker {
 
     private void copyDockerfileDirectoryFromLocal(String fixtureLocation, File outputDirectory) throws IOException {
         URL resourceDir = classLoader.getResource(fixtureLocation);
+        if (resourceDir == null) throw new Error("The fixture directory does not exist: " + fixtureLocation);
         copyFile(outputDirectory, resourceDir);
     }
 
