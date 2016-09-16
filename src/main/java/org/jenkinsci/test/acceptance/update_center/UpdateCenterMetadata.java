@@ -12,10 +12,13 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.jenkinsci.test.acceptance.po.Jenkins;
+import org.jenkinsci.test.acceptance.utils.SystemEnvironmentVariables;
 
 /**
  * Databinding for Update Center metadata
@@ -30,6 +33,9 @@ public class UpdateCenterMetadata {
     public final Map<String,PluginMetadata> plugins = new HashMap<>();
 
     public String id;
+
+    /** Set of plugins to consider. */
+    private Set<String> interestingPlugins;
 
     /**
      *
@@ -119,6 +125,35 @@ public class UpdateCenterMetadata {
         } catch (IllegalArgumentException ex) {
             // Plugin not installed
             return true;
+        }
+    }
+
+    /** Returns the plugins we are interested in. */
+    public Set<String> getInterestingPlugins() {
+        if (interestingPlugins == null) {
+            interestingPlugins = new HashSet<>();
+            final String onlyForPlugins = SystemEnvironmentVariables.getPropertyVariableOrEnvironment("ONLY_FOR_PLUGINS", null);
+            if (onlyForPlugins != null && !onlyForPlugins.isEmpty()) {
+                for (String p : onlyForPlugins.split(",")) {
+                    p = p.trim();
+                    if (!p.isEmpty()) {
+                        addInterestingPlugin(p);
+                    }
+                }
+            }
+        }
+        return interestingPlugins;
+    }
+
+    private void addInterestingPlugin(String id) {
+        if (interestingPlugins.add(id)) {
+            for (PluginMetadata m : plugins.values()) {
+                for (Dependency d : m.getDependencies()) {
+                    if (!d.optional && d.name.equals(id)) {
+                        addInterestingPlugin(m.getName());
+                    }
+                }
+            }
         }
     }
 

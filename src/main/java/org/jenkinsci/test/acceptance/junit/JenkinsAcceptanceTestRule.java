@@ -5,6 +5,8 @@ import com.google.inject.Injector;
 
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.guice.World;
+import org.jenkinsci.test.acceptance.po.PluginManager;
+import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata;
 import org.junit.internal.AssumptionViolatedException;
 import org.junit.rules.MethodRule;
 import org.junit.rules.TestRule;
@@ -15,6 +17,7 @@ import org.jvnet.hudson.annotation_indexer.Index;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 
+import javax.inject.Provider;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
@@ -50,6 +53,8 @@ public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should us
             public void evaluate() throws Throwable {
                 World world = World.get();
                 Injector injector = world.getInjector();
+
+                checkOnlyForInterestingPlugins(injector.getProvider(UpdateCenterMetadata.class).get());
 
                 world.startTestScope(description.getDisplayName());
 
@@ -175,6 +180,32 @@ public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should us
                     }
                 };
             }
+
+            private void checkOnlyForInterestingPlugins(UpdateCenterMetadata ucmd) {
+                final Set<String> interesting = ucmd.getInterestingPlugins();
+                if (interesting == null || interesting.isEmpty()) {
+                    return;
+                }
+                final Set<String> required = new HashSet<>();
+                collectPlugins(method.getMethod(), required);
+                collectPlugins(target.getClass(), required);
+                for (String plugin : required) {
+                    if (interesting.contains(new PluginManager.PluginSpec(plugin).getName())) {
+                        return; // we are interested in this test
+                    }
+                }
+                throw new AssumptionViolatedException("Not interested in " + description.getDisplayName());
+            }
+
+            private void collectPlugins(AnnotatedElement e, Collection<String> plugins) {
+                WithPlugins a = e.getAnnotation(WithPlugins.class);
+                if (a != null) {
+                    for (String spec : a.value()) {
+                        plugins.add(new PluginManager.PluginSpec(spec).getName());
+                    }
+                }
+            }
+
         };
     }
 }
