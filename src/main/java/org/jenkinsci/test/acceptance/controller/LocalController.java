@@ -291,6 +291,7 @@ public abstract class LocalController extends JenkinsController implements LogLi
         if (javaHome != null) {
             env.put("JAVA_HOME", javaHome.getAbsolutePath());
         }
+        env.put("jenkins.install.state", "TEST");
         return env;
     }
 
