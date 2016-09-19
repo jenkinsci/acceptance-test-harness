@@ -22,10 +22,10 @@ public class CachedUpdateCenterMetadataLoader implements Provider<UpdateCenterMe
     UpdateCenterMetadata metadata;
 
     @Inject(optional=true) @Named("update_center_url_cache")
-    File cache = new File(System.getProperty("java.io.tmpdir"), "update-center.json.html");
+    File cache = new File(System.getProperty("java.io.tmpdir"), "update-center.json");
 
     @Inject(optional=true) @Named("update_center_url")
-    String url = "https://updates.jenkins-ci.org/update-center.json.html";
+    String url = "https://updates.jenkins-ci.org/update-center.json";
 
     @Inject
     ExtensionList<UpdateCenterMetadataDecorator> decorators;
