@@ -16,12 +16,16 @@ public class JobsMixIn extends MixIn {
     public JobsMixIn(ContainerPageObject context) {
         super(context);
     }
+    
+    public WebElement findTypeCaption(Class<?> type) {
+        return findCaption(type, getFinder());
+    }
 
     public <T extends TopLevelItem> T create(Class<T> type, String name) {
         visit("newJob");
         fillIn("name", name);
 
-        findCaption(type, getFinder()).click();
+        findTypeCaption(type).click();
 
         // since 2.7, a bug in Firefox webdriver may prevent the blur event from triggering
         // properly, so we manually execute a blur event here, see: JENKINS-37232
