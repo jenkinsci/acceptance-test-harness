@@ -23,6 +23,7 @@
  */
 package core;
 
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -49,11 +50,13 @@ public class JenkinsDatabaseSecurityRealmTest extends AbstractJUnitTest {
     @Test
     public void login_and_logout() {
 
-        User user = realm.signup("jenkins-acceptance-tests-user");
+        User user = realm.signup("jenkins-acceptance-tests-user", "4242", "Full Name", "jatu@gmail.com");
 
-        assertThat(new User(jenkins, "jenkins-acceptance-tests-user").mail(), startsWith("jenkins-acceptance-tests-user"));
+        assertThat(user.id(), equalTo("jenkins-acceptance-tests-user"));
+        assertThat(user.fullName(), equalTo("full Name"));
+        assertThat(user.mail(), equalTo("jatu@gmail.com"));
 
-        jenkins.login().doLogin(user);
+        jenkins.login().doLogin(user.id(), "4242");
 
         assertEquals(user, jenkins.getCurrentUser());
 
