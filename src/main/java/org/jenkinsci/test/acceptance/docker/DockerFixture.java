@@ -21,7 +21,7 @@ import static java.lang.annotation.RetentionPolicy.*;
 @Inherited
 public @interface DockerFixture {
 
-    public static final String DEFAULT_DOCKER_IP = "";
+    String DEFAULT_DOCKER_IP = "";
     
     /**
      * Unique ID of this fixture. Used from cucumber, etc. to find this annotation.
