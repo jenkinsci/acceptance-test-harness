@@ -134,10 +134,11 @@ public class KerberosSsoTest extends AbstractJUnitTest {
         // Correct credentials provided
         get.setHeader("Authorization", "Basic " + Base64.encode("user:ATH".getBytes()));
         response = httpClient.execute(get);
+        String phrase = response.getStatusLine().getReasonPhrase();
         String out = IOUtils.toString(response.getEntity().getContent());
-        assertThat(out, containsString("Full Name"));
-        assertThat(out, containsString("Granted Authorities: authenticated"));
-        assertEquals("OK", response.getStatusLine().getReasonPhrase());
+        assertThat(phrase + ": " + out, out, containsString("Full Name"));
+        assertThat(phrase + ": " + out, out, containsString("Granted Authorities: authenticated"));
+        assertEquals(phrase + ": " + out, "OK", phrase);
 
         // Incorrect credentials
         get = new HttpGet(jenkins.url.toExternalForm() + "/whoAmI");
