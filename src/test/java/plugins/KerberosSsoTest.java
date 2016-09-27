@@ -49,8 +49,6 @@ import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.User;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.openqa.selenium.Alert;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import java.io.File;
 import java.io.IOException;
@@ -80,8 +78,6 @@ public class KerberosSsoTest extends AbstractJUnitTest {
         KerberosContainer kdc = startKdc();
         configureSso(kdc, false);
 
-        jenkins.restart();
-
         // Using kinit and curl to get the ticket and create a request as negotiation is only supported by FF and Chrome
         // and require explicit configuration. The local token cache is generated inside of the container so host do not need kinit.
         String clientKeytab = kdc.getClientKeytab();
@@ -104,12 +100,6 @@ public class KerberosSsoTest extends AbstractJUnitTest {
         KerberosContainer kdc = startKdc();
         configureSso(kdc, true);
 
-        // #restart() does not complete normally here as basic auth window is presented
-        jenkins.visit("restart");
-        clickButton("Yes");
-
-        Alert alert = waitFor(driver).until(ExpectedConditions.alertIsPresent());
-        alert.dismiss();
         // I am not able to get the basic auth to work in FF 45.3.0, so using this just to wait for Jenkins being ready
         // org.openqa.selenium.UnsupportedCommandException: Unrecognized command: POST /session/466a800f-eaf8-40cf-a9e8-815f5a6e3c32/alert/credentials
         // alert.setCredentials(new UserAndPassword("user", "ATH"));
