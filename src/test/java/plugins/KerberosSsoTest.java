@@ -83,20 +83,16 @@ public class KerberosSsoTest extends AbstractJUnitTest {
         jenkins.restart();
 
         // Using kinit and curl to get the ticket and create a request as negotiation is only supported by FF and Chrome
-        // and require explicit configuration
-        ProcessBuilder pb;
-        pb = new ProcessBuilder().redirectErrorStream(true).redirectOutput(ProcessBuilder.Redirect.INHERIT);
-        pb.environment().put("KRB5_CONFIG", kdc.getKrb5ConfPath());
-        pb.environment().put("KRB5CCNAME", kdc.getClientKeytab());
-        pb.command("kinit", "-k", "-t", kdc.getUserKeytab(), "user");
-        assertEquals(0 , pb.start().waitFor());
+        // and require explicit configuration. The local token cache is generated inside of the container so host do not need kinit.
+        String clientKeytab = kdc.getClientKeytab();
 
+        ProcessBuilder pb;
         String out;
         do {
             sleep(3000);
             pb = new ProcessBuilder("curl", "-vL", "--negotiate", "-u", ":", jenkins.url.toExternalForm() + "/whoAmI");
             pb.environment().put("KRB5_CONFIG", kdc.getKrb5ConfPath());
-            pb.environment().put("KRB5CCNAME", kdc.getClientKeytab());
+            pb.environment().put("KRB5CCNAME", clientKeytab);
             out = exec(pb);
         } while (out.contains("Please wait"));
         assertThat(out, containsString(AUTHORIZED));

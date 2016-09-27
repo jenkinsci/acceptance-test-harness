@@ -26,16 +26,15 @@ package org.jenkinsci.test.acceptance.docker.fixtures;
 import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.docker.DockerFixture;
 import org.jenkinsci.test.acceptance.docker.DynamicDockerContainer;
+import org.jenkinsci.utils.process.CommandBuilder;
 
-import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.HashMap;
-import java.util.Map;
 
+import static org.junit.Assert.assertTrue;
 
 /**
  * Kerberos kdc server ready to authenticate user principal 'user@EXAMPLE.COM' and service 'HTTP/<LOCAL_HOSTNAME>@EXAMPLE.COM'.
@@ -114,19 +113,24 @@ public class KerberosContainer extends DynamicDockerContainer {
     }
 
     /**
-     * Keytab used so we do not have to enter password to get ticket granting ticket.
+     * Generate local token cache with ticket granting ticket inside the container so host do not have to install krb client tools.
      *
-     * This is copied from the container.
+     * @return Path to the token cache.
      */
-    public String getUserKeytab() {
-        return new File(targetDir, "keytab/user").getAbsolutePath();
-    }
+    public String getClientKeytab() throws IOException, InterruptedException {
+        final String innerPath = "/target/keytab/client_tmp";
+        final String outerPath = new File(targetDir, "keytab/client_tmp").getAbsolutePath();
+        CommandBuilder cmd = Docker.cmd("exec", getCid())
+                .add("env")
+                .add("KRB5_CONFIG=/etc/krb5.conf")
+                .add("KRB5CCNAME=" + innerPath)
+                .add("kinit", "-k", "-t", "/target/keytab/user", "user")
+        ;
+        cmd.popen().verifyOrDieWith("Unable to get ticket granting ticket");
 
-    /**
-     * Temporary, test specific token cache for client.
-     */
-    public String getClientKeytab() {
-        return new File(targetDir, "keytab/client_tmp").getAbsolutePath();
+        cp(innerPath, outerPath);
+        assertTrue("Token cache exported", new File(outerPath).exists());
+        return outerPath;
     }
 
     @Override // TODO Can be replaced by build args that would require more flexible build customization to be implemented
