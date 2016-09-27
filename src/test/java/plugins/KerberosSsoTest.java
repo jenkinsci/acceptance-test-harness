@@ -58,7 +58,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 
 /**
- * Run Kerberos SSO tests agains containerized KDC.
+ * Run Kerberos SSO tests against the containerized KDC.
  */
 @WithPlugins("kerberos-sso")
 @Category(DockerTest.class)
@@ -79,7 +79,8 @@ public class KerberosSsoTest extends AbstractJUnitTest {
         configureSso(kdc, false);
 
         // Using kinit and curl to get the ticket and create a request as negotiation is only supported by FF and Chrome
-        // and require explicit configuration. The local token cache is generated inside of the container so host do not need kinit.
+        // and require explicit configuration. The local token cache is generated inside of the container so host do not
+        // need krb client tools installed.
         String clientKeytab = kdc.getClientKeytab();
 
         ProcessBuilder pb;
@@ -87,8 +88,11 @@ public class KerberosSsoTest extends AbstractJUnitTest {
         do {
             sleep(3000);
             pb = new ProcessBuilder("curl", "-vL", "--negotiate", "-u", ":", jenkins.url.toExternalForm() + "/whoAmI");
+            pb.redirectError(ProcessBuilder.Redirect.INHERIT);
             pb.environment().put("KRB5_CONFIG", kdc.getKrb5ConfPath());
             pb.environment().put("KRB5CCNAME", clientKeytab);
+            pb.environment().put("KRB5_TRACE", new File(kdc.getTargetDir(), "tracelog").getAbsolutePath());
+            System.out.println(pb.environment());
             out = exec(pb);
         } while (out.contains("Please wait"));
         assertThat(out, containsString(AUTHORIZED));

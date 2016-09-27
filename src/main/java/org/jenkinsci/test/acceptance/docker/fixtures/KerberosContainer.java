@@ -95,6 +95,10 @@ public class KerberosContainer extends DynamicDockerContainer {
         return targetDir;
     }
 
+    public File getTargetDir() {
+        return targetDir;
+    }
+
     public String getLoginConfPath() {
         return loginConf.getAbsolutePath();
     }
@@ -120,13 +124,23 @@ public class KerberosContainer extends DynamicDockerContainer {
     public String getClientKeytab() throws IOException, InterruptedException {
         final String innerPath = "/target/keytab/client_tmp";
         final String outerPath = new File(targetDir, "keytab/client_tmp").getAbsolutePath();
-        CommandBuilder cmd = Docker.cmd("exec", getCid())
+        System.out.println(Docker.cmd("exec", getCid())
                 .add("env")
                 .add("KRB5_CONFIG=/etc/krb5.conf")
                 .add("KRB5CCNAME=" + innerPath)
                 .add("kinit", "-k", "-t", "/target/keytab/user", "user")
-        ;
-        cmd.popen().verifyOrDieWith("Unable to get ticket granting ticket");
+                .popen()
+                .verifyOrDieWith("Unable to get ticket granting ticket")
+        );
+
+        System.out.println(Docker.cmd("exec", getCid())
+                .add("env")
+                .add("KRB5_CONFIG=/etc/krb5.conf")
+                .add("KRB5CCNAME=" + innerPath)
+                .add("klist", "-e")
+                .popen()
+                .verifyOrDieWith("Unable to get ticket granting ticket")
+        );
 
         cp(innerPath, outerPath);
         assertTrue("Token cache exported", new File(outerPath).exists());
