@@ -1,5 +1,6 @@
 package plugins;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 import java.io.File;
@@ -9,6 +10,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 
 import org.codehaus.plexus.util.FileUtils;
+import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.ForemanContainer;
 import org.jenkinsci.test.acceptance.docker.fixtures.JavaContainer;
@@ -51,6 +53,7 @@ public class ForemanNodeSharingPluginTest extends AbstractJUnitTest {
 
     private static final int FOREMAN_CLOUD_INIT_WAIT = 180;
     private static final int PROVISION_TIMEOUT = 240;
+    private static final String DEFAULTJOBSLEEPTIME = "15";
 
     /**
      * Setup instance before each test.
@@ -85,6 +88,40 @@ public class ForemanNodeSharingPluginTest extends AbstractJUnitTest {
         //CS IGNORE MagicNumber FOR NEXT 2 LINES. REASON: Mock object.
         elasticSleep(10000);
 
+    }
+
+    /**
+     * Test loss of connection to Foreman
+     * - 2 jobs are scheduled to be built for the
+     * same label.
+     * - First one starts, and we stop the Foreman instance
+     * - Once it finishes, we restart the container after a
+     *    small sleep to ensure that the release() has failed
+     *    and that we are going to dispose() the resource eventually
+     * - We wait until Second job has completed successfully.
+     * - If the disposer is not working,
+     *    the last build will never complete.
+     */
+    @Test
+    public void testLoseForemanConnection() throws Exception {
+        jenkins.save();
+        FreeStyleJob job1 = createAndConfigureJob(jobLabelExpression1);
+        FreeStyleJob job2 = createAndConfigureJob(jobLabelExpression1);
+
+        Build b1 = job1.scheduleBuild();
+        Build b2 = job2.scheduleBuild();
+        b1.waitUntilStarted();
+
+        Docker.cmd("stop").add(foreman.getCid())
+                .popen().verifyOrDieWith("Failed to stop " + foreman.getCid());
+
+        b1.waitUntilFinished(PROVISION_TIMEOUT);
+        elasticSleep(10000);
+
+        Docker.cmd("start").add(foreman.getCid())
+                .popen().verifyOrDieWith("Failed to start " + foreman.getCid());
+        elasticSleep(10000);
+        b2.waitUntilFinished(PROVISION_TIMEOUT).shouldSucceed();
     }
 
     /**
@@ -166,17 +203,24 @@ public class ForemanNodeSharingPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     * Create and configure Test job.
+     * Create and configure Test job with sleep time
      * @return FreeStyleJob.
      */
-    private FreeStyleJob createAndConfigureJob(String label) {
+    private FreeStyleJob createAndConfigureJob(String label, String sleepTime) {
         FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class);
         job.setLabelExpression(label);
-        job.addShellStep("sleep 15");
+        job.addShellStep("sleep " + sleepTime);
         job.save();
         return job;
     }
 
+    /**
+     * Create and configure Test job.
+     * @return FreeStyleJob.
+     */
+    private FreeStyleJob createAndConfigureJob(String label) {
+        return createAndConfigureJob(label, DEFAULTJOBSLEEPTIME);
+    }
     /**
      * Populate Foreman using hammer script.
      * @param server Foreman server url.
