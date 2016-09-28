@@ -26,6 +26,7 @@ import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.LocalController;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.junit.internal.AssumptionViolatedException;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.zeroturnaround.zip.ZipUtil;
 
@@ -284,6 +285,7 @@ public class Job extends TopLevelItem {
             clickLink("Build Now");
         } else {
             clickLink("Build with Parameters");
+            waitFor(by.xpath("//form[@name='parameters']"), 2);
             for (Parameter def : parameters) {
                 Object v = params.get(def.getName());
                 if (v != null) {
