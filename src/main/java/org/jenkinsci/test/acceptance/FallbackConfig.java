@@ -1,5 +1,6 @@
 package org.jenkinsci.test.acceptance;
 
+import javax.annotation.CheckForNull;
 import javax.inject.Named;
 
 import java.io.File;
@@ -154,7 +155,7 @@ public class FallbackConfig extends AbstractModule {
      *
      * Custom property <tt></>BROWSER_DISPLAY</tt> has the preference. If not provided <tt>DISPLAY</tt> is used.
      */
-    private String getBrowserDisplay() {
+    public static @CheckForNull String getBrowserDisplay() {
         String d = System.getenv("BROWSER_DISPLAY");
         if (d != null) return d;
 
