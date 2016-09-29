@@ -62,7 +62,7 @@ public class KerberosContainer extends DynamicDockerContainer {
     private File krb5Conf = null;
 
     public File populateTargetDir(File target) {
-        // No ned to do this twice
+        // No need to do this twice
         if (targetDir == null) {
             targetDir = target;
 
@@ -105,15 +105,13 @@ public class KerberosContainer extends DynamicDockerContainer {
 
     /**
      * Keytab to be linked with the service - Jenkins with Kerberos SSO.
-     *
-     * This is copied from the container.
      */
     public String getServiceKeytab() {
         return new File(targetDir, "keytab/service").getAbsolutePath();
     }
 
     /**
-     * Generate local token cache with ticket granting ticket inside the container so host do not have to install krb client tools.
+     * Generate local token cache with TGT inside the container so host do not have to install krb client tools.
      *
      * @return Path to the token cache.
      */

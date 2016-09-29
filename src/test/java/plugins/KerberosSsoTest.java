@@ -37,6 +37,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.jenkinsci.test.acceptance.FallbackConfig;
 import org.jenkinsci.test.acceptance.docker.fixtures.KerberosContainer;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
+import org.jenkinsci.test.acceptance.guice.TestCleaner;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.DockerTest;
 import org.jenkinsci.test.acceptance.junit.FailureDiagnostics;
@@ -49,9 +50,11 @@ import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.User;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.junit.runners.model.Statement;
 import org.openqa.selenium.firefox.FirefoxBinary;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxProfile;
+import org.openqa.selenium.remote.UnreachableBrowserException;
 
 import java.io.File;
 import java.io.IOException;
@@ -76,6 +79,9 @@ public class KerberosSsoTest extends AbstractJUnitTest {
     @Inject
     public FailureDiagnostics diag;
 
+    @Inject
+    public TestCleaner cleaner;
+
     @Test
     public void kerberosTicket() throws Exception {
         setupRealmUser();
@@ -83,7 +89,7 @@ public class KerberosSsoTest extends AbstractJUnitTest {
         configureSso(kdc, false);
         jenkins.logout();
 
-        // The local token cache is generated inside of the container so host do not need kinit installed.
+        // Get TGT
         String tokenCache = kdc.getClientTokenCache();
 
         // Correctly negotiate in browser
@@ -92,11 +98,11 @@ public class KerberosSsoTest extends AbstractJUnitTest {
         String out = negotiatingDriver.getPageSource();
         assertThat(out, containsString(AUTHORIZED));
 
-        // The global driver fail
+        // The global driver is not configured to do so
         jenkins.visit("/whoAmI"); // 401 Unauthorized
         assertThat(driver.getPageSource(), not(containsString(AUTHORIZED)));
 
-        // Non-negotiating request fail
+        // Non-negotiating request should fail as well
         assertUnauthenticatedRequestIsRejected(getBadassHttpClient());
     }
 
@@ -119,7 +125,23 @@ public class KerberosSsoTest extends AbstractJUnitTest {
         if (display != null) {
             binary.setEnvironmentProperty("DISPLAY", display);
         }
-        return new FirefoxDriver(binary, profile);
+        final FirefoxDriver driver = new FirefoxDriver(binary, profile);
+        cleaner.addTask(new Statement() {
+            @Override
+            public void evaluate() throws Throwable {
+                try {
+                    driver.quit();
+                } catch (UnreachableBrowserException ex) {
+                    System.err.println("Browser died already");
+                    ex.printStackTrace();
+                }
+            }
+
+            @Override public String toString() {
+                return "Close Kerberos WebDriver after test";
+            }
+        });
+        return driver;
     }
 
     @Test
