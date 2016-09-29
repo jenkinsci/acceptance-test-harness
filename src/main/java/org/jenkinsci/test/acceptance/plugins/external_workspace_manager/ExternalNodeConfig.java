@@ -23,11 +23,11 @@ public class ExternalNodeConfig extends PageAreaImpl {
         // add first disk
         control("nodeDiskPools/repeatable-add").click();
         control("nodeDiskPools/nodeDisks/diskRefId").set(diskOneId);
-        control("nodeDiskPools/nodeDisks/localRootPath").set(fakeMountingPoint);
+        control("nodeDiskPools/nodeDisks/nodeMountPoint").set(fakeMountingPoint);
 
         // add second disk
         control("nodeDiskPools/repeatable-add").click();
         control("nodeDiskPools/nodeDisks[1]/diskRefId").set(diskTwoId);
-        control("nodeDiskPools/nodeDisks[1]/localRootPath").set(fakeMountingPoint);
+        control("nodeDiskPools/nodeDisks[1]/nodeMountPoint").set(fakeMountingPoint);
     }
 }
