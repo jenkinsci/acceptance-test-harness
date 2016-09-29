@@ -95,10 +95,6 @@ public class KerberosContainer extends DynamicDockerContainer {
         return targetDir;
     }
 
-    public File getTargetDir() {
-        return targetDir;
-    }
-
     public String getLoginConfPath() {
         return loginConf.getAbsolutePath();
     }
@@ -121,7 +117,7 @@ public class KerberosContainer extends DynamicDockerContainer {
      *
      * @return Path to the token cache.
      */
-    public String getClientKeytab() throws IOException, InterruptedException {
+    public String getClientTokenCache() throws IOException, InterruptedException {
         final String innerPath = "/target/keytab/client_tmp";
         final String outerPath = new File(targetDir, "keytab/client_tmp").getAbsolutePath();
         System.out.println(Docker.cmd("exec", getCid())

@@ -23,7 +23,6 @@
  */
 package plugins;
 
-import com.google.common.base.Joiner;
 import com.google.inject.Inject;
 import hudson.remoting.Base64;
 import org.apache.commons.io.IOUtils;
@@ -35,6 +34,7 @@ import org.apache.http.config.RegistryBuilder;
 import org.apache.http.impl.auth.BasicSchemeFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.jenkinsci.test.acceptance.FallbackConfig;
 import org.jenkinsci.test.acceptance.docker.fixtures.KerberosContainer;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
@@ -49,12 +49,16 @@ import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.User;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.openqa.selenium.firefox.FirefoxBinary;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxProfile;
 
 import java.io.File;
 import java.io.IOException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -77,25 +81,45 @@ public class KerberosSsoTest extends AbstractJUnitTest {
         setupRealmUser();
         KerberosContainer kdc = startKdc();
         configureSso(kdc, false);
+        jenkins.logout();
 
-        // Using kinit and curl to get the ticket and create a request as negotiation is only supported by FF and Chrome
-        // and require explicit configuration. The local token cache is generated inside of the container so host do not
-        // need krb client tools installed.
-        String clientKeytab = kdc.getClientKeytab();
+        // The local token cache is generated inside of the container so host do not need kinit installed.
+        String tokenCache = kdc.getClientTokenCache();
 
-        ProcessBuilder pb;
-        String out;
-        do {
-            sleep(3000);
-            pb = new ProcessBuilder("curl", "-vL", "--negotiate", "-u", ":", jenkins.url.toExternalForm() + "/whoAmI");
-            pb.redirectError(ProcessBuilder.Redirect.INHERIT);
-            pb.environment().put("KRB5_CONFIG", kdc.getKrb5ConfPath());
-            pb.environment().put("KRB5CCNAME", clientKeytab);
-            pb.environment().put("KRB5_TRACE", new File(kdc.getTargetDir(), "tracelog").getAbsolutePath());
-            System.out.println(pb.environment());
-            out = exec(pb);
-        } while (out.contains("Please wait"));
+        // Correctly negotiate in browser
+        FirefoxDriver negotiatingDriver = getNegotiatingFirefox(kdc, tokenCache);
+        negotiatingDriver.get(jenkins.url("/whoAmI").toExternalForm());
+        String out = negotiatingDriver.getPageSource();
         assertThat(out, containsString(AUTHORIZED));
+
+        // The global driver fail
+        jenkins.visit("/whoAmI"); // 401 Unauthorized
+        assertThat(driver.getPageSource(), not(containsString(AUTHORIZED)));
+
+        // Non-negotiating request fail
+        assertUnauthenticatedRequestIsRejected(getBadassHttpClient());
+    }
+
+    private FirefoxDriver getNegotiatingFirefox(KerberosContainer kdc, String tokenCache) {
+        FirefoxProfile profile = new FirefoxProfile();
+        profile.setAlwaysLoadNoFocusLib(true);
+        // Allow auth negotiation for jenkins under test
+        profile.setPreference("network.negotiate-auth.trusted-uris", jenkins.url.toExternalForm());
+        profile.setPreference("network.negotiate-auth.delegation-uris", jenkins.url.toExternalForm());
+        FirefoxBinary binary = new FirefoxBinary();
+        // Inject config and TGT
+        binary.setEnvironmentProperty("KRB5CCNAME", tokenCache);
+        binary.setEnvironmentProperty("KRB5_CONFIG", kdc.getKrb5ConfPath());
+        // Turn debug on
+        binary.setEnvironmentProperty("KRB5_TRACE", diag.touch("tracelog").getAbsolutePath());
+        binary.setEnvironmentProperty("NSPR_LOG_MODULES", "negotiateauth:5");
+        binary.setEnvironmentProperty("NSPR_LOG_FILE", diag.touch("firefox.nego.log").getAbsolutePath());
+
+        String display = FallbackConfig.getBrowserDisplay();
+        if (display != null) {
+            binary.setEnvironmentProperty("DISPLAY", display);
+        }
+        return new FirefoxDriver(binary, profile);
     }
 
     @Test
@@ -104,45 +128,48 @@ public class KerberosSsoTest extends AbstractJUnitTest {
         KerberosContainer kdc = startKdc();
         configureSso(kdc, true);
 
-        // I am not able to get the basic auth to work in FF 45.3.0, so using this just to wait for Jenkins being ready
+        // I am not able to get the basic auth to work in FF 45.3.0, so using HttpClient instead
         // org.openqa.selenium.UnsupportedCommandException: Unrecognized command: POST /session/466a800f-eaf8-40cf-a9e8-815f5a6e3c32/alert/credentials
         // alert.setCredentials(new UserAndPassword("user", "ATH"));
 
-        // Disable other mechanisms so java does not try to negotiate
-        CloseableHttpClient httpClient = HttpClientBuilder.create().setDefaultAuthSchemeRegistry(
-                RegistryBuilder.<AuthSchemeProvider>create()
-                    .register(AuthSchemes.BASIC, new BasicSchemeFactory())
-                    .build()
-        ).build();
+        CloseableHttpClient httpClient = getBadassHttpClient();
 
         // No credentials provided
-        HttpGet get = new HttpGet(jenkins.url.toExternalForm() + "/whoAmI");
-        CloseableHttpResponse response = httpClient.execute(get);
-        assertEquals("Unauthorized", response.getStatusLine().getReasonPhrase());
-        assertEquals("Negotiate", response.getHeaders("WWW-Authenticate")[0].getValue());
+        assertUnauthenticatedRequestIsRejected(httpClient);
 
         // Correct credentials provided
+        HttpGet get = new HttpGet(jenkins.url.toExternalForm() + "/whoAmI");
         get.setHeader("Authorization", "Basic " + Base64.encode("user:ATH".getBytes()));
-        response = httpClient.execute(get);
+        CloseableHttpResponse response = httpClient.execute(get);
         String phrase = response.getStatusLine().getReasonPhrase();
         String out = IOUtils.toString(response.getEntity().getContent());
         assertThat(phrase + ": " + out, out, containsString("Full Name"));
         assertThat(phrase + ": " + out, out, containsString("Granted Authorities: authenticated"));
         assertEquals(phrase + ": " + out, "OK", phrase);
 
-        // Incorrect credentials
+        // Incorrect credentials provided
         get = new HttpGet(jenkins.url.toExternalForm() + "/whoAmI");
         get.setHeader("Authorization", "Basic " + Base64.encode("user:WRONG_PASSWD".getBytes()));
         response = httpClient.execute(get);
         assertEquals("Invalid password/token for user: user", response.getStatusLine().getReasonPhrase());
     }
 
-    public String exec(ProcessBuilder pb) throws Exception {
-        pb.redirectError(ProcessBuilder.Redirect.INHERIT);
-        Process process = pb.start();
-        String out = IOUtils.toString(process.getInputStream());
-        assertEquals("Executing command " + Joiner.on(" ").join(pb.command()), 0 , process.waitFor());
-        return out;
+    private void assertUnauthenticatedRequestIsRejected(CloseableHttpClient httpClient) throws IOException {
+        HttpGet get = new HttpGet(jenkins.url.toExternalForm());
+        CloseableHttpResponse response = httpClient.execute(get);
+        assertEquals("Unauthorized", response.getStatusLine().getReasonPhrase());
+        assertEquals("Negotiate", response.getHeaders("WWW-Authenticate")[0].getValue());
+    }
+
+    /**
+     * HTTP client that does not negotiate.
+     */
+    private CloseableHttpClient getBadassHttpClient() {
+        return HttpClientBuilder.create().setDefaultAuthSchemeRegistry(
+                RegistryBuilder.<AuthSchemeProvider>create()
+                    .register(AuthSchemes.BASIC, new BasicSchemeFactory())
+                    .build()
+        ).build();
     }
 
     /**
