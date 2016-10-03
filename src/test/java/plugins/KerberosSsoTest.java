@@ -86,9 +86,26 @@ public class KerberosSsoTest extends AbstractJUnitTest {
     public void kerberosTicket() throws Exception {
         setupRealmUser();
         KerberosContainer kdc = startKdc();
-        configureSso(kdc, false);
-        jenkins.logout();
+        configureSso(kdc, false, false);
 
+        verifyTicketAuth(kdc);
+
+        // The global driver is not configured to do so
+        driver.manage().deleteAllCookies(); // Logout
+        jenkins.visit("/whoAmI"); // 401 Unauthorized
+        assertThat(driver.getPageSource(), not(containsString(AUTHORIZED)));
+    }
+
+    @Test
+    public void kerberosTicketWithBasicAuthEnabled() throws Exception {
+        setupRealmUser();
+        KerberosContainer kdc = startKdc();
+        configureSso(kdc, false, true);
+
+        verifyTicketAuth(kdc);
+    }
+
+    private void verifyTicketAuth(KerberosContainer kdc) throws IOException, InterruptedException {
         // Get TGT
         String tokenCache = kdc.getClientTokenCache();
 
@@ -98,12 +115,83 @@ public class KerberosSsoTest extends AbstractJUnitTest {
         String out = negotiatingDriver.getPageSource();
         assertThat(out, containsString(AUTHORIZED));
 
-        // The global driver is not configured to do so
-        jenkins.visit("/whoAmI"); // 401 Unauthorized
-        assertThat(driver.getPageSource(), not(containsString(AUTHORIZED)));
-
-        // Non-negotiating request should fail as well
+        // Non-negotiating request should fail
         assertUnauthenticatedRequestIsRejected(getBadassHttpClient());
+    }
+
+    @Test
+    public void basicAuth() throws Exception {
+        setupRealmUser();
+        KerberosContainer kdc = startKdc();
+        configureSso(kdc, false, true);
+
+        CloseableHttpClient httpClient = getBadassHttpClient();
+
+        // No credentials provided
+        assertUnauthenticatedRequestIsRejected(httpClient);
+
+        // Correct credentials provided
+        HttpGet get = new HttpGet(jenkins.url.toExternalForm() + "/whoAmI");
+        get.setHeader("Authorization", "Basic " + Base64.encode("user:ATH".getBytes()));
+        CloseableHttpResponse response = httpClient.execute(get);
+        String phrase = response.getStatusLine().getReasonPhrase();
+        String out = IOUtils.toString(response.getEntity().getContent());
+        assertThat(phrase + ": " + out, out, containsString("Full Name"));
+        assertThat(phrase + ": " + out, out, containsString("Granted Authorities: authenticated"));
+        assertEquals(phrase + ": " + out, "OK", phrase);
+
+        // Incorrect credentials provided
+        get = new HttpGet(jenkins.url.toExternalForm() + "/whoAmI");
+        get.setHeader("Authorization", "Basic " + Base64.encode("user:WRONG_PASSWD".getBytes()));
+        response = httpClient.execute(get);
+        assertEquals("Invalid password/token for user: user", response.getStatusLine().getReasonPhrase());
+    }
+
+    @Test
+    public void explicitTicketAuth() throws Exception {
+        setupRealmUser();
+        KerberosContainer kdc = startKdc();
+        configureSso(kdc, true, true);
+
+        String tokenCache = kdc.getClientTokenCache();
+
+        FirefoxDriver nego = getNegotiatingFirefox(kdc, tokenCache);
+        nego.get(jenkins.url("/whoAmI").toExternalForm());
+        assertThat(nego.getPageSource(), not(containsString(AUTHORIZED)));
+
+        nego.get(jenkins.url("/login").toExternalForm());
+        nego.get(jenkins.url("/whoAmI").toExternalForm());
+        assertThat(nego.getPageSource(), containsString(AUTHORIZED));
+    }
+
+    @Test
+    public void explicitBasicAuth() throws Exception {
+        setupRealmUser();
+        KerberosContainer kdc = startKdc();
+        configureSso(kdc, true, true);
+
+        // No credentials provided
+        HttpGet get = new HttpGet(jenkins.url.toExternalForm() + "/whoAmI");
+        CloseableHttpResponse response = getBadassHttpClient().execute(get);
+        String out = IOUtils.toString(response.getEntity().getContent());
+        assertThat(out, not(containsString("Granted Authorities: authenticated")));
+        assertThat(out, containsString("Anonymous"));
+
+        // Correct credentials provided
+        get = new HttpGet(jenkins.url.toExternalForm() + "/login");
+        get.setHeader("Authorization", "Basic " + Base64.encode("user:ATH".getBytes()));
+        response = getBadassHttpClient().execute(get);
+        String phrase = response.getStatusLine().getReasonPhrase();
+        out = IOUtils.toString(response.getEntity().getContent());
+        assertThat(phrase + ": " + out, out, containsString("Full Name"));
+        //assertThat(phrase + ": " + out, out, containsString("Granted Authorities: authenticated"));
+        assertEquals(phrase + ": " + out, "OK", phrase);
+
+        // Incorrect credentials provided
+        get = new HttpGet(jenkins.url.toExternalForm() + "/login");
+        get.setHeader("Authorization", "Basic " + Base64.encode("user:WRONG_PASSWD".getBytes()));
+        response = getBadassHttpClient().execute(get);
+        assertEquals("Invalid password/token for user: user", response.getStatusLine().getReasonPhrase());
     }
 
     private FirefoxDriver getNegotiatingFirefox(KerberosContainer kdc, String tokenCache) {
@@ -144,38 +232,6 @@ public class KerberosSsoTest extends AbstractJUnitTest {
         return driver;
     }
 
-    @Test
-    public void basicAuth() throws Exception {
-        setupRealmUser();
-        KerberosContainer kdc = startKdc();
-        configureSso(kdc, true);
-
-        // I am not able to get the basic auth to work in FF 45.3.0, so using HttpClient instead
-        // org.openqa.selenium.UnsupportedCommandException: Unrecognized command: POST /session/466a800f-eaf8-40cf-a9e8-815f5a6e3c32/alert/credentials
-        // alert.setCredentials(new UserAndPassword("user", "ATH"));
-
-        CloseableHttpClient httpClient = getBadassHttpClient();
-
-        // No credentials provided
-        assertUnauthenticatedRequestIsRejected(httpClient);
-
-        // Correct credentials provided
-        HttpGet get = new HttpGet(jenkins.url.toExternalForm() + "/whoAmI");
-        get.setHeader("Authorization", "Basic " + Base64.encode("user:ATH".getBytes()));
-        CloseableHttpResponse response = httpClient.execute(get);
-        String phrase = response.getStatusLine().getReasonPhrase();
-        String out = IOUtils.toString(response.getEntity().getContent());
-        assertThat(phrase + ": " + out, out, containsString("Full Name"));
-        assertThat(phrase + ": " + out, out, containsString("Granted Authorities: authenticated"));
-        assertEquals(phrase + ": " + out, "OK", phrase);
-
-        // Incorrect credentials provided
-        get = new HttpGet(jenkins.url.toExternalForm() + "/whoAmI");
-        get.setHeader("Authorization", "Basic " + Base64.encode("user:WRONG_PASSWD".getBytes()));
-        response = httpClient.execute(get);
-        assertEquals("Invalid password/token for user: user", response.getStatusLine().getReasonPhrase());
-    }
-
     private void assertUnauthenticatedRequestIsRejected(CloseableHttpClient httpClient) throws IOException {
         HttpGet get = new HttpGet(jenkins.url.toExternalForm());
         CloseableHttpResponse response = httpClient.execute(get);
@@ -186,6 +242,9 @@ public class KerberosSsoTest extends AbstractJUnitTest {
     /**
      * HTTP client that does not negotiate.
      */
+    // I am not able to get the basic auth to work in FF 45.3.0, so using HttpClient instead
+    // org.openqa.selenium.UnsupportedCommandException: Unrecognized command: POST /session/466a800f-eaf8-40cf-a9e8-815f5a6e3c32/alert/credentials
+    // alert.setCredentials(new UserAndPassword("user", "ATH"));
     private CloseableHttpClient getBadassHttpClient() {
         return HttpClientBuilder.create().setDefaultAuthSchemeRegistry(
                 RegistryBuilder.<AuthSchemeProvider>create()
@@ -197,9 +256,10 @@ public class KerberosSsoTest extends AbstractJUnitTest {
     /**
      * Turn the SSO on in Jenkins.
      *
+     * @param allowAnonymous Require authentication on all URLs.
      * @param allowBasic Allow basic authentication.
      */
-    private void configureSso(KerberosContainer kdc, boolean allowBasic) {
+    private void configureSso(KerberosContainer kdc, boolean allowAnonymous, boolean allowBasic) {
         // Turn Jenkins side debugging on
         jenkins.runScript("System.setProperty('sun.security.krb5.debug', 'true'); System.setProperty('sun.security.spnego.debug', 'true'); return 42");
 
@@ -211,6 +271,7 @@ public class KerberosSsoTest extends AbstractJUnitTest {
         kgc.loginConf(kdc.getLoginConfPath());
         kgc.allowLocalhost(false);
         kgc.allowBasic(allowBasic);
+        kgc.allowAnonymous(allowAnonymous);
 
         config.save();
     }
@@ -236,8 +297,9 @@ public class KerberosSsoTest extends AbstractJUnitTest {
         sc.configure();
         JenkinsDatabaseSecurityRealm realm = sc.useRealm(JenkinsDatabaseSecurityRealm.class);
         sc.save();
-        // It seems the password needs to be the same as in kerberos
-        return realm.signup("user", "ATH", "Full Name", "email@mailinator.com");
+        // The password needs to be the same as in kerberos
+        User user = realm.signup("user", "ATH", "Full Name", "email@mailinator.com");
+        return user;
     }
 
     private class KerberosGlobalConfig extends PageAreaImpl {
@@ -267,6 +329,11 @@ public class KerberosSsoTest extends AbstractJUnitTest {
 
         public KerberosGlobalConfig allowBasic(boolean allow) {
             control("allowBasic").check(allow);
+            return this;
+        }
+
+        public KerberosGlobalConfig allowAnonymous(boolean login) {
+            control("anonymousAccess").check(login);
             return this;
         }
     }
