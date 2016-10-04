@@ -73,28 +73,22 @@ public @interface WithOS {
                 }
                 
                 String errorMsg = "Test and Jenkins instance must be running on any of the following operating systems: " + Arrays.toString(withos.os());
-                for (OS _os : withos.os()) {
-                    switch (_os) {
-                    case LINUX:
-                        if (!SystemUtils.IS_OS_LINUX) {
-                            throw new AssumptionViolatedException(errorMsg);
-                        }
-                        break;
-                    case WINDOWS:
-                        if (!SystemUtils.IS_OS_WINDOWS) {
-                            throw new AssumptionViolatedException(errorMsg);
-                        }
-                        break;
-                    case MAC:
-                        if (!SystemUtils.IS_OS_MAC) {
-                            throw new AssumptionViolatedException(errorMsg);
-                        }
-                        break;
-                    default:
-                        break;
-                    }
+                if (!Arrays.asList(withos.os()).contains(currentOS())) {
+                    throw new AssumptionViolatedException(errorMsg);
                 }
-                
+            }
+            
+            private OS currentOS() {
+                if (SystemUtils.IS_OS_LINUX) {
+                    return OS.LINUX;
+                }
+                if (SystemUtils.IS_OS_WINDOWS) {
+                    return OS.WINDOWS;
+                }
+                if (SystemUtils.IS_OS_MAC) {
+                    return OS.MAC;
+                }
+                throw new RuntimeException("Unrecognized OS");
             }
         };
         }
