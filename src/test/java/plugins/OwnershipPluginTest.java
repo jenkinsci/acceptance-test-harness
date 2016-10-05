@@ -23,7 +23,7 @@ import org.openqa.selenium.WebDriver;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
 
-@WithPlugins("ownership")
+@WithPlugins({"ownership", "cloudbees-folder"})
 public class OwnershipPluginTest extends AbstractJUnitTest {
 
     @Inject
@@ -109,7 +109,7 @@ public class OwnershipPluginTest extends AbstractJUnitTest {
     }
 
     private Matcher<ContainerPageObject> ownedBy(final User user) {
-        final Matcher<WebDriver> inner = Matchers.hasContent(Pattern.compile("(Primary owner: |Owner\\n)" + user.id()));
+        final Matcher<WebDriver> inner = Matchers.hasContent(Pattern.compile("(Primary owner: |Owner\\n|Primary\n)" + user.id()));
         return new Matcher<ContainerPageObject>("Item owned by " + user.id()) {
             @Override
             public boolean matchesSafely(ContainerPageObject item) {
