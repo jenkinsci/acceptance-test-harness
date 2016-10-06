@@ -148,6 +148,12 @@ public class PluginManager extends ContainerPageObject {
         return true;
     }
 
+    private VersionNumber getAvailableVersionForPlugin(String pluginName) {
+        // assuming we are on 'available' page
+        String v = find(by.xpath("//input[starts-with(@name,'plugin.%s.')]/../../td[last()]", pluginName)).getText();
+        return new VersionNumber(v);
+    }
+    
     /**
      * Installs specified plugins.
      *
@@ -224,6 +230,13 @@ public class PluginManager extends ContainerPageObject {
                 for (int attempt = 0; attempt < 2; attempt++) {// # of installations attempted, considering retries
                     visit("available");
                     check(find(by.xpath("//input[starts-with(@name,'plugin.%s.')]", n)));
+                    VersionNumber availableVersion = getAvailableVersionForPlugin(n);
+                    VersionNumber requiredVersion = new VersionNumber(candidates.get(n));
+                    if (availableVersion.isOlderThan(requiredVersion)) {
+                        throw new AssumptionViolatedException(
+                                String.format("Version '%s' of '%s' is required, but available version is '%s'", 
+                                        requiredVersion, n, availableVersion));
+                    }
 
                     clickButton("Install");
 
