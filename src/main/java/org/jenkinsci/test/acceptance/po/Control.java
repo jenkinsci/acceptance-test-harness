@@ -173,9 +173,35 @@ public class Control extends CapybaraPortingLayerImpl {
                             ");"
             );
 
+            boolean clickRetryDone = false;
+            WebElement yuiBtnSpan = findElement(menuButton, by.xpath("ancestor::*[contains(@class,'yui-menu-button')]"));
             WebElement context = findElement(menuButton, by.xpath("ancestor::*[contains(@class,'yui-menu-button')]/.."));
-            WebElement e = findElement(context, by.link(caption));
-            return e;
+
+            while (true) {
+                try {
+                    WebElement e = findElement(context, by.link(caption));
+                    return e;
+                } catch (NoSuchElementException e) {
+                    // For some reason, the expected dropdown entry is not in the DOM. Try clicking on the button
+                    // to see if they will get added. We need to scroll to the button before we click on it.
+
+                    // We only want to try this one.
+                    if (clickRetryDone) {
+                        throw e;
+                    }
+                    clickRetryDone = true;
+
+                    // Scroll to the button..
+                    int btnYCoord = menuButton.getLocation().getY();
+                    int btnHeight = menuButton.getSize().getHeight();
+                    executeScript("window.scrollTo(0, " + (btnYCoord - btnHeight - 100) + ")");
+
+                    // Click on it and then try finding it
+                    // (one more time only ... see clickRetryDone).
+                    yuiBtnSpan.click();
+                    elasticSleep(1000);
+                }
+            }
         }
     };
 
