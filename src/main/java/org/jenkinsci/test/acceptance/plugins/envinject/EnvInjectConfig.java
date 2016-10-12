@@ -29,7 +29,7 @@ import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.PageObject;
 
 public class EnvInjectConfig extends PageAreaImpl {
-    public final Control properties = control("propertiesContent");
+    public final Control properties = control("info/propertiesContent");
 
     protected EnvInjectConfig(PageObject context, String path) {
         super(context, path);
@@ -37,7 +37,7 @@ public class EnvInjectConfig extends PageAreaImpl {
 
     public static class Property extends EnvInjectConfig {
         public Property(Job job) {
-            super(job, "/properties/org-jenkinsci-plugins-envinject-EnvInjectJobProperty/on");
+            super(job, "/properties/org-jenkinsci-plugins-envinject-EnvInjectJobProperty");
             job.check("Prepare an environment for the run");
         }
     }
