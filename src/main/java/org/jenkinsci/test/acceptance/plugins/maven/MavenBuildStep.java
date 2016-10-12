@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.plugins.maven;
 
 import org.jenkinsci.test.acceptance.po.*;
+import org.openqa.selenium.NoSuchElementException;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -22,9 +23,18 @@ public class MavenBuildStep extends AbstractStep implements BuildStep {
         return this;
     }
 
-    public MavenBuildStep properties(String properties) {
+    public MavenBuildStep properties(String properties, boolean inject) {
         ensureAdvanced();
         control("properties").set(properties);
+        if (inject) {
+            // After the fix for JENKINS-25416 (core >= 2.12) we must explicitly say if we want the variables injected
+            // as properties into maven process.
+            try {
+                control("injectBuildVariables").check(true);
+            } catch (NoSuchElementException e) {
+                // Nothing, we are in core < 2.12
+            }
+        }
         return this;
     }
 
