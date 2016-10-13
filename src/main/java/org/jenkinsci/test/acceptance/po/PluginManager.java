@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -114,6 +115,14 @@ public class PluginManager extends ContainerPageObject {
      */
     public InstallationStatus installationStatus(String spec) {
         PluginSpec p = new PluginSpec(spec);
+        return installationStatus(p);
+    }
+
+    /**
+     * @param p plugin id with optional version (e.g. "ldap" or "ldap@1.8")
+     * @return whether the plugin (in version greater or equal than specified) is installed
+     */
+    private InstallationStatus installationStatus(PluginSpec p) {
         String name = p.getName();
         String version = p.getVersion();
         Plugin plugin;
@@ -127,10 +136,10 @@ public class PluginManager extends ContainerPageObject {
                     return InstallationStatus.OUTDATED;
                 }
             }
-            LOGGER.info(spec + " is up to date");
+            LOGGER.info(p.getCoordinates() + " is up to date");
             return InstallationStatus.UP_TO_DATE;
         } catch (IllegalArgumentException ex) {
-            LOGGER.info(spec + " is not installed");
+            LOGGER.info(p.getCoordinates() + " is not installed");
             return InstallationStatus.NOT_INSTALLED;
         }
     }
@@ -161,91 +170,17 @@ public class PluginManager extends ContainerPageObject {
      */
     @Deprecated
     public boolean installPlugins(final String... specs) throws UnableToResolveDependencies {
-        boolean changed = false;
-        boolean restartRequired = false;
-        final Map<String, String> candidates = getMapShortNamesVersion(specs);
+        Result result = INITIAL;
+        final Map<String, PluginSpec> candidates = getSpecsMap(specs);
 
         if (uploadPlugins) {
-            // First check to see whether we need to do anything.
-            // If not, do not consider transitive dependencies of the requested plugins,
-            // which might force updates (and thus restarts) even though we already have
-            // a sufficiently new version of the requested plugin.
-            boolean someChangeRequired = false;
-            for (String spec : specs) {
-                if (installationStatus(spec) != InstallationStatus.UP_TO_DATE) {
-                    someChangeRequired = true;
-                    break;
-                }
-            }
-            if (!someChangeRequired) {
-                return false;
-            }
-            List<PluginMetadata> pluginToBeInstalled = ucmd.get().transitiveDependenciesOf(jenkins, candidates);
-            for (PluginMetadata newPlugin : pluginToBeInstalled) {
-                final String name = newPlugin.getName();
-                String claimedVersion = candidates.get(name);
-                String availableVersion = newPlugin.getVersion();
-                if (claimedVersion == null) { // a dependency
-                    claimedVersion = availableVersion;
-                }
-                final String currentSpec = StringUtils.isNotEmpty(claimedVersion)
-                    ? name + "@" + claimedVersion
-                    : name
-                ;
-                InstallationStatus status = installationStatus(currentSpec);
-                if (status != InstallationStatus.UP_TO_DATE) {
-                    try {
-                        if (new VersionNumber(claimedVersion).compareTo(new VersionNumber(availableVersion)) > 0) {
-                            throw new AssumptionViolatedException(
-                                    name + " has version " + availableVersion + " but " + claimedVersion + " was requested");
-                        }
-                        newPlugin.uploadTo(jenkins, injector, availableVersion);
-                        changed = true;
-                        restartRequired |= status == InstallationStatus.OUTDATED;
-                        try {
-                            new UpdateCenter(jenkins).waitForInstallationToComplete(name);
-                        } catch (InstallationFailedException x) {
-                            if (!restartRequired) {
-                                throw x;
-                            }
-                            // JENKINS-19859: else ignore; may be fine after the restart
-                        }
-                    } catch (IOException | ArtifactResolutionException e) {
-                        throw new AssertionError("Failed to upload plugin: " + newPlugin, e);
-                    }
-                }
-            }
+            result = uploadPlugins(result, candidates);
         } else {
-            if (!updated)
-                checkForUpdates();
-
-            OUTER:
-            for (final String n : candidates.keySet()) {
-                for (int attempt = 0; attempt < 2; attempt++) {// # of installations attempted, considering retries
-                    visit("available");
-                    check(find(by.xpath("//input[starts-with(@name,'plugin.%s.')]", n)));
-
-                    clickButton("Install");
-
-                    elasticSleep(1000);
-
-                    try {
-                        new UpdateCenter(jenkins).waitForInstallationToComplete(n);
-                        changed = true;
-                    } catch (InstallationFailedException e) {
-                        if (e.getMessage().contains("Failed to download from")) {
-                            continue;   // retry
-                        }
-                    }
-
-                    continue OUTER;  // installation completed
-                }
-            }
-            // TODO set restartRequired if we did updates
+            result = installPlugins(result, candidates);
         }
 
-        if (changed) {
-            if (restartRequired || forceRestart) {
+        if (result.changed) {
+            if (result.restartRequired || forceRestart) {
                 return true;
             } else {
                 // plugin deployment happens asynchronously, so give it a few seconds
@@ -268,6 +203,106 @@ public class PluginManager extends ContainerPageObject {
         return false;
     }
 
+    private Result uploadPlugins(Result current, final Map<String, PluginSpec> specs) throws UnableToResolveDependencies {
+        // First check to see whether we need to do anything.
+        // If not, do not consider transitive dependencies of the requested plugins,
+        // which might force updates (and thus restarts) even though we already have
+        // a sufficiently new version of the requested plugin.
+        boolean someChangeRequired = false;
+        for (PluginSpec spec : specs.values()) {
+            if (installationStatus(spec) != InstallationStatus.UP_TO_DATE) {
+                someChangeRequired = true;
+                break;
+            }
+        }
+        if (someChangeRequired) {
+            List<PluginMetadata> pluginToBeInstalled = ucmd.get().transitiveDependenciesOf(jenkins, getMapShortNamesVersion(specs.values()));
+            for (PluginMetadata newPlugin : pluginToBeInstalled) {
+                final String name = newPlugin.getName();
+                String claimedVersion = null;
+                if (specs.containsKey(name)) {
+                    claimedVersion = specs.get(name).getVersion();
+                }
+                String availableVersion = newPlugin.getVersion();
+                if (claimedVersion == null) { // a dependency or no version specified
+                    claimedVersion = availableVersion;
+                }
+                final String currentSpec = StringUtils.isNotEmpty(claimedVersion)
+                        ? name + "@" + claimedVersion
+                        : name
+                        ;
+                InstallationStatus status = installationStatus(currentSpec);
+                if (status != InstallationStatus.UP_TO_DATE) {
+                    try {
+                        if (new VersionNumber(claimedVersion).compareTo(new VersionNumber(availableVersion)) > 0) {
+                            throw new AssumptionViolatedException(
+                                    name + " has version " + availableVersion + " but " + claimedVersion + " was requested");
+                        }
+                        newPlugin.uploadTo(jenkins, injector, availableVersion);
+                        current = current.installed(status == InstallationStatus.OUTDATED);
+                        try {
+                            new UpdateCenter(jenkins).waitForInstallationToComplete(name);
+                        } catch (InstallationFailedException x) {
+                            if (!current.restartRequired) {
+                                throw x;
+                            }
+                            // JENKINS-19859: else ignore; may be fine after the restart
+                        }
+                    } catch (IOException | ArtifactResolutionException e) {
+                        throw new AssertionError("Failed to upload plugin: " + newPlugin, e);
+                    }
+                }
+            }
+        }
+        return current;
+    }
+
+    public Result installPlugins(Result current, final Map<String, PluginSpec> specs) throws UnableToResolveDependencies {
+        if (!updated)
+            checkForUpdates();
+
+        // First of all we check if for any of the plugins we have provided a custom hpi file
+        // if so, we install them using the usual upload mechanism.
+        final Map<String, PluginSpec> overridden = new LinkedHashMap<>();
+        for (String id : specs.keySet()) {
+            if (System.getenv(id + ".jpi") != null) {
+                System.out.println("Here!!!");
+                overridden.put(id, specs.get(id));
+            }
+        }
+        if (!overridden.isEmpty()) {
+            specs.keySet().removeAll(overridden.keySet());
+            current = uploadPlugins(current, overridden);
+        }
+
+        OUTER:
+        for (final String n : specs.keySet()) {
+            for (int attempt = 0; attempt < 2; attempt++) {// # of installations attempted, considering retries
+                visit("available");
+                check(find(by.xpath("//input[starts-with(@name,'plugin.%s.')]", n)));
+
+                clickButton("Install");
+
+                elasticSleep(1000);
+
+                try {
+                    new UpdateCenter(jenkins).waitForInstallationToComplete(n);
+                    // TODO check when to set restartRequired if we did updates
+                    current = current.installed(false);
+                } catch (InstallationFailedException e) {
+                    if (e.getMessage().contains("Failed to download from")) {
+                        continue;   // retry
+                    }
+                }
+
+                continue OUTER;  // installation completed
+            }
+        }
+        return current;
+    }
+
+
+
     /**
      * Installs a plugin by uploading the *.jpi image.
      */
@@ -280,17 +315,31 @@ public class PluginManager extends ContainerPageObject {
     }
 
     /**
+     * Generates a map with shortNames plugin specs.
+     *
+     * @param specs Values of the {@link WithPlugins} annotation
+     * @return Map with Key:shortName Value:PluginSpec
+     */
+    private Map<String, PluginSpec> getSpecsMap(String... specs) {
+        Map<String, PluginSpec> map = new LinkedHashMap<>();
+        for (String s : specs) {
+            PluginSpec coord = new PluginSpec(s);
+            map.put(coord.getName(), coord);
+        }
+        return map;
+    }
+
+    /**
      * Generates a map with shortNames and version.
      * Version is null if not declared.
      *
      * @param specs Values of the {@link WithPlugins} annotation
      * @return Map with Key:shortName Value:Version
      */
-    private Map<String, String> getMapShortNamesVersion(String... specs) {
+    private Map<String, String> getMapShortNamesVersion(Iterable<PluginSpec> specs) {
         Map<String, String> shortNamesVersion = new HashMap<>();
-        for (String s : specs) {
-            PluginSpec coord = new PluginSpec(s);
-            shortNamesVersion.put(coord.getName(), coord.getVersion());
+        for (PluginSpec s : specs) {
+            shortNamesVersion.put(s.getName(), s.getVersion());
         }
         return shortNamesVersion;
     }
@@ -302,6 +351,10 @@ public class PluginManager extends ContainerPageObject {
      */
     public static class PluginSpec {
         /**
+         * Original coordinates.
+         */
+        private final @Nonnull String coordinates;
+        /**
          * Short name of the plugin.
          */
         private final @Nonnull String name;
@@ -311,12 +364,17 @@ public class PluginManager extends ContainerPageObject {
         private final String version;
 
         public PluginSpec(String coordinates) {
+            this.coordinates = coordinates;
             Iterator<String> spliter = Splitter.on("@").split(coordinates).iterator();
             name = spliter.next();
             version = spliter.hasNext()
                     ? spliter.next()
                     : null
             ;
+        }
+
+        public @Nonnull String getCoordinates() {
+            return coordinates;
         }
 
         public @Nonnull String getName() {
@@ -338,4 +396,34 @@ public class PluginManager extends ContainerPageObject {
             return sb.toString();
         }
     }
+
+    private static final Result INITIAL = new Result();
+
+    /** Installation result. */
+    private static class Result {
+        final boolean changed;
+        final boolean restartRequired;
+
+        Result(boolean changed, boolean restartRequired) {
+            this.changed = changed;
+            this.restartRequired = restartRequired;
+        }
+
+        /** Initial status. */
+        Result() {
+            this(false, false);
+        }
+
+        /** A plugin has been installed. */
+        Result installed(boolean restartRequired) {
+            if (this.restartRequired) {
+                return this;
+            }
+            if (!changed) {
+                return new Result(true, restartRequired);
+            }
+            return restartRequired ? new Result(true, true) : this;
+        }
+    }
+
 }
