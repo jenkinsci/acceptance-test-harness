@@ -52,7 +52,7 @@ public class ForemanNodeSharingPluginTest extends AbstractJUnitTest {
     private String jobLabelExpression2 = labelExpression2;
 
     private static final int FOREMAN_CLOUD_INIT_WAIT = 180;
-    private static final int PROVISION_TIMEOUT = 240;
+    private static final int PROVISION_TIMEOUT = 360;
     private static final String DEFAULTJOBSLEEPTIME = "15";
 
     /**
