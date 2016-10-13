@@ -145,7 +145,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
 
         MavenBuildStep step = job.addBuildStep(MavenBuildStep.class);
         step.targets.set(GENERATE + " -Dcmdline.property=$CMD");
-        step.properties("property.property=$PROPERTY");
+        step.properties("property.property=$PROPERTY", true);
         job.save();
 
         Map<String, String> params = new HashMap<>();
