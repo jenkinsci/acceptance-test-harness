@@ -231,11 +231,13 @@ public class PluginManager extends ContainerPageObject {
                     visit("available");
                     check(find(by.xpath("//input[starts-with(@name,'plugin.%s.')]", n)));
                     VersionNumber availableVersion = getAvailableVersionForPlugin(n);
-                    VersionNumber requiredVersion = new VersionNumber(candidates.get(n));
-                    if (availableVersion.isOlderThan(requiredVersion)) {
-                        throw new AssumptionViolatedException(
-                                String.format("Version '%s' of '%s' is required, but available version is '%s'", 
-                                        requiredVersion, n, availableVersion));
+                    if (candidates.get(n) != null) {
+                        VersionNumber requiredVersion = new VersionNumber(candidates.get(n));
+                        if (availableVersion.isOlderThan(requiredVersion)) {
+                            throw new AssumptionViolatedException(
+                                    String.format("Version '%s' of '%s' is required, but available version is '%s'",
+                                            requiredVersion, n, availableVersion));
+                        }
                     }
 
                     clickButton("Install");
