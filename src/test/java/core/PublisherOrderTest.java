@@ -7,6 +7,7 @@ import org.jenkinsci.test.acceptance.po.ArtifactArchiver;
 import org.jenkinsci.test.acceptance.po.BuildTrigger;
 import org.jenkinsci.test.acceptance.po.Fingerprint;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.JUnitPublisher;
 import org.junit.Test;
 
 public class PublisherOrderTest extends AbstractJUnitTest {
@@ -50,6 +51,11 @@ public class PublisherOrderTest extends AbstractJUnitTest {
         fingerprint.targets.set("aggregate.txt");
         AggregateDownstreamTestResults aggregate = upstream.addPublisher(AggregateDownstreamTestResults.class);
         aggregate.specify.check();
+        fingerprint.targets.set("another.txt");
         upstream.save();
+        upstream.configure();
+        archiver.includes("another.txt");
+        JUnitPublisher junit = upstream.addPublisher(JUnitPublisher.class);
+        fingerprint.targets.set("yetanother");
     }
 }
