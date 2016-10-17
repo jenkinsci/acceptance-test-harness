@@ -247,7 +247,7 @@ public class FallbackConfig extends AbstractModule {
     @Named("form-element-path.hpi") @Provides
     public File getFormElementsPathFile(RepositorySystem repositorySystem, RepositorySystemSession repositorySystemSession) {
         ArtifactResolverUtil resolverUtil = new ArtifactResolverUtil(repositorySystem, repositorySystemSession);
-        ArtifactResult resolvedArtifact = resolverUtil.resolve(new DefaultArtifact("org.jenkins-ci.plugins", "form-element-path", "hpi", "1.4"));
+        ArtifactResult resolvedArtifact = resolverUtil.resolve(new DefaultArtifact("org.jenkins-ci.plugins", "form-element-path", "hpi", "1.7-alpha-1"));
         return resolvedArtifact.getArtifact().getFile();
     }
 
