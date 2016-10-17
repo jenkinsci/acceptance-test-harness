@@ -137,7 +137,7 @@ public class Job extends TopLevelItem {
         elasticSleep(1000); // it takes some time until the element is visible
         String path = null;
         // if I have got a Describable use it to get the path
-        if (describableValue != null) {
+        if (describableValue != null && type.equals(PostBuildStep.class)) {
             List<WebElement> newSteps = driver.findElements(by.xpath("//div[@name='%s']", section));
             outer:
             for (WebElement element : newSteps) {
