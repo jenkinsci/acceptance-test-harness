@@ -5,6 +5,9 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -129,26 +132,36 @@ public abstract class PageObject extends CapybaraPortingLayerImpl {
     public @Nonnull String createPageArea(final String pathPrefix, Runnable action) throws TimeoutException {
         assert pathPrefix.startsWith("/"): "Path not absolute";
         final By by = this.by.areaPath(pathPrefix);
-        final int existing = all(by).size();
+        final List<String> existing = extractPaths(all(by));
+        final int existingSize = existing.size();
         action.run();
 
         return waitFor().withTimeout(10, TimeUnit.SECONDS).until(new Function<CapybaraPortingLayer, String>() {
             @Nullable @Override public String apply(@Nullable CapybaraPortingLayer input) {
-                List<WebElement> current = all(by);
+                List<String> current = extractPaths(all(by));
                 int size = current.size();
-                if (size == existing) return null; // Have not appeared yet
-                if (size == existing + 1) { // Appeared
-                    WebElement created = current.get(current.size() - 1);
-                    return created.getAttribute("path");
+                if (size == existingSize) return null; // Have not appeared yet
+                if (size == existingSize + 1) { // Appeared
+                    current.removeAll(existing);
+                    assert current.size() == 1 : "Path mismatch. Existing: " + existing + "; filtered: " + current;
+                    return current.get(1);
                 }
 
-                throw new AssertionError(String.format("Number of elements was %d, is %d: %s", existing, size, current));
+                throw new AssertionError(String.format("Number of elements was %d, now is %d: %s", existingSize, size, current));
             }
 
             @Override public String toString() {
                 return "Page area to appear: " + by;
             }
         });
+    }
+
+    private List<String> extractPaths(Collection<WebElement> elements) {
+        List<String> paths = new ArrayList<>(elements.size());
+        for (WebElement element : elements) {
+            paths.add(element.getAttribute("path"));
+        }
+        return paths;
     }
 
     @Override
