@@ -144,7 +144,7 @@ public abstract class PageObject extends CapybaraPortingLayerImpl {
                 if (size == existingSize + 1) { // Appeared
                     current.removeAll(existing);
                     assert current.size() == 1 : "Path mismatch. Existing: " + existing + "; filtered: " + current;
-                    return current.get(1);
+                    return current.get(0);
                 }
 
                 throw new AssertionError(String.format("Number of elements was %d, now is %d: %s", existingSize, size, current));
