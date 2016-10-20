@@ -156,7 +156,6 @@ public class ByFactory {
      * "/foo/bar" matches div elements with path attribute "/foo/bar" or "/foo/bar[n]". Does not match "/foo/bar/baz" or "/foo/bar[1]/baz".
      */
     public By areaPath(final String pathPrefix) {
-        final List<Character> delimiters = Arrays.asList('[', '/');
         final int prefixLength = pathPrefix.length();
 
         final By xpath = ByFactory.this.xpath("//div[starts-with(@path, '%s')]", pathPrefix);
@@ -168,8 +167,8 @@ public class ByFactory {
                 for (WebElement webElement: allPrefixed) {
                     String path = webElement.getAttribute("path");
 
-                    // Ensure /foo matches /foo/bar and /boo[bar], but not /foolish/bartender
-                    if (path.length() == prefixLength || delimiters.contains(path.charAt(prefixLength))) {
+                    // Ensure /foo matches /foo and /boo[bar], but not /foo/bar or /foolish/bartender
+                    if (path.substring(prefixLength).matches("^(\\[[^\\]]+\\]|)$")) {
                         ret.add(webElement);
                     }
                 }
