@@ -26,8 +26,7 @@ public class CredentialsPage extends ConfigurablePageObject {
     public <T extends Credential> T add(Class<T> type) {
         addButton.selectDropdownMenuAlt(type);
         String path = find(by.name("credentials")).getAttribute("path");
-
-        return newInstance(type, this, "/credentials");
+        return newInstance(type, this, path);
     }
 
     @Override
