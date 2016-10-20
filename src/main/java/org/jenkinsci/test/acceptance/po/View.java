@@ -50,6 +50,7 @@ public abstract class View extends ContainerPageObject {
     public void delete() {
         configure();
         clickLink("Delete View");
+        waitFor(by.button("Yes"));
         clickButton("Yes");
     }
 

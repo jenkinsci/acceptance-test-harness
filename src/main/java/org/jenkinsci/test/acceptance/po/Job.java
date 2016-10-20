@@ -26,6 +26,7 @@ import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.LocalController;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.junit.internal.AssumptionViolatedException;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.zeroturnaround.zip.ZipUtil;
 
@@ -65,6 +66,10 @@ public class Job extends TopLevelItem {
         super(injector, url, name);
     }
 
+    public Job(PageObject context, URL url, String name) {
+        super(context, url, name);
+    }
+    
     public <T extends Scm> T useScm(Class<T> type) {
         ensureConfigPage();
 
@@ -275,15 +280,13 @@ public class Job extends TopLevelItem {
     }
 
     public Build scheduleBuild(Map<String, ?> params) {
+        open();
         int nb = getJson().get("nextBuildNumber").intValue();
-        visit(getBuildUrl());
-
-        // if the security is enabled, GET request above will fail
-        if (driver.getTitle().contains("Form post required")) {
-            find(by.button("Proceed")).click();
-        }
-
-        if (!parameters.isEmpty()) {
+        if (parameters.isEmpty()) {
+            clickLink("Build Now");
+        } else {
+            clickLink("Build with Parameters");
+            waitFor(by.xpath("//form[@name='parameters']"), 2);
             for (Parameter def : parameters) {
                 Object v = params.get(def.getName());
                 if (v != null) {
@@ -411,5 +414,14 @@ public class Job extends TopLevelItem {
         }
 
         return links;
+    }
+
+    /**
+     * Deletes the current job
+     */
+    public void delete() {
+        this.open();
+        clickLink("Delete Project");
+        confirmAlert(2);
     }
 }

@@ -24,12 +24,18 @@
 
 package plugins;
 
+import java.io.File;
 import java.util.concurrent.Callable;
 import javax.inject.Inject;
+import org.apache.commons.io.FileUtils;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+import org.jenkinsci.test.acceptance.controller.JenkinsController;
+import org.jenkinsci.test.acceptance.controller.LocalController;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
+import org.jenkinsci.test.acceptance.docker.fixtures.SvnContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.DockerTest;
 import org.jenkinsci.test.acceptance.junit.Native;
@@ -45,14 +51,12 @@ import org.jenkinsci.test.acceptance.po.DumbSlave;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import static org.junit.Assert.*;
-
+import static org.junit.Assume.*;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.rules.TemporaryFolder;
 import org.jvnet.hudson.test.Issue;
-
-import static org.junit.Assume.assumeTrue;
 
 /**
  * Roughly follows <a href="https://github.com/jenkinsci/workflow-plugin/blob/master/TUTORIAL.md">the tutorial</a>.
@@ -61,7 +65,9 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
 
     @Inject private SlaveController slaveController;
     @Inject DockerContainerHolder<GitContainer> gitServer;
+    @Inject DockerContainerHolder<SvnContainer> svn;
     @Rule public TemporaryFolder tmp = new TemporaryFolder();
+    @Inject JenkinsController controller;
 
     @WithPlugins("workflow-aggregator@1.1")
     @Test public void helloWorld() throws Exception {
@@ -72,7 +78,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         job.startBuild().shouldSucceed().shouldContainsConsoleOutput("hello from Workflow");
     }
 
-    @WithPlugins({"workflow-aggregator@1.1", "junit@1.3", "git@2.3"})
+    @WithPlugins({"workflow-aggregator@2.0", "workflow-cps@2.10", "workflow-basic-steps@2.1", "junit@1.18", "git@2.3"})
     @Test public void linearFlow() throws Exception {
         assumeTrue("This test requires a restartable Jenkins", jenkins.canRestart());
         MavenInstallation.installMaven(jenkins, "M3", "3.1.0");
@@ -86,7 +92,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
         job.script.set(
             "node('remote') {\n" +
-            "  git url: 'https://github.com/jglick/simple-maven-project-with-tests.git'\n" +
+            "  git 'https://github.com/jglick/simple-maven-project-with-tests.git'\n" +
             "  def v = version()\n" +
             "  if (v) {\n" +
             "    echo \"Building version ${v}\"\n" +
@@ -96,8 +102,8 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
             "    sh 'mvn -B -Dmaven.test.failure.ignore verify'\n" +
             "  }\n" +
             "  input 'Ready to go?'\n" +
-            "  step([$class: 'ArtifactArchiver', artifacts: '**/target/*.jar', fingerprint: true])\n" +
-            "  step([$class: 'JUnitResultArchiver', testResults: '**/target/surefire-reports/TEST-*.xml'])\n" +
+            "  step([$class: 'ArtifactArchiver', artifacts: '**/target/*.jar', fingerprint: true])\n" + // TODO Jenkins 2.2+: archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
+            "  junit '**/target/surefire-reports/TEST-*.xml'\n" +
             "}\n" +
             "def version() {\n" +
             "  def matcher = readFile('pom.xml') =~ '<version>(.+)</version>'\n" +
@@ -116,19 +122,24 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         });
         build.shouldContainsConsoleOutput("Building version 1.0-SNAPSHOT");
         jenkins.restart();
+        // Default 120s timeout of Build.waitUntilFinished sometimes expires waiting for RetentionStrategy.Always to tick (after initial failure of CommandLauncher.launch: EOFException: unexpected stream termination):
+        slave.waitUntilOnline(); // TODO rather wait for build output: "Ready to run"
         visit(build.getConsoleUrl());
         clickLink("Proceed");
-        // Default 120s timeout of Build.waitUntilFinished sometimes expires waiting for RetentionStrategy.Always to tick (after initial failure of CommandLauncher.launch: EOFException: unexpected stream termination):
-        slave.waitUntilOnline();
-        // Can also fail due to double loading of build as per JENKINS-22767:
-        assertTrue(build.isSuccess() || build.isUnstable()); // tests in this project are currently designed to fail at random, so either is OK
+        try {
+            build.shouldSucceed();
+        } catch (AssertionError x) {
+            // Tests in this project are currently designed to fail at random, so either status is OK.
+            // TODO if resultIs were public and there were a disjunction combinator for Matcher we could use it here.
+            build.shouldBeUnstable();
+        }
         new Artifact(build, "target/simple-maven-project-with-tests-1.0-SNAPSHOT.jar").assertThatExists(true);
         build.open();
         clickLink("Test Result");
         assertThat(driver, hasContent("All Tests"));
     }
 
-    @WithPlugins({"workflow-aggregator@1.10", "parallel-test-executor@1.6", "junit@1.3", "git@2.3", "script-security@1.15"})
+    @WithPlugins({"workflow-aggregator@2.0", "workflow-cps@2.10", "workflow-basic-steps@2.1", "parallel-test-executor@1.9", "junit@1.18", "git@2.3"})
     @Native("mvn")
     @Test public void parallelTests() throws Exception {
         for (int i = 0; i < 3; i++) {
@@ -138,10 +149,10 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         job.script.set(
             "node('master') {\n" +
             // TODO could be switched to multibranch, in which case this initial `node` is unnecessary, and each branch can just `checkout scm`
-            "  git url: 'https://github.com/jenkinsci/parallel-test-executor-plugin-sample.git'\n" +
+            "  git 'https://github.com/jenkinsci/parallel-test-executor-plugin-sample.git'\n" +
             "  stash 'sources'\n" +
             "}\n" +
-            "def splits = splitTests([$class: 'CountDrivenParallelism', size: 3])\n" +
+            "def splits = splitTests count(3)\n" +
             "def branches = [:]\n" +
             "for (int i = 0; i < splits.size(); i++) {\n" +
             "  def exclusions = splits.get(i);\n" +
@@ -153,7 +164,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
             // Do not bother with ${tool 'M3'}; would take too long to unpack Maven on all slaves.
             // TODO would be useful for ToolInstallation to support the URL installer, hosting the tool ZIP ourselves somewhere cached.
             "      sh 'mvn -B -Dmaven.test.failure.ignore test'\n" +
-            "      step([$class: 'JUnitResultArchiver', testResults: 'target/surefire-reports/*.xml'])\n" +
+            "      junit 'target/surefire-reports/*.xml'\n" +
             "    }\n" +
             "  }\n" +
             "}\n" +
@@ -163,14 +174,16 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         Build build = job.startBuild();
         try {
             build.shouldSucceed();
-        } catch (AssertionError x) {
-            // again this project is designed to have occasional test failures
-            // TODO if resultIs were public and there were a disjunction combinator for Matcher we could use it here
+        } catch (AssertionError x) { // cf. linearFlow
             build.shouldBeUnstable();
         }
         build.shouldContainsConsoleOutput("No record available"); // first run
         build = job.startBuild();
-        assertTrue(build.isSuccess() || build.isUnstable());
+        try {
+            build.shouldSucceed();
+        } catch (AssertionError x) {
+            build.shouldBeUnstable();
+        }
         build.shouldContainsConsoleOutput("divided into 3 sets");
     }
 
@@ -200,6 +213,41 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         job.sandbox.check();
         job.save();
         job.startBuild().shouldSucceed();
+    }
+
+    @WithPlugins({"workflow-cps-global-lib@2.3", "workflow-basic-steps@2.1", "workflow-job@2.5"})
+    @Issue("JENKINS-26192")
+    @Test public void grapeLibrary() throws Exception {
+        assumeThat("TODO otherwise we would need to set up SSH access to push via Git, which seems an awful hassle", controller, instanceOf(LocalController.class));
+        File workflowLibs = /* WorkflowLibRepository.workspace() */ new File(((LocalController) controller).getJenkinsHome(), "workflow-libs");
+        // Cf. GrapeTest.useBinary using JenkinsRule:
+        FileUtils.write(new File(workflowLibs, "src/pkg/Lists.groovy"),
+            "package pkg\n" +
+            "@Grab('commons-primitives:commons-primitives:1.0')\n" +
+            "import org.apache.commons.collections.primitives.ArrayIntList\n" +
+            "static def arrayInt() {new ArrayIntList()}");
+        WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
+        job.script.set("echo(/got ${pkg.Lists.arrayInt()}/)");
+        job.sandbox.check();
+        job.save();
+        assertThat(job.startBuild().shouldSucceed().getConsole(), containsString("got []"));
+    }
+
+    /** Pipeline analogue of {@link SubversionPluginTest#build_has_changes}. */
+    @Category(DockerTest.class)
+    @WithDocker
+    @WithPlugins({"workflow-cps@2.12", "workflow-job@2.5", "workflow-durable-task-step@2.4", "subversion@2.6"})
+    @Test public void subversion() throws Exception {
+        final SvnContainer svnContainer = svn.get();
+        WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
+        job.script.set("node {svn '" + svnContainer.getUrlUnsaveRepoAtRevision(1) + "'}");
+        job.save();
+        job.startBuild().shouldSucceed();
+        job.configure();
+        job.script.set("node {svn '" + svnContainer.getUrlUnsaveRepoAtRevision(2) + "'}");
+        job.save();
+        Build b2 = job.startBuild().shouldSucceed();
+        assertTrue(b2.getChanges().hasChanges());
     }
 
 }

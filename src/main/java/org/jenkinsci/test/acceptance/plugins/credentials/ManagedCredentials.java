@@ -1,13 +1,8 @@
 package org.jenkinsci.test.acceptance.plugins.credentials;
 
-import java.util.List;
-import java.util.concurrent.Callable;
-
-import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.ContainerPageObject;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Jenkins;
-import org.openqa.selenium.WebElement;
 
 /**
  * "Manage Credentials" page.

@@ -29,7 +29,6 @@ import java.util.regex.Pattern;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Native;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.plugins.ant.AntInstallation;
 import org.jenkinsci.test.acceptance.plugins.groovy.GroovyInstallation;
 import org.jenkinsci.test.acceptance.plugins.groovy.GroovyStep;
 import org.jenkinsci.test.acceptance.plugins.groovy.SystemGroovyStep;

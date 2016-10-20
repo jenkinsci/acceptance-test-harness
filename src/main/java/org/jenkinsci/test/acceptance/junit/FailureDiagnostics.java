@@ -3,8 +3,8 @@ package org.jenkinsci.test.acceptance.junit;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 
-import com.google.common.io.Files;
 import org.codehaus.plexus.util.FileUtils;
 import org.jenkinsci.test.acceptance.guice.TestName;
 import org.jenkinsci.test.acceptance.guice.TestScope;
@@ -74,6 +74,16 @@ public class FailureDiagnostics extends TestWatcher {
         } catch (IOException e) {
             new Error(e);
         }
+    }
+
+    public File mkdirs(String path) {
+        File subdir = new File(getDir(), path);
+        try {
+            Files.createDirectories(subdir.toPath());
+        } catch (IOException e) {
+            new Error(e);
+        }
+        return subdir;
     }
 
     @Override

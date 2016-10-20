@@ -87,6 +87,11 @@ public interface CapybaraPortingLayer {
     void check(WebElement e, boolean state);
 
     /**
+     * Sends a blur event to the provided element
+     */
+    void blur(WebElement e);
+
+    /**
      * Finds all the elements that match the selector.
      * <p/>
      * <p/>
@@ -134,4 +139,11 @@ public interface CapybaraPortingLayer {
      * Checks the specified checkbox.
      */
     void check(String locator);
+
+    /**
+     *  Confirms an alert giving it some time to appear
+     *
+     *  @param timeout Maximun time to wait for the alert to appear, in seconds
+     */
+    void confirmAlert(int timeout);
 }

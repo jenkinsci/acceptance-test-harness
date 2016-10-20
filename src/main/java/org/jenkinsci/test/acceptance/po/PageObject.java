@@ -42,6 +42,12 @@ public abstract class PageObject extends CapybaraPortingLayerImpl {
      * @see ContainerPageObject#url(String) Method that lets you resolve relative paths easily.
      */
     public final URL url;
+    
+    /**
+     * If the object was created with some context, preserve it so that we can
+     * easily get the real Jenkins root
+     */
+    private PageObject context;
 
     private static final RandomNameGenerator RND = new RandomNameGenerator();
 
@@ -52,6 +58,7 @@ public abstract class PageObject extends CapybaraPortingLayerImpl {
 
     protected PageObject(PageObject context, URL url) {
         this(context.injector, url);
+        this.context = context;
     }
 
     public static String createRandomName() {
@@ -59,6 +66,9 @@ public abstract class PageObject extends CapybaraPortingLayerImpl {
     }
 
     public Jenkins getJenkins() {
+        if (context != null) {
+            return context.getJenkins();
+        }
         // TODO try to find the real Jenkins root according to the owner of this object, via breadcrumb
         // Alternately, Job could have a method to get Jenkins by appending ../../ to its own URL, if not in a folder (need a separate method to find folder owner, but that needs its own page object too)
         return injector.getInstance(Jenkins.class);
@@ -167,5 +177,9 @@ public abstract class PageObject extends CapybaraPortingLayerImpl {
     @Override
     public String toString() {
         return String.format("%s(%s)", getClass().getSimpleName(), url);
+    }
+
+    protected PageObject getContext() {
+        return context;
     }
 }

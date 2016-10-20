@@ -48,6 +48,9 @@ import org.junit.experimental.categories.Category;
 @Category(DockerTest.class)
 @WithDocker
 public class SshSlavesPluginTest extends AbstractJUnitTest {
+
+    public static final String REMOTE_FS = "/tmp";
+
     @Inject private DockerContainerHolder<JavaContainer> docker;
 
     private SshdContainer sshd;
@@ -58,6 +61,7 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
 
         slave = jenkins.slaves.create(DumbSlave.class);
         slave.setExecutors(1);
+        slave.remoteFS.set(REMOTE_FS);
     }
 
     @Test public void connectWithPassword() {
@@ -123,7 +127,7 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
         
         
         verify();
-        verifyLog("sh -c \"cd \"/tmp/" + slave.getName() + "\" && java  -jar slave.jar\"");
+        verifyLog("sh -c \"cd \"" + REMOTE_FS + "\" && java  -jar slave.jar\"");
     }
         
     private void verify() {

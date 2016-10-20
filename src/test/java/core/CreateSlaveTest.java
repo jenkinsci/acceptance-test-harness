@@ -14,8 +14,7 @@ import org.openqa.selenium.NoSuchElementException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
+
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import static org.junit.Assert.fail;
 

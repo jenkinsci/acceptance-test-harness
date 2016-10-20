@@ -23,10 +23,9 @@
  */
 package core;
 
-import static org.hamcrest.Matchers.startsWith;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
@@ -37,6 +36,11 @@ import org.junit.Test;
 
 public class JenkinsDatabaseSecurityRealmTest extends AbstractJUnitTest {
 
+    private static final String EMAIL = "jatu@gmail.com";
+    private static final String FULL_NAME = "Full Name";
+    private static final String PWD = "4242";
+    private static final String NAME = "jenkins-acceptance-tests-user";
+    
     private JenkinsDatabaseSecurityRealm realm;
 
     @Before
@@ -50,11 +54,13 @@ public class JenkinsDatabaseSecurityRealmTest extends AbstractJUnitTest {
     @Test
     public void login_and_logout() {
 
-        User user = realm.signup("jenkins-acceptance-tests-user");
+        User user = realm.signup(NAME, PWD, FULL_NAME, EMAIL);
 
-        assertThat(new User(jenkins, "jenkins-acceptance-tests-user").mail(), startsWith("jenkins-acceptance-tests-user"));
+        assertThat(user.id(), equalTo(NAME));
+        assertThat(user.fullName(), equalTo(FULL_NAME));
+        assertThat(user.mail(), equalTo(EMAIL));
 
-        jenkins.login().doLogin(user);
+        jenkins.login().doLogin(user.id(), PWD);
 
         assertEquals(user, jenkins.getCurrentUser());
 

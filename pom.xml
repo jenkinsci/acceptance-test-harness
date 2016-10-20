@@ -9,7 +9,7 @@
   </parent>
 
   <artifactId>acceptance-test-harness</artifactId>
-  <version>1.36-SNAPSHOT</version>
+  <version>1.42-SNAPSHOT</version>
 
   <name>Acceptance Test Harness</name>
   <licenses>
@@ -35,6 +35,7 @@
     <monte.version>0.7.7</monte.version>
     <mockito.version>1.10.19</mockito.version>
     <cucumber.options />
+    <surefire.rerunFailingTestsCount>2</surefire.rerunFailingTestsCount>
   </properties>
 
   <repositories>
@@ -402,7 +403,7 @@
     <dependency>
       <groupId>com.jcraft</groupId>
       <artifactId>jsch</artifactId>
-      <version>0.1.51</version>
+      <version>0.1.54</version>
     </dependency>
     <dependency>
         <groupId>commons-configuration</groupId>
@@ -747,7 +748,27 @@
         </plugins>
       </build>
     </profile>
-    <!-- TODO could be laboriously repeated for $TYPE, $DISPLAY, etc. (seems Maven provides no generic way to do this) -->
+    <profile>
+      <id>BROWSER_DISPLAY</id>
+      <activation>
+        <property>
+          <name>BROWSER_DISPLAY</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <environmentVariables>
+                  <BROWSER_DISPLAY>${BROWSER_DISPLAY}</BROWSER_DISPLAY>
+              </environmentVariables>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <!-- TODO could be laboriously repeated for $TYPE, etc. (seems Maven provides no generic way to do this) -->
 
     <profile>
       <!-- if ./excludes.txt is present, use that as the exclusion list. Useful when skipping tests. -->

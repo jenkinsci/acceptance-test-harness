@@ -30,11 +30,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
 import org.jenkinsci.test.acceptance.junit.Resource;
-import org.junit.Assert;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.TimeoutException;
-import org.openqa.selenium.WebDriver;
 
 @Describable("org.jenkinsci.plugins.workflow.job.WorkflowJob")
 public class WorkflowJob extends Job {

@@ -3,7 +3,6 @@ package org.jenkinsci.test.acceptance.guice;
 import com.cloudbees.sdk.extensibility.Extension;
 import com.cloudbees.sdk.extensibility.ExtensionModule;
 import com.google.inject.AbstractModule;
-import org.junit.rules.TestName;
 
 /**
  * Defines {@link TestScope} and exposes {@link TestLifecycle} to clean-up test-scoped instances.

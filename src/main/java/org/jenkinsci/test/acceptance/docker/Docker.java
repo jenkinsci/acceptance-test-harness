@@ -50,7 +50,7 @@ public class Docker {
         dockerCmd = Arrays.asList(stringDockerCmd);
     }
 
-    public static CommandBuilder cmd(String cmd) {
+    public static CommandBuilder cmd(String... cmd) {
         return new CommandBuilder(dockerCmd).add(cmd);
     }
 
@@ -92,7 +92,7 @@ public class Docker {
      * @param image Name of the image to be built.
      * @param dir   Directory that contains Dockerfile
      */
-    public DockerImage build(String image, File dir) throws IOException, InterruptedException {
+    private DockerImage build(String image, File dir) throws IOException, InterruptedException {
         return build(image, dir, null);
     }
 
@@ -103,22 +103,18 @@ public class Docker {
      * @param dir   Directory that contains Dockerfile
      * @param log   Log file to store image building output
      */
-    public DockerImage build(String image, File dir, @CheckForNull File log) throws IOException, InterruptedException {
+    private DockerImage build(String image, File dir, @CheckForNull File log) throws IOException, InterruptedException {
         // compute tag from the content of Dockerfile
         String tag = getDockerFileHash(dir);
-        String full = image + ":" + tag;
+        String fullTag = image + ":" + tag;
 
-        // check if the image already exists
-        if (cmd("images").add(image).popen().verifyOrDieWith("failed to query the status of the image").trim().contains(" " + tag + " ")) {
-            return new DockerImage(full);
-        }
-
-        CommandBuilder buildCmd = cmd("build").add("-t", full, dir);
-        ProcessBuilder processBuilder = buildCmd.build();
+        CommandBuilder buildCmd = cmd("build").add("-t", fullTag);
+        buildCmd.add(dir);
+        ProcessBuilder processBuilder = buildCmd.build().redirectErrorStream(true);
         if (log != null) {
-            processBuilder.redirectError(log).redirectOutput(log);
+            processBuilder.redirectOutput(log);
         } else {
-            processBuilder.redirectError(ProcessBuilder.Redirect.INHERIT).redirectOutput(ProcessBuilder.Redirect.INHERIT);
+            processBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
         }
 
         StringBuilder sb = new StringBuilder("Building Docker image `").append(buildCmd.toString()).append("`");
@@ -127,10 +123,11 @@ public class Docker {
         }
         System.out.println(sb.toString());
 
-        if (processBuilder.start().waitFor() != 0) {
-            throw new Error("Failed to build image: " + tag);
+        int exit = processBuilder.start().waitFor();
+        if (exit != 0) {
+            throw new Error("Failed to build image (" + exit + "): " + tag);
         }
-        return new DockerImage(full);
+        return new DockerImage(fullTag);
     }
 
     public DockerImage build(Class<? extends DockerContainer> fixture) throws IOException, InterruptedException {
@@ -171,7 +168,7 @@ public class Docker {
     }
 
     private String resolveDockerfileLocation(Class<? extends DockerContainer> fixture, DockerFixture f) {
-        String prefix = null;
+        String prefix;
         if(isSpecificDockerfileLocationSet(f)) {
             prefix = f.dockerfileFolder();
         } else {
@@ -233,6 +230,7 @@ public class Docker {
 
     private void copyDockerfileDirectoryFromLocal(String fixtureLocation, File outputDirectory) throws IOException {
         URL resourceDir = classLoader.getResource(fixtureLocation);
+        if (resourceDir == null) throw new Error("The fixture directory does not exist: " + fixtureLocation);
         copyFile(outputDirectory, resourceDir);
     }
 

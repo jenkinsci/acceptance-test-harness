@@ -85,6 +85,7 @@ public class CompressArtifactsPluginTest extends AbstractJUnitTest {
     }
 
     @Test @Issue("JENKINS-27042")
+    // TODO move to plugin testsuite
     public void archiveLargerThan4GInTotal() throws Exception {
         CompressingArtifactManager.setup(jenkins);
 
@@ -112,7 +113,7 @@ public class CompressArtifactsPluginTest extends AbstractJUnitTest {
         }
         job.save();
 
-        Build build = job.scheduleBuild().waitUntilFinished(10 * 60).shouldSucceed();
+        Build build = job.scheduleBuild().waitUntilFinished(15 * 60).shouldSucceed();
 
         long length = Long.parseLong(jenkins.runScript(
                 "new FilePath(Jenkins.instance.getJob('%s').lastBuild.artifactsDir).parent.child('archive.zip').length()",

@@ -37,7 +37,7 @@ public class JacocoPluginTest extends AbstractJUnitTest {
             // starting with version 2.0.0 uses JaCoCo 0.7.5 and thus requires also this version to be used in your projects. Please stick to JaCoCo plugin
             // 1.0.19 or lower if you still use JaCoCo 0.7.4 or lower
             boolean old = jenkins.getPlugin("jacoco").getVersion().isOlderThan(new VersionNumber("2.0.0"));
-            maven.properties("jacoco.version=" + (old ? "0.7.4.201502262128" : "0.7.5.201505241946"));
+            maven.properties("jacoco.version=" + (old ? "0.7.4.201502262128" : "0.7.5.201505241946"), true);
 
             JacocoPublisher publisher = job.addPublisher(JacocoPublisher.class);
             publisher.changeBuildStatus.check();

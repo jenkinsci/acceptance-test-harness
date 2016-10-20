@@ -2,6 +2,7 @@ package org.jenkinsci.test.acceptance.docker;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Joiner;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.utils.process.ProcessUtils;
 
@@ -35,6 +36,19 @@ public class DockerContainer implements Closeable {
             }
         };
         Runtime.getRuntime().addShutdownHook(shutdownHook);
+
+        assertRunning();
+    }
+
+    public void assertRunning() {
+        try {
+            JsonNode state = inspect().get("State");
+            if (!"running".equals(state.get("Status").asText())) {
+                throw new Error("The container is not running: " + state.toString());
+            }
+        } catch (IOException e) {
+            throw new Error("The container is not running", e);
+        }
     }
 
     /**
@@ -66,6 +80,7 @@ public class DockerContainer implements Closeable {
      * Finds the ephemeral ip that the given container port is bind to.
      */
     public String ipBound(int n) {
+        assertRunning();
         try {
             String out = Docker.cmd("port").add(cid, n).popen().verifyOrDieWith("docker port command failed").trim();
             if (out.isEmpty())  // expected to return single line like "0.0.0.0:55326"
@@ -80,6 +95,7 @@ public class DockerContainer implements Closeable {
      * Finds the ephemeral port that the given container port is mapped to.
      */
     public int port(int n) {
+        assertRunning();
         try {
             String out = Docker.cmd("port").add(cid, n).popen().verifyOrDieWith("docker port command failed").trim();
             if (out.isEmpty())  // expected to return single line like "0.0.0.0:55326"
@@ -97,10 +113,10 @@ public class DockerContainer implements Closeable {
     public void close() {
         try {
             p.destroy();
-            Docker.cmd("kill").add(cid)
-                    .popen().verifyOrDieWith("Failed to kill " + cid);
+            // If container fail to start, this produces phone failure that presents container to be removed
+            int killStatus = Docker.cmd("kill").add(cid).build().inheritIO().start().waitFor();
             Docker.cmd("rm").add(cid)
-                    .popen().verifyOrDieWith("Failed to rm " + cid);
+                    .popen().verifyOrDieWith("Failed to rm " + cid + ". kill completed with " + killStatus);
             if (shutdownHook != null) {
                 Runtime.getRuntime().removeShutdownHook(shutdownHook);
             }
@@ -117,6 +133,7 @@ public class DockerContainer implements Closeable {
      * @return {@code true}  if the copy was a success otherwise {@code false}
      */
     public boolean cp(String from, String toPath) {
+        assertRunning();
         File srcFile = new File(from);
         String fileName = srcFile.getName();
         File destFile = new File(toPath, fileName);
@@ -129,6 +146,8 @@ public class DockerContainer implements Closeable {
         } catch (IOException | InterruptedException e) {
             return false;
         }
+
+        assertRunning();
 
         return destFile.exists();
     }

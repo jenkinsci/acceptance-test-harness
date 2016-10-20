@@ -6,7 +6,6 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.By;
@@ -14,11 +13,6 @@ import org.openqa.selenium.WebElement;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Injector;
-
-import groovy.lang.Closure;
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.*;
-import static org.jenkinsci.test.acceptance.Matchers.*;
 
 /**
  * {@link PageObject} that represents a model that has multiple views underneath.
@@ -38,7 +32,10 @@ public abstract class ContainerPageObject extends ConfigurablePageObject {
     }
 
     protected ContainerPageObject(PageObject context, URL url) {
-        this(context.injector, url);
+        super(context, url);
+        if (!url.toExternalForm().endsWith("/")) {
+            throw new IllegalArgumentException("URL should end with '/': " + url);
+        }
     }
 
     public URL getJsonApiUrl() {

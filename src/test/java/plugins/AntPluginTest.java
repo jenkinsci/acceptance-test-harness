@@ -14,14 +14,13 @@ import org.junit.Test;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 
-/**
- * Plugin test for Ant.
- *
- * Also acting as an example for writing tests in plain-old JUnit.
- */
 @SuppressWarnings("CdiInjectionPointsInspection")
 @WithPlugins("ant")
 public class AntPluginTest extends AbstractJUnitTest {
+
+    public static final String INSTALL_VERSION_1_8 = "1.8.4";
+    public static final String INSTALL_NAME_1_8 = "ant_" + INSTALL_VERSION_1_8;
+
     FreeStyleJob job;
 
     @Before
@@ -34,33 +33,31 @@ public class AntPluginTest extends AbstractJUnitTest {
         buildHelloWorld(null);
     }
 
-    /**
-     Scenario: Add Auto-Installed Ant
-       Given I have installed the "ant" plugin
-       And I have Ant "1.8.4" auto-installation named "ant_1.8.4" configured
-       And a job
-       When I add an Ant build step for "ant_1.8.4"
-         """
-           <project default="hello">
-             <target name="hello">
-               <echo message="Hello World"/>
-             </target>
-           </project>
-         """
-       And I build the job
-       Then the build should succeed
-       And console output should contain
-           """
-           Unpacking http://archive.apache.org/dist/ant/binaries/apache-ant-1.8.4-bin.zip
-           """
-     */
     @Test
     public void autoInstallAnt() {
-        AntInstallation.install(jenkins, "ant_1.8.4", "1.8.4");
+        AntInstallation.install(jenkins, INSTALL_NAME_1_8, INSTALL_VERSION_1_8);
 
-        buildHelloWorld("ant_1.8.4").shouldContainsConsoleOutput(
-                "Unpacking http://archive.apache.org/dist/ant/binaries/apache-ant-1.8.4-bin.zip"
+        buildHelloWorld(INSTALL_NAME_1_8).shouldContainsConsoleOutput(
+            "Unpacking (http|https)://archive.apache.org/dist/ant/binaries/apache-ant-" + INSTALL_VERSION_1_8 + "-bin.zip"
         );
+    }
+
+    @Test @Native("ant")
+    public void locallyInstalledAnt() {
+        AntInstallation ant = ToolInstallation.addTool(jenkins, AntInstallation.class);
+        ant.name.set("native_ant");
+        String antHome = ant.useNative();
+        ant.getPage().save();
+
+        job.configure();
+        job.copyResource(resource("ant/echo-helloworld.xml"), "build.xml");
+        AntBuildStep step = job.addBuildStep(AntBuildStep.class);
+        step.antName.select("native_ant");
+        step.targets.set("-version");
+        job.save();
+
+        String expectedVersion = localAntVersion(antHome);
+        job.startBuild().shouldSucceed().shouldContainsConsoleOutput(Pattern.quote(expectedVersion));
     }
 
     private Build buildHelloWorld(final String name) {
@@ -76,5 +73,9 @@ public class AntPluginTest extends AbstractJUnitTest {
         });
 
         return job.startBuild().shouldSucceed().shouldContainsConsoleOutput("Hello World");
+    }
+
+    private String localAntVersion(String antHome) {
+        return jenkins.runScript(String.format("'%s/bin/ant -version'.execute().text", antHome));
     }
 }

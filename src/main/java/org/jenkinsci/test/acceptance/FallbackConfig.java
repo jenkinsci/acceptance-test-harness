@@ -1,5 +1,6 @@
 package org.jenkinsci.test.acceptance;
 
+import javax.annotation.CheckForNull;
 import javax.inject.Named;
 
 import java.io.File;
@@ -97,7 +98,10 @@ public class FallbackConfig extends AbstractModule {
             profile.setPreference(LANGUAGE_SELECTOR, "en");
 
             FirefoxBinary binary = new FirefoxBinary();
-            binary.setEnvironmentProperty("DISPLAY", getBrowserDisplay());
+            String display = getBrowserDisplay();
+            if (display != null) {
+                binary.setEnvironmentProperty("DISPLAY", display);
+            }
             return new FirefoxDriver(binary, profile);
         case "ie":
         case "iexplore":
@@ -151,7 +155,7 @@ public class FallbackConfig extends AbstractModule {
      *
      * Custom property <tt></>BROWSER_DISPLAY</tt> has the preference. If not provided <tt>DISPLAY</tt> is used.
      */
-    private String getBrowserDisplay() {
+    public static @CheckForNull String getBrowserDisplay() {
         String d = System.getenv("BROWSER_DISPLAY");
         if (d != null) return d;
 
@@ -247,7 +251,7 @@ public class FallbackConfig extends AbstractModule {
     @Named("form-element-path.hpi") @Provides
     public File getFormElementsPathFile(RepositorySystem repositorySystem, RepositorySystemSession repositorySystemSession) {
         ArtifactResolverUtil resolverUtil = new ArtifactResolverUtil(repositorySystem, repositorySystemSession);
-        ArtifactResult resolvedArtifact = resolverUtil.resolve(new DefaultArtifact("org.jenkins-ci.plugins", "form-element-path", "hpi", "1.7-alpha-1"));
+        ArtifactResult resolvedArtifact = resolverUtil.resolve(new DefaultArtifact("org.jenkins-ci.plugins", "form-element-path", "hpi", "1.7"));
         return resolvedArtifact.getArtifact().getFile();
     }
 

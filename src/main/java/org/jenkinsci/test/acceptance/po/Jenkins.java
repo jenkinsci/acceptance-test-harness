@@ -18,7 +18,6 @@ import com.google.inject.Injector;
 
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 
 /**
  * Top-level object that acts as an entry point to various systems.
@@ -41,6 +40,11 @@ public class Jenkins extends Node {
         jobs = new JobsMixIn(this);
         views = new ViewsMixIn(this);
         slaves = new SlavesMixIn(this);
+    }
+
+    @Override
+    public Jenkins getJenkins() {
+        return this;
     }
 
     public Jenkins(Injector injector, JenkinsController controller) {
@@ -77,6 +81,13 @@ public class Jenkins extends Node {
         }
 
         return version = new VersionNumber(text);
+    }
+    
+    /**
+     * Tells if Jenkins version under test is 1.X
+     */
+    public boolean isJenkins1X() {
+        return getVersion().isOlderThan(new VersionNumber("2.0"));
     }
 
     /**

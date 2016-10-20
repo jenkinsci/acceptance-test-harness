@@ -2,9 +2,6 @@ package org.jenkinsci.test.acceptance.update_center;
 
 import com.cloudbees.sdk.extensibility.Extension;
 import java.util.Map;
-import javax.inject.Inject;
-
-import org.jenkinsci.test.acceptance.utils.aether.ArtifactResolverUtil;
 
 /**
  * Download particular plugin version based on environement variable.

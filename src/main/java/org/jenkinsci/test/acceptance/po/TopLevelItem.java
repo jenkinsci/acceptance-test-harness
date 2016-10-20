@@ -28,6 +28,11 @@ public abstract class TopLevelItem extends ContainerPageObject {
         this.name = name;
     }
 
+    public TopLevelItem(PageObject context, URL url, String name) {
+        super(context, url);
+        this.name = name;
+    }
+
     /**
      * Renames the job. Opens the configuration section, sets the name and saves the form. Finally the rename is
      * confirmed.
@@ -41,7 +46,7 @@ public abstract class TopLevelItem extends ContainerPageObject {
         String oldName = name;
         control("/name").set(newName);
         save();
-        clickButton("Yes");
+        waitFor(by.button("Yes")).click();
 
         try {
             return (T) newInstance(getClass(),

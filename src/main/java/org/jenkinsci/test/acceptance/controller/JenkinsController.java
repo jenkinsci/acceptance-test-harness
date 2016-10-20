@@ -9,13 +9,9 @@ import java.net.URL;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.plexus.util.FileUtils;
-import org.codehaus.plexus.util.IOUtil;
 import org.jenkinsci.test.acceptance.guice.AutoCleaned;
-import org.jenkinsci.test.acceptance.guice.World;
 
 import com.cloudbees.sdk.extensibility.ExtensionPoint;
 import com.google.inject.Injector;

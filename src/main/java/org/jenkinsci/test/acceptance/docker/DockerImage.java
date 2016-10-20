@@ -1,6 +1,5 @@
 package org.jenkinsci.test.acceptance.docker;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.jenkinsci.utils.process.CommandBuilder;
@@ -167,7 +166,7 @@ public class DockerImage {
         private CommandBuilder options;
         private CommandBuilder args;
         private String ipAddress = getDockerHost();
-        private int portOffset = 0;
+        private Integer portOffset;
         private int[] ports;
         private File log;
 
@@ -177,6 +176,9 @@ public class DockerImage {
 
             DockerFixture fixtureAnnotation = type.getAnnotation(DockerFixture.class);
             ports = fixtureAnnotation.ports();
+            if (fixtureAnnotation.matchHostPorts()) {
+                portOffset = 0;
+            }
         }
 
         public @Nonnull Starter<T> withPorts(int... ports) {
@@ -184,7 +186,7 @@ public class DockerImage {
             return this;
         }
 
-        public @Nonnull Starter<T> withPortOffset(int portOffset) {
+        public @Nonnull Starter<T> withPortOffset(Integer portOffset) {
             this.portOffset = portOffset;
             return this;
         }
@@ -216,7 +218,7 @@ public class DockerImage {
         }
 
         private String getPortMapping(int port) {
-            return portOffset == 0
+            return portOffset == null
                     ? ipAddress + "::" + port
                     : ipAddress + ":" + (portOffset + port) + ":" + port
             ;

@@ -35,12 +35,16 @@ public class JenkinsDatabaseSecurityRealm extends SecurityRealm {
     }
 
     public User signup(String name) {
+        return signup(name, name, name, name + "@mailinator.com");
+    }
+
+    public User signup(String name, String pwd, String fullName, String email) {
         getPage().getJenkins().visit("signup");
         control(by.input("username")).set(name);
-        control(by.input("password1")).set(name);
-        control(by.input("password2")).set(name);
-        control(by.input("fullname")).set(name);
-        control(by.input("email")).set(name + "@mailinator.com");
+        control(by.input("password1")).set(pwd);
+        control(by.input("password2")).set(pwd);
+        control(by.input("fullname")).set(fullName);
+        control(by.input("email")).set(email);
 
         clickButton("Sign up");
 

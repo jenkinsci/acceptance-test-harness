@@ -28,12 +28,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.jenkinsci.test.acceptance.po.BuildHistory.containsBuildOf;
 
-/**
- * Feature: Use node name and label as parameter
- * In order to control where a build should run at the time it is triggered
- * As a Jenkins user
- * I want to specify the name of the slave or the label as a build parameter
- */
 @WithPlugins("nodelabelparameter")
 public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
 
@@ -43,18 +37,6 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
     @Inject
     SlaveController slave2;
 
-    /**
-     * Scenario: Build on a particular slave
-     * Given I have installed the "nodelabelparameter" plugin
-     * And a job
-     * And a slave named "slave42"
-     * When I configure the job
-     * And I add node parameter "slavename"
-     * And I save the job
-     * And I build the job with parameter
-     * | slavename | slave42 |
-     * Then the build should run on "slave42"
-     */
     @Test
     @Category(SmokeTest.class)
     public void build_on_a_particular_slave() throws Exception {
@@ -69,14 +51,6 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         assertThat(b.getNode(), is(s));
     }
 
-    /**
-     * This test is intended to check that an online slave is ignored
-     * when selected for a job and the job is configured with "Node eligibility" setting
-     * is set to "Ignore Offline Nodes"
-     * <p/>
-     * It is expected that all nodes are available for the build job.
-     * The default node shall be preselected and the job shall be built on the available slave.
-     */
     @Test
     public void build_with_preselected_node() throws Exception {
         FreeStyleJob j = jenkins.jobs.create();
@@ -103,22 +77,6 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         assertThat(b.getNode(), is(s));
     }
 
-    /**
-     * Scenario: Run on label
-     * Given I have installed the "nodelabelparameter" plugin
-     * And a job
-     * And a slave named "slave42"
-     * And a slave named "slave43"
-     * When I configure the job
-     * And I add label parameter "slavelabel"
-     * And I save the job
-     * And I build the job with parameter
-     * | slavelabel | slave42 |
-     * Then the build should run on "slave42"
-     * And I build the job with parameter
-     * | slavelabel | !slave42 && !slave43 |
-     * Then the build should run on "master"
-     */
     @Test
     public void run_on_label() throws Exception {
         FreeStyleJob j = jenkins.jobs.create();
@@ -137,23 +95,6 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         assertThat(b.getNode(), is((Node) jenkins));
     }
 
-    /**
-     * Scenario: Run on several slaves
-     * Given I have installed the "nodelabelparameter" plugin
-     * And a job
-     * And a slave named "slave1"
-     * And a slave named "slave2"
-     * When I configure the job
-     * And I add node parameter "slavename"
-     * And I allow multiple nodes
-     * And I enable concurrent builds
-     * And I save the job
-     * And I build the job with parameter
-     * | slavename | slave1, slave2 |
-     * Then the job should have 2 builds
-     * And  the job should be built on "slave1"
-     * And  the job should be built on "slave2"
-     */
     @Test
     public void run_on_several_slaves() throws Exception {
         FreeStyleJob j = jenkins.jobs.create();

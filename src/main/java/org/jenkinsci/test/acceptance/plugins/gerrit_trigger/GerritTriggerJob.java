@@ -26,8 +26,6 @@ package org.jenkinsci.test.acceptance.plugins.gerrit_trigger;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.PageObject;
-import org.openqa.selenium.By;
-import org.openqa.selenium.support.ui.Select;
 
 /**
  * Page Object for Gerrit Trigger test-job (configuration) page.
