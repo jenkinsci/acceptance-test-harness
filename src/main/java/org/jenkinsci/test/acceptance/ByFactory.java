@@ -9,7 +9,9 @@ import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * More factories for {@link By} objects.
@@ -154,6 +156,9 @@ public class ByFactory {
      * "/foo/bar" matches div elements with path attribute "/foo/bar" or "/foo/bar[n]". Does not match "/foo/bar/baz" or "/foo/bar[1]/baz".
      */
     public By areaPath(final String pathPrefix) {
+        final List<Character> delimiters = Arrays.asList('[', '/');
+        final int prefixLength = pathPrefix.length();
+
         final By xpath = ByFactory.this.xpath("//div[starts-with(@path, '%s')]", pathPrefix);
         return new By() {
             @Override
@@ -162,7 +167,9 @@ public class ByFactory {
                 List<WebElement> allPrefixed = context.findElements(xpath);
                 for (WebElement webElement: allPrefixed) {
                     String path = webElement.getAttribute("path");
-                    if (path.equals(pathPrefix) || path.substring(pathPrefix.length()).matches("\\[\\d+\\]")) {
+
+                    // Ensure /foo matches /foo/bar and /boo[bar], but not /foolish/bartender
+                    if (path.length() == prefixLength || delimiters.contains(path.charAt(prefixLength))) {
                         ret.add(webElement);
                     }
                 }
