@@ -128,11 +128,31 @@ public class Job extends TopLevelItem {
     private <T extends Step> T addStep(Class<T> type, String section) {
         ensureConfigPage();
 
+        // get @Describable value to use later to retrieve the path
+        String[] describableValue = null;
+        if (type.isAnnotationPresent(Describable.class)) {
+            describableValue = type.getAnnotation(Describable.class).value();
+        }
         control(by.path("/hetero-list-add[%s]", section)).selectDropdownMenu(type);
         elasticSleep(1000); // it takes some time until the element is visible
-        WebElement last = last(by.xpath("//div[@name='%s']", section));
-        String path = last.getAttribute("path");
-
+        String path = null;
+        // if I have got a Describable use it to get the path
+        if (describableValue != null && PostBuildStep.class.isAssignableFrom(type)) {
+            List<WebElement> newSteps = driver.findElements(by.xpath("//div[@name='%s']", section));
+            outer:
+            for (WebElement element : newSteps) {
+                for (String s : describableValue) {
+                    if (element.getText().contains(s)) {
+                        path = element.getAttribute("path");
+                        break outer;
+                    }
+                }
+            }
+        } else {
+            // on the other case just use the last element
+            WebElement last = last(by.xpath("//div[@name='%s']", section));
+            path = last.getAttribute("path");
+        }
         return newInstance(type, this, path);
     }
 
