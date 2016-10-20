@@ -140,7 +140,7 @@ public abstract class PageObject extends CapybaraPortingLayerImpl {
      * @return The surrounding path of the area, exception thrown when not able to find out.
      */
     public @Nonnull String createPageArea(final String pathPrefix, Runnable action) throws TimeoutException {
-        assert pathPrefix.startsWith("/"): "Path not absolute";
+        assert pathPrefix.startsWith("/"): "Path not absolute: " + pathPrefix;
         final By by = this.by.areaPath(pathPrefix);
         final List<String> existing = extractPaths(all(by));
         final int existingSize = existing.size();

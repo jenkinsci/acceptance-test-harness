@@ -37,7 +37,7 @@ public class DashboardView extends View {
      * @return The new portlet.
      */
     public <T extends AbstractDashboardViewPortlet> T addBottomPortlet(final Class<T> portletClass) {
-        String path = createPageArea("bottomPortlet", new Runnable() {
+        String path = createPageArea("/bottomPortlet", new Runnable() {
             @Override public void run() {
                 bottomPortlet.selectDropdownMenu(portletClass);
             }
