@@ -25,12 +25,14 @@ public class SshSlaveLauncher extends ComputerLauncher {
     public final Control retries = control("maxNumRetries");
     public final Control javaPath = control("javaPath");
     public final Control jvmOptions = control("jvmOptions");
-        
+
     public SshSlaveLauncher(PageObject context, String path) {
         super(context, path);
     }
 
     public SshCredentialDialog addCredential() {
+
+        find(by.button("Add")).click();
 
         if (getElement(by.xpath("//span[contains(@class,'credentials-add')]")) == null) {
 
@@ -38,18 +40,8 @@ public class SshSlaveLauncher extends ComputerLauncher {
                     + "/div[@class='bd']/ul[@class='first-of-type']/li[contains(@class, 'yuimenuitem')]"
                     + "/span[contains(@class,'yuimenuitemlabel') and contains(text(), 'Jenkins')]";
 
-            self().findElement(by.xpath("//button[@class='credentials-add-menu']")).click();
-
-            for (WebElement menuItem : self().findElements(by.xpath(providerXpathExpr))) {
-                if (menuItem.isDisplayed()) {
-                    menuItem.click();
-                    break;
-                }
-            }
-        } else {
-            self().findElement(by.button("Add")).click();
+            find(by.xpath(providerXpathExpr)).click();
         }
-
         return new SshCredentialDialog(getPage(), "/credentials");
     }
 
@@ -62,10 +54,10 @@ public class SshSlaveLauncher extends ComputerLauncher {
     private void ensureAdvancedOpen() {
         control("advanced-button").click();
     }
-    
+
     /**
      * Add username/password based credentials to the configuration
-     * 
+     *
      * @param username to use
      * @param password for the username
      * @return the SshSlaveLauncher to be configured
@@ -82,7 +74,7 @@ public class SshSlaveLauncher extends ComputerLauncher {
 
     /**
      * Add username/key based credentials to the configuration
-     * 
+     *
      * @param username to use
      * @param key for the private key to use
      * @return the SshSlaveLauncher to be configured
@@ -98,7 +90,7 @@ public class SshSlaveLauncher extends ComputerLauncher {
     }
 
     /**
-     * Once a credential has been created for a given slave, this method can be used 
+     * Once a credential has been created for a given slave, this method can be used
      * to check whether it has already been rendered in the dropdown.
      */
     private void waitForCredentialVisible(final String credUsername) {
