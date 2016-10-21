@@ -29,8 +29,10 @@ and you configure it the same way you configure normal test executions. That is,
 actually uses `WinstoneController` (the default controller type), which recognizes `JENKINS_WAR` environment
 variable. See [this document](CONTROLLER.md) for how to select JenkinsController properly.
 
-To specify the size of the pool explicitly, add the `-Dcount=2` or something as a Maven option.
+To specify the size of the pool explicitly, add the option `-n N` where N defines the number of instances, 
+e.g. in order to start 2 instances, run: 
 
+    JENKINS_WAR=/path/to/jenkins.war ./jut-server.sh -n 2
 
 ## Selecting PooledJenkinsController
 
