@@ -43,6 +43,7 @@ import org.jenkinsci.test.acceptance.junit.DockerTest;
 import org.jenkinsci.test.acceptance.junit.FailureDiagnostics;
 import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.po.GlobalPluginConfiguration;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
 import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.jenkinsci.test.acceptance.po.JenkinsDatabaseSecurityRealm;
@@ -140,6 +141,8 @@ public class KerberosSsoTest extends AbstractJUnitTest {
         assertThat(phrase + ": " + out, out, containsString("Granted Authorities: authenticated"));
         assertEquals(phrase + ": " + out, "OK", phrase);
 
+        //reset client
+        httpClient = getBadassHttpClient();
         // Incorrect credentials provided
         get = new HttpGet(jenkins.url.toExternalForm() + "/whoAmI");
         get.setHeader("Authorization", "Basic " + Base64.encode("user:WRONG_PASSWD".getBytes()));
@@ -302,38 +305,38 @@ public class KerberosSsoTest extends AbstractJUnitTest {
         return user;
     }
 
-    private class KerberosGlobalConfig extends PageAreaImpl {
+    private class KerberosGlobalConfig extends GlobalPluginConfiguration {
         public KerberosGlobalConfig(JenkinsConfig config) {
-            super(config, "/jenkins-model-GlobalPluginConfiguration/plugin/enabled");
+            super(config, "kerberos-sso");
         }
 
         public KerberosGlobalConfig enable() {
-            control("").check();
+            control("enabled").check();
             return this;
         }
 
         public KerberosGlobalConfig krb5Conf(String krb5) {
-            control("krb5Location").set(krb5);
+            control("enabled/krb5Location").set(krb5);
             return this;
         }
 
         public KerberosGlobalConfig loginConf(String krb5) {
-            control("loginLocation").set(krb5);
+            control("enabled/loginLocation").set(krb5);
             return this;
         }
 
         public KerberosGlobalConfig allowLocalhost(boolean allow) {
-            control("allowLocalhost").check(allow);
+            control("enabled/allowLocalhost").check(allow);
             return this;
         }
 
         public KerberosGlobalConfig allowBasic(boolean allow) {
-            control("allowBasic").check(allow);
+            control("enabled/allowBasic").check(allow);
             return this;
         }
 
         public KerberosGlobalConfig allowAnonymous(boolean login) {
-            control("anonymousAccess").check(login);
+            control("enabled/anonymousAccess").check(login);
             return this;
         }
     }
