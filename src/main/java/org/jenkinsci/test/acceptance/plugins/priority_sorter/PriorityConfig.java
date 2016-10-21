@@ -39,7 +39,7 @@ public class PriorityConfig extends Action {
     }
 
     public Group addGroup() {
-        String path = createPageArea("configs", new Runnable() {
+        String path = createPageArea("/jobGroup", new Runnable() {
             @Override public void run() {
                 control("/repeatable-add").click();
             }

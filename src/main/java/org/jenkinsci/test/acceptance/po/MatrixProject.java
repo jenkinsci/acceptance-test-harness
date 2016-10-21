@@ -34,7 +34,7 @@ public class MatrixProject extends Job {
 
     public <T extends Axis> T addAxis(final Class<T> type) {
         ensureConfigPage();
-        String path = createPageArea("axis", new Runnable() {
+        String path = createPageArea("/axis", new Runnable() {
             @Override public void run() {
                 addAxis.selectDropdownMenu(type);
             }
