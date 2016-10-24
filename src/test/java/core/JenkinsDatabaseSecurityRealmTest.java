@@ -27,16 +27,10 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
-import org.codehaus.groovy.runtime.DefaultGroovyMethods;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
 import org.jenkinsci.test.acceptance.po.JenkinsDatabaseSecurityRealm;
-import org.jenkinsci.test.acceptance.po.SecurityConfiguration;
 import org.jenkinsci.test.acceptance.po.User;
-import org.jenkinsci.test.acceptance.po.users.AddUserPage;
-import org.jenkinsci.test.acceptance.po.users.ConfigureUserPage;
-import org.jenkinsci.test.acceptance.po.users.DeleteUserPage;
-import org.jenkinsci.test.acceptance.po.users.UserListPage;
 import org.junit.Before;
 import org.junit.Test;
 

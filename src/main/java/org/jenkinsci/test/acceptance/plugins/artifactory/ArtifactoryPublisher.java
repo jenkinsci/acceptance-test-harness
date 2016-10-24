@@ -9,7 +9,7 @@ import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.PostBuildStep;
 
 /**
- * Geb Page Object for the Artifactory Publisher.
+ * Page Object for the Artifactory Publisher.
  * @author Eli Givoni
  */
 @Describable("Deploy artifacts to Artifactory")
