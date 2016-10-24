@@ -6,6 +6,9 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 public class CreateItemTest extends AbstractJUnitTest {
     @Test
     @Since("2.6")
@@ -21,19 +24,19 @@ public class CreateItemTest extends AbstractJUnitTest {
         blur(find(By.name("name")));
 
         // the 'name cannot be empty' message:
-        assert(!findIfNotVisible(By.id("itemname-required")).isDisplayed());
+        assertFalse(findIfNotVisible(By.id("itemname-required")).isDisplayed());
         // the 'real' message:
-        assert(findIfNotVisible(By.id("itemname-invalid")).isDisplayed());
-
-        assert(!findIfNotVisible(By.id("ok-button")).isEnabled());
-
+        assertTrue(find(By.id("itemname-invalid")).isDisplayed());
+        
+        assertFalse(find(By.id("ok-button")).isEnabled());
+        
         jenkins.jobs.findTypeCaption(FreeStyleJob.class).click();
 
         // the 'name cannot be empty' message:
-        assert(!findIfNotVisible(By.id("itemname-required")).isDisplayed());
+        assertFalse(findIfNotVisible(By.id("itemname-required")).isDisplayed());
         // the 'real' message:
-        assert(findIfNotVisible(By.id("itemname-invalid")).isDisplayed());
-
-        assert(!findIfNotVisible(By.id("ok-button")).isEnabled());
+        assertTrue(find(By.id("itemname-invalid")).isDisplayed());
+        
+        assertFalse(find(By.id("ok-button")).isEnabled());
     }
 }
