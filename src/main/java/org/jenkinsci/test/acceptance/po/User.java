@@ -74,8 +74,18 @@ public class User extends ContainerPageObject {
         return fullName;
     }
 
+    public User fullName(String fullName) {
+        control("/fullName").set(fullName);
+        return this;
+    }
+
     public String mail() {
         return mail;
+    }
+
+    public void delete() {
+        visit("delete");
+        clickButton("Yes");
     }
 
     @Override

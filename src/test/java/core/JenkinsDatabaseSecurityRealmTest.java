@@ -27,10 +27,16 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
+import org.codehaus.groovy.runtime.DefaultGroovyMethods;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
 import org.jenkinsci.test.acceptance.po.JenkinsDatabaseSecurityRealm;
+import org.jenkinsci.test.acceptance.po.SecurityConfiguration;
 import org.jenkinsci.test.acceptance.po.User;
+import org.jenkinsci.test.acceptance.po.users.AddUserPage;
+import org.jenkinsci.test.acceptance.po.users.ConfigureUserPage;
+import org.jenkinsci.test.acceptance.po.users.DeleteUserPage;
+import org.jenkinsci.test.acceptance.po.users.UserListPage;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -56,10 +62,6 @@ public class JenkinsDatabaseSecurityRealmTest extends AbstractJUnitTest {
 
         User user = realm.signup(NAME, PWD, FULL_NAME, EMAIL);
 
-        assertThat(user.id(), equalTo(NAME));
-        assertThat(user.fullName(), equalTo(FULL_NAME));
-        assertThat(user.mail(), equalTo(EMAIL));
-
         jenkins.login().doLogin(user.id(), PWD);
 
         assertEquals(user, jenkins.getCurrentUser());
@@ -67,5 +69,29 @@ public class JenkinsDatabaseSecurityRealmTest extends AbstractJUnitTest {
         jenkins.logout();
 
         assertEquals(null, jenkins.getCurrentUser());
+    }
+
+    @Test
+    public void create_update_delete() {
+
+        User user = realm.signup(NAME, PWD, FULL_NAME, EMAIL);
+        assertThat(user.id(), equalTo(NAME));
+        assertThat(user.fullName(), equalTo(FULL_NAME));
+        assertThat(user.mail(), equalTo(EMAIL));
+        jenkins.logout();
+
+        user.configure();
+        user.fullName("ASDF");
+        user.save();
+        user = jenkins.getUser(NAME);
+
+        assertThat(user.id(), equalTo(NAME));
+        assertThat(user.fullName(), equalTo("ASDF"));
+        assertThat(user.mail(), equalTo(EMAIL));
+
+        user.delete();
+        user = jenkins.getUser(NAME);
+        // Jenkins creates new users transparently. Verifying it is the new one and not the old by default fullName assigned
+        assertThat(user.fullName(), equalTo(NAME));
     }
 }

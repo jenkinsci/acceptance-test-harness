@@ -120,6 +120,10 @@ public class Jenkins extends Node {
         return User.getCurrent(this);
     }
 
+    public User getUser(String name) {
+        return new User(this, name);
+    }
+
     /**
      * Access the plugin manager page object
      */
