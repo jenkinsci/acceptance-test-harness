@@ -193,13 +193,16 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     @Override
     public WebElement find(final By selector) {
         try {
-            // Wait for the element to become visible
             return waitFor().withTimeout(time.seconds(1), TimeUnit.MILLISECONDS).until(new Callable<WebElement>() {
                 @Override public WebElement call() throws Exception {
                     for (WebElement element : driver.findElements(selector)) {
                         if (isDisplayed(element)) return element;
                     }
                     return null;
+                }
+
+                @Override public String toString() {
+                    return "Wait for the element (" + selector + ") to become visible";
                 }
             });
         } catch (NoSuchElementException|TimeoutException x) {
@@ -437,6 +440,17 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
         }
 
         throw cause;
+    }
+
+    public static String pageText(WebDriver driver) {
+        final By html = by.xpath("/html");
+
+        try {
+            return driver.findElement(html).getText();
+        } catch (StaleElementReferenceException ex) {
+            // Retry once to avoid random failures in case of bad timing (reload, js, etc.)
+            return driver.findElement(html).getText();
+        }
     }
 
     /**
