@@ -94,12 +94,9 @@ public @interface WithPlugins {
                             d.getAnnotation(WithPlugins.class),
                             d.getTestClass().getAnnotation(WithPlugins.class)
                     );
-                    boolean restartRequired = installPlugins(plugins);
-                    LOGGER.info("for " + d + " asked to install " + plugins + "; restartRequired? " + restartRequired);
-                    if (restartRequired) {
-                        assumeTrue("This test requires a restartable Jenkins", jenkins.canRestart());
-                        jenkins.restart();
-                    }
+
+                    installPlugins(plugins);
+
                     for (PluginSpec plugin : plugins) {
                         pluginReporter.log(
                                 d.getClassName() + "." + d.getMethodName(),
@@ -124,7 +121,7 @@ public @interface WithPlugins {
                     return plugins;
                 }
 
-                private boolean installPlugins(List<PluginSpec> install) {
+                private void installPlugins(List<PluginSpec> install) {
                     PluginManager pm = jenkins.getPluginManager();
 
                     for (Iterator<PluginSpec> iterator = install.iterator(); iterator.hasNext(); ) {
@@ -152,7 +149,7 @@ public @interface WithPlugins {
                     PluginSpec[] installList = install.toArray(new PluginSpec[install.size()]);
                     try {
                         //noinspection deprecation
-                        return pm.installPlugins(installList);
+                        pm.installPlugins(installList);
                     } catch (UnableToResolveDependencies ex) {
                         throw new AssumptionViolatedException("Unable to install required plugins", ex);
                     }

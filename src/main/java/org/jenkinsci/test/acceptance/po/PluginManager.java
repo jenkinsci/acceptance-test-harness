@@ -6,6 +6,7 @@ import javax.inject.Provider;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -170,13 +171,15 @@ public class PluginManager extends ContainerPageObject {
      * <p/>
      * The deprecation marker is to call attention to {@link WithPlugins}. This method
      * is not really deprecated.
-     * @return true if {@link Jenkins#restart} is required
+     * @return Always false.
      */
     @Deprecated
     public boolean installPlugins(final PluginSpec... specs) throws UnableToResolveDependencies {
-        boolean changed = false;
-        boolean restartRequired = false;
         final Map<String, String> candidates = getMapShortNamesVersion(specs);
+
+        if (!updated) {
+            checkForUpdates();
+        }
 
         LOGGER.info("Installing plugins by direct upload: " + uploadPlugins);
         if (uploadPlugins) {
@@ -194,46 +197,35 @@ public class PluginManager extends ContainerPageObject {
             if (!someChangeRequired) {
                 return false;
             }
-            List<PluginMetadata> pluginToBeInstalled = ucmd.get().transitiveDependenciesOf(jenkins, candidates);
-            for (PluginMetadata newPlugin : pluginToBeInstalled) {
+            List<PluginMetadata> pluginToBeInstalled = ucmd.get().transitiveDependenciesOf(jenkins, Arrays.asList(specs));
+            for (PluginMetadata newPlugin: pluginToBeInstalled) {
                 final String name = newPlugin.getName();
-                String claimedVersion = candidates.get(name);
+                String requiredVersion = candidates.get(name);
                 String availableVersion = newPlugin.getVersion();
-                if (claimedVersion == null) { // a dependency
-                    claimedVersion = availableVersion;
+                if (requiredVersion == null) { // a dependency
+                    requiredVersion = availableVersion;
                 }
-                final String currentSpec = StringUtils.isNotEmpty(claimedVersion)
-                    ? name + "@" + claimedVersion
+                final String currentSpec = StringUtils.isNotEmpty(requiredVersion)
+                    ? name + "@" + requiredVersion
                     : name
                 ;
                 InstallationStatus status = installationStatus(currentSpec);
                 if (status != InstallationStatus.UP_TO_DATE) {
+                    if (new VersionNumber(requiredVersion).compareTo(new VersionNumber(availableVersion)) > 0) {
+                        throw new AssumptionViolatedException(
+                                name + " has version " + availableVersion + " but " + requiredVersion + " was requested");
+                    }
+                    File localFile = newPlugin.resolve(injector, availableVersion);
                     try {
-                        if (new VersionNumber(claimedVersion).compareTo(new VersionNumber(availableVersion)) > 0) {
-                            throw new AssumptionViolatedException(
-                                    name + " has version " + availableVersion + " but " + claimedVersion + " was requested");
+                        installPlugin(localFile);
+                    } finally {
+                        if (!localFile.delete()) {
+                            localFile.deleteOnExit();
                         }
-                        newPlugin.uploadTo(jenkins, injector, availableVersion);
-                        changed = true;
-                        restartRequired |= status == InstallationStatus.OUTDATED;
-                        try {
-                            new UpdateCenter(jenkins).waitForInstallationToComplete(name);
-                        } catch (InstallationFailedException x) {
-                            if (!restartRequired) {
-                                throw x;
-                            }
-                            // JENKINS-19859: else ignore; may be fine after the restart
-                        }
-                    } catch (IOException | ArtifactResolutionException e) {
-                        throw new AssertionError("Failed to upload plugin: " + newPlugin, e);
                     }
                 }
             }
         } else {
-            if (!updated) {
-                checkForUpdates();
-            }
-
             visit("available");
 
             final ArrayList<PluginSpec> update = new ArrayList<>();
@@ -241,7 +233,6 @@ public class PluginManager extends ContainerPageObject {
                 switch (installationStatus(n)) {
                     case NOT_INSTALLED:
                         tickPluginToInstall(n);
-                        changed = true;
                     break;
                     case OUTDATED:
                         update.add(n);
@@ -262,41 +253,13 @@ public class PluginManager extends ContainerPageObject {
                 for (PluginSpec n : update) {
                     tickPluginToInstall(n);
                 }
-                changed = restartRequired = true;
                 clickButton("Download now and install after restart");
             }
-
-            waitFor(driver, not(Matchers.hasContent("Pending")), 60); // Wait for all plugins to get installed
-
-            if (!restartRequired) {
-                String uc = pageText(driver);
-                // "IOException: Failed to dynamically deploy this plugin" can be reported (by at least some Jenkins versions)
-                // in case update of plugin dependency is needed (and is in fact performed in sibling UC job). Restart should fix that.
-                restartRequired = uc.contains("Restarted") || uc.contains("Failure");
-            }
         }
 
-        if (changed) {
-            if (restartRequired || forceRestart) {
-                return true;
-            } else {
-                // plugin deployment happens asynchronously, so give it a few seconds
-                // for it to finish deploying
-                // TODO: Use better detection if this is actually necessary
-                // TODO: This is as good as Thread.sleep(5000) if we treat timeout as success
-                try {
-                    waitFor().withTimeout(4, TimeUnit.SECONDS)
-                            .until(new Callable<Boolean>() {
-                                @Override
-                                public Boolean call() throws Exception {
-                                    return isInstalled(specs);
-                                }
-                    });
-                } catch (TimeoutException e) {
-                    return true;
-                }
-            }
-        }
+        // Jenkins will be restarted if necessary
+        new UpdateCenter(jenkins).waitForInstallationToComplete(specs);
+
         return false;
     }
 
