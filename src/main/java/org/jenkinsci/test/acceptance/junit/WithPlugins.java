@@ -7,7 +7,7 @@ import com.google.inject.name.Named;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.Plugin;
 import org.jenkinsci.test.acceptance.po.PluginManager;
-import org.jenkinsci.test.acceptance.po.PluginManager.PluginSpec;
+import org.jenkinsci.test.acceptance.update_center.PluginSpec;
 import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata.UnableToResolveDependencies;
 import org.jenkinsci.test.acceptance.utils.pluginreporter.ExercisedPluginsReporter;
 import org.junit.internal.AssumptionViolatedException;
@@ -26,8 +26,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.logging.Logger;
 
 import static java.lang.annotation.ElementType.*;
@@ -68,7 +66,7 @@ public @interface WithPlugins {
     int PRIORITY = 10;
 
     /**
-     * See {@link PluginManager.PluginSpec} for the syntax.
+     * See {@link PluginSpec} for the syntax.
      */
     String[] value();
 
@@ -92,7 +90,7 @@ public @interface WithPlugins {
                 @Override
                 public void evaluate() throws Throwable {
                     jenkins = injector.getInstance(Jenkins.class);
-                    List<String> plugins = combinePlugins(
+                    List<PluginSpec> plugins = combinePlugins(
                             d.getAnnotation(WithPlugins.class),
                             d.getTestClass().getAnnotation(WithPlugins.class)
                     );
@@ -102,32 +100,35 @@ public @interface WithPlugins {
                         assumeTrue("This test requires a restartable Jenkins", jenkins.canRestart());
                         jenkins.restart();
                     }
-                    for (String name : plugins) {
-                        name = name.replaceAll("@.*", "");
-                        Plugin installedPlugin = jenkins.getPlugin(name);
-                        VersionNumber installedVersion = installedPlugin.getVersion();
-                        String version = installedVersion.toString();
-                        pluginReporter.log(d.getClassName() + "." + d.getMethodName(), name, version);
+                    for (PluginSpec plugin : plugins) {
+                        pluginReporter.log(
+                                d.getClassName() + "." + d.getMethodName(),
+                                plugin.getName(),
+                                plugin.getVersion()
+                        );
                     }
                     base.evaluate();
                 }
 
-                private List<String> combinePlugins(WithPlugins... wp) {
-                    ArrayList<String> plugins = new ArrayList<>();
+                private List<PluginSpec> combinePlugins(WithPlugins... wp) {
+                    ArrayList<PluginSpec> plugins = new ArrayList<>();
                     for (WithPlugins withPlugins : wp) {
                         if (withPlugins != null) {
-                            Collections.addAll(plugins, withPlugins.value());
+                            for (String spec: withPlugins.value()) {
+                                // TODO eliminate duplicates and prefer newer versions
+                                plugins.add(new PluginSpec(spec));
+                            }
                         }
                     }
 
                     return plugins;
                 }
 
-                private boolean installPlugins(List<String> install) {
+                private boolean installPlugins(List<PluginSpec> install) {
                     PluginManager pm = jenkins.getPluginManager();
 
-                    for (Iterator<String> iterator = install.iterator(); iterator.hasNext(); ) {
-                        String spec = iterator.next();
+                    for (Iterator<PluginSpec> iterator = install.iterator(); iterator.hasNext(); ) {
+                        PluginSpec spec = iterator.next();
                         switch (pm.installationStatus(spec)) {
                             case NOT_INSTALLED:
                                 LOGGER.info(spec + " is up to date");
@@ -148,7 +149,7 @@ public @interface WithPlugins {
                     }
 
                     LOGGER.info("Installing plugins for test: " + install);
-                    String[] installList = install.toArray(new String[install.size()]);
+                    PluginSpec[] installList = install.toArray(new PluginSpec[install.size()]);
                     try {
                         //noinspection deprecation
                         return pm.installPlugins(installList);

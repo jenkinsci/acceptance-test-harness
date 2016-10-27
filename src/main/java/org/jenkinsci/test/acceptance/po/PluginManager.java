@@ -1,13 +1,12 @@
 package org.jenkinsci.test.acceptance.po;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Named;
 import javax.inject.Provider;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -17,9 +16,11 @@ import java.util.logging.Logger;
 import com.google.common.base.Predicate;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
+import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.UpdateCenter.InstallationFailedException;
 import org.jenkinsci.test.acceptance.update_center.PluginMetadata;
+import org.jenkinsci.test.acceptance.update_center.PluginSpec;
 import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata;
 import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata.UnableToResolveDependencies;
 import org.junit.internal.AssumptionViolatedException;
@@ -27,10 +28,11 @@ import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 
-import com.google.common.base.Splitter;
 import com.google.inject.Inject;
 
 import hudson.util.VersionNumber;
+
+import static org.hamcrest.Matchers.not;
 
 /**
  * Page object for plugin manager.
@@ -108,37 +110,35 @@ public class PluginManager extends ContainerPageObject {
     }
 
     public enum InstallationStatus {NOT_INSTALLED, OUTDATED, UP_TO_DATE}
+
+    public InstallationStatus installationStatus(String spec) {
+        return installationStatus(new PluginSpec(spec));
+    }
+
     /**
-     * @param spec plugin id with optional version (e.g. "ldap" or "ldap@1.8")
      * @return whether the plugin (in version greater or equal than specified) is installed
      */
-    public InstallationStatus installationStatus(String spec) {
-        PluginSpec p = new PluginSpec(spec);
-        String name = p.getName();
-        String version = p.getVersion();
+    public InstallationStatus installationStatus(PluginSpec spec) {
+        String name = spec.getName();
+        String version = spec.getVersion();
         Plugin plugin;
         try {
             plugin = jenkins.getPlugin(name);
             if (version != null) {
                 VersionNumber actualVersion = plugin.getVersion();
-                // check if installed version >= specified version of @WithPlugins
+                // check if installed version >= required version
                 if (actualVersion.compareTo(new VersionNumber(version)) < 0) {
                     LOGGER.info(name + " has version " + actualVersion + " but " + version + " was requested");
                     return InstallationStatus.OUTDATED;
                 }
             }
-            LOGGER.info(spec + " is up to date");
             return InstallationStatus.UP_TO_DATE;
         } catch (IllegalArgumentException ex) {
-            LOGGER.info(spec + " is not installed");
             return InstallationStatus.NOT_INSTALLED;
         }
     }
 
-    /**
-     * @param specs plugin ids with optional version (e.g. "ldap" or "ldap@1.8")
-     * @return true, if plugin (in version greater or equal than specified) is installed
-     */
+    @Deprecated
     public boolean isInstalled(String... specs) {
         for (String s : specs) {
             if (installationStatus(s) != InstallationStatus.UP_TO_DATE) {
@@ -148,10 +148,17 @@ public class PluginManager extends ContainerPageObject {
         return true;
     }
 
-    private VersionNumber getAvailableVersionForPlugin(String pluginName) {
-        // assuming we are on 'available' page
-        String v = find(by.xpath("//input[starts-with(@name,'plugin.%s.')]/../../td[last()]", pluginName)).getText();
-        return new VersionNumber(v);
+    /**
+     * @param specs plugin ids with optional version (e.g. "ldap" or "ldap@1.8")
+     * @return true, if plugin (in version greater or equal than specified) is installed
+     */
+    public boolean isInstalled(PluginSpec... specs) {
+        for (PluginSpec s : specs) {
+            if (installationStatus(s) != InstallationStatus.UP_TO_DATE) {
+                return false;
+            }
+        }
+        return true;
     }
     
     /**
@@ -166,18 +173,19 @@ public class PluginManager extends ContainerPageObject {
      * @return true if {@link Jenkins#restart} is required
      */
     @Deprecated
-    public boolean installPlugins(final String... specs) throws UnableToResolveDependencies {
+    public boolean installPlugins(final PluginSpec... specs) throws UnableToResolveDependencies {
         boolean changed = false;
         boolean restartRequired = false;
         final Map<String, String> candidates = getMapShortNamesVersion(specs);
 
+        LOGGER.info("Installing plugins by direct upload: " + uploadPlugins);
         if (uploadPlugins) {
             // First check to see whether we need to do anything.
             // If not, do not consider transitive dependencies of the requested plugins,
             // which might force updates (and thus restarts) even though we already have
             // a sufficiently new version of the requested plugin.
             boolean someChangeRequired = false;
-            for (String spec : specs) {
+            for (PluginSpec spec : specs) {
                 if (installationStatus(spec) != InstallationStatus.UP_TO_DATE) {
                     someChangeRequired = true;
                     break;
@@ -222,41 +230,50 @@ public class PluginManager extends ContainerPageObject {
                 }
             }
         } else {
-            if (!updated)
+            if (!updated) {
                 checkForUpdates();
+            }
 
-            OUTER:
-            for (final String n : candidates.keySet()) {
-                for (int attempt = 0; attempt < 2; attempt++) {// # of installations attempted, considering retries
-                    visit("available");
-                    check(find(by.xpath("//input[starts-with(@name,'plugin.%s.')]", n)));
-                    VersionNumber availableVersion = getAvailableVersionForPlugin(n);
-                    if (candidates.get(n) != null) {
-                        VersionNumber requiredVersion = new VersionNumber(candidates.get(n));
-                        if (availableVersion.isOlderThan(requiredVersion)) {
-                            throw new AssumptionViolatedException(
-                                    String.format("Version '%s' of '%s' is required, but available version is '%s'",
-                                            requiredVersion, n, availableVersion));
-                        }
-                    }
+            visit("available");
 
-                    clickButton("Install");
-
-                    elasticSleep(1000);
-
-                    try {
-                        new UpdateCenter(jenkins).waitForInstallationToComplete(n);
+            final ArrayList<PluginSpec> update = new ArrayList<>();
+            for (final PluginSpec n : specs) {
+                switch (installationStatus(n)) {
+                    case NOT_INSTALLED:
+                        tickPluginToInstall(n);
                         changed = true;
-                    } catch (InstallationFailedException e) {
-                        if (e.getMessage().contains("Failed to download from")) {
-                            continue;   // retry
-                        }
-                    }
-
-                    continue OUTER;  // installation completed
+                    break;
+                    case OUTDATED:
+                        update.add(n);
+                    break;
+                    case UP_TO_DATE:
+                        // Nothing to do
+                    break;
+                    default: assert false: "Unreachable";
                 }
             }
-            // TODO set restartRequired if we did updates
+
+            clickButton("Install");
+
+            // Plugins that are already installed in older version will be updated
+            System.out.println("Plugins to be updated: " + update);
+            if (!update.isEmpty()) {
+                visit(""); // Updates tab
+                for (PluginSpec n : update) {
+                    tickPluginToInstall(n);
+                }
+                changed = restartRequired = true;
+                clickButton("Download now and install after restart");
+            }
+
+            waitFor(driver, not(Matchers.hasContent("Pending")), 60); // Wait for all plugins to get installed
+
+            if (!restartRequired) {
+                String uc = pageText(driver);
+                // "IOException: Failed to dynamically deploy this plugin" can be reported (by at least some Jenkins versions)
+                // in case update of plugin dependency is needed (and is in fact performed in sibling UC job). Restart should fix that.
+                restartRequired = uc.contains("Restarted") || uc.contains("Failure");
+            }
         }
 
         if (changed) {
@@ -283,6 +300,27 @@ public class PluginManager extends ContainerPageObject {
         return false;
     }
 
+    private void tickPluginToInstall(PluginSpec spec) {
+        String name = spec.getName();
+        check(find(by.xpath("//input[starts-with(@name,'plugin.%s.')]", name)));
+        final VersionNumber requiredVersion = spec.getVersionNumber();
+        if (requiredVersion != null) {
+            final VersionNumber availableVersion = getAvailableVersionForPlugin(name);
+            if (availableVersion.isOlderThan(requiredVersion)) {
+                throw new AssumptionViolatedException(String.format(
+                        "Version '%s' of '%s' is required, but available version is '%s'",
+                        requiredVersion, name, availableVersion
+                ));
+            }
+        }
+    }
+
+    private VersionNumber getAvailableVersionForPlugin(String pluginName) {
+        // assuming we are on 'available' or 'updates' page
+        String v = find(by.xpath("//input[starts-with(@name,'plugin.%s.')]/../../td[3]", pluginName)).getText();
+        return new VersionNumber(v);
+    }
+
     /**
      * Installs a plugin by uploading the *.jpi image.
      */
@@ -301,56 +339,11 @@ public class PluginManager extends ContainerPageObject {
      * @param specs Values of the {@link WithPlugins} annotation
      * @return Map with Key:shortName Value:Version
      */
-    private Map<String, String> getMapShortNamesVersion(String... specs) {
+    private Map<String, String> getMapShortNamesVersion(PluginSpec... specs) {
         Map<String, String> shortNamesVersion = new HashMap<>();
-        for (String s : specs) {
-            PluginSpec coord = new PluginSpec(s);
-            shortNamesVersion.put(coord.getName(), coord.getVersion());
+        for (PluginSpec s : specs) {
+            shortNamesVersion.put(s.getName(), s.getVersion());
         }
         return shortNamesVersion;
-    }
-
-    /**
-     * Reference to a plugin, optionally with the version.
-     *
-     * The string syntax of this is shortName[@version].
-     */
-    public static class PluginSpec {
-        /**
-         * Short name of the plugin.
-         */
-        private final @Nonnull String name;
-        /**
-         * Optional version.
-         */
-        private final String version;
-
-        public PluginSpec(String coordinates) {
-            Iterator<String> spliter = Splitter.on("@").split(coordinates).iterator();
-            name = spliter.next();
-            version = spliter.hasNext()
-                    ? spliter.next()
-                    : null
-            ;
-        }
-
-        public @Nonnull String getName() {
-            return name;
-        }
-
-        public @Nullable String getVersion() {
-            return version;
-        }
-
-        @Override
-        public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append(name);
-            if (version != null) {
-                sb.append('@').append(version);
-            }
-
-            return sb.toString();
-        }
     }
 }
