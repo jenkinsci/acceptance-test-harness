@@ -95,4 +95,10 @@ public abstract class ConfigurablePageObject extends PageObject {
         clickButton("Save");
         assertThat(driver, not(hasContent("This page expects a form submission")));
     }
+
+    public void apply() {
+        clickButton("Apply");
+        elasticSleep(1000);
+        assertThat(driver, hasContent("Saved"));
+    }
 }
