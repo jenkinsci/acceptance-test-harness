@@ -101,16 +101,6 @@ public abstract class ConfigurablePageObject extends PageObject {
 
     public void apply() {
         clickButton("Apply");
-        waitFor(driver).withTimeout(5, TimeUnit.SECONDS)
-                .ignoring(
-                        AssertionError.class // Still waiting
-                )
-                .until(new Predicate<WebDriver>() {
-                    @Override
-                    public boolean apply(WebDriver driver) {
-                        assertThat(driver, hasContent("Saved"));
-                        return true;
-                    }
-                });
+        waitFor(driver, hasContent("Saved"), 5);
     }
 }
