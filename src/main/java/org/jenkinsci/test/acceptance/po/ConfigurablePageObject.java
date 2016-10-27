@@ -23,11 +23,14 @@
  */
 package org.jenkinsci.test.acceptance.po;
 
+import com.google.common.base.Predicate;
 import com.google.inject.Injector;
 import groovy.lang.Closure;
+import org.openqa.selenium.WebDriver;
 
 import java.net.URL;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
@@ -98,7 +101,16 @@ public abstract class ConfigurablePageObject extends PageObject {
 
     public void apply() {
         clickButton("Apply");
-        elasticSleep(1000);
-        assertThat(driver, hasContent("Saved"));
+        waitFor(driver).withTimeout(5, TimeUnit.SECONDS)
+                .ignoring(
+                        AssertionError.class // Still waiting
+                )
+                .until(new Predicate<WebDriver>() {
+                    @Override
+                    public boolean apply(WebDriver driver) {
+                        assertThat(driver, hasContent("Saved"));
+                        return true;
+                    }
+                });
     }
 }
