@@ -80,9 +80,24 @@ public class SshSlaveLauncher extends ComputerLauncher {
      * @return the SshSlaveLauncher to be configured
      */
     public SshSlaveLauncher keyCredentials(String username, String key) {
-        SshCredentialDialog dia = this.addCredential();
-        SshPrivateKeyCredential cred = dia.select(SshPrivateKeyCredential.class);
+        return this.keyCredentialsWithDescription(username, key, null);
+    }
+
+    /**
+     * Add username/key based credentials to the configuration, including a description
+     *
+     * @param username to use
+     * @param key for the private key to use
+     * @param description to use
+     * @return the SshSlaveLauncher to be configured
+     */
+    public SshSlaveLauncher keyCredentialsWithDescription(String username, String key, String description) {
+        final SshCredentialDialog dia = this.addCredential();
+        final SshPrivateKeyCredential cred = dia.select(SshPrivateKeyCredential.class);
         cred.username.set(username);
+        if (description != null) {
+            cred.description.set(description);
+        }
         cred.enterDirectly(key);
         cred.add();
         waitForCredentialVisible(username);
