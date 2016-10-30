@@ -51,4 +51,12 @@ and then `mvn -DskipTests install` on Jenkins core or any plugin before running 
 
 ### Provide full plugins collection
 
-Contrary to previous ways to alter the plugin versions used, `PLUGINS_DIR` environment variable specifies a path to a directory with plugins that will all be installed into Jenkins for every test. If test require some plugin that is not part of the collection, it will be installed from update center. This is useful to verify whether particular set of plugins works as expected.
+Contrary to previous ways to alter the plugin versions used, `PLUGINS_DIR` 
+environment variable specifies a path to a directory with plugins that will all be 
+installed into Jenkins for every test. If test require some plugin that is not part of the collection, 
+it will be installed from update center. This is useful to verify whether particular set of plugins works 
+as expected (and it is also a good way to speed up your tests since no slow plugin installations are 
+executed during your tests).
+
+Note that this option is not yet supported by all [Jenkins controllers](CONTROLLER.md), 
+so e.g. use `TYPE=winstone` in order to get the `PLUGINS_DIR` option working.

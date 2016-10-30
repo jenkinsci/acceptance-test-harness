@@ -37,7 +37,7 @@ public class Matchers {
 
             @Override
             public boolean matchesSafely(WebDriver item) {
-                pageText = pageText(item);
+                pageText = CapybaraPortingLayerImpl.pageText(item);
                 return pattern.matcher(pageText).find();
             }
 
@@ -47,17 +47,6 @@ public class Matchers {
                         .appendValue(item.getCurrentUrl())
                         .appendText("\n")
                         .appendValue(pageText);
-            }
-
-            private String pageText(WebDriver item) {
-                final By html = by.xpath("/html");
-
-                try {
-                    return item.findElement(html).getText();
-                } catch (StaleElementReferenceException ex) {
-                    // Retry once to avoid random failures in case of bad timing
-                    return item.findElement(html).getText();
-                }
             }
         };
     }

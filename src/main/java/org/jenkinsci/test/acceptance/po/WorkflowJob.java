@@ -75,7 +75,7 @@ public class WorkflowJob extends Job {
     };
     private static void waitForRenderOf(@Nonnull final String cssSelector, @Nonnull final Jenkins jenkins) {
         jenkins.waitFor().withMessage("Timed out waiting on '" + cssSelector + "' to be rendered.")
-                .withTimeout(10, TimeUnit.SECONDS)
+                .withTimeout(20, TimeUnit.SECONDS)
                 .until(new Callable<Boolean>() {
                     @Override public Boolean call() throws Exception {
                         return isRendered(cssSelector, jenkins);

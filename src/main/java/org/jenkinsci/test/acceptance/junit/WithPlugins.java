@@ -7,7 +7,7 @@ import com.google.inject.name.Named;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.Plugin;
 import org.jenkinsci.test.acceptance.po.PluginManager;
-import org.jenkinsci.test.acceptance.po.PluginManager.PluginSpec;
+import org.jenkinsci.test.acceptance.update_center.PluginSpec;
 import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata.UnableToResolveDependencies;
 import org.jenkinsci.test.acceptance.utils.pluginreporter.ExercisedPluginsReporter;
 import org.junit.internal.AssumptionViolatedException;
@@ -22,8 +22,10 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 import java.util.logging.Logger;
 
 import static java.lang.annotation.ElementType.*;
@@ -61,14 +63,14 @@ import static org.junit.Assume.assumeTrue;
 @RuleAnnotation(value=WithPlugins.RuleImpl.class, priority=WithPlugins.PRIORITY)
 public @interface WithPlugins {
 
-    public static final int PRIORITY = 10;
+    int PRIORITY = 10;
 
     /**
-     * See {@link PluginManager.PluginSpec} for the syntax.
+     * See {@link PluginSpec} for the syntax.
      */
     String[] value();
 
-    public class RuleImpl implements TestRule {
+    class RuleImpl implements TestRule {
 
         private static final Logger LOGGER = Logger.getLogger(WithPlugins.class.getName());
 
@@ -88,57 +90,66 @@ public @interface WithPlugins {
                 @Override
                 public void evaluate() throws Throwable {
                     jenkins = injector.getInstance(Jenkins.class);
-                    Set<String> plugins = new TreeSet<>();
-                    boolean restartRequired = installPlugins(d.getAnnotation(WithPlugins.class), plugins);
-                    restartRequired |= installPlugins(d.getTestClass().getAnnotation(WithPlugins.class), plugins);
-                    LOGGER.info("for " + d + " asked to install " + plugins + "; restartRequired? " + restartRequired);
-                    if (restartRequired) {
-                        assumeTrue("This test requires a restartable Jenkins", jenkins.canRestart());
-                        jenkins.restart();
-                    }
-                    for (String name : plugins) {
-                        Plugin installedPlugin = jenkins.getPlugin(name);
-                        VersionNumber installedVersion = installedPlugin.getVersion();
-                        String version = installedVersion.toString();
-                        pluginReporter.log(d.getClassName() + "." + d.getMethodName(), name, version);
+                    List<PluginSpec> plugins = combinePlugins(
+                            d.getAnnotation(WithPlugins.class),
+                            d.getTestClass().getAnnotation(WithPlugins.class)
+                    );
+
+                    installPlugins(plugins);
+
+                    for (PluginSpec plugin : plugins) {
+                        pluginReporter.log(
+                                d.getClassName() + "." + d.getMethodName(),
+                                plugin.getName(),
+                                plugin.getVersion()
+                        );
                     }
                     base.evaluate();
                 }
 
-
-                private boolean installPlugins(WithPlugins wp, Set<String> plugins) {
-                    if (wp == null) return false;
-
-                    PluginManager pm = jenkins.getPluginManager();
-                    boolean restartRequired = false;
-                    for (String c: wp.value()) {
-                        PluginSpec candidate = new PluginSpec(c);
-                        String name = candidate.getName();
-                        plugins.add(name);
-
-                        switch (pm.installationStatus(c)) {
-                        case NOT_INSTALLED:
-                            restartRequired |= doInstall(pm, c);
-                            break;
-                        case OUTDATED:
-                            if (neverReplaceExistingPlugins) {
-                                throw new AssumptionViolatedException(String.format(
-                                        "Test requires %s plugin", c));
-                            } else {
-                                restartRequired |= doInstall(pm, c);
+                private List<PluginSpec> combinePlugins(WithPlugins... wp) {
+                    ArrayList<PluginSpec> plugins = new ArrayList<>();
+                    for (WithPlugins withPlugins : wp) {
+                        if (withPlugins != null) {
+                            for (String spec: withPlugins.value()) {
+                                // TODO eliminate duplicates and prefer newer versions
+                                plugins.add(new PluginSpec(spec));
                             }
-                        break;
-                        default:
-                            // OK
                         }
                     }
-                    return restartRequired;
+
+                    return plugins;
                 }
 
-                @SuppressWarnings("deprecation")
-                private boolean doInstall(PluginManager pm, String c) {
+                private void installPlugins(List<PluginSpec> install) {
+                    PluginManager pm = jenkins.getPluginManager();
+
+                    for (Iterator<PluginSpec> iterator = install.iterator(); iterator.hasNext(); ) {
+                        PluginSpec spec = iterator.next();
+                        switch (pm.installationStatus(spec)) {
+                            case NOT_INSTALLED:
+                                LOGGER.info(spec + " is up to date");
+                                break;
+                            case UP_TO_DATE:
+                                iterator.remove(); // Already installed
+                                break;
+                            case OUTDATED:
+                                if (neverReplaceExistingPlugins) {
+                                    throw new AssumptionViolatedException(String.format(
+                                            "Test requires %s plugin", spec
+                                    ));
+                                }
+                                break;
+                            default:
+                                assert false;
+                        }
+                    }
+
+                    LOGGER.info("Installing plugins for test: " + install);
+                    PluginSpec[] installList = install.toArray(new PluginSpec[install.size()]);
                     try {
-                        return pm.installPlugins(c);
+                        //noinspection deprecation
+                        pm.installPlugins(installList);
                     } catch (UnableToResolveDependencies ex) {
                         throw new AssumptionViolatedException("Unable to install required plugins", ex);
                     }
