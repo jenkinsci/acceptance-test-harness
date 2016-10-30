@@ -3,12 +3,17 @@ package org.jenkinsci.test.acceptance.po;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Iterables;
 
+import groovy.ui.SystemOutputInterceptor;
 import org.apache.commons.lang3.ArrayUtils;
+import org.jenkinsci.test.acceptance.Matchers;
+import org.jenkinsci.test.acceptance.update_center.PluginSpec;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import static java.util.Arrays.*;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -27,6 +32,7 @@ public class UpdateCenter extends ContainerPageObject {
      * @throws InstallationFailedException
      *      installation has failed.
      */
+    @Deprecated
     public boolean isInstalled(String pluginShortName) throws InstallationFailedException {
         // look for newer results first as we might retry
         JsonNode[] jobs = Iterables.toArray(getJson("tree=jobs[*[*]]").get("jobs"), JsonNode.class);
@@ -59,20 +65,44 @@ public class UpdateCenter extends ContainerPageObject {
     }
 
     /**
-     * Blocks until the installation of the specified plugin is ccompleted.
+     * Wait for the plugin installation is done.
      *
-     * @throws InstallationFailedException
-     *      If the installation has failed
+     * Wait for all UC jobs are completed. If some of them fail or require restart, Jenkins is restarted.
+     * If some of the plugins is not installed after that or the version is older than expected, the waiting is considered failed.
+     *
+     * @return true if Jenkins ware restarted to install plugins.
+     * @throws InstallationFailedException If the installation has failed.
      */
-    public void waitForInstallationToComplete(final String pluginShortName) throws InstallationFailedException {
-        waitFor().withMessage("Installation to complete")
-                .withTimeout(190, TimeUnit.SECONDS)
-                .until(new Callable<Boolean>() {
-                    @Override
-                    public Boolean call() throws Exception {
-                        return isInstalled(pluginShortName);
-                    }
-        });
+    public boolean waitForInstallationToComplete(final PluginSpec... specs) throws InstallationFailedException {
+        open();
+        waitFor(driver, not(Matchers.hasContent("Pending")), 60); // Wait for all plugins to get installed
+
+        String uc = pageText(driver);
+        // "IOException: Failed to dynamically deploy this plugin" can be reported (by at least some Jenkins versions)
+        // in case update of plugin dependency is needed (and is in fact performed in sibling UC job). Restart should fix that.
+        boolean restartRequired = uc.contains("restarted") || uc.contains("Failure");
+
+        Jenkins jenkins = getJenkins();
+        if (restartRequired) {
+            assumeTrue("This test requires a restartable Jenkins", jenkins.canRestart());
+            System.out.println("Restarting Jenkins to finish plugin installation");
+            jenkins.restart();
+        }
+
+        for (PluginSpec spec : specs) {
+            Plugin plugin = jenkins.getPlugin(spec.getName());
+            if (plugin == null) {
+                throw new InstallationFailedException("Plugin " + spec.getName() + " not installed, restarted " + restartRequired);
+            }
+
+            if (spec.getVersionNumber() != null && plugin.getVersion().isOlderThan(spec.getVersionNumber())) {
+                throw new InstallationFailedException(
+                        "Plugin " + spec + " not installed in required version, is " + plugin.getVersion() + ", restarted " + true
+                );
+            }
+        }
+
+        return restartRequired;
     }
 
     public static class InstallationFailedException extends RuntimeException {

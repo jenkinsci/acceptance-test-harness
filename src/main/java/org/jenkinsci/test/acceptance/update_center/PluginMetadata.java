@@ -23,6 +23,7 @@ import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.eclipse.aether.resolution.ArtifactResult;
 import org.jenkinsci.test.acceptance.po.Jenkins;
+import org.jenkinsci.test.acceptance.po.PluginManager;
 import org.jenkinsci.test.acceptance.utils.aether.ArtifactResolverUtil;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -64,6 +65,10 @@ public class PluginMetadata {
         }
     }
 
+    /**
+     * @deprecated in favour of {@link PluginManager#installPlugin(File)}.
+     */
+    @Deprecated
     public void uploadTo(Jenkins jenkins, Injector i, String version) throws ArtifactResolutionException, IOException {
         HttpClient httpclient = new DefaultHttpClient();
 
