@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,11 +65,11 @@ public class UpdateCenterMetadata {
      *
      * @throws UnableToResolveDependencies When there requested plugin version can not be installed.
      */
-    public List<PluginMetadata> transitiveDependenciesOf(Jenkins jenkins, Map<String, String> names) throws UnableToResolveDependencies {
+    public List<PluginMetadata> transitiveDependenciesOf(Jenkins jenkins, Collection<PluginSpec> plugins) throws UnableToResolveDependencies {
         List<PluginMetadata> set = new ArrayList<>();
-        for (Map.Entry<String, String> n : names.entrySet()) {
-            PluginMetadata p = plugins.get(n.getKey());
-            if (p==null) throw new IllegalArgumentException("No such plugin " + n.getKey());
+        for (PluginSpec n : plugins) {
+            PluginMetadata p = this.plugins.get(n.getName());
+            if (p==null) throw new IllegalArgumentException("No such plugin " + n.getName());
             if (p.requiredCore().isNewerThan(jenkins.getVersion())) {
                 throw new UnableToResolveDependencies(String.format(
                         "Unable to install %s plugin because of core dependency. Requeried: %s Used: %s",
@@ -76,7 +77,7 @@ public class UpdateCenterMetadata {
                 ));
             }
 
-            transitiveDependenciesOf(jenkins, p, n.getValue(), set);
+            transitiveDependenciesOf(jenkins, p, n.getVersion(), set);
         }
         return set;
     }

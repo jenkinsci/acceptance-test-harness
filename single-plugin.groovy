@@ -8,7 +8,7 @@ import org.junit.runners.model.Statement;
 
 import org.jenkinsci.test.acceptance.junit.FilterRule.Filter;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.po.PluginManager.PluginSpec;
+import org.jenkinsci.test.acceptance.update_center.PluginSpec;
 
 import java.lang.annotation.Annotation;
 
