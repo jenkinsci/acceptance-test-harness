@@ -84,44 +84,6 @@ public class CompressArtifactsPluginTest extends AbstractJUnitTest {
         assertThat(build, not(hasCompressedArtifacts()));
     }
 
-    @Test @Issue("JENKINS-27042")
-    // TODO move to plugin testsuite
-    public void archiveLargerThan4GInTotal() throws Exception {
-        CompressingArtifactManager.setup(jenkins);
-
-        FreeStyleJob job = jenkins.jobs.create();
-        job.configure();
-        job.addPublisher(ArtifactArchiver.class).includes("*");
-        if (SystemUtils.IS_OS_UNIX) {
-            job.addBuildStep(ShellBuildStep.class).command( // Generate archive larger than 4G
-                "#!/bin/bash\nwget $JENKINS_URL/jnlpJars/jenkins-cli.jar -O stuff.jar; for i in {0..7000}; do cp stuff.jar stuff.${i}.jar; done"
-                                            );
-        }
-        else {
-            // On windows although we could create hard links this would exceed the number of hard links you can create for a given file.
-            // and sparse files compress too well.
-            //job.addBuildStep(BatchCommandBuildStep.class).command("for /l %%x in (0, 1, 7000) do fsutil file createnew stuff.%%x.jar 819200");
-            job.addBuildStep(BatchCommandBuildStep.class).command("powershell -command \"& { " +
-                                            "try { " +
-                                            "  Invoke-WebRequest %JENKINS_URL%/jnlpJars/jenkins-cli.jar -OutFile stuff.jar " +
-                                            "} catch { " +
-                                            "  echo 'download of jenkins-cli.jar failed'; " +
-                                            "  exit 2 "+
-                                            "}}\n " +
-                                            "for /l %%x in (0, 1, 7000) do cp stuff.jar stuff.%%x.jar\n");
-
-        }
-        job.save();
-
-        Build build = job.scheduleBuild().waitUntilFinished(15 * 60).shouldSucceed();
-
-        long length = Long.parseLong(jenkins.runScript(
-                "new FilePath(Jenkins.instance.getJob('%s').lastBuild.artifactsDir).parent.child('archive.zip').length()",
-                job.name
-        ));
-        assertThat(length, greaterThanOrEqualTo(4L * 1024 * 1024 * 1024));
-    }
-
     @Test @Issue("JENKINS-27558")
     @WithPlugins("maven-plugin")
     public void archiveMavenProject() {
