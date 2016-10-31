@@ -62,6 +62,9 @@ import static org.hamcrest.Matchers.*;
  */
 @WithPlugins("active-directory@1.38")
 public class ActiveDirectoryTest extends AbstractJUnitTest {
+    // This should ideally use @TestActivation but it requires nonstandard properties so failing assumption in instance initialization instead.
+    private final ActiveDirectoryEnv ENV = ActiveDirectoryEnv.get();
+
     private SecurityDisabler securityDisabler;
 
     @Before
@@ -71,26 +74,26 @@ public class ActiveDirectoryTest extends AbstractJUnitTest {
 
     @Test
     public void user_can_login_to_Jenkins_as_admin_after_AD_security_configured() {
-        userCanLoginToJenkinsAsAdmin(ActiveDirectoryEnv.get().getUser());
+        userCanLoginToJenkinsAsAdmin(ENV.getUser());
     }
 
     @Test
     public void user_can_login_to_Jenkins_as_admin_group_member_after_AD_security_configured() {
-        userCanLoginToJenkinsAsAdmin(ActiveDirectoryEnv.get().getGroup());
+        userCanLoginToJenkinsAsAdmin(ENV.getGroup());
     }
 
     @Test
     public void wannabe_cannot_login_to_Jenkins_after_AD_security_configured() {
-        userCanLoginToJenkinsAsAdmin(ActiveDirectoryEnv.get().getUser());
-        String userWannabe = ActiveDirectoryEnv.get().getUser() + "-wannabe";
+        userCanLoginToJenkinsAsAdmin(ENV.getUser());
+        String userWannabe = ENV.getUser() + "-wannabe";
         GlobalSecurityConfig security = saveSecurityConfig(userWannabe);
         jenkins.logout();
         jenkins.login().doLoginDespiteNoPaths(userWannabe,
-                ActiveDirectoryEnv.get().getPassword());
+                ENV.getPassword());
         security.configure();
         assertThat(getElement(by.name("_.domain")), is(nullValue()));
-        jenkins.login().doLoginDespiteNoPaths(ActiveDirectoryEnv.get().getUser(),
-                ActiveDirectoryEnv.get().getPassword());
+        jenkins.login().doLoginDespiteNoPaths(ENV.getUser(),
+                ENV.getPassword());
     }
 
     @After
@@ -100,12 +103,12 @@ public class ActiveDirectoryTest extends AbstractJUnitTest {
 
     private void userCanLoginToJenkinsAsAdmin(String userOrGroupToAddAsAdmin) {
         GlobalSecurityConfig security = saveSecurityConfig(userOrGroupToAddAsAdmin);
-        jenkins.login().doLoginDespiteNoPaths(ActiveDirectoryEnv.get().getUser(),
-                ActiveDirectoryEnv.get().getPassword());
+        jenkins.login().doLoginDespiteNoPaths(ENV.getUser(),
+                ENV.getPassword());
         security.configure();
         WebElement domain = getElement(by.name("_.domain"));
         assertThat(domain, is(notNullValue()));
-        assertThat(domain.getAttribute("value"), is(equalTo(ActiveDirectoryEnv.get().getDomain())));
+        assertThat(domain.getAttribute("value"), is(equalTo(ENV.getDomain())));
     }
 
     private GlobalSecurityConfig saveSecurityConfig(String userOrGroupToAddAsAdmin) {

@@ -51,6 +51,11 @@ public class ActiveDirectoryEnv {
         site = System.getenv("adSite");
         user = System.getenv("adUser");
         groupLookupStrategy = System.getenv("adGroupLookupStrategy");
+
+        assumeNotNull(domain);
+        assumeNotNull(group);
+        assumeNotNull(password);
+        assumeNotNull(user);
     }
 
     public static ActiveDirectoryEnv get() {
@@ -69,17 +74,14 @@ public class ActiveDirectoryEnv {
     }
 
     public String getDomain() {
-        assumeNotNull(domain);
         return domain;
     }
 
     public String getGroup() {
-        assumeNotNull(group);
         return group;
     }
 
     public String getPassword() {
-        assumeNotNull(password);
         return password;
     }
 
@@ -88,12 +90,10 @@ public class ActiveDirectoryEnv {
     }
 
     public String getUser() {
-        assumeNotNull(user);
         return user;
     }
 
     public String getGroupLookupStrategy() {
         return groupLookupStrategy;
     }
-
 }

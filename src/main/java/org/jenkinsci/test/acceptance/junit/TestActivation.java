@@ -40,7 +40,7 @@ import org.junit.runners.model.Statement;
  * Declare there is a property that needs to be provided to run the test.
  *
  * This is often used when credentials than can not be in git are needed
- * to run the test. Another use case is test interacting with predeployed
+ * to run the test. Another use-case is test interacting with pre-deployed
  * service.
  *
  * Failing the activation criteria will skip the test but unlike JUnit assumptions
@@ -60,7 +60,7 @@ public @interface TestActivation {
      */
     String[] value();
 
-    public class RuleImpl implements TestRule {
+    class RuleImpl implements TestRule {
         @Override
         public Statement apply(final Statement base, final Description d) {
             return new Statement() {
@@ -87,7 +87,7 @@ public @interface TestActivation {
                         }
                     }
 
-                    return; // All properties provided - run
+                    // All properties provided - run
                 }
             };
         }
