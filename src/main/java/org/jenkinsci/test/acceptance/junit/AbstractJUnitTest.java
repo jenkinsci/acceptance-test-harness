@@ -52,4 +52,8 @@ public class AbstractJUnitTest extends CapybaraPortingLayerImpl {
         }
         return port;
     }
+
+    protected void interrupt() {
+        throw new RuntimeException("INTERACTIVE debugging");
+    }
 }

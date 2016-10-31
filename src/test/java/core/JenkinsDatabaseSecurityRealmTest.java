@@ -56,10 +56,6 @@ public class JenkinsDatabaseSecurityRealmTest extends AbstractJUnitTest {
 
         User user = realm.signup(NAME, PWD, FULL_NAME, EMAIL);
 
-        assertThat(user.id(), equalTo(NAME));
-        assertThat(user.fullName(), equalTo(FULL_NAME));
-        assertThat(user.mail(), equalTo(EMAIL));
-
         jenkins.login().doLogin(user.id(), PWD);
 
         assertEquals(user, jenkins.getCurrentUser());
@@ -67,5 +63,29 @@ public class JenkinsDatabaseSecurityRealmTest extends AbstractJUnitTest {
         jenkins.logout();
 
         assertEquals(null, jenkins.getCurrentUser());
+    }
+
+    @Test
+    public void create_update_delete() {
+
+        User user = realm.signup(NAME, PWD, FULL_NAME, EMAIL);
+        assertThat(user.id(), equalTo(NAME));
+        assertThat(user.fullName(), equalTo(FULL_NAME));
+        assertThat(user.mail(), equalTo(EMAIL));
+        jenkins.logout();
+
+        user.configure();
+        user.fullName("ASDF");
+        user.save();
+        user = jenkins.getUser(NAME);
+
+        assertThat(user.id(), equalTo(NAME));
+        assertThat(user.fullName(), equalTo("ASDF"));
+        assertThat(user.mail(), equalTo(EMAIL));
+
+        user.delete();
+        user = jenkins.getUser(NAME);
+        // Jenkins creates new users transparently. Verifying it is the new one and not the old by default fullName assigned
+        assertThat(user.fullName(), equalTo(NAME));
     }
 }
