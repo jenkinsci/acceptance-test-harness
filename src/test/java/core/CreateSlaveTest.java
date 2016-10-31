@@ -5,6 +5,7 @@ import org.jenkinsci.test.acceptance.junit.Since;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.credentials.CredentialsPage;
 import org.jenkinsci.test.acceptance.plugins.credentials.ManagedCredentials;
+import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshCredentialDialog;
 import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshPrivateKeyCredential;
 import org.jenkinsci.test.acceptance.plugins.ssh_slaves.SshSlaveLauncher;
 import org.jenkinsci.test.acceptance.po.Control;
@@ -50,7 +51,14 @@ public class CreateSlaveTest extends AbstractJUnitTest {
                 //ignore
             }
 
-            l.keyCredentialsWithDescription(username, privateKey, description);
+            SshCredentialDialog f = l.addCredential();
+            {
+                SshPrivateKeyCredential sc = f.select(SshPrivateKeyCredential.class);
+                sc.description.set(description);
+                sc.username.set(username);
+                sc.selectEnterDirectly().privateKey.set(privateKey);
+            }
+            f.add();
 
             l.credentialsId.select(String.format("%s (%s)", username, description));
         }
