@@ -84,11 +84,12 @@ public class OpenstackCloud extends Cloud {
     }
 
     public OpenstackSlaveTemplate addSlaveTemplate() {
-        control("repeatable-add").click();
-        elasticSleep(500); // Wait for template to appear
-        final String newPath = last(by.name("templates")).getAttribute("path");
+        String newPath = createPageArea("templates", new Runnable() {
+            @Override public void run() {
+                control("repeatable-add").click();
+            }
+        });
 
-        assert newPath.startsWith(getPath());
         return new OpenstackSlaveTemplate(this, newPath);
     }
 }

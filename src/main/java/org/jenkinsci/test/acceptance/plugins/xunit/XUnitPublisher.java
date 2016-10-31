@@ -13,9 +13,12 @@ public class XUnitPublisher extends AbstractStep implements PostBuildStep {
         super(parent, path);
     }
 
-    public Tool addTool(String kind) {
-        addButton.selectDropdownMenu(kind);
-        String path = last(by.xpath("//div[starts-with(@path, '%s/tools')]",super.getPath())).getAttribute("path");
+    public Tool addTool(final String kind) {
+        String path = createPageArea("tools", new Runnable() {
+            @Override public void run() {
+                addButton.selectDropdownMenu(kind);
+            }
+        });
         return newInstance(Tool.class, getPage(), path);
     }
 

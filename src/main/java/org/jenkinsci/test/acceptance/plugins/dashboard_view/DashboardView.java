@@ -36,9 +36,12 @@ public class DashboardView extends View {
      * @param <T>          The type constraint for portlets.
      * @return The new portlet.
      */
-    public <T extends AbstractDashboardViewPortlet> T addBottomPortlet(Class<T> portletClass) {
-        bottomPortlet.selectDropdownMenu(portletClass);
-        String path = last(by.css("[name='bottomPortlet']")).getAttribute("path");
+    public <T extends AbstractDashboardViewPortlet> T addBottomPortlet(final Class<T> portletClass) {
+        String path = createPageArea("/bottomPortlet", new Runnable() {
+            @Override public void run() {
+                bottomPortlet.selectDropdownMenu(portletClass);
+            }
+        });
         T portlet = newInstance(portletClass, this, path);
         bottomPortlets.add(portlet);
         return portlet;

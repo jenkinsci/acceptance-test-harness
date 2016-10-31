@@ -1,7 +1,10 @@
 package org.jenkinsci.test.acceptance.po;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
+
+import javax.annotation.Nonnull;
 
 /**
  * Special kind of page object that maps to a portion of a page with multiple INPUT controls.
@@ -59,6 +62,28 @@ public abstract class PageAreaImpl extends CapybaraPortingLayerImpl implements P
     }
 
     @Override
+    public String getPath(String rel) {
+        if (rel.length() == 0) {
+            return path;
+        }
+
+        // this allows path("") and path("/") to both work
+        if (rel.startsWith("/")) {
+            rel = rel.substring(1);
+        }
+        return path + '/' + rel;
+    }
+
+    @Override
+    public String getPath(String rel, int index) {
+        assert index >= 0: "Negative index is forbidden";
+        String path = getPath(rel);
+        if (index == 0) return path;
+
+        return path + '[' + index + ']';
+    }
+
+    @Override
     public PageObject getPage() {
         return page;
     }
@@ -70,15 +95,7 @@ public abstract class PageAreaImpl extends CapybaraPortingLayerImpl implements P
      */
     @Override
     public By path(String rel) {
-        if (rel.length() == 0) {
-            return by.path(path);
-        }
-
-        // this allows path("") and path("/") to both work
-        if (rel.startsWith("/")) {
-            rel = rel.substring(1);
-        }
-        return by.path(path + '/' + rel);
+        return by.path(getPath(rel));
     }
 
     /**
@@ -98,5 +115,10 @@ public abstract class PageAreaImpl extends CapybaraPortingLayerImpl implements P
     @Override
     public Control control(By selector) {
         return new Control(injector, selector);
+    }
+
+    public @Nonnull String createPageArea(String name, Runnable action) throws TimeoutException {
+        String pathPrefix = getPath() + '/' + name;
+        return getPage().createPageArea(pathPrefix, action);
     }
 }

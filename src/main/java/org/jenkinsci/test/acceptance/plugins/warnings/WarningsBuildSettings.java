@@ -50,26 +50,26 @@ public class WarningsBuildSettings extends AnalysisFreestyleSettings {
     }
 
     public void addConsoleParser(final String parserName) {
-        consoleParsers.click();
-        elasticSleep(1000);
+        final String path = createPageArea(CONSOLE_PARSERS, new Runnable() {
+            @Override public void run() {
+                consoleParsers.click();
+            }
+        });
 
-        PageArea repeatable = getRepeatableAreaOf(CONSOLE_PARSERS);
+        PageArea repeatable = new PageAreaImpl(WarningsBuildSettings.this.getPage(), path) {};
         repeatable.control("parserName").select(parserName);
     }
 
     public void addWorkspaceScanner(final String caption, final String pattern) {
-        fileParsers.click();
-        elasticSleep(1000);
+        final String path = createPageArea(FILE_PARSERS, new Runnable() {
+            @Override public void run() {
+                fileParsers.click();
+            }
+        });
 
-        PageArea repeatable = getRepeatableAreaOf(FILE_PARSERS);
+        PageArea repeatable = new PageAreaImpl(WarningsBuildSettings.this.getPage(), path) {};
         repeatable.control("pattern").set(pattern);
         repeatable.control("parserName").select(caption);
-    }
-
-    private PageArea getRepeatableAreaOf(final String propertyName) {
-        String path = last(by.xpath("//div[@name='" + propertyName + "']")).getAttribute("path");
-
-        return new PageAreaImpl(WarningsBuildSettings.this.getPage(), path) {};
     }
 
     /**

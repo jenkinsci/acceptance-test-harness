@@ -39,10 +39,13 @@ public class MultipleScms extends Scm {
         this.job = job;
     }
 
-    public <T extends Scm> T addScm(Class<T> type) {
-        addButton.selectDropdownMenu(type);
-        String path = last(by.button("Delete SCM")).getAttribute("path");
+    public <T extends Scm> T addScm(final Class<T> type) {
+        String path = createPageArea("scmList", new Runnable() {
+            @Override public void run() {
+                addButton.selectDropdownMenu(type);
+            }
+        });
 
-        return newInstance(type, job, path.substring(0, path.length() - 18));
+        return newInstance(type, job, path);
     }
 }

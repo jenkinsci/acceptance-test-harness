@@ -39,10 +39,12 @@ public class PriorityConfig extends Action {
     }
 
     public Group addGroup() {
-        control("/repeatable-add").click();
-        elasticSleep(1000);
-        String prefix = last(by.name("jobGroup")).getAttribute("path");
-        return new Group(this, prefix);
+        String path = createPageArea("/jobGroup", new Runnable() {
+            @Override public void run() {
+                control("/repeatable-add").click();
+            }
+        });
+        return new Group(this, path);
     }
 
     public void save() {

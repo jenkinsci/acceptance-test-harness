@@ -23,12 +23,9 @@
  */
 package org.jenkinsci.test.acceptance.plugins.jclouds;
 
-import java.util.List;
-
 import org.jenkinsci.test.acceptance.po.Cloud;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.PageObject;
-import org.openqa.selenium.WebElement;
 
 /**
  * JClouds Cloud.
@@ -78,12 +75,12 @@ public class JCloudsCloud extends Cloud {
     }
 
     public JCloudsSlaveTemplate addSlaveTemplate() {
-        control("repeatable-add").click();
-        List<WebElement> all = all(by.name("templates"));
-        final String fullPath = all.get(all.size()-1).getAttribute("path");
+        String path = createPageArea("templates", new Runnable() {
+            @Override public void run() {
+                control("repeatable-add").click();
+            }
+        });
 
-        //assert fullPath.startsWith(getPath());
-
-        return new JCloudsSlaveTemplate(this, fullPath);
+        return new JCloudsSlaveTemplate(this, path);
     }
 }

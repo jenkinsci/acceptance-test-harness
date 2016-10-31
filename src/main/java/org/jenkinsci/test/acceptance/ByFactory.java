@@ -5,6 +5,13 @@ import javax.xml.xpath.XPathFactory;
 
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.openqa.selenium.By;
+import org.openqa.selenium.SearchContext;
+import org.openqa.selenium.WebElement;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * More factories for {@link By} objects.
@@ -143,5 +150,35 @@ public class ByFactory {
 
     public By ancestor(String tagName) {
         return xpath("ancestor::%s[1]",tagName);
+    }
+
+    /**
+     * "/foo/bar" matches div elements with path attribute "/foo/bar" or "/foo/bar[n]". Does not match "/foo/bar/baz" or "/foo/bar[1]/baz".
+     */
+    public By areaPath(final String pathPrefix) {
+        final int prefixLength = pathPrefix.length();
+
+        final By xpath = ByFactory.this.xpath("//div[starts-with(@path, '%s')]", pathPrefix);
+        return new By() {
+            @Override
+            public List<WebElement> findElements(SearchContext context) {
+                ArrayList<WebElement> ret = new ArrayList<>();
+                List<WebElement> allPrefixed = context.findElements(xpath);
+                for (WebElement webElement: allPrefixed) {
+                    String path = webElement.getAttribute("path");
+
+                    // Ensure /foo matches /foo and /boo[bar], but not /foo/bar or /foolish/bartender
+                    if (path.substring(prefixLength).matches("^(\\[[^\\]]+\\]|)$")) {
+                        ret.add(webElement);
+                    }
+                }
+                return ret;
+            }
+
+            @Override
+            public String toString() {
+                return "By page area name: " + pathPrefix;
+            }
+        };
     }
 }

@@ -23,9 +23,12 @@ public class ScpGlobalConfig extends PageAreaImpl {
     }
 
     public Site addSite() {
-        add.click();
-        String p = last(by.xpath(".//div[@name='site'][starts-with(@path,'/be-certipost-hudson-plugin-SCPRepositoryPublisher/')]")).getAttribute("path");
-        return new Site(getPage(), p);
+        String path = createPageArea("configs", new Runnable() {
+            @Override public void run() {
+                add.click();
+            }
+        });
+        return new Site(getPage(), path);
     }
 
     public static class Site extends PageAreaImpl {

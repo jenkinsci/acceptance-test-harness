@@ -17,9 +17,12 @@ public class CifsGlobalConfig extends PublishGlobalConfig {
     }
 
     public CifSite addSite() {
-        add.click();
-        String p = last(by.xpath(".//div[@name='instance'][starts-with(@path,'/jenkins-plugins-publish_over_cifs-CifsPublisherPlugin/')]")).getAttribute("path");
-        return new CifSite(getPage(), p);
+        String path = createPageArea("instance", new Runnable() {
+            @Override public void run() {
+                add.click();
+            }
+        });
+        return new CifSite(getPage(), path);
     }
 
     public static class CifSite extends GlobalSite {

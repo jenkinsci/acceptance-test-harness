@@ -42,14 +42,15 @@ public class GlobalToolConfig extends ContainerPageObject {
         return url;
     }
 
-    public <T extends ToolInstallation> T addTool(Class<T> type) {
-        String name = type.getAnnotation(ToolInstallationPageObject.class).name();
+    public <T extends ToolInstallation> T addTool(final Class<T> type) {
+        final String name = type.getAnnotation(ToolInstallationPageObject.class).name();
 
-        clickButton("Add " + name);
-        elasticSleep(100);
-        String path = find(by.button("Delete " + name)).getAttribute("path");
-        String prefix = path.substring(0, path.length() - 18);
+        String path = createPageArea("configs", new Runnable() {
+            @Override public void run() {
+                clickButton("Add " + name);
+            }
+        });
 
-        return newInstance(type, this, prefix);
+        return newInstance(type, this, path);
     }
 }

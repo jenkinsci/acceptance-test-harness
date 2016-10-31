@@ -15,12 +15,12 @@ public class ManagedCredentialsBinding extends ContainerPageObject {
      * @param type
      * @return
      */
-    public <T extends CredentialsBinding> T addCredentialBinding(Class<T> type) {
-        control(by.path("/org-jenkinsci-plugins-credentialsbinding-impl-SecretBuildWrapper/hetero-list-add[bindings]")).selectDropdownMenu(type);
-        elasticSleep(1000); // it takes some time until the element is visible
-        WebElement last = last(by.xpath("//div[@name='bindings']"));
-        String path = last.getAttribute("path");
-
+    public <T extends CredentialsBinding> T addCredentialBinding(final Class<T> type) {
+        String path = createPageArea("bindings", new Runnable() {
+            @Override public void run() {
+                control(by.path("/org-jenkinsci-plugins-credentialsbinding-impl-SecretBuildWrapper/hetero-list-add[bindings]")).selectDropdownMenu(type);
+            }
+        });
         return newInstance(type, this, path);
     }
 }

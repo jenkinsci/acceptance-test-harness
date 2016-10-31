@@ -65,17 +65,19 @@ public abstract class ToolInstallation extends PageAreaImpl {
     }
 
     public static <T extends ToolInstallation> T addTool(Jenkins jenkins, Class<T> type) {
-        ConfigurablePageObject page = getPageObject(jenkins);
+        final ConfigurablePageObject page = getPageObject(jenkins);
         page.configure();
 
-        String name = type.getAnnotation(ToolInstallationPageObject.class).name();
+        final String name = type.getAnnotation(ToolInstallationPageObject.class).name();
+        final Control button = page.control(by.button("Add " + name));
 
-        page.clickButton("Add " + name);
-        page.elasticSleep(100);
-        String path = page.find(by.button("Delete " + name)).getAttribute("path");
-        String prefix = path.substring(0, path.length() - 18);
-
-        return page.newInstance(type, jenkins, prefix);
+        String pathPrefix = button.resolve().getAttribute("path").replaceAll("repeatable-add", "tool");
+        String path = page.createPageArea(pathPrefix, new Runnable() {
+            @Override public void run() {
+                button.click();
+            }
+        });
+        return page.newInstance(type, jenkins, path);
     }
 
     public static <T extends ToolInstallation> void installTool(Jenkins jenkins, Class<T> type, String name, String version) {

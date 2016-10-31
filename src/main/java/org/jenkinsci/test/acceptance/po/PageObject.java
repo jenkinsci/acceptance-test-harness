@@ -1,15 +1,25 @@
 package org.jenkinsci.test.acceptance.po;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+import com.google.common.base.Function;
 import org.kohsuke.randname.RandomNameGenerator;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Injector;
+import org.openqa.selenium.WebElement;
 
 /**
  * Encapsulates a model in Jenkins and wraps interactions with it.
@@ -109,6 +119,59 @@ public abstract class PageObject extends CapybaraPortingLayerImpl {
 
     public Control control(By selector) {
         return new Control(injector, selector);
+    }
+
+    /**
+     * Capture path attribute of newly created form chunk upon invoking action.
+     *
+     * Consider "Add" button in page area with path "/foo" that is supposed to create new page area with path "/foo/bar"
+     * or "/foo/bar[n]". There are several problems with the straightforward approach:
+     *  - Created area may or may not be the first one of its kind so figuring the "path" is nontrivial.
+     *  - The area may can take a while to render so waiting is needed.
+     *  - Even after the markup appears, it can take a while for "path" attribute is added.
+     *
+     * This method properly wait until the new path is known. To be used as:
+     *
+     *  String barPath = fooArea.createPageArea("/bar", () -> control("add-button").click());
+     *  new FooBarArea(fooArea, barPath);
+     *
+     * @param pathPrefix Prefix of the expected path. The path is always absolute.
+     * @param action An action that triggers the page area creation. Clicking the button, etc.
+     * @return The surrounding path of the area, exception thrown when not able to find out.
+     */
+    public @Nonnull String createPageArea(final String pathPrefix, Runnable action) throws TimeoutException {
+        assert pathPrefix.startsWith("/"): "Path not absolute: " + pathPrefix;
+        final By by = this.by.areaPath(pathPrefix);
+        final List<String> existing = extractPaths(all(by));
+        final int existingSize = existing.size();
+        action.run();
+
+        return waitFor().withTimeout(10, TimeUnit.SECONDS).until(new Function<CapybaraPortingLayer, String>() {
+            @Nullable @Override public String apply(@Nullable CapybaraPortingLayer input) {
+                List<String> current = extractPaths(all(by));
+                int size = current.size();
+                if (size == existingSize) return null; // Have not appeared yet
+                if (size == existingSize + 1) { // Appeared
+                    current.removeAll(existing);
+                    assert current.size() == 1 : "Path mismatch. Existing: " + existing + "; filtered: " + current;
+                    return current.get(0);
+                }
+
+                throw new AssertionError(String.format("Number of elements was %d, now is %d: %s", existingSize, size, current));
+            }
+
+            @Override public String toString() {
+                return "Page area to appear: " + by;
+            }
+        });
+    }
+
+    private List<String> extractPaths(Collection<WebElement> elements) {
+        List<String> paths = new ArrayList<>(elements.size());
+        for (WebElement element : elements) {
+            paths.add(element.getAttribute("path"));
+        }
+        return paths;
     }
 
     @Override

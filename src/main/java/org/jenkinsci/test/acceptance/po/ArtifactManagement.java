@@ -39,10 +39,13 @@ public class ArtifactManagement extends PageAreaImpl {
         super(config, "/jenkins-model-ArtifactManagerConfiguration");
     }
 
-    public <T extends Factory> T add(Class<T> impl) {
-        control("hetero-list-add[artifactManagerFactories]").selectDropdownMenu(impl);
-        String factoryPath = last(by.xpath("//div[@name='%s']", "artifactManagerFactories")).getAttribute("path");
-        return newInstance(impl, this, factoryPath.substring(path("").toString().length()));
+    public <T extends Factory> T add(final Class<T> impl) {
+        String path = createPageArea("artifactManagerFactories", new Runnable() {
+            @Override public void run() {
+                control("hetero-list-add[artifactManagerFactories]").selectDropdownMenu(impl);
+            }
+        });
+        return newInstance(impl, this, path);
     }
 
     public void clear() {

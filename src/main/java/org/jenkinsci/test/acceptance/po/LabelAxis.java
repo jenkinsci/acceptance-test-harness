@@ -18,7 +18,7 @@ public class LabelAxis extends Axis {
             find(by.xpath("//div[@class='yahooTree labelAxis-tree']//table[@id='ygtvtableel1']//a")).click();
             find(by.xpath("//div[@class='yahooTree labelAxis-tree']//table[@id='ygtvtableel2']//a")).click();
         }
-        checkBox.click();
+        check(checkBox, true);
     }
 }
 

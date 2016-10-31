@@ -93,6 +93,7 @@ public class Job extends TopLevelItem {
         return addStep(type, "builder");
     }
 
+    // TODO move this functionality to page area itself
     public void removeFirstBuildStep() {
         removeFirstStep("builder");
     }
@@ -125,34 +126,14 @@ public class Job extends TopLevelItem {
 
     }
 
-    private <T extends Step> T addStep(Class<T> type, String section) {
+    private <T extends Step> T addStep(final Class<T> type, final String section) {
         ensureConfigPage();
 
-        // get @Describable value to use later to retrieve the path
-        String[] describableValue = null;
-        if (type.isAnnotationPresent(Describable.class)) {
-            describableValue = type.getAnnotation(Describable.class).value();
-        }
-        control(by.path("/hetero-list-add[%s]", section)).selectDropdownMenu(type);
-        elasticSleep(1000); // it takes some time until the element is visible
-        String path = null;
-        // if I have got a Describable use it to get the path
-        if (describableValue != null && PostBuildStep.class.isAssignableFrom(type)) {
-            List<WebElement> newSteps = driver.findElements(by.xpath("//div[@name='%s']", section));
-            outer:
-            for (WebElement element : newSteps) {
-                for (String s : describableValue) {
-                    if (element.getText().contains(s)) {
-                        path = element.getAttribute("path");
-                        break outer;
-                    }
-                }
+        String path = createPageArea('/' + section, new Runnable() {
+            @Override public void run() {
+                control(by.path("/hetero-list-add[%s]", section)).selectDropdownMenu(type);
             }
-        } else {
-            // on the other case just use the last element
-            WebElement last = last(by.xpath("//div[@name='%s']", section));
-            path = last.getAttribute("path");
-        }
+        });
         return newInstance(type, this, path);
     }
 

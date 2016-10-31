@@ -15,9 +15,12 @@ public class FtpGlobalConfig extends PublishGlobalConfig {
 
     @Override
     public FtpSite addSite() {
-        add.click();
-        String p = last(by.xpath(".//div[@name='instance'][starts-with(@path,'/jenkins-plugins-publish_over_ftp-BapFtpPublisherPlugin/')]")).getAttribute("path");
-        return new FtpSite(getPage(), p);
+        String path = createPageArea("instance", new Runnable() {
+            @Override public void run() {
+                add.click();
+            }
+        });
+        return new FtpSite(getPage(), path);
     }
 
     public static class FtpSite extends GlobalSite {

@@ -34,9 +34,12 @@ public class PostBuildScript extends AbstractStep implements PostBuildStep {
         super(parent, path);
     }
 
-    public <T extends Step> T addStep(Class<T> type) {
-        control("hetero-list-add[buildStep]").selectDropdownMenu(type);
-        String path = last(by.xpath("//div[@name='buildStep']")).getAttribute("path");
+    public <T extends Step> T addStep(final Class<T> type) {
+        String path = createPageArea("buildStep", new Runnable() {
+            @Override public void run() {
+                control("hetero-list-add[buildStep]").selectDropdownMenu(type);
+            }
+        });
         return newInstance(type, parent, path);
     }
 
