@@ -17,10 +17,12 @@ import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.JenkinsConfig;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.inject.Inject;
 import org.junit.experimental.categories.Category;
+import org.jvnet.hudson.test.Issue;
 
 import java.io.IOException;
 import java.util.concurrent.Callable;
@@ -87,7 +89,7 @@ public class ArtifactoryPluginTest extends AbstractJUnitTest {
         assertThat(log, containsRegexp("Deploying build (info|descriptor) to: " + artifactory.getURL() + "/api/build"));
     }
 
-    @Test @WithPlugins("gradle")
+    @Test @WithPlugins("gradle") @Ignore @Issue("JENKINS-39323")
     public void gradle_integration() {
         final ArtifactoryContainer artifactory = artifactoryContainer.get();
         waitForArtifactory(artifactory);
