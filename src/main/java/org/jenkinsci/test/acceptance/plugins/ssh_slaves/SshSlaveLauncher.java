@@ -63,8 +63,8 @@ public class SshSlaveLauncher extends ComputerLauncher {
      * @return the SshSlaveLauncher to be configured
      */
     public SshSlaveLauncher pwdCredentials(String username, String password) {
-        SshCredentialDialog dia = this.addCredential();
-        UserPwdCredential cred = dia.select(UserPwdCredential.class);
+        final SshCredentialDialog dia = this.addCredential();
+        final UserPwdCredential cred = dia.select(UserPwdCredential.class);
         cred.username.set(username);
         cred.password.set(password);
         cred.add();
@@ -80,8 +80,8 @@ public class SshSlaveLauncher extends ComputerLauncher {
      * @return the SshSlaveLauncher to be configured
      */
     public SshSlaveLauncher keyCredentials(String username, String key) {
-        SshCredentialDialog dia = this.addCredential();
-        SshPrivateKeyCredential cred = dia.select(SshPrivateKeyCredential.class);
+        final SshCredentialDialog dia = this.addCredential();
+        final SshPrivateKeyCredential cred = dia.select(SshPrivateKeyCredential.class);
         cred.username.set(username);
         cred.enterDirectly(key);
         cred.add();
