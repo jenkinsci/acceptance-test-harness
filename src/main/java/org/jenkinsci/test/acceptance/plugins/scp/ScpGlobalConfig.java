@@ -23,7 +23,7 @@ public class ScpGlobalConfig extends PageAreaImpl {
     }
 
     public Site addSite() {
-        String path = createPageArea("configs", new Runnable() {
+        String path = createPageArea("site", new Runnable() {
             @Override public void run() {
                 add.click();
             }
