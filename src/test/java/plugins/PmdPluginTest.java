@@ -471,10 +471,12 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
      */
     @Test @WithPlugins("dashboard-view")
     public void should_set_warnings_count_in_dashboard_portlet() {
-        MavenModuleSet job = createMavenJob();
+        jenkins.restart();
+
+        final MavenModuleSet job = createMavenJob();
         buildJobAndWait(job).shouldSucceed();
 
-        DashboardView view = addDashboardViewAndBottomPortlet(PmdWarningsPortlet.class);
+        final DashboardView view = addDashboardViewAndBottomPortlet(PmdWarningsPortlet.class);
 
         assertValidLink(job.name);
         view.delete();
