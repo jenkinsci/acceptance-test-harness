@@ -46,6 +46,8 @@ public class ExternalWorkspaceManagerPluginTest extends AbstractJUnitTest {
 
     @Before
     public void setUp() throws Exception {
+        jenkins.restart();
+
         MavenInstallation.installMaven(jenkins, "M3", "3.1.0");
 
         setUpGlobalConfig();
