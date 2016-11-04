@@ -23,11 +23,14 @@
  */
 package org.jenkinsci.test.acceptance.po;
 
+import com.google.common.base.Predicate;
 import com.google.inject.Injector;
 import groovy.lang.Closure;
+import org.openqa.selenium.WebDriver;
 
 import java.net.URL;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
@@ -94,5 +97,10 @@ public abstract class ConfigurablePageObject extends PageObject {
     public void save() {
         clickButton("Save");
         assertThat(driver, not(hasContent("This page expects a form submission")));
+    }
+
+    public void apply() {
+        clickButton("Apply");
+        waitFor(driver, hasContent("Saved"), 5);
     }
 }

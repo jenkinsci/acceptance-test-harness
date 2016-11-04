@@ -743,6 +743,26 @@
         </plugins>
       </build>
     </profile>
+    <profile>
+      <id>FORM_ELEMENT_PATH_VERSION</id>
+      <activation>
+        <property>
+          <name>FORM_ELEMENT_PATH_VERSION</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <environmentVariables>
+                <FORM_ELEMENT_PATH_VERSION>${FORM_ELEMENT_PATH_VERSION}</FORM_ELEMENT_PATH_VERSION>
+              </environmentVariables>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
     <!-- TODO could be laboriously repeated for $TYPE, etc. (seems Maven provides no generic way to do this) -->
 
     <profile>
