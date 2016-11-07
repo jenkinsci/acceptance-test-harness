@@ -15,6 +15,7 @@ import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 
 import java.util.concurrent.ExecutionException;
 
@@ -46,8 +47,6 @@ public class ExternalWorkspaceManagerPluginTest extends AbstractJUnitTest {
 
     @Before
     public void setUp() throws Exception {
-        jenkins.restart();
-
         MavenInstallation.installMaven(jenkins, "M3", "3.1.0");
 
         setUpGlobalConfig();
@@ -147,7 +146,15 @@ public class ExternalWorkspaceManagerPluginTest extends AbstractJUnitTest {
     private void setUpGlobalConfig() {
         jenkins.configure();
         ExternalGlobalConfig globalConfig = new ExternalGlobalConfig(jenkins.getConfigPage());
-        globalConfig.addDiskPool(DISK_POOL_ID, DISK_ONE, DISK_TWO, MOUNT_FROM_MASTER_TO_DISK_ONE, MOUNT_FROM_MASTER_TO_DISK_TWO);
+
+        try {
+            globalConfig.addDiskPool(DISK_POOL_ID, DISK_ONE, DISK_TWO, MOUNT_FROM_MASTER_TO_DISK_ONE, MOUNT_FROM_MASTER_TO_DISK_TWO);
+        } catch (final NoSuchElementException ex) {
+            jenkins.restart();
+            jenkins.configure();
+            globalConfig.addDiskPool(DISK_POOL_ID, DISK_ONE, DISK_TWO, MOUNT_FROM_MASTER_TO_DISK_ONE, MOUNT_FROM_MASTER_TO_DISK_TWO);
+        }
+
         jenkins.save();
     }
 
