@@ -25,6 +25,7 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
 import hudson.util.VersionNumber;
@@ -471,15 +472,29 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
      */
     @Test @WithPlugins("dashboard-view")
     public void should_set_warnings_count_in_dashboard_portlet() {
-        jenkins.restart();
-
-        final MavenModuleSet job = createMavenJob();
+        MavenModuleSet job = createMavenJob();
         buildJobAndWait(job).shouldSucceed();
 
-        final DashboardView view = addDashboardViewAndBottomPortlet(PmdWarningsPortlet.class);
+        DashboardView view = addDashboardViewToConfigure();
+        try {
+            addBottomPortlet(view, false);
+        } catch (final NoSuchElementException ex) {
+            addBottomPortlet(view, true);
+        }
 
         assertValidLink(job.name);
         view.delete();
+    }
+
+    private void addBottomPortlet(final DashboardView view, final boolean performRestart) {
+        if (performRestart) {
+            view.save();
+            jenkins.restart();
+            view.configure();
+        }
+
+        view.addBottomPortlet(PmdWarningsPortlet.class);
+        view.save();
     }
 
     private void assertValidLink(final String jobName) {
