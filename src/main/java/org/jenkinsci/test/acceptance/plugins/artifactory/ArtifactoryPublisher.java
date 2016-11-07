@@ -24,12 +24,20 @@ public class ArtifactoryPublisher extends AbstractStep implements PostBuildStep 
     public final Control propertiesDeployment = control("matrixParams");
     public final Control deployBuildInfo = control("deployBuildInfo");
 
+    private static final String DEFAULT_REPO = "ext-release-local";
+
     public ArtifactoryPublisher(Job job, String path) {
         super(job, path);
     }
 
     public void refresh() {
         control("details/validate-button").click();
-        waitFor(driver, hasContent("Items refreshed successfully"), 10);
+        waitFor(hasContent("Items refreshed successfully"));
+
+        control("details/deployReleaseRepository/validate-button").click();
+        control("details/deployReleaseRepository/keyFromText").sendKeys(DEFAULT_REPO);
+        control("details/deploySnapshotRepository/validate-button").click();
+        control("details/deploySnapshotRepository/keyFromText").sendKeys(DEFAULT_REPO);
+
     }
 }
