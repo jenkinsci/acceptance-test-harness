@@ -54,15 +54,15 @@ public class ArtifactoryPluginTest extends AbstractJUnitTest {
         jenkins.configure();
 
         server.testConnectionButton.click();
-        waitFor(driver, hasContent("Found Artifactory"), 10);
+        waitFor(hasContent("Found Artifactory"));
 
         server.username.set("bob");
         server.testConnectionButton.click();
-        waitFor(driver, hasContent("Error occurred while requesting version information: Unauthorized"), 10);
+        waitFor(hasContent("Error occurred while requesting version information: Unauthorized"));
 
         server.url.set("http://localhost:4898/blabla");
         server.testConnectionButton.click();
-        waitFor(driver, hasContent(Pattern.compile("Error occurred while requesting version information: Connection( to http://localhost:4898)* refused")), 10);
+        waitFor(hasContent(Pattern.compile("Error occurred while requesting version information: Connection( to http://localhost:4898)* refused")));
     }
 
     @Test @WithPlugins("maven-plugin")
