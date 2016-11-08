@@ -7,6 +7,8 @@ import org.jenkinsci.test.acceptance.po.PageObject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -44,9 +46,9 @@ public class SshCredentialDialog extends PageAreaImpl {
     public void add() {
         final By addSubmitButton = by.id("credentials-add-submit-button");
 
-        find(addSubmitButton).click();
+        this.findAndPerformClick(addSubmitButton);
 
-        waitFor().withTimeout(5, TimeUnit.SECONDS).until(new Callable<Boolean>() {
+        waitFor().withTimeout(10, TimeUnit.SECONDS).until(new Callable<Boolean>() {
             @Override
             public Boolean call() throws Exception {
                 try {
@@ -56,5 +58,13 @@ public class SshCredentialDialog extends PageAreaImpl {
                 }
             }
         });
+    }
+
+    private void findAndPerformClick(final By addSubmitButtonLocator) {
+        final WebElement addSubmitButton = find(addSubmitButtonLocator);
+
+        final Actions builder = new Actions(driver);
+        builder.moveToElement(addSubmitButton).click(addSubmitButton);
+        builder.perform();
     }
 }
