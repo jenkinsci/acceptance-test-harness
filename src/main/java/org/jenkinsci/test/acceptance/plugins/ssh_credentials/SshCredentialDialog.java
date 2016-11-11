@@ -48,7 +48,7 @@ public class SshCredentialDialog extends PageAreaImpl {
 
         this.findAndPerformClick(addSubmitButton);
 
-        waitFor().withTimeout(10, TimeUnit.SECONDS).until(new Callable<Boolean>() {
+        waitFor().withTimeout(5, TimeUnit.SECONDS).until(new Callable<Boolean>() {
             @Override
             public Boolean call() throws Exception {
                 try {
