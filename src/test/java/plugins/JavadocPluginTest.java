@@ -8,14 +8,19 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.MatrixConfiguration;
 import org.jenkinsci.test.acceptance.po.MatrixProject;
+import org.jenkinsci.test.acceptance.po.Build;
+import org.junit.Assert;
 import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.not;
 import static org.jenkinsci.test.acceptance.Matchers.hasAction;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 @WithPlugins("javadoc")
 public class JavadocPluginTest extends AbstractJUnitTest {
+
+    private static final String JAVADOC_ACTION = "Javadoc";
 
     @Test
     public void publish_javadoc_from_freestyle_job() {
@@ -23,7 +28,7 @@ public class JavadocPluginTest extends AbstractJUnitTest {
         setup(job);
 
         job.startBuild().shouldSucceed();
-        assertThat(job, hasAction("Javadoc"));
+        assertThat(job, hasAction(JAVADOC_ACTION));
 
         assertJavadoc(job);
     }
@@ -35,9 +40,25 @@ public class JavadocPluginTest extends AbstractJUnitTest {
 
         job.startBuild().shouldSucceed();
         MatrixConfiguration def = job.getConfiguration("default");
-        assertThat(def, hasAction("Javadoc"));
+        assertThat(def, hasAction(JAVADOC_ACTION));
 
         assertJavadoc(def);
+    }
+
+    @Test
+    public void validate_javadoc_retention() {
+        FreeStyleJob job = jenkins.jobs.create();
+        setup(job);
+        Build b = job.startBuild().shouldSucceed();
+
+        assertThat(job, hasAction(JAVADOC_ACTION));
+        assertThat("Build #1 should not have Javadoc action", b, not(hasAction(JAVADOC_ACTION)));
+
+        this.setupForRetention(job);
+        b = job.startBuild().shouldSucceed();
+
+        assertThat(job, hasAction(JAVADOC_ACTION));
+        assertThat(b, hasAction(JAVADOC_ACTION));
     }
 
     private void setup(Job job) {
@@ -52,9 +73,17 @@ public class JavadocPluginTest extends AbstractJUnitTest {
         job.save();
     }
 
+    private void setupForRetention(Job job) {
+        job.configure();
+        job.removeFirstBuildStep();
+        JavadocPublisher jd = job.getPublisher(JavadocPublisher.class);
+        jd.keepAll.check();
+        job.save();
+    }
+
     private void assertJavadoc(Job job) {
         job.open();
-        find(by.link("Javadoc")).click();
+        find(by.link(JAVADOC_ACTION)).click();
         driver.switchTo().frame("classFrame");
         assertThat(driver, hasContent("com.mycompany.app"));
     }
