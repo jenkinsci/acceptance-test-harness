@@ -13,6 +13,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.not;
 import static org.jenkinsci.test.acceptance.Matchers.hasAction;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
@@ -51,10 +52,7 @@ public class JavadocPluginTest extends AbstractJUnitTest {
         Build b = job.startBuild().shouldSucceed();
 
         assertThat(job, hasAction(JAVADOC_ACTION));
-        try {
-            assertThat(b, hasAction(JAVADOC_ACTION));
-            Assert.fail("Build #1 should not have Javadoc action");
-        } catch (AssertionError ex) {}
+        assertThat("Build #1 should not have Javadoc action", b, not(hasAction(JAVADOC_ACTION)));
 
         this.setupForRetention(job);
         b = job.startBuild().shouldSucceed();
