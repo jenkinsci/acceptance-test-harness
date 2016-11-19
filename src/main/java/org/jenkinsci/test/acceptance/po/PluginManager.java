@@ -25,7 +25,6 @@ import org.jenkinsci.test.acceptance.update_center.PluginSpec;
 import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata;
 import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata.UnableToResolveDependencies;
 import org.junit.internal.AssumptionViolatedException;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
@@ -233,7 +232,7 @@ public class PluginManager extends ContainerPageObject {
             for (final PluginSpec n : specs) {
                 switch (installationStatus(n)) {
                     case NOT_INSTALLED:
-                        tickPluginToInstall(n, false);
+                        tickPluginToInstall(n);
                     break;
                     case OUTDATED:
                         update.add(n);
@@ -252,7 +251,7 @@ public class PluginManager extends ContainerPageObject {
             if (!update.isEmpty()) {
                 visit(""); // Updates tab
                 for (PluginSpec n : update) {
-                    tickPluginToInstall(n, true);
+                    tickPluginToInstall(n);
                 }
                 clickButton("Download now and install after restart");
             }
@@ -264,22 +263,9 @@ public class PluginManager extends ContainerPageObject {
         return false;
     }
 
-    private void tickPluginToInstall(PluginSpec spec, boolean updating) {
+    private void tickPluginToInstall(PluginSpec spec) {
         String name = spec.getName();
-        WebElement pluginInstallationTick = null;
-        try {
-            pluginInstallationTick = find(by.xpath("//input[starts-with(@name,'plugin.%s.')]", name));
-        } catch (NoSuchElementException ex) {
-            if (updating) {
-                throw new AssumptionViolatedException(String.format(
-                        "Plugin %s needs to be updated but does not appear in 'updates' page",
-                        name
-                ));
-            }
-            throw ex;
-        }
-
-        check(pluginInstallationTick);
+        check(find(by.xpath("//input[starts-with(@name,'plugin.%s.')]", name)));
         final VersionNumber requiredVersion = spec.getVersionNumber();
         if (requiredVersion != null) {
             final VersionNumber availableVersion = getAvailableVersionForPlugin(name);
