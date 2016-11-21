@@ -1,22 +1,21 @@
 package org.jenkinsci.test.acceptance.controller;
 
+import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
-
-import javax.inject.Inject;
-
-import com.google.common.base.Splitter;
-import com.google.inject.Injector;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.jenkinsci.utils.process.ProcessInputStream;
 
 import com.cloudbees.sdk.extensibility.Extension;
+import com.google.common.base.Splitter;
+import com.google.inject.Injector;
 
 /**
  * Launches Jenkins via "java -jar jenkins.war" on the local machine.
@@ -63,7 +62,7 @@ public class WinstoneController extends LocalController {
                 "--ajp13Port=-1",
                 "--httpPort=" + httpPort);
         cb.env.putAll(commonLaunchEnv());
-        System.out.println("Starting Jenkins: " + cb.toString());
+        LOGGER.info("Starting Jenkins: " + cb.toString());
         return cb.popen();
     }
 
@@ -95,4 +94,6 @@ public class WinstoneController extends LocalController {
             return i.getInstance(WinstoneController.class);
         }
     }
+
+    private static final Logger LOGGER = Logger.getLogger(WinstoneController.class.getName());
 }

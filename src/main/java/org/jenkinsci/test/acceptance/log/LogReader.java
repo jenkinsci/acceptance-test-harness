@@ -1,11 +1,12 @@
 package org.jenkinsci.test.acceptance.log;
 
-import org.apache.http.concurrent.BasicFuture;
-
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.concurrent.Future;
+import java.util.logging.Logger;
+
+import org.apache.http.concurrent.BasicFuture;
 
 /**
  * Reads {@link InputStream} and delivers logs to {@link LogListener}.
@@ -46,7 +47,7 @@ public class LogReader implements Runnable {
             while ((line = reader.readLine()) != null) {
                 listener.processLine(line);
             }
-            System.out.println("Jenkins is stopped");
+            LOGGER.info("Jenkins is stopped");
         } catch (Exception e) {
             listener.processClose(new Exception("Process has terminated", e));
             done.failed(e);
@@ -55,4 +56,6 @@ public class LogReader implements Runnable {
             done.completed(null);
         }
     }
+
+    private static final Logger LOGGER = Logger.getLogger(LogReader.class.getName());
 }

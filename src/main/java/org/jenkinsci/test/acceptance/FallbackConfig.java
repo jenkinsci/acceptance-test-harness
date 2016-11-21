@@ -258,6 +258,16 @@ public class FallbackConfig extends AbstractModule {
     }
 
     /**
+     * Returns whether Jenkins should be quite and should not report any logging information.
+     *
+     * @return {@code true} if Jenkins should be quite during the tests
+     */
+    @Provides @Named("quite")
+    public boolean getQuite() {
+        return System.getProperty("quite") != null;
+    }
+
+    /**
      * directory on the computer where this code is running that points to a directory
      * where test code can place log files, cache files, etc.
      * Note that this directory might not exist on the Jenkins master, since it can be

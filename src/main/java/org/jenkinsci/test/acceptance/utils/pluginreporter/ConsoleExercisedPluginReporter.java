@@ -24,15 +24,19 @@
 
 package org.jenkinsci.test.acceptance.utils.pluginreporter;
 
+import java.util.logging.Logger;
+
 /**
  * Exercised Plugin Reporter that logs to console
  *
  * @author scott.hebert@ericsson.com
  */
 public class ConsoleExercisedPluginReporter implements ExercisedPluginsReporter {
-
     @Override
     public void log(String testName, String pluginName, String pluginVersion) {
-        System.out.println("Plugin " + pluginName + "@" + pluginVersion + " is installed");
+        LOGGER.info("Plugin " + pluginName + "@" + pluginVersion + " is installed");
     }
+
+    private static final Logger LOGGER = Logger.getLogger(ConsoleExercisedPluginReporter.class.getName());
+
 }

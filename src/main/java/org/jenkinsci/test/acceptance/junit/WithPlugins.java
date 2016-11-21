@@ -22,6 +22,9 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+import java.text.SimpleDateFormat;
+
+import java.util.Date;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -104,7 +107,10 @@ public @interface WithPlugins {
                                 plugin.getVersion()
                         );
                     }
+                    System.out.println("... End of setup for " + getDescription(d));
+                    System.out.println("=== Starting test " + getDescription(d));
                     base.evaluate();
+                    System.out.println("=== End of test " + getDescription(d));
                 }
 
                 private List<PluginSpec> combinePlugins(WithPlugins... wp) {
@@ -155,6 +161,10 @@ public @interface WithPlugins {
                     }
                 }
             };
+        }
+
+        private String getDescription(final Description d) {
+            return d + ": " + new SimpleDateFormat("HH:mm:ss").format(new Date());
         }
     }
 }

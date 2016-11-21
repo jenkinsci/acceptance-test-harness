@@ -56,7 +56,6 @@ public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should us
 
                 injector.injectMembers(this);
 
-                System.out.println("=== Starting " + description.getDisplayName());
                 try {
                     decorateWithRules(base).evaluate();
                 } catch (AssumptionViolatedException e) {
