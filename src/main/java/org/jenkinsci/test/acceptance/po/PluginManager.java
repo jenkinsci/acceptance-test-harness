@@ -25,6 +25,7 @@ import org.jenkinsci.test.acceptance.update_center.PluginSpec;
 import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata;
 import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata.UnableToResolveDependencies;
 import org.junit.internal.AssumptionViolatedException;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
@@ -232,7 +233,7 @@ public class PluginManager extends ContainerPageObject {
             for (final PluginSpec n : specs) {
                 switch (installationStatus(n)) {
                     case NOT_INSTALLED:
-                        tickPluginToInstall(n);
+                        tickPluginToInstall(n, false);
                     break;
                     case OUTDATED:
                         update.add(n);
@@ -251,7 +252,7 @@ public class PluginManager extends ContainerPageObject {
             if (!update.isEmpty()) {
                 visit(""); // Updates tab
                 for (PluginSpec n : update) {
-                    tickPluginToInstall(n);
+                    tickPluginToInstall(n, true);
                 }
                 clickButton("Download now and install after restart");
             }
@@ -263,9 +264,21 @@ public class PluginManager extends ContainerPageObject {
         return false;
     }
 
-    private void tickPluginToInstall(PluginSpec spec) {
+    private void tickPluginToInstall(PluginSpec spec, boolean updating) {
         String name = spec.getName();
-        check(find(by.xpath("//input[starts-with(@name,'plugin.%s.')]", name)));
+        WebElement pluginInstallationTick = null;
+        try {
+            pluginInstallationTick = find(by.xpath("//input[starts-with(@name,'plugin.%s.')]", name));
+        } catch (NoSuchElementException ex) {
+            if (updating) {
+                throw new AssumptionViolatedException(String.format(
+                    "Plugin %s needs to be updated but does not appear in 'updates' page",
+                    name
+                ));
+            }
+            throw ex;
+        }
+        check(pluginInstallationTick);
         final VersionNumber requiredVersion = spec.getVersionNumber();
         if (requiredVersion != null) {
             final VersionNumber availableVersion = getAvailableVersionForPlugin(name);
