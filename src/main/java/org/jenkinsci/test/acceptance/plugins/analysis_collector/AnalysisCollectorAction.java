@@ -22,8 +22,8 @@ public class AnalysisCollectorAction extends AnalysisAction {
     }
 
     @Override
-    public String getName() {
-        return "Analysis";
+    public String getPluginName() {
+        return "Static Analysis";
     }
 
     @Override

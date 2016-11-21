@@ -29,8 +29,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 
-import org.jenkinsci.test.acceptance.po.Job;
-import org.jvnet.hudson.test.Issue;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
@@ -43,21 +41,24 @@ import org.jenkinsci.test.acceptance.plugins.findbugs.FindBugsPortlet;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.ListView;
 import org.jenkinsci.test.acceptance.po.Node;
 import org.jenkinsci.test.acceptance.po.PageObject;
+import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.jvnet.hudson.test.Issue;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.xml.sax.SAXException;
 
-import hudson.util.VersionNumber;
-
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.Assume.*;
+
+import hudson.util.VersionNumber;
 
 
 /**
@@ -75,7 +76,7 @@ public class FindBugsPluginTest extends AbstractAnalysisTest<FindBugsAction> {
     private static final int TOTAL_NUMBER_OF_WARNINGS = 6;
 
     @Override
-    protected FindBugsAction createProjectAction(final FreeStyleJob job) {
+    protected FindBugsAction createProjectAction(final Job job) {
         return new FindBugsAction(job);
     }
 
@@ -92,6 +93,11 @@ public class FindBugsPluginTest extends AbstractAnalysisTest<FindBugsAction> {
                 settings.pattern.set(PATTERN_WITH_6_WARNINGS);
             }
         });
+    }
+
+    @Override
+    protected WorkflowJob createPipeline() {
+        return createPipelineWith(FILE_WITH_6_WARNINGS, "FindBugsPublisher");
     }
 
     @Override

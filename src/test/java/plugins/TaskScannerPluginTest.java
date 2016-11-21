@@ -15,15 +15,16 @@ import org.jenkinsci.test.acceptance.plugins.tasks.TasksMavenSettings;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
+import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
 
-import hudson.util.VersionNumber;
-
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
+
+import hudson.util.VersionNumber;
 
 /**
  * Acceptance tests for the open tasks plugin.
@@ -33,8 +34,11 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
  */
 @WithPlugins("tasks")
 public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerAction> {
+    private static final String TASKS_PLUGIN_PREFIX = "/tasks_plugin/";
+    private static final String TASKS_FILES = TASKS_PLUGIN_PREFIX + "fileset1";
+
     @Override
-    protected TaskScannerAction createProjectAction(final FreeStyleJob job) {
+    protected TaskScannerAction createProjectAction(final Job job) {
         return new TaskScannerAction(job);
     }
 
@@ -56,6 +60,24 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
                 settings.setIgnoreCase(false);
             }
         });
+    }
+
+    @Override
+    protected WorkflowJob createPipeline() {
+        WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
+        String[] files = {"TSRBuildTimeoutPluginTest.java", "TSRCleaner.java", "TSRCreateSlaveTest.java",
+                "TSRDockerImage.java", "TSREc2Provider.java", "TSRGitRepo.java",
+                "TSRJenkinsAcceptanceTestRule.java", "TSRTestCleaner.java", "TSRWinstoneDockerController.java"};
+        StringBuilder copyFilesWithTasks = new StringBuilder();
+        for (String file : files) {
+            copyFilesWithTasks.append(job.copyResourceStep(TASKS_FILES + "/" + file));
+        }
+        job.script.set("node {\n"
+                + copyFilesWithTasks.toString()
+                + "  step([$class: 'TasksPublisher', high: 'PRIO1', normal: 'PRIO2,TODO', low :'PRIO3'])\n}");
+        job.sandbox.check();
+        job.save();
+        return job;
     }
 
     @Override
@@ -95,7 +117,7 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
     }
 
     private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<TasksFreestyleSettings> buildConfigurator) {
-        return createFreeStyleJob("/tasks_plugin/fileset1", buildConfigurator);
+        return createFreeStyleJob(TASKS_FILES, buildConfigurator);
     }
 
     private FreeStyleJob createFreeStyleJob(final String fileset, final AnalysisConfigurator<TasksFreestyleSettings> buildConfigurator) {
@@ -473,8 +495,7 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
      * the observations described in JENKINS-22744.
      */
     // Note: In order to run this test in IntelliJ the encoding of the source needs to be set to windows-1251
-    @Test
-    @Issue("JENKINS-22744")
+    @Test @Issue("JENKINS-22744")
     public void should_use_file_encoding_windows1251_when_parsing_files() throws Exception {
         FreeStyleJob job = createFreeStyleJob("/tasks_plugin/cp1251_files", new AnalysisConfigurator<TasksFreestyleSettings>() {
             @Override

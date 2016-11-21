@@ -7,7 +7,7 @@ import org.jenkinsci.test.acceptance.po.Job;
 /**
  * @author Michael Prankl
  */
-@Describable("Publish combined analysis results")
+@Describable("Publish combined static analysis results")
 public class AnalysisCollectorSettings extends AnalysisFreestyleSettings {
     private AnalysisCollectorPluginArea pluginArea;
 

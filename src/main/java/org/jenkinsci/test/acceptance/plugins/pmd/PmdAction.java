@@ -22,7 +22,7 @@ public class PmdAction extends AnalysisAction {
     }
 
     @Override
-    public String getName() {
+    public String getPluginName() {
         return "PMD";
     }
 
