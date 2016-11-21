@@ -3,13 +3,9 @@ package org.jenkinsci.test.acceptance.po;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Iterables;
 
-import groovy.ui.SystemOutputInterceptor;
 import org.apache.commons.lang3.ArrayUtils;
 import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.update_center.PluginSpec;
-
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
 import static java.util.Arrays.*;
 import static org.hamcrest.Matchers.not;
