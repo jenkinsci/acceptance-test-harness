@@ -3,8 +3,6 @@ package org.jenkinsci.test.acceptance.po;
 import com.google.inject.Injector;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.test.acceptance.plugins.workflow_multibranch.BranchSource;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 
 import java.io.IOException;
 import java.net.URL;
@@ -22,16 +20,14 @@ public class WorkflowMultiBranchJob extends FolderItem {
         super(injector, url, name);
     }
 
-    public <T extends BranchSource> T addBranchSource(Class<T> type) {
+    public <T extends BranchSource> T addBranchSource(final Class<T> type) {
         ensureConfigPage();
 
-        control(by.path("/hetero-list-add[sources]")).selectDropdownMenu(type);
-
-        final By branchSourceConfiguration = by.xpath("//div[@name='sources']");
-        waitFor(branchSourceConfiguration, 3); // it takes some time until the element is visible
-
-        final WebElement lastBranchSource = last(branchSourceConfiguration);
-        String path = lastBranchSource.getAttribute("path");
+        final String path = createPageArea("/sources", new Runnable() {
+            @Override public void run() {
+                control(by.path("/hetero-list-add[sources]")).selectDropdownMenu(type);
+            }
+        });
 
         return newInstance(type, this, path);
     }

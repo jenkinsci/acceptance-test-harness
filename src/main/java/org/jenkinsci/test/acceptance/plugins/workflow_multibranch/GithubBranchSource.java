@@ -4,7 +4,6 @@ import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.WorkflowMultiBranchJob;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.support.ui.Select;
 
 import java.util.concurrent.Callable;
@@ -26,7 +25,8 @@ public class GithubBranchSource extends BranchSource {
 
     public GithubBranchSource owner(final String owner) {
         this.owner.set(owner);
-        this.owner.sendKeys("" + Keys.TAB);
+        // This hack is necessary for the repository drop down population to be triggered
+        executeScript("var event = new Event('change');document.getElementsBySelector(\"input[name='_.repoOwner']\")[0].dispatchEvent(event);");
         return this;
     }
 
