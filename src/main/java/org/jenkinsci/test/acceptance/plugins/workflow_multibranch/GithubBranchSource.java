@@ -25,8 +25,11 @@ public class GithubBranchSource extends BranchSource {
 
     public GithubBranchSource owner(final String owner) {
         this.owner.set(owner);
+
         // This hack is necessary for the repository drop down population to be triggered
-        executeScript("var event = new Event('change');document.getElementsBySelector(\"input[name='_.repoOwner']\")[0].dispatchEvent(event);");
+        final String elementTag = this.owner.resolve().getTagName();
+        final String elementNameAttribute = this.owner.resolve().getAttribute("name");
+        executeScript("var event = new Event('change');document.getElementsBySelector(\"" + elementTag + "[name='" + elementNameAttribute + "']\")[0].dispatchEvent(event);");
         return this;
     }
 
