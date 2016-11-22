@@ -45,7 +45,6 @@ public class GithubBranchSource extends BranchSource {
                     }
                 });
 
-
         this.repository.select(repoName);
         return this;
     }
