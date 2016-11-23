@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import com.google.common.base.Predicate;
+import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.jenkinsci.test.acceptance.Matchers;
@@ -43,6 +44,8 @@ import static org.hamcrest.Matchers.not;
  */
 public class PluginManager extends ContainerPageObject {
 
+    private static final String PLUGIN_INSTALLATION_CHECKBOX_SELECTOR = "//input[starts-with(@name,'plugin.%s.')]";
+
     private static final Logger LOGGER = Logger.getLogger(PluginManager.class.getName());
 
     /**
@@ -63,6 +66,19 @@ public class PluginManager extends ContainerPageObject {
     @Inject(optional = true)
     @Named("uploadPlugins")
     public Boolean uploadPlugins;
+
+    @Inject(optional = true)
+    @Named("allowSkipIfMissingPluginWhen")
+    public String allowSkipIfMissingPluginWhen;
+    private boolean allowSkipWhenUpdating;
+    private boolean allowSkipWhenInstalling;
+    {
+        allowSkipWhenUpdating = EnumUtils.isValidEnum(ALLOW_SKIP_WHEN.class, allowSkipIfMissingPluginWhen)
+                && ALLOW_SKIP_WHEN.valueOf(allowSkipIfMissingPluginWhen) != ALLOW_SKIP_WHEN.installing;
+
+        allowSkipWhenInstalling = EnumUtils.isValidEnum(ALLOW_SKIP_WHEN.class, allowSkipIfMissingPluginWhen)
+                && ALLOW_SKIP_WHEN.valueOf(allowSkipIfMissingPluginWhen) != ALLOW_SKIP_WHEN.updating;
+    }
 
     @Inject(optional = true)
     @Named("forceRestartAfterPluginInstallation")
@@ -264,28 +280,44 @@ public class PluginManager extends ContainerPageObject {
         return false;
     }
 
+    private enum ALLOW_SKIP_WHEN {installing, updating, any}
+
     private void tickPluginToInstall(PluginSpec spec, boolean updating) {
         String name = spec.getName();
-        WebElement pluginInstallationTick = null;
+        VersionNumber version = spec.getVersionNumber();
+
+        WebElement pluginInstallationTick = verifyPluginInstallationTick(name, updating);
+        verifyValidPluginVersion(name, version);
+
+        check(pluginInstallationTick);
+    }
+
+    private WebElement verifyPluginInstallationTick(String pluginName, boolean updating) {
         try {
-            pluginInstallationTick = find(by.xpath("//input[starts-with(@name,'plugin.%s.')]", name));
+            return find(by.xpath(PLUGIN_INSTALLATION_CHECKBOX_SELECTOR, pluginName));
         } catch (NoSuchElementException ex) {
-            if (updating) {
+            if ((updating && allowSkipWhenUpdating) || (!updating && allowSkipWhenInstalling)) {
+
+                String action = (updating) ? "updated" : "installed";
+                String pageName = (updating) ? "Updates" : "Available";
+
                 throw new AssumptionViolatedException(String.format(
-                    "Plugin %s needs to be updated but does not appear in 'updates' page",
-                    name
+                        "Plugin %s needs to be %s but does not appear in '%s' page",
+                        pluginName, action, pageName
                 ));
             }
+
             throw ex;
         }
-        check(pluginInstallationTick);
-        final VersionNumber requiredVersion = spec.getVersionNumber();
+    }
+
+    private void verifyValidPluginVersion(String pluginName, VersionNumber requiredVersion) {
         if (requiredVersion != null) {
-            final VersionNumber availableVersion = getAvailableVersionForPlugin(name);
+            final VersionNumber availableVersion = getAvailableVersionForPlugin(pluginName);
             if (availableVersion.isOlderThan(requiredVersion)) {
                 throw new AssumptionViolatedException(String.format(
                         "Version '%s' of '%s' is required, but available version is '%s'",
-                        requiredVersion, name, availableVersion
+                        requiredVersion, pluginName, availableVersion
                 ));
             }
         }
@@ -293,7 +325,7 @@ public class PluginManager extends ContainerPageObject {
 
     private VersionNumber getAvailableVersionForPlugin(String pluginName) {
         // assuming we are on 'available' or 'updates' page
-        String v = find(by.xpath("//input[starts-with(@name,'plugin.%s.')]/../../td[3]", pluginName)).getText();
+        String v = find(by.xpath(PLUGIN_INSTALLATION_CHECKBOX_SELECTOR + "/../../td[3]", pluginName)).getText();
         return new VersionNumber(v);
     }
 
