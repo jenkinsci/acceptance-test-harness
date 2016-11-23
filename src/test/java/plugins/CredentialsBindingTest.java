@@ -1,5 +1,6 @@
 package plugins;
 
+import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.credentials.CredentialsPage;
@@ -19,6 +20,7 @@ import static org.junit.Assert.assertThat;
 public class CredentialsBindingTest extends AbstractJUnitTest {
 
     private static final String SECRET_TEXT = "secret";
+    private static final String SECRET_OUTPUT = " variable binded";
 
 
     @Test
@@ -37,11 +39,11 @@ public class CredentialsBindingTest extends AbstractJUnitTest {
         SecretStringCredentialsBinding cb = mcb.addCredentialBinding(SecretStringCredentialsBinding.class);
         cb.variable.set("BINDED_SECRET");
         ShellBuildStep shell = job.addBuildStep(ShellBuildStep.class);
-        shell.command("if [ \"$BINDED_SECRET\" = \"" + SECRET_TEXT + "\" ] \n then \n echo \"true\" \n fi");
+        shell.command("if [ \"$BINDED_SECRET\" = \"" + SECRET_TEXT + "\" ] \n then \n echo \"" + SECRET_OUTPUT + "\" \n fi");
         job.save();
-
+        
         Build b = job.scheduleBuild();
         b.shouldSucceed();
-        assertThat(b.getConsole(), containsString("true"));
+        assertThat(b.getConsole(), containsString(SECRET_OUTPUT));
     }
 }
