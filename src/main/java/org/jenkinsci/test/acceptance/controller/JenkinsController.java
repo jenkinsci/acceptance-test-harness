@@ -14,6 +14,9 @@ import java.util.logging.Logger;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.plexus.util.FileUtils;
 import org.jenkinsci.test.acceptance.guice.AutoCleaned;
+import org.jenkinsci.test.acceptance.log.LogListener;
+import org.jenkinsci.test.acceptance.log.LogPrinter;
+import org.jenkinsci.test.acceptance.log.NullPrinter;
 
 import com.cloudbees.sdk.extensibility.ExtensionPoint;
 import com.google.inject.Injector;
@@ -119,6 +122,15 @@ public abstract class JenkinsController implements IJenkinsController, AutoClean
         if (isRunning) {
             stopNow();
             isRunning = false;
+        }
+    }
+
+    protected LogListener getLogPrinter() {
+        if (isQuite) {
+            return new NullPrinter();
+        }
+        else {
+            return new LogPrinter(getLogId());
         }
     }
 

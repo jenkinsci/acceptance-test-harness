@@ -238,7 +238,7 @@ public abstract class LocalController extends JenkinsController implements LogLi
         this.process = startProcess();
         Runtime.getRuntime().addShutdownHook(shutdownHook);
 
-        logWatcher = new JenkinsLogWatcher(getLogId(),process,logFile);
+        logWatcher = new JenkinsLogWatcher(getLogId(),process,logFile, getLogPrinter());
         logWatcher.start();
         try {
             LOGGER.info("Waiting for Jenkins to become running in "+ this);

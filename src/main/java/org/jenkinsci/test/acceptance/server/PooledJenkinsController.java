@@ -1,14 +1,12 @@
 package org.jenkinsci.test.acceptance.server;
 
-import com.cloudbees.sdk.extensibility.Extension;
-import com.google.inject.Injector;
-
-import hudson.remoting.Callable;
-import hudson.remoting.Channel;
-import hudson.remoting.Channel.Mode;
-import hudson.remoting.ChannelBuilder;
-import jnr.unixsocket.UnixSocketAddress;
-import jnr.unixsocket.UnixSocketChannel;
+import javax.inject.Inject;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.Executors;
 
 import org.jenkinsci.remoting.RoleChecker;
 import org.jenkinsci.test.acceptance.controller.IJenkinsController;
@@ -19,17 +17,17 @@ import org.jenkinsci.test.acceptance.log.LogListener;
 import org.jenkinsci.test.acceptance.log.LogPrinter;
 import org.jenkinsci.test.acceptance.log.LogSplitter;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.util.concurrent.Executors;
+import com.cloudbees.sdk.extensibility.Extension;
+import com.google.inject.Injector;
 
 import static java.lang.System.*;
+import jnr.unixsocket.UnixSocketAddress;
+import jnr.unixsocket.UnixSocketChannel;
 
-import java.util.LinkedList;
-import java.util.List;
-
-import javax.inject.Inject;
+import hudson.remoting.Callable;
+import hudson.remoting.Channel;
+import hudson.remoting.Channel.Mode;
+import hudson.remoting.ChannelBuilder;
 
 /**
  * {@link JenkinsController} that talks to {@link JenkinsControllerPoolProcess} over Unix domain socket.
@@ -80,7 +78,9 @@ public class PooledJenkinsController extends JenkinsController implements LogLis
             controller.start();
             url = controller.getUrl();
 
-            splitter.addLogListener(new LogPrinter(getLogId()));
+            if (!isQuite) {
+                splitter.addLogListener(getLogPrinter());
+            }
 
             final LogListener l = channel.export(LogListener.class, splitter);
             channel.call(new InstallLogger(controller,l));
