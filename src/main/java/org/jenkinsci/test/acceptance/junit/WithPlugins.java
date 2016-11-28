@@ -1,11 +1,17 @@
 package org.jenkinsci.test.acceptance.junit;
 
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.name.Named;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.logging.Logger;
 
 import org.jenkinsci.test.acceptance.po.Jenkins;
-import org.jenkinsci.test.acceptance.po.Plugin;
 import org.jenkinsci.test.acceptance.po.PluginManager;
 import org.jenkinsci.test.acceptance.update_center.PluginSpec;
 import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata.UnableToResolveDependencies;
@@ -15,26 +21,12 @@ import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
-import hudson.util.VersionNumber;
-
-import java.lang.annotation.Documented;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-
-import java.text.SimpleDateFormat;
-
-import java.util.Date;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.logging.Logger;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.name.Named;
 
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
-
-import static org.junit.Assume.assumeTrue;
 
 /**
  * Indicates that a test requires the presence of the specified plugins.
@@ -151,13 +143,18 @@ public @interface WithPlugins {
                         }
                     }
 
-                    LOGGER.info("Installing plugins for test: " + install);
-                    PluginSpec[] installList = install.toArray(new PluginSpec[install.size()]);
-                    try {
-                        //noinspection deprecation
-                        pm.installPlugins(installList);
-                    } catch (UnableToResolveDependencies ex) {
-                        throw new AssumptionViolatedException("Unable to install required plugins", ex);
+                    if (install.isEmpty()) {
+                        LOGGER.info("All required plugins already installed.");
+                    }
+                    else {
+                        LOGGER.info("Installing plugins for test: " + install);
+                        PluginSpec[] installList = install.toArray(new PluginSpec[install.size()]);
+                        try {
+                            //noinspection deprecation
+                            pm.installPlugins(installList);
+                        } catch (UnableToResolveDependencies ex) {
+                            throw new AssumptionViolatedException("Unable to install required plugins", ex);
+                        }
                     }
                 }
             };
