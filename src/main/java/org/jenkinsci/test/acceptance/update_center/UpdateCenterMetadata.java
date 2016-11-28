@@ -28,11 +28,12 @@ public class UpdateCenterMetadata {
     /**
      * Details of plugins by {@linkplain PluginMetadata#name their name}.
      */
-    public final Map<String,PluginMetadata> plugins = new HashMap<>();
+    public Map<String,PluginMetadata> plugins = new HashMap<>();
 
     public String id;
 
     /**
+     * Create metadata parsing Jenkins update center file.
      *
      * @param data
      *      .json or .json.html file served from update center.
@@ -48,6 +49,14 @@ public class UpdateCenterMetadata {
         UpdateCenterMetadata v = om.readValue(json, UpdateCenterMetadata.class);
         v.init();
         return v;
+    }
+
+    public static UpdateCenterMetadata get(String id, Map<String,PluginMetadata> plugins) {
+        UpdateCenterMetadata ucm = new UpdateCenterMetadata();
+        ucm.id = id;
+        ucm.plugins.putAll(plugins);
+        ucm.init();
+        return ucm;
     }
 
     private void init() {
@@ -72,13 +81,14 @@ public class UpdateCenterMetadata {
             if (p==null) throw new IllegalArgumentException("No such plugin " + n.getName());
             if (p.requiredCore().isNewerThan(jenkins.getVersion())) {
                 throw new UnableToResolveDependencies(String.format(
-                        "Unable to install %s plugin because of core dependency. Requeried: %s Used: %s",
+                        "Unable to install %s plugin because of core dependency. Required: %s Used: %s",
                         p, p.requiredCore(), jenkins
                 ));
             }
 
             transitiveDependenciesOf(jenkins, p, n.getVersion(), set);
         }
+
         return set;
     }
 
@@ -88,19 +98,18 @@ public class UpdateCenterMetadata {
             PluginMetadata depMetaData = plugins.get(d.name);
             if (depMetaData == null) {
                 throw new UnableToResolveDependencies(
-                    String.format("Unable to install dependency '%s' for '%s': plugin not found", depMetaData, p)
+                    String.format("Unable to install dependency '%s' for '%s': plugin not found", d, p)
                 );
             }
             transitiveDependenciesOf(jenkins, depMetaData, d.version, result);
         }
 
         if (!result.contains(p)) {
-            PluginMetadata use = p;
-            if (use.requiredCore().isNewerThan(jenkins.getVersion())) {
+            if (p.requiredCore().isNewerThan(jenkins.getVersion())) {
                 // If latest version is too new for current Jenkins, use the declared one
                 result.add(p.withVersion(v));
             } else {
-                result.add(use);
+                result.add(p);
             }
         }
     }
