@@ -143,8 +143,6 @@ public class PluginMetadata {
      * @author ogondza
      */
     public static final class LocalOverride extends PluginMetadata {
-        private static final String OPTIONAL = ";resolution:=optional";
-
         private @Nonnull File override;
 
         /**
@@ -152,7 +150,7 @@ public class PluginMetadata {
          */
         public static LocalOverride create(@Nonnull File jpi) {
 
-            List<Dependency> dependencies = new ArrayList<Dependency>();
+            List<Dependency> dependencies = new ArrayList<>();
             try (JarFile j = new JarFile(jpi)) {
                 Attributes main = j.getManifest().getMainAttributes();
                 String name = main.getValue("Short-Name");
@@ -162,18 +160,11 @@ public class PluginMetadata {
                 String dep = main.getValue("Plugin-Dependencies");
                 if (dep!=null) {
                     for (String token : dep.split(",")) {
-                        Dependency d = new Dependency();
-                        d.optional = token.endsWith(OPTIONAL);
-                        if(d.optional)
-                            token = token.substring(0, token.length()-OPTIONAL.length());
-                        String[] tokens = token.split(":");
-                        if (tokens.length != 2) {
-                            System.err.println("Bad token ‘" + token + "’ from ‘" + dep + "’ in " + jpi);
-                            continue;
+                        try {
+                            dependencies.add(new Dependency(token));
+                        } catch (IllegalArgumentException ex) {
+                            System.err.println(ex.getMessage() + " from '" + dep + "' in " + jpi);
                         }
-                        d.name = tokens[0];
-                        d.version = tokens[1];
-                        dependencies.add(d);
                     }
                 }
 
