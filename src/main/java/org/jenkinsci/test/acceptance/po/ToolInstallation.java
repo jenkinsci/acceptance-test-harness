@@ -30,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.SystemUtils;
+import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.utils.process.CommandBuilder;
 
 /**
@@ -64,9 +65,15 @@ public abstract class ToolInstallation extends PageAreaImpl {
         ));
     }
 
+    public static <T extends ToolInstallation> T addTool(Jenkins jenkins, Class<T> type, String pathPrefix, Runnable action) {
+        final ConfigurablePageObject page = ensureConfigPage(jenkins);
+
+        String path = page.createPageArea(pathPrefix, action);
+        return page.newInstance(type, jenkins, path);
+    }
+
     public static <T extends ToolInstallation> T addTool(Jenkins jenkins, Class<T> type) {
-        final ConfigurablePageObject page = getPageObject(jenkins);
-        page.configure();
+        final ConfigurablePageObject page = ensureConfigPage(jenkins);
 
         final String name = type.getAnnotation(ToolInstallationPageObject.class).name();
         final Control button = page.control(by.button("Add " + name));
@@ -83,12 +90,30 @@ public abstract class ToolInstallation extends PageAreaImpl {
     public static <T extends ToolInstallation> void installTool(Jenkins jenkins, Class<T> type, String name, String version) {
         waitForUpdates(jenkins, type);
 
-        ConfigurablePageObject tools = getPageObject(jenkins);
-        tools.configure();
+        ConfigurablePageObject tools = ensureConfigPage(jenkins);
         T maven = addTool(jenkins, type);
         maven.name.set(name);
         maven.installVersion(version);
         tools.save();
+    }
+
+    public static <T extends ToolInstallation> void installTool(Jenkins jenkins, Class<T> type, String name, String version, String pathPrefix, Runnable action) {
+        waitForUpdates(jenkins, type);
+
+        ConfigurablePageObject tools = ensureConfigPage(jenkins);
+        T maven = addTool(jenkins, type, pathPrefix, action);
+        maven.name.set(name);
+        maven.installVersion(version);
+        tools.save();
+    }
+
+    public static ConfigurablePageObject ensureConfigPage(Jenkins jenkins) {
+        ConfigurablePageObject configPage = getPageObject(jenkins);
+        boolean onConfigPage = jenkins.getCurrentUrl().equals(configPage.getConfigUrl());
+        if (!onConfigPage) {
+            configPage.configure();
+        }
+        return configPage;
     }
 
     public ToolInstallation(Jenkins jenkins, String path) {

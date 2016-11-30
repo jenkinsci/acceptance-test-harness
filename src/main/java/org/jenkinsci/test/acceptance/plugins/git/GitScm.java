@@ -30,8 +30,9 @@ import org.openqa.selenium.support.ui.Select;
 
 @Describable("Git")
 public class GitScm extends Scm {
-    public final Control branch = control("branches/name");
+    private final Control branch = control("branches/name");
     private final Control url = control("userRemoteConfigs/url");
+    private final Control tool = control("gitTool");
 
     public GitScm(Job job, String path) {
         super(job, path);
@@ -48,7 +49,17 @@ public class GitScm extends Scm {
         return this;
     }
 
-    public void localBranch(String branch) {
+    public GitScm tool(String tool) {
+        this.tool.select(tool);
+        return this;
+    }
+
+    public GitScm branch(String branch) {
+        this.branch.set(branch);
+        return this;
+    }
+
+    public GitScm localBranch(String branch) {
         try {
             advanced();
             control("localBranch").set(branch);
@@ -56,9 +67,10 @@ public class GitScm extends Scm {
         catch (NoSuchElementException ex) { // Git 2.0
             addBehaviour(CheckoutToLocalBranch.class).name.set(branch);
         }
+        return this;
     }
 
-    public void localDir(String dir) {
+    public GitScm localDir(String dir) {
         try {
             advanced();
             control("relativeTargetDir").set(dir);
@@ -66,15 +78,17 @@ public class GitScm extends Scm {
         catch (NoSuchElementException ex) { // Git 2.0
             addBehaviour(CheckoutToLocalDir.class).name.set(dir);
         }
+        return this;
     }
 
     public void enableRecursiveSubmoduleProcessing() {
         addBehaviour(RecursiveSubmodules.class).enable.click();
     }
 
-    public void remoteName(String name) {
+    public GitScm remoteName(String name) {
         remoteAdvanced();
         control("userRemoteConfigs/name").set(name);
+        return this;
     }
 
     public <T extends Behaviour> T addBehaviour(Class<T> type) {

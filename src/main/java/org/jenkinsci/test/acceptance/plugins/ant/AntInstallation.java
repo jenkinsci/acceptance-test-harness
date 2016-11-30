@@ -31,7 +31,7 @@ import org.jenkinsci.test.acceptance.po.ToolInstallationPageObject;
 public class AntInstallation extends ToolInstallation {
 
     public static void install(Jenkins jenkins, String name, String version) {
-        installTool(jenkins, AntInstallation.class, name, version);
+        ToolInstallation.installTool(jenkins, AntInstallation.class, name, version);
     }
 
     public AntInstallation(Jenkins context, String path) {

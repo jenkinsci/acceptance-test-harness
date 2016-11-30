@@ -45,4 +45,9 @@ public @interface ToolInstallationPageObject {
      * Clients should not interact with this ToolInstalltion before updates was loaded.
      */
     String installer();
+
+    /**
+     *  Name of the concrete variant of the tool to install. IE Git or JGit
+     */
+    String variant() default "";
 }

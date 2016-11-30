@@ -15,8 +15,6 @@ public class JdkTest extends AbstractJUnitTest {
         final String login = System.getenv("ORACLE_LOGIN");
         final String passwd = System.getenv("ORACLE_PASSWORD");
 
-        ToolInstallation.waitForUpdates(jenkins, JdkInstallation.class);
-
         JdkInstallation jdk = ToolInstallation.addTool(jenkins, JdkInstallation.class);
         jdk.name.set("jdk_1.7.0");
         jdk.installVersion("jdk-7u11-oth-JPR");
