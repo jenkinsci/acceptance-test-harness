@@ -23,7 +23,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
@@ -31,7 +30,6 @@ import java.util.logging.Logger;
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
 
-import static org.junit.Assume.assumeTrue;
 
 /**
  * Indicates that a test requires the presence of the specified plugins.
@@ -98,10 +96,13 @@ public @interface WithPlugins {
                     installPlugins(plugins);
 
                     for (PluginSpec plugin : plugins) {
+                        Plugin installedPlugin = jenkins.getPlugin(plugin.getName());
+                        VersionNumber installedVersion = installedPlugin.getVersion();
+                        String version = installedVersion.toString();
                         pluginReporter.log(
                                 d.getClassName() + "." + d.getMethodName(),
                                 plugin.getName(),
-                                plugin.getVersion()
+                                version
                         );
                     }
                     base.evaluate();
