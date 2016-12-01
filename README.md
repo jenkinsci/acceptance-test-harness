@@ -33,6 +33,7 @@ it's own sandboxed workspace.
 * [Obtaining a report of plugins that were exercised](docs/EXERCISEDPLUGINSREPORTER.md)
 * [Managing the versions of Jenkins and plugins](docs/SUT-VERSIONS.md)
 * [Investigation](docs/INVESTIGATION.md)
+* [Running tests in container](docs/DOCKER.md)
 * Selecting tests based on plugins they cover (TODO)
 
 ### Writing tests
