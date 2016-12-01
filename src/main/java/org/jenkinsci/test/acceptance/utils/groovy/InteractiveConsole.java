@@ -22,7 +22,7 @@ public class InteractiveConsole {
      *      [name, value, name, value, ... ] pair array that defines additional variables accessible
      *      from the script. Useful to expose local variables in scope
      */
-    public static void execute(Object caller, Object... args) throws InterruptedException {
+    public static void execute(Object caller, Object... args) {
         Console cons = new Console();
         cons.getConfig().setScriptBaseClass(ClosureScript.class.getName());
         cons.setVariable("delegate",caller);
@@ -49,8 +49,13 @@ public class InteractiveConsole {
             });
 
             // block until the swing app is done
-            while (!done[0])
-                lock.wait();
+            while (!done[0]) {
+                try {
+                    lock.wait();
+                } catch (InterruptedException x) {
+                    throw new AssertionError(x);
+                }
+            }
         }
     }
 }
