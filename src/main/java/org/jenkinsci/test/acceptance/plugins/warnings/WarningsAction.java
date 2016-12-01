@@ -12,18 +12,29 @@ import org.jenkinsci.test.acceptance.po.Job;
  */
 public class WarningsAction extends AnalysisAction {
     private static final String PLUGIN = "warnings";
+    private final String linkName;
+    private final String parserName;
 
-    public WarningsAction(final Build parent) {
+    public WarningsAction(final Build parent, final String linkName, final String actionName) {
         super(parent, PLUGIN);
+        this.linkName = linkName;
+        this.parserName = actionName;
     }
 
-    public WarningsAction(final Job parent) {
+    public WarningsAction(final Job parent, final String linkName, final String parserName) {
         super(parent, PLUGIN);
+        this.linkName = linkName;
+        this.parserName = parserName;
+    }
+
+    @Override
+    public String getPluginName() {
+        return parserName;
     }
 
     @Override
     public String getName() {
-        return "Java Compiler (javac)"; // TODO: check if this needs to be adaptable
+        return linkName + " Warnings";
     }
 
     @Override

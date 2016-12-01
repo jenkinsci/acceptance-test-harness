@@ -20,6 +20,7 @@ import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.ListView;
 import org.jenkinsci.test.acceptance.po.Node;
 import org.jenkinsci.test.acceptance.po.PageObject;
+import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -27,13 +28,13 @@ import org.jvnet.hudson.test.Issue;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import hudson.util.VersionNumber;
-
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.text.IsEmptyString.isEmptyString;
+import static org.hamcrest.text.IsEmptyString.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 import static org.junit.Assume.*;
+
+import hudson.util.VersionNumber;
 
 /**
  * Acceptance tests for the PMD plugin.
@@ -52,7 +53,7 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
     private static final int TOTAL_NUMBER_OF_WARNINGS = 9;
 
     @Override
-    protected PmdAction createProjectAction(final FreeStyleJob job) {
+    protected PmdAction createProjectAction(final Job job) {
         return new PmdAction(job);
     }
 
@@ -69,6 +70,11 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
                 settings.pattern.set(PATTERN_WITH_9_WARNINGS);
             }
         });
+    }
+
+    @Override
+    protected WorkflowJob createPipeline() {
+        return createPipelineWith(FILE_WITH_9_WARNINGS, "PmdPublisher");
     }
 
     @Override

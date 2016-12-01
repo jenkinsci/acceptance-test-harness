@@ -8,7 +8,7 @@ The following types are available:
  * `textfile`
 
 ## Console Reporter
-The Console Reporter simply logs the plugin and its version to standard output.
+The Console Reporter simply logs the plugin and its version using the default logger.
 
 Here is an example:
 

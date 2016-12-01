@@ -23,18 +23,19 @@ import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.ListView;
 import org.jenkinsci.test.acceptance.po.Node;
 import org.jenkinsci.test.acceptance.po.PageObject;
+import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import hudson.util.VersionNumber;
-
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 import static org.junit.Assume.*;
+
+import hudson.util.VersionNumber;
 
 /**
  * Acceptance tests for the CheckStyle plugin.
@@ -52,7 +53,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
     private static final int TOTAL_NUMBER_OF_WARNINGS = 776;
 
     @Override
-    protected CheckStyleAction createProjectAction(final FreeStyleJob job) {
+    protected CheckStyleAction createProjectAction(final Job job) {
         return new CheckStyleAction(job);
     }
 
@@ -70,6 +71,11 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
             }
         };
         return createFreeStyleJob(buildConfigurator);
+    }
+
+    @Override
+    protected WorkflowJob createPipeline() {
+        return createPipelineWith(FILE_WITH_776_WARNINGS, "CheckStylePublisher");
     }
 
     @Override
@@ -124,6 +130,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
         Build downstream = checkstyleJob.build(1);
         downstream.shouldSucceed();
     }
+
     /**
      * Checks that the plug-in sends a mail after a build has been failed. The content of the mail contains several
      * tokens that should be expanded in the mail with the correct values.

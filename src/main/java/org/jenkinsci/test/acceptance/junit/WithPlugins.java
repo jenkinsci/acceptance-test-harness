@@ -1,8 +1,15 @@
 package org.jenkinsci.test.acceptance.junit;
 
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.name.Named;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.logging.Logger;
 
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.Plugin;
@@ -15,21 +22,14 @@ import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.name.Named;
+
 import hudson.util.VersionNumber;
-
-import java.lang.annotation.Documented;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.logging.Logger;
 
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
-
 
 /**
  * Indicates that a test requires the presence of the specified plugins.
@@ -105,7 +105,10 @@ public @interface WithPlugins {
                                 version
                         );
                     }
+                    System.out.println("... End of setup for " + getDescription(d));
+                    System.out.println("=== Starting test " + getDescription(d));
                     base.evaluate();
+                    System.out.println("=== End of test " + getDescription(d));
                 }
 
                 private List<PluginSpec> combinePlugins(WithPlugins... wp) {
@@ -146,16 +149,25 @@ public @interface WithPlugins {
                         }
                     }
 
-                    LOGGER.info("Installing plugins for test: " + install);
-                    PluginSpec[] installList = install.toArray(new PluginSpec[install.size()]);
-                    try {
-                        //noinspection deprecation
-                        pm.installPlugins(installList);
-                    } catch (UnableToResolveDependencies ex) {
-                        throw new AssumptionViolatedException("Unable to install required plugins", ex);
+                    if (install.isEmpty()) {
+                        LOGGER.info("All required plugins already installed.");
+                    }
+                    else {
+                        LOGGER.info("Installing plugins for test: " + install);
+                        PluginSpec[] installList = install.toArray(new PluginSpec[install.size()]);
+                        try {
+                            //noinspection deprecation
+                            pm.installPlugins(installList);
+                        } catch (UnableToResolveDependencies ex) {
+                            throw new AssumptionViolatedException("Unable to install required plugins", ex);
+                        }
                     }
                 }
             };
+        }
+
+        private String getDescription(final Description d) {
+            return d + ": " + new SimpleDateFormat("HH:mm:ss").format(new Date());
         }
     }
 }

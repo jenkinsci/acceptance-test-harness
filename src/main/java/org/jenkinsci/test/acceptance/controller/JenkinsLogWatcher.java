@@ -1,14 +1,5 @@
 package org.jenkinsci.test.acceptance.controller;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.input.TeeInputStream;
-import org.jenkinsci.test.acceptance.log.LogListenable;
-import org.jenkinsci.test.acceptance.log.LogListener;
-import org.jenkinsci.test.acceptance.log.LogPrinter;
-import org.jenkinsci.test.acceptance.log.LogReader;
-import org.jenkinsci.test.acceptance.log.LogSplitter;
-import org.jenkinsci.test.acceptance.log.LogWatcher;
-
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -21,6 +12,14 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.input.TeeInputStream;
+import org.jenkinsci.test.acceptance.log.LogListenable;
+import org.jenkinsci.test.acceptance.log.LogListener;
+import org.jenkinsci.test.acceptance.log.LogReader;
+import org.jenkinsci.test.acceptance.log.LogSplitter;
+import org.jenkinsci.test.acceptance.log.LogWatcher;
 
 import static java.util.concurrent.TimeUnit.*;
 
@@ -59,12 +58,14 @@ public class JenkinsLogWatcher implements LogListenable, Closeable {
     /**
      * @param id
      *      Short ID that indicates the log that we are watching.
+     * @param printer
+     *      The printer to use to write the Jenkins logging statements to
      */
-    public JenkinsLogWatcher(String id, InputStream pipe, File logFile) throws FileNotFoundException {
+    public JenkinsLogWatcher(String id, InputStream pipe, File logFile, final LogListener printer) throws FileNotFoundException {
         this.logFile = logFile;
         this.pipe = new TeeInputStream(pipe,new FileOutputStream(logFile));
 
-        splitter.addLogListener(new LogPrinter(id));
+        splitter.addLogListener(printer);
         splitter.addLogListener(watcher);
         reader = new Thread(new LogReader(pipe,splitter),"Log reader: "+id);
 

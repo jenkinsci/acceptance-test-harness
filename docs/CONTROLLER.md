@@ -20,6 +20,9 @@ All local controllers run both test harness and Jenkins under test on local mach
 * `JENKINS_JAVA_OPTS` Adds additional options to the java process like `-Xms=XXm -Xmx=XXXm`.
 * `INTERACTIVE` keep browser session opened after failed scenario for interactive investigation.
 
+You can disable the logging output of Jenkins by setting the system property `quite` on 
+the command line.
+
 ### Winstone controller (TYPE=winstone)
 This controller runs Jenkins via `java -jar jenkins.war` on the same host where the test is run. This is the default controller.
 

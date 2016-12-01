@@ -9,7 +9,7 @@
   </parent>
 
   <artifactId>acceptance-test-harness</artifactId>
-  <version>1.43-SNAPSHOT</version>
+  <version>1.44-SNAPSHOT</version>
 
   <name>Acceptance Test Harness</name>
   <licenses>
@@ -462,10 +462,11 @@
       </plugin>
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.18</version>
+        <version>2.19.1</version>
         <configuration>
           <includes>
             <include>**/CucumberTests.java</include>
+            <!-- surefire defaults (3) -->
             <include>**/Test*.java</include>
             <include>**/*Test.java</include>
             <include>**/*TestCase.java</include>
@@ -473,6 +474,12 @@
           <systemPropertyVariables>
             <cucumber.options>${cucumber.options}</cucumber.options>
           </systemPropertyVariables>
+          <properties>
+            <property>
+              <name>listener</name>
+              <value>org.jenkinsci.test.acceptance.junit.JUnitProgressReporter</value>
+            </property>
+          </properties>
         </configuration>
       </plugin>
       <plugin>

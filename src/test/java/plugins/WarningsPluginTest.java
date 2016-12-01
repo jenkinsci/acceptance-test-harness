@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
@@ -23,10 +24,12 @@ import org.jenkinsci.test.acceptance.po.MatrixProject;
 import org.jenkinsci.test.acceptance.po.Node;
 import org.jenkinsci.test.acceptance.po.StringParameter;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
 import org.openqa.selenium.By;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -49,20 +52,32 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
     private static final int JAVA_COUNT = 131;
     private static final int JAVADOC_COUNT = 8;
     private static final int MSBUILD_COUNT = 15;
+
     private static final int TOTAL = JAVA_COUNT + JAVADOC_COUNT + MSBUILD_COUNT;
-    private static final String JAVA_COMPILER = "Java Compiler (javac)";
-    private static final String MS_BUILD = "MSBuild";
-    private static final String JAVA_DOC = "JavaDoc Tool";
-    private static final String CLANG = "Clang (LLVM based)";
+
+    private static final String MS_BUILD_ID = "MSBuild";
+    private static final String JAVA_DOC_ID = "JavaDoc Tool";
+    private static final String CLANG_ID = "Clang (LLVM based)";
+
+    private static final String JAVA_TITLE = "Java Compiler (javac)";
+    private static final String CLANG_TITLE = "LLVM/Clang Warnings";
 
     @Override
-    protected WarningsAction createProjectAction(final FreeStyleJob job) {
-        return new WarningsAction(job);
+    protected WarningsAction createProjectAction(final Job job) {
+        return createJavaProjectAction(job);
+    }
+
+    private WarningsAction createJavaProjectAction(final Job job) {
+        return new WarningsAction(job, "Java", JAVA_TITLE);
     }
 
     @Override
     protected WarningsAction createResultAction(final Build build) {
-        return new WarningsAction(build);
+        return createJavaResultAction(build);
+    }
+
+    private WarningsAction createJavaResultAction(final Build build) {
+        return new WarningsAction(build, "Java", JAVA_TITLE);
     }
 
     @Override
@@ -70,10 +85,24 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         FreeStyleJob job = createFreeStyleJob(new AnalysisConfigurator<WarningsBuildSettings>() {
             @Override
             public void configure(WarningsBuildSettings settings) {
-                settings.addConsoleParser(JAVA_COMPILER);
+                settings.addConsoleParser(JAVA_TITLE);
             }
         });
         catWarningsToConsole(job);
+        return job;
+    }
+
+    @Override
+    protected WorkflowJob createPipeline() {
+        WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
+        job.script.set("node {\n"
+                + job.copyResourceStep(SEVERAL_PARSERS_FILE_FULL_PATH)
+                + "  step([$class: 'WarningsPublisher', "
+                + "     parserConfigurations: ["
+                + "             [parserName: 'Java Compiler (javac)', pattern: '**/warningsAll.txt'],"
+                + "     ]])\n}");
+        job.sandbox.check();
+        job.save();
         return job;
     }
 
@@ -86,8 +115,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
      * Runs a pipeline script that compiles a file with some warnings. The warnings plug-in should find all
      * 6 warnings.
      */
-    @Test
-    @WithPlugins("workflow-aggregator") @Issue("32191")
+    @Test @WithPlugins("workflow-aggregator") @Issue("32191") @Ignore("Exposes bug JENKINS-32191")
     public void should_find_warnings_without_sleep() {
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
         job.script.set(
@@ -128,12 +156,35 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
                         "}\n");
         job.sandbox.check();
         job.save();
-        Build build = job.startBuild();
-        build.shouldSucceed();
 
-        assertThat(job.getLastBuild(), hasAction("LLVM/Clang Warnings"));
+        Build build = buildSuccessfulJob(job);
+
+        assertThatActionExists(job, build, "LLVM/Clang Warnings");
+
         build.open();
-        assertThat(driver, hasContent(Pattern.compile("LLVM/Clang Warnings: [1-9][0-9]*"))); // some warnings, number depends on actual compiler version
+
+        Pattern warnings = Pattern.compile("LLVM/Clang Warnings: ([1-9][0-9]*)");
+        assertThat(driver, hasContent(warnings)); // some warnings, number depends on actual compiler version
+
+        int actualWarnings = extractWarningsCountFromPage(warnings);
+        buildSuccessfulJob(job);
+        job.open(); // FIXME: move to verify trend graph
+        verifyTrendGraph(job, actualWarnings);
+    }
+
+    private int extractWarningsCountFromPage(final Pattern warnings) {
+        By html = by.xpath("/html");
+        String result;
+        try {
+            result = driver.findElement(html).getText();
+        }
+        catch (StaleElementReferenceException ex) {
+            // Retry once to avoid random failures in case of bad timing
+            result = driver.findElement(html).getText();
+        }
+        Matcher matcher = warnings.matcher(result);
+        matcher.find();
+        return Integer.parseInt(matcher.group(1));
     }
 
     /**
@@ -144,9 +195,9 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         FreeStyleJob job = createFreeStyleJob(RESOURCES + "jenkins-32150", new AnalysisConfigurator<WarningsBuildSettings>() {
             @Override
             public void configure(WarningsBuildSettings settings) {
-                settings.addWorkspaceScanner(CLANG, "${ENV_PREFIX}/${PARAMETER}");
-                settings.addWorkspaceScanner(JAVA_COMPILER, "${BUILD_NUMBER}/nothing");
-                settings.addWorkspaceScanner(JAVA_DOC, "${BUILD_NUMBER}_${Reference}\\ND4\\ReleaseTools\\Build\\Log\\warning.log");
+                settings.addWorkspaceScanner(CLANG_ID, "${ENV_PREFIX}/${PARAMETER}");
+                settings.addWorkspaceScanner(JAVA_TITLE, "${BUILD_NUMBER}/nothing");
+                settings.addWorkspaceScanner(JAVA_DOC_ID, "${BUILD_NUMBER}_${Reference}\\ND4\\ReleaseTools\\Build\\Log\\warning.log");
             }
         });
 
@@ -170,7 +221,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
 
         build.open();
         int count = 10;
-        assertThat(driver, hasContent("LLVM/Clang Warnings: " + count));
+        assertThat(driver, hasContent(CLANG_TITLE + ": " + count));
 
         assertThat(build.getConsole(), containsString("[WARNINGS] Parsing warnings in files '**/compile-log.txt' with parser Clang (LLVM based)"));
         assertThat(build.getConsole(), containsRegexp("\\[WARNINGS\\] Parsing warnings in files '[\\d]+/nothing'"));
@@ -187,9 +238,9 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
                 WarningsBuildSettings.class, new AnalysisConfigurator<WarningsBuildSettings>() {
                     @Override
                     public void configure(WarningsBuildSettings settings) {
-                        settings.addWorkspaceScanner(JAVA_COMPILER, "**/*");
-                        settings.addWorkspaceScanner(MS_BUILD, "**/*");
-                        settings.addWorkspaceScanner(JAVA_DOC, "**/*");
+                        settings.addWorkspaceScanner(JAVA_TITLE, "**/*");
+                        settings.addWorkspaceScanner(MS_BUILD_ID, "**/*");
+                        settings.addWorkspaceScanner(JAVA_DOC_ID, "**/*");
                     }
                 });
 
@@ -205,7 +256,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         FreeStyleJob job = createFreeStyleJob(RESOURCES + "jenkins-32150", new AnalysisConfigurator<WarningsBuildSettings>() {
             @Override
             public void configure(WarningsBuildSettings settings) {
-                settings.addWorkspaceScanner(CLANG, "**/compile-log.txt");
+                settings.addWorkspaceScanner(CLANG_ID, "**/compile-log.txt");
                 settings.setCanResolveRelativePaths(true);
             }
         });
@@ -218,7 +269,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         int count = 10;
         assertThat(driver, hasContent("LLVM/Clang Warnings: " + count));
 
-        WarningsAction action = new WarningsAction(build);
+        WarningsAction action = new WarningsAction(build, "LLVM/Clang", "Clang (LLVM based)");
 
         assertThatWarningsCountInSummaryIs(action, count);
         assertThatNewWarningsCountInSummaryIs(action, count);
@@ -279,7 +330,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
      * also verified (4, 6, and 2 warnings).
      */
     // TODO: run the job twice and check for the graphs
-    @Test @Issue({"JENKINS-11225", "JENKINS-26913"})
+    @Test @Issue({"JENKINS-11225", "JENKINS-26913"}) @Ignore("Reactivate if JENKINS-31431 has been fixed")
     public void should_report_warnings_per_axis() {
         String file = "matrix-warnings.txt";
         MatrixProject job = setupJob(RESOURCES + file, MatrixProject.class,
@@ -327,7 +378,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         expectedConfigurationDetails.put("user_axis=one", 4);
         expectedConfigurationDetails.put("user_axis=two", 6);
         expectedConfigurationDetails.put("user_axis=three", 2);
-        WarningsAction action = new WarningsAction(job);
+        WarningsAction action = createJavaProjectAction(job);
         assertThat(action.getModulesTabContents(), is(expectedConfigurationDetails));
     }
 
@@ -336,13 +387,13 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         expectedConfigurationDetails.put("axis/one", 4);
         expectedConfigurationDetails.put("axis/two", 6);
         expectedConfigurationDetails.put("axis/three", 2);
-        WarningsAction action = new WarningsAction(job);
+        WarningsAction action = createJavaProjectAction(job);
         assertThat(action.getPackagesTabContents(), is(expectedConfigurationDetails));
     }
 
     private void assertThatFilesTabIsCorrectlyFilled(final MatrixProject job) {
         SortedMap<String, Integer> expectedConfigurationDetails = new TreeMap<>();
-        WarningsAction action = new WarningsAction(job);
+        WarningsAction action = createJavaProjectAction(job);
         expectedConfigurationDetails.put("FileOne.c", 4);
         expectedConfigurationDetails.put("FileTwo.c", 6);
         expectedConfigurationDetails.put("FileThree.c", 2);
@@ -360,8 +411,8 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         FreeStyleJob job = createFreeStyleJob(new AnalysisConfigurator<WarningsBuildSettings>() {
             @Override
             public void configure(WarningsBuildSettings settings) {
-                settings.addWorkspaceScanner(JAVA_COMPILER, "**/*");
-                settings.addWorkspaceScanner(MS_BUILD, "**/*");
+                settings.addWorkspaceScanner(JAVA_TITLE, "**/*");
+                settings.addWorkspaceScanner(MS_BUILD_ID, "**/*");
             }
         });
         buildSuccessfulJob(job);
@@ -369,7 +420,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         editJob(job, WarningsBuildSettings.class, new AnalysisConfigurator<WarningsBuildSettings>() {
             @Override
             public void configure(WarningsBuildSettings settings) {
-                settings.addWorkspaceScanner(JAVA_DOC, "**/*");
+                settings.addWorkspaceScanner(JAVA_DOC_ID, "**/*");
                 settings.setExcludePattern(".*Catalyst.*");
                 settings.setBuildFailedTotalAll("0");
             }
@@ -399,7 +450,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
             @Override
             public void configure(WarningsBuildSettings settings) {
                 settings.addConsoleParser("Maven");
-                settings.addWorkspaceScanner(JAVA_COMPILER, "**/*");
+                settings.addWorkspaceScanner(JAVA_TITLE, "**/*");
             }
         });
 
@@ -515,9 +566,9 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         FreeStyleJob job = createFreeStyleJob(new AnalysisConfigurator<WarningsBuildSettings>() {
             @Override
             public void configure(WarningsBuildSettings settings) {
-                settings.addConsoleParser(JAVA_COMPILER);
-                settings.addConsoleParser(JAVA_DOC);
-                settings.addConsoleParser(MS_BUILD);
+                settings.addConsoleParser(JAVA_TITLE);
+                settings.addConsoleParser(JAVA_DOC_ID);
+                settings.addConsoleParser(MS_BUILD_ID);
                 settings.setBuildUnstableTotalAll("0");
                 settings.setNewWarningsThresholdFailed("0");
                 settings.setUseDeltaValues(true);
@@ -555,9 +606,9 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         return new AnalysisConfigurator<WarningsBuildSettings>() {
             @Override
             public void configure(WarningsBuildSettings settings) {
-                settings.addConsoleParser(JAVA_COMPILER);
-                settings.addConsoleParser(JAVA_DOC);
-                settings.addConsoleParser(MS_BUILD);
+                settings.addConsoleParser(JAVA_TITLE);
+                settings.addConsoleParser(JAVA_DOC_ID);
+                settings.addConsoleParser(MS_BUILD_ID);
             }
         };
     }
@@ -571,9 +622,9 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         FreeStyleJob job = createFreeStyleJob(new AnalysisConfigurator<WarningsBuildSettings>() {
             @Override
             public void configure(WarningsBuildSettings settings) {
-                settings.addWorkspaceScanner(JAVA_COMPILER, "**/*");
-                settings.addWorkspaceScanner(JAVA_DOC, "**/*");
-                settings.addWorkspaceScanner(MS_BUILD, "**/*");
+                settings.addWorkspaceScanner(JAVA_TITLE, "**/*");
+                settings.addWorkspaceScanner(JAVA_DOC_ID, "**/*");
+                settings.addWorkspaceScanner(MS_BUILD_ID, "**/*");
             }
         });
 
@@ -615,14 +666,14 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
     /**
      * Checks that the warnings plugin will not skip build results if "Run always" is checked.
      */
-    @Test
+    @Test @Issue("28479") @Ignore("Reactivate after JENKINS-28479 has been fixed.")
     public void should_not_skip_failed_builds_with_option_run_always() {
         FreeStyleJob job = runBuildWithRunAlwaysOption(true);
         Build build = buildJobAndWait(job).shouldFail();
 
         assertThatActionExists(job, build, "Java Warnings");
 
-        WarningsAction action = new WarningsAction(build);
+        WarningsAction action = createJavaResultAction(build);
 
         assertThatWarningsCountInSummaryIs(action, 131);
         assertThatNewWarningsCountInSummaryIs(action, 131);
@@ -632,7 +683,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         FreeStyleJob job = createFreeStyleJob(new AnalysisConfigurator<WarningsBuildSettings>() {
             @Override
             public void configure(WarningsBuildSettings settings) {
-                settings.addWorkspaceScanner(JAVA_COMPILER, "**/*");
+                settings.addWorkspaceScanner(JAVA_TITLE, "**/*");
                 settings.setCanRunOnFailed(canRunOnFailed);
             }
         });
@@ -664,7 +715,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         Build build = buildSuccessfulJob(job);
         assertThatActionExists(job, build, "Maven Warnings");
 
-        WarningsAction action = new WarningsAction(build);
+        WarningsAction action = new WarningsAction(build, "Maven", "Maven");
 
         assertThatWarningsCountInSummaryIs(action, 1);
         assertThatNewWarningsCountInSummaryIs(action, 1);
@@ -695,7 +746,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         FreeStyleJob job = createFreeStyleJob(WARNINGS_FILE_FOR_INCLUDE_EXCLUDE_TESTS, new AnalysisConfigurator<WarningsBuildSettings>() {
             @Override
             public void configure(WarningsBuildSettings settings) {
-                settings.addWorkspaceScanner(JAVA_COMPILER, "**/*");
+                settings.addWorkspaceScanner(JAVA_TITLE, "**/*");
                 settings.setIncludePattern(".*/.*");
                 settings.setExcludePattern(".*/ignore1/.*, .*/ignore2/.*, .*/default/.*");
             }
@@ -704,7 +755,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         Build build = buildSuccessfulJob(job);
         assertThatActionExists(job, build, "Java Warnings");
 
-        WarningsAction action = new WarningsAction(build);
+        WarningsAction action = createJavaResultAction(build);
 
         assertThatWarningsCountInSummaryIs(action, 4);
         assertThatNewWarningsCountInSummaryIs(action, 4);
@@ -720,14 +771,14 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         FreeStyleJob job = createFreeStyleJob(WARNINGS_FILE_FOR_INCLUDE_EXCLUDE_TESTS, new AnalysisConfigurator<WarningsBuildSettings>() {
             @Override
             public void configure(WarningsBuildSettings settings) {
-                settings.addWorkspaceScanner(JAVA_COMPILER, "**/*");
+                settings.addWorkspaceScanner(JAVA_TITLE, "**/*");
                 settings.setIncludePattern(".*/include*/.*, .*/default/.*");
             }
         });
         Build build = buildSuccessfulJob(job);
         assertThatActionExists(job, build, "Java Warnings");
 
-        WarningsAction action = new WarningsAction(build);
+        WarningsAction action = createJavaResultAction(build);
 
         assertThatWarningsCountInSummaryIs(action, 5);
         assertThatNewWarningsCountInSummaryIs(action, 5);

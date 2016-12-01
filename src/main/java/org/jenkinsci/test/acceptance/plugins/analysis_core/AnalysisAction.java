@@ -65,7 +65,16 @@ public abstract class AnalysisAction extends ContainerPageObject {
      *
      * @return the plug-in name
      */
-    public abstract String getName();
+    public abstract String getPluginName();
+
+    /**
+     * Returns the human readable name of this action.
+     *
+     * @return the plug-in name
+     */
+    public String getName() {
+        return getPluginName() + " Warnings";
+    }
 
     /**
      * Returns the class of the page object of the analysis settings used to configure the plug-in.

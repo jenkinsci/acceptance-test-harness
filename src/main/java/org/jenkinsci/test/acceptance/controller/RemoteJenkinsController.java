@@ -1,6 +1,10 @@
 package org.jenkinsci.test.acceptance.controller;
 
-import jnr.ffi.LibraryLoader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InterruptedIOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import org.codehaus.plexus.util.FileUtils;
 import org.jenkinsci.test.acceptance.Ssh;
@@ -14,13 +18,8 @@ import org.slf4j.LoggerFactory;
 
 import com.google.inject.Injector;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InterruptedIOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-
 import static java.lang.System.*;
+import jnr.ffi.LibraryLoader;
 
 /**
  * A {@link JenkinsController} that runs on a remote machine. It can be injected in tests using
@@ -79,7 +78,7 @@ public class RemoteJenkinsController extends JenkinsController {
          **/
         System.out.println(String.format("[[ATTACHMENT|%s]]", logFile.getAbsolutePath()));
 
-        logWatcher = new JenkinsLogWatcher(getLogId(), process, logFile);
+        logWatcher = new JenkinsLogWatcher(getLogId(), process, logFile, getLogPrinter());
         logWatcher.start();
         try {
             this.logWatcher.waitTillReady();

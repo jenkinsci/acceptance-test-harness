@@ -8,18 +8,15 @@ import java.io.IOException;
  * @author Kohsuke Kawaguchi
  */
 public class LogPrinter implements LogListener {
-
     private final String prefix;
 
     public LogPrinter(String id) {
-        this.prefix = id==null ? null : id+"|";
+        this.prefix = id==null ? "" : id+"|";
     }
 
     @Override
     public void processLine(String line) throws IOException {
-        if (prefix!=null)
-            System.out.print(prefix);
-        System.out.println(line);
+        System.out.println(prefix + line);
     }
 
     @Override

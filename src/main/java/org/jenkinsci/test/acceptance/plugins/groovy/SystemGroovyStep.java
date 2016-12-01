@@ -24,6 +24,7 @@
 package org.jenkinsci.test.acceptance.plugins.groovy;
 
 import org.jenkinsci.test.acceptance.po.*;
+import org.openqa.selenium.NoSuchElementException;
 
 @Describable("Execute system Groovy script")
 public class SystemGroovyStep extends AbstractStep implements BuildStep {
@@ -33,15 +34,27 @@ public class SystemGroovyStep extends AbstractStep implements BuildStep {
     }
 
     public SystemGroovyStep script(String script) {
-        control("scriptSource[0]").check();
-        new CodeMirror(parent, getPath() + "/scriptSource[0]/command").set(script);
-        control("scriptSource[0]/validate-button").click();
+        String prefix = "scriptSource";
+        try {
+            control("").select("Groovy command");
+        } catch (NoSuchElementException ex) {
+            control("scriptSource[0]").check();
+            prefix += "[0]";
+        }
+        new CodeMirror(parent, getPath(prefix + "/command")).set(script);
+        control(prefix + "/validate-button").click();
         return this;
     }
 
     public SystemGroovyStep file(String path) {
-        control("scriptSource[1]").check();
-        control("scriptSource[1]/scriptFile").set(path);
+        String prefix = "scriptSource";
+        try {
+            control("").select("Groovy script file");
+        } catch (NoSuchElementException ex) {
+            control("scriptSource[1]").check();
+            prefix += "[1]";
+        }
+        control(prefix + "/scriptFile").set(path);
         return this;
     }
 }

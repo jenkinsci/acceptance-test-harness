@@ -1,23 +1,9 @@
 package org.jenkinsci.test.acceptance.controller;
 
-import com.google.inject.Injector;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.codehaus.plexus.util.Expand;
-import org.codehaus.plexus.util.StringUtils;
-import org.jenkinsci.test.acceptance.junit.FailureDiagnostics;
-import org.jenkinsci.test.acceptance.log.LogListenable;
-import org.jenkinsci.test.acceptance.log.LogListener;
-import org.jenkinsci.utils.process.ProcessInputStream;
-import org.junit.runners.model.MultipleFailureException;
-import org.openqa.selenium.TimeoutException;
-
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Named;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -30,9 +16,21 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import static java.lang.System.*;
-
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.codehaus.plexus.util.Expand;
+import org.codehaus.plexus.util.StringUtils;
+import org.jenkinsci.test.acceptance.junit.FailureDiagnostics;
+import org.jenkinsci.test.acceptance.log.LogListenable;
+import org.jenkinsci.test.acceptance.log.LogListener;
 import org.jenkinsci.utils.process.CommandBuilder;
+import org.jenkinsci.utils.process.ProcessInputStream;
+import org.junit.runners.model.MultipleFailureException;
+import org.openqa.selenium.TimeoutException;
+
+import com.google.inject.Injector;
+
+import static java.lang.System.*;
 
 /**
  * Abstract base class for those JenkinsController that runs the JVM locally on
@@ -121,7 +119,7 @@ public abstract class LocalController extends JenkinsController implements LogLi
             }
         }
 
-        System.out.println("running with given plugins: " + Arrays.toString(pluginDir.list()));
+        LOGGER.info("Running with given plugins: " + Arrays.toString(pluginDir.list()));
 
         try {
             FileUtils.copyFile(formElementPathPlugin, new File(pluginDir, "path-element.hpi"));
@@ -240,7 +238,7 @@ public abstract class LocalController extends JenkinsController implements LogLi
         this.process = startProcess();
         Runtime.getRuntime().addShutdownHook(shutdownHook);
 
-        logWatcher = new JenkinsLogWatcher(getLogId(),process,logFile);
+        logWatcher = new JenkinsLogWatcher(getLogId(),process,logFile, getLogPrinter());
         logWatcher.start();
         try {
             LOGGER.info("Waiting for Jenkins to become running in "+ this);
@@ -340,7 +338,7 @@ public abstract class LocalController extends JenkinsController implements LogLi
             if(isFreePort(candidate)){
                 return candidate;
             }
-            System.out.println(String.format("Port %s is in use", candidate));
+            LOGGER.info(String.format("Port %s is in use", candidate));
         }
     }
 

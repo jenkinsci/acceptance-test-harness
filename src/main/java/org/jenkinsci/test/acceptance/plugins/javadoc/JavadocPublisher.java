@@ -8,6 +8,7 @@ import org.jenkinsci.test.acceptance.po.*;
 @Describable("Publish Javadoc")
 public class JavadocPublisher extends AbstractStep implements PostBuildStep {
     public final Control javadocDir = control("javadocDir");
+    public final Control keepAll = control("keepAll");
 
     public JavadocPublisher(Job parent, String path) {
         super(parent, path);

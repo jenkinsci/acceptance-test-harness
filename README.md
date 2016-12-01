@@ -43,7 +43,6 @@ it's own sandboxed workspace.
 * Writing tests
     * [Video tutorial](https://www.youtube.com/watch?v=ZHAiywgMG-M) by Kohsuke on how to write tests
     * [Writing JUnit test](docs/JUNIT.md)
-    * [Writing tests with Geb and Spock](docs/GEB-SPOCK.md)
     * Writing Cucumber test (TODO)
 * [Testing slaves](docs/SLAVE.md)
 * [Testing emails](docs/EMAIL.md)

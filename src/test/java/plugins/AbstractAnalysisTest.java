@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.xerces.jaxp.DocumentBuilderFactoryImpl;
 import org.custommonkey.xmlunit.Diff;
@@ -23,6 +24,7 @@ import org.custommonkey.xmlunit.XMLUnit;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.junit.Since;
+import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisAction;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisAction.Tab;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
@@ -46,6 +48,7 @@ import org.jenkinsci.test.acceptance.po.Node;
 import org.jenkinsci.test.acceptance.po.PostBuildStep;
 import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.po.View;
+import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.jenkinsci.test.acceptance.utils.mail.MailService;
 import org.junit.Test;
@@ -103,7 +106,7 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
         List<WebElement> healthElements = all(by.xpath("//div[@class='healthReportDetails']//tr"));
         assertThat(healthElements.size(), is(3));
 
-        String expectedText = String.format("%s: %d %s%s found.", projectAction.getName(), getNumberOfWarnings(),
+        String expectedText = String.format("%s: %d %s%s found.", projectAction.getPluginName(), getNumberOfWarnings(),
                 projectAction.getAnnotationName(), plural(getNumberOfWarnings()));
         assertThatHealthReportIs(healthElements.get(1), expectedText, "00to19");
         assertThatHealthReportIs(healthElements.get(2), "Build stability: No recent builds failed.", "80plus");
@@ -133,8 +136,21 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      * result details view are verified.
      */
     @Test
-    public void should_navigate_to_result_action_from_job() {
-        FreeStyleJob job = createFreeStyleJob();
+    public void should_navigate_to_result_action_from_freestyle_job() {
+        verifyJobResults(createFreeStyleJob());
+    }
+
+    /**
+     * Builds a pipeline with an enabled publisher of the plug-in under test. Verifies that the project action from
+     * the job redirects to the result of the last build. The the correct number of warnings in the project overview and
+     * result details view are verified.
+     */
+    @Test @WithPlugins("workflow-aggregator") @Issue("31202")
+    public void should_navigate_to_result_action_from_pipeline() {
+        verifyJobResults(createPipeline());
+    }
+
+    private void verifyJobResults(final Job job) {
         Build build = buildSuccessfulJob(job);
 
         AnalysisAction resultAction = createResultAction(build);
@@ -150,6 +166,22 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
         build.open();
         assertThatWarningsCountInSummaryIs(resultAction, getNumberOfWarnings());
         assertThatNewWarningsCountInSummaryIs(resultAction, getNumberOfWarnings());
+
+        assertThat(job, hasAction(projectAction.getName()));
+        assertThat(job.getLastBuild(), hasAction(resultAction.getName()));
+        assertThat(build, hasAction(resultAction.getName()));
+    }
+
+    /**
+     * Builds a pipeline with an enabled publisher of the plug-in under test two times in a row. Verifies that
+     * afterwards a trend graph exists that contains 6 relative links to the plug-in results (one for each priority and
+     * build).
+     */
+    @Test @WithPlugins("workflow-aggregator") @Issue("31202")
+    public void should_have_trend_graph_with_relative_links_in_pipeline() {
+        Job job = runTwoTimesInARow(createPipeline());
+
+        verifyTrendGraph(job, getNumberOfWarnings());
     }
 
     /**
@@ -157,27 +189,31 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      * afterwards a trend graph exists that contains 6 relative links to the plug-in results (one for each priority and
      * build).
      */
-    @Test
-    @Issue({"JENKINS-21723", "JENKINS-29900"})
-    public void should_have_trend_graph_with_relative_links() {
-        FreeStyleJob job = buildJobTwoTimesInARow();
+    @Test @Issue({"JENKINS-21723", "JENKINS-29900"})
+    public void should_have_trend_graph_with_relative_links_in_freestyle_job() {
+        Job job = buildFreestyleJobTwoTimesInARow();
 
+        verifyTrendGraph(job, getNumberOfWarnings());
+    }
+
+    protected void verifyTrendGraph(final Job job, final int numberOfWarnings) {
         AnalysisAction action = createProjectAction(job);
-        verifyTrendGraphOverview(job, action);
-        verifyTrendGraphDetails(job, action);
+        verifyTrendGraphOverview(job, action, numberOfWarnings);
+        verifyTrendGraphDetails(job, action, numberOfWarnings);
     }
 
-    private void verifyTrendGraphOverview(final FreeStyleJob job, final AnalysisAction action) {
-        assertThatProjectPageTrendIsCorrect(job, action, "");
+    private void verifyTrendGraphOverview(final Job job, final AnalysisAction action, final int numberOfWarnings) {
+        assertThatProjectPageTrendIsCorrect(job, action, "", numberOfWarnings);
     }
 
-    private void verifyTrendGraphDetails(final FreeStyleJob job, final AnalysisAction action) {
+    private void verifyTrendGraphDetails(final Job job, final AnalysisAction action, final int numberOfWarnings) {
         List<WebElement> graphLinks = job.all(By.linkText("Enlarge"));
         graphLinks.get(graphLinks.size() - 1).click();
-        assertThatProjectPageTrendIsCorrect(job, action, "../../");
+        assertThatProjectPageTrendIsCorrect(job, action, "../../", numberOfWarnings);
     }
 
-    protected void assertThatProjectPageTrendIsCorrect(final FreeStyleJob job, final AnalysisAction action, final String prefix) {
+    protected void assertThatProjectPageTrendIsCorrect(final Job job, final AnalysisAction action, final String prefix,
+            final int numberOfWarnings) {
         elasticSleep(500);
 
         Map<String, Integer> trend = job.getTrendGraphContent(action.getUrl());
@@ -196,41 +232,41 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
                 assertThat(actualUrl, containsRegexp(expectedUrl));
                 sum += trend.get(actualUrl);
             }
-            assertThat(sum, is(getNumberOfWarnings()));
+            assertThat(sum, is(numberOfWarnings));
         }
     }
 
     /**
-     * Runs the test case {@link #should_have_trend_graph_with_relative_links} with a job that contains a space in the
-     * name. Then the trend is deactivated in the trend configuration view: now the trend should be replaced with a link
-     * to re-enable the trend. Finally, this link is clicked in order open the trend configuration again.
+     * Runs the test case {@link #should_have_trend_graph_with_relative_links_in_freestyle_job()} with a job that
+     * contains a space in the name. Then the trend is deactivated in the trend configuration view: now the trend should
+     * be replaced with a link to re-enable the trend. Finally, this link is clicked in order open the trend
+     * configuration again.
      */
-    @Test
-    @Issue({"JENKINS-25917", "JENKINS-32377"}) @Since("2.0")
+    @Test @Issue({"JENKINS-25917", "JENKINS-32377"}) @Since("2.0")
     public void should_store_trend_selection_in_cookie() {
-        FreeStyleJob job = buildJobTwoTimesInARow();
+        Job job = buildFreestyleJobTwoTimesInARow();
 
         assertThat(job.name, containsString("_"));
         job = job.renameTo(job.name.replace("_", " "));
 
         AnalysisAction action = createProjectAction(job);
-        verifyTrendGraphOverview(job, action);
 
+        verifyTrendGraphOverview(job, action, getNumberOfWarnings());
         deactivateTrendGraph(job, action);
     }
 
-    private FreeStyleJob buildJobTwoTimesInARow() {
-        FreeStyleJob job = createFreeStyleJob();
+    private Job buildFreestyleJobTwoTimesInARow() {
+        return runTwoTimesInARow(createFreeStyleJob());
+    }
+
+    private Job runTwoTimesInARow(final Job job) {
         buildJobAndWait(job);
         buildSuccessfulJob(job);
         job.open();
         return job;
     }
 
-    private void deactivateTrendGraph(final FreeStyleJob job, final AnalysisAction action) {
-        if ("warnings.*".equals(action.getUrl())) {
-            return; // FIXME: remove if fix for JENKINS-34635 is released
-        }
+    private void deactivateTrendGraph(final Job job, final AnalysisAction action) {
         GraphConfigurationView view = action.configureTrendGraphForUser();
 
         view.open();
@@ -243,7 +279,7 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
         enableLinks.get(0).click();
         elasticSleep(500);
 
-        assertThat(getCurrentUrl(), endsWith(action.getUrl() + "/configure/"));
+        assertThat(getCurrentUrl(), containsRegexp(action.getUrl() + "/configure/"));
     }
 
     /**
@@ -252,7 +288,7 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      * @param job the job containing this action
      * @return the created action
      */
-    protected abstract P createProjectAction(final FreeStyleJob job);
+    protected abstract P createProjectAction(final Job job);
 
     /**
      * Creates a specific result action of the plug-in under test.
@@ -269,6 +305,35 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      * @return the created freestyle job
      */
     protected abstract FreeStyleJob createFreeStyleJob();
+
+    /**
+     * Creates a pipeline that has an enabled publisher of the plug-in under test. The job is expected to run with
+     * build status SUCCESS.
+     *
+     * @return the created pipeline
+     */
+    protected abstract WorkflowJob createPipeline();
+
+    /**
+     * Creates a pipeline that enables the specified {@code stepName}. The first step of the pipeline copies the
+     * specified resource {@code stepName}. step as first instruction
+     * to the pipeline.
+     *
+     * @return the created pipeline
+     */
+    protected WorkflowJob createPipelineWith(final String fileName, final String stepName) {
+        WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
+        String script = "node {\n"
+                + job.copyResourceStep(fileName)
+                + "  step([$class: '" + stepName
+                + "', pattern: '**/" + FilenameUtils.getName(fileName)
+                + "'])\n" +
+                "}";
+        job.script.set(script);
+        job.sandbox.check();
+        job.save();
+        return job;
+    }
 
     /**
      * Returns the number of warnings that the created freestyle job should produce.

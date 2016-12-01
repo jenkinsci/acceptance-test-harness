@@ -22,7 +22,7 @@ public class CheckStyleAction extends AnalysisAction {
     }
 
     @Override
-    public String getName() {
+    public String getPluginName() {
         return "Checkstyle";
     }
 

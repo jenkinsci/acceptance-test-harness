@@ -27,8 +27,13 @@ public class TaskScannerAction extends AnalysisAction {
     }
 
     @Override
-    public String getName() {
+    public String getPluginName() {
         return "Task Scanner";
+    }
+
+    @Override
+    public String getName() {
+        return "Open Tasks";
     }
 
     @Override

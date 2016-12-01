@@ -1,17 +1,22 @@
 package org.jenkinsci.test.acceptance.controller;
 
+import javax.inject.Inject;
+import javax.inject.Named;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
-
-import javax.inject.Inject;
-import javax.inject.Named;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
 import org.codehaus.plexus.util.FileUtils;
 import org.jenkinsci.test.acceptance.guice.AutoCleaned;
+import org.jenkinsci.test.acceptance.log.LogListener;
+import org.jenkinsci.test.acceptance.log.LogPrinter;
+import org.jenkinsci.test.acceptance.log.NullPrinter;
 
 import com.cloudbees.sdk.extensibility.ExtensionPoint;
 import com.google.inject.Injector;
@@ -28,7 +33,8 @@ import com.google.inject.Injector;
  */
 @ExtensionPoint // TODO is it not the JenkinsControllerFactory that is the extension point?
 public abstract class JenkinsController implements IJenkinsController, AutoCleaned {
-
+    @Inject @Named("quite")
+    protected boolean isQuite;
     @Inject @Named("WORKSPACE")
     protected String WORKSPACE;
     protected String JENKINS_DEBUG_LOG;
@@ -52,6 +58,13 @@ public abstract class JenkinsController implements IJenkinsController, AutoClean
 
     protected JenkinsController(Injector i) {
         i.injectMembers(this);
+
+        if (isQuite) {
+            LogManager.getLogManager().reset();
+            Logger globalLogger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+            globalLogger.setLevel(Level.OFF);
+        }
+
         JENKINS_DEBUG_LOG  = WORKSPACE + "/last_test.log";
         if(FileUtils.fileExists(JENKINS_DEBUG_LOG)){
             FileUtils.removePath(JENKINS_DEBUG_LOG);
@@ -109,6 +122,15 @@ public abstract class JenkinsController implements IJenkinsController, AutoClean
         if (isRunning) {
             stopNow();
             isRunning = false;
+        }
+    }
+
+    protected LogListener getLogPrinter() {
+        if (isQuite) {
+            return new NullPrinter();
+        }
+        else {
+            return new LogPrinter(getLogId());
         }
     }
 

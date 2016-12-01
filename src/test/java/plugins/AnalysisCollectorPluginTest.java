@@ -66,7 +66,7 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
     private static final int WARNINGS_LOW = 0;
 
     @Override
-    protected AnalysisCollectorAction createProjectAction(final FreeStyleJob job) {
+    protected AnalysisCollectorAction createProjectAction(final Job job) {
         return new AnalysisCollectorAction(job);
     }
 
@@ -81,6 +81,36 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
     }
 
     @Override
+    protected WorkflowJob createPipeline() {
+        WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
+        job.script.set("node {\n"
+                + copyFileToWorkspace(job, "findbugs.xml")
+                + "  step([$class: 'FindBugsPublisher', pattern: '**/findbugs.xml'])\n"
+                + copyFileToWorkspace(job, "pmd.xml")
+                + "  step([$class: 'PmdPublisher'])\n"
+                + copyFileToWorkspace(job, "checkstyle-result.xml")
+                + "  step([$class: 'CheckStylePublisher'])\n"
+                + copyFileToWorkspace(job, "Tasks.java")
+                + copyFileToWorkspace(job, "Tasks2.java")
+                + "  step([$class: 'TasksPublisher', high: 'PRIO1', normal: 'PRIO2,TODO', low :'PRIO3'])\n"
+                + copyFileToWorkspace(job, "warnings.txt")
+                + "  step([$class: 'WarningsPublisher', "
+                + "     parserConfigurations: ["
+                + "             [parserName: 'Java Compiler (javac)', pattern: '**/warnings.txt'],"
+                + "             [parserName: 'JavaDoc Tool', pattern: '**/warnings.txt'],"
+                + "             [parserName: 'MSBuild', pattern: '**/warnings.txt']"
+                + "     ]])\n"
+                + "  step([$class: 'AnalysisPublisher'])\n}");
+        job.sandbox.check();
+        job.save();
+        return job;
+    }
+
+    private String copyFileToWorkspace(final WorkflowJob job, final String fileName) {
+        return job.copyResourceStep(ANALYSIS_COLLECTOR_PLUGIN_RESOURCES + "/" + fileName);
+    }
+
+    @Override
     protected int getNumberOfWarnings() {
         return TOTAL;
     }
@@ -90,8 +120,7 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
      * Finally, the collector trend graph is verified that contains 6 relative links to the
      * plug-in results (one for each priority and build).
      */
-    @Test
-    @Issue("JENKINS-30304") @Since("1.640")
+    @Test @Issue("JENKINS-30304") @Since("1.640")
     public void should_have_clickable_trend_details() {
         FreeStyleJob job = createFreeStyleJob();
         buildJobAndWait(job);
@@ -105,7 +134,7 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
 
         // Last link is the summary
         graphLinks.get(graphLinks.size() - 1).click();
-        assertThatProjectPageTrendIsCorrect(job, action, "../../");
+        assertThatProjectPageTrendIsCorrect(job, action, "../../", getNumberOfWarnings());
     }
 
     /**
@@ -330,8 +359,7 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
      * correct number of warnings. Then one of the tools is deselected. The portlet should then show only the remaining
      * number of warnings.
      */
-    @Test
-    @WithPlugins("dashboard-view")
+    @Test @WithPlugins("dashboard-view")
     public void should_aggregate_warnings_in_dashboard_portlet() {
         FreeStyleJob job = createFreeStyleJob();
         buildSuccessfulJob(job);
@@ -360,18 +388,17 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
         assertThat(dashboard, not(hasWarningsFor(job, TASKS, TASKS_ALL)));
     }
 
-    @Test
-    @WithPlugins("workflow-aggregator")
+    @Test @WithPlugins("workflow-aggregator")
     public void should_compute_annotations_on_workflow() {
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
         job.script.set(
-            "node {\n" +
-               job.copyResourceStep(ANALYSIS_COLLECTOR_PLUGIN_RESOURCES + "/checkstyle-result.xml") +
-               job.copyResourceStep(ANALYSIS_COLLECTOR_PLUGIN_RESOURCES +"/findbugs.xml") +
-            "  step([$class: 'FindBugsPublisher', pattern: '**/findbugs.xml'])\n" +
-            "  step([$class: 'CheckStylePublisher'])\n" +
-            "  step([$class: 'AnalysisPublisher'])\n" +
-            "}");
+                "node {\n" +
+                        copyFileToWorkspace(job, "checkstyle-result.xml") +
+                        copyFileToWorkspace(job, "findbugs.xml") +
+                        "  step([$class: 'FindBugsPublisher', pattern: '**/findbugs.xml'])\n" +
+                        "  step([$class: 'CheckStylePublisher'])\n" +
+                        "  step([$class: 'AnalysisPublisher'])\n" +
+                        "}");
         job.sandbox.check();
         job.save();
         final Build build = job.startBuild();

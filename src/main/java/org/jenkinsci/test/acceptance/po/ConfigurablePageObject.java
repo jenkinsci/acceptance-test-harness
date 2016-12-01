@@ -101,6 +101,6 @@ public abstract class ConfigurablePageObject extends PageObject {
 
     public void apply() {
         clickButton("Apply");
-        waitFor(driver, hasContent("Saved"), 5);
+        waitFor(driver, hasContent("Saved"), 30);
     }
 }

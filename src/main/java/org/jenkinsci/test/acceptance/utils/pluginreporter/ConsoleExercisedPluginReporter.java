@@ -24,15 +24,22 @@
 
 package org.jenkinsci.test.acceptance.utils.pluginreporter;
 
+import java.util.logging.Logger;
+import javax.annotation.CheckForNull;
+
 /**
  * Exercised Plugin Reporter that logs to console
  *
  * @author scott.hebert@ericsson.com
  */
 public class ConsoleExercisedPluginReporter implements ExercisedPluginsReporter {
-
     @Override
-    public void log(String testName, String pluginName, String pluginVersion) {
-        System.out.println("Plugin " + pluginName + "@" + pluginVersion + " is installed");
+    public void log(String testName, String pluginName, @CheckForNull String pluginVersion) {
+        if (pluginVersion != null) {
+            pluginName += "@" + pluginVersion;
+        }
+        LOGGER.info("Plugin " + pluginName + " is installed");
     }
+
+    private static final Logger LOGGER = Logger.getLogger(ConsoleExercisedPluginReporter.class.getName());
 }
