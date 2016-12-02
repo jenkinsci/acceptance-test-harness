@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import org.jenkinsci.test.acceptance.po.Jenkins;
+import org.jenkinsci.test.acceptance.po.Plugin;
 import org.jenkinsci.test.acceptance.po.PluginManager;
 import org.jenkinsci.test.acceptance.update_center.PluginSpec;
 import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata.UnableToResolveDependencies;
@@ -24,6 +25,8 @@ import org.junit.runners.model.Statement;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.name.Named;
+
+import hudson.util.VersionNumber;
 
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
@@ -93,10 +96,13 @@ public @interface WithPlugins {
                     installPlugins(plugins);
 
                     for (PluginSpec plugin : plugins) {
+                        Plugin installedPlugin = jenkins.getPlugin(plugin.getName());
+                        VersionNumber installedVersion = installedPlugin.getVersion();
+                        String version = installedVersion.toString();
                         pluginReporter.log(
                                 d.getClassName() + "." + d.getMethodName(),
                                 plugin.getName(),
-                                plugin.getVersion()
+                                version
                         );
                     }
                     System.out.println("... End of setup for " + getDescription(d));
