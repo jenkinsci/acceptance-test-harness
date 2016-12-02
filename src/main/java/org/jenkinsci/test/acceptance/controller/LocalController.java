@@ -148,8 +148,12 @@ public abstract class LocalController extends JenkinsController implements LogLi
         return tempDir;
     }
 
+    /**
+     * @deprecated Will not work correctly in Jenkins 2.33 and later. Apparently unused anyway.
+     */
+    @Deprecated
     public File getSlaveJarPath() {
-        return new File(getJenkinsHome(),"war/WEB-INF/slave.jar");
+        return new File(getJenkinsHome(),"war/WEB-INF/slave.jar"); // TODO look for war/WEB-INF/lib/remoting-*.jar instead
     }
 
 
