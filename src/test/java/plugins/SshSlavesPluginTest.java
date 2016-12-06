@@ -44,7 +44,7 @@ import org.junit.Test;
 import com.google.inject.Inject;
 import org.junit.experimental.categories.Category;
 
-@WithPlugins("ssh-slaves")
+@WithPlugins({"ssh-slaves@1.11", "credentials@2.1.10", "ssh-credentials@1.12"})
 @Category(DockerTest.class)
 @WithDocker
 public class SshSlavesPluginTest extends AbstractJUnitTest {

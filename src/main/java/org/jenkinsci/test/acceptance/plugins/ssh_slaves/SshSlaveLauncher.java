@@ -10,7 +10,7 @@ import org.jenkinsci.test.acceptance.po.ComputerLauncher;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.PageObject;
-import org.openqa.selenium.WebElement;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -94,11 +94,13 @@ public class SshSlaveLauncher extends ComputerLauncher {
      * to check whether it has already been rendered in the dropdown.
      */
     private void waitForCredentialVisible(final String credUsername) {
-        waitFor().withTimeout(5, TimeUnit.SECONDS).until(new Callable<Boolean>() {
+        assertTrue(waitFor().withTimeout(5, TimeUnit.SECONDS).until(new Callable<Boolean>() {
             @Override
             public Boolean call() throws Exception {
                 return credentialsId.resolve().getText().contains(credUsername);
             }
-        });
+        }));
+        // Select the new credentials. Control.selectDropdownMenu seems to be YUI-only.
+        credentialsId.select(credUsername);
     }
 }
