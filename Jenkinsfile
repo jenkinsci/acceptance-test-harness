@@ -14,7 +14,7 @@ node('highram&&docker') {
         sh 'docker build --build-arg=uid=$(id -u) --build-arg=gid=$(id -g) -t jenkins/ath src/main/resources/ath-container'
         docker.image('jenkins/ath').inside {
             sh '''
-                eval $(./vnc.sh)
+                eval $(./vnc.sh > /dev/null 2>&1)
                 ./run.sh firefox latest -Dmaven.test.failure.ignore=true -DforkCount=1 -B
             '''
         }

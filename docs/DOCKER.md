@@ -8,7 +8,7 @@ Interactive shell:
 
     $ docker build --build-arg=uid=$(id -u) --build-arg=gid=$(id -g) -t jenkins/ath src/main/resources/ath-container
     $ docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock -v $(pwd):/home/ath-user/ath --user ath-user jenkins/ath bash -c 'cd $HOME/ath && bash'
-    $ eval $(./vnc.sh > /dev/null)
+    $ eval $(./vnc.sh > /dev/null 2>&1)
     $ ./run.sh firefox latest -Dmaven.test.failure.ignore=true -DforkCount=1 -B
 
 Jenkinsfile:
@@ -16,5 +16,5 @@ Jenkinsfile:
     ... // Checkout ATH
     sh 'docker build --build-arg=uid=$(id -u) --build-arg=gid=$(id -g) -t jenkins/ath src/main/resources/ath-container'
     docker.image('jenkins/ath').inside {
-        sh 'eval $(./vnc.sh > /dev/null) && ./run.sh firefox latest -Dmaven.test.failure.ignore=true -DforkCount=1 -B'
+        sh 'eval $(./vnc.sh > /dev/null 2>&1) && ./run.sh firefox latest -Dmaven.test.failure.ignore=true -DforkCount=1 -B'
     }
