@@ -23,6 +23,16 @@ public class CredentialsPage extends ConfigurablePageObject {
         super(j, j.url("credentials/store/system/domain/"+domainName+"/newCredentials"));
     }
 
+    /**
+     * Create a new personal Credential
+     * @param j
+     * @param domainName
+     * @param userName
+     */
+    public CredentialsPage(Jenkins j, String domainName, String userName) {
+        super(j, j.url(String.format("user/%s/credentials/store/user/domain/%s/newCredentials", userName, domainName)));
+    }
+
     public <T extends Credential> T add(Class<T> type) {
         addButton.selectDropdownMenuAlt(type);
         String path = find(by.name("credentials")).getAttribute("path");

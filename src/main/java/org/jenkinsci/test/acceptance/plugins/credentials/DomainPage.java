@@ -15,6 +15,10 @@ public class DomainPage extends ConfigurablePageObject {
         super(j, j.url("credentials/store/system/newDomain"));
     }
 
+    public DomainPage(Jenkins j, String domain) {
+        super(j, j.url(String.format("credentials/store/system/domain/%s/", domain)));
+    }
+
     public Domain addDomain() {
         String path = find(by.name("newDomain")).getAttribute("path");
 
@@ -28,7 +32,19 @@ public class DomainPage extends ConfigurablePageObject {
 
     @Override
     public void save() {
-        clickButton("OK");
+        if (driver.getCurrentUrl().contains("configure")) {
+            clickButton("Save");
+        } else {
+            clickButton("OK");
+        }
+
         assertThat(driver, not(hasContent("This page expects a form submission")));
     }
+
+    public void delete() {
+        visit(url("delete"));
+        elasticSleep(1000);
+        clickButton("Yes");
+    }
+
 }
