@@ -74,7 +74,9 @@ public class ForemanSharedNodeCloudPageArea extends Cloud {
      * @return ForemanCloudPageArea.
      */
     public ForemanSharedNodeCloudPageArea testConnection() {
-        clickButton("Test Connection");
+        Control button = control(by.xpath("//div[@descriptorid='com.redhat.foreman.ForemanSharedNodeCloud']//button[contains(.,'Test " +
+                "Connection')]"));
+        button.click();
         return this;
     }
 
