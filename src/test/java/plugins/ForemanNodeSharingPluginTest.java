@@ -52,7 +52,7 @@ public class ForemanNodeSharingPluginTest extends AbstractJUnitTest {
     private String jobLabelExpression2 = labelExpression2;
 
     private static final int FOREMAN_CLOUD_INIT_WAIT = 180;
-    private static final int PROVISION_TIMEOUT = 360;
+    private static final int PROVISION_TIMEOUT = 480;
     private static final String DEFAULTJOBSLEEPTIME = "15";
 
     /**
@@ -60,6 +60,10 @@ public class ForemanNodeSharingPluginTest extends AbstractJUnitTest {
      * @throws Exception if occurs.
      */
     @Before public void setUp() throws Exception {
+
+        jenkins.runScript("import hudson.slaves.NodeProvisioner; NodeProvisioner.NodeProvisionerInvoker."
+                + "INITIALDELAY = NodeProvisioner.NodeProvisionerInvoker.RECURRENCEPERIOD = 100;");
+
         foreman = dockerForeman.get();
         sshslave1 = docker1.get();
 
@@ -110,7 +114,7 @@ public class ForemanNodeSharingPluginTest extends AbstractJUnitTest {
 
         Build b1 = job1.scheduleBuild();
         Build b2 = job2.scheduleBuild();
-        b1.waitUntilStarted();
+        b1.waitUntilStarted(480);
 
         Docker.cmd("stop").add(foreman.getCid())
                 .popen().verifyOrDieWith("Failed to stop " + foreman.getCid());
@@ -139,9 +143,9 @@ public class ForemanNodeSharingPluginTest extends AbstractJUnitTest {
         job.addUserAxis("X", "1 2 3 4 5");
         job.save();
 
-        MatrixBuild b = job.startBuild().waitUntilFinished(240).as(MatrixBuild.class);
+        MatrixBuild b = job.startBuild().waitUntilFinished(360).as(MatrixBuild.class);
         for (MatrixRun config: b.getConfigurations()) {
-        	config.shouldSucceed();
+            config.shouldSucceed();
         }
 
     }
