@@ -23,6 +23,7 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import org.jenkinsci.test.acceptance.plugins.credentials.BaseStandardCredentials;
+import static org.jenkinsci.test.acceptance.po.CapybaraPortingLayer.by;
 
 /**
  * Indicates that a test requires credentials.
@@ -110,6 +111,9 @@ public @interface WithCredentials {
                     try {
                         CredentialsPage cp = new CredentialsPage(jenkins, ManagedCredentials.DEFAULT_DOMAIN);
                         cp.open();
+                        // wait for default form fields to be present to avoid possible race
+                        // condition when changing to ssh type too fast (happens rarely)
+                        cp.waitFor(by.name("_.scope"));
                         SshPrivateKeyCredential sc = cp.add(SshPrivateKeyCredential.class);
                         sc.username.set(username);
                         sc.selectEnterDirectly().privateKey.set(resource(sshKeyPath).asText());
