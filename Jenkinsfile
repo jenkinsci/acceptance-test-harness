@@ -12,9 +12,10 @@ node('highram&&docker') {
         changelog scm
 
         sh 'docker build --build-arg=uid=$(id -u) --build-arg=gid=$(id -g) -t jenkins/ath src/main/resources/ath-container'
-        docker.image('jenkins/ath').inside {
+        String containerArgs = '-v /var/run/docker.sock:/var/run/docker.sock'
+        docker.image('jenkins/ath').inside(containerArgs) {
             sh '''
-                eval $(./vnc.sh > /dev/null 2>&1)
+                eval $(./vnc.sh)
                 ./run.sh firefox latest -Dmaven.test.failure.ignore=true -DforkCount=1 -B
             '''
         }
