@@ -8,6 +8,7 @@ import org.jenkinsci.test.acceptance.po.*;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+import org.openqa.selenium.WebDriver;
 
 public class CredentialsPage extends ConfigurablePageObject {
     public final Control addButton = control(by.xpath("//select[contains(@class, 'setting-input dropdownList')]"));
@@ -52,5 +53,14 @@ public class CredentialsPage extends ConfigurablePageObject {
         visit(deleteUrl);
         elasticSleep(1000); // configure page requires some time to load
         clickButton("Yes");
+    }
+
+    @Override
+    public WebDriver open() {
+        WebDriver wd = super.open();
+        // wait for default form fields to be present to avoid possible race
+        // condition when changing credentials type too fast (happens rarely)
+        waitFor(by.name("_.scope"));
+        return wd;
     }
 }
