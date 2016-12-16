@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
+import hudson.util.VersionNumber;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.jenkinsci.test.acceptance.Matchers;
@@ -121,10 +122,7 @@ public abstract class ToolInstallation extends PageAreaImpl {
     }
 
     protected static ConfigurablePageObject getPageObject(Jenkins jenkins) {
-        // TODO: change to jenkins.getVersion().isOlderThan(new VersionNumber("2")) after 2.0 is released.
-        // yeah, you could do a number of things here e.g. isNewerThan("1.1000") etc,
-        // but this is fine as it's temporary.
-        return jenkins.getVersion().toString().startsWith("1.")
+       return jenkins.getVersion().isOlderThan(new VersionNumber("2"))
                 ? new JenkinsConfig(jenkins)
                 : new GlobalToolConfig(jenkins);
     }

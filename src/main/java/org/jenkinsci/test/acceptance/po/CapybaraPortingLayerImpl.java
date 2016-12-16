@@ -399,7 +399,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
      * <p/>
      * This is often useful for binding {@link org.jenkinsci.test.acceptance.po.PageArea} by taking the concrete type as a parameter.
      */
-    public <T> T newInstance(Class<T> type, Object... args) {
+    protected <T> T newInstance(Class<T> type, Object... args) {
         try {
             OUTER:
             for (Constructor<?> c : type.getConstructors()) {

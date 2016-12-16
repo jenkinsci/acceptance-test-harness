@@ -34,6 +34,6 @@ public class GradleInstallation extends ToolInstallation {
     }
 
     public static void installGradle(Jenkins jenkins, String name, String version) {
-        ToolInstallation.installTool(jenkins, GradleInstallation.class, name, version);
+        installTool(jenkins, GradleInstallation.class, name, version);
     }
 }

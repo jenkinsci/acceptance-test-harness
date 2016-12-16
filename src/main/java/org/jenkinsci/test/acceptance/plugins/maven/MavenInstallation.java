@@ -51,7 +51,7 @@ public class MavenInstallation extends ToolInstallation {
     }
 
     public static void installMaven(Jenkins jenkins, String name, String version) {
-        ToolInstallation.installTool(jenkins, MavenInstallation.class, name, version);
+        installTool(jenkins, MavenInstallation.class, name, version);
     }
 
     public MavenInstallation(Jenkins context, String path) {
