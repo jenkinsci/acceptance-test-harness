@@ -24,7 +24,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * Tests a multibranch pipeline flow
  */
-@WithPlugins({"git", "workflow-job", "workflow-cps", "workflow-basic-steps", "workflow-durable-task-step", "workflow-multibranch", "github-branch-source"})
+@WithPlugins({"git", "javadoc@1.4", "workflow-job", "workflow-cps", "workflow-basic-steps", "workflow-durable-task-step", "workflow-multibranch", "github-branch-source"})
 public class WorkflowMultibranchTest extends AbstractJUnitTest {
 
     @Before
