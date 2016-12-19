@@ -6,6 +6,7 @@ import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.PageObject;
 
 import javax.inject.Inject;
+import static org.jenkinsci.test.acceptance.po.CapybaraPortingLayer.by;
 
 /**
  * @author jenky-hm
@@ -63,12 +64,9 @@ public class PublishOverSSHGlobalConfig extends PageAreaImpl {
         public final Control addAdvancedConfig = control("advanced-button");
 
         public AdvancedConfig addAdvancedConfig() {
-            String path = createPageArea("instance", new Runnable() {
-                @Override public void run() {
-                    addAdvancedConfig.click();
-                }
-            });
-            return new AdvancedConfig(getPage(), path);
+            addAdvancedConfig.click();
+            String p = last(by.xpath(".//div[@name='instance'][starts-with(@path,'/jenkins-plugins-publish_over_ssh-BapSshPublisherPlugin/')]")).getAttribute("path");
+            return new AdvancedConfig(getPage(), p);
         }
 
         public final Control validate = control("validate-button");
