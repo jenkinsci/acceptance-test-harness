@@ -11,12 +11,20 @@ import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 
 public class DomainPage extends ConfigurablePageObject {
+
+    private static final String SYSTEM_STORE_URL = "credentials/store/system";
+    private static final String CONFIGURE_URL = "configure";
+
+    private final String domainName;
+
     public DomainPage(Jenkins j) {
-        super(j, j.url("credentials/store/system/newDomain"));
+        super(j, j.url(SYSTEM_STORE_URL + "/newDomain"));
+        this.domainName = null;
     }
 
     public DomainPage(Jenkins j, String domain) {
-        super(j, j.url(String.format("credentials/store/system/domain/%s/", domain)));
+        super(j, j.url(String.format("%s/domain/%s/", SYSTEM_STORE_URL, domain)));
+        this.domainName = domain;
     }
 
     public Domain addDomain() {
@@ -27,12 +35,12 @@ public class DomainPage extends ConfigurablePageObject {
 
     @Override
     public URL getConfigUrl() {
-        return url("configure");
+        return url(CONFIGURE_URL);
     }
 
     @Override
     public void save() {
-        if (driver.getCurrentUrl().contains("configure")) {
+        if (this.onDomainConfigurationPage()) {
             clickButton("Save");
         } else {
             clickButton("OK");
@@ -41,9 +49,13 @@ public class DomainPage extends ConfigurablePageObject {
         assertThat(driver, not(hasContent("This page expects a form submission")));
     }
 
+    private boolean onDomainConfigurationPage() {
+        return this.domainName != null && driver.getCurrentUrl().contains(String.format("%s/domain/%s/%s", SYSTEM_STORE_URL, this.domainName, CONFIGURE_URL));
+    }
+
     public void delete() {
         visit(url("delete"));
-        elasticSleep(1000);
+        waitFor(by.button("Yes"));
         clickButton("Yes");
     }
 
