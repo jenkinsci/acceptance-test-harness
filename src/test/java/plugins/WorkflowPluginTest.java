@@ -267,8 +267,8 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         Build b = job.startBuild().shouldSucceed();
 
         String consoleOutput = b.getConsole();
-        Assert.assertThat(consoleOutput, containsString(EXPECTED_OUTPUT_FROM_LIBRARY_SRC));
-        Assert.assertThat(consoleOutput, containsString(EXPECTED_OUTPUT_FROM_LIBRARY_VARS));
+        assertThat(consoleOutput, containsString(EXPECTED_OUTPUT_FROM_LIBRARY_SRC));
+        assertThat(consoleOutput, containsString(EXPECTED_OUTPUT_FROM_LIBRARY_VARS));
     }
 
     private void configureSharedLibrary() {
