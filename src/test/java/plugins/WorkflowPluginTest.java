@@ -68,7 +68,6 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
 
     private static final String SHARED_LIBRARY_NAME = "Greeting";
     private static final String NAME = "myname";
-    private static final String EXPECTED_OUTPUT_FROM_LIBRARY_SRC = "Hello my friend " + NAME;
     private static final String EXPECTED_OUTPUT_FROM_LIBRARY_VARS = "Hello from vars my friend " + NAME;
 
     @Inject private SlaveController slaveController;
@@ -267,7 +266,6 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         Build b = job.startBuild().shouldSucceed();
 
         String consoleOutput = b.getConsole();
-        assertThat(consoleOutput, containsString(EXPECTED_OUTPUT_FROM_LIBRARY_SRC));
         assertThat(consoleOutput, containsString(EXPECTED_OUTPUT_FROM_LIBRARY_VARS));
     }
 
@@ -288,9 +286,6 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
         job.script.set(
                 "@Library('" + SHARED_LIBRARY_NAME + "@master') _\n" +
-                        "\n" +
-                        "def greet = new varyvol.foo.Greeting()\n" +
-                        "greet.printGreeting('" + NAME + "')\n" +
                         "\n" +
                         "otherGreeting('" + NAME + "')");
         job.sandbox.check();
