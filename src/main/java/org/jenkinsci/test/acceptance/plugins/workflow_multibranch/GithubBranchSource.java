@@ -16,9 +16,9 @@ import java.util.concurrent.TimeUnit;
 @Describable("GitHub")
 public class GithubBranchSource extends BranchSource {
 
-    public final Control owner = control(by.name("_.repoOwner"));
-    public final Control repository = control(by.name("_.repository"));
-    public final Control credential = control(by.name("_.scanCredentialsId"));
+    public final Control owner = control("repoOwner");
+    public final Control repository = control("repository");
+    public final Control credential = control("scanCredentialsId");
 
     public GithubBranchSource(WorkflowMultiBranchJob job, String path) {
         super(job, path);

@@ -9,8 +9,8 @@ import org.jenkinsci.test.acceptance.po.PageAreaImpl;
  */
 public class WorkflowGithubSharedLibrary extends WorkflowSharedLibrary {
 
-    public final Control modernScm = control("/retriever[0]");
-    public final Control githubSourceCodeManagement = control("/retriever[0]/scm[1]");
+    public final Control modernScm = control("retriever[0]");
+    public final Control githubSourceCodeManagement = control("retriever[0]/scm[1]");
 
     public WorkflowGithubSharedLibrary(WorkflowSharedLibraryGlobalConfig config, String path) {
         super(config, path);
@@ -22,7 +22,7 @@ public class WorkflowGithubSharedLibrary extends WorkflowSharedLibrary {
         this.githubSourceCodeManagement.waitFor();
         this.githubSourceCodeManagement.click();
 
-        return new GithubBranchSource(this, this.getPath());
+        return new GithubBranchSource(this, this.getPath() + "/retriever[0]/scm[1]");
     }
 
 }

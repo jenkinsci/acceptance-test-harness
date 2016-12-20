@@ -29,7 +29,7 @@ public class WorkflowMultiBranchJob extends FolderItem {
             }
         });
 
-        return newInstance(type, this, path);
+        return newInstance(type, this, path + "/source");
     }
 
     public String getBranchIndexingLog() {
