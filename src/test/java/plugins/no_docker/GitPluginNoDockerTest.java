@@ -26,6 +26,8 @@ package plugins.no_docker;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.git.GitScm;
+import org.jenkinsci.test.acceptance.plugins.git_client.JGitInstallation;
+import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.junit.Test;
 
@@ -34,69 +36,130 @@ import org.junit.Test;
 public class GitPluginNoDockerTest extends AbstractJUnitTest {
 
     private static final String REPO_URL = "git://github.com/jenkinsci/git-plugin.git";
-
-    private Job job;
+    private enum GIT_IMPL {GIT, JGIT};
 
     @Test
-    public void simple_checkout() {
-        job = jenkins.jobs.create();
-        job.configure();
-        job.useScm(GitScm.class).url(REPO_URL);
-        job.addShellStep("test -f pom.xml");
-        job.save();
-
-        job.startBuild().shouldSucceed();
+    public void simple_checkout_git() {
+        assertExecutesFine(generateSimpleJob(GIT_IMPL.GIT), "test -f pom.xml");
     }
 
     @Test
-    public void checkout_branch() {
-        job = jenkins.jobs.create();
-        job.configure();
-        job.useScm(GitScm.class).url(REPO_URL).branch.set("svn");
-        job.addShellStep("test `git rev-parse origin/svn` = `git rev-parse HEAD`");
-        job.save();
-
-        job.startBuild().shouldSucceed();
+    public void simple_checkout_jgit() {
+        assertExecutesFine(generateSimpleJob(GIT_IMPL.JGIT), "test -f pom.xml");
     }
 
     @Test
-    public void name_remote_repo() {
-        job = jenkins.jobs.create();
-        job.configure();
-        job.useScm(GitScm.class).url(REPO_URL).remoteName("custom_origin");
-        job.addShellStep("test -f pom.xml && git remote -v");
-        job.save();
-
-        job.startBuild().shouldSucceed().shouldContainsConsoleOutput("custom_origin\\s+" + REPO_URL);
+    public void checkout_branch_git() {
+        assertExecutesFine(generateJobWithBranch(GIT_IMPL.GIT), "test `git rev-parse origin/svn` = `git rev-parse HEAD`");
     }
 
     @Test
-    public void checkout_local_branch() {
-        job = jenkins.jobs.create();
-        job.configure();
-        job.useScm(GitScm.class).url(REPO_URL).localBranch("selenium_test_branch");
-        job.addShellStep("test `git rev-parse selenium_test_branch` = `git rev-parse HEAD`");
-        job.save();
-
-        job.startBuild().shouldSucceed();
+    public void checkout_branch_jgit() {
+        assertExecutesFine(generateJobWithBranch(GIT_IMPL.JGIT), "test `git rev-parse origin/svn` = `git rev-parse HEAD`");
     }
 
     @Test
-    public void checkout_to_local_dir() {
-        job = jenkins.jobs.create();
-        job.configure();
-        job.useScm(GitScm.class).url(REPO_URL).localDir("local_dir");
-        job.addShellStep("cd local_dir && test -f pom.xml");
-        job.save();
-
-        job.startBuild().shouldSucceed();
+    public void name_remote_repo_git() {
+        assertExecutesFine(generateJobWithRemoteName(GIT_IMPL.GIT), "test -f pom.xml && git remote -v").shouldContainsConsoleOutput("custom_origin\\s+" + REPO_URL);
     }
 
     @Test
-    public void poll_for_changes() {
-        job = jenkins.jobs.create();
-        job.configure();
-        job.useScm(GitScm.class).url(REPO_URL);
+    public void name_remote_repo_jgit() {
+        assertExecutesFine(generateJobWithRemoteName(GIT_IMPL.JGIT), "test -f pom.xml && git remote -v").shouldContainsConsoleOutput("custom_origin\\s+" + REPO_URL);
+    }
+
+    @Test
+    public void checkout_local_branch_git() {
+        assertExecutesFine(generateJobWithLocalBranch(GIT_IMPL.GIT), "test `git rev-parse selenium_test_branch` = `git rev-parse HEAD`");
+    }
+
+    @Test
+    public void checkout_local_branch_jgit() {
+        assertExecutesFine(generateJobWithLocalBranch(GIT_IMPL.JGIT), "test `git rev-parse selenium_test_branch` = `git rev-parse HEAD`");
+    }
+
+    @Test
+    public void checkout_to_local_dir_git() {
+        assertExecutesFine(generateJobWithLocalDir(GIT_IMPL.GIT), "cd local_dir && test -f pom.xml");
+    }
+
+    @Test
+    public void checkout_to_local_dir_jgit() {
+        assertExecutesFine(generateJobWithLocalDir(GIT_IMPL.JGIT), "cd local_dir && test -f pom.xml");
+    }
+
+    @Test
+    public void poll_for_changes_git() {
+        assertPoolingWorks(generateSimpleJob(GIT_IMPL.GIT));
+    }
+
+    @Test
+    public void poll_for_changes_jgit() {
+        assertPoolingWorks(generateSimpleJob(GIT_IMPL.JGIT));
+    }
+
+    private Job generateJob(GIT_IMPL type) {
+        if (type.equals(GIT_IMPL.JGIT)) {
+            JGitInstallation.addJGit(jenkins);
+            find(by.button("Save")).click();
+        }
+        Job job = jenkins.jobs.create();
+        return job;
+    }
+
+    private GitScm generateSCM(Job job) {
+        return job.useScm(GitScm.class).url(REPO_URL);
+    }
+
+    private void useJGitIfNeccesary(GIT_IMPL type, GitScm scm) {
+        if (type.equals(GIT_IMPL.JGIT)) {
+            scm.tool("jgit");
+        }
+    }
+
+    private Job generateSimpleJob(GIT_IMPL type) {
+        Job job = generateJob(type);
+        GitScm scm = generateSCM(job);
+        useJGitIfNeccesary(type, scm);
+        return job;
+    }
+
+    private Job generateJobWithBranch(GIT_IMPL type) {
+        Job job = generateJob(type);
+        GitScm scm = generateSCM(job).branch("svn");
+        useJGitIfNeccesary(type, scm);
+        return job;
+    }
+
+    private Job generateJobWithRemoteName(GIT_IMPL type) {
+        Job job = generateJob(type);
+        GitScm scm = generateSCM(job).remoteName("custom_origin");
+        useJGitIfNeccesary(type, scm);
+        return job;
+    }
+
+    private Job generateJobWithLocalBranch(GIT_IMPL type) {
+        Job job = generateJob(type);
+        GitScm scm = generateSCM(job).localBranch("selenium_test_branch");
+        useJGitIfNeccesary(type, scm);
+        return job;
+    }
+
+    private Job generateJobWithLocalDir(GIT_IMPL type) {
+        Job job = generateJob(type);
+        GitScm scm = generateSCM(job).localDir("local_dir");
+        useJGitIfNeccesary(type, scm);
+        return job;
+    }
+
+    private Build assertExecutesFine(Job job, String shellStep) {
+        job.addShellStep(shellStep);
+        job.save();
+
+        return job.startBuild().shouldSucceed();
+    }
+
+    private void assertPoolingWorks(Job job) {
         job.pollScm().schedule("* * * * *");
         job.addShellStep("test -f pom.xml");
         job.save();

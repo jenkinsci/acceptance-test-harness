@@ -97,7 +97,7 @@ public class GitPluginTest extends AbstractJUnitTest {
         job.useScm(GitScm.class)
                 .url(repoUrl)
                 .credentials(USERNAME)
-                .branch.set("svn");
+                .branch("svn");
         job.addShellStep("test `git rev-parse origin/svn` = `git rev-parse HEAD`");
         job.save();
 
