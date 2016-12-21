@@ -70,7 +70,7 @@ public class CredentialsPage extends ConfigurablePageObject {
         WebDriver wd = super.open();
         // wait for default form fields to be present to avoid possible race
         // condition when changing credentials type too fast (happens rarely)
-        waitFor(by.name("_.scope"));
+        waitFor(by.name("_.id"));
         return wd;
     }
 }
