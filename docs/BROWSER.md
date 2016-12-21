@@ -24,6 +24,8 @@ Therefore, to run tests with Safari, you'd execute:
 
 See `FallbackConfig.java` for how the browser is selected.
 
+Please note that since Selenium 2.x is the version used, you will need the Firefox ESR in order to run the tests against this browser. For more information about Selenium supported platforms visit [this page](http://www.seleniumhq.org/about/platforms.jsp).
+
 ## Advanced Browser Configuration
 [This test harness internally uses Guice](GUICE.md) to wire tests, and that is how we control
 WebDriver. To further fine-tune how a browser is selected and configured, bind `WebDriver` to
