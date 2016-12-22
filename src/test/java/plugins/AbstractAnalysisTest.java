@@ -758,6 +758,16 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
     }
 
     /**
+     * Creates a new Dashboard-View ready to be configured
+     *
+     * @return The view to be configured.
+     */
+    protected DashboardView addDashboardViewToConfigure() {
+        DashboardView view = createNewViewForAllJobs(DashboardView.class);
+        return view;
+    }
+
+    /**
      * Creates a new Dashboard-View and adds the given portlet as "bottom portlet".
      *
      * @param portlet The Portlet that shall be added.
