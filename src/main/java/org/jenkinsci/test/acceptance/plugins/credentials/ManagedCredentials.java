@@ -21,7 +21,11 @@ public class ManagedCredentials extends ContainerPageObject {
     }
 
     public ManagedCredentials(Jenkins j, String domain) {
-        super(j, j.url("credentials/store/system/domain/"+domain+"/"));
+        super(j, j.url("credentials/store/system/domain/" + domain + "/"));
+    }
+
+    public ManagedCredentials(Jenkins j, String domain, String user) {
+        super(j, j.url(String.format("user/%s/credentials/store/user/domain/%s/", user, domain)));
     }
 
     /**
@@ -48,8 +52,6 @@ public class ManagedCredentials extends ContainerPageObject {
      * @return
      */
     public String credentialById(String name) {
-        //String href = checkIfCredentialsExist(name).resolve().getAttribute("href");
-        //return href.substring(href.lastIndexOf('/'));
         return checkIfCredentialsExist(name).resolve().getAttribute("href");
     }
 }
