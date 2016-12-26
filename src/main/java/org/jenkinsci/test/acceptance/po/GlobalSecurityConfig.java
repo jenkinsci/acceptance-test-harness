@@ -25,6 +25,8 @@ package org.jenkinsci.test.acceptance.po;
 
 import java.net.URL;
 
+import org.jenkinsci.test.acceptance.plugins.authorize_project.BuildAccessControl;
+import org.jenkinsci.test.acceptance.plugins.workflow_multibranch.BranchSource;
 import org.openqa.selenium.WebElement;
 
 /**
@@ -49,6 +51,16 @@ public class GlobalSecurityConfig extends ContainerPageObject {
     public <T extends AuthorizationStrategy> T useAuthorizationStrategy(Class<T> type) {
         control("/useSecurity").check();
         return selectFromRadioGroup(type);
+    }
+
+    public <T extends BuildAccessControl> T addBuildAccessControl(final Class<T> type) {
+        final String path = createPageArea("/jenkins-security-QueueItemAuthenticatorConfiguration/authenticators", new Runnable() {
+            @Override public void run() {
+                control(by.path("/jenkins-security-QueueItemAuthenticatorConfiguration/hetero-list-add[authenticators]")).selectDropdownMenu(type);
+            }
+        });
+
+        return newInstance(type, this, path);
     }
 
 
