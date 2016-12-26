@@ -4,6 +4,7 @@ import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.WorkflowMultiBranchJob;
+import org.jenkinsci.test.acceptance.plugins.workflow_shared_library.WorkflowSharedLibrary;
 import org.openqa.selenium.support.ui.Select;
 
 import java.util.concurrent.Callable;
@@ -15,12 +16,16 @@ import java.util.concurrent.TimeUnit;
 @Describable("GitHub")
 public class GithubBranchSource extends BranchSource {
 
-    public final Control owner = control("source/repoOwner");
-    public final Control repository = control("source/repository");
-    public final Control credential = control("source/scanCredentialsId");
+    public final Control owner = control("repoOwner");
+    public final Control repository = control("repository");
+    public final Control credential = control("scanCredentialsId");
 
     public GithubBranchSource(WorkflowMultiBranchJob job, String path) {
         super(job, path);
+    }
+
+    public GithubBranchSource(WorkflowSharedLibrary sharedLibrary, String path) {
+        super(sharedLibrary, path);
     }
 
     public GithubBranchSource owner(final String owner) {
