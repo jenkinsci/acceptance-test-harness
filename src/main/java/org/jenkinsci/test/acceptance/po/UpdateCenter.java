@@ -2,7 +2,6 @@ package org.jenkinsci.test.acceptance.po;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Iterables;
-
 import org.apache.commons.lang3.ArrayUtils;
 import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.update_center.PluginSpec;
@@ -71,7 +70,8 @@ public class UpdateCenter extends ContainerPageObject {
      */
     public boolean waitForInstallationToComplete(final PluginSpec... specs) throws InstallationFailedException {
         open();
-        waitFor(driver, not(Matchers.hasContent("Pending")), 60); // Wait for all plugins to get installed
+        // Wait for all plugins to get installed
+        waitFor(driver, not(Matchers.hasElement(by.xpath("//*[@id='log']//*[contains(.,'Pending') or contains(.,'Installing')]"))), 60);
 
         String uc = pageText(driver);
         // "IOException: Failed to dynamically deploy this plugin" can be reported (by at least some Jenkins versions)
