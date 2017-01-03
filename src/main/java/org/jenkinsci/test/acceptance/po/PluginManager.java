@@ -190,7 +190,8 @@ public class PluginManager extends ContainerPageObject {
             if (!someChangeRequired) {
                 return false;
             }
-            List<PluginMetadata> pluginToBeInstalled = ucmd.get().transitiveDependenciesOf(jenkins, Arrays.asList(specs));
+            List<PluginMetadata> pluginToBeInstalled = ucmd.get().transitiveDependenciesIncludingOptionalsOf(jenkins, Arrays.asList(specs));
+
             for (PluginMetadata newPlugin: pluginToBeInstalled) {
                 final String name = newPlugin.getName();
                 String requiredVersion = candidates.get(name);
@@ -213,41 +214,70 @@ public class PluginManager extends ContainerPageObject {
                 }
             }
         } else {
-            visit("available");
+            List<PluginSpec> allRequiredPlugins = Arrays.asList(specs);
+            Map<Integer, List<String>> optionalDependencies = ucmd.get().optionalDependenciesOf(jenkins, allRequiredPlugins);
 
-            final ArrayList<PluginSpec> update = new ArrayList<>();
-            for (final PluginSpec n : specs) {
-                switch (installationStatus(n)) {
-                    case NOT_INSTALLED:
-                        tickPluginToInstall(n);
-                    break;
-                    case OUTDATED:
-                        update.add(n);
-                    break;
-                    case UP_TO_DATE:
-                        // Nothing to do
-                    break;
-                    default: assert false: "Unreachable";
+            for (List<String> optionalDependenciesLevel : optionalDependencies.values()) {
+                List<PluginSpec> optionalDependenciesToInstall = new ArrayList<>();
+                List<PluginSpec> specsWithoutOptional = new ArrayList<>();
+
+                for (PluginSpec requiredSpec : allRequiredPlugins) {
+                    if (optionalDependenciesLevel.contains(requiredSpec.getName())) {
+                        optionalDependenciesToInstall.add(requiredSpec);
+                    } else {
+                        specsWithoutOptional.add(requiredSpec);
+                    }
+                }
+
+                allRequiredPlugins = specsWithoutOptional;
+
+                if (!optionalDependenciesToInstall.isEmpty()) {
+                    installOrUpdatePlugins(optionalDependenciesToInstall);
+
+                    // Jenkins will be restarted if necessary
+                    new UpdateCenter(jenkins).waitForInstallationToComplete(optionalDependenciesToInstall.toArray(new PluginSpec[]{}));
                 }
             }
 
-            clickButton("Install");
-
-            // Plugins that are already installed in older version will be updated
-            System.out.println("Plugins to be updated: " + update);
-            if (!update.isEmpty()) {
-                visit(""); // Updates tab
-                for (PluginSpec n : update) {
-                    tickPluginToInstall(n);
-                }
-                clickButton("Download now and install after restart");
-            }
+            installOrUpdatePlugins(allRequiredPlugins);
         }
 
         // Jenkins will be restarted if necessary
         new UpdateCenter(jenkins).waitForInstallationToComplete(specs);
 
         return false;
+    }
+
+    private void installOrUpdatePlugins(List<PluginSpec> plugins) {
+        visit("available");
+
+        final ArrayList<PluginSpec> update = new ArrayList<>();
+        for (final PluginSpec n : plugins) {
+            switch (installationStatus(n)) {
+                case NOT_INSTALLED:
+                    tickPluginToInstall(n);
+                    break;
+                case OUTDATED:
+                    update.add(n);
+                    break;
+                case UP_TO_DATE:
+                    // Nothing to do
+                    break;
+                default: assert false: "Unreachable";
+            }
+        }
+
+        clickButton("Install");
+
+        // Plugins that are already installed in older version will be updated
+        System.out.println("Plugins to be updated: " + update);
+        if (!update.isEmpty()) {
+            visit(""); // Updates tab
+            for (PluginSpec n : update) {
+                tickPluginToInstall(n);
+            }
+            clickButton("Download now and install after restart");
+        }
     }
 
     private void tickPluginToInstall(PluginSpec spec) {
