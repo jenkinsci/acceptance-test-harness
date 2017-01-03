@@ -15,6 +15,7 @@ import org.jenkinsci.test.acceptance.plugins.warnings.WarningsAction;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsBuildSettings;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsColumn;
 import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.po.Container;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.FreeStyleMultiBranchJob;
 import org.jenkinsci.test.acceptance.po.Job;
@@ -81,13 +82,13 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
     }
 
     @Override
-    protected FreeStyleJob createFreeStyleJob() {
+    protected FreeStyleJob createFreeStyleJob(final Container owner) {
         FreeStyleJob job = createFreeStyleJob(new AnalysisConfigurator<WarningsBuildSettings>() {
             @Override
             public void configure(WarningsBuildSettings settings) {
                 settings.addConsoleParser(JAVA_TITLE);
             }
-        });
+        }, owner);
         catWarningsToConsole(job);
         return job;
     }
@@ -242,7 +243,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
                         settings.addWorkspaceScanner(MS_BUILD_ID, "**/*");
                         settings.addWorkspaceScanner(JAVA_DOC_ID, "**/*");
                     }
-                });
+                }, jenkins);
 
         // TODO: run a build and verify the results
     }
@@ -339,7 +340,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
                     public void configure(WarningsBuildSettings settings) {
                         settings.addConsoleParser("GNU C Compiler 4 (gcc)");
                     }
-                });
+                }, jenkins);
 
         job.configure();
         job.addUserAxis("user_axis", "one two three");
@@ -437,8 +438,19 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         return createFreeStyleJob(SEVERAL_PARSERS_FILE_FULL_PATH, buildConfigurator);
     }
 
-    private FreeStyleJob createFreeStyleJob(final String resourceToCopy, final AnalysisConfigurator<WarningsBuildSettings> buildConfigurator) {
-        return setupJob(resourceToCopy, FreeStyleJob.class, WarningsBuildSettings.class, buildConfigurator);
+    private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<WarningsBuildSettings> buildConfigurator,
+            final Container owner) {
+        return createFreeStyleJob(SEVERAL_PARSERS_FILE_FULL_PATH, buildConfigurator, owner);
+    }
+
+    private FreeStyleJob createFreeStyleJob(final String resourceToCopy,
+            final AnalysisConfigurator<WarningsBuildSettings> buildConfigurator) {
+        return createFreeStyleJob(resourceToCopy, buildConfigurator, jenkins);
+    }
+
+    private FreeStyleJob createFreeStyleJob(final String resourceToCopy,
+            final AnalysisConfigurator<WarningsBuildSettings> buildConfigurator, final Container owner) {
+        return setupJob(resourceToCopy, FreeStyleJob.class, WarningsBuildSettings.class, buildConfigurator, owner);
     }
 
     /**
@@ -466,7 +478,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
     }
 
     private FreeStyleJob createNoFilesFreeStyleJob(final AnalysisConfigurator<WarningsBuildSettings> configurator) {
-        return setupJob(null, FreeStyleJob.class, WarningsBuildSettings.class, configurator);
+        return createFreeStyleJob(null, configurator, jenkins);
     }
 
     /**
@@ -504,7 +516,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         catWarningsToConsole(job);
         buildJobAndWait(job).shouldSucceed();
 
-        ListView view = addListViewColumn(WarningsColumn.class);
+        ListView view = addListViewColumn(WarningsColumn.class, jenkins);
 
         assertValidLink(job.name);
         view.delete();
@@ -512,7 +524,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
 
     private MatrixProject createMatrixProject() {
         return setupJob(SEVERAL_PARSERS_FILE_FULL_PATH, MatrixProject.class,
-                WarningsBuildSettings.class, create3ParserConfiguration());
+                WarningsBuildSettings.class, create3ParserConfiguration(), jenkins);
     }
 
     private void assertValidLink(final String jobName) {

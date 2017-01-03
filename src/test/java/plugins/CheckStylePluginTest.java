@@ -16,6 +16,7 @@ import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Build.Result;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
+import org.jenkinsci.test.acceptance.po.Container;
 import org.jenkinsci.test.acceptance.po.Node;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
@@ -55,13 +56,13 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
     }
 
     @Override
-    protected FreeStyleJob createFreeStyleJob() {
+    protected FreeStyleJob createFreeStyleJob(final Container owner) {
         return createFreeStyleJob(new AnalysisConfigurator<CheckStyleFreestyleSettings>() {
             @Override
             public void configure(CheckStyleFreestyleSettings settings) {
                 settings.pattern.set(PATTERN_WITH_776_WARNINGS);
             }
-        });
+        }, owner);
     }
 
     @Override
@@ -146,12 +147,26 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
         verifyReceivedMail("Checkstyle: FAILURE", "Checkstyle: 776-0-776");
     }
 
+    private FreeStyleJob createFreeStyleJob() {
+        return createFreeStyleJob(jenkins);
+    }
+
     private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<CheckStyleFreestyleSettings> buildConfigurator) {
-        return createFreeStyleJob(FILE_WITH_776_WARNINGS, buildConfigurator);
+        return createFreeStyleJob(buildConfigurator, jenkins);
+    }
+
+    private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<CheckStyleFreestyleSettings> buildConfigurator,
+            final Container owner) {
+        return createFreeStyleJob(FILE_WITH_776_WARNINGS, buildConfigurator, owner);
     }
 
     private FreeStyleJob createFreeStyleJob(final String fileName, final AnalysisConfigurator<CheckStyleFreestyleSettings> buildConfigurator) {
-        return setupJob(fileName, FreeStyleJob.class, CheckStyleFreestyleSettings.class, buildConfigurator);
+        return createFreeStyleJob(fileName, buildConfigurator, jenkins);
+    }
+
+    private FreeStyleJob createFreeStyleJob(final String fileName, final AnalysisConfigurator<CheckStyleFreestyleSettings> buildConfigurator,
+            final Container owner) {
+        return setupJob(fileName, FreeStyleJob.class, CheckStyleFreestyleSettings.class, buildConfigurator, owner);
     }
 
     /**
@@ -371,7 +386,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
             }
         };
         FreeStyleJob job = setupJob(CHECKSTYLE_PLUGIN_ROOT + "sample_checkstyle_project", FreeStyleJob.class,
-                CheckStyleFreestyleSettings.class, buildConfigurator, "clean package checkstyle:checkstyle"
+                CheckStyleFreestyleSettings.class, buildConfigurator, "clean package checkstyle:checkstyle", jenkins
         );
 
         Build build = buildSuccessfulJob(job);

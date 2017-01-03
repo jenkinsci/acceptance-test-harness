@@ -1,20 +1,21 @@
 package org.jenkinsci.test.acceptance.po;
 
-import com.google.inject.Injector;
-import org.apache.commons.io.IOUtils;
-import org.jenkinsci.test.acceptance.plugins.workflow_multibranch.BranchSource;
-
 import java.io.IOException;
 import java.net.URL;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.io.IOUtils;
+import org.jenkinsci.test.acceptance.plugins.workflow_multibranch.BranchSource;
+
+import com.google.inject.Injector;
 
 /**
  * A pipeline multi-branch job (requires installation of multi-branch-project-plugin).
  *
  */
 @Describable("org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject")
-public class WorkflowMultiBranchJob extends FolderItem {
+public class WorkflowMultiBranchJob extends Folder {
 
     public WorkflowMultiBranchJob(Injector injector, URL url, String name) {
         super(injector, url, name);
@@ -54,7 +55,7 @@ public class WorkflowMultiBranchJob extends FolderItem {
     }
 
     public WorkflowJob getJob(final String name) {
-        return this.jobs.get(WorkflowJob.class, name);
+        return this.getJobs().get(WorkflowJob.class, name);
     }
 
 }

@@ -24,7 +24,6 @@ public abstract class AnalysisAction extends ContainerPageObject {
     private final String pluginUrl;
     private final ContainerPageObject parent;
     private final String plugin;
-    private final String parentName;
 
     /**
      * Creates a new instance of a static analysis action.
@@ -33,7 +32,7 @@ public abstract class AnalysisAction extends ContainerPageObject {
      * @param plugin plug-in name
      */
     public AnalysisAction(final Build parent, final String plugin) {
-        this(plugin + "Result", plugin, parent, parent.getName());
+        this(plugin + "Result", plugin, parent);
     }
 
     /**
@@ -43,7 +42,7 @@ public abstract class AnalysisAction extends ContainerPageObject {
      * @param plugin Path to plugin without / at the end
      */
     public AnalysisAction(final Job parent, final String plugin) {
-        this(plugin, plugin, parent, parent.name);
+        this(plugin, plugin, parent);
     }
 
     /**
@@ -55,13 +54,12 @@ public abstract class AnalysisAction extends ContainerPageObject {
         return parent;
     }
 
-    private AnalysisAction(final String url, final String pluginUrl, final ContainerPageObject parent, final String parentName) {
+    private AnalysisAction(final String url, final String pluginUrl, final ContainerPageObject parent) {
         super(parent, parent.url(url + '/'));
 
         this.pluginUrl = pluginUrl;
         this.parent = parent;
         plugin = url;
-        this.parentName = parentName;
     }
 
     /**
@@ -84,15 +82,6 @@ public abstract class AnalysisAction extends ContainerPageObject {
      * @return class of the view column
      */
     public abstract Class<? extends AbstractListViewColumn> getViewColumn();
-
-    /**
-     * Returns the human readable name of the parent of this action.
-     *
-     * @return the parent name
-     */
-    public String getParentName() {
-        return parentName;
-    }
 
     /**
      * Returns the human readable name of this action.

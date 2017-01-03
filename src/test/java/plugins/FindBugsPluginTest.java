@@ -37,6 +37,7 @@ import org.jenkinsci.test.acceptance.plugins.findbugs.FindBugsFreestyleSettings;
 import org.jenkinsci.test.acceptance.plugins.findbugs.FindBugsMavenSettings;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.po.Container;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.Node;
@@ -79,13 +80,13 @@ public class FindBugsPluginTest extends AbstractAnalysisTest<FindBugsAction> {
     }
 
     @Override
-    protected FreeStyleJob createFreeStyleJob() {
+    protected FreeStyleJob createFreeStyleJob(final Container owner) {
         return createFreeStyleJob(new AnalysisConfigurator<FindBugsFreestyleSettings>() {
             @Override
             public void configure(FindBugsFreestyleSettings settings) {
                 settings.pattern.set(PATTERN_WITH_6_WARNINGS);
             }
-        });
+        }, owner);
     }
 
     @Override
@@ -122,12 +123,27 @@ public class FindBugsPluginTest extends AbstractAnalysisTest<FindBugsAction> {
         verifyReceivedMail("FindBugs: FAILURE", "FindBugs: 6-0-6");
     }
 
+    private FreeStyleJob createFreeStyleJob() {
+        return createFreeStyleJob(jenkins);
+    }
+
+    private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<FindBugsFreestyleSettings> buildConfigurator,
+            final Container owner) {
+        return createFreeStyleJob(FILE_WITH_6_WARNINGS, buildConfigurator, owner);
+    }
+
     private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<FindBugsFreestyleSettings> buildConfigurator) {
         return createFreeStyleJob(FILE_WITH_6_WARNINGS, buildConfigurator);
     }
 
-    private FreeStyleJob createFreeStyleJob(final String file, final AnalysisConfigurator<FindBugsFreestyleSettings> buildConfigurator) {
-        return setupJob(file, FreeStyleJob.class, FindBugsFreestyleSettings.class, buildConfigurator);
+    private FreeStyleJob createFreeStyleJob(final String file,
+            final AnalysisConfigurator<FindBugsFreestyleSettings> buildConfigurator) {
+        return createFreeStyleJob(file, buildConfigurator, jenkins);
+    }
+
+    private FreeStyleJob createFreeStyleJob(final String file,
+            final AnalysisConfigurator<FindBugsFreestyleSettings> buildConfigurator, final Container owner) {
+        return setupJob(file, FreeStyleJob.class, FindBugsFreestyleSettings.class, buildConfigurator, owner);
     }
 
     /**
@@ -279,7 +295,7 @@ public class FindBugsPluginTest extends AbstractAnalysisTest<FindBugsAction> {
             }
         };
         FreeStyleJob job = setupJob("/findbugs_plugin/sample_findbugs_project", FreeStyleJob.class,
-                FindBugsFreestyleSettings.class, buildConfigurator, "clean package findbugs:findbugs");
+                FindBugsFreestyleSettings.class, buildConfigurator, "clean package findbugs:findbugs", jenkins);
 
         Build build = buildSuccessfulJob(job);
 

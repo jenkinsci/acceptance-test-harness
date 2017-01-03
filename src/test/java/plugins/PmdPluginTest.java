@@ -6,18 +6,15 @@ import java.util.TreeMap;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
-import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.plugins.pmd.PmdAction;
-import org.jenkinsci.test.acceptance.plugins.pmd.PmdColumn;
 import org.jenkinsci.test.acceptance.plugins.pmd.PmdFreestyleSettings;
 import org.jenkinsci.test.acceptance.plugins.pmd.PmdMavenSettings;
-import org.jenkinsci.test.acceptance.plugins.pmd.PmdWarningsPortlet;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Build.Result;
+import org.jenkinsci.test.acceptance.po.Container;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.ListView;
 import org.jenkinsci.test.acceptance.po.Node;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
@@ -25,8 +22,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
@@ -63,13 +58,13 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
     }
 
     @Override
-    protected FreeStyleJob createFreeStyleJob() {
+    protected FreeStyleJob createFreeStyleJob(final Container owner) {
         return createFreeStyleJob(FILE_WITH_9_WARNINGS, new AnalysisConfigurator<PmdFreestyleSettings>() {
             @Override
             public void configure(PmdFreestyleSettings settings) {
                 settings.pattern.set(PATTERN_WITH_9_WARNINGS);
             }
-        });
+        }, owner);
     }
 
     @Override
@@ -159,12 +154,26 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
         assertThatBuildHasNoWarnings(lastBuild);
     }
 
+    private FreeStyleJob createFreeStyleJob() {
+        return createFreeStyleJob(jenkins);
+    }
+
+    private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<PmdFreestyleSettings> buildConfigurator,
+            final Container owner) {
+        return createFreeStyleJob(FILE_WITHOUT_WARNINGS, buildConfigurator, owner);
+    }
+
     private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<PmdFreestyleSettings> buildConfigurator) {
         return createFreeStyleJob(FILE_WITHOUT_WARNINGS, buildConfigurator);
     }
 
     private FreeStyleJob createFreeStyleJob(final String fileName, final AnalysisConfigurator<PmdFreestyleSettings> buildConfigurator) {
-        return setupJob(fileName, FreeStyleJob.class, PmdFreestyleSettings.class, buildConfigurator);
+        return createFreeStyleJob(fileName, buildConfigurator, jenkins);
+    }
+
+    private FreeStyleJob createFreeStyleJob(final String fileName,
+            final AnalysisConfigurator<PmdFreestyleSettings> buildConfigurator, final Container owner) {
+        return setupJob(fileName, FreeStyleJob.class, PmdFreestyleSettings.class, buildConfigurator, owner);
     }
 
     /**
@@ -363,7 +372,7 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
             }
         };
         FreeStyleJob job = setupJob(PLUGIN_ROOT + "sample_pmd_project", FreeStyleJob.class,
-                PmdFreestyleSettings.class, buildConfigurator, "clean package pmd:pmd");
+                PmdFreestyleSettings.class, buildConfigurator, "clean package pmd:pmd", jenkins);
 
         Build build = buildSuccessfulJob(job);
 

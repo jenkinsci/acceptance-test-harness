@@ -20,6 +20,7 @@ import org.jenkinsci.test.acceptance.plugins.pmd.PmdFreestyleSettings;
 import org.jenkinsci.test.acceptance.plugins.tasks.TasksFreestyleSettings;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsBuildSettings;
 import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.po.Container;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.ListView;
@@ -76,8 +77,8 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
     }
 
     @Override
-    protected FreeStyleJob createFreeStyleJob() {
-        return createJob(ANALYSIS_COLLECTOR_PLUGIN_RESOURCES, true);
+    protected FreeStyleJob createFreeStyleJob(final Container owner) {
+        return createJob(ANALYSIS_COLLECTOR_PLUGIN_RESOURCES, true, owner);
     }
 
     @Override
@@ -425,8 +426,17 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
         return action;
     }
 
+    private FreeStyleJob createFreeStyleJob() {
+        return createFreeStyleJob(jenkins);
+    }
+
     private FreeStyleJob createJob(final String resourceToCopy, final boolean addAnalysisPublisher) {
-        FreeStyleJob job = jenkins.jobs.create();
+        return createJob(resourceToCopy, addAnalysisPublisher, jenkins);
+    }
+
+    private FreeStyleJob createJob(final String resourceToCopy, final boolean addAnalysisPublisher,
+            final Container owner) {
+        FreeStyleJob job = owner.getJobs().create();
         job.configure();
         job.copyResource(resourceToCopy);
         job.addPublisher(CheckStyleFreestyleSettings.class);
