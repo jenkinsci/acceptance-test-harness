@@ -493,22 +493,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         assertThat(driver, hasContent("Maven Warnings: 0"));
     }
 
-    /**
-     * Sets up a list view with a warnings column. Builds a freestyle job and checks if the column shows the correct
-     * number of warnings and provides a direct link to the actual warning results.
-     */
-    @Test
-    public void should_set_warnings_count_in_list_view_column_for_freestyle_project() {
-        FreeStyleJob job = createFreeStyleJobWith3Parsers();
-        catWarningsToConsole(job);
-        buildSuccessfulJob(job);
-
-        ListView view = addListViewColumn(WarningsColumn.class);
-
-        assertValidLink(job.name);
-        view.delete();
-    }
-
+    // TODO: check if this could be pulled up, too.
     /**
      * Sets up a list view with a warnings column. Builds a matrix job and checks if the column shows the correct number
      * of warnings and provides a direct link to the actual warning results.

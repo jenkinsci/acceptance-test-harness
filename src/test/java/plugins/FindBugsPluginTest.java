@@ -32,25 +32,19 @@ import java.util.concurrent.ExecutionException;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
-import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
 import org.jenkinsci.test.acceptance.plugins.findbugs.FindBugsAction;
-import org.jenkinsci.test.acceptance.plugins.findbugs.FindBugsColumn;
 import org.jenkinsci.test.acceptance.plugins.findbugs.FindBugsFreestyleSettings;
 import org.jenkinsci.test.acceptance.plugins.findbugs.FindBugsMavenSettings;
-import org.jenkinsci.test.acceptance.plugins.findbugs.FindBugsPortlet;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.ListView;
 import org.jenkinsci.test.acceptance.po.Node;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 import org.xml.sax.SAXException;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -59,7 +53,6 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
 import static org.junit.Assume.*;
 
 import hudson.util.VersionNumber;
-
 
 /**
  * Acceptance tests for the FindBugs plugin.
@@ -382,46 +375,5 @@ public class FindBugsPluginTest extends AbstractAnalysisTest<FindBugsAction> {
         assertThat(job, hasAction(actionName));
         assertThat(job.getLastBuild(), hasAction(actionName));
         assertThat(build, hasAction(actionName));
-    }
-
-    /**
-     * Sets up a list view with a warnings column. Builds a job and checks if the column shows the correct number of
-     * warnings and provides a direct link to the actual warning results.
-     */
-    @Test @Issue("24436")
-    public void should_set_warnings_count_in_list_view_column() {
-        MavenModuleSet job = createMavenJob();
-        buildJobAndWait(job).shouldSucceed();
-
-        ListView view = addListViewColumn(FindBugsColumn.class);
-
-        assertValidLink(job.name);
-        view.delete();
-    }
-
-    /**
-     * Sets up a dashboard view with a warnings-per-project portlet. Builds a job and checks if the portlet shows the
-     * correct number of warnings and provides a direct link to the actual warning results.
-     */
-    @Test @WithPlugins("dashboard-view")
-    public void should_set_warnings_count_in_dashboard_portlet() {
-        MavenModuleSet job = createMavenJob();
-        buildSuccessfulJob(job);
-
-        DashboardView view = addDashboardViewAndBottomPortlet(FindBugsPortlet.class);
-
-        assertValidLink(job.name);
-        view.delete();
-    }
-
-    private void assertValidLink(final String jobName) {
-        By warningsLinkMatcher = by.css("a[href$='job/" + jobName + "/findbugs']");
-
-        assertThat(jenkins.all(warningsLinkMatcher).size(), is(1));
-        WebElement link = jenkins.getElement(warningsLinkMatcher);
-        assertThat(link.getText().trim(), is("1"));
-
-        link.click();
-        assertThat(driver, hasContent("FindBugs Result"));
     }
 }

@@ -3,15 +3,11 @@ package plugins;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckStyleAction;
-import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckStyleColumn;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckStyleFreestyleSettings;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckStyleMavenSettings;
-import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckStylePortlet;
-import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
 import org.jenkinsci.test.acceptance.plugins.envinject.EnvInjectConfig;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.plugins.parameterized_trigger.BuildTriggerConfig;
@@ -20,15 +16,11 @@ import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Build.Result;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.ListView;
 import org.jenkinsci.test.acceptance.po.Node;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
@@ -64,13 +56,12 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
 
     @Override
     protected FreeStyleJob createFreeStyleJob() {
-        AnalysisConfigurator<CheckStyleFreestyleSettings> buildConfigurator = new AnalysisConfigurator<CheckStyleFreestyleSettings>() {
+        return createFreeStyleJob(new AnalysisConfigurator<CheckStyleFreestyleSettings>() {
             @Override
             public void configure(CheckStyleFreestyleSettings settings) {
                 settings.pattern.set(PATTERN_WITH_776_WARNINGS);
             }
-        };
-        return createFreeStyleJob(buildConfigurator);
+        });
     }
 
     @Override
@@ -505,48 +496,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
         assertThatCheckStyleResultExists(job, lastBuild);
     }
 
-    /**
-     * Sets up a list view with a warnings column. Builds a job and checks if the column shows the correct number of
-     * warnings and provides a direct link to the actual warning results.
-     */
-    @Test @Category(SmokeTest.class) @Issue("JENKINS-24436")
-    public void should_set_warnings_count_in_list_view_column() {
-        MavenModuleSet job = createMavenJob();
-
-        buildJobAndWait(job).shouldSucceed();
-
-        ListView view = addListViewColumn(CheckStyleColumn.class);
-        assertValidLink(job.name);
-        view.delete();
-    }
-
-    /**
-     * Sets up a dashboard view with a warnings-per-project portlet. Builds a job and checks if the portlet shows the
-     * correct number of warnings and provides a direct link to the actual warning results.
-     */
-    @Test @WithPlugins("dashboard-view")
-    public void should_set_warnings_count_in_dashboard_portlet() {
-        MavenModuleSet job = createMavenJob();
-
-        buildJobAndWait(job).shouldSucceed();
-
-        DashboardView view = addDashboardViewAndBottomPortlet(CheckStylePortlet.class);
-        assertValidLink(job.name);
-        view.delete();
-    }
-
-    private void assertValidLink(final String jobName) {
-        By warningsLinkMatcher = by.css("a[href$='job/" + jobName + "/checkstyle']");
-
-        assertThat(jenkins.all(warningsLinkMatcher).size(), is(1));
-        WebElement link = jenkins.getElement(warningsLinkMatcher);
-        assertThat(link.getText().trim(), is("12"));
-
-        link.click();
-        assertThat(driver, hasContent("CheckStyle Result"));
-    }
-
-    /**
+     /**
      * Creates a sequence of freestyle builds and checks if the build result is set correctly. New warning threshold is
      * set to zero, e.g. a new warning should mark a build as unstable.
      * <p/>

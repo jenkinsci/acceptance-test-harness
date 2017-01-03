@@ -67,7 +67,7 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
 
 /**
  * Base class for tests of the static analysis plug-ins. Contains several generic test cases that run for all
- * participating plug-ins. Additionally, serveral helper methods are available for the concrete test cases of a
+ * participating plug-ins. Additionally, several helper methods are available for the concrete test cases of a
  * plug-in.
  *
  * @param <P> the type of the project action
@@ -79,6 +79,57 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
  */
 public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends AbstractJUnitTest {
     private static final List<String> PRIORITIES = Arrays.asList("HIGH", "LOW", "NORMAL");
+
+    /**
+     * Sets up a dashboard view with a warnings-per-project portlet. Builds a job and checks if the portlet shows the
+     * correct number of warnings and provides a direct link to the actual warning results.
+     */
+    @Test @WithPlugins("dashboard-view")
+    public void should_populate_dashboard_table_portlet() {
+        FreeStyleJob job = createFreeStyleJob();
+
+        buildJobAndWait(job).shouldSucceed();
+
+        P projectAction = createProjectAction(job);
+        addDashboardViewAndBottomPortlet(projectAction.getTablePortlet());
+
+        List<WebElement> links = all(by.xpath("//td[@class='pane']//a"));
+
+        assertThat(links.size() >= 2, is(true));
+
+        WebElement projectLink = links.get(0);
+        assertThat(projectLink.getText().trim(), is(projectAction.getParentName()));
+
+        WebElement warningsLink = links.get(links.size() - 1);
+        assertThat(warningsLink.getText().trim(), is(String.valueOf(getNumberOfWarnings())));
+
+        warningsLink.click();
+        assertThat(driver, hasContent(projectAction.getName()));
+    }
+
+    /**
+     * Sets up a list view with a warnings column. Builds a job and checks if the column shows the correct number of
+     * warnings and provides a direct link to the actual warning results.
+     */
+    @Test @Issue("JENKINS-24436")
+    public void should_set_warnings_count_in_view_column() {
+        FreeStyleJob job = createFreeStyleJob();
+
+        buildJobAndWait(job).shouldSucceed();
+
+        P projectAction = createProjectAction(job);
+        addListViewColumn(projectAction.getViewColumn());
+
+        List<WebElement> links = all(by.xpath("//table[@id='projectstatus']//td//a"));
+
+        assertThat(links.isEmpty(), is(false));
+
+        WebElement warningsLink = links.get(links.size() - 1);
+        assertThat(warningsLink.getText().trim(), is(String.valueOf(getNumberOfWarnings())));
+
+        warningsLink.click();
+        assertThat(driver, hasContent(projectAction.getName()));
+    }
 
     /**
      * Builds a freestyle job with an enabled publisher of the plug-in under test. Sets the thresholds for the trend
@@ -124,7 +175,7 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
         return descriptions.get(index).getAttribute("innerHTML");
     }
 
-    private void editJob(final Job job, final AnalysisAction action, @CheckForNull final AnalysisConfigurator<AnalysisSettings> configurator) {
+    private void editJob(final Job job, final AnalysisAction action, final AnalysisConfigurator<AnalysisSettings> configurator) {
         job.configure();
         configurator.configure(job.getPublisher(action.getFreeStyleSettings()));
         job.save();
@@ -316,8 +367,10 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
 
     /**
      * Creates a pipeline that enables the specified {@code stepName}. The first step of the pipeline copies the
-     * specified resource {@code stepName}. step as first instruction
-     * to the pipeline.
+     * specified resource {@code fileName} as first instruction to the pipeline.
+     *
+     * @param fileName the name of the resource that will be copied to the pipeline (this file will be scanned for warnings)
+     * @param stepName the name of the publisher to run (as a pipeline step)
      *
      * @return the created pipeline
      */
@@ -336,10 +389,11 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
     }
 
     /**
-     * Returns the number of warnings that the created freestyle job should produce.
+     * Returns the number of warnings that the created jobs should produce.
      *
      * @return total number of warnings
      * @see #createFreeStyleJob()
+     * @see #createPipeline()
      */
     protected abstract int getNumberOfWarnings();
 

@@ -8,13 +8,15 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.AbstractDashboardViewPortlet;
+import org.jenkinsci.test.acceptance.po.AbstractListViewColumn;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.ContainerPageObject;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.openqa.selenium.WebElement;
 
 /**
- * Abstract action class for static analysis plugins with getters for warnings.
+ * Action for static analysis plugins with getters for warnings.
  *
  * @author Martin Kurz
  */
@@ -22,6 +24,7 @@ public abstract class AnalysisAction extends ContainerPageObject {
     private final String pluginUrl;
     private final ContainerPageObject parent;
     private final String plugin;
+    private final String parentName;
 
     /**
      * Creates a new instance of a static analysis action.
@@ -30,7 +33,7 @@ public abstract class AnalysisAction extends ContainerPageObject {
      * @param plugin plug-in name
      */
     public AnalysisAction(final Build parent, final String plugin) {
-        this(plugin + "Result", plugin, parent);
+        this(plugin + "Result", plugin, parent, parent.getName());
     }
 
     /**
@@ -40,7 +43,7 @@ public abstract class AnalysisAction extends ContainerPageObject {
      * @param plugin Path to plugin without / at the end
      */
     public AnalysisAction(final Job parent, final String plugin) {
-        this(plugin, plugin, parent);
+        this(plugin, plugin, parent, parent.name);
     }
 
     /**
@@ -52,12 +55,13 @@ public abstract class AnalysisAction extends ContainerPageObject {
         return parent;
     }
 
-    private AnalysisAction(final String url, final String pluginUrl, final ContainerPageObject parent) {
+    private AnalysisAction(final String url, final String pluginUrl, final ContainerPageObject parent, final String parentName) {
         super(parent, parent.url(url + '/'));
 
         this.pluginUrl = pluginUrl;
         this.parent = parent;
         plugin = url;
+        this.parentName = parentName;
     }
 
     /**
@@ -66,6 +70,29 @@ public abstract class AnalysisAction extends ContainerPageObject {
      * @return the plug-in name
      */
     public abstract String getPluginName();
+
+    /**
+     * Returns the class of the table dashboard portlet.
+     *
+     * @return class of the table portlet
+     */
+    public abstract Class<? extends AbstractDashboardViewPortlet> getTablePortlet();
+
+    /**
+     * Returns the class of the view column.
+     *
+     * @return class of the view column
+     */
+    public abstract Class<? extends AbstractListViewColumn> getViewColumn();
+
+    /**
+     * Returns the human readable name of the parent of this action.
+     *
+     * @return the parent name
+     */
+    public String getParentName() {
+        return parentName;
+    }
 
     /**
      * Returns the human readable name of this action.
@@ -82,6 +109,15 @@ public abstract class AnalysisAction extends ContainerPageObject {
      * @return the class of the freestyle publisher page object
      */
     public abstract Class<? extends AnalysisSettings> getFreeStyleSettings();
+
+    /**
+     * Returns the URL of the associated plug-in.
+     *
+     * @return  URL of this action
+     */
+    public String getPluginUrl() {
+        return pluginUrl;
+    }
 
     /**
      * Returns the URL of this action.

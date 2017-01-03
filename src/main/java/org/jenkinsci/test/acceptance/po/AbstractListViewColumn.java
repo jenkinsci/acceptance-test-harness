@@ -12,10 +12,9 @@ public class AbstractListViewColumn extends PageAreaImpl implements ListViewColu
     }
 
     /**
-     * Presses "delete" on the column.
+     * Deletes the column, i.e. removes it from the view.
      */
     public void delete() {
         control("repeatable-delete").click();
     }
-
 }

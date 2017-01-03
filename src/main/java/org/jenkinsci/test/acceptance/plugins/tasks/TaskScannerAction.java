@@ -6,6 +6,8 @@ import java.util.NoSuchElementException;
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisAction;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisSettings;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.AbstractDashboardViewPortlet;
+import org.jenkinsci.test.acceptance.po.AbstractListViewColumn;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.openqa.selenium.WebElement;
@@ -29,6 +31,16 @@ public class TaskScannerAction extends AnalysisAction {
     @Override
     public String getPluginName() {
         return "Task Scanner";
+    }
+
+    @Override
+    public Class<? extends AbstractDashboardViewPortlet> getTablePortlet() {
+        return TasksPortlet.class;
+    }
+
+    @Override
+    public Class<? extends AbstractListViewColumn> getViewColumn() {
+        return TasksColumn.class;
     }
 
     @Override

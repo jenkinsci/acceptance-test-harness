@@ -1,6 +1,6 @@
 package org.jenkinsci.test.acceptance.plugins.analysis_collector;
 
-import org.jenkinsci.test.acceptance.plugins.dashboard_view.AbstractDashboardViewPortlet;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.AbstractTablePortlet;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
@@ -11,20 +11,14 @@ import org.jenkinsci.test.acceptance.po.Describable;
  * @author Michael Prankl
  */
 @Describable("Warnings per project")
-public class WarningsPerProjectPortlet extends AbstractDashboardViewPortlet {
+public class WarningsPerProjectPortlet extends AbstractTablePortlet {
     private AnalysisCollectorPluginArea pluginArea;
 
-    private Control hideZeroWarningsProjects = control("canHideZeroWarningsProjects");
     private Control showImagesInTableHeader = control("useImages");
 
     public WarningsPerProjectPortlet(DashboardView parent, String path) {
         super(parent, path);
         this.pluginArea = new AnalysisCollectorPluginArea(parent, path);
-    }
-
-    public WarningsPerProjectPortlet hideZeroWarningsProjects(boolean checked) {
-        hideZeroWarningsProjects.check(checked);
-        return this;
     }
 
     public WarningsPerProjectPortlet showImagesInTableHeader(boolean checked) {
@@ -35,11 +29,10 @@ public class WarningsPerProjectPortlet extends AbstractDashboardViewPortlet {
     /**
      * Select if the warnings of given plugin should be included in the portlet.
      *
-     * @param plugin  the Plugin
+     * @param plugin  the plug-in
      * @param checked true or false
      */
     public void checkCollectedPlugin(AnalysisPlugin plugin, boolean checked) {
         plugin.check(this.pluginArea, checked);
     }
-
 }

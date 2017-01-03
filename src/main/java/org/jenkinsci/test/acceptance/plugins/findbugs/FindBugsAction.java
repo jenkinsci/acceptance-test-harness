@@ -2,6 +2,8 @@ package org.jenkinsci.test.acceptance.plugins.findbugs;
 
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisAction;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisSettings;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.AbstractDashboardViewPortlet;
+import org.jenkinsci.test.acceptance.po.AbstractListViewColumn;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Job;
 
@@ -24,6 +26,16 @@ public class FindBugsAction extends AnalysisAction {
     @Override
     public String getPluginName() {
         return "FindBugs";
+    }
+
+    @Override
+    public Class<? extends AbstractDashboardViewPortlet> getTablePortlet() {
+        return FindBugsPortlet.class;
+    }
+
+    @Override
+    public Class<? extends AbstractListViewColumn> getViewColumn() {
+        return FindBugsColumn.class;
     }
 
     @Override

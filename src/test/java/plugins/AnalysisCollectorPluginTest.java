@@ -369,7 +369,8 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
         dashboard.matchAllJobs();
         WarningsPerProjectPortlet portlet = dashboard.addBottomPortlet(WarningsPerProjectPortlet.class);
         portlet.setName("My Warnings");
-        portlet.hideZeroWarningsProjects(false).showImagesInTableHeader(true);
+        portlet.hideZeroWarningsProjects(false);
+        portlet.showImagesInTableHeader(true);
         dashboard.save();
 
         dashboard.open();

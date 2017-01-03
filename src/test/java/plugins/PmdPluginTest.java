@@ -457,47 +457,6 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
     }
 
     /**
-     * Sets up a list view with a warnings column. Builds a job and checks if the column shows the correct number of
-     * warnings and provides a direct link to the actual warning results.
-     */
-    @Test @Issue("JENKINS-24436")
-    public void should_set_warnings_count_in_list_view_column() {
-        MavenModuleSet job = createMavenJob();
-        buildJobAndWait(job).shouldSucceed();
-
-        ListView view = addListViewColumn(PmdColumn.class);
-
-        assertValidLink(job.name);
-        view.delete();
-    }
-
-    /**
-     * Sets up a dashboard view with a warnings-per-project portlet. Builds a job and checks if the portlet shows the
-     * correct number of warnings and provides a direct link to the actual warning results.
-     */
-    @Test @WithPlugins("dashboard-view")
-    public void should_set_warnings_count_in_dashboard_portlet() {
-        MavenModuleSet job = createMavenJob();
-        buildJobAndWait(job).shouldSucceed();
-
-        DashboardView view = addDashboardViewAndBottomPortlet(PmdWarningsPortlet.class);
-
-        assertValidLink(job.name);
-        view.delete();
-    }
-
-    private void assertValidLink(final String jobName) {
-        By warningsLinkMatcher = by.css("a[href$='job/" + jobName + "/pmd']");
-
-        assertThat(jenkins.all(warningsLinkMatcher).size(), is(1));
-        WebElement link = jenkins.getElement(warningsLinkMatcher);
-        assertThat(link.getText().trim(), is("2"));
-
-        link.click();
-        assertThat(driver, hasContent("PMD Result"));
-    }
-
-    /**
      * Creates a sequence of freestyle builds and checks if the build result is set correctly. New warning threshold is
      * set to zero, e.g. a new warning should mark a build as unstable.
      * <p/>

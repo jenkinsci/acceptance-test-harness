@@ -282,6 +282,15 @@ public class Build extends ContainerPageObject {
 
     @Override
     public String toString() {
+        return getName();
+    }
+
+    /**
+     * Returns the human-readable name of this build.
+     *
+     * @return the name
+     */
+    public String getName() {
         return job.name + " #" + getNumber();
     }
 
