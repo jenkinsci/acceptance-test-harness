@@ -6,7 +6,6 @@ import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisPlugin;
 import org.jenkinsci.test.acceptance.po.*;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -59,7 +58,7 @@ public class Matchers {
             @Override
             public boolean matchesSafely(WebDriver item) {
                 try {
-                    item.findElements(selector);
+                    item.findElement(selector);
                     return true;
                 } catch (NoSuchElementException _) {
                     return false;
