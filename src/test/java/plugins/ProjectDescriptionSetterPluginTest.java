@@ -9,7 +9,10 @@ import org.junit.Test;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-@WithPlugins("project-description-setter")
+@WithPlugins({
+        "matrix-project", // JENKINS-37545
+        "project-description-setter"
+})
 public class ProjectDescriptionSetterPluginTest extends AbstractJUnitTest {
     @Test
     public void set_project_description_based_upon_file_in_workspace() {
