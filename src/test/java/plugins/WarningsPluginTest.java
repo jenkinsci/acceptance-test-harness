@@ -1,6 +1,7 @@
 package plugins;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -59,8 +60,9 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
     private static final String MS_BUILD_ID = "MSBuild";
     private static final String JAVA_DOC_ID = "JavaDoc Tool";
     private static final String CLANG_ID = "Clang (LLVM based)";
+    private static final String JAVA_ID = "Java Compiler (javac)";
 
-    private static final String JAVA_TITLE = "Java Compiler (javac)";
+    private static final String JAVA_TITLE = JAVA_ID;
     private static final String CLANG_TITLE = "LLVM/Clang Warnings";
 
     @Override
@@ -86,7 +88,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         FreeStyleJob job = createFreeStyleJob(new AnalysisConfigurator<WarningsBuildSettings>() {
             @Override
             public void configure(WarningsBuildSettings settings) {
-                settings.addConsoleParser(JAVA_TITLE);
+                settings.addConsoleParser(JAVA_ID);
             }
         }, owner);
         catWarningsToConsole(job);
@@ -110,6 +112,56 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
     @Override
     protected int getNumberOfWarnings() {
         return 131;
+    }
+
+    /**
+     * Verifies that providing a wrong URL to the detail factories should navigate to the top-level page.
+     */
+    @Test @Issue("JENKINS-37195")
+    public void should_handle_invalid_ulr_gracefully() {
+        FreeStyleJob job = createFreeStyleJob(new AnalysisConfigurator<WarningsBuildSettings>() {
+            @Override
+            public void configure(WarningsBuildSettings settings) {
+                settings.addConsoleParser(JAVA_ID);
+            }
+        });
+        catWarningsToConsole(job);
+        buildSuccessfulJob(job);
+
+        WarningsAction action = createJavaProjectAction(job);
+        action.open();
+
+        visitLastPackage();
+
+        String packageRegex = "package.-?\\d+";
+        driver.get(driver.getCurrentUrl().replaceAll(packageRegex, "package.01234"));
+        assertThat(driver, hasContent("Aggregated Compiler Warnings"));
+
+        visitLastPackage();
+
+        driver.get(driver.getCurrentUrl().replaceAll(packageRegex, "package.NO_NUMBER"));
+        assertThat(driver, hasContent("Aggregated Compiler Warnings"));
+
+        visitLastPackage();
+
+        List<WebElement> fileLinks = all(by.xpath("//table[@id='files']//td[@class='pane']//a"));
+        int size = fileLinks.size();
+        assertThat(size, is(5));
+
+        fileLinks.get(size - 1).click();
+        assertThat(driver, hasContent("tmp/clover55196.tmp/net/sourceforge/pmd/renderers - File YAHTMLRenderer.java"));
+
+        driver.get(driver.getCurrentUrl().replaceAll("file.-?\\d+", "file.NO_NUMBER"));
+        assertThat(driver, hasContent("Compiler Warnings - Source Folder tmp/clover55196.tmp/net/sourceforge/pmd/renderers"));
+    }
+
+    private void visitLastPackage() {
+        List<WebElement> packageLinks = all(by.xpath("//table[@id='packages']//td[@class='pane']//a"));
+        int size = packageLinks.size();
+        assertThat(size, is(32));
+
+        packageLinks.get(size - 1).click();
+        assertThat(driver, hasContent("Compiler Warnings - Source Folder tmp/clover55196.tmp/net/sourceforge/pmd/renderers"));
     }
 
     /**
@@ -506,6 +558,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
     }
 
     // TODO: check if this could be pulled up, too.
+
     /**
      * Sets up a list view with a warnings column. Builds a matrix job and checks if the column shows the correct number
      * of warnings and provides a direct link to the actual warning results.
