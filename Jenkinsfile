@@ -11,7 +11,12 @@ node('highram&&docker') {
     ]) {
         changelog scm
 
-        sh 'docker build --build-arg=uid=$(id -u) --build-arg=gid=$(id -g) -t jenkins/ath src/main/resources/ath-container'
+        def uid = sh returnStdout: true, script: "id -u | tr -d '\n'"
+        def gid = sh returnStdout: true, script: "id -g | tr -d '\n'"
+
+        def buildArgs = "--build-arg=uid=${uid} --build-arg=gid=${gid} src/main/resources/ath-container"
+        docker.build('jenkins/ath', buildArgs)
+
         String containerArgs = '-v /var/run/docker.sock:/var/run/docker.sock'
         docker.image('jenkins/ath').inside(containerArgs) {
             sh '''

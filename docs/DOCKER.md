@@ -14,7 +14,10 @@ Interactive shell:
 Jenkinsfile:
 
     ... // Checkout ATH
-    sh 'docker build --build-arg=uid=$(id -u) --build-arg=gid=$(id -g) -t jenkins/ath src/main/resources/ath-container'
+    def uid = sh returnStdout: true, script: "id -u | tr -d '\n'"
+    def gid = sh returnStdout: true, script: "id -g | tr -d '\n'"
+    def buildArgs = "--build-arg=uid=${uid} --build-arg=gid=${gid} src/main/resources/ath-container"
+    docker.build('jenkins/ath', buildArgs)
     docker.image('jenkins/ath').inside {
         sh 'eval $(./vnc.sh) && ./run.sh firefox latest -Dmaven.test.failure.ignore=true -DforkCount=1 -B'
     }
