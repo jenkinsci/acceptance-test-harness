@@ -1,7 +1,7 @@
 package org.jenkinsci.test.acceptance.po;
 
 /**
- * A container owns jobs and views. Know container implementations are {@link Jenkins} and {@link Folder}.
+ * A container owns jobs and views. Known container implementations are {@link Jenkins} and {@link Folder}.
  *
  * @author Ullrich Hafner
  */
