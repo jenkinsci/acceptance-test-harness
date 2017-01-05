@@ -33,7 +33,7 @@ public class JavadocPluginTest extends AbstractJUnitTest {
         assertJavadoc(job);
     }
 
-    @Test
+    @Test @WithPlugins("matrix-project")
     public void publish_javadoc_from_matrix_job() {
         MatrixProject job = jenkins.jobs.create(MatrixProject.class);
         setup(job);

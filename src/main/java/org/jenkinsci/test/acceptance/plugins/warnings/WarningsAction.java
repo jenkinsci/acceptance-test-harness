@@ -2,6 +2,8 @@ package org.jenkinsci.test.acceptance.plugins.warnings;
 
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisAction;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisSettings;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.AbstractDashboardViewPortlet;
+import org.jenkinsci.test.acceptance.po.AbstractListViewColumn;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Job;
 
@@ -30,6 +32,16 @@ public class WarningsAction extends AnalysisAction {
     @Override
     public String getPluginName() {
         return parserName;
+    }
+
+    @Override
+    public Class<? extends AbstractDashboardViewPortlet> getTablePortlet() {
+        return WarningsPortlet.class;
+    }
+
+    @Override
+    public Class<? extends AbstractListViewColumn> getViewColumn() {
+        return WarningsColumn.class;
     }
 
     @Override

@@ -1,17 +1,18 @@
-package org.jenkinsci.test.acceptance.plugins.pmd;
+package org.jenkinsci.test.acceptance.plugins.tasks;
 
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AbstractTablePortlet;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
 import org.jenkinsci.test.acceptance.po.Describable;
 
 /**
- * A PMD portlet for {@link DashboardView}.
+ * A task scanner portlet for {@link DashboardView}.
  *
  * @author Fabian Trampusch
  */
-@Describable("PMD warnings per project")
-public class PmdWarningsPortlet extends AbstractTablePortlet {
-    public PmdWarningsPortlet(final DashboardView parent, final String path) {
+@Describable("Open tasks per project")
+public class TasksPortlet extends AbstractTablePortlet {
+    public TasksPortlet(final DashboardView parent, final String path) {
         super(parent, path);
     }
+
 }

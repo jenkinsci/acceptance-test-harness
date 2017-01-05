@@ -13,6 +13,7 @@ import org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerAction;
 import org.jenkinsci.test.acceptance.plugins.tasks.TasksFreestyleSettings;
 import org.jenkinsci.test.acceptance.plugins.tasks.TasksMavenSettings;
 import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.po.Container;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
@@ -48,7 +49,7 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
     }
 
     @Override
-    protected FreeStyleJob createFreeStyleJob() {
+    protected FreeStyleJob createFreeStyleJob(final Container owner) {
         return createFreeStyleJob(new AnalysisConfigurator<TasksFreestyleSettings>() {
             @Override
             public void configure(TasksFreestyleSettings settings) {
@@ -59,7 +60,7 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
                 settings.setLowPriorityTags("@Deprecated");
                 settings.setIgnoreCase(false);
             }
-        });
+        }, owner);
     }
 
     @Override
@@ -116,12 +117,27 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
         verifyReceivedMail("Tasks: FAILURE", "Tasks: 6-0-6");
     }
 
+    private FreeStyleJob createFreeStyleJob() {
+        return createFreeStyleJob(jenkins);
+    }
+
     private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<TasksFreestyleSettings> buildConfigurator) {
         return createFreeStyleJob(TASKS_FILES, buildConfigurator);
     }
 
-    private FreeStyleJob createFreeStyleJob(final String fileset, final AnalysisConfigurator<TasksFreestyleSettings> buildConfigurator) {
-        return setupJob(fileset, FreeStyleJob.class, TasksFreestyleSettings.class, buildConfigurator);
+    private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<TasksFreestyleSettings> buildConfigurator,
+            final Container owner) {
+        return createFreeStyleJob(TASKS_FILES, buildConfigurator, owner);
+    }
+
+    private FreeStyleJob createFreeStyleJob(final String fileset,
+            final AnalysisConfigurator<TasksFreestyleSettings> buildConfigurator) {
+        return createFreeStyleJob(fileset, buildConfigurator, jenkins);
+    }
+
+    private FreeStyleJob createFreeStyleJob(final String fileset,
+            final AnalysisConfigurator<TasksFreestyleSettings> buildConfigurator, final Container owner) {
+        return setupJob(fileset, FreeStyleJob.class, TasksFreestyleSettings.class, buildConfigurator, owner);
     }
 
     /**
@@ -278,11 +294,11 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
     }
 
     private MavenModuleSet createMavenJob(final String files, final AnalysisConfigurator<TasksMavenSettings> buildConfigurator) {
-        return setupJob(files, MavenModuleSet.class, TasksMavenSettings.class, buildConfigurator, null);
+        return setupJob(files, MavenModuleSet.class, TasksMavenSettings.class, buildConfigurator, null, jenkins);
     }
 
     private MavenModuleSet createMavenJob(final String files, final String goal, final AnalysisConfigurator<TasksMavenSettings> buildConfigurator) {
-        return setupJob(files, MavenModuleSet.class, TasksMavenSettings.class, buildConfigurator, goal);
+        return setupJob(files, MavenModuleSet.class, TasksMavenSettings.class, buildConfigurator, goal, jenkins);
     }
 
     private void verifyRegularExpressionScannerResult(final Job job) {

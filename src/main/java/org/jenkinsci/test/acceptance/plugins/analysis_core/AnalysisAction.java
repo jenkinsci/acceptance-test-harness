@@ -8,13 +8,15 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.AbstractDashboardViewPortlet;
+import org.jenkinsci.test.acceptance.po.AbstractListViewColumn;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.ContainerPageObject;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.openqa.selenium.WebElement;
 
 /**
- * Abstract action class for static analysis plugins with getters for warnings.
+ * Action for static analysis plugins with getters for warnings.
  *
  * @author Martin Kurz
  */
@@ -68,6 +70,20 @@ public abstract class AnalysisAction extends ContainerPageObject {
     public abstract String getPluginName();
 
     /**
+     * Returns the class of the table dashboard portlet.
+     *
+     * @return class of the table portlet
+     */
+    public abstract Class<? extends AbstractDashboardViewPortlet> getTablePortlet();
+
+    /**
+     * Returns the class of the view column.
+     *
+     * @return class of the view column
+     */
+    public abstract Class<? extends AbstractListViewColumn> getViewColumn();
+
+    /**
      * Returns the human readable name of this action.
      *
      * @return the plug-in name
@@ -82,6 +98,15 @@ public abstract class AnalysisAction extends ContainerPageObject {
      * @return the class of the freestyle publisher page object
      */
     public abstract Class<? extends AnalysisSettings> getFreeStyleSettings();
+
+    /**
+     * Returns the URL of the associated plug-in.
+     *
+     * @return  URL of this action
+     */
+    public String getPluginUrl() {
+        return pluginUrl;
+    }
 
     /**
      * Returns the URL of this action.

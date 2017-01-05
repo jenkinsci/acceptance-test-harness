@@ -29,20 +29,27 @@ import java.net.URL;
 import com.google.inject.Injector;
 
 /**
- * Top level item representing a folder.
+ * A container that stores nested items like {@link Job jobs}. A folder may contain a hierarchy of folders.
  */
 @Describable("com.cloudbees.hudson.plugins.folder.Folder")
-public class FolderItem extends TopLevelItem {
-    public final JobsMixIn jobs;
+public class Folder extends TopLevelItem implements Container {
+    private final JobsMixIn jobs;
+    private final ViewsMixIn views;
 
-    public FolderItem(Injector injector, URL url, String name) {
+    public Folder(final Injector injector, final URL url, final String name) {
         super(injector, url, name);
+
         jobs = new JobsMixIn(this);
-    }
-    
-    public FolderItem(PageObject context, URL url, String name) {
-        super(context, url, name);
-        jobs = new JobsMixIn(this);
+        views = new ViewsMixIn(this);
     }
 
+    @Override
+    public JobsMixIn getJobs() {
+        return jobs;
+    }
+
+    @Override
+    public ViewsMixIn getViews() {
+        return views;
+    }
 }

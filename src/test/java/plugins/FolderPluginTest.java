@@ -28,7 +28,7 @@ import org.hamcrest.MatcherAssert;
 import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.po.FolderItem;
+import org.jenkinsci.test.acceptance.po.Folder;
 import org.junit.Test;
 
 /**
@@ -44,7 +44,7 @@ public class FolderPluginTest extends AbstractJUnitTest {
     /**
      * Checks that a folder exists and has the provided name.
      */
-    private void checkFolder(FolderItem folder, String name) {
+    private void checkFolder(Folder folder, String name) {
         folder.open();
         MatcherAssert.assertThat(driver, Matchers.hasContent(name));
     }
@@ -58,7 +58,7 @@ public class FolderPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void createFolder() {
-        final FolderItem job = jenkins.jobs.create(FolderItem.class, F01);
+        final Folder job = jenkins.jobs.create(Folder.class, F01);
         job.save();
         jenkins.open();
         checkFolder(job, F01);
@@ -75,15 +75,15 @@ public class FolderPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void createFolderHierarchy() {
-        final FolderItem parent = jenkins.jobs.create(FolderItem.class, F01);
+        final Folder parent = jenkins.jobs.create(Folder.class, F01);
         parent.save();
         checkFolder(parent, F01);
-        final FolderItem child1 = parent.jobs.create(FolderItem.class, F02);
+        final Folder child1 = parent.getJobs().create(Folder.class, F02);
         child1.save();
         checkFolder(child1, F02);
         parent.open();
         jenkins.open();
-        final FolderItem child2 = parent.jobs.create(FolderItem.class, F01);
+        final Folder child2 = parent.getJobs().create(Folder.class, F01);
         child2.save();
         checkFolder(child2, F01);
     }

@@ -10,8 +10,7 @@ import com.google.inject.Injector;
 
 /**
  * Super class for top level items. 
- * Top level items include {@link Job}s and other non-buildable items
- * such as {@link FolderItem}s.
+ * Top level items include {@link Job}s and other non-buildable items such as {@link Folder}s.
  * Use {@link Describable} annotation to register an implementation.
  */
 public abstract class TopLevelItem extends ContainerPageObject {

@@ -2,6 +2,8 @@ package org.jenkinsci.test.acceptance.plugins.analysis_collector;
 
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisAction;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisSettings;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.AbstractDashboardViewPortlet;
+import org.jenkinsci.test.acceptance.po.AbstractListViewColumn;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Job;
 
@@ -24,6 +26,16 @@ public class AnalysisCollectorAction extends AnalysisAction {
     @Override
     public String getPluginName() {
         return "Static Analysis";
+    }
+
+    @Override
+    public Class<? extends AbstractDashboardViewPortlet> getTablePortlet() {
+        return WarningsPerProjectPortlet.class;
+    }
+
+    @Override
+    public Class<? extends AbstractListViewColumn> getViewColumn() {
+        return AnalysisCollectorColumn.class;
     }
 
     @Override
