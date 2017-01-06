@@ -11,7 +11,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
-@WithPlugins("description-setter")
+@WithPlugins({
+        "matrix-project", // JENKINS-37545
+        "description-setter"
+})
 public class DescriptionSetterPluginTest extends AbstractJUnitTest {
 
     @Test

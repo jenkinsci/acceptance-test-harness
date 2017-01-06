@@ -149,6 +149,10 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
             public Boolean call() throws Exception {
                 return slave.getLog().contains(message);
             }
+
+            @Override public String toString() {
+                return "slave log to contain '" + message + "':\n" + slave.getLog();
+            }
         });
     }
     private void verifyLog(String message) {

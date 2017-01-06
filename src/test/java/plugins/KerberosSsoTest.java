@@ -301,7 +301,7 @@ public class KerberosSsoTest extends AbstractJUnitTest {
         JenkinsDatabaseSecurityRealm realm = sc.useRealm(JenkinsDatabaseSecurityRealm.class);
         sc.save();
         // The password needs to be the same as in kerberos
-        User user = realm.signup("user", "ATH", "Full Name", "email@mailinator.com");
+        User user = realm.signup().password("ATH").fullname("Full Name").signup("user");
         return user;
     }
 
