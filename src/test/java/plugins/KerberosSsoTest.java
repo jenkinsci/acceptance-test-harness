@@ -264,7 +264,7 @@ public class KerberosSsoTest extends AbstractJUnitTest {
      */
     private void configureSso(KerberosContainer kdc, boolean allowAnonymous, boolean allowBasic) {
         // Turn Jenkins side debugging on
-        jenkins.runScript("System.setProperty('sun.security.krb5.debug', 'true'); System.setProperty('sun.security.spnego.debug', 'true'); return 42");
+        jenkins.runScript("System.setProperty('sun.security.krb5.debug', 'true'); System.setProperty('sun.security.spnego.debug', 'true');");
 
         JenkinsConfig config = jenkins.getConfigPage();
         config.configure();
@@ -301,8 +301,7 @@ public class KerberosSsoTest extends AbstractJUnitTest {
         JenkinsDatabaseSecurityRealm realm = sc.useRealm(JenkinsDatabaseSecurityRealm.class);
         sc.save();
         // The password needs to be the same as in kerberos
-        User user = realm.signup().password("ATH").fullname("Full Name").signup("user");
-        return user;
+        return realm.signup().password("ATH").fullname("Full Name").signup("user");
     }
 
     private class KerberosGlobalConfig extends GlobalPluginConfiguration {
