@@ -38,6 +38,8 @@ import java.util.concurrent.Callable;
 @Describable({"Cloud (OpenStack)", "Cloud (Openstack)"})
 public class OpenstackCloud extends Cloud {
 
+    private boolean advancedOpen = false;
+
     public OpenstackCloud(PageObject context, String path) {
         super(context, path);
     }
@@ -63,7 +65,7 @@ public class OpenstackCloud extends Cloud {
     }
 
     public OpenstackCloud associateFloatingIp(final String pool) {
-        control("advanced-button").click();
+        ensureAdvancedOpen();
         try {
             // Prior 2.1
             control("floatingIps").check();
@@ -75,6 +77,19 @@ public class OpenstackCloud extends Cloud {
                 }
             });
         }
+        return this;
+    }
+
+    private void ensureAdvancedOpen() {
+        if (advancedOpen == false) {
+            control("advanced-button").click();
+            advancedOpen = true;
+        }
+    }
+
+    public OpenstackCloud instanceCap(int instanceCap) {
+        ensureAdvancedOpen();
+        control("slaveOptions/instanceCap").set(instanceCap);
         return this;
     }
 

@@ -96,6 +96,11 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
         // We have never left the config - no nodes to terminate
         if (getCurrentUrl().endsWith("/configure")) return;
         jenkins.runScript("Jenkins.instance.nodes.each { it.terminate() }");
+        sleep(5000);
+        String s;
+        do {
+            s = jenkins.runScript("os = Jenkins.instance.clouds[0].openstack; rn = os.runningNodes; if (!rn.empty) { rn.each { os.destroyServer(it) } }; return os.runningNodes.size()");
+        } while ("0".equals(s));
     }
 
     @Test
@@ -154,6 +159,7 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
     @Test @Issue("JENKINS-29998")
     @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {MACHINE_USERNAME, "/openstack_plugin/unsafe"})
     @TestActivation({"HARDWARE_ID", "IMAGE_ID", "KEY_PAIR_NAME"})
+    @WithPlugins("matrix-project")
     public void scheduleMatrixWithoutLabel() {
         configureCloudInit("cloud-init");
         configureProvisioning("SSH", "label");
@@ -256,6 +262,7 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
     private void configureProvisioning(String type, String labels) {
         jenkins.configure();
         OpenstackCloud cloud = addCloud(jenkins.getConfigPage()).associateFloatingIp(FIP_POOL_NAME);
+        cloud.instanceCap(3);
         OpenstackSlaveTemplate template = cloud.addSlaveTemplate();
 
         template.name(CLOUD_DEFAULT_TEMPLATE);
