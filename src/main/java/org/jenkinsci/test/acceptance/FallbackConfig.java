@@ -76,6 +76,9 @@ public class FallbackConfig extends AbstractModule {
      */
     private static final String LANGUAGE_SELECTOR_PHANTOMJS = "phantomjs.page.customHeaders.Accept-Language";
 
+    public static final String DOM_MAX_SCRIPT_RUN_TIME = "dom.max_script_run_time";
+    public static final String DOM_MAX_CHROME_SCRIPT_RUN_TIME = "dom.max_chrome_script_run_time";
+
     @Override
     protected void configure() {
         // default in case nothing is specified
@@ -96,6 +99,14 @@ public class FallbackConfig extends AbstractModule {
             profile.setAlwaysLoadNoFocusLib(true);
 
             profile.setPreference(LANGUAGE_SELECTOR, "en");
+
+            //
+            // When Tests are executed with a "large" number of plugins,
+            // the job configure page may display a script timeout in FireFox.
+            // We adjust this to be more lenient.
+            //
+            profile.setPreference(DOM_MAX_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
+            profile.setPreference(DOM_MAX_CHROME_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
 
             FirefoxBinary binary = new FirefoxBinary();
             String display = getBrowserDisplay();
