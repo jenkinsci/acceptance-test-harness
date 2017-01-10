@@ -23,6 +23,8 @@
  */
 package org.jenkinsci.test.acceptance.plugins.config_file_provider;
 
+import org.jenkinsci.test.acceptance.po.Container;
+import org.jenkinsci.test.acceptance.po.Folder;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.PageObject;
 
@@ -30,6 +32,10 @@ public class ConfigFileProvider extends PageObject {
 
     public ConfigFileProvider(Jenkins jenkins) {
         super(jenkins, jenkins.url("configfiles/"));
+    }
+
+    public ConfigFileProvider(Folder f) {
+        super(f, f.url("configfiles/"));
     }
 
     public <T extends ProvidedFile> T addFile(Class<T> type) {
