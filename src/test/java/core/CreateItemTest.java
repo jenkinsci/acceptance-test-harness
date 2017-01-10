@@ -5,38 +5,48 @@ import org.jenkinsci.test.acceptance.junit.Since;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertThat;
 
 public class CreateItemTest extends AbstractJUnitTest {
+
+    private static final String JOB_NAME = "asdf";
+    private static final String NAME_FIELD = "name";
+    private static final String JOB_CREATION_ERROR_MSG = "A job already exists";
+
+    private static final By NAME_NOT_EMPTY_MSG = By.id("itemname-required");
+    private static final By EXISTING_NAME_MSG = By.id("itemname-invalid");
+    private static final By OK_BUTTON = By.id("ok-button");
+
     @Test
     @Since("2.6")
     public void duplicate_item_name_displays_error() {
         // create a job with a known name
-        jenkins.jobs.create(FreeStyleJob.class, "asdf");
+        jenkins.jobs.create(FreeStyleJob.class, JOB_NAME);
 
         // go try to create one with the same name
         jenkins.jobs.visit("newJob");
+        fillIn(NAME_FIELD, JOB_NAME);
+        blur(find(By.name(NAME_FIELD)));
 
-        fillIn("name", "asdf");
+        assertFalse(findIfNotVisible(NAME_NOT_EMPTY_MSG).isDisplayed());
+        assertTrue(find(EXISTING_NAME_MSG).isDisplayed());
+        assertFalse(find(OK_BUTTON).isEnabled());
 
-        blur(find(By.name("name")));
-
-        // the 'name cannot be empty' message:
-        assertFalse(findIfNotVisible(By.id("itemname-required")).isDisplayed());
-        // the 'real' message:
-        assertTrue(find(By.id("itemname-invalid")).isDisplayed());
-        
-        assertFalse(find(By.id("ok-button")).isEnabled());
-        
+        // select type of job
         jenkins.jobs.findTypeCaption(FreeStyleJob.class).click();
 
-        // the 'name cannot be empty' message:
-        assertFalse(findIfNotVisible(By.id("itemname-required")).isDisplayed());
-        // the 'real' message:
-        assertTrue(find(By.id("itemname-invalid")).isDisplayed());
-        
-        assertFalse(find(By.id("ok-button")).isEnabled());
+        assertFalse(findIfNotVisible(NAME_NOT_EMPTY_MSG).isDisplayed());
+        assertTrue(find(EXISTING_NAME_MSG).isDisplayed());
+
+        final WebElement okButtonElement = find(OK_BUTTON);
+        assertTrue(okButtonElement.isEnabled());
+
+        okButtonElement.click();
+        assertThat(driver, hasContent(JOB_CREATION_ERROR_MSG));
     }
 }
