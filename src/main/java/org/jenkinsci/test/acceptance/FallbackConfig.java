@@ -100,11 +100,7 @@ public class FallbackConfig extends AbstractModule {
 
             profile.setPreference(LANGUAGE_SELECTOR, "en");
 
-            //
-            // When Tests are executed with a "large" number of plugins,
-            // the job configure page may display a script timeout in FireFox.
-            // We adjust this to be more lenient.
-            //
+            // Config screen with many plugins can cause FF to complain JS takes too long to complete - set longer timeout
             profile.setPreference(DOM_MAX_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
             profile.setPreference(DOM_MAX_CHROME_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
 
