@@ -46,17 +46,14 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
     public void should_send_mail_with_expanded_tokens() {
         setUpMailer();
 
-        FreeStyleJob job = createFreeStyleJob(new AnalysisConfigurator<TasksFreestyleSettings>() {
-            @Override
-            public void configure(TasksFreestyleSettings settings) {
-                settings.setPattern("**/*.java");
-                settings.setExcludePattern("**/*Test.java");
-                settings.setHighPriorityTags("FIXME");
-                settings.setNormalPriorityTags("TODO");
-                settings.setLowPriorityTags("@Deprecated");
-                settings.setIgnoreCase(false);
-                settings.setBuildFailedTotalAll("0");
-            }
+        FreeStyleJob job = createFreeStyleJob(settings -> {
+            settings.setPattern("**/*.java");
+            settings.setExcludePattern("**/*Test.java");
+            settings.setHighPriorityTags("FIXME");
+            settings.setNormalPriorityTags("TODO");
+            settings.setLowPriorityTags("@Deprecated");
+            settings.setIgnoreCase(false);
+            settings.setBuildFailedTotalAll("0");
         });
 
         configureEmailNotification(job, "Tasks: ${TASKS_RESULT}",
@@ -99,12 +96,7 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
         // now disable case sensitivity and build again. Then the publisher shall also
         // find the high priority task in Ec2Provider.java:133.
 
-        editJob(false, job, TasksFreestyleSettings.class, new AnalysisConfigurator<TasksFreestyleSettings>() {
-                    @Override
-                    public void configure(TasksFreestyleSettings settings) {
-                        settings.setIgnoreCase(true);
-                    }
-                });
+        editJob(false, job, TasksFreestyleSettings.class, settings -> settings.setIgnoreCase(true));
 
         Build build = buildSuccessfulJob(job);
 
@@ -164,7 +156,8 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
         Build build = buildSuccessfulJob(job);
 
         boolean is2xLine = !jenkins.getVersion().isOlderThan(new VersionNumber("2.0"));
-        assertXmlApiMatchesExpected(build, "tasksResult/api/xml?depth=0", "/tasks_plugin/" + (is2xLine ? "api_depth_0-2_x.xml" : "api_depth_0.xml"), false);
+        assertXmlApiMatchesExpected(build, "tasksResult/api/xml?depth=0",
+                "/tasks_plugin/" + (is2xLine ? "api_depth_0-2_x.xml" : "api_depth_0.xml"), false);
     }
 
     /**
@@ -172,14 +165,12 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
      */
     @Test
     public void should_detect_regular_expression_in_freestyle_job() throws Exception {
-        FreeStyleJob job = createFreeStyleJob("/tasks_plugin/regexp", new AnalysisConfigurator<TasksFreestyleSettings>() {
-            @Override
-            public void configure(TasksFreestyleSettings settings) {
-                settings.setPattern("**/*.txt");
-                settings.setNormalPriorityTags("^.*(TODO(?:[0-9]*))(.*)$");
-                settings.setAsRegexp(true);
-            }
-        });
+        FreeStyleJob job = createFreeStyleJob("/tasks_plugin/regexp",
+                settings -> {
+                    settings.setPattern("**/*.txt");
+                    settings.setNormalPriorityTags("^.*(TODO(?:[0-9]*))(.*)$");
+                    settings.setAsRegexp(true);
+                });
 
         verifyRegularExpressionScannerResult(job);
     }
@@ -189,24 +180,14 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
      */
     @Test
     public void should_detect_regular_expression_in_maven_job() throws Exception {
-        MavenModuleSet job = createMavenJob("/tasks_plugin/regexp", new AnalysisConfigurator<TasksMavenSettings>() {
-            @Override
-            public void configure(TasksMavenSettings settings) {
-                settings.setPattern("**/*.txt");
-                settings.setNormalPriorityTags("^.*(TODO(?:[0-9]*))(.*)$");
-                settings.setAsRegexp(true);
-            }
-        });
+        MavenModuleSet job = createMavenJob("/tasks_plugin/regexp",
+                settings -> {
+                    settings.setPattern("**/*.txt");
+                    settings.setNormalPriorityTags("^.*(TODO(?:[0-9]*))(.*)$");
+                    settings.setAsRegexp(true);
+                });
 
         verifyRegularExpressionScannerResult(job);
-    }
-
-    private MavenModuleSet createMavenJob(final String files, final AnalysisConfigurator<TasksMavenSettings> buildConfigurator) {
-        return setupJob(files, MavenModuleSet.class, TasksMavenSettings.class, buildConfigurator, null, jenkins);
-    }
-
-    private MavenModuleSet createMavenJob(final String files, final String goal, final AnalysisConfigurator<TasksMavenSettings> buildConfigurator) {
-        return setupJob(files, MavenModuleSet.class, TasksMavenSettings.class, buildConfigurator, goal, jenkins);
     }
 
     private void verifyRegularExpressionScannerResult(final Job job) {
@@ -230,16 +211,13 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
      */
     @Test
     public void should_find_multiple_task_tags() throws Exception {
-        FreeStyleJob job = createFreeStyleJob(new AnalysisConfigurator<TasksFreestyleSettings>() {
-            @Override
-            public void configure(TasksFreestyleSettings settings) {
-                settings.setPattern("**/*.java");
-                settings.setExcludePattern("**/*Test.java");
-                settings.setHighPriorityTags("FIXME,BUG");
-                settings.setNormalPriorityTags("TODO");
-                settings.setLowPriorityTags("@Deprecated");
-                settings.setIgnoreCase(true);
-            }
+        FreeStyleJob job = createFreeStyleJob(settings -> {
+            settings.setPattern("**/*.java");
+            settings.setExcludePattern("**/*Test.java");
+            settings.setHighPriorityTags("FIXME,BUG");
+            settings.setNormalPriorityTags("TODO");
+            settings.setLowPriorityTags("@Deprecated");
+            settings.setIgnoreCase(true);
         });
 
         Build build = buildSuccessfulJob(job);
@@ -271,13 +249,11 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
         // find the second priority task in TSRDockerImage.java (line 102) amd
         // a low priority task in TSRDockerImage.java (line 56).
 
-        editJob(false, job, TasksFreestyleSettings.class, new AnalysisConfigurator<TasksFreestyleSettings>() {
-            @Override
-            public void configure(TasksFreestyleSettings settings) {
-                settings.setNormalPriorityTags("TODO,XXX");
-                settings.setLowPriorityTags("@Deprecated,\\?\\?\\?");
-            }
-        });
+        editJob(false, job, TasksFreestyleSettings.class,
+                settings -> {
+                    settings.setNormalPriorityTags("TODO,XXX");
+                    settings.setLowPriorityTags("@Deprecated,\\?\\?\\?");
+                });
 
         build = buildSuccessfulJob(job);
 
@@ -308,16 +284,13 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
      */
     @Test
     public void should_report_closed_tasks() throws Exception {
-        FreeStyleJob job = createFreeStyleJob(new AnalysisConfigurator<TasksFreestyleSettings>() {
-            @Override
-            public void configure(TasksFreestyleSettings settings) {
-                settings.setPattern("**/*.java");
-                settings.setExcludePattern("**/*Test.java");
-                settings.setHighPriorityTags("FIXME");
-                settings.setNormalPriorityTags("TODO");
-                settings.setLowPriorityTags("@Deprecated");
-                settings.setIgnoreCase(false);
-            }
+        FreeStyleJob job = createFreeStyleJob(settings -> {
+            settings.setPattern("**/*.java");
+            settings.setExcludePattern("**/*Test.java");
+            settings.setHighPriorityTags("FIXME");
+            settings.setNormalPriorityTags("TODO");
+            settings.setLowPriorityTags("@Deprecated");
+            settings.setIgnoreCase(false);
         });
         buildSuccessfulJob(job);
 
@@ -364,15 +337,12 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
      */
     @Test
     public void should_run_on_failed_builds_if_configured() throws Exception {
-        FreeStyleJob job = createFreeStyleJob(new AnalysisConfigurator<TasksFreestyleSettings>() {
-            @Override
-            public void configure(TasksFreestyleSettings settings) {
-                settings.setPattern("**/*.java");
-                settings.setExcludePattern("**/*Test.java");
-                settings.setHighPriorityTags("FIXME");
-                settings.setIgnoreCase(true);
-                settings.setCanRunOnFailed(false);
-            }
+        FreeStyleJob job = createFreeStyleJob(settings -> {
+            settings.setPattern("**/*.java");
+            settings.setExcludePattern("**/*Test.java");
+            settings.setHighPriorityTags("FIXME");
+            settings.setIgnoreCase(true);
+            settings.setCanRunOnFailed(false);
         });
 
         job.configure();
@@ -386,12 +356,8 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
         assertThatConsoleContains(build, ".*\\[TASKS\\] Skipping publisher since build result is FAILURE");
 
         // now activate "Run always"
-        editJob(false, job, TasksFreestyleSettings.class, new AnalysisConfigurator<TasksFreestyleSettings>() {
-            @Override
-            public void configure(TasksFreestyleSettings settings) {
-                settings.setCanRunOnFailed(true);
-            }
-        });
+        editJob(false, job, TasksFreestyleSettings.class,
+                settings -> settings.setCanRunOnFailed(true));
 
         build = buildFailingJob(job);
 
@@ -421,16 +387,13 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
     // Note: In order to run this test in IntelliJ the encoding of the source needs to be set to windows-1251
     @Test @Issue("JENKINS-22744")
     public void should_use_file_encoding_windows1251_when_parsing_files() throws Exception {
-        FreeStyleJob job = createFreeStyleJob("/tasks_plugin/cp1251_files", new AnalysisConfigurator<TasksFreestyleSettings>() {
-            @Override
-            public void configure(TasksFreestyleSettings settings) {
-                settings.setPattern("**/*.java");
-                settings.setExcludePattern("**/*Test.java");
-                settings.setHighPriorityTags("FIXME");
-                settings.setNormalPriorityTags("TODO");
-                settings.setIgnoreCase(true);
-                settings.setDefaultEncoding("windows-1251");
-            }
+        FreeStyleJob job = createFreeStyleJob("/tasks_plugin/cp1251_files", settings -> {
+            settings.setPattern("**/*.java");
+            settings.setExcludePattern("**/*Test.java");
+            settings.setHighPriorityTags("FIXME");
+            settings.setNormalPriorityTags("TODO");
+            settings.setIgnoreCase(true);
+            settings.setDefaultEncoding("windows-1251");
         });
 
         Build build = buildSuccessfulJob(job);
@@ -464,16 +427,13 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
     @Test
     public void should_find_tasks_in_maven_project() throws Exception {
         MavenModuleSet job = createMavenJob("/tasks_plugin/sample_tasks_project", "clean package test",
-                new AnalysisConfigurator<TasksMavenSettings>() {
-                    @Override
-                    public void configure(TasksMavenSettings settings) {
-                        settings.setPattern("**/*.java");
-                        settings.setExcludePattern("**/*Test.java");
-                        settings.setHighPriorityTags("FIXME");
-                        settings.setNormalPriorityTags("TODO");
-                        settings.setLowPriorityTags("@Deprecated");
-                        settings.setIgnoreCase(false);
-                    }
+                settings -> {
+                    settings.setPattern("**/*.java");
+                    settings.setExcludePattern("**/*Test.java");
+                    settings.setHighPriorityTags("FIXME");
+                    settings.setNormalPriorityTags("TODO");
+                    settings.setLowPriorityTags("@Deprecated");
+                    settings.setIgnoreCase(false);
                 });
 
         // as one of the unit tests fail, the build should be unstable
@@ -500,13 +460,10 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
         assertThat(action.getNumberOfWarningsWithLowPriority(), is(1));
 
         // re-configure the job and set a threshold to mark the build as failed
-        editJob(false, job, TasksMavenSettings.class, new AnalysisConfigurator<TasksMavenSettings>() {
-            @Override
-            public void configure(TasksMavenSettings settings) {
-                settings.setBuildFailedTotalHigh("0");
-                settings.setBuildFailedTotalNormal("5");
-                settings.setBuildFailedTotalLow("10");
-            }
+        editJob(false, job, TasksMavenSettings.class, settings -> {
+            settings.setBuildFailedTotalHigh("0");
+            settings.setBuildFailedTotalNormal("5");
+            settings.setBuildFailedTotalLow("10");
         });
 
         // as the threshold for high priority warnings is exceeded, the build should be marked as failed
@@ -544,22 +501,19 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
      */
     @Test
     public void should_set_build_result_based_on_status_thresholds() {
-        FreeStyleJob job = createFreeStyleJob("/tasks_plugin/fileset1_less", new AnalysisConfigurator<TasksFreestyleSettings>() {
-            @Override
-            public void configure(TasksFreestyleSettings settings) {
-                settings.setPattern("**/*.java");
-                settings.setExcludePattern("**/*Test.java");
-                settings.setHighPriorityTags(""); //no high prio tags
-                settings.setNormalPriorityTags("TODO");
-                settings.setLowPriorityTags("@Deprecated");
-                settings.setIgnoreCase(false);
-                //setup thresholds
-                settings.setBuildUnstableTotalLow("1");
-                settings.setBuildUnstableTotalNormal("4");
-                settings.setBuildUnstableTotalHigh("0");
-                settings.setBuildUnstableTotalAll("10");
-                settings.setBuildFailedTotalAll("15");
-            }
+        FreeStyleJob job = createFreeStyleJob("/tasks_plugin/fileset1_less", settings -> {
+            settings.setPattern("**/*.java");
+            settings.setExcludePattern("**/*Test.java");
+            settings.setHighPriorityTags(""); //no high prio tags
+            settings.setNormalPriorityTags("TODO");
+            settings.setLowPriorityTags("@Deprecated");
+            settings.setIgnoreCase(false);
+            //setup thresholds
+            settings.setBuildUnstableTotalLow("1");
+            settings.setBuildUnstableTotalNormal("4");
+            settings.setBuildUnstableTotalHigh("0");
+            settings.setBuildUnstableTotalAll("10");
+            settings.setBuildFailedTotalAll("15");
         });
 
         TaskScannerAction action = new TaskScannerAction(job.getLastBuild());
@@ -621,11 +575,8 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
      * @return The modified {@link org.jenkinsci.test.acceptance.po.FreeStyleJob}.
      */
     private FreeStyleJob status_thresholds_step2(final FreeStyleJob job, final TaskScannerAction action) {
-        editJob("/tasks_plugin/fileset1", false, job, TasksFreestyleSettings.class, new AnalysisConfigurator<TasksFreestyleSettings>() {
-            @Override
-            public void configure(TasksFreestyleSettings settings) {
-                settings.setLowPriorityTags("@Deprecated,\\?\\?\\?"); // add tag "???"
-            }
+        editJob("/tasks_plugin/fileset1", false, job, TasksFreestyleSettings.class, settings -> {
+            settings.setLowPriorityTags("@Deprecated,\\?\\?\\?"); // add tag "???"
         });
 
         Build lastBuild = buildUnstableJob(job);
@@ -660,12 +611,9 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
      * @return The modified {@link org.jenkinsci.test.acceptance.po.FreeStyleJob}.
      */
     private FreeStyleJob status_thresholds_step3(final FreeStyleJob job, final TaskScannerAction action) {
-        editJob(false, job, TasksFreestyleSettings.class, new AnalysisConfigurator<TasksFreestyleSettings>() {
-            @Override
-            public void configure(TasksFreestyleSettings settings) {
-                settings.setNormalPriorityTags("TODO,XXX"); // add tag "XXX"
-                settings.setLowPriorityTags("@Deprecated"); // remove tag "???"
-            }
+        editJob(false, job, TasksFreestyleSettings.class, settings -> {
+            settings.setNormalPriorityTags("TODO,XXX"); // add tag "XXX"
+            settings.setLowPriorityTags("@Deprecated"); // remove tag "???"
         });
 
         Build lastBuild = buildUnstableJob(job);
@@ -706,12 +654,9 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
      * @return The modified {@link org.jenkinsci.test.acceptance.po.FreeStyleJob}.
      */
     private FreeStyleJob status_thresholds_step4(final FreeStyleJob job, final TaskScannerAction action) {
-        editJob(false, job, TasksFreestyleSettings.class, new AnalysisConfigurator<TasksFreestyleSettings>() {
-            @Override
-            public void configure(TasksFreestyleSettings settings) {
-                settings.setLowPriorityTags("@Deprecated,\\?\\?\\?"); // add tag "???"
-                settings.setHighPriorityTags("FIXME"); // add tag "FIXME"
-            }
+        editJob(false, job, TasksFreestyleSettings.class, settings -> {
+            settings.setLowPriorityTags("@Deprecated,\\?\\?\\?"); // add tag "???"
+            settings.setHighPriorityTags("FIXME"); // add tag "FIXME"
         });
 
         Build lastBuild = buildUnstableJob(job);
@@ -748,11 +693,8 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
      */
     private FreeStyleJob status_thresholds_step5(final FreeStyleJob job, final TaskScannerAction action) {
         // add a second shell step to copy another folder
-        editJob("/tasks_plugin/fileset2", true, job, TasksFreestyleSettings.class, new AnalysisConfigurator<TasksFreestyleSettings>() {
-            @Override
-            public void configure(TasksFreestyleSettings settings) {
-                settings.setNormalPriorityTags("TODO"); //remove tag "XXX"
-            }
+        editJob("/tasks_plugin/fileset2", true, job, TasksFreestyleSettings.class, settings -> {
+            settings.setNormalPriorityTags("TODO"); //remove tag "XXX"
         });
 
         Build lastBuild = buildUnstableJob(job);
@@ -788,12 +730,8 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
      * @return The modified {@link org.jenkinsci.test.acceptance.po.FreeStyleJob}.
      */
     private FreeStyleJob status_thresholds_step6(final FreeStyleJob job, final TaskScannerAction action) {
-        editJob(false, job, TasksFreestyleSettings.class, new AnalysisConfigurator<TasksFreestyleSettings>() {
-            @Override
-            public void configure(TasksFreestyleSettings settings) {
-                settings.setIgnoreCase(true);
-            }
-        });
+        editJob(false, job, TasksFreestyleSettings.class,
+                settings -> settings.setIgnoreCase(true));
 
         Build lastBuild = buildFailingJob(job);
 
@@ -1037,17 +975,14 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
 
     @Override
     protected FreeStyleJob createFreeStyleJob(final Container owner) {
-        return createFreeStyleJob(new AnalysisConfigurator<TasksFreestyleSettings>() {
-            @Override
-            public void configure(TasksFreestyleSettings settings) {
-                settings.setPattern("**/*.java");
-                settings.setExcludePattern("**/*Test.java");
-                settings.setHighPriorityTags("FIXME");
-                settings.setNormalPriorityTags("TODO");
-                settings.setLowPriorityTags("@Deprecated");
-                settings.setIgnoreCase(false);
-            }
-        }, owner);
+        return createFreeStyleJob(owner, settings -> {
+            settings.setPattern("**/*.java");
+            settings.setExcludePattern("**/*Test.java");
+            settings.setHighPriorityTags("FIXME");
+            settings.setNormalPriorityTags("TODO");
+            settings.setLowPriorityTags("@Deprecated");
+            settings.setIgnoreCase(false);
+        });
     }
 
     @Override
@@ -1096,18 +1031,28 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
         return createFreeStyleJob(TASKS_FILES, buildConfigurator);
     }
 
-    private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<TasksFreestyleSettings> buildConfigurator,
-            final Container owner) {
-        return createFreeStyleJob(TASKS_FILES, buildConfigurator, owner);
+    private FreeStyleJob createFreeStyleJob(final Container owner,
+            final AnalysisConfigurator<TasksFreestyleSettings> buildConfigurator) {
+        return createFreeStyleJob(TASKS_FILES, owner, buildConfigurator);
     }
 
     private FreeStyleJob createFreeStyleJob(final String fileset,
             final AnalysisConfigurator<TasksFreestyleSettings> buildConfigurator) {
-        return createFreeStyleJob(fileset, buildConfigurator, jenkins);
+        return createFreeStyleJob(fileset, jenkins, buildConfigurator);
     }
 
     private FreeStyleJob createFreeStyleJob(final String fileset,
-            final AnalysisConfigurator<TasksFreestyleSettings> buildConfigurator, final Container owner) {
-        return setupJob(fileset, FreeStyleJob.class, TasksFreestyleSettings.class, buildConfigurator, owner);
+            final Container owner, final AnalysisConfigurator<TasksFreestyleSettings> buildConfigurator) {
+        return setupJob(fileset, FreeStyleJob.class, TasksFreestyleSettings.class, owner, buildConfigurator);
+    }
+
+    private MavenModuleSet createMavenJob(final String files,
+            final AnalysisConfigurator<TasksMavenSettings> buildConfigurator) {
+        return setupJob(files, MavenModuleSet.class, TasksMavenSettings.class, null, jenkins, buildConfigurator);
+    }
+
+    private MavenModuleSet createMavenJob(final String files, final String goal,
+            final AnalysisConfigurator<TasksMavenSettings> buildConfigurator) {
+        return setupJob(files, MavenModuleSet.class, TasksMavenSettings.class, goal, jenkins, buildConfigurator);
     }
 }

@@ -171,12 +171,7 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
         job.addPublisher(FindBugsFreestyleSettings.class);
 
         AnalysisCollectorSettings analysis = job.addPublisher(AnalysisCollectorSettings.class);
-        AnalysisConfigurator<AnalysisCollectorSettings> configurator = new AnalysisConfigurator<AnalysisCollectorSettings>() {
-            @Override
-            public void configure(AnalysisCollectorSettings settings) {
-                settings.setBuildUnstableTotalAll("5");
-            }
-        };
+        AnalysisConfigurator<AnalysisCollectorSettings> configurator = settings -> settings.setBuildUnstableTotalAll("5");
         configurator.configure(analysis);
         job.save();
 
@@ -444,26 +439,20 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
 
     private void addAndConfigureWarningsPublisher(final FreeStyleJob job) {
         WarningsBuildSettings warningsSettings = job.addPublisher(WarningsBuildSettings.class);
-        AnalysisConfigurator<WarningsBuildSettings> warningsConfigurator = new AnalysisConfigurator<WarningsBuildSettings>() {
-            @Override
-            public void configure(WarningsBuildSettings settings) {
-                settings.addWorkspaceScanner("Java Compiler (javac)", "**/*");
-                settings.addWorkspaceScanner("JavaDoc Tool", "**/*");
-                settings.addWorkspaceScanner("MSBuild", "**/*");
-            }
+        AnalysisConfigurator<WarningsBuildSettings> warningsConfigurator = settings -> {
+            settings.addWorkspaceScanner("Java Compiler (javac)", "**/*");
+            settings.addWorkspaceScanner("JavaDoc Tool", "**/*");
+            settings.addWorkspaceScanner("MSBuild", "**/*");
         };
         warningsConfigurator.configure(warningsSettings);
     }
 
     private void addAndConfigureTasksPublisher(final FreeStyleJob job) {
         TasksFreestyleSettings taskScannerSettings = job.addPublisher(TasksFreestyleSettings.class);
-        AnalysisConfigurator<TasksFreestyleSettings> configurator = new AnalysisConfigurator<TasksFreestyleSettings>() {
-            @Override
-            public void configure(TasksFreestyleSettings settings) {
-                settings.setHighPriorityTags("PRIO1");
-                settings.setNormalPriorityTags("PRIO2,TODO");
-                settings.setLowPriorityTags("PRIO3");
-            }
+        AnalysisConfigurator<TasksFreestyleSettings> configurator = settings -> {
+            settings.setHighPriorityTags("PRIO1");
+            settings.setNormalPriorityTags("PRIO2,TODO");
+            settings.setLowPriorityTags("PRIO3");
         };
         configurator.configure(taskScannerSettings);
     }

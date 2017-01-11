@@ -55,15 +55,8 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
     public void should_show_no_warnings_for_correct_ant_patterns() {
         FreeStyleJob job = createFreeStyleJob();
 
-        AnalysisConfigurator<PmdFreestyleSettings> buildConfigurator = new AnalysisConfigurator<PmdFreestyleSettings>() {
-            @Override
-            public void configure(PmdFreestyleSettings settings) {
-                settings.pattern.set(PATTERN_WITHOUT_WARNINGS);
-            }
-        };
-
-        editJob(PLUGIN_ROOT, false, job,
-                PmdFreestyleSettings.class, buildConfigurator);
+        editJob(PLUGIN_ROOT, false, job, PmdFreestyleSettings.class,
+                settings -> settings.pattern.set(PATTERN_WITHOUT_WARNINGS));
         buildSuccessfulJob(job);
 
         validatePattern(job, "pmd.xml,not-here.xml");
@@ -72,15 +65,11 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
     }
 
     private void validatePattern(final FreeStyleJob job, final String pattern) {
-        AnalysisConfigurator<PmdFreestyleSettings> buildConfigurator = new AnalysisConfigurator<PmdFreestyleSettings>() {
-            @Override
-            public void configure(PmdFreestyleSettings settings) {
-                String validationMessage = settings.validatePattern(pattern);
-                assertThat(validationMessage, isEmptyString());
-            }
-        };
-        editJob(PLUGIN_ROOT, false, job,
-                PmdFreestyleSettings.class, buildConfigurator);
+        editJob(PLUGIN_ROOT, false, job, PmdFreestyleSettings.class,
+                settings -> {
+                    String validationMessage = settings.validatePattern(pattern);
+                    assertThat(validationMessage, isEmptyString());
+                });
     }
 
     /**
@@ -91,13 +80,11 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
     public void should_send_mail_with_expanded_tokens() {
         setUpMailer();
 
-        FreeStyleJob job = createFreeStyleJob(FILE_WITH_9_WARNINGS, new AnalysisConfigurator<PmdFreestyleSettings>() {
-            @Override
-            public void configure(PmdFreestyleSettings settings) {
-                settings.setBuildFailedTotalAll("0");
-                settings.pattern.set(PATTERN_WITH_9_WARNINGS);
-            }
-        });
+        FreeStyleJob job = createFreeStyleJob(FILE_WITH_9_WARNINGS, settings -> {
+            settings.setBuildFailedTotalAll("0");
+            settings.pattern.set(PATTERN_WITH_9_WARNINGS);
+        }
+        );
 
         configureEmailNotification(job, "PMD: ${PMD_RESULT}",
                 "PMD: ${PMD_COUNT}-${PMD_FIXED}-${PMD_NEW}");
@@ -112,12 +99,7 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
      */
     @Test
     public void should_find_no_warnings() {
-        FreeStyleJob job = createFreeStyleJob(new AnalysisConfigurator<PmdFreestyleSettings>() {
-            @Override
-            public void configure(PmdFreestyleSettings settings) {
-                settings.pattern.set(PATTERN_WITHOUT_WARNINGS);
-            }
-        });
+        FreeStyleJob job = createFreeStyleJob(settings -> settings.pattern.set(PATTERN_WITHOUT_WARNINGS));
 
         Build lastBuild = buildSuccessfulJob(job);
 
@@ -129,12 +111,9 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
      */
     @Test
     public void should_collect_warnings_even_if_build_failed() {
-        FreeStyleJob job = createFreeStyleJob(new AnalysisConfigurator<PmdFreestyleSettings>() {
-            @Override
-            public void configure(PmdFreestyleSettings settings) {
-                settings.pattern.set(PATTERN_WITHOUT_WARNINGS);
-                settings.setCanRunOnFailed(true);
-            }
+        FreeStyleJob job = createFreeStyleJob(settings -> {
+            settings.pattern.set(PATTERN_WITHOUT_WARNINGS);
+            settings.setCanRunOnFailed(true);
         });
 
         job.configure();
@@ -157,7 +136,8 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
         Build build = buildSuccessfulJob(job);
 
         boolean is2xLine = !jenkins.getVersion().isOlderThan(new VersionNumber("2.0"));
-        assertXmlApiMatchesExpected(build, "pmdResult/api/xml?depth=0", PLUGIN_ROOT + (is2xLine ? "api_depth_0-2_x.xml" : "api_depth_0.xml"), false);
+        assertXmlApiMatchesExpected(build, "pmdResult/api/xml?depth=0",
+                PLUGIN_ROOT + (is2xLine ? "api_depth_0-2_x.xml" : "api_depth_0.xml"), false);
     }
 
     /**
@@ -219,14 +199,9 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
      */
     @Test
     public void should_link_to_source_code_in_real_project() {
-        AnalysisConfigurator<PmdFreestyleSettings> buildConfigurator = new AnalysisConfigurator<PmdFreestyleSettings>() {
-            @Override
-            public void configure(PmdFreestyleSettings settings) {
-                settings.pattern.set("target/pmd.xml");
-            }
-        };
         FreeStyleJob job = setupJob(PLUGIN_ROOT + "sample_pmd_project", FreeStyleJob.class,
-                PmdFreestyleSettings.class, buildConfigurator, "clean package pmd:pmd", jenkins);
+                PmdFreestyleSettings.class, "clean package pmd:pmd", jenkins,
+                settings -> settings.pattern.set("target/pmd.xml"));
 
         Build build = buildSuccessfulJob(job);
 
@@ -279,12 +254,7 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
      */
     @Test
     public void should_set_result_to_unstable_if_warning_found() {
-        MavenModuleSet job = createMavenJob(new AnalysisConfigurator<PmdMavenSettings>() {
-            @Override
-            public void configure(PmdMavenSettings settings) {
-                settings.setBuildUnstableTotalAll("0");
-            }
-        });
+        MavenModuleSet job = createMavenJob(settings -> settings.setBuildUnstableTotalAll("0"));
 
         buildJobAndWait(job).shouldBeUnstable();
     }
@@ -294,12 +264,7 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
      */
     @Test
     public void should_set_result_to_failed_if_warning_found() {
-        MavenModuleSet job = createMavenJob(new AnalysisConfigurator<PmdMavenSettings>() {
-            @Override
-            public void configure(PmdMavenSettings settings) {
-                settings.setBuildFailedTotalAll("0");
-            }
-        });
+        MavenModuleSet job = createMavenJob(settings -> settings.setBuildFailedTotalAll("0"));
 
         buildJobAndWait(job).shouldFail();
     }
@@ -359,18 +324,15 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
         runBuild(job, 3, Result.SUCCESS, 0, true);
     }
 
-    private void runBuild(final FreeStyleJob job, final int number, final Result expectedResult, final int expectedNewWarnings, final boolean usePreviousAsReference) {
+    private void runBuild(final FreeStyleJob job, final int number, final Result expectedResult,
+            final int expectedNewWarnings, final boolean usePreviousAsReference) {
         final String fileName = "pmd-warnings-build" + number + ".xml";
-        AnalysisConfigurator<PmdFreestyleSettings> buildConfigurator = new AnalysisConfigurator<PmdFreestyleSettings>() {
-            @Override
-            public void configure(PmdFreestyleSettings settings) {
-                settings.setNewWarningsThresholdUnstable("0", usePreviousAsReference);
-                settings.pattern.set(fileName);
-            }
-        };
 
-        editJob(PLUGIN_ROOT + fileName, false, job,
-                PmdFreestyleSettings.class, buildConfigurator);
+        editJob(PLUGIN_ROOT + fileName, false, job, PmdFreestyleSettings.class,
+                settings -> {
+                    settings.setNewWarningsThresholdUnstable("0", usePreviousAsReference);
+                    settings.pattern.set(fileName);
+                });
         Build build = buildJobAndWait(job).shouldBe(expectedResult);
 
         if (expectedNewWarnings > 0) {
@@ -397,27 +359,12 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
 
     @Override
     protected FreeStyleJob createFreeStyleJob(final Container owner) {
-        return createFreeStyleJob(FILE_WITH_9_WARNINGS, new AnalysisConfigurator<PmdFreestyleSettings>() {
-            @Override
-            public void configure(PmdFreestyleSettings settings) {
-                settings.pattern.set(PATTERN_WITH_9_WARNINGS);
-            }
-        }, owner);
+        return createFreeStyleJob(FILE_WITH_9_WARNINGS, owner, settings -> settings.pattern.set(PATTERN_WITH_9_WARNINGS));
     }
 
     @Override
     protected WorkflowJob createPipeline() {
         return createPipelineWith(FILE_WITH_9_WARNINGS, "PmdPublisher");
-    }
-
-    private MavenModuleSet createMavenJob() {
-        return createMavenJob(null);
-    }
-
-    private MavenModuleSet createMavenJob(AnalysisConfigurator<PmdMavenSettings> configurator) {
-        String projectPath = PLUGIN_ROOT + "sample_pmd_project";
-        String goal = "clean package pmd:pmd";
-        return setupMavenJob(projectPath, goal, PmdMavenSettings.class, configurator);
     }
 
     @Override
@@ -480,21 +427,25 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
         return createFreeStyleJob(jenkins);
     }
 
-    private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<PmdFreestyleSettings> buildConfigurator,
-            final Container owner) {
-        return createFreeStyleJob(FILE_WITHOUT_WARNINGS, buildConfigurator, owner);
-    }
-
     private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<PmdFreestyleSettings> buildConfigurator) {
         return createFreeStyleJob(FILE_WITHOUT_WARNINGS, buildConfigurator);
     }
 
     private FreeStyleJob createFreeStyleJob(final String fileName, final AnalysisConfigurator<PmdFreestyleSettings> buildConfigurator) {
-        return createFreeStyleJob(fileName, buildConfigurator, jenkins);
+        return createFreeStyleJob(fileName, jenkins, buildConfigurator);
     }
 
-    private FreeStyleJob createFreeStyleJob(final String fileName,
-            final AnalysisConfigurator<PmdFreestyleSettings> buildConfigurator, final Container owner) {
-        return setupJob(fileName, FreeStyleJob.class, PmdFreestyleSettings.class, buildConfigurator, owner);
+    private FreeStyleJob createFreeStyleJob(final String fileName, final Container owner,
+            final AnalysisConfigurator<PmdFreestyleSettings> buildConfigurator) {
+        return setupJob(fileName, FreeStyleJob.class, PmdFreestyleSettings.class, owner, buildConfigurator);
+    }
+    private MavenModuleSet createMavenJob() {
+        return createMavenJob(null);
+    }
+
+    private MavenModuleSet createMavenJob(AnalysisConfigurator<PmdMavenSettings> configurator) {
+        String projectPath = PLUGIN_ROOT + "sample_pmd_project";
+        String goal = "clean package pmd:pmd";
+        return setupMavenJob(projectPath, goal, PmdMavenSettings.class, configurator);
     }
 }

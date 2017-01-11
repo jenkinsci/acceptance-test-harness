@@ -50,12 +50,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
      */
     @Test @Issue("JENKINS-30735") @WithPlugins({"envinject", "analysis-core@1.77", "checkstyle@3.46"})
     public void should_resolve_environment_variables() {
-        FreeStyleJob job = createFreeStyleJob(new AnalysisConfigurator<CheckStyleFreestyleSettings>() {
-            @Override
-            public void configure(CheckStyleFreestyleSettings settings) {
-                settings.pattern.set("checkstyle${ENV_DASH}result.xml");
-            }
-        });
+        FreeStyleJob job = createFreeStyleJob(settings -> settings.pattern.set("checkstyle${ENV_DASH}result.xml"));
 
         job.configure();
         new EnvInjectConfig.Environment(job).properties.sendKeys("ENV_DASH=-");
@@ -73,12 +68,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
 
     @Test @WithPlugins("parameterized-trigger") @Issue("JENKINS-33162")
     public void should_return_from_triggered_subjob() {
-        FreeStyleJob checkstyleJob = createFreeStyleJob(new AnalysisConfigurator<CheckStyleFreestyleSettings>() {
-            @Override
-            public void configure(CheckStyleFreestyleSettings settings) {
-                settings.pattern.set(PATTERN_WITH_776_WARNINGS);
-            }
-        });
+        FreeStyleJob checkstyleJob = createFreeStyleJob(settings -> settings.pattern.set(PATTERN_WITH_776_WARNINGS));
 
         FreeStyleJob trigger = jenkins.jobs.create();
         trigger.configure();
@@ -101,12 +91,9 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
     public void should_send_mail_with_expanded_tokens() {
         setUpMailer();
 
-        FreeStyleJob job = createFreeStyleJob(new AnalysisConfigurator<CheckStyleFreestyleSettings>() {
-            @Override
-            public void configure(CheckStyleFreestyleSettings settings) {
-                settings.setBuildFailedTotalAll("0");
-                settings.pattern.set(PATTERN_WITH_776_WARNINGS);
-            }
+        FreeStyleJob job = createFreeStyleJob(settings -> {
+            settings.setBuildFailedTotalAll("0");
+            settings.pattern.set(PATTERN_WITH_776_WARNINGS);
         });
 
         configureEmailNotification(job, "Checkstyle: ${CHECKSTYLE_RESULT}",
@@ -128,7 +115,9 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
         Build build = buildSuccessfulJob(job);
 
         boolean is2xLine = !jenkins.getVersion().isOlderThan(new VersionNumber("2.0"));
-        assertXmlApiMatchesExpected(build, "checkstyleResult/api/xml?depth=0", CHECKSTYLE_PLUGIN_ROOT + (is2xLine ? "api_depth_0-2_x.xml" : "api_depth_0.xml"), false);
+        assertXmlApiMatchesExpected(build, "checkstyleResult/api/xml?depth=0",
+                CHECKSTYLE_PLUGIN_ROOT + (is2xLine ? "api_depth_0-2_x.xml" : "api_depth_0.xml"),
+                false);
     }
 
     /**
@@ -209,15 +198,9 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
      */
     @Test
     public void should_link_to_source_code_in_real_project() {
-        AnalysisConfigurator<CheckStyleFreestyleSettings> buildConfigurator = new AnalysisConfigurator<CheckStyleFreestyleSettings>() {
-            @Override
-            public void configure(CheckStyleFreestyleSettings settings) {
-                settings.pattern.set("target/checkstyle-result.xml");
-            }
-        };
         FreeStyleJob job = setupJob(CHECKSTYLE_PLUGIN_ROOT + "sample_checkstyle_project", FreeStyleJob.class,
-                CheckStyleFreestyleSettings.class, buildConfigurator, "clean package checkstyle:checkstyle", jenkins
-        );
+                CheckStyleFreestyleSettings.class, "clean package checkstyle:checkstyle", jenkins,
+                settings -> settings.pattern.set("target/checkstyle-result.xml"));
 
         Build build = buildSuccessfulJob(job);
 
@@ -301,12 +284,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
      */
     @Test
     public void should_set_result_to_unstable_if_warning_found() {
-        MavenModuleSet job = createMavenJob(new AnalysisConfigurator<CheckStyleMavenSettings>() {
-            @Override
-            public void configure(CheckStyleMavenSettings settings) {
-                settings.setBuildUnstableTotalAll("0");
-            }
-        });
+        MavenModuleSet job = createMavenJob(settings -> settings.setBuildUnstableTotalAll("0"));
 
         buildJobAndWait(job).shouldBeUnstable();
     }
@@ -316,12 +294,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
      */
     @Test
     public void should_set_result_to_failed_if_warning_found() {
-        MavenModuleSet job = createMavenJob(new AnalysisConfigurator<CheckStyleMavenSettings>() {
-            @Override
-            public void configure(CheckStyleMavenSettings settings) {
-                settings.setBuildFailedTotalAll("0");
-            }
-        });
+        MavenModuleSet job = createMavenJob(settings -> settings.setBuildFailedTotalAll("0"));
 
         buildJobAndWait(job).shouldFail();
     }
@@ -384,17 +357,14 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
 
     private void runBuild(final FreeStyleJob job, final int buildNumber, final Result expectedResult,
             final int expectedNewWarnings, final int expectedFixedWarnings, final boolean usePreviousAsReference) {
-        final String fileName = "checkstyle-result-build" + buildNumber + ".xml";
-        AnalysisConfigurator<CheckStyleFreestyleSettings> buildConfigurator = new AnalysisConfigurator<CheckStyleFreestyleSettings>() {
-            @Override
-            public void configure(CheckStyleFreestyleSettings settings) {
-                settings.setNewWarningsThresholdUnstable("0", usePreviousAsReference);
-                settings.pattern.set(fileName);
-            }
-        };
+        String fileName = "checkstyle-result-build" + buildNumber + ".xml";
 
         editJob(CHECKSTYLE_PLUGIN_ROOT + fileName, false, job,
-                CheckStyleFreestyleSettings.class, buildConfigurator);
+                CheckStyleFreestyleSettings.class,
+                settings -> {
+                    settings.setNewWarningsThresholdUnstable("0", usePreviousAsReference);
+                    settings.pattern.set(fileName);
+                });
         Build build = buildJobAndWait(job).shouldBe(expectedResult);
 
         if (expectedNewWarnings > 0) {
@@ -420,12 +390,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
 
     @Override
     protected FreeStyleJob createFreeStyleJob(final Container owner) {
-        return createFreeStyleJob(new AnalysisConfigurator<CheckStyleFreestyleSettings>() {
-            @Override
-            public void configure(CheckStyleFreestyleSettings settings) {
-                settings.pattern.set(PATTERN_WITH_776_WARNINGS);
-            }
-        }, owner);
+        return createFreeStyleJob(owner, settings -> settings.pattern.set(PATTERN_WITH_776_WARNINGS));
     }
 
     @Override
@@ -458,21 +423,17 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
     }
 
     private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<CheckStyleFreestyleSettings> buildConfigurator) {
-        return createFreeStyleJob(buildConfigurator, jenkins);
+        return createFreeStyleJob(jenkins, buildConfigurator);
     }
 
-    private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<CheckStyleFreestyleSettings> buildConfigurator,
-            final Container owner) {
-        return createFreeStyleJob(FILE_WITH_776_WARNINGS, buildConfigurator, owner);
+    private FreeStyleJob createFreeStyleJob(final Container owner,
+            final AnalysisConfigurator<CheckStyleFreestyleSettings> buildConfigurator) {
+        return createFreeStyleJob(owner, FILE_WITH_776_WARNINGS, buildConfigurator);
     }
 
-    private FreeStyleJob createFreeStyleJob(final String fileName, final AnalysisConfigurator<CheckStyleFreestyleSettings> buildConfigurator) {
-        return createFreeStyleJob(fileName, buildConfigurator, jenkins);
-    }
-
-    private FreeStyleJob createFreeStyleJob(final String fileName, final AnalysisConfigurator<CheckStyleFreestyleSettings> buildConfigurator,
-            final Container owner) {
-        return setupJob(fileName, FreeStyleJob.class, CheckStyleFreestyleSettings.class, buildConfigurator, owner);
+    private FreeStyleJob createFreeStyleJob(final Container owner, final String fileName,
+            final AnalysisConfigurator<CheckStyleFreestyleSettings> buildConfigurator) {
+        return setupJob(fileName, FreeStyleJob.class, CheckStyleFreestyleSettings.class, owner, buildConfigurator);
     }
 
     @Override
@@ -482,7 +443,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
         assertThatTypesTabIsCorrectlyFilled(action);
     }
 
-    private void assertThatFilesTabIsCorrectlyFilled(CheckStyleAction ca) {
+    private void assertThatFilesTabIsCorrectlyFilled(CheckStyleAction action) {
         SortedMap<String, Integer> expectedFileDetails = new TreeMap<>();
         expectedFileDetails.put("JavaProvider.java", 18);
         expectedFileDetails.put("PluginImpl.java", 8);
@@ -491,10 +452,10 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
         expectedFileDetails.put("SFTPFileSystem.java", 34);
         expectedFileDetails.put("SSHConnector.java", 96);
         expectedFileDetails.put("SSHLauncher.java", 481);
-        assertThat(ca.getFileTabContents(), is(expectedFileDetails));
+        assertThat(action.getFileTabContents(), is(expectedFileDetails));
     }
 
-    private void assertThatCategoriesTabIsCorrectlyFilled(CheckStyleAction ca) {
+    private void assertThatCategoriesTabIsCorrectlyFilled(CheckStyleAction action) {
         SortedMap<String, Integer> expectedCategories = new TreeMap<>();
         expectedCategories.put("Blocks", 28);
         expectedCategories.put("Checks", 123);
@@ -506,10 +467,10 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
         expectedCategories.put("Regexp", 23);
         expectedCategories.put("Sizes", 164);
         expectedCategories.put("Whitespace", 219);
-        assertThat(ca.getCategoriesTabContents(), is(expectedCategories));
+        assertThat(action.getCategoriesTabContents(), is(expectedCategories));
     }
 
-    private void assertThatTypesTabIsCorrectlyFilled(CheckStyleAction ca) {
+    private void assertThatTypesTabIsCorrectlyFilled(CheckStyleAction action) {
         SortedMap<String, Integer> expectedTypes = new TreeMap<>();
         expectedTypes.put("AvoidInlineConditionalsCheck", 9);
         expectedTypes.put("AvoidStarImportCheck", 1);
@@ -537,6 +498,6 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
         expectedTypes.put("VisibilityModifierCheck", 12);
         expectedTypes.put("WhitespaceAfterCheck", 66);
         expectedTypes.put("WhitespaceAroundCheck", 106);
-        assertThat(ca.getTypesTabContents(), is(expectedTypes));
+        assertThat(action.getTypesTabContents(), is(expectedTypes));
     }
 }

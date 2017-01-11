@@ -547,14 +547,14 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      * @param resourceToCopy              Resource to copy to build (Directory or File path)
      * @param jobClass                    the type the job shall be created of, e.g. FreeStyleJob
      * @param publisherBuildSettingsClass the type of the publisher to be added
-     * @param configurator                the configuration of the publisher
      * @param owner
+     * @param configurator                the configuration of the publisher
      * @return the new job
      */
     public <J extends Job, T extends AnalysisSettings & PostBuildStep> J setupJob(String resourceToCopy,
             Class<J> jobClass, Class<T> publisherBuildSettingsClass,
-            AnalysisConfigurator<T> configurator, final Container owner) {
-        return setupJob(resourceToCopy, jobClass, publisherBuildSettingsClass, configurator, null, owner);
+            final Container owner, AnalysisConfigurator<T> configurator) {
+        return setupJob(resourceToCopy, jobClass, publisherBuildSettingsClass, null, owner, configurator);
     }
 
     /**
@@ -564,14 +564,14 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      * @param resourceToCopy              Resource to copy to build (Directory or File path)
      * @param jobClass                    the type the job shall be created of, e.g. FreeStyleJob
      * @param publisherBuildSettingsClass the type of the publisher to be added
-     * @param configurator                the configuration of the publisher
      * @param goal                        a maven goal to be added to the job or null otherwise
      * @param owner                       the owner of the job (Jenkins or a folder)
+     * @param configurator                the configuration of the publisher
      * @return the new job
      */
     public <J extends Job, T extends AnalysisSettings & PostBuildStep> J setupJob(String resourceToCopy,
             Class<J> jobClass, Class<T> publisherBuildSettingsClass,
-            AnalysisConfigurator<T> configurator, String goal, final Container owner) {
+            String goal, final Container owner, AnalysisConfigurator<T> configurator) {
         if (jobClass.isAssignableFrom(MavenModuleSet.class)) {
             MavenInstallation.ensureThatMavenIsInstalled(jenkins);
         }

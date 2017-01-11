@@ -77,12 +77,9 @@ public class FindBugsPluginTest extends AbstractAnalysisTest<FindBugsAction> {
     public void should_send_mail_with_expanded_tokens() {
         setUpMailer();
 
-        FreeStyleJob job = createFreeStyleJob(new AnalysisConfigurator<FindBugsFreestyleSettings>() {
-            @Override
-            public void configure(FindBugsFreestyleSettings settings) {
-                settings.setBuildFailedTotalAll("0");
-                settings.pattern.set(PATTERN_WITH_6_WARNINGS);
-            }
+        FreeStyleJob job = createFreeStyleJob(settings -> {
+            settings.setBuildFailedTotalAll("0");
+            settings.pattern.set(PATTERN_WITH_6_WARNINGS);
         });
 
         configureEmailNotification(job, "FindBugs: ${FINDBUGS_RESULT}",
@@ -104,7 +101,8 @@ public class FindBugsPluginTest extends AbstractAnalysisTest<FindBugsAction> {
         Build build = buildSuccessfulJob(job);
 
         boolean is2xLine = !jenkins.getVersion().isOlderThan(new VersionNumber("2.0"));
-        assertXmlApiMatchesExpected(build, "findbugsResult/api/xml?depth=0", PLUGIN_ROOT + (is2xLine ? "api_depth_0-2_x.xml" : "api_depth_0.xml"), false);
+        assertXmlApiMatchesExpected(build, "findbugsResult/api/xml?depth=0",
+                PLUGIN_ROOT + (is2xLine ? "api_depth_0-2_x.xml" : "api_depth_0.xml"), false);
     }
 
     /**
@@ -166,14 +164,9 @@ public class FindBugsPluginTest extends AbstractAnalysisTest<FindBugsAction> {
      */
     @Test
     public void should_link_to_source_code_in_real_project() {
-        AnalysisConfigurator<FindBugsFreestyleSettings> buildConfigurator = new AnalysisConfigurator<FindBugsFreestyleSettings>() {
-            @Override
-            public void configure(FindBugsFreestyleSettings settings) {
-                settings.pattern.set("target/findbugsXml.xml");
-            }
-        };
         FreeStyleJob job = setupJob("/findbugs_plugin/sample_findbugs_project", FreeStyleJob.class,
-                FindBugsFreestyleSettings.class, buildConfigurator, "clean package findbugs:findbugs", jenkins);
+                FindBugsFreestyleSettings.class, "clean package findbugs:findbugs", jenkins,
+                settings -> settings.pattern.set("target/findbugsXml.xml"));
 
         Build build = buildSuccessfulJob(job);
 
@@ -215,12 +208,7 @@ public class FindBugsPluginTest extends AbstractAnalysisTest<FindBugsAction> {
      */
     @Test
     public void should_set_result_to_unstable_if_warning_found() {
-        MavenModuleSet job = createMavenJob(new AnalysisConfigurator<FindBugsMavenSettings>() {
-            @Override
-            public void configure(FindBugsMavenSettings settings) {
-                settings.setBuildUnstableTotalAll("0");
-            }
-        });
+        MavenModuleSet job = createMavenJob(settings -> settings.setBuildUnstableTotalAll("0"));
 
         buildJobAndWait(job).shouldBeUnstable();
     }
@@ -230,12 +218,7 @@ public class FindBugsPluginTest extends AbstractAnalysisTest<FindBugsAction> {
      */
     @Test
     public void should_set_result_to_failed_if_warning_found() {
-        MavenModuleSet job = createMavenJob(new AnalysisConfigurator<FindBugsMavenSettings>() {
-            @Override
-            public void configure(FindBugsMavenSettings settings) {
-                settings.setBuildFailedTotalAll("0");
-            }
-        });
+        MavenModuleSet job = createMavenJob(settings -> settings.setBuildFailedTotalAll("0"));
 
         buildJobAndWait(job).shouldFail();
     }
@@ -274,12 +257,7 @@ public class FindBugsPluginTest extends AbstractAnalysisTest<FindBugsAction> {
 
     @Override
     protected FreeStyleJob createFreeStyleJob(final Container owner) {
-        return createFreeStyleJob(new AnalysisConfigurator<FindBugsFreestyleSettings>() {
-            @Override
-            public void configure(FindBugsFreestyleSettings settings) {
-                settings.pattern.set(PATTERN_WITH_6_WARNINGS);
-            }
-        }, owner);
+        return createFreeStyleJob(owner, settings -> settings.pattern.set(PATTERN_WITH_6_WARNINGS));
     }
 
     @Override
@@ -311,9 +289,9 @@ public class FindBugsPluginTest extends AbstractAnalysisTest<FindBugsAction> {
         return createFreeStyleJob(jenkins);
     }
 
-    private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<FindBugsFreestyleSettings> buildConfigurator,
-            final Container owner) {
-        return createFreeStyleJob(FILE_WITH_6_WARNINGS, buildConfigurator, owner);
+    private FreeStyleJob createFreeStyleJob(final Container owner,
+            final AnalysisConfigurator<FindBugsFreestyleSettings> buildConfigurator) {
+        return createFreeStyleJob(FILE_WITH_6_WARNINGS, owner, buildConfigurator);
     }
 
     private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<FindBugsFreestyleSettings> buildConfigurator) {
@@ -322,12 +300,12 @@ public class FindBugsPluginTest extends AbstractAnalysisTest<FindBugsAction> {
 
     private FreeStyleJob createFreeStyleJob(final String file,
             final AnalysisConfigurator<FindBugsFreestyleSettings> buildConfigurator) {
-        return createFreeStyleJob(file, buildConfigurator, jenkins);
+        return createFreeStyleJob(file, jenkins, buildConfigurator);
     }
 
-    private FreeStyleJob createFreeStyleJob(final String file,
-            final AnalysisConfigurator<FindBugsFreestyleSettings> buildConfigurator, final Container owner) {
-        return setupJob(file, FreeStyleJob.class, FindBugsFreestyleSettings.class, buildConfigurator, owner);
+    private FreeStyleJob createFreeStyleJob(final String file, final Container owner,
+            final AnalysisConfigurator<FindBugsFreestyleSettings> buildConfigurator) {
+        return setupJob(file, FreeStyleJob.class, FindBugsFreestyleSettings.class, owner, buildConfigurator);
     }
 
     private MavenModuleSet createMavenJob() {
@@ -335,8 +313,8 @@ public class FindBugsPluginTest extends AbstractAnalysisTest<FindBugsAction> {
     }
 
     private MavenModuleSet createMavenJob(AnalysisConfigurator<FindBugsMavenSettings> configurator) {
-        return setupMavenJob("/findbugs_plugin/sample_findbugs_project", "clean package findbugs:findbugs",
-                FindBugsMavenSettings.class, configurator);
+        return setupMavenJob("/findbugs_plugin/sample_findbugs_project",
+                "clean package findbugs:findbugs", FindBugsMavenSettings.class, configurator);
     }
 
     @Override
