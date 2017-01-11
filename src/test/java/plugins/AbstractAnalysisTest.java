@@ -82,6 +82,25 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
     private static final List<String> PRIORITIES = Arrays.asList("HIGH", "LOW", "NORMAL");
 
     /**
+     * Runs a job with warning threshold configured once and validates that build is marked as unstable.
+     */
+    @Test @Issue("JENKINS-19614")
+    public void should_set_build_to_unstable_if_total_warnings_threshold_set() {
+        FreeStyleJob job = createFreeStyleJob(jenkins);
+        AnalysisAction projectAction = createProjectAction(job);
+        editJob(job, projectAction, new AnalysisConfigurator<AnalysisSettings>() {
+            @Override
+            public void configure(final AnalysisSettings settings) {
+                settings.setBuildUnstableTotalAll("0");
+                settings.setNewWarningsThresholdFailed("0");
+                settings.setUseDeltaValues(true);
+            }
+        });
+
+        buildJobAndWait(job).shouldBeUnstable();
+    }
+
+    /**
      * Sets up a job within a folder. Verifies that the project action from the job redirects to the result
      * of the last build. Checks the correct number of warnings in the project overview and
      * result details view. Finally checks if the warnings-per-project portlet and warnings column show the
@@ -235,8 +254,8 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
     private void verifyJobResults(final Job job) {
         Build build = buildSuccessfulJob(job);
 
-        AnalysisAction resultAction = createResultAction(build);
-        AnalysisAction projectAction = createProjectAction(job);
+        P resultAction = createResultAction(build);
+        P projectAction = createProjectAction(job);
 
         projectAction.open();
         assertThat(projectAction.getCurrentUrl(), containsRegexp(resultAction.getUrl()));
@@ -245,6 +264,10 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
         assertThat(resultAction.getNumberOfNewWarnings(), is(getNumberOfWarnings()));
         assertThat(resultAction.getNumberOfFixedWarnings(), is(0));
 
+        assertThat(resultAction.getNumberOfWarningsWithHighPriority(), is(getNumberOfHighPriorityWarnings()));
+        assertThat(resultAction.getNumberOfWarningsWithNormalPriority(), is(getNumberOfNormalPriorityWarnings()));
+        assertThat(resultAction.getNumberOfWarningsWithLowPriority(), is(getNumberOfLowPriorityWarnings()));
+
         build.open();
         assertThatWarningsCountInSummaryIs(resultAction, getNumberOfWarnings());
         assertThatNewWarningsCountInSummaryIs(resultAction, getNumberOfWarnings());
@@ -252,6 +275,18 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
         assertThat(job, hasAction(projectAction.getName()));
         assertThat(job.getLastBuild(), hasAction(resultAction.getName()));
         assertThat(build, hasAction(resultAction.getName()));
+
+        assertThatDetailsAreFilled(resultAction);
+    }
+
+    /**
+     * Verifies that the detail views of the results are correctly set. E.g. Sub-classes may check the contents
+     * of the individual tabs. This default implementation is empty and should be overwritten.
+     *
+     * @param resultAction the action containing the results
+     */
+    protected void assertThatDetailsAreFilled(final P resultAction) {
+        // sub-classes may check the contents of the individual tabs
     }
 
     /**
@@ -428,6 +463,33 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      * @see #createPipeline()
      */
     protected abstract int getNumberOfWarnings();
+
+    /**
+     * Returns the number of warnings with priority HIGH that the created jobs should produce.
+     *
+     * @return total number of warnings (priority HIGH)
+     * @see #createFreeStyleJob(Container)
+     * @see #createPipeline()
+     */
+    protected abstract int getNumberOfHighPriorityWarnings();
+
+    /**
+     * Returns the number of warnings with priority NORMAL that the created jobs should produce.
+     *
+     * @return total number of warnings (priority NORMAL)
+     * @see #createFreeStyleJob(Container)
+     * @see #createPipeline()
+     */
+    protected abstract int getNumberOfNormalPriorityWarnings();
+
+    /**
+     * Returns the number of warnings with priority LOW that the created jobs should produce.
+     *
+     * @return total number of warnings (priority LOW)
+     * @see #createFreeStyleJob(Container)
+     * @see #createPipeline()
+     */
+    protected abstract int getNumberOfLowPriorityWarnings();
 
     /** Mock that verifies that mails have been sent by Jenkins email-ext plugin. */
     @Inject

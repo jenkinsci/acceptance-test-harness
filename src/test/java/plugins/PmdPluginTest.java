@@ -47,36 +47,6 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
     private static final String FILE_WITH_9_WARNINGS = PLUGIN_ROOT + PATTERN_WITH_9_WARNINGS;
     private static final int TOTAL_NUMBER_OF_WARNINGS = 9;
 
-    @Override
-    protected PmdAction createProjectAction(final Job job) {
-        return new PmdAction(job);
-    }
-
-    @Override
-    protected PmdAction createResultAction(final Build build) {
-        return new PmdAction(build);
-    }
-
-    @Override
-    protected FreeStyleJob createFreeStyleJob(final Container owner) {
-        return createFreeStyleJob(FILE_WITH_9_WARNINGS, new AnalysisConfigurator<PmdFreestyleSettings>() {
-            @Override
-            public void configure(PmdFreestyleSettings settings) {
-                settings.pattern.set(PATTERN_WITH_9_WARNINGS);
-            }
-        }, owner);
-    }
-
-    @Override
-    protected WorkflowJob createPipeline() {
-        return createPipelineWith(FILE_WITH_9_WARNINGS, "PmdPublisher");
-    }
-
-    @Override
-    protected int getNumberOfWarnings() {
-        return TOTAL_NUMBER_OF_WARNINGS;
-    }
-
     /**
      * Verifies the validation of the ant pattern input field. The workspace is populated with several pmd files. Then,
      * different patterns are provided that all should match.
@@ -154,29 +124,7 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
         assertThatBuildHasNoWarnings(lastBuild);
     }
 
-    private FreeStyleJob createFreeStyleJob() {
-        return createFreeStyleJob(jenkins);
-    }
-
-    private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<PmdFreestyleSettings> buildConfigurator,
-            final Container owner) {
-        return createFreeStyleJob(FILE_WITHOUT_WARNINGS, buildConfigurator, owner);
-    }
-
-    private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<PmdFreestyleSettings> buildConfigurator) {
-        return createFreeStyleJob(FILE_WITHOUT_WARNINGS, buildConfigurator);
-    }
-
-    private FreeStyleJob createFreeStyleJob(final String fileName, final AnalysisConfigurator<PmdFreestyleSettings> buildConfigurator) {
-        return createFreeStyleJob(fileName, buildConfigurator, jenkins);
-    }
-
-    private FreeStyleJob createFreeStyleJob(final String fileName,
-            final AnalysisConfigurator<PmdFreestyleSettings> buildConfigurator, final Container owner) {
-        return setupJob(fileName, FreeStyleJob.class, PmdFreestyleSettings.class, buildConfigurator, owner);
-    }
-
-    /**
+     /**
      * Checks that PMD runs even if the build failed if the property 'canRunOnFailed' is set.
      */
     @Test
@@ -196,72 +144,6 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
         Build lastBuild = buildFailingJob(job);
 
         assertThatBuildHasNoWarnings(lastBuild);
-    }
-
-    /**
-     * Configures a job with PMD and checks that the parsed PMD file contains 9 warnings.
-     */
-    @Test
-    public void should_report_details_in_different_tabs() {
-        FreeStyleJob job = createFreeStyleJob(FILE_WITH_9_WARNINGS, new AnalysisConfigurator<PmdFreestyleSettings>() {
-            @Override
-            public void configure(PmdFreestyleSettings settings) {
-                settings.pattern.set(PATTERN_WITH_9_WARNINGS);
-            }
-        });
-
-        Build build = buildSuccessfulJob(job);
-
-        assertThatPmdResultExists(job, build);
-
-        build.open();
-
-        PmdAction action = new PmdAction(build);
-
-        assertThatWarningsCountInSummaryIs(action, TOTAL_NUMBER_OF_WARNINGS);
-        assertThatNewWarningsCountInSummaryIs(action, TOTAL_NUMBER_OF_WARNINGS);
-
-        action.open();
-
-        assertThat(action.getNumberOfWarnings(), is(TOTAL_NUMBER_OF_WARNINGS));
-        assertThat(action.getNumberOfNewWarnings(), is(TOTAL_NUMBER_OF_WARNINGS));
-        assertThat(action.getNumberOfFixedWarnings(), is(0));
-        assertThat(action.getNumberOfWarningsWithHighPriority(), is(0));
-        assertThat(action.getNumberOfWarningsWithNormalPriority(), is(3));
-        assertThat(action.getNumberOfWarningsWithLowPriority(), is(6));
-
-        assertThatFilesTabIsCorrectlyFilled(action);
-        assertThatTypesTabIsCorrectlyFilled(action);
-        assertThatWarningsTabIsCorrectlyFilled(action);
-    }
-
-    private void assertThatFilesTabIsCorrectlyFilled(PmdAction action) {
-        SortedMap<String, Integer> expectedContent = new TreeMap<>();
-        expectedContent.put("ChannelContentAPIClient.m", 6);
-        expectedContent.put("ProductDetailAPIClient.m", 2);
-        expectedContent.put("ViewAllHoldingsAPIClient.m", 1);
-        assertThat(action.getFileTabContents(), is(expectedContent));
-    }
-
-    private void assertThatTypesTabIsCorrectlyFilled(PmdAction action) {
-        SortedMap<String, Integer> expectedContent = new TreeMap<>();
-        expectedContent.put("long line", 6);
-        expectedContent.put("unused method parameter", 3);
-        assertThat(action.getTypesTabContents(), is(expectedContent));
-    }
-
-    private void assertThatWarningsTabIsCorrectlyFilled(PmdAction action) {
-        SortedMap<String, Integer> expectedContent = new TreeMap<>();
-        expectedContent.put("ChannelContentAPIClient.m:28", 28);
-        expectedContent.put("ChannelContentAPIClient.m:28", 28);
-        expectedContent.put("ChannelContentAPIClient.m:28", 28);
-        expectedContent.put("ChannelContentAPIClient.m:32", 32);
-        expectedContent.put("ChannelContentAPIClient.m:36", 36);
-        expectedContent.put("ChannelContentAPIClient.m:40", 40);
-        expectedContent.put("ProductDetailAPIClient.m:37", 37);
-        expectedContent.put("ProductDetailAPIClient.m:38", 38);
-        expectedContent.put("ViewAllHoldingsAPIClient.m:23", 23);
-        assertThat(action.getWarningsTabContents(), is(expectedContent));
     }
 
     /**
@@ -330,34 +212,6 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
         action.openFixed();
 
         assertThat(action.getNumberOfRowsInFixedWarningsTable(), is(1));
-    }
-
-    /**
-     * Runs a job with warning threshold configured once and validates that build is marked as unstable.
-     */
-    @Test @Issue("JENKINS-19614")
-    public void should_set_build_to_unstable_if_total_warnings_threshold_set() {
-        FreeStyleJob job = createFreeStyleJob(FILE_WITH_9_WARNINGS, new AnalysisConfigurator<PmdFreestyleSettings>() {
-            @Override
-            public void configure(PmdFreestyleSettings settings) {
-                settings.pattern.set(PATTERN_WITH_9_WARNINGS);
-                settings.setBuildUnstableTotalAll("0");
-                settings.setNewWarningsThresholdFailed("0");
-                settings.setUseDeltaValues(true);
-            }
-        });
-
-        buildUnstableJob(job);
-    }
-
-    private MavenModuleSet createMavenJob() {
-        return createMavenJob(null);
-    }
-
-    private MavenModuleSet createMavenJob(AnalysisConfigurator<PmdMavenSettings> configurator) {
-        String projectPath = PLUGIN_ROOT + "sample_pmd_project";
-        String goal = "clean package pmd:pmd";
-        return setupMavenJob(projectPath, goal, PmdMavenSettings.class, configurator);
     }
 
     /**
@@ -529,5 +383,118 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
 
             assertThat(action.getNumberOfNewWarnings(), is(expectedNewWarnings));
         }
+    }
+
+    @Override
+    protected PmdAction createProjectAction(final Job job) {
+        return new PmdAction(job);
+    }
+
+    @Override
+    protected PmdAction createResultAction(final Build build) {
+        return new PmdAction(build);
+    }
+
+    @Override
+    protected FreeStyleJob createFreeStyleJob(final Container owner) {
+        return createFreeStyleJob(FILE_WITH_9_WARNINGS, new AnalysisConfigurator<PmdFreestyleSettings>() {
+            @Override
+            public void configure(PmdFreestyleSettings settings) {
+                settings.pattern.set(PATTERN_WITH_9_WARNINGS);
+            }
+        }, owner);
+    }
+
+    @Override
+    protected WorkflowJob createPipeline() {
+        return createPipelineWith(FILE_WITH_9_WARNINGS, "PmdPublisher");
+    }
+
+    private MavenModuleSet createMavenJob() {
+        return createMavenJob(null);
+    }
+
+    private MavenModuleSet createMavenJob(AnalysisConfigurator<PmdMavenSettings> configurator) {
+        String projectPath = PLUGIN_ROOT + "sample_pmd_project";
+        String goal = "clean package pmd:pmd";
+        return setupMavenJob(projectPath, goal, PmdMavenSettings.class, configurator);
+    }
+
+    @Override
+    protected int getNumberOfWarnings() {
+        return TOTAL_NUMBER_OF_WARNINGS;
+    }
+
+    @Override
+    protected int getNumberOfHighPriorityWarnings() {
+        return 0;
+    }
+
+    @Override
+    protected int getNumberOfNormalPriorityWarnings() {
+        return 3;
+    }
+
+    @Override
+    protected int getNumberOfLowPriorityWarnings() {
+        return 6;
+    }
+
+    @Override
+    protected void assertThatDetailsAreFilled(final PmdAction action) {
+        assertThatFilesTabIsCorrectlyFilled(action);
+        assertThatTypesTabIsCorrectlyFilled(action);
+        assertThatWarningsTabIsCorrectlyFilled(action);
+    }
+
+    private void assertThatFilesTabIsCorrectlyFilled(PmdAction action) {
+        SortedMap<String, Integer> expectedContent = new TreeMap<>();
+        expectedContent.put("ChannelContentAPIClient.m", 6);
+        expectedContent.put("ProductDetailAPIClient.m", 2);
+        expectedContent.put("ViewAllHoldingsAPIClient.m", 1);
+        assertThat(action.getFileTabContents(), is(expectedContent));
+    }
+
+    private void assertThatTypesTabIsCorrectlyFilled(PmdAction action) {
+        SortedMap<String, Integer> expectedContent = new TreeMap<>();
+        expectedContent.put("long line", 6);
+        expectedContent.put("unused method parameter", 3);
+        assertThat(action.getTypesTabContents(), is(expectedContent));
+    }
+
+    private void assertThatWarningsTabIsCorrectlyFilled(PmdAction action) {
+        SortedMap<String, Integer> expectedContent = new TreeMap<>();
+        expectedContent.put("ChannelContentAPIClient.m:28", 28);
+        expectedContent.put("ChannelContentAPIClient.m:28", 28);
+        expectedContent.put("ChannelContentAPIClient.m:28", 28);
+        expectedContent.put("ChannelContentAPIClient.m:32", 32);
+        expectedContent.put("ChannelContentAPIClient.m:36", 36);
+        expectedContent.put("ChannelContentAPIClient.m:40", 40);
+        expectedContent.put("ProductDetailAPIClient.m:37", 37);
+        expectedContent.put("ProductDetailAPIClient.m:38", 38);
+        expectedContent.put("ViewAllHoldingsAPIClient.m:23", 23);
+        assertThat(action.getWarningsTabContents(), is(expectedContent));
+    }
+
+    private FreeStyleJob createFreeStyleJob() {
+        return createFreeStyleJob(jenkins);
+    }
+
+    private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<PmdFreestyleSettings> buildConfigurator,
+            final Container owner) {
+        return createFreeStyleJob(FILE_WITHOUT_WARNINGS, buildConfigurator, owner);
+    }
+
+    private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<PmdFreestyleSettings> buildConfigurator) {
+        return createFreeStyleJob(FILE_WITHOUT_WARNINGS, buildConfigurator);
+    }
+
+    private FreeStyleJob createFreeStyleJob(final String fileName, final AnalysisConfigurator<PmdFreestyleSettings> buildConfigurator) {
+        return createFreeStyleJob(fileName, buildConfigurator, jenkins);
+    }
+
+    private FreeStyleJob createFreeStyleJob(final String fileName,
+            final AnalysisConfigurator<PmdFreestyleSettings> buildConfigurator, final Container owner) {
+        return setupJob(fileName, FreeStyleJob.class, PmdFreestyleSettings.class, buildConfigurator, owner);
     }
 }

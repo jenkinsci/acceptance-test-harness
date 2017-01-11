@@ -69,36 +69,6 @@ public class FindBugsPluginTest extends AbstractAnalysisTest<FindBugsAction> {
     private static final String PLUGIN_ROOT = "/findbugs_plugin/";
     private static final int TOTAL_NUMBER_OF_WARNINGS = 6;
 
-    @Override
-    protected FindBugsAction createProjectAction(final Job job) {
-        return new FindBugsAction(job);
-    }
-
-    @Override
-    protected FindBugsAction createResultAction(final Build build) {
-        return new FindBugsAction(build);
-    }
-
-    @Override
-    protected FreeStyleJob createFreeStyleJob(final Container owner) {
-        return createFreeStyleJob(new AnalysisConfigurator<FindBugsFreestyleSettings>() {
-            @Override
-            public void configure(FindBugsFreestyleSettings settings) {
-                settings.pattern.set(PATTERN_WITH_6_WARNINGS);
-            }
-        }, owner);
-    }
-
-    @Override
-    protected WorkflowJob createPipeline() {
-        return createPipelineWith(FILE_WITH_6_WARNINGS, "FindBugsPublisher");
-    }
-
-    @Override
-    protected int getNumberOfWarnings() {
-        return TOTAL_NUMBER_OF_WARNINGS;
-    }
-
     /**
      * Checks that the plug-in sends a mail after a build has been failed. The content of the mail
      * contains several tokens that should be expanded in the mail with the correct values.
@@ -121,98 +91,6 @@ public class FindBugsPluginTest extends AbstractAnalysisTest<FindBugsAction> {
         buildFailingJob(job);
 
         verifyReceivedMail("FindBugs: FAILURE", "FindBugs: 6-0-6");
-    }
-
-    private FreeStyleJob createFreeStyleJob() {
-        return createFreeStyleJob(jenkins);
-    }
-
-    private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<FindBugsFreestyleSettings> buildConfigurator,
-            final Container owner) {
-        return createFreeStyleJob(FILE_WITH_6_WARNINGS, buildConfigurator, owner);
-    }
-
-    private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<FindBugsFreestyleSettings> buildConfigurator) {
-        return createFreeStyleJob(FILE_WITH_6_WARNINGS, buildConfigurator);
-    }
-
-    private FreeStyleJob createFreeStyleJob(final String file,
-            final AnalysisConfigurator<FindBugsFreestyleSettings> buildConfigurator) {
-        return createFreeStyleJob(file, buildConfigurator, jenkins);
-    }
-
-    private FreeStyleJob createFreeStyleJob(final String file,
-            final AnalysisConfigurator<FindBugsFreestyleSettings> buildConfigurator, final Container owner) {
-        return setupJob(file, FreeStyleJob.class, FindBugsFreestyleSettings.class, buildConfigurator, owner);
-    }
-
-    /**
-     * Builds a job and checks if warnings of Findbugs are displayed. Checks as well, if the content of the tabs is
-     * the one we expect.
-     */
-    @Test
-    public void should_find_warnings_in_freestyle_job() {
-        FreeStyleJob job = createFreeStyleJob();
-
-        Build build = buildSuccessfulJob(job);
-
-        assertThatFindBugsResultExists(job, build);
-
-        build.open();
-
-        FindBugsAction action = new FindBugsAction(build);
-
-        assertThatWarningsCountInSummaryIs(action, TOTAL_NUMBER_OF_WARNINGS);
-        assertThatNewWarningsCountInSummaryIs(action, TOTAL_NUMBER_OF_WARNINGS);
-
-        action.open();
-
-        assertThat(action.getNumberOfWarnings(), is(TOTAL_NUMBER_OF_WARNINGS));
-        assertThat(action.getNumberOfNewWarnings(), is(TOTAL_NUMBER_OF_WARNINGS));
-        assertThat(action.getNumberOfFixedWarnings(), is(0));
-        assertThat(action.getNumberOfWarningsWithHighPriority(), is(2));
-        assertThat(action.getNumberOfWarningsWithNormalPriority(), is(4));
-        assertThat(action.getNumberOfWarningsWithLowPriority(), is(0));
-
-        assertThatFilesTabIsCorrectlyFilled(action);
-        assertThatCategoriesTabIsCorrectlyFilled(action);
-        assertThatTypesTabIsCorrectlyFilled(action);
-        assertThatWarningsTabIsCorrectlyFilled(action);
-    }
-
-    private void assertThatFilesTabIsCorrectlyFilled(FindBugsAction action) {
-        SortedMap<String, Integer> expectedContent = new TreeMap<>();
-        expectedContent.put("SSHConnector.java", 1);
-        expectedContent.put("SSHLauncher.java", 5);
-        assertThat(action.getFileTabContents(), is(expectedContent));
-    }
-
-    private void assertThatCategoriesTabIsCorrectlyFilled(FindBugsAction action) {
-        SortedMap<String, Integer> expectedContent = new TreeMap<>();
-        expectedContent.put("BAD_PRACTICE", 1);
-        expectedContent.put("CORRECTNESS", 3);
-        expectedContent.put("STYLE", 2);
-        assertThat(action.getCategoriesTabContents(), is(expectedContent));
-    }
-
-    private void assertThatTypesTabIsCorrectlyFilled(FindBugsAction action) {
-        SortedMap<String, Integer> expectedContent = new TreeMap<>();
-        expectedContent.put("DE_MIGHT_IGNORE", 1);
-        expectedContent.put("NP_NULL_ON_SOME_PATH", 1);
-        expectedContent.put("NP_NULL_PARAM_DEREF", 2);
-        expectedContent.put("REC_CATCH_EXCEPTION", 2);
-        assertThat(action.getTypesTabContents(), is(expectedContent));
-    }
-
-    private void assertThatWarningsTabIsCorrectlyFilled(FindBugsAction action) {
-        SortedMap<String, Integer> expectedContent = new TreeMap<>();
-        expectedContent.put("SSHConnector.java:138", 138);
-        expectedContent.put("SSHLauncher.java:437", 437);
-        expectedContent.put("SSHLauncher.java:679", 679);
-        expectedContent.put("SSHLauncher.java:960", 960);
-        expectedContent.put("SSHLauncher.java:960", 960);
-        expectedContent.put("SSHLauncher.java:971", 971);
-        assertThat(action.getWarningsTabContents(), is(expectedContent));
     }
 
     /**
@@ -313,15 +191,6 @@ public class FindBugsPluginTest extends AbstractAnalysisTest<FindBugsAction> {
                 "Redundant nullcheck of o, which is known to be non-null in Main.main(String[])");
     }
 
-    private MavenModuleSet createMavenJob() {
-        return createMavenJob(null);
-    }
-
-    private MavenModuleSet createMavenJob(AnalysisConfigurator<FindBugsMavenSettings> configurator) {
-        return setupMavenJob("/findbugs_plugin/sample_findbugs_project", "clean package findbugs:findbugs",
-                FindBugsMavenSettings.class, configurator);
-    }
-
     /**
      * Builds a maven project and checks if a new warning is displayed.
      */
@@ -391,5 +260,125 @@ public class FindBugsPluginTest extends AbstractAnalysisTest<FindBugsAction> {
         assertThat(job, hasAction(actionName));
         assertThat(job.getLastBuild(), hasAction(actionName));
         assertThat(build, hasAction(actionName));
+    }
+
+    @Override
+    protected FindBugsAction createProjectAction(final Job job) {
+        return new FindBugsAction(job);
+    }
+
+    @Override
+    protected FindBugsAction createResultAction(final Build build) {
+        return new FindBugsAction(build);
+    }
+
+    @Override
+    protected FreeStyleJob createFreeStyleJob(final Container owner) {
+        return createFreeStyleJob(new AnalysisConfigurator<FindBugsFreestyleSettings>() {
+            @Override
+            public void configure(FindBugsFreestyleSettings settings) {
+                settings.pattern.set(PATTERN_WITH_6_WARNINGS);
+            }
+        }, owner);
+    }
+
+    @Override
+    protected WorkflowJob createPipeline() {
+        return createPipelineWith(FILE_WITH_6_WARNINGS, "FindBugsPublisher");
+    }
+
+    @Override
+    protected int getNumberOfWarnings() {
+        return TOTAL_NUMBER_OF_WARNINGS;
+    }
+
+    @Override
+    protected int getNumberOfHighPriorityWarnings() {
+        return 2;
+    }
+
+    @Override
+    protected int getNumberOfNormalPriorityWarnings() {
+        return 4;
+    }
+
+    @Override
+    protected int getNumberOfLowPriorityWarnings() {
+        return 0;
+    }
+
+    private FreeStyleJob createFreeStyleJob() {
+        return createFreeStyleJob(jenkins);
+    }
+
+    private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<FindBugsFreestyleSettings> buildConfigurator,
+            final Container owner) {
+        return createFreeStyleJob(FILE_WITH_6_WARNINGS, buildConfigurator, owner);
+    }
+
+    private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<FindBugsFreestyleSettings> buildConfigurator) {
+        return createFreeStyleJob(FILE_WITH_6_WARNINGS, buildConfigurator);
+    }
+
+    private FreeStyleJob createFreeStyleJob(final String file,
+            final AnalysisConfigurator<FindBugsFreestyleSettings> buildConfigurator) {
+        return createFreeStyleJob(file, buildConfigurator, jenkins);
+    }
+
+    private FreeStyleJob createFreeStyleJob(final String file,
+            final AnalysisConfigurator<FindBugsFreestyleSettings> buildConfigurator, final Container owner) {
+        return setupJob(file, FreeStyleJob.class, FindBugsFreestyleSettings.class, buildConfigurator, owner);
+    }
+
+    private MavenModuleSet createMavenJob() {
+        return createMavenJob(null);
+    }
+
+    private MavenModuleSet createMavenJob(AnalysisConfigurator<FindBugsMavenSettings> configurator) {
+        return setupMavenJob("/findbugs_plugin/sample_findbugs_project", "clean package findbugs:findbugs",
+                FindBugsMavenSettings.class, configurator);
+    }
+
+    @Override
+    protected void assertThatDetailsAreFilled(final FindBugsAction action) {
+        assertThatFilesTabIsCorrectlyFilled(action);
+        assertThatCategoriesTabIsCorrectlyFilled(action);
+        assertThatTypesTabIsCorrectlyFilled(action);
+        assertThatWarningsTabIsCorrectlyFilled(action);
+    }
+
+    private void assertThatFilesTabIsCorrectlyFilled(FindBugsAction action) {
+        SortedMap<String, Integer> expectedContent = new TreeMap<>();
+        expectedContent.put("SSHConnector.java", 1);
+        expectedContent.put("SSHLauncher.java", 5);
+        assertThat(action.getFileTabContents(), is(expectedContent));
+    }
+
+    private void assertThatCategoriesTabIsCorrectlyFilled(FindBugsAction action) {
+        SortedMap<String, Integer> expectedContent = new TreeMap<>();
+        expectedContent.put("BAD_PRACTICE", 1);
+        expectedContent.put("CORRECTNESS", 3);
+        expectedContent.put("STYLE", 2);
+        assertThat(action.getCategoriesTabContents(), is(expectedContent));
+    }
+
+    private void assertThatTypesTabIsCorrectlyFilled(FindBugsAction action) {
+        SortedMap<String, Integer> expectedContent = new TreeMap<>();
+        expectedContent.put("DE_MIGHT_IGNORE", 1);
+        expectedContent.put("NP_NULL_ON_SOME_PATH", 1);
+        expectedContent.put("NP_NULL_PARAM_DEREF", 2);
+        expectedContent.put("REC_CATCH_EXCEPTION", 2);
+        assertThat(action.getTypesTabContents(), is(expectedContent));
+    }
+
+    private void assertThatWarningsTabIsCorrectlyFilled(FindBugsAction action) {
+        SortedMap<String, Integer> expectedContent = new TreeMap<>();
+        expectedContent.put("SSHConnector.java:138", 138);
+        expectedContent.put("SSHLauncher.java:437", 437);
+        expectedContent.put("SSHLauncher.java:679", 679);
+        expectedContent.put("SSHLauncher.java:960", 960);
+        expectedContent.put("SSHLauncher.java:960", 960);
+        expectedContent.put("SSHLauncher.java:971", 971);
+        assertThat(action.getWarningsTabContents(), is(expectedContent));
     }
 }

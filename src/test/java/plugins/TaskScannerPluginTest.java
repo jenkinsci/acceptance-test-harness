@@ -5,7 +5,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
 
-import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
@@ -18,7 +17,6 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -37,54 +35,6 @@ import hudson.util.VersionNumber;
 public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerAction> {
     private static final String TASKS_PLUGIN_PREFIX = "/tasks_plugin/";
     private static final String TASKS_FILES = TASKS_PLUGIN_PREFIX + "fileset1";
-
-    @Override
-    protected TaskScannerAction createProjectAction(final Job job) {
-        return new TaskScannerAction(job);
-    }
-
-    @Override
-    protected TaskScannerAction createResultAction(final Build build) {
-        return new TaskScannerAction(build);
-    }
-
-    @Override
-    protected FreeStyleJob createFreeStyleJob(final Container owner) {
-        return createFreeStyleJob(new AnalysisConfigurator<TasksFreestyleSettings>() {
-            @Override
-            public void configure(TasksFreestyleSettings settings) {
-                settings.setPattern("**/*.java");
-                settings.setExcludePattern("**/*Test.java");
-                settings.setHighPriorityTags("FIXME");
-                settings.setNormalPriorityTags("TODO");
-                settings.setLowPriorityTags("@Deprecated");
-                settings.setIgnoreCase(false);
-            }
-        }, owner);
-    }
-
-    @Override
-    protected WorkflowJob createPipeline() {
-        WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
-        String[] files = {"TSRBuildTimeoutPluginTest.java", "TSRCleaner.java", "TSRCreateSlaveTest.java",
-                "TSRDockerImage.java", "TSREc2Provider.java", "TSRGitRepo.java",
-                "TSRJenkinsAcceptanceTestRule.java", "TSRTestCleaner.java", "TSRWinstoneDockerController.java"};
-        StringBuilder copyFilesWithTasks = new StringBuilder();
-        for (String file : files) {
-            copyFilesWithTasks.append(job.copyResourceStep(TASKS_FILES + "/" + file));
-        }
-        job.script.set("node {\n"
-                + copyFilesWithTasks.toString()
-                + "  step([$class: 'TasksPublisher', high: 'PRIO1', normal: 'PRIO2,TODO', low :'PRIO3'])\n}");
-        job.sandbox.check();
-        job.save();
-        return job;
-    }
-
-    @Override
-    protected int getNumberOfWarnings() {
-        return 6;
-    }
 
     /**
      * Checks that the plug-in sends a mail after a build has been failed. The content of the mail contains several
@@ -117,64 +67,13 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
         verifyReceivedMail("Tasks: FAILURE", "Tasks: 6-0-6");
     }
 
-    private FreeStyleJob createFreeStyleJob() {
-        return createFreeStyleJob(jenkins);
-    }
-
-    private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<TasksFreestyleSettings> buildConfigurator) {
-        return createFreeStyleJob(TASKS_FILES, buildConfigurator);
-    }
-
-    private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<TasksFreestyleSettings> buildConfigurator,
-            final Container owner) {
-        return createFreeStyleJob(TASKS_FILES, buildConfigurator, owner);
-    }
-
-    private FreeStyleJob createFreeStyleJob(final String fileset,
-            final AnalysisConfigurator<TasksFreestyleSettings> buildConfigurator) {
-        return createFreeStyleJob(fileset, buildConfigurator, jenkins);
-    }
-
-    private FreeStyleJob createFreeStyleJob(final String fileset,
-            final AnalysisConfigurator<TasksFreestyleSettings> buildConfigurator, final Container owner) {
-        return setupJob(fileset, FreeStyleJob.class, TasksFreestyleSettings.class, buildConfigurator, owner);
-    }
-
-    /**
-     * Verifies the basic functionality of the Task Scanner plugin, i.e. finding different task tags, including /
-     * excluding files and providing the correct results. The test builds the same job twice with and without case
-     * sensitivity.
-     */
-    @Test
-    @Category(SmokeTest.class)
-    public void should_find_single_task_tags_with_exclusion_pattern() {
-        FreeStyleJob job = createFreeStyleJob();
-
-        Build build = buildSuccessfulJob(job);
-
-        assertThatTasksResultExists(job, build);
-
-        build.open();
-
+    @Override
+    protected void assertThatDetailsAreFilled(final TaskScannerAction action) {
         // The file set consists of 9 files, whereof
         //   - 2 file names match the exclusion pattern
         //   - 7 files are to be scanned for tasks
         //   - 5 files actually contain tasks with the specified tags (with case sensitivity)
-        //
-        // The expected task priorities are:
-        //   - 1x high
-        //   - 4x medium
-        //   - 1x low
-        TaskScannerAction action = new TaskScannerAction(build);
-
         assertThatOpenTaskCountLinkIs(action, 6, 7);
-
-        action.open();
-
-        assertThat(action.getNumberOfWarnings(), is(6));
-        assertThat(action.getNumberOfWarningsWithHighPriority(), is(1));
-        assertThat(action.getNumberOfWarningsWithNormalPriority(), is(4));
-        assertThat(action.getNumberOfWarningsWithLowPriority(), is(1));
 
         assertFilesTabFS1E1(action);
         assertTypesTabFS1E1(action);
@@ -187,22 +86,31 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
         verifySourceLine(action, "TSRDockerImage.java", 84,
                 "084         // TODO: properly wait for either cidfile to appear or process to exit",
                 "Normal Priority");
+    }
+
+    /**
+     * Verifies that different number of open tasks are found depending on the configured case sensitivity option.
+     */
+    @Test
+    public void shouldFindMoreWarningsWhenIgnoringCase() {
+        FreeStyleJob job = createFreeStyleJob();
+        buildSuccessfulJob(job);
 
         // now disable case sensitivity and build again. Then the publisher shall also
         // find the high priority task in Ec2Provider.java:133.
 
         editJob(false, job, TasksFreestyleSettings.class, new AnalysisConfigurator<TasksFreestyleSettings>() {
-            @Override
-            public void configure(TasksFreestyleSettings settings) {
-                settings.setIgnoreCase(true);
-            }
-        });
+                    @Override
+                    public void configure(TasksFreestyleSettings settings) {
+                        settings.setIgnoreCase(true);
+                    }
+                });
 
-        build = buildSuccessfulJob(job);
+        Build build = buildSuccessfulJob(job);
 
         build.open();
 
-        action = new TaskScannerAction(build);
+        TaskScannerAction action = new TaskScannerAction(build);
 
         assertThatOpenTaskCountLinkIs(action, 7, 7);
         assertThatNewOpenTaskCountLinkIs(action, 1);
@@ -1115,5 +1023,91 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
 
         assertThat(cellStrings.get(3), is(type));
         assertThat(cellStrings.get(4), is(warningText));
+    }
+
+    @Override
+    protected TaskScannerAction createProjectAction(final Job job) {
+        return new TaskScannerAction(job);
+    }
+
+    @Override
+    protected TaskScannerAction createResultAction(final Build build) {
+        return new TaskScannerAction(build);
+    }
+
+    @Override
+    protected FreeStyleJob createFreeStyleJob(final Container owner) {
+        return createFreeStyleJob(new AnalysisConfigurator<TasksFreestyleSettings>() {
+            @Override
+            public void configure(TasksFreestyleSettings settings) {
+                settings.setPattern("**/*.java");
+                settings.setExcludePattern("**/*Test.java");
+                settings.setHighPriorityTags("FIXME");
+                settings.setNormalPriorityTags("TODO");
+                settings.setLowPriorityTags("@Deprecated");
+                settings.setIgnoreCase(false);
+            }
+        }, owner);
+    }
+
+    @Override
+    protected WorkflowJob createPipeline() {
+        WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
+        String[] files = {"TSRBuildTimeoutPluginTest.java", "TSRCleaner.java", "TSRCreateSlaveTest.java",
+                "TSRDockerImage.java", "TSREc2Provider.java", "TSRGitRepo.java",
+                "TSRJenkinsAcceptanceTestRule.java", "TSRTestCleaner.java", "TSRWinstoneDockerController.java"};
+        StringBuilder copyFilesWithTasks = new StringBuilder();
+        for (String file : files) {
+            copyFilesWithTasks.append(job.copyResourceStep(TASKS_FILES + "/" + file));
+        }
+        job.script.set("node {\n"
+                + copyFilesWithTasks.toString()
+                + "  step([$class: 'TasksPublisher', high: 'PRIO1', normal: 'PRIO2,TODO', low :'PRIO3'])\n}");
+        job.sandbox.check();
+        job.save();
+        return job;
+    }
+
+    @Override
+    protected int getNumberOfWarnings() {
+        return 6;
+    }
+
+    @Override
+    protected int getNumberOfHighPriorityWarnings() {
+        return 1;
+    }
+
+    @Override
+    protected int getNumberOfNormalPriorityWarnings() {
+        return 4;
+    }
+
+    @Override
+    protected int getNumberOfLowPriorityWarnings() {
+        return 1;
+    }
+
+    private FreeStyleJob createFreeStyleJob() {
+        return createFreeStyleJob(jenkins);
+    }
+
+    private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<TasksFreestyleSettings> buildConfigurator) {
+        return createFreeStyleJob(TASKS_FILES, buildConfigurator);
+    }
+
+    private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<TasksFreestyleSettings> buildConfigurator,
+            final Container owner) {
+        return createFreeStyleJob(TASKS_FILES, buildConfigurator, owner);
+    }
+
+    private FreeStyleJob createFreeStyleJob(final String fileset,
+            final AnalysisConfigurator<TasksFreestyleSettings> buildConfigurator) {
+        return createFreeStyleJob(fileset, buildConfigurator, jenkins);
+    }
+
+    private FreeStyleJob createFreeStyleJob(final String fileset,
+            final AnalysisConfigurator<TasksFreestyleSettings> buildConfigurator, final Container owner) {
+        return setupJob(fileset, FreeStyleJob.class, TasksFreestyleSettings.class, buildConfigurator, owner);
     }
 }

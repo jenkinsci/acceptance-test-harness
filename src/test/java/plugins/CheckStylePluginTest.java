@@ -14,9 +14,9 @@ import org.jenkinsci.test.acceptance.plugins.parameterized_trigger.BuildTriggerC
 import org.jenkinsci.test.acceptance.plugins.parameterized_trigger.TriggerCallBuildStep;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Build.Result;
+import org.jenkinsci.test.acceptance.po.Container;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.Container;
 import org.jenkinsci.test.acceptance.po.Node;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
@@ -44,36 +44,6 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
     private static final String FILE_WITH_776_WARNINGS = CHECKSTYLE_PLUGIN_ROOT + PATTERN_WITH_776_WARNINGS;
     private static final String FILE_FOR_2ND_RUN = CHECKSTYLE_PLUGIN_ROOT + "forSecondRun/checkstyle-result.xml";
     private static final int TOTAL_NUMBER_OF_WARNINGS = 776;
-
-    @Override
-    protected CheckStyleAction createProjectAction(final Job job) {
-        return new CheckStyleAction(job);
-    }
-
-    @Override
-    protected CheckStyleAction createResultAction(final Build build) {
-        return new CheckStyleAction(build);
-    }
-
-    @Override
-    protected FreeStyleJob createFreeStyleJob(final Container owner) {
-        return createFreeStyleJob(new AnalysisConfigurator<CheckStyleFreestyleSettings>() {
-            @Override
-            public void configure(CheckStyleFreestyleSettings settings) {
-                settings.pattern.set(PATTERN_WITH_776_WARNINGS);
-            }
-        }, owner);
-    }
-
-    @Override
-    protected WorkflowJob createPipeline() {
-        return createPipelineWith(FILE_WITH_776_WARNINGS, "CheckStylePublisher");
-    }
-
-    @Override
-    protected int getNumberOfWarnings() {
-        return TOTAL_NUMBER_OF_WARNINGS;
-    }
 
     /**
      * Verifies that environment variables are expanded in the file name pattern.
@@ -145,128 +115,6 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
         buildFailingJob(job);
 
         verifyReceivedMail("Checkstyle: FAILURE", "Checkstyle: 776-0-776");
-    }
-
-    private FreeStyleJob createFreeStyleJob() {
-        return createFreeStyleJob(jenkins);
-    }
-
-    private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<CheckStyleFreestyleSettings> buildConfigurator) {
-        return createFreeStyleJob(buildConfigurator, jenkins);
-    }
-
-    private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<CheckStyleFreestyleSettings> buildConfigurator,
-            final Container owner) {
-        return createFreeStyleJob(FILE_WITH_776_WARNINGS, buildConfigurator, owner);
-    }
-
-    private FreeStyleJob createFreeStyleJob(final String fileName, final AnalysisConfigurator<CheckStyleFreestyleSettings> buildConfigurator) {
-        return createFreeStyleJob(fileName, buildConfigurator, jenkins);
-    }
-
-    private FreeStyleJob createFreeStyleJob(final String fileName, final AnalysisConfigurator<CheckStyleFreestyleSettings> buildConfigurator,
-            final Container owner) {
-        return setupJob(fileName, FreeStyleJob.class, CheckStyleFreestyleSettings.class, buildConfigurator, owner);
-    }
-
-    /**
-     * Builds a job with checkstyle enabled and verifies that checkstyle details are displayed in the build overview.
-     */
-    @Test
-    public void should_collect_warnings_in_build() {
-        FreeStyleJob job = createFreeStyleJob();
-
-        Build lastBuild = buildSuccessfulJob(job);
-
-        assertThatCheckStyleResultExists(job, lastBuild);
-    }
-
-    /**
-     * Builds a job with checkstyle and verifies that the information checkstyle provides in the tabs about the build
-     * are the information we expect.
-     */
-    @Test
-    public void should_report_details_in_different_tabs() {
-        FreeStyleJob job = createFreeStyleJob();
-
-        Build build = buildSuccessfulJob(job);
-        build.open();
-
-        CheckStyleAction action = new CheckStyleAction(build);
-
-        assertThatWarningsCountInSummaryIs(action, TOTAL_NUMBER_OF_WARNINGS);
-        assertThatNewWarningsCountInSummaryIs(action, TOTAL_NUMBER_OF_WARNINGS);
-
-        action.open();
-
-        assertThat(action.getNumberOfWarnings(), is(TOTAL_NUMBER_OF_WARNINGS));
-        assertThat(action.getNumberOfNewWarnings(), is(TOTAL_NUMBER_OF_WARNINGS));
-        assertThat(action.getNumberOfFixedWarnings(), is(0));
-        assertThat(action.getNumberOfWarningsWithHighPriority(), is(TOTAL_NUMBER_OF_WARNINGS));
-        assertThat(action.getNumberOfWarningsWithNormalPriority(), is(0));
-        assertThat(action.getNumberOfWarningsWithLowPriority(), is(0));
-
-        assertThatFilesTabIsCorrectlyFilled(action);
-        assertThatCategoriesTabIsCorrectlyFilled(action);
-        assertThatTypesTabIsCorrectlyFilled(action);
-    }
-
-    private void assertThatFilesTabIsCorrectlyFilled(CheckStyleAction ca) {
-        SortedMap<String, Integer> expectedFileDetails = new TreeMap<>();
-        expectedFileDetails.put("JavaProvider.java", 18);
-        expectedFileDetails.put("PluginImpl.java", 8);
-        expectedFileDetails.put("RemoteLauncher.java", 63);
-        expectedFileDetails.put("SFTPClient.java", 76);
-        expectedFileDetails.put("SFTPFileSystem.java", 34);
-        expectedFileDetails.put("SSHConnector.java", 96);
-        expectedFileDetails.put("SSHLauncher.java", 481);
-        assertThat(ca.getFileTabContents(), is(expectedFileDetails));
-    }
-
-    private void assertThatCategoriesTabIsCorrectlyFilled(CheckStyleAction ca) {
-        SortedMap<String, Integer> expectedCategories = new TreeMap<>();
-        expectedCategories.put("Blocks", 28);
-        expectedCategories.put("Checks", 123);
-        expectedCategories.put("Coding", 61);
-        expectedCategories.put("Design", 47);
-        expectedCategories.put("Imports", 3);
-        expectedCategories.put("Javadoc", 104);
-        expectedCategories.put("Naming", 4);
-        expectedCategories.put("Regexp", 23);
-        expectedCategories.put("Sizes", 164);
-        expectedCategories.put("Whitespace", 219);
-        assertThat(ca.getCategoriesTabContents(), is(expectedCategories));
-    }
-
-    private void assertThatTypesTabIsCorrectlyFilled(CheckStyleAction ca) {
-        SortedMap<String, Integer> expectedTypes = new TreeMap<>();
-        expectedTypes.put("AvoidInlineConditionalsCheck", 9);
-        expectedTypes.put("AvoidStarImportCheck", 1);
-        expectedTypes.put("ConstantNameCheck", 1);
-        expectedTypes.put("DesignForExtensionCheck", 35);
-        expectedTypes.put("EmptyBlockCheck", 1);
-        expectedTypes.put("FileTabCharacterCheck", 47);
-        expectedTypes.put("FinalParametersCheck", 120);
-        expectedTypes.put("HiddenFieldCheck", 44);
-        expectedTypes.put("JavadocMethodCheck", 88);
-        expectedTypes.put("JavadocPackageCheck", 1);
-        expectedTypes.put("JavadocStyleCheck", 9);
-        expectedTypes.put("JavadocTypeCheck", 3);
-        expectedTypes.put("JavadocVariableCheck", 3);
-        expectedTypes.put("LineLengthCheck", 160);
-        expectedTypes.put("MagicNumberCheck", 8);
-        expectedTypes.put("MethodNameCheck", 1);
-        expectedTypes.put("NeedBracesCheck", 26);
-        expectedTypes.put("ParameterNameCheck", 2);
-        expectedTypes.put("ParameterNumberCheck", 4);
-        expectedTypes.put("RegexpSinglelineCheck", 23);
-        expectedTypes.put("RightCurlyCheck", 1);
-        expectedTypes.put("TodoCommentCheck", 3);
-        expectedTypes.put("UnusedImportsCheck", 2);
-        expectedTypes.put("VisibilityModifierCheck", 12);
-        expectedTypes.put("WhitespaceAfterCheck", 66);
-        expectedTypes.put("WhitespaceAroundCheck", 106);
-        assertThat(ca.getTypesTabContents(), is(expectedTypes));
     }
 
     /**
@@ -342,24 +190,6 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
         assertThat(job, hasAction(actionName));
         assertThat(job.getLastBuild(), hasAction(actionName));
         assertThat(build, hasAction(actionName));
-    }
-
-    /**
-     * Runs a job with warning threshold configured once and validates that build is marked as unstable.
-     */
-    @Test @Issue("JENKINS-19614")
-    public void should_set_build_to_unstable_if_total_warnings_threshold_set() {
-        FreeStyleJob job = createFreeStyleJob(FILE_WITH_776_WARNINGS, new AnalysisConfigurator<CheckStyleFreestyleSettings>() {
-            @Override
-            public void configure(CheckStyleFreestyleSettings settings) {
-                settings.pattern.set(PATTERN_WITH_776_WARNINGS);
-                settings.setBuildUnstableTotalAll("0");
-                settings.setNewWarningsThresholdFailed("0");
-                settings.setUseDeltaValues(true);
-            }
-        });
-
-        buildJobAndWait(job).shouldBeUnstable();
     }
 
     private MavenModuleSet createMavenJob() {
@@ -576,5 +406,137 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
             assertThat(checkstyle.getNumberOfNewWarnings(), is(expectedNewWarnings));
             assertThat(checkstyle.getNumberOfFixedWarnings(), is(expectedFixedWarnings));
         }
+    }
+
+    @Override
+    protected CheckStyleAction createProjectAction(final Job job) {
+        return new CheckStyleAction(job);
+    }
+
+    @Override
+    protected CheckStyleAction createResultAction(final Build build) {
+        return new CheckStyleAction(build);
+    }
+
+    @Override
+    protected FreeStyleJob createFreeStyleJob(final Container owner) {
+        return createFreeStyleJob(new AnalysisConfigurator<CheckStyleFreestyleSettings>() {
+            @Override
+            public void configure(CheckStyleFreestyleSettings settings) {
+                settings.pattern.set(PATTERN_WITH_776_WARNINGS);
+            }
+        }, owner);
+    }
+
+    @Override
+    protected WorkflowJob createPipeline() {
+        return createPipelineWith(FILE_WITH_776_WARNINGS, "CheckStylePublisher");
+    }
+
+    @Override
+    protected int getNumberOfWarnings() {
+        return TOTAL_NUMBER_OF_WARNINGS;
+    }
+
+    @Override
+    protected int getNumberOfHighPriorityWarnings() {
+        return TOTAL_NUMBER_OF_WARNINGS;
+    }
+
+    @Override
+    protected int getNumberOfNormalPriorityWarnings() {
+        return 0;
+    }
+
+    @Override
+    protected int getNumberOfLowPriorityWarnings() {
+        return 0;
+    }
+
+    private FreeStyleJob createFreeStyleJob() {
+        return createFreeStyleJob(jenkins);
+    }
+
+    private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<CheckStyleFreestyleSettings> buildConfigurator) {
+        return createFreeStyleJob(buildConfigurator, jenkins);
+    }
+
+    private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<CheckStyleFreestyleSettings> buildConfigurator,
+            final Container owner) {
+        return createFreeStyleJob(FILE_WITH_776_WARNINGS, buildConfigurator, owner);
+    }
+
+    private FreeStyleJob createFreeStyleJob(final String fileName, final AnalysisConfigurator<CheckStyleFreestyleSettings> buildConfigurator) {
+        return createFreeStyleJob(fileName, buildConfigurator, jenkins);
+    }
+
+    private FreeStyleJob createFreeStyleJob(final String fileName, final AnalysisConfigurator<CheckStyleFreestyleSettings> buildConfigurator,
+            final Container owner) {
+        return setupJob(fileName, FreeStyleJob.class, CheckStyleFreestyleSettings.class, buildConfigurator, owner);
+    }
+
+    @Override
+    protected void assertThatDetailsAreFilled(final CheckStyleAction action) {
+        assertThatFilesTabIsCorrectlyFilled(action);
+        assertThatCategoriesTabIsCorrectlyFilled(action);
+        assertThatTypesTabIsCorrectlyFilled(action);
+    }
+
+    private void assertThatFilesTabIsCorrectlyFilled(CheckStyleAction ca) {
+        SortedMap<String, Integer> expectedFileDetails = new TreeMap<>();
+        expectedFileDetails.put("JavaProvider.java", 18);
+        expectedFileDetails.put("PluginImpl.java", 8);
+        expectedFileDetails.put("RemoteLauncher.java", 63);
+        expectedFileDetails.put("SFTPClient.java", 76);
+        expectedFileDetails.put("SFTPFileSystem.java", 34);
+        expectedFileDetails.put("SSHConnector.java", 96);
+        expectedFileDetails.put("SSHLauncher.java", 481);
+        assertThat(ca.getFileTabContents(), is(expectedFileDetails));
+    }
+
+    private void assertThatCategoriesTabIsCorrectlyFilled(CheckStyleAction ca) {
+        SortedMap<String, Integer> expectedCategories = new TreeMap<>();
+        expectedCategories.put("Blocks", 28);
+        expectedCategories.put("Checks", 123);
+        expectedCategories.put("Coding", 61);
+        expectedCategories.put("Design", 47);
+        expectedCategories.put("Imports", 3);
+        expectedCategories.put("Javadoc", 104);
+        expectedCategories.put("Naming", 4);
+        expectedCategories.put("Regexp", 23);
+        expectedCategories.put("Sizes", 164);
+        expectedCategories.put("Whitespace", 219);
+        assertThat(ca.getCategoriesTabContents(), is(expectedCategories));
+    }
+
+    private void assertThatTypesTabIsCorrectlyFilled(CheckStyleAction ca) {
+        SortedMap<String, Integer> expectedTypes = new TreeMap<>();
+        expectedTypes.put("AvoidInlineConditionalsCheck", 9);
+        expectedTypes.put("AvoidStarImportCheck", 1);
+        expectedTypes.put("ConstantNameCheck", 1);
+        expectedTypes.put("DesignForExtensionCheck", 35);
+        expectedTypes.put("EmptyBlockCheck", 1);
+        expectedTypes.put("FileTabCharacterCheck", 47);
+        expectedTypes.put("FinalParametersCheck", 120);
+        expectedTypes.put("HiddenFieldCheck", 44);
+        expectedTypes.put("JavadocMethodCheck", 88);
+        expectedTypes.put("JavadocPackageCheck", 1);
+        expectedTypes.put("JavadocStyleCheck", 9);
+        expectedTypes.put("JavadocTypeCheck", 3);
+        expectedTypes.put("JavadocVariableCheck", 3);
+        expectedTypes.put("LineLengthCheck", 160);
+        expectedTypes.put("MagicNumberCheck", 8);
+        expectedTypes.put("MethodNameCheck", 1);
+        expectedTypes.put("NeedBracesCheck", 26);
+        expectedTypes.put("ParameterNameCheck", 2);
+        expectedTypes.put("ParameterNumberCheck", 4);
+        expectedTypes.put("RegexpSinglelineCheck", 23);
+        expectedTypes.put("RightCurlyCheck", 1);
+        expectedTypes.put("TodoCommentCheck", 3);
+        expectedTypes.put("UnusedImportsCheck", 2);
+        expectedTypes.put("VisibilityModifierCheck", 12);
+        expectedTypes.put("WhitespaceAfterCheck", 66);
+        expectedTypes.put("WhitespaceAroundCheck", 106);
+        assertThat(ca.getTypesTabContents(), is(expectedTypes));
     }
 }

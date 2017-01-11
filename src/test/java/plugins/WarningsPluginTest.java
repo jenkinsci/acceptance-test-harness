@@ -65,55 +65,6 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
     private static final String JAVA_TITLE = JAVA_ID;
     private static final String CLANG_TITLE = "LLVM/Clang Warnings";
 
-    @Override
-    protected WarningsAction createProjectAction(final Job job) {
-        return createJavaProjectAction(job);
-    }
-
-    private WarningsAction createJavaProjectAction(final Job job) {
-        return new WarningsAction(job, "Java", JAVA_TITLE);
-    }
-
-    @Override
-    protected WarningsAction createResultAction(final Build build) {
-        return createJavaResultAction(build);
-    }
-
-    private WarningsAction createJavaResultAction(final Build build) {
-        return new WarningsAction(build, "Java", JAVA_TITLE);
-    }
-
-    @Override
-    protected FreeStyleJob createFreeStyleJob(final Container owner) {
-        FreeStyleJob job = createFreeStyleJob(new AnalysisConfigurator<WarningsBuildSettings>() {
-            @Override
-            public void configure(WarningsBuildSettings settings) {
-                settings.addConsoleParser(JAVA_ID);
-            }
-        }, owner);
-        catWarningsToConsole(job);
-        return job;
-    }
-
-    @Override
-    protected WorkflowJob createPipeline() {
-        WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
-        job.script.set("node {\n"
-                + job.copyResourceStep(SEVERAL_PARSERS_FILE_FULL_PATH)
-                + "  step([$class: 'WarningsPublisher', "
-                + "     parserConfigurations: ["
-                + "             [parserName: 'Java Compiler (javac)', pattern: '**/warningsAll.txt'],"
-                + "     ]])\n}");
-        job.sandbox.check();
-        job.save();
-        return job;
-    }
-
-    @Override
-    protected int getNumberOfWarnings() {
-        return 131;
-    }
-
     /**
      * Verifies that providing a wrong URL to the detail factories should navigate to the top-level page.
      */
@@ -486,25 +437,6 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         verifyReceivedMail("Warnings: FAILURE", "Warnings: 142-12-8");
     }
 
-    private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<WarningsBuildSettings> buildConfigurator) {
-        return createFreeStyleJob(SEVERAL_PARSERS_FILE_FULL_PATH, buildConfigurator);
-    }
-
-    private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<WarningsBuildSettings> buildConfigurator,
-            final Container owner) {
-        return createFreeStyleJob(SEVERAL_PARSERS_FILE_FULL_PATH, buildConfigurator, owner);
-    }
-
-    private FreeStyleJob createFreeStyleJob(final String resourceToCopy,
-            final AnalysisConfigurator<WarningsBuildSettings> buildConfigurator) {
-        return createFreeStyleJob(resourceToCopy, buildConfigurator, jenkins);
-    }
-
-    private FreeStyleJob createFreeStyleJob(final String resourceToCopy,
-            final AnalysisConfigurator<WarningsBuildSettings> buildConfigurator, final Container owner) {
-        return setupJob(resourceToCopy, FreeStyleJob.class, WarningsBuildSettings.class, buildConfigurator, owner);
-    }
-
     /**
      * Checks that no warnings are reported if the build does nothing.
      */
@@ -609,27 +541,6 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
     }
 
     /**
-     * Runs a job with warning threshold configured once and validates that build is marked as unstable.
-     */
-    @Test @Issue("19614")
-    public void should_set_build_to_unstable_if_total_warnings_threshold_set() {
-        FreeStyleJob job = createFreeStyleJob(new AnalysisConfigurator<WarningsBuildSettings>() {
-            @Override
-            public void configure(WarningsBuildSettings settings) {
-                settings.addConsoleParser(JAVA_TITLE);
-                settings.addConsoleParser(JAVA_DOC_ID);
-                settings.addConsoleParser(MS_BUILD_ID);
-                settings.setBuildUnstableTotalAll("0");
-                settings.setNewWarningsThresholdFailed("0");
-                settings.setUseDeltaValues(true);
-            }
-        });
-
-        catWarningsToConsole(job);
-        buildUnstableJob(job);
-    }
-
-    /**
      * Checks that warning results are correctly created for a freestyle project with the parsers "Java", "JavaDoc" and
      * "MSBuild" if the console log contains multiple warnings of these types.
      */
@@ -640,27 +551,6 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         catWarningsToConsole(job);
 
         verify3ParserResults(job, 1);
-    }
-
-    private FreeStyleJob createFreeStyleJobWith3Parsers() {
-        return createFreeStyleJob(create3ParserConfiguration());
-    }
-
-    private void catWarningsToConsole(final Job job) {
-        job.configure();
-        job.addShellStep("cat " + SEVERAL_PARSERS_FILE_NAME);
-        job.save();
-    }
-
-    private AnalysisConfigurator<WarningsBuildSettings> create3ParserConfiguration() {
-        return new AnalysisConfigurator<WarningsBuildSettings>() {
-            @Override
-            public void configure(WarningsBuildSettings settings) {
-                settings.addConsoleParser(JAVA_TITLE);
-                settings.addConsoleParser(JAVA_DOC_ID);
-                settings.addConsoleParser(MS_BUILD_ID);
-            }
-        };
     }
 
     /**
@@ -841,5 +731,109 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         assertThat(action.getNumberOfWarningsWithHighPriority(), is(0));
         assertThat(action.getNumberOfWarningsWithNormalPriority(), is(5));
         assertThat(action.getNumberOfWarningsWithLowPriority(), is(0));
+    }
+
+    @Override
+    protected WarningsAction createProjectAction(final Job job) {
+        return createJavaProjectAction(job);
+    }
+
+    private WarningsAction createJavaProjectAction(final Job job) {
+        return new WarningsAction(job, "Java", JAVA_TITLE);
+    }
+
+    @Override
+    protected WarningsAction createResultAction(final Build build) {
+        return createJavaResultAction(build);
+    }
+
+    private WarningsAction createJavaResultAction(final Build build) {
+        return new WarningsAction(build, "Java", JAVA_TITLE);
+    }
+
+    @Override
+    protected FreeStyleJob createFreeStyleJob(final Container owner) {
+        FreeStyleJob job = createFreeStyleJob(new AnalysisConfigurator<WarningsBuildSettings>() {
+            @Override
+            public void configure(WarningsBuildSettings settings) {
+                settings.addConsoleParser(JAVA_ID);
+            }
+        }, owner);
+        catWarningsToConsole(job);
+        return job;
+    }
+
+    private FreeStyleJob createFreeStyleJobWith3Parsers() {
+        return createFreeStyleJob(create3ParserConfiguration());
+    }
+
+    private void catWarningsToConsole(final Job job) {
+        job.configure();
+        job.addShellStep("cat " + SEVERAL_PARSERS_FILE_NAME);
+        job.save();
+    }
+
+    private AnalysisConfigurator<WarningsBuildSettings> create3ParserConfiguration() {
+        return new AnalysisConfigurator<WarningsBuildSettings>() {
+            @Override
+            public void configure(WarningsBuildSettings settings) {
+                settings.addConsoleParser(JAVA_TITLE);
+                settings.addConsoleParser(JAVA_DOC_ID);
+                settings.addConsoleParser(MS_BUILD_ID);
+            }
+        };
+    }
+
+    @Override
+    protected WorkflowJob createPipeline() {
+        WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
+        job.script.set("node {\n"
+                + job.copyResourceStep(SEVERAL_PARSERS_FILE_FULL_PATH)
+                + "  step([$class: 'WarningsPublisher', "
+                + "     parserConfigurations: ["
+                + "             [parserName: 'Java Compiler (javac)', pattern: '**/warningsAll.txt'],"
+                + "     ]])\n}");
+        job.sandbox.check();
+        job.save();
+        return job;
+    }
+
+    @Override
+    protected int getNumberOfWarnings() {
+        return 131;
+    }
+
+    @Override
+    protected int getNumberOfHighPriorityWarnings() {
+        return 0;
+    }
+
+    @Override
+    protected int getNumberOfNormalPriorityWarnings() {
+        return JAVA_COUNT;
+    }
+
+    @Override
+    protected int getNumberOfLowPriorityWarnings() {
+        return 0;
+    }
+
+    private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<WarningsBuildSettings> buildConfigurator) {
+        return createFreeStyleJob(SEVERAL_PARSERS_FILE_FULL_PATH, buildConfigurator);
+    }
+
+    private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<WarningsBuildSettings> buildConfigurator,
+            final Container owner) {
+        return createFreeStyleJob(SEVERAL_PARSERS_FILE_FULL_PATH, buildConfigurator, owner);
+    }
+
+    private FreeStyleJob createFreeStyleJob(final String resourceToCopy,
+            final AnalysisConfigurator<WarningsBuildSettings> buildConfigurator) {
+        return createFreeStyleJob(resourceToCopy, buildConfigurator, jenkins);
+    }
+
+    private FreeStyleJob createFreeStyleJob(final String resourceToCopy,
+            final AnalysisConfigurator<WarningsBuildSettings> buildConfigurator, final Container owner) {
+        return setupJob(resourceToCopy, FreeStyleJob.class, WarningsBuildSettings.class, buildConfigurator, owner);
     }
 }
