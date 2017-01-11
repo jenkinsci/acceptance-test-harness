@@ -1,7 +1,7 @@
 jenkins*.war
 *.swp
 *.swn
-last_test.log
+*.log
 *~
 .vagrant
 iso
@@ -10,14 +10,12 @@ workspace/
 path-element.hpi
 slave.jar
 temp_dir_*
-chromedriver.log
 .buildpath
 .project
 target
 .classpath
 .settings/
 jenkins*home/
-jenkins*home.log
 .idea/
 *.iml
 *.iws
