@@ -18,9 +18,9 @@ public class CreateItemTest extends AbstractJUnitTest {
     private static final String NAME_FIELD = "name";
     private static final String JOB_CREATION_ERROR_MSG = "A job already exists";
 
-    private static final By NAME_NOT_EMPTY_MSG = By.id("itemname-required");
-    private static final By EXISTING_NAME_MSG = By.id("itemname-invalid");
-    private static final By OK_BUTTON = By.id("ok-button");
+    private static final By NAME_NOT_EMPTY_MSG = by.id("itemname-required");
+    private static final By EXISTING_NAME_MSG = by.id("itemname-invalid");
+    private static final By OK_BUTTON = by.id("ok-button");
 
     @Test
     @Since("2.6")
@@ -31,7 +31,7 @@ public class CreateItemTest extends AbstractJUnitTest {
         // go try to create one with the same name
         jenkins.jobs.visit("newJob");
         fillIn(NAME_FIELD, JOB_NAME);
-        blur(find(By.name(NAME_FIELD)));
+        blur(find(by.name(NAME_FIELD)));
 
         assertFalse(findIfNotVisible(NAME_NOT_EMPTY_MSG).isDisplayed());
         assertTrue(find(EXISTING_NAME_MSG).isDisplayed());
