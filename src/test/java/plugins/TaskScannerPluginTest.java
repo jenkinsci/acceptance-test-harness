@@ -23,8 +23,6 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 
-import hudson.util.VersionNumber;
-
 /**
  * Acceptance tests for the open tasks plugin.
  *
@@ -66,6 +64,9 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
 
     @Override
     protected void assertThatDetailsAreFilled(final TaskScannerAction action) {
+        assertXmlApiMatchesExpected(action.getBuild(), "tasksResult/api/xml?depth=0",
+                TASKS_PLUGIN_PREFIX + "api_depth_0-2_x.xml", false);
+
         // The file set consists of 9 files, whereof
         //   - 2 file names match the exclusion pattern
         //   - 7 files are to be scanned for tasks
@@ -143,21 +144,6 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
     private void assertThatClosedTaskCountLinkIs(final TaskScannerAction action, final int numberOfClosedTasks) {
         String linkText = numberOfClosedTasks + " closed task" + plural(numberOfClosedTasks);
         assertThat(action.getResultLinkByXPathText(linkText), is("tasksResult/fixed"));
-    }
-
-    /**
-     * Builds a job and tests if the tasks api (with depth=0 parameter set) responds with the expected output.
-     * Difference in whitespaces are ok.
-     */
-    @Test
-    public void should_return_results_via_remote_api() {
-        FreeStyleJob job = createFreeStyleJob();
-
-        Build build = buildSuccessfulJob(job);
-
-        boolean is2xLine = !jenkins.getVersion().isOlderThan(new VersionNumber("2.0"));
-        assertXmlApiMatchesExpected(build, "tasksResult/api/xml?depth=0",
-                "/tasks_plugin/" + (is2xLine ? "api_depth_0-2_x.xml" : "api_depth_0.xml"), false);
     }
 
     /**
@@ -718,7 +704,8 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
     }
 
     /**
-     * This method does special configurations for test step 6 of test {@link TaskScannerPluginTest#should_set_build_result_based_on_status_thresholds()}.
+     * This method does special configurations for test step 6 of test
+     * {@link TaskScannerPluginTest#should_set_build_result_based_on_status_thresholds()}.
      * The scenario is that the file set consists of 19 files, whereof - 17 files are to be scanned for tasks
      * <p/>
      * The expected task priorities are: -  2x high - 11x medium -  3x low

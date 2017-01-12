@@ -28,8 +28,6 @@ import static org.hamcrest.MatcherAssert.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 import static org.junit.Assume.*;
 
-import hudson.util.VersionNumber;
-
 /**
  * Acceptance tests for the CheckStyle plugin.
  *
@@ -102,22 +100,6 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
         buildFailingJob(job);
 
         verifyReceivedMail("Checkstyle: FAILURE", "Checkstyle: 776-0-776");
-    }
-
-    /**
-     * Builds a job and tests if the checkstyle api (with depth=0 parameter set) responds with the expected output.
-     * Difference in whitespaces are ok.
-     */
-    @Test
-    public void should_return_results_via_remote_api() {
-        FreeStyleJob job = createFreeStyleJob();
-
-        Build build = buildSuccessfulJob(job);
-
-        boolean is2xLine = !jenkins.getVersion().isOlderThan(new VersionNumber("2.0"));
-        assertXmlApiMatchesExpected(build, "checkstyleResult/api/xml?depth=0",
-                CHECKSTYLE_PLUGIN_ROOT + (is2xLine ? "api_depth_0-2_x.xml" : "api_depth_0.xml"),
-                false);
     }
 
     /**
@@ -438,6 +420,10 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
 
     @Override
     protected void assertThatDetailsAreFilled(final CheckStyleAction action) {
+        assertXmlApiMatchesExpected(action.getBuild(), "checkstyleResult/api/xml?depth=0",
+                CHECKSTYLE_PLUGIN_ROOT + "api_depth_0-2_x.xml",
+                false);
+
         assertThatFilesTabIsCorrectlyFilled(action);
         assertThatCategoriesTabIsCorrectlyFilled(action);
         assertThatTypesTabIsCorrectlyFilled(action);

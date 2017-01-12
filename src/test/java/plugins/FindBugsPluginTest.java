@@ -23,8 +23,6 @@
  */
 package plugins;
 
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
@@ -46,14 +44,11 @@ import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
-import org.xml.sax.SAXException;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 import static org.junit.Assume.*;
-
-import hudson.util.VersionNumber;
 
 /**
  * Acceptance tests for the FindBugs plugin.
@@ -88,21 +83,6 @@ public class FindBugsPluginTest extends AbstractAnalysisTest<FindBugsAction> {
         buildFailingJob(job);
 
         verifyReceivedMail("FindBugs: FAILURE", "FindBugs: 6-0-6");
-    }
-
-    /**
-     * Builds a job and tests if the findbugs api (with depth=0 parameter set) responds with the expected output.
-     * Difference in whitespaces are ok.
-     */
-    @Test
-    public void should_return_results_via_remote_api() throws IOException, SAXException, ParserConfigurationException {
-        FreeStyleJob job = createFreeStyleJob();
-
-        Build build = buildSuccessfulJob(job);
-
-        boolean is2xLine = !jenkins.getVersion().isOlderThan(new VersionNumber("2.0"));
-        assertXmlApiMatchesExpected(build, "findbugsResult/api/xml?depth=0",
-                PLUGIN_ROOT + (is2xLine ? "api_depth_0-2_x.xml" : "api_depth_0.xml"), false);
     }
 
     /**
@@ -319,6 +299,9 @@ public class FindBugsPluginTest extends AbstractAnalysisTest<FindBugsAction> {
 
     @Override
     protected void assertThatDetailsAreFilled(final FindBugsAction action) {
+        assertXmlApiMatchesExpected(action.getBuild(), "findbugsResult/api/xml?depth=0",
+                PLUGIN_ROOT + "api_depth_0-2_x.xml", false);
+
         assertThatFilesTabIsCorrectlyFilled(action);
         assertThatCategoriesTabIsCorrectlyFilled(action);
         assertThatTypesTabIsCorrectlyFilled(action);

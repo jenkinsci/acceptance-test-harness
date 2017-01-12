@@ -3,7 +3,6 @@ package plugins;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
@@ -20,7 +19,6 @@ import org.jenkinsci.test.acceptance.po.PageObject;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -28,8 +26,6 @@ import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.text.IsEmptyString.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 import static org.junit.Assume.*;
-
-import hudson.util.VersionNumber;
 
 /**
  * Acceptance tests for the PMD plugin.
@@ -123,21 +119,6 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
         Build lastBuild = buildFailingJob(job);
 
         assertThatBuildHasNoWarnings(lastBuild);
-    }
-
-    /**
-     * Builds a job and tests if the PMD api (with depth=0 parameter set) responds with the expected output.
-     * Difference in whitespaces are ok.
-     */
-    @Test @Category(SmokeTest.class)
-    public void should_return_results_via_remote_api() {
-        FreeStyleJob job = createFreeStyleJob();
-
-        Build build = buildSuccessfulJob(job);
-
-        boolean is2xLine = !jenkins.getVersion().isOlderThan(new VersionNumber("2.0"));
-        assertXmlApiMatchesExpected(build, "pmdResult/api/xml?depth=0",
-                PLUGIN_ROOT + (is2xLine ? "api_depth_0-2_x.xml" : "api_depth_0.xml"), false);
     }
 
     /**
@@ -389,6 +370,9 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
 
     @Override
     protected void assertThatDetailsAreFilled(final PmdAction action) {
+        assertXmlApiMatchesExpected(action.getBuild(), "pmdResult/api/xml?depth=0",
+                PLUGIN_ROOT + "api_depth_0-2_x.xml", false);
+
         assertThatFilesTabIsCorrectlyFilled(action);
         assertThatTypesTabIsCorrectlyFilled(action);
         assertThatWarningsTabIsCorrectlyFilled(action);
