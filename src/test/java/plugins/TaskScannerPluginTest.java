@@ -984,7 +984,8 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
         }
         job.script.set("node {\n"
                 + copyFilesWithTasks.toString()
-                + "  step([$class: 'TasksPublisher', high: 'PRIO1', normal: 'PRIO2,TODO', low :'PRIO3'])\n}");
+                + "  step([$class: 'TasksPublisher', high: 'FIXME', normal: 'TODO', low: '@Deprecated',"
+                + "excludePattern: '**/*Test.java'])\n}");
         job.sandbox.check();
         job.save();
         return job;

@@ -281,21 +281,6 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
         buildJobAndWait(job).shouldFail();
     }
 
-    /**
-     * Builds a job on a slave with checkstyle and verifies that the information checkstyle provides in the tabs about
-     * the build are the information we expect.
-     */
-    @Test
-    public void should_retrieve_results_from_slave() throws Exception {
-        FreeStyleJob job = createFreeStyleJob();
-        Node slave = createSlaveForJob(job);
-
-        Build lastBuild = buildSuccessfulJobOnSlave(job, slave);
-
-        assertThat(lastBuild.getNode(), is(slave));
-        assertThatCheckStyleResultExists(job, lastBuild);
-    }
-
      /**
      * Creates a sequence of freestyle builds and checks if the build result is set correctly. New warning threshold is
      * set to zero, e.g. a new warning should mark a build as unstable.

@@ -25,7 +25,6 @@ package plugins;
 
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.concurrent.ExecutionException;
 
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
@@ -38,7 +37,6 @@ import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Container;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.Node;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.junit.Test;
@@ -201,21 +199,6 @@ public class FindBugsPluginTest extends AbstractAnalysisTest<FindBugsAction> {
         MavenModuleSet job = createMavenJob(settings -> settings.setBuildFailedTotalAll("0"));
 
         buildJobAndWait(job).shouldFail();
-    }
-
-    /**
-     * Builds a job on an slave and checks if warnings of Findbugs are displayed.
-     */
-    @Test
-    public void should_retrieve_results_from_slave() throws ExecutionException, InterruptedException {
-        FreeStyleJob job = createFreeStyleJob();
-        Node slave = createSlaveForJob(job);
-
-        Build lastBuild = buildSuccessfulJobOnSlave(job, slave);
-
-        assertThat(lastBuild.getNode(), is(slave));
-        assertThatFindBugsResultExists(job, lastBuild);
-        assertThatFindBugsResultExists(job, job);
     }
 
     private void assertThatFindBugsResultExists(final Job job, final PageObject build) {

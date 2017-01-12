@@ -86,15 +86,13 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      */
     @Test @Issue("JENKINS-19614")
     public void should_set_build_to_unstable_if_total_warnings_threshold_set() {
-        FreeStyleJob job = createFreeStyleJob(jenkins);
+        // TODO: Test multiple variants for thresholds new/all failed/unstable first-build/subsequent-build
+        FreeStyleJob job = createFreeStyleJob();
         AnalysisAction projectAction = createProjectAction(job);
-        editJob(job, projectAction, new AnalysisConfigurator<AnalysisSettings>() {
-            @Override
-            public void configure(final AnalysisSettings settings) {
-                settings.setBuildUnstableTotalAll("0");
-                settings.setNewWarningsThresholdFailed("0");
-                settings.setUseDeltaValues(true);
-            }
+        editJob(job, projectAction, settings -> {
+            settings.setBuildUnstableTotalAll("0");
+            settings.setNewWarningsThresholdFailed("0");
+            settings.setUseDeltaValues(true);
         });
 
         buildJobAndWait(job).shouldBeUnstable();
@@ -114,7 +112,7 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
         folder.open();
 
         FreeStyleJob job = createFreeStyleJob(folder);
-        verifyJobResults(job);
+        runAndVerifyJobResults(job);
 
         P projectAction = createProjectAction(job);
 
@@ -131,7 +129,7 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      */
     @Test @WithPlugins("dashboard-view")
     public void should_show_warning_totals_in_dashboard_portlet_with_link_to_results() {
-        FreeStyleJob job = createFreeStyleJob(jenkins);
+        FreeStyleJob job = createFreeStyleJob();
 
         buildJobAndWait(job).shouldSucceed();
 
@@ -159,7 +157,7 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      */
     @Test @Issue("JENKINS-24436")
     public void should_show_warning_totals_in_view_column_with_link_to_results() {
-        FreeStyleJob job = createFreeStyleJob(jenkins);
+        FreeStyleJob job = createFreeStyleJob();
 
         buildJobAndWait(job).shouldSucceed();
 
@@ -189,15 +187,12 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      */
     @Test @Issue("JENKINS-28360")
     public void should_show_build_health() {
-        FreeStyleJob job = createFreeStyleJob(jenkins);
+        FreeStyleJob job = createFreeStyleJob();
 
         AnalysisAction projectAction = createProjectAction(job);
-        editJob(job, projectAction, new AnalysisConfigurator<AnalysisSettings>() {
-            @Override
-            public void configure(final AnalysisSettings settings) {
-                settings.setBuildHealthyThreshold(0);
-                settings.setBuildUnhealthyThreshold(getNumberOfWarnings());
-            }
+        editJob(job, projectAction, settings -> {
+            settings.setBuildHealthyThreshold(0);
+            settings.setBuildUnhealthyThreshold(getNumberOfWarnings());
         });
 
         buildSuccessfulJob(job);
@@ -238,7 +233,7 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      */
     @Test
     public void should_navigate_to_result_action_from_freestyle_job() {
-        verifyJobResults(createFreeStyleJob(jenkins));
+        runAndVerifyJobResults(createFreeStyleJob());
     }
 
     /**
@@ -248,12 +243,31 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      */
     @Test @WithPlugins("workflow-aggregator") @Issue("31202")
     public void should_navigate_to_result_action_from_pipeline() {
-        verifyJobResults(createPipeline());
+        runAndVerifyJobResults(createPipeline());
     }
 
-    private void verifyJobResults(final Job job) {
+    /**
+     * Builds a job on a slave with checkstyle and verifies that the information checkstyle provides in the tabs about
+     * the build are the information we expect.
+     */
+    @Test
+    public void should_retrieve_results_from_slave() throws Exception {
+        FreeStyleJob job = createFreeStyleJob();
+        Node slave = createSlaveForJob(job);
+
+        Build build = buildSuccessfulJobOnSlave(job, slave);
+
+        assertThat(build.getNode(), is(slave));
+        verifyJobResults(job, build);
+    }
+
+    private void runAndVerifyJobResults(final Job job) {
         Build build = buildSuccessfulJob(job);
 
+        verifyJobResults(job, build);
+    }
+
+    private void verifyJobResults(final Job job, final Build build) {
         P resultAction = createResultAction(build);
         P projectAction = createProjectAction(job);
 
@@ -373,7 +387,7 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
     }
 
     private Job buildFreestyleJobTwoTimesInARow() {
-        return runTwoTimesInARow(createFreeStyleJob(jenkins));
+        return runTwoTimesInARow(createFreeStyleJob());
     }
 
     private Job runTwoTimesInARow(final Job job) {
@@ -423,6 +437,10 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      * @return the created freestyle job
      */
     protected abstract FreeStyleJob createFreeStyleJob(final Container owner);
+
+    private FreeStyleJob createFreeStyleJob() {
+        return createFreeStyleJob(jenkins);
+    }
 
     /**
      * Creates a pipeline that has an enabled publisher of the plug-in under test. The job is expected to run with

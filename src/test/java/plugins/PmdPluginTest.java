@@ -14,7 +14,6 @@ import org.jenkinsci.test.acceptance.po.Build.Result;
 import org.jenkinsci.test.acceptance.po.Container;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.Node;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.junit.Ignore;
@@ -248,21 +247,6 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
         MavenModuleSet job = createMavenJob(settings -> settings.setBuildFailedTotalAll("0"));
 
         buildJobAndWait(job).shouldFail();
-    }
-
-    /**
-     * Builds a job on a slave with pmd and verifies that the information pmd provides in the tabs about the build
-     * are the information we expect.
-     */
-    @Test
-    public void should_retrieve_results_from_slave() throws Exception {
-        FreeStyleJob job = createFreeStyleJob();
-        Node slave = createSlaveForJob(job);
-
-        Build build = buildSuccessfulJobOnSlave(job, slave);
-
-        assertThat(build.getNode(), is(slave));
-        assertThatPmdResultExists(job, build);
     }
 
     /**
