@@ -44,15 +44,20 @@ import static org.hamcrest.Matchers.is;
 @WithPlugins("jobConfigHistory")
 public class JobConfigHistoryPluginTest extends AbstractJUnitTest {
 
+    private static final String LS_COMMAND = "ls";
+    private static final String LS_LH_COMMAND = LS_COMMAND + " -lh";
+    private static final String COMMAND_NODE = "<command>%s</command>";
+    private static final String CREATED = "Created";
+
     @Test
     public void show_simple_history() {
         FreeStyleJob job = jenkins.jobs.create();
         job.configure();
-        job.addShellStep("ls");
+        job.addShellStep(LS_COMMAND);
         job.save();
 
         job.action(JobConfigHistory.class).open();
-        assertThat(driver, Matchers.hasContent("Created"));
+        assertThat(driver, Matchers.hasContent(CREATED));
         assertThat(all(by.xpath("//tr//a[contains(text(),'View as XML')]")).size(), is(greaterThan(2)));
         assertThat(all(by.xpath("//tr//a[contains(text(),'(RAW)')]")).size(), is(greaterThan(2)));
     }
@@ -95,19 +100,19 @@ public class JobConfigHistoryPluginTest extends AbstractJUnitTest {
     public void show_difference_in_config_history() {
         FreeStyleJob job = jenkins.jobs.create();
         job.configure();
-        ShellBuildStep step = job.addShellStep("ls");
+        ShellBuildStep step = job.addShellStep(LS_COMMAND);
         job.save();
         job.configure();
-        step.command("ls -lh");
+        step.command(LS_LH_COMMAND);
         job.save();
 
         JobConfigHistory action = job.action(JobConfigHistory.class);
         action.open();
-        assertThat(driver, Matchers.hasContent("Created"));
+        assertThat(driver, Matchers.hasContent(CREATED));
         assertThat(driver, Matchers.hasContent("Changed"));
 
         action.showLastChange();
-        assertThat(driver, Matchers.hasElement(by.xpath("//td[@class='diff_original']/pre[normalize-space(text())='#{original}']")));
-        assertThat(driver, Matchers.hasElement(by.xpath("//td[@class='diff_revised']/pre[normalize-space(text())='#{current}']")));
+        assertThat(driver, Matchers.hasElement(by.xpath("//td[@class='diff_original']/pre[contains(text(),'" + String.format(COMMAND_NODE, LS_COMMAND) + "')]")));
+        assertThat(driver, Matchers.hasElement(by.xpath("//td[@class='diff_revised']/pre[contains(text(),'" + String.format(COMMAND_NODE, LS_LH_COMMAND) + "')]")));
     }
 }
