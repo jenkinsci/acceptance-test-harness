@@ -4,7 +4,7 @@ import org.openqa.selenium.TimeoutException;
 
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 import static org.jenkinsci.test.acceptance.Matchers.hasLoggedInUser;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Page object for login page.
@@ -72,7 +72,7 @@ public class Login extends PageObject {
         try {
             waitFor(getJenkins(), hasLoggedInUser(this.loginUser), timeoutInSeconds);
         } catch (TimeoutException ex) {
-            assertTrue(this.loginUser + " user is not logged in", false);
+            fail(this.loginUser + " user is not logged in");
         }
 
         return this;
@@ -90,7 +90,7 @@ public class Login extends PageObject {
         try {
             waitFor(driver, hasContent("Invalid login information. Please try again."), timeoutInSeconds);
         } catch (TimeoutException ex) {
-            assertTrue("Login did not fail", false);
+            fail("Login did not fail");
         }
 
         return this;
