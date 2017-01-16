@@ -178,6 +178,44 @@ public class Matchers {
         };
     }
 
+    public static Matcher<Login> loggedInAs(final String user) {
+        return new Matcher<Login>("has logged in user %s", user) {
+            @Override
+            public boolean matchesSafely(final Login login) {
+                try {
+                    login.find(by.href("/user/" + user));
+                    return true;
+                } catch (NoSuchElementException e) {
+                    return false;
+                }
+            }
+
+            @Override
+            public void describeMismatchSafely(final Login item, final Description desc) {
+                desc.appendText(user + " is not logged in.");
+            }
+        };
+    }
+
+    public static Matcher<Login> hasInvalidLoginInformation() {
+        return new Matcher<Login>("has invalid login information message") {
+            @Override
+            public boolean matchesSafely(final Login login) {
+                try {
+                    login.find(by.xpath("//div[contains(text(), 'Invalid login information. Please try again.')]"));
+                    return true;
+                } catch (NoSuchElementException e) {
+                    return false;
+                }
+            }
+
+            @Override
+            public void describeMismatchSafely(final Login item, final Description desc) {
+                desc.appendText("There is no invalid login message.");
+            }
+        };
+    }
+
     public static Matcher<User> isMemberOf(final String group) {
         return new Matcher<User>(" is member of group %s", group) {
             @Override

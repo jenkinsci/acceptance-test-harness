@@ -1,10 +1,9 @@
 package org.jenkinsci.test.acceptance.po;
 
-import org.openqa.selenium.TimeoutException;
+import org.junit.Assert;
 
-import static org.jenkinsci.test.acceptance.Matchers.hasContent;
-import static org.jenkinsci.test.acceptance.Matchers.hasLoggedInUser;
-import static org.junit.Assert.fail;
+import static org.jenkinsci.test.acceptance.Matchers.hasInvalidLoginInformation;
+import static org.jenkinsci.test.acceptance.Matchers.loggedInAs;
 
 /**
  * Page object for login page.
@@ -12,8 +11,6 @@ import static org.junit.Assert.fail;
  * @author Michael Prankl
  */
 public class Login extends PageObject {
-
-    private String loginUser;
 
     private Control cUser = control("/j_username");
     private Control cPassword = control("/j_password");
@@ -29,8 +26,6 @@ public class Login extends PageObject {
      * (Available thanks to pre-installed form-element-path plugin.)
      */
     public Login doLogin(String user, String password){
-        this.loginUser = user;
-
         cUser.set(user);
         cPassword.set(password);
         cLogin.click();
@@ -60,40 +55,32 @@ public class Login extends PageObject {
         return doLogin(user.fullName());
     }
 
-    public Login shouldSucceed() {
-        return this.shouldSucceed(10);
-    }
-
-    public Login shouldSucceed(int timeoutInSeconds) {
-        if (this.loginUser == null) {
-            throw new RuntimeException("Checking login success is not possible without login in first");
-        }
-
-        try {
-            waitFor(getJenkins(), hasLoggedInUser(this.loginUser), timeoutInSeconds);
-        } catch (TimeoutException ex) {
-            fail(this.loginUser + " user is not logged in");
-        }
-
+    public Login doSuccessfulLogin(String user, String password) {
+        this.doLogin(user, password);
+        Assert.assertThat(this, loggedInAs(user));
         return this;
     }
 
-    public Login shouldFail() {
-        return this.shouldFail(10);
+    public Login doSuccessfulLogin(String user) {
+        return this.doSuccessfulLogin(user, user);
     }
 
-    public Login shouldFail(int timeoutInSeconds) {
-        if (this.loginUser == null) {
-            throw new RuntimeException("Checking login failure is not possible without login in first");
-        }
+    public Login doSuccessfulLogin(User user) {
+        return this.doSuccessfulLogin(user.fullName());
+    }
 
-        try {
-            waitFor(driver, hasContent("Invalid login information. Please try again."), timeoutInSeconds);
-        } catch (TimeoutException ex) {
-            fail("Login did not fail");
-        }
-
+    public Login doFailedLogin(String user, String password) {
+        this.doLogin(user, password);
+        Assert.assertThat(this, hasInvalidLoginInformation());
         return this;
+    }
+
+    public Login doFailedLogin(String user) {
+        return this.doFailedLogin(user, user);
+    }
+
+    public Login doFailedLogin(User user) {
+        return this.doFailedLogin(user.fullName());
     }
 
 }
