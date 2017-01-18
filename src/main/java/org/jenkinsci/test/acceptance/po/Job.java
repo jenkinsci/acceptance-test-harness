@@ -1,5 +1,6 @@
 package org.jenkinsci.test.acceptance.po;
 
+import javax.inject.Inject;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,11 +14,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
-
-import javax.inject.Inject;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.SystemUtils;
@@ -26,7 +26,6 @@ import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.LocalController;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.junit.internal.AssumptionViolatedException;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.zeroturnaround.zip.ZipUtil;
 
@@ -96,6 +95,7 @@ public class Job extends TopLevelItem {
     // TODO move this functionality to page area itself
     public void removeFirstBuildStep() {
         removeFirstStep("builder");
+        elasticSleep(500); // chrome needs some time
     }
 
     /**
@@ -417,11 +417,37 @@ public class Job extends TopLevelItem {
     }
 
     /**
-     * Deletes the current job
+     * Deletes the current job.
      */
     public void delete() {
-        this.open();
+        open();
         clickLink("Delete Project");
         confirmAlert(2);
+    }
+
+    /**
+     * Edits this job using the specified configuration lambda. Opens the job configuration view, selects the specified
+     * publisher page object, runs the specified configuration lambda, and saves the changes.
+     *
+     * @param publisherClass the publisher to configure
+     * @param configuration  the additional configuration options for this job
+     */
+    public <T  extends PostBuildStep> void edit(final Class<T> publisherClass, final Consumer<T> configuration) {
+        configure();
+        T publisher = getPublisher(publisherClass);
+        configuration.accept(publisher);
+        save();
+    }
+
+    /**
+     * Edits this job using the specified configuration lambda. Opens the job configuration view, runs the specified
+     * configuration lambda and saves the changes.
+     *
+     * @param configuration the additional configuration options for this job
+     */
+    public void edit(final Runnable configuration) {
+        configure();
+        configuration.run();
+        save();
     }
 }

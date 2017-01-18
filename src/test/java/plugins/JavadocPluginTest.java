@@ -4,18 +4,16 @@ import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.javadoc.JavadocPublisher;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenBuildStep;
+import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.MatrixConfiguration;
 import org.jenkinsci.test.acceptance.po.MatrixProject;
-import org.jenkinsci.test.acceptance.po.Build;
-import org.junit.Assert;
 import org.junit.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.not;
-import static org.jenkinsci.test.acceptance.Matchers.hasAction;
-import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.Matchers.*;
+import static org.jenkinsci.test.acceptance.Matchers.*;
 
 @WithPlugins("javadoc")
 public class JavadocPluginTest extends AbstractJUnitTest {
@@ -74,11 +72,10 @@ public class JavadocPluginTest extends AbstractJUnitTest {
     }
 
     private void setupForRetention(Job job) {
-        job.configure();
-        job.removeFirstBuildStep();
-        JavadocPublisher jd = job.getPublisher(JavadocPublisher.class);
-        jd.keepAll.check();
-        job.save();
+        job.edit(JavadocPublisher.class, (publisher) -> {
+            job.removeFirstBuildStep();
+            publisher.keepAll.check();
+        });
     }
 
     private void assertJavadoc(Job job) {
