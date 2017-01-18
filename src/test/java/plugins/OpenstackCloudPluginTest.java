@@ -100,7 +100,7 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
         String s;
         do {
             s = jenkins.runScript("os = Jenkins.instance.clouds[0].openstack; rn = os.runningNodes; if (!rn.empty) { rn.each { os.destroyServer(it) } }; return os.runningNodes.size()");
-        } while ("0".equals(s));
+        } while (!"0".equals(s));
     }
 
     @Test
