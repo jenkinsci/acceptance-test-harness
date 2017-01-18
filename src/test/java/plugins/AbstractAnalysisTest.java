@@ -82,14 +82,40 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
     private static final List<String> PRIORITIES = Arrays.asList("HIGH", "LOW", "NORMAL");
 
     /**
+     * Checks that the plug-in sends a mail after a build has been failed. The content of the mail contains several
+     * tokens that should be expanded in the mail with the correct values.
+     */
+    @Test @Issue("JENKINS-25501") @WithPlugins("email-ext")
+    public void should_send_mail_with_expanded_tokens() {
+        setUpMailer();
+
+        FreeStyleJob job = createFreeStyleJob();
+
+        P projectAction = createProjectAction(job);
+        job.edit(projectAction.getFreeStyleSettings(),
+                settings -> settings.setBuildFailedTotalAll("0"));
+
+        String name = projectAction.getUrl().toUpperCase();
+        String title = "Analysis-Result";
+        configureEmailNotification(job, String.format("%s: ${%s_RESULT}", title, name),
+                String.format("%s: ${%s_COUNT}-${%s_FIXED}-${%s_NEW}", title, name, name, name));
+
+        buildFailingJob(job);
+
+        verifyReceivedMail(String.format("%s: FAILURE", title),
+                String.format("%s: %d-0-%d", title, getNumberOfWarnings(), getNumberOfWarnings()));
+    }
+
+    /**
      * Runs a job with warning threshold configured once and validates that build is marked as unstable.
      */
     @Test @Issue("JENKINS-19614")
     public void should_set_build_to_unstable_if_total_warnings_threshold_set() {
         // TODO: Test multiple variants for thresholds new/all failed/unstable first-build/subsequent-build
         FreeStyleJob job = createFreeStyleJob();
+
         AnalysisAction projectAction = createProjectAction(job);
-        editJob(job, projectAction, settings -> {
+        job.edit(projectAction.getFreeStyleSettings(), settings -> {
             settings.setBuildUnstableTotalAll("0");
             settings.setNewWarningsThresholdFailed("0");
             settings.setUseDeltaValues(true);
@@ -190,7 +216,7 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
         FreeStyleJob job = createFreeStyleJob();
 
         AnalysisAction projectAction = createProjectAction(job);
-        editJob(job, projectAction, settings -> {
+        job.edit(projectAction.getFreeStyleSettings(), settings -> {
             settings.setBuildHealthyThreshold(0);
             settings.setBuildUnhealthyThreshold(getNumberOfWarnings());
         });
@@ -218,12 +244,6 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
 
     private String getDescriptionValue(final List<WebElement> descriptions, final int index) {
         return descriptions.get(index).getAttribute("innerHTML");
-    }
-
-    private void editJob(final Job job, final AnalysisAction action, final AnalysisConfigurator<AnalysisSettings> configurator) {
-        job.configure();
-        configurator.configure(job.getPublisher(action.getFreeStyleSettings()));
-        job.save();
     }
 
     /**
@@ -725,7 +745,6 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
             //check whether to exchange the copy resource shell step
             if (!isAdditionalResource) {
                 job.removeFirstBuildStep();
-                elasticSleep(1000); // chrome needs some time
             }
 
             //add the new copy resource shell step
@@ -741,6 +760,20 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
         return job;
     }
 
+    /**
+     * Replaces the copy resource step of the specified job with a new step that copies the specified resource.
+     *
+     * @param newResourceToCopy    the new resource to be copied to build (Directory or File path) or null if not to be
+     *                             changed
+     * @param job                  the job to be changed
+     * @return the edited job
+     */
+    public void replaceResource(final String newResourceToCopy, Job job) {
+        job.edit(() -> {
+            job.removeFirstBuildStep();
+            job.copyResource(newResourceToCopy);
+        });
+    }
 
     /**
      * Creates a slave and configures thes specified job to run on that slave.
@@ -768,14 +801,12 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      *                               contain the pom.xml
      * @param goal                   The maven goals to set.
      * @param codeStyleBuildSettings The code analyzer to use or null if you do not want one.
-     * @param configurator           A configurator to custommize the code analyzer settings you want to use.
+     * @param configurator           A configurator to customize the code analyzer settings you want to use.
      * @param <T>                    The type of the Analyzer.
      * @return The configured job.
      */
     public <T extends AnalysisMavenSettings> MavenModuleSet setupMavenJob(String resourceProjectDir,
-            String goal,
-            Class<T> codeStyleBuildSettings,
-            AnalysisConfigurator<T> configurator) {
+            String goal, Class<T> codeStyleBuildSettings, AnalysisConfigurator<T> configurator) {
         MavenInstallation.ensureThatMavenIsInstalled(jenkins);
 
         MavenModuleSet job = jenkins.jobs.create(MavenModuleSet.class);

@@ -63,27 +63,6 @@ public class FindBugsPluginTest extends AbstractAnalysisTest<FindBugsAction> {
     private static final int TOTAL_NUMBER_OF_WARNINGS = 6;
 
     /**
-     * Checks that the plug-in sends a mail after a build has been failed. The content of the mail
-     * contains several tokens that should be expanded in the mail with the correct values.
-     */
-    @Test @Issue("JENKINS-25501") @WithPlugins("email-ext")
-    public void should_send_mail_with_expanded_tokens() {
-        setUpMailer();
-
-        FreeStyleJob job = createFreeStyleJob(settings -> {
-            settings.setBuildFailedTotalAll("0");
-            settings.pattern.set(PATTERN_WITH_6_WARNINGS);
-        });
-
-        configureEmailNotification(job, "FindBugs: ${FINDBUGS_RESULT}",
-                "FindBugs: ${FINDBUGS_COUNT}-${FINDBUGS_FIXED}-${FINDBUGS_NEW}");
-
-        buildFailingJob(job);
-
-        verifyReceivedMail("FindBugs: FAILURE", "FindBugs: 6-0-6");
-    }
-
-    /**
      * Runs job two times to check if new and fixed warnings are displayed. Afterwards, the first build
      * is deleted and Jenkins is restarted. Then the results of the second build are validated again: the detail
      * pages should then show the same results (see JENKINS-24940).
