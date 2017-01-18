@@ -253,7 +253,6 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
     private void configureCloudInit(String cloudInitName) {
         ConfigFileProvider fileProvider = new ConfigFileProvider(jenkins);
         UserDataConfig cloudInit = fileProvider.addFile(UserDataConfig.class);
-        cloudInit.open();
         cloudInit.name(CLOUD_INIT_NAME);
         cloudInit.content(resource("/openstack_plugin/" + cloudInitName).asText());
         cloudInit.save();
