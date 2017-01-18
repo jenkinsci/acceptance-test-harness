@@ -114,14 +114,17 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
         // TODO: Test multiple variants for thresholds new/all failed/unstable first-build/subsequent-build
         FreeStyleJob job = createFreeStyleJob();
 
-        AnalysisAction projectAction = createProjectAction(job);
-        job.edit(projectAction.getFreeStyleSettings(), settings -> {
+        job.edit(getFreeStyleSettingsFor(job), settings -> {
             settings.setBuildUnstableTotalAll("0");
             settings.setNewWarningsThresholdFailed("0");
             settings.setUseDeltaValues(true);
         });
 
         buildJobAndWait(job).shouldBeUnstable();
+    }
+
+    private Class<? extends AnalysisSettings> getFreeStyleSettingsFor(final FreeStyleJob job) {
+        return createProjectAction(job).getFreeStyleSettings();
     }
 
     /**
@@ -552,12 +555,11 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      * @param body    body of the mail
      */
     protected void configureEmailNotification(final FreeStyleJob job, final String subject, final String body) {
-        job.configure();
-        EmailExtPublisher pub = job.addPublisher(EmailExtPublisher.class);
-        pub.subject.set(subject);
-        pub.setRecipient("dev@example.com");
-        pub.body.set(body);
-        job.save();
+        job.edit(EmailExtPublisher.class, (publisher) -> {
+            publisher.subject.set(subject);
+            publisher.setRecipient("dev@example.com");
+            publisher.body.set(body);
+        });
     }
 
     /**
