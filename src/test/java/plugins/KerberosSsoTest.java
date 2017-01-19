@@ -35,8 +35,8 @@ import org.apache.http.impl.auth.BasicSchemeFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.jenkinsci.test.acceptance.FallbackConfig;
-import org.jenkinsci.test.acceptance.docker.fixtures.KerberosContainer;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
+import org.jenkinsci.test.acceptance.docker.fixtures.KerberosContainer;
 import org.jenkinsci.test.acceptance.guice.TestCleaner;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.DockerTest;
@@ -47,7 +47,6 @@ import org.jenkinsci.test.acceptance.po.GlobalPluginConfiguration;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
 import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.jenkinsci.test.acceptance.po.JenkinsDatabaseSecurityRealm;
-import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.User;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -301,7 +300,9 @@ public class KerberosSsoTest extends AbstractJUnitTest {
         JenkinsDatabaseSecurityRealm realm = sc.useRealm(JenkinsDatabaseSecurityRealm.class);
         sc.save();
         // The password needs to be the same as in kerberos
-        return realm.signup().password("ATH").fullname("Full Name").signup("user");
+        return realm.signup().password("ATH").fullname("Full Name")
+                .email("ath@ath.com")
+                .signup("user");
     }
 
     private class KerberosGlobalConfig extends GlobalPluginConfiguration {
