@@ -555,11 +555,13 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      * @param body    body of the mail
      */
     protected void configureEmailNotification(final FreeStyleJob job, final String subject, final String body) {
-        job.edit(EmailExtPublisher.class, (publisher) -> {
-            publisher.subject.set(subject);
-            publisher.setRecipient("dev@example.com");
-            publisher.body.set(body);
-        });
+        // TODO: add a new job method that adds a publisher with configuration
+        job.edit(() -> {
+                    EmailExtPublisher pub = job.addPublisher(EmailExtPublisher.class);
+                    pub.subject.set(subject);
+                    pub.setRecipient("dev@example.com");
+                    pub.body.set(body);
+                });
     }
 
     /**
