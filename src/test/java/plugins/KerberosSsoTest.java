@@ -67,7 +67,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * Run Kerberos SSO tests against the containerized KDC.
  */
-@WithPlugins("kerberos-sso")
+@WithPlugins({"kerberos-sso", "mailer"})
 @Category(DockerTest.class)
 @WithDocker
 public class KerberosSsoTest extends AbstractJUnitTest {
