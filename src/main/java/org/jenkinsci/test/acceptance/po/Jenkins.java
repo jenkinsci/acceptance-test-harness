@@ -2,10 +2,12 @@ package org.jenkinsci.test.acceptance.po;
 
 import java.io.IOException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
+import org.apache.commons.io.IOUtils;
 import org.hamcrest.MatcherAssert;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.openqa.selenium.NoSuchElementException;
@@ -68,9 +70,14 @@ public class Jenkins extends Node implements Container {
 
         String text;
         try {
-            text = url.openConnection().getHeaderField("X-Jenkins");
+            URLConnection urlConnection = url.openConnection();
+            text = urlConnection.getHeaderField("X-Jenkin");
             if (text == null) {
-                throw new AssertionError("Application running on " + url + " does not seem to be Jenkins");
+
+                String pageText = IOUtils.toString(urlConnection.getInputStream());
+                throw new AssertionError(
+                        "Application running on " + url + " does not seem to be Jenkins:\n" + pageText
+                );
             }
         } catch (IOException ex) {
             throw new AssertionError(ex);
