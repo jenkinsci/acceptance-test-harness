@@ -8,22 +8,22 @@ import org.jenkinsci.test.acceptance.po.Job;
 import org.openqa.selenium.WebElement;
 
 /**
- * Abstract job configuration class.
+ * Static analysis configuration settings for freestyle jobs.
+ *
  * @author Fabian Trampusch
  */
 public abstract class AnalysisFreestyleSettings extends AnalysisSettings {
-    /**
-     * The input for the file name.
-     */
+    /** The file names that will be scanned by one of the analysis plug-ins. */
+    // TODO: Add accessor
     public final Control pattern = control("pattern");
 
     /**
-     * Constructor for the build settings page area.
+     * Creates a new settings page area.
      *
      * @param parent       the job currently being configured.
      * @param selectorPath the selector path used as prefix.
      */
-    public AnalysisFreestyleSettings(Job parent, String selectorPath) {
+    public AnalysisFreestyleSettings(final Job parent, final String selectorPath) {
         super(parent, selectorPath);
     }
 

@@ -50,9 +50,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
     public void should_resolve_environment_variables() {
         FreeStyleJob job = createFreeStyleJob(settings -> settings.pattern.set("checkstyle${ENV_DASH}result.xml"));
 
-        job.configure();
-        new EnvInjectConfig.Environment(job).properties.sendKeys("ENV_DASH=-");
-        job.save();
+        job.edit(() -> new EnvInjectConfig.Environment(job).properties.sendKeys("ENV_DASH=-"));
 
         Build build = buildSuccessfulJob(job);
         assertThatCheckStyleResultExists(job, build);
@@ -82,27 +80,6 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
     }
 
     /**
-     * Checks that the plug-in sends a mail after a build has been failed. The content of the mail contains several
-     * tokens that should be expanded in the mail with the correct values.
-     */
-    @Test @Issue("JENKINS-25501") @WithPlugins("email-ext")
-    public void should_send_mail_with_expanded_tokens() {
-        setUpMailer();
-
-        FreeStyleJob job = createFreeStyleJob(settings -> {
-            settings.setBuildFailedTotalAll("0");
-            settings.pattern.set(PATTERN_WITH_776_WARNINGS);
-        });
-
-        configureEmailNotification(job, "Checkstyle: ${CHECKSTYLE_RESULT}",
-                "Checkstyle: ${CHECKSTYLE_COUNT}-${CHECKSTYLE_FIXED}-${CHECKSTYLE_NEW}");
-
-        buildFailingJob(job);
-
-        verifyReceivedMail("Checkstyle: FAILURE", "Checkstyle: 776-0-776");
-    }
-
-    /**
      * Runs job two times to check if new and fixed warnings are displayed. Afterwards, the first build
      * is deleted and Jenkins is restarted. Then the results of the second build are validated again: the detail
      * pages should then show the same results (see JENKINS-24940).
@@ -110,9 +87,11 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
     @Test @Issue("24940")
     public void should_report_new_and_fixed_warnings_in_consecutive_builds() {
         assumeTrue("This test requires a restartable Jenkins", jenkins.canRestart());
+
         FreeStyleJob job = createFreeStyleJob();
         Build firstBuild = buildJobAndWait(job);
-        editJob(FILE_FOR_2ND_RUN, false, job);
+
+        replaceResource(FILE_FOR_2ND_RUN, job);
 
         Build lastBuild = buildSuccessfulJob(job);
 

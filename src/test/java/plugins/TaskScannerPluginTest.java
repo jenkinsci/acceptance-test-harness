@@ -34,35 +34,7 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
     private static final String TASKS_PLUGIN_PREFIX = "/tasks_plugin/";
     private static final String TASKS_FILES = TASKS_PLUGIN_PREFIX + "fileset1";
 
-    /**
-     * Checks that the plug-in sends a mail after a build has been failed. The content of the mail contains several
-     * tokens that should be expanded in the mail with the correct values.
-     */
-    @Test
-    @WithPlugins("email-ext")
-    @Issue("JENKINS-25501")
-    public void should_send_mail_with_expanded_tokens() {
-        setUpMailer();
-
-        FreeStyleJob job = createFreeStyleJob(settings -> {
-            settings.setPattern("**/*.java");
-            settings.setExcludePattern("**/*Test.java");
-            settings.setHighPriorityTags("FIXME");
-            settings.setNormalPriorityTags("TODO");
-            settings.setLowPriorityTags("@Deprecated");
-            settings.setIgnoreCase(false);
-            settings.setBuildFailedTotalAll("0");
-        });
-
-        configureEmailNotification(job, "Tasks: ${TASKS_RESULT}",
-                "Tasks: ${TASKS_COUNT}-${TASKS_FIXED}-${TASKS_NEW}");
-
-        buildFailingJob(job);
-
-        verifyReceivedMail("Tasks: FAILURE", "Tasks: 6-0-6");
-    }
-
-    @Override
+   @Override
     protected void assertThatDetailsAreFilled(final TaskScannerAction action) {
         assertXmlApiMatchesExpected(action.getBuild(), "tasksResult/api/xml?depth=0",
                 TASKS_PLUGIN_PREFIX + "api_depth_0-2_x.xml", false);

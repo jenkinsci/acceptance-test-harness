@@ -67,29 +67,7 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
                 });
     }
 
-    /**
-     * Checks that the plug-in sends a mail after a build has been failed. The content of the mail
-     * contains several tokens that should be expanded in the mail with the correct values.
-     */
-    @Test  @Issue("JENKINS-25501") @WithPlugins("email-ext")
-    public void should_send_mail_with_expanded_tokens() {
-        setUpMailer();
-
-        FreeStyleJob job = createFreeStyleJob(FILE_WITH_9_WARNINGS, settings -> {
-            settings.setBuildFailedTotalAll("0");
-            settings.pattern.set(PATTERN_WITH_9_WARNINGS);
-        }
-        );
-
-        configureEmailNotification(job, "PMD: ${PMD_RESULT}",
-                "PMD: ${PMD_COUNT}-${PMD_FIXED}-${PMD_NEW}");
-
-        job.startBuild().shouldFail();
-
-        verifyReceivedMail("PMD: FAILURE", "PMD: 9-0-9");
-    }
-
-    /**
+   /**
      * Configures a job with PMD and checks that the parsed PMD file does not contain warnings.
      */
     @Test
@@ -111,9 +89,7 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
             settings.setCanRunOnFailed(true);
         });
 
-        job.configure();
-        job.addShellStep("false");
-        job.save();
+        job.edit(() -> job.addShellStep("false"));
 
         Build lastBuild = buildFailingJob(job);
 
@@ -128,6 +104,7 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
     @Test @Issue("24940")
     public void should_report_new_and_fixed_warnings_in_consecutive_builds() {
         assumeTrue("This test requires a restartable Jenkins", jenkins.canRestart());
+
         FreeStyleJob job = createFreeStyleJob();
         Build firstBuild = buildJobAndWait(job);
         editJob(PLUGIN_ROOT + "forSecondRun/pmd-warnings.xml", false, job);
