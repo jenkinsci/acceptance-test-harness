@@ -99,15 +99,68 @@ public class Job extends TopLevelItem {
     }
 
     /**
-     * publishers added to the job are stored in a list member to provide
-     * later access for modification
+     * Adds the specified publisher to this job. Publishers are stored in a list member to provide
+     * later access for modification.
+     *
+     * @param publisherClass the publisher to configure
+     * @param <T>            the type of the publisher
+     * @see #getPublisher(Class)
+     * @see #editPublisher(Class, Consumer)
      */
-
-    public <T extends PostBuildStep> T addPublisher(Class<T> type) {
-        T p = addStep(type, "publisher");
+    public <T extends PostBuildStep> T addPublisher(Class<T> publisherClass) {
+        T p = addStep(publisherClass, "publisher");
 
         publishers.add(p);
+
         return p;
+    }
+
+    /**
+     * Adds the specified publisher to this job. Publishers are stored in a list member to provide
+     * later access for modification. After the publisher has been added the publisher is configured
+     * with the specified configuration lambda. Afterwards, the job configuration page still is visible and
+     * not saved.
+     *
+     * @param type          the publisher to configure
+     * @param configuration the additional configuration options for this job
+     * @param <T>           the type of the publisher
+     * @see #getPublisher(Class)
+     * @see #editPublisher(Class, Consumer)
+     */
+    public <T extends PostBuildStep> T addPublisher(final Class<T> type, final Consumer<T> configuration) {
+        T p = addPublisher(type);
+
+        configuration.accept(p);
+
+        return p;
+    }
+
+    /**
+     * Edits this job using the specified configuration lambda. Opens the job configuration view, selects the specified
+     * publisher page object, runs the specified configuration lambda, and saves the changes. Afterwards, the job
+     * configuration page still is visible and not saved.
+     *
+     * @param type          the publisher to configure
+     * @param configuration the additional configuration options for this job
+     * @param <T>           the type of the publisher
+     */
+    public <T extends PostBuildStep> void editPublisher(final Class<T> type, final Consumer<T> configuration) {
+        configure();
+        T publisher = getPublisher(type);
+        configuration.accept(publisher);
+        save();
+    }
+
+    /**
+     * Edits this job using the specified configuration lambda. Opens the job configuration view, runs the specified
+     * configuration lambda and saves the changes.
+     *
+     * @param configuration the additional configuration options for this job
+     */
+    public void edit(final Runnable configuration) {
+        configure();
+        configuration.run();
+        save();
     }
 
     /**
@@ -423,31 +476,5 @@ public class Job extends TopLevelItem {
         open();
         clickLink("Delete Project");
         confirmAlert(2);
-    }
-
-    /**
-     * Edits this job using the specified configuration lambda. Opens the job configuration view, selects the specified
-     * publisher page object, runs the specified configuration lambda, and saves the changes.
-     *
-     * @param publisherClass the publisher to configure
-     * @param configuration  the additional configuration options for this job
-     */
-    public <T  extends PostBuildStep> void edit(final Class<T> publisherClass, final Consumer<T> configuration) {
-        configure();
-        T publisher = getPublisher(publisherClass);
-        configuration.accept(publisher);
-        save();
-    }
-
-    /**
-     * Edits this job using the specified configuration lambda. Opens the job configuration view, runs the specified
-     * configuration lambda and saves the changes.
-     *
-     * @param configuration the additional configuration options for this job
-     */
-    public void edit(final Runnable configuration) {
-        configure();
-        configuration.run();
-        save();
     }
 }
