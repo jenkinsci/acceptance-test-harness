@@ -6,8 +6,6 @@ import org.jenkinsci.test.acceptance.po.Describable;
 
 /**
  * Class for Maven Settings files.
- *
- * @author egutierrez
  */
 @Describable("org.jenkinsci.plugins.configfiles.maven.MavenSettingsConfig")
 public class MavenSettingsConfig extends ProvidedFile {

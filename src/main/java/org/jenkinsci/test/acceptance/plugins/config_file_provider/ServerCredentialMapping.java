@@ -5,8 +5,6 @@ import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 
 /**
  * Class for Server Credentials in Maven Settings files.
- *
- * @author egutierrez
  */
 public class ServerCredentialMapping extends PageAreaImpl {
 
