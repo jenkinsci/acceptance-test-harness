@@ -100,7 +100,7 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
         String s;
         do {
             s = jenkins.runScript("os = Jenkins.instance.clouds[0].openstack; rn = os.runningNodes; if (!rn.empty) { rn.each { os.destroyServer(it) } }; return os.runningNodes.size()");
-        } while ("0".equals(s));
+        } while (!"0".equals(s));
     }
 
     @Test
@@ -253,7 +253,6 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
     private void configureCloudInit(String cloudInitName) {
         ConfigFileProvider fileProvider = new ConfigFileProvider(jenkins);
         UserDataConfig cloudInit = fileProvider.addFile(UserDataConfig.class);
-        cloudInit.open();
         cloudInit.name(CLOUD_INIT_NAME);
         cloudInit.content(resource("/openstack_plugin/" + cloudInitName).asText());
         cloudInit.save();

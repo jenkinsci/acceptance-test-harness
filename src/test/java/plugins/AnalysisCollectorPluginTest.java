@@ -59,62 +59,15 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
     private static final int PMD_HIGH = 0;
     private static final int TASKS_HIGH = 2;
     private static final int WARNINGS_HIGH = 3;
+    private static final int HIGH_COUNT = CHECKSTYLE_HIGH + FINDBUGS_HIGH + PMD_HIGH + TASKS_HIGH + WARNINGS_HIGH;
 
     private static final int CHECKSTYLE_LOW = 0;
     private static final int FINDBUGS_LOW = 0;
     private static final int PMD_LOW = 6;
     private static final int TASKS_LOW = 2;
     private static final int WARNINGS_LOW = 0;
-
-    @Override
-    protected AnalysisCollectorAction createProjectAction(final Job job) {
-        return new AnalysisCollectorAction(job);
-    }
-
-    @Override
-    protected AnalysisCollectorAction createResultAction(final Build build) {
-        return new AnalysisCollectorAction(build);
-    }
-
-    @Override
-    protected FreeStyleJob createFreeStyleJob(final Container owner) {
-        return createJob(ANALYSIS_COLLECTOR_PLUGIN_RESOURCES, true, owner);
-    }
-
-    @Override
-    protected WorkflowJob createPipeline() {
-        WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
-        job.script.set("node {\n"
-                + copyFileToWorkspace(job, "findbugs.xml")
-                + "  step([$class: 'FindBugsPublisher', pattern: '**/findbugs.xml'])\n"
-                + copyFileToWorkspace(job, "pmd.xml")
-                + "  step([$class: 'PmdPublisher'])\n"
-                + copyFileToWorkspace(job, "checkstyle-result.xml")
-                + "  step([$class: 'CheckStylePublisher'])\n"
-                + copyFileToWorkspace(job, "Tasks.java")
-                + copyFileToWorkspace(job, "Tasks2.java")
-                + "  step([$class: 'TasksPublisher', high: 'PRIO1', normal: 'PRIO2,TODO', low :'PRIO3'])\n"
-                + copyFileToWorkspace(job, "warnings.txt")
-                + "  step([$class: 'WarningsPublisher', "
-                + "     parserConfigurations: ["
-                + "             [parserName: 'Java Compiler (javac)', pattern: '**/warnings.txt'],"
-                + "             [parserName: 'JavaDoc Tool', pattern: '**/warnings.txt'],"
-                + "             [parserName: 'MSBuild', pattern: '**/warnings.txt']"
-                + "     ]])\n"
-                + "  step([$class: 'AnalysisPublisher'])\n}");
-        job.sandbox.check();
-        job.save();
-        return job;
-    }
-
-    private String copyFileToWorkspace(final WorkflowJob job, final String fileName) {
-        return job.copyResourceStep(ANALYSIS_COLLECTOR_PLUGIN_RESOURCES + "/" + fileName);
-    }
-
-    @Override
-    protected int getNumberOfWarnings() {
-        return TOTAL;
-    }
+    private static final int LOW_COUNT = CHECKSTYLE_LOW + FINDBUGS_LOW + PMD_LOW + TASKS_LOW + WARNINGS_LOW;
+    private static final int NORMAL_COUNT = TOTAL - LOW_COUNT - HIGH_COUNT;
 
     /**
      * Builds a freestyle job. Verifies that afterwards a trend graph exists for each of the participating plug-ins.
@@ -180,35 +133,7 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
         assertThat(trends.size(), is(expectedCount));
     }
 
-    /**
-     * Verifies that the plugin correctly collects and aggregates the warnings of all participating plugins.
-     */
-    @Test
-    public void should_collect_warnings_of_all_tools() {
-        FreeStyleJob job = createFreeStyleJob();
-
-        Build build = buildSuccessfulJob(job);
-
-        assertThat(job, hasAction("Static Analysis Warnings"));
-        assertThat(build, hasAction("Static Analysis Warnings"));
-
-        AnalysisCollectorAction action = new AnalysisCollectorAction(build);
-        action.open();
-
-        assertThat(action.getNumberOfWarnings(), is(TOTAL));
-        assertThat(action.getNumberOfNewWarnings(), is(TOTAL));
-
-        int high = CHECKSTYLE_HIGH + FINDBUGS_HIGH + PMD_HIGH + TASKS_HIGH + WARNINGS_HIGH;
-        assertThat(action.getNumberOfWarningsWithHighPriority(), is(high));
-
-        int low = CHECKSTYLE_LOW + FINDBUGS_LOW + PMD_LOW + TASKS_LOW + WARNINGS_LOW;
-        assertThat(action.getNumberOfWarningsWithLowPriority(), is(low));
-
-        int normal = TOTAL - low - high;
-        assertThat(action.getNumberOfWarningsWithNormalPriority(), is(normal));
-    }
-
-    /**
+   /**
      * Verifies that the plugin correctly identifies new open tasks. The first build contains 4 open tasks. The second
      * builds adds another 4 open tasks, summing up to a total of 8 open tasks. The second build should then contain 4
      * new warnings.
@@ -246,12 +171,7 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
         job.addPublisher(FindBugsFreestyleSettings.class);
 
         AnalysisCollectorSettings analysis = job.addPublisher(AnalysisCollectorSettings.class);
-        AnalysisConfigurator<AnalysisCollectorSettings> configurator = new AnalysisConfigurator<AnalysisCollectorSettings>() {
-            @Override
-            public void configure(AnalysisCollectorSettings settings) {
-                settings.setBuildUnstableTotalAll("5");
-            }
-        };
+        AnalysisConfigurator<AnalysisCollectorSettings> configurator = settings -> settings.setBuildUnstableTotalAll("5");
         configurator.configure(analysis);
         job.save();
 
@@ -426,6 +346,71 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
         return action;
     }
 
+    @Override
+    protected AnalysisCollectorAction createProjectAction(final Job job) {
+        return new AnalysisCollectorAction(job);
+    }
+
+    @Override
+    protected AnalysisCollectorAction createResultAction(final Build build) {
+        return new AnalysisCollectorAction(build);
+    }
+
+    @Override
+    protected FreeStyleJob createFreeStyleJob(final Container owner) {
+        return createJob(ANALYSIS_COLLECTOR_PLUGIN_RESOURCES, true, owner);
+    }
+
+    @Override
+    protected WorkflowJob createPipeline() {
+        WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
+        job.script.set("node {\n"
+                + copyFileToWorkspace(job, "findbugs.xml")
+                + "  step([$class: 'FindBugsPublisher', pattern: '**/findbugs.xml'])\n"
+                + copyFileToWorkspace(job, "pmd.xml")
+                + "  step([$class: 'PmdPublisher'])\n"
+                + copyFileToWorkspace(job, "checkstyle-result.xml")
+                + "  step([$class: 'CheckStylePublisher'])\n"
+                + copyFileToWorkspace(job, "Tasks.java")
+                + copyFileToWorkspace(job, "Tasks2.java")
+                + "  step([$class: 'TasksPublisher', high: 'PRIO1', normal: 'PRIO2,TODO', low :'PRIO3'])\n"
+                + copyFileToWorkspace(job, "warnings.txt")
+                + "  step([$class: 'WarningsPublisher', "
+                + "     parserConfigurations: ["
+                + "             [parserName: 'Java Compiler (javac)', pattern: '**/warnings.txt'],"
+                + "             [parserName: 'JavaDoc Tool', pattern: '**/warnings.txt'],"
+                + "             [parserName: 'MSBuild', pattern: '**/warnings.txt']"
+                + "     ]])\n"
+                + "  step([$class: 'AnalysisPublisher'])\n}");
+        job.sandbox.check();
+        job.save();
+        return job;
+    }
+
+    private String copyFileToWorkspace(final WorkflowJob job, final String fileName) {
+        return job.copyResourceStep(ANALYSIS_COLLECTOR_PLUGIN_RESOURCES + "/" + fileName);
+    }
+
+    @Override
+    protected int getNumberOfWarnings() {
+        return TOTAL;
+    }
+
+    @Override
+    protected int getNumberOfHighPriorityWarnings() {
+        return HIGH_COUNT;
+    }
+
+    @Override
+    protected int getNumberOfNormalPriorityWarnings() {
+        return NORMAL_COUNT;
+    }
+
+    @Override
+    protected int getNumberOfLowPriorityWarnings() {
+        return LOW_COUNT;
+    }
+
     private FreeStyleJob createFreeStyleJob() {
         return createFreeStyleJob(jenkins);
     }
@@ -454,26 +439,20 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
 
     private void addAndConfigureWarningsPublisher(final FreeStyleJob job) {
         WarningsBuildSettings warningsSettings = job.addPublisher(WarningsBuildSettings.class);
-        AnalysisConfigurator<WarningsBuildSettings> warningsConfigurator = new AnalysisConfigurator<WarningsBuildSettings>() {
-            @Override
-            public void configure(WarningsBuildSettings settings) {
-                settings.addWorkspaceScanner("Java Compiler (javac)", "**/*");
-                settings.addWorkspaceScanner("JavaDoc Tool", "**/*");
-                settings.addWorkspaceScanner("MSBuild", "**/*");
-            }
+        AnalysisConfigurator<WarningsBuildSettings> warningsConfigurator = settings -> {
+            settings.addWorkspaceScanner("Java Compiler (javac)", "**/*");
+            settings.addWorkspaceScanner("JavaDoc Tool", "**/*");
+            settings.addWorkspaceScanner("MSBuild", "**/*");
         };
         warningsConfigurator.configure(warningsSettings);
     }
 
     private void addAndConfigureTasksPublisher(final FreeStyleJob job) {
         TasksFreestyleSettings taskScannerSettings = job.addPublisher(TasksFreestyleSettings.class);
-        AnalysisConfigurator<TasksFreestyleSettings> configurator = new AnalysisConfigurator<TasksFreestyleSettings>() {
-            @Override
-            public void configure(TasksFreestyleSettings settings) {
-                settings.setHighPriorityTags("PRIO1");
-                settings.setNormalPriorityTags("PRIO2,TODO");
-                settings.setLowPriorityTags("PRIO3");
-            }
+        AnalysisConfigurator<TasksFreestyleSettings> configurator = settings -> {
+            settings.setHighPriorityTags("PRIO1");
+            settings.setNormalPriorityTags("PRIO2,TODO");
+            settings.setLowPriorityTags("PRIO3");
         };
         configurator.configure(taskScannerSettings);
     }

@@ -65,66 +65,12 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
     private static final String JAVA_TITLE = JAVA_ID;
     private static final String CLANG_TITLE = "LLVM/Clang Warnings";
 
-    @Override
-    protected WarningsAction createProjectAction(final Job job) {
-        return createJavaProjectAction(job);
-    }
-
-    private WarningsAction createJavaProjectAction(final Job job) {
-        return new WarningsAction(job, "Java", JAVA_TITLE);
-    }
-
-    @Override
-    protected WarningsAction createResultAction(final Build build) {
-        return createJavaResultAction(build);
-    }
-
-    private WarningsAction createJavaResultAction(final Build build) {
-        return new WarningsAction(build, "Java", JAVA_TITLE);
-    }
-
-    @Override
-    protected FreeStyleJob createFreeStyleJob(final Container owner) {
-        FreeStyleJob job = createFreeStyleJob(new AnalysisConfigurator<WarningsBuildSettings>() {
-            @Override
-            public void configure(WarningsBuildSettings settings) {
-                settings.addConsoleParser(JAVA_ID);
-            }
-        }, owner);
-        catWarningsToConsole(job);
-        return job;
-    }
-
-    @Override
-    protected WorkflowJob createPipeline() {
-        WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
-        job.script.set("node {\n"
-                + job.copyResourceStep(SEVERAL_PARSERS_FILE_FULL_PATH)
-                + "  step([$class: 'WarningsPublisher', "
-                + "     parserConfigurations: ["
-                + "             [parserName: 'Java Compiler (javac)', pattern: '**/warningsAll.txt'],"
-                + "     ]])\n}");
-        job.sandbox.check();
-        job.save();
-        return job;
-    }
-
-    @Override
-    protected int getNumberOfWarnings() {
-        return 131;
-    }
-
     /**
      * Verifies that providing a wrong URL to the detail factories should navigate to the top-level page.
      */
     @Test @Issue("JENKINS-37195")
     public void should_handle_invalid_ulr_gracefully() {
-        FreeStyleJob job = createFreeStyleJob(new AnalysisConfigurator<WarningsBuildSettings>() {
-            @Override
-            public void configure(WarningsBuildSettings settings) {
-                settings.addConsoleParser(JAVA_ID);
-            }
-        });
+        FreeStyleJob job = createFreeStyleJob(settings -> settings.addConsoleParser(JAVA_ID));
         catWarningsToConsole(job);
         buildSuccessfulJob(job);
 
@@ -245,13 +191,10 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
      */
     @Test @Issue("JENKINS-34157") @WithPlugins("envinject")
     public void should_resolve_environment_variables() {
-        FreeStyleJob job = createFreeStyleJob(RESOURCES + "jenkins-32150", new AnalysisConfigurator<WarningsBuildSettings>() {
-            @Override
-            public void configure(WarningsBuildSettings settings) {
-                settings.addWorkspaceScanner(CLANG_ID, "${ENV_PREFIX}/${PARAMETER}");
-                settings.addWorkspaceScanner(JAVA_TITLE, "${BUILD_NUMBER}/nothing");
-                settings.addWorkspaceScanner(JAVA_DOC_ID, "${BUILD_NUMBER}_${Reference}\\ND4\\ReleaseTools\\Build\\Log\\warning.log");
-            }
+        FreeStyleJob job = createFreeStyleJob(RESOURCES + "jenkins-32150", settings -> {
+            settings.addWorkspaceScanner(CLANG_ID, "${ENV_PREFIX}/${PARAMETER}");
+            settings.addWorkspaceScanner(JAVA_TITLE, "${BUILD_NUMBER}/nothing");
+            settings.addWorkspaceScanner(JAVA_DOC_ID, "${BUILD_NUMBER}_${Reference}\\ND4\\ReleaseTools\\Build\\Log\\warning.log");
         });
 
         job.configure();
@@ -287,15 +230,12 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
      */
     @Test @Issue("JENKINS-33582") @WithPlugins("multi-branch-project-plugin")
     public void should_find_warnings_in_multi_branch_project() {
-        setupJob(SEVERAL_PARSERS_FILE_FULL_PATH, FreeStyleMultiBranchJob.class,
-                WarningsBuildSettings.class, new AnalysisConfigurator<WarningsBuildSettings>() {
-                    @Override
-                    public void configure(WarningsBuildSettings settings) {
-                        settings.addWorkspaceScanner(JAVA_TITLE, "**/*");
-                        settings.addWorkspaceScanner(MS_BUILD_ID, "**/*");
-                        settings.addWorkspaceScanner(JAVA_DOC_ID, "**/*");
-                    }
-                }, jenkins);
+        setupJob(SEVERAL_PARSERS_FILE_FULL_PATH, FreeStyleMultiBranchJob.class, WarningsBuildSettings.class,
+                jenkins, settings -> {
+                    settings.addWorkspaceScanner(JAVA_TITLE, "**/*");
+                    settings.addWorkspaceScanner(MS_BUILD_ID, "**/*");
+                    settings.addWorkspaceScanner(JAVA_DOC_ID, "**/*");
+                });
 
         // TODO: run a build and verify the results
     }
@@ -306,12 +246,9 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
      */
     @Test @Issue("JENKINS-32150") @WithPlugins("analysis-core@1.76")
     public void should_resolve_workspace_files() {
-        FreeStyleJob job = createFreeStyleJob(RESOURCES + "jenkins-32150", new AnalysisConfigurator<WarningsBuildSettings>() {
-            @Override
-            public void configure(WarningsBuildSettings settings) {
-                settings.addWorkspaceScanner(CLANG_ID, "**/compile-log.txt");
-                settings.setCanResolveRelativePaths(true);
-            }
+        FreeStyleJob job = createFreeStyleJob(RESOURCES + "jenkins-32150", settings -> {
+            settings.addWorkspaceScanner(CLANG_ID, "**/compile-log.txt");
+            settings.setCanResolveRelativePaths(true);
         });
 
         Build build = buildSuccessfulJob(job);
@@ -386,13 +323,8 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
     @Test @Issue({"JENKINS-11225", "JENKINS-26913"}) @Ignore("Reactivate if JENKINS-31431 has been fixed")
     public void should_report_warnings_per_axis() {
         String file = "matrix-warnings.txt";
-        MatrixProject job = setupJob(RESOURCES + file, MatrixProject.class,
-                WarningsBuildSettings.class, new AnalysisConfigurator<WarningsBuildSettings>() {
-                    @Override
-                    public void configure(WarningsBuildSettings settings) {
-                        settings.addConsoleParser("GNU C Compiler 4 (gcc)");
-                    }
-                }, jenkins);
+        MatrixProject job = setupJob(RESOURCES + file, MatrixProject.class, WarningsBuildSettings.class, jenkins,
+                settings -> settings.addConsoleParser("GNU C Compiler 4 (gcc)"));
 
         job.configure();
         job.addUserAxis("user_axis", "one two three");
@@ -461,22 +393,16 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
     public void should_send_mail_with_expanded_tokens() {
         setUpMailer();
 
-        FreeStyleJob job = createFreeStyleJob(new AnalysisConfigurator<WarningsBuildSettings>() {
-            @Override
-            public void configure(WarningsBuildSettings settings) {
-                settings.addWorkspaceScanner(JAVA_TITLE, "**/*");
-                settings.addWorkspaceScanner(MS_BUILD_ID, "**/*");
-            }
+        FreeStyleJob job = createFreeStyleJob(settings -> {
+            settings.addWorkspaceScanner(JAVA_TITLE, "**/*");
+            settings.addWorkspaceScanner(MS_BUILD_ID, "**/*");
         });
         buildSuccessfulJob(job);
 
-        editJob(job, WarningsBuildSettings.class, new AnalysisConfigurator<WarningsBuildSettings>() {
-            @Override
-            public void configure(WarningsBuildSettings settings) {
-                settings.addWorkspaceScanner(JAVA_DOC_ID, "**/*");
-                settings.setExcludePattern(".*Catalyst.*");
-                settings.setBuildFailedTotalAll("0");
-            }
+        editJob(job, WarningsBuildSettings.class, settings -> {
+            settings.addWorkspaceScanner(JAVA_DOC_ID, "**/*");
+            settings.setExcludePattern(".*Catalyst.*");
+            settings.setBuildFailedTotalAll("0");
         });
         configureEmailNotification(job, "Warnings: ${WARNINGS_RESULT}",
                 "Warnings: ${WARNINGS_COUNT}-${WARNINGS_FIXED}-${WARNINGS_NEW}");
@@ -486,36 +412,14 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         verifyReceivedMail("Warnings: FAILURE", "Warnings: 142-12-8");
     }
 
-    private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<WarningsBuildSettings> buildConfigurator) {
-        return createFreeStyleJob(SEVERAL_PARSERS_FILE_FULL_PATH, buildConfigurator);
-    }
-
-    private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<WarningsBuildSettings> buildConfigurator,
-            final Container owner) {
-        return createFreeStyleJob(SEVERAL_PARSERS_FILE_FULL_PATH, buildConfigurator, owner);
-    }
-
-    private FreeStyleJob createFreeStyleJob(final String resourceToCopy,
-            final AnalysisConfigurator<WarningsBuildSettings> buildConfigurator) {
-        return createFreeStyleJob(resourceToCopy, buildConfigurator, jenkins);
-    }
-
-    private FreeStyleJob createFreeStyleJob(final String resourceToCopy,
-            final AnalysisConfigurator<WarningsBuildSettings> buildConfigurator, final Container owner) {
-        return setupJob(resourceToCopy, FreeStyleJob.class, WarningsBuildSettings.class, buildConfigurator, owner);
-    }
-
     /**
      * Checks that no warnings are reported if the build does nothing.
      */
     @Test
     public void should_detect_no_errors_in_console_log_and_workspace_when_there_are_none() {
-        FreeStyleJob job = createNoFilesFreeStyleJob(new AnalysisConfigurator<WarningsBuildSettings>() {
-            @Override
-            public void configure(WarningsBuildSettings settings) {
-                settings.addConsoleParser("Maven");
-                settings.addWorkspaceScanner(JAVA_TITLE, "**/*");
-            }
+        FreeStyleJob job = createNoFilesFreeStyleJob(settings -> {
+            settings.addConsoleParser("Maven");
+            settings.addWorkspaceScanner(JAVA_TITLE, "**/*");
         });
 
         Build build = buildSuccessfulJob(job);
@@ -538,12 +442,8 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
      */
     @Test
     public void should_not_detect_errors_in_ignored_parts_of_the_workspace() {
-        FreeStyleJob job = createNoFilesFreeStyleJob(new AnalysisConfigurator<WarningsBuildSettings>() {
-            @Override
-            public void configure(WarningsBuildSettings settings) {
-                settings.addWorkspaceScanner("Maven", "no_errors_here.log");
-            }
-        });
+        FreeStyleJob job = createNoFilesFreeStyleJob(
+                settings -> settings.addWorkspaceScanner("Maven", "no_errors_here.log"));
 
         job.configure();
         job.addShellStep("mvn clean install > errors.log || true");
@@ -577,7 +477,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
 
     private MatrixProject createMatrixProject() {
         return setupJob(SEVERAL_PARSERS_FILE_FULL_PATH, MatrixProject.class,
-                WarningsBuildSettings.class, create3ParserConfiguration(), jenkins);
+                WarningsBuildSettings.class, jenkins, create3ParserConfiguration());
     }
 
     private void assertValidLink(final String jobName) {
@@ -609,27 +509,6 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
     }
 
     /**
-     * Runs a job with warning threshold configured once and validates that build is marked as unstable.
-     */
-    @Test @Issue("19614")
-    public void should_set_build_to_unstable_if_total_warnings_threshold_set() {
-        FreeStyleJob job = createFreeStyleJob(new AnalysisConfigurator<WarningsBuildSettings>() {
-            @Override
-            public void configure(WarningsBuildSettings settings) {
-                settings.addConsoleParser(JAVA_TITLE);
-                settings.addConsoleParser(JAVA_DOC_ID);
-                settings.addConsoleParser(MS_BUILD_ID);
-                settings.setBuildUnstableTotalAll("0");
-                settings.setNewWarningsThresholdFailed("0");
-                settings.setUseDeltaValues(true);
-            }
-        });
-
-        catWarningsToConsole(job);
-        buildUnstableJob(job);
-    }
-
-    /**
      * Checks that warning results are correctly created for a freestyle project with the parsers "Java", "JavaDoc" and
      * "MSBuild" if the console log contains multiple warnings of these types.
      */
@@ -642,40 +521,16 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         verify3ParserResults(job, 1);
     }
 
-    private FreeStyleJob createFreeStyleJobWith3Parsers() {
-        return createFreeStyleJob(create3ParserConfiguration());
-    }
-
-    private void catWarningsToConsole(final Job job) {
-        job.configure();
-        job.addShellStep("cat " + SEVERAL_PARSERS_FILE_NAME);
-        job.save();
-    }
-
-    private AnalysisConfigurator<WarningsBuildSettings> create3ParserConfiguration() {
-        return new AnalysisConfigurator<WarningsBuildSettings>() {
-            @Override
-            public void configure(WarningsBuildSettings settings) {
-                settings.addConsoleParser(JAVA_TITLE);
-                settings.addConsoleParser(JAVA_DOC_ID);
-                settings.addConsoleParser(MS_BUILD_ID);
-            }
-        };
-    }
-
     /**
      * Checks that warning results are correctly created for the workspace parsers "Java", "JavaDoc" and "MSBuild" if a
      * file with multiple warnings of these types is copied to the workspace.
      */
     @Test
     public void should_detect_warnings_of_multiple_compilers_in_workspace() {
-        FreeStyleJob job = createFreeStyleJob(new AnalysisConfigurator<WarningsBuildSettings>() {
-            @Override
-            public void configure(WarningsBuildSettings settings) {
-                settings.addWorkspaceScanner(JAVA_TITLE, "**/*");
-                settings.addWorkspaceScanner(JAVA_DOC_ID, "**/*");
-                settings.addWorkspaceScanner(MS_BUILD_ID, "**/*");
-            }
+        FreeStyleJob job = createFreeStyleJob(settings -> {
+            settings.addWorkspaceScanner(JAVA_TITLE, "**/*");
+            settings.addWorkspaceScanner(JAVA_DOC_ID, "**/*");
+            settings.addWorkspaceScanner(MS_BUILD_ID, "**/*");
         });
 
         verify3ParserResults(job, 1);
@@ -730,12 +585,9 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
     }
 
     private FreeStyleJob runBuildWithRunAlwaysOption(final boolean canRunOnFailed) {
-        FreeStyleJob job = createFreeStyleJob(new AnalysisConfigurator<WarningsBuildSettings>() {
-            @Override
-            public void configure(WarningsBuildSettings settings) {
-                settings.addWorkspaceScanner(JAVA_TITLE, "**/*");
-                settings.setCanRunOnFailed(canRunOnFailed);
-            }
+        FreeStyleJob job = createFreeStyleJob(settings -> {
+            settings.addWorkspaceScanner(JAVA_TITLE, "**/*");
+            settings.setCanRunOnFailed(canRunOnFailed);
         });
 
         job.configure();
@@ -751,12 +603,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
      */
     @Test
     public void should_detect_errors_in_console_log() {
-        FreeStyleJob job = createNoFilesFreeStyleJob(new AnalysisConfigurator<WarningsBuildSettings>() {
-            @Override
-            public void configure(WarningsBuildSettings settings) {
-                settings.addConsoleParser("Maven");
-            }
-        });
+        FreeStyleJob job = createNoFilesFreeStyleJob(settings -> settings.addConsoleParser("Maven"));
 
         job.configure();
         job.addShellStep("mvn clean install || true");
@@ -793,13 +640,10 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
      */
     @Test
     public void should_skip_warnings_in_ignored_parts() {
-        FreeStyleJob job = createFreeStyleJob(WARNINGS_FILE_FOR_INCLUDE_EXCLUDE_TESTS, new AnalysisConfigurator<WarningsBuildSettings>() {
-            @Override
-            public void configure(WarningsBuildSettings settings) {
-                settings.addWorkspaceScanner(JAVA_TITLE, "**/*");
-                settings.setIncludePattern(".*/.*");
-                settings.setExcludePattern(".*/ignore1/.*, .*/ignore2/.*, .*/default/.*");
-            }
+        FreeStyleJob job = createFreeStyleJob(WARNINGS_FILE_FOR_INCLUDE_EXCLUDE_TESTS, settings -> {
+            settings.addWorkspaceScanner(JAVA_TITLE, "**/*");
+            settings.setIncludePattern(".*/.*");
+            settings.setExcludePattern(".*/ignore1/.*, .*/ignore2/.*, .*/default/.*");
         });
 
         Build build = buildSuccessfulJob(job);
@@ -818,12 +662,9 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
      */
     @Test
     public void should_include_warnings_specified_in_included_parts() {
-        FreeStyleJob job = createFreeStyleJob(WARNINGS_FILE_FOR_INCLUDE_EXCLUDE_TESTS, new AnalysisConfigurator<WarningsBuildSettings>() {
-            @Override
-            public void configure(WarningsBuildSettings settings) {
-                settings.addWorkspaceScanner(JAVA_TITLE, "**/*");
-                settings.setIncludePattern(".*/include*/.*, .*/default/.*");
-            }
+        FreeStyleJob job = createFreeStyleJob(WARNINGS_FILE_FOR_INCLUDE_EXCLUDE_TESTS, settings -> {
+            settings.addWorkspaceScanner(JAVA_TITLE, "**/*");
+            settings.setIncludePattern(".*/include*/.*, .*/default/.*");
         });
         Build build = buildSuccessfulJob(job);
         assertThatActionExists(job, build, "Java Warnings");
@@ -841,5 +682,101 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         assertThat(action.getNumberOfWarningsWithHighPriority(), is(0));
         assertThat(action.getNumberOfWarningsWithNormalPriority(), is(5));
         assertThat(action.getNumberOfWarningsWithLowPriority(), is(0));
+    }
+
+    @Override
+    protected WarningsAction createProjectAction(final Job job) {
+        return createJavaProjectAction(job);
+    }
+
+    private WarningsAction createJavaProjectAction(final Job job) {
+        return new WarningsAction(job, "Java", JAVA_TITLE);
+    }
+
+    @Override
+    protected WarningsAction createResultAction(final Build build) {
+        return createJavaResultAction(build);
+    }
+
+    private WarningsAction createJavaResultAction(final Build build) {
+        return new WarningsAction(build, "Java", JAVA_TITLE);
+    }
+
+    @Override
+    protected FreeStyleJob createFreeStyleJob(final Container owner) {
+        FreeStyleJob job = createFreeStyleJob(settings -> settings.addConsoleParser(JAVA_ID), owner);
+        catWarningsToConsole(job);
+        return job;
+    }
+
+    private FreeStyleJob createFreeStyleJobWith3Parsers() {
+        return createFreeStyleJob(create3ParserConfiguration());
+    }
+
+    private void catWarningsToConsole(final Job job) {
+        job.configure();
+        job.addShellStep("cat " + SEVERAL_PARSERS_FILE_NAME);
+        job.save();
+    }
+
+    private AnalysisConfigurator<WarningsBuildSettings> create3ParserConfiguration() {
+        return settings -> {
+            settings.addConsoleParser(JAVA_TITLE);
+            settings.addConsoleParser(JAVA_DOC_ID);
+            settings.addConsoleParser(MS_BUILD_ID);
+        };
+    }
+
+    @Override
+    protected WorkflowJob createPipeline() {
+        WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
+        job.script.set("node {\n"
+                + job.copyResourceStep(SEVERAL_PARSERS_FILE_FULL_PATH)
+                + "  step([$class: 'WarningsPublisher', "
+                + "     parserConfigurations: ["
+                + "             [parserName: 'Java Compiler (javac)', pattern: '**/warningsAll.txt'],"
+                + "     ]])\n}");
+        job.sandbox.check();
+        job.save();
+        return job;
+    }
+
+    @Override
+    protected int getNumberOfWarnings() {
+        return 131;
+    }
+
+    @Override
+    protected int getNumberOfHighPriorityWarnings() {
+        return 0;
+    }
+
+    @Override
+    protected int getNumberOfNormalPriorityWarnings() {
+        return JAVA_COUNT;
+    }
+
+    @Override
+    protected int getNumberOfLowPriorityWarnings() {
+        return 0;
+    }
+
+    private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<WarningsBuildSettings> buildConfigurator) {
+        return createFreeStyleJob(SEVERAL_PARSERS_FILE_FULL_PATH, buildConfigurator);
+    }
+
+    private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<WarningsBuildSettings> buildConfigurator,
+            final Container owner) {
+        return createFreeStyleJob(SEVERAL_PARSERS_FILE_FULL_PATH, buildConfigurator, owner);
+    }
+
+    private FreeStyleJob createFreeStyleJob(final String resourceToCopy,
+            final AnalysisConfigurator<WarningsBuildSettings> buildConfigurator) {
+        return createFreeStyleJob(resourceToCopy, buildConfigurator, jenkins);
+    }
+
+    private FreeStyleJob createFreeStyleJob(final String resourceToCopy,
+            final AnalysisConfigurator<WarningsBuildSettings> buildConfigurator, final Container owner) {
+        return setupJob(resourceToCopy, FreeStyleJob.class, WarningsBuildSettings.class, owner, buildConfigurator);
     }
 }

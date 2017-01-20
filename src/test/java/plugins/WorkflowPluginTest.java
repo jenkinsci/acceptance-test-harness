@@ -210,7 +210,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         repo.transferToDockerContainer(host, port);
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
         job.script.set(
-            "node {ws('" + tmp.getRoot() + "') {\n" + // TODO UNIX_PATH_MAX workaround
+            "node {ws('" + tmp.getRoot() + "') {\n" + // TODO JENKINS-36997 workaround
             "  docker.image('cloudbees/java-build-tools').inside {\n" +
             "    git url: '" + container.getRepoUrlInsideDocker() + "', credentialsId: 'gitcreds'\n" +
             "    sh 'mkdir ~/.ssh && echo StrictHostKeyChecking no > ~/.ssh/config'\n" +
