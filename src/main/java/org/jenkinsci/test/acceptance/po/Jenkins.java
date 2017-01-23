@@ -71,7 +71,7 @@ public class Jenkins extends Node implements Container {
         String text;
         try {
             URLConnection urlConnection = url.openConnection();
-            text = urlConnection.getHeaderField("X-Jenkin");
+            text = urlConnection.getHeaderField("X-Jenkins");
             if (text == null) {
 
                 String pageText = IOUtils.toString(urlConnection.getInputStream());
