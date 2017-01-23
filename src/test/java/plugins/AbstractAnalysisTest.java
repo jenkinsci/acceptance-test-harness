@@ -92,11 +92,12 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
         FreeStyleJob job = createFreeStyleJob();
 
         P projectAction = createProjectAction(job);
-        job.edit(projectAction.getFreeStyleSettings(),
+        job.editPublisher(projectAction.getFreeStyleSettings(),
                 settings -> settings.setBuildFailedTotalAll("0"));
 
         String name = projectAction.getUrl().toUpperCase();
         String title = "Analysis-Result";
+
         configureEmailNotification(job, String.format("%s: ${%s_RESULT}", title, name),
                 String.format("%s: ${%s_COUNT}-${%s_FIXED}-${%s_NEW}", title, name, name, name));
 
@@ -114,7 +115,7 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
         // TODO: Test multiple variants for thresholds new/all failed/unstable first-build/subsequent-build
         FreeStyleJob job = createFreeStyleJob();
 
-        job.edit(getFreeStyleSettingsFor(job), settings -> {
+        job.editPublisher(getFreeStyleSettingsFor(job), settings -> {
             settings.setBuildUnstableTotalAll("0");
             settings.setNewWarningsThresholdFailed("0");
             settings.setUseDeltaValues(true);
@@ -219,7 +220,7 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
         FreeStyleJob job = createFreeStyleJob();
 
         AnalysisAction projectAction = createProjectAction(job);
-        job.edit(projectAction.getFreeStyleSettings(), settings -> {
+        job.editPublisher(projectAction.getFreeStyleSettings(), settings -> {
             settings.setBuildHealthyThreshold(0);
             settings.setBuildUnhealthyThreshold(getNumberOfWarnings());
         });
@@ -555,11 +556,13 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      * @param body    body of the mail
      */
     protected void configureEmailNotification(final FreeStyleJob job, final String subject, final String body) {
-        job.edit(EmailExtPublisher.class, (publisher) -> {
-            publisher.subject.set(subject);
-            publisher.setRecipient("dev@example.com");
-            publisher.body.set(body);
-        });
+        // TODO: add a new job method that adds a publisher with configuration
+        job.edit(() ->
+            job.addPublisher(EmailExtPublisher.class, publisher -> {
+                publisher.subject.set(subject);
+                publisher.setRecipient("dev@example.com");
+                publisher.body.set(body);
+                }));
     }
 
     /**
@@ -578,6 +581,22 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
         catch (IOException e) {
             throw new IllegalStateException("Mailer exception", e);
         }
+    }
+
+    /**
+     * Create a new freestyle job with a given resource and a publisher which can be configured by providing a
+     * configurator.
+     *
+     * @param resourceToCopy Resource to copy to build (Directory or File path)
+     * @param publisherClass the type of the publisher to be added
+     * @param owner          the owner of the job
+     * @param configurator   the configuration of the publisher
+     * @return the new job
+     */
+    public <T extends AnalysisSettings & PostBuildStep> FreeStyleJob createFreestyleJob(
+            final String resourceToCopy, final Container owner, Class<T> publisherClass,
+            AnalysisConfigurator<T> configurator) {
+        return setupJob(resourceToCopy, FreeStyleJob.class, publisherClass, null, owner, configurator);
     }
 
     /**
