@@ -17,9 +17,9 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertThat;
 
 /**
- * Tests config-file-provider plugin inside a Pipeline. 2.15.5 includes a major refactor as well as some bug fixes
+ * Tests config-file-provider plugin inside a Pipeline.
  */
-@WithPlugins({"config-file-provider@2.15.5", "workflow-job", "workflow-cps", "workflow-basic-steps", "workflow-durable-task-step"})
+@WithPlugins({"config-file-provider", "workflow-job", "workflow-cps", "workflow-basic-steps", "workflow-durable-task-step"})
 public class ConfigFileProviderTest extends AbstractJUnitTest {
 
     private static final String CRED_ID = "credId";
@@ -53,7 +53,6 @@ public class ConfigFileProviderTest extends AbstractJUnitTest {
 
     private MavenSettingsConfig createMavenSettingsConfig(final String serverId, final String credId) {
         final MavenSettingsConfig mvnConfig = new ConfigFileProvider(jenkins).addFile(MavenSettingsConfig.class);
-        mvnConfig.open();
 
         mvnConfig.content(String.format("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                 "<settings xmlns=\"http://maven.apache.org/SETTINGS/1.0.0\" \n" +

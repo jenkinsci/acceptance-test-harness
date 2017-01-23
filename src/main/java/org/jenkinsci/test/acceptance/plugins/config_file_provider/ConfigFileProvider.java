@@ -32,7 +32,7 @@ public class ConfigFileProvider extends PageObject {
     public ConfigFileProvider(Jenkins jenkins) {
         super(jenkins, jenkins.url("configfiles/"));
     }
-    
+
     public ConfigFileProvider(Folder f) {
         super(f, f.url("configfiles/"));
     }
