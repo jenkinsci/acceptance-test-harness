@@ -23,8 +23,7 @@
  */
 package org.jenkinsci.test.acceptance.plugins.config_file_provider;
 
-import java.net.URL;
-
+import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.PageObject;
 
 /**
@@ -34,11 +33,33 @@ import org.jenkinsci.test.acceptance.po.PageObject;
  */
 public abstract class ProvidedFile extends PageObject {
 
-    public ProvidedFile(ConfigFileProvider context, URL url) {
-        super(context, url);
+    private final String fileId;
+
+    public final Control id = control("/config/id");
+    public final Control name = control("/config/name");
+    public final Control content = control("/config/content");
+
+    public ProvidedFile(ConfigFileProvider context, String id) {
+        super(context, context.url("editConfig?id=" + id));
+        this.fileId = id;
+    }
+
+    public String id() {
+        return this.fileId;
+    }
+
+    public void name(String string) {
+        this.name.set(string);
     }
 
     public void save() {
         clickButton("Submit");
     }
+
+    public void remove() {
+        visit(url("removeConfig?id=" + this.fileId));
+    }
+
+    public abstract void content(String content);
+
 }

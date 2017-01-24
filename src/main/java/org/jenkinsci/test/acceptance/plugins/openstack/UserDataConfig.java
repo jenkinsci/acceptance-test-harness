@@ -32,15 +32,11 @@ import org.jenkinsci.test.acceptance.po.Describable;
 public class UserDataConfig extends ProvidedFile {
 
     public UserDataConfig(ConfigFileProvider context, String id) {
-        super(context, context.url("editConfig?id=" + id));
+        super(context, id);
     }
 
-    public void name(String string) {
-        control("/config/name").set(string);
-    }
-
-    public void content(String string) {
-        //driver.findElement(by.path("/config/content")).sendKeys(string);
-        new CodeMirror(this, "/config/content").set(string);
+    @Override
+    public void content(String content) {
+        new CodeMirror(this, "/config/content").set(content);
     }
 }
