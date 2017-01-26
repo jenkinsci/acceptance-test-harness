@@ -90,4 +90,6 @@ public abstract class TopLevelItem extends ContainerPageObject {
     public int hashCode() {
         return url.toExternalForm().hashCode();
     }
+
+    public abstract void delete();
 }
