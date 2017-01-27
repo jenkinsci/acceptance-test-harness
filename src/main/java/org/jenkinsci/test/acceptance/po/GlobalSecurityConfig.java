@@ -34,6 +34,8 @@ import org.openqa.selenium.WebElement;
  */
 public class GlobalSecurityConfig extends ContainerPageObject {
 
+    private static final String SAFE_HTML = "Safe HTML";
+
     public GlobalSecurityConfig(Jenkins context) {
         super(context, context.url("configureSecurity/"));
     }
@@ -61,6 +63,14 @@ public class GlobalSecurityConfig extends ContainerPageObject {
         });
 
         return newInstance(type, this, path);
+    }
+
+    public void selectSafeHtmlFormatter() {
+        this.selectMarkupFormatter(SAFE_HTML);
+    }
+
+    private void selectMarkupFormatter(final String formatter) {
+        find(by.option(formatter)).click();
     }
 
 
