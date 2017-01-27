@@ -145,11 +145,11 @@ public class FolderPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     * Test scenario to validate credentials and properties scoped in folders.
+     * Test scenario to validate credentials scoped in folders.
      */
     @Test
     @WithPlugins({ "credentials", "credentials-binding", "workflow-job", "workflow-cps", "workflow-basic-steps", "workflow-durable-task-step" })
-    public void credsAndPropertiesTest() {
+    public void credsTest() {
         final Folder folder = jenkins.jobs.create(Folder.class, F01);
         final FreeStyleJob job1 = folder.getJobs().create(FreeStyleJob.class, JOB1);
 
@@ -161,7 +161,6 @@ public class FolderPluginTest extends AbstractJUnitTest {
 
         final String console = job2.startBuild().shouldSucceed().getConsole();
         assertThat(console, containsRegexp(CRED_INJECTED_MESSAGE));
-        assertThat(console, containsRegexp(PROPERTY_VALUE));
 
         job1.delete();
         this.checkItemExists(job1, false);
@@ -212,21 +211,15 @@ public class FolderPluginTest extends AbstractJUnitTest {
     }
 
     private WorkflowJob createWorkflowJob(final Folder f) {
-        // Create folder property
-        final Map<String, String> fEnvVbles = new HashMap<>();
-        fEnvVbles.put(PROPERTY_NAME, PROPERTY_VALUE);
-        f.setEnvironmentalVariables(fEnvVbles);
-
         // Create folder credentials
         this.createCredentials(f);
 
         final String script = String.format("node {\n" +
                 "    withCredentials([usernamePassword(credentialsId: '%s', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {\n" +
-                "        sh '[ \\\"$USERNAME\\\" = \\\"%s\\\" ] && [ \\\"$PASSWORD\\\" = \\\"%s\\\" ] && echo \\\"%s\\\"'\n" +
-                "        sh 'echo $%s'\n" +
+                "        sh '[ \"$USERNAME\" = \"%s\" ] && [ \"$PASSWORD\" = \"%s\" ] && echo \"%s\"'\n" +
                 "    }\n" +
                 "}",
-                CRED_ID, CRED_USER, CRED_PASS, CRED_INJECTED_MESSAGE, PROPERTY_NAME);
+                CRED_ID, CRED_USER, CRED_PASS, CRED_INJECTED_MESSAGE);
 
         final WorkflowJob job = f.getJobs().create(WorkflowJob.class, JOB2);
         job.script.set(script);
