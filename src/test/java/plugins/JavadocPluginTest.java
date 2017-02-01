@@ -72,7 +72,7 @@ public class JavadocPluginTest extends AbstractJUnitTest {
     }
 
     private void setupForRetention(Job job) {
-        job.edit(JavadocPublisher.class, (publisher) -> {
+        job.editPublisher(JavadocPublisher.class, (publisher) -> {
             job.removeFirstBuildStep();
             publisher.keepAll.check();
         });

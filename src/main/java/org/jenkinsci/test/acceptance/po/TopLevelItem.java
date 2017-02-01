@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.inject.Injector;
+import org.openqa.selenium.WebElement;
 
 /**
  * Super class for top level items. 
@@ -54,6 +55,27 @@ public abstract class TopLevelItem extends ContainerPageObject {
         catch (MalformedURLException e) {
             throw new AssertionError("Not a valid url: " + newName, e);
         }
+    }
+
+    /**
+     * Renames the job. Opens the configuration section, sets the name and saves the form. Finally the rename is
+     * confirmed.
+     *
+     * @param description the description of the job
+     * @param withCodeMirror if description field uses CodeMirror or not (depending on Markup Formatter)
+     */
+    public void description(final String description, final boolean withCodeMirror) {
+        configure();
+
+        if (withCodeMirror) {
+            new CodeMirror(this, "/description").set(description);
+        } else {
+            WebElement descrElem = find(by.name("description"));
+            descrElem.clear();
+            descrElem.sendKeys(description);
+        }
+
+        save();
     }
 
     /**
