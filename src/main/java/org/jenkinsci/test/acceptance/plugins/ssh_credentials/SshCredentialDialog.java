@@ -48,14 +48,11 @@ public class SshCredentialDialog extends PageAreaImpl {
 
         this.findAndPerformClick(addSubmitButton);
 
-        waitFor().withTimeout(5, TimeUnit.SECONDS).until(new Callable<Boolean>() {
-            @Override
-            public Boolean call() throws Exception {
-                try {
-                    return !find(addSubmitButton).isDisplayed();
-                } catch (final NoSuchElementException | StaleElementReferenceException ex) {
-                    return true;
-                }
+        waitFor().withTimeout(5, TimeUnit.SECONDS).until(() -> {
+            try {
+                return !find(addSubmitButton).isDisplayed();
+            } catch (final NoSuchElementException | StaleElementReferenceException ex) {
+                return true;
             }
         });
     }
