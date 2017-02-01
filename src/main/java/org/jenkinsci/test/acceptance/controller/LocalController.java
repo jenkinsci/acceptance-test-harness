@@ -253,11 +253,20 @@ public abstract class LocalController extends JenkinsController implements LogLi
                 cause.printStackTrace(out);
             }
             out.println("Commencing interactive debugging. Browser session was kept open.");
-            out.println("Press return to proceed.");
-            try {
-                new BufferedReader(new InputStreamReader(System.in)).readLine();
-            } catch (IOException e) {
-                throw new Error(e);
+            // Broken in current surefire
+//            out.println("Press return to proceed.");
+//            try {
+//                new BufferedReader(new InputStreamReader(System.in)).readLine();
+//            } catch (IOException e) {
+//                throw new Error(e);
+//            }
+
+            synchronized (this) {
+                try {
+                    this.wait();
+                } catch (InterruptedException e) {
+                    return;
+                }
             }
         }
 
