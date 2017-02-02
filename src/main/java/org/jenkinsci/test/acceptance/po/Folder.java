@@ -21,7 +21,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 package org.jenkinsci.test.acceptance.po;
 
 import java.net.URL;
@@ -51,6 +50,12 @@ public class Folder extends TopLevelItem implements Container {
     public Folder(final Injector injector, final URL url, final String name) {
         super(injector, url, name);
 
+        jobs = new JobsMixIn(this);
+        views = new ViewsMixIn(this);
+    }
+
+    public Folder(PageObject context, URL url, String name) {
+        super(context, url, name);
         jobs = new JobsMixIn(this);
         views = new ViewsMixIn(this);
     }

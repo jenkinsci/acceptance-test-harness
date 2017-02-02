@@ -36,9 +36,7 @@ import org.jenkinsci.test.acceptance.po.*;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.jenkinsci.test.acceptance.Matchers.containsRegexp;
 import static org.junit.Assert.assertEquals;
@@ -60,9 +58,6 @@ public class FolderPluginTest extends AbstractJUnitTest {
     /** Test job names. */
     private static final String JOB1 = "job1";
     private static final String JOB2 = "job2";
-    /** Test properties data. */
-    private final static String PROPERTY_NAME = "myProperty";
-    private final static String PROPERTY_VALUE = "myValue";
     /** Credential data. */
     private final static String CRED_ID = "mycreds";
     private final static String CRED_USER = "myUser";
@@ -211,7 +206,6 @@ public class FolderPluginTest extends AbstractJUnitTest {
     }
 
     private WorkflowJob createWorkflowJob(final Folder f) {
-        // Create folder credentials
         this.createCredentials(f);
 
         final String script = String.format("node {\n" +

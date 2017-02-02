@@ -23,10 +23,6 @@
  */
 package core;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
@@ -35,8 +31,12 @@ import org.jenkinsci.test.acceptance.po.User;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.print.attribute.standard.MediaSize;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
+
+@WithPlugins("mailer")
 public class JenkinsDatabaseSecurityRealmTest extends AbstractJUnitTest {
 
     private static final String EMAIL = "jatu@gmail.com";
@@ -54,7 +54,7 @@ public class JenkinsDatabaseSecurityRealmTest extends AbstractJUnitTest {
         security.save();
     }
 
-    @Test @WithPlugins("mailer") // email support
+    @Test
     public void login_and_logout() {
 
         User user = realm.signup().fullname(FULL_NAME).email(EMAIL).password(PWD).signup(NAME);
@@ -71,7 +71,7 @@ public class JenkinsDatabaseSecurityRealmTest extends AbstractJUnitTest {
     @Test
     public void create_update_delete() {
 
-        User user = realm.signup().fullname(FULL_NAME).password(PWD).signup(NAME);
+        User user = realm.signup().fullname(FULL_NAME).password(PWD).email(EMAIL).signup(NAME);
         assertThat(user.id(), equalTo(NAME));
         assertThat(user.fullName(), equalTo(FULL_NAME));
         jenkins.logout();
