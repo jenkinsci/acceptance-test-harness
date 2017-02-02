@@ -1,5 +1,6 @@
 package org.jenkinsci.test.acceptance.po;
 
+import javax.inject.Inject;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,11 +14,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
-
-import javax.inject.Inject;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.SystemUtils;
@@ -26,7 +26,6 @@ import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.LocalController;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.junit.internal.AssumptionViolatedException;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.zeroturnaround.zip.ZipUtil;
 
@@ -96,18 +95,72 @@ public class Job extends TopLevelItem {
     // TODO move this functionality to page area itself
     public void removeFirstBuildStep() {
         removeFirstStep("builder");
+        elasticSleep(500); // chrome needs some time
     }
 
     /**
-     * publishers added to the job are stored in a list member to provide
-     * later access for modification
+     * Adds the specified publisher to this job. Publishers are stored in a list member to provide
+     * later access for modification.
+     *
+     * @param publisherClass the publisher to configure
+     * @param <T>            the type of the publisher
+     * @see #getPublisher(Class)
+     * @see #editPublisher(Class, Consumer)
      */
-
-    public <T extends PostBuildStep> T addPublisher(Class<T> type) {
-        T p = addStep(type, "publisher");
+    public <T extends PostBuildStep> T addPublisher(Class<T> publisherClass) {
+        T p = addStep(publisherClass, "publisher");
 
         publishers.add(p);
+
         return p;
+    }
+
+    /**
+     * Adds the specified publisher to this job. Publishers are stored in a list member to provide
+     * later access for modification. After the publisher has been added the publisher is configured
+     * with the specified configuration lambda. Afterwards, the job configuration page still is visible and
+     * not saved.
+     *
+     * @param type          the publisher to configure
+     * @param configuration the additional configuration options for this job
+     * @param <T>           the type of the publisher
+     * @see #getPublisher(Class)
+     * @see #editPublisher(Class, Consumer)
+     */
+    public <T extends PostBuildStep> T addPublisher(final Class<T> type, final Consumer<T> configuration) {
+        T p = addPublisher(type);
+
+        configuration.accept(p);
+
+        return p;
+    }
+
+    /**
+     * Edits this job using the specified configuration lambda. Opens the job configuration view, selects the specified
+     * publisher page object, runs the specified configuration lambda, and saves the changes. Afterwards, the job
+     * configuration page still is visible and not saved.
+     *
+     * @param type          the publisher to configure
+     * @param configuration the additional configuration options for this job
+     * @param <T>           the type of the publisher
+     */
+    public <T extends PostBuildStep> void editPublisher(final Class<T> type, final Consumer<T> configuration) {
+        configure();
+        T publisher = getPublisher(type);
+        configuration.accept(publisher);
+        save();
+    }
+
+    /**
+     * Edits this job using the specified configuration lambda. Opens the job configuration view, runs the specified
+     * configuration lambda and saves the changes.
+     *
+     * @param configuration the additional configuration options for this job
+     */
+    public void edit(final Runnable configuration) {
+        configure();
+        configuration.run();
+        save();
     }
 
     /**
@@ -417,10 +470,10 @@ public class Job extends TopLevelItem {
     }
 
     /**
-     * Deletes the current job
+     * Deletes the current job.
      */
     public void delete() {
-        this.open();
+        open();
         clickLink("Delete Project");
         confirmAlert(2);
     }

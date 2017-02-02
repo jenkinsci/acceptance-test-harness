@@ -1,11 +1,10 @@
 package org.jenkinsci.test.acceptance.controller;
 
+import javax.inject.Inject;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.inject.Inject;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -61,7 +60,7 @@ public class ExistingJenkinsController extends JenkinsController {
             String responseBody = EntityUtils.toString(resEntity);
 
             if (!responseBody.contains("form-element-path")) {
-                failTestSuite();
+                failTestSuite(response.toString());
             }
         }
         catch (IOException exception) {
@@ -69,8 +68,8 @@ public class ExistingJenkinsController extends JenkinsController {
         }
     }
 
-    private void failTestSuite() {
-        throw new RuntimeException("Test suite requires in pre-installed Jenkins plugin https://wiki.jenkins-ci.org/display/JENKINS/Form+Element+Path+Plugin");
+    private void failTestSuite(final String errorMessage) {
+        throw new RuntimeException("Test suite requires in pre-installed Jenkins plugin https://wiki.jenkins-ci.org/display/JENKINS/Form+Element+Path+Plugin\n" + errorMessage);
     }
 
     @Override

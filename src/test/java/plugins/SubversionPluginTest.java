@@ -1,12 +1,15 @@
 package plugins;
 
-import com.google.inject.Inject;
-
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.SvnContainer;
-import org.jenkinsci.test.acceptance.junit.*;
+import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.DockerTest;
+import org.jenkinsci.test.acceptance.junit.SmokeTest;
+import org.jenkinsci.test.acceptance.junit.WithCredentials;
+import org.jenkinsci.test.acceptance.junit.WithDocker;
+import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.subversion.SubversionPluginTestException;
 import org.jenkinsci.test.acceptance.plugins.subversion.SubversionScm;
 import org.jenkinsci.test.acceptance.plugins.subversion.SubversionSvmAdvanced;
@@ -16,6 +19,8 @@ import org.jenkinsci.test.acceptance.po.Changes;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+
+import com.google.inject.Inject;
 
 import static org.junit.Assert.*;
 
@@ -116,8 +121,6 @@ public class SubversionPluginTest extends AbstractJUnitTest {
 
         f.configure();
         f.removeFirstBuildStep();
-        // Sleep for 500ms to give time to DOM to regenerate
-        f.elasticSleep(500);
         f.addShellStep("test ! -f unversioned.txt");
         f.save();
         f.startBuild().shouldSucceed();

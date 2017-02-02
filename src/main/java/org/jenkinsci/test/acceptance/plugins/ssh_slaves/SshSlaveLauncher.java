@@ -94,12 +94,9 @@ public class SshSlaveLauncher extends ComputerLauncher {
      * to check whether it has already been rendered in the dropdown.
      */
     private void waitForCredentialVisible(final String credUsername) {
-        assertTrue(waitFor().withTimeout(5, TimeUnit.SECONDS).until(new Callable<Boolean>() {
-            @Override
-            public Boolean call() throws Exception {
-                return credentialsId.resolve().getText().contains(credUsername);
-            }
-        }));
+        assertTrue(waitFor().withTimeout(5, TimeUnit.SECONDS).until(() ->
+                credentialsId.resolve().getText().contains(credUsername))
+        );
         // Select the new credentials. Control.selectDropdownMenu seems to be YUI-only.
         credentialsId.select(credUsername);
     }

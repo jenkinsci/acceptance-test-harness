@@ -181,40 +181,11 @@ public abstract class LocalController extends JenkinsController implements LogLi
             } finally {
                 template.delete();
             }
-            installDetachedPlugins();
         } catch (Exception e) {
             throw new IOException(e.getMessage(), e);
         }
     }
 
-    private void installDetachedPlugins() throws Exception {
-        File expandedWarDir = new File(tempDir, "war");
-
-        // Expand the war file so we can get the detached plugins from it.
-        Expand expand = new Expand();
-        expand.setSrc(war);
-        expand.setOverwrite(true);
-        expand.setDest(expandedWarDir);
-        expand.execute();
-
-        // Copy the detached plugins into the plugin dir
-        File pluginsDir = new File(tempDir, "plugins");
-        File detachedPluginsDir = new File(expandedWarDir, "WEB-INF/detached-plugins");
-        if (detachedPluginsDir.isDirectory()) {
-            File[] detachedPlugins = detachedPluginsDir.listFiles();
-            if (detachedPlugins != null) {
-                for (File detachedPlugin : detachedPlugins) {
-                    String pluginName = detachedPlugin.getName().replace(".hpi", "").replace(".jpi", "");
-
-                    // Only copy in the HPI file if it doesn't already exist in the plugins dir
-                    // (checking for both .hpi and .jpi).
-                    if (!new File(pluginsDir, pluginName + ".hpi").exists() && !new File(pluginsDir, pluginName + ".jpi").exists()) {
-                        FileUtils.copyFile(detachedPlugin, new File(pluginsDir, detachedPlugin.getName()));
-                    }
-                }
-            }
-        }
-    }
 
     public File getJavaHome() {
         String javaHome = getenv("JENKINS_JAVA_HOME");
@@ -282,11 +253,20 @@ public abstract class LocalController extends JenkinsController implements LogLi
                 cause.printStackTrace(out);
             }
             out.println("Commencing interactive debugging. Browser session was kept open.");
-            out.println("Press return to proceed.");
-            try {
-                new BufferedReader(new InputStreamReader(System.in)).readLine();
-            } catch (IOException e) {
-                throw new Error(e);
+            // Broken in current surefire
+//            out.println("Press return to proceed.");
+//            try {
+//                new BufferedReader(new InputStreamReader(System.in)).readLine();
+//            } catch (IOException e) {
+//                throw new Error(e);
+//            }
+
+            synchronized (this) {
+                try {
+                    this.wait();
+                } catch (InterruptedException e) {
+                    return;
+                }
             }
         }
 

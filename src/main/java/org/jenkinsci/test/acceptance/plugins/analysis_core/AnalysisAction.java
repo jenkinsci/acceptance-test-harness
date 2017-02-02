@@ -24,6 +24,7 @@ public abstract class AnalysisAction extends ContainerPageObject {
     private final String pluginUrl;
     private final ContainerPageObject parent;
     private final String plugin;
+    private final Build build;
 
     /**
      * Creates a new instance of a static analysis action.
@@ -32,7 +33,7 @@ public abstract class AnalysisAction extends ContainerPageObject {
      * @param plugin plug-in name
      */
     public AnalysisAction(final Build parent, final String plugin) {
-        this(plugin + "Result", plugin, parent);
+        this(plugin + "Result", plugin, parent, parent);
     }
 
     /**
@@ -42,7 +43,7 @@ public abstract class AnalysisAction extends ContainerPageObject {
      * @param plugin Path to plugin without / at the end
      */
     public AnalysisAction(final Job parent, final String plugin) {
-        this(plugin, plugin, parent);
+        this(plugin, plugin, parent, parent.getLastBuild());
     }
 
     /**
@@ -54,12 +55,23 @@ public abstract class AnalysisAction extends ContainerPageObject {
         return parent;
     }
 
-    private AnalysisAction(final String url, final String pluginUrl, final ContainerPageObject parent) {
+    private AnalysisAction(final String url, final String pluginUrl, final ContainerPageObject parent,
+            final Build build) {
         super(parent, parent.url(url + '/'));
 
         this.pluginUrl = pluginUrl;
         this.parent = parent;
         plugin = url;
+        this.build = build;
+    }
+
+    /**
+     * Returns the last build with results for this plug-in.
+     *
+     * @return the last build
+     */
+    public Build getBuild() {
+        return build;
     }
 
     /**

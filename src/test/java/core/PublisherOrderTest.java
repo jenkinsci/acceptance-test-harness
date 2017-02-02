@@ -2,6 +2,7 @@ package core;
 
 import org.apache.commons.lang.SystemUtils;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.AggregateDownstreamTestResults;
 import org.jenkinsci.test.acceptance.po.ArtifactArchiver;
 import org.jenkinsci.test.acceptance.po.BuildTrigger;
@@ -10,6 +11,7 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.JUnitPublisher;
 import org.junit.Test;
 
+@WithPlugins("junit")
 public class PublisherOrderTest extends AbstractJUnitTest {
 
     @Test

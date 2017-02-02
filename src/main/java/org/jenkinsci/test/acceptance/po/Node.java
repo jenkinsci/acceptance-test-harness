@@ -24,6 +24,7 @@
 package org.jenkinsci.test.acceptance.po;
 
 import com.google.inject.Injector;
+import org.openqa.selenium.NoSuchElementException;
 
 import java.net.URL;
 
@@ -57,13 +58,26 @@ public abstract class Node extends ContainerPageObject {
         find(by.path("/labelString")).sendKeys(l);
     }
 
+    /**
+     * Run groovy string in groovy console.
+     *
+     * @param script Script text to run.
+     * @param args Arguments to String#format in the script.
+     * @return String output of the script or null if there is none.
+     */
     public String runScript(String script, Object... args) {
         visit("script");
         CodeMirror cm = new CodeMirror(this, "/script");
         cm.set(String.format(script, args));
         clickButton("Run");
 
-        return find(by.css("h2 + pre")).getText().replaceAll("^Result: ", "");
+        find(by.xpath("//h2[text() = 'Result']")); // Ensure we are looking at the page with completed script
+        try {
+            return find(by.css("h2 + pre")).getText().replaceAll("^Result: ", "");
+        } catch (NoSuchElementException ex) {
+            // Pre element does not exists if there is nothing returned.
+            return null;
+        }
     }
 
     public BuildHistory getBuildHistory() {

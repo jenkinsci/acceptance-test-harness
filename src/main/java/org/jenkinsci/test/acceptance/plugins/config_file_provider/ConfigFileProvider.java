@@ -23,6 +23,7 @@
  */
 package org.jenkinsci.test.acceptance.plugins.config_file_provider;
 
+import org.jenkinsci.test.acceptance.po.Folder;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.PageObject;
 
@@ -32,14 +33,18 @@ public class ConfigFileProvider extends PageObject {
         super(jenkins, jenkins.url("configfiles/"));
     }
 
+    public ConfigFileProvider(Folder f) {
+        super(f, f.url("configfiles/"));
+    }
+
+    /**
+     * Select provider type and submit.
+     */
     public <T extends ProvidedFile> T addFile(Class<T> type) {
         visit(url("selectProvider"));
         control(by.name("providerId")).choose(type);
         clickButton("Submit");
-
-        // Auto generated ID for later identification
         String id = getElement(by.name("config.id")).getAttribute("value");
-        clickButton("Submit");
         return newInstance(type, this, id);
     }
 }
