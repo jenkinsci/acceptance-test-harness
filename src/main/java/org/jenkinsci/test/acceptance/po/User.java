@@ -42,15 +42,14 @@ public class User extends ContainerPageObject {
 
     private User(Jenkins context) {
         super(context, context.url("me/"));
-        load();
     }
 
     public User(Jenkins context, String name) {
         super(context, context.url("user/%s/", name));
-        load();
     }
 
     private void load() {
+        if (id != null) return;
         JsonNode json = getJson();
         id = json.get("id").asText();
         fullName = json.get("fullName").asText();
@@ -67,20 +66,23 @@ public class User extends ContainerPageObject {
     }
 
     public String id() {
+        load();
         return id;
     }
 
     public String fullName() {
+        load();
         return fullName;
+    }
+
+    public String mail() {
+        load();
+        return mail;
     }
 
     public User fullName(String fullName) {
         control("/fullName").set(fullName);
         return this;
-    }
-
-    public String mail() {
-        return mail;
     }
 
     public void delete() {
@@ -90,7 +92,7 @@ public class User extends ContainerPageObject {
 
     @Override
     public String toString() {
-        return String.format("%s (%s)", id, fullName);
+        return String.format("%s (%s)", id(), fullName());
     }
 
     @Override
@@ -101,11 +103,11 @@ public class User extends ContainerPageObject {
         if (!getClass().equals(rhs.getClass())) return false;
 
         User other = (User) rhs;
-        return id.equals(other.id);
+        return id().equals(other.id());
     }
 
     @Override
     public int hashCode() {
-        return id.hashCode();
+        return id().hashCode();
     }
 }

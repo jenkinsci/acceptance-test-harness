@@ -23,6 +23,7 @@
  */
 package core;
 
+import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
@@ -31,6 +32,7 @@ import org.jenkinsci.test.acceptance.po.User;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -86,7 +88,11 @@ public class JenkinsDatabaseSecurityRealmTest extends AbstractJUnitTest {
 
         user.delete();
         user = jenkins.getUser(NAME);
-        // Jenkins creates new users transparently. Verifying it is the new one and not the old by default fullName assigned
-        assertThat(user.fullName(), equalTo(NAME));
+        try {
+            assertThat(user, Matchers.pageObjectDoesNotExist());
+        } catch (AssertionError ex) {
+            // Old Jenkins creates new users transparently. Verifying it is the new one and not the old by default fullName assigned
+            assertThat(user.fullName(), equalTo(NAME));
+        }
     }
 }
