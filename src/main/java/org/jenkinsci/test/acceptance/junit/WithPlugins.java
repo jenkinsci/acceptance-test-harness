@@ -127,7 +127,7 @@ public @interface WithPlugins {
                         PluginSpec spec = iterator.next();
                         switch (pm.installationStatus(spec)) {
                             case NOT_INSTALLED:
-                                LOGGER.info(spec + " is up to date");
+                                LOGGER.info(spec + " is not installed");
                                 break;
                             case UP_TO_DATE:
                                 iterator.remove(); // Already installed
