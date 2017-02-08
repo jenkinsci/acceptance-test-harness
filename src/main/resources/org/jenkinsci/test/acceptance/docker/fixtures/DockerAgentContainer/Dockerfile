@@ -1,7 +1,7 @@
 FROM jenkins/java:eed7706a10fb
 
 RUN cd /tmp && \
-    wget -nv -O - https://get.docker.com/builds/Linux/x86_64/docker-latest.tgz | tar xvfz - docker/docker && \
+    wget -nv -O - https://get.docker.com/builds/Linux/x86_64/docker-1.13.1.tgz | tar xvfz - docker/docker && \
     chmod a+x docker/docker && \
     mv docker/docker /usr/bin/docker
 VOLUME /home/test/workspace
