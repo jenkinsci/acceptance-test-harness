@@ -40,7 +40,7 @@ public class AuthorizeProjectTest extends AbstractJUnitTest {
     @Test
     @WithPlugins("mock-security-realm")
     public void testProjectRunByUser() {
-        jenkins.login().doLogin(USER2);
+        jenkins.login().doSuccessfulLogin(USER2);
 
         final FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class);
         job.save();

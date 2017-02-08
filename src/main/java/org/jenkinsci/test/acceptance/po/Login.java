@@ -1,5 +1,10 @@
 package org.jenkinsci.test.acceptance.po;
 
+import org.junit.Assert;
+
+import static org.jenkinsci.test.acceptance.Matchers.hasInvalidLoginInformation;
+import static org.jenkinsci.test.acceptance.Matchers.loggedInAs;
+
 /**
  * Page object for login page.
  *
@@ -49,4 +54,33 @@ public class Login extends PageObject {
     public Login doLogin(User user) {
         return doLogin(user.fullName());
     }
+
+    public Login doSuccessfulLogin(String user, String password) {
+        this.doLogin(user, password);
+        Assert.assertThat(this, loggedInAs(user));
+        return this;
+    }
+
+    public Login doSuccessfulLogin(String user) {
+        return this.doSuccessfulLogin(user, user);
+    }
+
+    public Login doSuccessfulLogin(User user) {
+        return this.doSuccessfulLogin(user.fullName());
+    }
+
+    public Login doFailedLogin(String user, String password) {
+        this.doLogin(user, password);
+        Assert.assertThat(this, hasInvalidLoginInformation());
+        return this;
+    }
+
+    public Login doFailedLogin(String user) {
+        return this.doFailedLogin(user, user);
+    }
+
+    public Login doFailedLogin(User user) {
+        return this.doFailedLogin(user.fullName());
+    }
+
 }
