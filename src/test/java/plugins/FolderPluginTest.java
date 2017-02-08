@@ -144,7 +144,7 @@ public class FolderPluginTest extends AbstractJUnitTest {
      */
     @Test
     @WithPlugins({ "credentials", "credentials-binding", "workflow-job", "workflow-cps", "workflow-basic-steps", "workflow-durable-task-step" })
-    public void credsTest() {
+    public void folderScopedCredentialsTest() {
         final Folder folder = jenkins.jobs.create(Folder.class, F01);
         final FreeStyleJob job1 = folder.getJobs().create(FreeStyleJob.class, JOB1);
 
