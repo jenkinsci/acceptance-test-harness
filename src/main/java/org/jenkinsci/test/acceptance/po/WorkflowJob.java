@@ -100,4 +100,10 @@ public class WorkflowJob extends Job {
         return String.format("sh '''%s'''%n", copyResourceShell(res, res.getName()));
     }
 
+    public void delete() {
+        open();
+        clickLink("Delete Pipeline");
+        confirmAlert(2);
+    }
+
 }
