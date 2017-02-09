@@ -152,18 +152,6 @@ public class Job extends TopLevelItem {
     }
 
     /**
-     * Edits this job using the specified configuration lambda. Opens the job configuration view, runs the specified
-     * configuration lambda and saves the changes.
-     *
-     * @param configuration the additional configuration options for this job
-     */
-    public void edit(final Runnable configuration) {
-        configure();
-        configuration.run();
-        save();
-    }
-
-    /**
      * Getter for a specific publisher previously added to the job.
      * If a publisher of a class is requested which has not been added previously
      * this will result in a {@link java.util.NoSuchElementException}.
