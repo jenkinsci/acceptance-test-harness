@@ -78,8 +78,6 @@ public class Folder extends TopLevelItem implements Container {
     }
 
     public void setEnvironmentalVariables(final Map<String, String> envVbles) {
-        configure();
-
         String envVblesAsString = "";
 
         if (envVbles != null) {
@@ -89,7 +87,6 @@ public class Folder extends TopLevelItem implements Container {
         }
 
         this.properties.set(envVblesAsString);
-        save();
     }
 
     public List<String> getViewsNames() {
