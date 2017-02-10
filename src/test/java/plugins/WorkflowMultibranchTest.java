@@ -17,6 +17,7 @@ import java.io.IOException;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.not;
 import static org.jenkinsci.test.acceptance.Matchers.hasAction;
 import static org.junit.Assert.assertEquals;
@@ -54,7 +55,7 @@ public class WorkflowMultibranchTest extends AbstractJUnitTest {
     }
 
     private void assertBranchIndexing(final WorkflowMultiBranchJob job) {
-        assertThat(job, hasAction("Branch Indexing"));
+        assertThat(job, anyOf(/* 1.x */hasAction("Branch Indexing"), /* 2.x */hasAction("Scan Repository")));
 
         final String branchIndexingLog = job.getBranchIndexingLog();
 
