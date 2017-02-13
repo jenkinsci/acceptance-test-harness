@@ -1,5 +1,6 @@
 package plugins;
 
+import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,10 @@ import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
 import org.jenkinsci.test.acceptance.plugins.envinject.EnvInjectConfig;
+import org.jenkinsci.test.acceptance.plugins.warnings.GroovyParser;
+import org.jenkinsci.test.acceptance.plugins.warnings.ParsersConfiguration;
+import org.jenkinsci.test.acceptance.po.Jenkins;
+import org.jenkinsci.test.acceptance.po.LoggedInAuthorizationStrategy;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsAction;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsBuildSettings;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsColumn;
@@ -19,6 +24,7 @@ import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Container;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.FreeStyleMultiBranchJob;
+import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.ListView;
 import org.jenkinsci.test.acceptance.po.MatrixConfiguration;
@@ -64,6 +70,81 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
 
     private static final String JAVA_TITLE = JAVA_ID;
     private static final String CLANG_TITLE = "LLVM/Clang Warnings";
+    private static final String GROOVY_LINE_FILE_NAME = "groovy-line.txt";
+
+    /**
+     * Checks that a dynamic parser with only methods from the whitelist correctly detects a warning
+     * .
+     */
+    @Test
+    public void should_detect_warnings_with_groovy_parser() {
+        String parserName = Jenkins.createRandomName();
+        String legalScript = "import hudson.plugins.warnings.parser.Warning\n"
+                + "import hudson.plugins.analysis.util.model.Priority;\n"
+                + "String all = matcher.group(1);\n"
+                + "Priority test = Priority.NORMAL;\n"
+                + "return new Warning(all, 42, all, all, all);";
+
+        jenkins.edit(() -> {
+            ParsersConfiguration parsers = new ParsersConfiguration(jenkins.getConfigPage());
+            parsers.add(parserName, legalScript);
+        });
+
+        FreeStyleJob job = createFreeStyleJob(RESOURCES + GROOVY_LINE_FILE_NAME,
+                settings -> settings.addWorkspaceScanner(parserName, "**/" + GROOVY_LINE_FILE_NAME));
+
+        Build build = buildSuccessfulJob(job);
+        String header = parserName + GroovyParser.LINK_SUFFIX;
+        assertThatActionExists(job, build, header);
+        assertThat(driver, hasContent(header + ": 2 warnings from one analysis."));
+    }
+
+    /**
+     * Checks that a dynamic parser with a blacklisted method is rejected.
+     */
+    @Test
+    public void should_be_refused_by_sandbox() {
+        String parserName = Jenkins.createRandomName();
+        String illegalScript = "import hudson.plugins.warnings.parser.Warning\n"
+                + "import hudson.plugins.analysis.util.model.Priority;\n"
+                + "String all = matcher.group(1);\n"
+                + "Priority test = Priority.fromString('NORMAL');\n" // not on whitelist!!
+                + "return new Warning(all, 42, all, all, all);";
+
+        jenkins.edit(() -> {
+            ParsersConfiguration parsers = new ParsersConfiguration(jenkins.getConfigPage());
+            parsers.add(parserName, illegalScript);
+        });
+
+        FreeStyleJob job = createFreeStyleJob(RESOURCES + GROOVY_LINE_FILE_NAME,
+                settings -> settings.addWorkspaceScanner(parserName, "**/" + GROOVY_LINE_FILE_NAME));
+
+        Build build = buildSuccessfulJob(job);
+        assertThatActionIsMissing(job, build, parserName + GroovyParser.LINK_SUFFIX);
+
+        assertThat(build.getConsole(),
+                containsString("Groovy sandbox rejected the parsing script for parser " + parserName));
+    }
+
+    /**
+     * Verifies that evaluating Groovy code requires the RUN_SCRIPTS permission.
+     */
+    @Test
+    public void should_require_script_permission() throws MalformedURLException {
+        GlobalSecurityConfig security = new GlobalSecurityConfig(jenkins);
+        security.edit(() -> {
+            LoggedInAuthorizationStrategy strategy = security.useAuthorizationStrategy(LoggedInAuthorizationStrategy.class);
+            strategy.enableAnonymousReadAccess();
+        });
+
+        assertThatScriptIsNotExecuted("checkExample?example=foo&regexp=foo&script=foo");
+        assertThatScriptIsNotExecuted("checkScript?script=foo");
+    }
+
+    private void assertThatScriptIsNotExecuted(final String url) {
+        jenkins.visit("descriptorByName/GroovyParser/" + url);
+        assertThat(driver, hasContent("You have no rights to execute Groovy scripts."));
+    }
 
     /**
      * Verifies that providing a wrong URL to the detail factories should navigate to the top-level page.
@@ -387,8 +468,9 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
 
     /**
      * Checks that the plug-in sends a mail after a build has been failed. The content of the mail contains several
-     * tokens that should be expanded in the mail with the correct vaules.
+     * tokens that should be expanded in the mail with the correct values.
      */
+    // TODO: check if we can remove this test since a similar one in parent
     @Test @Issue("25501") @Category(SmokeTest.class) @WithPlugins("email-ext")
     public void should_send_mail_with_expanded_tokens() {
         setUpMailer();
