@@ -4,11 +4,10 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.StringWriter;
+import java.io.PrintStream;
 import java.lang.reflect.Field;
 import java.net.ServerSocket;
 import java.util.Arrays;
@@ -16,8 +15,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import com.github.olivergondza.dumpling.factory.PidRuntimeFactory;
+import com.github.olivergondza.dumpling.model.ModelObject;
+import com.github.olivergondza.dumpling.model.dump.ThreadDumpRuntime;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.codehaus.plexus.util.Expand;
 import org.codehaus.plexus.util.StringUtils;
 import org.jenkinsci.test.acceptance.junit.FailureDiagnostics;
@@ -348,7 +349,7 @@ public abstract class LocalController extends JenkinsController implements LogLi
         Process proc = process.getProcess();
 
         try {
-            int val = proc.exitValue();
+            proc.exitValue();
             return null; // already dead
         } catch (IllegalThreadStateException _) {
             // Process alive
@@ -374,12 +375,12 @@ public abstract class LocalController extends JenkinsController implements LogLi
             }
 
             try {
-                Process jstack = new ProcessBuilder("jstack", String.valueOf(pid)).start();
-                if (jstack.waitFor() == 0) {
-                    StringWriter writer = new StringWriter();
-                    IOUtils.copy(jstack.getInputStream(), writer);
-                    return writer.toString();
-                }
+                ThreadDumpRuntime runtime = new PidRuntimeFactory().fromProcess(pid);
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                PrintStream printStream = new PrintStream(baos);
+                runtime.toString(printStream, ModelObject.Mode.MACHINE);
+                printStream.close();
+                return baos.toString();
             } catch (IOException | InterruptedException e) {
                 throw new AssertionError(e);
             }
