@@ -29,6 +29,7 @@ import org.junit.runners.model.MultipleFailureException;
 import org.openqa.selenium.TimeoutException;
 
 import com.google.inject.Injector;
+import java.io.FileInputStream;
 
 import static java.lang.System.*;
 
@@ -374,10 +375,15 @@ public abstract class LocalController extends JenkinsController implements LogLi
             }
 
             try {
-                Process jstack = new ProcessBuilder("jstack", String.valueOf(pid)).start();
+                File tmpFile = File.createTempFile("jstack-output", ".tmp");
+                tmpFile.deleteOnExit();
+                Process jstack = new ProcessBuilder("jstack", String.valueOf(pid))
+                        .redirectErrorStream(true)
+                        .redirectOutput(ProcessBuilder.Redirect.to(tmpFile))
+                        .start();
                 if (jstack.waitFor() == 0) {
                     StringWriter writer = new StringWriter();
-                    IOUtils.copy(jstack.getInputStream(), writer);
+                    IOUtils.copy(new FileInputStream(tmpFile), writer);
                     return writer.toString();
                 }
             } catch (IOException | InterruptedException e) {
