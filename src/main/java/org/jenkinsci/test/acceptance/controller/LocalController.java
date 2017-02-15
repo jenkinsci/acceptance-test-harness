@@ -4,20 +4,17 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.net.ServerSocket;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.codehaus.plexus.util.Expand;
 import org.codehaus.plexus.util.StringUtils;
 import org.jenkinsci.test.acceptance.junit.FailureDiagnostics;
@@ -31,6 +28,7 @@ import org.openqa.selenium.TimeoutException;
 import com.google.inject.Injector;
 
 import static java.lang.System.*;
+
 
 /**
  * Abstract base class for those JenkinsController that runs the JVM locally on
@@ -374,11 +372,14 @@ public abstract class LocalController extends JenkinsController implements LogLi
             }
 
             try {
-                Process jstack = new ProcessBuilder("jstack", String.valueOf(pid)).start();
+                File tmpFile = File.createTempFile("jstack-output", ".tmp");
+                tmpFile.deleteOnExit();
+                Process jstack = new ProcessBuilder("jstack", String.valueOf(pid))
+                        .redirectErrorStream(true)
+                        .redirectOutput(ProcessBuilder.Redirect.to(tmpFile))
+                        .start();
                 if (jstack.waitFor() == 0) {
-                    StringWriter writer = new StringWriter();
-                    IOUtils.copy(jstack.getInputStream(), writer);
-                    return writer.toString();
+                    return FileUtils.readFileToString(tmpFile, Charset.defaultCharset());
                 }
             } catch (IOException | InterruptedException e) {
                 throw new AssertionError(e);
