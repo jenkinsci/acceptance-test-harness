@@ -61,9 +61,9 @@ public class DiskUsagePluginTest extends AbstractJUnitTest {
         job.startBuild().waitUntilFinished();
 
         showGraphOnProjectPage();
-
         du.reload();
 
+        job.open();
         assertThat(driver, hasElement(by.xpath(JOB_GRAPH)));
     }
 

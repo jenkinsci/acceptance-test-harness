@@ -36,7 +36,10 @@ import org.junit.Test;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-@WithPlugins("matrix-reloaded")
+@WithPlugins({
+        "matrix-project", // JENKINS-37545
+        "matrix-reloaded"
+})
 public class MatrixReloadedPluginTest extends AbstractJUnitTest {
 
     @Test

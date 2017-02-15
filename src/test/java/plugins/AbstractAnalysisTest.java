@@ -38,6 +38,8 @@ import org.jenkinsci.test.acceptance.plugins.maven.MavenBuildStep;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.po.Container;
+import org.jenkinsci.test.acceptance.po.Folder;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.FreeStyleMultiBranchJob;
 import org.jenkinsci.test.acceptance.po.Job;
@@ -67,11 +69,10 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
 
 /**
  * Base class for tests of the static analysis plug-ins. Contains several generic test cases that run for all
- * participating plug-ins. Additionally, serveral helper methods are available for the concrete test cases of a
+ * participating plug-ins. Additionally, several helper methods are available for the concrete test cases of a
  * plug-in.
  *
  * @param <P> the type of the project action
- *
  * @author Martin Ende
  * @author Martin Kurz
  * @author Fabian Trampusch
@@ -79,6 +80,134 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
  */
 public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends AbstractJUnitTest {
     private static final List<String> PRIORITIES = Arrays.asList("HIGH", "LOW", "NORMAL");
+
+    /**
+     * Checks that the plug-in sends a mail after a build has been failed. The content of the mail contains several
+     * tokens that should be expanded in the mail with the correct values.
+     */
+    @Test @Issue("JENKINS-25501") @WithPlugins("email-ext")
+    public void should_send_mail_with_expanded_tokens() {
+        setUpMailer();
+
+        FreeStyleJob job = createFreeStyleJob();
+
+        P projectAction = createProjectAction(job);
+        job.editPublisher(projectAction.getFreeStyleSettings(),
+                settings -> settings.setBuildFailedTotalAll("0"));
+
+        String name = projectAction.getUrl().toUpperCase();
+        String title = "Analysis-Result";
+
+        configureEmailNotification(job, String.format("%s: ${%s_RESULT}", title, name),
+                String.format("%s: ${%s_COUNT}-${%s_FIXED}-${%s_NEW}", title, name, name, name));
+
+        buildFailingJob(job);
+
+        verifyReceivedMail(String.format("%s: FAILURE", title),
+                String.format("%s: %d-0-%d", title, getNumberOfWarnings(), getNumberOfWarnings()));
+    }
+
+    /**
+     * Runs a job with warning threshold configured once and validates that build is marked as unstable.
+     */
+    @Test @Issue("JENKINS-19614")
+    public void should_set_build_to_unstable_if_total_warnings_threshold_set() {
+        // TODO: Test multiple variants for thresholds new/all failed/unstable first-build/subsequent-build
+        FreeStyleJob job = createFreeStyleJob();
+
+        job.editPublisher(getFreeStyleSettingsFor(job), settings -> {
+            settings.setBuildUnstableTotalAll("0");
+            settings.setNewWarningsThresholdFailed("0");
+            settings.setUseDeltaValues(true);
+        });
+
+        buildJobAndWait(job).shouldBeUnstable();
+    }
+
+    private Class<? extends AnalysisSettings> getFreeStyleSettingsFor(final FreeStyleJob job) {
+        return createProjectAction(job).getFreeStyleSettings();
+    }
+
+    /**
+     * Sets up a job within a folder. Verifies that the project action from the job redirects to the result
+     * of the last build. Checks the correct number of warnings in the project overview and
+     * result details view. Finally checks if the warnings-per-project portlet and warnings column show the
+     * correct number of warnings and provide a direct link to the actual warning results.
+     */
+    @Test @Issue({"JENKINS-39947", "JENKINS-39950"}) @WithPlugins({"dashboard-view", "cloudbees-folder"})
+    public void should_show_warnings_in_folder() {
+        Folder folder = jenkins.jobs.create(Folder.class, jenkins.createRandomName());
+        folder.save();
+
+        folder.open();
+
+        FreeStyleJob job = createFreeStyleJob(folder);
+        runAndVerifyJobResults(job);
+
+        P projectAction = createProjectAction(job);
+
+        addDashboardViewAndBottomPortlet(projectAction.getTablePortlet(), folder);
+        verifyPortlet(projectAction);
+
+        addListViewColumn(projectAction.getViewColumn(), folder);
+        verifyColumn(projectAction);
+    }
+
+    /**
+     * Sets up a dashboard view with a warnings-per-project portlet. Builds a job and checks if the portlet shows the
+     * correct number of warnings and provides a direct link to the actual warning results.
+     */
+    @Test @WithPlugins("dashboard-view")
+    public void should_show_warning_totals_in_dashboard_portlet_with_link_to_results() {
+        FreeStyleJob job = createFreeStyleJob();
+
+        buildJobAndWait(job).shouldSucceed();
+
+        P projectAction = createProjectAction(job);
+        addDashboardViewAndBottomPortlet(projectAction.getTablePortlet(), jenkins);
+
+        verifyPortlet(projectAction);
+    }
+
+    public void verifyPortlet(final P projectAction) {
+        List<WebElement> links = all(by.xpath("//td[@class='pane']//a"));
+
+        assertThat(links.size() >= 2, is(true));
+
+        WebElement warningsLink = links.get(links.size() - 1);
+        assertThat(warningsLink.getText().trim(), is(String.valueOf(getNumberOfWarnings())));
+
+        warningsLink.click();
+        assertThat(driver, hasContent(projectAction.getName()));
+    }
+
+    /**
+     * Sets up a list view with a warnings column. Builds a job and checks if the column shows the correct number of
+     * warnings and provides a direct link to the actual warning results.
+     */
+    @Test @Issue("JENKINS-24436")
+    public void should_show_warning_totals_in_view_column_with_link_to_results() {
+        FreeStyleJob job = createFreeStyleJob();
+
+        buildJobAndWait(job).shouldSucceed();
+
+        P projectAction = createProjectAction(job);
+        addListViewColumn(projectAction.getViewColumn(), jenkins);
+
+        verifyColumn(projectAction);
+    }
+
+    public void verifyColumn(final P projectAction) {
+        List<WebElement> links = all(by.xpath("//table[@id='projectstatus']//td//a"));
+
+        assertThat(links.isEmpty(), is(false));
+
+        WebElement warningsLink = links.get(links.size() - 1);
+        assertThat(warningsLink.getText().trim(), is(String.valueOf(getNumberOfWarnings())));
+
+        warningsLink.click();
+        assertThat(driver, hasContent(projectAction.getName()));
+    }
 
     /**
      * Builds a freestyle job with an enabled publisher of the plug-in under test. Sets the thresholds for the trend
@@ -91,12 +220,9 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
         FreeStyleJob job = createFreeStyleJob();
 
         AnalysisAction projectAction = createProjectAction(job);
-        editJob(job, projectAction, new AnalysisConfigurator<AnalysisSettings>() {
-            @Override
-            public void configure(final AnalysisSettings settings) {
-                settings.setBuildHealthyThreshold(0);
-                settings.setBuildUnhealthyThreshold(getNumberOfWarnings());
-            }
+        job.editPublisher(projectAction.getFreeStyleSettings(), settings -> {
+            settings.setBuildHealthyThreshold(0);
+            settings.setBuildUnhealthyThreshold(getNumberOfWarnings());
         });
 
         buildSuccessfulJob(job);
@@ -124,37 +250,50 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
         return descriptions.get(index).getAttribute("innerHTML");
     }
 
-    private void editJob(final Job job, final AnalysisAction action, @CheckForNull final AnalysisConfigurator<AnalysisSettings> configurator) {
-        job.configure();
-        configurator.configure(job.getPublisher(action.getFreeStyleSettings()));
-        job.save();
-    }
-
     /**
      * Builds a freestyle job with an enabled publisher of the plug-in under test. Verifies that the project action from
-     * the job redirects to the result of the last build. The the correct number of warnings in the project overview and
+     * the job redirects to the result of the last build. Then the correct number of warnings in the project overview and
      * result details view are verified.
      */
     @Test
     public void should_navigate_to_result_action_from_freestyle_job() {
-        verifyJobResults(createFreeStyleJob());
+        runAndVerifyJobResults(createFreeStyleJob());
     }
 
     /**
      * Builds a pipeline with an enabled publisher of the plug-in under test. Verifies that the project action from
-     * the job redirects to the result of the last build. The the correct number of warnings in the project overview and
+     * the job redirects to the result of the last build. Then the correct number of warnings in the project overview and
      * result details view are verified.
      */
     @Test @WithPlugins("workflow-aggregator") @Issue("31202")
     public void should_navigate_to_result_action_from_pipeline() {
-        verifyJobResults(createPipeline());
+        runAndVerifyJobResults(createPipeline());
     }
 
-    private void verifyJobResults(final Job job) {
+    /**
+     * Builds a job on a slave with checkstyle and verifies that the information checkstyle provides in the tabs about
+     * the build are the information we expect.
+     */
+    @Test
+    public void should_retrieve_results_from_slave() throws Exception {
+        FreeStyleJob job = createFreeStyleJob();
+        Node slave = createSlaveForJob(job);
+
+        Build build = buildSuccessfulJobOnSlave(job, slave);
+
+        assertThat(build.getNode(), is(slave));
+        verifyJobResults(job, build);
+    }
+
+    private void runAndVerifyJobResults(final Job job) {
         Build build = buildSuccessfulJob(job);
 
-        AnalysisAction resultAction = createResultAction(build);
-        AnalysisAction projectAction = createProjectAction(job);
+        verifyJobResults(job, build);
+    }
+
+    private void verifyJobResults(final Job job, final Build build) {
+        P resultAction = createResultAction(build);
+        P projectAction = createProjectAction(job);
 
         projectAction.open();
         assertThat(projectAction.getCurrentUrl(), containsRegexp(resultAction.getUrl()));
@@ -163,6 +302,10 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
         assertThat(resultAction.getNumberOfNewWarnings(), is(getNumberOfWarnings()));
         assertThat(resultAction.getNumberOfFixedWarnings(), is(0));
 
+        assertThat(resultAction.getNumberOfWarningsWithHighPriority(), is(getNumberOfHighPriorityWarnings()));
+        assertThat(resultAction.getNumberOfWarningsWithNormalPriority(), is(getNumberOfNormalPriorityWarnings()));
+        assertThat(resultAction.getNumberOfWarningsWithLowPriority(), is(getNumberOfLowPriorityWarnings()));
+
         build.open();
         assertThatWarningsCountInSummaryIs(resultAction, getNumberOfWarnings());
         assertThatNewWarningsCountInSummaryIs(resultAction, getNumberOfWarnings());
@@ -170,6 +313,18 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
         assertThat(job, hasAction(projectAction.getName()));
         assertThat(job.getLastBuild(), hasAction(resultAction.getName()));
         assertThat(build, hasAction(resultAction.getName()));
+
+        assertThatDetailsAreFilled(resultAction);
+    }
+
+    /**
+     * Verifies that the detail views of the results are correctly set. E.g. Sub-classes may check the contents
+     * of the individual tabs. This default implementation is empty and should be overwritten.
+     *
+     * @param resultAction the action containing the results
+     */
+    protected void assertThatDetailsAreFilled(final P resultAction) {
+        // sub-classes may check the contents of the individual tabs
     }
 
     /**
@@ -302,9 +457,14 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      * Creates a freestyle job that has an enabled publisher of the plug-in under test. The job is expected to run with
      * build status SUCCESS.
      *
+     * @param owner the owner of the job (Jenkins or a folder)
      * @return the created freestyle job
      */
-    protected abstract FreeStyleJob createFreeStyleJob();
+    protected abstract FreeStyleJob createFreeStyleJob(final Container owner);
+
+    private FreeStyleJob createFreeStyleJob() {
+        return createFreeStyleJob(jenkins);
+    }
 
     /**
      * Creates a pipeline that has an enabled publisher of the plug-in under test. The job is expected to run with
@@ -316,9 +476,11 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
 
     /**
      * Creates a pipeline that enables the specified {@code stepName}. The first step of the pipeline copies the
-     * specified resource {@code stepName}. step as first instruction
-     * to the pipeline.
+     * specified resource {@code fileName} as first instruction to the pipeline.
      *
+     * @param fileName the name of the resource that will be copied to the pipeline (this file will be scanned for
+     *                 warnings)
+     * @param stepName the name of the publisher to run (as a pipeline step)
      * @return the created pipeline
      */
     protected WorkflowJob createPipelineWith(final String fileName, final String stepName) {
@@ -336,12 +498,40 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
     }
 
     /**
-     * Returns the number of warnings that the created freestyle job should produce.
+     * Returns the number of warnings that the created jobs should produce.
      *
      * @return total number of warnings
-     * @see #createFreeStyleJob()
+     * @see #createFreeStyleJob(Container)
+     * @see #createPipeline()
      */
     protected abstract int getNumberOfWarnings();
+
+    /**
+     * Returns the number of warnings with priority HIGH that the created jobs should produce.
+     *
+     * @return total number of warnings (priority HIGH)
+     * @see #createFreeStyleJob(Container)
+     * @see #createPipeline()
+     */
+    protected abstract int getNumberOfHighPriorityWarnings();
+
+    /**
+     * Returns the number of warnings with priority NORMAL that the created jobs should produce.
+     *
+     * @return total number of warnings (priority NORMAL)
+     * @see #createFreeStyleJob(Container)
+     * @see #createPipeline()
+     */
+    protected abstract int getNumberOfNormalPriorityWarnings();
+
+    /**
+     * Returns the number of warnings with priority LOW that the created jobs should produce.
+     *
+     * @return total number of warnings (priority LOW)
+     * @see #createFreeStyleJob(Container)
+     * @see #createPipeline()
+     */
+    protected abstract int getNumberOfLowPriorityWarnings();
 
     /** Mock that verifies that mails have been sent by Jenkins email-ext plugin. */
     @Inject
@@ -366,12 +556,13 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      * @param body    body of the mail
      */
     protected void configureEmailNotification(final FreeStyleJob job, final String subject, final String body) {
-        job.configure();
-        EmailExtPublisher pub = job.addPublisher(EmailExtPublisher.class);
-        pub.subject.set(subject);
-        pub.setRecipient("dev@example.com");
-        pub.body.set(body);
-        job.save();
+        // TODO: add a new job method that adds a publisher with configuration
+        job.edit(() ->
+            job.addPublisher(EmailExtPublisher.class, publisher -> {
+                publisher.subject.set(subject);
+                publisher.setRecipient("dev@example.com");
+                publisher.body.set(body);
+                }));
     }
 
     /**
@@ -393,20 +584,19 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
     }
 
     /**
-     * Set up a Job of a certain type with a given resource and a publisher which can be configured by providing a
-     * configurator
+     * Create a new freestyle job with a given resource and a publisher which can be configured by providing a
+     * configurator.
      *
-     * @param resourceToCopy              Resource to copy to build (Directory or File path)
-     * @param jobClass                    the type the job shall be created of, e.g. FreeStyleJob
-     * @param publisherBuildSettingsClass the type of the publisher to be added
-     * @param configurator                the configuration of the publisher
+     * @param resourceToCopy Resource to copy to build (Directory or File path)
+     * @param publisherClass the type of the publisher to be added
+     * @param owner          the owner of the job
+     * @param configurator   the configuration of the publisher
      * @return the new job
      */
-    public <J extends Job, T extends AnalysisSettings & PostBuildStep> J setupJob(String resourceToCopy,
-            Class<J> jobClass,
-            Class<T> publisherBuildSettingsClass,
+    public <T extends AnalysisSettings & PostBuildStep> FreeStyleJob createFreestyleJob(
+            final String resourceToCopy, final Container owner, Class<T> publisherClass,
             AnalysisConfigurator<T> configurator) {
-        return setupJob(resourceToCopy, jobClass, publisherBuildSettingsClass, configurator, null);
+        return setupJob(resourceToCopy, FreeStyleJob.class, publisherClass, null, owner, configurator);
     }
 
     /**
@@ -416,20 +606,36 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      * @param resourceToCopy              Resource to copy to build (Directory or File path)
      * @param jobClass                    the type the job shall be created of, e.g. FreeStyleJob
      * @param publisherBuildSettingsClass the type of the publisher to be added
+     * @param owner
      * @param configurator                the configuration of the publisher
-     * @param goal                        a maven goal to be added to the job or null otherwise
      * @return the new job
      */
     public <J extends Job, T extends AnalysisSettings & PostBuildStep> J setupJob(String resourceToCopy,
-            Class<J> jobClass,
-            Class<T> publisherBuildSettingsClass,
-            AnalysisConfigurator<T> configurator,
-            String goal) {
+            Class<J> jobClass, Class<T> publisherBuildSettingsClass,
+            final Container owner, AnalysisConfigurator<T> configurator) {
+        return setupJob(resourceToCopy, jobClass, publisherBuildSettingsClass, null, owner, configurator);
+    }
+
+    /**
+     * Set up a Job of a certain type with a given resource and a publisher which can be configured by providing a
+     * configurator
+     *
+     * @param resourceToCopy              Resource to copy to build (Directory or File path)
+     * @param jobClass                    the type the job shall be created of, e.g. FreeStyleJob
+     * @param publisherBuildSettingsClass the type of the publisher to be added
+     * @param goal                        a maven goal to be added to the job or null otherwise
+     * @param owner                       the owner of the job (Jenkins or a folder)
+     * @param configurator                the configuration of the publisher
+     * @return the new job
+     */
+    public <J extends Job, T extends AnalysisSettings & PostBuildStep> J setupJob(String resourceToCopy,
+            Class<J> jobClass, Class<T> publisherBuildSettingsClass,
+            String goal, final Container owner, AnalysisConfigurator<T> configurator) {
         if (jobClass.isAssignableFrom(MavenModuleSet.class)) {
             MavenInstallation.ensureThatMavenIsInstalled(jenkins);
         }
 
-        J job = jenkins.jobs.create(jobClass);
+        J job = owner.getJobs().create(jobClass);
         job.configure();
 
         if (resourceToCopy != null) {
@@ -560,7 +766,6 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
             //check whether to exchange the copy resource shell step
             if (!isAdditionalResource) {
                 job.removeFirstBuildStep();
-                elasticSleep(1000); // chrome needs some time
             }
 
             //add the new copy resource shell step
@@ -576,6 +781,20 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
         return job;
     }
 
+    /**
+     * Replaces the copy resource step of the specified job with a new step that copies the specified resource.
+     *
+     * @param newResourceToCopy    the new resource to be copied to build (Directory or File path) or null if not to be
+     *                             changed
+     * @param job                  the job to be changed
+     * @return the edited job
+     */
+    public void replaceResource(final String newResourceToCopy, Job job) {
+        job.edit(() -> {
+            job.removeFirstBuildStep();
+            job.copyResource(newResourceToCopy);
+        });
+    }
 
     /**
      * Creates a slave and configures thes specified job to run on that slave.
@@ -603,14 +822,12 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      *                               contain the pom.xml
      * @param goal                   The maven goals to set.
      * @param codeStyleBuildSettings The code analyzer to use or null if you do not want one.
-     * @param configurator           A configurator to custommize the code analyzer settings you want to use.
+     * @param configurator           A configurator to customize the code analyzer settings you want to use.
      * @param <T>                    The type of the Analyzer.
      * @return The configured job.
      */
     public <T extends AnalysisMavenSettings> MavenModuleSet setupMavenJob(String resourceProjectDir,
-            String goal,
-            Class<T> codeStyleBuildSettings,
-            AnalysisConfigurator<T> configurator) {
+            String goal, Class<T> codeStyleBuildSettings, AnalysisConfigurator<T> configurator) {
         MavenInstallation.ensureThatMavenIsInstalled(jenkins);
 
         MavenModuleSet job = jenkins.jobs.create(MavenModuleSet.class);
@@ -670,7 +887,8 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
     }
 
     /**
-     * Builds the job on the specified slave and waits until the job has been finished. The build result must be SUCCESS.
+     * Builds the job on the specified slave and waits until the job has been finished. The build result must be
+     * SUCCESS.
      *
      * @param job   the job to build
      * @param slave the slave to run the job on
@@ -684,12 +902,13 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      * When Given a finished build, an API-Url and a reference XML-File, this method compares if the api call to the
      * build matches the expected XML-File. Whitespace differences are ignored.
      *
-     * @param build           The build, whose api shall be called.
-     * @param apiUrl          The API-Url, declares which build API shall be called.
-     * @param expectedXmlPath The Resource-Path to a file, which contains the expected XML
+     * @param build                 The build, whose api shall be called.
+     * @param apiUrl                The API-Url, declares which build API shall be called.
+     * @param expectedXmlPath       The Resource-Path to a file, which contains the expected XML
      * @param ignoreAttributesDiffs whether to ignore attribute differences
      */
-    protected void assertXmlApiMatchesExpected(final Build build, final String apiUrl, final String expectedXmlPath, final boolean ignoreAttributesDiffs) {
+    protected void assertXmlApiMatchesExpected(final Build build, final String apiUrl,
+            final String expectedXmlPath, final boolean ignoreAttributesDiffs) {
         try {
             XMLUnit.setIgnoreWhitespace(true);
             String xmlUrl = build.url(apiUrl).toString();
@@ -698,7 +917,7 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
 
             Document actual = documentBuilder.parse(xmlUrl);
             Document expected = documentBuilder.parse(resource(expectedXmlPath).asFile());
-            Diff diff =new Diff(expected, actual);
+            Diff diff = new Diff(expected, actual);
             if (ignoreAttributesDiffs) {
                 diff.overrideDifferenceListener(new IgnoreAttributesDifferenceListener());
             }
@@ -712,12 +931,13 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
     /**
      * Creates a new view and adds the given column to the view.
      *
-     * @param columnClass The ListViewColumn that should bee added.
-     * @param <T>         The concrete type of the ListViewColumn.
-     * @return The ListView.
+     * @param columnClass the type of the column to add
+     * @param owner       the owner of this view
+     * @param <T>         the concrete type of the ListViewColumn
+     * @return the created view
      */
-    protected <T extends ListViewColumn> ListView addListViewColumn(Class<T> columnClass) {
-        ListView view = createNewViewForAllJobs(ListView.class);
+    protected <T extends ListViewColumn> ListView addListViewColumn(final Class<T> columnClass, final Container owner) {
+        ListView view = createNewViewForAllJobs(ListView.class, owner);
         view.addColumn(columnClass);
         view.save();
         return view;
@@ -726,12 +946,13 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
     /**
      * Creates a new view with a random name that matches all jobs.
      *
-     * @param viewClass The view that shall be used.
-     * @param <T>       The type constraint of the view.
-     * @return The view.
+     * @param viewClass the type of the view to add
+     * @param owner     the owner of this view
+     * @param <T>       the type constraint of the view
+     * @return the created view
      */
-    private <T extends View> T createNewViewForAllJobs(Class<T> viewClass) {
-        T view = jenkins.views.create(viewClass, jenkins.createRandomName());
+    private <T extends View> T createNewViewForAllJobs(final Class<T> viewClass, final Container owner) {
+        T view = owner.getViews().create(viewClass, jenkins.createRandomName());
         view.configure();
         view.matchAllJobs();
         return view;
@@ -760,12 +981,14 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
     /**
      * Creates a new Dashboard-View and adds the given portlet as "bottom portlet".
      *
-     * @param portlet The Portlet that shall be added.
-     * @param <T>     The type constraint of the portlet.
+     * @param <T>     the type constraint of the portlet
+     * @param portlet the portlet to add
+     * @param owner   the owner of the view
      * @return The view.
      */
-    protected <T extends AbstractDashboardViewPortlet> DashboardView addDashboardViewAndBottomPortlet(Class<T> portlet) {
-        DashboardView view = createNewViewForAllJobs(DashboardView.class);
+    protected <T extends AbstractDashboardViewPortlet> DashboardView addDashboardViewAndBottomPortlet(
+            final Class<T> portlet, final Container owner) {
+        DashboardView view = createNewViewForAllJobs(DashboardView.class, owner);
         view.addBottomPortlet(portlet);
         view.save();
         return view;
@@ -840,18 +1063,18 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
     protected void assertThatBuildHasNoWarnings(final Build build) {
         assertThat(build.open(), hasContent("0 warnings"));
     }
-    
+
     /**
-     * Difference listener that overrides the default one if attributes related different 
+     * Difference listener that overrides the default one if attributes related different
      * need to be ignored.
      */
     public static class IgnoreAttributesDifferenceListener implements DifferenceListener {
-        
-        private static final int[] IGNORE = new int[] {
+
+        private static final int[] IGNORE = new int[]{
                 DifferenceConstants.ATTR_NAME_NOT_FOUND_ID,
                 DifferenceConstants.ELEMENT_NUM_ATTRIBUTES_ID
-            };
-        
+        };
+
         @Override
         public int differenceFound(Difference difference) {
             return Arrays.binarySearch(IGNORE, difference.getId()) >= 0

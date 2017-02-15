@@ -19,7 +19,7 @@ public class JUnitProgressReporter extends RunListener {
 
     @Override
     public void testStarted(final Description description) throws Exception {
-        System.out.println("... Starting setup for " + getSuffix(description));
+        System.out.println("=== Starting test " + getSuffix(description));
     }
 
     private String getSuffix(final Object object) {

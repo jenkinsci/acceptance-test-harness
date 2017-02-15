@@ -154,7 +154,12 @@ public class PluginMetadata {
             try (JarFile j = new JarFile(jpi)) {
                 Attributes main = j.getManifest().getMainAttributes();
                 String name = main.getValue("Short-Name");
-                String version = trimVersion(main.getValue("Plugin-Version"));
+                String fullVersion = main.getValue("Plugin-Version");
+                if (fullVersion == null) {
+                    System.err.println("Warning: no Plugin-Version found in " + jpi);
+                    fullVersion = "0";
+                }
+                String version = trimVersion(fullVersion);
                 String requiredCore = main.getValue("Jenkins-Version");
                 String gav = main.getValue("Group-Id")+":"+name+":"+version;
                 String dep = main.getValue("Plugin-Dependencies");

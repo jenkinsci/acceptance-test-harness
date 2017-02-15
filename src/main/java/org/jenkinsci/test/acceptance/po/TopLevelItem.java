@@ -7,11 +7,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.inject.Injector;
+import org.openqa.selenium.WebElement;
 
 /**
  * Super class for top level items. 
- * Top level items include {@link Job}s and other non-buildable items
- * such as {@link FolderItem}s.
+ * Top level items include {@link Job}s and other non-buildable items such as {@link Folder}s.
  * Use {@link Describable} annotation to register an implementation.
  */
 public abstract class TopLevelItem extends ContainerPageObject {
@@ -58,6 +58,26 @@ public abstract class TopLevelItem extends ContainerPageObject {
     }
 
     /**
+     * Changes the description. Opens the configuration section, sets the description and saves the form.
+     *
+     * @param description the description of the job
+     * @param withCodeMirror if description field uses CodeMirror or not (depending on Markup Formatter)
+     */
+    public void description(final String description, final boolean withCodeMirror) {
+        configure();
+
+        if (withCodeMirror) {
+            new CodeMirror(this, "/description").set(description);
+        } else {
+            WebElement descrElem = find(by.name("description"));
+            descrElem.clear();
+            descrElem.sendKeys(description);
+        }
+
+        save();
+    }
+
+    /**
      * "Casts" this object into a subtype by creating the specified type.
      */
     public <T extends TopLevelItem> T as(Class<T> type) {
@@ -91,4 +111,6 @@ public abstract class TopLevelItem extends ContainerPageObject {
     public int hashCode() {
         return url.toExternalForm().hashCode();
     }
+
+    public abstract void delete();
 }

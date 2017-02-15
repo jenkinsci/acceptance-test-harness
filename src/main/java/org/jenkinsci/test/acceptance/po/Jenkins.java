@@ -1,23 +1,25 @@
 package org.jenkinsci.test.acceptance.po;
 
-import static org.hamcrest.Matchers.not;
-import static org.jenkinsci.test.acceptance.Matchers.hasContent;
-import hudson.util.VersionNumber;
-
 import java.io.IOException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
+import org.apache.commons.io.IOUtils;
 import org.hamcrest.MatcherAssert;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebDriver;
 
 import com.google.common.base.Predicate;
 import com.google.inject.Injector;
 
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.WebDriver;
+import static org.hamcrest.Matchers.*;
+import static org.jenkinsci.test.acceptance.Matchers.*;
+
+import hudson.util.VersionNumber;
 
 /**
  * Top-level object that acts as an entry point to various systems.
@@ -27,7 +29,7 @@ import org.openqa.selenium.WebDriver;
  *
  * @author Kohsuke Kawaguchi
  */
-public class Jenkins extends Node {
+public class Jenkins extends Node implements Container {
     private VersionNumber version;
 
     public final JobsMixIn jobs;
@@ -68,9 +70,14 @@ public class Jenkins extends Node {
 
         String text;
         try {
-            text = url.openConnection().getHeaderField("X-Jenkins");
+            URLConnection urlConnection = url.openConnection();
+            text = urlConnection.getHeaderField("X-Jenkins");
             if (text == null) {
-                throw new AssertionError("Application running on " + url + " does not seem to be Jenkins");
+
+                String pageText = IOUtils.toString(urlConnection.getInputStream());
+                throw new AssertionError(
+                        "Application running on " + url + " does not seem to be Jenkins:\n" + pageText
+                );
             }
         } catch (IOException ex) {
             throw new AssertionError(ex);
@@ -183,5 +190,15 @@ public class Jenkins extends Node {
     @Override
     public String getName() {
         return "(master)";
+    }
+
+    @Override
+    public JobsMixIn getJobs() {
+        return jobs;
+    }
+
+    @Override
+    public ViewsMixIn getViews() {
+        return views;
     }
 }

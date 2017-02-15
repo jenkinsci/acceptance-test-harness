@@ -45,6 +45,9 @@ import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.git.GitRepo;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation;
+import org.jenkinsci.test.acceptance.plugins.workflow_multibranch.GithubBranchSource;
+import org.jenkinsci.test.acceptance.plugins.workflow_shared_library.WorkflowGithubSharedLibrary;
+import org.jenkinsci.test.acceptance.plugins.workflow_shared_library.WorkflowSharedLibraryGlobalConfig;
 import org.jenkinsci.test.acceptance.po.Artifact;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.DumbSlave;
@@ -62,6 +65,10 @@ import org.jvnet.hudson.test.Issue;
  * Roughly follows <a href="https://github.com/jenkinsci/workflow-plugin/blob/master/TUTORIAL.md">the tutorial</a>.
  */
 public class WorkflowPluginTest extends AbstractJUnitTest {
+
+    private static final String SHARED_LIBRARY_NAME = "Greeting";
+    private static final String NAME = "myname";
+    private static final String EXPECTED_OUTPUT_FROM_LIBRARY_VARS = "Hello from vars my friend " + NAME;
 
     @Inject private SlaveController slaveController;
     @Inject DockerContainerHolder<GitContainer> gitServer;
@@ -203,7 +210,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         repo.transferToDockerContainer(host, port);
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
         job.script.set(
-            "node {ws('" + tmp.getRoot() + "') {\n" + // TODO UNIX_PATH_MAX workaround
+            "node {ws('" + tmp.getRoot() + "') {\n" + // TODO JENKINS-36997 workaround
             "  docker.image('cloudbees/java-build-tools').inside {\n" +
             "    git url: '" + container.getRepoUrlInsideDocker() + "', credentialsId: 'gitcreds'\n" +
             "    sh 'mkdir ~/.ssh && echo StrictHostKeyChecking no > ~/.ssh/config'\n" +
@@ -248,6 +255,43 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         job.save();
         Build b2 = job.startBuild().shouldSucceed();
         assertTrue(b2.getChanges().hasChanges());
+    }
+
+    @WithPlugins({"git@3.0.1", "workflow-job", "workflow-cps", "workflow-basic-steps", "workflow-durable-task-step", "workflow-multibranch", "github-branch-source", "workflow-cps-global-lib"})
+    @Test
+    public void testSharedLibraryFromGithub() {
+        this.configureSharedLibrary();
+
+        WorkflowJob job = configureJob();
+        Build b = job.startBuild().shouldSucceed();
+
+        String consoleOutput = b.getConsole();
+        assertThat(consoleOutput, containsString(EXPECTED_OUTPUT_FROM_LIBRARY_VARS));
+    }
+
+    private void configureSharedLibrary() {
+        jenkins.configure();
+
+        WorkflowGithubSharedLibrary sharedLibrary = new WorkflowSharedLibraryGlobalConfig(jenkins).addSharedLibrary(WorkflowGithubSharedLibrary.class);
+        sharedLibrary.name.set(SHARED_LIBRARY_NAME);
+        final GithubBranchSource source = sharedLibrary.selectSCM();
+
+        source.owner("varyvoltest");
+        source.selectRepository("pipeline-basic-shared-library");
+
+        jenkins.save();
+    }
+
+    private WorkflowJob configureJob() {
+        WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
+        job.script.set(
+                "@Library('" + SHARED_LIBRARY_NAME + "@master') _\n" +
+                        "\n" +
+                        "otherGreeting('" + NAME + "')");
+        job.sandbox.check();
+        job.save();
+
+        return job;
     }
 
 }

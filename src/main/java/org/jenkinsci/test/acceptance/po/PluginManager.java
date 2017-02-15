@@ -4,36 +4,29 @@ import javax.annotation.Nullable;
 import javax.inject.Named;
 import javax.inject.Provider;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import com.google.common.base.Predicate;
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.aether.resolution.ArtifactResolutionException;
-import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.po.UpdateCenter.InstallationFailedException;
 import org.jenkinsci.test.acceptance.update_center.PluginMetadata;
 import org.jenkinsci.test.acceptance.update_center.PluginSpec;
 import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata;
 import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata.UnableToResolveDependencies;
 import org.junit.internal.AssumptionViolatedException;
 import org.openqa.selenium.StaleElementReferenceException;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 
 import com.google.inject.Inject;
 
 import hudson.util.VersionNumber;
 
-import static org.hamcrest.Matchers.not;
 
 /**
  * Page object for plugin manager.
@@ -216,13 +209,7 @@ public class PluginManager extends ContainerPageObject {
                                 name + " has version " + availableVersion + " but " + requiredVersion + " was requested");
                     }
                     File localFile = newPlugin.resolve(injector, availableVersion);
-                    try {
-                        installPlugin(localFile);
-                    } finally {
-                        if (!localFile.delete()) {
-                            localFile.deleteOnExit();
-                        }
-                    }
+                    installPlugin(localFile);
                 }
             }
         } else {

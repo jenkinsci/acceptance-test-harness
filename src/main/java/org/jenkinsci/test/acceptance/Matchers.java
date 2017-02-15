@@ -6,7 +6,6 @@ import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisPlugin;
 import org.jenkinsci.test.acceptance.po.*;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -59,7 +58,7 @@ public class Matchers {
             @Override
             public boolean matchesSafely(WebDriver item) {
                 try {
-                    item.findElements(selector);
+                    item.findElement(selector);
                     return true;
                 } catch (NoSuchElementException _) {
                     return false;
@@ -175,6 +174,44 @@ public class Matchers {
             @Override
             public void describeMismatchSafely(final Jenkins item, final Description desc) {
                 desc.appendText(user + " is not logged in.");
+            }
+        };
+    }
+
+    public static Matcher<Login> loggedInAs(final String user) {
+        return new Matcher<Login>("has logged in user %s", user) {
+            @Override
+            public boolean matchesSafely(final Login login) {
+                try {
+                    login.find(by.href("/user/" + user));
+                    return true;
+                } catch (NoSuchElementException e) {
+                    return false;
+                }
+            }
+
+            @Override
+            public void describeMismatchSafely(final Login item, final Description desc) {
+                desc.appendText(user + " is not logged in.");
+            }
+        };
+    }
+
+    public static Matcher<Login> hasInvalidLoginInformation() {
+        return new Matcher<Login>("has invalid login information message") {
+            @Override
+            public boolean matchesSafely(final Login login) {
+                try {
+                    login.find(by.xpath("//div[contains(text(), 'Invalid login information. Please try again.')]"));
+                    return true;
+                } catch (NoSuchElementException e) {
+                    return false;
+                }
+            }
+
+            @Override
+            public void describeMismatchSafely(final Login item, final Description desc) {
+                desc.appendText("There is no invalid login message.");
             }
         };
     }

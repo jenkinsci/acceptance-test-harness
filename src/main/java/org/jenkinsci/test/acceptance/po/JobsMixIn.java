@@ -103,7 +103,9 @@ public class JobsMixIn extends MixIn {
             choose("copy");
         } else {
             // a bit hacky: send a tab to enable the OK button
-            find(By.name("from")).sendKeys("\t");
+            WebElement fromElem = find(By.name("from"));
+            fromElem.sendKeys("\t");
+            blur(fromElem);
         }
         clickButton("OK");
     }

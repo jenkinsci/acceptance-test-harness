@@ -8,7 +8,10 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Before;
 import org.junit.Test;
 
-@WithPlugins("plot")
+@WithPlugins({
+        "matrix-project", // JENKINS-37545
+        "plot"
+})
 public class PlotPluginTest extends AbstractJUnitTest {
 
     private FreeStyleJob job;

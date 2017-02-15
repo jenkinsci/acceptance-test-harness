@@ -22,7 +22,7 @@ import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
 
-@WithPlugins("xvnc")
+@WithPlugins({"xvnc", "ssh-slaves"})
 @Category(DockerTest.class)
 @WithDocker
 public class XvncPluginTest extends AbstractJUnitTest {

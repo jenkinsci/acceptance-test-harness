@@ -2,6 +2,7 @@ package org.jenkinsci.test.acceptance.update_center;
 
 import com.cloudbees.sdk.extensibility.Extension;
 import java.io.File;
+import java.util.Iterator;
 import java.util.Map;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -26,7 +27,8 @@ public class LocalOverrideUpdateCenterMetadataDecoratorImpl implements UpdateCen
             File userHome = new File(System.getProperty("user.home"));
             File localRepo = new File(new File(userHome, ".m2"), "repository");
             VersionScheme versionScheme = new GenericVersionScheme();
-            for (Map.Entry<String,PluginMetadata> entry : ucm.plugins.entrySet()) {
+            for (Iterator<Map.Entry<String, PluginMetadata>> it = ucm.plugins.entrySet().iterator(); it.hasNext();) {
+                Map.Entry<String,PluginMetadata> entry = it.next();
                 DefaultArtifact artifact = entry.getValue().getDefaultArtifact();
                 File artifactDir = new File(new File(localRepo, artifact.getGroupId().replace('.', File.separatorChar)), artifact.getArtifactId());
                 File metadata = new File(artifactDir, "maven-metadata-local.xml");
@@ -39,9 +41,14 @@ public class LocalOverrideUpdateCenterMetadataDecoratorImpl implements UpdateCen
                             if (version.endsWith("-SNAPSHOT") && versionScheme.parseVersion(version).compareTo(ucVersion) > 0) {
                                 File hpi = new File(new File(artifactDir, version), artifact.getArtifactId() + "-" + version + ".hpi");
                                 if (hpi.isFile()) {
-                                    System.err.println("Overriding " + entry.getKey() + " " + ucVersion + " with local build of " + version);
+                                    String name = entry.getKey();
+                                    System.err.println("Overriding " + name + " " + ucVersion + " with local build of " + version);
                                     PluginMetadata m = PluginMetadata.LocalOverride.create(hpi);
-                                    ucm.plugins.put(m.getName(), m);
+                                    String parsedName = m.getName();
+                                    if (!name.equals(parsedName)) {
+                                        throw new AssertionError("wrong name: " + parsedName + " vs. " + name);
+                                    }
+                                    entry.setValue(m);
                                 }
                             }
                         }

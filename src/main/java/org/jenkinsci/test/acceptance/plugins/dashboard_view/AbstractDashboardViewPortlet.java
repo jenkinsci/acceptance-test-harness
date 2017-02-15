@@ -4,7 +4,7 @@ import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 
 /**
- * Abstract base class for Dashboard View Portlets.
+ * A portlet that is shown in the {@link DashboardView}.
  *
  * @author Fabian Trampusch
  */
@@ -16,13 +16,15 @@ public class AbstractDashboardViewPortlet extends PageAreaImpl {
     }
 
     /**
-     * Presses "delete" on the portlet.
+     * Deletes the portlet, i.e. removes it from the dashboard.
      */
     public void delete() {
         control("repeatable-delete").click();
     }
 
     /**
+     * Sets the name of the portlet.
+     *
      * @param name the name of the portlet
      */
     public void setName(String name) {
@@ -30,11 +32,11 @@ public class AbstractDashboardViewPortlet extends PageAreaImpl {
     }
 
     /**
+     * Returns the name of the portlet.
+     *
      * @return the name of the portlet
      */
     public String getName() {
         return this.name.resolve().getAttribute("value");
     }
-
-
 }

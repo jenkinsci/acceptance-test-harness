@@ -13,7 +13,10 @@ import org.junit.Test;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-@WithPlugins("postbuildscript")
+@WithPlugins({
+        "matrix-project", // JENKINS-37545
+        "postbuildscript"
+})
 public class PostBuildScriptPluginTest extends AbstractJUnitTest {
 
     private FreeStyleJob j;

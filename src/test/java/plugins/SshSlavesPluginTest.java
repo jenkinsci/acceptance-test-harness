@@ -44,7 +44,7 @@ import org.junit.Test;
 import com.google.inject.Inject;
 import org.junit.experimental.categories.Category;
 
-@WithPlugins("ssh-slaves")
+@WithPlugins({"ssh-slaves@1.11", "credentials@2.1.10", "ssh-credentials@1.12"})
 @Category(DockerTest.class)
 @WithDocker
 public class SshSlavesPluginTest extends AbstractJUnitTest {
@@ -148,6 +148,10 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
             @Override
             public Boolean call() throws Exception {
                 return slave.getLog().contains(message);
+            }
+
+            @Override public String toString() {
+                return "slave log to contain '" + message + "':\n" + slave.getLog();
             }
         });
     }

@@ -4,14 +4,13 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 
 import org.jenkinsci.test.acceptance.po.Jenkins;
+import org.jenkinsci.test.acceptance.po.Plugin;
 import org.jenkinsci.test.acceptance.po.PluginManager;
 import org.jenkinsci.test.acceptance.update_center.PluginSpec;
 import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata.UnableToResolveDependencies;
@@ -27,6 +26,8 @@ import com.google.inject.name.Named;
 
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
+
+import hudson.util.VersionNumber;
 
 /**
  * Indicates that a test requires the presence of the specified plugins.
@@ -93,16 +94,16 @@ public @interface WithPlugins {
                     installPlugins(plugins);
 
                     for (PluginSpec plugin : plugins) {
+                        Plugin installedPlugin = jenkins.getPlugin(plugin.getName());
+                        VersionNumber installedVersion = installedPlugin.getVersion();
+                        String version = installedVersion.toString();
                         pluginReporter.log(
                                 d.getClassName() + "." + d.getMethodName(),
                                 plugin.getName(),
-                                plugin.getVersion()
+                                version
                         );
                     }
-                    System.out.println("... End of setup for " + getDescription(d));
-                    System.out.println("=== Starting test " + getDescription(d));
                     base.evaluate();
-                    System.out.println("=== End of test " + getDescription(d));
                 }
 
                 private List<PluginSpec> combinePlugins(WithPlugins... wp) {
@@ -126,7 +127,7 @@ public @interface WithPlugins {
                         PluginSpec spec = iterator.next();
                         switch (pm.installationStatus(spec)) {
                             case NOT_INSTALLED:
-                                LOGGER.info(spec + " is up to date");
+                                LOGGER.info(spec + " is not installed");
                                 break;
                             case UP_TO_DATE:
                                 iterator.remove(); // Already installed
@@ -158,10 +159,6 @@ public @interface WithPlugins {
                     }
                 }
             };
-        }
-
-        private String getDescription(final Description d) {
-            return d + ": " + new SimpleDateFormat("HH:mm:ss").format(new Date());
         }
     }
 }

@@ -24,6 +24,7 @@
 package org.jenkinsci.test.acceptance.po;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.openqa.selenium.NoSuchElementException;
 
 public class User extends ContainerPageObject {
 
@@ -42,45 +43,51 @@ public class User extends ContainerPageObject {
 
     private User(Jenkins context) {
         super(context, context.url("me/"));
-        load();
     }
 
     public User(Jenkins context, String name) {
         super(context, context.url("user/%s/", name));
-        load();
     }
 
     private void load() {
-        JsonNode json = getJson();
-        id = json.get("id").asText();
-        fullName = json.get("fullName").asText();
-        JsonNode property = json.get("property");
-        if (property != null) {
-            if (property.isArray()) {
-                for (JsonNode propertyNodes : property) {
-                    if (propertyNodes.get("address") != null && propertyNodes.get("address").asText() != "null") {
-                        mail = propertyNodes.get("address").asText();
+        if (id != null) return;
+        try {
+            JsonNode json = getJson();
+            id = json.get("id").asText();
+            fullName = json.get("fullName").asText();
+            JsonNode property = json.get("property");
+            if (property != null) {
+                if (property.isArray()) {
+                    for (JsonNode propertyNodes : property) {
+                        if (propertyNodes.get("address") != null && propertyNodes.get("address").asText() != "null") {
+                            mail = propertyNodes.get("address").asText();
+                        }
                     }
                 }
             }
+        } catch (NoSuchElementException nse) {
+            // /me not accessible => not logged in
         }
     }
 
     public String id() {
+        load();
         return id;
     }
 
     public String fullName() {
+        load();
         return fullName;
+    }
+
+    public String mail() {
+        load();
+        return mail;
     }
 
     public User fullName(String fullName) {
         control("/fullName").set(fullName);
         return this;
-    }
-
-    public String mail() {
-        return mail;
     }
 
     public void delete() {
@@ -90,7 +97,7 @@ public class User extends ContainerPageObject {
 
     @Override
     public String toString() {
-        return String.format("%s (%s)", id, fullName);
+        return String.format("%s (%s)", id(), fullName());
     }
 
     @Override
@@ -101,11 +108,11 @@ public class User extends ContainerPageObject {
         if (!getClass().equals(rhs.getClass())) return false;
 
         User other = (User) rhs;
-        return id.equals(other.id);
+        return id().equals(other.id());
     }
 
     @Override
     public int hashCode() {
-        return id.hashCode();
+        return id().hashCode();
     }
 }

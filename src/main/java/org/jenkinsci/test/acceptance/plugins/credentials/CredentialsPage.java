@@ -8,6 +8,7 @@ import org.jenkinsci.test.acceptance.po.*;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+import org.openqa.selenium.WebDriver;
 
 public class CredentialsPage extends ConfigurablePageObject {
     public final Control addButton = control(by.xpath("//select[contains(@class, 'setting-input dropdownList')]"));
@@ -20,7 +21,26 @@ public class CredentialsPage extends ConfigurablePageObject {
      * @param domainName
      */
     public CredentialsPage(Jenkins j, String domainName) {
-        super(j, j.url("credentials/store/system/domain/"+domainName+"/newCredentials"));
+        super(j, j.url("credentials/store/system/domain/" + domainName + "/newCredentials"));
+    }
+
+    /**
+     * Create a new Credential scoped to a Folder
+     * @param f
+     * @param domainName
+     */
+    public CredentialsPage(Folder f, String domainName) {
+        super(f, f.url("credentials/store/folder/domain/" + domainName + "/newCredentials"));
+    }
+
+    /**
+     * Create a new personal Credential
+     * @param j
+     * @param domainName
+     * @param userName
+     */
+    public CredentialsPage(Jenkins j, String domainName, String userName) {
+        super(j, j.url(String.format("user/%s/credentials/store/user/domain/%s/newCredentials", userName, domainName)));
     }
 
     public <T extends Credential> T add(Class<T> type) {
@@ -52,5 +72,14 @@ public class CredentialsPage extends ConfigurablePageObject {
         visit(deleteUrl);
         elasticSleep(1000); // configure page requires some time to load
         clickButton("Yes");
+    }
+
+    @Override
+    public WebDriver open() {
+        WebDriver wd = super.open();
+        // wait for default form fields to be present to avoid possible race
+        // condition when changing credentials type too fast (happens rarely)
+        waitFor(by.name("_.id"));
+        return wd;
     }
 }

@@ -2,6 +2,7 @@ package org.jenkinsci.test.acceptance.po;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -66,8 +68,10 @@ public abstract class ContainerPageObject extends ConfigurablePageObject {
             con.setRequestProperty("Cookie", StringUtils.join(driver.manage().getCookies(), ";"));
 
             return jsonParser.readTree(con.getInputStream());
+        } catch (MalformedURLException e) {
+            throw new Error(e);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to read from " + url, e);
+            throw new NoSuchElementException("Failed to read from " + url, e);
         }
     }
 

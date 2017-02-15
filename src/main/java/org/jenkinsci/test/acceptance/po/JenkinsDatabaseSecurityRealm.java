@@ -23,6 +23,8 @@
  */
 package org.jenkinsci.test.acceptance.po;
 
+import org.openqa.selenium.NoSuchElementException;
+
 @Describable({"Jenkins’ own user database", "Jenkins’s own user database"})
 public class JenkinsDatabaseSecurityRealm extends SecurityRealm {
 
@@ -34,20 +36,51 @@ public class JenkinsDatabaseSecurityRealm extends SecurityRealm {
         control("allowSignup").check(allow);
     }
 
+    public Signup signup() {
+        Signup signup = new Signup(getPage().getJenkins());
+        signup.open();
+        return signup;
+    }
+
     public User signup(String name) {
         return signup(name, name, name, name + "@mailinator.com");
     }
 
     public User signup(String name, String pwd, String fullName, String email) {
-        getPage().getJenkins().visit("signup");
-        control(by.input("username")).set(name);
-        control(by.input("password1")).set(pwd);
-        control(by.input("password2")).set(pwd);
-        control(by.input("fullname")).set(fullName);
-        control(by.input("email")).set(email);
+        return signup().password(pwd).fullname(fullName).email(email).signup(name);
+    }
 
-        clickButton("Sign up");
+    public static final class Signup extends PageObject {
 
-        return new User(getPage().getJenkins(), name);
+        protected Signup(Jenkins context) {
+            super(context, context.url("signup"));
+        }
+
+        public Signup password(String pwd) {
+            control(by.input("password1")).set(pwd);
+            control(by.input("password2")).set(pwd);
+            return this;
+        }
+
+        public Signup fullname(String name) {
+            control(by.input("fullname")).set(name);
+            return this;
+        }
+
+        public Signup email(String mail) {
+            try {
+                control(by.input("email")).set(mail);
+            } catch (NoSuchElementException ex) {
+                throw new AssertionError("email field requires mailer plugin installed", ex);
+            }
+            return this;
+        }
+
+        public User signup(String name) {
+            control(by.input("username")).set(name);
+            clickButton("Sign up");
+
+            return new User(getJenkins(), name);
+        }
     }
 }

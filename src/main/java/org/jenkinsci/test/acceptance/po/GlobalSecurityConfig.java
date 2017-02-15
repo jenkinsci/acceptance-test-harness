@@ -25,12 +25,18 @@ package org.jenkinsci.test.acceptance.po;
 
 import java.net.URL;
 
+import org.jenkinsci.test.acceptance.plugins.authorize_project.BuildAccessControl;
+import org.jenkinsci.test.acceptance.plugins.workflow_multibranch.BranchSource;
 import org.openqa.selenium.WebElement;
 
 /**
  * Global security configuration UI.
  */
 public class GlobalSecurityConfig extends ContainerPageObject {
+
+    private static final String SAFE_HTML = "Safe HTML";
+
+    public final Control csrf = control(by.name("_.csrf"));
 
     public GlobalSecurityConfig(Jenkins context) {
         super(context, context.url("configureSecurity/"));
@@ -51,6 +57,23 @@ public class GlobalSecurityConfig extends ContainerPageObject {
         return selectFromRadioGroup(type);
     }
 
+    public <T extends BuildAccessControl> T addBuildAccessControl(final Class<T> type) {
+        final String path = createPageArea("/jenkins-security-QueueItemAuthenticatorConfiguration/authenticators", new Runnable() {
+            @Override public void run() {
+                control(by.path("/jenkins-security-QueueItemAuthenticatorConfiguration/hetero-list-add[authenticators]")).selectDropdownMenu(type);
+            }
+        });
+
+        return newInstance(type, this, path);
+    }
+
+    public void selectSafeHtmlFormatter() {
+        this.selectMarkupFormatter(SAFE_HTML);
+    }
+
+    private void selectMarkupFormatter(final String formatter) {
+        find(by.option(formatter)).click();
+    }
 
     private <T> T selectFromRadioGroup(Class<T> type) {
         WebElement radio = findCaption(type, new Finder<WebElement>() {

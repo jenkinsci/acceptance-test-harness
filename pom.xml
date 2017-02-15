@@ -9,7 +9,7 @@
   </parent>
 
   <artifactId>acceptance-test-harness</artifactId>
-  <version>1.44-SNAPSHOT</version>
+  <version>1.51-SNAPSHOT</version>
 
   <name>Acceptance Test Harness</name>
   <licenses>
@@ -35,6 +35,7 @@
     <monte.version>0.7.7</monte.version>
     <mockito.version>1.10.19</mockito.version>
     <cucumber.options />
+    <trimStackTrace>false</trimStackTrace> <!-- surefire -->
   </properties>
 
   <repositories>
@@ -372,7 +373,7 @@
     <dependency>
       <groupId>org.jenkins-ci.main</groupId>
       <artifactId>remoting</artifactId>
-      <version>2.48</version>
+      <version>3.2</version>
     </dependency>
     <dependency>
       <groupId>com.jcraft</groupId>
@@ -412,6 +413,11 @@
         </exclusion>
       </exclusions>
     </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.test</groupId>
+      <artifactId>docker-fixtures</artifactId>
+      <version>1.0</version>
+    </dependency>
   </dependencies>
 
   <build>
@@ -431,9 +437,25 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.2</version>
         <configuration>
-          <source>1.7</source>
-          <target>1.7</target>
+          <source>1.8</source>
+          <target>1.8</target>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.10.3</version>
+        <configuration>
+          <additionalparam>-Xdoclint:none</additionalparam>
+        </configuration>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <configuration>
+              <additionalparam>-Xdoclint:none</additionalparam>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <groupId>org.codehaus.gmaven</groupId>
@@ -512,6 +534,7 @@
             so there's no point in running tests during a release of the harness
           -->
           <arguments>-DskipTests</arguments>
+          <useReleaseProfile>false</useReleaseProfile>
         </configuration>
         <dependencies>
             <dependency>
