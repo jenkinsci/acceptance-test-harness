@@ -12,7 +12,7 @@ import org.openqa.selenium.WebElement;
 /**
  * @author Kohsuke Kawaguchi
  */
-@Describable("Node")
+@Describable({"Node", "org.jvnet.jenkins.plugins.nodelabelparameter.NodeParameterDefinition"})
 public class NodeParameter extends Parameter {
     public final Control runIfSuccess = control("triggerIfResult[success]");
     public final Control runIfUnstable = control("triggerIfResult[unstable]");

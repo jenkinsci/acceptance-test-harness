@@ -9,8 +9,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -29,12 +31,14 @@ import org.junit.internal.AssumptionViolatedException;
 import org.openqa.selenium.WebElement;
 import org.zeroturnaround.zip.ZipUtil;
 
+import com.google.common.reflect.ClassPath;
 import com.google.inject.Injector;
 
 import cucumber.api.DataTable;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.jenkinsci.test.acceptance.Matchers.by;
 
 /**
  * Job Page object superclass.
@@ -44,6 +48,24 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
  */
 public class Job extends TopLevelItem {
     public List<Parameter> getParameters() {
+        if(parameters.isEmpty()) {
+            configure();
+            List<WebElement> paramElements = driver.findElements(by.xpath("//div[starts-with(@path,'/properties/hudson-model-ParametersDefinitionProperty/parameter')]"));
+            for (WebElement paramElement : paramElements) {
+                List<Class<? extends Parameter>> currentParamClasses = new LinkedList<>(Parameter.all());
+                for (Class<? extends Parameter> paramClass : currentParamClasses) {
+                    String[] captions = paramClass.getAnnotation(Describable.class).value();
+                    for (String value : captions) {
+                        if (value.equals(paramElement.getAttribute("descriptorId"))) {
+                            Parameter param = newInstance(paramClass, this, paramElement.getAttribute("path"));
+                            param.setNameProperty(param.control("name").resolve().getAttribute("value"));
+                            parameters.add(param);
+                        }
+                    }
+                }
+            }
+        }
+
         return parameters;
     }
 
@@ -323,6 +345,7 @@ public class Job extends TopLevelItem {
     public Build scheduleBuild(Map<String, ?> params) {
         open();
         int nb = getJson().get("nextBuildNumber").intValue();
+        List<Parameter> parameters = getParameters();
         if (parameters.isEmpty()) {
             clickLink("Build Now");
         } else {
