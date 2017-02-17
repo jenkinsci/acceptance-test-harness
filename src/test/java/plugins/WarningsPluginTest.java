@@ -1,6 +1,8 @@
 package plugins;
 
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,10 +15,10 @@ import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
 import org.jenkinsci.test.acceptance.plugins.envinject.EnvInjectConfig;
+import org.jenkinsci.test.acceptance.plugins.matrix_auth.MatrixAuthorizationStrategy;
+import org.jenkinsci.test.acceptance.plugins.mock_security_realm.MockSecurityRealm;
 import org.jenkinsci.test.acceptance.plugins.warnings.GroovyParser;
 import org.jenkinsci.test.acceptance.plugins.warnings.ParsersConfiguration;
-import org.jenkinsci.test.acceptance.po.Jenkins;
-import org.jenkinsci.test.acceptance.po.LoggedInAuthorizationStrategy;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsAction;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsBuildSettings;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsColumn;
@@ -25,6 +27,7 @@ import org.jenkinsci.test.acceptance.po.Container;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.FreeStyleMultiBranchJob;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
+import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.ListView;
 import org.jenkinsci.test.acceptance.po.MatrixConfiguration;
@@ -71,29 +74,28 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
     private static final String JAVA_TITLE = JAVA_ID;
     private static final String CLANG_TITLE = "LLVM/Clang Warnings";
     private static final String GROOVY_LINE_FILE_NAME = "groovy-line.txt";
+    private static final String ILLEGAL_PARSER_SCRIPT = "import hudson.plugins.warnings.parser.Warning\n"
+            + "import hudson.plugins.analysis.util.model.Priority;\n"
+            + "String all = matcher.group(1);\n"
+            + "Priority test = Priority.fromString('NORMAL');\n" // not on whitelist!!
+            + "return new Warning(all, 42, all, all, all);";
+    private static final String LEGAL_PARSER_SCRIPT = "import hudson.plugins.warnings.parser.Warning\n"
+            + "import hudson.plugins.analysis.util.model.Priority;\n"
+            + "String all = matcher.group(1);\n"
+            + "Priority test = Priority.NORMAL;\n"
+            + "return new Warning(all, 42, all, all, all);";
 
     /**
-     * Checks that a dynamic parser with only methods from the whitelist correctly detects a warning
-     * .
+     * Checks that a dynamic parser with only methods from the whitelist correctly detects a warning.
      */
     @Test
     public void should_detect_warnings_with_groovy_parser() {
-        String parserName = Jenkins.createRandomName();
-        String legalScript = "import hudson.plugins.warnings.parser.Warning\n"
-                + "import hudson.plugins.analysis.util.model.Priority;\n"
-                + "String all = matcher.group(1);\n"
-                + "Priority test = Priority.NORMAL;\n"
-                + "return new Warning(all, 42, all, all, all);";
+        String parserName = createParser(LEGAL_PARSER_SCRIPT);
 
-        jenkins.edit(() -> {
-            ParsersConfiguration parsers = new ParsersConfiguration(jenkins.getConfigPage());
-            parsers.add(parserName, legalScript);
-        });
-
-        FreeStyleJob job = createFreeStyleJob(RESOURCES + GROOVY_LINE_FILE_NAME,
-                settings -> settings.addWorkspaceScanner(parserName, "**/" + GROOVY_LINE_FILE_NAME));
+        FreeStyleJob job = createJobWithParser(parserName);
 
         Build build = buildSuccessfulJob(job);
+
         String header = parserName + GroovyParser.LINK_SUFFIX;
         assertThatActionExists(job, build, header);
         assertThat(driver, hasContent(header + ": 2 warnings from one analysis."));
@@ -104,41 +106,91 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
      */
     @Test
     public void should_be_refused_by_sandbox() {
-        String parserName = Jenkins.createRandomName();
-        String illegalScript = "import hudson.plugins.warnings.parser.Warning\n"
-                + "import hudson.plugins.analysis.util.model.Priority;\n"
-                + "String all = matcher.group(1);\n"
-                + "Priority test = Priority.fromString('NORMAL');\n" // not on whitelist!!
-                + "return new Warning(all, 42, all, all, all);";
+        String parserName = createParser(ILLEGAL_PARSER_SCRIPT);
 
-        jenkins.edit(() -> {
-            ParsersConfiguration parsers = new ParsersConfiguration(jenkins.getConfigPage());
-            parsers.add(parserName, illegalScript);
-        });
-
-        FreeStyleJob job = createFreeStyleJob(RESOURCES + GROOVY_LINE_FILE_NAME,
-                settings -> settings.addWorkspaceScanner(parserName, "**/" + GROOVY_LINE_FILE_NAME));
+        FreeStyleJob job = createJobWithParser(parserName);
 
         Build build = buildSuccessfulJob(job);
-        assertThatActionIsMissing(job, build, parserName + GroovyParser.LINK_SUFFIX);
 
+        assertThatActionIsMissing(job, build, parserName + GroovyParser.LINK_SUFFIX);
         assertThat(build.getConsole(),
                 containsString("Groovy sandbox rejected the parsing script for parser " + parserName));
     }
 
+    private String createParser(final String script) {
+        String parserName = Jenkins.createRandomName();
+        jenkins.edit(() -> {
+            ParsersConfiguration parsers = new ParsersConfiguration(jenkins.getConfigPage());
+            parsers.add(parserName, script);
+        });
+        return parserName;
+    }
+
+    private FreeStyleJob createJobWithParser(final String parserName) {
+        return createFreeStyleJob(RESOURCES + GROOVY_LINE_FILE_NAME,
+                settings -> settings.addWorkspaceScanner(parserName, "**/" + GROOVY_LINE_FILE_NAME));
+    }
+
+    /**
+     * Verifies that a Groovy parser script will be validated if the logged in user is an
+     * administrator with script rights.
+     *
+     * @throws UnsupportedEncodingException if the created URL is invalid
+     */
+    @Test @WithPlugins("mock-security-realm")
+    public void should_validate_parser_script() throws UnsupportedEncodingException {
+        loginAsAdmin();
+
+        jenkins.visit(createValidationUrl("0:0"));
+        assertThat(driver, hasContent("This is not a valid Groovy script"));
+
+        jenkins.visit(createValidationUrl("import hudson.plugins.analysis.util.model.Priority"));
+        assertThat(driver.getPageSource(), containsString("<body><div></div></body>"));
+    }
+
+    private String createValidationUrl(final String script) throws UnsupportedEncodingException {
+        return "descriptorByName/GroovyParser/" + "checkScript?script=" + URLEncoder.encode(script, "UTF-8");
+    }
+
     /**
      * Verifies that evaluating Groovy code requires the RUN_SCRIPTS permission.
+     *
+     * @throws MalformedURLException if the URL is invalid
      */
-    @Test
+    @Test @WithPlugins("mock-security-realm")
     public void should_require_script_permission() throws MalformedURLException {
-        GlobalSecurityConfig security = new GlobalSecurityConfig(jenkins);
-        security.edit(() -> {
-            LoggedInAuthorizationStrategy strategy = security.useAuthorizationStrategy(LoggedInAuthorizationStrategy.class);
-            strategy.enableAnonymousReadAccess();
-        });
+        loginAsUser();
 
         assertThatScriptIsNotExecuted("checkExample?example=foo&regexp=foo&script=foo");
         assertThatScriptIsNotExecuted("checkScript?script=foo");
+    }
+
+    private void loginAsUser() {
+        String admin = "admin";
+        String user = "user";
+        configureSecurity(admin, user);
+
+        jenkins.login().doLogin(user);
+    }
+
+    private void loginAsAdmin() {
+        String admin = "admin";
+        String user = "user";
+        configureSecurity(admin, user);
+
+        jenkins.login().doLogin(admin);
+    }
+
+    // TODO: Create a new security mock that can be used by other plugins
+    private void configureSecurity(final String admin, final String user) {
+        GlobalSecurityConfig security = new GlobalSecurityConfig(jenkins);
+        security.edit(() -> {
+            MockSecurityRealm realm = security.useRealm(MockSecurityRealm.class);
+            realm.configure(admin, user);
+            MatrixAuthorizationStrategy mas = security.useAuthorizationStrategy(MatrixAuthorizationStrategy.class);
+            mas.addUser(admin).admin();
+            mas.addUser(user).developer();
+        });
     }
 
     private void assertThatScriptIsNotExecuted(final String url) {
