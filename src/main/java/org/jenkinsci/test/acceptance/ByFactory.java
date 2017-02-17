@@ -56,17 +56,17 @@ public class ByFactory {
     // as described earlier and then glued together using xpath's concat function. Note that we can not use variable resolvers
     // or XPath 2.0 here as java is not executing the xpath, it merely passes that to browser to execute. To make this a
     // bit more fun, this is an API relied upon external clients that might have written something like `xpath("//foo[text()='%s']", var)`
-    // that does not allow us to choose the quote type easily or replace the argument value with xpath function call.
-    // Therefore ...
+    // so we need to control the quotes around String.format placeholders as well.
+    // Therefore we ...
     /*package for testing*/ String formatXPath(String format, Object... args) {
-        // We fill the pattern with unique placeholders so we can safely identify what appears where so we do not
-        // have to support all String.format specifiers.
         String[] placeholders = new String[args.length];
         for (int i = 0; i < args.length; i++) {
             placeholders[i] = "placeholder" + (i + 1);
-            // Quote the xpath arguments
+            // Sanitize xpath arguments appropriately
             args[i] = xq(String.valueOf(args[i]));
         }
+        // Fill the pattern with unique placeholders so we can safely identify what appears where so we do not
+        // have to support various String.format specifiers.
         String marker = String.format(format, placeholders);
         // Then replace the placeholders with potential quotes around them with unquoted format sequences
         String unquotedFormat = marker.replaceAll("(['\"])?placeholder(\\d+)\\1?", "%$2\\$s");
@@ -226,19 +226,5 @@ public class ByFactory {
                 return "By page area name: " + pathPrefix;
             }
         };
-    }
-
-    private static final class VariableResolver implements XPathVariableResolver {
-
-        private Map<String, Object> mapping;
-
-        public VariableResolver(Map<String, Object> mapping) {
-            this.mapping = mapping;
-        }
-
-        @Override
-        public Object resolveVariable(QName variableName) {
-            return null;
-        }
     }
 }

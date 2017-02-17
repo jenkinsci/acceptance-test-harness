@@ -26,6 +26,7 @@ import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.LocalController;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.junit.internal.AssumptionViolatedException;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.zeroturnaround.zip.ZipUtil;
 
@@ -33,8 +34,8 @@ import com.google.inject.Injector;
 
 import cucumber.api.DataTable;
 import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.junit.Assert.assertThat;
 
 /**
  * Job Page object superclass.
@@ -464,5 +465,14 @@ public class Job extends TopLevelItem {
         open();
         clickLink("Delete Project");
         confirmAlert(2);
+    }
+
+    public static org.hamcrest.Matcher<WebDriver> disabled() {
+        return allOf(
+                not(hasContent("Build Now")),
+                not(hasContent("Disable Project")),
+                hasContent("Enable"),
+                hasContent("This project is currently disabled")
+        );
     }
 }
