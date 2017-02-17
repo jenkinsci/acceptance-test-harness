@@ -280,6 +280,15 @@ public class Build extends ContainerPageObject {
         return new Changes(this, changesUrl);
     }
 
+    public void keepForever(boolean keep) {
+        open();
+        if (keep) {
+            clickButton("Keep this build forever");
+        } else {
+            clickButton("Don't keep this build forever");
+        }
+    }
+
     @Override
     public String toString() {
         return getName();

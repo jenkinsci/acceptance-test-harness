@@ -1,7 +1,9 @@
 package org.jenkinsci.test.acceptance;
 
+import javax.xml.namespace.QName;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
+import javax.xml.xpath.XPathVariableResolver;
 
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.openqa.selenium.By;
@@ -10,7 +12,9 @@ import org.openqa.selenium.WebElement;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -37,8 +41,50 @@ public class ByFactory {
         return By.xpath(xpath);
     }
 
+    /**
+     * Construct XPath inserting placeholders using String.format.
+     *
+     * Do not put quotes around your format sequences.
+     */
     public By xpath(String format, Object... args) {
-        return xpath(String.format(format,args));
+        return xpath(formatXPath(format, args));
+    }
+
+    // XPath 1.0 supported by JDK and browsers has no way to escape quotes in string literals. Therefore whenever such
+    // argument is specified it needs to be delimited by the other kind of quotes. In case the string contains both kind
+    // of quotes, it needs to be split to substrings containing only one kind of quotes each so the literals can be quoted
+    // as described earlier and then glued together using xpath's concat function. Note that we can not use variable resolvers
+    // or XPath 2.0 here as java is not executing the xpath, it merely passes that to browser to execute. To make this a
+    // bit more fun, this is an API relied upon external clients that might have written something like `xpath("//foo[text()='%s']", var)`
+    // that does not allow us to choose the quote type easily or replace the argument value with xpath function call.
+    // Therefore ...
+    /*package for testing*/ String formatXPath(String format, Object... args) {
+        // We fill the pattern with unique placeholders so we can safely identify what appears where so we do not
+        // have to support all String.format specifiers.
+        String[] placeholders = new String[args.length];
+        for (int i = 0; i < args.length; i++) {
+            placeholders[i] = "placeholder" + (i + 1);
+            // Quote the xpath arguments
+            args[i] = xq(String.valueOf(args[i]));
+        }
+        String marker = String.format(format, placeholders);
+        // Then replace the placeholders with potential quotes around them with unquoted format sequences
+        String unquotedFormat = marker.replaceAll("(['\"])?placeholder(\\d+)\\1?", "%$2\\$s");
+
+        // Finally format the template with quoted arguments
+        return String.format(unquotedFormat, args);
+    }
+
+    private String xq(String value) {
+        boolean quote = value.contains("'");
+        boolean doublequote = value.contains("\"");
+        if (quote && doublequote) {
+            return "concat('" + value.replace("'", "', \"'\", '") + "', '')";
+        } else if (quote){
+            return '"' + value + '"';
+        } else {
+            return "'" + value + "'";
+        }
     }
 
     /**
@@ -180,5 +226,19 @@ public class ByFactory {
                 return "By page area name: " + pathPrefix;
             }
         };
+    }
+
+    private static final class VariableResolver implements XPathVariableResolver {
+
+        private Map<String, Object> mapping;
+
+        public VariableResolver(Map<String, Object> mapping) {
+            this.mapping = mapping;
+        }
+
+        @Override
+        public Object resolveVariable(QName variableName) {
+            return null;
+        }
     }
 }
