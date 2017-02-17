@@ -1,19 +1,30 @@
 package core;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.Wait;
+import org.jenkinsci.test.acceptance.po.Artifact;
+import org.jenkinsci.test.acceptance.po.ArtifactArchiver;
 import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.po.BuildWithParameters;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
+import org.jenkinsci.test.acceptance.po.ListView;
 import org.jenkinsci.test.acceptance.po.ShellBuildStep;
 import org.jenkinsci.test.acceptance.po.StringParameter;
+import org.jenkinsci.test.acceptance.po.TimerTrigger;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
 import org.openqa.selenium.NoSuchElementException;
 
+import java.net.URL;
 import java.util.Collections;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.Matchers.equalTo;
+import static org.jenkinsci.test.acceptance.Matchers.containsRegexp;
 import static org.jenkinsci.test.acceptance.Matchers.pageObjectDoesNotExist;
 import static org.jenkinsci.test.acceptance.Matchers.pageObjectExists;
 import static org.junit.Assert.assertThat;
@@ -114,5 +125,72 @@ public class FreestyleJobTest extends AbstractJUnitTest {
 
         j.scheduleBuild().waitUntilFinished();
         assertThat(b2, pageObjectDoesNotExist());
+    }
+
+    @Test
+    public void archiveArtifacts() throws Exception {
+        FreeStyleJob j = jenkins.jobs.create(FreeStyleJob.class);
+        j.configure();
+        j.addShellStep("echo 'yes' > include; echo 'no' > exclude;");
+        ArtifactArchiver archiver = j.addPublisher(ArtifactArchiver.class);
+        archiver.includes("**/*include*");
+        archiver.excludes("exclude");
+        j.save();
+        Build build = j.scheduleBuild().waitUntilFinished();
+        assertThat(build.getArtifact("exclude"), pageObjectDoesNotExist());
+        Artifact include = build.getArtifact("include");
+        assertThat(include, pageObjectExists());
+        assertThat(include.getTextContent(), equalTo("yes"));
+    }
+
+    @Test
+    public void buildPeriodically() throws Exception {
+        FreeStyleJob j = jenkins.jobs.create(FreeStyleJob.class);
+        j.configure();
+        TimerTrigger trigger = j.addTrigger(TimerTrigger.class);
+        trigger.spec.set("* * * * *");
+        j.save();
+
+        Build first = j.build(1);
+        new Wait<>(first)
+                .withTimeout(70, TimeUnit.SECONDS) // Wall-clock time
+                .until(pageObjectExists())
+        ;
+        assertThat(first.getConsole(), containsString("Started by timer"));
+
+        assertThat(j.build(3), pageObjectDoesNotExist());
+    }
+
+    @Test
+    public void customWorkspace() throws Exception {
+        FreeStyleJob j = jenkins.jobs.create(FreeStyleJob.class);
+        j.configure();
+        j.useCustomWorkspace("custom_workspace");
+        j.save();
+        Pattern expected = Pattern.compile("^Building in workspace (.*)custom_workspace$", Pattern.MULTILINE);
+        assertThat(j.scheduleBuild().waitUntilFinished().getConsole(), containsRegexp(expected));
+    }
+
+    @Test
+    public void scheduleFromView() throws Exception {
+        FreeStyleJob j = jenkins.jobs.create(FreeStyleJob.class);
+        ListView view = jenkins.views.create(ListView.class, "AView");
+        view.configure();
+        view.addJob(j);
+        view.save();
+        view.scheduleJob(j.name);
+        j.build(1).waitUntilStarted().shouldSucceed();
+
+        j.configure();
+        StringParameter p = j.addParameter(StringParameter.class);
+        p.setName("foo");
+        j.save();
+
+        view.scheduleJob(j.name);
+        BuildWithParameters paramPage = new BuildWithParameters(j, new URL(driver.getCurrentUrl()));
+        paramPage.enter(Collections.singletonList(p), Collections.singletonMap("foo", "bar"));
+        paramPage.start();
+
+        j.build(2).waitUntilStarted().shouldSucceed();
     }
 }

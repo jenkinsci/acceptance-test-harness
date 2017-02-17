@@ -23,8 +23,32 @@
  */
 package org.jenkinsci.test.acceptance.po;
 
+import java.net.URL;
+import java.util.List;
+import java.util.Map;
+
 /**
+ * PO for `/build` page that wait for user to specify parameters.
+ *
  * @author ogondza.
  */
-public class BuildWithParameters {
+public class BuildWithParameters extends PageObject {
+    public BuildWithParameters(Job job, URL url) {
+        super(job, url);
+    }
+
+    public BuildWithParameters enter(List<Parameter> definitions, Map<String, ?> values) {
+        waitFor(by.xpath("//form[@name='parameters']"), 2);
+        for (Parameter def : definitions) {
+            Object v = values.get(def.getName());
+            if (v != null) {
+                def.fillWith(v);
+            }
+        }
+        return this;
+    }
+
+    public void start() {
+        clickButton("Build");
+    }
 }

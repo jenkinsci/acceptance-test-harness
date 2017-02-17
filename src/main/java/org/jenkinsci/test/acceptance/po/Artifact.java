@@ -38,6 +38,11 @@ public class Artifact extends PageObject {
         assertThat(driver, hasContent(content));
     }
 
+    public String getTextContent() {
+        visit(url("%s/*view*/", path));
+        return pageText(driver);
+    }
+
     /**
      * Asserts that this artifact should or shouldn't exist.
      */

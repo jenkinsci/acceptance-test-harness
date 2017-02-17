@@ -8,22 +8,6 @@ Feature: Configure/build freestyle jobs
   **********************************************************************************
 
 
-   Scenario: Schedule build from view
-    When I create a job named "viewed_job"
-    And I visit the home page
-    And I build "viewed_job" in view
-    Then the build should succeed
-
-  Scenario: Schedule parameterized build from view
-    When I create a job named "viewed_job"
-    When I configure the job
-    And I add a string parameter "Foo"
-    And I save the job
-    And I visit the home page
-    And I build "viewed_job" in view
-    Then the page should say "This build requires parameters:"
-    Then the page should say "Foo"
-
   Scenario: Do not discard last successful build
     Given a simple job
     When I configure the job
@@ -38,57 +22,6 @@ Feature: Configure/build freestyle jobs
     And  the job should not have build 2
     And  the job should have build 3
     And  the job should not have build 4
-
-  Scenario: Archive artifact and check content of archived artifact
-    Given a job
-    When I add a shell build step "echo 'archive test' > test.txt" in the job configuration
-    And I set artifact "test.txt" to archive in the job configuration
-    And I build the job
-    Then the build should succeed
-    And console output should contain "Archiving artifacts"
-    And the artifact "test.txt" should be archived
-    And the content of artifact "test.txt" should be "archive test"
-
-  Scenario: Archive artifact and exclude another
-    Given a job
-    When I add a shell build step in the job configuration
-        """
-            echo 'archive include test' > test1.txt
-            echo 'archive exclude test' > test2.txt
-        """
-    And I set artifact "test1.txt" to archive and exclude "test2.txt" in the job configuration
-    And I build the job
-    Then the build should succeed
-    And the artifact "test1.txt" should be archived
-    And the artifact "test2.txt" should not be archived
-
-  Scenario: Schedule build periodically
-    Given a job
-    When I configure the job
-    And I schedule job to run periodically at "* * * * *"
-    And I save the job
-    And I wait for 70 seconds
-    Then the job should have build 1
-    # number 2 might exist
-    And  the job should not have build 3
-
-  @bug(16630)
-  Scenario: Format zero-sized artifact size properly
-    Given a job
-    When I configure the job
-    And I add a shell build step "touch empty.file"
-    And I set artifact "empty.file" to archive
-    And I save the job
-    And I build the job
-    Then the size of artifact "empty.file" should be "0 B"
-
-  Scenario: Use custom workspace
-    Given a job
-    When I configure the job
-    And I use "custom_workspace" as custom workspace
-    And I save the job
-    And I build the job
-    Then console output should match "^Building in workspace (.*)custom_workspace$"
 
   @bug(21457) @bug(20772) @bug(21478) @wip
   Scenario: Show error message after apply
