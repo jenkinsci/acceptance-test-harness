@@ -60,19 +60,24 @@ public class ByFactory {
     // Therefore we ...
     /*package for testing*/ String formatXPath(String format, Object... args) {
         String[] placeholders = new String[args.length];
+        String[] sanitized = new String[args.length];
         for (int i = 0; i < args.length; i++) {
             placeholders[i] = "placeholder" + (i + 1);
             // Sanitize xpath arguments appropriately
-            args[i] = xq(String.valueOf(args[i]));
+            sanitized[i] = xq(String.valueOf(args[i]));
         }
         // Fill the pattern with unique placeholders so we can safely identify what appears where so we do not
         // have to support various String.format specifiers.
         String marker = String.format(format, placeholders);
-        // Then replace the placeholders with potential quotes around them with unquoted format sequences
-        String unquotedFormat = marker.replaceAll("(['\"])?placeholder(\\d+)\\1?", "%$2\\$s");
+        // Then replace the placeholders with quotes around them with unquoted format sequences
+        String unquotedFormat = marker.replaceAll("(['\" ])placeholder(\\d+)\\1", "%$2\\$s");
 
-        // Finally format the template with quoted arguments
-        return String.format(unquotedFormat, args);
+        // Format the template with quoted arguments
+        String quotedSanitizedFormat = String.format(unquotedFormat, sanitized);
+
+        // Placeholders that are part of longer string literal will not be escaped
+        String finalFormat = quotedSanitizedFormat.replaceAll("placeholder(\\d+)", "%$1\\$s");
+        return String.format(finalFormat, args);
     }
 
     private String xq(String value) {
