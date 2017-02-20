@@ -44,7 +44,7 @@ public class ByFactory {
     /**
      * Construct XPath inserting placeholders using String.format.
      *
-     * Do not put quotes around your format sequences.
+     * @param format Format specifier for xpath. Only string placeholders are supported - do not put quotes around them.
      */
     public By xpath(String format, Object... args) {
         return xpath(formatXPath(format, args));
