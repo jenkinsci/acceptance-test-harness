@@ -14,6 +14,7 @@ import org.jenkinsci.test.acceptance.po.StringParameter;
 import org.jenkinsci.test.acceptance.po.TimerTrigger;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
+import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 
 import java.net.URL;
@@ -25,6 +26,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.equalTo;
 import static org.jenkinsci.test.acceptance.Matchers.containsRegexp;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 import static org.jenkinsci.test.acceptance.Matchers.pageObjectDoesNotExist;
 import static org.jenkinsci.test.acceptance.Matchers.pageObjectExists;
 import static org.junit.Assert.assertThat;
@@ -128,6 +130,33 @@ public class FreestyleJobTest extends AbstractJUnitTest {
     }
 
     @Test
+    public void doNotDiscardSuccessfulBuilds() throws Exception {
+        FreeStyleJob j = jenkins.jobs.create(FreeStyleJob.class);
+
+        j.configure();
+        try {
+            check("Discard old builds");
+        } catch (NoSuchElementException x) { // 1.636-
+            check("Discard Old Builds");
+        }
+        j.control(by.name("_.numToKeepStr")).set(1);
+        ShellBuildStep shellBuildStep = j.addShellStep("exit 0");
+        j.save();
+
+        Build b1 = j.scheduleBuild().waitUntilFinished();
+
+        j.configure();
+        shellBuildStep.command("exit 1");
+        j.save();
+
+        Build b2 = j.scheduleBuild().waitUntilFinished();
+        Build b3 = j.scheduleBuild().waitUntilFinished();
+        assertThat(b1, pageObjectExists());
+        assertThat(b2, pageObjectDoesNotExist());
+        assertThat(b3, pageObjectExists());
+    }
+
+    @Test
     public void archiveArtifacts() throws Exception {
         FreeStyleJob j = jenkins.jobs.create(FreeStyleJob.class);
         j.configure();
@@ -192,5 +221,27 @@ public class FreestyleJobTest extends AbstractJUnitTest {
         paramPage.start();
 
         j.build(2).waitUntilStarted().shouldSucceed();
+    }
+
+    @Test @Issue({"JENKINS-21457", "JENKINS-20772", "JENKINS-21478"})
+    public void showErrorSavingConfig() throws Exception {
+        FreeStyleJob j = jenkins.jobs.create(FreeStyleJob.class);
+        j.configure();
+        TimerTrigger trigger = j.addTrigger(TimerTrigger.class);
+        trigger.spec.set("not_a_time");
+        clickButton("Apply");
+
+        By error = by.css("#error-description pre");
+
+        assertThat(waitFor(error).getText(), containsString("Invalid input: \"not_a_time\""));
+        clickLink("Close");
+
+        j.configure();
+        j.addTrigger(TimerTrigger.class);
+        trigger.spec.set("not_a_time_either");
+        clickButton("Apply");
+
+        assertThat(waitFor(error).getText(), containsString("Invalid input: \"not_a_time_either\""));
+        clickLink("Close");
     }
 }
