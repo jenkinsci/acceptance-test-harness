@@ -17,6 +17,7 @@ import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
 import org.jenkinsci.test.acceptance.plugins.envinject.EnvInjectConfig;
 import org.jenkinsci.test.acceptance.plugins.matrix_auth.MatrixAuthorizationStrategy;
 import org.jenkinsci.test.acceptance.plugins.mock_security_realm.MockSecurityRealm;
+import org.jenkinsci.test.acceptance.plugins.script_security.ScriptApproval;
 import org.jenkinsci.test.acceptance.plugins.warnings.GroovyParser;
 import org.jenkinsci.test.acceptance.plugins.warnings.ParsersConfiguration;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsAction;
@@ -102,7 +103,8 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
     }
 
     /**
-     * Checks that a dynamic parser with a blacklisted method is rejected.
+     * Checks that a dynamic parser with a blacklisted method is rejected and the rejected
+     * method is handled over to the script approval console.
      */
     @Test
     public void should_be_refused_by_sandbox() {
@@ -115,6 +117,10 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         assertThatActionIsMissing(job, build, parserName + GroovyParser.LINK_SUFFIX);
         assertThat(build.getConsole(),
                 containsString("Groovy sandbox rejected the parsing script for parser " + parserName));
+
+        ScriptApproval approval = new ScriptApproval(jenkins);
+        approval.open();
+        approval.findSignature("staticMethod hudson.plugins.analysis.util.model.Priority");
     }
 
     private String createParser(final String script) {
