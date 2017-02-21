@@ -237,8 +237,7 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
 
         Slave slave = ((Slave) reconnected);
         slave.delete();
-        assertTrue(slave.isTemporarillyOffline());
-        waitFor(slave).withMessage("Openstack slave to be deleted").withTimeout(7, TimeUnit.MINUTES).until(pageObjectDoesNotExist());
+        assertThat(slave, pageObjectDoesNotExist());
     }
 
     private OpenstackCloud addCloud(JenkinsConfig config) {
