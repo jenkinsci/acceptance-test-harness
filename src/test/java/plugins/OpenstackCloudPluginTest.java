@@ -141,8 +141,8 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
     }
 
     // The test will fail when test host is not reachable from openstack machine for obvious reasons
-    @Test // @WithPlugins("openstack-cloud@1.9") JENKINS-29996
-    // TODO JENKINS-30784: Do not bother with credentials for jnlp slaves
+    @Test
+    // TODO: JENKINS-30784 Do not bother with credentials for jnlp slaves
     @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {MACHINE_USERNAME, "/openstack_plugin/unsafe"})
     @TestActivation({"HARDWARE_ID", "IMAGE_ID", "KEY_PAIR_NAME"})
     public void provisionJnlpSlave() {
