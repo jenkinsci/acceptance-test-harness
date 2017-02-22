@@ -140,6 +140,20 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
         job.scheduleBuild().waitUntilFinished(PROVISIONING_TIMEOUT).shouldSucceed();
     }
 
+    @Test
+    @WithCredentials(credentialType = WithCredentials.USERNAME_PASSWORD, values = {MACHINE_USERNAME, "ath"})
+    @TestActivation({"HARDWARE_ID", "IMAGE_ID", "KEY_PAIR_NAME"})
+    public void provisionSshSlaveWithPasswdAuthRetryOnFailedAuth() {
+        configureCloudInit("cloud-init-authfix");
+        configureProvisioning("SSH", "label");
+
+        FreeStyleJob job = jenkins.jobs.create();
+        job.configure();
+        job.setLabelExpression("label");
+        job.save();
+        job.scheduleBuild().waitUntilFinished(PROVISIONING_TIMEOUT).shouldSucceed();
+    }
+
     // The test will fail when test host is not reachable from openstack machine for obvious reasons
     @Test
     // TODO: JENKINS-30784 Do not bother with credentials for jnlp slaves
