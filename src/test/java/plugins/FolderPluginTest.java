@@ -26,6 +26,7 @@ package plugins;
 
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.MatcherAssert;
+import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
@@ -158,13 +159,13 @@ public class FolderPluginTest extends AbstractJUnitTest {
         assertThat(console, containsRegexp(CRED_INJECTED_MESSAGE));
 
         job1.delete();
-        this.checkItemExists(job1, false);
+        waitFor(job1, Matchers.pageObjectDoesNotExist(), 1000);
 
         job2.delete();
-        this.checkItemExists(job2, false);
+        waitFor(job2, Matchers.pageObjectDoesNotExist(), 1000);
 
         folder.delete();
-        this.checkItemExists(folder, false);
+        waitFor(folder, Matchers.pageObjectDoesNotExist(), 1000);
     }
 
     private void checkViews(final Folder f, final String expectedActiveView, final String... expectedExistingViews) {
