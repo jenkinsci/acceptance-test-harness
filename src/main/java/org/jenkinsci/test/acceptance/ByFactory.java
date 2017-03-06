@@ -7,6 +7,7 @@ import org.jenkinsci.test.acceptance.po.PageObject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.By.ByPartialLinkText;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -181,4 +182,13 @@ public class ByFactory {
             }
         };
     }
+
+    /**
+     * @param linkText The text to match against
+     * @return a By which locates A elements that contain the given link text
+     */
+    public By partialLinkText(final String linkText) {
+        return By.partialLinkText(linkText);
+    }
+
 }
