@@ -62,7 +62,7 @@ public class WorkflowMultibranchTest extends AbstractJUnitTest {
         assertThat(branchIndexingLog, containsString("Scheduled build for branch: jenkinsfile_failure"));
         assertThat(branchIndexingLog, containsString("Scheduled build for branch: jenkinsfile_success"));
         assertThat(branchIndexingLog, not(containsString("Scheduled build for branch: master")));
-        assertThat(branchIndexingLog, containsString("2 branches were processed"));
+        assertThat(branchIndexingLog, containsString("3 branches were processed"));
     }
 
     private void assertExistAndRun(final WorkflowJob job, final boolean withSuccess) {
