@@ -58,4 +58,9 @@ public class WorkflowMultiBranchJob extends Folder {
         return this.getJobs().get(WorkflowJob.class, name);
     }
 
+    public void reIndex() {
+        driver.findElement(by.xpath("//div[@class=\"task\"]//*[text()=\"Scan Repository\" or text()=\"Branch Indexing\"]")).click();
+        driver.findElement(by.xpath("//div[@class=\"subtasks\"]//*[text()=\"Run Now\"]")).click();
+    }
+
 }

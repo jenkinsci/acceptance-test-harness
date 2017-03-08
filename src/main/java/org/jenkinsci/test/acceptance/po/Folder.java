@@ -39,8 +39,6 @@ import org.openqa.selenium.WebElement;
 @Describable("com.cloudbees.hudson.plugins.folder.Folder")
 public class Folder extends TopLevelItem implements Container {
 
-    private static final String ALL_VIEW = "All";
-
     private final JobsMixIn jobs;
     private final ViewsMixIn views;
     private final Control properties = control("/com-cloudbees-hudson-plugins-folder-properties-EnvVarsFolderProperty/properties");
@@ -106,17 +104,20 @@ public class Folder extends TopLevelItem implements Container {
 
     public <T extends View> T  selectView(final Class<T> type, final String viewName) {
         final List<WebElement> viewTabs = this.getViewTabs();
+        int i = 0;
 
         for (final WebElement tab : viewTabs) {
             if (tab.getText().equals(viewName)) {
                 tab.click();
 
-                if (ALL_VIEW.equals(viewName)) {
+                if (i == 0) {
                     return null;
                 } else {
                     return newInstance(type, injector, url("view/%s/", viewName));
                 }
             }
+
+            i++;
         }
 
         throw new NoSuchElementException(String.format("There is no view with name [%s]", viewName));
@@ -124,7 +125,12 @@ public class Folder extends TopLevelItem implements Container {
 
     private List<WebElement> getViewTabs() {
         final List<WebElement> viewTabs = driver.findElements(viewTab);
-        viewTabs.remove(viewTabs.size() - 1); // add new view tab
+
+        final int lastViewIndex = viewTabs.size() - 1;
+
+        if ("+".equals(viewTabs.get(lastViewIndex).getText())) {
+            viewTabs.remove(lastViewIndex);
+        }
 
         return viewTabs;
     }

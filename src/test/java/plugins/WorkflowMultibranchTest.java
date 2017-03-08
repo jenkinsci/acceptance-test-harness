@@ -46,6 +46,13 @@ public class WorkflowMultibranchTest extends AbstractJUnitTest {
         final WorkflowJob failureJob = multibranchJob.getJob("jenkinsfile_failure");
         this.assertExistAndRun(successJob, true);
         this.assertExistAndRun(failureJob, false);
+
+        multibranchJob.open();
+        multibranchJob.reIndex();
+        multibranchJob.waitForBranchIndexingFinished(20);
+
+        this.assertExistAndRun(successJob, true);
+        this.assertExistAndRun(failureJob, false);
     }
 
     private void configureJobWithGithubBranchSource(final WorkflowMultiBranchJob job) {
