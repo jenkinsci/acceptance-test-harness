@@ -71,6 +71,11 @@ public abstract class LocalController extends JenkinsController implements LogLi
     private Injector injector;
 
     /**
+     * Flag to indicate if the install wizard should be run
+     */
+    private boolean runInstallWizard = false;
+
+    /**
      * Partial implementation of {@link JenkinsControllerFactory} for subtypes.
      */
     public static abstract class LocalFactoryImpl implements JenkinsControllerFactory {
@@ -303,7 +308,11 @@ public abstract class LocalController extends JenkinsController implements LogLi
         if (javaHome != null) {
             env.put("JAVA_HOME", javaHome.getAbsolutePath());
         }
-        env.put("jenkins.install.state", "TEST");
+
+        if (!runInstallWizard) {
+            env.put("jenkins.install.state", "TEST");
+        }
+
         return env;
     }
 
@@ -412,6 +421,22 @@ public abstract class LocalController extends JenkinsController implements LogLi
             name = "127.0.0.1";
         }
         return name;
+    }
+
+    /**
+     * @return true if the install wizard is going to be run
+     */
+    public boolean isRunInstallWizard() {
+        return runInstallWizard;
+    }
+
+    /**
+     * Set the flag to run the install wizard.
+     * 
+     * @param runInstallWizard - <code>true</code> to run the install wizard
+     */
+    public void setRunInstallWizard(boolean runInstallWizard) {
+        this.runInstallWizard = runInstallWizard;
     }
 
     private static final Logger LOGGER = Logger.getLogger(LocalController.class.getName());
