@@ -2,6 +2,7 @@ package org.jenkinsci.test.acceptance.po;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -9,6 +10,7 @@ import org.apache.commons.io.IOUtils;
 import org.jenkinsci.test.acceptance.plugins.workflow_multibranch.BranchSource;
 
 import com.google.inject.Injector;
+import org.openqa.selenium.WebElement;
 
 /**
  * A pipeline multi-branch job (requires installation of multi-branch-project-plugin).
@@ -59,8 +61,16 @@ public class WorkflowMultiBranchJob extends Folder {
     }
 
     public void reIndex() {
-        driver.findElement(by.xpath("//div[@class=\"task\"]//*[text()=\"Scan Repository\" or text()=\"Branch Indexing\"]")).click();
-        driver.findElement(by.xpath("//div[@class=\"subtasks\"]//*[text()=\"Run Now\"]")).click();
+        final List<WebElement> scanRepoNow = driver.findElements(by.xpath("//div[@class=\"task\"]//*[text()=\"Scan Repository Now\"]"));
+
+        if (scanRepoNow.size() > 0) {
+            // JENKINS-41416
+            scanRepoNow.get(0).click();
+        } else {
+            // Previous versions
+            find(by.xpath("//div[@class=\"task\"]//*[text()=\"Scan Repository\" or text()=\"Branch Indexing\"]")).click();
+            find(by.xpath("//div[@class=\"subtasks\"]//*[text()=\"Run Now\"]")).click();
+        }
     }
 
 }
