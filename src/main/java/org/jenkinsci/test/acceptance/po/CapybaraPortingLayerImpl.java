@@ -1,7 +1,6 @@
 package org.jenkinsci.test.acceptance.po;
 
 import javax.inject.Inject;
-
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.util.List;
@@ -20,12 +19,11 @@ import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.google.common.base.Joiner;
 import com.google.inject.Injector;
-import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 import static java.util.Arrays.*;
 
@@ -86,23 +84,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     @Override
     public void clickButton(String text) {
         WebElement e = find(by.button(text));
-        /*
-         * YUI sticky buttons present some problems when scroll to them, also if you have a sticky button
-         * you should not need to scroll to use them
-         */
-        boolean isStickyButton = false;
-        WebElement stickyContainer = getElement(by.id("bottom-sticker"));
-        if (stickyContainer != null) {
-            JavascriptExecutor je = (JavascriptExecutor)driver;
-            isStickyButton = (boolean)je.executeScript("return arguments[0].contains(arguments[1])", stickyContainer, e);
-        }
-        if (isStickyButton) {
-            Actions builder = new Actions(driver);
-            builder.moveToElement(e).click(e);
-            builder.perform();
-        } else {
-            e.click();
-        }
+        e.click();
     }
 
     /**
