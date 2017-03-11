@@ -40,7 +40,7 @@ public class JobsMixIn extends MixIn {
 
         clickButton("OK");
         // Sometimes job creation is not fast enough, so make sure it's finished before continue
-        waitFor(by.name("config"), 10);
+        waitFor(by.name("config"), 20);
 
         final T j = get(type, name);
 
