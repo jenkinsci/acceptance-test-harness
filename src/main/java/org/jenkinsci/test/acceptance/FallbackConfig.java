@@ -2,16 +2,15 @@ package org.jenkinsci.test.acceptance;
 
 import javax.annotation.CheckForNull;
 import javax.inject.Named;
+
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.aether.RepositorySystem;
@@ -36,9 +35,9 @@ import org.jenkinsci.test.acceptance.utils.SauceLabsConnection;
 import org.jenkinsci.test.acceptance.utils.aether.ArtifactResolverUtil;
 import org.jenkinsci.test.acceptance.utils.mail.MailService;
 import org.jenkinsci.test.acceptance.utils.mail.Mailtrap;
-import org.jenkinsci.test.acceptance.utils.pluginreporter.ConsoleExercisedPluginReporter;
 import org.jenkinsci.test.acceptance.utils.pluginreporter.ExercisedPluginsReporter;
 import org.jenkinsci.test.acceptance.utils.pluginreporter.TextFileExercisedPluginReporter;
+import org.jenkinsci.test.acceptance.utils.pluginreporter.ConsoleExercisedPluginReporter;
 import org.junit.runners.model.Statement;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.UnsupportedCommandException;
@@ -48,7 +47,6 @@ import org.openqa.selenium.chrome.ChromeDriverService;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxBinary;
 import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.firefox.FirefoxProfile;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
@@ -93,99 +91,73 @@ public class FallbackConfig extends AbstractModule {
     }
 
     private WebDriver createWebDriver(TestName testName) throws IOException {
-        String browser = StringUtils.defaultIfBlank(System.getenv("BROWSER"), "firefox");
+        String browser = System.getenv("BROWSER");
+        if (browser==null) browser = "firefox";
         browser = browser.toLowerCase(Locale.ENGLISH);
 
         String display = getBrowserDisplay();
         switch (browser) {
         case "firefox":
-            return createFirefoxDriver();
+            FirefoxProfile profile = new FirefoxProfile();
+            profile.setAlwaysLoadNoFocusLib(true);
+
+            profile.setPreference(LANGUAGE_SELECTOR, "en");
+
+            // Config screen with many plugins can cause FF to complain JS takes too long to complete - set longer timeout
+            profile.setPreference(DOM_MAX_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
+            profile.setPreference(DOM_MAX_CHROME_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
+
+            FirefoxBinary binary = new FirefoxBinary();
+            String display = getBrowserDisplay();
+            if (display != null) {
+                binary.setEnvironmentProperty("DISPLAY", display);
+            }
+            return new FirefoxDriver(binary, profile);
         case "ie":
         case "iexplore":
         case "iexplorer":
             return new InternetExplorerDriver();
         case "chrome":
-            return createChromeDriver();
+            Map<String, String> prefs = new HashMap<String, String>();
+            prefs.put(LANGUAGE_SELECTOR, "en");
+            ChromeOptions options = new ChromeOptions();
+            options.setExperimentalOption("prefs", prefs);
+
+            return new ChromeDriver(options);
         case "safari":
             return new SafariDriver();
         case "htmlunit":
             return new HtmlUnitDriver(true);
         case "saucelabs":
         case "saucelabs-firefox":
-            return createSauceLabsDriver(testName);
+            DesiredCapabilities caps = DesiredCapabilities.firefox();
+            caps.setCapability("version", "29");
+            caps.setCapability("platform", "Windows 7");
+            caps.setCapability("name", testName.get());
+
+            // if running inside Jenkins, expose build ID
+            String tag = System.getenv("BUILD_TAG");
+            if (tag!=null)
+                caps.setCapability("build", tag);
+
+            return new SauceLabsConnection().createWebDriver(caps);
         case "phantomjs":
-            return createPhantomJSDriver();
+            DesiredCapabilities capabilities = DesiredCapabilities.phantomjs();
+            capabilities.setCapability(LANGUAGE_SELECTOR, "en");
+            capabilities.setCapability(LANGUAGE_SELECTOR_PHANTOMJS, "en");
+            return new PhantomJSDriver(capabilities);
         case "remote-webdriver-firefox":
-            return createRemoteFirefoxDriver();
+            String u = System.getenv("REMOTE_WEBDRIVER_URL");
+            if (StringUtils.isBlank(u)) {
+                throw new Error("remote-webdriver-firefox requires REMOTE_WEBDRIVER_URL to be set");
+            }
+            return new RemoteWebDriver(
+                    new URL(u), //http://192.168.99.100:4444/wd/hub
+                    DesiredCapabilities.firefox());
 
         default:
             throw new Error("Unrecognized browser type: "+browser);
         }
-    }
-
-    private WebDriver createRemoteFirefoxDriver() throws MalformedURLException {
-        String u = System.getenv("REMOTE_WEBDRIVER_URL");
-        if (StringUtils.isBlank(u)) {
-            throw new Error("remote-webdriver-firefox requires REMOTE_WEBDRIVER_URL to be set");
-        }
-        return new RemoteWebDriver(
-                new URL(u), //http://192.168.99.100:4444/wd/hub
-                DesiredCapabilities.firefox());
-    }
-
-    private WebDriver createPhantomJSDriver() {
-        DesiredCapabilities capabilities = DesiredCapabilities.phantomjs();
-        capabilities.setCapability(LANGUAGE_SELECTOR, "en");
-        capabilities.setCapability(LANGUAGE_SELECTOR_PHANTOMJS, "en");
-        return new PhantomJSDriver(capabilities);
-    }
-
-    private WebDriver createSauceLabsDriver(final TestName testName) throws IOException {
-        DesiredCapabilities caps = DesiredCapabilities.firefox();
-        caps.setCapability("version", "29");
-        caps.setCapability("platform", "Windows 7");
-        caps.setCapability("name", testName.get());
-
-        // if running inside Jenkins, expose build ID
-        String tag = System.getenv("BUILD_TAG");
-        if (tag!=null)
-            caps.setCapability("build", tag);
-
-        return new SauceLabsConnection().createWebDriver(caps);
-    }
-
-    private WebDriver createChromeDriver() {
-        ChromeOptions options = new ChromeOptions();
-        options.setExperimentalOption("prefs", Collections.singletonMap(LANGUAGE_SELECTOR, "en"));
-
-        ChromeDriverService.Builder builder = new ChromeDriverService.Builder();
-        String display = getBrowserDisplay();
-        if (display != null) {
-            builder.withEnvironment(Collections.singletonMap("DISPLAY", display));
-        }
-        return new ChromeDriver(builder.build(), options);
-    }
-
-    private WebDriver createFirefoxDriver() {
-        FirefoxProfile profile = new FirefoxProfile();
-        profile.setAlwaysLoadNoFocusLib(true);
-        profile.setPreference(LANGUAGE_SELECTOR, "en");
-
-        // Config screen with many plugins can cause FF to complain JS takes too long to complete - set longer timeout
-        profile.setPreference(DOM_MAX_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
-        profile.setPreference(DOM_MAX_CHROME_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
-        profile.setPreference("logFile", "/dev/null");
-
-        FirefoxBinary binary = new FirefoxBinary();
-        String display = getBrowserDisplay();
-        if (display != null) {
-            binary.setEnvironmentProperty("DISPLAY", display);
-        }
-
-        DesiredCapabilities capabilities = new FirefoxOptions().setLogLevel(Level.OFF).addPreference("logFile", "/dev/null").addTo(DesiredCapabilities.firefox());
-        capabilities.setCapability("marionette", true);
-        capabilities.setCapability("logFile", "/dev/null");
-        return new FirefoxDriver(binary, profile, capabilities);
     }
 
     /**
