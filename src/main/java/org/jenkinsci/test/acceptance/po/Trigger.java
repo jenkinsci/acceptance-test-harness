@@ -3,6 +3,7 @@ package org.jenkinsci.test.acceptance.po;
 /**
  * Base type for {@link PageAreaImpl} for trigger.
  *
+ * @see {@link Job#addTrigger(Class)}.
  */
 public abstract class Trigger extends PageAreaImpl {
     public final Control enabled = control("");
@@ -10,6 +11,4 @@ public abstract class Trigger extends PageAreaImpl {
     protected Trigger(Job parent, String path) {
         super(parent, path);
     }
-
-
 }

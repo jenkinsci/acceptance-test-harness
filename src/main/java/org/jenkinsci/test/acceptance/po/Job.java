@@ -7,6 +7,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,6 +27,7 @@ import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.LocalController;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.junit.internal.AssumptionViolatedException;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.zeroturnaround.zip.ZipUtil;
 
@@ -33,8 +35,8 @@ import com.google.inject.Injector;
 
 import cucumber.api.DataTable;
 import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.junit.Assert.assertThat;
 
 /**
  * Job Page object superclass.
@@ -211,6 +213,13 @@ public class Job extends TopLevelItem {
         return wrapper;
     }
 
+    public <T extends Trigger> T addTrigger(Class<T> type) {
+        ensureConfigPage();
+        T trigger = newInstance(type, this);
+        trigger.enabled.check();
+        return trigger;
+    }
+
     /**
      * Adds a shell step that copies a resource inside the test project into a file on the build machine.
      * <p/>
@@ -317,7 +326,7 @@ public class Job extends TopLevelItem {
     }
 
     public Build scheduleBuild() {
-        return scheduleBuild(Collections.<String, Object>emptyMap());
+        return scheduleBuild(Collections.emptyMap());
     }
 
     public Build scheduleBuild(Map<String, ?> params) {
@@ -327,14 +336,12 @@ public class Job extends TopLevelItem {
             clickLink("Build Now");
         } else {
             clickLink("Build with Parameters");
-            waitFor(by.xpath("//form[@name='parameters']"), 2);
-            for (Parameter def : parameters) {
-                Object v = params.get(def.getName());
-                if (v != null) {
-                    def.fillWith(v);
-                }
+            try {
+                BuildWithParameters paramsPage = new BuildWithParameters(this, new URL(driver.getCurrentUrl()));
+                paramsPage.enter(parameters, params).start();
+            } catch (MalformedURLException e) {
+                throw new Error(e);
             }
-            clickButton("Build");
         }
 
         return build(nb);
@@ -464,5 +471,14 @@ public class Job extends TopLevelItem {
         open();
         clickLink("Delete Project");
         confirmAlert(2);
+    }
+
+    public static org.hamcrest.Matcher<WebDriver> disabled() {
+        return allOf(
+                not(hasContent("Build Now")),
+                not(hasContent("Disable Project")),
+                hasContent("Enable"),
+                hasContent("This project is currently disabled")
+        );
     }
 }

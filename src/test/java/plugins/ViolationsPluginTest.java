@@ -55,7 +55,7 @@ public class ViolationsPluginTest extends AbstractJUnitTest {
 
         return new Matcher<ViolationsAction>("%s %s violations in %s files", violations, kind, files) {
 
-            private final String pattern = "//td//a[@href='#%1$s' and text()='%1$s']/../../td[%2$d]";
+            private final String pattern = "//td//a[@href='#%1$s' and text()='%1$s']/../../td[%2$s]";
 
             @Override
             public boolean matchesSafely(ViolationsAction item) {
