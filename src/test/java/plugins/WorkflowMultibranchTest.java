@@ -62,7 +62,7 @@ public class WorkflowMultibranchTest extends AbstractJUnitTest {
     }
 
     private void assertBranchIndexing(final WorkflowMultiBranchJob job) {
-        assertThat(job, anyOf(/* 1.x */hasAction("Branch Indexing"), /* 2.x */hasAction("Scan Repository")));
+        assertThat(job, anyOf(/* 1.x */hasAction("Branch Indexing"), /* 2.x */hasAction("Scan Repository"), /* 2.1.0 */hasAction("Scan Repository Now")));
 
         final String branchIndexingLog = job.getBranchIndexingLog();
 
