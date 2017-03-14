@@ -29,6 +29,7 @@ import java.io.IOException;
 
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.Since;
 import org.jenkinsci.test.acceptance.junit.WithInstallWizard;
 import org.jenkinsci.test.acceptance.po.Login;
 import org.jenkinsci.test.acceptance.po.WizardCreateAdminUser;
@@ -45,6 +46,7 @@ public class InstallWizardTest extends AbstractJUnitTest {
     @Inject
     public JenkinsController controller;
 
+    @Since("2.0")
     @Test
     public void wizardInstallSugestedTest() throws IOException {
 
@@ -72,6 +74,7 @@ public class InstallWizardTest extends AbstractJUnitTest {
         Assert.assertThat(login, loggedInAs("adminUser"));
     }
 
+    @Since("2.0")
     @Test
     public void wizardInstallCustomPluginsTest() throws IOException {
 
