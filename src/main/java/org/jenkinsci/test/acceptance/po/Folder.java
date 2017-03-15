@@ -111,6 +111,7 @@ public class Folder extends TopLevelItem implements Container {
                 tab.click();
 
                 if (i == 0) {
+                    // First tab redirects to Folder's home page
                     return null;
                 } else {
                     return newInstance(type, injector, url("view/%s/", viewName));
