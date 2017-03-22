@@ -13,6 +13,7 @@ import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.BuildWithParameters;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
+import org.jenkinsci.test.acceptance.po.UpstreamJobTrigger;
 import org.jenkinsci.test.acceptance.po.ListView;
 import org.jenkinsci.test.acceptance.po.ShellBuildStep;
 import org.jenkinsci.test.acceptance.po.StringParameter;
@@ -29,6 +30,26 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
 import static org.junit.Assert.*;
 
 public class FreestyleJobTest extends AbstractJUnitTest {
+    @Test
+    public void should_use_upstream_trigger() {
+        FreeStyleJob main = jenkins.jobs.create(FreeStyleJob.class);
+        FreeStyleJob trigger = jenkins.jobs.create(FreeStyleJob.class);
+
+        main.edit(() -> {
+            UpstreamJobTrigger configuration = main.addTrigger(UpstreamJobTrigger.class);
+            configuration.setUpstreamProjects(trigger.name);
+        });
+
+        Build build = trigger.scheduleBuild().shouldSucceed();
+        assertThat(build.getConsole(), containsString("Triggering a new build of %s", main.name));
+
+        Build automaticallyStartedBuild = main.build(1);
+        automaticallyStartedBuild.waitUntilFinished();
+
+        assertThat(automaticallyStartedBuild.getConsole(),
+                containsString("Started by upstream project \"%s\"", trigger.name));
+    }
+
     @Test
     public void should_set_description() {
         FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class);

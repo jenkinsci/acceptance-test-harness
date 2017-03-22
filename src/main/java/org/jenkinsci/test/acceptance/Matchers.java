@@ -1,20 +1,25 @@
 package org.jenkinsci.test.acceptance;
 
-import org.apache.commons.io.IOUtils;
-import org.hamcrest.Description;
-import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisPlugin;
-import org.jenkinsci.test.acceptance.po.*;
-import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-
+import javax.annotation.CheckForNull;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import javax.annotation.CheckForNull;
+import org.apache.commons.io.IOUtils;
+import org.hamcrest.CoreMatchers;
+import org.hamcrest.Description;
+import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisPlugin;
+import org.jenkinsci.test.acceptance.po.CapybaraPortingLayerImpl;
+import org.jenkinsci.test.acceptance.po.Jenkins;
+import org.jenkinsci.test.acceptance.po.Job;
+import org.jenkinsci.test.acceptance.po.Login;
+import org.jenkinsci.test.acceptance.po.PageObject;
+import org.jenkinsci.test.acceptance.po.User;
+import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 
 /**
  * Hamcrest matchers.
@@ -60,7 +65,8 @@ public class Matchers {
                 try {
                     item.findElement(selector);
                     return true;
-                } catch (NoSuchElementException _) {
+                }
+                catch (NoSuchElementException _) {
                     return false;
                 }
             }
@@ -83,7 +89,8 @@ public class Matchers {
                     po.open();
                     po.find(by.xpath("//div[@id='tasks']/div/a[text()='%s']", displayName));
                     return true;
-                } catch (NoSuchElementException _) {
+                }
+                catch (NoSuchElementException _) {
                     return false;
                 }
             }
@@ -107,6 +114,21 @@ public class Matchers {
     }
 
     /**
+     * Matches the specified formatted string.
+     *
+     * @param format A <a href="../util/Formatter.html#syntax">format string</a>
+     * @param args   Arguments referenced by the format specifiers in the format string.  If there are more arguments
+     *               than format specifiers, the extra arguments are ignored.  The number of arguments is variable and
+     *               may be zero.  The maximum number of arguments is limited by the maximum dimension of a Java array
+     *               as defined by <cite>The Java&trade; Virtual Machine Specification</cite>. The behaviour on a {@code
+     *               null} argument depends on the <a href="../util/Formatter.html#syntax">conversion</a>.
+     * @return the matcher
+     */
+    public static org.hamcrest.Matcher<String> containsString(final String format, final Object... args) {
+        return CoreMatchers.containsString(String.format(format, args));
+    }
+
+    /**
      * Matches if a string contains a portion that matches to the regular expression.
      */
     public static Matcher<String> containsRegexp(final Pattern re) {
@@ -120,7 +142,10 @@ public class Matchers {
 
     public static Matcher<PageObject> pageObjectExists() {
         return new Matcher<PageObject>("Page object exists") {
-            private @CheckForNull HttpURLConnection conn; // Store for later defect localization
+            private
+            @CheckForNull
+            HttpURLConnection conn; // Store for later defect localization
+
             @Override
             public void describeMismatchSafely(PageObject item, Description desc) {
                 desc.appendText(item.url.toString()).appendText(" does not exist");
@@ -132,7 +157,8 @@ public class Matchers {
                     conn = (HttpURLConnection) item.url.openConnection();
                     IOUtils.toByteArray(conn.getInputStream());
                     return true;
-                } catch (IOException e) {
+                }
+                catch (IOException e) {
                     return false;
                 }
             }
@@ -141,7 +167,10 @@ public class Matchers {
 
     public static Matcher<PageObject> pageObjectDoesNotExist() {
         return new Matcher<PageObject>("Page object exists") {
-            private @CheckForNull HttpURLConnection conn; // Store for later defect localization
+            private
+            @CheckForNull
+            HttpURLConnection conn; // Store for later defect localization
+
             @Override
             public void describeMismatchSafely(PageObject item, Description desc) {
                 desc.appendText(item.url.toString()).appendText(" does exist");
@@ -152,7 +181,8 @@ public class Matchers {
                 try {
                     conn = (HttpURLConnection) item.url.openConnection();
                     return conn.getResponseCode() == 404;
-                } catch (IOException e) {
+                }
+                catch (IOException e) {
                     return false;
                 }
             }
@@ -166,7 +196,8 @@ public class Matchers {
                 try {
                     jenkins.find(by.href("/user/" + user));
                     return true;
-                } catch (NoSuchElementException e) {
+                }
+                catch (NoSuchElementException e) {
                     return false;
                 }
             }
@@ -185,7 +216,8 @@ public class Matchers {
                 try {
                     login.find(by.href("/user/" + user));
                     return true;
-                } catch (NoSuchElementException e) {
+                }
+                catch (NoSuchElementException e) {
                     return false;
                 }
             }
@@ -204,7 +236,8 @@ public class Matchers {
                 try {
                     login.find(by.xpath("//div[contains(text(), 'Invalid login information. Please try again.')]"));
                     return true;
-                } catch (NoSuchElementException e) {
+                }
+                catch (NoSuchElementException e) {
                     return false;
                 }
             }
@@ -228,7 +261,8 @@ public class Matchers {
                             return true;
                         }
                     }
-                } catch (NoSuchElementException e) {
+                }
+                catch (NoSuchElementException e) {
                     return false;
                 }
                 return false;
@@ -287,7 +321,8 @@ public class Matchers {
                 try {
                     job.find(By.xpath("//h2[text()='Analysis results']/following-sibling::ul/li/img[@title='" + plugin.getName() + "']"));
                     return true;
-                } catch (NoSuchElementException e) {
+                }
+                catch (NoSuchElementException e) {
                     return false;
                 }
             }
