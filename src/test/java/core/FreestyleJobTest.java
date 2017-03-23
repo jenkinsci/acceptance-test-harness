@@ -53,10 +53,11 @@ public class FreestyleJobTest extends AbstractJUnitTest {
     @Test
     public void should_set_description() {
         FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class);
-        String description = "Hello World!";
-        job.description(description, false);
+        String description = "A description!";
+        job.edit(() -> job.setDescription(description));
 
-        assertThat(driver, hasContent(description));
+        WebElement actual = job.find(By.xpath("//div[@id='description']/div"));
+        assertThat(actual.getText(), containsString(description));
     }
 
     @Test
