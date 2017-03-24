@@ -20,7 +20,7 @@ public class DumbSlave extends Slave {
     public final Control executors = control("/numExecutors");
     public final Control remoteFS = control("/remoteFS");
     public final Control labels = control("/labelString");
-    public final Control launchMethod = control("/");   // TODO: this path looks rather buggy to me
+    public final Control launchMethod = control("/");   // TODO: this path looks rather buggy because of JENKINS-43076
 
     public DumbSlave(Jenkins j, String name) {
         super(j, name);

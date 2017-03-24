@@ -17,14 +17,15 @@ import static org.junit.Assert.assertTrue;
  */
 @Describable("hudson.plugins.sshslaves.SSHLauncher")
 public class SshSlaveLauncher extends ComputerLauncher {
-    public final Control host = control("host");
-    public final Control credentialsId = control("credentialsId");
-    public final Control prefixCmd = control("prefixStartSlaveCmd");
-    public final Control suffixCmd = control("suffixStartSlaveCmd");
-    public final Control timeout = control("launchTimeoutSeconds");
-    public final Control retries = control("maxNumRetries");
-    public final Control javaPath = control("javaPath");
-    public final Control jvmOptions = control("jvmOptions");
+    public final Control host = control("/host");
+    public final Control credentialsId = control("/credentialsId");
+    public final Control prefixCmd = control("/prefixStartSlaveCmd");
+    public final Control suffixCmd = control("/suffixStartSlaveCmd");
+    public final Control timeout = control("/launchTimeoutSeconds");
+    public final Control retries = control("/maxNumRetries");
+    public final Control javaPath = control("/javaPath");
+    public final Control jvmOptions = control("/jvmOptions");
+    public final Control sshHostKeyVerificationStrategy = control("/"); //weird path because of JENKINS-43076
 
     public SshSlaveLauncher(PageObject context, String path) {
         super(context, path);
