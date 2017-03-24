@@ -36,6 +36,8 @@ public class GlobalSecurityConfig extends ContainerPageObject {
 
     private static final String SAFE_HTML = "Safe HTML";
 
+    public final Control csrf = control(by.name("_.csrf"));
+
     public GlobalSecurityConfig(Jenkins context) {
         super(context, context.url("configureSecurity/"));
     }
@@ -72,7 +74,6 @@ public class GlobalSecurityConfig extends ContainerPageObject {
     private void selectMarkupFormatter(final String formatter) {
         find(by.option(formatter)).click();
     }
-
 
     private <T> T selectFromRadioGroup(Class<T> type) {
         WebElement radio = findCaption(type, new Finder<WebElement>() {

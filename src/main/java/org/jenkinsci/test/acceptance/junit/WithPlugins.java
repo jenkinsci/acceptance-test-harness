@@ -6,6 +6,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -86,11 +87,17 @@ public @interface WithPlugins {
                 @Override
                 public void evaluate() throws Throwable {
                     jenkins = injector.getInstance(Jenkins.class);
-                    List<PluginSpec> plugins = combinePlugins(
-                            d.getAnnotation(WithPlugins.class),
-                            d.getTestClass().getAnnotation(WithPlugins.class)
-                    );
 
+                    List<WithPlugins> wp = new LinkedList<>();
+                    wp.add(d.getAnnotation(WithPlugins.class));
+
+                    Class<?> testClass = d.getTestClass();
+                    while (testClass != null) {
+                        wp.add(testClass.getAnnotation(WithPlugins.class));
+                        testClass = testClass.getSuperclass();
+                    }
+
+                    List<PluginSpec> plugins = combinePlugins(wp);
                     installPlugins(plugins);
 
                     for (PluginSpec plugin : plugins) {
@@ -106,7 +113,7 @@ public @interface WithPlugins {
                     base.evaluate();
                 }
 
-                private List<PluginSpec> combinePlugins(WithPlugins... wp) {
+                private List<PluginSpec> combinePlugins(List<WithPlugins> wp) {
                     ArrayList<PluginSpec> plugins = new ArrayList<>();
                     for (WithPlugins withPlugins : wp) {
                         if (withPlugins != null) {
@@ -127,7 +134,7 @@ public @interface WithPlugins {
                         PluginSpec spec = iterator.next();
                         switch (pm.installationStatus(spec)) {
                             case NOT_INSTALLED:
-                                LOGGER.info(spec + " is up to date");
+                                LOGGER.info(spec + " is not installed");
                                 break;
                             case UP_TO_DATE:
                                 iterator.remove(); // Already installed

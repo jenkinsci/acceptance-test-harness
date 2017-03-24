@@ -1,14 +1,6 @@
 package plugins;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.jenkinsci.test.acceptance.Matchers.hasContent;
-
-import java.io.File;
-import java.io.IOException;
-import java.lang.ProcessBuilder.Redirect;
-import java.net.URISyntaxException;
-import java.net.URL;
-
+import com.google.inject.Inject;
 import org.codehaus.plexus.util.FileUtils;
 import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
@@ -31,7 +23,15 @@ import org.jenkinsci.test.acceptance.po.MatrixRun;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.google.inject.Inject;
+import java.io.File;
+import java.io.IOException;
+import java.lang.ProcessBuilder.Redirect;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 /**
  * Acceptance Test Harness Test for Foreman Node Sharing Plugin.
@@ -53,6 +53,7 @@ public class ForemanNodeSharingPluginTest extends AbstractJUnitTest {
 
     private static final int FOREMAN_CLOUD_INIT_WAIT = 180;
     private static final int PROVISION_TIMEOUT = 480;
+    private static final int EXTENDED_PROVISION_TIMEOUT = 900;
     private static final String DEFAULTJOBSLEEPTIME = "15";
 
     /**
@@ -143,7 +144,9 @@ public class ForemanNodeSharingPluginTest extends AbstractJUnitTest {
         job.addUserAxis("X", "1 2 3 4 5");
         job.save();
 
-        MatrixBuild b = job.startBuild().waitUntilFinished(360).as(MatrixBuild.class);
+        MatrixBuild b = job.startBuild().as(MatrixBuild.class);
+
+        b.waitUntilFinished(EXTENDED_PROVISION_TIMEOUT);
         for (MatrixRun config: b.getConfigurations()) {
             config.shouldSucceed();
         }
@@ -167,9 +170,25 @@ public class ForemanNodeSharingPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void testCheckForCompatible() throws IOException {
-        cloud.checkForCompatibleHosts();
-        waitFor(driver, hasContent(sshslave1.getCid()), FOREMAN_CLOUD_INIT_WAIT);
+        jenkins.save();
+        waitForHostsMap(sshslave1.getCid(), EXTENDED_PROVISION_TIMEOUT);
     }
+
+    private void waitForHostsMap(final String pattern, final int timeout) {
+        waitFor().withMessage("%s to be displayed", pattern)
+                .withTimeout(timeout, TimeUnit.SECONDS)
+                .until(new Callable<Boolean>() {
+                    @Override public Boolean call() throws Exception {
+                        return isHostListed(pattern);
+                    }
+                });
+    }
+
+    private Boolean isHostListed(String pattern) {
+        jenkins.visit("/cloud/" + cloud.getCloudName());
+        return (driver.getPageSource().indexOf(pattern) > 0);
+    }
+
 
     /**
      * Test that we can provision, build and release.
@@ -202,6 +221,7 @@ public class ForemanNodeSharingPluginTest extends AbstractJUnitTest {
         Build b = job1.scheduleBuild();
         job2.scheduleBuild();
         jenkins.restart();
+
         b.waitUntilFinished(PROVISION_TIMEOUT);
 
     }

@@ -36,6 +36,7 @@ import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 
 @WithPlugins("mailer")
@@ -67,7 +68,7 @@ public class JenkinsDatabaseSecurityRealmTest extends AbstractJUnitTest {
 
         jenkins.logout();
 
-        assertEquals(null, jenkins.getCurrentUser());
+        assertEquals(null, jenkins.getCurrentUser().id());
     }
 
     @Test

@@ -21,7 +21,16 @@ public class CredentialsPage extends ConfigurablePageObject {
      * @param domainName
      */
     public CredentialsPage(Jenkins j, String domainName) {
-        super(j, j.url("credentials/store/system/domain/"+domainName+"/newCredentials"));
+        super(j, j.url("credentials/store/system/domain/" + domainName + "/newCredentials"));
+    }
+
+    /**
+     * Create a new Credential scoped to a Folder
+     * @param f
+     * @param domainName
+     */
+    public CredentialsPage(Folder f, String domainName) {
+        super(f, f.url("credentials/store/folder/domain/" + domainName + "/newCredentials"));
     }
 
     /**

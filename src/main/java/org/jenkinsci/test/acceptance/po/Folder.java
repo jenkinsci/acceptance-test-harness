@@ -24,8 +24,14 @@
 package org.jenkinsci.test.acceptance.po;
 
 import java.net.URL;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 import com.google.inject.Injector;
+import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebElement;
 
 /**
  * A container that stores nested items like {@link Job jobs}. A folder may contain a hierarchy of folders.
@@ -35,6 +41,9 @@ public class Folder extends TopLevelItem implements Container {
 
     private final JobsMixIn jobs;
     private final ViewsMixIn views;
+    private final Control properties = control("/com-cloudbees-hudson-plugins-folder-properties-EnvVarsFolderProperty/properties");
+    private final By viewTab = by.css(".tabBar .tab a");
+    private final By activeViewTab = by.css(".tabBar .tab.active a");
 
     public Folder(final Injector injector, final URL url, final String name) {
         super(injector, url, name);
@@ -58,4 +67,73 @@ public class Folder extends TopLevelItem implements Container {
     public ViewsMixIn getViews() {
         return views;
     }
+
+    @Override
+    public void delete() {
+        open();
+        clickLink("Delete Folder");
+        waitFor(by.button("Yes")).click();
+    }
+
+    public void setEnvironmentalVariables(final Map<String, String> envVbles) {
+        String envVblesAsString = "";
+
+        if (envVbles != null) {
+            for (Map.Entry<String, String> envVble : envVbles.entrySet()) {
+                envVblesAsString += String.format("%s=%s\n", envVble.getKey(), envVble.getValue());
+            }
+        }
+
+        this.properties.set(envVblesAsString);
+    }
+
+    public List<String> getViewsNames() {
+        final List<WebElement> viewTabs = this.getViewTabs();
+
+        final List<String> viewNames = new LinkedList<>();
+        for (final WebElement tab : viewTabs) {
+            viewNames.add(tab.getText());
+        }
+
+        return viewNames;
+    }
+
+    public String getActiveViewName() {
+        return find(activeViewTab).getText();
+    }
+
+    public <T extends View> T  selectView(final Class<T> type, final String viewName) {
+        final List<WebElement> viewTabs = this.getViewTabs();
+        int i = 0;
+
+        for (final WebElement tab : viewTabs) {
+            if (tab.getText().equals(viewName)) {
+                tab.click();
+
+                if (i == 0) {
+                    // First tab redirects to Folder's home page
+                    return null;
+                } else {
+                    return newInstance(type, injector, url("view/%s/", viewName));
+                }
+            }
+
+            i++;
+        }
+
+        throw new NoSuchElementException(String.format("There is no view with name [%s]", viewName));
+    }
+
+    private List<WebElement> getViewTabs() {
+        final List<WebElement> viewTabs = driver.findElements(viewTab);
+
+        final int lastViewIndex = viewTabs.size() - 1;
+
+        if ("+".equals(viewTabs.get(lastViewIndex).getText())) {
+            viewTabs.remove(lastViewIndex);
+        }
+
+        return viewTabs;
+    }
+
 }

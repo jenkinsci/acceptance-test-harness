@@ -23,19 +23,15 @@
  */
 package org.jenkinsci.test.acceptance.po;
 
-import com.google.common.base.Predicate;
-import com.google.inject.Injector;
-import groovy.lang.Closure;
-import org.openqa.selenium.WebDriver;
-
 import java.net.URL;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+import com.google.inject.Injector;
+
+import groovy.lang.Closure;
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.*;
+import static org.jenkinsci.test.acceptance.Matchers.*;
 
 /**
  * {@link PageObject} that can be configured and saved.
@@ -102,5 +98,17 @@ public abstract class ConfigurablePageObject extends PageObject {
     public void apply() {
         clickButton("Apply");
         waitFor(driver, hasContent("Saved"), 30);
+    }
+
+    /**
+     * Edits this configurable page object using the specified configuration lambda. Opens the configuration view, runs the specified
+     * configuration lambda and saves the changes.
+     *
+     * @param configuration the additional configuration options for this page object
+     */
+    public void edit(final Runnable configuration) {
+        configure();
+        configuration.run();
+        save();
     }
 }

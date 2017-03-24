@@ -58,8 +58,7 @@ public abstract class TopLevelItem extends ContainerPageObject {
     }
 
     /**
-     * Renames the job. Opens the configuration section, sets the name and saves the form. Finally the rename is
-     * confirmed.
+     * Changes the description. Opens the configuration section, sets the description and saves the form.
      *
      * @param description the description of the job
      * @param withCodeMirror if description field uses CodeMirror or not (depending on Markup Formatter)
@@ -112,4 +111,6 @@ public abstract class TopLevelItem extends ContainerPageObject {
     public int hashCode() {
         return url.toExternalForm().hashCode();
     }
+
+    public abstract void delete();
 }

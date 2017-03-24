@@ -46,10 +46,10 @@ public class GerritTriggerNewServer extends PageObject {
      * Saves harness' gerrit-trigger server if none already configured.<br>
      * Does not matter if already configured; no-op with harmless error then.
      */
-    public void saveNewTestServerConfigIfNone() {
+    public void saveNewTestServerConfigIfNone(String serverName) {
         avoidOccasional404FromNonReadyGerritUI();
         open();
-        name.set(this.getClass().getPackage().getName());
+        name.set(serverName);
         modeDefault.click();
         clickButton("OK");
     }

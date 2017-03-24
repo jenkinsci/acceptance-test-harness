@@ -9,7 +9,7 @@ import org.jenkinsci.test.acceptance.po.PageAreaImpl;
  */
 public abstract class WorkflowSharedLibrary extends PageAreaImpl {
 
-    public final Control name = control(by.name("_.name"));
+    public final Control name = control("name");
 
     public WorkflowSharedLibrary(WorkflowSharedLibraryGlobalConfig config, String path) {
         super(config, path);

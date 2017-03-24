@@ -4,11 +4,10 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.StringWriter;
+import java.io.PrintStream;
 import java.lang.reflect.Field;
 import java.net.ServerSocket;
 import java.util.Arrays;
@@ -16,8 +15,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import com.github.olivergondza.dumpling.factory.PidRuntimeFactory;
+import com.github.olivergondza.dumpling.model.ModelObject;
+import com.github.olivergondza.dumpling.model.dump.ThreadDumpRuntime;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.codehaus.plexus.util.Expand;
 import org.codehaus.plexus.util.StringUtils;
 import org.jenkinsci.test.acceptance.junit.FailureDiagnostics;
@@ -68,6 +69,11 @@ public abstract class LocalController extends JenkinsController implements LogLi
 
     @Inject
     private Injector injector;
+
+    /**
+     * Flag to indicate if the install wizard should be run
+     */
+    private boolean runInstallWizard = false;
 
     /**
      * Partial implementation of {@link JenkinsControllerFactory} for subtypes.
@@ -302,7 +308,11 @@ public abstract class LocalController extends JenkinsController implements LogLi
         if (javaHome != null) {
             env.put("JAVA_HOME", javaHome.getAbsolutePath());
         }
-        env.put("jenkins.install.state", "TEST");
+
+        if (!runInstallWizard) {
+            env.put("jenkins.install.state", "TEST");
+        }
+
         return env;
     }
 
@@ -348,7 +358,7 @@ public abstract class LocalController extends JenkinsController implements LogLi
         Process proc = process.getProcess();
 
         try {
-            int val = proc.exitValue();
+            proc.exitValue();
             return null; // already dead
         } catch (IllegalThreadStateException _) {
             // Process alive
@@ -374,12 +384,12 @@ public abstract class LocalController extends JenkinsController implements LogLi
             }
 
             try {
-                Process jstack = new ProcessBuilder("jstack", String.valueOf(pid)).start();
-                if (jstack.waitFor() == 0) {
-                    StringWriter writer = new StringWriter();
-                    IOUtils.copy(jstack.getInputStream(), writer);
-                    return writer.toString();
-                }
+                ThreadDumpRuntime runtime = new PidRuntimeFactory().fromProcess(pid);
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                PrintStream printStream = new PrintStream(baos);
+                runtime.toString(printStream, ModelObject.Mode.MACHINE);
+                printStream.close();
+                return baos.toString();
             } catch (IOException | InterruptedException e) {
                 throw new AssertionError(e);
             }
@@ -411,6 +421,22 @@ public abstract class LocalController extends JenkinsController implements LogLi
             name = "127.0.0.1";
         }
         return name;
+    }
+
+    /**
+     * @return true if the install wizard is going to be run
+     */
+    public boolean isRunInstallWizard() {
+        return runInstallWizard;
+    }
+
+    /**
+     * Set the flag to run the install wizard.
+     * 
+     * @param runInstallWizard - <code>true</code> to run the install wizard
+     */
+    public void setRunInstallWizard(boolean runInstallWizard) {
+        this.runInstallWizard = runInstallWizard;
     }
 
     private static final Logger LOGGER = Logger.getLogger(LocalController.class.getName());
