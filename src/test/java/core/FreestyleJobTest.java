@@ -90,8 +90,7 @@ public class FreestyleJobTest extends AbstractJUnitTest {
         assertThat(successIcon.getAttribute("tooltip"), is("Success"));
     }
 
-    @Test
-    @Issue("JENKINS-38928")
+    @Test @Issue("JENKINS-38928")
     public void apply_then_save() {
         FreeStyleJob j = jenkins.jobs.create(FreeStyleJob.class, "simple-job");
         assertThat(j, pageObjectExists());
@@ -139,7 +138,7 @@ public class FreestyleJobTest extends AbstractJUnitTest {
     }
 
     @Test
-    public void buildParameterized() throws Exception {
+    public void buildParametrized() throws Exception {
         FreeStyleJob j = jenkins.jobs.create(FreeStyleJob.class);
         j.configure();
         j.addParameter(StringParameter.class).setName("text").setDefault("foo").setDescription("Bar");
