@@ -28,7 +28,6 @@ import org.jenkinsci.test.acceptance.po.Container;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.FreeStyleMultiBranchJob;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
-import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.ListView;
 import org.jenkinsci.test.acceptance.po.MatrixConfiguration;
@@ -47,6 +46,7 @@ import org.openqa.selenium.WebElement;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.jenkinsci.test.acceptance.po.PageObject.*;
 
 /**
  * Tests various aspects of the warnings plug-in. Most tests copy an existing file with several warnings into the
@@ -120,11 +120,11 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
 
         ScriptApproval approval = new ScriptApproval(jenkins);
         approval.open();
-        approval.findSignature("staticMethod hudson.plugins.analysis.util.model.Priority");
+        approval.findSignature("staticMethod hudson.plugins.analysis.util.model.Priority fromString java.lang.String");
     }
 
     private String createParser(final String script) {
-        String parserName = Jenkins.createRandomName();
+        String parserName = createRandomName();
         jenkins.edit(() -> {
             ParsersConfiguration parsers = new ParsersConfiguration(jenkins.getConfigPage());
             parsers.add(parserName, script);
@@ -201,7 +201,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
 
     private void assertThatScriptIsNotExecuted(final String url) {
         jenkins.visit("descriptorByName/GroovyParser/" + url);
-        assertThat(driver, hasContent("You have no rights to execute Groovy scripts."));
+        assertThat(driver, hasContent("You have no rights to execute Groovy warnings parsers."));
     }
 
     /**
