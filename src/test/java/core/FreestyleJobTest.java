@@ -76,8 +76,6 @@ public class FreestyleJobTest extends AbstractJUnitTest {
     public void should_visit_build_with_permalink() {
         FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class);
 
-        String last = "Last build (#1)";
-
         Build build = job.scheduleBuild().shouldSucceed();
         job.open();
         WebElement link = job.find(By.partialLinkText("Last build (#1)"));
