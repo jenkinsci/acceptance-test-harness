@@ -59,7 +59,8 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
         assertThatWarningsCountInSummaryIs(action, TOTAL_NUMBER_OF_WARNINGS);
         assertThatNewWarningsCountInSummaryIs(action, TOTAL_NUMBER_OF_WARNINGS);
 
-        assertThat(build.getConsole(), containsString("[CHECKSTYLE] Finding all files that match the pattern checkstyle-result.xml"));
+        assertThat(build.getConsole(),
+                containsRegexp("\\[CHECKSTYLE\\] Searching for all files in .* that match the pattern checkstyle-result.xml\n"));
     }
 
     @Test @WithPlugins("parameterized-trigger") @Issue("JENKINS-33162")
