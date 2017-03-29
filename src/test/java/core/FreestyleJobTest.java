@@ -244,4 +244,15 @@ public class FreestyleJobTest extends AbstractJUnitTest {
         assertThat(waitFor(error).getText(), containsString("Invalid input: \"not_a_time_either\""));
         clickLink("Close");
     }
+
+    @Test
+    public void createJobWithDescription() throws Exception{
+        FreeStyleJob j = jenkins.jobs.create(FreeStyleJob.class);
+        j.configure();
+        j.description("Beschreibung für Job",false);
+
+        assertTrue("Seite sollte >Build History<", driver.getPageSource().contains("Build History"));
+        assertTrue("Seite sollte >Beschreibung für Job< enthalten", driver.getPageSource().contains("Beschreibung für Job"));
+
+    }
 }
