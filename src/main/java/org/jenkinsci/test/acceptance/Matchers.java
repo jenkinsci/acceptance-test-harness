@@ -65,8 +65,7 @@ public class Matchers {
                 try {
                     item.findElement(selector);
                     return true;
-                }
-                catch (NoSuchElementException _) {
+                } catch (NoSuchElementException _) {
                     return false;
                 }
             }
@@ -89,8 +88,7 @@ public class Matchers {
                     po.open();
                     po.find(by.xpath("//div[@id='tasks']/div/a[text()='%s']", displayName));
                     return true;
-                }
-                catch (NoSuchElementException _) {
+                } catch (NoSuchElementException _) {
                     return false;
                 }
             }
@@ -142,10 +140,7 @@ public class Matchers {
 
     public static Matcher<PageObject> pageObjectExists() {
         return new Matcher<PageObject>("Page object exists") {
-            private
-            @CheckForNull
-            HttpURLConnection conn; // Store for later defect localization
-
+            private @CheckForNull HttpURLConnection conn; // Store for later defect localization
             @Override
             public void describeMismatchSafely(PageObject item, Description desc) {
                 desc.appendText(item.url.toString()).appendText(" does not exist");
@@ -157,8 +152,7 @@ public class Matchers {
                     conn = (HttpURLConnection) item.url.openConnection();
                     IOUtils.toByteArray(conn.getInputStream());
                     return true;
-                }
-                catch (IOException e) {
+                } catch (IOException e) {
                     return false;
                 }
             }
@@ -167,10 +161,7 @@ public class Matchers {
 
     public static Matcher<PageObject> pageObjectDoesNotExist() {
         return new Matcher<PageObject>("Page object exists") {
-            private
-            @CheckForNull
-            HttpURLConnection conn; // Store for later defect localization
-
+            private @CheckForNull HttpURLConnection conn; // Store for later defect localization
             @Override
             public void describeMismatchSafely(PageObject item, Description desc) {
                 desc.appendText(item.url.toString()).appendText(" does exist");
@@ -181,8 +172,7 @@ public class Matchers {
                 try {
                     conn = (HttpURLConnection) item.url.openConnection();
                     return conn.getResponseCode() == 404;
-                }
-                catch (IOException e) {
+                } catch (IOException e) {
                     return false;
                 }
             }
@@ -196,8 +186,7 @@ public class Matchers {
                 try {
                     jenkins.find(by.href("/user/" + user));
                     return true;
-                }
-                catch (NoSuchElementException e) {
+                } catch (NoSuchElementException e) {
                     return false;
                 }
             }
@@ -216,8 +205,7 @@ public class Matchers {
                 try {
                     login.find(by.href("/user/" + user));
                     return true;
-                }
-                catch (NoSuchElementException e) {
+                } catch (NoSuchElementException e) {
                     return false;
                 }
             }
@@ -236,8 +224,7 @@ public class Matchers {
                 try {
                     login.find(by.xpath("//div[contains(text(), 'Invalid login information. Please try again.')]"));
                     return true;
-                }
-                catch (NoSuchElementException e) {
+                } catch (NoSuchElementException e) {
                     return false;
                 }
             }
@@ -261,8 +248,7 @@ public class Matchers {
                             return true;
                         }
                     }
-                }
-                catch (NoSuchElementException e) {
+                } catch (NoSuchElementException e) {
                     return false;
                 }
                 return false;
@@ -321,8 +307,7 @@ public class Matchers {
                 try {
                     job.find(By.xpath("//h2[text()='Analysis results']/following-sibling::ul/li/img[@title='" + plugin.getName() + "']"));
                     return true;
-                }
-                catch (NoSuchElementException e) {
+                } catch (NoSuchElementException e) {
                     return false;
                 }
             }
