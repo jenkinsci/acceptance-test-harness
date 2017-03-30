@@ -255,4 +255,16 @@ public class FreestyleJobTest extends AbstractJUnitTest {
         assertTrue("Seite sollte >Beschreibung für Job< enthalten", driver.getPageSource().contains("Beschreibung für Job"));
 
     }
+
+    /*
+    @Test
+    public void should_set_description(){
+
+        WebElement actual = job.find(By.xpath("//div[@id='discription']/div"))
+    }
+       assertThat driver contains stuff
+
+    */
+
+
 }
