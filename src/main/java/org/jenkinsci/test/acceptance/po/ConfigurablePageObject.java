@@ -51,13 +51,37 @@ public abstract class ConfigurablePageObject extends PageObject {
         super(injector, url);
     }
 
-    public void configure(Closure body) {
+    /**
+     * Edits this configurable page object using the specified configuration lambda. Opens the configuration view, runs the specified
+     * configuration lambda and saves the changes.
+     *
+     * @param body the additional configuration options for this page object
+     */
+    public void configure(final Runnable body) {
+        configure();
+        body.run();
+        save();
+    }
+
+    /**
+     * Edits this configurable page object using the specified configuration lambda. Opens the configuration view, runs the specified
+     * configuration lambda and saves the changes.
+     *
+     * @param body the additional configuration options for this page object
+     */
+    public void configure(final Closure body) {
         configure();
         body.call(this);
         save();
     }
 
-    public <T> T configure(Callable<T> body) {
+    /**
+     * Edits this configurable page object using the specified configuration lambda. Opens the configuration view, runs the specified
+     * configuration lambda and saves the changes.
+     *
+     * @param body the additional configuration options for this page object
+     */
+    public <T> T configure(final Callable<T> body) {
         try {
             configure();
             T v = body.call();
@@ -98,17 +122,5 @@ public abstract class ConfigurablePageObject extends PageObject {
     public void apply() {
         clickButton("Apply");
         waitFor(driver, hasContent("Saved"), 30);
-    }
-
-    /**
-     * Edits this configurable page object using the specified configuration lambda. Opens the configuration view, runs the specified
-     * configuration lambda and saves the changes.
-     *
-     * @param configuration the additional configuration options for this page object
-     */
-    public void edit(final Runnable configuration) {
-        configure();
-        configuration.run();
-        save();
     }
 }

@@ -50,7 +50,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
     public void should_resolve_environment_variables() {
         FreeStyleJob job = createFreeStyleJob(settings -> settings.pattern.set("checkstyle${ENV_DASH}result.xml"));
 
-        job.edit(() -> new EnvInjectConfig.Environment(job).properties.sendKeys("ENV_DASH=-"));
+        job.configure(() -> new EnvInjectConfig.Environment(job).properties.sendKeys("ENV_DASH=-"));
 
         Build build = buildSuccessfulJob(job);
         assertThatCheckStyleResultExists(job, build);
