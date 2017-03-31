@@ -33,21 +33,21 @@ public class SystemGroovyStep extends AbstractStep implements BuildStep {
         super(parent, path);
     }
 
-    public SystemGroovyStep script(String script) {
-        String prefix = "scriptSource";
+    public SystemGroovyStep script(String script, boolean sandbox) {
+        String prefix = "source";
         try {
             control("").select("Groovy command");
         } catch (NoSuchElementException ex) {
             control("scriptSource[0]").check();
             prefix += "[0]";
         }
-        new CodeMirror(parent, getPath(prefix + "/command")).set(script);
-        control(prefix + "/validate-button").click();
+        control(prefix + "/script/script").set(script);
+        control(prefix + "/script/sandbox").check(sandbox);
         return this;
     }
 
     public SystemGroovyStep file(String path) {
-        String prefix = "scriptSource";
+        String prefix = "source";
         try {
             control("").select("Groovy script file");
         } catch (NoSuchElementException ex) {
