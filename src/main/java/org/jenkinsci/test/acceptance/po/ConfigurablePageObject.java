@@ -35,10 +35,10 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
 
 /**
  * {@link PageObject} that can be configured and saved.
- *
+ * <p>
  * There are 2 uses of this:
- *   - {@link ContainerPageObject}, PO that has /configure page associated
- *   - PO that is itself a config page, such as /configureSecurity
+ * - {@link ContainerPageObject}, PO that has /configure page associated
+ * - PO that is itself a config page, such as /configureSecurity
  *
  * @author ogondza.
  */
@@ -52,8 +52,8 @@ public abstract class ConfigurablePageObject extends PageObject {
     }
 
     /**
-     * Edits this configurable page object using the specified configuration lambda. Opens the configuration view, runs the specified
-     * configuration lambda and saves the changes.
+     * Edits this configurable page object using the specified configuration lambda. Opens the configuration view,
+     * runs the specified body and saves the changes.
      *
      * @param body the additional configuration options for this page object
      */
@@ -64,8 +64,8 @@ public abstract class ConfigurablePageObject extends PageObject {
     }
 
     /**
-     * Edits this configurable page object using the specified configuration lambda. Opens the configuration view, runs the specified
-     * configuration lambda and saves the changes.
+     * Edits this configurable page object using the specified closure. Opens the configuration view,
+     * runs the specified body and saves the changes.
      *
      * @param body the additional configuration options for this page object
      */
@@ -76,10 +76,11 @@ public abstract class ConfigurablePageObject extends PageObject {
     }
 
     /**
-     * Edits this configurable page object using the specified configuration lambda. Opens the configuration view, runs the specified
-     * configuration lambda and saves the changes.
+     * Edits this configurable page object using the specified callable. Opens the configuration view,
+     * runs the specified body and saves the changes.
      *
      * @param body the additional configuration options for this page object
+     * @return return value of the body
      */
     public <T> T configure(final Callable<T> body) {
         try {
