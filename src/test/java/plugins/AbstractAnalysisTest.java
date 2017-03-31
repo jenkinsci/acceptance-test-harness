@@ -557,7 +557,7 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      */
     protected void configureEmailNotification(final FreeStyleJob job, final String subject, final String body) {
         // TODO: add a new job method that adds a publisher with configuration
-        job.edit(() ->
+        job.configure(() ->
             job.addPublisher(EmailExtPublisher.class, publisher -> {
                 publisher.subject.set(subject);
                 publisher.setRecipient("dev@example.com");
@@ -790,7 +790,7 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      * @return the edited job
      */
     public void replaceResource(final String newResourceToCopy, Job job) {
-        job.edit(() -> {
+        job.configure(() -> {
             job.removeFirstBuildStep();
             job.copyResource(newResourceToCopy);
         });
