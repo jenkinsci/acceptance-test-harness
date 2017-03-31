@@ -253,8 +253,9 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
         assertEquals(created, reconnected);
 
         Slave slave = ((Slave) reconnected);
-        slave.delete();
-        assertThat(slave, pageObjectDoesNotExist());
+        slave.open();
+        slave.clickLink("Schedule Termination");
+        waitFor(slave, pageObjectDoesNotExist(), 1000);
     }
 
     private OpenstackCloud addCloud(JenkinsConfig config) {

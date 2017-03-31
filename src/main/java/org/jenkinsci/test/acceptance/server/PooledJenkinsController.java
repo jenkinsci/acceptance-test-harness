@@ -14,7 +14,6 @@ import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.LocalController.LocalFactoryImpl;
 import org.jenkinsci.test.acceptance.log.LogListenable;
 import org.jenkinsci.test.acceptance.log.LogListener;
-import org.jenkinsci.test.acceptance.log.LogPrinter;
 import org.jenkinsci.test.acceptance.log.LogSplitter;
 
 import com.cloudbees.sdk.extensibility.Extension;
@@ -74,6 +73,7 @@ public class PooledJenkinsController extends JenkinsController implements LogLis
                 .build(ChannelStream.in(conn), ChannelStream.out(conn));
 
         try {
+            System.out.println("Requesting jut instance using socket " + socket.getAbsolutePath());
             controller = (IJenkinsController)channel.waitForRemoteProperty("controller");
             controller.start();
             url = controller.getUrl();

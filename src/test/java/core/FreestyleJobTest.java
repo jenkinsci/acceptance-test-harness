@@ -1,5 +1,10 @@
 package core;
 
+import java.net.URL;
+import java.util.Collections;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
+
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Wait;
 import org.jenkinsci.test.acceptance.po.Artifact;
@@ -8,6 +13,7 @@ import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.BuildWithParameters;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
+import org.jenkinsci.test.acceptance.po.UpstreamJobTrigger;
 import org.jenkinsci.test.acceptance.po.ListView;
 import org.jenkinsci.test.acceptance.po.ShellBuildStep;
 import org.jenkinsci.test.acceptance.po.StringParameter;
@@ -16,26 +22,73 @@ import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebElement;
 
-import java.net.URL;
-import java.util.Collections;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
-
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.Matchers.equalTo;
-import static org.jenkinsci.test.acceptance.Matchers.containsRegexp;
-import static org.jenkinsci.test.acceptance.Matchers.hasContent;
-import static org.jenkinsci.test.acceptance.Matchers.pageObjectDoesNotExist;
-import static org.jenkinsci.test.acceptance.Matchers.pageObjectExists;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.junit.Assert.*;
 
 public class FreestyleJobTest extends AbstractJUnitTest {
+    @Test
+    public void should_use_upstream_trigger() {
+        FreeStyleJob main = jenkins.jobs.create(FreeStyleJob.class);
+        FreeStyleJob trigger = jenkins.jobs.create(FreeStyleJob.class);
+
+        main.configure(() -> {
+            UpstreamJobTrigger configuration = main.addTrigger(UpstreamJobTrigger.class);
+            configuration.setUpstreamProjects(trigger.name);
+        });
+
+        Build build = trigger.scheduleBuild().shouldSucceed();
+        assertThat(build.getConsole(), containsString("Triggering a new build of %s", main.name));
+
+        Build automaticallyStartedBuild = main.build(1);
+        automaticallyStartedBuild.waitUntilFinished();
+
+        assertThat(automaticallyStartedBuild.getConsole(),
+                containsString("Started by upstream project \"%s\"", trigger.name));
+    }
 
     @Test
-    @Issue("JENKINS-38928")
+    public void should_set_description() {
+        FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class);
+        String description = "A description!";
+        job.configure(() -> job.setDescription(description));
+
+        WebElement actual = job.find(By.xpath("//div[@id='description']/div"));
+        assertThat(actual.getText(), containsString(description));
+    }
+
+    @Test
+    public void should_show_permalink_last_build() {
+        FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class);
+
+        String last = "Last build (#1)";
+        assertThat(driver, not(hasContent(last)));
+
+        job.scheduleBuild().waitUntilFinished();
+        job.open();
+        assertThat(driver, hasContent(last));
+    }
+
+    @Test
+    public void should_visit_build_with_permalink() {
+        FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class);
+
+        Build build = job.scheduleBuild().shouldSucceed();
+        job.open();
+        WebElement link = job.find(By.partialLinkText("Last build (#1)"));
+        link.click();
+
+        assertThat(driver, hasContent("Build #1"));
+        assertThat(driver, hasContent("No changes"));
+
+        WebElement successIcon = build.find(By.xpath("//h1/img"));
+        assertThat(successIcon.getAttribute("tooltip"), is("Success"));
+    }
+
+    @Test @Issue("JENKINS-38928")
     public void apply_then_save() {
         FreeStyleJob j = jenkins.jobs.create(FreeStyleJob.class, "simple-job");
         assertThat(j, pageObjectExists());
@@ -83,7 +136,7 @@ public class FreestyleJobTest extends AbstractJUnitTest {
     }
 
     @Test
-    public void buildParameterized() throws Exception {
+    public void buildParametrized() throws Exception {
         FreeStyleJob j = jenkins.jobs.create(FreeStyleJob.class);
         j.configure();
         j.addParameter(StringParameter.class).setName("text").setDefault("foo").setDescription("Bar");
