@@ -125,7 +125,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
 
     private String createParser(final String script) {
         String parserName = createRandomName();
-        jenkins.edit(() -> {
+        jenkins.configure(() -> {
             ParsersConfiguration parsers = new ParsersConfiguration(jenkins.getConfigPage());
             parsers.add(parserName, script);
         });
@@ -190,7 +190,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
     // TODO: Create a new security mock that can be used by other plugins
     private void configureSecurity(final String admin, final String user) {
         GlobalSecurityConfig security = new GlobalSecurityConfig(jenkins);
-        security.edit(() -> {
+        security.configure(() -> {
             MockSecurityRealm realm = security.useRealm(MockSecurityRealm.class);
             realm.configure(admin, user);
             MatrixAuthorizationStrategy mas = security.useAuthorizationStrategy(MatrixAuthorizationStrategy.class);
