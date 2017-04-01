@@ -227,10 +227,15 @@ public class FallbackConfig extends AbstractModule {
         if (type==null)
             type = System.getenv("TYPE");
         if (type==null) {
-            if (JenkinsControllerPoolProcess.SOCKET.exists() && !JenkinsControllerPoolProcess.MAIN)
+            File socket = JenkinsControllerPoolProcess.SOCKET;
+            if (socket.exists() && !JenkinsControllerPoolProcess.MAIN) {
+                System.out.println("Found pooled jenkins controller listening on socket " + socket.getAbsolutePath());
                 return new PooledJenkinsController(injector);
-            else
+            }
+            else {
+                System.out.println("No pooled jenkins controller listening on socket " + socket.getAbsolutePath());
                 type = "winstone";
+            }
         }
 
         for (JenkinsControllerFactory f : factories) {
