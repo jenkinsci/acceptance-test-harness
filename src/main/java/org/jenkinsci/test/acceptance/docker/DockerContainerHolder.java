@@ -45,20 +45,28 @@ public class DockerContainerHolder<T extends DockerContainer> implements Provide
     @Override
     public synchronized T get() {
         if (container==null) {
-            Class<T> fixture = (Class<T>) type.getRawType();
-            File buildlog = diag.touch("docker-" + fixture.getSimpleName() + ".build.log");
-            File runlog = diag.touch("docker-" + fixture.getSimpleName() + ".run.log");
             try {
-                Starter<T> containerStarter = docker.build(fixture, buildlog).start(fixture);
-                if (portOffset != null) {
-                    containerStarter.withPortOffset(portOffset);
-                }
-                container = containerStarter.withLog(runlog).start();
+                container = starter().start();
             } catch (InterruptedException | IOException e) {
-                throw new Error("Failed to start container - " + fixture.getName(), e);
+                throw new Error("Failed to start container - " + type, e);
             }
         }
         return container;
+    }
+
+    /**
+     * Provides a starter directly, so you can customize it a bit before calling {@link Starter#start}.
+     */
+    public Starter<T> starter() throws IOException, InterruptedException {
+        @SuppressWarnings("unchecked")
+        Class<T> fixture = (Class<T>) type.getRawType();
+        File buildlog = diag.touch("docker-" + fixture.getSimpleName() + ".build.log");
+        File runlog = diag.touch("docker-" + fixture.getSimpleName() + ".run.log");
+        Starter<T> containerStarter = docker.build(fixture, buildlog).start(fixture).withLog(runlog);
+        if (portOffset != null) {
+            containerStarter.withPortOffset(portOffset);
+        }
+        return containerStarter;
     }
 
     /**

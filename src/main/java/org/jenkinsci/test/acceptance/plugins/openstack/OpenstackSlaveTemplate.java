@@ -91,6 +91,16 @@ public class OpenstackSlaveTemplate extends PageAreaImpl {
         return this;
     }
 
+    public OpenstackSlaveTemplate networkId(String id) {
+        ensureAdvancedOpened();
+        waitFor().withMessage("Network ID select populates").ignoring(NoSuchElementException.class).until(new Callable<Boolean>() {
+            @Override public Boolean call() throws Exception {
+                control("slaveOptions/networkId", "networkId").select(id);
+                return true;
+            }
+        });
+        return this;
+    }
     public OpenstackSlaveTemplate keyPair(String name) {
         ensureAdvancedOpened();
         Control control = control("slaveOptions/keyPairName", "keyPairName");

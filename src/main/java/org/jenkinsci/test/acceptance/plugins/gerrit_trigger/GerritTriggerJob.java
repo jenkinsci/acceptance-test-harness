@@ -56,9 +56,9 @@ public class GerritTriggerJob extends PageObject {
      * Saves harness' gerrit-trigger test-job configuration.
      * @param eventToTriggerOn event to trigger on
      */
-    public void saveTestJobConfig(EventToTriggerOn eventToTriggerOn) {
+    public void saveTestJobConfig(EventToTriggerOn eventToTriggerOn, String serverName, String projectName) {
         if(!event.resolve().isSelected()) event.click();
-        server.select(this.getClass().getPackage().getName());
+        server.select(serverName);
 
         String displayName = eventToTriggerOn.getDisplayName();
         switch (eventToTriggerOn) {
@@ -80,7 +80,7 @@ public class GerritTriggerJob extends PageObject {
         failVerif.set("-1");
         passRev.set("1");
         failRev.set("-1");
-        project.set(GerritTriggerEnv.get().getProject());
+        project.set(projectName);
         branch.set("master");
         clickButton("Save");
     }

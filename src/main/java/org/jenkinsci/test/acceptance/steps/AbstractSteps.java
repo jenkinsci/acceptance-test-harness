@@ -16,6 +16,7 @@ import org.openqa.selenium.WebDriver;
  */
 @TestScope
 public abstract class AbstractSteps extends CapybaraPortingLayerImpl {
+
     /**
      * Implicit contextual Jenkins instance.
      */
@@ -30,5 +31,7 @@ public abstract class AbstractSteps extends CapybaraPortingLayerImpl {
 
     protected AbstractSteps() {
         super(null);
+
+        throw new AssertionError("Cucumber support in ath is deprecated and will be removed in future versions. Migrate your testsuite to JUnit.");
     }
 }

@@ -141,6 +141,10 @@ public class Build extends ContainerPageObject {
         return url("consoleFull");
     }
 
+    public URL getConsoleTextUrl() {
+        return url("consoleText");
+    }
+
     public URL getStatusUrl() {
         return url(Integer.toString(getNumber()));
     }
@@ -150,13 +154,7 @@ public class Build extends ContainerPageObject {
     }
 
     public String getConsole() {
-        visit(getConsoleUrl());
-
-        try {
-            return IOUtils.toString(url("consoleText").openStream());
-        } catch (IOException ex) {
-            throw new AssertionError(ex);
-        }
+        return visit(getConsoleTextUrl()).getPageSource();
     }
 
     /**
@@ -278,6 +276,15 @@ public class Build extends ContainerPageObject {
         final URL changesUrl = url("changes");
         visit(changesUrl);
         return new Changes(this, changesUrl);
+    }
+
+    public void keepForever(boolean keep) {
+        open();
+        if (keep) {
+            clickButton("Keep this build forever");
+        } else {
+            clickButton("Don't keep this build forever");
+        }
     }
 
     @Override

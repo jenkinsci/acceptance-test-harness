@@ -24,7 +24,6 @@
 
 package plugins;
 
-import org.apache.commons.io.IOUtils;
 import org.hamcrest.MatcherAssert;
 import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
@@ -35,10 +34,11 @@ import org.jenkinsci.test.acceptance.plugins.credentials.UserPwdCredential;
 import org.jenkinsci.test.acceptance.po.*;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.util.List;
 
 import static org.jenkinsci.test.acceptance.Matchers.containsRegexp;
+import static org.jenkinsci.test.acceptance.Matchers.pageObjectDoesNotExist;
+import static org.jenkinsci.test.acceptance.Matchers.pageObjectExists;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -148,23 +148,23 @@ public class FolderPluginTest extends AbstractJUnitTest {
         final Folder folder = jenkins.jobs.create(Folder.class, F01);
         final FreeStyleJob job1 = folder.getJobs().create(FreeStyleJob.class, JOB1);
 
-        this.checkItemExists(folder, true);
-        this.checkItemExists(job1, true);
+        waitFor(folder, pageObjectExists(), 1000);
+        waitFor(job1, pageObjectExists(), 1000);
 
         final WorkflowJob job2 = createWorkflowJob(folder);
-        this.checkItemExists(job2, true);
+        waitFor(job2, pageObjectExists(), 1000);
 
         final String console = job2.startBuild().shouldSucceed().getConsole();
         assertThat(console, containsRegexp(CRED_INJECTED_MESSAGE));
 
         job1.delete();
-        this.checkItemExists(job1, false);
+        waitFor(job1, pageObjectDoesNotExist(), 1000);
 
         job2.delete();
-        this.checkItemExists(job2, false);
+        waitFor(job2, pageObjectDoesNotExist(), 1000);
 
         folder.delete();
-        this.checkItemExists(folder, false);
+        waitFor(folder, pageObjectDoesNotExist(), 1000);
     }
 
     private void checkViews(final Folder f, final String expectedActiveView, final String... expectedExistingViews) {
@@ -179,18 +179,6 @@ public class FolderPluginTest extends AbstractJUnitTest {
 
         final String activeView = f.getActiveViewName();
         assertEquals(expectedActiveView, activeView);
-    }
-
-    private void checkItemExists(final TopLevelItem f, final boolean expectedExists) {
-        boolean exists = true;
-
-        try {
-            IOUtils.toString(f.url("").openStream());
-        } catch (final IOException ex) {
-            exists = false;
-        }
-
-        assertEquals(exists, expectedExists);
     }
 
     private void createCredentials(final Folder f) {
@@ -221,5 +209,4 @@ public class FolderPluginTest extends AbstractJUnitTest {
 
         return job;
     }
-
 }

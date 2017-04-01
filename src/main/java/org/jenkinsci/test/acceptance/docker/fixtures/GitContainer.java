@@ -32,9 +32,17 @@ public class GitContainer extends DockerContainer {
         return "ssh://git@" + host() + ":" + port() + REPO_DIR;
     }
 
-    /** URL visible from other Docker containers. */
+    @Deprecated
     public String getRepoUrlInsideDocker() throws IOException {
         return "ssh://git@" + getIpAddress() + REPO_DIR;
+    }
+
+    /**
+     * URL visible from other Docker containers.
+     * @param alias an alias for this container’s {@link #getCid} passed to {@code --link}
+     */
+    public String getRepoUrlInsideDocker(String alias) throws IOException {
+        return "ssh://git@" + alias + REPO_DIR;
     }
 
 }

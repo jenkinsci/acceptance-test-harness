@@ -24,6 +24,7 @@
 package org.jenkinsci.test.acceptance.po;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.openqa.selenium.NoSuchElementException;
 
 public class User extends ContainerPageObject {
 
@@ -50,18 +51,22 @@ public class User extends ContainerPageObject {
 
     private void load() {
         if (id != null) return;
-        JsonNode json = getJson();
-        id = json.get("id").asText();
-        fullName = json.get("fullName").asText();
-        JsonNode property = json.get("property");
-        if (property != null) {
-            if (property.isArray()) {
-                for (JsonNode propertyNodes : property) {
-                    if (propertyNodes.get("address") != null && propertyNodes.get("address").asText() != "null") {
-                        mail = propertyNodes.get("address").asText();
+        try {
+            JsonNode json = getJson();
+            id = json.get("id").asText();
+            fullName = json.get("fullName").asText();
+            JsonNode property = json.get("property");
+            if (property != null) {
+                if (property.isArray()) {
+                    for (JsonNode propertyNodes : property) {
+                        if (propertyNodes.get("address") != null && propertyNodes.get("address").asText() != "null") {
+                            mail = propertyNodes.get("address").asText();
+                        }
                     }
                 }
             }
+        } catch (NoSuchElementException nse) {
+            // /me not accessible => not logged in
         }
     }
 

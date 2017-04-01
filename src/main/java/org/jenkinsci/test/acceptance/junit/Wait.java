@@ -59,8 +59,24 @@ public class Wait<Subject> extends FluentWait<Subject> {
     private Predicate<?> predicate;
     private Subject input;
 
+    /**
+     * Create wait with configurable timer.
+     *
+     * This is useful for timeout waiting for tasks to complete that might be dependent on test environment.
+     */
     public Wait(Subject input, ElasticTime time) {
         super(input, new ElasticClock(time), Sleeper.SYSTEM_SLEEPER);
+        this.input = input;
+    }
+
+    /**
+     * Create wait with configurable timer.
+     *
+     * This is useful for timeout waiting wall-clock time to pass.
+     * @see {@link Wait<Subject>(Subject, ElasticTime)}
+     */
+    public Wait(Subject input) {
+        super(input);
         this.input = input;
     }
 

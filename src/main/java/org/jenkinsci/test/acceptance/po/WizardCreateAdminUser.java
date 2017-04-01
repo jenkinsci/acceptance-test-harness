@@ -1,0 +1,82 @@
+/*
+ * The MIT License
+ *
+ * Copyright 2017 CloudBees, Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
+package org.jenkinsci.test.acceptance.po;
+
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+
+import org.jenkinsci.test.acceptance.controller.JenkinsController;
+
+import com.google.inject.Inject;
+
+/**
+ * Page object for Wizard Create admin user
+ *
+ */
+public class WizardCreateAdminUser extends PageObject {
+
+    private static final String START_BUTTON_TEXT = "Start using";
+    Control cUsername = control(by.name("username"));
+    Control cPassword1 = control(by.name("password1"));
+    Control cPassword2 = control(by.name("password2"));
+    Control cFullName = control(by.name("fullname"));
+    Control cEmail = control(by.name("email"));
+
+    @Inject
+    JenkinsController controller;
+
+    public WizardCreateAdminUser(Jenkins jenkins) {
+        super(jenkins.injector, jenkins.url(""));
+    }
+
+    public WizardCreateAdminUser createAdminUser(String userName, String password, String fullName, String email) {
+        driver.switchTo().defaultContent().switchTo().frame(1);
+
+        cUsername.set(userName);
+        cPassword1.set(password);
+        cPassword2.set(password);
+        cFullName.set(fullName);
+
+        if (cEmail.exists()) {
+            cEmail.set(email);
+        }
+
+        driver.switchTo().defaultContent();
+        clickButton("Save and Finish");
+        return this;
+    }
+
+
+    public void shouldCreateTheUserSuccessfully() {
+        waitFor(hasContent("Jenkins is ready!"));
+    }
+
+    public void wizardShouldFinishSuccessfully() {
+        waitFor(by.button(START_BUTTON_TEXT));
+        clickButton(START_BUTTON_TEXT);
+        waitFor(driver, hasContent("Welcome to Jenkins!"), 30);
+    }
+
+}
+

@@ -17,6 +17,7 @@ import java.io.IOException;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.not;
 import static org.jenkinsci.test.acceptance.Matchers.hasAction;
 import static org.junit.Assert.assertEquals;
@@ -45,6 +46,13 @@ public class WorkflowMultibranchTest extends AbstractJUnitTest {
         final WorkflowJob failureJob = multibranchJob.getJob("jenkinsfile_failure");
         this.assertExistAndRun(successJob, true);
         this.assertExistAndRun(failureJob, false);
+
+        multibranchJob.open();
+        multibranchJob.reIndex();
+        multibranchJob.waitForBranchIndexingFinished(20);
+
+        this.assertExistAndRun(successJob, true);
+        this.assertExistAndRun(failureJob, false);
     }
 
     private void configureJobWithGithubBranchSource(final WorkflowMultiBranchJob job) {
@@ -54,14 +62,14 @@ public class WorkflowMultibranchTest extends AbstractJUnitTest {
     }
 
     private void assertBranchIndexing(final WorkflowMultiBranchJob job) {
-        assertThat(job, hasAction("Branch Indexing"));
+        assertThat(job, anyOf(/* 1.x */hasAction("Branch Indexing"), /* 2.x */hasAction("Scan Repository"), /* 2.1.0 */hasAction("Scan Repository Now")));
 
         final String branchIndexingLog = job.getBranchIndexingLog();
 
         assertThat(branchIndexingLog, containsString("Scheduled build for branch: jenkinsfile_failure"));
         assertThat(branchIndexingLog, containsString("Scheduled build for branch: jenkinsfile_success"));
         assertThat(branchIndexingLog, not(containsString("Scheduled build for branch: master")));
-        assertThat(branchIndexingLog, containsString("2 branches were processed"));
+        assertThat(branchIndexingLog, containsString("3 branches were processed"));
     }
 
     private void assertExistAndRun(final WorkflowJob job, final boolean withSuccess) {
