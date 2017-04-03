@@ -32,7 +32,7 @@
     <maven.version>3.1.0</maven.version>
     <groovy.version>2.3.1</groovy.version>
     <shrinkwrap.version>1.2.2</shrinkwrap.version>
-    <monte.version>0.7.7</monte.version>
+    <monte.version>0.7.7.0</monte.version>
     <mockito.version>1.10.19</mockito.version>
     <cucumber.options />
     <trimStackTrace>false</trimStackTrace> <!-- surefire -->
@@ -188,8 +188,8 @@
 
     <!-- recorder -->
     <dependency>
-      <groupId>org.monte</groupId>
-      <artifactId>screen-recorder</artifactId>
+      <groupId>com.github.stephenc.monte</groupId>
+      <artifactId>monte-screen-recorder</artifactId>
       <version>${monte.version}</version>
     </dependency>
     <!-- jclouds -->
