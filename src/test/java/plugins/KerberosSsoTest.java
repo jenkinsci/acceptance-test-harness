@@ -58,6 +58,9 @@ import org.openqa.selenium.remote.UnreachableBrowserException;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -200,14 +203,29 @@ public class KerberosSsoTest extends AbstractJUnitTest {
         FirefoxProfile profile = new FirefoxProfile();
         profile.setAlwaysLoadNoFocusLib(true);
         // Allow auth negotiation for jenkins under test
-        profile.setPreference("network.negotiate-auth.trusted-uris", jenkins.url.toExternalForm());
-        profile.setPreference("network.negotiate-auth.delegation-uris", jenkins.url.toExternalForm());
+        String trustedUris = jenkins.url.toExternalForm();
+        String jenkins_local_hostname = System.getenv("JENKINS_LOCAL_HOSTNAME");
+        // if JENKINS_LOCAL_HOSTNAME is set, we add this to FF nego uris
+        if (jenkins_local_hostname != null && !jenkins_local_hostname.isEmpty()) {
+            try {
+                // In the case where JENKINS_LOCAL_HOSTNAME is an IP,
+                // we need to add its resolved hostname for auth negociation
+                String hostName = InetAddress.getByName(jenkins_local_hostname).getCanonicalHostName();
+                trustedUris = trustedUris + ", " + hostName;
+            } catch (UnknownHostException e) {
+                e.printStackTrace();
+                throw new Error(e);
+            }
+        }
+        profile.setPreference("network.negotiate-auth.trusted-uris", trustedUris);
+        profile.setPreference("network.negotiate-auth.delegation-uris", trustedUris);
+
         FirefoxBinary binary = new FirefoxBinary();
         // Inject config and TGT
         binary.setEnvironmentProperty("KRB5CCNAME", tokenCache);
         binary.setEnvironmentProperty("KRB5_CONFIG", kdc.getKrb5ConfPath());
         // Turn debug on
-        binary.setEnvironmentProperty("KRB5_TRACE", diag.touch("tracelog").getAbsolutePath());
+        binary.setEnvironmentProperty("KRB5_TRACE", diag.touch("krb5_trace.log").getAbsolutePath());
         binary.setEnvironmentProperty("NSPR_LOG_MODULES", "negotiateauth:5");
         binary.setEnvironmentProperty("NSPR_LOG_FILE", diag.touch("firefox.nego.log").getAbsolutePath());
 
