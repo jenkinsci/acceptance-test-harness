@@ -32,7 +32,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
  */
 @Category(DockerTest.class)
 @WithDocker
-@WithPlugins("ldap@1.10")
+@WithPlugins("ldap@1.15")
 public class LdapPluginTest extends AbstractJUnitTest {
 
     @Inject
@@ -67,6 +67,32 @@ public class LdapPluginTest extends AbstractJUnitTest {
      */
     private LdapDetails createDefaultsWithoutManagerCred(LdapContainer ldapContainer) {
         return new LdapDetails(ldapContainer.getHost(), ldapContainer.getPort(), "", "", ldapContainer.getRootDn());
+    }
+
+    @Test
+    public void validate_happy_path() {
+        // Given
+        GlobalSecurityConfig security = new GlobalSecurityConfig(jenkins);
+        security.configure();
+        LdapSecurityRealm realm = security.useRealm(LdapSecurityRealm.class);
+        realm.configure(createDefaults(ldap.get()));
+        // When
+        realm.validate("jenkins", "root");
+        // Then
+        assertThat(realm, LdapSecurityRealm.hasValidationSuccess());
+    }
+
+    @Test
+    public void validate_sad_path() {
+        // Given
+        GlobalSecurityConfig security = new GlobalSecurityConfig(jenkins);
+        security.configure();
+        LdapSecurityRealm realm = security.useRealm(LdapSecurityRealm.class);
+        realm.configure(createDefaults(ldap.get()));
+        // When
+        realm.validate("jenkins", "not-root");
+        // Then
+        assertThat(realm, LdapSecurityRealm.hasValidationError());
     }
 
     @Test
