@@ -2,10 +2,17 @@ package org.jenkinsci.test.acceptance.update_center;
 
 import com.cloudbees.sdk.extensibility.Extension;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Properties;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.util.version.GenericVersionScheme;
 import org.eclipse.aether.version.Version;
@@ -58,16 +65,40 @@ public class LocalOverrideUpdateCenterMetadataDecoratorImpl implements UpdateCen
                 }
             }
         }
-        for (Map.Entry<String,String> e : System.getenv().entrySet()) {
+        Map<String,File> overrides = new LinkedHashMap<>();
+        for (Map.Entry<String, String> e : System.getenv().entrySet()) {
             String name = e.getKey();
             if (name.endsWith(".jpi")) {
                 name = name.replace(".jpi", "");
-                if (ucm.plugins.get(name) == null) throw new IllegalArgumentException("Plugin does not exists in update center: " + name);
-                File file = new File(e.getValue());
-                if (!file.exists()) throw new IllegalArgumentException("Plugin file for " + name + " does not exist: " + file.getAbsolutePath());
-                PluginMetadata m = PluginMetadata.LocalOverride.create(file);
-                ucm.plugins.put(m.getName(), m);
+                overrides.put(name, new File(e.getValue()));
             }
+        }
+        String localPlugins = System.getenv("FORCE_PLUGIN_FILES");
+        if (StringUtils.isNotBlank(localPlugins)) {
+            File file = new File(localPlugins);
+            if (!file.isFile()) {
+                throw new AssertionError("Environment variable 'FORCE_PLUGIN_FILES' specifies a non-existent file: " + file);
+            }
+            Properties properties = new Properties();
+            try (InputStream is = Files.newInputStream(file.toPath())) {
+                properties.load(is);
+            } catch (IOException e) {
+                throw new AssertionError("Could not read 'FORCE_PLUGIN_FILES' file: " + file, e);
+            }
+            for (Map.Entry<Object,Object> e: properties.entrySet()) {
+                overrides.put((String)e.getKey(), new File((String)e.getValue()));
+            }
+        }
+        for (Map.Entry<String, File> e : overrides.entrySet()) {
+            if (ucm.plugins.get(e.getKey()) == null) {
+                throw new IllegalArgumentException("Plugin does not exists in update center: " + e.getKey());
+            }
+            if (!e.getValue().isFile()) {
+                throw new IllegalArgumentException(
+                        "Plugin file for " + e.getKey() + " does not exist: " + e.getValue().getAbsolutePath());
+            }
+            PluginMetadata m = PluginMetadata.LocalOverride.create(e.getValue());
+            ucm.plugins.put(m.getName(), m);
         }
     }
 }
