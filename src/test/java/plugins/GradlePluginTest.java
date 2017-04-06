@@ -35,12 +35,12 @@ public class GradlePluginTest extends AbstractJUnitTest {
 
     @Test
     public void run_gradle_scirpt() {
-        GradleInstallation.installGradle(jenkins, "gradle-1.5", "1.5");
+        GradleInstallation.installGradle(jenkins, "Default", GradleInstallation.NEWEST_VERSION);
 
         FreeStyleJob job = jenkins.jobs.create();
         job.copyResource(resource("/gradle_plugin/script.gradle"), "build.gradle");
         GradleStep step = job.addBuildStep(GradleStep.class);
-        step.useVersion("gradle-1.5");
+        step.useVersion("Default");
         step.tasks.set("hello");
         step.switches.set("--quiet");
         job.save();

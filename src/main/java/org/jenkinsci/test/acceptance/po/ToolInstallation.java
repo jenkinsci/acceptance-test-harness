@@ -91,6 +91,8 @@ public abstract class ToolInstallation extends PageAreaImpl {
     public static <T extends ToolInstallation> void installTool(Jenkins jenkins, Class<T> type, String name, String version) {
         waitForUpdates(jenkins, type);
 
+        jenkins.getPluginManager().checkForUpdates();
+        
         ConfigurablePageObject tools = ensureConfigPage(jenkins);
         T maven = addTool(jenkins, type);
         maven.name.set(name);

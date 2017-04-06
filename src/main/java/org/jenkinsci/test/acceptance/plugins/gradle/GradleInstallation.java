@@ -23,6 +23,7 @@
  */
 package org.jenkinsci.test.acceptance.plugins.gradle;
 
+import org.jenkinsci.test.acceptance.po.ConfigurablePageObject;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.ToolInstallation;
 import org.jenkinsci.test.acceptance.po.ToolInstallationPageObject;
@@ -33,7 +34,19 @@ public class GradleInstallation extends ToolInstallation {
         super(context, path);
     }
 
+    public static final String NEWEST_VERSION = "newest";
+
     public static void installGradle(Jenkins jenkins, String name, String version) {
-        installTool(jenkins, GradleInstallation.class, name, version);
+        waitForUpdates(jenkins, GradleInstallation.class);
+
+        jenkins.getPluginManager().checkForUpdates();
+
+        ConfigurablePageObject tools = ensureConfigPage(jenkins);
+        ToolInstallation maven = addTool(jenkins, GradleInstallation.class);
+        maven.name.set(name);
+        if(!NEWEST_VERSION.equals(version)) {
+            maven.installVersion(version);
+        }
+        tools.save();
     }
 }
