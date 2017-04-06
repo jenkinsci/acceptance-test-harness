@@ -23,12 +23,15 @@
  */
 package plugins;
 
+import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.gradle.GradleInstallation;
 import org.jenkinsci.test.acceptance.plugins.gradle.GradleStep;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
+
+import java.util.regex.Pattern;
 
 @WithPlugins("gradle")
 public class GradlePluginTest extends AbstractJUnitTest {
@@ -37,18 +40,17 @@ public class GradlePluginTest extends AbstractJUnitTest {
     public void run_gradle_scirpt() {
         GradleInstallation.installGradle(jenkins, "Default", GradleInstallation.LATEST_VERSION);
 
-        FreeStyleJob job = jenkins.jobs.create();
+        final FreeStyleJob job = jenkins.jobs.create();
         job.copyResource(resource("/gradle_plugin/script.gradle"), "build.gradle");
-        GradleStep step = job.addBuildStep(GradleStep.class);
+        final GradleStep step = job.addBuildStep(GradleStep.class);
         step.useVersion("Default");
         step.tasks.set("hello");
         step.switches.set("--quiet");
         job.save();
 
-        job.startBuild().shouldSucceed()
-                .shouldContainsConsoleOutput("Hello world!")
-                .shouldContainsConsoleOutput("gradle.* --quiet")
-        ;
+        job.startBuild().shouldSucceed();
+        Matchers.containsRegexp("Hello world!", Pattern.MULTILINE);
+        Matchers.containsRegexp("gradle.* --quiet", Pattern.MULTILINE);
     }
 
     @Test
@@ -64,6 +66,7 @@ public class GradlePluginTest extends AbstractJUnitTest {
         step.dir.set("gradle");
         job.save();
 
-        job.startBuild().shouldSucceed().shouldContainsConsoleOutput("Hello world!");
+        job.startBuild().shouldSucceed();
+        Matchers.containsRegexp("Hello world!", Pattern.MULTILINE);
     }
 }
