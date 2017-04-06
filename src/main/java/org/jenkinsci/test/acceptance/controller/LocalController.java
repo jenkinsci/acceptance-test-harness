@@ -15,9 +15,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import com.github.olivergondza.dumpling.factory.PidRuntimeFactory;
-import com.github.olivergondza.dumpling.model.ModelObject;
-import com.github.olivergondza.dumpling.model.dump.ThreadDumpRuntime;
 import org.apache.commons.io.FileUtils;
 import org.codehaus.plexus.util.Expand;
 import org.codehaus.plexus.util.StringUtils;
@@ -29,6 +26,9 @@ import org.jenkinsci.utils.process.ProcessInputStream;
 import org.junit.runners.model.MultipleFailureException;
 import org.openqa.selenium.TimeoutException;
 
+import com.github.olivergondza.dumpling.factory.PidRuntimeFactory;
+import com.github.olivergondza.dumpling.model.ModelObject;
+import com.github.olivergondza.dumpling.model.dump.ThreadDumpRuntime;
 import com.google.inject.Injector;
 
 import static java.lang.System.*;
@@ -287,11 +287,13 @@ public abstract class LocalController extends JenkinsController implements LogLi
 
             FileUtils.forceDelete(tempDir);
         } catch (IOException e) {
+            System.out.println("Cleaning up temporary JENKINS_HOME failed, retrying in 5 sec.");
             //maybe process is shutting down, wait for a sec then try again
             try {
-                Thread.sleep(1000);
+                Thread.sleep(5000);
                 FileUtils.forceDelete(tempDir);
             } catch (InterruptedException | IOException e1) {
+                System.out.println("Cleaning up temporary JENKINS_HOME failed again, giving up.");
                 throw new RuntimeException(e);
             }
 
