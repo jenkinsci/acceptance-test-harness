@@ -22,7 +22,8 @@ To launch a JUT server, run the following command:
     JENKINS_WAR=/path/to/jenkins.war ./jut-server.sh
 
 The server will keep running until you kill the Maven process. The server listens to
-Unix domain socket at `~/jenkins.sock`
+Unix domain socket at `~/jenkins.sock`. You can change the name of the socket using the command
+line parameter `-socket /path/to/jenkins.sock`.
 
 JUT server internally uses to other real `JenkinsController` implementations to launch JUT,
 and you configure it the same way you configure normal test executions. That is, the above example
@@ -37,6 +38,8 @@ e.g. in order to start 2 instances, run:
 ## Selecting PooledJenkinsController
 
 If no controller is explicitly specified, the harness checks the presence of `~/jenkins.sock` and
-it automatically selects `PooledJenkinsController`.
+it automatically selects `PooledJenkinsController`. If you did change the name of the socket (see section
+[Launching JUT server](#launching-jut-server))
+then you need to specify the filename using the `SOCKET` environment variable.
 
 To select this controller explicitly, use `TYPE=pool` environment variable.
