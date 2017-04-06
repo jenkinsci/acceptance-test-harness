@@ -34,7 +34,7 @@ public class GradleInstallation extends ToolInstallation {
         super(context, path);
     }
 
-    public static final String NEWEST_VERSION = "newest";
+    public static final String LATEST_VERSION = "latestVersion";
 
     public static void installGradle(Jenkins jenkins, String name, String version) {
         waitForUpdates(jenkins, GradleInstallation.class);
@@ -44,7 +44,7 @@ public class GradleInstallation extends ToolInstallation {
         ConfigurablePageObject tools = ensureConfigPage(jenkins);
         ToolInstallation maven = addTool(jenkins, GradleInstallation.class);
         maven.name.set(name);
-        if(!NEWEST_VERSION.equals(version)) {
+        if(!LATEST_VERSION.equals(version)) {
             maven.installVersion(version);
         }
         tools.save();
