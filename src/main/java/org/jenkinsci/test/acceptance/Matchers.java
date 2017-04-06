@@ -3,6 +3,7 @@ package org.jenkinsci.test.acceptance;
 import javax.annotation.CheckForNull;
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -73,6 +74,20 @@ public class Matchers {
             @Override
             public void describeMismatchSafely(WebDriver item, Description d) {
                 d.appendText("was at ").appendValue(item.getCurrentUrl());
+            }
+        };
+    }
+
+    public static Matcher<WebDriver> hasURL(final URL url) {
+        return new Matcher<WebDriver>("URL matching %s", url) {
+            @Override
+            public boolean matchesSafely(WebDriver item) {
+                return item.getCurrentUrl().equals(url.toString());
+            }
+
+            @Override
+            public void describeMismatchSafely(WebDriver item, Description mismatchDescription) {
+                mismatchDescription.appendText("was ").appendValue(item.getCurrentUrl());
             }
         };
     }
