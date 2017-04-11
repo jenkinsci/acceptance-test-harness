@@ -40,6 +40,6 @@ e.g. in order to start 2 instances, run:
 If no controller is explicitly specified, the harness checks the presence of `~/jenkins.sock` and
 it automatically selects `PooledJenkinsController`. If you did change the name of the socket (see section
 [Launching JUT server](#launching-jut-server))
-then you need to specify the filename using the `SOCKET` environment variable.
+then you need to specify the filename using the `JUT_SOCKET` environment variable.
 
 To select this controller explicitly, use `TYPE=pool` environment variable.

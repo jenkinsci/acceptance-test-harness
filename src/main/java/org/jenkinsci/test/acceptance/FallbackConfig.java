@@ -301,7 +301,7 @@ public class FallbackConfig extends AbstractModule {
      */
     @Provides @Named("socket")
     public File getSocket() {
-        String socket = System.getenv("SOCKET");
+        String socket = System.getenv("JUT_SOCKET");
         if (StringUtils.isNotBlank(socket)) {
             return new File(socket);
         }
