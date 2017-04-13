@@ -10,6 +10,8 @@ import org.jenkinsci.test.acceptance.po.ComputerLauncher;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.PageObject;
+import org.openqa.selenium.By;
+
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -25,6 +27,19 @@ public class SshSlaveLauncher extends ComputerLauncher {
     public final Control retries = control("maxNumRetries");
     public final Control javaPath = control("javaPath");
     public final Control jvmOptions = control("jvmOptions");
+    public final Control hostKeyVerificationStrategy = control("/");
+
+
+    //<select class="setting-input dropdownList" path="/launcher/"><option value="0">Known hosts file Verification Strategy</option><option value="1">Manually provided key Verification Strategy</option><option value="2">Manually trusted key Verification Strategy</option><option value="3">Non verifying Verification Strategy</option></select>
+
+    public enum HostKeyVerificationStrategy {
+        Known_hosts_file(0), Manually_provided(1), Manually_trusted(2), Non_verifying(3);
+        public final String value;
+
+        HostKeyVerificationStrategy(int value) {
+            this.value = String.valueOf(value);
+        }
+    }
 
     public SshSlaveLauncher(PageObject context, String path) {
         super(context, path);
