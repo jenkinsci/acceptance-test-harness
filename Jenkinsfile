@@ -4,7 +4,7 @@
 def mavenName = 'mvn'
 def jdkName = 'jdk8'
 
-node('highram&&docker') {
+node('highram') {
     withEnv([
         "JAVA_HOME=${tool jdkName}",
         "PATH+MAVEN=${tool mavenName}/bin:${env.JAVA_HOME}/bin"
