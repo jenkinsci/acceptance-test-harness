@@ -5,7 +5,7 @@ def mavenName = 'mvn'
 def jdkName = 'jdk8'
 
 node('docker') {
-    changelog scm
+    checkout scm
 
     def uid = sh returnStdout: true, script: "id -u | tr -d '\n'"
     def gid = sh returnStdout: true, script: "id -g | tr -d '\n'"
