@@ -1,13 +1,11 @@
 package plugins;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.plugins.plot.CsvDataSeries;
-import org.jenkinsci.test.acceptance.plugins.plot.Plot;
+import org.jenkinsci.test.acceptance.plugins.plot.*;
 import org.jenkinsci.test.acceptance.po.JenkinsLogger;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.jvnet.hudson.test.Issue;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.plugins.plot.PlotPublisher;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,9 +36,22 @@ public class PlotPluginTest extends AbstractJUnitTest {
 
         pub.getPlot(1).setGroup("My group");
         pub.getPlot(1).setTitle("My plot");
+        pub.getPlot(1).setStyle("Line 3D");
 
-        pub.getPlot(1).addDataSeries(CsvDataSeries.class);
-        pub.getPlot(1).getSeries(1).setFile("plot.csv");
+        CsvDataSeries csv = pub.getPlot(1).addDataSeries(CsvDataSeries.class);
+
+        csv.setFile("plot.csv");
+        csv.selectIncludeByName();
+        csv.selectExcludeByName();
+        csv.selectIncludeByIndex();
+
+        XmlDataSeries xml = pub.getPlot(1).addDataSeries(XmlDataSeries.class);
+        xml.setUrl("test");
+        xml.selectResultTypBoolean();
+        xml.selectResultTypNumber();
+
+        PropertiesDataSeries p =  pub.getPlot(1).addDataSeries(PropertiesDataSeries.class);
+        p.setLabel("label");
 
         Plot p2 = pub.addPlot();
         p2.setGroup("My group2");

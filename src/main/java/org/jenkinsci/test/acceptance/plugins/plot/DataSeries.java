@@ -16,12 +16,14 @@ public abstract class  DataSeries  extends PageAreaImpl {
     protected DataSeries(PageArea area, String path) {
         super(area, path);
         parant = (Plot)area;
+    }
 
+    protected String getFileType(){
+        return "fileType[" + this.getClass().getAnnotation(Describable.class).value()[0] + "]";
     }
 
     public void selectType(){
-        String p = "fileType[" + this.getClass().getAnnotation(Describable.class).value()[0] + "]";
-        control(p).click();
+        control(getFileType()).click();
     }
 
     public <S extends  DataSeries> S setFileType(Class<S> DataSeriesClass){
