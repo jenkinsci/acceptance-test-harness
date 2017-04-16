@@ -19,8 +19,32 @@ public class CsvDataSeries extends DataSeries {
     }
 
     public  void setExclusionValues(String exclusionValues){
-        control("exclusionValues").set(exclusionValues);
+        control(getFileType() + "/exclusionValues").set(exclusionValues);
     }
 
-    //todo radio buttons
+    public void checkDispalyTabel(){
+        control(getFileType() + "/displayTableFlag").check();
+    }
+
+    public void selectIncludeAllColumns(){
+        control(getFileType() +"/inclusionFlag[OFF]").click();
+    }
+
+    public void selectIncludeByName(){
+        control(getFileType() +"/inclusionFlag[INCLUDE_BY_STRING]").click();
+    }
+
+    public void selectExcludeByName(){
+        control(getFileType() +"/inclusionFlag[EXCLUDE_BY_STRING]").click();
+    }
+
+    public void selectIncludeByIndex(){
+        control(getFileType() +"/inclusionFlag[INCLUDE_BY_COLUMN]").click();
+    }
+
+    public void selectExcludeByIndex(){
+        control(getFileType() +"/inclusionFlag[EXCLUDE_BY_COLUMN]").click();
+    }
+
+
 }
