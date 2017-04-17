@@ -14,20 +14,18 @@ import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.LocalController.LocalFactoryImpl;
 import org.jenkinsci.test.acceptance.log.LogListenable;
 import org.jenkinsci.test.acceptance.log.LogListener;
-import org.jenkinsci.test.acceptance.log.LogPrinter;
 import org.jenkinsci.test.acceptance.log.LogSplitter;
 
 import com.cloudbees.sdk.extensibility.Extension;
 import com.google.inject.Injector;
 
-import static java.lang.System.*;
-import jnr.unixsocket.UnixSocketAddress;
-import jnr.unixsocket.UnixSocketChannel;
-
 import hudson.remoting.Callable;
 import hudson.remoting.Channel;
 import hudson.remoting.Channel.Mode;
 import hudson.remoting.ChannelBuilder;
+import jnr.unixsocket.UnixSocketAddress;
+import jnr.unixsocket.UnixSocketChannel;
+import static java.lang.System.*;
 
 /**
  * {@link JenkinsController} that talks to {@link JenkinsControllerPoolProcess} over Unix domain socket.
@@ -66,6 +64,7 @@ public class PooledJenkinsController extends JenkinsController implements LogLis
     private boolean connect() throws IOException {
         if (conn != null)      return false;
 
+        System.out.println("Requesting jut instance using socket " + socket.getAbsolutePath());
         UnixSocketAddress address = new UnixSocketAddress(socket);
         conn = UnixSocketChannel.open(address);
 
