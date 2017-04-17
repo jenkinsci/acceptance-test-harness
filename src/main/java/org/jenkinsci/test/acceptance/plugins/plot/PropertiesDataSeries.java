@@ -15,7 +15,7 @@ public class PropertiesDataSeries extends DataSeries {
 
 
     public void setLabel(String label){
-        control(getPath("label", index())).set(label);
+        control(getFileType() + "/label").set(label);
     }
 
 }

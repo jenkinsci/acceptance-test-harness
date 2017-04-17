@@ -36,28 +36,27 @@ public class Plot extends PageAreaImpl{
 
     /**
      * Create a DataSeries of selected Type and select the Control. If not the first DataSeries create
-     * a new onw with Add Button.
-     * @param series
+     * a new one with Add Button.
+     * @param seriesClass
      * @param <S>
      * @return
      */
-    public <S extends DataSeries> S addDataSeries(Class<S> series){
-        if (this.series.size()>1){
+    public <S extends DataSeries> S addDataSeries(Class<S> seriesClass){
+        if (this.series.size()>=1){
             control("repeatable-add").click();
             //todo insert wait period to make sure the new PageArea appers
         }
 
-        S s;
-        String fileType = series.getAnnotation(Describable.class).value()[0];
+        S series;
         try {
-            s = series.getConstructor(PageArea.class, String.class)
+            series = seriesClass.getConstructor(PageArea.class, String.class)
                     .newInstance(this, getPath("series", this.series.size()));
         }catch (ReflectiveOperationException e) {
-            throw new AssertionError("Failed to invoke a constructor of " + series, e);
+            throw new AssertionError("Failed to invoke a constructor of " + seriesClass, e);
         }
 
-        this.series.add(s);
-        return s;
+        this.series.add(series);
+        return series;
     }
 
     /**
@@ -86,39 +85,36 @@ public class Plot extends PageAreaImpl{
         control("group").set(group);
     }
 
-
     public void setTitle(String title){
         control("title").set(title);
     }
-
 
     public void setNumBuilds(String numBuilds){
         control("numBuilds").set(numBuilds);
     }
 
-
     public void setYaxisLabel(String yAxisLabel){
         control("yaxis").set(yAxisLabel);
     }
 
+    public void setStyle(String plotStyle){
+        control("style").select(plotStyle);
+    }
 
     public void setUseDescr(String descr){
         control ( "useDescr").set(descr);
     }
 
-
-    public Control getExclZero(){
-        return control ("exclZero");
+    public void checkExclZero(){
+        control ("exclZero").check();
     }
 
-
-    public Control getLogarithmic(){
-        return control( "logarithmic");
+    public void checkLogarithmic(){
+        control( "logarithmic").check();
     }
 
-
-    public Control getKeepRecords(){
-        return control("keepRecords");
+    public void checkKeepRecords(){
+        control("keepRecords").check();
     }
 
 }
