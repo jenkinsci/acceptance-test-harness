@@ -64,15 +64,17 @@ public class PlotPluginTest extends AbstractJUnitTest {
 
     }
 
-/*
+
     @Test
-    public void generate_simple_plot() {
+    public void generate_simple_plot_2() {
         job.configure();
         job.copyResource(resource("/plot_plugin/plot.csv"));
         PlotPublisher pub = job.addPublisher(PlotPublisher.class);
 
-        pub.group.set("My group");
-        pub.title.set("My plot");
+        Plot plot = pub.getPlot(1);
+        plot.setGroup("My group");
+        plot.setTitle("My plot");
+        plot.setStyle("Line 3D");
 
         pub.source("csv", "plot.csv");
         job.save();
@@ -86,10 +88,9 @@ public class PlotPluginTest extends AbstractJUnitTest {
         job.configure();
         PlotPublisher pub = job.addPublisher(PlotPublisher.class);
 
-        pub.usePlot(1).
-
-        pub.group.set("Plots");
-        pub.title.set("Some plot");
+        Plot plot = pub.getPlot(1);
+        plot.setGroup("Plots");
+        plot.setTitle("Some plot");
         job.save();
 
         job.configure();
@@ -105,8 +106,10 @@ public class PlotPluginTest extends AbstractJUnitTest {
         job.configure();
         job.copyResource(resource("/plot_plugin/plot.csv"));
         PlotPublisher pub = job.addPublisher(PlotPublisher.class);
-        pub.group.set("My group");
-        pub.title.set("My plot");
+
+        Plot plot = pub.getPlot(1);
+        plot.setGroup("My group");
+        plot.setTitle("My plot");
 
         pub.source("csv", "plot.csv");
         job.save();
@@ -122,12 +125,10 @@ public class PlotPluginTest extends AbstractJUnitTest {
 
     }
 
-
     private void assertThatBuildHasPlot(String title, String group) {
         job.visit("plot");
         find(by.xpath("//h1[contains(text(), '%s')]", group));
         find(by.xpath("//select[@name='choice']/option[contains(text(), '%s')]",title));
     }
-*/
 
 }
