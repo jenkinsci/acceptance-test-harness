@@ -15,6 +15,9 @@ import static org.hamcrest.Matchers.containsString;
 
 /**
  * Created by boris on 17.04.17.
+ * Base Implementation of the stageview test.
+ * TODO: Remove inline editor Tests and store in files/improve with builder pattern
+ * TODO: Build po for
  */
 public class StageViewTest extends AbstractJUnitTest{
 
@@ -41,7 +44,7 @@ public class StageViewTest extends AbstractJUnitTest{
     }
 
     /**
-     * Does check multiple formattings on the stage view.
+     * Does check multiple formattings on the stage view. So far unordered.
      * @throws Exception
      */
     @WithPlugins("workflow-aggregator@1.1")
@@ -65,7 +68,7 @@ public class StageViewTest extends AbstractJUnitTest{
     }
 
     /**
-     * Does check multiple formattings on the stage view.
+     * Does check multiple jobs in the stage view.
      * @throws Exception
      */
     @WithPlugins("workflow-aggregator@1.1")
@@ -90,11 +93,4 @@ public class StageViewTest extends AbstractJUnitTest{
         assertThat(webElement.getText(),containsString("build"));
 
     }
-
-
-
-
-
-
-
 }
