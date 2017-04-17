@@ -59,7 +59,7 @@ public class ListView extends View {
 
     public void scheduleJob(String name) {
         open();
-        find(by.xpath("//a[contains(@href, '/%1$s/build?')]/img[contains(@title, 'Schedule a build')]", name)).click();
+        find(by.xpath("//a[contains(@href, '/%1$s/build?')]/img[contains(@title, 'Schedule a Build')]", name)).click();
     }
 
     public void scheduleJob(String name, Map<String, Object> params) {
