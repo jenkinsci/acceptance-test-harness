@@ -6,6 +6,7 @@ import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.ant.AntBuildStep;
 import org.jenkinsci.test.acceptance.plugins.ant.AntInstallation;
+import org.jenkinsci.test.acceptance.plugins.logparser.LogParserProjectConfig;
 import org.jenkinsci.test.acceptance.po.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,6 +18,14 @@ import java.util.regex.Pattern;
 
 @WithPlugins("log-parser")
 public class LogParserTest extends AbstractJUnitTest {
+
+    @Before
+    public void globalConfig() {
+        jenkins.configure();
+        LogParserProjectConfig config = new LogParserProjectConfig(jenkins.getConfigPage());
+        config.addParserConfig("description", "path");
+        jenkins.save();
+    }
 
     @Test
     public void testing(){
