@@ -1,9 +1,9 @@
 # Dockerfile to be used to run ATH itself.
 #
 # see docs/DOCKER.md for usage
-#
 
-FROM debian:sid
+
+FROM debian:stretch
 MAINTAINER ogondza@gmail.com
 
 RUN apt-get -y update && \
@@ -26,6 +26,8 @@ ENV uid $uid
 ARG gid=1000
 ENV gid $gid
 
+EXPOSE 5942
+
 # So it is owned by root and has the permissions vncserver seems to require:
 RUN mkdir /tmp/.X11-unix && chmod 1777 /tmp/.X11-unix/
 
@@ -39,6 +41,8 @@ USER ath-user
 RUN mkdir /home/ath-user/.vnc && (echo ath-user; echo ath-user) | vncpasswd /home/ath-user/.vnc/passwd
 # Default content includes x-window-manager, which is not installed, plus other stuff we do not need (vncconfig, x-terminal-emulator, etc.):
 RUN touch /home/ath-user/.vnc/xstartup && chmod a+x /home/ath-user/.vnc/xstartup
+# Prevent xauth to complain in a confusing way
+RUN touch /home/ath-user/.Xauthority
 
 # Set SUID and SGID for docker binary so it can communicate with mapped socket its uid:gid we can not control. Alternative
 # approach used for this is adding ath-user to the group of /var/run/docker.sock but that require root permission we do not
