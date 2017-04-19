@@ -5,6 +5,7 @@ import com.google.inject.Injector;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 /**
@@ -54,5 +55,14 @@ public class ListView extends View {
     public void addJob(Job job) {
         ensureConfigPage();
         check(job.name);
+    }
+
+    public void scheduleJob(String name) {
+        open();
+        find(by.xpath("//a[contains(@href, '/%1$s/build?')]/img[contains(@title, 'Schedule a build')]", name)).click();
+    }
+
+    public void scheduleJob(String name, Map<String, Object> params) {
+        scheduleJob(name);
     }
 }

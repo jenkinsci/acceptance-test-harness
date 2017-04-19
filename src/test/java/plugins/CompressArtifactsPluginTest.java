@@ -72,14 +72,14 @@ public class CompressArtifactsPluginTest extends AbstractJUnitTest {
 
         // Works after installation
         assertThat(build.getArtifacts(), hasSize(1));
-        build.getArtifact(ARTIFACT_NAME).shouldHaveContent("content");
+        assertThat(build.getArtifact(ARTIFACT_NAME).getTextContent(), equalTo("content"));
         assertThat(build, not(hasCompressedArtifacts()));
 
         CompressingArtifactManager.setup(jenkins);
 
         // Works after configuration
         assertThat(build.getArtifacts(), hasSize(1));
-        build.getArtifact(ARTIFACT_NAME).shouldHaveContent("content");
+        assertThat(build.getArtifact(ARTIFACT_NAME).getTextContent(), equalTo("content"));
         assertThat(build, not(hasCompressedArtifacts()));
     }
 

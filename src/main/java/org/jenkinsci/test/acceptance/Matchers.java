@@ -1,20 +1,26 @@
 package org.jenkinsci.test.acceptance;
 
+import javax.annotation.CheckForNull;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.List;
+import java.util.regex.Pattern;
+
 import org.apache.commons.io.IOUtils;
+import org.hamcrest.CoreMatchers;
 import org.hamcrest.Description;
 import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisPlugin;
-import org.jenkinsci.test.acceptance.po.*;
+import org.jenkinsci.test.acceptance.po.CapybaraPortingLayerImpl;
+import org.jenkinsci.test.acceptance.po.Jenkins;
+import org.jenkinsci.test.acceptance.po.Job;
+import org.jenkinsci.test.acceptance.po.Login;
+import org.jenkinsci.test.acceptance.po.PageObject;
+import org.jenkinsci.test.acceptance.po.User;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.util.List;
-import java.util.regex.Pattern;
-
-import javax.annotation.CheckForNull;
 
 /**
  * Hamcrest matchers.
@@ -72,6 +78,20 @@ public class Matchers {
         };
     }
 
+    public static Matcher<WebDriver> hasURL(final URL url) {
+        return new Matcher<WebDriver>("URL matching %s", url) {
+            @Override
+            public boolean matchesSafely(WebDriver item) {
+                return item.getCurrentUrl().equals(url.toString());
+            }
+
+            @Override
+            public void describeMismatchSafely(WebDriver item, Description mismatchDescription) {
+                mismatchDescription.appendText("was ").appendValue(item.getCurrentUrl());
+            }
+        };
+    }
+
     /**
      * For asserting that a {@link PageObject}'s top page has an action of the given name.
      */
@@ -104,6 +124,21 @@ public class Matchers {
      */
     public static Matcher<String> containsRegexp(final String regexp, int opts) {
         return containsRegexp(Pattern.compile(regexp, opts));
+    }
+
+    /**
+     * Matches the specified formatted string.
+     *
+     * @param format A <a href="../util/Formatter.html#syntax">format string</a>
+     * @param args   Arguments referenced by the format specifiers in the format string.  If there are more arguments
+     *               than format specifiers, the extra arguments are ignored.  The number of arguments is variable and
+     *               may be zero.  The maximum number of arguments is limited by the maximum dimension of a Java array
+     *               as defined by <cite>The Java&trade; Virtual Machine Specification</cite>. The behaviour on a {@code
+     *               null} argument depends on the <a href="../util/Formatter.html#syntax">conversion</a>.
+     * @return the matcher
+     */
+    public static org.hamcrest.Matcher<String> containsString(final String format, final Object... args) {
+        return CoreMatchers.containsString(String.format(format, args));
     }
 
     /**

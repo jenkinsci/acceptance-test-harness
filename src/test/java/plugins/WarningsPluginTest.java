@@ -1,5 +1,8 @@
 package plugins;
 
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +15,11 @@ import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
 import org.jenkinsci.test.acceptance.plugins.envinject.EnvInjectConfig;
+import org.jenkinsci.test.acceptance.plugins.matrix_auth.MatrixAuthorizationStrategy;
+import org.jenkinsci.test.acceptance.plugins.mock_security_realm.MockSecurityRealm;
+import org.jenkinsci.test.acceptance.plugins.script_security.ScriptApproval;
+import org.jenkinsci.test.acceptance.plugins.warnings.GroovyParser;
+import org.jenkinsci.test.acceptance.plugins.warnings.ParsersConfiguration;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsAction;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsBuildSettings;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsColumn;
@@ -19,6 +27,7 @@ import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Container;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.FreeStyleMultiBranchJob;
+import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.ListView;
 import org.jenkinsci.test.acceptance.po.MatrixConfiguration;
@@ -37,6 +46,7 @@ import org.openqa.selenium.WebElement;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.jenkinsci.test.acceptance.po.PageObject.*;
 
 /**
  * Tests various aspects of the warnings plug-in. Most tests copy an existing file with several warnings into the
@@ -64,6 +74,135 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
 
     private static final String JAVA_TITLE = JAVA_ID;
     private static final String CLANG_TITLE = "LLVM/Clang Warnings";
+    private static final String GROOVY_LINE_FILE_NAME = "groovy-line.txt";
+    private static final String ILLEGAL_PARSER_SCRIPT = "import hudson.plugins.warnings.parser.Warning\n"
+            + "import hudson.plugins.analysis.util.model.Priority;\n"
+            + "String all = matcher.group(1);\n"
+            + "Priority test = Priority.fromString('NORMAL');\n" // not on whitelist!!
+            + "return new Warning(all, 42, all, all, all);";
+    private static final String LEGAL_PARSER_SCRIPT = "import hudson.plugins.warnings.parser.Warning\n"
+            + "import hudson.plugins.analysis.util.model.Priority;\n"
+            + "String all = matcher.group(1);\n"
+            + "Priority test = Priority.NORMAL;\n"
+            + "return new Warning(all, 42, all, all, all);";
+
+    /**
+     * Checks that a dynamic parser with only methods from the whitelist correctly detects a warning.
+     */
+    @Test
+    public void should_detect_warnings_with_groovy_parser() {
+        String parserName = createParser(LEGAL_PARSER_SCRIPT);
+
+        FreeStyleJob job = createJobWithParser(parserName);
+
+        Build build = buildSuccessfulJob(job);
+
+        String header = parserName + GroovyParser.LINK_SUFFIX;
+        assertThatActionExists(job, build, header);
+        assertThat(driver, hasContent(header + ": 2 warnings from one analysis."));
+    }
+
+    /**
+     * Checks that a dynamic parser with a blacklisted method is rejected and the rejected
+     * method is handled over to the script approval console.
+     */
+    @Test
+    public void should_be_refused_by_sandbox() {
+        String parserName = createParser(ILLEGAL_PARSER_SCRIPT);
+
+        FreeStyleJob job = createJobWithParser(parserName);
+
+        Build build = buildSuccessfulJob(job);
+
+        assertThatActionIsMissing(job, build, parserName + GroovyParser.LINK_SUFFIX);
+        assertThat(build.getConsole(),
+                containsString("Groovy sandbox rejected the parsing script for parser " + parserName));
+
+        ScriptApproval approval = new ScriptApproval(jenkins);
+        approval.open();
+        approval.findSignature("staticMethod hudson.plugins.analysis.util.model.Priority fromString java.lang.String");
+    }
+
+    private String createParser(final String script) {
+        String parserName = createRandomName();
+        jenkins.configure(() -> {
+            ParsersConfiguration parsers = new ParsersConfiguration(jenkins.getConfigPage());
+            parsers.add(parserName, script);
+        });
+        return parserName;
+    }
+
+    private FreeStyleJob createJobWithParser(final String parserName) {
+        return createFreeStyleJob(RESOURCES + GROOVY_LINE_FILE_NAME,
+                settings -> settings.addWorkspaceScanner(parserName, "**/" + GROOVY_LINE_FILE_NAME));
+    }
+
+    /**
+     * Verifies that a Groovy parser script will be validated if the logged in user is an
+     * administrator with script rights.
+     *
+     * @throws UnsupportedEncodingException if the created URL is invalid
+     */
+    @Test @WithPlugins({"mock-security-realm", "matrix-auth"})
+    public void should_validate_parser_script() throws UnsupportedEncodingException {
+        loginAsAdmin();
+
+        jenkins.visit(createValidationUrl("0:0"));
+        assertThat(driver, hasContent("This is not a valid Groovy script"));
+
+        jenkins.visit(createValidationUrl("import hudson.plugins.analysis.util.model.Priority"));
+        assertThat(driver.getPageSource(), containsString("<body><div></div></body>"));
+    }
+
+    private String createValidationUrl(final String script) throws UnsupportedEncodingException {
+        return "descriptorByName/GroovyParser/" + "checkScript?script=" + URLEncoder.encode(script, "UTF-8");
+    }
+
+    /**
+     * Verifies that evaluating Groovy code requires the RUN_SCRIPTS permission.
+     *
+     * @throws MalformedURLException if the URL is invalid
+     */
+    @Test @WithPlugins({"mock-security-realm", "matrix-auth"})
+    public void should_require_script_permission() throws MalformedURLException {
+        loginAsUser();
+
+        assertThatScriptIsNotExecuted("checkExample?example=foo&regexp=foo&script=foo");
+        assertThatScriptIsNotExecuted("checkScript?script=foo");
+    }
+
+    private void loginAsUser() {
+        String admin = "admin";
+        String user = "user";
+        configureSecurity(admin, user);
+
+        jenkins.login().doLogin(user);
+    }
+
+    private void loginAsAdmin() {
+        String admin = "admin";
+        String user = "user";
+        configureSecurity(admin, user);
+
+        jenkins.login().doLogin(admin);
+    }
+
+    // TODO: Create a new security mock that can be used by other plugins
+    private void configureSecurity(final String admin, final String user) {
+        GlobalSecurityConfig security = new GlobalSecurityConfig(jenkins);
+        security.configure(() -> {
+            MockSecurityRealm realm = security.useRealm(MockSecurityRealm.class);
+            realm.configure(admin, user);
+            MatrixAuthorizationStrategy mas = security.useAuthorizationStrategy(MatrixAuthorizationStrategy.class);
+            mas.addUser(admin).admin();
+            mas.addUser(user).developer();
+        });
+    }
+
+    private void assertThatScriptIsNotExecuted(final String url) {
+        jenkins.visit("descriptorByName/GroovyParser/" + url);
+        assertThat(driver, hasContent("You have no rights to execute Groovy warnings parsers."));
+    }
 
     /**
      * Verifies that providing a wrong URL to the detail factories should navigate to the top-level page.
@@ -387,8 +526,9 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
 
     /**
      * Checks that the plug-in sends a mail after a build has been failed. The content of the mail contains several
-     * tokens that should be expanded in the mail with the correct vaules.
+     * tokens that should be expanded in the mail with the correct values.
      */
+    // TODO: check if we can remove this test since a similar one in parent
     @Test @Issue("25501") @Category(SmokeTest.class) @WithPlugins("email-ext")
     public void should_send_mail_with_expanded_tokens() {
         setUpMailer();

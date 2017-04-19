@@ -56,22 +56,22 @@ public class GerritTriggerServer extends PageObject {
     public final Control verifiedD = control("/verdictCategories[3]/verdictDescription");
     public final Control start = control("/button");
 
-    private static final String serverUrl = "gerrit-trigger/server/" + GerritTriggerServer.class.getPackage().getName();
+    private static final String serverUrl = "gerrit-trigger/server/";
 
-    public GerritTriggerServer(Jenkins jenkins) {
-        super(jenkins.injector, jenkins.url(serverUrl));
+    public GerritTriggerServer(Jenkins jenkins, String serverName) {
+        super(jenkins.injector, jenkins.url(serverUrl + serverName));
         this.jenkins = jenkins;
     }
 
     /**
      * Saves harness' gerrit-trigger server configuration.
      */
-    public void saveTestServerConfig() {
+    public void saveTestServerConfig(String gtHost, String gtUrl, String gtUser, String gtPrivateKey) {
         open();
-        hostName.set(GerritTriggerEnv.get().getHostName());
-        feUrl.set("https://"+GerritTriggerEnv.get().getHostName());
-        userName.set(GerritTriggerEnv.get().getGerritUser());
-        keyFile.set(GerritTriggerEnv.get().getUserHome()+"/.ssh/id_rsa");
+        hostName.set(gtHost);
+        feUrl.set(gtUrl);
+        userName.set(gtUser);
+        keyFile.set(gtPrivateKey);
         advanced.click();
         try {
             codeReview.resolve();

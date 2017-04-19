@@ -89,7 +89,7 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
             settings.setCanRunOnFailed(true);
         });
 
-        job.edit(() -> job.addShellStep("false"));
+        job.configure(() -> job.addShellStep("false"));
 
         Build lastBuild = buildFailingJob(job);
 

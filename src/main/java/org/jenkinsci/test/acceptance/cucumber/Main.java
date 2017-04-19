@@ -23,6 +23,7 @@ import java.util.Collections;
  */
 public class Main {
     public static void main(String[] args) throws Exception {
+        System.err.println("*** Cucumber support in ath is deprecated and will be removed in future versions. Migrate your testsuite to JUnit.");
         if (args.length==0)
             args = new String[]{"features"};
 

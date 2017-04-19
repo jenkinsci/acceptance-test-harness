@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright (c) 2014 Red Hat, Inc.
+ * Copyright (c) Red Hat, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,40 +21,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.test.acceptance.plugins.groovy;
+package org.jenkinsci.test.acceptance.po;
 
-import org.jenkinsci.test.acceptance.po.*;
-import org.openqa.selenium.NoSuchElementException;
+import java.net.URL;
+import java.util.List;
+import java.util.Map;
 
-@Describable("Execute system Groovy script")
-public class SystemGroovyStep extends AbstractStep implements BuildStep {
-
-    public SystemGroovyStep(Job parent, String path) {
-        super(parent, path);
+/**
+ * PO for `/build` page that wait for user to specify parameters.
+ *
+ * @author ogondza.
+ */
+public class BuildWithParameters extends PageObject {
+    public BuildWithParameters(Job job, URL url) {
+        super(job, url);
     }
 
-    public SystemGroovyStep script(String script, boolean sandbox) {
-        String prefix = "source";
-        try {
-            control("").select("Groovy command");
-        } catch (NoSuchElementException ex) {
-            control("scriptSource[0]").check();
-            prefix += "[0]";
+    public BuildWithParameters enter(List<Parameter> definitions, Map<String, ?> values) {
+        waitFor(by.xpath("//form[@name='parameters']"), 2);
+        for (Parameter def : definitions) {
+            Object v = values.get(def.getName());
+            if (v != null) {
+                def.fillWith(v);
+            }
         }
-        control(prefix + "/script/script").set(script);
-        control(prefix + "/script/sandbox").check(sandbox);
         return this;
     }
 
-    public SystemGroovyStep file(String path) {
-        String prefix = "source";
-        try {
-            control("").select("Groovy script file");
-        } catch (NoSuchElementException ex) {
-            control("scriptSource[1]").check();
-            prefix += "[1]";
-        }
-        control(prefix + "/scriptFile").set(path);
-        return this;
+    public void start() {
+        clickButton("Build");
     }
 }

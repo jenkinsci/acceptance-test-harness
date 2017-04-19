@@ -6,8 +6,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.inject.Injector;
 import org.openqa.selenium.WebElement;
+
+import com.google.inject.Injector;
 
 /**
  * Super class for top level items. 
@@ -66,6 +67,16 @@ public abstract class TopLevelItem extends ContainerPageObject {
     public void description(final String description, final boolean withCodeMirror) {
         configure();
 
+        setDescription(description, withCodeMirror);
+
+        save();
+    }
+
+    public void setDescription(final String description) {
+        setDescription(description, false);
+    }
+
+    public void setDescription(final String description, final boolean withCodeMirror) {
         if (withCodeMirror) {
             new CodeMirror(this, "/description").set(description);
         } else {
@@ -73,8 +84,6 @@ public abstract class TopLevelItem extends ContainerPageObject {
             descrElem.clear();
             descrElem.sendKeys(description);
         }
-
-        save();
     }
 
     /**

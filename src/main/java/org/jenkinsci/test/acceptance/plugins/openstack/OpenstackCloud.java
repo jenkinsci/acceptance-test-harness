@@ -24,6 +24,7 @@
 package org.jenkinsci.test.acceptance.plugins.openstack;
 
 import org.jenkinsci.test.acceptance.po.Cloud;
+import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.openqa.selenium.NoSuchElementException;
@@ -94,7 +95,9 @@ public class OpenstackCloud extends Cloud {
     }
 
     public OpenstackCloud testConnection() {
-        clickButton("Test Connection");
+        Control button = control(by.xpath("//div[@descriptorid='jenkins.plugins.openstack.compute.JCloudsCloud']"
+                + "//button[contains(.,'Test Connection')]"));
+        button.click();
         return this;
     }
 
