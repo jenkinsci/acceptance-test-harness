@@ -4,6 +4,7 @@ import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.logparser.LogParserGlobalConfig;
+import org.jenkinsci.test.acceptance.plugins.logparser.LogParserPublisher;
 import org.jenkinsci.test.acceptance.po.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,9 +27,17 @@ public class LogParserTest extends AbstractJUnitTest {
         Map<String, String> rules = new HashMap<>();
         rules.put("des1", "path1");
         rules.put("des2", "path2");
-        addLogParserRule(rules);
+        addLogParserRules(rules);
         FreeStyleJob j = jenkins.jobs.create(FreeStyleJob.class, "simple-job");
         j.configure();
+
+        // sample use of the LogParserPublisher
+        LogParserPublisher lpp = j.addPublisher(LogParserPublisher.class);
+        lpp.setMarkOnUnstableWarning(true);
+        lpp.setMarkOnBuildFail(true);
+        lpp.setShowGraphs(true);
+        lpp.setRule(LogParserPublisher.RuleType.GLOBAL, rules.get("des1"));
+
         Resource res = resource("/warnings_plugin/warningsAll.txt");
         if (res.asFile().isDirectory()) {
             j.copyDir(res);
@@ -64,7 +73,7 @@ public class LogParserTest extends AbstractJUnitTest {
      * Adds serveral rules to the existing config.
      * @param rules Map of the rules. Key is the description and Value is the path.
      */
-    private void addLogParserRule(final Map<String, String> rules) {
+    private void addLogParserRules(final Map<String, String> rules) {
         jenkins.configure();
         for(Map.Entry<String, String> rule : rules.entrySet()) {
             config.addParserConfig(rule.getKey(), rule.getValue());
