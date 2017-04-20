@@ -58,7 +58,7 @@ public class JenkinsControllerPoolProcess {
     @Option(name="-n",usage="Number of instances to pool. >=1.")
     public int n = Integer.getInteger("count",1);
 
-    @Option(name="-socket",usage="Unix domain socket file to communicate with client") @Inject @Named("socket")
+    @Inject @Named("socket")
     public File socket;
 
     private final ExecutorService executors = Executors.newCachedThreadPool();
