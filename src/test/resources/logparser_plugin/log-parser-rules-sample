@@ -1,0 +1,7 @@
+ok /.*ok.*/
+error /Finished: FAILED/
+
+info /Building in workspace.*/
+info /Finished: SUCCESS/
+
+start /Started by user.*/
