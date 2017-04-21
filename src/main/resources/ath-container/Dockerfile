@@ -6,7 +6,8 @@
 FROM debian:stretch
 MAINTAINER ogondza@gmail.com
 
-RUN apt-get -y update && \
+RUN apt-get clean && \
+    apt-get -y update && \
     apt-get install -y \
         curl \
         git \
