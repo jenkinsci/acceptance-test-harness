@@ -9,11 +9,13 @@ MAINTAINER ogondza@gmail.com
 RUN apt-get -y update && \
     apt-get install -y \
         curl \
+        git \
         imagemagick \
         iptables \
         firefox-esr \
         maven \
         openjdk-8-jdk \
+        unzip \
         vnc4server
 
 # All we need is a statically linked client library - no need to install daemon deps: https://get.docker.com/builds/
