@@ -31,7 +31,7 @@ public abstract class View extends ContainerPageObject {
      * Clicks a build button for a job of the specified name.
      */
     public void build(String name) {
-        find(by.xpath("//a[contains(@href, '/%s/build?')]/img[contains(@title, 'Schedule a Build')]", name)).click();
+        find(by.xpath("//a[contains(@href, '/%s/build?')]/img[contains(@title, 'Schedule a')]", name)).click();
     }
 
     /**
