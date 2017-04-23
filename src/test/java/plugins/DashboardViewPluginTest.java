@@ -1,13 +1,12 @@
 package plugins;
 
-import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
 
 @WithPlugins("dashboard-view")
-public class DashboardViewPluginTest extends AbstractJUnitTest {
+public class DashboardViewPluginTest extends AbstractJobRelatedTest {
     @Test
     public void configure_dashboard() {
         DashboardView v = jenkins.views.create(DashboardView.class, "dashboard");
