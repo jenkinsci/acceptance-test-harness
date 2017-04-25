@@ -27,6 +27,8 @@ package plugins;
 import java.io.File;
 import java.util.concurrent.Callable;
 import javax.inject.Inject;
+
+import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -135,6 +137,8 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         build.shouldContainsConsoleOutput("Building version 1.0-SNAPSHOT");
         jenkins.restart();
         // Default 120s timeout of Build.waitUntilFinished sometimes expires waiting for RetentionStrategy.Always to tick (after initial failure of CommandLauncher.launch: EOFException: unexpected stream termination):
+        System.out.println("Waiting for slave to come online...");
+        Thread.sleep(10000); //Jenkins needs some extra time to wake up before we can query the api
         slave.waitUntilOnline(); // TODO rather wait for build output: "Ready to run"
         visit(build.getConsoleUrl());
         clickLink("Proceed");
@@ -226,6 +230,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         launcher.host.set(agentContainer.ipBound(22));
         launcher.port(agentContainer.port(22));
         launcher.pwdCredentials("test", "test");
+        launcher.hostKeyVerificationStrategy.select(SshSlaveLauncher.HostKeyVerificationStrategy.Non_verifying.value);
         slave.save();
         { // TODO JENKINS-30600 workaround
             JGitInstallation.addJGit(jenkins);
@@ -243,7 +248,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
             "}");
         job.sandbox.check();
         job.save();
-        assertThat(job.startBuild().shouldSucceed().getConsole(), containsString("-> FETCH_HEAD"));
+        assertThat(job.startBuild().shouldSucceed().getConsole(), containsString("-&gt; FETCH_HEAD"));
     }
 
     @WithPlugins({"workflow-cps-global-lib@2.3", "workflow-basic-steps@2.1", "workflow-job@2.5"})

@@ -2,7 +2,9 @@ package org.jenkinsci.test.acceptance.po;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.jenkinsci.utils.process.CommandBuilder;
@@ -48,9 +50,14 @@ public class DumbSlave extends Slave {
         File jar = new File(tmpDir, "slave"+createRandomName()+".jar");
         String command;
         if (SystemUtils.IS_OS_UNIX) {
+            String java = "java";
+            String jh = System.getProperty("java.home");
+            if (!StringUtils.isEmpty(jh)) {
+                java = new File(jh, "bin/java").getAbsolutePath();
+            }
             command = String.format(
-                    "sh -c 'curl -s -o %1$s %2$sjnlpJars/slave.jar && java -jar %1$s'",
-                    jar, url("../../")
+                    "sh -c 'curl -s -o %1$s %2$sjnlpJars/slave.jar && \"%3$s\" -jar %1$s'",
+                    jar, url("../../"), java
             );
         }
         else {
