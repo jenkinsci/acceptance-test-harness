@@ -53,7 +53,10 @@ public class DumbSlave extends Slave {
             String java = "java";
             String jh = System.getProperty("java.home");
             if (!StringUtils.isEmpty(jh)) {
-                java = new File(jh, "bin/java").getAbsolutePath();
+                final File file = new File(jh, "bin/java");
+                if (file.canExecute()) {
+                    java = file.getAbsolutePath();
+                }
             }
             command = String.format(
                     "sh -c 'curl -s -o %1$s %2$sjnlpJars/slave.jar && \"%3$s\" -jar %1$s'",

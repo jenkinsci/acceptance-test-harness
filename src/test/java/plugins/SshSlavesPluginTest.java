@@ -167,7 +167,7 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
         SshSlaveLauncher launcher = slave.setLauncher(SshSlaveLauncher.class);
         launcher.host.set(host);
         launcher.port(port);
-        launcher.hostKeyVerificationStrategy.select(SshSlaveLauncher.HostKeyVerificationStrategy.Non_verifying.value);
+        launcher.setSshHostKeyVerificationStrategy(SshSlaveLauncher.NonVerifyingKeyVerificationStrategy.class);
         return launcher;
     }
 }

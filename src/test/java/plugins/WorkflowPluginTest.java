@@ -230,7 +230,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         launcher.host.set(agentContainer.ipBound(22));
         launcher.port(agentContainer.port(22));
         launcher.pwdCredentials("test", "test");
-        launcher.hostKeyVerificationStrategy.select(SshSlaveLauncher.HostKeyVerificationStrategy.Non_verifying.value);
+        launcher.setSshHostKeyVerificationStrategy(SshSlaveLauncher.NonVerifyingKeyVerificationStrategy.class);
         slave.save();
         { // TODO JENKINS-30600 workaround
             JGitInstallation.addJGit(jenkins);

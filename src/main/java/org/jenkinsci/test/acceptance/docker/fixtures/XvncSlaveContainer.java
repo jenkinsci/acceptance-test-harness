@@ -51,7 +51,7 @@ public class XvncSlaveContainer extends DockerContainer {
         launcher.host.set(ipBound(22));
         launcher.port(port(22));
         launcher.pwdCredentials("jenkins", "jenkins");
-        launcher.hostKeyVerificationStrategy.select(SshSlaveLauncher.HostKeyVerificationStrategy.Non_verifying.value);
+        launcher.setSshHostKeyVerificationStrategy(SshSlaveLauncher.NonVerifyingKeyVerificationStrategy.class);
         s.remoteFS.set("/home/jenkins");
         s.setExecutors(1);
         return s;
