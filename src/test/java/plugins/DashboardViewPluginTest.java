@@ -43,13 +43,38 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
 
         v.save();
 
-        FreeStyleJob j = v.jobs.create(FreeStyleJob.class);
-        j.save();
+        buildSuccessfulJob(createFreeStyleJob());
 
-        j.startBuild().shouldSucceed();
         v.open();
 
         assertThat(stats.getNumberOfBuilds(Jobtype.SUCCESS), is(1));
+    }
+
+    @Test
+    public void buildStats_successPercentage() {
+        DashboardView v = jenkins.views.create(DashboardView.class, "dashboard");
+        v.configure();
+        v.matchAllJobs();
+
+        BuildStatisticsPortlet stats = v.addBottomPortlet(BuildStatisticsPortlet.class);
+
+        v.save();
+
+        FreeStyleJob success = createFreeStyleJob();
+        FreeStyleJob failing = createFailingFreeStyleJob();
+
+        buildSuccessfulJob(success);
+        v.open();
+        assertThat(stats.getPercentageOfBuilds(Jobtype.SUCCESS), is("100.0"));
+
+
+        buildFailingJob(failing);
+        v.open();
+        assertThat(stats.getPercentageOfBuilds(Jobtype.SUCCESS), is("50.0"));
+
+        buildFailingJob(failing);
+        v.open();
+        assertThat(stats.getPercentageOfBuilds(Jobtype.SUCCESS), is("33.33"));
     }
 
     @Test
@@ -62,14 +87,27 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
 
         v.save();
 
-        FreeStyleJob j = v.jobs.create(FreeStyleJob.class);
-        j.configure();
-        j.addShellStep("exit 1");
-        j.save();
+        buildFailingJob(createFailingFreeStyleJob());
 
-        j.startBuild().shouldFail();
         v.open();
 
         assertThat(stats.getNumberOfBuilds(Jobtype.FAILED), is(1));
+    }
+
+    @Test
+    public void buildStats_unstable() {
+        DashboardView v = jenkins.views.create(DashboardView.class, "dashboard");
+        v.configure();
+        v.matchAllJobs();
+
+        BuildStatisticsPortlet stats = v.addBottomPortlet(BuildStatisticsPortlet.class);
+
+        v.save();
+
+        buildUnstableJob(createUnstableFreeStyleJob());
+
+        v.open();
+
+        assertThat(stats.getNumberOfBuilds(Jobtype.UNSTABLE), is(1));
     }
 }

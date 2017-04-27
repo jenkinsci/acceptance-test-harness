@@ -48,7 +48,7 @@ public class BuildStatisticsPortlet extends AbstractDashboardViewPortlet {
    * @param type Type of Job
    * @return int
    */
-  public int getPercentageOfBuilds(Jobtype type){
-    return Integer.valueOf(getTable().findElement(By.xpath(".//tbody/tr["+type.row+"]/td[4]")).getText().trim());
+  public String getPercentageOfBuilds(Jobtype type){
+    return getTable().findElement(By.xpath(".//tbody/tr["+type.row+"]/td[4]")).getText().trim();
   }
 }
