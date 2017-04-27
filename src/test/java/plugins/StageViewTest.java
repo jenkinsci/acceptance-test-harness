@@ -28,6 +28,10 @@ import static org.hamcrest.Matchers.containsString;
 public class StageViewTest extends AbstractJUnitTest{
 
 
+    public static final String SINGLE_JOB = "stageview_plugin/single_job.txt";
+    public static final String MULTI_JOB = "stageview_plugin/multi_job.txt";
+    public static final String MUTLI_JOB_FAIL = "stageview_plugin/multi_job_fail.txt";
+    
     /**
      * This tests create a simple stage. It checks if after the first build the stage view is now part of the job page.
      * @throws Exception
@@ -35,7 +39,7 @@ public class StageViewTest extends AbstractJUnitTest{
 
     @Test
     public void jobShouldContainStageview() throws Exception {
-        WorkflowJob job = this.saveWorkflowJobWithFile("stageview_plugin/single_job.txt");
+        WorkflowJob job = this.saveWorkflowJobWithFile(SINGLE_JOB);
         Build build = job.startBuild().shouldSucceed();
         job.open();
         assertThat(driver.findElement(By.id("pipeline-box")).getText(),containsString("Stage View"));
@@ -45,18 +49,9 @@ public class StageViewTest extends AbstractJUnitTest{
      * Does check multiple formattings on the stage view. So far unordered.
      * @throws Exception
      */
-    @WithPlugins("workflow-aggregator@1.1")
     @Test
     public void stageViewContainsStageNames() throws Exception {
-        WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
-        job.script.set("node {\n" +
-                "    stage ('Clone sources'){\n" +
-                "    echo 'cloned'\n" +
-                "    } " +
-                "}");
-
-        job.sandbox.check();
-        job.save();
+        WorkflowJob job = this.saveWorkflowJobWithFile(SINGLE_JOB);
         Build build = job.startBuild().shouldSucceed();
         job.open();
         WebElement webElement = this.driver.findElement(By.xpath("//*[@id=\"pipeline-box\"]/div/div/table/thead/tr"));
@@ -69,20 +64,9 @@ public class StageViewTest extends AbstractJUnitTest{
      * Does check multiple jobs in the stage view.
      * @throws Exception
      */
-    @WithPlugins("workflow-aggregator@1.1")
     @Test
     public void stageViewContainsMultipleStages() throws Exception {
-        WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
-        job.script.set("node {\n" +
-                "    stage ('Clone sources'){\n" +
-                "    echo 'cloned'\n" +
-                "    }\n " +
-                "    stage ('build'){\n" +
-                "    echo 'build'\n" +
-                "    }\n " +
-                "}");
-        job.sandbox.check();
-        job.save();
+        WorkflowJob job = this.saveWorkflowJobWithFile(MULTI_JOB);
         Build build = job.startBuild().shouldSucceed();
         job.open();
         WebElement webElement = this.driver.findElement(By.xpath("//*[@id=\"pipeline-box\"]/div/div/table/thead/tr"));
@@ -95,21 +79,9 @@ public class StageViewTest extends AbstractJUnitTest{
      * Does check multiple jobs in the stage view.
      * @throws Exception
      */
-    @WithPlugins("workflow-aggregator@1.1")
     @Test
     public void stageViewContainsMultipleStagesWithFail() throws Exception {
-        WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
-        job.script.set("node {\n" +
-                "    stage ('Clone sources'){\n" +
-                "    echo 'cloned'\n" +
-                "    }\n " +
-                "    stage ('build'){\n" +
-                "    echo 'Meant to fail'\n" +
-                "    sh \"exit 1\"\n" +
-                "    }\n " +
-                "}");
-        job.sandbox.check();
-        job.save();
+        WorkflowJob job = this.saveWorkflowJobWithFile(MUTLI_JOB_FAIL);
         Build build = job.startBuild().shouldFail();
         job.open();
         job.getNavigationLinks();
