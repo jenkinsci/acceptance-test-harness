@@ -1,18 +1,34 @@
 package org.jenkinsci.test.acceptance.po;
 
-import com.google.inject.Injector;
-
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
+import com.google.inject.Injector;
+
 /**
  * @author Kohsuke Kawaguchi
  */
 @Describable("List View")
 public class ListView extends View {
+    /**
+     * Creates a new list view with the specified column.
+     *
+     * @param owner       owner of the list view (jenkins, folder, etc.)
+     * @param columnClass the class of the column to add
+     * @param <T>         the type of the column
+     * @return the created column
+     */
+    public static <T extends ListViewColumn> T createWithColumn(final Container owner, final Class<T> columnClass) {
+        ListView view = owner.getViews().create(ListView.class, createRandomName());
+        view.configure();
+        view.matchAllJobs();
+        T column = view.addColumn(columnClass);
+        view.save();
+        return column;
+    }
 
     private List<ListViewColumn> columns = new ArrayList<>();
 
