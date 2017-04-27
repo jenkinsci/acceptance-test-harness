@@ -34,7 +34,7 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
     }
 
     @Test
-    public void buildStats_success() {
+    public void buildStatisticsPortlet_successNr() {
         DashboardView v = jenkins.views.create(DashboardView.class, "dashboard");
         v.configure();
         v.matchAllJobs();
@@ -51,7 +51,7 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
     }
 
     @Test
-    public void buildStats_successPercentage() {
+    public void buildStatisticsPortlet_successPercentage() {
         DashboardView v = jenkins.views.create(DashboardView.class, "dashboard");
         v.configure();
         v.matchAllJobs();
@@ -78,7 +78,7 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
     }
 
     @Test
-    public void buildStats_failed() {
+    public void buildStatisticsPortlet_failedNr() {
         DashboardView v = jenkins.views.create(DashboardView.class, "dashboard");
         v.configure();
         v.matchAllJobs();
@@ -95,7 +95,7 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
     }
 
     @Test
-    public void buildStats_unstable() {
+    public void buildStatisticsPortlet_unstableNr() {
         DashboardView v = jenkins.views.create(DashboardView.class, "dashboard");
         v.configure();
         v.matchAllJobs();
