@@ -11,8 +11,8 @@ import org.jenkinsci.test.acceptance.po.ListView;
 import org.junit.Test;
 import org.openqa.selenium.WebElement;
 
-import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.Matchers.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 import static org.jenkinsci.test.acceptance.po.PageObject.*;
 
@@ -39,7 +39,7 @@ public class ExtraColumnsPluginTest extends AbstractJUnitTest {
         ListView.createWithColumn(folder, LastConsoleColumn.class);
 
         List<WebElement> links = all(by.link("Last/current build console output"));
-        assertThat(links.size(), is(1));
+        assertThat(links, iterableWithSize(1));
 
         links.get(0).click();
 
