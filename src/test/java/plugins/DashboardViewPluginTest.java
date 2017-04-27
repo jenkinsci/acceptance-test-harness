@@ -3,6 +3,7 @@ package plugins;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.BuildStatisticsPortlet;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.BuildStatisticsPortlet.Jobtype;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
@@ -33,43 +34,43 @@ public class DashboardViewPluginTest extends AbstractJUnitTest {
 
     }
 
-  @Test
-  public void buildStats_success(){
-    DashboardView v = jenkins.views.create(DashboardView.class, "dashboard");
-    v.configure();
-    v.matchAllJobs();
+    @Test
+    public void buildStats_success() {
+        DashboardView v = jenkins.views.create(DashboardView.class, "dashboard");
+        v.configure();
+        v.matchAllJobs();
 
-    BuildStatisticsPortlet stats = v.addBottomPortlet(BuildStatisticsPortlet.class);
+        BuildStatisticsPortlet stats = v.addBottomPortlet(BuildStatisticsPortlet.class);
 
-    v.save();
+        v.save();
 
-    FreeStyleJob j = v.jobs.create(FreeStyleJob.class);
-    j.save();
+        FreeStyleJob j = v.jobs.create(FreeStyleJob.class);
+        j.save();
 
-    j.startBuild().shouldSucceed();
-    v.open();
+        j.startBuild().shouldSucceed();
+        v.open();
 
-    assertThat(stats.getNumberOfBuilds(BuildStatisticsPortlet.Jobtype.SUCCESS), is(1));
-  }
+        assertThat(stats.getNumberOfBuilds(Jobtype.SUCCESS), is(1));
+    }
 
     @Test
-    public void buildStats_failed(){
-      DashboardView v = jenkins.views.create(DashboardView.class, "dashboard");
-      v.configure();
-      v.matchAllJobs();
+    public void buildStats_failed() {
+        DashboardView v = jenkins.views.create(DashboardView.class, "dashboard");
+        v.configure();
+        v.matchAllJobs();
 
-      BuildStatisticsPortlet stats = v.addBottomPortlet(BuildStatisticsPortlet.class);
+        BuildStatisticsPortlet stats = v.addBottomPortlet(BuildStatisticsPortlet.class);
 
-      v.save();
+        v.save();
 
-      FreeStyleJob j = v.jobs.create(FreeStyleJob.class);
-      j.configure();
-      j.addShellStep("exit 1");
-      j.save();
+        FreeStyleJob j = v.jobs.create(FreeStyleJob.class);
+        j.configure();
+        j.addShellStep("exit 1");
+        j.save();
 
-      j.startBuild().shouldFail();
-      v.open();
+        j.startBuild().shouldFail();
+        v.open();
 
-      assertThat(stats.getNumberOfBuilds(BuildStatisticsPortlet.Jobtype.FAILED), is(1));
+        assertThat(stats.getNumberOfBuilds(Jobtype.FAILED), is(1));
     }
 }
