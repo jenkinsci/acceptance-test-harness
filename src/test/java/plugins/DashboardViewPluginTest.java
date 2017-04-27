@@ -1,6 +1,5 @@
 package plugins;
 
-import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.BuildStatisticsPortlet;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.BuildStatisticsPortlet.Jobtype;
@@ -12,7 +11,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 @WithPlugins("dashboard-view")
-public class DashboardViewPluginTest extends AbstractJUnitTest {
+public class DashboardViewPluginTest extends AbstractJobRelatedTest {
     @Test
     public void configure_dashboard() {
         DashboardView v = jenkins.views.create(DashboardView.class, "dashboard");
