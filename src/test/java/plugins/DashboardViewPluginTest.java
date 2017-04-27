@@ -49,7 +49,7 @@ public class DashboardViewPluginTest extends AbstractJUnitTest {
     j.startBuild().shouldSucceed();
     v.open();
 
-    assertThat(stats.getSuccessJobsCount(), is(1));
+    assertThat(stats.getNumberOfBuilds(BuildStatisticsPortlet.Jobtype.SUCCESS), is(1));
   }
 
     @Test
@@ -70,6 +70,6 @@ public class DashboardViewPluginTest extends AbstractJUnitTest {
       j.startBuild().shouldFail();
       v.open();
 
-      assertThat(stats.getFailedJobsCount(), is(1));
+      assertThat(stats.getNumberOfBuilds(BuildStatisticsPortlet.Jobtype.FAILED), is(1));
     }
 }

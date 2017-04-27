@@ -12,24 +12,43 @@ import org.openqa.selenium.WebElement;
 @Describable("Build statistics")
 public class BuildStatisticsPortlet extends AbstractDashboardViewPortlet {
 
+  public enum Jobtype{
+    FAILED(2), UNSTABLE(3), SUCCESS(4), PENDING(5),
+    DISABLED(6), ABORTED(7), NOT_BUILT(8), TOTAL(9);
+
+    private final int row;
+    Jobtype(int r){
+      row =r;
+    }
+  }
+
   public BuildStatisticsPortlet(DashboardView parent, String path) {
     super(parent, path);
   }
 
+  /**
+   * Get the Buildstatistics table as {@link WebElement}
+   * @return table
+   */
   public WebElement getTable(){
     return find(By.id("statistics"));
   }
 
-  public int getFailedJobsCount(){
-    return Integer.valueOf(getTable().findElement(By.xpath(".//tbody/tr[2]/td[3]")).getText().trim());
+  /**
+   * Get number of builds of a specific {@link Jobtype}
+   * @param type Type of Job
+   * @return int
+   */
+  public int getNumberOfBuilds(Jobtype type){
+    return Integer.valueOf(getTable().findElement(By.xpath(".//tbody/tr["+type.row+"]/td[3]")).getText().trim());
   }
 
-  public int getUnstableJobsCount(){
-    return Integer.valueOf(getTable().findElement(By.xpath(".//tbody/tr[3]/td[3]")).getText().trim());
+  /**
+   * Get percentage of builds of a specific {@link Jobtype}
+   * @param type Type of Job
+   * @return int
+   */
+  public int getPercentageOfBuilds(Jobtype type){
+    return Integer.valueOf(getTable().findElement(By.xpath(".//tbody/tr["+type.row+"]/td[4]")).getText().trim());
   }
-
-  public int getSuccessJobsCount(){
-    return Integer.valueOf(getTable().findElement(By.xpath(".//tbody/tr[4]/td[3]")).getText().trim());
-  }
-
 }
