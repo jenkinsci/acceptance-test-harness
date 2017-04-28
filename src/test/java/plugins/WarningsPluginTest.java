@@ -369,8 +369,8 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
      */
     @Test @Issue("JENKINS-33582") @WithPlugins("multi-branch-project-plugin")
     public void should_find_warnings_in_multi_branch_project() {
-        setupJob(SEVERAL_PARSERS_FILE_FULL_PATH, FreeStyleMultiBranchJob.class, WarningsBuildSettings.class,
-                jenkins, settings -> {
+        createJob(jenkins, SEVERAL_PARSERS_FILE_FULL_PATH, FreeStyleMultiBranchJob.class, WarningsBuildSettings.class,
+                settings -> {
                     settings.addWorkspaceScanner(JAVA_TITLE, "**/*");
                     settings.addWorkspaceScanner(MS_BUILD_ID, "**/*");
                     settings.addWorkspaceScanner(JAVA_DOC_ID, "**/*");
@@ -462,7 +462,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
     @Test @Issue({"JENKINS-11225", "JENKINS-26913"}) @Ignore("Reactivate if JENKINS-31431 has been fixed")
     public void should_report_warnings_per_axis() {
         String file = "matrix-warnings.txt";
-        MatrixProject job = setupJob(RESOURCES + file, MatrixProject.class, WarningsBuildSettings.class, jenkins,
+        MatrixProject job = createJob(jenkins, RESOURCES + file, MatrixProject.class, WarningsBuildSettings.class,
                 settings -> settings.addConsoleParser("GNU C Compiler 4 (gcc)"));
 
         job.configure();
@@ -616,8 +616,8 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
     }
 
     private MatrixProject createMatrixProject() {
-        return setupJob(SEVERAL_PARSERS_FILE_FULL_PATH, MatrixProject.class,
-                WarningsBuildSettings.class, jenkins, create3ParserConfiguration());
+        return createJob(jenkins, SEVERAL_PARSERS_FILE_FULL_PATH, MatrixProject.class,
+                WarningsBuildSettings.class, create3ParserConfiguration());
     }
 
     private void assertValidLink(final String jobName) {
@@ -917,6 +917,6 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
 
     private FreeStyleJob createFreeStyleJob(final String resourceToCopy,
             final AnalysisConfigurator<WarningsBuildSettings> buildConfigurator, final Container owner) {
-        return setupJob(resourceToCopy, FreeStyleJob.class, WarningsBuildSettings.class, owner, buildConfigurator);
+        return createJob(owner, resourceToCopy, FreeStyleJob.class, WarningsBuildSettings.class, buildConfigurator);
     }
 }

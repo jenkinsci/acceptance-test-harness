@@ -22,13 +22,11 @@ import org.custommonkey.xmlunit.DifferenceListener;
 import org.custommonkey.xmlunit.XMLAssert;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.junit.Since;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisAction;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisAction.Tab;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
-import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisMavenSettings;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisSettings;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.GraphConfigurationView;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.AbstractDashboardViewPortlet;
@@ -41,11 +39,9 @@ import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Container;
 import org.jenkinsci.test.acceptance.po.Folder;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
-import org.jenkinsci.test.acceptance.po.FreeStyleMultiBranchJob;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.ListView;
 import org.jenkinsci.test.acceptance.po.ListViewColumn;
-import org.jenkinsci.test.acceptance.po.MatrixProject;
 import org.jenkinsci.test.acceptance.po.Node;
 import org.jenkinsci.test.acceptance.po.PostBuildStep;
 import org.jenkinsci.test.acceptance.po.Slave;
@@ -63,9 +59,11 @@ import org.xml.sax.SAXException;
 import com.google.inject.Inject;
 
 import static java.util.Collections.*;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation.*;
 
 /**
  * Base class for tests of the static analysis plug-ins. Contains several generic test cases that run for all
@@ -584,96 +582,72 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
     }
 
     /**
-     * Create a new freestyle job with a given resource and a publisher which can be configured by providing a
-     * configurator.
+     * Creates a new job of a certain type with a given resource and a publisher which can be configured by providing a
+     * configurator
      *
-     * @param resourceToCopy Resource to copy to build (Directory or File path)
-     * @param publisherClass the type of the publisher to be added
-     * @param owner          the owner of the job
+     * @param owner          the owner of the job (Jenkins or a folder)
+     * @param resourceToCopy Resource to copy to build (directory or file path)
+     * @param jobClass       the type the job shall be created of, e.g. FreeStyleJob
+     * @param settingsType   the type of the publisher to be added
      * @param configurator   the configuration of the publisher
      * @return the new job
      */
-    public <T extends AnalysisSettings & PostBuildStep> FreeStyleJob createFreestyleJob(
-            final String resourceToCopy, final Container owner, Class<T> publisherClass,
+    public <J extends Job, T extends AnalysisSettings & PostBuildStep> J createJob(
+            final Container owner, String resourceToCopy, Class<J> jobClass, Class<T> settingsType,
             AnalysisConfigurator<T> configurator) {
-        return setupJob(resourceToCopy, FreeStyleJob.class, publisherClass, null, owner, configurator);
-    }
-
-    /**
-     * Set up a Job of a certain type with a given resource and a publisher which can be configured by providing a
-     * configurator
-     *
-     * @param resourceToCopy              Resource to copy to build (Directory or File path)
-     * @param jobClass                    the type the job shall be created of, e.g. FreeStyleJob
-     * @param publisherBuildSettingsClass the type of the publisher to be added
-     * @param owner
-     * @param configurator                the configuration of the publisher
-     * @return the new job
-     */
-    public <J extends Job, T extends AnalysisSettings & PostBuildStep> J setupJob(String resourceToCopy,
-            Class<J> jobClass, Class<T> publisherBuildSettingsClass,
-            final Container owner, AnalysisConfigurator<T> configurator) {
-        return setupJob(resourceToCopy, jobClass, publisherBuildSettingsClass, null, owner, configurator);
-    }
-
-    /**
-     * Set up a Job of a certain type with a given resource and a publisher which can be configured by providing a
-     * configurator
-     *
-     * @param resourceToCopy              Resource to copy to build (Directory or File path)
-     * @param jobClass                    the type the job shall be created of, e.g. FreeStyleJob
-     * @param publisherBuildSettingsClass the type of the publisher to be added
-     * @param goal                        a maven goal to be added to the job or null otherwise
-     * @param owner                       the owner of the job (Jenkins or a folder)
-     * @param configurator                the configuration of the publisher
-     * @return the new job
-     */
-    public <J extends Job, T extends AnalysisSettings & PostBuildStep> J setupJob(String resourceToCopy,
-            Class<J> jobClass, Class<T> publisherBuildSettingsClass,
-            String goal, final Container owner, AnalysisConfigurator<T> configurator) {
-        if (jobClass.isAssignableFrom(MavenModuleSet.class)) {
-            MavenInstallation.ensureThatMavenIsInstalled(jenkins);
-        }
-
         J job = owner.getJobs().create(jobClass);
-        job.configure();
 
         if (resourceToCopy != null) {
-            // first copy resource and then add a goal
-            addResourceToJob(job, resourceToCopy);
+            job.copyResource(resourceToCopy);
         }
 
-        // check if a goal is defined and configure the job depending on the job class
-        if (goal != null) {
-            if (jobClass.isAssignableFrom(MavenModuleSet.class)) {
-                ((MavenModuleSet) job).goals.set(goal);
-            }
-            else if (isFreeStyleOrMatrixJob(jobClass)) {
-                job.addBuildStep(MavenBuildStep.class).targets.set(goal);
-            }
-        }
+        T buildSettings = job.addPublisher(settingsType);
 
-        T buildSettings = null;
-
-        if (jobClass.isAssignableFrom(MavenModuleSet.class)) {
-            buildSettings = ((MavenModuleSet) job).addBuildSettings(publisherBuildSettingsClass);
-        }
-        else if (isFreeStyleOrMatrixJob(jobClass)) {
-            buildSettings = job.addPublisher(publisherBuildSettingsClass);
-        }
-
-        if ((buildSettings != null) && (configurator != null)) {
-            configurator.configure(buildSettings);
-        }
+        configurator.configure(buildSettings);
 
         job.save();
+
         return job;
     }
 
-    private <J extends Job> boolean isFreeStyleOrMatrixJob(final Class<J> jobClass) {
-        return jobClass.isAssignableFrom(FreeStyleJob.class)
-                || jobClass.isAssignableFrom(MatrixProject.class)
-                || jobClass.isAssignableFrom(FreeStyleMultiBranchJob.class);
+    /**
+     * Creates a new maven job (an instance of {@link MavenModuleSet}) and initializes it with the specified configurator.
+     *
+     * @param resources    File or folder in resources which will be copied to the working directory before the maven
+     *                     goals are invoked. Should contain the pom.xml.
+     * @param goal         The maven goals to set.
+     * @param settings     The code analyzer to use or null if you do not want one.
+     * @param configurator A configurator to customize the code analyzer settings you want to use.
+     * @param <T>          The type of the Analyzer.
+     * @return the configured job.
+     */
+    public <T extends AnalysisSettings> MavenModuleSet createMavenJob(
+            final String resources, final String goal, Class<T> settings, final AnalysisConfigurator<T> configurator) {
+        ensureThatMavenIsInstalled(jenkins);
+
+        MavenModuleSet job = jenkins.jobs.create(MavenModuleSet.class);
+
+        job.copyDir(resource(resources));
+
+        job.goals.set(goal);
+        job.version.select(MavenInstallation.DEFAULT_MAVEN_ID);
+
+        T buildSettings = job.addBuildSettings(settings);
+
+        configurator.configure(buildSettings);
+
+        job.save();
+
+        return job;
+    }
+
+    public void setMavenGoal(final FreeStyleJob job, final String goal) {
+        MavenInstallation.ensureThatMavenIsInstalled(jenkins);
+        job.configure(() -> {
+            MavenBuildStep maven = job.addBuildStep(MavenBuildStep.class);
+            maven.targets.set(goal);
+            maven.version.select(MavenInstallation.DEFAULT_MAVEN_ID);
+        });
     }
 
     /**
@@ -768,8 +742,7 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
                 job.removeFirstBuildStep();
             }
 
-            //add the new copy resource shell step
-            addResourceToJob(job, newResourceToCopy);
+            job.copyResource(newResourceToCopy);
         }
 
         // change the configuration of the publisher
@@ -813,37 +786,6 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
         catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException("Can't create Slave", e);
         }
-    }
-
-    /**
-     * Setup a maven build.
-     *
-     * @param resourceProjectDir     A Folder in resources which shall be copied to the working directory. Should
-     *                               contain the pom.xml
-     * @param goal                   The maven goals to set.
-     * @param codeStyleBuildSettings The code analyzer to use or null if you do not want one.
-     * @param configurator           A configurator to customize the code analyzer settings you want to use.
-     * @param <T>                    The type of the Analyzer.
-     * @return The configured job.
-     */
-    public <T extends AnalysisMavenSettings> MavenModuleSet setupMavenJob(String resourceProjectDir,
-            String goal, Class<T> codeStyleBuildSettings, AnalysisConfigurator<T> configurator) {
-        MavenInstallation.ensureThatMavenIsInstalled(jenkins);
-
-        MavenModuleSet job = jenkins.jobs.create(MavenModuleSet.class);
-        job.copyDir(resource(resourceProjectDir));
-        job.goals.set(goal);
-
-
-        T buildSettings = job.addBuildSettings(codeStyleBuildSettings);
-
-        if (configurator != null) {
-            configurator.configure(buildSettings);
-        }
-
-        job.save();
-
-        return job;
     }
 
     /**
@@ -956,26 +898,6 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
         view.configure();
         view.matchAllJobs();
         return view;
-    }
-
-    /**
-     * Adds a shell step to a given job to copy resources to the job's workspace.
-     *
-     * @param job            the job the resource shall be added to
-     * @param resourceToCopy Resource to copy to build (Directory or File path)
-     */
-    protected <J extends Job> J addResourceToJob(J job, String resourceToCopy) {
-
-        Resource res = resource(resourceToCopy);
-        //decide whether to utilize copyResource or copyDir
-        if (res.asFile().isDirectory()) {
-            job.copyDir(res);
-        }
-        else {
-            job.copyResource(res);
-        }
-
-        return job;
     }
 
     /**

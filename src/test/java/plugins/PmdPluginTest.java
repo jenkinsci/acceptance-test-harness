@@ -156,9 +156,10 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
      */
     @Test
     public void should_link_to_source_code_in_real_project() {
-        FreeStyleJob job = setupJob(PLUGIN_ROOT + "sample_pmd_project", FreeStyleJob.class,
-                PmdFreestyleSettings.class, "clean package pmd:pmd", jenkins,
+        FreeStyleJob job = createJob(jenkins, PLUGIN_ROOT + "sample_pmd_project", FreeStyleJob.class,
+                PmdFreestyleSettings.class,
                 settings -> settings.pattern.set("target/pmd.xml"));
+        setMavenGoal(job, "clean package pmd:pmd");
 
         Build build = buildSuccessfulJob(job);
 
@@ -382,7 +383,7 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
 
     private FreeStyleJob createFreeStyleJob(final String fileName, final Container owner,
             final AnalysisConfigurator<PmdFreestyleSettings> buildConfigurator) {
-        return setupJob(fileName, FreeStyleJob.class, PmdFreestyleSettings.class, owner, buildConfigurator);
+        return createJob(owner, fileName, FreeStyleJob.class, PmdFreestyleSettings.class, buildConfigurator);
     }
     private MavenModuleSet createMavenJob() {
         return createMavenJob(null);
@@ -391,6 +392,6 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
     private MavenModuleSet createMavenJob(AnalysisConfigurator<PmdMavenSettings> configurator) {
         String projectPath = PLUGIN_ROOT + "sample_pmd_project";
         String goal = "clean package pmd:pmd";
-        return setupMavenJob(projectPath, goal, PmdMavenSettings.class, configurator);
+        return createMavenJob(projectPath, goal, PmdMavenSettings.class, configurator);
     }
 }
