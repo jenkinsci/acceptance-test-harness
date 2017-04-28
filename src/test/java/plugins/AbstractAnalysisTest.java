@@ -755,7 +755,7 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
     }
 
     /**
-     * Creates a slave and configures thes specified job to run on that slave.
+     * Creates a slave and configures the specified job to run on that slave.
      *
      * @param job job to run on slave
      * @return created slave

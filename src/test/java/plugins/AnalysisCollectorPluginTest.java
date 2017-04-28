@@ -110,14 +110,10 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
         AnalysisGraphConfigurationView view = action.configureTrendGraphForUser();
 
         deactivateOtherTrendGraphs(view, true);
-        // Give some time to JS to work
-        elasticSleep(500);
 
         assertThatNumberOfGraphsIs(job, 6);
 
         deactivateOtherTrendGraphs(view, false);
-        // Give some time to JS to work
-        elasticSleep(500);
 
         assertThatNumberOfGraphsIs(job, 48);
     }
@@ -126,6 +122,8 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
         view.open();
         view.deactiveOtherTrendGraphs(shouldDisable);
         view.save();
+        // Give some time to JS to work
+        elasticSleep(500);
     }
 
     private void assertThatNumberOfGraphsIs(final FreeStyleJob job, final int expectedCount) {
