@@ -24,8 +24,14 @@
 package org.jenkinsci.test.acceptance.plugins.maven;
 
 import java.net.URL;
+import java.util.function.Consumer;
 
-import org.jenkinsci.test.acceptance.po.*;
+import org.jenkinsci.test.acceptance.po.BuildStep;
+import org.jenkinsci.test.acceptance.po.Control;
+import org.jenkinsci.test.acceptance.po.Describable;
+import org.jenkinsci.test.acceptance.po.Job;
+import org.jenkinsci.test.acceptance.po.PostBuildStep;
+import org.jenkinsci.test.acceptance.po.ShellBuildStep;
 import org.openqa.selenium.WebElement;
 
 import com.google.inject.Injector;
@@ -54,6 +60,36 @@ public class MavenModuleSet extends Job {
         advancedButton = null;
     }
 
+    /**
+     * Enables the specified settings for this job. Settings (i.e. publishers) are stored in a list member to provide
+     * later access for modification. After the settings have been added they are configured
+     * with the specified configuration lambda. Afterwards, the job configuration page still is visible and
+     * not saved.
+     *
+     * @param type          the settings to configure
+     * @param configuration the additional configuration options for this job
+     * @param <T>           the type of the settings
+     * @see #addBuildSettings(Class)
+     * @see #getPublisher(Class)
+     */
+    public <T extends PostBuildStep> T addBuildSettings(final Class<T> type, final Consumer<T> configuration) {
+        T settings = addBuildSettings(type);
+
+        configuration.accept(settings);
+
+        return settings;
+    }
+
+    /**
+     * Enables the specified settings for this job. Settings (i.e. publishers) are stored in a list member to provide
+     * later access for modification. Afterwards, the job configuration page still is visible and
+     * not saved.
+     *
+     * @param type          the settings to configure
+     * @param <T>           the type of the settings
+     * @see #addBuildSettings(Class)
+     * @see #getPublisher(Class)
+     */
     public <T extends PostBuildStep> T addBuildSettings(Class<T> type) {
         WebElement checkbox = findCaption(type, new Finder<WebElement>() {
             @Override protected WebElement find(String caption) {

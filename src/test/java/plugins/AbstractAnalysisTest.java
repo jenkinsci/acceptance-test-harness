@@ -83,6 +83,7 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      * Checks that the plug-in sends a mail after a build has been failed. The content of the mail contains several
      * tokens that should be expanded in the mail with the correct values.
      */
+    // TODO: we should have two builds so that the numbers are different
     @Test @Issue("JENKINS-25501") @WithPlugins("email-ext")
     public void should_send_mail_with_expanded_tokens() {
         setUpMailer();
@@ -554,7 +555,6 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      * @param body    body of the mail
      */
     protected void configureEmailNotification(final FreeStyleJob job, final String subject, final String body) {
-        // TODO: add a new job method that adds a publisher with configuration
         job.configure(() ->
             job.addPublisher(EmailExtPublisher.class, publisher -> {
                 publisher.subject.set(subject);
@@ -601,9 +601,7 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
             job.copyResource(resourceToCopy);
         }
 
-        T buildSettings = job.addPublisher(settingsType);
-
-        configurator.configure(buildSettings);
+        job.addPublisher(settingsType, configurator);
 
         job.save();
 
@@ -632,9 +630,7 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
         job.goals.set(goal);
         job.version.select(MavenInstallation.DEFAULT_MAVEN_ID);
 
-        T buildSettings = job.addBuildSettings(settings);
-
-        configurator.configure(buildSettings);
+        T buildSettings = job.addBuildSettings(settings, configurator);
 
         job.save();
 
@@ -747,7 +743,7 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
 
         // change the configuration of the publisher
         if (configurator != null) {
-            configurator.configure(job.getPublisher(publisherBuildSettingsClass));
+            configurator.accept(job.getPublisher(publisherBuildSettingsClass));
         }
 
         job.save();
