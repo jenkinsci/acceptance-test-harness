@@ -10,11 +10,5 @@ import org.jenkinsci.test.acceptance.po.PostBuildStep;
  * @author Fabian Trampusch
  */
 public interface AnalysisConfigurator<T extends PostBuildStep> extends Consumer<T> {
-    /**
-     * Implement this method to access the static analysis job configuration page area
-     * and set e.g. the thresholds as you like.
-     *
-     * @param settings The settings you can use to configure everything as you like.
-     */
-    void accept(T settings);
+    // no additional methods
 }

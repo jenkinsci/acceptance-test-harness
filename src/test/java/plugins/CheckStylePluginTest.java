@@ -145,7 +145,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
     }
 
     private MavenModuleSet createMavenJob() {
-        return createMavenJob(new NullConfigurator());
+        return createMavenJob(new NullConfigurator<>());
     }
 
     private MavenModuleSet createMavenJob(AnalysisConfigurator<CheckStyleMavenSettings> configurator) {
@@ -202,7 +202,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
     @Test
     public void should_group_warnings_by_module() {
         MavenModuleSet job = createMavenJob(CHECKSTYLE_PLUGIN_ROOT + "maven_multi_module",
-                "clean package checkstyle:checkstyle", CheckStyleMavenSettings.class, new NullConfigurator());
+                "clean package checkstyle:checkstyle", CheckStyleMavenSettings.class, new NullConfigurator<>());
         Node slave = createSlaveForJob(job);
         Build build = buildSuccessfulJobOnSlave(job, slave);
 

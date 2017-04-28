@@ -7,9 +7,9 @@ import org.jenkinsci.test.acceptance.po.PostBuildStep;
  *
  * @author Ullrich Hafner
  */
-public class NullConfigurator implements AnalysisConfigurator {
+public class NullConfigurator<T extends PostBuildStep>  implements AnalysisConfigurator<T> {
     @Override
-    public void accept(PostBuildStep settings) {
+    public void accept(T analysisSettings) {
         // nothing to do
     }
 }
