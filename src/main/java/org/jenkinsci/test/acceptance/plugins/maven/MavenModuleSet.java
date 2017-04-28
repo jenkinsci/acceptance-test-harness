@@ -29,6 +29,7 @@ import java.util.function.Consumer;
 import org.jenkinsci.test.acceptance.po.BuildStep;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
+import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.PostBuildStep;
 import org.jenkinsci.test.acceptance.po.ShellBuildStep;
@@ -38,7 +39,7 @@ import com.google.inject.Injector;
 
 @Describable("hudson.maven.MavenModuleSet")
 public class MavenModuleSet extends Job {
-    public final Control version = control("/name");
+    public final Control version = control("/name"); // only visible if there are at least 2 versions
     public final Control goals = control("/goals");
 
     private Control advancedButton = control("/advanced-button[1]");
@@ -140,5 +141,17 @@ public class MavenModuleSet extends Job {
     @Override
     public MavenBuild getLastBuild() {
         return new MavenBuild(this,"lastBuild");
+    }
+
+    /**
+     * Use the default maven version for a job. Note that this maven version needs to be installed before
+     * this method is called. Additionally, at least 2 versions need to be installed. Otherwise the drop down
+     * menu is not shown and the default version is used.
+     *
+     * @see MavenInstallation#ensureThatMavenIsInstalled(Jenkins)
+     * @see MavenInstallation#installSomeMaven(Jenkins)
+     */
+    public void useDefaultMavenVersion() {
+        version.select(MavenInstallation.DEFAULT_MAVEN_ID);
     }
 }
