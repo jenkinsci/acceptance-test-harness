@@ -29,6 +29,7 @@ import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisAction.Tab;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisSettings;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.GraphConfigurationView;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.NullConfigurator;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.AbstractDashboardViewPortlet;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
 import org.jenkinsci.test.acceptance.plugins.email_ext.EmailExtPublisher;
@@ -63,7 +64,6 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
-import static org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation.*;
 
 /**
  * Base class for tests of the static analysis plug-ins. Contains several generic test cases that run for all
@@ -621,16 +621,11 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      */
     public <T extends AnalysisSettings> MavenModuleSet createMavenJob(
             final String resources, final String goal, Class<T> settings, final AnalysisConfigurator<T> configurator) {
-        ensureThatMavenIsInstalled(jenkins);
-
         MavenModuleSet job = jenkins.jobs.create(MavenModuleSet.class);
 
-        job.copyDir(resource(resources));
-
-        job.goals.set(goal);
-        job.version.select(MavenInstallation.DEFAULT_MAVEN_ID);
-
-        T buildSettings = job.addBuildSettings(settings, configurator);
+        job.copyResource(resources);
+        job.setGoals(goal);
+        job.addBuildSettings(settings, configurator);
 
         job.save();
 
@@ -641,8 +636,8 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
         MavenInstallation.ensureThatMavenIsInstalled(jenkins);
         job.configure(() -> {
             MavenBuildStep maven = job.addBuildStep(MavenBuildStep.class);
-            maven.targets.set(goal);
-            maven.version.select(MavenInstallation.DEFAULT_MAVEN_ID);
+            maven.setGoals(goal);
+            maven.useDefaultMavenVersion();
         });
     }
 
@@ -656,10 +651,9 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      * @param job                  the job to be changed
      * @return the edited job
      */
-    public <J extends Job, T extends AnalysisSettings & PostBuildStep> J editJob(String newResourceToCopy,
-            boolean isAdditionalResource,
-            J job) {
-        return edit(newResourceToCopy, isAdditionalResource, job, null, null);
+    public <J extends Job, T extends AnalysisSettings & PostBuildStep> J editJob(
+            final String newResourceToCopy, final boolean isAdditionalResource, final J job) {
+        return edit(newResourceToCopy, isAdditionalResource, job, null, new NullConfigurator<>());
     }
 
     /**
@@ -674,11 +668,9 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      * @param configurator                the new configuration of the publisher
      * @return the edited job
      */
-    public <J extends Job, T extends AnalysisSettings & PostBuildStep> J editJob(String newResourceToCopy,
-            boolean isAdditionalResource,
-            J job,
-            Class<T> publisherBuildSettingsClass,
-            AnalysisConfigurator<T> configurator) {
+    public <J extends Job, T extends AnalysisSettings & PostBuildStep> J editJob(
+            final String newResourceToCopy, final boolean isAdditionalResource, final J job,
+            final Class<T> publisherBuildSettingsClass, final AnalysisConfigurator<T> configurator) {
         return edit(newResourceToCopy, isAdditionalResource, job, publisherBuildSettingsClass, configurator);
     }
 
@@ -692,9 +684,7 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      * @return the edited job
      */
     public <J extends Job, T extends AnalysisSettings & PostBuildStep> J editJob(
-            final J job,
-            Class<T> publisherBuildSettingsClass,
-            AnalysisConfigurator<T> configurator) {
+            final J job, final Class<T> publisherBuildSettingsClass, final AnalysisConfigurator<T> configurator) {
         return edit(null, false, job, publisherBuildSettingsClass, configurator);
     }
 
@@ -729,11 +719,10 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      */
     private <J extends Job, T extends AnalysisSettings & PostBuildStep> J edit(
             @CheckForNull final String newResourceToCopy, final boolean isAdditionalResource,
-            final J job, final Class<T> publisherBuildSettingsClass, @CheckForNull AnalysisConfigurator<T> configurator) {
+            final J job, final Class<T> publisherBuildSettingsClass, final AnalysisConfigurator<T> configurator) {
         job.configure();
 
         if (newResourceToCopy != null) {
-            //check whether to exchange the copy resource shell step
             if (!isAdditionalResource) {
                 job.removeFirstBuildStep();
             }
@@ -741,12 +730,10 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
             job.copyResource(newResourceToCopy);
         }
 
-        // change the configuration of the publisher
-        if (configurator != null) {
-            configurator.accept(job.getPublisher(publisherBuildSettingsClass));
-        }
+        configurator.accept(job.getPublisher(publisherBuildSettingsClass));
 
         job.save();
+
         return job;
     }
 

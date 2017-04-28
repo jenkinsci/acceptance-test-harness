@@ -53,6 +53,10 @@ public class MavenModuleSet extends Job {
         return this;
     }
 
+    public void setGoals(final String goals) {
+        this.goals.set(goals);
+    }
+
     private void ensureAdvanced() {
         if (advancedButton == null) return;
 
