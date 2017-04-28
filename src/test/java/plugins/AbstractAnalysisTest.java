@@ -621,6 +621,8 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      */
     public <T extends AnalysisSettings> MavenModuleSet createMavenJob(
             final String resources, final String goal, Class<T> settings, final AnalysisConfigurator<T> configurator) {
+        MavenInstallation.ensureThatMavenIsInstalled(jenkins);
+
         MavenModuleSet job = jenkins.jobs.create(MavenModuleSet.class);
 
         job.copyResource(resources);
