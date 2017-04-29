@@ -59,6 +59,12 @@ public class Plot extends PageAreaImpl{
         return series;
     }
 
+    public <S extends DataSeries> S addDataSeries(Class<S> seriesClass, String file) {
+        S series = addDataSeries(seriesClass);
+        series.setFile(file);
+        return series;
+    }
+
     /**
      * Index used for construction of path
      * @param dataSeries
