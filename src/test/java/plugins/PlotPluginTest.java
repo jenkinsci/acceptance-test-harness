@@ -12,6 +12,7 @@ import org.junit.Test;
 
 import java.util.regex.Pattern;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 @WithPlugins({
@@ -102,6 +103,7 @@ public class PlotPluginTest extends AbstractJUnitTest {
     }
 
     @Test
+    @WithPlugins("plot@1.10")
     public void no_exception_visit_plot_page(){
         job.configure();
         job.copyResource(resource("/plot_plugin/plot.csv"));
@@ -121,7 +123,7 @@ public class PlotPluginTest extends AbstractJUnitTest {
 
         Pattern p = Pattern.compile(".*java.lang.NumberFormatException.*", Pattern.DOTALL);
 
-        assertTrue(jLog.hasLogged(p));
+        assertFalse("NumberFormatException was logged",jLog.hasLogged(p));
 
     }
 
