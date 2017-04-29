@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<books>
+    <book id="book1">
+        <author>Max, Mustermann</author>
+        <title>Max und Moritz</title>
+        <genre>Streiche</genre>
+        <price>0.99</price>
+    </book>
+    <book id="book2">
+        <author>Lufan, Stefkas</author>
+        <title>Coding Dojo</title>
+        <genre>Pair Programming</genre>
+        <price>95</price>
+    </book>
+    <book id="book3">
+        <author>Max, Mustermann</author>
+        <title>Essen ohne Zucker</title>
+        <genre>Kochen</genre>
+        <price>9.99</price>
+    </book>
+    <book id="book4">
+        <author>Unknown author</author>
+        <title>Buchvorlage</title>
+        <genre>Unknown genre</genre>
+    </book>
+    <book id="book5">
+        <author>Max, Mustermann</author>
+        <title>Essen ohne Zucker Teil 2</title>
+        <genre>Kochen</genre>
+        <price>99.99</price>
+    </book>
+    <book id="book6">
+        <author>Max, Mustermann</author>
+        <title>Essen ohne Zucker Teil 3</title>
+        <genre>Kochen</genre>
+        <price>99.99</price>
+    </book>
+</books>
