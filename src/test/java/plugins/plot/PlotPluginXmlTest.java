@@ -6,6 +6,7 @@ import org.jenkinsci.test.acceptance.plugins.plot.*;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.JenkinsLogger;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
 
@@ -28,6 +29,38 @@ public class PlotPluginXmlTest extends AbstractJUnitTest {
 
     @Test
     public void generateSimpleXmlTest() {
+        setupFirstPlot();
+
+        job.save();
+        job.startBuild().shouldSucceed();
+        job.visit("plot");
+
+        find(by.xpath("//map/area[contains(@href, '%s')]", "http://foo.bar"));
+
+    }
+
+    @Ignore("Plot-Plugin functionality not yet ready")
+    @Test
+    public void generateXmlPlotWithTwoDataSeriesTest() {
+        Plot p1 = setupFirstPlot();
+
+        // this will override first csv line inside plot
+        XmlDataSeries xmlDataSeries2 = p1.addDataSeries(XmlDataSeries.class);
+        xmlDataSeries2.setFile("plot.xml");
+        xmlDataSeries2.setUrl("http://foo.foo");
+        xmlDataSeries2.setXpath("count(/books/book[author='Max, Mustermann'])");
+        xmlDataSeries2.selectResultTypNumber();
+
+        job.save();
+        job.startBuild().shouldSucceed();
+        job.visit("plot");
+
+        find(by.xpath("//map/area[contains(@href, '%s')]", "http://foo.foo"));
+        find(by.xpath("//map/area[contains(@href, '%s')]", "http://foo.bar"));
+
+    }
+
+    private Plot setupFirstPlot() {
         job.configure();
         job.copyResource(resource("/plot_plugin/plot.xml"));
         PlotPublisher pub = job.addPublisher(PlotPublisher.class);
@@ -43,19 +76,7 @@ public class PlotPluginXmlTest extends AbstractJUnitTest {
         xmlDataSeries1.setUrl("http://foo.bar");
         xmlDataSeries1.selectResultTypNumber();
 
-        // this will override first csv line inside plot
-        //XmlDataSeries xmlDataSeries2 = p1.addDataSeries(XmlDataSeries.class);
-        //xmlDataSeries2.setFile("plot.xml");
-        //xmlDataSeries2.setUrl("http://foo.bar2");
-        //xmlDataSeries2.setXpath("count(/books/book[author='Max, Mustermann'])");
-        //xmlDataSeries2.selectResultTypNumber();
-
-        job.save();
-        job.startBuild().shouldSucceed();
-        job.visit("plot");
-
-        find(by.xpath("//map/area[contains(@href, '%s')]", "http://foo.bar"));
-
+        return p1;
     }
 
 }
