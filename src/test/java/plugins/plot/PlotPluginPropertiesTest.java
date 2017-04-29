@@ -28,7 +28,8 @@ public class PlotPluginPropertiesTest extends AbstractJUnitTest {
 
     private FreeStyleJob job;
     private PlotPublisher pub;
-    private final String propertiesFile = "/plot_plugin/plot.properties";
+    private final String propertiesFilePath = "/plot_plugin/plot.properties";
+    private final String propertiesFileName = "plot.properties";
 
     @Before
     public void setUp() {
@@ -37,11 +38,32 @@ public class PlotPluginPropertiesTest extends AbstractJUnitTest {
     }
 
     @Test
-    public void generate_simple_plot_properties() throws IOException {
+    public void generate_simple_plot_properties()  {
         job.configure();
-        job.copyResource(propertiesFile);
+        job.copyResource(propertiesFilePath);
 
-        final Resource res = resource(propertiesFile);
+        Plot plot = pub.getPlot(1);
+        plot.setGroup("Group_1");
+        plot.setTitle("PropertiesPlot1");
+
+
+        PropertiesDataSeries pSeries = plot.addDataSeries(PropertiesDataSeries.class, propertiesFileName);
+        pSeries.setLabel("propLabel");
+
+        job.save();
+        job.startBuild().shouldSucceed();
+
+        job.visit("plot");
+        find(by.xpath("//h1[contains(text(), '%s')]", "Group_1"));
+        find(by.xpath("//select[@name='choice']/option[contains(text(), '%s')]","PropertiesPlot1"));
+    }
+
+    @Test
+    public void test_clickable_data_points() throws IOException {
+        job.configure();
+        job.copyResource(propertiesFilePath);
+
+        final Resource res = resource(propertiesFilePath);
         Properties prop = new Properties();
         prop.load(res.asInputStream());
 
@@ -50,7 +72,9 @@ public class PlotPluginPropertiesTest extends AbstractJUnitTest {
         plot.setGroup("Group_1");
         plot.setTitle("PropertiesPlot1");
 
-        pub.source("properties", "plot.properties");
+        PropertiesDataSeries pSeries = plot.addDataSeries(PropertiesDataSeries.class, propertiesFileName);
+
+
         job.save();
         job.startBuild().shouldSucceed();
 
@@ -61,9 +85,6 @@ public class PlotPluginPropertiesTest extends AbstractJUnitTest {
 
     }
 
-    private void assertThatBuildHasPlot(String title, String group) {
-        job.visit("plot");
-        find(by.xpath("//h1[contains(text(), '%s')]", group));
-        find(by.xpath("//select[@name='choice']/option[contains(text(), '%s')]",title));
-    }
+
+
 }
