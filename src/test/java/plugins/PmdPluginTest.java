@@ -5,6 +5,7 @@ import java.util.TreeMap;
 
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.NullConfigurator;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.plugins.pmd.PmdAction;
 import org.jenkinsci.test.acceptance.plugins.pmd.PmdFreestyleSettings;
@@ -107,7 +108,8 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
 
         FreeStyleJob job = createFreeStyleJob();
         Build firstBuild = buildJobAndWait(job);
-        editJob(PLUGIN_ROOT + "forSecondRun/pmd-warnings.xml", false, job);
+        editJob(PLUGIN_ROOT + "forSecondRun/pmd-warnings.xml", false, job,
+                PmdFreestyleSettings.class);
 
         Build lastBuild = buildSuccessfulJob(job);
 
@@ -386,7 +388,7 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
         return createJob(owner, fileName, FreeStyleJob.class, PmdFreestyleSettings.class, buildConfigurator);
     }
     private MavenModuleSet createMavenJob() {
-        return createMavenJob(null);
+        return createMavenJob(new NullConfigurator<>());
     }
 
     private MavenModuleSet createMavenJob(AnalysisConfigurator<PmdMavenSettings> configurator) {

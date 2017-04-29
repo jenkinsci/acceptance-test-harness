@@ -29,6 +29,7 @@ import java.util.TreeMap;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.NullConfigurator;
 import org.jenkinsci.test.acceptance.plugins.findbugs.FindBugsAction;
 import org.jenkinsci.test.acceptance.plugins.findbugs.FindBugsFreestyleSettings;
 import org.jenkinsci.test.acceptance.plugins.findbugs.FindBugsMavenSettings;
@@ -70,9 +71,11 @@ public class FindBugsPluginTest extends AbstractAnalysisTest<FindBugsAction> {
     @Test @Issue("24940")
     public void should_report_new_and_fixed_warnings_in_consecutive_builds() {
         assumeTrue("This test requires a restartable Jenkins", jenkins.canRestart());
+
         FreeStyleJob job = createFreeStyleJob();
         Build firstBuild = buildJobAndWait(job);
-        editJob("/findbugs_plugin/forSecondRun/findbugsXml.xml", false, job);
+        editJob("/findbugs_plugin/forSecondRun/findbugsXml.xml", false, job,
+                FindBugsFreestyleSettings.class);
 
         Build lastBuild = buildSuccessfulJob(job);
 
@@ -243,7 +246,7 @@ public class FindBugsPluginTest extends AbstractAnalysisTest<FindBugsAction> {
     }
 
     private MavenModuleSet createMavenJob() {
-        return createMavenJob(null);
+        return createMavenJob(new NullConfigurator<>());
     }
 
     private MavenModuleSet createMavenJob(AnalysisConfigurator<FindBugsMavenSettings> configurator) {

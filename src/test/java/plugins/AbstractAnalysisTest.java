@@ -647,33 +647,35 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      * Provides the ability to edit an existing job by changing or adding the resource to copy and/or by changing the
      * configuration of a publisher
      *
-     * @param newResourceToCopy    the new resource to be copied to build (Directory or File path) or null if not to be
+     * @param newResource          the new resource to be copied to build (Directory or File path) or null if not to be
      *                             changed
      * @param isAdditionalResource decides whether the old resource is kept (FALSE) or deleted (TRUE)
      * @param job                  the job to be changed
+     * @param settingsClass        the type of the publisher to be modified
      * @return the edited job
      */
     public <J extends Job, T extends AnalysisSettings & PostBuildStep> J editJob(
-            final String newResourceToCopy, final boolean isAdditionalResource, final J job) {
-        return edit(newResourceToCopy, isAdditionalResource, job, null, new NullConfigurator<>());
+            final String newResource, final boolean isAdditionalResource, final J job,
+            final Class<T> settingsClass) {
+        return edit(newResource, isAdditionalResource, job, settingsClass, new NullConfigurator<>());
     }
 
     /**
      * Provides the ability to edit an existing job by changing or adding the resource to copy and/or by changing the
      * configuration of a publisher
      *
-     * @param newResourceToCopy           the new resource to be copied to build (Directory or File path) or null if not
+     * @param newResource           the new resource to be copied to build (Directory or File path) or null if not
      *                                    to be changed
      * @param isAdditionalResource        decides whether the old resource is kept (FALSE) or deleted (TRUE)
      * @param job                         the job to be changed
-     * @param publisherBuildSettingsClass the type of the publisher to be modified
+     * @param settingClass the type of the publisher to be modified
      * @param configurator                the new configuration of the publisher
      * @return the edited job
      */
     public <J extends Job, T extends AnalysisSettings & PostBuildStep> J editJob(
-            final String newResourceToCopy, final boolean isAdditionalResource, final J job,
-            final Class<T> publisherBuildSettingsClass, final AnalysisConfigurator<T> configurator) {
-        return edit(newResourceToCopy, isAdditionalResource, job, publisherBuildSettingsClass, configurator);
+            final String newResource, final boolean isAdditionalResource, final J job,
+            final Class<T> settingClass, final AnalysisConfigurator<T> configurator) {
+        return edit(newResource, isAdditionalResource, job, settingClass, configurator);
     }
 
     /**

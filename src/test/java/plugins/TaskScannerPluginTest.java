@@ -257,7 +257,7 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
         // as for single_task_tags_and_exclusion_pattern
         // So we proceed directly with the preparation of build #2
 
-        editJob("/tasks_plugin/fileset1_less", false, job);
+        editJob("/tasks_plugin/fileset1_less", false, job, TasksFreestyleSettings.class);
 
         Build build = buildSuccessfulJob(job);
 
