@@ -9,6 +9,7 @@ import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.WebElement;
 
 import java.util.regex.Pattern;
 
@@ -17,23 +18,26 @@ import static org.junit.Assert.assertTrue;
 
 @WithPlugins({
         "matrix-project", // JENKINS-37545
-        "plot"
+        "plot@1.11"
 })
 public class PlotPluginTest extends AbstractJUnitTest {
 
     private FreeStyleJob job;
+    private PlotPublisher pub;
+    private final String csvFilePath = "/plot_plugin/plot.csv";
+    private final String csvFileName = "plot.csv";
 
     @Before
     public void setUp() {
         job = jenkins.jobs.create();
+        pub =job.addPublisher(PlotPublisher.class);
     }
 
 
     @Test
     public void generate_simple_plot(){
         job.configure();
-        job.copyResource(resource("/plot_plugin/plot.csv"));
-        PlotPublisher pub = job.addPublisher(PlotPublisher.class);
+        job.copyResource(csvFilePath);
 
         pub.getPlot(1).setGroup("My group");
         pub.getPlot(1).setTitle("My plot");
@@ -60,17 +64,13 @@ public class PlotPluginTest extends AbstractJUnitTest {
 
         p2.addDataSeries(CsvDataSeries.class);
         p2.getSeries(1).setFile("plot2.csv");
-
-        System.out.println("stop");
-
     }
 
 
     @Test
     public void generate_simple_plot_2() {
         job.configure();
-        job.copyResource(resource("/plot_plugin/plot.csv"));
-        PlotPublisher pub = job.addPublisher(PlotPublisher.class);
+        job.copyResource(csvFilePath);
 
         Plot plot = pub.getPlot(1);
         plot.setGroup("My group");
@@ -87,7 +87,6 @@ public class PlotPluginTest extends AbstractJUnitTest {
     @Test @Issue({"JENKINS-18585","JENKINS-18674"})
     public void postbuild_rendering_should_work() {
         job.configure();
-        PlotPublisher pub = job.addPublisher(PlotPublisher.class);
 
         Plot plot = pub.getPlot(1);
         plot.setGroup("Plots");
