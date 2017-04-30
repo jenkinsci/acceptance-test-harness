@@ -1,14 +1,13 @@
 package plugins.plot;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.plugins.plot.*;
-import org.jenkinsci.test.acceptance.po.JenkinsLogger;
-import org.jenkinsci.test.acceptance.po.PageObject;
-import org.jvnet.hudson.test.Issue;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.plugins.plot.*;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.JenkinsLogger;
 import org.junit.Before;
 import org.junit.Test;
+import org.jvnet.hudson.test.Issue;
 
 import java.util.regex.Pattern;
 
@@ -22,6 +21,12 @@ import static org.junit.Assert.assertTrue;
 public class PlotPluginTest extends AbstractJUnitTest {
 
     private FreeStyleJob job;
+    private final String csvFilePath = "/plot_plugin/plot.csv";
+    private final String csvFileName = "plot.csv";
+    private final String csvWithStringsFilePath = "/plot_plugin/plot_with_strings.csv";
+    private final String csvWithStringsFileName = "plot_with_strings.csv";
+    private final String EMPTY_STRING = ".*java.lang.NumberFormatException: For input string: \"\".*";
+    private final String NON_EMPTY_STRING = ".*java.lang.NumberFormatException: For input string: \".+\".*";
 
     @Before
     public void setUp() {
@@ -30,54 +35,17 @@ public class PlotPluginTest extends AbstractJUnitTest {
 
 
     @Test
-    public void generate_simple_plot(){
+    public void generate_simple_plot() {
         job.configure();
-        job.copyResource(resource("/plot_plugin/plot.csv"));
-        PlotPublisher pub = job.addPublisher(PlotPublisher.class);
+        job.copyResource(csvFilePath);
 
-        pub.getPlot(1).setGroup("My group");
-        pub.getPlot(1).setTitle("My plot");
-        pub.getPlot(1).setStyle("Line 3D");
-
-        CsvDataSeries csv = pub.getPlot(1).addDataSeries(CsvDataSeries.class);
-
-        csv.setFile("plot.csv");
-        csv.selectIncludeByName();
-        csv.selectExcludeByName();
-        csv.selectIncludeByIndex();
-
-        XmlDataSeries xml = pub.getPlot(1).addDataSeries(XmlDataSeries.class);
-        xml.setUrl("test");
-        xml.selectResultTypBoolean();
-        xml.selectResultTypNumber();
-
-        PropertiesDataSeries p =  pub.getPlot(1).addDataSeries(PropertiesDataSeries.class);
-        p.setLabel("label");
-
-        Plot p2 = pub.addPlot();
-        p2.setGroup("My group2");
-        p2.setTitle("My plot2");
-
-        p2.addDataSeries(CsvDataSeries.class);
-        p2.getSeries(1).setFile("plot2.csv");
-
-        System.out.println("stop");
-
-    }
-
-
-    @Test
-    public void generate_simple_plot_2() {
-        job.configure();
-        job.copyResource(resource("/plot_plugin/plot.csv"));
-        PlotPublisher pub = job.addPublisher(PlotPublisher.class);
-
+        PlotPublisher pub =job.addPublisher(PlotPublisher.class);
         Plot plot = pub.getPlot(1);
         plot.setGroup("My group");
         plot.setTitle("My plot");
         plot.setStyle("Line 3D");
 
-        pub.source("csv", "plot.csv");
+        plot.addDataSeries(CsvDataSeries.class, csvFileName);
         job.save();
 
         job.startBuild().shouldSucceed();
@@ -87,43 +55,51 @@ public class PlotPluginTest extends AbstractJUnitTest {
     @Test @Issue({"JENKINS-18585","JENKINS-18674"})
     public void postbuild_rendering_should_work() {
         job.configure();
-        PlotPublisher pub = job.addPublisher(PlotPublisher.class);
 
+        PlotPublisher pub =job.addPublisher(PlotPublisher.class);
         Plot plot = pub.getPlot(1);
         plot.setGroup("Plots");
         plot.setTitle("Some plot");
         job.save();
 
         job.configure();
-        pub.source("csv", "plot.csv");
+        plot.addDataSeries(CsvDataSeries.class, csvFileName);
         job.save();
 
         job.startBuild().shouldSucceed();
         assertThatBuildHasPlot("Some plot","Plots");
     }
 
+
+    /**
+     * Test if NumberFormatException is logged only if a non-zero length string is found in the data set.
+     */
     @Test
-    @WithPlugins("plot@1.10")
+    @WithPlugins("plot@1.10") @Issue("JENKINS-25849")
     public void no_exception_visit_plot_page(){
         job.configure();
-        job.copyResource(resource("/plot_plugin/plot.csv"));
-        PlotPublisher pub = job.addPublisher(PlotPublisher.class);
+        job.copyResource(resource(csvWithStringsFilePath));
 
+        PlotPublisher pub = job.addPublisher(PlotPublisher.class);
         Plot plot = pub.getPlot(1);
         plot.setGroup("My group");
         plot.setTitle("My plot");
 
-        pub.source("csv", "plot.csv");
+        plot.addDataSeries(CsvDataSeries.class, csvWithStringsFileName);
         job.save();
 
         job.startBuild().shouldSucceed();
         job.visit("plot");
 
+        assertThatBuildHasPlot("My plot", "My group");
+
         JenkinsLogger jLog = job.getJenkins().getLogger("all");
 
-        Pattern p = Pattern.compile(".*java.lang.NumberFormatException.*", Pattern.DOTALL);
+        Pattern p1 = Pattern.compile(EMPTY_STRING, Pattern.DOTALL);
+        Pattern p2 = Pattern.compile(NON_EMPTY_STRING, Pattern.DOTALL);
 
-        assertFalse("NumberFormatException was logged",jLog.hasLogged(p));
+        assertFalse("NumberFormatException was logged for empty string.",jLog.hasLogged(p1));
+        assertTrue("NumberFormatException was not logged for non-empty string value.",jLog.hasLogged(p2));
 
     }
 
