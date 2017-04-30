@@ -27,20 +27,21 @@ import static org.junit.Assert.assertFalse;
 public class PlotPluginPropertiesTest extends AbstractJUnitTest {
 
     private FreeStyleJob job;
-    private PlotPublisher pub;
+
     private final String propertiesFilePath = "/plot_plugin/plot.properties";
     private final String propertiesFileName = "plot.properties";
 
     @Before
     public void setUp() {
         job = jenkins.jobs.create();
-        pub = job.addPublisher(PlotPublisher.class);
+
     }
 
     @Test
     public void generate_simple_plot_properties()  {
         job.configure();
         job.copyResource(propertiesFilePath);
+        PlotPublisher pub = job.addPublisher(PlotPublisher.class);
 
         Plot plot = pub.getPlot(1);
         plot.setGroup("Group_1");
@@ -62,18 +63,17 @@ public class PlotPluginPropertiesTest extends AbstractJUnitTest {
     public void test_clickable_data_points() throws IOException {
         job.configure();
         job.copyResource(propertiesFilePath);
+        PlotPublisher pub = job.addPublisher(PlotPublisher.class);
 
         final Resource res = resource(propertiesFilePath);
         Properties prop = new Properties();
         prop.load(res.asInputStream());
-
 
         Plot plot = pub.getPlot(1);
         plot.setGroup("Group_1");
         plot.setTitle("PropertiesPlot1");
 
         PropertiesDataSeries pSeries = plot.addDataSeries(PropertiesDataSeries.class, propertiesFileName);
-
 
         job.save();
         job.startBuild().shouldSucceed();

@@ -42,12 +42,4 @@ public class PlotPublisher extends AbstractStep implements PostBuildStep {
     protected int getPlotIndex(Plot p) {
         return plots.indexOf(p);
     }
-
-    public void source(String type, String path) {
-        control("plots/series/fileType[" + type + "]");
-        control("plots/series/file").set(path);
-    }
-
-
-
 }
