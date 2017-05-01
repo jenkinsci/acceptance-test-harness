@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jenkinsci.test.acceptance.po.Jenkins;
+import org.junit.internal.AssumptionViolatedException;
 
 /**
  * Databinding for Update Center metadata
@@ -78,7 +79,11 @@ public class UpdateCenterMetadata {
         List<PluginMetadata> set = new ArrayList<>();
         for (PluginSpec n : plugins) {
             PluginMetadata p = this.plugins.get(n.getName());
-            if (p==null) throw new IllegalArgumentException("No such plugin " + n.getName());
+            if (p==null) {
+                // The plugin explicitly requested is not available in the configured update center
+                // Skipping the test since it can happen for both upstream and downstream update centers
+                throw new AssumptionViolatedException("No such plugin " + n.getName());
+            }
             if (p.requiredCore().isNewerThan(jenkins.getVersion())) {
                 throw new UnableToResolveDependencies(String.format(
                         "Unable to install %s plugin because of core dependency. Required: %s Used: %s",

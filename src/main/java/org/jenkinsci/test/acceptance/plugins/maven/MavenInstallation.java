@@ -32,9 +32,10 @@ import org.openqa.selenium.WebElement;
 
 @ToolInstallationPageObject(name="Maven", installer="hudson.tasks.Maven.MavenInstaller")
 public class MavenInstallation extends ToolInstallation {
+    public static final String DEFAULT_MAVEN_ID = "default_maven";
 
     public static void installSomeMaven(Jenkins jenkins) {
-        installMaven(jenkins, "default_maven", "3.0.5");
+        installMaven(jenkins, DEFAULT_MAVEN_ID, "3.0.5");
     }
 
     /**

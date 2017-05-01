@@ -227,10 +227,10 @@ public class FallbackConfig extends AbstractModule {
         if (type==null)
             type = System.getenv("TYPE");
         if (type==null) {
-            File socket = JenkinsControllerPoolProcess.SOCKET;
+            File socket = getSocket();
             if (socket.exists() && !JenkinsControllerPoolProcess.MAIN) {
                 System.out.println("Found pooled jenkins controller listening on socket " + socket.getAbsolutePath());
-                return new PooledJenkinsController(injector);
+                return new PooledJenkinsController(injector, socket);
             }
             else {
                 System.out.println("No pooled jenkins controller listening on socket " + socket.getAbsolutePath());
@@ -290,6 +290,22 @@ public class FallbackConfig extends AbstractModule {
         String ws = System.getenv("WORKSPACE");
         if (ws != null) return ws;
         return new File(System.getProperty("user.dir"), "target").getPath();
+    }
+
+    /**
+     * Name of the socket file used to communicate between jut-server and JUnit.
+     *
+     * @return the name of the socket
+     * @see JenkinsControllerPoolProcess
+     * @see docs/PRELAUNCH.md
+     */
+    @Provides @Named("socket")
+    public File getSocket() {
+        String socket = System.getenv("JUT_SOCKET");
+        if (StringUtils.isNotBlank(socket)) {
+            return new File(socket);
+        }
+        return new File(System.getProperty("user.home"),"jenkins.sock");
     }
 
     /**

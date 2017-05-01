@@ -110,14 +110,10 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
         AnalysisGraphConfigurationView view = action.configureTrendGraphForUser();
 
         deactivateOtherTrendGraphs(view, true);
-        // Give some time to JS to work
-        elasticSleep(500);
 
         assertThatNumberOfGraphsIs(job, 6);
 
         deactivateOtherTrendGraphs(view, false);
-        // Give some time to JS to work
-        elasticSleep(500);
 
         assertThatNumberOfGraphsIs(job, 48);
     }
@@ -126,6 +122,8 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
         view.open();
         view.deactiveOtherTrendGraphs(shouldDisable);
         view.save();
+        // Give some time to JS to work
+        elasticSleep(500);
     }
 
     private void assertThatNumberOfGraphsIs(final FreeStyleJob job, final int expectedCount) {
@@ -172,7 +170,7 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
 
         AnalysisCollectorSettings analysis = job.addPublisher(AnalysisCollectorSettings.class);
         AnalysisConfigurator<AnalysisCollectorSettings> configurator = settings -> settings.setBuildUnstableTotalAll("5");
-        configurator.configure(analysis);
+        configurator.accept(analysis);
         job.save();
 
         buildUnstableJob(job);
@@ -444,7 +442,7 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
             settings.addWorkspaceScanner("JavaDoc Tool", "**/*");
             settings.addWorkspaceScanner("MSBuild", "**/*");
         };
-        warningsConfigurator.configure(warningsSettings);
+        warningsConfigurator.accept(warningsSettings);
     }
 
     private void addAndConfigureTasksPublisher(final FreeStyleJob job) {
@@ -454,6 +452,6 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
             settings.setNormalPriorityTags("PRIO2,TODO");
             settings.setLowPriorityTags("PRIO3");
         };
-        configurator.configure(taskScannerSettings);
+        configurator.accept(taskScannerSettings);
     }
 }
