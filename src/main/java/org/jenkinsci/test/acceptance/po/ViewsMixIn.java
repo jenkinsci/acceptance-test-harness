@@ -1,9 +1,9 @@
 package org.jenkinsci.test.acceptance.po;
 
+import org.openqa.selenium.WebElement;
+
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
-
-import org.openqa.selenium.WebElement;
 
 /**
  * Mix-in for {@link PageObject}s that own a group of views, like
@@ -40,5 +40,9 @@ public class ViewsMixIn extends MixIn {
         clickButton("OK");
 
         return newInstance(type, injector, url("view/%s/", name));
+    }
+
+    public <T extends View> T create(final Class<T> type) {
+        return create(type, createRandomName());
     }
 }

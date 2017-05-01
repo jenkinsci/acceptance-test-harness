@@ -14,7 +14,7 @@ import static org.junit.Assert.assertThat;
 public class DashboardViewPluginTest extends AbstractJobRelatedTest {
     @Test
     public void configure_dashboard() {
-        DashboardView v = jenkins.views.create(DashboardView.class, "dashboard");
+        DashboardView v = jenkins.views.create(DashboardView.class);
         v.configure();
         {
             v.topPortlet.click();
@@ -35,9 +35,7 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
 
     @Test
     public void buildStatisticsPortlet_successNr() {
-        DashboardView v = jenkins.views.create(DashboardView.class, "dashboard");
-        v.configure();
-        v.matchAllJobs();
+        DashboardView v = createDashboardView();
 
         BuildStatisticsPortlet stats = v.addBottomPortlet(BuildStatisticsPortlet.class);
 
@@ -52,9 +50,7 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
 
     @Test
     public void buildStatisticsPortlet_successPercentage() {
-        DashboardView v = jenkins.views.create(DashboardView.class, "dashboard");
-        v.configure();
-        v.matchAllJobs();
+        DashboardView v = createDashboardView();
 
         BuildStatisticsPortlet stats = v.addBottomPortlet(BuildStatisticsPortlet.class);
 
@@ -79,9 +75,7 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
 
     @Test
     public void buildStatisticsPortlet_failedNr() {
-        DashboardView v = jenkins.views.create(DashboardView.class, "dashboard");
-        v.configure();
-        v.matchAllJobs();
+        DashboardView v = createDashboardView();
 
         BuildStatisticsPortlet stats = v.addBottomPortlet(BuildStatisticsPortlet.class);
 
@@ -96,9 +90,7 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
 
     @Test
     public void buildStatisticsPortlet_unstableNr() {
-        DashboardView v = jenkins.views.create(DashboardView.class, "dashboard");
-        v.configure();
-        v.matchAllJobs();
+        DashboardView v = createDashboardView();
 
         BuildStatisticsPortlet stats = v.addBottomPortlet(BuildStatisticsPortlet.class);
 
@@ -109,5 +101,12 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
         v.open();
 
         assertThat(stats.getNumberOfBuilds(Jobtype.UNSTABLE), is(1));
+    }
+
+    private DashboardView createDashboardView() {
+        DashboardView v = jenkins.views.create(DashboardView.class);
+        v.configure();
+        v.matchAllJobs();
+        return v;
     }
 }
