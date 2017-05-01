@@ -36,9 +36,7 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
     @Test
     public void buildStatisticsPortlet_successNr() {
         DashboardView v = createDashboardView();
-
         BuildStatisticsPortlet stats = v.addBottomPortlet(BuildStatisticsPortlet.class);
-
         v.save();
 
         buildSuccessfulJob(createFreeStyleJob());
@@ -51,9 +49,7 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
     @Test
     public void buildStatisticsPortlet_successPercentage() {
         DashboardView v = createDashboardView();
-
         BuildStatisticsPortlet stats = v.addBottomPortlet(BuildStatisticsPortlet.class);
-
         v.save();
 
         FreeStyleJob success = createFreeStyleJob();
@@ -76,9 +72,7 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
     @Test
     public void buildStatisticsPortlet_failedNr() {
         DashboardView v = createDashboardView();
-
         BuildStatisticsPortlet stats = v.addBottomPortlet(BuildStatisticsPortlet.class);
-
         v.save();
 
         buildFailingJob(createFailingFreeStyleJob());
@@ -91,9 +85,7 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
     @Test
     public void buildStatisticsPortlet_unstableNr() {
         DashboardView v = createDashboardView();
-
         BuildStatisticsPortlet stats = v.addBottomPortlet(BuildStatisticsPortlet.class);
-
         v.save();
 
         buildUnstableJob(createUnstableFreeStyleJob());
