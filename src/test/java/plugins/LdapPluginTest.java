@@ -32,7 +32,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
  */
 @Category(DockerTest.class)
 @WithDocker
-@WithPlugins("ldap@1.15")
+@WithPlugins("ldap@1.10")
 public class LdapPluginTest extends AbstractJUnitTest {
 
     @Inject
@@ -70,6 +70,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
     }
 
     @Test
+    @WithPlugins("ldap@1.15")
     public void validate_happy_path() {
         // Given
         GlobalSecurityConfig security = new GlobalSecurityConfig(jenkins);
@@ -83,6 +84,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
     }
 
     @Test
+    @WithPlugins("ldap@1.15")
     public void validate_sad_path() {
         // Given
         GlobalSecurityConfig security = new GlobalSecurityConfig(jenkins);
