@@ -15,6 +15,7 @@ public class BuildStatisticsPortlet extends AbstractDashboardViewPortlet {
     /**
      * Different types of jobs and related default row number in statistics table.
      */
+    @SuppressWarnings("checkstyle:javadocvariable")
     public enum JobType {
         FAILED(2), UNSTABLE(3), SUCCESS(4), PENDING(5),
         DISABLED(6), ABORTED(7), NOT_BUILT(8), TOTAL(9);
