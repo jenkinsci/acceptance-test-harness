@@ -2,7 +2,7 @@ package plugins;
 
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.BuildStatisticsPortlet;
-import org.jenkinsci.test.acceptance.plugins.dashboard_view.BuildStatisticsPortlet.Jobtype;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.BuildStatisticsPortlet.JobType;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
@@ -43,7 +43,7 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
 
         v.open();
 
-        assertThat(stats.getNumberOfBuilds(Jobtype.SUCCESS), is(1));
+        assertThat(stats.getNumberOfBuilds(JobType.SUCCESS), is(1));
     }
 
     @Test
@@ -57,16 +57,16 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
 
         buildSuccessfulJob(success);
         v.open();
-        assertThat(stats.getPercentageOfBuilds(Jobtype.SUCCESS), is("100.0"));
+        assertThat(stats.getPercentageOfBuilds(JobType.SUCCESS), is("100.0"));
 
 
         buildFailingJob(failing);
         v.open();
-        assertThat(stats.getPercentageOfBuilds(Jobtype.SUCCESS), is("50.0"));
+        assertThat(stats.getPercentageOfBuilds(JobType.SUCCESS), is("50.0"));
 
         buildFailingJob(failing);
         v.open();
-        assertThat(stats.getPercentageOfBuilds(Jobtype.SUCCESS), is("33.33"));
+        assertThat(stats.getPercentageOfBuilds(JobType.SUCCESS), is("33.33"));
     }
 
     @Test
@@ -79,7 +79,7 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
 
         v.open();
 
-        assertThat(stats.getNumberOfBuilds(Jobtype.FAILED), is(1));
+        assertThat(stats.getNumberOfBuilds(JobType.FAILED), is(1));
     }
 
     @Test
@@ -92,9 +92,14 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
 
         v.open();
 
-        assertThat(stats.getNumberOfBuilds(Jobtype.UNSTABLE), is(1));
+        assertThat(stats.getNumberOfBuilds(JobType.UNSTABLE), is(1));
     }
 
+    /**
+     * Creates a default dashboard view matching all jobs.
+     *
+     * @return default dashboard view
+     */
     private DashboardView createDashboardView() {
         DashboardView v = jenkins.views.create(DashboardView.class);
         v.configure();
