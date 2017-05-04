@@ -15,7 +15,7 @@ import static org.junit.Assert.assertTrue;
  * @author Maximilian Oeckler
  */
 @WithPlugins("job-dsl")
-public class JobDSLPluginTest extends AbstractJUnitTest {
+public class JobDslPluginTest extends AbstractJUnitTest {
 
     /**
      * Tests if the checkbox ignoreMissingFiles is shown when the
@@ -26,11 +26,11 @@ public class JobDSLPluginTest extends AbstractJUnitTest {
     @Test
     public void is_ignoreMissingFiles_shown_right() {
         FreeStyleJob seed = jenkins.jobs.create(FreeStyleJob.class);
-        JobDSLBuildStep jobdsl = seed.addBuildStep(JobDSLBuildStep.class);
-        assertTrue(jobdsl.ignoreMissingFiles.exists());
-        jobdsl.useScriptText.click();
-        assertFalse(jobdsl.ignoreMissingFiles.exists());
-        jobdsl.lookOnFilesystem.click();
-        assertTrue(jobdsl.ignoreMissingFiles.exists());
+        JobDslBuildStep jobdsl = seed.addBuildStep(JobDslBuildStep.class);
+        assertTrue(jobdsl.isIgnoreMissingFilesShown());
+        jobdsl.clickUseScriptText();
+        assertFalse(jobdsl.isIgnoreMissingFilesShown());
+        jobdsl.clickLookOnFilesystem();
+        assertTrue(jobdsl.isIgnoreMissingFilesShown());
     }
 }

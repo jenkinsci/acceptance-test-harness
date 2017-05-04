@@ -5,7 +5,7 @@ package org.jenkinsci.test.acceptance.plugins.job_dsl;
  *
  * @author Maximilian Oeckler
  */
-public enum JobDSLRemovedViewAction {
+public enum JobDslRemovedViewAction {
 
     IGNORE, DELETE;
 }

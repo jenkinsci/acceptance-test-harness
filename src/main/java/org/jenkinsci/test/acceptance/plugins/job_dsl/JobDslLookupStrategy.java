@@ -5,7 +5,7 @@ package org.jenkinsci.test.acceptance.plugins.job_dsl;
  *
  * @author Maximilian Oeckler
  */
-public enum JobDSLLookupStrategy {
+public enum JobDslLookupStrategy {
 
     JENKINS_ROOT, SEED_JOB;
 }
