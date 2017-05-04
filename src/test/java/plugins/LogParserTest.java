@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.Matchers.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 
 @WithPlugins("log-parser")
@@ -33,6 +34,35 @@ public class LogParserTest extends AbstractJUnitTest {
         Resource sampleRule = resource("/logparser_plugin/rules/log-parser-rules-sample");
         rules.put("sampleRule", "" + sampleRule.url.getPath());
         addLogParserRules(rules);
+    }
+
+    /**
+     * Test information for failed log parsing.
+     */
+    @Test
+    public void invalidRulePath() {
+        FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class, "fail-job");
+
+        // configure invalid route
+        job.configure();
+        LogParserPublisher lpp = job.addPublisher(LogParserPublisher.class);
+        lpp.setRule(LogParserPublisher.RuleType.PROJECT, "invalidPath");
+        job.save();
+
+        Build build = job.startBuild().waitUntilFinished();
+
+        // check information on build overview
+        build.open();
+        WebElement tableRow = driver.findElement(By.xpath("//table/tbody/tr[3]"));
+        WebElement icon = tableRow.findElement(By.xpath("td[1]/img"));
+        assertThat(icon.getAttribute("src"), containsString("graph.png"));
+        WebElement text = tableRow.findElement(By.xpath("td[2]"));
+        assertThat(text.getText(), is("Log parsing has failed"));
+
+        // check information in parsed console output
+        driver.findElement(By.partialLinkText("Parsed Console Output")).click();
+        WebElement output = driver.findElement(By.id("main-panel"));
+        assertThat(output.getText(), containsString("ERROR: Failed to parse console log"));
     }
 
     /**
