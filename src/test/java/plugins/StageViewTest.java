@@ -38,11 +38,6 @@ public class StageViewTest extends AbstractJUnitTest{
     private String path;
     private StageView stageView;
 
-    @Before
-    public void before() {
-        stageView = new StageView(context, path);
-    }
-    
     /**
      * This tests create a simple stage. It checks if after the first build the stage view is now part of the job page.
      * @throws Exception
@@ -51,6 +46,7 @@ public class StageViewTest extends AbstractJUnitTest{
     public void jobShouldContainStageview() throws Exception {
         WorkflowJob job = this.saveWorkflowJobWithFile(SINGLE_JOB);
         Build build = job.startBuild().shouldSucceed();
+        stageView = new StageView(job, path);
         job.open();
         assertThat(stageView.getRootElementName().getText(),containsString("Stage View"));
     }
@@ -64,7 +60,7 @@ public class StageViewTest extends AbstractJUnitTest{
             job.open();
             job.getNavigationLinks();
             WebElement webElement = this.driver.findElement(By.xpath("//*[@id=\"pipeline-box\"]/div/div/table/tbody[2]/tr[1]/td[1]/div/div/div[1]/span"));
-            assertThat(webElement.getText(),containsString(String.valueOf(build.getNumber());
+            assertThat(webElement.getText(),containsString(String.valueOf(build.getNumber())));
     }
 
     /**
