@@ -37,14 +37,16 @@ import java.util.Iterator;
  * The string syntax of this is shortName[@version].
  */
 public class PluginSpec {
+
     /**
      * Short name of the plugin.
      */
     private final @Nonnull String name;
+
     /**
      * Optional version.
      */
-    private final VersionNumber version;
+    private final @CheckForNull VersionNumber version;
 
     public PluginSpec(@Nonnull String name, String version) {
         this.name = name;
@@ -85,5 +87,23 @@ public class PluginSpec {
         }
 
         return sb.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        PluginSpec that = (PluginSpec) o;
+
+        if (!name.equals(that.name)) return false;
+        return version != null ? version.equals(that.version): that.version == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = name.hashCode();
+        result = 31 * result + (version != null ? version.hashCode(): 0);
+        return result;
     }
 }
