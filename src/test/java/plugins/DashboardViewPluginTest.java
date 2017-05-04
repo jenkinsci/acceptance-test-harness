@@ -10,8 +10,6 @@ import org.junit.Test;
 import org.openqa.selenium.WebElement;
 
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -41,9 +39,7 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
 
     @Test
     public void unstableJobsPortlet_failedJob() {
-        DashboardView v = jenkins.views.create(DashboardView.class, "dashboard");
-        v.configure();
-        v.matchAllJobs();
+        DashboardView v = createDashboardView();
         UnstableJobsPortlet unstableJobsPortlet = v.addBottomPortlet(UnstableJobsPortlet.class);
         v.save();
 
@@ -62,9 +58,7 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
 
     @Test
     public void unstableJobsPortlet_successfulJob() {
-        DashboardView v = jenkins.views.create(DashboardView.class, "dashboard");
-        v.configure();
-        v.matchAllJobs();
+        DashboardView v = createDashboardView();
         UnstableJobsPortlet unstableJobsPortlet = v.addBottomPortlet(UnstableJobsPortlet.class);
         v.save();
 
@@ -78,9 +72,7 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
 
     @Test
     public void unstableJobsPortlet_unstableJob() {
-        DashboardView v = jenkins.views.create(DashboardView.class, "dashboard");
-        v.configure();
-        v.matchAllJobs();
+        DashboardView v = createDashboardView();
         UnstableJobsPortlet unstableJobsPortlet = v.addBottomPortlet(UnstableJobsPortlet.class);
         v.save();
 
