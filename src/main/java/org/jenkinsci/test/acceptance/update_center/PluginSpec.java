@@ -30,6 +30,7 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Iterator;
+import java.util.Objects;
 
 /**
  * Reference to a plugin, optionally with the version.
@@ -97,13 +98,11 @@ public class PluginSpec {
         PluginSpec that = (PluginSpec) o;
 
         if (!name.equals(that.name)) return false;
-        return version != null ? version.equals(that.version): that.version == null;
+        return Objects.equals(version, that.version);
     }
 
     @Override
     public int hashCode() {
-        int result = name.hashCode();
-        result = 31 * result + (version != null ? version.hashCode(): 0);
-        return result;
+        return Objects.hash(name, version);
     }
 }

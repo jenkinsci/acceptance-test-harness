@@ -55,13 +55,13 @@ public class WithPluginsTest {
                 new PluginSpec("keepspecific@42"), // ditto
                 new PluginSpec("override@2"), // never version is the more specific one
                 new PluginSpec("donotoverride@2"), // ditto
-                new PluginSpec("inherrit"),
+                new PluginSpec("inherit"),
                 new PluginSpec("add")
         );
         assertThat(actual, equalTo(expected));
     }
 
-    @WithPlugins(          {"keep", "keepv@1", "specify",    "keepspecific@42", "override@1", "donotoverride@2", "inherrit"})
+    @WithPlugins(          {"keep", "keepv@1", "specify",    "keepspecific@42", "override@1", "donotoverride@2", "inherit"})
     private static final class FakeTestClass {
         @Test @WithPlugins({"keep", "keepv@1", "specify@42", "keepspecific",    "override@2", "donotoverride@1", "add"})
         public void test() throws Exception {

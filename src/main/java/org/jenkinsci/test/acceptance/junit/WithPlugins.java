@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.Plugin;
 import org.jenkinsci.test.acceptance.po.PluginManager;
@@ -82,7 +83,7 @@ public @interface WithPlugins {
         @Inject(optional=true) @Named("neverReplaceExistingPlugins")
         boolean neverReplaceExistingPlugins;
 
-        /*package for testing*/ static List<PluginSpec> combinePlugins(List<WithPlugins> wp) {
+        @VisibleForTesting static List<PluginSpec> combinePlugins(List<WithPlugins> wp) {
             Map<String, PluginSpec> plugins = new LinkedHashMap<>();
             for (WithPlugins withPlugins : wp) {
                 if (withPlugins != null) {
