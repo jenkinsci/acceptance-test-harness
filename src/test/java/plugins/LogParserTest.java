@@ -10,9 +10,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.jenkinsci.test.acceptance.junit.Resource;
+import org.openqa.selenium.WebElement;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.hamcrest.MatcherAssert.*;
+import static org.jenkinsci.test.acceptance.Matchers.*;
 
 @WithPlugins("log-parser")
 public class LogParserTest extends AbstractJUnitTest {
@@ -32,27 +36,30 @@ public class LogParserTest extends AbstractJUnitTest {
         addLogParserRules(rules);
     }
 
+    /**
+     * Check whether trend is visible
+     */
     @Test
-    public void testing(){
-        FreeStyleJob j = jenkins.jobs.create(FreeStyleJob.class, "simple-job");
-        j.configure();
+    public void trendVisible(){
+        FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class, "simple-job");
 
+        job.configure();
         // sample use of the LogParserPublisher
-        LogParserPublisher lpp = j.addPublisher(LogParserPublisher.class);
-        lpp.setMarkOnUnstableWarning(true);
-        lpp.setMarkOnBuildFail(true);
+        LogParserPublisher lpp = job.addPublisher(LogParserPublisher.class);
         lpp.setShowGraphs(true);
-        lpp.setRule(LogParserPublisher.RuleType.GLOBAL, rules.get("some"));
+        lpp.setRule(LogParserPublisher.RuleType.GLOBAL, rules.get("sampleRule"));
+        job.save();
 
-        j.save();
+        // Trend is shown after second build
+        job.startBuild().waitUntilFinished();
+        job.startBuild().waitUntilFinished();
 
-        Build b = j.startBuild().waitUntilFinished();
-        find(By.linkText("Parsed Console Output")).click();
-
-        LogParserOutputPage p = new LogParserOutputPage(b);
-        p.openFrameInWindow(LogParserOutputPage.LOGPARSERFRAME.CONTENT);
-        p.restoreWindow();
-        p.restoreWindow();
+        // Check trend is visible
+        job.open();
+        WebElement trend = driver.findElement(By.className("test-trend-caption"));
+        assertThat(trend.getText(), containsString("Log Parser Trend"));
+        WebElement img = driver.findElement(By.xpath("//img[@src='logparser/trend']"));
+        assertThat(img.getAttribute("alt"), containsString("[Log Parser Chart]"));
     }
 
     /**
