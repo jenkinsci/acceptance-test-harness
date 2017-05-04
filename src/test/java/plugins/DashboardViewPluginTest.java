@@ -6,6 +6,7 @@ import org.jenkinsci.test.acceptance.plugins.dashboard_view.BuildStatisticsPortl
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
+import org.openqa.selenium.WebElement;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -34,7 +35,7 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
     }
 
     @Test
-    public void buildStatisticsPortlet_successNr() {
+    public void buildStatisticsPortlet_success() {
         DashboardView v = createDashboardView();
         BuildStatisticsPortlet stats = v.addBottomPortlet(BuildStatisticsPortlet.class);
         v.save();
@@ -44,16 +45,21 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
         v.open();
 
         assertThat(stats.getNumberOfBuilds(JobType.SUCCESS), is(1));
+
+        WebElement table = stats.getTable();
+        
+
     }
 
     @Test
-    public void buildStatisticsPortlet_successPercentage() {
+    public void buildStatisticsPortlet_Percentage() {
         DashboardView v = createDashboardView();
         BuildStatisticsPortlet stats = v.addBottomPortlet(BuildStatisticsPortlet.class);
         v.save();
 
         FreeStyleJob success = createFreeStyleJob();
         FreeStyleJob failing = createFailingFreeStyleJob();
+        FreeStyleJob unstable = createUnstableFreeStyleJob();
 
         buildSuccessfulJob(success);
         v.open();
@@ -63,10 +69,18 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
         buildFailingJob(failing);
         v.open();
         assertThat(stats.getPercentageOfBuilds(JobType.SUCCESS), is("50.0"));
+        assertThat(stats.getPercentageOfBuilds(JobType.FAILED), is("50.0"));
 
         buildFailingJob(failing);
         v.open();
         assertThat(stats.getPercentageOfBuilds(JobType.SUCCESS), is("33.33"));
+        assertThat(stats.getPercentageOfBuilds(JobType.FAILED), is("66.67"));
+
+        buildUnstableJob(unstable);
+        v.open();
+        assertThat(stats.getPercentageOfBuilds(JobType.SUCCESS), is("25.0"));
+        assertThat(stats.getPercentageOfBuilds(JobType.FAILED), is("50.0"));
+        assertThat(stats.getPercentageOfBuilds(JobType.UNSTABLE), is("25.0"));
     }
 
     @Test
@@ -93,6 +107,26 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
         v.open();
 
         assertThat(stats.getNumberOfBuilds(JobType.UNSTABLE), is(1));
+    }
+
+    @Test
+    public void buildStatisticsPortlet_totalBuilds() {
+        DashboardView v = createDashboardView();
+        BuildStatisticsPortlet stats = v.addBottomPortlet(BuildStatisticsPortlet.class);
+        v.save();
+
+        FreeStyleJob successJob = createFreeStyleJob();
+        FreeStyleJob failingJob = createFailingFreeStyleJob();
+        FreeStyleJob unstableJob = createUnstableFreeStyleJob();
+
+        buildUnstableJob(unstableJob);
+        buildSuccessfulJob(successJob);
+        buildSuccessfulJob(successJob);
+        buildFailingJob(failingJob);
+
+        v.open();
+
+        assertThat(stats.getNumberOfBuilds(JobType.TOTAL), is(4));
     }
 
     /**
