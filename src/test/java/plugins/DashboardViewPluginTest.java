@@ -4,7 +4,6 @@ import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.UnstableJobsPortlet;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
-import org.jenkinsci.test.acceptance.po.JUnitPublisher;
 import org.junit.Test;
 
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
@@ -39,12 +38,10 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
         DashboardView v = jenkins.views.create(DashboardView.class, "dashboard");
         v.configure();
         UnstableJobsPortlet unstableJobsPortlet = v.addBottomPortlet(UnstableJobsPortlet.class);
+        v.matchAllJobs();
         v.save();
 
-        FreeStyleJob j = v.jobs.create(FreeStyleJob.class);
-        j.configure();
-        j.addShellStep("exit 1");
-        j.save();
+        FreeStyleJob j = createFailingFreeStyleJob();
         buildFailingJob(j);
 
         v.open();
@@ -62,9 +59,10 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
         DashboardView v = jenkins.views.create(DashboardView.class, "dashboard");
         v.configure();
         UnstableJobsPortlet unstableJobsPortlet = v.addBottomPortlet(UnstableJobsPortlet.class);
+        v.matchAllJobs();
         v.save();
 
-        FreeStyleJob j = v.jobs.create(FreeStyleJob.class);
+        FreeStyleJob j = createFreeStyleJob();
         buildSuccessfulJob(j);
 
         v.open();
@@ -77,17 +75,10 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
         DashboardView v = jenkins.views.create(DashboardView.class, "dashboard");
         v.configure();
         UnstableJobsPortlet unstableJobsPortlet = v.addBottomPortlet(UnstableJobsPortlet.class);
+        v.matchAllJobs();
         v.save();
 
-        FreeStyleJob j = v.jobs.create(FreeStyleJob.class);
-        j.configure();
-        String resultFileName = "status.xml";
-        j.addShellStep(
-                "echo '<testsuite><testcase classname=\"\"><failure>\n" +
-                        "</failure></testcase></testsuite>'>" + resultFileName
-        );
-        j.addPublisher(JUnitPublisher.class).testResults.set(resultFileName);
-        j.save();
+        FreeStyleJob j = createUnstableFreeStyleJob();
         buildUnstableJob(j);
 
         v.open();
