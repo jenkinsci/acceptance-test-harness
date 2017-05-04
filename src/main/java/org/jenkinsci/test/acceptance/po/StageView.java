@@ -5,6 +5,7 @@ import org.openqa.selenium.WebElement;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Created by boris on 26.04.17.
@@ -29,6 +30,9 @@ public class StageView extends  PageAreaImpl {
     }
 
     public Collection getAllStageViewJobs() {
+        WebElement jobs_parent = driver.findElement(By.xpath("//*[@id=\"pipeline-box\"]/div/div/table/tbody[2]"));
+        List<WebElement> children = jobs_parent.findElements(By.xpath("\".//*\""));
+
         //TODO implement
         return new ArrayList();
     }

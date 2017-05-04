@@ -34,6 +34,8 @@ public class StageViewTest extends AbstractJUnitTest{
     public static final String MULTI_JOB = "stageview_plugin/multi_job.txt";
     public static final String MUTLI_JOB_FAIL = "stageview_plugin/multi_job_fail.txt";
 
+    public static final String JOB_PATH = "/job/Pipeline-Test/";
+
     private PageObject context;
     private String path;
     private StageView stageView;
@@ -46,7 +48,7 @@ public class StageViewTest extends AbstractJUnitTest{
     public void jobShouldContainStageview() throws Exception {
         WorkflowJob job = this.saveWorkflowJobWithFile(SINGLE_JOB);
         Build build = job.startBuild().shouldSucceed();
-        stageView = new StageView(job, path);
+        stageView = new StageView(job, JOB_PATH);
         job.open();
         assertThat(stageView.getRootElementName().getText(),containsString("Stage View"));
     }
