@@ -6,10 +6,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.Plugin;
 import org.jenkinsci.test.acceptance.po.PluginManager;
@@ -80,6 +83,31 @@ public @interface WithPlugins {
         @Inject(optional=true) @Named("neverReplaceExistingPlugins")
         boolean neverReplaceExistingPlugins;
 
+        @VisibleForTesting static List<PluginSpec> combinePlugins(List<WithPlugins> wp) {
+            Map<String, PluginSpec> plugins = new LinkedHashMap<>();
+            for (WithPlugins withPlugins : wp) {
+                if (withPlugins != null) {
+                    // eliminate duplicates and prefer newer versions
+                    for (String spec: withPlugins.value()) {
+                        PluginSpec candidate = new PluginSpec(spec);
+                        PluginSpec existing = plugins.get(candidate.getName());
+
+                        if (existing == null || existing.getVersion() == null) {
+                            // first declaration or override of unversioned declaration
+                            plugins.put(candidate.getName(), candidate);
+                        } else if (candidate.getVersion() == null) {
+                            // Existing is equally or more specific - noop
+                        } else if (candidate.getVersionNumber().isNewerThan(existing.getVersionNumber())) {
+                            // Candidate requires never version - replace
+                            plugins.put(candidate.getName(), candidate);
+                        }
+                    }
+                }
+            }
+
+            return new ArrayList<>(plugins.values());
+        }
+
         @Override
         public Statement apply(final Statement base, final Description d) {
             return new Statement() {
@@ -111,20 +139,6 @@ public @interface WithPlugins {
                         );
                     }
                     base.evaluate();
-                }
-
-                private List<PluginSpec> combinePlugins(List<WithPlugins> wp) {
-                    ArrayList<PluginSpec> plugins = new ArrayList<>();
-                    for (WithPlugins withPlugins : wp) {
-                        if (withPlugins != null) {
-                            for (String spec: withPlugins.value()) {
-                                // TODO eliminate duplicates and prefer newer versions
-                                plugins.add(new PluginSpec(spec));
-                            }
-                        }
-                    }
-
-                    return plugins;
                 }
 
                 private void installPlugins(List<PluginSpec> install) {
