@@ -17,6 +17,12 @@ public class UnstableJobsPortlet extends AbstractDashboardViewPortlet {
     private Control showOnlyFailedJobs = control("showOnlyFailedJobs");
     private Control recurseWithinFolders = control("recurse");
 
+    /**
+     * Constructs a new unstable jobs portlet.
+     *
+     * @param parent Dashboard view this portlet is scoped to.
+     * @param path   Absolute path to the area.
+     */
     public UnstableJobsPortlet(DashboardView parent, String path) {
         super(parent, path);
     }
@@ -38,6 +44,11 @@ public class UnstableJobsPortlet extends AbstractDashboardViewPortlet {
         return find(By.xpath("//div[contains(.,'Unstable Jobs')]/following::table[1]"));
     }
 
+    /**
+     * Returns true if this Portlet contains a job with the given name.
+     *
+     * @param jobName Name of the job to look for.
+     */
     public boolean hasJob(String jobName) {
         try {
             return !getTable().findElements(By.partialLinkText(jobName)).isEmpty();
@@ -46,6 +57,10 @@ public class UnstableJobsPortlet extends AbstractDashboardViewPortlet {
         }
     }
 
+    /**
+     * Opens the job with the given name, if it exists in the Portlet.
+     * @param jobName Name of the job to open.
+     */
     public void openJob(String jobName) {
         clickLink(jobName);
     }

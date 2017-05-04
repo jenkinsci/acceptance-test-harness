@@ -37,8 +37,8 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
     public void unstableJobsPortlet_failedJob() {
         DashboardView v = jenkins.views.create(DashboardView.class, "dashboard");
         v.configure();
-        UnstableJobsPortlet unstableJobsPortlet = v.addBottomPortlet(UnstableJobsPortlet.class);
         v.matchAllJobs();
+        UnstableJobsPortlet unstableJobsPortlet = v.addBottomPortlet(UnstableJobsPortlet.class);
         v.save();
 
         FreeStyleJob j = createFailingFreeStyleJob();
@@ -58,8 +58,8 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
     public void unstableJobsPortlet_successfulJob() {
         DashboardView v = jenkins.views.create(DashboardView.class, "dashboard");
         v.configure();
-        UnstableJobsPortlet unstableJobsPortlet = v.addBottomPortlet(UnstableJobsPortlet.class);
         v.matchAllJobs();
+        UnstableJobsPortlet unstableJobsPortlet = v.addBottomPortlet(UnstableJobsPortlet.class);
         v.save();
 
         FreeStyleJob j = createFreeStyleJob();
@@ -74,8 +74,8 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
     public void unstableJobsPortlet_unstableJob() {
         DashboardView v = jenkins.views.create(DashboardView.class, "dashboard");
         v.configure();
-        UnstableJobsPortlet unstableJobsPortlet = v.addBottomPortlet(UnstableJobsPortlet.class);
         v.matchAllJobs();
+        UnstableJobsPortlet unstableJobsPortlet = v.addBottomPortlet(UnstableJobsPortlet.class);
         v.save();
 
         FreeStyleJob j = createUnstableFreeStyleJob();
