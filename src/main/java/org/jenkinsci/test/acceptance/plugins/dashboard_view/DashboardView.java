@@ -4,6 +4,10 @@ import com.google.inject.Injector;
 import org.hamcrest.Description;
 import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisPlugin;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.controls.ColumnsArea;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.controls.DashboardPortlets;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.controls.JobFiltersArea;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.controls.MainArea;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Job;
@@ -23,10 +27,36 @@ public class DashboardView extends View {
     public final Control topPortlet = new Control(this, "/hetero-list-add[topPortlet]");
     public final Control bottomPortlet = new Control(this, "/hetero-list-add[bottomPortlet]");
 
+    public final JobFiltersArea jobFilters = new JobFiltersArea(this, "");
+    public final MainArea mainArea = new MainArea(this, "");
+    public final ColumnsArea columnsArea = new ColumnsArea(this, "");
+    public final DashboardPortlets dashboardPortlets = new DashboardPortlets(this, "");
+
     private List<AbstractDashboardViewPortlet> bottomPortlets = new ArrayList<>();
 
     public DashboardView(Injector injector, URL url) {
         super(injector, url);
+    }
+
+    public static Matcher<DashboardView> hasWarningsFor(final Job job, final AnalysisPlugin plugin, final int warningsCount) {
+        return new Matcher<DashboardView>(" shows %s warnings for plugin %s and job %s", warningsCount, plugin.getId(), job.name) {
+            @Override
+            public boolean matchesSafely(final DashboardView view) {
+                view.open();
+                try {
+                    WebElement warningsLink = view.find(by.css("a[href='job/" + job.name + "/" + plugin.getId() + "']"));
+                    String linkText = warningsLink.getText();
+                    return Integer.parseInt(linkText) == warningsCount;
+                } catch (NoSuchElementException | NumberFormatException e) {
+                    return false;
+                }
+            }
+
+            @Override
+            public void describeMismatchSafely(final DashboardView view, final Description desc) {
+                desc.appendText("Portlet does not show expected warnings for plugin " + plugin.getId());
+            }
+        };
     }
 
     /**
@@ -56,26 +86,5 @@ public class DashboardView extends View {
                 return portletClass.cast(p);
         }
         throw new java.util.NoSuchElementException();
-    }
-
-    public static Matcher<DashboardView> hasWarningsFor(final Job job, final AnalysisPlugin plugin, final int warningsCount) {
-        return new Matcher<DashboardView>(" shows %s warnings for plugin %s and job %s", warningsCount, plugin.getId(), job.name) {
-            @Override
-            public boolean matchesSafely(final DashboardView view) {
-                view.open();
-                try {
-                    WebElement warningsLink = view.find(by.css("a[href='job/" + job.name + "/" + plugin.getId() + "']"));
-                    String linkText = warningsLink.getText();
-                    return Integer.parseInt(linkText) == warningsCount;
-                } catch (NoSuchElementException | NumberFormatException e) {
-                    return false;
-                }
-            }
-
-            @Override
-            public void describeMismatchSafely(final DashboardView view, final Description desc) {
-                desc.appendText("Portlet does not show expected warnings for plugin " + plugin.getId());
-            }
-        };
     }
 }
