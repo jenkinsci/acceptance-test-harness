@@ -13,9 +13,6 @@ public class DashboardViewPluginTest extends AbstractJUnitTest {
         DashboardView v = jenkins.views.create(DashboardView.class, "dashboard");
         v.configure();
         {
-            v.dashboardPortlets.setLeftPortletWidthPercent(20);
-            v.dashboardPortlets.setRightPortletWidthPixel(33);
-
             v.topPortlet.click();
             clickLink("Build statistics");
 
