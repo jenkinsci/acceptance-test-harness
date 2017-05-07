@@ -7,7 +7,6 @@ import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.UnstableJobsPortlet;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
-import org.openqa.selenium.WebElement;
 
 import static org.hamcrest.Matchers.is;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
@@ -99,10 +98,6 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
         v.open();
 
         assertThat(stats.getNumberOfBuilds(JobType.SUCCESS), is(1));
-
-        WebElement table = stats.getTable();
-
-
     }
 
     @Test

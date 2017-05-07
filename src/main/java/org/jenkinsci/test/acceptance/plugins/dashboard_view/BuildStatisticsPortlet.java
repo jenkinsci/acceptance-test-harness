@@ -13,6 +13,11 @@ import org.openqa.selenium.WebElement;
 public class BuildStatisticsPortlet extends AbstractDashboardViewPortlet {
 
     /**
+     * Default name of this Portlet.
+     */
+    public static final String PORTLET_NAME = "Build statistics";
+
+    /**
      * Different types of jobs and related default row number in statistics table.
      */
     @SuppressWarnings("checkstyle:javadocvariable")
@@ -43,7 +48,9 @@ public class BuildStatisticsPortlet extends AbstractDashboardViewPortlet {
      * @return build statistics table
      */
     public WebElement getTable() {
-        return find(By.id("statistics"));
+        WebElement portlet = find(By.xpath("//div[contains(.,'" + PORTLET_NAME + "')]/following::table[1]"));
+
+        return portlet.findElement(By.id("statistics"));
     }
 
     /**
