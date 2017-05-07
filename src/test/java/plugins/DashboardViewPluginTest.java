@@ -53,7 +53,7 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
         unstableJobsPortlet.openJob(j.name);
 
         assertThat(driver, hasContent("Project " + j.name));
-        assertTrue(getCurrentUrl().contains(j.name));
+        assertThat(getCurrentUrl().contains(j.name), is(true));
     }
 
     @Test
@@ -67,7 +67,7 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
 
         v.open();
 
-        assertTrue(!unstableJobsPortlet.hasJob(j.name));
+        assertThat(unstableJobsPortlet.hasJob(j.name), is(false));
     }
 
     @Test
@@ -86,7 +86,7 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
         unstableJobsPortlet.openJob(j.name);
 
         assertThat(driver, hasContent("Project " + j.name));
-        assertTrue(getCurrentUrl().contains(j.name));
+        assertThat(getCurrentUrl().contains(j.name), is(true));
     }
 
     @Test
