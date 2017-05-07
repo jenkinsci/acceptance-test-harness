@@ -12,7 +12,6 @@ import org.openqa.selenium.WebElement;
 import static org.hamcrest.Matchers.is;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 @WithPlugins("dashboard-view")
 public class DashboardViewPluginTest extends AbstractJobRelatedTest {
@@ -48,7 +47,7 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
 
         v.open();
 
-        assertTrue(unstableJobsPortlet.hasJob(j.name));
+        assertThat(unstableJobsPortlet.hasJob(j.name), is(true));
 
         unstableJobsPortlet.openJob(j.name);
 
@@ -81,7 +80,7 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
 
         v.open();
 
-        assertTrue(unstableJobsPortlet.hasJob(j.name));
+        assertThat(unstableJobsPortlet.hasJob(j.name), is(true));
 
         unstableJobsPortlet.openJob(j.name);
 
