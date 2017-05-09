@@ -25,6 +25,7 @@ public class SshSlaveLauncher extends ComputerLauncher {
     public final Control retries = control("maxNumRetries");
     public final Control javaPath = control("javaPath");
     public final Control jvmOptions = control("jvmOptions");
+    public final Control sshHostKeyVerificationStrategy = control(""); //weird path because of JENKINS-43076
 
     public SshSlaveLauncher(PageObject context, String path) {
         super(context, path);

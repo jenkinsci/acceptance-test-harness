@@ -44,7 +44,7 @@ import org.junit.Test;
 import com.google.inject.Inject;
 import org.junit.experimental.categories.Category;
 
-@WithPlugins({"ssh-slaves@1.11", "credentials@2.1.10", "ssh-credentials@1.12"})
+@WithPlugins({"ssh-slaves@1.15", "credentials@2.1.10", "ssh-credentials@1.12"})
 @Category(DockerTest.class)
 @WithDocker
 public class SshSlavesPluginTest extends AbstractJUnitTest {
@@ -81,7 +81,7 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
     }
 
     @Test public void unableToConnectWrongPort() {
-        configureSSHSlaveLauncher(sshd.ipBound(22), 1234).pwdCredentials("test", "test");
+        configureSSHSlaveLauncher(sshd.ipBound(22), 1234, "Non verifying Verification Strategy").pwdCredentials("test", "test");
         slave.save();
         
         // Wait for connection attempt to fail
@@ -160,12 +160,13 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
     }
     
     private SshSlaveLauncher configureDefaultSSHSlaveLauncher() {
-        return configureSSHSlaveLauncher(sshd.ipBound(22), sshd.port(22));
+        return configureSSHSlaveLauncher(sshd.ipBound(22), sshd.port(22), "Non verifying Verification Strategy");
     }
     
-    private SshSlaveLauncher configureSSHSlaveLauncher(String host, int port) {
+    private SshSlaveLauncher configureSSHSlaveLauncher(String host, int port, String sshHostKeyVerificationStrategy) {
         SshSlaveLauncher launcher = slave.setLauncher(SshSlaveLauncher.class);
         launcher.host.set(host);
+        launcher.sshHostKeyVerificationStrategy.select(sshHostKeyVerificationStrategy);
         launcher.port(port);
         return launcher;
     }
