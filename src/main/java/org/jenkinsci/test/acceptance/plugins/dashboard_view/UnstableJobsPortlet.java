@@ -27,18 +27,29 @@ public class UnstableJobsPortlet extends AbstractDashboardViewPortlet {
         super(parent, path);
     }
 
+    /**
+     * Sets the "Recurse within folders"-parameter for this Portlet.
+     *
+     * @param showOnlyFailedJobs New value to set.
+     */
     public void setShowOnlyFailedJobs(boolean showOnlyFailedJobs) {
         this.showOnlyFailedJobs.check(showOnlyFailedJobs);
     }
 
+    /**
+     * Sets the "Show only failed jobs"-parameter for this Portlet.
+     *
+     * @param recurseWithinFolders New value to set.
+     */
     public void setRecurseWithinFolders(boolean recurseWithinFolders) {
         this.recurseWithinFolders.check(recurseWithinFolders);
     }
 
     /**
-     * Gets the table of unstable jobs as {@link WebElement}
+     * Gets the table of unstable jobs as {@link WebElement}.
      *
-     * @return table
+     * @return The table-{@link WebElement} containing the unstable jobs.
+     * @throws NoSuchElementException
      */
     public WebElement getTable() throws NoSuchElementException {
         return find(By.xpath("//div[contains(.,'Unstable Jobs')]/following::table[1]"));
@@ -48,6 +59,7 @@ public class UnstableJobsPortlet extends AbstractDashboardViewPortlet {
      * Returns true if this Portlet contains a job with the given name.
      *
      * @param jobName Name of the job to look for.
+     * @return True, if this Portlet contains a job with the given name.
      */
     public boolean hasJob(String jobName) {
         try {
@@ -59,6 +71,7 @@ public class UnstableJobsPortlet extends AbstractDashboardViewPortlet {
 
     /**
      * Opens the job with the given name, if it exists in the Portlet.
+     *
      * @param jobName Name of the job to open.
      */
     public void openJob(String jobName) {
