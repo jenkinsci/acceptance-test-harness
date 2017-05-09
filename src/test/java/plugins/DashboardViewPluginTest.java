@@ -36,55 +36,68 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
     }
 
     @Test
-    public void unstableJobsPortlet_failedJob() {
+    public void unstableJobsPortlet_notShowOnlyFailedJobs() {
         DashboardView v = createDashboardView();
         UnstableJobsPortlet unstableJobsPortlet = v.addBottomPortlet(UnstableJobsPortlet.class);
+        unstableJobsPortlet.setShowOnlyFailedJobs(false);
         v.save();
 
-        FreeStyleJob j = createFailingFreeStyleJob();
-        buildFailingJob(j);
+        FreeStyleJob unstableJob = createUnstableFreeStyleJob();
+        buildUnstableJob(unstableJob);
+        assertJobInUnstableJobsPortlet(unstableJobsPortlet, unstableJob.name, true);
 
-        v.open();
-
-        assertThat(unstableJobsPortlet.hasJob(j.name), is(true));
-
-        unstableJobsPortlet.openJob(j.name);
-
-        assertThat(driver, hasContent("Project " + j.name));
-        assertThat(getCurrentUrl().contains(j.name), is(true));
+        FreeStyleJob failingJob = createFailingFreeStyleJob();
+        buildFailingJob(failingJob);
+        assertJobInUnstableJobsPortlet(unstableJobsPortlet, failingJob.name, true);
     }
 
     @Test
-    public void unstableJobsPortlet_successfulJob() {
+    public void unstableJobsPortlet_showOnlyFailedJobs() {
         DashboardView v = createDashboardView();
         UnstableJobsPortlet unstableJobsPortlet = v.addBottomPortlet(UnstableJobsPortlet.class);
+        unstableJobsPortlet.setShowOnlyFailedJobs(true);
         v.save();
 
-        FreeStyleJob j = createFreeStyleJob();
-        buildSuccessfulJob(j);
+        FreeStyleJob unstableJob = createUnstableFreeStyleJob();
+        buildUnstableJob(unstableJob);
+        assertJobInUnstableJobsPortlet(unstableJobsPortlet, unstableJob.name, false);
 
-        v.open();
-
-        assertThat(unstableJobsPortlet.hasJob(j.name), is(false));
+        FreeStyleJob failingJob = createFailingFreeStyleJob();
+        buildFailingJob(failingJob);
+        assertJobInUnstableJobsPortlet(unstableJobsPortlet, failingJob.name, true);
     }
 
     @Test
-    public void unstableJobsPortlet_unstableJob() {
+    public void unstableJobsPortlet_success() {
         DashboardView v = createDashboardView();
         UnstableJobsPortlet unstableJobsPortlet = v.addBottomPortlet(UnstableJobsPortlet.class);
+        unstableJobsPortlet.setShowOnlyFailedJobs(true);
         v.save();
 
-        FreeStyleJob j = createUnstableFreeStyleJob();
-        buildUnstableJob(j);
+        FreeStyleJob successfulJob = createFreeStyleJob();
+        buildSuccessfulJob(successfulJob);
+        assertJobInUnstableJobsPortlet(unstableJobsPortlet, successfulJob.name, false);
+    }
 
-        v.open();
+    /**
+     * Asserts, if the given portlet contains the given job and correctly links to it.
+     *
+     * @param portlet       that should or shouldn't contain the given job.
+     * @param jobName       that should or shouldn't be contained.
+     * @param shouldContain whether the portlet should or shouldn't contain the job.
+     * @throws AssertionError If shouldContain is true and the Portlet doesn't contain the job.
+     *                        Or if shouldContain is false and the Portlet does contain the job.
+     */
+    private void assertJobInUnstableJobsPortlet(UnstableJobsPortlet portlet, String jobName, boolean shouldContain) throws AssertionError {
+        portlet.getPage().open();
+        assertThat(portlet.hasJob(jobName), is(shouldContain));
 
-        assertThat(unstableJobsPortlet.hasJob(j.name), is(true));
+        if (shouldContain) {
+            portlet.openJob(jobName);
 
-        unstableJobsPortlet.openJob(j.name);
-
-        assertThat(driver, hasContent("Project " + j.name));
-        assertThat(getCurrentUrl().contains(j.name), is(true));
+            assertThat(driver, hasContent("Project " + jobName));
+            assertThat(getCurrentUrl().contains(jobName), is(true));
+        }
     }
 
     @Test
