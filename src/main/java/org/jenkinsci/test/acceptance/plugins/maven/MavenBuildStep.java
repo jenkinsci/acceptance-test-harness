@@ -23,6 +23,10 @@ public class MavenBuildStep extends AbstractStep implements BuildStep {
         return this;
     }
 
+    public void setGoals(final String goals) {
+        targets.set(goals);
+    }
+
     public MavenBuildStep properties(String properties, boolean inject) {
         ensureAdvanced();
         control("properties").set(properties);
@@ -45,5 +49,16 @@ public class MavenBuildStep extends AbstractStep implements BuildStep {
 
         advancedButton.click();
         advancedButton = null;
+    }
+
+    /**
+     * Use the default maven version for a job. Note that this maven version needs to be installed before
+     * this method is called.
+     *
+     * @see MavenInstallation#ensureThatMavenIsInstalled(Jenkins)
+     * @see MavenInstallation#installSomeMaven(Jenkins)
+     */
+    public void useDefaultMavenVersion() {
+        version.select(MavenInstallation.DEFAULT_MAVEN_ID);
     }
 }

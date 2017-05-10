@@ -16,10 +16,9 @@ import org.openqa.selenium.WebDriver;
 import com.google.common.base.Predicate;
 import com.google.inject.Injector;
 
+import hudson.util.VersionNumber;
 import static org.hamcrest.Matchers.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
-
-import hudson.util.VersionNumber;
 
 /**
  * Top-level object that acts as an entry point to various systems.
@@ -163,6 +162,7 @@ public class Jenkins extends Node implements Container {
                     public boolean apply(WebDriver driver) {
                         visit(driver.getCurrentUrl()); // the page sometimes does not reload (fast enough)
                         MatcherAssert.assertThat(driver, not(hasContent("Please wait")));
+                        MatcherAssert.assertThat(driver, hasContent("Jenkins ver.")); // Wait until Jenkins actually is up
                         return true;
                     }
                 })

@@ -3,6 +3,7 @@ package org.jenkinsci.test.acceptance.update_center;
 import com.cloudbees.sdk.extensibility.Extension;
 import java.io.File;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -59,15 +60,33 @@ public class LocalOverrideUpdateCenterMetadataDecoratorImpl implements UpdateCen
             }
         }
         for (Map.Entry<String,String> e : System.getenv().entrySet()) {
-            String name = e.getKey();
-            if (name.endsWith(".jpi")) {
-                name = name.replace(".jpi", "");
-                if (ucm.plugins.get(name) == null) throw new IllegalArgumentException("Plugin does not exists in update center: " + name);
-                File file = new File(e.getValue());
-                if (!file.exists()) throw new IllegalArgumentException("Plugin file for " + name + " does not exist: " + file.getAbsolutePath());
-                PluginMetadata m = PluginMetadata.LocalOverride.create(file);
-                ucm.plugins.put(m.getName(), m);
+            String key = e.getKey();
+            String name;
+            if (key.endsWith(".jpi")) {
+                name = key.replace(".jpi", "");
+            } else if (key.endsWith("_JPI")) { // http://stackoverflow.com/a/36992531/12916
+                name = null;
+                for (String _name : ucm.plugins.keySet()) {
+                    if ((_name.toUpperCase(Locale.ENGLISH).replaceAll("[^A-Z0-9_]", "_") + "_JPI").equals(key)) {
+                        name = _name;
+                        break;
+                    }
+                }
+                if (name == null) {
+                    throw new IllegalArgumentException("Could not identify plugin name from " + key + " given " + ucm.plugins.keySet());
+                }
+            } else {
+                continue;
             }
+            PluginMetadata stock = ucm.plugins.get(name);
+            if (stock == null) {
+                throw new IllegalArgumentException("Plugin does not exists in update center: " + name);
+            }
+            File file = new File(e.getValue());
+            if (!file.exists()) throw new IllegalArgumentException("Plugin file for " + name + " does not exist: " + file.getAbsolutePath());
+            PluginMetadata m = PluginMetadata.LocalOverride.create(file);
+            System.err.println("Overriding " + name + " " + stock.getVersion() + " with local build of " + m.getVersion());
+            ucm.plugins.put(m.getName(), m);
         }
     }
 }

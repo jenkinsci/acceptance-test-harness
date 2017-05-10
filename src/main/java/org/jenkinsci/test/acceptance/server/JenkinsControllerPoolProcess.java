@@ -20,6 +20,7 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -57,8 +58,8 @@ public class JenkinsControllerPoolProcess {
     @Option(name="-n",usage="Number of instances to pool. >=1.")
     public int n = Integer.getInteger("count",1);
 
-    @Option(name="-socket",usage="Unix domain socket file to communicate with client")
-    public File socket = SOCKET;
+    @Inject @Named("socket")
+    public File socket;
 
     private final ExecutorService executors = Executors.newCachedThreadPool();
 
@@ -179,7 +180,6 @@ public class JenkinsControllerPoolProcess {
         }
     }
 
-    public static final File SOCKET = new File(System.getProperty("user.home"),"jenkins.sock");
     /**
      * Are we running the JUT server?
      */
