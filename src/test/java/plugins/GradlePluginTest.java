@@ -28,6 +28,7 @@ import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.gradle.GradleInstallation;
 import org.jenkinsci.test.acceptance.plugins.gradle.GradleStep;
+import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
 
@@ -38,17 +39,19 @@ public class GradlePluginTest extends AbstractJUnitTest {
 
     @Test
     public void run_gradle_scirpt() {
-        GradleInstallation.installGradle(jenkins, "Default", GradleInstallation.LATEST_VERSION);
+        final String gradleInstallationName = "Default";
+        GradleInstallation.installGradle(jenkins, gradleInstallationName, GradleInstallation.LATEST_VERSION);
 
         final FreeStyleJob job = jenkins.jobs.create();
         job.copyResource(resource("/gradle_plugin/script.gradle"), "build.gradle");
         final GradleStep step = job.addBuildStep(GradleStep.class);
-        step.useVersion("Default");
+        step.useVersion(gradleInstallationName);
         step.tasks.set("hello");
         step.switches.set("--quiet");
         job.save();
 
-        job.startBuild().shouldSucceed();
+        final Build build = job.startBuild();
+        build.shouldSucceed();
         Matchers.containsRegexp("Hello world!", Pattern.MULTILINE);
         Matchers.containsRegexp("gradle.* --quiet", Pattern.MULTILINE);
     }

@@ -80,11 +80,8 @@ public abstract class ToolInstallation extends PageAreaImpl {
         final Control button = page.control(by.button("Add " + name));
 
         String pathPrefix = button.resolve().getAttribute("path").replaceAll("repeatable-add", "tool");
-        String path = page.createPageArea(pathPrefix, new Runnable() {
-            @Override public void run() {
-                button.click();
-            }
-        });
+        String path = page.createPageArea(pathPrefix, () -> button.click());
+        System.out.println("Path: " + path);
         return page.newInstance(type, jenkins, path);
     }
 
