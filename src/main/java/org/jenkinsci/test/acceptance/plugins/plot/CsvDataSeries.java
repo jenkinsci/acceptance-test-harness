@@ -14,15 +14,6 @@ public class CsvDataSeries extends DataSeries {
         this.selectType();
     }
 
-    @Override
-    public DataSeries setFileType() {
-
-        area.setDataSeries(index(), this);
-        this.selectType();
-
-        return this;
-    }
-
     public void setUrl(String url) {
         control("url").set(url);
     }

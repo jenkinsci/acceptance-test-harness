@@ -13,16 +13,6 @@ public class PropertiesDataSeries extends DataSeries {
         this.selectType();
     }
 
-    @Override
-    public DataSeries setFileType() {
-
-        area.setDataSeries(index(), this);
-        this.selectType();
-
-        return this;
-    }
-
-
     public void setLabel(String label){
         control(getFileType() + "/label").set(label);
     }
