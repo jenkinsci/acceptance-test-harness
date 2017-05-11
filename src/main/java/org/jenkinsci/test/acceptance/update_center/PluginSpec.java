@@ -30,6 +30,7 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Iterator;
+import java.util.Objects;
 
 /**
  * Reference to a plugin, optionally with the version.
@@ -37,14 +38,16 @@ import java.util.Iterator;
  * The string syntax of this is shortName[@version].
  */
 public class PluginSpec {
+
     /**
      * Short name of the plugin.
      */
     private final @Nonnull String name;
+
     /**
      * Optional version.
      */
-    private final VersionNumber version;
+    private final @CheckForNull VersionNumber version;
 
     public PluginSpec(@Nonnull String name, String version) {
         this.name = name;
@@ -85,5 +88,21 @@ public class PluginSpec {
         }
 
         return sb.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        PluginSpec that = (PluginSpec) o;
+
+        if (!name.equals(that.name)) return false;
+        return Objects.equals(version, that.version);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, version);
     }
 }
