@@ -4,6 +4,8 @@ import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.BuildStatisticsPortlet;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.BuildStatisticsPortlet.JobType;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.LatestBuildsPortlet;
+import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
 
@@ -122,6 +124,21 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
         v.open();
 
         assertThat(stats.getNumberOfBuilds(JobType.TOTAL), is(4));
+    }
+
+    @Test
+    public void latestsBuildsPortlet_correctJobAndBuild() {
+        DashboardView v = createDashboardView();
+        LatestBuildsPortlet latestBuilds = v.addBottomPortlet(LatestBuildsPortlet.class);
+        v.save();
+
+
+        FreeStyleJob job = createFreeStyleJob();
+        Build build = buildSuccessfulJob(job);
+
+        v.open();
+        assertThat(latestBuilds.hasJob(job.name), is(true));
+        assertThat(latestBuilds.hasBuild(build.getNumber()), is(true));
     }
 
     /**
