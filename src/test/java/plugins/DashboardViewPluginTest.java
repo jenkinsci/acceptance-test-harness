@@ -10,6 +10,7 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
 
 import static org.hamcrest.Matchers.is;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 import static org.junit.Assert.assertThat;
 
 @WithPlugins("dashboard-view")
@@ -134,11 +135,49 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
 
 
         FreeStyleJob job = createFreeStyleJob();
-        Build build = buildSuccessfulJob(job);
+
+        v.open();
+        assertThat(latestBuilds.hasJob(job.name), is(false));
+
+        Build build1 = buildSuccessfulJob(job);
+        Build build2 = buildSuccessfulJob(job);
+
 
         v.open();
         assertThat(latestBuilds.hasJob(job.name), is(true));
-        assertThat(latestBuilds.hasBuild(build.getNumber()), is(true));
+        assertThat(latestBuilds.hasBuild(build1.getNumber()), is(true));
+        assertThat(latestBuilds.hasBuild(build2.getNumber()), is(true));
+    }
+
+    @Test
+    public void latestsBuildsPortlet_correctJobLink() {
+        DashboardView v = createDashboardView();
+        LatestBuildsPortlet latestBuilds = v.addBottomPortlet(LatestBuildsPortlet.class);
+        v.save();
+
+
+        FreeStyleJob job = createFreeStyleJob();
+        buildSuccessfulJob(job);
+
+        v.open();
+        latestBuilds.openJob(job.name);
+
+        assertThat(driver, hasContent("Project " + job.name));
+    }
+
+    @Test
+    public void latestsBuildsPortlet_correctBuildLink() {
+        DashboardView v = createDashboardView();
+        LatestBuildsPortlet latestBuilds = v.addBottomPortlet(LatestBuildsPortlet.class);
+        v.save();
+
+
+        Build build = buildSuccessfulJob(createFreeStyleJob());
+
+        v.open();
+        latestBuilds.openBuild(build.getNumber());
+
+        assertThat(driver, hasContent("Build #" + build.getNumber()));
     }
 
     /**
