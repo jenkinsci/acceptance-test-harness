@@ -1,17 +1,14 @@
 package plugins;
 
-import javafx.scene.paint.Color;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.*;
-import org.junit.Before;
+import org.jenkinsci.test.acceptance.po.stageview.StageView;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.stream.Collectors;
 
@@ -48,9 +45,10 @@ public class StageViewTest extends AbstractJUnitTest{
     public void jobShouldContainStageview() throws Exception {
         WorkflowJob job = this.saveWorkflowJobWithFile(SINGLE_JOB);
         Build build = job.startBuild().shouldSucceed();
-        stageView = new StageView(job, JOB_PATH);
         job.open();
+        stageView = new StageView(job, JOB_PATH);
         assertThat(stageView.getRootElementName().getText(),containsString("Stage View"));
+        //assertThat(stageView.getRootElementName().getText(),containsString("Stage View"));
     }
 
     /**
@@ -61,6 +59,7 @@ public class StageViewTest extends AbstractJUnitTest{
             Build build = job.startBuild().shouldFail();
             job.open();
             job.getNavigationLinks();
+            stageView = new StageView(job, JOB_PATH);
             WebElement webElement = this.driver.findElement(By.xpath("//*[@id=\"pipeline-box\"]/div/div/table/tbody[2]/tr[1]/td[1]/div/div/div[1]/span"));
             assertThat(webElement.getText(),containsString(String.valueOf(build.getNumber())));
     }
@@ -74,6 +73,8 @@ public class StageViewTest extends AbstractJUnitTest{
         WorkflowJob job = this.saveWorkflowJobWithFile(SINGLE_JOB);
         Build build = job.startBuild().shouldSucceed();
         job.open();
+        stageView = new StageView(job, JOB_PATH);
+
         WebElement webElement = this.driver.findElement(By.xpath("//*[@id=\"pipeline-box\"]/div/div/table/thead/tr"));
         assertThat(webElement.getText(),containsString("Clone sources"));
         assertThat(driver.getPageSource(),containsString("SUCCESS"));
@@ -89,10 +90,9 @@ public class StageViewTest extends AbstractJUnitTest{
         WorkflowJob job = this.saveWorkflowJobWithFile(MULTI_JOB);
         Build build = job.startBuild().shouldSucceed();
         job.open();
-        WebElement webElement = this.driver.findElement(By.xpath("//*[@id=\"pipeline-box\"]/div/div/table/thead/tr"));
-        assertThat(webElement.getText(),containsString("Clone sources"));
-        assertThat(webElement.getText(),containsString("build"));
-        //assertThat(webElement.getText(),containsString("build"));
+        stageView = new StageView(job, JOB_PATH);
+        assertThat(stageView.getStageViewHeadlines().get(0).toString(),containsString("Clone sources"));
+        assertThat(stageView.getStageViewHeadlines().get(1).toString(),containsString("build"));
     }
 
     /**
@@ -106,12 +106,11 @@ public class StageViewTest extends AbstractJUnitTest{
         Build build = job.startBuild().shouldFail();
         job.open();
         job.getNavigationLinks();
-        WebElement webElement = this.driver.findElement(By.xpath("//*[@id=\"pipeline-box\"]/div/div/table/thead/tr"));
-        assertThat(driver.getPageSource(),containsString("FAILED"));
-        assertThat(driver.getPageSource(),containsString("SUCCESS"));
-        //order check
-        //gesamtergebnis
-        //refactor
+        stageView = new StageView(job, JOB_PATH);
+        String firstJob = stageView.getLatestBuild().getStageViewItem(0).toString();
+        String secondJob = stageView.getLatestBuild().getStageViewItem(1).toString();
+        assertThat(firstJob,containsString("ms"));
+        assertThat(secondJob,containsString("failed"));
     }
 
     /**
