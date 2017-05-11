@@ -7,29 +7,54 @@ import org.openqa.selenium.WebElement;
 /**
  *
  *
- * Created by larca on 25.04.17.
+ * Created by Michael Engel on 25.04.17.
  */
 public class LogParserOutputPage extends PageObject{
 
+    /**
+     * Defines the different types of frames used by the parsed output of the logparser
+     */
     public enum LOGPARSERFRAME{
         SIDEBAR("sidebar"), CONTENT("content");
+
         private String framename;
-        LOGPARSERFRAME(String framename){ this.framename = framename; }
-        public String getFramename(){ return this.framename; }
+        LOGPARSERFRAME(String framename){
+            this.framename = framename;
+        }
+
+        public String getFramename(){
+            return this.framename;
+        }
     }
 
+    /**
+     * Constructor.
+     *
+     * @param po The page of the logparser.
+     */
     public LogParserOutputPage(PageObject po) {
         super(po.injector, po.url(""));
     }
 
 
+    // URL to return from the opened frame to the default window
     private String restoreURL = null;
+
+    /**
+     * Opens the defined frame in the current window.
+     *
+     * @param frame Enum of the frame to open in the current window.
+     */
     public void openFrameInWindow(LOGPARSERFRAME frame){
         switchToMainframe();
         WebElement e = driver.findElement(By.xpath("//frame[@name='" + frame.getFramename() + "']"));
         restoreURL = driver.getCurrentUrl();
         driver.navigate().to(e.getAttribute("src"));
     }
+
+    /**
+     * Returns to the previous window.
+     */
     public void restoreWindow(){
         if(restoreURL != null){
             driver.navigate().to(restoreURL);
@@ -37,31 +62,29 @@ public class LogParserOutputPage extends PageObject{
         }
     }
 
-
-    public boolean switchToFrame(LOGPARSERFRAME frame){
+    /**
+     * Switch focus of the driver to the specified frame.
+     *
+     * @param frame The frame to switch to.
+     */
+    public void switchToFrame(LOGPARSERFRAME frame){
         switchToMainframe();
-        try{
-            WebElement e = driver.findElement(By.xpath("//frame[@name='" + frame.getFramename() + "']"));
-            driver.switchTo().frame(e);
-        }
-        catch(Exception ex){
-            return false;
-        }
-        return true;
+        WebElement e = driver.findElement(By.xpath("//frame[@name='" + frame.getFramename() + "']"));
+        driver.switchTo().frame(e);
     }
 
+    /**
+     * Switch focus back to the default content.
+     */
     public void switchToDefaultContent(){
         driver.switchTo().defaultContent();
     }
 
-    private boolean switchToMainframe(){
-        try {
-            WebElement e = driver.findElement(By.xpath("//div[@id='main-panel']//table//tbody//tr//td//iframe"));
-            driver.switchTo().frame(e);
-        }catch(Exception ex){
-            return false;
-        }
-
-        return true;
+    /**
+     * Switch focus of the driver to the main frame.
+     */
+    private void switchToMainframe(){
+        WebElement e = driver.findElement(By.xpath("//div[@id='main-panel']//table//tbody//tr//td//iframe"));
+        driver.switchTo().frame(e);
     }
 }
