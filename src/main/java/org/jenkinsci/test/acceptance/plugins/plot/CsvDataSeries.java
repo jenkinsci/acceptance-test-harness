@@ -13,7 +13,6 @@ public class CsvDataSeries extends DataSeries {
         this.selectType();
     }
 
-
     public void setUrl(String url) {
         control("url").set(url);
     }

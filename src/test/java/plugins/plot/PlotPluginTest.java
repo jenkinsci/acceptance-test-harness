@@ -11,8 +11,8 @@ import org.jvnet.hudson.test.Issue;
 
 import java.util.regex.Pattern;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 
 @WithPlugins({
         "matrix-project", // JENKINS-37545
@@ -98,9 +98,8 @@ public class PlotPluginTest extends AbstractJUnitTest {
         Pattern p1 = Pattern.compile(EMPTY_STRING, Pattern.DOTALL);
         Pattern p2 = Pattern.compile(NON_EMPTY_STRING, Pattern.DOTALL);
 
-        assertFalse("NumberFormatException was logged for empty string.",jLog.hasLogged(p1));
-        assertTrue("NumberFormatException was not logged for non-empty string value.",jLog.hasLogged(p2));
-
+        assertThat("NumberFormatException was logged for empty string.", jLog.hasLogged(p1), is(false));
+        assertThat("NumberFormatException was not logged for non empty string.", jLog.hasLogged(p2), is(true));
     }
 
     private void assertThatBuildHasPlot(String title, String group) {
