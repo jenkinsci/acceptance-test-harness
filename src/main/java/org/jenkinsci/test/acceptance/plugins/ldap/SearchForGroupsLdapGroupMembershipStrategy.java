@@ -5,7 +5,7 @@ import org.jenkinsci.test.acceptance.po.*;
 /**
  * @author Michael Prankl
  */
-@Describable("Search for groups containing user")
+@Describable({"Search for groups containing user", "Search for LDAP groups containing user"})
 public class SearchForGroupsLdapGroupMembershipStrategy extends LdapGroupMembershipStrategy {
 
     private Control groupMembershipFilter = control("filter");

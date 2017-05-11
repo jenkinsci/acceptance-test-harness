@@ -4,6 +4,7 @@ import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 
 /**
  * Abstract job configuration class.
+ *
  * @author Fabian Trampusch
  */
 public abstract class AnalysisMavenSettings extends AnalysisSettings {

@@ -33,8 +33,9 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
 public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerAction> {
     private static final String TASKS_PLUGIN_PREFIX = "/tasks_plugin/";
     private static final String TASKS_FILES = TASKS_PLUGIN_PREFIX + "fileset1";
+    private static final String NO_GOAL = "";
 
-   @Override
+    @Override
     protected void assertThatDetailsAreFilled(final TaskScannerAction action) {
         assertXmlApiMatchesExpected(action.getBuild(), "tasksResult/api/xml?depth=0",
                 TASKS_PLUGIN_PREFIX + "api_depth_0-2_x.xml", false);
@@ -256,7 +257,7 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
         // as for single_task_tags_and_exclusion_pattern
         // So we proceed directly with the preparation of build #2
 
-        editJob("/tasks_plugin/fileset1_less", false, job);
+        editJob("/tasks_plugin/fileset1_less", false, job, TasksFreestyleSettings.class);
 
         Build build = buildSuccessfulJob(job);
 
@@ -1003,16 +1004,16 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
 
     private FreeStyleJob createFreeStyleJob(final String fileset,
             final Container owner, final AnalysisConfigurator<TasksFreestyleSettings> buildConfigurator) {
-        return setupJob(fileset, FreeStyleJob.class, TasksFreestyleSettings.class, owner, buildConfigurator);
+        return createJob(owner, fileset, FreeStyleJob.class, TasksFreestyleSettings.class, buildConfigurator);
     }
 
     private MavenModuleSet createMavenJob(final String files,
             final AnalysisConfigurator<TasksMavenSettings> buildConfigurator) {
-        return setupJob(files, MavenModuleSet.class, TasksMavenSettings.class, null, jenkins, buildConfigurator);
+        return createMavenJob(files, NO_GOAL, buildConfigurator);
     }
 
     private MavenModuleSet createMavenJob(final String files, final String goal,
             final AnalysisConfigurator<TasksMavenSettings> buildConfigurator) {
-        return setupJob(files, MavenModuleSet.class, TasksMavenSettings.class, goal, jenkins, buildConfigurator);
+        return createMavenJob(files, goal, TasksMavenSettings.class, buildConfigurator);
     }
 }

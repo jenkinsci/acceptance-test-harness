@@ -41,11 +41,6 @@ public class PooledJenkinsController extends JenkinsController implements LogLis
     private IJenkinsController controller;
     private final List<byte[]> toUnpack = new LinkedList<>();
 
-    @Inject
-    public PooledJenkinsController(Injector i) {
-        this(i, JenkinsControllerPoolProcess.SOCKET);
-    }
-
     public PooledJenkinsController(Injector i, File socket) {
         super(i);
         this.socket = socket;

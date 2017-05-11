@@ -1,5 +1,7 @@
 package org.jenkinsci.test.acceptance.plugins.analysis_core;
 
+import java.util.function.Consumer;
+
 import org.jenkinsci.test.acceptance.po.PostBuildStep;
 
 /**
@@ -7,13 +9,6 @@ import org.jenkinsci.test.acceptance.po.PostBuildStep;
  *
  * @author Fabian Trampusch
  */
-@FunctionalInterface
-public interface AnalysisConfigurator<T extends PostBuildStep> {
-    /**
-     * Implement this method to access the code analyzer job configuration page area and set e.g. the thresholds as you
-     * like.
-     *
-     * @param settings The settings you can use to configure everything as you like.
-     */
-    void configure(T settings);
+public interface AnalysisConfigurator<T extends PostBuildStep> extends Consumer<T> {
+    // no additional methods
 }

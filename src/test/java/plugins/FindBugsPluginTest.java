@@ -29,6 +29,7 @@ import java.util.TreeMap;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.NullConfigurator;
 import org.jenkinsci.test.acceptance.plugins.findbugs.FindBugsAction;
 import org.jenkinsci.test.acceptance.plugins.findbugs.FindBugsFreestyleSettings;
 import org.jenkinsci.test.acceptance.plugins.findbugs.FindBugsMavenSettings;
@@ -70,9 +71,11 @@ public class FindBugsPluginTest extends AbstractAnalysisTest<FindBugsAction> {
     @Test @Issue("24940")
     public void should_report_new_and_fixed_warnings_in_consecutive_builds() {
         assumeTrue("This test requires a restartable Jenkins", jenkins.canRestart());
+
         FreeStyleJob job = createFreeStyleJob();
         Build firstBuild = buildJobAndWait(job);
-        editJob("/findbugs_plugin/forSecondRun/findbugsXml.xml", false, job);
+        editJob("/findbugs_plugin/forSecondRun/findbugsXml.xml", false, job,
+                FindBugsFreestyleSettings.class);
 
         Build lastBuild = buildSuccessfulJob(job);
 
@@ -121,9 +124,10 @@ public class FindBugsPluginTest extends AbstractAnalysisTest<FindBugsAction> {
      */
     @Test
     public void should_link_to_source_code_in_real_project() {
-        FreeStyleJob job = setupJob("/findbugs_plugin/sample_findbugs_project", FreeStyleJob.class,
-                FindBugsFreestyleSettings.class, "clean package findbugs:findbugs", jenkins,
+        FreeStyleJob job = createJob(jenkins, "/findbugs_plugin/sample_findbugs_project", FreeStyleJob.class,
+                FindBugsFreestyleSettings.class,
                 settings -> settings.pattern.set("target/findbugsXml.xml"));
+        setMavenGoal(job, "clean package findbugs:findbugs");
 
         Build build = buildSuccessfulJob(job);
 
@@ -236,26 +240,17 @@ public class FindBugsPluginTest extends AbstractAnalysisTest<FindBugsAction> {
         return createFreeStyleJob(FILE_WITH_6_WARNINGS, owner, buildConfigurator);
     }
 
-    private FreeStyleJob createFreeStyleJob(final AnalysisConfigurator<FindBugsFreestyleSettings> buildConfigurator) {
-        return createFreeStyleJob(FILE_WITH_6_WARNINGS, buildConfigurator);
-    }
-
-    private FreeStyleJob createFreeStyleJob(final String file,
-            final AnalysisConfigurator<FindBugsFreestyleSettings> buildConfigurator) {
-        return createFreeStyleJob(file, jenkins, buildConfigurator);
-    }
-
     private FreeStyleJob createFreeStyleJob(final String file, final Container owner,
             final AnalysisConfigurator<FindBugsFreestyleSettings> buildConfigurator) {
-        return setupJob(file, FreeStyleJob.class, FindBugsFreestyleSettings.class, owner, buildConfigurator);
+        return createJob(owner, file, FreeStyleJob.class, FindBugsFreestyleSettings.class, buildConfigurator);
     }
 
     private MavenModuleSet createMavenJob() {
-        return createMavenJob(null);
+        return createMavenJob(new NullConfigurator<>());
     }
 
     private MavenModuleSet createMavenJob(AnalysisConfigurator<FindBugsMavenSettings> configurator) {
-        return setupMavenJob("/findbugs_plugin/sample_findbugs_project",
+        return createMavenJob("/findbugs_plugin/sample_findbugs_project",
                 "clean package findbugs:findbugs", FindBugsMavenSettings.class, configurator);
     }
 

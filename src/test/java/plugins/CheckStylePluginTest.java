@@ -5,6 +5,7 @@ import java.util.TreeMap;
 
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.NullConfigurator;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckStyleAction;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckStyleFreestyleSettings;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckStyleMavenSettings;
@@ -144,13 +145,13 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
     }
 
     private MavenModuleSet createMavenJob() {
-        return createMavenJob(null);
+        return createMavenJob(new NullConfigurator<>());
     }
 
     private MavenModuleSet createMavenJob(AnalysisConfigurator<CheckStyleMavenSettings> configurator) {
         String projectPath = CHECKSTYLE_PLUGIN_ROOT + "sample_checkstyle_project";
         String goal = "clean package checkstyle:checkstyle";
-        return setupMavenJob(projectPath, goal, CheckStyleMavenSettings.class, configurator);
+        return createMavenJob(projectPath, goal, CheckStyleMavenSettings.class, configurator);
     }
 
     /**
@@ -160,9 +161,10 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
      */
     @Test
     public void should_link_to_source_code_in_real_project() {
-        FreeStyleJob job = setupJob(CHECKSTYLE_PLUGIN_ROOT + "sample_checkstyle_project", FreeStyleJob.class,
-                CheckStyleFreestyleSettings.class, "clean package checkstyle:checkstyle", jenkins,
+        FreeStyleJob job = createJob(jenkins, CHECKSTYLE_PLUGIN_ROOT + "sample_checkstyle_project", FreeStyleJob.class,
+                CheckStyleFreestyleSettings.class,
                 settings -> settings.pattern.set("target/checkstyle-result.xml"));
+        setMavenGoal(job, "clean package checkstyle:checkstyle");
 
         Build build = buildSuccessfulJob(job);
 
@@ -199,8 +201,8 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
     // TODO: Check module details
     @Test
     public void should_group_warnings_by_module() {
-        MavenModuleSet job = setupMavenJob(CHECKSTYLE_PLUGIN_ROOT + "maven_multi_module",
-                "clean package checkstyle:checkstyle", CheckStyleMavenSettings.class, null);
+        MavenModuleSet job = createMavenJob(CHECKSTYLE_PLUGIN_ROOT + "maven_multi_module",
+                "clean package checkstyle:checkstyle", CheckStyleMavenSettings.class, new NullConfigurator<>());
         Node slave = createSlaveForJob(job);
         Build build = buildSuccessfulJobOnSlave(job, slave);
 
@@ -380,7 +382,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
 
     private FreeStyleJob createFreeStyleJob(final Container owner, final String fileName,
             final AnalysisConfigurator<CheckStyleFreestyleSettings> buildConfigurator) {
-        return setupJob(fileName, FreeStyleJob.class, CheckStyleFreestyleSettings.class, owner, buildConfigurator);
+        return createJob(owner, fileName, FreeStyleJob.class, CheckStyleFreestyleSettings.class, buildConfigurator);
     }
 
     @Override

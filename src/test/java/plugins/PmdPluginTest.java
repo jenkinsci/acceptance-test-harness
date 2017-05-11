@@ -5,6 +5,7 @@ import java.util.TreeMap;
 
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.NullConfigurator;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.plugins.pmd.PmdAction;
 import org.jenkinsci.test.acceptance.plugins.pmd.PmdFreestyleSettings;
@@ -107,7 +108,8 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
 
         FreeStyleJob job = createFreeStyleJob();
         Build firstBuild = buildJobAndWait(job);
-        editJob(PLUGIN_ROOT + "forSecondRun/pmd-warnings.xml", false, job);
+        editJob(PLUGIN_ROOT + "forSecondRun/pmd-warnings.xml", false, job,
+                PmdFreestyleSettings.class);
 
         Build lastBuild = buildSuccessfulJob(job);
 
@@ -156,9 +158,10 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
      */
     @Test
     public void should_link_to_source_code_in_real_project() {
-        FreeStyleJob job = setupJob(PLUGIN_ROOT + "sample_pmd_project", FreeStyleJob.class,
-                PmdFreestyleSettings.class, "clean package pmd:pmd", jenkins,
+        FreeStyleJob job = createJob(jenkins, PLUGIN_ROOT + "sample_pmd_project", FreeStyleJob.class,
+                PmdFreestyleSettings.class,
                 settings -> settings.pattern.set("target/pmd.xml"));
+        setMavenGoal(job, "clean package pmd:pmd");
 
         Build build = buildSuccessfulJob(job);
 
@@ -382,15 +385,15 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
 
     private FreeStyleJob createFreeStyleJob(final String fileName, final Container owner,
             final AnalysisConfigurator<PmdFreestyleSettings> buildConfigurator) {
-        return setupJob(fileName, FreeStyleJob.class, PmdFreestyleSettings.class, owner, buildConfigurator);
+        return createJob(owner, fileName, FreeStyleJob.class, PmdFreestyleSettings.class, buildConfigurator);
     }
     private MavenModuleSet createMavenJob() {
-        return createMavenJob(null);
+        return createMavenJob(new NullConfigurator<>());
     }
 
     private MavenModuleSet createMavenJob(AnalysisConfigurator<PmdMavenSettings> configurator) {
         String projectPath = PLUGIN_ROOT + "sample_pmd_project";
         String goal = "clean package pmd:pmd";
-        return setupMavenJob(projectPath, goal, PmdMavenSettings.class, configurator);
+        return createMavenJob(projectPath, goal, PmdMavenSettings.class, configurator);
     }
 }

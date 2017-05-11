@@ -13,6 +13,6 @@ public class ViewSteps extends AbstractSteps {
         else
             my.view.open();
 
-        find(by.xpath("//a[contains(@href, '/%1$s/build?')]/img[contains(@title, 'Schedule a build')]", job)).click();
+        find(by.xpath("//a[contains(@href, '/%1$s/build?')]/img[contains(@title, 'Schedule a')]", job)).click();
     }
 }

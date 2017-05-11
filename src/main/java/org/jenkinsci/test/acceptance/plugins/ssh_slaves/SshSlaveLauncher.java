@@ -6,10 +6,9 @@ import java.util.concurrent.TimeUnit;
 import org.jenkinsci.test.acceptance.plugins.credentials.UserPwdCredential;
 import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshCredentialDialog;
 import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshPrivateKeyCredential;
-import org.jenkinsci.test.acceptance.po.ComputerLauncher;
-import org.jenkinsci.test.acceptance.po.Control;
-import org.jenkinsci.test.acceptance.po.Describable;
-import org.jenkinsci.test.acceptance.po.PageObject;
+import org.jenkinsci.test.acceptance.po.*;
+import org.openqa.selenium.By;
+
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -25,6 +24,7 @@ public class SshSlaveLauncher extends ComputerLauncher {
     public final Control retries = control("maxNumRetries");
     public final Control javaPath = control("javaPath");
     public final Control jvmOptions = control("jvmOptions");
+    public final Control hostKeyVerificationStrategy = control("/");
 
     public SshSlaveLauncher(PageObject context, String path) {
         super(context, path);
@@ -99,5 +99,51 @@ public class SshSlaveLauncher extends ComputerLauncher {
         );
         // Select the new credentials. Control.selectDropdownMenu seems to be YUI-only.
         credentialsId.select(credUsername);
+    }
+
+    public void setSshHostKeyVerificationStrategy(Class<? extends SshHostKeyVerificationStrategy> type) {
+        try {
+            SshHostKeyVerificationStrategy strategy = type.newInstance();
+            hostKeyVerificationStrategy.select(strategy.id());
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new IllegalArgumentException(type.getName() + " is missing a default constructor.", e);
+        }
+
+    }
+
+    public abstract static class SshHostKeyVerificationStrategy {
+        public abstract String id();
+    }
+
+    @Describable("hudson.plugins.sshslaves.verifiers.KnownHostsFileKeyVerificationStrategy")
+    public static class KnownHostsFileKeyVerificationStrategy extends SshHostKeyVerificationStrategy {
+        @Override
+        public String id() {
+            return "0";
+        }
+    }
+
+    @Describable("hudson.plugins.sshslaves.verifiers.ManuallyProvidedKeyVerificationStrategy")
+    public static class ManuallyProvidedKeyVerificationStrategy extends SshHostKeyVerificationStrategy {
+        @Override
+        public String id() {
+            return "1";
+        }
+    }
+
+    @Describable("hudson.plugins.sshslaves.verifiers.ManuallyTrustedKeyVerificationStrategy")
+    public static class ManuallyTrustedKeyVerificationStrategy extends SshHostKeyVerificationStrategy {
+        @Override
+        public String id() {
+            return "2";
+        }
+    }
+
+    @Describable("hudson.plugins.sshslaves.verifiers.NonVerifyingKeyVerificationStrategy")
+    public static class NonVerifyingKeyVerificationStrategy extends SshHostKeyVerificationStrategy {
+        @Override
+        public String id() {
+            return "3";
+        }
     }
 }

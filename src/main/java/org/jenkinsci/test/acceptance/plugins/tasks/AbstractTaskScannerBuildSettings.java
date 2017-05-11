@@ -16,6 +16,7 @@ import org.jenkinsci.test.acceptance.po.Job;
  *
  * @author Martin Ende
  */
+// FIXME: move up to analysis settings
 public abstract class AbstractTaskScannerBuildSettings extends AnalysisSettings {
     protected Control pattern = control("pattern");
     protected Control excludePattern = control("excludePattern");

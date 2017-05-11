@@ -32,6 +32,7 @@ import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.groovy.GroovyInstallation;
 import org.jenkinsci.test.acceptance.plugins.groovy.GroovyStep;
 import org.jenkinsci.test.acceptance.plugins.groovy.SystemGroovyStep;
+import org.jenkinsci.test.acceptance.plugins.script_security.ScriptApproval;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.ToolInstallation;
@@ -78,7 +79,7 @@ public class GroovyPluginTest extends AbstractJUnitTest {
         job.addBuildStep(SystemGroovyStep.class).script(
                 "job = jenkins.model.Jenkins.instance.getJob('my_job');" +
                 "println \"name: ${job.displayName}. number: ${job.lastBuild.number}\""
-        );
+        , false);
 
         shouldReport("name: my_job. number: 1");
     }
@@ -90,7 +91,20 @@ public class GroovyPluginTest extends AbstractJUnitTest {
         job.addShellStep("echo println \\'running groovy file\\' > script.groovy");
         job.addBuildStep(SystemGroovyStep.class).file("script.groovy");
 
+        /* TODO cf. FileSystemScriptSourceTest.smokes; when added to generic-whitelist, simplify to:
         shouldReport("running groovy file");
+        */
+        job.save();
+        Build build = job.startBuild();
+        if (build.isSuccess()) {
+            build.shouldContainsConsoleOutput("running groovy file");
+        } else {
+            build.shouldContainsConsoleOutput("org.jenkinsci.plugins.scriptsecurity.sandbox.RejectedAccessException: Scripts not permitted to use method groovy.lang.Script println java.lang.Object");
+            ScriptApproval sa = new ScriptApproval(jenkins);
+            sa.open();
+            sa.findSignature("method groovy.lang.Script println java.lang.Object").approve();
+            job.startBuild().shouldSucceed().shouldContainsConsoleOutput("running groovy file");
+        }
     }
 
     @Test
