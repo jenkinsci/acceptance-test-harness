@@ -35,7 +35,7 @@ public class FreestyleJobTest extends AbstractJUnitTest {
         FreeStyleJob main = jenkins.jobs.create(FreeStyleJob.class);
         FreeStyleJob trigger = jenkins.jobs.create(FreeStyleJob.class);
 
-        main.edit(() -> {
+        main.configure(() -> {
             UpstreamJobTrigger configuration = main.addTrigger(UpstreamJobTrigger.class);
             configuration.setUpstreamProjects(trigger.name);
         });
@@ -54,7 +54,7 @@ public class FreestyleJobTest extends AbstractJUnitTest {
     public void should_set_description() {
         FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class);
         String description = "A description!";
-        job.edit(() -> job.setDescription(description));
+        job.configure(() -> job.setDescription(description));
 
         WebElement actual = job.find(By.xpath("//div[@id='description']/div"));
         assertThat(actual.getText(), containsString(description));
