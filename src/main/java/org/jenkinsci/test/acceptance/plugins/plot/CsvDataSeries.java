@@ -4,7 +4,7 @@ import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.PageArea;
 
 /**
- * Created by lphex on 4/6/17.
+ * @author Stefan Schuhbaeck, Lukasz Koceluch
  */
 @Describable("csv")
 public class CsvDataSeries extends DataSeries {
@@ -14,35 +14,35 @@ public class CsvDataSeries extends DataSeries {
     }
 
 
-    public void setUrl(String url){
+    public void setUrl(String url) {
         control("url").set(url);
     }
 
-    public  void setExclusionValues(String exclusionValues){
+    public  void setExclusionValues(String exclusionValues) {
         control(getFileType() + "/exclusionValues").set(exclusionValues);
     }
 
-    public void checkDispalyTabel(){
+    public void checkTabel() {
         control(getFileType() + "/displayTableFlag").check();
     }
 
-    public void selectIncludeAllColumns(){
+    public void selectIncludeAllColumns() {
         control(getFileType() +"/inclusionFlag[OFF]").click();
     }
 
-    public void selectIncludeByName(){
+    public void selectIncludeByName() {
         control(getFileType() +"/inclusionFlag[INCLUDE_BY_STRING]").click();
     }
 
-    public void selectExcludeByName(){
+    public void selectExcludeByName() {
         control(getFileType() +"/inclusionFlag[EXCLUDE_BY_STRING]").click();
     }
 
-    public void selectIncludeByIndex(){
+    public void selectIncludeByIndex() {
         control(getFileType() +"/inclusionFlag[INCLUDE_BY_COLUMN]").click();
     }
 
-    public void selectExcludeByIndex(){
+    public void selectExcludeByIndex() {
         control(getFileType() +"/inclusionFlag[EXCLUDE_BY_COLUMN]").click();
     }
 

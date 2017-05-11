@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by lphex on 4/6/17.
+ * @author Stefan Schuhbaeck, Lukasz Koceluch
  */
 public class Plot extends PageAreaImpl{
 
@@ -27,7 +27,7 @@ public class Plot extends PageAreaImpl{
 
     /**
      * Own index in ArrayList of Parent PageArea
-     * @return
+     * @return the plot index
      */
     private int index(){
         return parant.getPlotIndex(this);
@@ -37,9 +37,9 @@ public class Plot extends PageAreaImpl{
     /**
      * Create a DataSeries of selected Type and select the Control. If not the first DataSeries create
      * a new one with Add Button.
-     * @param seriesClass
-     * @param <S>
-     * @return
+     * @param seriesClass the series class type
+     * @param <S> series class name as generic
+     * @return series
      */
     public <S extends DataSeries> S addDataSeries(Class<S> seriesClass){
         if (this.series.size()>=1){
@@ -67,8 +67,8 @@ public class Plot extends PageAreaImpl{
 
     /**
      * Index used for construction of path
-     * @param dataSeries
-     * @return
+     * @param dataSeries the data series object
+     * @return series index
      */
     protected int getSeriesIndex(DataSeries dataSeries){
         return series.indexOf(dataSeries);
