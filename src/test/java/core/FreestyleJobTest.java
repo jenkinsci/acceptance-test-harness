@@ -35,7 +35,7 @@ public class FreestyleJobTest extends AbstractJUnitTest {
         FreeStyleJob main = jenkins.jobs.create(FreeStyleJob.class);
         FreeStyleJob trigger = jenkins.jobs.create(FreeStyleJob.class);
 
-        main.configure(() -> {
+        main.edit(() -> {
             UpstreamJobTrigger configuration = main.addTrigger(UpstreamJobTrigger.class);
             configuration.setUpstreamProjects(trigger.name);
         });
@@ -54,7 +54,7 @@ public class FreestyleJobTest extends AbstractJUnitTest {
     public void should_set_description() {
         FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class);
         String description = "A description!";
-        job.configure(() -> job.setDescription(description));
+        job.edit(() -> job.setDescription(description));
 
         WebElement actual = job.find(By.xpath("//div[@id='description']/div"));
         assertThat(actual.getText(), containsString(description));
@@ -297,27 +297,4 @@ public class FreestyleJobTest extends AbstractJUnitTest {
         assertThat(waitFor(error).getText(), containsString("Invalid input: \"not_a_time_either\""));
         clickLink("Close");
     }
-
-    @Test
-    public void createJobWithDescription() throws Exception{
-        FreeStyleJob j = jenkins.jobs.create(FreeStyleJob.class);
-        j.configure();
-        j.description("Beschreibung für Job",false);
-
-        assertTrue("Seite sollte >Build History<", driver.getPageSource().contains("Build History"));
-        assertTrue("Seite sollte >Beschreibung für Job< enthalten", driver.getPageSource().contains("Beschreibung für Job"));
-
-    }
-
-    /*
-    @Test
-    public void should_set_description(){
-
-        WebElement actual = job.find(By.xpath("//div[@id='discription']/div"))
-    }
-       assertThat driver contains stuff
-
-    */
-
-
 }
