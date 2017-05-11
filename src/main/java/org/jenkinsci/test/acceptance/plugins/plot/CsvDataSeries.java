@@ -8,9 +8,19 @@ import org.jenkinsci.test.acceptance.po.PageArea;
  */
 @Describable("csv")
 public class CsvDataSeries extends DataSeries {
+
     public CsvDataSeries(PageArea area, String path) {
-        super(area,  path );
+        super(area, path);
         this.selectType();
+    }
+
+    @Override
+    public DataSeries setFileType() {
+
+        area.setDataSeries(index(), this);
+        this.selectType();
+
+        return this;
     }
 
     public void setUrl(String url) {

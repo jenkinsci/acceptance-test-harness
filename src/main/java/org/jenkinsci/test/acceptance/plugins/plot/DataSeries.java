@@ -9,11 +9,13 @@ import org.jenkinsci.test.acceptance.po.PageAreaImpl;
  */
 public abstract class  DataSeries  extends PageAreaImpl {
 
-    private Plot area;
+    protected Plot area;
+    protected String path;
 
     protected DataSeries(PageArea area, String path) {
         super(area, path);
         this.area = (Plot)area;
+        this.path = path;
     }
 
     protected String getFileType() {
@@ -24,22 +26,7 @@ public abstract class  DataSeries  extends PageAreaImpl {
         control(getFileType()).click();
     }
 
-    public <S extends  DataSeries> S setFileType(Class<S> DataSeriesClass) {
-        String fileType = DataSeriesClass.getAnnotation(Describable.class).value()[0];
-        S series;
-        try {
-            series =  DataSeriesClass.getConstructor(PageArea.class, String.class)
-                    .newInstance(this, fileType);
-        }catch (ReflectiveOperationException e) {
-            throw new AssertionError("Failed to invoke a constructor of " + DataSeriesClass, e);
-        }
-
-        area.setDataSeries(index(), series);
-
-        series.selectType();
-
-        return  series;
-    }
+    public abstract DataSeries setFileType();
 
     public int index() {
         return  area.getSeriesIndex(this);
