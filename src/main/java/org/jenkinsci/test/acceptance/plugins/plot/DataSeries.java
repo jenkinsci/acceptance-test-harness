@@ -7,7 +7,7 @@ import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 /**
  * @author Stefan Schuhbaeck, Lukasz Koceluch
  */
-public class  DataSeries  extends PageAreaImpl {
+public abstract class DataSeries  extends PageAreaImpl {
 
     private Plot area;
 
