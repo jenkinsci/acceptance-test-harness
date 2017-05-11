@@ -13,15 +13,6 @@ public class XmlDataSeries extends DataSeries {
         this.selectType();
     }
 
-    @Override
-    public DataSeries setFileType() {
-
-        area.setDataSeries(index(), this);
-        this.selectType();
-
-        return this;
-    }
-
     public void setXpath(String xpath){
         control(getFileType() + "/xpath").set(xpath);
     }

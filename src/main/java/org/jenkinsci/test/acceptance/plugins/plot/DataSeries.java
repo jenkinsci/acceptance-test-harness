@@ -7,15 +7,13 @@ import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 /**
  * @author Stefan Schuhbaeck, Lukasz Koceluch
  */
-public abstract class  DataSeries  extends PageAreaImpl {
+public class  DataSeries  extends PageAreaImpl {
 
-    protected Plot area;
-    protected String path;
+    private Plot area;
 
     protected DataSeries(PageArea area, String path) {
         super(area, path);
         this.area = (Plot)area;
-        this.path = path;
     }
 
     protected String getFileType() {
@@ -25,8 +23,6 @@ public abstract class  DataSeries  extends PageAreaImpl {
     public void selectType() {
         control(getFileType()).click();
     }
-
-    public abstract DataSeries setFileType();
 
     public int index() {
         return  area.getSeriesIndex(this);
