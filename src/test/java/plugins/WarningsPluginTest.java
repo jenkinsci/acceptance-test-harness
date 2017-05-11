@@ -1,5 +1,6 @@
 package plugins;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
@@ -8,33 +9,37 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jenkinsci.test.acceptance.junit.SmokeTest;
-import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import javax.inject.Inject;
+
+import org.apache.commons.io.IOUtils;
+import org.hamcrest.CoreMatchers;
+import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
+import org.jenkinsci.test.acceptance.docker.fixtures.DockerAgentContainer;
+import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
+import org.jenkinsci.test.acceptance.docker.fixtures.JavaContainer;
+import org.jenkinsci.test.acceptance.docker.fixtures.SshdContainer;
+import org.jenkinsci.test.acceptance.junit.*;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
 import org.jenkinsci.test.acceptance.plugins.envinject.EnvInjectConfig;
 import org.jenkinsci.test.acceptance.plugins.matrix_auth.MatrixAuthorizationStrategy;
 import org.jenkinsci.test.acceptance.plugins.mock_security_realm.MockSecurityRealm;
 import org.jenkinsci.test.acceptance.plugins.script_security.ScriptApproval;
+import org.jenkinsci.test.acceptance.plugins.ssh_slaves.SshSlaveLauncher;
 import org.jenkinsci.test.acceptance.plugins.warnings.GroovyParser;
 import org.jenkinsci.test.acceptance.plugins.warnings.ParsersConfiguration;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsAction;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsBuildSettings;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsColumn;
-import org.jenkinsci.test.acceptance.po.Build;
-import org.jenkinsci.test.acceptance.po.Container;
-import org.jenkinsci.test.acceptance.po.FreeStyleJob;
-import org.jenkinsci.test.acceptance.po.FreeStyleMultiBranchJob;
-import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
-import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.ListView;
-import org.jenkinsci.test.acceptance.po.MatrixConfiguration;
-import org.jenkinsci.test.acceptance.po.MatrixProject;
-import org.jenkinsci.test.acceptance.po.Node;
-import org.jenkinsci.test.acceptance.po.StringParameter;
-import org.jenkinsci.test.acceptance.po.WorkflowJob;
+import org.jenkinsci.test.acceptance.po.*;
+import org.jenkinsci.test.acceptance.slave.SlaveController;
+import org.jenkinsci.test.acceptance.slave.SshSlaveController;
+import org.jenkinsci.test.acceptance.slave.SshSlaveProvider;
+import org.jenkinsci.utils.process.CommandBuilder;
+import org.junit.Assume;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -45,6 +50,7 @@ import org.openqa.selenium.WebElement;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.Matchers.is;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 import static org.jenkinsci.test.acceptance.po.PageObject.*;
 
@@ -52,6 +58,8 @@ import static org.jenkinsci.test.acceptance.po.PageObject.*;
  * Tests various aspects of the warnings plug-in. Most tests copy an existing file with several warnings into the
  * workspace. This file is then analyzed by console and workspace parsers.
  */
+@WithDocker
+@Category(DockerTest.class)
 @WithPlugins("warnings")
 public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
     private static final String RESOURCES = "/warnings_plugin/";
@@ -85,6 +93,49 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
             + "String all = matcher.group(1);\n"
             + "Priority test = Priority.NORMAL;\n"
             + "return new Warning(all, 42, all, all, all);";
+
+    @com.google.inject.Inject
+    private DockerContainerHolder<DockerAgentContainer> docker;
+
+    @WithDocker
+    @Test
+    public void test() throws IOException, InterruptedException, ExecutionException {
+        DumbSlave slave = jenkins.slaves.create(DumbSlave.class);
+        slave.setExecutors(1);
+        slave.setLabels("SlaveBuilder");
+        slave.remoteFS.set("/home/test"); // TODO perhaps should be a constant in SshdContainer
+        SshSlaveLauncher launcher = slave.setLauncher(SshSlaveLauncher.class);
+        Process proc = new ProcessBuilder("stat", "-c", "%g", "/var/run/docker.sock").start();
+        String group = IOUtils.toString(proc.getInputStream()).trim();
+        Assume.assumeThat("docker.sock can be statted", proc.waitFor(), is(0));
+        try {
+            Integer.parseInt(group);
+        } catch (NumberFormatException x) {
+            Assume.assumeNoException("unexpected output from stat on docker.sock", x);
+        }
+        // Note that we need to link to the Git container both on the agent, for the benefit of JGit (TODO pending JENKINS-30600), and in the build container, for the benefit of git-pull:
+        DockerAgentContainer agentContainer = docker.get();
+        launcher.host.set(agentContainer.ipBound(22));
+        launcher.port(agentContainer.port(22));
+        System.out.println(agentContainer.getPrivateKeyString());
+        System.out.println("IP:" + agentContainer.ipBound(22));
+        System.out.println("Port: " + agentContainer.port(22));
+        agentContainer.cp("/home/test/workspace/test.txt", "/tmp/aaa");
+
+
+        launcher.keyCredentials("root", agentContainer.getPrivateKeyString());
+        slave.save();
+
+        FreeStyleJob j = jenkins.jobs.create();
+        j.setLabelExpression("SlaveBuilder");
+        j.save();
+
+        Build b = j.startBuild().shouldSucceed();
+        j.shouldBeTiedToLabel("SlaveBuilder");
+        assertThat(b.getNode(), CoreMatchers.is(slave));
+
+
+    }
 
     /**
      * Checks that a dynamic parser with only methods from the whitelist correctly detects a warning.
