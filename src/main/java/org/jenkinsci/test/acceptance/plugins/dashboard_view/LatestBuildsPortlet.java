@@ -77,7 +77,7 @@ public class LatestBuildsPortlet extends AbstractDashboardViewPortlet {
      */
     public boolean hasJob(String jobName) {
         try {
-            return !getTable().findElements(By.partialLinkText(jobName)).isEmpty();
+            return !getTable().findElements(By.linkText(jobName)).isEmpty();
         } catch (NoSuchElementException e) {
             return false;
         }
@@ -91,7 +91,7 @@ public class LatestBuildsPortlet extends AbstractDashboardViewPortlet {
      */
     public boolean hasBuild(int buildNr) {
         try {
-            return !getTable().findElements(By.partialLinkText(String.valueOf(buildNr))).isEmpty();
+            return !getTable().findElements(By.linkText("#" + String.valueOf(buildNr))).isEmpty();
         } catch (NoSuchElementException e) {
             return false;
         }

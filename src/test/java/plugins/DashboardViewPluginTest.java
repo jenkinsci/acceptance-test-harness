@@ -180,6 +180,21 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
         assertThat(driver, hasContent("Build #" + build.getNumber()));
     }
 
+    @Test
+    public void latestsBuildsPortlet_onlyLatest() {
+        DashboardView v = createDashboardView();
+        LatestBuildsPortlet latestBuilds = v.addBottomPortlet(LatestBuildsPortlet.class);
+        v.save();
+
+        FreeStyleJob job = createFreeStyleJob();
+
+        for (int i = 0; i <= LatestBuildsPortlet.NUMBER_OF_BUILDS + 1; i++)
+            buildSuccessfulJob(job);
+
+        v.open();
+        assertThat(latestBuilds.hasBuild(1), is(false));
+    }
+
     /**
      * Creates a default dashboard view matching all jobs.
      *
