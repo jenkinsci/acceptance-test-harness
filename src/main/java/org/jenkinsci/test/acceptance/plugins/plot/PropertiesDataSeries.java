@@ -4,7 +4,7 @@ import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.PageArea;
 
 /**
- * Created by lphex on 4/6/17.
+ * @author Stefan Schuhbaeck, Lukasz Koceluch
  */
 @Describable("properties")
 public class PropertiesDataSeries extends DataSeries {

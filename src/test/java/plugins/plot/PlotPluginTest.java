@@ -76,7 +76,7 @@ public class PlotPluginTest extends AbstractJUnitTest {
      */
     @Test
     @WithPlugins("plot@1.10") @Issue("JENKINS-25849")
-    public void no_exception_visit_plot_page(){
+    public void no_exception_visit_plot_page() {
         job.configure();
         job.copyResource(resource(csvWithStringsFilePath));
 

@@ -1,24 +1,17 @@
 package plugins.plot;
 
-import org.apache.commons.io.IOUtils;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.plugins.plot.*;
+import org.jenkinsci.test.acceptance.plugins.plot.Plot;
+import org.jenkinsci.test.acceptance.plugins.plot.PlotPublisher;
+import org.jenkinsci.test.acceptance.plugins.plot.PropertiesDataSeries;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
-import org.jenkinsci.test.acceptance.po.JenkinsLogger;
-import org.jenkinsci.test.acceptance.utils.IOUtil;
 import org.junit.Before;
 import org.junit.Test;
-import org.jvnet.hudson.test.Issue;
 
-import java.io.*;
-import java.util.DoubleSummaryStatistics;
-import java.util.List;
+import java.io.IOException;
 import java.util.Properties;
-import java.util.regex.Pattern;
-
-import static org.junit.Assert.assertFalse;
 
 @WithPlugins({
         "matrix-project", // JENKINS-37545
@@ -38,7 +31,7 @@ public class PlotPluginPropertiesTest extends AbstractJUnitTest {
     }
 
     @Test
-    public void generate_simple_plot_properties()  {
+    public void generate_simple_plot_properties() {
         job.configure();
         job.copyResource(propertiesFilePath);
         PlotPublisher pub = job.addPublisher(PlotPublisher.class);
