@@ -1,9 +1,22 @@
 package plugins;
 
+import javax.inject.Inject;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
+import org.hamcrest.Description;
+import org.jenkinsci.test.acceptance.Matcher;
+import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
+import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
 import org.jenkinsci.test.acceptance.junit.Since;
+import org.jenkinsci.test.acceptance.junit.WithCredentials;
+import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisCollectorAction;
 import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisCollectorColumn;
@@ -16,22 +29,34 @@ import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckStyleFreestyleSettings;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
 import org.jenkinsci.test.acceptance.plugins.findbugs.FindBugsFreestyleSettings;
+import org.jenkinsci.test.acceptance.plugins.git.GitRepo;
+import org.jenkinsci.test.acceptance.plugins.nested_view.NestedView;
 import org.jenkinsci.test.acceptance.plugins.pmd.PmdFreestyleSettings;
 import org.jenkinsci.test.acceptance.plugins.tasks.TasksFreestyleSettings;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsBuildSettings;
+import org.jenkinsci.test.acceptance.plugins.workflow_multibranch.GitBranchSource;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Container;
+import org.jenkinsci.test.acceptance.po.Folder;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.ListView;
+import org.jenkinsci.test.acceptance.po.TopLevelItem;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
+import org.jenkinsci.test.acceptance.po.WorkflowMultiBranchJob;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.SftpException;
+
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.collection.IsCollectionWithSize.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 import static org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisPlugin.*;
 import static org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView.*;
@@ -68,6 +93,9 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
     private static final int WARNINGS_LOW = 0;
     private static final int LOW_COUNT = CHECKSTYLE_LOW + FINDBUGS_LOW + PMD_LOW + TASKS_LOW + WARNINGS_LOW;
     private static final int NORMAL_COUNT = TOTAL - LOW_COUNT - HIGH_COUNT;
+
+    @Inject
+    DockerContainerHolder<GitContainer> gitForMultiBranch;
 
     /**
      * Builds a freestyle job. Verifies that afterwards a trend graph exists for each of the participating plug-ins.
@@ -274,6 +302,88 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
     }
 
     /**
+     * Sets up a nested view that contains a dashboard view with a warnings-per-project portlet.
+     * Creates a folder in this view and a multi-branch job in this folder.
+     * The multi-branch job is based on a git repository with two branches (master and branch).
+     * Each branch contains a Jenkinsfile and several warnings results files.
+     * Builds the jobs and verifies that the portlet is correctly filled and that all links open the correct page.
+     */
+    @Test @Issue("JENKINS-39950") @WithPlugins({"dashboard-view", "nested-view"})
+    @WithDocker @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {"warnings", "/org/jenkinsci/test/acceptance/docker/fixtures/GitContainer/unsafe"})
+    public void should_show_correct_links() throws InterruptedException, SftpException, JSchException, IOException {
+        NestedView nested = jenkins.getViews().create(NestedView.class, "Nested");
+
+        DashboardView dashboard = nested.getViews().create(DashboardView.class, "Dashboard");
+        dashboard.configure();
+        dashboard.matchAllJobs();
+        dashboard.checkRecurseIntoFolders();
+
+        addWarningsPortlet(dashboard);
+        dashboard.save();
+
+        Folder folder = dashboard.jobs.create(Folder.class, "Folder");
+        folder.save();
+        folder.open();
+
+        String repoUrl = createGitRepositoryInDockerContainer();
+
+        WorkflowMultiBranchJob job = folder.getJobs().create(WorkflowMultiBranchJob.class);
+        GitBranchSource branchSource = job.addBranchSource(GitBranchSource.class);
+        branchSource.setRemote(repoUrl);
+        branchSource.setCredentials("warnings");
+
+        job.save();
+        job.waitForBranchIndexingFinished(20);
+
+        WorkflowJob master = job.getJob("master");
+        master.build(1).waitUntilFinished().shouldSucceed();
+        WorkflowJob branch = job.getJob("branch");
+        branch.build(1).waitUntilFinished().shouldSucceed();
+
+        dashboard.open();
+
+        verifyWarningsCountInPortlet(master, dashboard);
+        verifyWarningsCountInPortlet(branch, dashboard);
+
+        // FIXME: check that the links are broken
+        List<WebElement> links = all(By.linkText(String.valueOf(CHECKSTYLE_ALL)));
+        assertThat(links, hasSize(2));
+
+    }
+
+    private String createGitRepositoryInDockerContainer() {
+        try {
+            GitRepo repo = new GitRepo();
+            Path source = Paths.get(getClass().getResource(ANALYSIS_COLLECTOR_PLUGIN_RESOURCES).toURI());
+
+            try (DirectoryStream<Path> paths = Files.newDirectoryStream(source)) {
+                for (Path path : paths) {
+                    Files.copy(path, repo.path(path.getFileName()));
+                }
+            }
+            repo.git("add", "*");
+            repo.git("commit", "-m", "Initial commit in master");
+            repo.git("branch", "branch");
+
+            GitContainer container = gitForMultiBranch.get();
+            repo.transferToDockerContainer(container.host(), container.port());
+
+            return container.getRepoUrl();
+        }
+        catch (IOException | InterruptedException | URISyntaxException | JSchException | SftpException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    private WarningsPerProjectPortlet addWarningsPortlet(DashboardView dashboard) {
+        WarningsPerProjectPortlet portlet = dashboard.addBottomPortlet(WarningsPerProjectPortlet.class);
+        portlet.setName("My Warnings");
+        portlet.hideZeroWarningsProjects(false);
+        portlet.showImagesInTableHeader(true);
+        return portlet;
+    }
+
+    /**
      * Sets up a dashboard view with a warnings-per-project portlet. Builds a job and checks if the portlet shows the
      * correct number of warnings. Then one of the tools is deselected. The portlet should then show only the remaining
      * number of warnings.
@@ -286,26 +396,25 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
         DashboardView dashboard = jenkins.views.create(DashboardView.class, createRandomName());
         dashboard.configure();
         dashboard.matchAllJobs();
-        WarningsPerProjectPortlet portlet = dashboard.addBottomPortlet(WarningsPerProjectPortlet.class);
-        portlet.setName("My Warnings");
-        portlet.hideZeroWarningsProjects(false);
-        portlet.showImagesInTableHeader(true);
+        WarningsPerProjectPortlet portlet = addWarningsPortlet(dashboard);
         dashboard.save();
 
         dashboard.open();
+        verifyWarningsCountInPortlet(job, dashboard);
+
+        // uncheck Open Tasks
+        dashboard.configure(() -> portlet.checkCollectedPlugin(TASKS, false));
+        dashboard.open();
+
+        assertThat(dashboard, not(hasWarningsFor(job, TASKS, TASKS_ALL)));
+    }
+
+    private void verifyWarningsCountInPortlet(TopLevelItem job, DashboardView dashboard) {
         assertThat(dashboard, hasWarningsFor(job, CHECKSTYLE, CHECKSTYLE_ALL));
         assertThat(dashboard, hasWarningsFor(job, PMD, PMD_ALL));
         assertThat(dashboard, hasWarningsFor(job, FINDBUGS, FINDBUGS_ALL));
         assertThat(dashboard, hasWarningsFor(job, TASKS, TASKS_ALL));
         assertThat(dashboard, hasWarningsFor(job, WARNINGS, WARNINGS_ALL));
-
-        // uncheck Open Tasks
-        dashboard.configure();
-        portlet = dashboard.getBottomPortlet(WarningsPerProjectPortlet.class);
-        portlet.checkCollectedPlugin(TASKS, false);
-        dashboard.save();
-        dashboard.open();
-        assertThat(dashboard, not(hasWarningsFor(job, TASKS, TASKS_ALL)));
     }
 
     @Test @WithPlugins("workflow-aggregator")
@@ -453,5 +562,26 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
             settings.setLowPriorityTags("PRIO3");
         };
         configurator.accept(taskScannerSettings);
+    }
+
+    public static Matcher<DashboardView> hasWarningsFor(final TopLevelItem job, final AnalysisPlugin plugin, final int warningsCount) {
+        return new Matcher<DashboardView>(" shows %s warnings for plugin %s and job %s", warningsCount, plugin.getId(), job.name) {
+            @Override
+            public boolean matchesSafely(final DashboardView view) {
+                view.open();
+                try {
+                    WebElement warningsLink = view.find(by.css("a[href='job/" + job.name + "/" + plugin.getId() + "']"));
+                    String linkText = warningsLink.getText();
+                    return Integer.parseInt(linkText) == warningsCount;
+                } catch (NoSuchElementException | NumberFormatException e) {
+                    return false;
+                }
+            }
+
+            @Override
+            public void describeMismatchSafely(final DashboardView view, final Description desc) {
+                desc.appendText("Portlet does not show expected warnings for plugin " + plugin.getId());
+            }
+        };
     }
 }

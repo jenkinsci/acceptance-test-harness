@@ -1,11 +1,12 @@
 package org.jenkinsci.test.acceptance.plugins.nested_view;
 
-import com.google.inject.Injector;
+import java.net.URL;
 
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.View;
 import org.jenkinsci.test.acceptance.po.ViewsMixIn;
-import java.net.URL;
+
+import com.google.inject.Injector;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -30,5 +31,9 @@ public class NestedView extends View {
 
     public void assertInactiveView(String name) {
         find(by.xpath("//*[contains(@class, 'inactive') or not(contains(@class, 'active'))]/a[text()='%s']", name));
+    }
+
+    public ViewsMixIn getViews() {
+        return views;
     }
 }

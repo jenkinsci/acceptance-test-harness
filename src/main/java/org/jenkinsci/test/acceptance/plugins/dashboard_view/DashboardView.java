@@ -1,19 +1,14 @@
 package org.jenkinsci.test.acceptance.plugins.dashboard_view;
 
-import com.google.inject.Injector;
-import org.hamcrest.Description;
-import org.jenkinsci.test.acceptance.Matcher;
-import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisPlugin;
-import org.jenkinsci.test.acceptance.po.Control;
-import org.jenkinsci.test.acceptance.po.Describable;
-import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.View;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.WebElement;
-
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.jenkinsci.test.acceptance.po.Control;
+import org.jenkinsci.test.acceptance.po.Describable;
+import org.jenkinsci.test.acceptance.po.View;
+
+import com.google.inject.Injector;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -56,26 +51,5 @@ public class DashboardView extends View {
                 return portletClass.cast(p);
         }
         throw new java.util.NoSuchElementException();
-    }
-
-    public static Matcher<DashboardView> hasWarningsFor(final Job job, final AnalysisPlugin plugin, final int warningsCount) {
-        return new Matcher<DashboardView>(" shows %s warnings for plugin %s and job %s", warningsCount, plugin.getId(), job.name) {
-            @Override
-            public boolean matchesSafely(final DashboardView view) {
-                view.open();
-                try {
-                    WebElement warningsLink = view.find(by.css("a[href='job/" + job.name + "/" + plugin.getId() + "']"));
-                    String linkText = warningsLink.getText();
-                    return Integer.parseInt(linkText) == warningsCount;
-                } catch (NoSuchElementException | NumberFormatException e) {
-                    return false;
-                }
-            }
-
-            @Override
-            public void describeMismatchSafely(final DashboardView view, final Description desc) {
-                desc.appendText("Portlet does not show expected warnings for plugin " + plugin.getId());
-            }
-        };
     }
 }
