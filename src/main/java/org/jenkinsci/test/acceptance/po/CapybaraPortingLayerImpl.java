@@ -288,8 +288,8 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
                 e.click();
             }
         } catch (WebDriverException ex) {
-            // There was an error clicking the element, let's try the fallback
-            LOGGER.log(Level.WARNING, String.format("Element %s could not be clicked. Trying javascript click", e.toString()), e);
+            // There was an error clicking the element, let's try the javascript fallback
+            LOGGER.log(Level.WARNING, String.format("Element %s could not be clicked. Trying javascript click...", e.toString()), ex);
         }
         
         // It seems like Selenium sometimes has issues when trying to click elements that are out of view.
