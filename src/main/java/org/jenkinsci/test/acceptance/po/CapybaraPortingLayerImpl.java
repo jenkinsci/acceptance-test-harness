@@ -7,10 +7,13 @@ import java.net.URL;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.hamcrest.StringDescription;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.junit.Wait;
+import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.utils.ElasticTime;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
@@ -19,6 +22,7 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 
 import com.google.common.base.Joiner;
@@ -36,6 +40,9 @@ import static java.util.Arrays.*;
  */
 @SuppressWarnings("CdiManagedBeanInconsistencyInspection")
 public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
+    
+    private static final Logger LOGGER = Logger.getLogger(WithPlugins.class.getName());
+    
     /**
      * {@link org.openqa.selenium.WebDriver} that subtypes use to talk to the server.
      */
@@ -276,9 +283,15 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
      */
     @Override
     public void check(WebElement e, boolean state) {
-        if (e.isSelected() != state) {
-            e.click();
+        try {
+            if (e.isSelected() != state) {
+                e.click();
+            }
+        } catch (WebDriverException ex) {
+            // There was an error clicking the element, let's try the fallback
+            LOGGER.log(Level.WARNING, String.format("Element %s could not be clicked. Trying javascript click", e.toString()), e);
         }
+        
         // It seems like Selenium sometimes has issues when trying to click elements that are out of view.
         // We use the following javascript as a workaround if the previous click failed.
         if (e.isSelected() != state) {
