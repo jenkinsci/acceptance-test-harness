@@ -11,6 +11,7 @@ import org.jenkinsci.test.acceptance.po.*;
 @Describable("Process Job DSLs")
 public class JobDslBuildStep extends AbstractStep implements BuildStep {
 
+    private final CodeMirror scriptText = new CodeMirror(this, "scriptText");
     private final Control useScriptText = control(by.radioButton("Use the provided DSL script"));
     private final Control lookOnFilesystem = control(by.radioButton("Look on Filesystem"));
 
@@ -18,6 +19,7 @@ public class JobDslBuildStep extends AbstractStep implements BuildStep {
     private final Control expandTargetsArea = control(by.xpath("//tr[td/input[@id='textarea._.targets' and @name='_.targets']]//input[@type='button']"));
     private final Control ignoreMissingFiles = control("ignoreMissingFiles");
 
+    private final Control useSandbox = control("sandbox");
     private final Control ignoreExisting = control("ignoreExisting");
 
     private final Control removedJobAction = control("removedJobAction");
@@ -26,6 +28,9 @@ public class JobDslBuildStep extends AbstractStep implements BuildStep {
     private final Control advanced = control(by.xpath("//td[table[@class='advancedBody']/tbody/tr/td[@class='setting-main']/select[@name='_.lookupStrategy']]/div[@class='advancedLink']//button"));
 
     private final Control lookupStrategy = control("lookupStrategy");
+    private final Control additionalClasspath = control("additionalClasspath");
+    private final Control expandClasspathArea = control(by.xpath("//tr[td/input[@id='textarea._.additionalClasspath' and @name='_.additionalClasspath']]//input[@type='button']"));
+
     private final Control failOnMissingPlugin = control("failOnMissingPlugin");
     private final Control unstableOnDeprecation = control("unstableOnDeprecation");
 
@@ -39,7 +44,15 @@ public class JobDslBuildStep extends AbstractStep implements BuildStep {
      */
     public void setScript(final String dslScript) {
         useScriptText.click();
-        new CodeMirror(this, "scriptText").set(dslScript);
+        scriptText.set(dslScript);
+    }
+
+    /**
+     * Get the DSL script.
+     * @return the DSL script.
+     */
+    public String getScript() {
+        return scriptText.get();
     }
 
     /**
@@ -53,6 +66,14 @@ public class JobDslBuildStep extends AbstractStep implements BuildStep {
     }
 
     /**
+     * Get the DSL scripts, that are located in the workspace.
+     * @return an array of DSL scripts.
+     */
+    public String[] getScriptTargetsOnFilesystem() {
+        return targets.get().split("\n");
+    }
+
+    /**
      * Click the radiobutton useScriptText.
      */
     public void clickUseScriptText() {
@@ -60,10 +81,26 @@ public class JobDslBuildStep extends AbstractStep implements BuildStep {
     }
 
     /**
+     * Determines if the provided DSL script should be used.
+     * @return TRUE if radiobutton useScriptText is selected
+     */
+    public boolean isUseScriptText() {
+        return useScriptText.resolve().isSelected();
+    }
+
+    /**
      * Click the radiobutton lookOnFilesystem.
      */
     public void clickLookOnFilesystem() {
         lookOnFilesystem.click();
+    }
+
+    /**
+     * Determines whether to look on filesystem for DSL scripts.
+     * @return TRUE if radiobutton lookOnFilesystem is selected
+     */
+    public boolean isLookOnFilesystem() {
+        return lookOnFilesystem.resolve().isSelected();
     }
 
     /**
@@ -76,11 +113,36 @@ public class JobDslBuildStep extends AbstractStep implements BuildStep {
     }
 
     /**
+     * Determines if missing DSL scripts will be ignored.
+     * @return TRUE if checkbox ignoreMissingFiles is selected
+     */
+    public boolean isIgnoreMissingFiles() {
+        return ignoreMissingFiles.resolve().isSelected();
+    }
+
+    /**
      * Determines whether checkbox ignoreMissingFiles exists on the current page.
      * @return TRUE if it exists
      */
     public boolean isIgnoreMissingFilesShown() {
         return ignoreMissingFiles.exists();
+    }
+
+    /**
+     * Decides if the DSL scripts run in a sandbox with limited abilities.
+     *
+     * @param use Run DSL scripts in a sandbox if true
+     */
+    public void setUseSandbox(boolean use) {
+        useSandbox.check(use);
+    }
+
+    /**
+     * Determines if the DSL scripts run in a sandbox with limited abilities.
+     * @return TRUE if checkbox sandbox is selected
+     */
+    public boolean isUseSandbox() {
+        return useSandbox.resolve().isSelected();
     }
 
     /**
@@ -93,28 +155,82 @@ public class JobDslBuildStep extends AbstractStep implements BuildStep {
     }
 
     /**
+     * Determines if previously generated jobs or views will be ignored.
+     * @return TRUE if checkbox ignoreExisting is selected
+     */
+    public boolean isIgnoreExisting() {
+        return ignoreExisting.resolve().isSelected();
+    }
+
+    /**
      * Set what to do when a previously generated job is not referenced anymore.
-     * @param action The action to select. A Element of the type {@link JobDslRemovedJobAction}.
+     * @param action The action to select. An Element of the type {@link JobDslRemovedJobAction}.
      */
     public void setRemovedJobAction(JobDslRemovedJobAction action) {
         removedJobAction.select(action.toString());
     }
 
     /**
-     * Set what to do when a previously generated view is not referenced anymore..
-     * @param action The action to select. A Element of the type {@link JobDslRemovedViewAction}.
+     * Determines what to do when a previously generated job is not referenced anymore.
+     * @return The selected action for removed jobs. An Element of the type {@link JobDslRemovedJobAction}.
+     */
+    public JobDslRemovedJobAction getRemovedJobAction() {
+        return JobDslRemovedJobAction.valueOf(removedJobAction.get());
+    }
+
+    /**
+     * Set what to do when a previously generated view is not referenced anymore.
+     * @param action The action to select. An element of the type {@link JobDslRemovedViewAction}.
      */
     public void setRemovedViewAction(JobDslRemovedViewAction action) {
         removedViewAction.select(action.toString());
     }
 
     /**
+     * Determines what to do when a previously generated view is not referenced anymore.
+     * @return The selected action for removed views. An element of the type {@link JobDslRemovedViewAction}.
+     */
+    public JobDslRemovedViewAction getRemovedViewAction() {
+        return JobDslRemovedViewAction.valueOf(removedViewAction.get());
+    }
+
+    /**
      * Set the context to use for relative job names.
-     * @param strategy The strategy to select. A Element of the type {@link JobDslLookupStrategy}
+     * @param strategy The strategy to select. An element of the type {@link JobDslLookupStrategy}.
      */
     public void setLookupStrategy(JobDslLookupStrategy strategy) {
         ensureAdvancedClicked();
         lookupStrategy.select(strategy.toString());
+    }
+
+    /**
+     * Determines the context to use for relative job names.
+     * @return The selected strategy for lookup. An element of the type {@link JobDslLookupStrategy}.
+     */
+    public JobDslLookupStrategy getLookupStrategy() {
+        ensureAdvancedClicked();
+        return JobDslLookupStrategy.valueOf(lookupStrategy.get());
+    }
+
+    /**
+     * Newline separated list of additional classpath entries for the Job DSL scripts.
+     * All entries must be relative to the workspace root.
+     * @param classpaths The additional classpaths.
+     */
+    public void setAdditionalClasspath(final String... classpaths) {
+        ensureAdvancedClicked();
+        ensureClasspathAreaExpanded();
+        additionalClasspath.set(StringUtils.join(classpaths, "\n"));
+
+    }
+
+    /**
+     * Get the additional classpath entries for the Job DSL scripts.
+     * @return an array of additional classpaths.
+     */
+    public String[] getAdditionalClasspath() {
+        ensureAdvancedClicked();
+        return additionalClasspath.get().split("\n");
     }
 
     /**
@@ -129,6 +245,16 @@ public class JobDslBuildStep extends AbstractStep implements BuildStep {
     }
 
     /**
+     * Determines if the build will be marked as failed when a plugin must be installed
+     * or updated to support all features used in the DSL scripts.
+     * @return TRUE if checkbox failOnMissingPlugin is selected
+     */
+    public boolean isFailOnMissingPlugin() {
+        ensureAdvancedClicked();
+        return failOnMissingPlugin.resolve().isSelected();
+    }
+
+    /**
      * Decides if the build will be marked as unstable when using deprecated features.
      *
      * @param unstable mark build as unstable if true
@@ -136,6 +262,15 @@ public class JobDslBuildStep extends AbstractStep implements BuildStep {
     public void setUnstableOnDeprecation(boolean unstable) {
         ensureAdvancedClicked();
         unstableOnDeprecation.check(unstable);
+    }
+
+    /**
+     * Determines if the build will be marked as unstable when using deprecated features.
+     * @return TRUE if checkbox unstableOnDeprecation is selected
+     */
+    public boolean isUnstableOnDeprecation() {
+        ensureAdvancedClicked();
+        return unstableOnDeprecation.resolve().isSelected();
     }
 
     /**
@@ -153,6 +288,15 @@ public class JobDslBuildStep extends AbstractStep implements BuildStep {
     private void ensureTargetsAreaExpanded() {
         if (expandTargetsArea.exists()) {
             expandTargetsArea.click();
+        }
+    }
+
+    /**
+     * Ensures that expandClasspathArea is clicked.
+     */
+    private void ensureClasspathAreaExpanded() {
+        if (expandClasspathArea.exists()) {
+            expandClasspathArea.click();
         }
     }
 }
