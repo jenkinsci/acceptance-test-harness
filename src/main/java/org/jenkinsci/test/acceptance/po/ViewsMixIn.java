@@ -41,4 +41,17 @@ public class ViewsMixIn extends MixIn {
 
         return newInstance(type, injector, url("view/%s/", name));
     }
+
+    /**
+     * Returns the page object of a view.
+     *
+     * @param type The class object of the type of the view..
+     * @param name The name of the view.
+     * @param <T> The type of the view.
+     *
+     * @return page object of a view to the corresponding type and name.
+     */
+    public <T extends View> T get(Class<T> type, String name) {
+        return newInstance(type, injector, url("view/%s/", name));
+    }
 }

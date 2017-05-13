@@ -7,6 +7,7 @@ import java.net.URL;
 
 import org.hamcrest.Description;
 import org.jenkinsci.test.acceptance.Matcher;
+import org.openqa.selenium.WebElement;
 
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -84,5 +85,16 @@ public abstract class View extends ContainerPageObject {
                 }
             }
         };
+    }
+
+    /**
+     * Sets the description of the current {@link View}.
+     *
+     * @param description The description of the view.
+     */
+    public void setDescription(final String description) {
+        WebElement descrElem = find(by.name("description"));
+        descrElem.clear();
+        descrElem.sendKeys(description);
     }
 }
