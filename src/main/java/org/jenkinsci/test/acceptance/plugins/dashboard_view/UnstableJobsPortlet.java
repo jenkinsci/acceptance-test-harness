@@ -15,7 +15,6 @@ import org.openqa.selenium.WebElement;
 public class UnstableJobsPortlet extends AbstractDashboardViewPortlet {
 
     private Control showOnlyFailedJobs = control("showOnlyFailedJobs");
-    private Control recurseWithinFolders = control("recurse");
 
     /**
      * Constructs a new unstable jobs portlet.
@@ -37,19 +36,10 @@ public class UnstableJobsPortlet extends AbstractDashboardViewPortlet {
     }
 
     /**
-     * Sets the "Show only failed jobs"-parameter for this Portlet.
-     *
-     * @param recurseWithinFolders New value to set.
-     */
-    public void setRecurseWithinFolders(boolean recurseWithinFolders) {
-        this.recurseWithinFolders.check(recurseWithinFolders);
-    }
-
-    /**
      * Gets the table of unstable jobs as {@link WebElement}.
      *
      * @return The table-{@link WebElement} containing the unstable jobs.
-     * @throws NoSuchElementException
+     * @throws NoSuchElementException if the table is not found
      */
     public WebElement getTable() throws NoSuchElementException {
         return find(By.xpath("//div[contains(.,'Unstable Jobs')]/following::table[1]"));
