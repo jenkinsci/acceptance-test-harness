@@ -38,6 +38,10 @@ import static org.jenkinsci.test.acceptance.docker.fixtures.GitContainer.*;
  *
  * @author Kohsuke Kawaguchi
  */
+// TODO: Base all methods on java.nio
+// TODO: Add more convenience methods to create branches, etc.
+// TODO: Move copyDirectory method from AnalysisCollector package to GitRepo
+// TODO: Don't throw checked exceptions in API methods
 public class GitRepo implements Closeable {
     public final File dir;
 
