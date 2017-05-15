@@ -7,9 +7,11 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FilenameUtils;
@@ -370,7 +372,7 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
             final int numberOfWarnings) {
         elasticSleep(500);
 
-        Map<String, Integer> trend = job.getTrendGraphContent(action.getUrl());
+        Map<String, Integer> trend = getTrendGraphContent(action.getUrl());
         assertThat(trend.size(), is(6));
 
         List<String> actualUrls = new ArrayList<>();
@@ -388,6 +390,33 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
             }
             assertThat(sum, is(numberOfWarnings));
         }
+    }
+
+    /**
+     * Returns the relevant information of the trend graph image map. A trend graph shows for each build three
+     * values: the number of warnings for priority HIGH, NORMAL, and LOW. These results are returned in a map.
+     * The key is the URL to the warnings results of each build (and priority). The value is the number of warnings
+     * for each result.
+     *
+     * @param url the URL of the graph to look at
+     * @return the content of the trend graph
+     */
+    public Map<String, Integer> getTrendGraphContent(final String url) {
+        Map<String, Integer> links = new HashMap<String, Integer>();
+        Pattern resultLink = Pattern.compile("href=\"(.*" + url +".*)\"");
+        Pattern warningsCount = Pattern.compile("title=\"(\\d+).*\"");
+        for (WebElement area : all(by.xpath(".//div/map/area"))) {
+            String outerHtml = area.getAttribute("outerHTML");
+            Matcher linkMatcher = resultLink.matcher(outerHtml);
+            if (linkMatcher.find()) {
+                Matcher countMatcher = warningsCount.matcher(outerHtml);
+                if (countMatcher.find()) {
+                    links.put(linkMatcher.group(1), Integer.valueOf(countMatcher.group(1)));
+                }
+            }
+        }
+
+        return links;
     }
 
     /**

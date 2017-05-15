@@ -16,8 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.io.IOUtils;
@@ -36,7 +34,7 @@ import com.google.inject.Injector;
 import cucumber.api.DataTable;
 import static org.hamcrest.CoreMatchers.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 /**
  * Job Page object superclass.
@@ -435,33 +433,6 @@ public class Job extends TopLevelItem {
 
     public ScmPolling pollScm() {
         return new ScmPolling(this);
-    }
-
-    /**
-     * Returns the relevant information of the trend graph image map. A trend graph shows for each build three
-     * values: the number of warnings for priority HIGH, NORMAL, and LOW. These results are returned in a map.
-     * The key is the URL to the warnings results of each build (and priority). The value is the number of warnings
-     * for each result.
-     *
-     * @param url the URL of the graph to look at
-     * @return the content of the trend graph
-     */
-    public Map<String, Integer> getTrendGraphContent(final String url) {
-        Map<String, Integer> links = new HashMap<String, Integer>();
-        Pattern resultLink = Pattern.compile("href=\"(.*" + url +".*)\"");
-        Pattern warningsCount = Pattern.compile("title=\"(\\d+).*\"");
-        for (WebElement area : all(by.xpath(".//div/map/area"))) {
-            String outerHtml = area.getAttribute("outerHTML");
-            Matcher linkMatcher = resultLink.matcher(outerHtml);
-            if (linkMatcher.find()) {
-                Matcher countMatcher = warningsCount.matcher(outerHtml);
-                if (countMatcher.find()) {
-                    links.put(linkMatcher.group(1), Integer.valueOf(countMatcher.group(1)));
-                }
-            }
-        }
-
-        return links;
     }
 
     /**

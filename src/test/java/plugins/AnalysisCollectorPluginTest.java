@@ -155,7 +155,7 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
     }
 
     private void assertThatNumberOfGraphsIs(final FreeStyleJob job, final int expectedCount) {
-        Map<String, Integer> trends = job.getTrendGraphContent(".*");
+        Map<String, Integer> trends = getTrendGraphContent(".*");
         assertThat(trends.size(), is(expectedCount));
     }
 
