@@ -217,7 +217,6 @@ public class GitPluginTest extends AbstractJUnitTest {
         Build b;
         GitRepo repo = buildGitRepo();
 
-        repo.commit("Initial commit");
         repo.branch("testBranch");
         repo.commit(TEST_COMMIT_MESSAGE);
         repo.transferToDockerContainer(host, port);
@@ -242,6 +241,62 @@ public class GitPluginTest extends AbstractJUnitTest {
                 visit(changesUrl).getPageSource(),
                 Matchers.containsRegexp(TEST_COMMIT_MESSAGE, Pattern.MULTILINE)
         );
+    }
+
+    @Test
+    public void clean_after_checkout() throws IOException, InterruptedException, SftpException, JSchException {
+        GitRepo repo = buildGitRepo();
+        repo.transferToDockerContainer(host, port);
+
+        //first config and build producing untrackedFile.txt
+
+        job.useScm(GitScm.class)
+                .url(repoUrl)
+                .credentials(USERNAME)
+                .cleanAfterCheckout();
+
+        job.addShellStep("touch untrackedFile.txt");
+        job.save();
+
+        job.startBuild().shouldSucceed();
+
+        // second config and build tests if file has been removed before checkout
+
+        job.configure();
+        job.removeFirstBuildStep();
+        job.addShellStep("ls && test ! -f untrackedFile.txt");
+        job.save();
+
+        job.startBuild().shouldSucceed();
+
+    }
+
+    @Test
+    public void clean_before_checkout() throws IOException, InterruptedException, SftpException, JSchException {
+        GitRepo repo = buildGitRepo();
+        repo.transferToDockerContainer(host, port);
+
+        //first config and build producing untrackedFile.txt
+
+        job.useScm(GitScm.class)
+                .url(repoUrl)
+                .credentials(USERNAME)
+                .cleanBeforeCheckout();
+
+        job.addShellStep("touch untrackedFile.txt");
+        job.save();
+
+        job.startBuild().shouldSucceed();
+
+        // second config and build tests if file has been removed after checkout
+
+        job.configure();
+        job.removeFirstBuildStep();
+        job.addShellStep("ls && test ! -f untrackedFile.txt");
+        job.save();
+
+        job.startBuild().shouldSucceed();
+
     }
 
     ////////////////////

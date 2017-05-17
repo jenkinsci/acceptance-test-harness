@@ -87,10 +87,37 @@ public class GitScm extends Scm {
         addBehaviour(RecursiveSubmodules.class).enable.click();
     }
 
+    /**
+     * Add behaviour "Calculate changelog against specific branch"
+     *
+     * @param remote Remote to compare with
+     * @param branch Branch to compare with
+     * @return this, to allow function chaining
+     */
     public GitScm calculateChangelog(String remote, String branch) {
         CalculateChangelog behaviour = addBehaviour(CalculateChangelog.class);
         behaviour.txtCompareRemote.set(remote);
         behaviour.txtCompareTarget.set(branch);
+        return this;
+    }
+
+    /**
+     * Add behaviour "Clean after checkout"
+     *
+     * @return this, to allow function chaining
+     */
+    public GitScm cleanAfterCheckout() {
+        addBehaviour(CleanAfterCheckout.class);
+        return this;
+    }
+
+    /**
+     * Add behaviour "Clean before checkout"
+     *
+     * @return this, to allow function chaining
+     */
+    public GitScm cleanBeforeCheckout() {
+        addBehaviour(CleanBeforeCheckout.class);
         return this;
     }
 
@@ -180,15 +207,6 @@ public class GitScm extends Scm {
         public CalculateChangelog(GitScm git, String path) {
             super(git, path);
             clickLink("Calculate changelog against a specific branch");
-        }
-    }
-
-    public static class CheckoutLocalBranch extends Behaviour {
-        private final Control txtLocalBranch = control("localBranch");
-
-        public CheckoutLocalBranch(GitScm git, String path) {
-            super(git, path);
-            clickLink("Check out to specific local branch");
         }
     }
 
