@@ -164,6 +164,19 @@ public class GitRepo implements Closeable {
     }
 
     /**
+     * Create a new branch with the given name
+     * @param name Branch name
+     * @return this, to allow function chaining
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public GitRepo branch(String name) throws IOException, InterruptedException {
+        git("branch", name);
+
+        return this;
+    }
+
+    /**
      * Refers to a file relative to the workspace directory.
      */
     private File file(String name) {
