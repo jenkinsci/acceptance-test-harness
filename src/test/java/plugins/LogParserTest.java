@@ -43,12 +43,12 @@ public class LogParserTest extends AbstractJUnitTest {
     public void trendVisible(){
         FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class, "simple-job");
 
-        job.configure();
-        // sample use of the LogParserPublisher
-        LogParserPublisher lpp = job.addPublisher(LogParserPublisher.class);
-        lpp.setShowGraphs(true);
-        lpp.setRule(LogParserPublisher.RuleType.GLOBAL, rules.get("sampleRule"));
-        job.save();
+        job.configure(() -> {
+            // sample use of the LogParserPublisher
+            LogParserPublisher lpp = job.addPublisher(LogParserPublisher.class);
+            lpp.setShowGraphs(true);
+            lpp.setRule(LogParserPublisher.RuleType.GLOBAL, rules.get("sampleRule"));
+        });
 
         // Trend is shown after second build
         job.startBuild().waitUntilFinished();

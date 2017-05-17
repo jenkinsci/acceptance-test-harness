@@ -3,7 +3,7 @@ package org.jenkinsci.test.acceptance.plugins.logparser;
 import org.jenkinsci.test.acceptance.po.*;
 
 /**
- *
+ * Helperclass for configuring the logparser plugin.
  *
  * @author Michael Engel
  */
@@ -11,7 +11,7 @@ import org.jenkinsci.test.acceptance.po.*;
 public class LogParserPublisher extends AbstractStep implements PostBuildStep {
 
     // The available types of rules of the log-parser
-    public enum RuleType{
+    public enum RuleType {
         PROJECT("true"), GLOBAL("false");
         private final String projecttype;
         RuleType(String projecttype){
@@ -23,10 +23,10 @@ public class LogParserPublisher extends AbstractStep implements PostBuildStep {
     }
 
     // available controls of the log-parser post-build-step
-    private final Control controlMarkOnUnstableWarning;
-    private final Control controlMarkOnBuildFail;
-    private final Control controlShowGraphs;
-    private final Control controlRuleType;
+    private final Control controlMarkOnUnstableWarning = control("unstableOnWarning");
+    private final Control controlMarkOnBuildFail = control("failBuildOnError");
+    private final Control controlShowGraphs = control("showGraphs");
+    private final Control controlRuleType = control("useProjectRule");
 
     /**
      * Constructor.
@@ -37,11 +37,6 @@ public class LogParserPublisher extends AbstractStep implements PostBuildStep {
      */
     public LogParserPublisher(Job parent, String path) {
         super(parent, path);
-
-        controlMarkOnUnstableWarning = control("unstableOnWarning");
-        controlMarkOnBuildFail = control("failBuildOnError");
-        controlShowGraphs = control("showGraphs");
-        controlRuleType = control("useProjectRule");
     }
 
     /**
@@ -77,9 +72,9 @@ public class LogParserPublisher extends AbstractStep implements PostBuildStep {
      * @param type The type of the parsing-rule (see: {@link RuleType})
      * @param rule Whole path to the rule if the type is a {@link RuleType#PROJECT}. An already configured log-parser rule if the type is a {@link RuleType#GLOBAL}.
      */
-    public void setRule(RuleType type, String rule){
+    public void setRule(RuleType type, String rule) {
         controlRuleType.choose(type.getProjecttype());
-        switch (type){
+        switch (type) {
             case PROJECT:
                 control("projectRulePath").set(rule);
                 break;

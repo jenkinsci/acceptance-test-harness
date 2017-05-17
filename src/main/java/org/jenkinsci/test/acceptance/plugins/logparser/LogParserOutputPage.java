@@ -5,25 +5,27 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 /**
+ * The logparser plugin uses two frames.
  *
+ * To check the content of the frames the selenium driver must be switched to the frames.
  *
- * Created by Michael Engel on 25.04.17.
+ * @author Michael Engel.
  */
-public class LogParserOutputPage extends PageObject{
+public class LogParserOutputPage extends PageObject {
 
     /**
      * Defines the different types of frames used by the parsed output of the logparser
      */
-    public enum LOGPARSERFRAME{
+    public enum LogParserFrame {
         SIDEBAR("sidebar"), CONTENT("content");
 
-        private String framename;
-        LOGPARSERFRAME(String framename){
-            this.framename = framename;
+        private String frameName;
+        LogParserFrame(String frameName) {
+            this.frameName = frameName;
         }
 
-        public String getFramename(){
-            return this.framename;
+        public String getFrameName() {
+            return this.frameName;
         }
     }
 
@@ -45,9 +47,9 @@ public class LogParserOutputPage extends PageObject{
      *
      * @param frame Enum of the frame to open in the current window.
      */
-    public void openFrameInWindow(LOGPARSERFRAME frame){
+    public void openFrameInWindow(LogParserFrame frame) {
         switchToMainframe();
-        WebElement e = driver.findElement(By.xpath("//frame[@name='" + frame.getFramename() + "']"));
+        WebElement e = driver.findElement(By.xpath("//frame[@name='" + frame.getFrameName() + "']"));
         restoreURL = driver.getCurrentUrl();
         driver.navigate().to(e.getAttribute("src"));
     }
@@ -55,8 +57,8 @@ public class LogParserOutputPage extends PageObject{
     /**
      * Returns to the previous window.
      */
-    public void restoreWindow(){
-        if(restoreURL != null){
+    public void restoreWindow() {
+        if(restoreURL != null) {
             driver.navigate().to(restoreURL);
             restoreURL = null;
         }
@@ -67,23 +69,23 @@ public class LogParserOutputPage extends PageObject{
      *
      * @param frame The frame to switch to.
      */
-    public void switchToFrame(LOGPARSERFRAME frame){
+    public void switchToFrame(LogParserFrame frame) {
         switchToMainframe();
-        WebElement e = driver.findElement(By.xpath("//frame[@name='" + frame.getFramename() + "']"));
+        WebElement e = driver.findElement(By.xpath("//frame[@name='" + frame.getFrameName() + "']"));
         driver.switchTo().frame(e);
     }
 
     /**
      * Switch focus back to the default content.
      */
-    public void switchToDefaultContent(){
+    public void switchToDefaultContent() {
         driver.switchTo().defaultContent();
     }
 
     /**
      * Switch focus of the driver to the main frame.
      */
-    private void switchToMainframe(){
+    private void switchToMainframe() {
         WebElement e = driver.findElement(By.xpath("//div[@id='main-panel']//table//tbody//tr//td//iframe"));
         driver.switchTo().frame(e);
     }

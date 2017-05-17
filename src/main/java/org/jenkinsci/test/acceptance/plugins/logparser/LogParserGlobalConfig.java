@@ -8,7 +8,7 @@ import org.jenkinsci.test.acceptance.po.PageObject;
 /**
  * Helper class for configuring global settings of LogParser.
  *
- * Created by Daniel Sikeler.
+ * @author Daniel Sikeler.
  */
 public class LogParserGlobalConfig extends PageAreaImpl {
 
@@ -28,12 +28,7 @@ public class LogParserGlobalConfig extends PageAreaImpl {
      * @param path The path to the rules file.
      */
     public void addParserConfig(String description, String path) {
-        String rulePath = createPageArea("rule", new Runnable() {
-            @Override
-            public void run() {
-                addButton.click();
-            }
-        });
+        String rulePath = createPageArea("rule", () -> addButton.click());
         Rule rule = new Rule(getPage(), rulePath);
         rule.description.set(description);
         rule.path.set(path);
