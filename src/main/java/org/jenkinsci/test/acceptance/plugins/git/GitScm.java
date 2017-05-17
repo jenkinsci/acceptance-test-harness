@@ -87,6 +87,13 @@ public class GitScm extends Scm {
         addBehaviour(RecursiveSubmodules.class).enable.click();
     }
 
+    public GitScm calculateChangelog(String remote, String branch) {
+        CalculateChangelog behaviour = addBehaviour(CalculateChangelog.class);
+        behaviour.txtCompareRemote.set(remote);
+        behaviour.txtCompareTarget.set(branch);
+        return this;
+    }
+
     public GitScm remoteName(String name) {
         remoteAdvanced();
         control("userRemoteConfigs/name").set(name);

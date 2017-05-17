@@ -27,7 +27,7 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
@@ -47,6 +47,7 @@ import org.openqa.selenium.By;
 
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
+import java.net.URL;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.core.Is.*;
@@ -208,6 +209,44 @@ public class GitPluginTest extends AbstractJUnitTest {
         job.save();
         job.startBuild().shouldSucceed();
     }
+
+    @Test
+    public void calculate_changelog() throws IOException, InterruptedException, SftpException, JSchException {
+        final URL changesUrl;
+        final String TEST_COMMIT_MESSAGE = "Second commit";
+        Build b;
+        GitRepo repo = buildGitRepo();
+
+        repo.commit("Initial commit");
+        repo.branch("testBranch");
+        repo.commit(TEST_COMMIT_MESSAGE);
+        repo.transferToDockerContainer(host, port);
+
+        job.useScm(GitScm.class)
+                .url(repoUrl)
+                .credentials(USERNAME)
+                .calculateChangelog("origin", "testBranch");
+
+        job.save();
+
+        b = job.startBuild();
+        b.shouldSucceed();
+        changesUrl = b.url("changes");
+
+        assertThat(
+                b.getConsole(),
+                Matchers.containsRegexp("Using 'Changelog to branch' strategy.", Pattern.MULTILINE)
+        );
+
+        assertThat(
+                visit(changesUrl).getPageSource(),
+                Matchers.containsRegexp(TEST_COMMIT_MESSAGE, Pattern.MULTILINE)
+        );
+    }
+
+    ////////////////////
+    // HELPER METHODS //
+    ////////////////////
 
     private String getRevisionFromConsole(String console) {
         Pattern p = Pattern.compile("(?<=\\bRevision\\s)(\\w+)");
