@@ -38,27 +38,6 @@ public class DashboardView extends View {
         super(injector, url);
     }
 
-    public static Matcher<DashboardView> hasWarningsFor(final Job job, final AnalysisPlugin plugin, final int warningsCount) {
-        return new Matcher<DashboardView>(" shows %s warnings for plugin %s and job %s", warningsCount, plugin.getId(), job.name) {
-            @Override
-            public boolean matchesSafely(final DashboardView view) {
-                view.open();
-                try {
-                    WebElement warningsLink = view.find(by.css("a[href='job/" + job.name + "/" + plugin.getId() + "']"));
-                    String linkText = warningsLink.getText();
-                    return Integer.parseInt(linkText) == warningsCount;
-                } catch (NoSuchElementException | NumberFormatException e) {
-                    return false;
-                }
-            }
-
-            @Override
-            public void describeMismatchSafely(final DashboardView view, final Description desc) {
-                desc.appendText("Portlet does not show expected warnings for plugin " + plugin.getId());
-            }
-        };
-    }
-
     /**
      * Adds a new bottom portlet.
      *
@@ -86,5 +65,26 @@ public class DashboardView extends View {
                 return portletClass.cast(p);
         }
         throw new java.util.NoSuchElementException();
+    }
+
+    public static Matcher<DashboardView> hasWarningsFor(final Job job, final AnalysisPlugin plugin, final int warningsCount) {
+        return new Matcher<DashboardView>(" shows %s warnings for plugin %s and job %s", warningsCount, plugin.getId(), job.name) {
+            @Override
+            public boolean matchesSafely(final DashboardView view) {
+                view.open();
+                try {
+                    WebElement warningsLink = view.find(by.css("a[href='job/" + job.name + "/" + plugin.getId() + "']"));
+                    String linkText = warningsLink.getText();
+                    return Integer.parseInt(linkText) == warningsCount;
+                } catch (NoSuchElementException | NumberFormatException e) {
+                    return false;
+                }
+            }
+
+            @Override
+            public void describeMismatchSafely(final DashboardView view, final Description desc) {
+                desc.appendText("Portlet does not show expected warnings for plugin " + plugin.getId());
+            }
+        };
     }
 }
