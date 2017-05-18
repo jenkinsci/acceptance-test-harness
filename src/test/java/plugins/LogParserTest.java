@@ -12,11 +12,13 @@ import org.jenkinsci.test.acceptance.junit.Resource;
 import org.openqa.selenium.WebElement;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.junit.Assert.assertEquals;
 
 @WithPlugins("log-parser")
 public class LogParserTest extends AbstractJUnitTest {
@@ -37,6 +39,45 @@ public class LogParserTest extends AbstractJUnitTest {
         Resource sampleRule = resource("/logparser_plugin/rules/log-parser-rules-sample");
         rules.put("sampleRule", "" + sampleRule.url.getPath());
         addLogParserRules(rules);
+    }
+
+    /**
+     * Test the number of warnings and errors recognized by the plugin.
+     */
+    @Test
+    public void testErrorReporting() throws Exception {
+        FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class, "sampleJob");
+
+        // configure job
+        job.configure(() -> {
+            LogParserPublisher lpp = job.addPublisher(LogParserPublisher.class);
+            lpp.setRule(LogParserPublisher.RuleType.GLOBAL, rules.get("sampleRule"));
+
+            // write sample output
+            Resource sampleRule = resource("/logparser_plugin/console-outputs/sample-log");
+            catToConsole(job, sampleRule.url.getPath());
+        });
+
+        Build build = job.startBuild().waitUntilFinished();
+
+        build.open();
+
+        // Summary has correct values
+        WebElement summary = driver.findElement(By.xpath(SUMMARY + "/td[2]"));
+        assertThat(summary.getText(), is("13 errors, 4 warnings"));
+
+        // Detail has correct values
+        driver.findElement(By.partialLinkText("Parsed Console Output")).click();
+        LogParserOutputPage outputPage = new LogParserOutputPage(build);
+
+        assertThat(outputPage.getNumberOfMatches("Error"), is(13));
+        assertThat(outputPage.getLinkList("Error").size(), is(13));
+
+        assertThat(outputPage.getNumberOfMatches("Warning"), is(4));
+        assertThat(outputPage.getLinkList("Warning").size(), is(4));
+
+        assertThat(outputPage.getNumberOfMatches("Info"), is(2));
+        assertThat(outputPage.getLinkList("Info").size(), is(2));
     }
 
     /**
