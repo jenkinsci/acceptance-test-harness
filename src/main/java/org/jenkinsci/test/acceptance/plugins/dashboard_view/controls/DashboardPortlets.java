@@ -35,6 +35,24 @@ public class DashboardPortlets extends PageAreaImpl {
     }
 
     /**
+     * Enable the Std Job list in this View.
+     *
+     * @param state state, true if included
+     */
+    public void checkIncludeStdJobList(boolean state) {
+        this.includeStdJobList.check(state);
+    }
+
+    /**
+     * Hide the normal Jenkins panels.
+     *
+     * @param state state, true if hidden
+     */
+    public void checkHideJenkinsPanels(boolean state) {
+        this.hideJenkinsPanels.check(state);
+    }
+
+    /**
      * Enable the additional setting of css styles.
      *
      * @param state state, true if enabled

@@ -4,10 +4,17 @@ import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.BuildStatisticsPortlet;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.BuildStatisticsPortlet.JobType;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.controls.ColumnsArea;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.controls.JobFiltersArea;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.junit.Ignore;
 import org.junit.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
-import static org.hamcrest.Matchers.is;
+import java.util.List;
+
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
 @WithPlugins("dashboard-view")
@@ -122,6 +129,135 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
         v.open();
 
         assertThat(stats.getNumberOfBuilds(JobType.TOTAL), is(4));
+    }
+
+    @Test
+    public void configureDashboardNameAndDescription() {
+        final String name = "MyDashboard";
+        final String description = "My Description";
+
+        DashboardView v = jenkins.views.create(DashboardView.class, name);
+        v.configure();
+        {
+            v.mainArea.setName(name);
+            v.mainArea.setDescription(description);
+        }
+        v.save();
+        createFreeStyleJob();
+        v.open();
+
+        final String url = getCurrentUrl();
+        assertThat(url, endsWith(name + "/"));
+
+        final By nameCrumb = By.xpath("//ul[@id=\"breadcrumbs\"]/li[@class=\"item\"][last()]");
+        assertThat(find(nameCrumb).getText(), is(name));
+
+        final By tabName = By.xpath("//div[@id=\"main-panel\"]//div[@class=\"tab active\"]/a");
+        assertThat(find(tabName).getText(), is(name));
+
+        final By descriptionPath = By
+                .xpath("//div[@id=\"main-panel\"]/div[@id=\"view-message\"]/div[@id=\"description\"]/div[1]");
+        assertThat(find(descriptionPath).getText(), is(description));
+    }
+
+    @Test
+    @Ignore
+    public void configureDashboardFilterBuildExecutors() {
+        final boolean filterBuildExecutors = true;
+
+        DashboardView v = jenkins.views.create(DashboardView.class, "Dashboard");
+        v.configure();
+        {
+            v.mainArea.setFilterBuildExecutors(filterBuildExecutors);
+        }
+        v.save();
+        v.open();
+
+        final By executors = By.xpath("//div[@id=\"executors\"]/div[@class=\"row pane-content\"]/table");
+        final List<WebElement> elements = find(executors).findElements(By.xpath("/tbody/tr"));
+        assertThat(elements.size(), is(0));
+    }
+
+    @Test
+    public void changeColumns() {
+
+        DashboardView v = createDashboardView();
+        v.configure();
+        {
+            v.columnsArea.removeAll();
+            v.columnsArea.add(ColumnsArea.Column.NAME);
+            v.columnsArea.add(ColumnsArea.Column.LAST_FAILURE);
+            v.dashboardPortlets.checkIncludeStdJobList(true);
+        }
+        v.save();
+        createFreeStyleJob();
+        v.open();
+
+        final By header = By.xpath("//table[@id=\"projectstatus\"]/tbody/tr[@class=\"header\"]");
+        final List<WebElement> titles = find(header).findElements(By.xpath(".//a"));
+        titles.remove(titles.size() - 1); // last is not a name
+
+        assertThat(titles.size(), is(2));
+        final String[] headers = titles.stream()
+                .map(WebElement::getText)
+                .toArray(String[]::new);
+
+        assertThat(headers[0], containsString(ColumnsArea.Column.NAME.getText()));
+        assertThat(headers[1], containsString(ColumnsArea.Column.LAST_FAILURE.getText()));
+    }
+
+    @Test
+    @Ignore
+    public void configureDashboardFilterOnlyActivatedJobs() {
+
+        DashboardView v = createDashboardView();
+        BuildStatisticsPortlet stats = v.addBottomPortlet(BuildStatisticsPortlet.class);
+        v.configure();
+        {
+            v.jobFilters.setStatusFilter(JobFiltersArea.StatusFilter.ENABLED);
+        }
+        v.save();
+
+        final FreeStyleJob active = createFreeStyleJob();
+        final FreeStyleJob disabled = createFreeStyleJob();
+
+        buildSuccessfulJob(active);
+        buildSuccessfulJob(disabled);
+
+        disabled.configure(disabled::disable);
+
+        v.open();
+        final int numberOfBuilds = stats.getNumberOfBuilds(JobType.TOTAL);
+        assertThat(numberOfBuilds, is(1));
+        final int numberOfDisabled = stats.getNumberOfBuilds(JobType.DISABLED);
+        assertThat(numberOfDisabled, is(0));
+    }
+
+    @Test
+    @Ignore
+    public void configureDashboardFilterOnlyDisabledJobs() {
+
+        DashboardView v = createDashboardView();
+        BuildStatisticsPortlet stats = v.addBottomPortlet(BuildStatisticsPortlet.class);
+        v.configure();
+        {
+            v.jobFilters.setStatusFilter(JobFiltersArea.StatusFilter.DISABLED);
+        }
+        v.save();
+
+        final FreeStyleJob active = createFreeStyleJob();
+        final FreeStyleJob disabled = createFreeStyleJob();
+
+        buildSuccessfulJob(active);
+        buildSuccessfulJob(disabled);
+
+        disabled.configure(disabled::disable);
+
+        v.open();
+        final int numberOfBuilds = stats.getNumberOfBuilds(JobType.TOTAL);
+        assertThat(numberOfBuilds, is(1));
+        final int numberOfDisabled = stats.getNumberOfBuilds(JobType.DISABLED);
+        assertThat(numberOfDisabled, is(1));
     }
 
     /**
