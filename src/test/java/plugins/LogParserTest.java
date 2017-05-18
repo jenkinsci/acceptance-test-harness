@@ -21,6 +21,9 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
 @WithPlugins("log-parser")
 public class LogParserTest extends AbstractJUnitTest {
 
+    // XPath to the summary on the build page
+    private static final String SUMMARY = "//div[@id='main-panel']/table/tbody/tr[3]";
+
     // GlobalConfig for the LogParser-Plugin
     private LogParserGlobalConfig config;
     // Available Rules for the tests
@@ -44,16 +47,16 @@ public class LogParserTest extends AbstractJUnitTest {
         FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class, "fail-job");
 
         // configure invalid route
-        job.configure();
-        LogParserPublisher lpp = job.addPublisher(LogParserPublisher.class);
-        lpp.setRule(LogParserPublisher.RuleType.PROJECT, "invalidPath");
-        job.save();
+        job.configure(() -> {
+            LogParserPublisher lpp = job.addPublisher(LogParserPublisher.class);
+            lpp.setRule(LogParserPublisher.RuleType.PROJECT, "invalidPath");
+        });
 
         Build build = job.startBuild().waitUntilFinished();
 
         // check information on build overview
         build.open();
-        WebElement tableRow = driver.findElement(By.xpath("//table/tbody/tr[3]"));
+        WebElement tableRow = driver.findElement(By.xpath(SUMMARY));
         WebElement icon = tableRow.findElement(By.xpath("td[1]/img"));
         assertThat(icon.getAttribute("src"), containsString("graph.png"));
         WebElement text = tableRow.findElement(By.xpath("td[2]"));
