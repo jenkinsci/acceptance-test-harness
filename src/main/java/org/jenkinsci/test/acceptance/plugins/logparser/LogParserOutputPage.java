@@ -38,47 +38,10 @@ public class LogParserOutputPage extends PageObject {
         super(po.injector, po.url(""));
     }
 
-
-    // URL to return from the opened frame to the default window
-    private String restoreURL = null;
-
-    /**
-     * Opens the defined frame in the current window.
-     *
-     * @param frame Enum of the frame to open in the current window.
-     */
-    public void openFrameInWindow(LogParserFrame frame) {
-        switchToMainframe();
-        WebElement e = driver.findElement(By.xpath("//frame[@name='" + frame.getFrameName() + "']"));
-        restoreURL = driver.getCurrentUrl();
-        driver.navigate().to(e.getAttribute("src"));
-    }
-
-    /**
-     * Returns to the previous window.
-     */
-    public void restoreWindow() {
-        if(restoreURL != null) {
-            driver.navigate().to(restoreURL);
-            restoreURL = null;
-        }
-    }
-
-    /**
-     * Switch focus of the driver to the specified frame.
-     *
-     * @param frame The frame to switch to.
-     */
-    public void switchToFrame(LogParserFrame frame) {
-        switchToMainframe();
-        WebElement e = driver.findElement(By.xpath("//frame[@name='" + frame.getFrameName() + "']"));
-        driver.switchTo().frame(e);
-    }
-
     /**
      * Switch focus back to the default content.
      */
-    public void switchToDefaultContent() {
+    private void switchToDefaultContent() {
         driver.switchTo().defaultContent();
     }
 
@@ -88,5 +51,34 @@ public class LogParserOutputPage extends PageObject {
     private void switchToMainframe() {
         WebElement e = driver.findElement(By.xpath("//div[@id='main-panel']//table//tbody//tr//td//iframe"));
         driver.switchTo().frame(e);
+    }
+    
+    /**
+     * Switch focus of the driver to the specified frame. 
+     * Calls {@link LogParserOutputPage#switchToMainframe()} before switching to the specified frame. 
+     * 
+     * @param frame The frame to switch to. 
+     */
+    private void switchToFrame(LogParserFrame frame) {
+        switchToMainframe();
+        WebElement e = driver.findElement(By.xpath("//frame[@name='" + frame.getFrameName() + "']"));
+        driver.switchTo().frame(e);
+    }
+    
+    /**
+     * Executes the specified action within the context of the target frame and, eventually, restores the context. 
+     * Assertions can be made within the action. 
+     * 
+     * @param targetFrame The frame where the action is performed. 
+     * @param action The action which is performed in the context of the target frame. 
+     */
+    public void executeInFrame(LogParserFrame targetFrame, Runnable action) {
+        try{
+            switchToFrame(targetFrame);
+            action.run();
+        }
+        finally{
+            switchToDefaultContent();
+        }
     }
 }
