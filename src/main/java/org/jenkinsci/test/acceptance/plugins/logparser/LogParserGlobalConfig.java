@@ -15,11 +15,10 @@ public class LogParserGlobalConfig extends PageAreaImpl {
     /**
      * Repeatable-add Button.
      */
-    private final Control addButton;
+    private final Control addButton = control("repeatable-add");
     
     public LogParserGlobalConfig(JenkinsConfig context) {
         super(context, "/hudson-plugins-logparser-LogParserPublisher/log-parser");
-        addButton = control("repeatable-add");
     }
 
     /**
