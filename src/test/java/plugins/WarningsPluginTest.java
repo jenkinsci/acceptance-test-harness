@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
+import java.security.KeyFactory;
+import java.security.PublicKey;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,14 +18,17 @@ import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
+import groovy.lang.DelegatesTo;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.CoreMatchers;
+import org.jenkinsci.test.acceptance.SshKeyPair;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.DockerAgentContainer;
 import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
 import org.jenkinsci.test.acceptance.docker.fixtures.JavaContainer;
 import org.jenkinsci.test.acceptance.docker.fixtures.SshdContainer;
 import org.jenkinsci.test.acceptance.junit.*;
+import org.jenkinsci.test.acceptance.machine.DockerMachineProvider;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
 import org.jenkinsci.test.acceptance.plugins.envinject.EnvInjectConfig;
 import org.jenkinsci.test.acceptance.plugins.matrix_auth.MatrixAuthorizationStrategy;
@@ -53,6 +59,7 @@ import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.is;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 import static org.jenkinsci.test.acceptance.po.PageObject.*;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Tests various aspects of the warnings plug-in. Most tests copy an existing file with several warnings into the
@@ -96,6 +103,44 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
 
     @com.google.inject.Inject
     private DockerContainerHolder<DockerAgentContainer> docker;
+
+    @Inject
+    SshKeyPair keyPair;
+
+    @Inject
+    private DockerContainerHolder<JavaContainer> dockerContainer;
+
+    @Inject
+    private SshdContainer sshdDocker;
+
+    @WithDocker
+    @Test
+    public void dockerMachineTest() throws ExecutionException, InterruptedException {
+        sshdDocker = dockerContainer.get();
+        DumbSlave slave = jenkins.slaves.create(DumbSlave.class);
+
+        slave.setExecutors(1);
+        slave.remoteFS.set("/tmp/");
+        SshSlaveLauncher launcher = slave.setLauncher(SshSlaveLauncher.class);
+
+        launcher.host.set(sshdDocker.ipBound(22));
+        launcher.port(sshdDocker.port(22));
+        launcher.setSshHostKeyVerificationStrategy(SshSlaveLauncher.NonVerifyingKeyVerificationStrategy.class);
+        launcher.keyCredentials("test", sshdDocker.getPrivateKeyString());
+
+        slave.save();
+
+        slave.waitUntilOnline();
+
+        assertTrue(slave.isOnline());
+
+        //DockerMachineProvider dockerProvider = new DockerMachineProvider(12345, 54321, "192.168.178.142", "TestUser", keyPair);
+        //SshSlaveController controller = new SshSlaveController(dockerProvider.get(), keyPair, 30);
+        //Slave slave = controller.install(jenkins).get();
+        //System.err.println("Disconnecting slave.");
+        //slave.disconnect("Disconnecting slave.");
+
+    }
 
     @WithDocker
     @Test
