@@ -1,30 +1,12 @@
 package plugins;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URLEncoder;
-import java.security.GeneralSecurityException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import java.util.concurrent.ExecutionException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.inject.Inject;
-
-import org.apache.commons.io.IOUtils;
-import org.hamcrest.CoreMatchers;
-import org.jenkinsci.test.acceptance.SshKeyPair;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.DockerAgentContainer;
-import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
-import org.jenkinsci.test.acceptance.docker.fixtures.JavaContainer;
 import org.jenkinsci.test.acceptance.docker.fixtures.SshdContainer;
-import org.jenkinsci.test.acceptance.junit.*;
+import org.jenkinsci.test.acceptance.junit.DockerTest;
+import org.jenkinsci.test.acceptance.junit.SmokeTest;
+import org.jenkinsci.test.acceptance.junit.WithDocker;
+import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisAction;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
 import org.jenkinsci.test.acceptance.plugins.envinject.EnvInjectConfig;
@@ -34,25 +16,29 @@ import org.jenkinsci.test.acceptance.plugins.script_security.ScriptApproval;
 import org.jenkinsci.test.acceptance.plugins.ssh_slaves.SshSlaveLauncher;
 import org.jenkinsci.test.acceptance.plugins.warnings.*;
 import org.jenkinsci.test.acceptance.po.*;
-import org.jenkinsci.test.acceptance.slave.SlaveController;
-import org.jenkinsci.test.acceptance.slave.SshSlaveController;
-import org.jenkinsci.test.acceptance.slave.SshSlaveProvider;
-import org.jenkinsci.utils.process.CommandBuilder;
-import org.junit.Assume;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
 import org.openqa.selenium.By;
 import org.openqa.selenium.StaleElementReferenceException;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.*;
+import javax.inject.Inject;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URLEncoder;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.jenkinsci.test.acceptance.Matchers.*;
-import static org.jenkinsci.test.acceptance.po.PageObject.*;
+import static org.jenkinsci.test.acceptance.po.PageObject.createRandomName;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -100,9 +86,67 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
 
 
     @com.google.inject.Inject
-    private DockerContainerHolder<JavaContainer> dockerContainer;
+    private DockerContainerHolder<DockerAgentContainer> dockerContainer;
+    @Inject
     private SshdContainer sshdDocker;
 
+    @WithDocker
+    @Test
+    public void dockerMachineTest() throws ExecutionException, InterruptedException {
+        sshdDocker = dockerContainer.get();
+        DumbSlave slave = jenkins.slaves.create(DumbSlave.class);
+
+        slave.setExecutors(1);
+        slave.remoteFS.set("/tmp/");
+        SshSlaveLauncher launcher = slave.setLauncher(SshSlaveLauncher.class);
+
+        launcher.host.set(sshdDocker.ipBound(22));
+        launcher.port(sshdDocker.port(22));
+        launcher.setSshHostKeyVerificationStrategy(SshSlaveLauncher.NonVerifyingKeyVerificationStrategy.class);
+        launcher.keyCredentials("test", sshdDocker.getPrivateKeyString());
+
+        slave.save();
+
+        slave.waitUntilOnline();
+        
+        assertTrue(slave.isOnline());
+
+        FreeStyleJob job = jenkins.jobs.create();
+        job.configure();
+        job.setLabelExpression(slave.getName());
+        job.save();
+        job.startBuild().shouldSucceed();
+
+        job.configure();
+        job.copyResource(resource("/warnings_plugin/WarningMain.java"));
+        ShellBuildStep shellBuildStep = job.addBuildStep(ShellBuildStep.class);
+        shellBuildStep.command("javac -Xlint:all WarningMain.java");
+        WarningsPublisher warningsPublisher = job.addPublisher(WarningsPublisher.class);
+        warningsPublisher.addConsoleScanner(JAVA_ID);
+
+        job.save();
+        //job.startBuild().shouldSucceed();
+
+        //job.shouldBeTiedToLabel(slave.getName());
+        Build build = buildSuccessfulJob(job);
+        //Build build = job.startBuild().shouldSucceed();
+
+        assertThatActionExists(job, build, "Java Warnings");
+
+        WarningsAction action = createJavaResultAction(build);
+
+        action.open();
+
+        String resultString = action.getLinkedSourceFileText(AnalysisAction.Tab.DETAILS, "WarningMain.java", 26);
+        assertThat(resultString, is("26     TextClass text2 = (TextClass) text;"));
+
+        //DockerMachineProvider dockerProvider = new DockerMachineProvider(12345, 54321, "192.168.178.142", "TestUser", keyPair);
+        //SshSlaveController controller = new SshSlaveController(dockerProvider.get(), keyPair, 30);
+        //Slave slave = controller.install(jenkins).get();
+        //System.err.println("Disconnecting slave.");
+        //slave.disconnect("Disconnecting slave.");
+
+    }
 
     @WithDocker
     @Test
