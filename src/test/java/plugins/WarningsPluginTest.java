@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
+import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,23 +18,21 @@ import javax.inject.Inject;
 
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.CoreMatchers;
+import org.jenkinsci.test.acceptance.SshKeyPair;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.DockerAgentContainer;
 import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
 import org.jenkinsci.test.acceptance.docker.fixtures.JavaContainer;
 import org.jenkinsci.test.acceptance.docker.fixtures.SshdContainer;
 import org.jenkinsci.test.acceptance.junit.*;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisAction;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
 import org.jenkinsci.test.acceptance.plugins.envinject.EnvInjectConfig;
 import org.jenkinsci.test.acceptance.plugins.matrix_auth.MatrixAuthorizationStrategy;
 import org.jenkinsci.test.acceptance.plugins.mock_security_realm.MockSecurityRealm;
 import org.jenkinsci.test.acceptance.plugins.script_security.ScriptApproval;
 import org.jenkinsci.test.acceptance.plugins.ssh_slaves.SshSlaveLauncher;
-import org.jenkinsci.test.acceptance.plugins.warnings.GroovyParser;
-import org.jenkinsci.test.acceptance.plugins.warnings.ParsersConfiguration;
-import org.jenkinsci.test.acceptance.plugins.warnings.WarningsAction;
-import org.jenkinsci.test.acceptance.plugins.warnings.WarningsBuildSettings;
-import org.jenkinsci.test.acceptance.plugins.warnings.WarningsColumn;
+import org.jenkinsci.test.acceptance.plugins.warnings.*;
 import org.jenkinsci.test.acceptance.po.*;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.jenkinsci.test.acceptance.slave.SshSlaveController;
@@ -46,6 +45,7 @@ import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
 import org.openqa.selenium.By;
 import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -53,6 +53,7 @@ import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.is;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 import static org.jenkinsci.test.acceptance.po.PageObject.*;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Tests various aspects of the warnings plug-in. Most tests copy an existing file with several warnings into the
@@ -93,46 +94,64 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
             + "String all = matcher.group(1);\n"
             + "Priority test = Priority.NORMAL;\n"
             + "return new Warning(all, 42, all, all, all);";
+    public static final String WARNING_MAIN_JAVA_26 = "WarningMain.java:26";
+    public static final String RESOURCE_WARNING_MAIN_JAVA = "/warnings_plugin/WarningMain.java";
+    public static final String CMD_WARNING_MAIN_JAVA = "javac -Xlint:all WarningMain.java";
+
 
     @com.google.inject.Inject
-    private DockerContainerHolder<DockerAgentContainer> docker;
+    private DockerContainerHolder<JavaContainer> dockerContainer;
+    private SshdContainer sshdDocker;
+
 
     @WithDocker
     @Test
-    public void test() throws IOException, InterruptedException, ExecutionException {
+    public void dockerMachineTest2() throws ExecutionException, InterruptedException {
+        sshdDocker = dockerContainer.get();
         DumbSlave slave = jenkins.slaves.create(DumbSlave.class);
+
         slave.setExecutors(1);
-        slave.setLabels("SlaveBuilder");
-        slave.remoteFS.set("/home/test"); // TODO perhaps should be a constant in SshdContainer
+        slave.remoteFS.set("/tmp/");
         SshSlaveLauncher launcher = slave.setLauncher(SshSlaveLauncher.class);
-        Process proc = new ProcessBuilder("stat", "-c", "%g", "/var/run/docker.sock").start();
-        String group = IOUtils.toString(proc.getInputStream()).trim();
-        Assume.assumeThat("docker.sock can be statted", proc.waitFor(), is(0));
-        try {
-            Integer.parseInt(group);
-        } catch (NumberFormatException x) {
-            Assume.assumeNoException("unexpected output from stat on docker.sock", x);
-        }
-        // Note that we need to link to the Git container both on the agent, for the benefit of JGit (TODO pending JENKINS-30600), and in the build container, for the benefit of git-pull:
-        DockerAgentContainer agentContainer = docker.get();
-        launcher.host.set(agentContainer.ipBound(22));
-        launcher.port(agentContainer.port(22));
-        System.out.println(agentContainer.getPrivateKeyString());
-        System.out.println("IP:" + agentContainer.ipBound(22));
-        System.out.println("Port: " + agentContainer.port(22));
-        agentContainer.cp("/home/test/workspace/test.txt", "/tmp/aaa");
 
+        launcher.host.set(sshdDocker.ipBound(22));
+        launcher.port(sshdDocker.port(22));
+        launcher.setSshHostKeyVerificationStrategy(SshSlaveLauncher.NonVerifyingKeyVerificationStrategy.class);
+        launcher.keyCredentials("test", sshdDocker.getPrivateKeyString());
 
-        launcher.keyCredentials("root", agentContainer.getPrivateKeyString());
         slave.save();
 
-        FreeStyleJob j = jenkins.jobs.create();
-        j.setLabelExpression("SlaveBuilder");
-        j.save();
+        slave.waitUntilOnline();
 
-        Build b = j.startBuild().shouldSucceed();
-        j.shouldBeTiedToLabel("SlaveBuilder");
-        assertThat(b.getNode(), CoreMatchers.is(slave));
+        assertTrue(slave.isOnline());
+
+        FreeStyleJob job = jenkins.jobs.create();
+        job.configure();
+        job.setLabelExpression(slave.getName());
+        job.save();
+        job.startBuild().shouldSucceed();
+
+        job.configure();
+        job.copyResource(resource(RESOURCE_WARNING_MAIN_JAVA));
+        ShellBuildStep shellBuildStep = job.addBuildStep(ShellBuildStep.class);
+        shellBuildStep.command(CMD_WARNING_MAIN_JAVA);
+        WarningsPublisher warningsPublisher = job.addPublisher(WarningsPublisher.class);
+        warningsPublisher.addConsoleScanner(JAVA_ID);
+
+        job.save();
+        Build build = job.startBuild().shouldSucceed();
+
+        assertThatActionExists(job, build, "Java Warnings");
+
+        WarningsAction action = createJavaResultAction(build);
+        assertThatWarningsCountInSummaryIs(action, 1);
+
+
+        String codeLine =  action.getLinkedSourceFileText(AnalysisAction.Tab.DETAILS,"WarningMain.java", 26);
+
+        String[] codeLineArr =  codeLine.trim().split("\\s+", 2);
+        assertThat("Warning should be at line",codeLineArr[0], is("26"));
+        assertThat("Assert faild comparing code line is",codeLineArr[1], is("TextClass text2 = (TextClass) text;"));
 
 
     }
