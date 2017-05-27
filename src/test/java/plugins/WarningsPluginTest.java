@@ -29,17 +29,14 @@ import org.jenkinsci.test.acceptance.docker.fixtures.JavaContainer;
 import org.jenkinsci.test.acceptance.docker.fixtures.SshdContainer;
 import org.jenkinsci.test.acceptance.junit.*;
 import org.jenkinsci.test.acceptance.machine.DockerMachineProvider;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisAction;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
 import org.jenkinsci.test.acceptance.plugins.envinject.EnvInjectConfig;
 import org.jenkinsci.test.acceptance.plugins.matrix_auth.MatrixAuthorizationStrategy;
 import org.jenkinsci.test.acceptance.plugins.mock_security_realm.MockSecurityRealm;
 import org.jenkinsci.test.acceptance.plugins.script_security.ScriptApproval;
 import org.jenkinsci.test.acceptance.plugins.ssh_slaves.SshSlaveLauncher;
-import org.jenkinsci.test.acceptance.plugins.warnings.GroovyParser;
-import org.jenkinsci.test.acceptance.plugins.warnings.ParsersConfiguration;
-import org.jenkinsci.test.acceptance.plugins.warnings.WarningsAction;
-import org.jenkinsci.test.acceptance.plugins.warnings.WarningsBuildSettings;
-import org.jenkinsci.test.acceptance.plugins.warnings.WarningsColumn;
+import org.jenkinsci.test.acceptance.plugins.warnings.*;
 import org.jenkinsci.test.acceptance.po.*;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.jenkinsci.test.acceptance.slave.SshSlaveController;
@@ -131,8 +128,37 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         slave.save();
 
         slave.waitUntilOnline();
-
+        
         assertTrue(slave.isOnline());
+
+        FreeStyleJob job = jenkins.jobs.create();
+        job.configure();
+        job.setLabelExpression(slave.getName());
+        job.save();
+        job.startBuild().shouldSucceed();
+
+        job.configure();
+        job.copyResource(resource("/warnings_plugin/WarningMain.java"));
+        ShellBuildStep shellBuildStep = job.addBuildStep(ShellBuildStep.class);
+        shellBuildStep.command("javac -Xlint:all WarningMain.java");
+        WarningsPublisher warningsPublisher = job.addPublisher(WarningsPublisher.class);
+        warningsPublisher.addConsoleScanner(JAVA_ID);
+
+        job.save();
+        //job.startBuild().shouldSucceed();
+
+        //job.shouldBeTiedToLabel(slave.getName());
+        Build build = buildSuccessfulJob(job);
+        //Build build = job.startBuild().shouldSucceed();
+
+        assertThatActionExists(job, build, "Java Warnings");
+
+        WarningsAction action = createJavaResultAction(build);
+
+        action.open();
+
+        String resultString = action.getLinkedSourceFileText(AnalysisAction.Tab.DETAILS, "WarningMain.java", 26);
+        assertThat(resultString, is("26     TextClass text2 = (TextClass) text;"));
 
         //DockerMachineProvider dockerProvider = new DockerMachineProvider(12345, 54321, "192.168.178.142", "TestUser", keyPair);
         //SshSlaveController controller = new SshSlaveController(dockerProvider.get(), keyPair, 30);
