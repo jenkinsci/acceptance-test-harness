@@ -16,6 +16,10 @@ public class ViewsMixIn extends MixIn {
         super(context);
     }
 
+    public <T extends View> T create(final Class<T> type) {
+        return create(type, createRandomName());
+    }
+
     public <T extends View> T create(final Class<T> type, String name) {
 
         final Finder<WebElement> finder = new Finder<WebElement>() {
