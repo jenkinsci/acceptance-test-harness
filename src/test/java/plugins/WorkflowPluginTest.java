@@ -207,7 +207,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
     @Test public void sshGitInsideDocker() throws Exception {
         GitContainer gitContainer = gitServer.get();
         GitRepo repo = new GitRepo();
-        repo.commit("Initial commit");
+        repo.changeAndCommitFoo("Initial commit");
         repo.transferToDockerContainer(gitContainer.host(), gitContainer.port());
         DumbSlave slave = jenkins.slaves.create(DumbSlave.class);
         slave.setExecutors(1);

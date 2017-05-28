@@ -1,12 +1,6 @@
 package plugins;
 
 import javax.inject.Inject;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -49,9 +43,6 @@ import org.jvnet.hudson.test.Issue;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
-
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.SftpException;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.CoreMatchers.containsString;
@@ -365,27 +356,15 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
     }
 
     private String createGitRepositoryInDockerContainer() {
-        try {
-            GitRepo repo = new GitRepo();
-            Path source = Paths.get(getClass().getResource(ANALYSIS_COLLECTOR_PLUGIN_RESOURCES).toURI());
+        GitRepo repo = new GitRepo();
+        repo.addFilesIn(getClass().getResource(ANALYSIS_COLLECTOR_PLUGIN_RESOURCES));
+        repo.commit("Initial commit in master");
+        repo.createBranch("branch");
 
-            try (DirectoryStream<Path> paths = Files.newDirectoryStream(source)) {
-                for (Path path : paths) {
-                    Files.copy(path, repo.path(path.getFileName()));
-                }
-            }
-            repo.git("add", "*");
-            repo.git("commit", "-m", "Initial commit in master");
-            repo.git("branch", "branch");
+        GitContainer container = gitForMultiBranch.get();
+        repo.transferToDockerContainer(container.host(), container.port());
 
-            GitContainer container = gitForMultiBranch.get();
-            repo.transferToDockerContainer(container.host(), container.port());
-
-            return container.getRepoUrl();
-        }
-        catch (IOException | InterruptedException | URISyntaxException | JSchException | SftpException e) {
-            throw new AssertionError(e);
-        }
+        return container.getRepoUrl();
     }
 
     private WarningsPerProjectPortlet addWarningsPortlet(DashboardView dashboard) {
