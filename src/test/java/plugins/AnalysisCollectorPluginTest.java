@@ -259,7 +259,7 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
         FreeStyleJob job = createFreeStyleJob();
         buildSuccessfulJob(job);
 
-        ListView view = jenkins.views.create(ListView.class, createRandomName());
+        ListView view = jenkins.views.create(ListView.class);
         view.configure();
         view.matchAllJobs();
         view.addColumn(AnalysisCollectorColumn.class);

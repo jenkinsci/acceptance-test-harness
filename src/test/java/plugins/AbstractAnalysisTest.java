@@ -38,6 +38,7 @@ import org.jenkinsci.test.acceptance.plugins.email_ext.EmailExtPublisher;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenBuildStep;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
+import org.jenkinsci.test.acceptance.plugins.nested_view.NestedView;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Container;
 import org.jenkinsci.test.acceptance.po.Folder;
@@ -130,16 +131,23 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
     }
 
     /**
-     * Sets up a job within a folder. Verifies that the project action from the job redirects to the result
-     * of the last build. Checks the correct number of warnings in the project overview and
-     * result details view. Finally checks if the warnings-per-project portlet and warnings column show the
+     * Sets up a nested view that contains a dashboard view with a warnings-per-project portlet.
+     * Creates a folder in this view and a freestyle job in this folder.
+     * Finally checks if the warnings-per-project portlet and warnings column show the
      * correct number of warnings and provide a direct link to the actual warning results.
      */
-    @Test @Issue({"JENKINS-39947", "JENKINS-39950"}) @WithPlugins({"dashboard-view", "cloudbees-folder"})
+    @Test @Issue("JENKINS-39947") @WithPlugins({"dashboard-view", "nested-view", "cloudbees-folder", "analysis-core@1.87"})
     public void should_show_warnings_in_folder() {
-        Folder folder = jenkins.jobs.create(Folder.class, jenkins.createRandomName());
-        folder.save();
+        NestedView nested = jenkins.getViews().create(NestedView.class);
 
+        DashboardView dashboard = nested.getViews().create(DashboardView.class);
+        dashboard.configure(() -> {
+            dashboard.matchAllJobs();
+            dashboard.checkRecurseIntoFolders();
+        });
+
+        Folder folder = dashboard.jobs.create(Folder.class);
+        folder.save();
         folder.open();
 
         FreeStyleJob job = createFreeStyleJob(folder);
@@ -147,7 +155,10 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
 
         P projectAction = createProjectAction(job);
 
-        addDashboardViewAndBottomPortlet(projectAction.getTablePortlet(), folder);
+        dashboard.configure(() -> {
+            dashboard.addBottomPortlet(projectAction.getTablePortlet());
+        });
+
         verifyPortlet(projectAction);
 
         addListViewColumn(projectAction.getViewColumn(), folder);
