@@ -4,6 +4,8 @@ import org.jenkinsci.test.acceptance.po.PageObject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+import java.util.List;
+
 /**
  * The logparser plugin uses two frames.
  *
@@ -64,20 +66,37 @@ public class LogParserOutputPage extends PageObject {
         WebElement e = driver.findElement(By.xpath("//frame[@name='" + frame.getFrameName() + "']"));
         driver.switchTo().frame(e);
     }
-    
+
     /**
-     * Executes the specified action within the context of the target frame and, eventually, restores the context. 
-     * Assertions can be made within the action. 
-     * 
-     * @param targetFrame The frame where the action is performed. 
-     * @param action The action which is performed in the context of the target frame. 
+     * Get the number of matches identified by the logparser for one category.
+     * @param category The name of the category.
+     * @return The number of matches.
+     * @throws Exception Number not found or number not correctly extracted.
      */
-    public void executeInFrame(LogParserFrame targetFrame, Runnable action) {
-        try{
-            switchToFrame(targetFrame);
-            action.run();
+    public int getNumberOfMatches(String category) throws Exception {
+        try {
+            switchToFrame(LogParserFrame.SIDEBAR);
+            WebElement link = driver.findElement(By.partialLinkText(category));
+            // text looks like "Error (5)"
+            String text = link.getText();
+            text = text.substring(category.length() + 2, text.indexOf(")"));
+            return Integer.parseInt(text);
+        } finally {
+            switchToDefaultContent();
         }
-        finally{
+    }
+
+    /**
+     * Get a list of all links for one category.
+     * @param category The name of the category.
+     * @return The list elements belonging to this category.
+     * @throws Exception The list elements are not found.
+     */
+    public List<WebElement> getLinkList(String category) throws Exception {
+        try {
+            switchToFrame(LogParserFrame.SIDEBAR);
+            return driver.findElements(By.xpath("//ul[@id='" + category + "']/li"));
+        } finally {
             switchToDefaultContent();
         }
     }
