@@ -17,7 +17,7 @@ users:
 runcmd:
   - [ "set", "-x" ]
   - [ "mkdir", "/usr/local/java/" ]
-  - [ "curl", "-LSs", "-o", "/usr/local/java/java.tar.gz", "http://download.oracle.com/otn-pub/java/jdk/8u51-b16/jdk-8u51-linux-x64.tar.gz", "-H", "Cookie: oraclelicense=accept-securebackup-cookie" ]
+  - [ "curl", "-LSs", "-o", "/usr/local/java/java.tar.gz", "http://download.oracle.com/otn-pub/java/jdk/8u131-b11/d54c1d3a095b4ff2b6607d096fa80163/jdk-8u131-linux-x64.tar.gz", "-H", "Cookie: oraclelicense=accept-securebackup-cookie" ]
   - [ "tar", "xf", "/usr/local/java/java.tar.gz", "-C",  "/usr/local/java/", "--strip-components=1" ]
   - [ "curl", "-LSs", "-o", "/tmp/slave.jar", "http://repo.jenkins-ci.org/releases/org/jenkins-ci/main/remoting/3.4.1/remoting-3.4.1.jar" ]
   - [ "sh", "-c", "/usr/local/java/bin/java -jar /tmp/slave.jar -jnlpUrl ${SLAVE_JNLP_URL} &" ]
