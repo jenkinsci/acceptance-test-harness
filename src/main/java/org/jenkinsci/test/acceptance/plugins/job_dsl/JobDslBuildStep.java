@@ -24,6 +24,7 @@ public class JobDslBuildStep extends AbstractStep implements BuildStep {
 
     private final Control removedJobAction = control("removedJobAction");
     private final Control removedViewAction = control("removedViewAction");
+    private final Control removedConfigFilesAction = control("removedConfigFilesAction");
 
     private final Control advanced = control(by.xpath("//td[table[@class='advancedBody']/tbody/tr/td[@class='setting-main']/select[@name='_.lookupStrategy']]/div[@class='advancedLink']//button"));
 
@@ -192,6 +193,22 @@ public class JobDslBuildStep extends AbstractStep implements BuildStep {
      */
     public JobDslRemovedViewAction getRemovedViewAction() {
         return JobDslRemovedViewAction.valueOf(removedViewAction.get());
+    }
+
+    /**
+     * Set what to do when a previously generated config file is not referenced anymore.
+     * @param action The action to select. An element of the type {@link JobDslRemovedConfigFilesAction}.
+     */
+    public void setRemovedConfigFilesAction(JobDslRemovedConfigFilesAction action) {
+        removedConfigFilesAction.select(action.toString());
+    }
+
+    /**
+     * Determines what to do when a previously generated config file is not referenced anymore.
+     * @return The selected action for removed config files. An element of the type {@link JobDslRemovedConfigFilesAction}.
+     */
+    public JobDslRemovedConfigFilesAction getRemovedConfigFilesAction() {
+        return JobDslRemovedConfigFilesAction.valueOf(removedConfigFilesAction.get());
     }
 
     /**

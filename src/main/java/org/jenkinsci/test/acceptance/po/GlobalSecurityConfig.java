@@ -86,4 +86,13 @@ public class GlobalSecurityConfig extends ContainerPageObject {
 
         return newInstance(type, this, radio.getAttribute("path"));
     }
+
+    /**
+     * Decides whether script security for Job DSL scripts is enabled.
+     *
+     * @param enable Use script security if true.
+     */
+    public void setJobDslScriptSecurity(boolean enable) {
+        control(by.name("_.useScriptSecurity")).check(enable);
+    }
 }
