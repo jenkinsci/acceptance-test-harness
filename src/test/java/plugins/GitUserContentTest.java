@@ -40,6 +40,8 @@ public class GitUserContentTest extends AbstractJUnitTest {
                 "    git url: '%suserContent.git/'\n" +
                 "    writeFile encoding: 'UTF-8', file: '%s', text: '%s'\n" +
                 "    sh 'git add %s'\n" +
+                "    sh 'git config user.email \"you@example.com\"'\n" +
+                "    sh 'git config user.name \"Your Name\"'\n" +
                 "    sh 'git commit -m \"Including new file\"'\n" +
                 "    sh 'git push --set-upstream origin master'\n" +
                 "}", jenkins.url, NEW_FILE_NAME, NEW_FILE_CONTENT, NEW_FILE_NAME));
