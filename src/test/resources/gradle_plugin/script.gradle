@@ -24,3 +24,14 @@ task secondTask {
         println 'Second!'
     }
 }
+
+task environmentVariables << {
+    ext.env = System.getenv()
+    ext.buildNumber = env.BUILD_NUMBER?.toInteger()
+    println "Build Number: $buildNumber"
+    
+    ext.buildName = env.BUILD_DISPLAY_NAME?.toString()
+
+    ext.jobName = env.JOB_NAME?.toString()
+    println "Build Name: $jobName $buildName"
+}
