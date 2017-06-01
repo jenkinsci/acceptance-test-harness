@@ -94,4 +94,21 @@ public class GradlePluginTest extends AbstractJUnitTest {
         assertThat(build.getConsole(), containsString("Second!"));
     }
 
+    @Test
+    public void run_gradle_environment_variables(){
+        final String gradleInstallationName = "Default";
+        GradleInstallation.installGradle(jenkins, gradleInstallationName, GradleInstallation.LATEST_VERSION);
+
+        final FreeStyleJob job = jenkins.jobs.create();
+        job.copyResource(resource("/gradle_plugin/script.gradle"), "build.gradle");
+        final GradleStep step = job.addBuildStep(GradleStep.class);
+        step.useVersion(gradleInstallationName);
+        step.tasks.set("environmentVariables");
+        job.save();
+
+        final Build build = job.startBuild().shouldSucceed();
+        assertThat(build.getConsole(), containsString("Build Number: " + build.getNumber()));
+        assertThat(build.getConsole(), containsString("Build Name: " + build.getName()));
+    }
+
 }
