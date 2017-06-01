@@ -23,7 +23,6 @@
  */
 package plugins;
 
-import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.gradle.GradleInstallation;
@@ -32,13 +31,15 @@ import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
 
-import java.util.regex.Pattern;
+import static org.jenkinsci.test.acceptance.Matchers.containsRegexp;
+import static org.jenkinsci.test.acceptance.Matchers.containsString;
+import static org.junit.Assert.assertThat;
 
 @WithPlugins("gradle")
 public class GradlePluginTest extends AbstractJUnitTest {
 
     @Test
-    public void run_gradle_scirpt() {
+    public void run_gradle_script() {
         final String gradleInstallationName = "Default";
         GradleInstallation.installGradle(jenkins, gradleInstallationName, GradleInstallation.LATEST_VERSION);
 
@@ -52,8 +53,8 @@ public class GradlePluginTest extends AbstractJUnitTest {
 
         final Build build = job.startBuild();
         build.shouldSucceed();
-        Matchers.containsRegexp("Hello world!", Pattern.MULTILINE);
-        Matchers.containsRegexp("gradle.* --quiet", Pattern.MULTILINE);
+        assertThat(build.getConsole(), containsString("Hello world!"));
+        assertThat(build.getConsole(), containsRegexp("gradle.* --quiet"));
     }
 
     @Test
@@ -69,7 +70,28 @@ public class GradlePluginTest extends AbstractJUnitTest {
         step.dir.set("gradle");
         job.save();
 
-        job.startBuild().shouldSucceed();
-        Matchers.containsRegexp("Hello world!", Pattern.MULTILINE);
+        final Build build = job.startBuild();
+        build.shouldSucceed();
+        assertThat(build.getConsole(), containsString("Hello world!"));
     }
+
+
+    @Test
+    public void run_gradle_script_multiple_tasks() {
+        final String gradleInstallationName = "Default";
+        GradleInstallation.installGradle(jenkins, gradleInstallationName, GradleInstallation.LATEST_VERSION);
+
+        final FreeStyleJob job = jenkins.jobs.create();
+        job.copyResource(resource("/gradle_plugin/script.gradle"), "build.gradle");
+        final GradleStep step = job.addBuildStep(GradleStep.class);
+        step.useVersion(gradleInstallationName);
+        step.tasks.set("firstTask secondTask");
+        job.save();
+
+        final Build build = job.startBuild();
+        build.shouldSucceed();
+        assertThat(build.getConsole(), containsString("First!"));
+        assertThat(build.getConsole(), containsString("Second!"));
+    }
+
 }

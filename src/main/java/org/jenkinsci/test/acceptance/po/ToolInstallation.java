@@ -80,8 +80,7 @@ public abstract class ToolInstallation extends PageAreaImpl {
         final Control button = page.control(by.button("Add " + name));
 
         String pathPrefix = button.resolve().getAttribute("path").replaceAll("repeatable-add", "tool");
-        String path = page.createPageArea(pathPrefix, () -> button.click());
-        System.out.println("Path: " + path);
+        String path = page.createPageArea(pathPrefix, button::click);
         return page.newInstance(type, jenkins, path);
     }
 
@@ -93,7 +92,9 @@ public abstract class ToolInstallation extends PageAreaImpl {
         ConfigurablePageObject tools = ensureConfigPage(jenkins);
         T maven = addTool(jenkins, type);
         maven.name.set(name);
-        maven.installVersion(version);
+        if(version != null) {
+            maven.installVersion(version);
+        }
         tools.save();
     }
 

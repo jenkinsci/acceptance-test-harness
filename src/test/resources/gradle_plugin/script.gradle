@@ -3,3 +3,15 @@ task hello {
         println 'Hello world!'
     }
 }
+
+task firstTask {
+    doLast {
+        println 'First!'
+    }
+}
+
+task secondTask {
+    doLast {
+        println 'Second!'
+    }
+}
