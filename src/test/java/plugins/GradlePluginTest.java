@@ -29,6 +29,8 @@ import org.jenkinsci.test.acceptance.plugins.gradle.GradleInstallation;
 import org.jenkinsci.test.acceptance.plugins.gradle.GradleStep;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.Parameter;
+import org.jenkinsci.test.acceptance.po.StringParameter;
 import org.junit.Test;
 
 import static org.jenkinsci.test.acceptance.Matchers.containsRegexp;
@@ -92,6 +94,26 @@ public class GradlePluginTest extends AbstractJUnitTest {
         build.shouldSucceed();
         assertThat(build.getConsole(), containsString("First!"));
         assertThat(build.getConsole(), containsString("Second!"));
+    }
+
+    @Test
+    public void run_gradle_job_parameters(){
+        final String gradleInstallationName = "Default";
+        GradleInstallation.installGradle(jenkins, gradleInstallationName, GradleInstallation.LATEST_VERSION);
+
+        final FreeStyleJob job = jenkins.jobs.create();
+        job.copyResource(resource("/gradle_plugin/script.gradle"), "build.gradle");
+        job.addParameter(StringParameter.class).setName("TEST_PARAM_1").setDefault("hello");
+        job.addParameter(StringParameter.class).setName("TEST_PARAM_2").setDefault("world");
+
+        final GradleStep step = job.addBuildStep(GradleStep.class);
+        step.useVersion(gradleInstallationName);
+        step.tasks.set("jobParameters");
+        step.passAsProperties.click();
+        job.save();
+
+        final Build build = job.startBuild().shouldSucceed();
+        assertThat(build.getConsole(), containsString("Gradle Properties: hello world"));
     }
 
 }

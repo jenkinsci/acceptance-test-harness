@@ -32,6 +32,7 @@ public class GradleStep extends AbstractStep implements BuildStep {
     public final Control dir = control("rootBuildScriptDir");
     public final Control switches = control("switches");
     public final Control tasks = control("tasks");
+    public final Control passAsProperties = control("passAsProperties");
 
     public GradleStep(Job parent, String path) {
         super(parent, path);

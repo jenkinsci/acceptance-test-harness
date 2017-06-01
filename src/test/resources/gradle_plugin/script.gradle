@@ -15,3 +15,7 @@ task secondTask {
         println 'Second!'
     }
 }
+
+task jobParameters << {
+    println "Gradle Properties: $project.TEST_PARAM_1 $project.TEST_PARAM_2"
+}
