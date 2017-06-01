@@ -3,6 +3,6 @@ node {
            echo 'cloned'
     }
     stage ('Unstable') {
-            currentBuild.result = 'FAILURE'
+            currentBuild.result = 'UNSTABLE'
     }
 }

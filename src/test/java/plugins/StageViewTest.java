@@ -77,7 +77,7 @@ public class StageViewTest extends AbstractJUnitTest{
         job.open();
         stageView = new StageView(job, JOB_PATH);
         assertThat(stageView.getStageViewHeadlines().get(0).toString(),containsString("Clone sources"));
-        assertThat(stageView.getStageViewHeadlines().get(1).toString(),containsString("build"));
+        assertThat(stageView.getStageViewHeadlines().get(1).toString(),containsString("Build"));
     }
 
     /**
@@ -106,7 +106,7 @@ public class StageViewTest extends AbstractJUnitTest{
     @Test
     public void stageViewContainsMultipleStagesWithUnstable() throws Exception {
         WorkflowJob job = this.saveWorkflowJobWithFile(MUTLI_JOB_UNSTABLE);
-        Build build = job.startBuild().shouldFail();
+        Build build = job.startBuild().shouldBeUnstable();
         job.open();
         job.getNavigationLinks();
         stageView = new StageView(job, JOB_PATH);
@@ -114,7 +114,6 @@ public class StageViewTest extends AbstractJUnitTest{
         String secondJob = stageView.getLatestBuild().getStageViewItem(1).toString();
         assertThat(stageView.getLatestBuild().getCssClasses(),containsString("UNSTABLE"));
         assertThat(firstJob,containsString("ms"));
-        assertThat(secondJob,containsString("failed"));
     }
 
     /**
@@ -125,7 +124,7 @@ public class StageViewTest extends AbstractJUnitTest{
     @Test
     public void stageViewContainsMultipleStagesWithAborted() throws Exception {
         WorkflowJob job = this.saveWorkflowJobWithFile(MUTLI_JOB_ABORTED);
-        Build build = job.startBuild().shouldFail();
+        Build build = job.startBuild().shouldAbort();
         job.open();
         job.getNavigationLinks();
         stageView = new StageView(job, JOB_PATH);
