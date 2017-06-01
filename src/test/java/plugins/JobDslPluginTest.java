@@ -91,11 +91,8 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         assertThat(jobDsl.isUseScriptText(), is(true));
         assertThat(jobDsl.getScript(), equalTo(script));
 
-        final GlobalSecurityConfig security = new GlobalSecurityConfig(jenkins);
-        security.open();
-
-        JenkinsDatabaseSecurityRealm realm = security.useRealm(JenkinsDatabaseSecurityRealm.class);
-        security.save();
+        setUpSecurity();
+        jenkins.login().doLogin(ADMIN);
 
         seedJob.edit(() -> jobDsl.setUseSandbox(true));
         seedJob.configure();
@@ -135,9 +132,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         jobDsl.setScriptTargetsOnFilesystem("CreateFolder.groovy");
         seedJob.save();
         seedJob.scheduleBuild().shouldFail();
-        seedJob.edit(() -> {
-            jobDsl.setIgnoreMissingFiles(true);
-        });
+        seedJob.edit(() -> jobDsl.setIgnoreMissingFiles(true));
         seedJob.scheduleBuild().shouldSucceed();
     }
 
@@ -170,9 +165,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         assertThat(build.getConsole(), containsRegexp(expected));
         checkDescription(existingJob, "Existing description");
 
-        seedJob.edit(() -> {
-            jobDsl.setIgnoreExisting(false);
-        });
+        seedJob.edit(() -> jobDsl.setIgnoreExisting(false));
         Build build2 = seedJob.scheduleBuild().shouldSucceed();
         assertThat(build2.getConsole(), containsRegexp(expected));
         checkDescription(existingJob, "This is a description");
@@ -207,9 +200,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         assertThat(build.getConsole(), containsRegexp(expected));
         checkDescription(existingView, "Existing description");
 
-        seedJob.edit(() -> {
-            jobDsl.setIgnoreExisting(false);
-        });
+        seedJob.edit(() -> jobDsl.setIgnoreExisting(false));
         Build build2 = seedJob.scheduleBuild().shouldSucceed();
         assertThat(build2.getConsole(), containsRegexp(expected));
         checkDescription(existingView, "This is a description");
@@ -533,7 +524,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
     public void should_use_script_security() {
         GlobalSecurityConfig sc = setUpSecurity();
 
-        jenkins.login().doLogin("user");
+        jenkins.login().doLogin(USER);
         FreeStyleJob seedJob = createSeedJob();
         JobDslBuildStep jobDsl = seedJob.addBuildStep(JobDslBuildStep.class);
         jobDsl.setScript("job('New_Job')");
@@ -545,7 +536,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         assertThat(build.getConsole(), containsString("script not yet approved for use"));
 
         jenkins.logout();
-        jenkins.login().doLogin("admin");
+        jenkins.login().doLogin(ADMIN);
 
         // Build should fail because script is saved from non administrator an not yet approved
         Build build2 = seedJob.scheduleBuild().shouldFail();
@@ -554,10 +545,10 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         sc.edit(() -> sc.setJobDslScriptSecurity(false));
 
         jenkins.logout();
-        jenkins.login().doLogin("user");
+        jenkins.login().doLogin(USER);
 
         // Build should succeed because script is approved now
-        Build build3 = seedJob.scheduleBuild().shouldSucceed();
+        seedJob.scheduleBuild().shouldSucceed();
         getJob("New_Job").open();
     }
 
@@ -570,9 +561,9 @@ public class JobDslPluginTest extends AbstractJUnitTest {
      */
     @Test @WithPlugins({"matrix-auth","mock-security-realm"})
     public void should_use_script_approval() {
-        GlobalSecurityConfig sc = setUpSecurity();
+        setUpSecurity();
 
-        jenkins.login().doLogin("user");
+        jenkins.login().doLogin(USER);
         FreeStyleJob seedJob = createSeedJob();
         JobDslBuildStep jobDsl = seedJob.addBuildStep(JobDslBuildStep.class);
         jobDsl.setScript("job('New_Job')");
@@ -584,7 +575,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         assertThat(build.getConsole(), containsString("script not yet approved for use"));
 
         jenkins.logout();
-        jenkins.login().doLogin("admin");
+        jenkins.login().doLogin(ADMIN);
 
         // Build should fail because script is saved from non administrator an not yet approved
         Build build2 = seedJob.scheduleBuild().shouldFail();
@@ -595,10 +586,10 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         sa.find(seedJob.name).approve();
 
         jenkins.logout();
-        jenkins.login().doLogin("user");
+        jenkins.login().doLogin(USER);
 
         // Build should succeed because script is approved now
-        Build build3 = seedJob.scheduleBuild().shouldSucceed();
+        seedJob.scheduleBuild().shouldSucceed();
         getJob("New_Job").open();
     }
 
@@ -612,9 +603,9 @@ public class JobDslPluginTest extends AbstractJUnitTest {
      */
     @Test @WithPlugins({"matrix-auth","mock-security-realm"})
     public void should_approve_administrator_script_automatically() {
-        GlobalSecurityConfig sc = setUpSecurity();
+        setUpSecurity();
 
-        jenkins.login().doLogin("user");
+        jenkins.login().doLogin(USER);
         FreeStyleJob seedJob = createSeedJob();
         JobDslBuildStep jobDsl = seedJob.addBuildStep(JobDslBuildStep.class);
         jobDsl.setScript("job('New_Job')");
@@ -626,7 +617,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         assertThat(build.getConsole(), containsString("script not yet approved for use"));
 
         jenkins.logout();
-        jenkins.login().doLogin("admin");
+        jenkins.login().doLogin(ADMIN);
 
         // Build should fail because script is saved from non administrator an not yet approved
         Build build2 = seedJob.scheduleBuild().shouldFail();
@@ -635,10 +626,10 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         seedJob.save();
 
         jenkins.logout();
-        jenkins.login().doLogin("user");
+        jenkins.login().doLogin(USER);
 
         // Build should succeed because job was saved from administrator
-        Build build3 = seedJob.scheduleBuild().shouldSucceed();
+        seedJob.scheduleBuild().shouldSucceed();
         getJob("New_Job").open();
     }
 
@@ -652,7 +643,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         GlobalSecurityConfig sc = setUpSecurity();
         runBuildAsUserWhoTriggered(sc);
 
-        jenkins.login().doLogin("user");
+        jenkins.login().doLogin(USER);
         FreeStyleJob seedJob = createSeedJob();
         JobDslBuildStep jobDsl = seedJob.addBuildStep(JobDslBuildStep.class);
         jobDsl.setScript("job('New_Job')");
@@ -667,7 +658,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
 
         // Build should succeed because the script runs in Groovy sandbox
         // and only Job DSL methods are used.
-        Build build2 = seedJob.scheduleBuild().shouldSucceed();
+        seedJob.scheduleBuild().shouldSucceed();
         getJob("New_Job").open();
     }
 
@@ -683,7 +674,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         GlobalSecurityConfig sc = setUpSecurity();
         runBuildAsUserWhoTriggered(sc);
 
-        jenkins.login().doLogin("user");
+        jenkins.login().doLogin(USER);
         FreeStyleJob seedJob = createSeedJob();
         JobDslBuildStep jobDsl = seedJob.addBuildStep(JobDslBuildStep.class);
         jobDsl.setScript("def jobNames = [\"First_Job\", \"Second_Job\"].toArray()\n" +
@@ -700,17 +691,17 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         assertThat(build.getConsole(), containsString("Scripts not permitted to use method java.util.Collection toArray"));
 
         jenkins.logout();
-        jenkins.login().doLogin("admin");
+        jenkins.login().doLogin(ADMIN);
 
         ScriptApproval sa = new ScriptApproval(jenkins);
         sa.open();
         sa.findSignature("toArray").approve();
 
         jenkins.logout();
-        jenkins.login().doLogin("user");
+        jenkins.login().doLogin(USER);
 
         // Build should succeed because the not whitelisted content was approved.
-        Build build2 = seedJob.scheduleBuild().shouldSucceed();
+        seedJob.scheduleBuild().shouldSucceed();
         getJob("New_Job").open();
     }
 
@@ -723,7 +714,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
     public void should_run_grooy_sandbox_as_particular_user() {
         GlobalSecurityConfig sc = setUpSecurity();
 
-        jenkins.login().doLogin("user");
+        jenkins.login().doLogin(USER);
         FreeStyleJob seedJob = createSeedJob();
         JobDslBuildStep jobDsl = seedJob.addBuildStep(JobDslBuildStep.class);
         jobDsl.setScript("job('New_Job')");
@@ -737,9 +728,9 @@ public class JobDslPluginTest extends AbstractJUnitTest {
 
         runBuildAsUserWhoTriggered(sc);
 
-        jenkins.login().doLogin("user");
+        jenkins.login().doLogin(USER);
         // Build should succeed because now a particular user is specified
-        Build build2 = seedJob.scheduleBuild().shouldSucceed();
+        seedJob.scheduleBuild().shouldSucceed();
         getJob("New_Job").open();
     }
 
