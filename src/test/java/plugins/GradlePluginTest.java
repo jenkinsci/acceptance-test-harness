@@ -102,8 +102,10 @@ public class GradlePluginTest extends AbstractJUnitTest {
         final FreeStyleJob job = jenkins.jobs.create();
         GradleWrapper.addWrapperStep(job);
         job.save();
+        
         final Build build = job.startBuild();
         build.shouldSucceed();
         assertThat(build.getConsole(), containsString(successFullBuild));
     }
+
 }
