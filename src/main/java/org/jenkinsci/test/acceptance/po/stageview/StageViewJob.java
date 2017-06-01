@@ -10,28 +10,28 @@ import java.util.List;
  */
 public class StageViewJob {
 
-private WebElement webWebElement;
-private List<StageViewStage> stageViewStages;
-        String buildNo;
-        String color;
+    private WebElement webWebElement;
+    private List<StageViewStage> stageViewStages;
+    String buildNo;
+    String color;
 
-public StageViewJob(WebElement webElement, List<StageViewStage> stageViewStages) {
+    public StageViewJob(WebElement webElement, List<StageViewStage> stageViewStages) {
         this.webWebElement = webElement;
         this.stageViewStages = stageViewStages;
         this.buildNo = webWebElement.getAttribute("data-runid");
-        }
+    }
 
-public Collection<StageViewStage> getAllStageViewItem() {
+    public List<StageViewStage> getAllStageViewItem() {
         return this.stageViewStages;
-        }
+    }
 
-public StageViewStage getStageViewItem(int buildNumber) {
-        return this.stageViewStages.get(stageViewStages.size()-1);
-        }
+    public StageViewStage getStageViewItem(int buildNumber) {
+        return this.stageViewStages.get(stageViewStages.size() - 1);
+    }
 
-        @Override
-        public String toString() {
-        return this.buildNo + " - " + webWebElement.getText().replace("\n", "");
-        }
+    @Override
+    public String toString() {
+        return this.buildNo + " - " + webWebElement.getText().replace("\n", "") ;
+    }
 
 }

@@ -30,6 +30,8 @@ public class StageViewTest extends AbstractJUnitTest{
     public static final String SINGLE_JOB = "stageview_plugin/single_job.txt";
     public static final String MULTI_JOB = "stageview_plugin/multi_job.txt";
     public static final String MUTLI_JOB_FAIL = "stageview_plugin/multi_job_fail.txt";
+    public static final String MUTLI_JOB_ABORTED = "stageview_plugin/multi_job_aborted.txt";
+    public static final String MUTLI_JOB_UNSTABLE = "stageview_plugin/multi_job_unstable.txt";
 
     public static final String JOB_PATH = "/job/Pipeline-Test/";
 
@@ -65,23 +67,6 @@ public class StageViewTest extends AbstractJUnitTest{
     }
 
     /**
-     * Does check multiple formattings on the stage view. So far unordered.
-     * @throws Exception
-     */
-    @Test
-    public void stageViewContainsStageNames() throws Exception {
-        WorkflowJob job = this.saveWorkflowJobWithFile(SINGLE_JOB);
-        Build build = job.startBuild().shouldSucceed();
-        job.open();
-        stageView = new StageView(job, JOB_PATH);
-
-        WebElement webElement = this.driver.findElement(By.xpath("//*[@id=\"pipeline-box\"]/div/div/table/thead/tr"));
-        assertThat(webElement.getText(),containsString("Clone sources"));
-        assertThat(driver.getPageSource(),containsString("SUCCESS"));
-        assertThat(driver.getPageSource(),containsString("Average stage times"));
-    }
-
-    /**
      * Does check multiple jobs in the stage view.
      * @throws Exception
      */
@@ -97,11 +82,44 @@ public class StageViewTest extends AbstractJUnitTest{
 
     /**
      * Does check multiple jobs in the stage view. One with a failed, and one with a success.
-     * //TODO check the color of these jobs
      * @throws Exception
      */
     @Test
     public void stageViewContainsMultipleStagesWithFail() throws Exception {
+        WorkflowJob job = this.saveWorkflowJobWithFile(MUTLI_JOB_FAIL);
+        Build build = job.startBuild().shouldFail();
+        job.open();
+        job.getNavigationLinks();
+        stageView = new StageView(job, JOB_PATH);
+        String firstJob = stageView.getLatestBuild().getStageViewItem(0).toString();
+        String secondJob = stageView.getLatestBuild().getStageViewItem(1).toString();
+        assertThat(firstJob,containsString("ms"));
+        assertThat(secondJob,containsString("failed"));
+    }
+
+    /**
+     * Does check multiple jobs in the stage view. One with a unsable, and one with a success.
+     * @throws Exception
+     */
+    @Test
+    public void stageViewContainsMultipleStagesWithUnstable() throws Exception {
+        WorkflowJob job = this.saveWorkflowJobWithFile(MUTLI_JOB_FAIL);
+        Build build = job.startBuild().shouldFail();
+        job.open();
+        job.getNavigationLinks();
+        stageView = new StageView(job, JOB_PATH);
+        String firstJob = stageView.getLatestBuild().getStageViewItem(0).toString();
+        String secondJob = stageView.getLatestBuild().getStageViewItem(1).toString();
+        assertThat(firstJob,containsString("ms"));
+        assertThat(secondJob,containsString("failed"));
+    }
+
+    /**
+     * Does check multiple jobs in the stage view. One with a aborted, and one with a success.
+     * @throws Exception
+     */
+    @Test
+    public void stageViewContainsMultipleStagesWithAborted() throws Exception {
         WorkflowJob job = this.saveWorkflowJobWithFile(MUTLI_JOB_FAIL);
         Build build = job.startBuild().shouldFail();
         job.open();
