@@ -102,8 +102,8 @@ public class ArtifactoryPluginTest extends AbstractJUnitTest {
         ArtifactoryGradleConfiguratior gradleConfig = new ArtifactoryGradleConfiguratior(job);
         gradleConfig.refresh();
         GradleStep gradle = job.addBuildStep(GradleStep.class);
-        gradle.name.select("gradle 2.0");
-        gradle.tasks.set("build"); // gradle.tasks.set("build --stacktrace --debug");
+        gradle.setVersion("gradle 2.0");
+        gradle.setTasks("build"); // gradle.tasks.set("build --stacktrace --debug");
         job.save();
 
         Build build = job.startBuild().shouldSucceed();

@@ -23,26 +23,52 @@
  */
 package org.jenkinsci.test.acceptance.plugins.gradle;
 
+import hudson.util.VersionNumber;
 import org.jenkinsci.test.acceptance.po.*;
 
 @Describable("Invoke Gradle script")
 public class GradleStep extends AbstractStep implements BuildStep {
-    public final Control name = control("");
-    public final Control file = control("buildFile");
-    public final Control dir = control("rootBuildScriptDir");
-    public final Control switches = control("switches");
-    public final Control tasks = control("tasks");
+    private final Control file = control("buildFile");
+    private final Control dir = control("rootBuildScriptDir");
+    private final Control switches = control("switches");
+    private final Control tasks = control("tasks");
 
     public GradleStep(Job parent, String path) {
         super(parent, path);
     }
 
-    public void useVersion(String version) {
+    private void ensureAdvancedOptionsOpen() {
+        if (parent.getJenkins().getPlugin("gradle").getVersion().compareTo(new VersionNumber("1.26")) > 0) {
+            control("advanced-button").click();
+        }
+    }
+
+    public void setVersion(String version) {
         String path = parent.getJenkins().getPlugin("gradle").isOlderThan("1.24")
-                ? "useWrapper[false]/gradleName"
-                : "gradleName"
-        ;
+            ? "useWrapper[false]/gradleName"
+            : "gradleName"
+            ;
 
         control(path).select(version);
+    }
+
+    public void setFile(final String file) {
+        ensureAdvancedOptionsOpen();
+        this.file.set(file);
+    }
+
+    public void setDir(final String dir) {
+        ensureAdvancedOptionsOpen();
+        this.dir.set(dir);
+    }
+
+    public void setSwitches(final String switches) {
+        ensureAdvancedOptionsOpen();
+        this.switches.set(switches);
+    }
+
+    public void setTasks(final String tasks) {
+        ensureAdvancedOptionsOpen();
+        this.tasks.set(tasks);
     }
 }
