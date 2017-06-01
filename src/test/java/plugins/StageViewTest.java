@@ -13,8 +13,7 @@ import java.io.InputStreamReader;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.*;
 
 /**
  * Created by boris on 17.04.17.
@@ -50,7 +49,31 @@ public class StageViewTest extends AbstractJUnitTest{
         job.open();
         stageView = new StageView(job, JOB_PATH);
         assertThat(stageView.getRootElementName().getText(),containsString("Stage View"));
-        //assertThat(stageView.getRootElementName().getText(),containsString("Stage View"));
+    }
+
+    /**
+     * This tests verfies the hieght of the diplay. The standard hieght is 11 of the maximum builds dislayed.
+     */
+    @Test
+    public void multiBuildJobShouldContainCorrectNumberOfJobsBuilt() {
+        WorkflowJob job = this.saveWorkflowJobWithFile(SINGLE_JOB);
+        Build build = null;
+        for (int i = 0; i < 8; i++) {
+            build = job.startBuild().shouldSucceed();
+        }
+        assertThat(build,notNullValue());
+        job.open();
+
+        stageView = new StageView(job, JOB_PATH);
+        assertThat(stageView.getAllStageViewJobs().size(),is(8)); //as not max display
+
+        for (int i = 0; i < 10; i++) {
+            build = job.startBuild().shouldSucceed();
+        }
+        assertThat(build,notNullValue());
+        job.open();
+        stageView = new StageView(job, JOB_PATH);
+        assertThat(stageView.getAllStageViewJobs().size(),is(11));//max diplay is 11
     }
 
     /**
