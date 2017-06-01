@@ -27,6 +27,7 @@ import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.gradle.GradleInstallation;
 import org.jenkinsci.test.acceptance.plugins.gradle.GradleStep;
+import org.jenkinsci.test.acceptance.plugins.gradle.GradleWrapper;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
@@ -40,6 +41,8 @@ import static org.junit.Assert.assertThat;
 
 @WithPlugins("gradle")
 public class GradlePluginTest extends AbstractJUnitTest {
+
+    final private static String successFullBuild = "Finished: SUCCESS";
 
     @Test
     public void run_gradle_script() {
@@ -77,7 +80,7 @@ public class GradlePluginTest extends AbstractJUnitTest {
         build.shouldSucceed();
         assertThat(build.getConsole(), containsString("Hello world!"));
     }
-    
+
     @Test
     public void run_gradle_script_multiple_tasks() {
         final String gradleInstallationName = "Default";
@@ -132,5 +135,17 @@ public class GradlePluginTest extends AbstractJUnitTest {
         build.openStatusPage();
         final WebElement buildScanLink = build.find(By.partialLinkText("Gradle Build Scan"));
         assertThat(buildScanLink.getAttribute("href"), containsString("https://gradle.com/"));
+    }
+
+    @Test
+    public void run_gradle_script_with_wrapper(){
+        GradleInstallation.installGradle(jenkins, "Default", GradleInstallation.LATEST_VERSION);
+        final FreeStyleJob job = jenkins.jobs.create();
+        GradleWrapper.addWrapperStep(job);
+        job.save();
+        
+        final Build build = job.startBuild();
+        build.shouldSucceed();
+        assertThat(build.getConsole(), containsString(successFullBuild));
     }
 }

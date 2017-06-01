@@ -32,6 +32,8 @@ public class GradleStep extends AbstractStep implements BuildStep {
     private final Control dir = control("rootBuildScriptDir");
     private final Control switches = control("switches");
     private final Control tasks = control("tasks");
+    private final Control useWrapper = control("useWrapper[true]");
+    private final Control makeWrapperExecutable = control("makeExecutable");
 
     public GradleStep(Job parent, String path) {
         super(parent, path);
@@ -70,5 +72,15 @@ public class GradleStep extends AbstractStep implements BuildStep {
     public void setTasks(final String tasks) {
         ensureAdvancedOptionsOpen();
         this.tasks.set(tasks);
+    }
+
+    public void setUseWrapper(){
+        ensureAdvancedOptionsOpen();
+        this.useWrapper.click();
+    }
+
+    public void setMakeWrapperExecutable(){
+        ensureAdvancedOptionsOpen();
+        this.makeWrapperExecutable.click();
     }
 }
