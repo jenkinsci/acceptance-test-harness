@@ -98,7 +98,7 @@ public class GradlePluginTest extends AbstractJUnitTest {
 
     @Test
     public void run_gradle_script_with_wrapper(){
-        GradleInstallation.installGradle(jenkins, "gradle-3.5", GradleInstallation.LATEST_VERSION);
+        GradleInstallation.installGradle(jenkins, "Default", GradleInstallation.LATEST_VERSION);
         final FreeStyleJob job = jenkins.jobs.create();
         GradleWrapper.addWrapperStep(job);
         job.save();
