@@ -93,42 +93,46 @@ public class StageViewTest extends AbstractJUnitTest{
         stageView = new StageView(job, JOB_PATH);
         String firstJob = stageView.getLatestBuild().getStageViewItem(0).toString();
         String secondJob = stageView.getLatestBuild().getStageViewItem(1).toString();
+        assertThat(stageView.getLatestBuild().getCssClasses(),containsString("FAILED"));
         assertThat(firstJob,containsString("ms"));
         assertThat(secondJob,containsString("failed"));
     }
 
     /**
-     * Does check multiple jobs in the stage view. One with a unsable, and one with a success.
+     * Does check multiple jobs in the stage view. One with a unstable, and one with a success. Unstable jobs
+     * are represented with yellow color and represented with the css class "UNSTABLE".
      * @throws Exception
      */
     @Test
     public void stageViewContainsMultipleStagesWithUnstable() throws Exception {
-        WorkflowJob job = this.saveWorkflowJobWithFile(MUTLI_JOB_FAIL);
+        WorkflowJob job = this.saveWorkflowJobWithFile(MUTLI_JOB_UNSTABLE);
         Build build = job.startBuild().shouldFail();
         job.open();
         job.getNavigationLinks();
         stageView = new StageView(job, JOB_PATH);
         String firstJob = stageView.getLatestBuild().getStageViewItem(0).toString();
         String secondJob = stageView.getLatestBuild().getStageViewItem(1).toString();
+        assertThat(stageView.getLatestBuild().getCssClasses(),containsString("UNSTABLE"));
         assertThat(firstJob,containsString("ms"));
         assertThat(secondJob,containsString("failed"));
     }
 
     /**
-     * Does check multiple jobs in the stage view. One with a aborted, and one with a success.
+     * Does check multiple jobs in the stage view. One with a success, and one with aborted.
+     * Aborted jobs are not represented in the satgeview. They are also shown green.
      * @throws Exception
      */
     @Test
     public void stageViewContainsMultipleStagesWithAborted() throws Exception {
-        WorkflowJob job = this.saveWorkflowJobWithFile(MUTLI_JOB_FAIL);
+        WorkflowJob job = this.saveWorkflowJobWithFile(MUTLI_JOB_ABORTED);
         Build build = job.startBuild().shouldFail();
         job.open();
         job.getNavigationLinks();
         stageView = new StageView(job, JOB_PATH);
         String firstJob = stageView.getLatestBuild().getStageViewItem(0).toString();
         String secondJob = stageView.getLatestBuild().getStageViewItem(1).toString();
+        assertThat(stageView.getLatestBuild().getCssClasses(),containsString("ABORTED"));
         assertThat(firstJob,containsString("ms"));
-        assertThat(secondJob,containsString("failed"));
     }
 
     /**
