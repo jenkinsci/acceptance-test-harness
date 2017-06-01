@@ -25,6 +25,7 @@ task secondTask {
     }
 }
 
+
 task environmentVariables << {
     ext.env = System.getenv()
     ext.buildNumber = env.BUILD_NUMBER?.toInteger()
@@ -35,3 +36,8 @@ task environmentVariables << {
     ext.jobName = env.JOB_NAME?.toString()
     println "Build Name: $jobName $buildName"
 }
+
+task jobParameters << {
+    println "Gradle Properties: $project.TEST_PARAM_1 $project.TEST_PARAM_2"
+}
+

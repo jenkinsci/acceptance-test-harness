@@ -28,12 +28,14 @@ import org.jenkinsci.test.acceptance.po.*;
 
 @Describable("Invoke Gradle script")
 public class GradleStep extends AbstractStep implements BuildStep {
+
     private final Control file = control("buildFile");
     private final Control dir = control("rootBuildScriptDir");
     private final Control switches = control("switches");
     private final Control tasks = control("tasks");
     private final Control useWrapper = control("useWrapper[true]");
     private final Control makeWrapperExecutable = control("makeExecutable");
+    private final Control passAsProperties = control("passAsProperties");
 
     public GradleStep(Job parent, String path) {
         super(parent, path);
@@ -82,5 +84,10 @@ public class GradleStep extends AbstractStep implements BuildStep {
     public void setMakeWrapperExecutable(){
         ensureAdvancedOptionsOpen();
         this.makeWrapperExecutable.click();
+    }
+
+    public void setPassAsProperties(){
+        ensureAdvancedOptionsOpen();
+        this.passAsProperties.click();
     }
 }
