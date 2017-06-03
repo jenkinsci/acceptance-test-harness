@@ -10,6 +10,7 @@ import org.jenkinsci.test.acceptance.plugins.matrix_auth.MatrixRow;
 import org.jenkinsci.test.acceptance.plugins.mock_security_realm.MockSecurityRealm;
 import org.jenkinsci.test.acceptance.plugins.script_security.ScriptApproval;
 import org.jenkinsci.test.acceptance.po.*;
+import org.jenkinsci.test.acceptance.update_center.PluginSpec;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -20,6 +21,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Acceptance tests for the Job DSL plugin.
@@ -441,6 +443,15 @@ public class JobDslPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void should_fail_on_missing_plugin() {
+        assumeTrue("This test requires a restartable Jenkins", jenkins.canRestart());
+        // check if plugin is installed. if true, disable plugin
+        PluginSpec pluginSpec = new PluginSpec("chucknorris");
+        PluginManager pm = jenkins.getPluginManager();
+        if (pm.isInstalled(pluginSpec)) {
+            pm.enablePlugin(pluginSpec, false);
+            jenkins.restart();
+        }
+
         FreeStyleJob seedJob = createSeedJob();
         JobDslBuildStep jobDsl = seedJob.addBuildStep(JobDslBuildStep.class);
         jobDsl.setScript("job('New_Job') {\n" +
