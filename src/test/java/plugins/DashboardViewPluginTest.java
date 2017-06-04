@@ -4,9 +4,16 @@ import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.BuildStatisticsPortlet;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.BuildStatisticsPortlet.JobType;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.TestStatisticsChartPortlet;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.UnstableJobsPortlet;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.JUnitPublisher;
 import org.junit.Test;
+
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
 import static org.hamcrest.Matchers.is;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
@@ -189,6 +196,31 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
         v.open();
 
         assertThat(stats.getNumberOfBuilds(JobType.TOTAL), is(4));
+    }
+
+    @Test
+    public void testStatisticsChart_success() throws IOException {
+        DashboardView v = createDashboardView();
+        TestStatisticsChartPortlet chart = v.addBottomPortlet(TestStatisticsChartPortlet.class);
+        v.save();
+
+        FreeStyleJob successJob = createFreeStyleJob(job -> {
+            String resultFileName = "status.xml";
+            job.addShellStep(
+                "echo '<testsuite><testcase classname=\"\"><failure>\n" +
+                    "</testcase></testsuite>'>" + resultFileName
+            );
+            job.addPublisher(JUnitPublisher.class).testResults.set(resultFileName);
+        });
+
+        buildSuccessfulJob(successJob);
+
+        v.open();
+
+        File testImageFile = new File("dashboardview_plugin/test_statistics_chart/success.png");
+        BufferedImage testImage = ImageIO.read(testImageFile);
+
+        assertThat(chart.getImage(), is(testImage));
     }
 
     /**
