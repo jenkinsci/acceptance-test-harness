@@ -35,7 +35,7 @@ public class TestStatisticsChartPortlet extends AbstractDashboardViewPortlet {
      * @throws NoSuchElementException if the chart is not found
      */
     public WebElement getChart() throws NoSuchElementException {
-        return find(By.xpath("//div[contains(.,'Test Statistics Chart')]/following::img[0]"));
+        return find(By.xpath("//div[contains(.,'Test Statistics Chart')]/following::img[1]"));
     }
 
     /**
@@ -45,7 +45,7 @@ public class TestStatisticsChartPortlet extends AbstractDashboardViewPortlet {
      * @throws IOException if the chart is not found
      */
     public BufferedImage getImage() throws IOException {
-        URL imageUrl = new URL(getCurrentUrl() + getChart().getAttribute("src"));
+        URL imageUrl = new URL(getChart().getAttribute("src"));
         return ImageIO.read(imageUrl);
     }
 

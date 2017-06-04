@@ -1,5 +1,6 @@
 package plugins;
 
+import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.BuildStatisticsPortlet;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.BuildStatisticsPortlet.JobType;
@@ -12,7 +13,6 @@ import org.junit.Test;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 
 import static org.hamcrest.Matchers.is;
@@ -207,7 +207,7 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
         FreeStyleJob successJob = createFreeStyleJob(job -> {
             String resultFileName = "status.xml";
             job.addShellStep(
-                "echo '<testsuite><testcase classname=\"\"><failure>\n" +
+                "echo '<testsuite><testcase classname=\"\">" +
                     "</testcase></testsuite>'>" + resultFileName
             );
             job.addPublisher(JUnitPublisher.class).testResults.set(resultFileName);
@@ -217,10 +217,72 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
 
         v.open();
 
-        File testImageFile = new File("dashboardview_plugin/test_statistics_chart/success.png");
-        BufferedImage testImage = ImageIO.read(testImageFile);
+        Resource testImageResource = resource("/dashboardview_plugin/test_statistics_chart/success.png");
+        BufferedImage testImage = ImageIO.read(testImageResource.asFile());
 
-        assertThat(chart.getImage(), is(testImage));
+        checkImages(chart.getImage(), testImage);
+    }
+
+    @Test
+    public void testStatisticsChart_failure() throws IOException {
+        DashboardView v = createDashboardView();
+        TestStatisticsChartPortlet chart = v.addBottomPortlet(TestStatisticsChartPortlet.class);
+        v.save();
+
+        FreeStyleJob unstableFreeStyleJob = createUnstableFreeStyleJob();
+
+        buildUnstableJob(unstableFreeStyleJob);
+
+        v.open();
+
+        Resource testImageResource = resource("/dashboardview_plugin/test_statistics_chart/failure.png");
+        BufferedImage testImage = ImageIO.read(testImageResource.asFile());
+
+        checkImages(chart.getImage(), testImage);
+    }
+
+    @Test
+    public void testStatisticsChart_failureAndSuccess() throws IOException {
+        DashboardView v = createDashboardView();
+        TestStatisticsChartPortlet chart = v.addBottomPortlet(TestStatisticsChartPortlet.class);
+        v.save();
+
+        FreeStyleJob unstableFreeStyleJob = createUnstableFreeStyleJob();
+        FreeStyleJob successJob = createFreeStyleJob(job -> {
+            String resultFileName = "status.xml";
+            job.addShellStep(
+                "echo '<testsuite><testcase classname=\"\">" +
+                    "</testcase></testsuite>'>" + resultFileName
+            );
+            job.addPublisher(JUnitPublisher.class).testResults.set(resultFileName);
+        });
+
+        buildSuccessfulJob(successJob);
+        buildUnstableJob(unstableFreeStyleJob);
+
+        v.open();
+
+        Resource testImageResource = resource("/dashboardview_plugin/test_statistics_chart/success_failure.png");
+        BufferedImage testImage = ImageIO.read(testImageResource.asFile());
+
+        checkImages(chart.getImage(), testImage);
+    }
+
+    /**
+     * Checks an image pixel by pixel if it's the same as the other image.
+     *
+     * @param actualImage image to test
+     * @param testImage   image to test against
+     */
+    private void checkImages(BufferedImage actualImage, BufferedImage testImage) {
+        assertThat(actualImage.getHeight(), is(testImage.getHeight()));
+        assertThat(actualImage.getWidth(), is(testImage.getWidth()));
+
+        for (int x = 0; x < testImage.getWidth(); x++) {
+            for (int y = 0; y < testImage.getHeight(); y++) {
+                assertThat(actualImage.getRGB(x, y), is(testImage.getRGB(x, y)));
+            }
+        }
     }
 
     /**
