@@ -13,7 +13,7 @@ import org.openqa.selenium.WebElement;
 import static org.hamcrest.MatcherAssert.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 
-@WithPlugins("mission-control")
+@WithPlugins("mission-control-view")
 public class MissionControlTest extends AbstractJUnitTest {
 
     /**
