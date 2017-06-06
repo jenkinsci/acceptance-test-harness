@@ -35,14 +35,16 @@ public class GradleStep extends AbstractStep implements BuildStep {
     private final Control tasks = control("tasks");
     private final Control useWrapper = control("useWrapper[true]");
     private final Control makeWrapperExecutable = control("makeExecutable");
-    private final Control passAsProperties = control("passAsProperties");
+    private final Control passAllAsProjectProperties = control("passAllAsProjectProperties");
+    private final Control passAllAsSystemProperties = control("passAllAsSystemProperties");
+    private final Control forceGradleHomeToUseWorkspace = control("useWorkspaceAsHome");
 
     public GradleStep(Job parent, String path) {
         super(parent, path);
     }
 
     private void ensureAdvancedOptionsOpen() {
-        if (parent.getJenkins().getPlugin("gradle").getVersion().compareTo(new VersionNumber("1.26")) > 0) {
+        if(control("advanced-button").exists()) {
             control("advanced-button").click();
         }
     }
@@ -86,8 +88,19 @@ public class GradleStep extends AbstractStep implements BuildStep {
         this.makeWrapperExecutable.click();
     }
 
-    public void setPassAsProperties(){
+    public void setPassAllAsProjectProperties(){
         ensureAdvancedOptionsOpen();
-        this.passAsProperties.click();
+        this.passAllAsProjectProperties.click();
     }
+
+    public void setPassAllAsSystemProperties(){
+        ensureAdvancedOptionsOpen();
+        this.passAllAsSystemProperties.click();
+    }
+
+    public void setForceGradleHomeToUseWorkspace(){
+        ensureAdvancedOptionsOpen();
+        this.forceGradleHomeToUseWorkspace.click();
+    }
+
 }

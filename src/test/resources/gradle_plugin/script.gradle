@@ -37,7 +37,12 @@ task environmentVariables << {
     println "Build Name: $jobName $buildName"
 }
 
-task jobParameters << {
+task jobParametersAsProjectProperties << {
     println "Gradle Properties: $project.TEST_PARAM_1 $project.TEST_PARAM_2"
 }
 
+task jobParametersAsSystemProperties {
+    doLast {
+        println "Gradle Properties: " + System.properties.getProperty('TEST_PARAM_1') + " " + System.properties.getProperty('TEST_PARAM_2')
+    }
+}
