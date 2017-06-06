@@ -96,7 +96,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         setUpSecurity();
         jenkins.login().doLogin(ADMIN);
 
-        seedJob.edit(() -> jobDsl.setUseSandbox(true));
+        seedJob.configure(() -> jobDsl.setUseSandbox(true));
         seedJob.configure();
         assertThat(jobDsl.isUseSandbox(), is(true));
     }
@@ -134,7 +134,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         jobDsl.setScriptTargetsOnFilesystem("CreateFolder.groovy");
         seedJob.save();
         seedJob.scheduleBuild().shouldFail();
-        seedJob.edit(() -> jobDsl.setIgnoreMissingFiles(true));
+        seedJob.configure(() -> jobDsl.setIgnoreMissingFiles(true));
         seedJob.scheduleBuild().shouldSucceed();
     }
 
@@ -155,7 +155,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         seedJob.scheduleBuild().shouldSucceed();
         FreeStyleJob existingJob = getJob("Existing_Job");
 
-        seedJob.edit(() -> {
+        seedJob.configure(() -> {
             jobDsl.setScript("job('Existing_Job') {\n" +
                              "   description('This is a description');\n" +
                              "}");
@@ -167,7 +167,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         assertThat(build.getConsole(), containsRegexp(expected));
         checkDescription(existingJob, "Existing description");
 
-        seedJob.edit(() -> jobDsl.setIgnoreExisting(false));
+        seedJob.configure(() -> jobDsl.setIgnoreExisting(false));
         Build build2 = seedJob.scheduleBuild().shouldSucceed();
         assertThat(build2.getConsole(), containsRegexp(expected));
         checkDescription(existingJob, "This is a description");
@@ -190,7 +190,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         seedJob.scheduleBuild().shouldSucceed();
         ListView existingView = getView("Existing_View");
 
-        seedJob.edit(() -> {
+        seedJob.configure(() -> {
             jobDsl.setScript("listView('Existing_View') {\n" +
                     "   description('This is a description');\n" +
                     "}");
@@ -202,7 +202,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         assertThat(build.getConsole(), containsRegexp(expected));
         checkDescription(existingView, "Existing description");
 
-        seedJob.edit(() -> jobDsl.setIgnoreExisting(false));
+        seedJob.configure(() -> jobDsl.setIgnoreExisting(false));
         Build build2 = seedJob.scheduleBuild().shouldSucceed();
         assertThat(build2.getConsole(), containsRegexp(expected));
         checkDescription(existingView, "This is a description");
@@ -213,7 +213,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
      * is not referenced anymore.
      */
     @Test
-    public void should_ignore_removed_Jobs() {
+    public void should_ignore_removed_jobs() {
         FreeStyleJob seedJob = executeRemovedJobAction(JobDslRemovedJobAction.IGNORE);
         Build build = seedJob.scheduleBuild().shouldSucceed();
         Pattern expected = Pattern.compile("Unreferenced items:(\\s*)GeneratedJob[{]name='Old_Job'}");
@@ -229,7 +229,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
      * is not referenced anymore.
      */
     @Test
-    public void should_disable_removed_Jobs() {
+    public void should_disable_removed_jobs() {
         FreeStyleJob seedJob = executeRemovedJobAction(JobDslRemovedJobAction.DISABLE);
         Build build = seedJob.scheduleBuild().shouldSucceed();
         Pattern expected = Pattern.compile("Unreferenced items:(\\s*)GeneratedJob[{]name='Old_Job'}(\\s*)Disabled items:(\\s*)GeneratedJob[{]name='Old_Job'}");
@@ -245,7 +245,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
      * is not referenced anymore.
      */
     @Test
-    public void should_delete_removed_Jobs() {
+    public void should_delete_removed_jobs() {
         FreeStyleJob seedJob = executeRemovedJobAction(JobDslRemovedJobAction.DELETE);
         Build build = seedJob.scheduleBuild().shouldSucceed();
         Pattern expected = Pattern.compile("Unreferenced items:(\\s*)GeneratedJob[{]name='Old_Job'}(\\s*)Removed items:(\\s*)GeneratedJob[{]name='Old_Job'}");
@@ -267,7 +267,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         seedJob.save();
         seedJob.scheduleBuild().shouldSucceed();
 
-        seedJob.edit(() -> {
+        seedJob.configure(() -> {
             jobDsl.setScript("job('New_Job')");
             jobDsl.setRemovedJobAction(action);
         });
@@ -316,7 +316,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         seedJob.save();
         seedJob.scheduleBuild().shouldSucceed();
 
-        seedJob.edit(() -> {
+        seedJob.configure(() -> {
             jobDsl.setScript("listView('New_View')");
             jobDsl.setRemovedViewAction(action);
         });
@@ -377,7 +377,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         seedJob.save();
         seedJob.scheduleBuild().shouldSucceed();
 
-        seedJob.edit(() -> {
+        seedJob.configure(() -> {
             jobDsl.setScript("configFiles {\n" +
                     "  customConfig {\n" +
                     "    id('456789123')\n" +
@@ -463,7 +463,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         Build build = seedJob.scheduleBuild().shouldBeUnstable();
         assertThat(build.getConsole(), containsString("Warning: (script, line 3) plugin 'chucknorris' needs to be installed"));
 
-        seedJob.edit(() -> jobDsl.setFailOnMissingPlugin(true));
+        seedJob.configure(() -> jobDsl.setFailOnMissingPlugin(true));
         build = seedJob.scheduleBuild().shouldFail();
         assertThat(build.getConsole(), containsString("ERROR: (script, line 3) plugin 'chucknorris' needs to be installed"));
     }
@@ -482,7 +482,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         seedJob.save();
         Build build = seedJob.scheduleBuild().shouldSucceed();
         assertThat(build.getConsole(), containsString("Warning: (script, line 1) customConfigFile is deprecated"));
-        seedJob.edit(() -> jobDsl.setUnstableOnDeprecation(true));
+        seedJob.configure(() -> jobDsl.setUnstableOnDeprecation(true));
         build = seedJob.scheduleBuild().shouldBeUnstable();
         assertThat(build.getConsole(), containsString("Warning: (script, line 1) customConfigFile is deprecated"));
     }
@@ -515,7 +515,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         assertThat(getJob("job_src_folder"), pageObjectDoesNotExist());
         assertThat(getJob("job_jar_file"), pageObjectDoesNotExist());
 
-        seedJob.edit(() -> jobDsl.setAdditionalClasspath("src", "Utility.jar"));
+        seedJob.configure(() -> jobDsl.setAdditionalClasspath("src", "Utility.jar"));
 
         Build build2 = seedJob.scheduleBuild().shouldSucceed();
         assertThat(build2.getConsole(), containsString("GeneratedJob{name='job_src_folder'}"));
@@ -553,7 +553,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         Build build2 = seedJob.scheduleBuild().shouldFail();
         assertThat(build2.getConsole(), containsString("script not yet approved for use"));
 
-        sc.edit(() -> sc.setJobDslScriptSecurity(false));
+        sc.configure(() -> sc.setJobDslScriptSecurity(false));
 
         jenkins.logout();
         jenkins.login().doLogin(USER);
@@ -587,7 +587,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         Build build = seedJob.scheduleBuild().shouldFail();
         assertThat(build.getConsole(), containsString("unable to resolve class utilities.MyUtilities"));
 
-        sc.edit(() -> sc.setJobDslScriptSecurity(false));
+        sc.configure(() -> sc.setJobDslScriptSecurity(false));
 
         seedJob.scheduleBuild().shouldSucceed();
     }
@@ -694,7 +694,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         Build build = seedJob.scheduleBuild().shouldFail();
         assertThat(build.getConsole(), containsString("script not yet approved for use"));
 
-        seedJob.edit(() -> jobDsl.setUseSandbox(true));
+        seedJob.configure(() -> jobDsl.setUseSandbox(true));
 
         // Build should succeed because the script runs in Groovy sandbox
         // and only Job DSL methods are used.
@@ -780,19 +780,19 @@ public class JobDslPluginTest extends AbstractJUnitTest {
      * Further it checks that the API page could be shown if the link was clicked.
      */
     @Test
-    public void should_show_Job_Dsl_Api_Reference() {
+    public void should_show_job_dsl_api_reference() {
         String hrefLocator = "/plugin/job-dsl/api-viewer/index.html";
 
         FreeStyleJob seedJob = createSeedJob();
         seedJob.open();
         assertThat(driver, not(hasElement(by.href(hrefLocator))));
 
-        seedJob.edit(() -> seedJob.addBuildStep(JobDslBuildStep.class));
+        seedJob.configure(() -> seedJob.addBuildStep(JobDslBuildStep.class));
 
         find(by.href(hrefLocator)).click();
         assertThat(driver, hasElement(by.link("Jenkins Job DSL Plugin")));
 
-        seedJob.edit(seedJob::removeFirstBuildStep);
+        seedJob.configure(seedJob::removeFirstBuildStep);
         assertThat(driver, not(hasElement(by.href(hrefLocator))));
     }
 
@@ -813,7 +813,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         String alert = "This item has been changed manually since it was generated by the seed job.";
         assertThat(driver, not(hasContent(alert)));
 
-        generatedJob.description("New Description", false);
+        generatedJob.configure(() -> generatedJob.setDescription("New Description"));
         assertThat(driver, hasContent(alert));
     }
 
@@ -837,7 +837,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
      */
     private GlobalSecurityConfig setUpSecurity() {
         GlobalSecurityConfig sc = new GlobalSecurityConfig(jenkins);
-        sc.edit(() -> {
+        sc.configure(() -> {
             MockSecurityRealm ms = sc.useRealm(MockSecurityRealm.class);
             ms.configure(ADMIN,USER);
 
@@ -862,7 +862,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
      */
     private void runBuildAsUserWhoTriggered(GlobalSecurityConfig sc) {
         jenkins.login().doLogin(ADMIN);
-        sc.edit(() -> {
+        sc.configure(() -> {
             final ProjectDefaultBuildAccessControl control = sc.addBuildAccessControl(ProjectDefaultBuildAccessControl.class);
             control.runAsUserWhoTriggered();
 
