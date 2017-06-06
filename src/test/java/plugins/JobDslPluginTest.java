@@ -564,6 +564,35 @@ public class JobDslPluginTest extends AbstractJUnitTest {
     }
 
     /**
+     * Verifies that if script security for Job DSL scripts is enabled and Jenkins
+     * security is enabled, it is not possible to import Groovy classes from the
+     * workspace.
+     */
+    @Test @WithPlugins({"matrix-auth","mock-security-realm"})
+    public void should_disallow_importing_groovy_classes_when_script_security_enabled() {
+        GlobalSecurityConfig sc = setUpSecurity();
+
+        jenkins.login().doLogin(ADMIN);
+        FreeStyleJob seedJob = createSeedJob();
+        seedJob.copyResource(resource("/job_dsl_plugin/MyUtilities.groovy"), "utilities/MyUtilities.groovy");
+        JobDslBuildStep jobDsl = seedJob.addBuildStep(JobDslBuildStep.class);
+        jobDsl.setScript("import utilities.MyUtilities\n" +
+                "\n" +
+                "def newJob = job('New_Job')\n" +
+                "MyUtilities.addDescription(newJob)");
+
+        seedJob.save();
+
+        // Build should fail because importing Groovy classes not allowed if script security is enabled
+        Build build = seedJob.scheduleBuild().shouldFail();
+        assertThat(build.getConsole(), containsString("unable to resolve class utilities.MyUtilities"));
+
+        sc.edit(() -> sc.setJobDslScriptSecurity(false));
+
+        seedJob.scheduleBuild().shouldSucceed();
+    }
+
+    /**
      * Verifies that if script security for Job DSL scripts is enabled,
      * scripts saved by non administrators that not run in a Groovy sandbox
      * wont be executed.
