@@ -25,4 +25,12 @@ public class ProjectDefaultBuildAccessControl extends BuildAccessControl {
         return this;
     }
 
+    /**
+     * Run a build as the user who triggered it.
+     * @return The Project Default Build Access Control.
+     */
+    public ProjectDefaultBuildAccessControl runAsUserWhoTriggered() {
+        strategy.select("Run as User who Triggered Build");
+        return this;
+    }
 }

@@ -296,4 +296,14 @@ public class PluginManager extends ContainerPageObject {
         }
         return shortNamesVersion;
     }
+
+    /**
+     * Enable oder disable the specified plugin.
+     * @param spec plugin id (e.g. "ldap")
+     * @param state enable plugin if true, disable plugin if false
+     */
+    public void enablePlugin(PluginSpec spec, boolean state) {
+        visit("installed");
+        check(find(by.url("plugin/" + spec.getName())), state);
+    }
 }
