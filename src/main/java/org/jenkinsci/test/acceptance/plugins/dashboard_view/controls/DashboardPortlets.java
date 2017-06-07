@@ -5,7 +5,9 @@ import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.PageObject;
 
 /**
- * Created by peter-mueller on 04.05.17.
+ * Provides the Area for configuring the basic settings for default portlets in the dashboard view.
+ *
+ * @author Peter Müller
  */
 public class DashboardPortlets extends PageAreaImpl {
 

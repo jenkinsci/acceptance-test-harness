@@ -8,7 +8,7 @@ import org.jenkinsci.test.acceptance.po.PageObject;
  * Provides a small area of the Dashboard Configuration that can limit the Jenkins Jobs
  * displayed in the Dashboard.
  *
- * @author peter-mueller
+ * @author Peter Müller
  */
 public class JobFiltersArea extends PageAreaImpl {
     /**
