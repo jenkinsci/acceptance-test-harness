@@ -5,6 +5,8 @@ import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.BuildStatisticsPortlet;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.BuildStatisticsPortlet.JobType;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.LatestBuildsPortlet;
+import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.TestStatisticsChartPortlet;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.UnstableJobsPortlet;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
@@ -196,6 +198,74 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
         v.open();
 
         assertThat(stats.getNumberOfBuilds(JobType.TOTAL), is(4));
+    }
+
+    @Test
+    public void latestsBuildsPortlet_correctJobAndBuild() {
+        DashboardView v = createDashboardView();
+        LatestBuildsPortlet latestBuilds = v.addBottomPortlet(LatestBuildsPortlet.class);
+        v.save();
+
+
+        FreeStyleJob job = createFreeStyleJob();
+
+        v.open();
+        assertThat(latestBuilds.hasJob(job.name), is(false));
+
+        Build build1 = buildSuccessfulJob(job);
+        Build build2 = buildSuccessfulJob(job);
+
+
+        v.open();
+        assertThat(latestBuilds.hasJob(job.name), is(true));
+        assertThat(latestBuilds.hasBuild(build1.getNumber()), is(true));
+        assertThat(latestBuilds.hasBuild(build2.getNumber()), is(true));
+    }
+
+    @Test
+    public void latestsBuildsPortlet_correctJobLink() {
+        DashboardView v = createDashboardView();
+        LatestBuildsPortlet latestBuilds = v.addBottomPortlet(LatestBuildsPortlet.class);
+        v.save();
+
+
+        FreeStyleJob job = createFreeStyleJob();
+        buildSuccessfulJob(job);
+
+        v.open();
+        latestBuilds.openJob(job.name);
+
+        assertThat(driver, hasContent("Project " + job.name));
+    }
+
+    @Test
+    public void latestsBuildsPortlet_correctBuildLink() {
+        DashboardView v = createDashboardView();
+        LatestBuildsPortlet latestBuilds = v.addBottomPortlet(LatestBuildsPortlet.class);
+        v.save();
+
+
+        Build build = buildSuccessfulJob(createFreeStyleJob());
+
+        v.open();
+        latestBuilds.openBuild(build.getNumber());
+
+        assertThat(driver, hasContent("Build #" + build.getNumber()));
+    }
+
+    @Test
+    public void latestsBuildsPortlet_onlyLatest() {
+        DashboardView v = createDashboardView();
+        LatestBuildsPortlet latestBuilds = v.addBottomPortlet(LatestBuildsPortlet.class);
+        v.save();
+
+        FreeStyleJob job = createFreeStyleJob();
+
+        for (int i = 0; i <= LatestBuildsPortlet.NUMBER_OF_BUILDS + 1; i++)
+            buildSuccessfulJob(job);
+
+        v.open();
+        assertThat(latestBuilds.hasBuild(1), is(false));
     }
 
     @Test
