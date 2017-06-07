@@ -10,6 +10,9 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Field;
 import java.net.ServerSocket;
+import java.nio.file.CopyOption;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -296,7 +299,6 @@ public abstract class LocalController extends JenkinsController implements LogLi
                 System.out.println("Cleaning up temporary JENKINS_HOME failed again, giving up.");
                 throw new RuntimeException(e);
             }
-
         }
     }
 
@@ -349,6 +351,11 @@ public abstract class LocalController extends JenkinsController implements LogLi
             ex.setStackTrace(cause.getStackTrace());
             cause = ex;
         }
+
+        // Copy log to diagnostics
+        FailureDiagnostics diagnostics = injector.getInstance(FailureDiagnostics.class);
+        File log = diagnostics.touch("jenkins.log");
+        Files.copy(logFile.toPath(), log.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
         throw (cause instanceof IOException)
                 ? (IOException) cause

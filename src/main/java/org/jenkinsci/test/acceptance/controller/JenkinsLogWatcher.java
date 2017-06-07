@@ -100,7 +100,7 @@ public class JenkinsLogWatcher implements LogListenable, Closeable {
 
             throw new RuntimeException(failedToLoadMessage());
         } catch (InterruptedException | ExecutionException e) {
-            throw new Error(failedToLoadMessage(), e);
+            throw new RuntimeException(failedToLoadMessage(), e);
         }
     }
 
