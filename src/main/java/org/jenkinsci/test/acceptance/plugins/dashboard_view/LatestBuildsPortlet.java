@@ -14,7 +14,7 @@ import org.openqa.selenium.WebElement;
 @Describable("Latest builds")
 public class LatestBuildsPortlet extends AbstractDashboardViewPortlet {
 
-    private Control numberOfBuilds = control("numBuilds");
+    private final Control numberOfBuilds = control("numBuilds");
 
     /**
      * Default name of this Portlet.
