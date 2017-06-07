@@ -8,6 +8,8 @@ import org.jenkinsci.test.acceptance.plugins.dashboard_view.controls.ColumnsArea
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.controls.DashboardPortlets;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.controls.JobFiltersArea;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.controls.MainArea;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.read.BreadCrumbs;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.read.MainPanel;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Job;
@@ -32,6 +34,10 @@ public class DashboardView extends View {
     public final ColumnsArea columnsArea = new ColumnsArea(this, "");
     public final DashboardPortlets dashboardPortlets = new DashboardPortlets(this, "");
 
+
+    public final BreadCrumbs breadCrumbs = new BreadCrumbs(this, "");
+    public final MainPanel mainPanel = new MainPanel(this, "");
+
     private List<AbstractDashboardViewPortlet> bottomPortlets = new ArrayList<>();
 
     public DashboardView(Injector injector, URL url) {
@@ -47,7 +53,8 @@ public class DashboardView extends View {
      */
     public <T extends AbstractDashboardViewPortlet> T addBottomPortlet(final Class<T> portletClass) {
         String path = createPageArea("/bottomPortlet", new Runnable() {
-            @Override public void run() {
+            @Override
+            public void run() {
                 bottomPortlet.selectDropdownMenu(portletClass);
             }
         });

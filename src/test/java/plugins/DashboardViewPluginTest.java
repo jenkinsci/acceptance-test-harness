@@ -137,27 +137,25 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
         final String description = "My Description";
 
         DashboardView v = jenkins.views.create(DashboardView.class, name);
-        v.configure();
-        {
+        v.configure(() -> {
             v.mainArea.setName(name);
             v.mainArea.setDescription(description);
-        }
-        v.save();
+        });
+
         createFreeStyleJob();
         v.open();
 
         final String url = getCurrentUrl();
         assertThat(url, endsWith(name + "/"));
 
-        final By nameCrumb = By.xpath("//ul[@id=\"breadcrumbs\"]/li[@class=\"item\"][last()]");
-        assertThat(find(nameCrumb).getText(), is(name));
+        final List<String> breadCrumbs = v.breadCrumbs.getBreadCrumbs();
+        assertThat(breadCrumbs, hasSize(2));
+        final String nameCrumb = breadCrumbs.get(breadCrumbs.size() - 1);
+        assertThat(nameCrumb, is(name));
 
-        final By tabName = By.xpath("//div[@id=\"main-panel\"]//div[@class=\"tab active\"]/a");
-        assertThat(find(tabName).getText(), is(name));
 
-        final By descriptionPath = By
-                .xpath("//div[@id=\"main-panel\"]/div[@id=\"view-message\"]/div[@id=\"description\"]/div[1]");
-        assertThat(find(descriptionPath).getText(), is(description));
+        assertThat(v.mainPanel.getTabName(), is(name));
+        assertThat(v.mainPanel.getDescription(), is(description));
     }
 
     @Test
@@ -207,7 +205,7 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
     }
 
     @Test
-    @Ignore
+    @Ignore("There needs to be a better way to read the stats on the left side.")
     public void configureDashboardFilterOnlyActivatedJobs() {
 
         DashboardView v = createDashboardView();
@@ -234,7 +232,7 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
     }
 
     @Test
-    @Ignore
+    @Ignore("")
     public void configureDashboardFilterOnlyDisabledJobs() {
 
         DashboardView v = createDashboardView();
