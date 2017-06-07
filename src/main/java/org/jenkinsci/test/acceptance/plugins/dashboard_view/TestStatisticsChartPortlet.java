@@ -19,6 +19,11 @@ import java.net.URL;
 public class TestStatisticsChartPortlet extends AbstractDashboardViewPortlet {
 
     /**
+     * ID of this Portlet in Listview.
+     **/
+    public static final String TEST_STATISTICS_CHART = "Test Statistics Chart";
+
+    /**
      * Constructs a new test statistics chart portlet.
      *
      * @param parent Dashboard view this portlet is scoped to.
@@ -35,7 +40,7 @@ public class TestStatisticsChartPortlet extends AbstractDashboardViewPortlet {
      * @throws NoSuchElementException if the chart is not found
      */
     public WebElement getChart() throws NoSuchElementException {
-        return find(By.xpath("//div[contains(.,'Test Statistics Chart')]/following::img[1]"));
+        return find(By.xpath("//div[contains(.,'" + TEST_STATISTICS_CHART + "')]/following::img[1]"));
     }
 
     /**
