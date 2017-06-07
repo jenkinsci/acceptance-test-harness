@@ -5,12 +5,12 @@ import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.mission_control.MissionControlView;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
-import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.Matchers.hasSize;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 
 @WithPlugins("mission-control-view")
@@ -48,7 +48,7 @@ public class MissionControlTest extends AbstractJUnitTest {
         // (after the creation of a new mission control view the configuration needs to be reloaded)
         view.open();
         WebElement buildHistory = driver.findElement(By.id("jenkinsBuildHistory"));
-        Assert.assertEquals(0, buildHistory.findElements(By.xpath(".//tbody/tr")).size(), 0);
+        assertThat(buildHistory.findElements(By.xpath(".//tbody/tr")), hasSize(0));
 
         // reload configuration (alternative: jenkins.restart(), very inefficient for this task)
         view.reloadConfiguration();
@@ -56,7 +56,7 @@ public class MissionControlTest extends AbstractJUnitTest {
         // open mission control view again and assert that the n-builds are being displayed
         view.open();
         buildHistory = driver.findElement(By.id("jenkinsBuildHistory"));
-        Assert.assertEquals(historySize, buildHistory.findElements(By.xpath(".//tbody/tr")).size(), 0);
+        assertThat(buildHistory.findElements(By.xpath(".//tbody/tr")), hasSize(historySize));
         // check for correct highlighting of the builds
         WebElement failedBuild = buildHistory.findElement(By.xpath(".//tbody/tr[td='" + strFailedJob + "']"));
         assertThat(failedBuild.getAttribute("class"), containsString("danger"));

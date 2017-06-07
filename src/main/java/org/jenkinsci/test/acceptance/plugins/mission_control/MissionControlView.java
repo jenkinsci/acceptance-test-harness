@@ -14,8 +14,6 @@ import java.util.List;
 
 /**
  * {@link View} class of the mission control plugin.
- *
- * @author engelmi
  */
 @Describable("Mission Control")
 public class MissionControlView extends View {
