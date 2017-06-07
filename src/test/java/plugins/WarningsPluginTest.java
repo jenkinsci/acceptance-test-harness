@@ -103,6 +103,9 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
     public static final String RESOURCE_WARNING_MAIN_JAVA = "/warnings_plugin/WarningMain.java";
     public static final String CMD_WARNING_MAIN_JAVA = "javac -Xlint:all WarningMain.java";
 
+    public static final String RESOURCE_CODE_NARC_REPORT = "CodeNarcXmlReport.xml";
+    public static final String RESOURCE_CODE_NARC_REPORT_PATH = "/warnings_plugin/jenkins-17787/"
+                                                                    + RESOURCE_CODE_NARC_REPORT;
 
     @com.google.inject.Inject
     private DockerContainerHolder<JavaContainer> dockerContainer;
@@ -268,28 +271,9 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
     @Test
     public void dockerMachineTest2() throws ExecutionException, InterruptedException {
         sshdDocker = dockerContainer.get();
-        DumbSlave slave = jenkins.slaves.create(DumbSlave.class);
+        DumbSlave dockerSlave = (DumbSlave) getDockerSlave(sshdDocker);
 
-        slave.setExecutors(1);
-        slave.remoteFS.set("/tmp/");
-        SshSlaveLauncher launcher = slave.setLauncher(SshSlaveLauncher.class);
-
-        launcher.host.set(sshdDocker.ipBound(22));
-        launcher.port(sshdDocker.port(22));
-        launcher.setSshHostKeyVerificationStrategy(SshSlaveLauncher.NonVerifyingKeyVerificationStrategy.class);
-        launcher.keyCredentials("test", sshdDocker.getPrivateKeyString());
-
-        slave.save();
-
-        slave.waitUntilOnline();
-
-        assertTrue(slave.isOnline());
-
-        FreeStyleJob job = jenkins.jobs.create();
-        job.configure();
-        job.setLabelExpression(slave.getName());
-        job.save();
-        job.startBuild().shouldSucceed();
+        FreeStyleJob job = prepairDockerSlave(dockerSlave);
 
         job.configure();
         job.copyResource(resource(RESOURCE_WARNING_MAIN_JAVA));
@@ -314,6 +298,65 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         assertThat("Assert faild comparing code line is",codeLineArr[1], is("TextClass text2 = (TextClass) text;"));
 
 
+    }
+
+    @WithDocker
+    @Test
+    public void dockerMachineTestCodenarcParser(){
+        DumbSlave dockerSlave = (DumbSlave) getDockerSlave(dockerContainer.get());
+        FreeStyleJob job = prepairDockerSlave(dockerSlave);
+
+        job.configure();
+        job.copyResource(resource(RESOURCE_CODE_NARC_REPORT_PATH));
+
+        WarningsPublisher warningsPublisher = job.addPublisher(WarningsPublisher.class);
+        warningsPublisher.addWorkspaceFileScanner("Codenarc", RESOURCE_CODE_NARC_REPORT);
+
+        job.save();
+
+        Build build = job.startBuild().shouldSucceed();
+
+
+
+        assertThatActionExists(job, build, " Codenarc Warnings");
+    }
+
+    /**
+     * Create a Slave with the supplied Docker Container
+     * @param container     SshContainer for Slave to live in
+     * @return
+     */
+    private Slave getDockerSlave(SshdContainer container){
+        DumbSlave slave = jenkins.slaves.create(DumbSlave.class);
+
+        slave.setExecutors(1);
+        slave.remoteFS.set("/tmp/");
+        SshSlaveLauncher launcher = slave.setLauncher(SshSlaveLauncher.class);
+
+        launcher.host.set(container.ipBound(22));
+        launcher.port(container.port(22));
+        launcher.setSshHostKeyVerificationStrategy(SshSlaveLauncher.NonVerifyingKeyVerificationStrategy.class);
+        launcher.keyCredentials("test", container.getPrivateKeyString());
+
+        slave.save();
+
+        slave.waitUntilOnline();
+
+        assertTrue(slave.isOnline());
+
+        return slave;
+    }
+
+    /**
+     * Create {@link FreeStyleJob} and build once to create Workspace on Slave
+     */
+    private FreeStyleJob prepairDockerSlave(Slave dockerSlave){
+        FreeStyleJob job = jenkins.jobs.create();
+        job.configure();
+        job.setLabelExpression(dockerSlave.getName());
+        job.save();
+        job.startBuild().shouldSucceed();
+        return job;
     }
 
     /**
