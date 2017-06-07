@@ -45,8 +45,4 @@ public class ViewsMixIn extends MixIn {
 
         return newInstance(type, injector, url("view/%s/", name));
     }
-
-    public <T extends View> T create(final Class<T> type) {
-        return create(type, createRandomName());
-    }
 }
