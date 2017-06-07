@@ -180,14 +180,14 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
     public void changeColumns() {
 
         DashboardView v = createDashboardView();
-        v.configure();
-        {
+        v.configure(() -> {
+
             v.columnsArea.removeAll();
             v.columnsArea.add(ColumnsArea.Column.NAME);
             v.columnsArea.add(ColumnsArea.Column.LAST_FAILURE);
             v.dashboardPortlets.checkIncludeStdJobList(true);
-        }
-        v.save();
+        });
+
         createFreeStyleJob();
         v.open();
 
@@ -195,13 +195,10 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
         final List<WebElement> titles = find(header).findElements(By.xpath(".//a"));
         titles.remove(titles.size() - 1); // last is not a name
 
-        assertThat(titles.size(), is(2));
-        final String[] headers = titles.stream()
-                .map(WebElement::getText)
-                .toArray(String[]::new);
+        assertThat(titles, hasSize(2));
 
-        assertThat(headers[0], containsString(ColumnsArea.Column.NAME.getText()));
-        assertThat(headers[1], containsString(ColumnsArea.Column.LAST_FAILURE.getText()));
+        assertThat(titles.get(0).getText(), containsString(ColumnsArea.Column.NAME.getText()));
+        assertThat(titles.get(1).getText(), containsString(ColumnsArea.Column.LAST_FAILURE.getText()));
     }
 
     @Test
