@@ -19,7 +19,7 @@ runcmd:
 
   - [ "chown", "jenkins", "/home/jenkins" ] # Not sure why this is needed - othwrvise owned by root
   - [ "mkdir", "/usr/local/java/" ] # Location searched by ssh-slaves plugin, though not controlled by it
-  - [ "curl", "-L", "-o", "/usr/local/java/java.tar.gz", "http://download.oracle.com/otn-pub/java/jdk/8u51-b16/jdk-8u51-linux-x64.tar.gz", "-H", "Cookie: oraclelicense=accept-securebackup-cookie" ]
+  - [ "curl", "-L", "-o", "/usr/local/java/java.tar.gz", "http://download.oracle.com/otn-pub/java/jdk/8u131-b11/d54c1d3a095b4ff2b6607d096fa80163/jdk-8u131-linux-x64.tar.gz", "-H", "Cookie: oraclelicense=accept-securebackup-cookie" ]
   - [ "tar", "xf", "/usr/local/java/java.tar.gz", "-C",  "/usr/local/java/", "--strip-components=1" ]
 # Fix auth at the very end so ssh-slaves will retry until java is installed. Otherwise, plugin will install java itself which is much slower for some reason
   - [ "sh", "-c", "echo jenkins:ath | chpasswd" ]

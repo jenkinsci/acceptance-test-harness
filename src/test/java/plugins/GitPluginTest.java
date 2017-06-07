@@ -23,11 +23,19 @@
  */
 package plugins;
 
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.SftpException;
+import javax.inject.Inject;
+import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
-import org.jenkinsci.test.acceptance.junit.*;
+import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.DockerTest;
+import org.jenkinsci.test.acceptance.junit.SmokeTest;
+import org.jenkinsci.test.acceptance.junit.WithCredentials;
+import org.jenkinsci.test.acceptance.junit.WithDocker;
+import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.git.GitRepo;
 import org.jenkinsci.test.acceptance.plugins.git.GitScm;
 import org.jenkinsci.test.acceptance.po.Build;
@@ -37,13 +45,11 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.openqa.selenium.By;
 
-import javax.inject.Inject;
-import java.io.IOException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.SftpException;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
+import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.core.Is.*;
 
 @WithDocker
 @Category(DockerTest.class)
@@ -212,7 +218,7 @@ public class GitPluginTest extends AbstractJUnitTest {
 
     private GitRepo buildGitRepo() throws IOException, InterruptedException {
         GitRepo repo = new GitRepo();
-        repo.commit("Initial commit");
+        repo.changeAndCommitFoo("Initial commit");
         return repo;
     }
 }
