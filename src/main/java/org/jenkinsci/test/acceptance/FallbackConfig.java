@@ -6,6 +6,7 @@ import javax.inject.Named;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -42,6 +43,7 @@ import org.openqa.selenium.Dimension;
 import org.openqa.selenium.UnsupportedCommandException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeDriverService;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxBinary;
 import org.openqa.selenium.firefox.FirefoxDriver;
@@ -93,6 +95,7 @@ public class FallbackConfig extends AbstractModule {
         if (browser==null) browser = "firefox";
         browser = browser.toLowerCase(Locale.ENGLISH);
 
+        String display = getBrowserDisplay();
         switch (browser) {
         case "firefox":
             FirefoxProfile profile = new FirefoxProfile();
@@ -105,7 +108,6 @@ public class FallbackConfig extends AbstractModule {
             profile.setPreference(DOM_MAX_CHROME_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
 
             FirefoxBinary binary = new FirefoxBinary();
-            String display = getBrowserDisplay();
             if (display != null) {
                 binary.setEnvironmentProperty("DISPLAY", display);
             }
@@ -115,12 +117,14 @@ public class FallbackConfig extends AbstractModule {
         case "iexplorer":
             return new InternetExplorerDriver();
         case "chrome":
-            Map<String, String> prefs = new HashMap<String, String>();
-            prefs.put(LANGUAGE_SELECTOR, "en");
             ChromeOptions options = new ChromeOptions();
-            options.setExperimentalOption("prefs", prefs);
+            options.setExperimentalOption("prefs", Collections.singletonMap(LANGUAGE_SELECTOR, "en"));
 
-            return new ChromeDriver(options);
+            ChromeDriverService.Builder builder = new ChromeDriverService.Builder();
+            if (display != null) {
+                builder.withEnvironment(Collections.singletonMap("DISPLAY", display));
+            }
+            return new ChromeDriver(builder.build(), options);
         case "safari":
             return new SafariDriver();
         case "htmlunit":
@@ -297,7 +301,7 @@ public class FallbackConfig extends AbstractModule {
      *
      * @return the name of the socket
      * @see JenkinsControllerPoolProcess
-     * @see docs/PRELAUNCH.md
+     * @see <tt>docs/PRELAUNCH.md<tt/>
      */
     @Provides @Named("socket")
     public File getSocket() {

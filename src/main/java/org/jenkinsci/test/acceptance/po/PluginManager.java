@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 import javax.inject.Named;
 import javax.inject.Provider;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -278,7 +279,11 @@ public class PluginManager extends ContainerPageObject {
         visit("advanced");
         WebElement form = find(by.name("uploadPlugin"));
         WebElement upload = form.findElement(by.input("name"));
-        upload.sendKeys(localFile.getAbsolutePath());
+        try {
+            upload.sendKeys(localFile.getCanonicalPath());
+        } catch (IOException e) {
+            throw new Error(e);
+        }
         form.submit();
     }
 
