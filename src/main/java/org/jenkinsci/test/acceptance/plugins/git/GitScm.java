@@ -121,6 +121,28 @@ public class GitScm extends Scm {
         return this;
     }
 
+    /**
+     * Add behaviour "Create tag for every build"
+     *
+     * @return this, to allow function chaining
+     */
+    public GitScm createTagForBuild() {
+        addBehaviour(CreateTagForBuild.class);
+        return this;
+    }
+
+    /**
+     * Add behaviour "Custom SCM name"
+     *
+     * @param name Custom name
+     * @return  this, to allow function chaining
+     */
+    public GitScm customScmName(String name) {
+        CustomSCMName behaviour = addBehaviour(CustomSCMName.class);
+        behaviour.txtName.set(name);
+        return this;
+    }
+
     public GitScm remoteName(String name) {
         remoteAdvanced();
         control("userRemoteConfigs/name").set(name);

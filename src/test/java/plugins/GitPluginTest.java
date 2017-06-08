@@ -299,6 +299,49 @@ public class GitPluginTest extends AbstractJUnitTest {
 
     }
 
+    @Test
+    public void create_tag_for_build() throws IOException, InterruptedException, SftpException, JSchException {
+        GitRepo repo = buildGitRepo();
+        repo.transferToDockerContainer(host, port);
+
+        job.useScm(GitScm.class)
+                .url(repoUrl)
+                .credentials(USERNAME)
+                .createTagForBuild();
+
+        job.addShellStep("git tag -n1");
+        job.save();
+        Build b = job.startBuild();
+        b.shouldSucceed();
+
+        assertThat(
+                b.getConsole(),
+                Matchers.containsRegexp("jenkins-"+job.name +"-1 Jenkins Build #1", Pattern.MULTILINE)
+        );
+
+    }
+
+    @Test
+    public void custom_scm_name() throws IOException, InterruptedException, SftpException, JSchException {
+        final String SCM_NAME = "halligalli";
+        GitRepo repo = buildGitRepo();
+        repo.transferToDockerContainer(host, port);
+
+        job.useScm(GitScm.class)
+                .url(repoUrl)
+                .credentials(USERNAME)
+                .customScmName(SCM_NAME);
+
+        job.save();
+        Build b = job.startBuild();
+        b.shouldSucceed();
+
+        assertThat(
+                b.getGitBuildData(),
+                Matchers.containsRegexp("<b>SCM:</b> " + SCM_NAME, Pattern.MULTILINE)
+        );
+    }
+
     ////////////////////
     // HELPER METHODS //
     ////////////////////
