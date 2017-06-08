@@ -284,10 +284,9 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
     @WithDocker
     @Test
     public void dockerMachineTestFileScanner(){
-        sshdDocker = dockerContainer.get();
-        DumbSlave dockerSlave = (DumbSlave) getDockerSlave(sshdDocker);
-
+        DumbSlave dockerSlave = (DumbSlave) getDockerSlave(dockerContainer.get());
         FreeStyleJob job = prepairDockerSlave(dockerSlave);
+
         job.configure();
         job.copyResource(resource("/warnings_plugin/out.txt"));
         job.addPublisher(WarningsPublisher.class).addWorkspaceFileScanner(JAVA_ID, "out.txt");
@@ -302,41 +301,21 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
 
     @WithDocker
     @Test
-    public void dockerMachineTestCodenarcParserFile(){
-        DumbSlave dockerSlave = (DumbSlave) getDockerSlave(dockerContainer.get());
-        FreeStyleJob job = prepairDockerSlave(dockerSlave);
-
-        job.configure();
-        job.copyResource(resource(RESOURCE_CODE_NARC_REPORT2_PATH));
-        job.addBuildStep(ShellBuildStep.class).command("cat " + RESOURCE_CODE_NARC_REPORT2);
-
-        WarningsPublisher warningsPublisher = job.addPublisher(WarningsPublisher.class);
-        warningsPublisher.addConsoleScanner ("Codenarc");
-
-        job.save();
-
-        Build build = job.startBuild().shouldSucceed();
-
-
-
-        assertThatActionExists(job, build, " Codenarc Warnings");
-    }
-
-    @WithDocker
-    @Test
+    @Issue("JENKINS-17787")
+    @Ignore
     public void codenarcParserOnDockerSlave(){
         DumbSlave dockerSlave = (DumbSlave) getDockerSlave(dockerContainer.get());
         FreeStyleJob job = prepairDockerSlave(dockerSlave);
-        assertThatWarningsExists(job);
+        assertThatCodeNarcActionExists(job);
     }
 
     @Test
     public void codenarcParserOnMaster(){
         FreeStyleJob job = jenkins.jobs.create();
-        assertThatWarningsExists(job);
+        assertThatCodeNarcActionExists(job);
     }
 
-    private void assertThatWarningsExists(FreeStyleJob job){
+    private void assertThatCodeNarcActionExists(FreeStyleJob job){
         job.configure();
         job.copyResource(resource(RESOURCE_CODE_NARC_REPORT_PATH));
 
@@ -384,8 +363,6 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         FreeStyleJob job = jenkins.jobs.create();
         job.configure();
         job.setLabelExpression(dockerSlave.getName());
-        job.save();
-        job.startBuild().shouldSucceed();
         return job;
     }
 
