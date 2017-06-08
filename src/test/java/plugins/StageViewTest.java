@@ -6,8 +6,6 @@ import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.jenkinsci.test.acceptance.po.stageview.StageView;
 import org.junit.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -42,7 +40,7 @@ public class StageViewTest extends AbstractJUnitTest {
      */
     @Test
     public void jobShouldContainStageview() throws Exception {
-        WorkflowJob job = this.saveWorkflowJobWithFile(SINGLE_JOB);
+        WorkflowJob job = this.createPipelineFromFile(SINGLE_JOB);
         Build build = job.startBuild().shouldSucceed();
         job.open();
         StageView stageView = new StageView(job, JOB_PATH);
@@ -54,7 +52,7 @@ public class StageViewTest extends AbstractJUnitTest {
      */
     @Test
     public void multiBuildJobShouldContainCorrectNumberOfJobsBuilt() {
-        WorkflowJob job = this.saveWorkflowJobWithFile(SINGLE_JOB);
+        WorkflowJob job = this.createPipelineFromFile(SINGLE_JOB);
         Build build = null;
         for (int i = 0; i < 8; i++) {
             build = job.startBuild().shouldSucceed();
@@ -63,7 +61,7 @@ public class StageViewTest extends AbstractJUnitTest {
         job.open();
 
         StageView stageView = new StageView(job, JOB_PATH);
-        assertThat(stageView.getAllStageViewJobs().size(), is(8)); //as not max display
+        assertThat(stageView.getAllStageViewJobs(), hasSize(8)); //as not max display
 
         for (int i = 0; i < 10; i++) {
             build = job.startBuild().shouldSucceed();
@@ -71,7 +69,7 @@ public class StageViewTest extends AbstractJUnitTest {
         assertThat(build, notNullValue());
         job.open();
         stageView = new StageView(job, JOB_PATH);
-        assertThat(stageView.getAllStageViewJobs().size(), is(11));//max diplay is 11
+        assertThat(stageView.getAllStageViewJobs(), hasSize(11));//max diplay is 11
     }
 
     /**
@@ -106,8 +104,8 @@ public class StageViewTest extends AbstractJUnitTest {
         assertThat(build, notNullValue());
         job.open();
         StageView stageView = new StageView(job, JOB_PATH);
-        assertThat(stageView.getAllStageViewJobs().size(), is(11));
-        assertThat(stageView.getStageViewHeadlines().size(), is(10));
+        assertThat(stageView.getAllStageViewJobs(), hasSize(11));
+        assertThat(stageView.getStageViewHeadlines(), hasSize(10));
 
     }
 
@@ -116,7 +114,7 @@ public class StageViewTest extends AbstractJUnitTest {
      */
     @Test
     public void jobNumberShouldbeCorrect() {
-        WorkflowJob job = this.saveWorkflowJobWithFile(SINGLE_JOB);
+        WorkflowJob job = this.createPipelineFromFile(SINGLE_JOB);
         Build build = job.startBuild().shouldSucceed();
         job.open();
         job.getNavigationLinks();
@@ -131,7 +129,7 @@ public class StageViewTest extends AbstractJUnitTest {
      */
     @Test
     public void stageViewContainsMultipleStages() throws Exception {
-        WorkflowJob job = this.saveWorkflowJobWithFile(MULTI_JOB);
+        WorkflowJob job = this.createPipelineFromFile(MULTI_JOB);
         Build build = job.startBuild().shouldSucceed();
         job.open();
         StageView stageView = new StageView(job, JOB_PATH);
@@ -146,7 +144,7 @@ public class StageViewTest extends AbstractJUnitTest {
      */
     @Test
     public void stageViewContainsMultipleStagesWithFail() throws Exception {
-        WorkflowJob job = this.saveWorkflowJobWithFile(MUTLI_JOB_FAIL);
+        WorkflowJob job = this.createPipelineFromFile(MUTLI_JOB_FAIL);
         Build build = job.startBuild().shouldFail();
         job.open();
         job.getNavigationLinks();
@@ -166,7 +164,7 @@ public class StageViewTest extends AbstractJUnitTest {
      */
     @Test
     public void stageViewContainsMultipleStagesWithUnstable() throws Exception {
-        WorkflowJob job = this.saveWorkflowJobWithFile(MUTLI_JOB_UNSTABLE);
+        WorkflowJob job = this.createPipelineFromFile(MUTLI_JOB_UNSTABLE);
         Build build = job.startBuild().shouldBeUnstable();
         job.open();
         job.getNavigationLinks();
@@ -185,7 +183,7 @@ public class StageViewTest extends AbstractJUnitTest {
      */
     @Test
     public void stageViewContainsMultipleStagesWithAborted() throws Exception {
-        WorkflowJob job = this.saveWorkflowJobWithFile(MUTLI_JOB_ABORTED);
+        WorkflowJob job = this.createPipelineFromFile(MUTLI_JOB_ABORTED);
         Build build = job.startBuild().shouldAbort();
         job.open();
         job.getNavigationLinks();
@@ -216,7 +214,7 @@ public class StageViewTest extends AbstractJUnitTest {
      * @param fileName the naame of the file including path
      * @return return the newly generated workflow job with a defined pipeline
      */
-    private WorkflowJob saveWorkflowJobWithFile(String fileName) {
+    private WorkflowJob createPipelineFromFile(String fileName) {
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
         job.script.set(readFromRessourceFolder(fileName));
         job.sandbox.check();
