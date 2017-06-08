@@ -5,6 +5,7 @@ import com.google.inject.Injector;
 
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.guice.World;
+import org.jenkinsci.test.acceptance.po.CapybaraPortingLayerImpl;
 import org.junit.internal.AssumptionViolatedException;
 import org.junit.rules.MethodRule;
 import org.junit.rules.TestRule;
@@ -66,9 +67,7 @@ public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should us
                     if (causedBy(e, NoSuchElementException.class) != null) {
                         diagnostics.write(
                                 "last-page.html",
-                                (String) ((JavascriptExecutor) driver).executeScript(
-                                        "return document.getElementsByTagName('html')[0].innerHTML"
-                                )
+                                CapybaraPortingLayerImpl.pageText(driver)
                         );
                     }
                     controller.diagnose(e);
