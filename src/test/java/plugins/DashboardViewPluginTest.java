@@ -1,13 +1,18 @@
 package plugins;
 
+import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.BuildStatisticsPortlet;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.BuildStatisticsPortlet.JobType;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.JobsGridPortlet;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.LatestBuildsPortlet;
+import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.TestStatisticsChartPortlet;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.UnstableJobsPortlet;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Rule;
+import org.jenkinsci.test.acceptance.po.JUnitPublisher;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.openqa.selenium.NoSuchElementException;
@@ -15,6 +20,11 @@ import org.openqa.selenium.NoSuchElementException;
 import java.net.MalformedURLException;
 
 import static org.hamcrest.Matchers.*;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+
+import static org.hamcrest.Matchers.is;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
@@ -260,6 +270,161 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
         v.open();
 
         assertThat(stats.getNumberOfBuilds(JobType.TOTAL), is(4));
+    }
+
+    @Test
+    public void latestsBuildsPortlet_correctJobAndBuild() {
+        DashboardView v = createDashboardView();
+        LatestBuildsPortlet latestBuilds = v.addBottomPortlet(LatestBuildsPortlet.class);
+        v.save();
+
+
+        FreeStyleJob job = createFreeStyleJob();
+
+        v.open();
+        assertThat(latestBuilds.hasJob(job.name), is(false));
+
+        Build build1 = buildSuccessfulJob(job);
+        Build build2 = buildSuccessfulJob(job);
+
+
+        v.open();
+        assertThat(latestBuilds.hasJob(job.name), is(true));
+        assertThat(latestBuilds.hasBuild(build1.getNumber()), is(true));
+        assertThat(latestBuilds.hasBuild(build2.getNumber()), is(true));
+    }
+
+    @Test
+    public void latestsBuildsPortlet_correctJobLink() {
+        DashboardView v = createDashboardView();
+        LatestBuildsPortlet latestBuilds = v.addBottomPortlet(LatestBuildsPortlet.class);
+        v.save();
+
+
+        FreeStyleJob job = createFreeStyleJob();
+        buildSuccessfulJob(job);
+
+        v.open();
+        latestBuilds.openJob(job.name);
+
+        assertThat(driver, hasContent("Project " + job.name));
+    }
+
+    @Test
+    public void latestsBuildsPortlet_correctBuildLink() {
+        DashboardView v = createDashboardView();
+        LatestBuildsPortlet latestBuilds = v.addBottomPortlet(LatestBuildsPortlet.class);
+        v.save();
+
+
+        Build build = buildSuccessfulJob(createFreeStyleJob());
+
+        v.open();
+        latestBuilds.openBuild(build.getNumber());
+
+        assertThat(driver, hasContent("Build #" + build.getNumber()));
+    }
+
+    @Test
+    public void latestsBuildsPortlet_onlyLatest() {
+        DashboardView v = createDashboardView();
+        LatestBuildsPortlet latestBuilds = v.addBottomPortlet(LatestBuildsPortlet.class);
+        v.save();
+
+        FreeStyleJob job = createFreeStyleJob();
+
+        for (int i = 0; i <= LatestBuildsPortlet.NUMBER_OF_BUILDS + 1; i++)
+            buildSuccessfulJob(job);
+
+        v.open();
+        assertThat(latestBuilds.hasBuild(1), is(false));
+    }
+
+    @Test
+    public void testStatisticsChart_success() throws IOException {
+        DashboardView v = createDashboardView();
+        TestStatisticsChartPortlet chart = v.addBottomPortlet(TestStatisticsChartPortlet.class);
+        v.save();
+
+        FreeStyleJob successJob = createFreeStyleJob(job -> {
+            String resultFileName = "status.xml";
+            job.addShellStep(
+                "echo '<testsuite><testcase classname=\"\">" +
+                    "</testcase></testsuite>'>" + resultFileName
+            );
+            job.addPublisher(JUnitPublisher.class).testResults.set(resultFileName);
+        });
+
+        buildSuccessfulJob(successJob);
+
+        v.open();
+
+        Resource testImageResource = resource("/dashboardview_plugin/test_statistics_chart/success.png");
+        BufferedImage testImage = ImageIO.read(testImageResource.asFile());
+
+        checkImages(chart.getImage(), testImage);
+    }
+
+    @Test
+    public void testStatisticsChart_failure() throws IOException {
+        DashboardView v = createDashboardView();
+        TestStatisticsChartPortlet chart = v.addBottomPortlet(TestStatisticsChartPortlet.class);
+        v.save();
+
+        FreeStyleJob unstableFreeStyleJob = createUnstableFreeStyleJob();
+
+        buildUnstableJob(unstableFreeStyleJob);
+
+        v.open();
+
+        Resource testImageResource = resource("/dashboardview_plugin/test_statistics_chart/failure.png");
+        BufferedImage testImage = ImageIO.read(testImageResource.asFile());
+
+        checkImages(chart.getImage(), testImage);
+    }
+
+    @Test
+    public void testStatisticsChart_failureAndSuccess() throws IOException {
+        DashboardView v = createDashboardView();
+        TestStatisticsChartPortlet chart = v.addBottomPortlet(TestStatisticsChartPortlet.class);
+        v.save();
+
+        FreeStyleJob unstableFreeStyleJob = createUnstableFreeStyleJob();
+        FreeStyleJob successJob = createFreeStyleJob(job -> {
+            String resultFileName = "status.xml";
+            job.addShellStep(
+                "echo '<testsuite><testcase classname=\"\">" +
+                    "</testcase></testsuite>'>" + resultFileName
+            );
+            job.addPublisher(JUnitPublisher.class).testResults.set(resultFileName);
+        });
+
+        buildSuccessfulJob(successJob);
+        buildUnstableJob(unstableFreeStyleJob);
+
+        v.open();
+
+        Resource testImageResource = resource("/dashboardview_plugin/test_statistics_chart/success_failure.png");
+        BufferedImage testImage = ImageIO.read(testImageResource.asFile());
+
+        checkImages(chart.getImage(), testImage);
+    }
+
+    /**
+     * Checks an image pixel by pixel if it's the same as the other image.
+     *
+     * @param actualImage image to test
+     * @param testImage   image to test against
+     */
+    private void checkImages(BufferedImage actualImage, BufferedImage testImage) {
+        assertThat(actualImage.getHeight(), is(testImage.getHeight()));
+        assertThat(actualImage.getWidth(), is(testImage.getWidth()));
+
+        for (int x = 0; x < testImage.getWidth(); x++) {
+            for (int y = 0; y < testImage.getHeight(); y++) {
+                assertThat(actualImage.getRGB(x, y), is(testImage.getRGB(x, y)));
+            }
+        }
     }
 
     /**
