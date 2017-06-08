@@ -31,6 +31,7 @@ import org.jenkinsci.test.acceptance.plugins.gradle.GradleWrapper;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.StringParameter;
+import org.jenkinsci.test.acceptance.po.Workspace;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
 import org.openqa.selenium.By;
@@ -187,7 +188,7 @@ public class GradlePluginTest extends AbstractJUnitTest {
         assertThat(build.getConsole(), containsString("Gradle Properties: hello world"));
     }
 
-    @Test @WithPlugins("gradle@1.27")
+    @Test //@WithPlugins("gradle@1.27")
     public void run_gradle_job_parameters_as_system_properties(){
         GradleInstallation.installLatestGradleVersion(jenkins);
 
@@ -222,6 +223,22 @@ public class GradlePluginTest extends AbstractJUnitTest {
 
         assertThat(build.getConsole(), containsString(SUCCESSFUL_BUILD));
         assertThat(build.getConsole(), containsString("Hello world!"));
+    }
+
+    @Test
+    public void run_gradle_user_home_workspace(){
+        GradleInstallation.installGradle(jenkins, GradleInstallation.DEFAULT_VERSION_NAME, GradleInstallation.LATEST_VERSION);
+        final FreeStyleJob job = jenkins.jobs.create();
+        job.copyResource(resource("/gradle_plugin/script.gradle"), "build.gradle");
+
+        final GradleStep step = job.addBuildStep(GradleStep.class);
+        step.setTasks("hello");
+        step.setVersion(GradleInstallation.DEFAULT_VERSION_NAME);
+        step.setForceGradleHomeToUseWorkspace();
+        job.save();
+
+        job.startBuild().shouldSucceed();
+        assertThat(job, Workspace.workspaceContains("caches"));
     }
 
 }
