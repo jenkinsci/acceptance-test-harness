@@ -23,6 +23,7 @@ import groovy.lang.DelegatesTo;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.CoreMatchers;
 import org.jenkinsci.test.acceptance.SshKeyPair;
+import jdk.nashorn.internal.runtime.regexp.joni.Warnings;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.DockerAgentContainer;
 import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
@@ -99,13 +100,25 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
             + "String all = matcher.group(1);\n"
             + "Priority test = Priority.NORMAL;\n"
             + "return new Warning(all, 42, all, all, all);";
+    public static final String WARNING_MAIN_JAVA_26 = "WarningMain.java:26";
 
-    public static final String RESOURCE_WARNING_MAIN_JAVA = "/warnings_plugin/WarningMain.java";
-    public static final String CMD_WARNING_MAIN_JAVA = "javac -Xlint:all WarningMain.java";
+    public static final String RESOURCE_WARNING_MAIN_JAVA = "WarningMain.java";
+    public static final String RESOURCE_WARNING_MAIN_JAVA_PATH = "/warnings_plugin/"
+                                                                + RESOURCE_WARNING_MAIN_JAVA;
+
+    public static final String CMD_WARNING_MAIN_JAVA_CONSOLE = "javac -Xlint:all "
+                                                                + RESOURCE_WARNING_MAIN_JAVA;
+    public static final String CMD_WARNING_MAIN_JAVA_FILE = "javac -Xlint:all "
+                                                                + RESOURCE_WARNING_MAIN_JAVA
+                                                                + " &> out.txt";
 
     public static final String RESOURCE_CODE_NARC_REPORT = "CodeNarcXmlReport.xml";
     public static final String RESOURCE_CODE_NARC_REPORT_PATH = "/warnings_plugin/jenkins-17787/"
                                                                     + RESOURCE_CODE_NARC_REPORT;
+
+    public static final String RESOURCE_CODE_NARC_REPORT2 = "CodeNarcReport2.xml";
+    public static final String RESOURCE_CODE_NARC_REPORT2_PATH = "/warnings_plugin/jenkins-17787/"
+            + RESOURCE_CODE_NARC_REPORT2;
 
     @com.google.inject.Inject
     private DockerContainerHolder<JavaContainer> dockerContainer;
@@ -269,16 +282,14 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
 
     @WithDocker
     @Test
-    public void dockerMachineTest2() throws ExecutionException, InterruptedException {
-        sshdDocker = dockerContainer.get();
-        DumbSlave dockerSlave = (DumbSlave) getDockerSlave(sshdDocker);
-
+    public void dockerMachineTestConsoleScanner() throws ExecutionException, InterruptedException {
+        DumbSlave dockerSlave = (DumbSlave) getDockerSlave(dockerContainer.get());
         FreeStyleJob job = prepairDockerSlave(dockerSlave);
 
         job.configure();
-        job.copyResource(resource(RESOURCE_WARNING_MAIN_JAVA));
+        job.copyResource(resource(RESOURCE_WARNING_MAIN_JAVA_PATH));
         ShellBuildStep shellBuildStep = job.addBuildStep(ShellBuildStep.class);
-        shellBuildStep.command(CMD_WARNING_MAIN_JAVA);
+        shellBuildStep.command(CMD_WARNING_MAIN_JAVA_CONSOLE);
         WarningsPublisher warningsPublisher = job.addPublisher(WarningsPublisher.class);
         warningsPublisher.addConsoleScanner(JAVA_ID);
 
@@ -296,16 +307,64 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         String[] codeLineArr =  codeLine.trim().split("\\s+", 2);
         assertThat("Warning should be at line",codeLineArr[0], is("26"));
         assertThat("Assert faild comparing code line is",codeLineArr[1], is("TextClass text2 = (TextClass) text;"));
-
-
     }
 
     @WithDocker
     @Test
-    public void dockerMachineTestCodenarcParser(){
+    public void dockerMachineTestFileScanner(){
+        sshdDocker = dockerContainer.get();
+        DumbSlave dockerSlave = (DumbSlave) getDockerSlave(sshdDocker);
+
+        FreeStyleJob job = prepairDockerSlave(dockerSlave);
+        job.configure();
+        job.copyResource(resource("/warnings_plugin/out.txt"));
+        job.addPublisher(WarningsPublisher.class).addWorkspaceFileScanner(JAVA_ID, "out.txt");
+        job.save();
+
+        Build build = job.startBuild().shouldSucceed();
+
+        assertThatActionExists(job, build, "Java Warnings");
+
+    }
+
+
+    @WithDocker
+    @Test
+    public void dockerMachineTestCodenarcParserFile(){
         DumbSlave dockerSlave = (DumbSlave) getDockerSlave(dockerContainer.get());
         FreeStyleJob job = prepairDockerSlave(dockerSlave);
 
+        job.configure();
+        job.copyResource(resource(RESOURCE_CODE_NARC_REPORT2_PATH));
+        job.addBuildStep(ShellBuildStep.class).command("cat " + RESOURCE_CODE_NARC_REPORT2);
+
+        WarningsPublisher warningsPublisher = job.addPublisher(WarningsPublisher.class);
+        warningsPublisher.addConsoleScanner ("Codenarc");
+
+        job.save();
+
+        Build build = job.startBuild().shouldSucceed();
+
+
+
+        assertThatActionExists(job, build, " Codenarc Warnings");
+    }
+
+    @WithDocker
+    @Test
+    public void codenarcParserOnDockerSlave(){
+        DumbSlave dockerSlave = (DumbSlave) getDockerSlave(dockerContainer.get());
+        FreeStyleJob job = prepairDockerSlave(dockerSlave);
+        assertThatWarningsExists(job);
+    }
+
+    @Test
+    public void codenarcParserOnMaster(){
+        FreeStyleJob job = jenkins.jobs.create();
+        assertThatWarningsExists(job);
+    }
+
+    private void assertThatWarningsExists(FreeStyleJob job){
         job.configure();
         job.copyResource(resource(RESOURCE_CODE_NARC_REPORT_PATH));
 
@@ -316,10 +375,9 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
 
         Build build = job.startBuild().shouldSucceed();
 
-
-
-        assertThatActionExists(job, build, " Codenarc Warnings");
+        assertThatActionExists(job, build, "Codenarc Warnings");
     }
+
 
     /**
      * Create a Slave with the supplied Docker Container
