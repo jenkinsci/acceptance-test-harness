@@ -108,7 +108,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         slave.save();
 
         slave.waitUntilOnline();
-        
+
         assertTrue(slave.isOnline());
 
         FreeStyleJob job = jenkins.jobs.create();
@@ -137,9 +137,18 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
 
         action.open();
 
-        String resultString = action.getLinkedSourceFileText(AnalysisAction.Tab.DETAILS, "WarningMain.java", 26);
-        assertThat(resultString, is("26     TextClass text2 = (TextClass) text;"));
+        //String resultString = action.getLinkedSourceFileText(AnalysisAction.Tab.DETAILS, "WarningMain.java", 26);
+        //assertThat(resultString, is("26     TextClass text2 = (TextClass) text;"));
+        SortedMap<String, String> map = action.getDetailsTabContents();
+        Set<Map.Entry<String, String>> set = map.entrySet();
+        System.err.println("EntrySet size: " + set.size());
+        if( !set.isEmpty() ) {
+            for (Map.Entry<String, String> entry : set) {
+                System.err.println("Key: " + entry.getKey() + " - Value: " + entry.getValue());
+            }
+        }
 
+        System.err.println("EntrySet size: " + set.size());
         //DockerMachineProvider dockerProvider = new DockerMachineProvider(12345, 54321, "192.168.178.142", "TestUser", keyPair);
         //SshSlaveController controller = new SshSlaveController(dockerProvider.get(), keyPair, 30);
         //Slave slave = controller.install(jenkins).get();
