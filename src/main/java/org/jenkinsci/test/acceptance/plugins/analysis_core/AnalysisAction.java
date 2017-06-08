@@ -326,6 +326,11 @@ public abstract class AnalysisAction extends ContainerPageObject {
         return getContentsOfVisibleTable(true, false);
     }
 
+    public SortedMap<String, String> getDetailsTabContents() {
+        openTab(Tab.DETAILS);
+        return mapContentsOfHeaderValueRows();
+    }
+
     /**
      * Returns the first two columns of the "Warnings"-tab as key => value pairs, skipping the header row.
      *
@@ -358,6 +363,22 @@ public abstract class AnalysisAction extends ContainerPageObject {
 
     private SortedMap<String, Integer> getContentsOfVisibleTable(boolean removeHeader, boolean removeFooter) {
         return mapTableCellsKeyValue(getVisibleTableRows(removeHeader, removeFooter));
+    }
+
+    private SortedMap<String, String> mapContentsOfHeaderValueRows() {
+        List<WebElement> table = all(by.xpath("//div[@id='statistics']/div/div/table"));
+        final SortedMap<String, String> result = new TreeMap<>();
+
+        for(WebElement element : table) {
+            final List<WebElement> rows = element.findElements(by.xpath("./tbody/tr/td"));
+            if(rows.size() > 1) {
+                String key = asTrimmedString(rows.get(0));
+                String value = asTrimmedString(rows.get(1));
+                result.put(key, value);
+            }
+        }
+
+        return result;
     }
 
     /**

@@ -16,15 +16,16 @@ public class WarningMain {
 	}
 	
 	public static void main(String[] args) {
-		
+
 		// unused variable for compiler warning generation
 		int i;
-		
+
 		TextClass text = new TextClass();
-		
+		TextClass text2 = new TextClass();
 		// useless casting for compiler warning generation
-		TextClass text2 = (TextClass) text;
-		
+		text =  (TextClass) text2;
+		text2 = (TextClass) text;
+
 		// using deprecated method  for compiler warning generation
 		LOG.warning(text2.getText());
 
