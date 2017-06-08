@@ -13,7 +13,7 @@ public class StageViewHeadline {
     private WebElement webElement;
 
     /**
-     * The actual haedline in the box. Sanitized.
+     * The actual headline in the box. Sanitized.
      */
     private String name;
 
