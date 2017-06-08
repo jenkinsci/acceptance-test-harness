@@ -27,6 +27,7 @@ public class StageViewTest extends AbstractJUnitTest {
 
     public static final String SINGLE_JOB = "stageview_plugin/single_job.txt";
     public static final String MULTI_JOB = "stageview_plugin/multi_job.txt";
+    public static final String MULTI_JOB_IRR_NAMES = "stageview_plugin/multi_job_irregularnames.txt";
     public static final String MUTLI_JOB_FAIL = "stageview_plugin/multi_job_fail.txt";
     public static final String MUTLI_JOB_ABORTED = "stageview_plugin/multi_job_aborted.txt";
     public static final String MUTLI_JOB_UNSTABLE = "stageview_plugin/multi_job_unstable.txt";
@@ -135,6 +136,13 @@ public class StageViewTest extends AbstractJUnitTest {
         StageView stageView = new StageView(job, JOB_PATH);
         assertThat(stageView.getStageViewHeadlines().get(0).getName(), containsString("Clone sources"));
         assertThat(stageView.getStageViewHeadlines().get(1).getName(), containsString("Build"));
+
+        job = this.createPipelineFromFile(MULTI_JOB_IRR_NAMES);
+        build = job.startBuild().shouldSucceed();
+        job.open();
+        stageView = new StageView(job, JOB_PATH);
+        assertThat(stageView.getStageViewHeadlines().get(0).getName(), containsString("-"));
+        assertThat(stageView.getStageViewHeadlines().get(1).getName(), containsString("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"));
     }
 
     /**
