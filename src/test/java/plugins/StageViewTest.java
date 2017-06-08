@@ -49,7 +49,8 @@ public class StageViewTest extends AbstractJUnitTest {
     }
 
     /**
-     * This tests verfies the hieght of the diplay. The standard height is 11 of the maximum builds dislayed.
+     * This tests verifies the height of the diplay. The standard height is 11 of the maximum builds dislayed
+     * aka Pagination
      */
     @Test
     public void multiBuildJobShouldContainCorrectNumberOfJobsBuilt() {
@@ -124,7 +125,8 @@ public class StageViewTest extends AbstractJUnitTest {
     }
 
     /**
-     * Does check multiple jobs in the stage view.
+     * Does check multiple jobs in the stage view. Second part uses long name to verify the display.
+     * Note: emptyjob names are not allowed
      *
      * @throws Exception
      */
@@ -143,6 +145,8 @@ public class StageViewTest extends AbstractJUnitTest {
         stageView = new StageView(job, JOB_PATH);
         assertThat(stageView.getStageViewHeadlines().get(0).getName(), containsString("-"));
         assertThat(stageView.getStageViewHeadlines().get(1).getName(), containsString("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"));
+        assertThat(stageView.getStageViewHeadlines().get(2).getName(), containsString(",.-;:_*+#"));
+
     }
 
     /**
