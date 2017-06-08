@@ -70,6 +70,7 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
 
     @Test
     public void jobsGridPortlet_numberOfColumns() throws MalformedURLException {
+        // One job is required for the portlet to be displayed
         createFreeStyleJob();
 
         DashboardView v = createDashboardView();
