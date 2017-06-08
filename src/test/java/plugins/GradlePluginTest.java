@@ -200,4 +200,16 @@ public class GradlePluginTest extends AbstractJUnitTest {
         final Build build = job.startBuild().shouldSucceed();
         assertThat(build.getConsole(), containsString("Gradle Properties: hello world"));
     }
+
+    @Test
+    public void run_gradle_wrapper_location_param(){
+        GradleInstallation.installLatestGradleVersion(jenkins);
+        final FreeStyleJob job = jenkins.jobs.create();
+        GradleWrapper.addWrapperStep(job, "test/");
+        job.save();
+
+        final Build build = job.startBuild().shouldSucceed();
+        assertThat(build.getConsole(), containsString(SUCCESSFUL_BUILD));
+    }
+
 }

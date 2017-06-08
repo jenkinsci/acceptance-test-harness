@@ -34,17 +34,28 @@ public class GradleWrapper {
     private static final String WRAPPER_DIR = GRADLE_DIR + "wrapper/";
 
     private static void addWrapperFiles(final Job job){
-        job.copyResource(job.resource(GRADLE_DIR + "script.gradle"), "build.gradle");
-        job.copyResource(job.resource(WRAPPER_DIR + "gradlew"), "gradlew");
-        job.copyResource(job.resource(WRAPPER_DIR + "gradlew.bat"), "gradlew.bat");
-        job.copyResource(job.resource(WRAPPER_DIR + "gradle-wrapper.jar"), "gradle/wrapper/gradle-wrapper.jar");
-        job.copyResource(job.resource(WRAPPER_DIR + "gradle-wrapper.properties"), "gradle/wrapper/gradle-wrapper.properties");
+        addWrapperFiles(job, "");
     }
 
-    public static void addWrapperStep(final Job job){
-        addWrapperFiles(job);
+    private static void addWrapperFiles(final Job job, final String path){
+        job.copyResource(job.resource(GRADLE_DIR + "script.gradle"), path + "build.gradle");
+        job.copyResource(job.resource(WRAPPER_DIR + "gradlew"), path + "gradlew");
+        job.copyResource(job.resource(WRAPPER_DIR + "gradlew.bat"), path + "gradlew.bat");
+        job.copyResource(job.resource(WRAPPER_DIR + "gradle-wrapper.jar"), path + "gradle/wrapper/gradle-wrapper.jar");
+        job.copyResource(job.resource(WRAPPER_DIR + "gradle-wrapper.properties"), path + "gradle/wrapper/gradle-wrapper.properties");
+    }
+
+
+    public static void addWrapperStep(final Job job, final String wrapperLocation){
+        addWrapperFiles(job, wrapperLocation);
         final GradleStep step = job.addBuildStep(GradleStep.class);
         step.setUseWrapper();
         step.setMakeWrapperExecutable();
+        step.setWrapperLocation(wrapperLocation);
     }
+
+    public static void addWrapperStep(final Job job){
+        addWrapperStep(job, "");
+    }
+
 }

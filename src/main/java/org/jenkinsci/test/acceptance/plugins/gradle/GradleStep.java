@@ -33,6 +33,7 @@ public class GradleStep extends AbstractStep implements BuildStep {
     private final Control switches = control("switches");
     private final Control tasks = control("tasks");
     private final Control useWrapper = control("useWrapper[true]");
+    private final Control wrapperLocation = control("wrapperLocation");
     private final Control makeWrapperExecutable = control("makeExecutable");
     private final Control passAllAsProjectProperties = control("passAllAsProjectProperties");
     private final Control passAllAsSystemProperties = control("passAllAsSystemProperties");
@@ -81,6 +82,11 @@ public class GradleStep extends AbstractStep implements BuildStep {
     public void setUseWrapper(){
         ensureAdvancedOptionsOpen();
         this.useWrapper.click();
+    }
+
+    public void setWrapperLocation(final String wrapperLocation){
+        ensureAdvancedOptionsOpen();
+        this.wrapperLocation.set(wrapperLocation);
     }
 
     public void setMakeWrapperExecutable(){
