@@ -259,7 +259,7 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
         FreeStyleJob job = createFreeStyleJob();
         buildSuccessfulJob(job);
 
-        ListView view = jenkins.views.create(ListView.class);
+        ListView view = jenkins.views.create(ListView.class, "list");
         view.configure();
         view.matchAllJobs();
         view.addColumn(AnalysisCollectorColumn.class);
@@ -272,10 +272,10 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
         String tooltip = warningsCell.getAttribute("tooltip");
         assertThat(tooltip,
                 allOf(
-                        containsString("<a href=\"job/" + job.name + "/checkstyle\">" + CHECKSTYLE_ALL + "</a>"),
-                        containsString("<a href=\"job/" + job.name + "/findbugs\">" + FINDBUGS_ALL + "</a>"),
-                        containsString("<a href=\"job/" + job.name + "/pmd\">" + PMD_ALL + "</a>"),
-                        containsString("<a href=\"job/" + job.name + "/warnings\">" + WARNINGS_ALL + "</a>")
+                        containsString("<a href=\"view/list/job/" + job.name + "/checkstyle\">" + CHECKSTYLE_ALL + "</a>"),
+                        containsString("<a href=\"view/list/job/" + job.name + "/findbugs\">" + FINDBUGS_ALL + "</a>"),
+                        containsString("<a href=\"view/list/job/" + job.name + "/pmd\">" + PMD_ALL + "</a>"),
+                        containsString("<a href=\"view/list/job/" + job.name + "/warnings\">" + WARNINGS_ALL + "</a>")
                 )
         );
 
