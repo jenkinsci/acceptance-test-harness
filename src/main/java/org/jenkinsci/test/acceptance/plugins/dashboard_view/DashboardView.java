@@ -4,10 +4,14 @@ import com.google.inject.Injector;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.View;
+import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebElement;
 
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * PageObject of DashboardView Configuration Page.
@@ -18,13 +22,21 @@ import java.util.List;
 @Describable("Dashboard")
 public class DashboardView extends View {
 
-    /** List control for top portlets. **/
+    /**
+     * List control for top portlets.
+     **/
     public final Control topPortlet = new Control(this, "/hetero-list-add[topPortlet]");
-    /** List control for left portlets. **/
+    /**
+     * List control for left portlets.
+     **/
     public final Control leftPortlet = new Control(this, "/hetero-list-add[leftPortlet]");
-    /** List control for right portlets. **/
+    /**
+     * List control for right portlets.
+     **/
     public final Control rightPortlet = new Control(this, "/hetero-list-add[rightPortlet]");
-    /**List control for bottom portlets. **/
+    /**
+     * List control for bottom portlets.
+     **/
     public final Control bottomPortlet = new Control(this, "/hetero-list-add[bottomPortlet]");
 
     private List<AbstractDashboardViewPortlet> topPortlets = new ArrayList<>();
@@ -36,7 +48,7 @@ public class DashboardView extends View {
      * Constructs a new {@link DashboardView}.
      *
      * @param injector Injector to use.
-     * @param url URL of view.
+     * @param url      URL of view.
      */
     public DashboardView(Injector injector, URL url) {
         super(injector, url);
@@ -149,5 +161,82 @@ public class DashboardView extends View {
      */
     public <T extends AbstractDashboardViewPortlet> T getBottomPortlet(Class<T> portletClass) {
         return getPortlet(bottomPortlets, portletClass);
+    }
+
+    /**
+     * Gets the main panel of this dashboard containing all portlets.
+     *
+     * @return main panel of this dashboard.
+     */
+    public WebElement getPanel() {
+        if(!Objects.equals(getCurrentUrl(), url.toString())) {
+            open();
+        }
+        return find(By.id("main-panel"));
+    }
+
+    /**
+     * Gets the web element of a portlet in the top area of this dashboard view.
+     *
+     * @param name name of portlet.
+     * @return web element of the portlet or null if not available.
+     */
+    public WebElement getPortletInTopTable(String name) {
+        try {
+            return getPanel().findElement(By.xpath("//table[1]/tbody/tr/td/div[contains(.,'" + name + "')]"));
+        } catch (NoSuchElementException ex) {
+            return null;
+        }
+
+    }
+
+    /**
+     * Gets the web element of a portlet in the left area of this dashboard view.
+     * If there are no portlets in the left area but in the right area, this
+     * method searches in the right area.
+     *
+     * @param name name of portlet.
+     * @return web element of the portlet or null if not available.
+     */
+    public WebElement getPortletInLeftTable(String name) {
+        try {
+            return getPanel().findElement(By.xpath("//table[2]//td[1]/div[contains(.,'" + name + "')]"));
+        } catch (NoSuchElementException ex) {
+            return null;
+        }
+    }
+
+    /**
+     * Gets the web element of a portlet in the top area of this dashboard view.
+     * If there are no portlets in the right area but in the left area, this
+     * method searches in the left area.
+     *
+     * @param name name of portlet.
+     * @return web element of the portlet or null if not available.
+     */
+    public WebElement getPortletInRightTable(String name) {
+        try {
+            if (getPanel().findElements(By.xpath("//table[2]/tbody/tr/td")).size() > 1) {
+                return getPanel().findElement(By.xpath("//table[2]/tbody/tr/td[2]/div[contains(.,'" + name + "')]"));
+            } else {
+                return getPanel().findElement(By.xpath("//table[2]/tbody/tr/td[1]/div[contains(.,'" + name + "')]"));
+            }
+        } catch (NoSuchElementException ex) {
+            return null;
+        }
+    }
+
+    /**
+     * Gets the web element of a portlet in the bottom area of this dashboard view.
+     *
+     * @param name name of portlet.
+     * @return web element of the portlet or null if not available.
+     */
+    public WebElement getPortletInBottomTable(String name) {
+        try {
+            return getPanel().findElement(By.xpath("//table[3]/tbody/tr/td/div[contains(.,'" + name + "')]"));
+        } catch (NoSuchElementException ex) {
+            return null;
+        }
     }
 }
