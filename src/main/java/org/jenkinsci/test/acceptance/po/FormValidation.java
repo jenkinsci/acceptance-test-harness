@@ -24,12 +24,16 @@
 package org.jenkinsci.test.acceptance.po;
 
 import org.hamcrest.Description;
+import org.hamcrest.Matchers;
+import org.hamcrest.StringDescription;
 import org.jenkinsci.test.acceptance.Matcher;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import javax.annotation.Nonnull;
 import java.util.List;
+
+import static org.hamcrest.Matchers.*;
 
 /**
  * Result of form field validation.
@@ -97,6 +101,9 @@ public class FormValidation {
         return kind + ": " + message;
     }
 
+    /**
+     * When either there is no validation or empty OK was returned (there is no way to tell that apart).
+     */
     public static final Matcher<FormValidation> silent() {
         return new Matcher<FormValidation>("No form validation result should be presented") {
             @Override public boolean matchesSafely(FormValidation item) {
@@ -109,14 +116,24 @@ public class FormValidation {
         };
     }
 
-    public static final Matcher<FormValidation> reported(final Kind kind, final String expectedMessage) {
-        return new Matcher<FormValidation>("Validation reporting " + kind + " with message '" + expectedMessage + "'") {
+    public static final Matcher<FormValidation> reported(final Kind kind, final String message) {
+        return reported(kind, equalTo(message));
+    }
+
+    public static final Matcher<FormValidation> reported(final Kind kind, final org.hamcrest.Matcher<String> message) {
+        StringDescription sd = new StringDescription();
+        message.describeTo(sd);
+        return new Matcher<FormValidation>("Validation reporting " + kind + " with message: " + sd.toString()) {
             @Override public boolean matchesSafely(FormValidation item) {
-                return item.getKind() == kind && expectedMessage.equals(item.getMessage());
+                return item.getKind() == kind && message.matches(item.getMessage());
             }
 
             @Override public void describeMismatchSafely(FormValidation item, Description mismatchDescription) {
-                mismatchDescription.appendText("It is " + item.toString());
+                if (item.getKind() != kind) {
+                    mismatchDescription.appendText("It is " + item.toString());
+                } else {
+                    message.describeMismatch(item.getMessage(), mismatchDescription);
+                }
             }
         };
     }
