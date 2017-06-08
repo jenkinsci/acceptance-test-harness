@@ -10,14 +10,30 @@ import java.util.List;
  */
 public class StageViewJob {
 
+    /**
+     * Webelement locator for this current headline
+     */
     private WebElement webWebElement;
+
+    /**
+     * List of underlying stages
+     */
     private List<StageViewStage> stageViewStages;
+
+    /**
+     * the current build number
+     */
     private String buildNo;
+
+    /**
+     * String of css clases used for the build.
+     */
     private String cssClasses;
 
     /**
      * Initializes a stageviewjob
-     * @param webElement theElement of the particular job
+     *
+     * @param webElement      theElement of the particular job
      * @param stageViewStages The overall stages
      */
     public StageViewJob(WebElement webElement, List<StageViewStage> stageViewStages) {
@@ -29,6 +45,7 @@ public class StageViewJob {
 
     /**
      * Returns all the items of a particular job
+     *
      * @return list of stageviewitems
      */
     public List<StageViewStage> getAllStageViewItem() {
@@ -37,6 +54,7 @@ public class StageViewJob {
 
     /**
      * Return the stageViewItem
+     *
      * @param buildNumber
      * @return specific item
      */
@@ -46,6 +64,7 @@ public class StageViewJob {
 
     /**
      * Return the current build no
+     *
      * @return the number as  a String
      */
     public String getBuildNo() {
@@ -54,6 +73,7 @@ public class StageViewJob {
 
     /**
      * Return the css classes as a String
+     *
      * @return cssclasses
      */
     public String getCssClasses() {
@@ -62,7 +82,7 @@ public class StageViewJob {
 
     @Override
     public String toString() {
-        return this.buildNo + " - " + webWebElement.getText().replace("\n", "") + " - css: " + this.cssClasses ;
+        return this.buildNo + " - " + webWebElement.getText().replace("\n", "") + " - css: " + this.cssClasses;
     }
 
 }

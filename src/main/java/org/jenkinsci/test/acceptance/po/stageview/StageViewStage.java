@@ -7,16 +7,23 @@ import org.openqa.selenium.WebElement;
  */
 public class StageViewStage {
 
-        private WebElement webElement;
+    /**
+     * Webelement locator for this current headline
+     */
+    private WebElement webElement;
 
-        private String name;
+    /**
+     * full naem of the current stage
+     */
+    private String name;
 
-        public StageViewStage(WebElement webElement) {
-            this.webElement = webElement;
-            this.name = webElement.getText().replace("\n", "");
-        }
-        @Override
-        public String toString() {
-            return "-- Stage: " + this.name;
-        }
+    public StageViewStage(WebElement webElement) {
+        this.webElement = webElement;
+        this.name = webElement.getText().replace("\n", "");
+    }
+
+    @Override
+    public String toString() {
+        return "-- Stage: " + this.name;
+    }
 }

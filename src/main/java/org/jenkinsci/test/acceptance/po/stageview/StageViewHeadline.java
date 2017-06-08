@@ -7,11 +7,19 @@ import org.openqa.selenium.WebElement;
  */
 public class StageViewHeadline {
 
+    /**
+     * Webelement locator for this current headline
+     */
     private WebElement webElement;
+
+    /**
+     * The actual haedline in the box. Sanitized.
+     */
     private String name;
 
     /**
      * Constructor fot Headline
+     *
      * @param webElement the parent element
      */
     public StageViewHeadline(WebElement webElement) {
