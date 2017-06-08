@@ -192,8 +192,17 @@ public class FallbackConfig extends AbstractModule {
         d.register(new SanityChecker());
         d.register(new Scroller());
 
+        // Check if pageLoadTimeout is set
+        int seconds = 30;
         try {
-            d.manage().timeouts().pageLoadTimeout(time.seconds(30), TimeUnit.MILLISECONDS);
+            String timeout = System.getenv("PAGE_LOAD_TIMEOUT");
+            if (timeout != null) seconds = Integer.parseInt(timeout);
+        } catch (NumberFormatException e) {
+            System.out.println("PAGE_LOAD_TIMEOUT is not an integer, fallback to default of 30 seconds.");
+        }
+
+        try {
+            if (seconds > 0) d.manage().timeouts().pageLoadTimeout(time.seconds(seconds), TimeUnit.MILLISECONDS);
             d.manage().timeouts().implicitlyWait(time.seconds(1), TimeUnit.MILLISECONDS);
         } catch (UnsupportedCommandException e) {
             // sauce labs RemoteWebDriver doesn't support this

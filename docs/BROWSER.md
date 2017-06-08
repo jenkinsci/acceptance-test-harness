@@ -42,6 +42,8 @@ For example,
 
 See [WIRING.md](WIRING.md) for details of where to put this.
 
+One slow hardware it's possible, that all tests fail because the pageLoadTimeout of the WebDriver is exceeded. You can use the `PAGE_LOAD_TIMEOUT` environment variable to configure the timeout. If the value is greater than 0, it is used as the timeout in seconds. Values of 0 or below mean that there is no timeout. The default value is 30 seconds.
+
 ## Avoid focus steal with Xvnc on Linux
 If you select a real GUI browser, such as Firefox, browser window will pop up left and right during tests, making it practically unusable for you to use your computer. There is a script to run vnc server and propage the display number to the test suite using dedicated variable `BROWSER_DISPLAY`.
 
