@@ -12,6 +12,7 @@ public class StageViewHeadline {
      */
     private WebElement webElement;
 
+
     /**
      * The actual headline in the box. Sanitized.
      */
@@ -25,6 +26,14 @@ public class StageViewHeadline {
     public StageViewHeadline(WebElement webElement) {
         this.webElement = webElement;
         this.name = webElement.getText().replace("\n", "");
+    }
+
+    /**
+     * Name of the headline
+     * @return name
+     */
+    public String getName() {
+        return name;
     }
 
     @Override

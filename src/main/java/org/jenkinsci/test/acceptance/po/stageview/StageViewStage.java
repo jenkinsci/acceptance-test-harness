@@ -8,12 +8,12 @@ import org.openqa.selenium.WebElement;
 public class StageViewStage {
 
     /**
-     * Webelement locator for this current headline
+     * Web element locator for this current headline
      */
     private WebElement webElement;
 
     /**
-     * full naem of the current stage
+     * full name of the current stage
      */
     private String name;
 
@@ -21,6 +21,15 @@ public class StageViewStage {
         this.webElement = webElement;
         this.name = webElement.getText().replace("\n", "");
     }
+
+    /**
+     * Name of the stage
+     * @return name as String
+     */
+    public String getName() {
+        return name;
+    }
+
 
     @Override
     public String toString() {

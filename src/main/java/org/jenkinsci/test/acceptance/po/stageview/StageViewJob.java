@@ -26,7 +26,7 @@ public class StageViewJob {
     private String buildNo;
 
     /**
-     * String of css clases used for the build.
+     * String of css classes used for the build.
      */
     private String cssClasses;
 

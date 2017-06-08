@@ -133,8 +133,8 @@ public class StageViewTest extends AbstractJUnitTest {
         Build build = job.startBuild().shouldSucceed();
         job.open();
         StageView stageView = new StageView(job, JOB_PATH);
-        assertThat(stageView.getStageViewHeadlines().get(0).toString(), containsString("Clone sources"));
-        assertThat(stageView.getStageViewHeadlines().get(1).toString(), containsString("Build"));
+        assertThat(stageView.getStageViewHeadlines().get(0).getName(), containsString("Clone sources"));
+        assertThat(stageView.getStageViewHeadlines().get(1).getName(), containsString("Build"));
     }
 
     /**
