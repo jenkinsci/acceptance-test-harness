@@ -10,7 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * PageObject of DashboardView Configuration Page.
+ *
  * @author Kohsuke Kawaguchi
+ * @author Rene Zarwel
  */
 @Describable("Dashboard")
 public class DashboardView extends View {
