@@ -188,7 +188,7 @@ public class GradlePluginTest extends AbstractJUnitTest {
         assertThat(build.getConsole(), containsString("Gradle Properties: hello world"));
     }
 
-    @Test //@WithPlugins("gradle@1.27")
+    @Test @WithPlugins("gradle@1.27")
     public void run_gradle_job_parameters_as_system_properties(){
         GradleInstallation.installLatestGradleVersion(jenkins);
 
