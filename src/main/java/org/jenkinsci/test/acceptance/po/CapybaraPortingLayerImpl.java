@@ -74,6 +74,15 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     }
 
     /**
+     * Get a string representing the current URL with fragment part that the browser is looking at.
+     *
+     * @return The URL with fragment part of the page currently loaded in the browser.
+     */
+    public String getCurrentUrlWithFragment() {
+        return executeScript("return document.location.href").toString();
+    }
+
+    /**
      * Navigates the browser to the page.
      *
      * @param url URL relative to the context path of Jenkins, such as "/about" or "/job/foo/configure".

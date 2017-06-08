@@ -12,12 +12,10 @@ import org.jenkinsci.test.acceptance.junit.Resource;
 import org.openqa.selenium.WebElement;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
-import static org.jenkinsci.test.acceptance.Matchers.*;
 import static org.junit.Assert.assertEquals;
 
 @WithPlugins("log-parser")
@@ -39,6 +37,35 @@ public class LogParserTest extends AbstractJUnitTest {
         Resource sampleRule = resource("/logparser_plugin/rules/log-parser-rules-sample");
         rules.put("sampleRule", "" + sampleRule.url.getPath());
         addLogParserRules(rules);
+    }
+
+    /**
+     * Test that the link from the sidebar points to a valid position in the content page and
+     * that the text in the content page has the correct color.
+     */
+    @Test
+    public void testLinksAndColor() throws Exception {
+        FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class, "linkJob");
+
+        // configure job
+        job.configure(() -> {
+           LogParserPublisher lpp = job.addPublisher(LogParserPublisher.class);
+           lpp.setRule(LogParserPublisher.RuleType.GLOBAL, rules.get("sampleRule"));
+
+           // write sample output
+            Resource sampleLog = resource("/logparser_plugin/console-outputs/sample-log");
+            catToConsole(job, sampleLog.url.getPath());
+        });
+
+        Build build = job.startBuild().waitUntilFinished();
+        build.open();
+
+        driver.findElement(By.partialLinkText("Parsed Console Output")).click();
+        LogParserOutputPage outputPage = new LogParserOutputPage(build);
+
+        assertThat(outputPage.getFragmentOfContentFrame("Error", 1), is("ERROR1"));
+
+        assertThat(outputPage.getColor("Error",1), is("red"));
     }
 
     /**
