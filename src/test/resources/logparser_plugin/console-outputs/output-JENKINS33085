@@ -1,0 +1,197 @@
+Started by timer
+[EnvInject] - Loading node environment variables.
+Building in workspace /var/lib/jenkins/jobs/console.aws.amazon.com_qualys_ssl_check/workspace
+[workspace] $ /bin/sh -xe /tmp/hudson2837803993568173615.sh
++ /usr/bin/ssllabs-scan console.aws.amazon.com
+2016/02/22 14:25:01 [INFO] SSL Labs v1.21.14 (criteria version 2009k)
+2016/02/22 14:25:01 [NOTICE] Server message: This assessment service is provided free of charge by Qualys SSL Labs, subject to our terms and conditions: https://www.ssllabs.com/about/terms.html
+2016/02/22 14:25:03 [INFO] Assessment starting: console.aws.amazon.com
+2016/02/22 14:25:44 [INFO] Assessment complete: console.aws.amazon.com (1 host in 39 seconds)
+    72.21.215.152: C
+[
+{"host":"console.aws.amazon.com","port":443,"protocol":"HTTP","isPublic":
+  false,"status":"READY","startTime":1456151107013,"testTime":
+  1456151146058,"engineVersion":"1.21.14","criteriaVersion":"2009k",
+  "endpoints":[{"ipAddress":"72.21.215.152","statusMessage":"Ready","grade":
+      "C","gradeTrustIgnored":"C","hasWarnings":true,"isExceptional":false,
+      "progress":100,"duration":38791,"eta":1,"delegation":1,"details":{
+        "hostStartTime":1456151107013,"key":{"size":2048,"alg":"RSA",
+          "debianFlaw":false,"strength":2048},"cert":{"subject":
+          "CN\u003dconsole.aws.amazon.com,O\u003dAmazon.com, Inc.,L\u003dSeattle,ST\u003dWashington,C\u003dUS",
+          "commonNames":["console.aws.amazon.com"],"altNames":[
+            "us-east-1.console.aws.amazon.com",
+            "resources.console.aws.amazon.com","console.aws.amazon.com"],
+          "notBefore":1436832000000,"notAfter":1475279999000,"issuerSubject":
+
+          "CN\u003dSymantec Class 3 Secure Server CA - G4,OU\u003dSymantec Trust Network,O\u003dSymantec Corporation,C\u003dUS",
+          "issuerLabel":"Symantec Class 3 Secure Server CA - G4","sigAlg":
+          "SHA256withRSA","revocationInfo":3,"crlURIs":[
+            "http://ss.symcb.com/ss.crl"],"ocspURIs":[
+            "http://ss.symcd.com"],"revocationStatus":2,
+          "crlRevocationStatus":2,"ocspRevocationStatus":2,"sgc":0,"issues":
+          0,"sct":false,"sha1Hash":
+          "2b1c7f85d374c509ef20b2bc77bb9059ef23f43a","pinSha256":
+          "/v3Wwqc17iTTXkqOPG77CfuEWJ4SNKg5EeRjPS3U2+c\u003d"},"chain":{
+          "certs":[{"subject":
+              "CN\u003dconsole.aws.amazon.com,O\u003dAmazon.com, Inc.,L\u003dSeattle,ST\u003dWashington,C\u003dUS",
+              "label":"console.aws.amazon.com","notBefore":1436832000000,
+              "notAfter":1475279999000,"issuerSubject":
+              "CN\u003dSymantec Class 3 Secure Server CA - G4,OU\u003dSymantec Trust Network,O\u003dSymantec Corporation,C\u003dUS",
+              "issuerLabel":"Symantec Class 3 Secure Server CA - G4",
+              "sigAlg":"SHA256withRSA","issues":0,"keyAlg":"RSA","keySize":
+              2048,"keyStrength":2048,"revocationStatus":2,
+              "crlRevocationStatus":2,"ocspRevocationStatus":2,"sha1Hash":
+              "2b1c7f85d374c509ef20b2bc77bb9059ef23f43a","pinSha256":
+              "/v3Wwqc17iTTXkqOPG77CfuEWJ4SNKg5EeRjPS3U2+c\u003d","raw":
+              "-----BEGIN CERTIFICATE-----\nMIIFKTCCBBGgAwIBAgIQGLKZWOLWkG4VZxEALMiwWTANBgkqhkiG9w0BAQsFADB+MQswCQYDVQQG\r\nEwJVUzEdMBsGA1UEChMUU3ltYW50ZWMgQ29ycG9yYXRpb24xHzAdBgNVBAsTFlN5bWFudGVjIFRy\r\ndXN0IE5ldHdvcmsxLzAtBgNVBAMTJlN5bWFudGVjIENsYXNzIDMgU2VjdXJlIFNlcnZlciBDQSAt\r\nIEc0MB4XDTE1MDcxNDAwMDAwMFoXDTE2MDkzMDIzNTk1OVowcDELMAkGA1UEBhMCVVMxEzARBgNV\r\nBAgMCldhc2hpbmd0b24xEDAOBgNVBAcMB1NlYXR0bGUxGTAXBgNVBAoMEEFtYXpvbi5jb20sIElu\r\nYy4xHzAdBgNVBAMMFmNvbnNvbGUuYXdzLmFtYXpvbi5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IB\r\nDwAwggEKAoIBAQC7e8CAu/0hfFOsOVgrItLFNKqkpkQiW9Pj7pstMg77hQgJiJGYaaRrzgihjxJl\r\nZ4rg0mWh1L3jxfloB/+uCG5sRSX757WojSjuvWG226mXYsBKFFGrDWuh78M0ipVOTg5zU+OxbFY4\r\nv3+HYX9rPZLiXJdPRZ5aR8VRWSw1LQXcB4o69RIWGULpy6sFH0wOcmbg+IQLiJLQwJTF4njqZY8E\r\nVceeamNuePrvxXon7ZqST0NYM1udcnj2D4nRS4qQD1mtpXmRTnMojU06GtlfT2bUv7lKAtQkMagD\r\nicIFuo0lFEzPCPoTcp2AOmBphg7d7Sio2CCcuAQzUoZum7cU5MkbAgMBAAGjggGvMIIBqzBlBgNV\r\nHREEXjBcgiB1cy1lYXN0LTEuY29uc29sZS5hd3MuYW1hem9uLmNvbYIgcmVzb3VyY2VzLmNvbnNv\r\nbGUuYXdzLmFtYXpvbi5jb22CFmNvbnNvbGUuYXdzLmFtYXpvbi5jb20wCQYDVR0TBAIwADAOBgNV\r\nHQ8BAf8EBAMCBaAwHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMGEGA1UdIARaMFgwVgYG\r\nZ4EMAQICMEwwIwYIKwYBBQUHAgEWF2h0dHBzOi8vZC5zeW1jYi5jb20vY3BzMCUGCCsGAQUFBwIC\r\nMBkaF2h0dHBzOi8vZC5zeW1jYi5jb20vcnBhMB8GA1UdIwQYMBaAFF9gz2GQVd+EQxSKYCqy9Xr0\r\nQxjvMCsGA1UdHwQkMCIwIKAeoByGGmh0dHA6Ly9zcy5zeW1jYi5jb20vc3MuY3JsMFcGCCsGAQUF\r\nBwEBBEswSTAfBggrBgEFBQcwAYYTaHR0cDovL3NzLnN5bWNkLmNvbTAmBggrBgEFBQcwAoYaaHR0\r\ncDovL3NzLnN5bWNiLmNvbS9zcy5jcnQwDQYJKoZIhvcNAQELBQADggEBADgFEWvLa+sKGlhyBV83\r\n0SfhW/bFOGO6es5sqXv3Qs2qQdZbz7/xcTQu08d46n3FOyAHdaPGtWbE11CGbcagRIA4wvrMNJPs\r\nOmEnSb6yht6Rl9/THZ/0OdaCUOaq1D+9ywMc/bgOoThVoA1IyBT8rsB1ECfeu4FLOLj+NVRe+kVe\r\n5w5nr9O/hPKtvO6EIEef756XfJQoJaI36TiLIsmU+nzhF+7prRqhtGGj+KL9Vb3U+H2/rR/EzFNV\r\n2vetskWAiOn0dZiOaHEfIDnSS9b/vMgewDJ6flqbjhxSvfCyLd1AolMHOrqMJg5gcFDeu+vVrzY0\r\nOL5gNnIOqAEryuJwj1A\u003d\r\n-----END CERTIFICATE-----\n"},
+            {"subject":
+              "CN\u003dSymantec Class 3 Secure Server CA - G4,OU\u003dSymantec Trust Network,O\u003dSymantec Corporation,C\u003dUS",
+              "label":"Symantec Class 3 Secure Server CA - G4","notBefore":
+              1383177600000,"notAfter":1698710399000,"issuerSubject":
+              "CN\u003dVeriSign Class 3 Public Primary Certification Authority - G5,OU\u003d(c) 2006 VeriSign, Inc. - For authorized use only,OU\u003dVeriSign Trust Network,O\u003dVeriSign, Inc.,C\u003dUS",
+              "issuerLabel":
+              "VeriSign Class 3 Public Primary Certification Authority - G5",
+              "sigAlg":"SHA256withRSA","issues":0,"keyAlg":"RSA","keySize":
+              2048,"keyStrength":2048,"revocationStatus":2,
+              "crlRevocationStatus":2,"ocspRevocationStatus":2,"sha1Hash":
+              "ff67367c5cd4de4ae18bcce1d70fdabd7c866135","pinSha256":
+              "9n0izTnSRF+W4W4JTq51avSXkWhQB8duS2bxVLfzXsY\u003d","raw":
+              "-----BEGIN CERTIFICATE-----\nMIIFODCCBCCgAwIBAgIQUT+5dDhwtzRAQY0wkwaZ/zANBgkqhkiG9w0BAQsFADCByjELMAkGA1UE\r\nBhMCVVMxFzAVBgNVBAoTDlZlcmlTaWduLCBJbmMuMR8wHQYDVQQLExZWZXJpU2lnbiBUcnVzdCBO\r\nZXR3b3JrMTowOAYDVQQLEzEoYykgMjAwNiBWZXJpU2lnbiwgSW5jLiAtIEZvciBhdXRob3JpemVk\r\nIHVzZSBvbmx5MUUwQwYDVQQDEzxWZXJpU2lnbiBDbGFzcyAzIFB1YmxpYyBQcmltYXJ5IENlcnRp\r\nZmljYXRpb24gQXV0aG9yaXR5IC0gRzUwHhcNMTMxMDMxMDAwMDAwWhcNMjMxMDMwMjM1OTU5WjB+\r\nMQswCQYDVQQGEwJVUzEdMBsGA1UEChMUU3ltYW50ZWMgQ29ycG9yYXRpb24xHzAdBgNVBAsTFlN5\r\nbWFudGVjIFRydXN0IE5ldHdvcmsxLzAtBgNVBAMTJlN5bWFudGVjIENsYXNzIDMgU2VjdXJlIFNl\r\ncnZlciBDQSAtIEc0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAstgFyhx0LbUXVjnF\r\nSlIJluhL2AzxaJ+aQihiw6UwU35VEYJbA3oNL+F5BMm0lncZgQGUWfm893qZJ4Itt4PdWid/sgN6\r\nnFMl6UgfRk/InSn4vnlW9vf92Tpo2otLgjNBEsPIPMzWlnqEIRoiBAMnF4scaGGTDw5RgDMdtLXO\r\n637QYqzus3sBdO9pNevK1T2p7peYyo2qRA4lmUoVlqTObQJUHypqJuIGOmNIrLRM0XWTUP8TL9ba\r\n4cYY9Z/JJV3zADreJk20KQnNDz0jbxZKgRb78oMQw7jW2FUyPfG9D72MUpVKFpd6UiFjdS8W+cRm\r\nvvW1Cdj/JwDNRHxvSz+w9wIDAQABo4IBYzCCAV8wEgYDVR0TAQH/BAgwBgEB/wIBADAwBgNVHR8E\r\nKTAnMCWgI6Ahhh9odHRwOi8vczEuc3ltY2IuY29tL3BjYTMtZzUuY3JsMA4GA1UdDwEB/wQEAwIB\r\nBjAvBggrBgEFBQcBAQQjMCEwHwYIKwYBBQUHMAGGE2h0dHA6Ly9zMi5zeW1jYi5jb20wawYDVR0g\r\nBGQwYjBgBgpghkgBhvhFAQc2MFIwJgYIKwYBBQUHAgEWGmh0dHA6Ly93d3cuc3ltYXV0aC5jb20v\r\nY3BzMCgGCCsGAQUFBwICMBwaGmh0dHA6Ly93d3cuc3ltYXV0aC5jb20vcnBhMCkGA1UdEQQiMCCk\r\nHjAcMRowGAYDVQQDExFTeW1hbnRlY1BLSS0xLTUzNDAdBgNVHQ4EFgQUX2DPYZBV34RDFIpgKrL1\r\nevRDGO8wHwYDVR0jBBgwFoAUf9Nlp8Ld7LvwMAnzQzn6Aq8zMTMwDQYJKoZIhvcNAQELBQADggEB\r\nAF6UVkndji1l9cE2UbYD49qecxnyH1mrWH5sJgUs+oHXXCMXIiw3k/eG7IXmsKP9H+IyqEVv4dn7\r\nua/ScKAyQmW/hP4WKo8/xabWo5N9Q+l0IZE1KPRj6S7t9/Vcf0uatSDpCr3gRRAMFJSaXaXjS5Ho\r\nJJtGQGX0InLNmfiIEfXzf+YzguaoxX7+0AjiJVgIcWjmzaLmFN5OUiQt/eV5E1PnXi8tTRttQBVS\r\nK/eHiXgSgW7ZTaoteNTCLD0IX4eRnh8OsN4wUmSGiaqdZpwOdgyA8nTYKvi4Os7X1g8RvmurFPW9\r\nQaAiY4nxug9vKWNmLT+sjHLF+8fk1A/yO0+MKcc\u003d\r\n-----END CERTIFICATE-----\n"}],
+          "issues":0},"protocols":[{"id":769,"name":"TLS","version":"1.0"}],
+        "suites":{"list":[{"id":47,"name":"TLS_RSA_WITH_AES_128_CBC_SHA",
+              "cipherStrength":128},{"id":53,"name":
+              "TLS_RSA_WITH_AES_256_CBC_SHA","cipherStrength":256},{"id":
+              10,"name":"TLS_RSA_WITH_3DES_EDE_CBC_SHA","cipherStrength":
+              168}],"preference":true},"serverSignature":"AWS Server",
+        "prefixDelegation":false,"nonPrefixDelegation":true,"vulnBeast":
+        true,"renegSupport":0,"stsStatus":"absent","stsResponseHeader":"",
+        "stsSubdomains":false,"stsPreload":false,"sessionResumption":2,
+        "compressionMethods":0,"supportsNpn":false,"sessionTickets":0,
+        "ocspStapling":false,"sniRequired":false,"httpStatusCode":200,
+        "supportsRc4":false,"rc4WithModern":false,"rc4Only":false,
+        "forwardSecrecy":0,"sims":{"results":[{"client":{"id":56,"name":
+                "Android","version":"2.3.7","isReference":false},"errorCode":
+              0,"attempts":1,"protocolId":769,"suiteId":47},{"client":{"id":
+                58,"name":"Android","version":"4.0.4","isReference":false},
+              "errorCode":0,"attempts":1,"protocolId":769,"suiteId":47},{
+              "client":{"id":59,"name":"Android","version":"4.1.1",
+                "isReference":false},"errorCode":0,"attempts":1,"protocolId":
+              769,"suiteId":47},{"client":{"id":60,"name":"Android",
+                "version":"4.2.2","isReference":false},"errorCode":0,
+              "attempts":1,"protocolId":769,"suiteId":47},{"client":{"id":
+                61,"name":"Android","version":"4.3","isReference":false},
+              "errorCode":0,"attempts":1,"protocolId":769,"suiteId":47},{
+              "client":{"id":62,"name":"Android","version":"4.4.2",
+                "isReference":false},"errorCode":0,"attempts":1,"protocolId":
+              769,"suiteId":47},{"client":{"id":88,"name":"Android",
+                "version":"5.0.0","isReference":false},"errorCode":0,
+              "attempts":1,"protocolId":769,"suiteId":47},{"client":{"id":
+                94,"name":"Baidu","version":"Jan 2015","isReference":false},
+              "errorCode":0,"attempts":1,"protocolId":769,"suiteId":47},{
+              "client":{"id":91,"name":"BingPreview","version":"Jan 2015",
+                "isReference":false},"errorCode":0,"attempts":1,"protocolId":
+              769,"suiteId":47},{"client":{"id":117,"name":"Chrome",
+                "platform":"OS X","version":"47","isReference":true},
+              "errorCode":0,"attempts":1,"protocolId":769,"suiteId":47},{
+              "client":{"id":84,"name":"Firefox","platform":"Win 7",
+                "version":"31.3.0 ESR","isReference":false},"errorCode":0,
+              "attempts":1,"protocolId":769,"suiteId":47},{"client":{"id":
+                118,"name":"Firefox","platform":"OS X","version":"42",
+                "isReference":true},"errorCode":0,"attempts":1,"protocolId":
+              769,"suiteId":47},{"client":{"id":97,"name":"Googlebot",
+                "version":"Feb 2015","isReference":false},"errorCode":0,
+              "attempts":1,"protocolId":769,"suiteId":47},{"client":{"id":
+                100,"name":"IE","platform":"XP","version":"6","isReference":
+                false},"errorCode":1,"attempts":1},{"client":{"id":19,"name":
+                "IE","platform":"Vista","version":"7","isReference":false},
+              "errorCode":0,"attempts":1,"protocolId":769,"suiteId":47},{
+              "client":{"id":101,"name":"IE","platform":"XP","version":"8",
+                "isReference":false},"errorCode":0,"attempts":1,"protocolId":
+              769,"suiteId":10},{"client":{"id":113,"name":"IE","platform":
+                "Win 7","version":"8-10","isReference":true},"errorCode":0,
+              "attempts":1,"protocolId":769,"suiteId":47},{"client":{"id":
+                102,"name":"IE","platform":"Win 7","version":"11",
+                "isReference":true},"errorCode":0,"attempts":1,"protocolId":
+              769,"suiteId":47},{"client":{"id":104,"name":"IE","platform":
+                "Win 8.1","version":"11","isReference":true},"errorCode":0,
+              "attempts":1,"protocolId":769,"suiteId":47},{"client":{"id":
+                64,"name":"IE","platform":"Win Phone 8.0","version":"10",
+                "isReference":false},"errorCode":0,"attempts":1,"protocolId":
+              769,"suiteId":47},{"client":{"id":65,"name":"IE","platform":
+                "Win Phone 8.1","version":"11","isReference":true},
+              "errorCode":0,"attempts":1,"protocolId":769,"suiteId":47},{
+              "client":{"id":106,"name":"IE","platform":
+                "Win Phone 8.1 Update","version":"11","isReference":true},
+              "errorCode":0,"attempts":1,"protocolId":769,"suiteId":47},{
+              "client":{"id":107,"name":"IE","platform":"Win 10","version":
+                "11","isReference":true},"errorCode":0,"attempts":1,
+              "protocolId":769,"suiteId":47},{"client":{"id":119,"name":
+                "Edge","platform":"Win 10","version":"13","isReference":
+                true},"errorCode":0,"attempts":1,"protocolId":769,"suiteId":
+              47},{"client":{"id":120,"name":"Edge","platform":
+                "Win Phone 10","version":"13","isReference":true},
+              "errorCode":0,"attempts":1,"protocolId":769,"suiteId":47},{
+              "client":{"id":25,"name":"Java","version":"6u45","isReference":
+                false},"errorCode":0,"attempts":1,"protocolId":769,"suiteId":
+              47},{"client":{"id":26,"name":"Java","version":"7u25",
+                "isReference":false},"errorCode":0,"attempts":1,"protocolId":
+              769,"suiteId":47},{"client":{"id":86,"name":"Java","version":
+                "8u31","isReference":false},"errorCode":0,"attempts":1,
+              "protocolId":769,"suiteId":47},{"client":{"id":27,"name":
+                "OpenSSL","version":"0.9.8y","isReference":false},
+              "errorCode":0,"attempts":1,"protocolId":769,"suiteId":47},{
+              "client":{"id":99,"name":"OpenSSL","version":"1.0.1l",
+                "isReference":true},"errorCode":0,"attempts":1,"protocolId":
+              769,"suiteId":47},{"client":{"id":98,"name":"OpenSSL",
+                "version":"1.0.2","isReference":true},"errorCode":0,
+              "attempts":1,"protocolId":769,"suiteId":47},{"client":{"id":
+                32,"name":"Safari","platform":"OS X 10.6.8","version":
+                "5.1.9","isReference":false},"errorCode":0,"attempts":1,
+              "protocolId":769,"suiteId":47},{"client":{"id":33,"name":
+                "Safari","platform":"iOS 6.0.1","version":"6","isReference":
+                true},"errorCode":0,"attempts":1,"protocolId":769,"suiteId":
+              47},{"client":{"id":34,"name":"Safari","platform":
+                "OS X 10.8.4","version":"6.0.4","isReference":true},
+              "errorCode":0,"attempts":1,"protocolId":769,"suiteId":47},{
+              "client":{"id":63,"name":"Safari","platform":"iOS 7.1",
+                "version":"7","isReference":true},"errorCode":0,"attempts":
+              1,"protocolId":769,"suiteId":47},{"client":{"id":35,"name":
+                "Safari","platform":"OS X 10.9","version":"7","isReference":
+                true},"errorCode":0,"attempts":1,"protocolId":769,"suiteId":
+              47},{"client":{"id":85,"name":"Safari","platform":"iOS 8.4",
+                "version":"8","isReference":true},"errorCode":0,"attempts":
+              1,"protocolId":769,"suiteId":47},{"client":{"id":87,"name":
+                "Safari","platform":"OS X 10.10","version":"8","isReference":
+                true},"errorCode":0,"attempts":1,"protocolId":769,"suiteId":
+              47},{"client":{"id":114,"name":"Safari","platform":"iOS 9",
+                "version":"9","isReference":true},"errorCode":0,"attempts":
+              1,"protocolId":769,"suiteId":47},{"client":{"id":111,"name":
+                "Safari","platform":"OS X 10.11","version":"9","isReference":
+                true},"errorCode":0,"attempts":1,"protocolId":769,"suiteId":
+              47},{"client":{"id":112,"name":"Apple ATS","platform":
+                "iOS 9","version":"9","isReference":true},"errorCode":1,
+              "attempts":1},{"client":{"id":92,"name":"Yahoo Slurp",
+                "version":"Jan 2015","isReference":false},"errorCode":0,
+              "attempts":1,"protocolId":769,"suiteId":47},{"client":{"id":
+                93,"name":"YandexBot","version":"Jan 2015","isReference":
+                false},"errorCode":0,"attempts":1,"protocolId":769,"suiteId":
+              47}]},"heartbleed":false,"heartbeat":false,"openSslCcs":1,
+        "poodle":false,"poodleTls":1,"freak":false,"hasSct":0,"logjam":
+        false,"hstsPolicy":{"LONG_MAX_AGE":15552000,"status":"absent",
+          "directives":{}},"hstsPreloads":[{"source":"Chrome","hostname":
+            "console.aws.amazon.com","status":"absent","sourceTime":
+            1456150140909},{"source":"Edge","hostname":
+            "console.aws.amazon.com","status":"absent","sourceTime":
+            1456150141414},{"source":"Firefox","hostname":
+            "console.aws.amazon.com","status":"absent","sourceTime":
+            1456150141414},{"source":"IE","hostname":
+            "console.aws.amazon.com","status":"absent","sourceTime":
+            1456150141414},{"source":"Tor","hostname":
+            "console.aws.amazon.com","status":"absent","sourceTime":
+            1456150142036}],"hpkpPolicy":{"status":"absent","pins":[],
+          "matchedPins":[],"directives":{}},"hpkpRoPolicy":{"status":
+          "absent","pins":[],"matchedPins":[],"directives":{}}}}]}
+
+]
+
+2016/02/22 14:25:44 [INFO] All assessments complete; shutting down
