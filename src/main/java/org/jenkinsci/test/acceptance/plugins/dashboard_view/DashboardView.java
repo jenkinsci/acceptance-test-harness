@@ -15,17 +15,11 @@ import java.util.List;
 @Describable("Dashboard")
 public class DashboardView extends View {
 
-    /**
-     * List control for top portlets.
-     **/
+    /** List control for top portlets. **/
     public final Control topPortlet = new Control(this, "/hetero-list-add[topPortlet]");
-    /**
-     * List control for left portlets.
-     **/
+    /** List control for left portlets. **/
     public final Control leftPortlet = new Control(this, "/hetero-list-add[leftPortlet]");
-    /**
-     * List control for right portlets.
-     **/
+    /** List control for right portlets. **/
     public final Control rightPortlet = new Control(this, "/hetero-list-add[rightPortlet]");
     /**List control for bottom portlets. **/
     public final Control bottomPortlet = new Control(this, "/hetero-list-add[bottomPortlet]");
