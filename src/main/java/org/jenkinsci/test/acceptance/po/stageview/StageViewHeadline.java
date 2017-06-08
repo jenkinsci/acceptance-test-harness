@@ -8,18 +8,19 @@ import org.openqa.selenium.WebElement;
 public class StageViewHeadline {
 
     private WebElement webElement;
+    private String name;
 
+    /**
+     * Constructor fot Headline
+     * @param webElement the parent element
+     */
     public StageViewHeadline(WebElement webElement) {
         this.webElement = webElement;
         this.name = webElement.getText().replace("\n", "");
     }
 
-    String name;
-    String duration;
-    String color;
-
     @Override
     public String toString() {
-        return "-- Haedline: " + this.name;
+        return "-- Headline: " + this.name;
     }
 }

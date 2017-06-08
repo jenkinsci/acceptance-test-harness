@@ -12,10 +12,14 @@ public class StageViewJob {
 
     private WebElement webWebElement;
     private List<StageViewStage> stageViewStages;
-    String buildNo;
-    String cssClasses;
-    String color;
+    private String buildNo;
+    private String cssClasses;
 
+    /**
+     * Initializes a stageviewjob
+     * @param webElement theElement of the particular job
+     * @param stageViewStages The overall stages
+     */
     public StageViewJob(WebElement webElement, List<StageViewStage> stageViewStages) {
         this.webWebElement = webElement;
         this.stageViewStages = stageViewStages;
@@ -23,18 +27,35 @@ public class StageViewJob {
         this.cssClasses = webWebElement.getAttribute("class");
     }
 
+    /**
+     * Returns all the items of a particular job
+     * @return list of stageviewitems
+     */
     public List<StageViewStage> getAllStageViewItem() {
         return this.stageViewStages;
     }
 
+    /**
+     * Return the stageViewItem
+     * @param buildNumber
+     * @return specific item
+     */
     public StageViewStage getStageViewItem(int buildNumber) {
         return this.stageViewStages.get(stageViewStages.size() - 1);
     }
 
+    /**
+     * Return the current build no
+     * @return the number as  a String
+     */
     public String getBuildNo() {
         return buildNo;
     }
 
+    /**
+     * Return the css classes as a String
+     * @return cssclasses
+     */
     public String getCssClasses() {
         return cssClasses;
     }

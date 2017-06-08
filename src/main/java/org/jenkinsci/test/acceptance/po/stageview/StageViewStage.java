@@ -9,9 +9,7 @@ public class StageViewStage {
 
         private WebElement webElement;
 
-        String name;
-        String duration;
-        String color;
+        private String name;
 
         public StageViewStage(WebElement webElement) {
             this.webElement = webElement;
