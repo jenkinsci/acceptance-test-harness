@@ -38,8 +38,14 @@ public class GradleInstallation extends ToolInstallation {
      * The latest version is the default, and therefore chosen.
      */
     public static final String LATEST_VERSION = null;
+    public static final String DEFAULT_VERSION_NAME = "Default";
+
 
     public static void installGradle(final Jenkins jenkins, final String name, final String version) {
         installTool(jenkins, GradleInstallation.class, name, version);
+    }
+
+    public static void installLatestGradleVersion(final Jenkins jenkins) {
+        installGradle(jenkins, GradleInstallation.DEFAULT_VERSION_NAME, GradleInstallation.LATEST_VERSION);
     }
 }

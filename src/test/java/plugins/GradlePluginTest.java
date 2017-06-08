@@ -43,17 +43,16 @@ import static org.junit.Assert.assertThat;
 @WithPlugins("gradle")
 public class GradlePluginTest extends AbstractJUnitTest {
 
-    final private static String successFullBuild = "Finished: SUCCESS";
+    private static final String SUCCESSFUL_BUILD = "Finished: SUCCESS";
 
     @Test
     public void run_gradle_script() {
-        final String gradleInstallationName = "Default";
-        GradleInstallation.installGradle(jenkins, gradleInstallationName, GradleInstallation.LATEST_VERSION);
+        GradleInstallation.installLatestGradleVersion(jenkins);
 
         final FreeStyleJob job = jenkins.jobs.create();
         job.copyResource(resource("/gradle_plugin/script.gradle"), "build.gradle");
         final GradleStep step = job.addBuildStep(GradleStep.class);
-        step.setVersion(gradleInstallationName);
+        step.setVersion(GradleInstallation.DEFAULT_VERSION_NAME);
         step.setTasks("hello");
         step.setSwitches("--quiet");
         job.save();
@@ -66,13 +65,14 @@ public class GradlePluginTest extends AbstractJUnitTest {
 
     @Test
     public void run_gradle_script_in_dir() {
-        GradleInstallation.installGradle(jenkins, "gradle-1.5", "1.5");
+        final String gradleInstallationName = "gradle-1.5";
+        GradleInstallation.installGradle(jenkins, gradleInstallationName, "1.5");
 
         FreeStyleJob job = jenkins.jobs.create();
         job.copyResource(resource("/gradle_plugin/scriptNoPlugins.gradle"), "gradle/hello.gradle");
         GradleStep step = job.addBuildStep(GradleStep.class);
         step.setFile("hello.gradle");
-        step.setVersion("gradle-1.5");
+        step.setVersion(gradleInstallationName);
         step.setTasks("hello");
         step.setDir("gradle");
         job.save();
@@ -84,13 +84,12 @@ public class GradlePluginTest extends AbstractJUnitTest {
 
     @Test
     public void run_gradle_script_multiple_tasks() {
-        final String gradleInstallationName = "Default";
-        GradleInstallation.installGradle(jenkins, gradleInstallationName, GradleInstallation.LATEST_VERSION);
+        GradleInstallation.installLatestGradleVersion(jenkins);
 
         final FreeStyleJob job = jenkins.jobs.create();
         job.copyResource(resource("/gradle_plugin/script.gradle"), "build.gradle");
         final GradleStep step = job.addBuildStep(GradleStep.class);
-        step.setVersion(gradleInstallationName);
+        step.setVersion(GradleInstallation.DEFAULT_VERSION_NAME);
         step.setTasks("firstTask secondTask");
         job.save();
 
@@ -103,13 +102,12 @@ public class GradlePluginTest extends AbstractJUnitTest {
     @Test
     @Issue({"JENKINS-40778"})
     public void run_gradle_script_messages_initialized() {
-        final String gradleInstallationName = "Default";
-        GradleInstallation.installGradle(jenkins, gradleInstallationName, GradleInstallation.LATEST_VERSION);
+        GradleInstallation.installLatestGradleVersion(jenkins);
 
         final FreeStyleJob job = jenkins.jobs.create();
         job.copyResource(resource("/gradle_plugin/script.gradle"), "build.gradle");
         final GradleStep step = job.addBuildStep(GradleStep.class);
-        step.setVersion(gradleInstallationName);
+        step.setVersion(GradleInstallation.DEFAULT_VERSION_NAME);
         step.setTasks("hello");
         job.save();
 
@@ -120,13 +118,12 @@ public class GradlePluginTest extends AbstractJUnitTest {
 
     @Test @WithPlugins("gradle@1.27")
     public void run_gradle_script_build_scan_link() {
-        final String gradleInstallationName = "Default";
-        GradleInstallation.installGradle(jenkins, gradleInstallationName, GradleInstallation.LATEST_VERSION);
+        GradleInstallation.installLatestGradleVersion(jenkins);
 
         final FreeStyleJob job = jenkins.jobs.create();
         job.copyResource(resource("/gradle_plugin/script.gradle"), "build.gradle");
         final GradleStep step = job.addBuildStep(GradleStep.class);
-        step.setVersion(gradleInstallationName);
+        step.setVersion(GradleInstallation.DEFAULT_VERSION_NAME);
         step.setTasks("hello");
         step.setSwitches("--scan");
         job.save();
@@ -140,27 +137,24 @@ public class GradlePluginTest extends AbstractJUnitTest {
 
     @Test
     public void run_gradle_script_with_wrapper(){
-        GradleInstallation.installGradle(jenkins, "Default", GradleInstallation.LATEST_VERSION);
+        GradleInstallation.installLatestGradleVersion(jenkins);
         final FreeStyleJob job = jenkins.jobs.create();
         GradleWrapper.addWrapperStep(job);
         job.save();
         
         final Build build = job.startBuild();
         build.shouldSucceed();
-        assertThat(build.getConsole(), containsString(successFullBuild));
+        assertThat(build.getConsole(), containsString(SUCCESSFUL_BUILD));
     }
 
     @Test
     public void run_gradle_environment_variables(){
-        final String gradleInstallationName = "Default";
-        GradleInstallation.installGradle(jenkins, gradleInstallationName, GradleInstallation.LATEST_VERSION);
+        GradleInstallation.installLatestGradleVersion(jenkins);
 
         final FreeStyleJob job = jenkins.jobs.create();
         job.copyResource(resource("/gradle_plugin/script.gradle"), "build.gradle");
         final GradleStep step = job.addBuildStep(GradleStep.class);
-        step.setVersion(gradleInstallationName);
-
-        step.setVersion(gradleInstallationName);
+        step.setVersion(GradleInstallation.DEFAULT_VERSION_NAME);
         step.setTasks("environmentVariables");
         job.save();
 
@@ -171,8 +165,7 @@ public class GradlePluginTest extends AbstractJUnitTest {
 
     @Test @WithPlugins("gradle@1.27")
     public void run_gradle_job_parameters_as_project_properties(){
-        final String gradleInstallationName = "Default";
-        GradleInstallation.installGradle(jenkins, gradleInstallationName, GradleInstallation.LATEST_VERSION);
+        GradleInstallation.installLatestGradleVersion(jenkins);
 
         final FreeStyleJob job = jenkins.jobs.create();
         job.copyResource(resource("/gradle_plugin/script.gradle"), "build.gradle");
@@ -180,7 +173,7 @@ public class GradlePluginTest extends AbstractJUnitTest {
         job.addParameter(StringParameter.class).setName("TEST_PARAM_2").setDefault("world");
 
         final GradleStep step = job.addBuildStep(GradleStep.class);
-        step.setVersion(gradleInstallationName);
+        step.setVersion(GradleInstallation.DEFAULT_VERSION_NAME);
         step.setTasks("jobParametersAsProjectProperties");
         step.setPassAllAsProjectProperties();
         job.save();
@@ -191,8 +184,7 @@ public class GradlePluginTest extends AbstractJUnitTest {
 
     @Test @WithPlugins("gradle@1.27")
     public void run_gradle_job_parameters_as_system_properties(){
-        final String gradleInstallationName = "Default";
-        GradleInstallation.installGradle(jenkins, gradleInstallationName, GradleInstallation.LATEST_VERSION);
+        GradleInstallation.installLatestGradleVersion(jenkins);
 
         final FreeStyleJob job = jenkins.jobs.create();
         job.copyResource(resource("/gradle_plugin/script.gradle"), "build.gradle");
@@ -200,7 +192,7 @@ public class GradlePluginTest extends AbstractJUnitTest {
         job.addParameter(StringParameter.class).setName("TEST_PARAM_2").setDefault("world");
 
         final GradleStep step = job.addBuildStep(GradleStep.class);
-        step.setVersion(gradleInstallationName);
+        step.setVersion(GradleInstallation.DEFAULT_VERSION_NAME);
         step.setTasks("jobParametersAsSystemProperties");
         step.setPassAllAsSystemProperties();
         job.save();

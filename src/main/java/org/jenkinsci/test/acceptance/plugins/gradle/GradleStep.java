@@ -23,7 +23,6 @@
  */
 package org.jenkinsci.test.acceptance.plugins.gradle;
 
-import hudson.util.VersionNumber;
 import org.jenkinsci.test.acceptance.po.*;
 
 @Describable("Invoke Gradle script")
@@ -44,8 +43,9 @@ public class GradleStep extends AbstractStep implements BuildStep {
     }
 
     private void ensureAdvancedOptionsOpen() {
-        if(control("advanced-button").exists()) {
-            control("advanced-button").click();
+        Control advancedButton = control("advanced-button");
+        if(advancedButton.exists()) {
+            advancedButton.click();
         }
     }
 
