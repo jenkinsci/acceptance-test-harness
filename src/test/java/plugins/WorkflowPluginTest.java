@@ -27,6 +27,7 @@ package plugins;
 import java.io.File;
 import java.util.concurrent.Callable;
 import javax.inject.Inject;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -54,7 +55,6 @@ import org.jenkinsci.test.acceptance.plugins.workflow_shared_library.WorkflowGit
 import org.jenkinsci.test.acceptance.plugins.workflow_shared_library.WorkflowSharedLibraryGlobalConfig;
 import org.jenkinsci.test.acceptance.po.Artifact;
 import org.jenkinsci.test.acceptance.po.Build;
-import static org.jenkinsci.test.acceptance.po.CapybaraPortingLayer.by;
 import org.jenkinsci.test.acceptance.po.DumbSlave;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
@@ -207,7 +207,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
     @Test public void sshGitInsideDocker() throws Exception {
         GitContainer gitContainer = gitServer.get();
         GitRepo repo = new GitRepo();
-        repo.commit("Initial commit");
+        repo.changeAndCommitFoo("Initial commit");
         repo.transferToDockerContainer(gitContainer.host(), gitContainer.port());
         DumbSlave slave = jenkins.slaves.create(DumbSlave.class);
         slave.setExecutors(1);
@@ -226,6 +226,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         launcher.host.set(agentContainer.ipBound(22));
         launcher.port(agentContainer.port(22));
         launcher.pwdCredentials("test", "test");
+        launcher.setSshHostKeyVerificationStrategy(SshSlaveLauncher.NonVerifyingKeyVerificationStrategy.class);
         slave.save();
         { // TODO JENKINS-30600 workaround
             JGitInstallation.addJGit(jenkins);

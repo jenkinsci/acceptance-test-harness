@@ -7,9 +7,11 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FilenameUtils;
@@ -36,6 +38,7 @@ import org.jenkinsci.test.acceptance.plugins.email_ext.EmailExtPublisher;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenBuildStep;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
+import org.jenkinsci.test.acceptance.plugins.nested_view.NestedView;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Container;
 import org.jenkinsci.test.acceptance.po.Folder;
@@ -128,16 +131,23 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
     }
 
     /**
-     * Sets up a job within a folder. Verifies that the project action from the job redirects to the result
-     * of the last build. Checks the correct number of warnings in the project overview and
-     * result details view. Finally checks if the warnings-per-project portlet and warnings column show the
+     * Sets up a nested view that contains a dashboard view with a warnings-per-project portlet.
+     * Creates a folder in this view and a freestyle job in this folder.
+     * Finally checks if the warnings-per-project portlet and warnings column show the
      * correct number of warnings and provide a direct link to the actual warning results.
      */
-    @Test @Issue({"JENKINS-39947", "JENKINS-39950"}) @WithPlugins({"dashboard-view", "cloudbees-folder"})
+    @Test @Issue("JENKINS-39947") @WithPlugins({"dashboard-view", "nested-view", "cloudbees-folder", "analysis-core@1.87"})
     public void should_show_warnings_in_folder() {
-        Folder folder = jenkins.jobs.create(Folder.class, jenkins.createRandomName());
-        folder.save();
+        NestedView nested = jenkins.getViews().create(NestedView.class);
 
+        DashboardView dashboard = nested.getViews().create(DashboardView.class);
+        dashboard.configure(() -> {
+            dashboard.matchAllJobs();
+            dashboard.checkRecurseIntoFolders();
+        });
+
+        Folder folder = dashboard.jobs.create(Folder.class);
+        folder.save();
         folder.open();
 
         FreeStyleJob job = createFreeStyleJob(folder);
@@ -145,7 +155,10 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
 
         P projectAction = createProjectAction(job);
 
-        addDashboardViewAndBottomPortlet(projectAction.getTablePortlet(), folder);
+        dashboard.configure(() -> {
+            dashboard.addBottomPortlet(projectAction.getTablePortlet());
+        });
+
         verifyPortlet(projectAction);
 
         addListViewColumn(projectAction.getViewColumn(), folder);
@@ -370,7 +383,7 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
             final int numberOfWarnings) {
         elasticSleep(500);
 
-        Map<String, Integer> trend = job.getTrendGraphContent(action.getUrl());
+        Map<String, Integer> trend = getTrendGraphContent(action.getUrl());
         assertThat(trend.size(), is(6));
 
         List<String> actualUrls = new ArrayList<>();
@@ -388,6 +401,33 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
             }
             assertThat(sum, is(numberOfWarnings));
         }
+    }
+
+    /**
+     * Returns the relevant information of the trend graph image map. A trend graph shows for each build three
+     * values: the number of warnings for priority HIGH, NORMAL, and LOW. These results are returned in a map.
+     * The key is the URL to the warnings results of each build (and priority). The value is the number of warnings
+     * for each result.
+     *
+     * @param url the URL of the graph to look at
+     * @return the content of the trend graph
+     */
+    public Map<String, Integer> getTrendGraphContent(final String url) {
+        Map<String, Integer> links = new HashMap<String, Integer>();
+        Pattern resultLink = Pattern.compile("href=\"(.*" + url +".*)\"");
+        Pattern warningsCount = Pattern.compile("title=\"(\\d+).*\"");
+        for (WebElement area : all(by.xpath(".//div/map/area"))) {
+            String outerHtml = area.getAttribute("outerHTML");
+            Matcher linkMatcher = resultLink.matcher(outerHtml);
+            if (linkMatcher.find()) {
+                Matcher countMatcher = warningsCount.matcher(outerHtml);
+                if (countMatcher.find()) {
+                    links.put(linkMatcher.group(1), Integer.valueOf(countMatcher.group(1)));
+                }
+            }
+        }
+
+        return links;
     }
 
     /**

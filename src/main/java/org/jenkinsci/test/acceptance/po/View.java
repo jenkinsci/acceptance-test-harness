@@ -1,16 +1,16 @@
 package org.jenkinsci.test.acceptance.po;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.google.inject.Injector;
-
 import java.net.URL;
 
 import org.hamcrest.Description;
 import org.jenkinsci.test.acceptance.Matcher;
 
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.google.inject.Injector;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.*;
+import static org.jenkinsci.test.acceptance.Matchers.*;
 
 /**
  * Page object for view, which is a collection of jobs rendered in the UI.
@@ -20,6 +20,8 @@ import static org.jenkinsci.test.acceptance.Matchers.hasContent;
  * @author Kohsuke Kawaguchi
  */
 public abstract class View extends ContainerPageObject {
+    private final Control recurseIntoFolder = control("/recurse");
+
     public final JobsMixIn jobs;
 
     public View(Injector injector, URL url) {
@@ -84,5 +86,9 @@ public abstract class View extends ContainerPageObject {
                 }
             }
         };
+    }
+
+    public void checkRecurseIntoFolders() {
+        recurseIntoFolder.check();
     }
 }

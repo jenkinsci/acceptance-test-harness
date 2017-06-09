@@ -1,0 +1,15 @@
+node {
+    checkout scm
+
+    step([$class: 'FindBugsPublisher', pattern: '**/findbugs.xml'])
+    step([$class: 'PmdPublisher'])
+    step([$class: 'CheckStylePublisher'])
+    step([$class: 'TasksPublisher', high: 'PRIO1', normal: 'PRIO2, TODO', low :'PRIO3'])
+    step([$class: 'WarningsPublisher',
+                    parserConfigurations: [
+                    [parserName: 'Java Compiler (javac)', pattern: '**/warnings.txt'],
+                    [parserName: 'JavaDoc Tool', pattern: '**/warnings.txt'],
+                    [parserName: 'MSBuild', pattern: '**/warnings.txt']
+                    ]])
+    step([$class: 'AnalysisPublisher'])
+}

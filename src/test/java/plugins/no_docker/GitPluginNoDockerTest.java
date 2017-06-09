@@ -50,12 +50,12 @@ public class GitPluginNoDockerTest extends AbstractJUnitTest {
 
     @Test
     public void checkout_branch_git() {
-        assertExecutesFine(generateJobWithBranch(GIT_IMPL.GIT), "test `git rev-parse origin/svn` = `git rev-parse HEAD`");
+        assertExecutesFine(generateJobWithBranch(GIT_IMPL.GIT), "test `git rev-parse origin/recovery` = `git rev-parse HEAD`");
     }
 
     @Test
     public void checkout_branch_jgit() {
-        assertExecutesFine(generateJobWithBranch(GIT_IMPL.JGIT), "test `git rev-parse origin/svn` = `git rev-parse HEAD`");
+        assertExecutesFine(generateJobWithBranch(GIT_IMPL.JGIT), "test `git rev-parse origin/recovery` = `git rev-parse HEAD`");
     }
 
     @Test
@@ -126,7 +126,7 @@ public class GitPluginNoDockerTest extends AbstractJUnitTest {
 
     private Job generateJobWithBranch(GIT_IMPL type) {
         Job job = generateJob(type);
-        GitScm scm = generateSCM(job).branch("svn");
+        GitScm scm = generateSCM(job).branch("recovery");
         useJGitIfNeccesary(type, scm);
         return job;
     }
