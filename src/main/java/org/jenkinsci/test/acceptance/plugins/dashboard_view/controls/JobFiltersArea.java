@@ -23,6 +23,10 @@ public class JobFiltersArea extends PageAreaImpl {
      * Checkbox to use a regular expression to include jobs into the view.
      */
     private final Control useIncludeRegex = control("/useincluderegex");
+    /**
+     * Text input for the regex, only visible if useIncludeRegex is checked.
+     */
+    private final Control includeRegex = control("/useincluderegex/includeRegex");
 
     /**
      * Create a new Area for the configuration regarding the job filters.
@@ -54,12 +58,13 @@ public class JobFiltersArea extends PageAreaImpl {
     }
 
     /**
-     * Change the state of the checkbox for to option to include a job by regex.
+     * Set a regex to include jobs only if they match the expression
      *
-     * @param state true if enabled
+     * @param regex regex the regex to filter the job names
      */
-    public void setUseIncludeRegex(boolean state) {
-        this.useIncludeRegex.check(state);
+    public void setIncludeRegex(String regex) {
+        this.useIncludeRegex.check(true);
+        includeRegex.set(regex);
     }
 
 

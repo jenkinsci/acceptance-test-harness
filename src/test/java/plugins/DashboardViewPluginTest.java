@@ -165,6 +165,23 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
     SlaveController slave1;
 
     @Test
+    @Ignore("Test criteria still missing")
+    public void filterByRegex() {
+        jenkins.jobs.create(FreeStyleJob.class, "a");
+        jenkins.jobs.create(FreeStyleJob.class, "aa");
+        jenkins.jobs.create(FreeStyleJob.class, "b");
+
+        final DashboardView view = createDashboardView();
+        view.configure(() -> view.dashboardPortlets.checkIncludeStdJobList(true));
+        view.open();
+
+
+        view.configure(() -> view.jobFilters.setIncludeRegex("a*"));
+
+        view.open();
+    }
+
+    @Test
     public void configureDashboardFilterBuildExecutors() throws Exception {
         final boolean filterBuildExecutors = true;
         Node s = slave1.install(jenkins).get();
