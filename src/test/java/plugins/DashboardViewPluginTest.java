@@ -7,11 +7,14 @@ import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.controls.ColumnsArea;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.controls.JobFiltersArea;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.Node;
+import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+import javax.inject.Inject;
 import java.util.List;
 
 import static org.hamcrest.Matchers.*;
@@ -158,22 +161,40 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
         assertThat(v.mainPanel.getDescription(), is(description));
     }
 
-    @Test
-    @Ignore
-    public void configureDashboardFilterBuildExecutors() {
-        final boolean filterBuildExecutors = true;
+    @Inject
+    SlaveController slave1;
 
-        DashboardView v = jenkins.views.create(DashboardView.class, "Dashboard");
-        v.configure();
-        {
+    @Test
+    public void configureDashboardFilterBuildExecutors() throws Exception {
+        final boolean filterBuildExecutors = true;
+        Node s = slave1.install(jenkins).get();
+        s.configure();
+        s.setLabels("test");
+        s.save();
+
+        FreeStyleJob job = jenkins.jobs.create();
+
+        DashboardView v = createDashboardView();
+        v.configure(() -> {
             v.mainArea.setFilterBuildExecutors(filterBuildExecutors);
-        }
-        v.save();
+        });
         v.open();
 
-        final By executors = By.xpath("//div[@id=\"executors\"]/div[@class=\"row pane-content\"]/table");
-        final List<WebElement> elements = find(executors).findElements(By.xpath("/tbody/tr"));
-        assertThat(elements.size(), is(0));
+        final List<String> headers = v.buildExecutorStatus.getHeaders();
+        final List<String> executors = v.buildExecutorStatus.getExecutors();
+        assertThat(headers.size(), is(2));
+        assertThat(executors.size(), greaterThan(1));
+
+        job.configure(() -> {
+            job.setLabelExpression("test");
+        });
+        v.open();
+
+        final List<String> headers2 = v.buildExecutorStatus.getHeaders();
+        final List<String> executors2 = v.buildExecutorStatus.getExecutors();
+        // If only one node, the title header is not shown.
+        assertThat(headers2.size(), is(0));
+        assertThat(executors2.size(), is(1));
     }
 
     @Test

@@ -9,6 +9,7 @@ import org.jenkinsci.test.acceptance.plugins.dashboard_view.controls.DashboardPo
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.controls.JobFiltersArea;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.controls.MainArea;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.read.BreadCrumbs;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.read.BuildExecutorStatus;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.read.MainPanel;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
@@ -36,6 +37,7 @@ public class DashboardView extends View {
 
 
     public final BreadCrumbs breadCrumbs = new BreadCrumbs(this, "");
+    public final BuildExecutorStatus buildExecutorStatus = new BuildExecutorStatus(this, "");
     public final MainPanel mainPanel = new MainPanel(this, "");
 
     private List<AbstractDashboardViewPortlet> bottomPortlets = new ArrayList<>();
