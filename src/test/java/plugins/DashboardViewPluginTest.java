@@ -202,16 +202,12 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
     }
 
     @Test
-    @Ignore("There needs to be a better way to read the stats on the left side.")
     public void configureDashboardFilterOnlyActivatedJobs() {
-
         DashboardView v = createDashboardView();
         BuildStatisticsPortlet stats = v.addBottomPortlet(BuildStatisticsPortlet.class);
-        v.configure();
-        {
+        v.configure(() -> {
             v.jobFilters.setStatusFilter(JobFiltersArea.StatusFilter.ENABLED);
-        }
-        v.save();
+        });
 
         final FreeStyleJob active = createFreeStyleJob();
         final FreeStyleJob disabled = createFreeStyleJob();
@@ -219,13 +215,15 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
         buildSuccessfulJob(active);
         buildSuccessfulJob(disabled);
 
+        v.open();
+        assertThat(stats.getNumberOfBuilds(JobType.TOTAL), is(2));
+        assertThat(stats.getNumberOfBuilds(JobType.DISABLED), is(0));
+
         disabled.configure(disabled::disable);
 
         v.open();
-        final int numberOfBuilds = stats.getNumberOfBuilds(JobType.TOTAL);
-        assertThat(numberOfBuilds, is(1));
-        final int numberOfDisabled = stats.getNumberOfBuilds(JobType.DISABLED);
-        assertThat(numberOfDisabled, is(0));
+        assertThat(stats.getNumberOfBuilds(JobType.TOTAL), is(1));
+        assertThat(stats.getNumberOfBuilds(JobType.DISABLED), is(0));
     }
 
     @Test
@@ -260,6 +258,7 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
      *
      * @return default dashboard view
      */
+
     private DashboardView createDashboardView() {
         DashboardView v = jenkins.views.create(DashboardView.class);
         v.configure();
