@@ -1,9 +1,6 @@
 package org.jenkinsci.test.acceptance.plugins.dashboard_view;
 
 import com.google.inject.Injector;
-import org.hamcrest.Description;
-import org.jenkinsci.test.acceptance.Matcher;
-import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisPlugin;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.controls.ColumnsArea;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.controls.DashboardPortlets;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.controls.JobFiltersArea;
@@ -14,20 +11,11 @@ import org.jenkinsci.test.acceptance.plugins.dashboard_view.read.MainPanel;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.read.ProjectStatusStdJobList;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
-import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.View;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.WebElement;
 
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.jenkinsci.test.acceptance.po.Control;
-import org.jenkinsci.test.acceptance.po.Describable;
-import org.jenkinsci.test.acceptance.po.View;
-
-import com.google.inject.Injector;
 
 /**
  * @author Kohsuke Kawaguchi

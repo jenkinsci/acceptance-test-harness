@@ -2,43 +2,27 @@ package plugins;
 
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.plugins.dashboard_view.BuildStatisticsPortlet;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.*;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.BuildStatisticsPortlet.JobType;
-import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.controls.ColumnsArea;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.controls.JobFiltersArea;
-import org.jenkinsci.test.acceptance.plugins.dashboard_view.LatestBuildsPortlet;
 import org.jenkinsci.test.acceptance.po.Build;
-import org.jenkinsci.test.acceptance.plugins.dashboard_view.TestStatisticsChartPortlet;
-import org.jenkinsci.test.acceptance.plugins.dashboard_view.UnstableJobsPortlet;
-import org.jenkinsci.test.acceptance.plugins.dashboard_view.controls.ColumnsArea;
-import org.jenkinsci.test.acceptance.plugins.dashboard_view.controls.JobFiltersArea;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
-import org.jenkinsci.test.acceptance.po.Node;
-import org.jenkinsci.test.acceptance.slave.SlaveController;
-import org.junit.Ignore;
 import org.jenkinsci.test.acceptance.po.JUnitPublisher;
 import org.jenkinsci.test.acceptance.po.Node;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import javax.imageio.ImageIO;
 import javax.inject.Inject;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertEquals;
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-
-import static org.hamcrest.Matchers.is;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
-
-import static org.hamcrest.Matchers.*;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
