@@ -328,7 +328,7 @@ public abstract class AnalysisAction extends ContainerPageObject {
 
     public SortedMap<String, String> getDetailsTabContents() {
         openTab(Tab.DETAILS);
-        return mapContentsOfHeaderValueRows();
+        return mapContentsOfHeaderValueRows("details");
     }
 
     /**
@@ -365,8 +365,8 @@ public abstract class AnalysisAction extends ContainerPageObject {
         return mapTableCellsKeyValue(getVisibleTableRows(removeHeader, removeFooter));
     }
 
-    private SortedMap<String, String> mapContentsOfHeaderValueRows() {
-        List<WebElement> table = all(by.xpath("//div[@id='statistics']/div/div/table"));
+    private SortedMap<String, String> mapContentsOfHeaderValueRows(String tableId) {
+        List<WebElement> table = all(by.xpath("//div[@id='statistics']/div/div/table[@id='"+tableId+"']"));
         final SortedMap<String, String> result = new TreeMap<>();
 
         for(WebElement element : table) {
