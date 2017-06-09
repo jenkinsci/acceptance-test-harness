@@ -227,30 +227,27 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
     }
 
     @Test
-    @Ignore("")
+    @Ignore("The statistics portlet shows only one job in total (the disabled one). it is shown as successful (1) but disabled(0)." +
+            "I found no way to get a disabled number other than zero when status filter is set to disabled. ")
     public void configureDashboardFilterOnlyDisabledJobs() {
 
         DashboardView v = createDashboardView();
         BuildStatisticsPortlet stats = v.addBottomPortlet(BuildStatisticsPortlet.class);
-        v.configure();
-        {
+        v.configure(() -> {
             v.jobFilters.setStatusFilter(JobFiltersArea.StatusFilter.DISABLED);
-        }
-        v.save();
+        });
 
         final FreeStyleJob active = createFreeStyleJob();
         final FreeStyleJob disabled = createFreeStyleJob();
 
         buildSuccessfulJob(active);
         buildSuccessfulJob(disabled);
-
         disabled.configure(disabled::disable);
 
         v.open();
-        final int numberOfBuilds = stats.getNumberOfBuilds(JobType.TOTAL);
-        assertThat(numberOfBuilds, is(1));
-        final int numberOfDisabled = stats.getNumberOfBuilds(JobType.DISABLED);
-        assertThat(numberOfDisabled, is(1));
+        assertThat(stats.getNumberOfBuilds(JobType.TOTAL), is(1));
+        // When run the number of disabled jobs is zero.
+        assertThat(stats.getNumberOfBuilds(JobType.DISABLED), is(1));
     }
 
     /**
