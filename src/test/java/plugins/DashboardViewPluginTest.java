@@ -11,13 +11,13 @@ import org.jenkinsci.test.acceptance.po.Node;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 
 import javax.inject.Inject;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 @WithPlugins("dashboard-view")
@@ -175,10 +175,14 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
         view.configure(() -> view.dashboardPortlets.checkIncludeStdJobList(true));
         view.open();
 
+        final List<String> jobIDs = view.projectStatus.getJobIDs();
+        assertEquals(Arrays.asList("a", "aa", "b"), jobIDs);
 
         view.configure(() -> view.jobFilters.setIncludeRegex("a*"));
-
         view.open();
+
+        final List<String> jobIDsFiltered = view.projectStatus.getJobIDs();
+        assertEquals(Arrays.asList("a", "aa"), jobIDsFiltered);
     }
 
     @Test
@@ -229,14 +233,13 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
         createFreeStyleJob();
         v.open();
 
-        final By header = By.xpath("//table[@id=\"projectstatus\"]/tbody/tr[@class=\"header\"]");
-        final List<WebElement> titles = find(header).findElements(By.xpath(".//a"));
+        final List<String> titles = v.projectStatus.getHeaders();
         titles.remove(titles.size() - 1); // last is not a name
 
         assertThat(titles, hasSize(2));
 
-        assertThat(titles.get(0).getText(), containsString(ColumnsArea.Column.NAME.getText()));
-        assertThat(titles.get(1).getText(), containsString(ColumnsArea.Column.LAST_FAILURE.getText()));
+        assertThat(titles.get(0), containsString(ColumnsArea.Column.NAME.getText()));
+        assertThat(titles.get(1), containsString(ColumnsArea.Column.LAST_FAILURE.getText()));
     }
 
     @Test
