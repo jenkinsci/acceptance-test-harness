@@ -2,29 +2,22 @@ package plugins;
 
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.plugins.dashboard_view.BuildStatisticsPortlet;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.*;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.BuildStatisticsPortlet.JobType;
-import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
-import org.jenkinsci.test.acceptance.plugins.dashboard_view.JobsGridPortlet;
-import org.jenkinsci.test.acceptance.plugins.dashboard_view.LatestBuildsPortlet;
 import org.jenkinsci.test.acceptance.po.Build;
-import org.jenkinsci.test.acceptance.plugins.dashboard_view.TestStatisticsChartPortlet;
-import org.jenkinsci.test.acceptance.plugins.dashboard_view.UnstableJobsPortlet;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
-import org.junit.Rule;
 import org.jenkinsci.test.acceptance.po.JUnitPublisher;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.openqa.selenium.NoSuchElementException;
 
-import java.net.MalformedURLException;
-
-import static org.hamcrest.Matchers.*;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.net.MalformedURLException;
 
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
@@ -68,14 +61,14 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
         jobsGridPortlet.setFillColumnFirst(true);
         v.save();
 
-        assertThat(jobsGridPortlet.openJob(1, 3), nullValue());
-        assertThat(jobsGridPortlet.openJob(2, 2), notNullValue());
+        assertThat(jobsGridPortlet.getJob(1, 3), nullValue());
+        assertThat(jobsGridPortlet.getJob(2, 2), notNullValue());
 
         v.configure();
         jobsGridPortlet.setFillColumnFirst(false);
         v.save();
-        assertThat(jobsGridPortlet.openJob(1, 3), notNullValue());
-        assertThat(jobsGridPortlet.openJob(2, 2), nullValue());
+        assertThat(jobsGridPortlet.getJob(1, 3), notNullValue());
+        assertThat(jobsGridPortlet.getJob(2, 2), nullValue());
     }
 
     @Test
@@ -88,13 +81,13 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
 
         jobsGridPortlet.setNumberOfColumns(2);
         v.save();
-        assertThat(jobsGridPortlet.openJob(1, 2), nullValue());
+        assertThat(jobsGridPortlet.getJob(1, 2), nullValue());
         assertJobsGridOutOfBounds(jobsGridPortlet, 1, 3);
 
         v.configure();
         jobsGridPortlet.setNumberOfColumns(3);
         v.save();
-        assertThat(jobsGridPortlet.openJob(1, 3), nullValue());
+        assertThat(jobsGridPortlet.getJob(1, 3), nullValue());
         assertJobsGridOutOfBounds(jobsGridPortlet, 1, 4);
     }
 
@@ -109,7 +102,7 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
     private void assertJobsGridOutOfBounds(JobsGridPortlet portlet, int row, int column) throws MalformedURLException {
         try {
             portlet.getPage().open();
-            portlet.openJob(row, column);
+            portlet.getJob(row, column);
             fail("Element " + row + ", " + column + " was found. Expected NoSuchElementException");
         } catch (NoSuchElementException e) {
             // exception was expected -> success

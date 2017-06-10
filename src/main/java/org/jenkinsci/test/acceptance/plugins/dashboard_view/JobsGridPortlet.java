@@ -62,15 +62,15 @@ public class JobsGridPortlet extends AbstractDashboardViewPortlet {
      * @return The job at the given position. Null if the position exists, but is empty.
      * @throws NoSuchElementException if column or row are below 0 or higher than the column- or row-number of the grid.
      */
-    public Job openJob(int row, int column) throws NoSuchElementException, MalformedURLException {
+    public Job getJob(int row, int column) throws NoSuchElementException, MalformedURLException {
         getPage().open();
 
         WebElement tableElement = getTable().findElement(By.xpath("//tbody/tr[" + row + "]/td[" + column + "]"));
         try {
             WebElement link = getTable().findElement(By.xpath("//tbody/tr[" + row + "]/td[" + column + "]/a[2]"));
             String name = link.getText();
-            link.click();
-            return new Job(injector, new URL(getCurrentUrl()), name);
+            URL url = new URL(link.getAttribute("href"));
+            return new Job(injector, url, name);
         } catch (NoSuchElementException e) {
             // position exists in grid, but is empty
             return null;
