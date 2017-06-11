@@ -20,7 +20,6 @@ import java.net.MalformedURLException;
 import static org.hamcrest.Matchers.*;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 
 @WithPlugins("dashboard-view")
 public class DashboardViewPluginTest extends AbstractJobRelatedTest {
@@ -50,10 +49,10 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
 
     @Test
     public void jobsGridPortlet_fillColumnsFirst() throws MalformedURLException {
-        FreeStyleJob j1 = createFreeStyleJob();
-        FreeStyleJob j2 = createFreeStyleJob();
-        FreeStyleJob j3 = createFreeStyleJob();
-        FreeStyleJob j4 = createFreeStyleJob();
+        createFreeStyleJob();
+        createFreeStyleJob();
+        createFreeStyleJob();
+        createFreeStyleJob();
 
         DashboardView v = createDashboardView();
         JobsGridPortlet jobsGridPortlet = v.addBottomPortlet(JobsGridPortlet.class);
@@ -63,8 +62,18 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
 
         assertThat(jobsGridPortlet.getJob(1, 3), nullValue());
         assertThat(jobsGridPortlet.getJob(2, 2), notNullValue());
+    }
 
-        v.configure();
+    @Test
+    public void jobsGridPortlet_notFillColumnsFirst() throws MalformedURLException {
+        createFreeStyleJob();
+        createFreeStyleJob();
+        createFreeStyleJob();
+        createFreeStyleJob();
+
+        DashboardView v = createDashboardView();
+        JobsGridPortlet jobsGridPortlet = v.addBottomPortlet(JobsGridPortlet.class);
+        jobsGridPortlet.setNumberOfColumns(3);
         jobsGridPortlet.setFillColumnFirst(false);
         v.save();
         assertThat(jobsGridPortlet.getJob(1, 3), notNullValue());
@@ -79,34 +88,24 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
         DashboardView v = createDashboardView();
         JobsGridPortlet jobsGridPortlet = v.addBottomPortlet(JobsGridPortlet.class);
 
-        jobsGridPortlet.setNumberOfColumns(2);
+        jobsGridPortlet.setNumberOfColumns(10);
         v.save();
-        assertThat(jobsGridPortlet.getJob(1, 2), nullValue());
-        assertJobsGridOutOfBounds(jobsGridPortlet, 1, 3);
-
-        v.configure();
-        jobsGridPortlet.setNumberOfColumns(3);
-        v.save();
-        assertThat(jobsGridPortlet.getJob(1, 3), nullValue());
-        assertJobsGridOutOfBounds(jobsGridPortlet, 1, 4);
+        assertThat(jobsGridPortlet.getJob(1, 10), nullValue());
     }
 
-    /**
-     * Assert, that the given position in the given portlet does not exist.
-     *
-     * @param portlet to look into.
-     * @param row     to look for.
-     * @param column  to look for.
-     * @throws MalformedURLException
-     */
-    private void assertJobsGridOutOfBounds(JobsGridPortlet portlet, int row, int column) throws MalformedURLException {
-        try {
-            portlet.getPage().open();
-            portlet.getJob(row, column);
-            fail("Element " + row + ", " + column + " was found. Expected NoSuchElementException");
-        } catch (NoSuchElementException e) {
-            // exception was expected -> success
-        }
+    @Test
+    public void jobsGridPortlet_invalidNumberOfColumn() throws MalformedURLException {
+        // One job is required for the portlet to be displayed
+        createFreeStyleJob();
+
+        DashboardView v = createDashboardView();
+        JobsGridPortlet jobsGridPortlet = v.addBottomPortlet(JobsGridPortlet.class);
+
+        jobsGridPortlet.setNumberOfColumns(2);
+        v.save();
+
+        expectedException.expect(NoSuchElementException.class);
+        jobsGridPortlet.getJob(1, 3);
     }
 
     @Test
