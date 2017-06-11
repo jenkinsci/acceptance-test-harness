@@ -2,27 +2,30 @@ package plugins;
 
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.plugins.dashboard_view.BuildStatisticsPortlet;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.*;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.BuildStatisticsPortlet.JobType;
-import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
-import org.jenkinsci.test.acceptance.plugins.dashboard_view.LatestBuildsPortlet;
 import org.jenkinsci.test.acceptance.po.Build;
-import org.jenkinsci.test.acceptance.plugins.dashboard_view.TestStatisticsChartPortlet;
-import org.jenkinsci.test.acceptance.plugins.dashboard_view.UnstableJobsPortlet;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.JUnitPublisher;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.openqa.selenium.NoSuchElementException;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.net.MalformedURLException;
 
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 import static org.junit.Assert.assertThat;
 
 @WithPlugins("dashboard-view")
 public class DashboardViewPluginTest extends AbstractJobRelatedTest {
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
+
     @Test
     public void configure_dashboard() {
         DashboardView v = jenkins.views.create(DashboardView.class);
@@ -42,6 +45,67 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
         v.build(j.name);
         j.getLastBuild().shouldSucceed();
 
+    }
+
+    @Test
+    public void jobsGridPortlet_fillColumnsFirst() throws MalformedURLException {
+        createFreeStyleJob();
+        createFreeStyleJob();
+        createFreeStyleJob();
+        createFreeStyleJob();
+
+        DashboardView v = createDashboardView();
+        JobsGridPortlet jobsGridPortlet = v.addBottomPortlet(JobsGridPortlet.class);
+        jobsGridPortlet.setNumberOfColumns(3);
+        jobsGridPortlet.setFillColumnFirst(true);
+        v.save();
+
+        assertThat(jobsGridPortlet.getJob(1, 3), nullValue());
+        assertThat(jobsGridPortlet.getJob(2, 2), notNullValue());
+    }
+
+    @Test
+    public void jobsGridPortlet_notFillColumnsFirst() throws MalformedURLException {
+        createFreeStyleJob();
+        createFreeStyleJob();
+        createFreeStyleJob();
+        createFreeStyleJob();
+
+        DashboardView v = createDashboardView();
+        JobsGridPortlet jobsGridPortlet = v.addBottomPortlet(JobsGridPortlet.class);
+        jobsGridPortlet.setNumberOfColumns(3);
+        jobsGridPortlet.setFillColumnFirst(false);
+        v.save();
+        assertThat(jobsGridPortlet.getJob(1, 3), notNullValue());
+        assertThat(jobsGridPortlet.getJob(2, 2), nullValue());
+    }
+
+    @Test
+    public void jobsGridPortlet_numberOfColumns() throws MalformedURLException {
+        // One job is required for the portlet to be displayed
+        createFreeStyleJob();
+
+        DashboardView v = createDashboardView();
+        JobsGridPortlet jobsGridPortlet = v.addBottomPortlet(JobsGridPortlet.class);
+
+        jobsGridPortlet.setNumberOfColumns(10);
+        v.save();
+        assertThat(jobsGridPortlet.getJob(1, 10), nullValue());
+    }
+
+    @Test
+    public void jobsGridPortlet_invalidNumberOfColumn() throws MalformedURLException {
+        // One job is required for the portlet to be displayed
+        createFreeStyleJob();
+
+        DashboardView v = createDashboardView();
+        JobsGridPortlet jobsGridPortlet = v.addBottomPortlet(JobsGridPortlet.class);
+
+        jobsGridPortlet.setNumberOfColumns(2);
+        v.save();
+
+        expectedException.expect(NoSuchElementException.class);
+        jobsGridPortlet.getJob(1, 3);
     }
 
     @Test
