@@ -63,7 +63,7 @@ public class LogParserTest extends AbstractJUnitTest {
 
     /**
      * Test case:
-     * Check for the build to be marked as failed.
+     * Check for the build to be marked as unstable.
      */
     @Test
     public void checkMarkedUnstableOnWarning() {
@@ -73,12 +73,12 @@ public class LogParserTest extends AbstractJUnitTest {
 
         // Create a new freestyle job
         FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class, "simple-job");
-        job.configure();
-        job.addShellStep("echo marked as warn");
-        LogParserPublisher lpp = job.addPublisher(LogParserPublisher.class);
-        lpp.setMarkOnUnstableWarning(true);
-        lpp.setRule(LogParserPublisher.RuleType.GLOBAL, "" + rule.url.getPath());
-        job.save();
+        job.configure(() -> {
+            job.addShellStep("echo marked as warn");
+            LogParserPublisher lpp = job.addPublisher(LogParserPublisher.class);
+            lpp.setMarkOnUnstableWarning(true);
+            lpp.setRule(LogParserPublisher.RuleType.GLOBAL, "" + rule.url.getPath());
+        });
 
         job.startBuild().waitUntilFinished().open();
 
@@ -99,12 +99,12 @@ public class LogParserTest extends AbstractJUnitTest {
 
         // Create a new freestyle job
         FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class, "simple-job");
-        job.configure();
-        job.addShellStep("echo marked as error");
-        LogParserPublisher lpp = job.addPublisher(LogParserPublisher.class);
-        lpp.setMarkOnBuildFail(true);
-        lpp.setRule(LogParserPublisher.RuleType.GLOBAL, "" + rule.url.getPath());
-        job.save();
+        job.configure(() -> {
+            job.addShellStep("echo marked as error");
+            LogParserPublisher lpp = job.addPublisher(LogParserPublisher.class);
+            lpp.setMarkOnBuildFail(true);
+            lpp.setRule(LogParserPublisher.RuleType.GLOBAL, "" + rule.url.getPath());
+        });
 
         job.startBuild().waitUntilFinished().open();
 
