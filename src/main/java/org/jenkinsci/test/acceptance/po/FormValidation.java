@@ -24,7 +24,6 @@
 package org.jenkinsci.test.acceptance.po;
 
 import org.hamcrest.Description;
-import org.hamcrest.Matchers;
 import org.hamcrest.StringDescription;
 import org.jenkinsci.test.acceptance.Matcher;
 import org.openqa.selenium.By;
@@ -40,7 +39,7 @@ import static org.hamcrest.Matchers.*;
  *
  * @see Control#getFormValidation()
  * @see FormValidation#silent()
- * @see FormValidation#reported(Kind, String)
+ * @see FormValidation#reports(Kind, String)
  *
  * @author ogondza.
  */
@@ -116,11 +115,11 @@ public class FormValidation {
         };
     }
 
-    public static final Matcher<FormValidation> reported(final Kind kind, final String message) {
-        return reported(kind, equalTo(message));
+    public static final Matcher<FormValidation> reports(final Kind kind, final String message) {
+        return reports(kind, equalTo(message));
     }
 
-    public static final Matcher<FormValidation> reported(final Kind kind, final org.hamcrest.Matcher<String> message) {
+    public static final Matcher<FormValidation> reports(final Kind kind, final org.hamcrest.Matcher<String> message) {
         StringDescription sd = new StringDescription();
         message.describeTo(sd);
         return new Matcher<FormValidation>("Validation reporting " + kind + " with message: " + sd.toString()) {

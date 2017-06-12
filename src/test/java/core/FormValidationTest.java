@@ -44,6 +44,6 @@ public class FormValidationTest extends AbstractJUnitTest {
 
         c.numExecutors.set(-16);
         formValidation = c.numExecutors.getFormValidation();
-        assertThat(formValidation, reported(FormValidation.Kind.ERROR, "Not an integer"));
+        assertThat(formValidation, FormValidation.reports(FormValidation.Kind.ERROR, "Not an integer"));
     }
 }

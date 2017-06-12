@@ -162,7 +162,7 @@ public class ForemanNodeSharingPluginTest extends AbstractJUnitTest {
     @Test
     public void testConnection() throws IOException {
         FormValidation validation = cloud.testConnection();
-        assertThat(validation, FormValidation.reported(OK, startsWith("Foreman version is")));
+        assertThat(validation, FormValidation.reports(OK, startsWith("Foreman version is")));
     }
 
     /**

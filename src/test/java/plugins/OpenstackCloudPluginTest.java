@@ -112,7 +112,7 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
         config.configure();
         OpenstackCloud cloud = addCloud(config);
         FormValidation val = cloud.testConnection();
-        assertThat(val, FormValidation.reported(OK, "Connection succeeded!"));
+        assertThat(val, FormValidation.reports(OK, "Connection succeeded!"));
     }
 
     @Test
