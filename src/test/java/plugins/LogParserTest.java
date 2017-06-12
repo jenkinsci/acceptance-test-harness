@@ -3,7 +3,6 @@ package plugins;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.logparser.LogParserGlobalConfig;
-import org.jenkinsci.test.acceptance.plugins.logparser.LogParserOutputPage;
 import org.jenkinsci.test.acceptance.plugins.logparser.LogParserPublisher;
 import org.jenkinsci.test.acceptance.po.*;
 import org.junit.Before;
@@ -40,7 +39,7 @@ public class LogParserTest extends AbstractJUnitTest {
      * Check whether trend is visible
      */
     @Test
-    public void trendVisible(){
+    public void trendVisible() {
         FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class, "simple-job");
 
         job.configure(() -> {
@@ -63,6 +62,58 @@ public class LogParserTest extends AbstractJUnitTest {
     }
 
     /**
+     * Test case:
+     * Check for the build to be marked as failed.
+     */
+    @Test
+    public void checkMarkedUnstableOnWarning() {
+        // Create a special rule set for this test case
+        Resource rule = resource("/logparser_plugin/rules/log-parser-rule-markings");
+        addLogParserRule("error_warning_rule", rule.url.getPath());
+
+        // Create a new freestyle job
+        FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class, "simple-job");
+        job.configure();
+        job.addShellStep("echo marked as warn");
+        LogParserPublisher lpp = job.addPublisher(LogParserPublisher.class);
+        lpp.setMarkOnUnstableWarning(true);
+        lpp.setRule(LogParserPublisher.RuleType.GLOBAL, "" + rule.url.getPath());
+        job.save();
+
+        job.startBuild().waitUntilFinished().open();
+
+        // Find the status image and check if it is set correctly
+        WebElement imgUnstable = driver.findElement(By.xpath("//div[@id='main-panel']/h1[@class='build-caption page-headline']/img"));
+        assertThat(imgUnstable.getAttribute("title"), containsString("Unstable"));
+    }
+
+    /**
+     * Test case:
+     * Check for the build to be marked as failed.
+     */
+    @Test
+    public void checkMarkedFailedOnError() {
+        // Create a special rule set for this test case
+        Resource rule = resource("/logparser_plugin/rules/log-parser-rule-markings");
+        addLogParserRule("error_warning_rule", rule.url.getPath());
+
+        // Create a new freestyle job
+        FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class, "simple-job");
+        job.configure();
+        job.addShellStep("echo marked as error");
+        LogParserPublisher lpp = job.addPublisher(LogParserPublisher.class);
+        lpp.setMarkOnBuildFail(true);
+        lpp.setRule(LogParserPublisher.RuleType.GLOBAL, "" + rule.url.getPath());
+        job.save();
+
+        job.startBuild().waitUntilFinished().open();
+
+        // Find the status image and check if it is set correctly
+        WebElement imgUnstable = driver.findElement(By.xpath("//div[@id='main-panel']/h1[@class='build-caption page-headline']/img"));
+        assertThat(imgUnstable.getAttribute("title"), containsString("Failed"));
+    }
+
+    /**
      * Adds a post-build-step to the job which prints out the content of the specified file.
      *
      * @param job The job where the post-build-step is added.
@@ -74,10 +125,11 @@ public class LogParserTest extends AbstractJUnitTest {
 
     /**
      * Adds a new rule to the existing config.
+     *
      * @param description The description of the new rule.
-     * @param pathToFile The path to the rule file.
+     * @param pathToFile  The path to the rule file.
      */
-    private void addLogParserRule(final String description, final String pathToFile){
+    private void addLogParserRule(final String description, final String pathToFile) {
         jenkins.configure();
         config.addParserConfig(description, pathToFile);
         jenkins.save();
@@ -85,11 +137,12 @@ public class LogParserTest extends AbstractJUnitTest {
 
     /**
      * Adds serveral rules to the existing config.
+     *
      * @param rules Map of the rules. Key is the description and Value is the path.
      */
     private void addLogParserRules(final Map<String, String> rules) {
         jenkins.configure();
-        for(Map.Entry<String, String> rule : rules.entrySet()) {
+        for (Map.Entry<String, String> rule : rules.entrySet()) {
             config.addParserConfig(rule.getKey(), rule.getValue());
         }
         jenkins.save();
