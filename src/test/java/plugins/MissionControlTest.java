@@ -11,6 +11,7 @@ import org.openqa.selenium.WebElement;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 
 @WithPlugins("mission-control-view")
@@ -22,7 +23,7 @@ public class MissionControlTest extends AbstractJUnitTest {
      */
     @Test
     public void testBuildHistory() {
-        // create new mission control view and configure it
+        // Create new mission control view and configure it
         int historySize = 8;
         MissionControlView view = jenkins.views.create(MissionControlView.class, "mission-control-sample-view");
         view.configure();
@@ -32,40 +33,38 @@ public class MissionControlTest extends AbstractJUnitTest {
 
         String strSimpleJob = "simple-job";
         String strFailedJob = "simple-failed-job";
-        // create new freestyle job and build it n-times
+        // Create new freestyle job and build it n-times
         FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class, strSimpleJob);
-        for (int i = 0; i < historySize + 2; ++i) {
+        for (int i = 0; i < historySize; ++i) {
             job.startBuild().waitUntilFinished();
         }
         job = jenkins.jobs.create(FreeStyleJob.class, strFailedJob);
         job.configure();
-        // add shell build step to cause the job to fail
+        // Add invalid shell build step to cause the job to fail
         job.addShellStep("sh <");
         job.save();
         job.startBuild().waitUntilFinished();
 
-        // open mission control view and assert that no build entries are being displayed
+        // Open mission control view and assert that no build entries are being displayed
         // (after the creation of a new mission control view the configuration needs to be reloaded)
         view.open();
-        WebElement buildHistory = driver.findElement(By.id("jenkinsBuildHistory"));
-        assertThat(buildHistory.findElements(By.xpath(".//tbody/tr")), hasSize(0));
+        assertThat(view.getBuildHistoryArea().getBuildHistorySize(), is(0));
 
-        // reload configuration (alternative: jenkins.restart(), very inefficient for this task)
+        // Reload configuration (alternative: jenkins.restart(), very inefficient for this task)
         view.reloadConfiguration();
 
-        // open mission control view again and assert that the n-builds are being displayed
+        // Open mission control view again and assert that the n-builds are being displayed now
         view.open();
-        buildHistory = driver.findElement(By.id("jenkinsBuildHistory"));
-        assertThat(buildHistory.findElements(By.xpath(".//tbody/tr")), hasSize(historySize));
-        // check for correct highlighting of the builds
-        WebElement failedBuild = buildHistory.findElement(By.xpath(".//tbody/tr[td='" + strFailedJob + "']"));
-        assertThat(failedBuild.getAttribute("class"), containsString("danger"));
-        for (WebElement successfulBuild : buildHistory.findElements(By.xpath(".//tbody/tr[td='" + strSimpleJob + "']"))) {
-            assertThat(successfulBuild.getAttribute("class"), containsString(""));
-        }
+        assertThat(view.getBuildHistoryArea().getBuildHistorySize(), is(historySize));
+
+        // Check for correct highlighting of the builds
+        // Also, according to the made settings, there should be 1 failed and historySize - 1 successful builds
+        // in the build history
+        assertThat(view.getBuildHistoryArea().getFailedBuildsOfJob(strFailedJob), hasSize(1));
+        assertThat(view.getBuildHistoryArea().getSuccessfulBuildsOfJob(strSimpleJob), hasSize(historySize - 1));
     }
 
-    /**
+    /****
      * Test Case:
      * Check the correct highlighting of different jobs statuses.
      */
@@ -88,19 +87,15 @@ public class MissionControlTest extends AbstractJUnitTest {
         jobSuccess.startBuild().waitUntilFinished();
         FreeStyleJob jobFailed = jenkins.jobs.create(FreeStyleJob.class, strBuildFailed);
         jobFailed.configure();
-        // add shell build step to cause the job to fail
+        // add invalid shell build step to cause the job to fail
         jobFailed.addShellStep("sh <");
         jobFailed.save();
         jobFailed.startBuild().waitUntilFinished();
 
         view.open();
         // check for the correct highlighting of the jobs
-        WebElement jobContainer = driver.findElement(By.id("jenkinsJobStatuses"));
-        WebElement btnNotBuild = jobContainer.findElement(By.xpath("//button[text()='" + strJobNotBuild + "']"));
-        assertThat(btnNotBuild.getAttribute("class"), containsString("invert-text-color"));
-        WebElement btnBuildSuccess = jobContainer.findElement(By.xpath("//button[text()='" + strBuildSuccess + "']"));
-        assertThat(btnBuildSuccess.getAttribute("class"), containsString("btn-success"));
-        WebElement btnBuildFailed = jobContainer.findElement(By.xpath("//button[text()='" + strBuildFailed + "']"));
-        assertThat(btnBuildFailed.getAttribute("class"), containsString("btn-danger"));
+        assertThat(view.getJobStatusArea().getStatusOfJob(strJobNotBuild), containsString("invert-text-color"));
+        assertThat(view.getJobStatusArea().getStatusOfJob(strBuildSuccess), containsString("success"));
+        assertThat(view.getJobStatusArea().getStatusOfJob(strBuildFailed), containsString("danger"));
     }
 }
