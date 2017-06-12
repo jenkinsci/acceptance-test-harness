@@ -10,6 +10,7 @@ import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.jenkinsci.test.acceptance.po.WorkflowMultiBranchJob;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.mail.MessagingException;
@@ -25,7 +26,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * Tests a multibranch pipeline flow
  */
-@WithPlugins({"git", "javadoc@1.4", "workflow-job", "workflow-cps", "workflow-basic-steps", "workflow-durable-task-step", "workflow-multibranch", "github-branch-source"})
+@WithPlugins({"git", "javadoc@1.4", "workflow-basic-steps", "workflow-durable-task-step", "workflow-multibranch", "github-branch-source"})
 public class WorkflowMultibranchTest extends AbstractJUnitTest {
 
     @Before
@@ -33,6 +34,7 @@ public class WorkflowMultibranchTest extends AbstractJUnitTest {
         MavenInstallation.installMaven(jenkins, "M3", "3.3.9");
     }
 
+    @Ignore("cannot run quickly as anonymous")
     @Test
     public void testMultibranchPipeline() throws IOException, MessagingException {
         final WorkflowMultiBranchJob multibranchJob = jenkins.jobs.create(WorkflowMultiBranchJob.class);
