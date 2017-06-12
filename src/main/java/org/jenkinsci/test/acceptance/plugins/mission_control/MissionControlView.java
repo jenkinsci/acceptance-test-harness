@@ -37,6 +37,11 @@ public class MissionControlView extends View {
     private Control statusBtnSize = new Control(this, "/statusButtonSize");
     private Control heightRatio = new Control(this, "/layoutHeightRatio");
 
+    // All page areas contained in the mission control view
+    private BuildHistoryArea buildHistoryArea = new BuildHistoryArea(this);
+    private BuildQueueArea buildQueueArea = new BuildQueueArea(this);
+    private JobStatusArea jobStatusArea = new JobStatusArea(this);
+    private NodeStatusArea nodeStatusArea = new NodeStatusArea(this);
 
     /**
      * Constructor.
@@ -46,6 +51,46 @@ public class MissionControlView extends View {
      */
     public MissionControlView(Injector injector, URL url) {
         super(injector, url);
+    }
+
+    /**
+     * Returns the BuildHistoryArea contained in the current MissionControlView, which offers specific methods to
+     * retrieve information from it.
+     *
+     * @return The {@link BuildHistoryArea} of the current {@link MissionControlView}.
+     */
+    public BuildHistoryArea getBuildHistoryArea() {
+        return buildHistoryArea;
+    }
+
+    /**
+     * Returns the BuildQueueArea contained in the current MissionControlView, which offers specific methods to
+     * retrieve information from it.
+     *
+     * @return The {@link BuildQueueArea} of the current {@link MissionControlView}.
+     */
+    public BuildQueueArea getBuildQueueArea() {
+        return buildQueueArea;
+    }
+
+    /**
+     * Returns the JobStatusArea contained in the current MissionControlView, which offers specific methods to
+     * retrieve information from it.
+     *
+     * @return The {@link JobStatusArea} of the current {@link MissionControlView}.
+     */
+    public JobStatusArea getJobStatusArea() {
+        return jobStatusArea;
+    }
+
+    /**
+     * Returns the NodeStatusArea contained in the current MissionControlView, which offers specific methods to
+     * retrieve information from it.
+     *
+     * @return The {@link NodeStatusArea} of the current {@link MissionControlView}.
+     */
+    public NodeStatusArea getNodeStatusArea() {
+        return nodeStatusArea;
     }
 
     /**
@@ -279,5 +324,19 @@ public class MissionControlView extends View {
         } finally {
             driver.switchTo().defaultContent();
         }
+    }
+
+    /**
+     * Similar to the {@link ConfigurablePageObject#ensureConfigPage()} method, this method ensures that the
+     * view page is open.
+     *
+     * @return Returns {@code true} if the view page was opened and {@code false} if the the view was already open.
+     */
+    public boolean ensureViewIsOpen() {
+        if (!driver.getCurrentUrl().equals(url.toString())) {
+            this.open();
+            return true;
+        }
+        return false;
     }
 }
