@@ -2,7 +2,6 @@ package org.jenkinsci.test.acceptance.po;
 
 import javax.annotation.Nullable;
 import javax.inject.Named;
-import javax.inject.Provider;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,8 +17,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.update_center.PluginMetadata;
 import org.jenkinsci.test.acceptance.update_center.PluginSpec;
-import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata;
 import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata.UnableToResolveDependencies;
+import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadataProvider;
 import org.junit.internal.AssumptionViolatedException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
@@ -46,7 +45,7 @@ public class PluginManager extends ContainerPageObject {
     public final Jenkins jenkins;
 
     @Inject
-    private Provider<UpdateCenterMetadata> ucmd;
+    private UpdateCenterMetadataProvider ucmd;
 
     /**
      * Optional configuration value that selects whether to resolve plugins locally and upload to Jenkins
@@ -168,7 +167,7 @@ public class PluginManager extends ContainerPageObject {
      * @return Always false.
      */
     @Deprecated
-    public boolean installPlugins(final PluginSpec... specs) throws UnableToResolveDependencies {
+    public boolean installPlugins(final PluginSpec... specs) throws UnableToResolveDependencies, IOException {
         final Map<String, String> candidates = getMapShortNamesVersion(specs);
 
         if (!updated) {
@@ -191,7 +190,7 @@ public class PluginManager extends ContainerPageObject {
             if (!someChangeRequired) {
                 return false;
             }
-            List<PluginMetadata> pluginToBeInstalled = ucmd.get().transitiveDependenciesOf(jenkins, Arrays.asList(specs));
+            List<PluginMetadata> pluginToBeInstalled = ucmd.get(jenkins).transitiveDependenciesOf(jenkins, Arrays.asList(specs));
             for (PluginMetadata newPlugin: pluginToBeInstalled) {
                 final String name = newPlugin.getName();
                 String requiredVersion = candidates.get(name);

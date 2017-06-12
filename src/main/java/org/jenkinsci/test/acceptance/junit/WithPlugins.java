@@ -32,6 +32,7 @@ import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
 
 import hudson.util.VersionNumber;
+import java.io.IOException;
 
 /**
  * Indicates that a test requires the presence of the specified plugins.
@@ -174,7 +175,7 @@ public @interface WithPlugins {
                         try {
                             //noinspection deprecation
                             pm.installPlugins(installList);
-                        } catch (UnableToResolveDependencies ex) {
+                        } catch (UnableToResolveDependencies | IOException ex) {
                             throw new AssumptionViolatedException("Unable to install required plugins", ex);
                         }
                     }
