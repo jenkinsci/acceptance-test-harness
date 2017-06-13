@@ -74,7 +74,7 @@ public abstract class JenkinsController implements IJenkinsController, AutoClean
             f.createNewFile();
             this.logger = new FileOutputStream(f);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to create log file "+ JENKINS_DEBUG_LOG);
+            throw new RuntimeException("Failed to create log file "+ JENKINS_DEBUG_LOG, e);
         }
     }
 
