@@ -258,7 +258,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
 
     @Override
     public void fillIn(String formFieldName, Object value) {
-        WebElement e = find(By.name(formFieldName));
+        WebElement e = waitFor(by.name(formFieldName));
         e.clear();
         e.sendKeys(value.toString());
     }
