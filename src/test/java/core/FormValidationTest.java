@@ -29,8 +29,7 @@ import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.jenkinsci.test.acceptance.po.FormValidation.reported;
-import static org.jenkinsci.test.acceptance.po.FormValidation.silent;
+import static org.jenkinsci.test.acceptance.po.FormValidation.*;
 
 public class FormValidationTest extends AbstractJUnitTest {
 
@@ -44,6 +43,6 @@ public class FormValidationTest extends AbstractJUnitTest {
 
         c.numExecutors.set(-16);
         formValidation = c.numExecutors.getFormValidation();
-        assertThat(formValidation, FormValidation.reports(FormValidation.Kind.ERROR, "Not an integer"));
+        assertThat(formValidation, reports(Kind.ERROR, "Not an integer"));
     }
 }
