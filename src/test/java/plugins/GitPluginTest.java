@@ -217,7 +217,7 @@ public class GitPluginTest extends AbstractJUnitTest {
         Build b;
         GitRepo repo = buildGitRepo();
 
-        repo.branch("testBranch");
+        repo.createBranch("testBranch");
         repo.commit(TEST_COMMIT_MESSAGE);
         repo.transferToDockerContainer(host, port);
 
@@ -340,6 +340,30 @@ public class GitPluginTest extends AbstractJUnitTest {
                 b.getGitBuildData(),
                 Matchers.containsRegexp("<b>SCM:</b> " + SCM_NAME, Pattern.MULTILINE)
         );
+    }
+
+    @Test
+    public void sparse_checkout() throws IOException, InterruptedException {
+        final String SUB_DIR = "testDir";
+        final String TEST_FILE = "testFile.txt";
+
+        GitRepo repo = buildGitRepo();
+        repo.touch(SUB_DIR + "/" + TEST_FILE);
+        repo.touch(TEST_FILE);
+        repo.addFilesIn(getClass().getResource("."));
+        repo.commit("Added two test files.");
+        repo.transferToDockerContainer(host, port);
+
+        job.useScm(GitScm.class)
+                .url(repoUrl)
+                .credentials(USERNAME)
+                .sparseCheckout().addPath(SUB_DIR);
+
+        job.addShellStep("test ! -f " + TEST_FILE + " && test -f " + SUB_DIR + "/" + TEST_FILE);
+
+        job.save();
+        Build b = job.startBuild();
+        b.shouldSucceed();
     }
 
     ////////////////////

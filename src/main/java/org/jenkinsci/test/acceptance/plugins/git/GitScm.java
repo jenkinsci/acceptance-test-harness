@@ -28,6 +28,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.support.ui.Select;
 
+import javax.swing.text.html.HTMLDocument;
 import java.util.ArrayList;
 
 @Describable("Git")
@@ -141,6 +142,11 @@ public class GitScm extends Scm {
         CustomSCMName behaviour = addBehaviour(CustomSCMName.class);
         behaviour.txtName.set(name);
         return this;
+    }
+
+    public SparseCheckoutPaths sparseCheckout() {
+        SparseCheckoutPaths behaviour = addBehaviour(SparseCheckoutPaths.class);
+        return behaviour;
     }
 
     public GitScm remoteName(String name) {
@@ -349,19 +355,26 @@ public class GitScm extends Scm {
 
     // TODO Check if addPath actually works
     public static class SparseCheckoutPaths extends Behaviour {
-        public final ArrayList<Control> paths = new ArrayList<>();
-        public final Control btnAdd = control("repeatable-add");
+        private  int pathCounter = 0;
+        private final Control btnAdd = control("repeatable-add");
 
         public SparseCheckoutPaths(GitScm git, String path) {
             super(git, path);
             clickLink("Sparse Checkout paths");
-            paths.add(control("sparseCheckoutPaths/path"));
         }
 
-        public Behaviour addPath () {
-            String relativePaths = "sparseCheckoutPaths[" + paths.size() + "]/path";
-            btnAdd.click();
-            paths.add(control(relativePaths));
+        public SparseCheckoutPaths addPath (String name) {
+            String relativePaths = "sparseCheckoutPaths";
+
+            if (pathCounter == 0) {
+                relativePaths += "/path";
+            } else {
+                btnAdd.click();
+                relativePaths += "[" + pathCounter + "]/path";
+            }
+
+            control(relativePaths).set(name);
+            pathCounter++;
             return this;
         }
     }
