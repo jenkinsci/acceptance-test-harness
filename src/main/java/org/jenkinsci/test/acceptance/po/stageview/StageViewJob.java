@@ -6,7 +6,8 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * Created by boris on 11.05.17.
+ * Representation of buildjobs done. Rows in the table.
+ * @author Boris Dippolter
  */
 public class StageViewJob {
 

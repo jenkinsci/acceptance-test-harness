@@ -3,7 +3,8 @@ package org.jenkinsci.test.acceptance.po.stageview;
 import org.openqa.selenium.WebElement;
 
 /**
- * Created by boris on 11.05.17.
+ * Single element of a job. The actual stage within a job.
+ * @author Boris Dippolter
  */
 public class StageViewStage {
 

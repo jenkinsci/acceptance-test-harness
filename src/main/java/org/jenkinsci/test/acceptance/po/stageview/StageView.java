@@ -12,43 +12,40 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Created by boris on 26.04.17.
  * Basic container for the stageview implementation. The stageview is the graphical
  * representation of the pipeline builds. In the current abstraction the stagview contains
  * headlines and jobs to build the matrix of the build history.
  * The stageview is located on the jobs page right above the navigation links.
+ * @author Boris Dippolter
  */
 public class StageView extends PageAreaImpl {
 
-    /**
-     * SLF4J logger.
-     */
     private static final Logger LOG = LoggerFactory.getLogger(StageView.class);
 
     /**
      * Main box for all content
      */
-    public static final String ID_WRAPPER = "pipeline-box";
+    private static final String ID_WRAPPER = "pipeline-box";
 
     /**
      * Main job wrapper. Alle children in this are "tr".
      */
-    public static final String XPATH_JOBS = "//*[@id=\"pipeline-box\"]/div/div/table/tbody[2]";
+    private static final String XPATH_JOBS = "//*[@id=\"pipeline-box\"]/div/div/table/tbody[2]";
 
     /**
      * Table heading xpath
      */
-    public static final String XPATH_JOB_HEADLINES = "//*[@id=\"pipeline-box\"]/div/div/table/thead/tr/th";
+    private static final String XPATH_JOB_HEADLINES = "//*[@id=\"pipeline-box\"]/div/div/table/thead/tr/th";
 
     /**
      * Headlines are represented by the name of the stages
      */
-    public List<StageViewHeadline> stageViewHeadlines = new ArrayList<>();
+    private List<StageViewHeadline> stageViewHeadlines = new ArrayList<>();
 
     /**
      * A StageviewJob represents the build
      */
-    public List<StageViewJob> jobs = new ArrayList<>();
+    private List<StageViewJob> jobs = new ArrayList<>();
 
     /**
      * root Element

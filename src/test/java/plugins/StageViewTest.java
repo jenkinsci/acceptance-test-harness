@@ -16,10 +16,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
 /**
- * Created by boris on 17.04.17.
  * Base Implementation of the stageview test as a component. Important aspect of this
  * testclass is the correct visualisation depending of stages and builds (matrix). Might
  * needs adaption for future blue ocean
+ * @Boris Dippolter
  */
 @WithPlugins("workflow-aggregator")
 public class StageViewTest extends AbstractJUnitTest {
@@ -40,7 +40,7 @@ public class StageViewTest extends AbstractJUnitTest {
      * @throws Exception
      */
     @Test
-    public void jobShouldContainStageview() throws Exception {
+    public void jobShouldContainStageView() throws Exception {
         WorkflowJob job = this.createPipelineFromFile(SINGLE_JOB);
         Build build = job.startBuild().shouldSucceed();
         job.open();
@@ -81,16 +81,15 @@ public class StageViewTest extends AbstractJUnitTest {
     @Test
     public void multiBuildJobShouldContainCorrectNumberOfJobsHeadline() {
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
-        String pre = new String("node {\n");
-        String post = new String("}");
-        String singleStage = new String("stage ('Clone sources'){\n" +
+        String pre = "node {\n";
+        String post = "}";
+        String singleStage = "stage ('Clone sources'){\n" +
                 "           echo 'cloned'\n" +
-                "    }\n");
+                "    }\n";
         job.script.set("");
         job.sandbox.check();
         job.save();
-        Build build = null;
-        build = job.startBuild().shouldSucceed();
+        Build build = job.startBuild().shouldSucceed();
 
         for (int i = 0; i < 10; i++) {
             final StringBuilder stageBuilder2 = new StringBuilder();

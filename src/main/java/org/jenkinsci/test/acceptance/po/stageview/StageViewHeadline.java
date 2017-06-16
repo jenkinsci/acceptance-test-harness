@@ -3,7 +3,8 @@ package org.jenkinsci.test.acceptance.po.stageview;
 import org.openqa.selenium.WebElement;
 
 /**
- * Created by boris on 11.05.17.
+ * Representation of the headlines in the Stageview. The actual names of the stages.
+ * @author Boris Dippolter
  */
 public class StageViewHeadline {
 
