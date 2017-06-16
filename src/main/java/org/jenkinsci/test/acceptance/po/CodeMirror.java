@@ -61,24 +61,21 @@ public class CodeMirror extends PageAreaImpl {
         return executeScript(scriptGet, String.format("//*[@path='%s']/following-sibling::div", getPath())).toString();
     }
 
-    private static final String scriptSet =
+    private static final String scriptPrefix =
                     "cmElem = document.evaluate(" +
                     "        arguments[0], document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null" +
                     ").singleNodeValue;" +
                     "codemirror = cmElem.CodeMirror;" +
                     "if (codemirror == null) {" +
                     "    console.log('CodeMirror object not found!');" +
-                    "}" +
+                    "}";
+
+    private static final String scriptSet =
+                    scriptPrefix +
                     "codemirror.setValue(arguments[1]);" +
                     "codemirror.save();";
 
     private static final String scriptGet =
-                    "cmElem = document.evaluate(" +
-                    "        arguments[0], document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null" +
-                    ").singleNodeValue;" +
-                    "codemirror = cmElem.CodeMirror;" +
-                    "if (codemirror == null) {" +
-                    "    console.log('CodeMirror object not found!');" +
-                    "}" +
+                    scriptPrefix +
                     "return codemirror.getValue();";
 }
