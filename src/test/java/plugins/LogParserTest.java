@@ -108,6 +108,16 @@ public class LogParserTest extends AbstractJUnitTest {
     }
 
     /**
+     * Adds a new rule to the existing config.
+     *
+     * @param description The description of the new rule.
+     * @param resource The {@link Resource} object of the rule file. 
+     */
+    private void addLogParserRule(final String description, Resource resource){
+        addLogParserRule(description, resource.url.getPath());
+    }
+
+    /**
      * Adds serveral rules to the existing config.
      *
      * @param rules Map of the rules. Key is the description and Value is the path.
