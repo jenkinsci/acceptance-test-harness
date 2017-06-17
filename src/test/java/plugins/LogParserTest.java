@@ -63,54 +63,26 @@ public class LogParserTest extends AbstractJUnitTest {
 
     /**
      * Test case:
-     * Check for the build to be marked as unstable.
+     * Check for a build to be marked as failed and another build to be marked as unstable.
      */
     @Test
-    public void checkMarkedUnstableOnWarning() {
-        // Create a special rule set for this test case
-        Resource rule = resource("/logparser_plugin/rules/log-parser-rule-markings");
-        addLogParserRule("error_warning_rule", rule.url.getPath());
-
-        // Create a new freestyle job
-        FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class, "simple-job");
-        job.configure(() -> {
-            job.addShellStep("echo marked as warn");
-            LogParserPublisher lpp = job.addPublisher(LogParserPublisher.class);
-            lpp.setMarkOnUnstableWarning(true);
-            lpp.setRule(LogParserPublisher.RuleType.GLOBAL, "" + rule.url.getPath());
-        });
-
-        job.startBuild().waitUntilFinished().open();
-
-        // Find the status image and check if it is set correctly
-        WebElement imgUnstable = driver.findElement(By.xpath("//div[@id='main-panel']/h1[@class='build-caption page-headline']/img"));
-        assertThat(imgUnstable.getAttribute("title"), containsString("Unstable"));
-    }
-
-    /**
-     * Test case:
-     * Check for the build to be marked as failed.
-     */
-    @Test
-    public void checkMarkedFailedOnError() {
-        // Create a special rule set for this test case
-        Resource rule = resource("/logparser_plugin/rules/log-parser-rule-markings");
-        addLogParserRule("error_warning_rule", rule.url.getPath());
-
-        // Create a new freestyle job
+    public void checkMarkedFailedAndUnstable() {
         FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class, "simple-job");
         job.configure(() -> {
             job.addShellStep("echo marked as error");
             LogParserPublisher lpp = job.addPublisher(LogParserPublisher.class);
             lpp.setMarkOnBuildFail(true);
-            lpp.setRule(LogParserPublisher.RuleType.GLOBAL, "" + rule.url.getPath());
+            lpp.setRule(resource("/logparser_plugin/rules/log-parser-rule-markings"));
         });
+        job.startBuild().waitUntilFinished().shouldFail();
 
-        job.startBuild().waitUntilFinished().open();
-
-        // Find the status image and check if it is set correctly
-        WebElement imgUnstable = driver.findElement(By.xpath("//div[@id='main-panel']/h1[@class='build-caption page-headline']/img"));
-        assertThat(imgUnstable.getAttribute("title"), containsString("Failed"));
+        job.configure(() -> {
+            job.addShellStep("echo marked as warning");
+            LogParserPublisher lpp = job.getPublisher(LogParserPublisher.class);
+            lpp.setMarkOnBuildFail(false);
+            lpp.setMarkOnUnstableWarning(true);
+        });
+        job.startBuild().waitUntilFinished().shouldBeUnstable();
     }
 
     /**
