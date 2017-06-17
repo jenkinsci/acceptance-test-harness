@@ -1,5 +1,6 @@
 package org.jenkinsci.test.acceptance.plugins.logparser;
 
+import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.po.*;
 
 /**
@@ -14,10 +15,14 @@ public class LogParserPublisher extends AbstractStep implements PostBuildStep {
     public enum RuleType {
         PROJECT("true"), GLOBAL("false");
         private final String projecttype;
-        RuleType(String projecttype){
+
+        RuleType(String projecttype) {
             this.projecttype = projecttype;
-        };
-        public String getProjecttype(){
+        }
+
+        ;
+
+        public String getProjecttype() {
             return projecttype;
         }
     }
@@ -44,7 +49,7 @@ public class LogParserPublisher extends AbstractStep implements PostBuildStep {
      *
      * @param state The boolean state of the checkbox
      */
-    public void setMarkOnUnstableWarning(boolean state){
+    public void setMarkOnUnstableWarning(boolean state) {
         controlMarkOnUnstableWarning.check(state);
     }
 
@@ -53,7 +58,7 @@ public class LogParserPublisher extends AbstractStep implements PostBuildStep {
      *
      * @param state The boolean state of the checkbox
      */
-    public void setMarkOnBuildFail(boolean state){
+    public void setMarkOnBuildFail(boolean state) {
         controlMarkOnBuildFail.check(state);
     }
 
@@ -62,7 +67,7 @@ public class LogParserPublisher extends AbstractStep implements PostBuildStep {
      *
      * @param state The boolean state of the checkbox
      */
-    public void setShowGraphs(boolean state){
+    public void setShowGraphs(boolean state) {
         controlShowGraphs.check(state);
     }
 
@@ -84,5 +89,14 @@ public class LogParserPublisher extends AbstractStep implements PostBuildStep {
             default:
                 break;
         }
+    }
+
+    /**
+     * Sets a new rule as {@link RuleType#PROJECT}.
+     *
+     * @param resource The {@link Resource} object of a rule file.
+     */
+    public void setRule(Resource resource) {
+        setRule(RuleType.PROJECT, resource.url.getPath());
     }
 }
