@@ -138,13 +138,18 @@ public class GradlePluginTest extends AbstractJUnitTest {
     @Test
     public void run_gradle_script_with_wrapper(){
         GradleInstallation.installLatestGradleVersion(jenkins);
+
         final FreeStyleJob job = jenkins.jobs.create();
-        GradleWrapper.addWrapperStep(job);
+        job.copyResource(job.resource("/gradle_plugin/script.gradle"), "build.gradle");
+
+        GradleWrapper.downloadWrapperFiles(job);
+        GradleWrapper.addWrapperStep(job, null, "hello");
         job.save();
-        
+
         final Build build = job.startBuild();
         build.shouldSucceed();
         assertThat(build.getConsole(), containsString(SUCCESSFUL_BUILD));
+        assertThat(build.getConsole(), containsString("Hello world!"));
     }
 
     @Test
@@ -205,11 +210,18 @@ public class GradlePluginTest extends AbstractJUnitTest {
     public void run_gradle_wrapper_location_param(){
         GradleInstallation.installLatestGradleVersion(jenkins);
         final FreeStyleJob job = jenkins.jobs.create();
-        GradleWrapper.addWrapperStep(job, "test/");
-        job.save();
+        job.copyResource(resource("/gradle_plugin/script.gradle"), "build.gradle");
 
+        final String location = "test";
+        GradleWrapper.downloadWrapperFiles(job);
+        GradleWrapper.moveWrapperFiles(job, location);
+        GradleWrapper.addWrapperStep(job, location, "hello");
+
+        job.save();
         final Build build = job.startBuild().shouldSucceed();
+
         assertThat(build.getConsole(), containsString(SUCCESSFUL_BUILD));
+        assertThat(build.getConsole(), containsString("Hello world!"));
     }
 
 }

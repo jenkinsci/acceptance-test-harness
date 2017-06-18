@@ -46,3 +46,7 @@ task jobParametersAsSystemProperties {
         println "Gradle Properties: " + System.properties.getProperty('TEST_PARAM_1') + " " + System.properties.getProperty('TEST_PARAM_2')
     }
 }
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '3.5'
+}
