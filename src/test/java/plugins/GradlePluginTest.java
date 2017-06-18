@@ -54,14 +54,42 @@ public class GradlePluginTest extends AbstractJUnitTest {
         job.copyResource(resource("/gradle_plugin/script.gradle"), "build.gradle");
         final GradleStep step = job.addBuildStep(GradleStep.class);
         step.setVersion(GradleInstallation.DEFAULT_VERSION_NAME);
-        step.setTasks("hello");
-        step.setSwitches("--quiet");
         job.save();
 
         final Build build = job.startBuild();
         build.shouldSucceed();
-        assertThat(build.getConsole(), containsString("Hello world!"));
+        assertThat(build.getConsole(), containsString(SUCCESSFUL_BUILD));
+
+    }
+
+
+    @Test
+    public void run_gradle_task() {
+        GradleInstallation.installLatestGradleVersion(jenkins);
+        final FreeStyleJob job = jenkins.jobs.create();
+        job.copyResource(resource("/gradle_plugin/script.gradle"), "build.gradle");
+        final GradleStep step = job.addBuildStep(GradleStep.class);
+        step.setVersion(GradleInstallation.DEFAULT_VERSION_NAME);
+        step.setTasks("hello");
+        job.save();
+
+        final Build build = job.startBuild().shouldSucceed();
+        assertThat(build.getConsole(), containsString(SUCCESSFUL_BUILD));
+    }
+
+    @Test
+    public void run_gradle_with_switches(){
+        GradleInstallation.installLatestGradleVersion(jenkins);
+        final FreeStyleJob job = jenkins.jobs.create();
+        job.copyResource(resource("/gradle_plugin/script.gradle"), "build.gradle");
+        final GradleStep step = job.addBuildStep(GradleStep.class);
+        step.setVersion(GradleInstallation.DEFAULT_VERSION_NAME);
+        step.setSwitches("--quiet");
+        job.save();
+
+        final Build build = job.startBuild().shouldSucceed();
         assertThat(build.getConsole(), containsRegexp("gradle.* --quiet"));
+        assertThat(build.getConsole(), containsString(SUCCESSFUL_BUILD));
     }
 
     @Test
