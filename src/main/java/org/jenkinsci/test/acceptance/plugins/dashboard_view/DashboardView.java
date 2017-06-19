@@ -1,6 +1,14 @@
 package org.jenkinsci.test.acceptance.plugins.dashboard_view;
 
 import com.google.inject.Injector;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.controls.ColumnsArea;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.controls.DashboardPortlets;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.controls.JobFiltersArea;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.controls.MainArea;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.read.BreadCrumbs;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.read.BuildExecutorStatus;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.read.MainPanel;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.read.ProjectStatusStdJobList;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.View;
@@ -38,6 +46,17 @@ public class DashboardView extends View {
      * List control for bottom portlets.
      **/
     public final Control bottomPortlet = new Control(this, "/hetero-list-add[bottomPortlet]");
+
+    public final JobFiltersArea jobFilters = new JobFiltersArea(this, "");
+    public final MainArea mainArea = new MainArea(this, "");
+    public final ColumnsArea columnsArea = new ColumnsArea(this, "");
+    public final DashboardPortlets dashboardPortlets = new DashboardPortlets(this, "");
+
+
+    public final BreadCrumbs breadCrumbs = new BreadCrumbs(this, "");
+    public final BuildExecutorStatus buildExecutorStatus = new BuildExecutorStatus(this, "");
+    public final ProjectStatusStdJobList projectStatus = new ProjectStatusStdJobList(this, "");
+    public final MainPanel mainPanel = new MainPanel(this, "");
 
     private final List<AbstractDashboardViewPortlet> topPortlets = new ArrayList<>();
     private final List<AbstractDashboardViewPortlet> leftPortlets = new ArrayList<>();
@@ -104,7 +123,8 @@ public class DashboardView extends View {
      * @return The new portlet.
      */
     public <T extends AbstractDashboardViewPortlet> T addBottomPortlet(final Class<T> portletClass) {
-        String path = createPageArea("/bottomPortlet", () -> bottomPortlet.selectDropdownMenu(portletClass));
+        String path = createPageArea("/bottomPortlet", () ->
+                bottomPortlet.selectDropdownMenu(portletClass));
         T portlet = newInstance(portletClass, this, path);
         bottomPortlets.add(portlet);
         return portlet;
