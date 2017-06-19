@@ -4,6 +4,10 @@ import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.*;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.BuildStatisticsPortlet.JobType;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.LatestBuildsPortlet;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.TestStatisticsChartPortlet;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.UnstableJobsPortlet;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.JUnitPublisher;
@@ -400,6 +404,64 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
         BufferedImage testImage = ImageIO.read(testImageResource.asFile());
 
         checkImages(chart.getImage(), testImage);
+    }
+
+    @Test
+    public void testPortletPositioning_topPortlets(){
+        DashboardView v = createDashboardView();
+        v.addTopPortlet(TestStatisticsChartPortlet.class);
+        v.save();
+
+        createFreeStyleJob();
+
+        assertThat(v.getPortletInTopTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), notNullValue());
+        assertThat(v.getPortletInLeftTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), nullValue());
+        assertThat(v.getPortletInRightTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), nullValue());
+        assertThat(v.getPortletInBottomTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), nullValue());
+    }
+
+    @Test
+    public void testPortletPositioning_leftPortlets(){
+        DashboardView v = createDashboardView();
+        v.addLeftPortlet(TestStatisticsChartPortlet.class);
+        v.addRightPortlet(BuildStatisticsPortlet.class);
+        v.save();
+
+        createFreeStyleJob();
+
+        assertThat(v.getPortletInTopTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), nullValue());
+        assertThat(v.getPortletInLeftTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), notNullValue());
+        assertThat(v.getPortletInRightTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), nullValue());
+        assertThat(v.getPortletInBottomTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), nullValue());
+    }
+
+    @Test
+    public void testPortletPositioning_rightPortlets(){
+        DashboardView v = createDashboardView();
+        v.addRightPortlet(TestStatisticsChartPortlet.class);
+        v.addLeftPortlet(BuildStatisticsPortlet.class);
+        v.save();
+
+        createFreeStyleJob();
+
+        assertThat(v.getPortletInTopTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), nullValue());
+        assertThat(v.getPortletInLeftTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), nullValue());
+        assertThat(v.getPortletInRightTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), notNullValue());
+        assertThat(v.getPortletInBottomTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), nullValue());
+    }
+
+    @Test
+    public void testPortletPositioning_bottomPortlets(){
+        DashboardView v = createDashboardView();
+        v.addBottomPortlet(TestStatisticsChartPortlet.class);
+        v.save();
+
+        createFreeStyleJob();
+
+        assertThat(v.getPortletInTopTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), nullValue());
+        assertThat(v.getPortletInLeftTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), nullValue());
+        assertThat(v.getPortletInRightTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), nullValue());
+        assertThat(v.getPortletInBottomTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), notNullValue());
     }
 
     /**
