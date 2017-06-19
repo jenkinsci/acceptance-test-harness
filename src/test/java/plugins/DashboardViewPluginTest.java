@@ -7,12 +7,19 @@ import org.jenkinsci.test.acceptance.plugins.dashboard_view.BuildStatisticsPortl
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.controls.ColumnsArea;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.controls.JobFiltersArea;
 import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.LatestBuildsPortlet;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.TestStatisticsChartPortlet;
+import org.jenkinsci.test.acceptance.plugins.dashboard_view.UnstableJobsPortlet;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.JUnitPublisher;
 import org.jenkinsci.test.acceptance.po.Node;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.openqa.selenium.NoSuchElementException;
 
 import javax.imageio.ImageIO;
 import javax.inject.Inject;
@@ -20,6 +27,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.net.MalformedURLException;
 
 import static org.hamcrest.Matchers.*;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
@@ -28,6 +36,9 @@ import static org.junit.Assert.assertThat;
 
 @WithPlugins("dashboard-view")
 public class DashboardViewPluginTest extends AbstractJobRelatedTest {
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
+
     @Test
     public void configure_dashboard() {
         DashboardView v = jenkins.views.create(DashboardView.class);
@@ -47,6 +58,67 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
         v.build(j.name);
         j.getLastBuild().shouldSucceed();
 
+    }
+
+    @Test
+    public void jobsGridPortlet_fillColumnsFirst() throws MalformedURLException {
+        createFreeStyleJob();
+        createFreeStyleJob();
+        createFreeStyleJob();
+        createFreeStyleJob();
+
+        DashboardView v = createDashboardView();
+        JobsGridPortlet jobsGridPortlet = v.addBottomPortlet(JobsGridPortlet.class);
+        jobsGridPortlet.setNumberOfColumns(3);
+        jobsGridPortlet.setFillColumnFirst(true);
+        v.save();
+
+        assertThat(jobsGridPortlet.getJob(1, 3), nullValue());
+        assertThat(jobsGridPortlet.getJob(2, 2), notNullValue());
+    }
+
+    @Test
+    public void jobsGridPortlet_notFillColumnsFirst() throws MalformedURLException {
+        createFreeStyleJob();
+        createFreeStyleJob();
+        createFreeStyleJob();
+        createFreeStyleJob();
+
+        DashboardView v = createDashboardView();
+        JobsGridPortlet jobsGridPortlet = v.addBottomPortlet(JobsGridPortlet.class);
+        jobsGridPortlet.setNumberOfColumns(3);
+        jobsGridPortlet.setFillColumnFirst(false);
+        v.save();
+        assertThat(jobsGridPortlet.getJob(1, 3), notNullValue());
+        assertThat(jobsGridPortlet.getJob(2, 2), nullValue());
+    }
+
+    @Test
+    public void jobsGridPortlet_numberOfColumns() throws MalformedURLException {
+        // One job is required for the portlet to be displayed
+        createFreeStyleJob();
+
+        DashboardView v = createDashboardView();
+        JobsGridPortlet jobsGridPortlet = v.addBottomPortlet(JobsGridPortlet.class);
+
+        jobsGridPortlet.setNumberOfColumns(10);
+        v.save();
+        assertThat(jobsGridPortlet.getJob(1, 10), nullValue());
+    }
+
+    @Test
+    public void jobsGridPortlet_invalidNumberOfColumn() throws MalformedURLException {
+        // One job is required for the portlet to be displayed
+        createFreeStyleJob();
+
+        DashboardView v = createDashboardView();
+        JobsGridPortlet jobsGridPortlet = v.addBottomPortlet(JobsGridPortlet.class);
+
+        jobsGridPortlet.setNumberOfColumns(2);
+        v.save();
+
+        expectedException.expect(NoSuchElementException.class);
+        jobsGridPortlet.getJob(1, 3);
     }
 
     @Test
@@ -341,6 +413,64 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
         BufferedImage testImage = ImageIO.read(testImageResource.asFile());
 
         checkImages(chart.getImage(), testImage);
+    }
+
+    @Test
+    public void testPortletPositioning_topPortlets(){
+        DashboardView v = createDashboardView();
+        v.addTopPortlet(TestStatisticsChartPortlet.class);
+        v.save();
+
+        createFreeStyleJob();
+
+        assertThat(v.getPortletInTopTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), notNullValue());
+        assertThat(v.getPortletInLeftTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), nullValue());
+        assertThat(v.getPortletInRightTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), nullValue());
+        assertThat(v.getPortletInBottomTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), nullValue());
+    }
+
+    @Test
+    public void testPortletPositioning_leftPortlets(){
+        DashboardView v = createDashboardView();
+        v.addLeftPortlet(TestStatisticsChartPortlet.class);
+        v.addRightPortlet(BuildStatisticsPortlet.class);
+        v.save();
+
+        createFreeStyleJob();
+
+        assertThat(v.getPortletInTopTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), nullValue());
+        assertThat(v.getPortletInLeftTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), notNullValue());
+        assertThat(v.getPortletInRightTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), nullValue());
+        assertThat(v.getPortletInBottomTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), nullValue());
+    }
+
+    @Test
+    public void testPortletPositioning_rightPortlets(){
+        DashboardView v = createDashboardView();
+        v.addRightPortlet(TestStatisticsChartPortlet.class);
+        v.addLeftPortlet(BuildStatisticsPortlet.class);
+        v.save();
+
+        createFreeStyleJob();
+
+        assertThat(v.getPortletInTopTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), nullValue());
+        assertThat(v.getPortletInLeftTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), nullValue());
+        assertThat(v.getPortletInRightTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), notNullValue());
+        assertThat(v.getPortletInBottomTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), nullValue());
+    }
+
+    @Test
+    public void testPortletPositioning_bottomPortlets(){
+        DashboardView v = createDashboardView();
+        v.addBottomPortlet(TestStatisticsChartPortlet.class);
+        v.save();
+
+        createFreeStyleJob();
+
+        assertThat(v.getPortletInTopTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), nullValue());
+        assertThat(v.getPortletInLeftTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), nullValue());
+        assertThat(v.getPortletInRightTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), nullValue());
+        assertThat(v.getPortletInBottomTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), notNullValue());
     }
 
     /**
