@@ -39,10 +39,10 @@ public class DashboardView extends View {
      **/
     public final Control bottomPortlet = new Control(this, "/hetero-list-add[bottomPortlet]");
 
-    private List<AbstractDashboardViewPortlet> topPortlets = new ArrayList<>();
-    private List<AbstractDashboardViewPortlet> leftPortlets = new ArrayList<>();
-    private List<AbstractDashboardViewPortlet> rightPortlets = new ArrayList<>();
-    private List<AbstractDashboardViewPortlet> bottomPortlets = new ArrayList<>();
+    private final List<AbstractDashboardViewPortlet> topPortlets = new ArrayList<>();
+    private final List<AbstractDashboardViewPortlet> leftPortlets = new ArrayList<>();
+    private final List<AbstractDashboardViewPortlet> rightPortlets = new ArrayList<>();
+    private final List<AbstractDashboardViewPortlet> bottomPortlets = new ArrayList<>();
 
     /**
      * Constructs a new {@link DashboardView}.
