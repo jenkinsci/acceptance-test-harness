@@ -118,8 +118,7 @@ public class Control extends CapybaraPortingLayerImpl {
      * @return the value of the input field.
      */
     public String get() {
-        WebElement e = resolve();
-        return ((JavascriptExecutor)driver).executeScript("return arguments[0].value;", e).toString();
+        return resolve().getAttribute("value");
     }
 
     /**
