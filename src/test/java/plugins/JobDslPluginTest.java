@@ -448,7 +448,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         PluginSpec pluginSpec = new PluginSpec("chucknorris");
         PluginManager pm = jenkins.getPluginManager();
         if (pm.isInstalled(pluginSpec)) {
-            pm.enablePlugin(pluginSpec, false);
+            pm.enablePlugin(pluginSpec.getName(), false);
             jenkins.restart();
         }
 

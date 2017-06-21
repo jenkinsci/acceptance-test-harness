@@ -299,11 +299,11 @@ public class PluginManager extends ContainerPageObject {
 
     /**
      * Enable oder disable the specified plugin.
-     * @param spec plugin id (e.g. "ldap")
+     * @param pluginName plugin id (e.g. "ldap")
      * @param state enable plugin if true, disable plugin if false
      */
-    public void enablePlugin(PluginSpec spec, boolean state) {
+    public void enablePlugin(String pluginName, boolean state) {
         visit("installed");
-        check(find(by.url("plugin/" + spec.getName())), state);
+        check(find(by.url("plugin/" + pluginName)), state);
     }
 }
