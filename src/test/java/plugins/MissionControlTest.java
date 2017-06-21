@@ -117,4 +117,34 @@ public class MissionControlTest extends AbstractJUnitTest {
         assertThat(view.getNodeStatusArea().getStatusOfNode("test / 15"), containsString("danger"));
         assertThat(view.getNodeStatusArea().getStatusOfNode("master / 2"), containsString("success"));
     }
+
+    /**
+     * Test the existence and number of builds in the queue.
+     */
+    @Test
+    public void testBuildQueue() {
+        MissionControlView view = jenkins.views.create(MissionControlView.class, "mission-control-sample-view");
+        view.configure(() -> view.setHideBuildQueue(true));
+
+        view.open();
+        assertThat(driver, not(hasContent("Build queue")));
+
+        view.configure(() -> view.setHideBuildQueue(false));
+
+        DumbSlave master = jenkins.slaves.getMaster();
+        master.configure(() -> master.setLabels("notQueued"));
+
+        FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class, "queuedJob");
+        job.configure(() -> job.setLabelExpression("queued"));
+        job.scheduleBuild();
+
+        view.open();
+        assertThat(view.getBuildQueueArea().getBuildQueueSize(), is(1));
+
+        job.configure(() -> job.setLabelExpression("notQueued"));
+        job.getLastBuild().waitUntilFinished();
+
+        view.open();
+        assertThat(view.getBuildQueueArea().getBuildQueueSize(), is(0));
+    }
 }

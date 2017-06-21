@@ -54,4 +54,12 @@ public class SlavesMixIn extends MixIn {
 
         return base + name;
     }
+
+    /**
+     * Get the master node of jenkins.
+     * @return The master node.
+     */
+    public DumbSlave getMaster() {
+        return newInstance(DumbSlave.class, jenkins, "(master)");
+    }
 }
