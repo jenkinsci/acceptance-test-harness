@@ -81,7 +81,6 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
             + "String all = matcher.group(1);\n"
             + "Priority test = Priority.NORMAL;\n"
             + "return new Warning(all, 42, all, all, all);";
-    public static final String WARNING_MAIN_JAVA_26 = "WarningMain.java:26";
 
     public static final String RESOURCE_WARNING_MAIN_JAVA = "WarningMain.java";
     public static final String RESOURCE_WARNING_MAIN_JAVA_PATH = "/warnings_plugin/"
@@ -89,17 +88,11 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
 
     public static final String CMD_WARNING_MAIN_JAVA_CONSOLE = "javac -Xlint:all "
                                                                 + RESOURCE_WARNING_MAIN_JAVA;
-    public static final String CMD_WARNING_MAIN_JAVA_FILE = "javac -Xlint:all "
-                                                                + RESOURCE_WARNING_MAIN_JAVA
-                                                                + " &> out.txt";
 
     public static final String RESOURCE_CODE_NARC_REPORT = "CodeNarcXmlReport.xml";
     public static final String RESOURCE_CODE_NARC_REPORT_PATH = "/warnings_plugin/jenkins-17787/"
                                                                     + RESOURCE_CODE_NARC_REPORT;
 
-    public static final String RESOURCE_CODE_NARC_REPORT2 = "CodeNarcReport2.xml";
-    public static final String RESOURCE_CODE_NARC_REPORT2_PATH = "/warnings_plugin/jenkins-17787/"
-            + RESOURCE_CODE_NARC_REPORT2;
 
 
     @Inject
@@ -279,13 +272,13 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         assertThatWarningsCountInSummaryIs(action, 3);
 
 
-/*
-        String codeLine =  action.getLinkedSourceFileText(AnalysisAction.Tab.DETAILS,"WarningMain.java", 26);
+
+        String codeLine =  action.getLinkedSourceFileText(AnalysisAction.Tab.DETAILS,"WarningMain.java", 10);
 
         String[] codeLineArr =  codeLine.trim().split("\\s+", 2);
-        assertThat("Warning should be at line",codeLineArr[0], is("26"));
-        assertThat("Assert faild comparing code line is",codeLineArr[1], is("TextClass text2 = (TextClass) text;"));
-*/
+        assertThat("Warning should be at line",codeLineArr[0], is("10"));
+        assertThat("Assert faild comparing code line is",codeLineArr[1], is("text =  (TextClass) text2;"));
+
     }
 
     @WithDocker
