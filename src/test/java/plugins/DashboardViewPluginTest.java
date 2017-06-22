@@ -371,9 +371,11 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
 
         assertThat(colorsOccurrences.size(), is(1));
 
-        int blueComp = (colorsOccurrences.keySet().iterator().next() << 24) >>> 24;
-        int greenComp = (colorsOccurrences.keySet().iterator().next() << 16) >>> 24;
-        int redComp = (colorsOccurrences.keySet().iterator().next() << 8) >>> 24;
+        Integer color = colorsOccurrences.keySet().iterator().next();
+        int blueComp = (color << 24) >>> 24;
+        int greenComp = (color << 16) >>> 24;
+        int redComp = (color << 8) >>> 24;
+
         assertThat(blueComp, greaterThan(150));
         assertThat(blueComp, greaterThan(greenComp));
         assertThat(blueComp, greaterThan(redComp));
@@ -395,12 +397,14 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
 
         assertThat(colorsOccurrences.size(), is(1));
 
-        int blueComp = (colorsOccurrences.keySet().iterator().next() << 24) >>> 24;
-        int greenComp = (colorsOccurrences.keySet().iterator().next() << 16) >>> 24;
-        int redComp = (colorsOccurrences.keySet().iterator().next() << 8) >>> 24;
+        Integer color = colorsOccurrences.keySet().iterator().next();
+        int blueComp = (color << 24) >>> 24;
+        int greenComp = (color << 16) >>> 24;
+        int redComp = (color << 8) >>> 24;
+
         assertThat(redComp, greaterThan(150));
         assertThat(redComp, greaterThan(blueComp));
-        assertThat(redComp, greaterThan(redComp));
+        assertThat(redComp, greaterThan(greenComp));
     }
 
     @Test
@@ -436,7 +440,7 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
 
     /**
      * Gets the distribution of the most significant colors from an image.
-     * A color is significant if it occupies more than 5% of the image.
+     * A color is significant if it occupies more than 10% of the image.
      * As White & Black aren't colors, they get filtered.
      *
      * The key of the returned map is the color and the value is the occurrence count.
@@ -455,7 +459,7 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
             }
         }
 
-        long significanceGate = Math.round(image.getWidth() * image.getHeight() * 0.05);
+        long significanceGate = Math.round(image.getWidth() * image.getHeight() * 0.1);
 
         return colormap.entrySet().stream()
             .filter(entry -> entry.getValue() > significanceGate)
