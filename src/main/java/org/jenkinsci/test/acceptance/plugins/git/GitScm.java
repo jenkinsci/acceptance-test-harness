@@ -144,9 +144,44 @@ public class GitScm extends Scm {
         return this;
     }
 
+    /**
+     * Add behaviour "Sparse checkout"
+     *
+     * @return behaviour, to access .addPath() method
+     */
     public SparseCheckoutPaths sparseCheckout() {
         SparseCheckoutPaths behaviour = addBehaviour(SparseCheckoutPaths.class);
         return behaviour;
+    }
+
+    /**
+     * Select strategy for choosing what to build
+     *
+     * @param strategy Strategy to use ("Default" || "Inverse")
+     * @return this, to allow function chaining
+     */
+    public GitScm chooseBuildStrategy(String strategy) {
+        return chooseBuildStrategy(strategy, 0, null);
+    }
+
+    /**
+     * Select strategy for choosing what to build
+     *
+     * @param strategy Strategy to use ("Ancestry" || "Default" || "Inverse")
+     * @param age Age in days (only for strategy "Ancestry")
+     * @param ancestor SHA1 commit hash (only for strategy "Ancestry")
+     * @return this, to allow function chaining
+     */
+    public GitScm chooseBuildStrategy(String strategy, int age, String ancestor) {
+        StrategyToChooseBuild behaviour = addBehaviour(StrategyToChooseBuild.class);
+        new Select(behaviour.selStrategy.resolve()).selectByVisibleText(strategy);
+
+        if (strategy == "Ancestry") {
+            behaviour.numMaxAge.set(age);
+            behaviour.txtAncestorCommit.set(ancestor);
+        }
+
+        return this;
     }
 
     public GitScm remoteName(String name) {
@@ -353,7 +388,6 @@ public class GitScm extends Scm {
         }
     }
 
-    // TODO Check if addPath actually works
     public static class SparseCheckoutPaths extends Behaviour {
         private  int pathCounter = 0;
         private final Control btnAdd = control("repeatable-add");
@@ -379,11 +413,10 @@ public class GitScm extends Scm {
         }
     }
 
-    // TODO Check if selStrategy is correctly referenced
     public static class StrategyToChooseBuild extends Behaviour {
-        private final Control selStrategy = control(""); //absolute path is "/scm[1]/extensions/"
-        private final Control numMaxAge = control("maximumAgeInDays");
-        private final Control txtAncestorCommit = control("ancestorCommitSha1");
+        private final Control selStrategy = control("/"); //absolute path is "/scm[1]/extensions/"
+        private final Control numMaxAge = control("buildChooser/maximumAgeInDays");
+        private final Control txtAncestorCommit = control("buildChooser/ancestorCommitSha1");
 
         public StrategyToChooseBuild(GitScm git, String path) {
             super(git, path);

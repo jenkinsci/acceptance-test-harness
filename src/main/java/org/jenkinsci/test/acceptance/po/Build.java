@@ -157,14 +157,6 @@ public class Build extends ContainerPageObject {
         return visit(getConsoleTextUrl()).getPageSource();
     }
 
-    public URL getGitBuildDataUrl() {
-        return url("git");
-    }
-
-    public String getGitBuildData() {
-        return visit(getGitBuildDataUrl()).getPageSource();
-    }
-
     /**
      * @deprecated Use {@link org.jenkinsci.test.acceptance.Matchers#containsRegexp} instead.
      */

@@ -41,6 +41,7 @@ import org.jenkinsci.test.acceptance.plugins.git.GitScm;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.openqa.selenium.By;
@@ -218,7 +219,7 @@ public class GitPluginTest extends AbstractJUnitTest {
         GitRepo repo = buildGitRepo();
 
         repo.createBranch("testBranch");
-        repo.commit(TEST_COMMIT_MESSAGE);
+        repo.changeAndCommitFoo(TEST_COMMIT_MESSAGE);
         repo.transferToDockerContainer(host, port);
 
         job.useScm(GitScm.class)
@@ -244,59 +245,13 @@ public class GitPluginTest extends AbstractJUnitTest {
     }
 
     @Test
-    public void clean_after_checkout() throws IOException, InterruptedException, SftpException, JSchException {
-        GitRepo repo = buildGitRepo();
-        repo.transferToDockerContainer(host, port);
-
-        //first config and build producing untrackedFile.txt
-
-        job.useScm(GitScm.class)
-                .url(repoUrl)
-                .credentials(USERNAME)
-                .cleanAfterCheckout();
-
-        job.addShellStep("touch untrackedFile.txt");
-        job.save();
-
-        job.startBuild().shouldSucceed();
-
-        // second config and build tests if file has been removed before checkout
-
-        job.configure();
-        job.removeFirstBuildStep();
-        job.addShellStep("ls && test ! -f untrackedFile.txt");
-        job.save();
-
-        job.startBuild().shouldSucceed();
-
+    public void clean_after_checkout() throws IOException, InterruptedException {
+        test_clean_while_checkout(false);
     }
 
     @Test
-    public void clean_before_checkout() throws IOException, InterruptedException, SftpException, JSchException {
-        GitRepo repo = buildGitRepo();
-        repo.transferToDockerContainer(host, port);
-
-        //first config and build producing untrackedFile.txt
-
-        job.useScm(GitScm.class)
-                .url(repoUrl)
-                .credentials(USERNAME)
-                .cleanBeforeCheckout();
-
-        job.addShellStep("touch untrackedFile.txt");
-        job.save();
-
-        job.startBuild().shouldSucceed();
-
-        // second config and build tests if file has been removed after checkout
-
-        job.configure();
-        job.removeFirstBuildStep();
-        job.addShellStep("ls && test ! -f untrackedFile.txt");
-        job.save();
-
-        job.startBuild().shouldSucceed();
-
+    public void clean_before_checkout() throws IOException, InterruptedException {
+        test_clean_while_checkout(true);
     }
 
     @Test
@@ -337,7 +292,7 @@ public class GitPluginTest extends AbstractJUnitTest {
         b.shouldSucceed();
 
         assertThat(
-                b.getGitBuildData(),
+                visit(b.url("git")).getPageSource(),
                 Matchers.containsRegexp("<b>SCM:</b> " + SCM_NAME, Pattern.MULTILINE)
         );
     }
@@ -366,6 +321,66 @@ public class GitPluginTest extends AbstractJUnitTest {
         b.shouldSucceed();
     }
 
+    @Test
+    public void ancestry_strategy_to_choose_build() throws IOException, InterruptedException {
+        final String TEST_BRANCH = "testBranch";
+
+        GitRepo repo = buildGitRepo();
+        repo.createBranch(TEST_BRANCH);
+        repo.changeAndCommitFoo("Commit1 on master");
+        repo.checkout(TEST_BRANCH);
+        repo.changeAndCommitFoo("commit1 on " + TEST_BRANCH);
+        String sha1 = repo.getLastSha1();
+        repo.changeAndCommitFoo("commit2 on " + TEST_BRANCH);
+
+        repo.transferToDockerContainer(host, port);
+
+        job.useScm(GitScm.class)
+                .url(repoUrl)
+                .branch("")
+                .credentials(USERNAME)
+                .chooseBuildStrategy("Ancestry", 1, sha1);
+
+        job.save();
+        Build b = job.startBuild();
+        b.shouldSucceed();
+        // TODO Multiple selected branches create multiple builds, these should also be verified
+
+        assertThat(
+                b.getConsole(),
+                Matchers.containsRegexp(
+                        "Checking out Revision .* \\(origin/"+TEST_BRANCH+"\\)",
+                        Pattern.MULTILINE
+                )
+        );
+    }
+
+    @Test
+    public void inverse_strategy_to_choose_build() throws IOException, InterruptedException {
+        final String BRANCH_NAME = "secondBranch";
+
+        GitRepo repo = buildGitRepo();
+        repo.createBranch(BRANCH_NAME);
+        repo.transferToDockerContainer(host, port);
+
+        job.useScm(GitScm.class)
+                .url(repoUrl)
+                .credentials(USERNAME)
+                .chooseBuildStrategy("Inverse");
+
+        job.save();
+        Build b = job.startBuild();
+        b.shouldSucceed();
+
+        assertThat(
+                b.getConsole(),
+                Matchers.containsRegexp(
+                        "Checking out Revision .* \\(origin/"+BRANCH_NAME+"\\)",
+                        Pattern.MULTILINE
+                )
+        );
+    }
+
     ////////////////////
     // HELPER METHODS //
     ////////////////////
@@ -381,5 +396,43 @@ public class GitPluginTest extends AbstractJUnitTest {
         GitRepo repo = new GitRepo();
         repo.changeAndCommitFoo("Initial commit");
         return repo;
+    }
+
+    /**
+     * Invoked by {@link #clean_after_checkout()} and {@link #clean_before_checkout()}
+     *
+     * @param before Select "clean before" or "clean after"
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    private void test_clean_while_checkout(boolean before) throws IOException, InterruptedException {
+        GitRepo repo = buildGitRepo();
+        repo.transferToDockerContainer(host, port);
+
+        // configure and build to create untrackedFile.txt
+
+        GitScm git = job.useScm(GitScm.class)
+                .url(repoUrl)
+                .credentials(USERNAME);
+
+        if (before) {
+            git.cleanBeforeCheckout();
+        } else {
+            git.cleanAfterCheckout();
+        }
+
+        job.addShellStep("touch untrackedFile.txt");
+        job.save();
+
+        job.startBuild().shouldSucceed();
+
+        // configure and build to test if file has been removed
+
+        job.configure();
+        job.removeFirstBuildStep();
+        job.addShellStep("ls && test ! -f untrackedFile.txt");
+        job.save();
+
+        job.startBuild().shouldSucceed();
     }
 }
