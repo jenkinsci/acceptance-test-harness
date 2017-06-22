@@ -16,6 +16,7 @@ import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
+import org.jenkinsci.test.acceptance.plugins.logparser.LogParserOutputPage;
 import static org.junit.Assert.assertEquals;
 
 @WithPlugins("log-parser")
@@ -45,17 +46,7 @@ public class LogParserTest extends AbstractJUnitTest {
      */
     @Test
     public void testLinksAndColor() throws Exception {
-        FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class, "linkJob");
-
-        // configure job
-        job.configure(() -> {
-           LogParserPublisher lpp = job.addPublisher(LogParserPublisher.class);
-           lpp.setRule(LogParserPublisher.RuleType.GLOBAL, rules.get("sampleRule"));
-
-           // write sample output
-            Resource sampleLog = resource("/logparser_plugin/console-outputs/sample-log");
-            catToConsole(job, sampleLog.url.getPath());
-        });
+        Job job = configureSampleJob();
 
         Build build = job.startBuild().waitUntilFinished();
         build.open();
@@ -73,17 +64,7 @@ public class LogParserTest extends AbstractJUnitTest {
      */
     @Test
     public void testErrorReporting() throws Exception {
-        FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class, "sampleJob");
-
-        // configure job
-        job.configure(() -> {
-            LogParserPublisher lpp = job.addPublisher(LogParserPublisher.class);
-            lpp.setRule(LogParserPublisher.RuleType.GLOBAL, rules.get("sampleRule"));
-
-            // write sample output
-            Resource sampleRule = resource("/logparser_plugin/console-outputs/sample-log");
-            catToConsole(job, sampleRule.url.getPath());
-        });
+        Job job = configureSampleJob();
 
         Build build = job.startBuild().waitUntilFinished();
 
@@ -98,13 +79,13 @@ public class LogParserTest extends AbstractJUnitTest {
         LogParserOutputPage outputPage = new LogParserOutputPage(build);
 
         assertThat(outputPage.getNumberOfMatches("Error"), is(13));
-        assertThat(outputPage.getLinkList("Error").size(), is(13));
+        assertThat(outputPage.getLinkList("Error"), hasSize(13));
 
         assertThat(outputPage.getNumberOfMatches("Warning"), is(4));
-        assertThat(outputPage.getLinkList("Warning").size(), is(4));
+        assertThat(outputPage.getLinkList("Warning"), hasSize(4));
 
         assertThat(outputPage.getNumberOfMatches("Info"), is(2));
-        assertThat(outputPage.getLinkList("Info").size(), is(2));
+        assertThat(outputPage.getLinkList("Info"), hasSize(2));
     }
 
     /**
@@ -229,5 +210,20 @@ public class LogParserTest extends AbstractJUnitTest {
             config.addParserConfig(rule.getKey(), rule.getValue());
         }
         jenkins.save();
+    }
+
+    private Job configureSampleJob() {
+        FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class, "sampleJob");
+
+        // configure job
+        job.configure(() -> {
+            LogParserPublisher lpp = job.addPublisher(LogParserPublisher.class);
+            lpp.setRule(LogParserPublisher.RuleType.GLOBAL, rules.get("sampleRule"));
+
+            // write sample output
+            Resource sampleRule = resource("/logparser_plugin/console-outputs/sample-log");
+            catToConsole(job, sampleRule.url.getPath());
+        });
+        return job;
     }
 }
