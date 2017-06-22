@@ -3,7 +3,6 @@ package plugins;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.logparser.LogParserGlobalConfig;
-import org.jenkinsci.test.acceptance.plugins.logparser.LogParserOutputPage;
 import org.jenkinsci.test.acceptance.plugins.logparser.LogParserPublisher;
 import org.jenkinsci.test.acceptance.po.*;
 import org.junit.Before;
@@ -40,7 +39,7 @@ public class LogParserTest extends AbstractJUnitTest {
      * Check whether trend is visible
      */
     @Test
-    public void trendVisible(){
+    public void trendVisible() {
         FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class, "simple-job");
 
         job.configure(() -> {
@@ -63,6 +62,30 @@ public class LogParserTest extends AbstractJUnitTest {
     }
 
     /**
+     * Test case:
+     * Check for a build to be marked as failed and another build to be marked as unstable.
+     */
+    @Test
+    public void checkMarkedFailedAndUnstable() {
+        FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class, "simple-job");
+        job.configure(() -> {
+            job.addShellStep("echo marked as error");
+            LogParserPublisher lpp = job.addPublisher(LogParserPublisher.class);
+            lpp.setMarkOnBuildFail(true);
+            lpp.setRule(resource("/logparser_plugin/rules/log-parser-rule-markings"));
+        });
+        job.startBuild().waitUntilFinished().shouldFail();
+
+        job.configure(() -> {
+            job.addShellStep("echo marked as warning");
+            LogParserPublisher lpp = job.getPublisher(LogParserPublisher.class);
+            lpp.setMarkOnBuildFail(false);
+            lpp.setMarkOnUnstableWarning(true);
+        });
+        job.startBuild().waitUntilFinished().shouldBeUnstable();
+    }
+
+    /**
      * Adds a post-build-step to the job which prints out the content of the specified file.
      *
      * @param job The job where the post-build-step is added.
@@ -74,22 +97,34 @@ public class LogParserTest extends AbstractJUnitTest {
 
     /**
      * Adds a new rule to the existing config.
+     *
      * @param description The description of the new rule.
-     * @param pathToFile The path to the rule file.
+     * @param pathToFile  The path to the rule file.
      */
-    private void addLogParserRule(final String description, final String pathToFile){
+    private void addLogParserRule(final String description, final String pathToFile) {
         jenkins.configure();
         config.addParserConfig(description, pathToFile);
         jenkins.save();
     }
 
     /**
+     * Adds a new rule to the existing config.
+     *
+     * @param description The description of the new rule.
+     * @param resource    The {@link Resource} object of the rule file.
+     */
+    private void addLogParserRule(final String description, Resource resource) {
+        addLogParserRule(description, resource.url.getPath());
+    }
+
+    /**
      * Adds serveral rules to the existing config.
+     *
      * @param rules Map of the rules. Key is the description and Value is the path.
      */
     private void addLogParserRules(final Map<String, String> rules) {
         jenkins.configure();
-        for(Map.Entry<String, String> rule : rules.entrySet()) {
+        for (Map.Entry<String, String> rule : rules.entrySet()) {
             config.addParserConfig(rule.getKey(), rule.getValue());
         }
         jenkins.save();
