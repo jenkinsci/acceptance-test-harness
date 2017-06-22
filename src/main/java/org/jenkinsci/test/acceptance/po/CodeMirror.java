@@ -49,17 +49,33 @@ public class CodeMirror extends PageAreaImpl {
         // can't use find() because it wants a visible element
         driver.findElement(by.xpath("//*[@path='%s']", getPath()));    // wait until the element in question appears in DOM
 
-        executeScript(script, String.format("//*[@path='%s']/following-sibling::div", getPath()), content);
+        executeScript(scriptSet, String.format("//*[@path='%s']/following-sibling::div", getPath()), content);
     }
 
-    private static final String script =
+    /**
+     * Returns the value of the codemirror.
+     *
+     * @return value of the codemirror.
+     */
+    public String get() {
+        return executeScript(scriptGet, String.format("//*[@path='%s']/following-sibling::div", getPath())).toString();
+    }
+
+    private static final String scriptPrefix =
                     "cmElem = document.evaluate(" +
                     "        arguments[0], document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null" +
                     ").singleNodeValue;" +
                     "codemirror = cmElem.CodeMirror;" +
                     "if (codemirror == null) {" +
                     "    console.log('CodeMirror object not found!');" +
-                    "}" +
+                    "}";
+
+    private static final String scriptSet =
+                    scriptPrefix +
                     "codemirror.setValue(arguments[1]);" +
                     "codemirror.save();";
+
+    private static final String scriptGet =
+                    scriptPrefix +
+                    "return codemirror.getValue();";
 }

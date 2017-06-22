@@ -112,6 +112,14 @@ public class Control extends CapybaraPortingLayerImpl {
         ((JavascriptExecutor)driver).executeScript("arguments[0].value = arguments[1];", e, text);
     }
 
+    /**
+     * Returns the value of the input field.
+     *
+     * @return the value of the input field.
+     */
+    public String get() {
+        return resolve().getAttribute("value");
+    }
 
     /**
      * Sets the value of the input field to the specified text.
