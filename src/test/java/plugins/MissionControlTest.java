@@ -131,8 +131,8 @@ public class MissionControlTest extends AbstractJUnitTest {
 
         view.configure(() -> view.setHideBuildQueue(false));
 
-        DumbSlave master = jenkins.slaves.getMaster();
-        master.configure(() -> master.setLabels("notQueued"));
+        JenkinsConfig master = jenkins.getConfigPage();
+        master.configure(() -> master.labels.set("notQueued"));
 
         FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class, "queuedJob");
         job.configure(() -> job.setLabelExpression("queued"));
