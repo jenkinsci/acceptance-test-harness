@@ -11,10 +11,13 @@ import org.jenkinsci.test.acceptance.plugins.mock_security_realm.MockSecurityRea
 import org.jenkinsci.test.acceptance.plugins.script_security.ScriptApproval;
 import org.jenkinsci.test.acceptance.po.*;
 import org.jenkinsci.test.acceptance.update_center.PluginSpec;
+import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -33,6 +36,9 @@ public class JobDslPluginTest extends AbstractJUnitTest {
 
     private static String ADMIN = "admin";
     private static String USER = "user";
+
+    private static final String LIST_VIEW_NAME = "testListView";
+
     /**
      * Tests if the checkbox ignoreMissingFiles is shown when the
      * radiobutton 'Look on Filesystem' is selected,
@@ -745,7 +751,6 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         getJob("New_Job").open();
     }
 
-
     /**
      * Verifies that Groovy sandbox can only used if 'Access Control for Builds'
      * is configured. The DSL job needs to run as a particular user.
@@ -815,6 +820,615 @@ public class JobDslPluginTest extends AbstractJUnitTest {
 
         generatedJob.configure(() -> generatedJob.setDescription("New Description"));
         assertThat(driver, hasContent(alert));
+    }
+
+    /**
+     * Test if a new ListView is created via Job DSL script TextBox.
+     * The created View shall contain a description.
+     */
+    @Test
+    public void is_ListView_created() {
+        String descriptionText = "This is the description of testView";
+        String jobDslScript = "listView('"+ LIST_VIEW_NAME +"') {\n" +
+                "    description('"+descriptionText+"')\n" +
+                "}";
+        openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        WebElement description = find(By.xpath("//div[@id='description']/div"));
+        Assert.assertThat(description.getText(), containsString(descriptionText));
+    }
+
+    /**
+     * Test if all native columns of a ListView are created and shown correctly.
+     */
+    @Test
+    public void are_columns_created() {
+        Job job1 = createJobAndBuild();
+        String jobDslScript = "listView('"+ LIST_VIEW_NAME +"') {\n" +
+                "  columns {\n" +
+                "    status()\n" +
+                "    weather()\n" +
+                "    name()\n" +
+                "    lastSuccess()\n" +
+                "    lastFailure()\n" +
+                "    lastDuration()\n" +
+                "    buildButton()\n" +
+                "  }\n" +
+                "  jobs{\n" +
+                "    name('"+job1.name+"')\n" +
+                "  }\n" +
+                "}";
+        openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        Assert.assertThat(driver, hasElement(By.xpath("//th[contains(@tooltip, 'Status of the last build')]")));
+        Assert.assertThat(driver, hasElement(By.xpath("//th[contains(@tooltip, 'Weather report showing aggregated status of recent builds')]")));
+        Assert.assertThat(driver, hasElement(By.xpath("//th/a[text() = 'Name']")));
+        Assert.assertThat(driver, hasElement(By.xpath("//th/a[text() = 'Last Success']")));
+        Assert.assertThat(driver, hasElement(By.xpath("//th/a[text() = 'Last Failure']")));
+        Assert.assertThat(driver, hasElement(By.xpath("//th/a[text() = 'Last Duration']")));
+        Assert.assertThat(driver, hasElement(By.xpath("//td/a/img[contains(@src, 'clock.png')]")));
+    }
+
+    /**
+     * Test if the created jobs are correctly added to the ListView and if the status filter works correctly.
+     * In this case only enabled jobs shall be shown.
+     */
+    @Test
+    public void status_filter_only_shows_enabled_jobs() {
+        List<Job> jobs = createAmountOfJobs(3, false);
+        String jobDisabled = "exampled-disabled";
+        String jobDslScript = "job('"+jobDisabled+"') {\n" +
+                "  disabled()\n" +
+                "}\n" +
+                "listView('"+ LIST_VIEW_NAME +"') {\n" +
+                "  statusFilter(StatusFilter.ENABLED)\n" +
+                "  columns {\n" +
+                "    name()\n" +
+                "  }\n" +
+                "  jobs {\n" +
+                "    names('"+jobs.get(0).name+"', '"+jobs.get(1).name+"', '"+jobs.get(2).name+"', '"+jobDisabled+"')\n" +
+                "  }\n" +
+                "}";
+        openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobDisabled+"')]"))));
+        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(0).name+"')]")));
+        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(1).name+"')]")));
+        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(2).name+"')]")));
+    }
+
+    /**
+     * Test if the created jobs are correctly added to the ListView and if the status filter works correctly.
+     * In this case only disabled jobs shall be shown.
+     */
+    @Test
+    public void status_filter_only_shows_disabled_jobs() {
+        String jobDisabled = "exampled-disabled";
+        List<Job> jobs = createAmountOfJobs(3, false);
+        String jobDslScript = "job('"+jobDisabled+"') {\n" +
+                "  disabled()\n" +
+                "}\n" +
+                "listView('"+ LIST_VIEW_NAME +"') {\n" +
+                "  statusFilter(StatusFilter.DISABLED)\n" +
+                "  columns {\n" +
+                "    name()\n" +
+                "  }\n" +
+                "  jobs {\n" +
+                "    names('"+jobs.get(0).name+"', '"+jobs.get(1).name+"', '"+jobs.get(2).name+"', '"+jobDisabled+"')\n" +
+                "  }\n" +
+                "}";
+        openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobDisabled+"')]")));
+        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(0).name+"')]"))));
+        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(1).name+"')]"))));
+        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(2).name+"')]"))));
+    }
+
+    /**
+     * Test if the created jobs are correctly added to the ListView and if the status filter works correctly.
+     * In this case all jobs shall be shown.
+     */
+    @Test
+    public void status_filter_shows_all_jobs() {
+        String jobDisabled = "exampled-disabled";
+        List<Job> jobs = createAmountOfJobs(3, false);
+        String jobDslScript = "job('"+jobDisabled+"') {\n" +
+                "  disabled()\n" +
+                "}\n" +
+                "listView('"+ LIST_VIEW_NAME +"') {\n" +
+                "  statusFilter(StatusFilter.ALL)\n" +
+                "  columns {\n" +
+                "    name()\n" +
+                "  }\n" +
+                "  jobs {\n" +
+                "    names('"+jobs.get(0).name+"', '"+jobs.get(1).name+"', '"+jobs.get(2).name+"', '"+jobDisabled+"')\n" +
+                "  }\n" +
+                "}";
+        openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobDisabled+"')]")));
+        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(0).name+"')]")));
+        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(1).name+"')]")));
+        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(2).name+"')]")));
+    }
+
+    /**
+     * Test if the created jobs are correctly added to the ListView using a regex.
+     */
+    @Test
+    public void only_jobs_matching_regex_are_added() {
+        String job1 = "exampled-disabled";
+        String job2 = "example-enabled";
+        List<Job> jobs = createAmountOfJobs(2, false);
+        String regex = ".*abled.*";
+        String jobDslScript = "job('"+job1+"') {\n" +
+                "  disabled()\n" +
+                "}\n" +
+                "job('"+job2+"')\n" +
+                "listView('"+ LIST_VIEW_NAME +"') {\n" +
+                "  columns {\n" +
+                "    name()\n" +
+                "  }\n" +
+                "  jobs {\n" +
+                "    regex('"+regex+"')\n" +
+                "  }\n" +
+                "}";
+        openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+job1+"')]")));
+        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+job2+"')]")));
+        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(0).name+"')]"))));
+        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(1).name+"')]"))));
+    }
+
+    /**
+     * This test creates a listView and creates two additional jobs. The job filter of the script is set to "all jobs".
+     * The two additional jobs as well as the seed job is added to the listView.
+     */
+    @Test
+    @WithPlugins("view-job-filters")
+    public void job_filters_all_jobs_are_added() {
+        List<Job> jobs = createAmountOfJobs(2, false);
+        String jobDslScript = "listView('"+ LIST_VIEW_NAME +"') {\n" +
+                "  columns {\n" +
+                "    name()\n" +
+                "  }\n" +
+                "  jobFilters {\n" +
+                "        all()\n" +
+                "  }\n" +
+                "\n" +
+                "}";
+        Job seed = openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(0).name+"')]")));
+        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(1).name+"')]")));
+        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, "+seed.name+")]")));
+    }
+
+    /**
+     * This test creates a listView and 4 jobs. The job filters are checking the name with a regex and
+     * jobs matching the regex are included in the listView.
+     */
+    @Test
+    @WithPlugins("view-job-filters")
+    public void job_filters_regex_name_include_matched() {
+        String job1 = "example-disabled";
+        String job2 = "example-enabled";
+        List<Job> jobs = createAmountOfJobs(2, false);
+        String regex = ".*abled.*";
+        String jobDslScript = "job('"+job1+"')\n" +
+                "job('"+job2+"')\n" +
+                "listView('"+ LIST_VIEW_NAME +"') {\n" +
+                "  columns {\n" +
+                "    name()\n" +
+                "  }\n" +
+                "  jobFilters {\n" +
+                "        regex {\n" +
+                "            matchType(MatchType.INCLUDE_MATCHED)\n" +
+                "            matchValue(RegexMatchValue.NAME)\n" +
+                "            regex('"+regex+"')\n" +
+                "        }\n" +
+                "  }\n" +
+                "}";
+        openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+job1+"')]")));
+        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+job2+"')]")));
+        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(0).name+"')]"))));
+        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(1).name+"')]"))));
+    }
+
+    /**
+     * This test creates a listView and 4 jobs. The job filters are checking the name with a regex and
+     * jobs matching the regex are excluded in the listView.
+     */
+    @Test
+    @WithPlugins("view-job-filters")
+    public void job_filters_regex_name_exclude_matched() {
+        String job1 = "example-disabled";
+        String job2 = "example-enabled";
+        List<Job> jobs = createAmountOfJobs(2, false);
+        String regex = ".*abled.*";
+        String jobDslScript = "job('"+job1+"')\n" +
+                "job('"+job2+"')\n" +
+                "listView('"+ LIST_VIEW_NAME +"') {\n" +
+                "  columns {\n" +
+                "    name()\n" +
+                "  }\n" +
+                "  jobs{\n" +
+                "    names('"+job1+"','"+job2+"','"+jobs.get(0).name+"','"+jobs.get(1).name+"')\n" +
+                "  }\n" +
+                "  jobFilters {\n" +
+                "        regex {\n" +
+                "            matchType(MatchType.EXCLUDE_MATCHED)\n" +
+                "            matchValue(RegexMatchValue.NAME)\n" +
+                "            regex('"+regex+"')\n" +
+                "        }\n" +
+                "  }\n" +
+                "}";
+        openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+job1+"')]"))));
+        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+job2+"')]"))));
+        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(0).name+"')]")));
+        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(1).name+"')]")));
+    }
+
+    /**
+     * This test creates a listView and 4 jobs. The job filters are checking the name with a regex and
+     * jobs not matching the regex are included in the listView.
+     */
+    @Test
+    @WithPlugins("view-job-filters")
+    public void job_filters_regex_name_include_unmatched() {
+        String job1 = "example-disabled";
+        String job2 = "example-enabled";
+        List<Job> jobs = createAmountOfJobs(2, false);
+        String regex = ".*abled.*";
+        String jobDslScript = "job('"+job1+"')\n" +
+                "job('"+job2+"')\n" +
+                "listView('"+ LIST_VIEW_NAME +"') {\n" +
+                "  columns {\n" +
+                "    name()\n" +
+                "  }\n" +
+                "  jobFilters {\n" +
+                "        regex {\n" +
+                "            matchType(MatchType.INCLUDE_UNMATCHED)\n" +
+                "            matchValue(RegexMatchValue.NAME)\n" +
+                "            regex('"+regex+"')\n" +
+                "        }\n" +
+                "  }\n" +
+                "}";
+        openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+job1+"')]"))));
+        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+job2+"')]"))));
+        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(0).name+"')]")));
+        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(1).name+"')]")));
+    }
+
+    /**
+     * This test creates a listView and 4 jobs. The job filters are checking the name with a regex and
+     * jobs not matching the regex are excluded in the listView.
+     */
+    @Test
+    @WithPlugins("view-job-filters")
+    public void job_filters_regex_name_exclude_unmatched() {
+        String job1 = "example-disabled";
+        String job2 = "example-enabled";
+        List<Job> jobs = createAmountOfJobs(2, false);
+        String regex = ".*abled.*";
+        String jobDslScript = "job('"+job1+"')\n" +
+                "job('"+job2+"')\n" +
+                "listView('"+ LIST_VIEW_NAME +"') {\n" +
+                "  columns {\n" +
+                "    name()\n" +
+                "  }\n" +
+                "  jobs{\n" +
+                "    names('"+job1+"','"+job2+"','"+jobs.get(0).name+"','"+jobs.get(1).name+"')\n" +
+                "  }\n" +
+                "  jobFilters {\n" +
+                "        regex {\n" +
+                "            matchType(MatchType.EXCLUDE_UNMATCHED)\n" +
+                "            matchValue(RegexMatchValue.NAME)\n" +
+                "            regex('"+regex+"')\n" +
+                "        }\n" +
+                "  }\n" +
+                "}";
+        openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+job1+"')]")));
+        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+job2+"')]")));
+        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(0).name+"')]"))));
+        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(1).name+"')]"))));
+    }
+
+    /**
+     * This test creates a job and runs a build which fails. Afterwards 4 new jobs get created as well as a listView.
+     * The job filter of the listView is set to show jobs which build status is 'FAILED'.
+     */
+    @Test
+    @WithPlugins("view-job-filters")
+    public void job_filters_status_failed_include_matched() {
+        Job failedJob = createJobThatFails();
+        List<Job> jobs = createAmountOfJobs(4, true);
+        String jobDslScript = "listView('"+ LIST_VIEW_NAME +"') {\n" +
+                "  columns {\n" +
+                "    name()\n" +
+                "  }\n" +
+                "  jobFilters {\n" +
+                "        status {\n" +
+                "            matchType(MatchType.INCLUDE_MATCHED)\n" +
+                "            status(Status.FAILED)\n" +
+                "        }\n" +
+                "  }\n" +
+                "}";
+        openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+failedJob.name+"')]")));
+        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(0).name+"')]"))));
+        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(0).name+"')]"))));
+        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(0).name+"')]"))));
+        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(0).name+"')]"))));
+    }
+
+    /**
+     * This test creates a job and runs a build which fails. Afterwards 4 new jobs get created as well as a listView.
+     * The job filter of the listView is set to not show jobs which build status is 'FAILED'.
+     */
+    @Test
+    @WithPlugins("view-job-filters")
+    public void job_filters_status_failed_exclude_matched() {
+        Job failedJob = createJobThatFails();
+        List<Job> jobs = createAmountOfJobs(4, true);
+        String jobDslScript = "listView('"+ LIST_VIEW_NAME +"') {\n" +
+                "  columns {\n" +
+                "    name()\n" +
+                "  }\n" +
+                "  jobs{\n" +
+                "    names('"+failedJob.name+"','"+jobs.get(0).name+"','"+jobs.get(1).name+"','"+jobs.get(2).name+"','"+jobs.get(3).name+"')\n" +
+                "  }\n" +
+                "  jobFilters {\n" +
+                "        status {\n" +
+                "            matchType(MatchType.EXCLUDE_MATCHED)\n" +
+                "            status(Status.FAILED)\n" +
+                "        }\n" +
+                "  }\n" +
+                "}";
+        openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+failedJob.name+"')]"))));
+        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(0).name+"')]")));
+        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(1).name+"')]")));
+        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(2).name+"')]")));
+        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(3).name+"')]")));
+    }
+
+    /**
+     * This test creates a job and runs a build which fails. Afterwards 4 new jobs get created as well as a listView.
+     * The job filter of the listView is set to show jobs which build status is not 'FAILED'.
+     */
+    @Test
+    @WithPlugins("view-job-filters")
+    public void job_filters_status_failed_include_unmatched() {
+        Job failedJob = createJobThatFails();
+        List<Job> jobs = createAmountOfJobs(4, true);
+        String jobDslScript = "listView('"+ LIST_VIEW_NAME +"') {\n" +
+                "  columns {\n" +
+                "    name()\n" +
+                "  }\n" +
+                "  jobFilters {\n" +
+                "        status {\n" +
+                "            matchType(MatchType.INCLUDE_UNMATCHED)\n" +
+                "            status(Status.FAILED)\n" +
+                "        }\n" +
+                "  }\n" +
+                "}";
+        openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+failedJob.name+"')]"))));
+        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(0).name+"')]")));
+        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(1).name+"')]")));
+        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(2).name+"')]")));
+        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(3).name+"')]")));
+    }
+
+    /**
+     * This test creates a job and runs a build which fails. Afterwards 4 new jobs get created as well as a listView.
+     * The job filter of the listView is set to not show jobs which build status is not 'FAILED'.
+     */
+    @Test
+    @WithPlugins("view-job-filters")
+    public void job_filters_status_failed_exclude_unmatched() {
+        Job failedJob = createJobThatFails();
+        List<Job> jobs = createAmountOfJobs(4, true);
+        String jobDslScript = "listView('"+ LIST_VIEW_NAME +"') {\n" +
+                "  columns {\n" +
+                "    name()\n" +
+                "  }\n" +
+                "  jobs{\n" +
+                "    names('"+failedJob.name+"','"+jobs.get(0).name+"','"+jobs.get(1).name+"','"+jobs.get(2).name+"','"+jobs.get(3).name+"')\n" +
+                "  }\n" +
+                "  jobFilters {\n" +
+                "        status {\n" +
+                "            matchType(MatchType.EXCLUDE_UNMATCHED)\n" +
+                "            status(Status.FAILED)\n" +
+                "        }\n" +
+                "  }\n" +
+                "}";
+        openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+failedJob.name+"')]")));
+        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(0).name+"')]"))));
+        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(1).name+"')]"))));
+        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(2).name+"')]"))));
+        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(3).name+"')]"))));
+    }
+
+    /**
+     * This test creates 5 jobs and builds them immediately. A list view is created with its job filter set to show the
+     * 3 jobs which were most recently built.
+     */
+    @Test
+    @WithPlugins("view-job-filters")
+    public void job_filters_most_recent_3_jobs() {
+        List<Job> jobs = createAmountOfJobs(5, true);
+        String jobDslScript = "listView('"+ LIST_VIEW_NAME +"') {\n" +
+                "  columns {\n" +
+                "    name()\n" +
+                "  }\n" +
+                "  jobs{\n" +
+                "    names('"+jobs.get(0).name+"','"+jobs.get(1).name+"','"+jobs.get(2).name+"','"+jobs.get(3).name+"','"+jobs.get(4).name+"')\n" +
+                "  }\n" +
+                "  jobFilters {\n" +
+                "    mostRecent {\n" +
+                "      maxToInclude(3)\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+        openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(0).name+"')]"))));
+        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(1).name+"')]"))));
+        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(2).name+"')]")));
+        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(3).name+"')]")));
+        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(4).name+"')]")));
+    }
+
+    /**
+     * This test creates 5 jobs and builds 3 of them immediately. A list view is created with its job filter set to only
+     * include jobs that were built at least once.
+     */
+    @Test
+    @WithPlugins("view-job-filters")
+    public void job_filters_include_jobs_built_at_least_once() {
+        List<Job> notBuiltJobs = createAmountOfJobs(2, false);
+        List<Job> builtJobs = createAmountOfJobs(3, true);
+        String jobDslScript = "listView('"+ LIST_VIEW_NAME +"') {\n" +
+                "  columns {\n" +
+                "    name()\n" +
+                "  }\n" +
+                "  jobFilters {\n" +
+                "    buildTrend {\n" +
+                "      matchType(MatchType.INCLUDE_MATCHED)\n" +
+                "      buildCountType(BuildCountType.AT_LEAST_ONE)\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+        openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+notBuiltJobs.get(0).name+"')]"))));
+        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+notBuiltJobs.get(1).name+"')]"))));
+        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+builtJobs.get(0).name+"')]")));
+        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+builtJobs.get(1).name+"')]")));
+        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+builtJobs.get(2).name+"')]")));
+    }
+
+    /**
+     * This test creates 3 jobs and builds 3 of them immediately. One of the fails. A list view is created with its job filter set to only
+     * include jobs that failed.
+     */
+    @Test
+    @WithPlugins("view-job-filters")
+    public void job_filters_include_failed_jobs_built_at_least_once() {
+        List<Job> jobs = createAmountOfJobs(2, true);
+        Job job3 = createJobThatFails();
+        String jobDslScript = "listView('"+ LIST_VIEW_NAME +"') {\n" +
+                "  columns {\n" +
+                "    name()\n" +
+                "  }\n" +
+                "  jobFilters {\n" +
+                "    buildTrend {\n" +
+                "      matchType(MatchType.INCLUDE_MATCHED)\n" +
+                "      buildCountType(BuildCountType.AT_LEAST_ONE)\n" +
+                "      status(BuildStatusType.FAILED)\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+        openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(0).name+"')]"))));
+        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(1).name+"')]"))));
+        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+job3.name+"')]")));
+    }
+
+    /**
+     * This test creates jobs and a list view. The job filter only allows jobs that have been built yet.
+     */
+    @Test
+    @WithPlugins("view-job-filters")
+    public void job_filters_include_jobs_that_have_been_built() {
+        List<Job> notBuiltJobs = createAmountOfJobs(2, false);
+        List<Job> builtJobs = createAmountOfJobs(3, true);
+        String jobDslScript = "listView('"+ LIST_VIEW_NAME +"') {\n" +
+                "  columns {\n" +
+                "    name()\n" +
+                "  }\n" +
+                "  jobFilters {\n" +
+                "    buildTrend {\n" +
+                "      matchType(MatchType.INCLUDE_MATCHED)\n" +
+                "      amountType(AmountType.BUILDS)\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+        openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+builtJobs.get(0).name+"')]")));
+        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+builtJobs.get(1).name+"')]")));
+        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+builtJobs.get(2).name+"')]")));
+        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+notBuiltJobs.get(0).name+"')]"))));
+        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+notBuiltJobs.get(1).name+"')]"))));
+    }
+
+    /**
+     * This method creates a given amount of jobs and returns them in a List.
+     * The caller can choose whether to build the jobs or not.
+     * @param amount amount to be created
+     * @param isBuilt flag if the jobs should be built
+     * @return List of Jobs
+     */
+    private List<Job> createAmountOfJobs(int amount, boolean isBuilt) {
+        List<Job> jobs = new ArrayList<>();
+        if (isBuilt) {
+            for (int i = 0; i < amount; i++) {
+                jobs.add(createJobAndBuild());
+            }
+        } else {
+            for (int i = 0; i < amount; i++) {
+                jobs.add(jenkins.jobs.create(FreeStyleJob.class));
+            }
+        }
+        return jobs;
+    }
+
+    /**
+     * This method creates a job which uses a job DSL script that fails its build.
+     * @return job that failed
+     */
+    private Job createJobThatFails() {
+        String jobDslScriptFailed = "fail";
+        FreeStyleJob job = createSeedAndSetJobDslScript(jobDslScriptFailed);
+        job.scheduleBuild().shouldFail();
+        return job;
+    }
+
+    /**
+     * This method creates a new job and builds it.
+     * @return the newly created job
+     */
+    private Job createJobAndBuild() {
+        FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class);
+        job.scheduleBuild();
+        return job;
+    }
+
+
+    /**
+     * This method creates a seed job and configures it with a Job DSL script.
+     * @param script The Job DSL scrpt
+     * @return The newly created and configured seed job
+     */
+    private FreeStyleJob createSeedAndSetJobDslScript(String script) {
+        FreeStyleJob seed = createSeedJob();
+        JobDslBuildStep jobDsl = seed.addBuildStep(JobDslBuildStep.class);
+        jobDsl.setScript(script);
+        seed.save();
+        return seed;
+    }
+
+    /**
+     * Opens a newly created ListView. The View gets created by a seed job via Job DSL script.
+     * @param script The Job DSL script
+     */
+    private FreeStyleJob openNewlyCreatedListView(String script, String viewName) {
+        FreeStyleJob seed = createSeedAndSetJobDslScript(script);
+        seed.scheduleBuild().shouldSucceed();
+        seed.open();
+        WebElement link = seed.find(By.xpath("//a[contains(@href, '" + viewName + "')]"));
+        link.click();
+        return seed;
     }
 
     private FreeStyleJob createSeedJob() {
