@@ -61,6 +61,8 @@ import static org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView
 public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCollectorAction> {
     private static final String ANALYSIS_COLLECTOR_PLUGIN_RESOURCES = "/analysis_collector_plugin";
     private static final String XPATH_LISTVIEW_WARNING_TD = "//table[@id='projectstatus']/tbody/tr[2]/td[last()-1]";
+    private static final String CREDENTIALS_ID = "collector";
+    private static final String KEY_FILENAME = "/org/jenkinsci/test/acceptance/docker/fixtures/GitContainer/unsafe";
 
     private static final int CHECKSTYLE_ALL = 776;
     private static final int FINDBUGS_ALL = 6;
@@ -86,7 +88,25 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
     private static final List<AnalysisPlugin> ANALYSIS_PLUGINS = Arrays.asList(CHECKSTYLE, PMD, FINDBUGS, TASKS, WARNINGS);
 
     @Inject
-    DockerContainerHolder<GitContainer> gitForMultiBranch;
+    DockerContainerHolder<GitContainer> gitServer;
+
+    /**
+     * Creates and builds a pipeline that is version controlled in Git. Basically the same test case as
+     * {@link AbstractAnalysisTest#should_navigate_to_result_action_from_pipeline()}. Rather than using the script
+     * text box a Git repository is connected.
+     */
+    @Test @WithPlugins({"git", "workflow-job"}) @WithDocker
+    @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {CREDENTIALS_ID, KEY_FILENAME})
+    public void should_checkout_pipeline_from_git() {
+        String gitRepositoryUrl = createGitRepositoryInDockerContainer();
+
+        WorkflowJob job = jenkins.getJobs().create(WorkflowJob.class);
+        job.setJenkinsFileRepository(gitRepositoryUrl, CREDENTIALS_ID);
+        job.save();
+
+        Build build = buildSuccessfulJob(job);
+        verifyJobResults(job, build);
+    }
 
     /**
      * Builds a freestyle job. Verifies that afterwards a trend graph exists for each of the participating plug-ins.
@@ -361,7 +381,7 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
         repo.commit("Initial commit in master");
         repo.createBranch("branch");
 
-        GitContainer container = gitForMultiBranch.get();
+        GitContainer container = gitServer.get();
         repo.transferToDockerContainer(container.host(), container.port());
 
         return container.getRepoUrl();

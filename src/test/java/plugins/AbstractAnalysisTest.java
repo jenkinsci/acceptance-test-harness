@@ -303,7 +303,7 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
         verifyJobResults(job, build);
     }
 
-    private void verifyJobResults(final Job job, final Build build) {
+    protected void verifyJobResults(final Job job, final Build build) {
         P resultAction = createResultAction(build);
         P projectAction = createProjectAction(job);
 
