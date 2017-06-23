@@ -60,7 +60,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
      * Verifies that all configurations, done on the job configuration page,
      * are saved correctly.
      */
-    @Test
+    @Test @WithPlugins({"matrix-auth","mock-security-realm"})
     public void should_save_configurations() {
         FreeStyleJob seedJob = createSeedJob();
         JobDslBuildStep jobDsl = seedJob.addBuildStep(JobDslBuildStep.class);
@@ -350,7 +350,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
      * Verifies whether a previously generated config file will be deleted if it
      * is not referenced anymore.
      */
-    @Test
+    @Test @WithPlugins("config-file-provider")
     public void should_delete_removed_config_files() {
         FreeStyleJob seedJob = executeRemovedConfigFilesAction(JobDslRemovedConfigFilesAction.DELETE);
         Build build = seedJob.scheduleBuild().shouldSucceed();
