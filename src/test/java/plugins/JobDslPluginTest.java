@@ -14,6 +14,7 @@ import org.jenkinsci.test.acceptance.update_center.PluginSpec;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.NoSuchElementException;
 
 import java.util.regex.Pattern;
 
@@ -21,6 +22,8 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeTrue;
 
 /**
