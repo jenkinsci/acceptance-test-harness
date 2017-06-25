@@ -17,27 +17,24 @@ import java.util.Map;
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 import org.jenkinsci.test.acceptance.plugins.logparser.LogParserOutputPage;
-import static org.junit.Assert.assertEquals;
 
 @WithPlugins("log-parser")
 public class LogParserTest extends AbstractJUnitTest {
 
-    // XPath to the summary on the build page
-    private static final String SUMMARY = "//div[@id='main-panel']/table/tbody/tr[3]";
+    private static final String SUMMARY_XPATH = "//div[@id='main-panel']/table/tbody/tr[3]";
 
-    // GlobalConfig for the LogParser-Plugin
     private LogParserGlobalConfig config;
-    // Available Rules for the tests
-    private Map<String, String> rules;
+
+    private Map<String, String> parserRules;
 
     @Before
     public void globalConfig() {
         config = new LogParserGlobalConfig(jenkins.getConfigPage());
-        rules = new HashMap<>();
+        parserRules = new HashMap<>();
         // initialize a sample rule for the following test cases
         Resource sampleRule = resource("/logparser_plugin/rules/log-parser-rules-sample");
-        rules.put("sampleRule", "" + sampleRule.url.getPath());
-        addLogParserRules(rules);
+        parserRules.put("sampleRule", "" + sampleRule.url.getPath());
+        addLogParserRules(parserRules);
     }
 
     /**
@@ -70,11 +67,9 @@ public class LogParserTest extends AbstractJUnitTest {
 
         build.open();
 
-        // Summary has correct values
-        WebElement summary = driver.findElement(By.xpath(SUMMARY + "/td[2]"));
+        WebElement summary = driver.findElement(By.xpath(SUMMARY_XPATH + "/td[2]"));
         assertThat(summary.getText(), is("13 errors, 4 warnings"));
 
-        // Detail has correct values
         driver.findElement(By.partialLinkText("Parsed Console Output")).click();
         LogParserOutputPage outputPage = new LogParserOutputPage(build);
 
@@ -105,7 +100,7 @@ public class LogParserTest extends AbstractJUnitTest {
 
         // check information on build overview
         build.open();
-        WebElement tableRow = driver.findElement(By.xpath(SUMMARY));
+        WebElement tableRow = driver.findElement(By.xpath(SUMMARY_XPATH));
         WebElement icon = tableRow.findElement(By.xpath("td[1]/img"));
         assertThat(icon.getAttribute("src"), containsString("graph.png"));
         WebElement text = tableRow.findElement(By.xpath("td[2]"));
@@ -128,7 +123,7 @@ public class LogParserTest extends AbstractJUnitTest {
             // sample use of the LogParserPublisher
             LogParserPublisher lpp = job.addPublisher(LogParserPublisher.class);
             lpp.setShowGraphs(true);
-            lpp.setRule(LogParserPublisher.RuleType.GLOBAL, rules.get("sampleRule"));
+            lpp.setRule(LogParserPublisher.RuleType.GLOBAL, parserRules.get("sampleRule"));
         });
 
         // Trend is shown after second build
@@ -218,7 +213,7 @@ public class LogParserTest extends AbstractJUnitTest {
         // configure job
         job.configure(() -> {
             LogParserPublisher lpp = job.addPublisher(LogParserPublisher.class);
-            lpp.setRule(LogParserPublisher.RuleType.GLOBAL, rules.get("sampleRule"));
+            lpp.setRule(LogParserPublisher.RuleType.GLOBAL, parserRules.get("sampleRule"));
 
             // write sample output
             Resource sampleRule = resource("/logparser_plugin/console-outputs/sample-log");

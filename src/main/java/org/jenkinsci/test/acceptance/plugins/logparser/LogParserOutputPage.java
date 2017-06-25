@@ -104,7 +104,7 @@ public class LogParserOutputPage extends PageObject {
     }
 
     /**
-     * Getthe fragment part of the URL of the content frame after a link in the sidebar was clicked.
+     * Get the fragment part of the URL of the content frame after a link in the sidebar was clicked.
      * @param category The parser category of the link.
      * @param index The index of the link in the category, starting with 1.
      * @return The fragment part of the URL.
