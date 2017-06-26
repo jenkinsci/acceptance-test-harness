@@ -858,8 +858,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         // Assert
         Job job = jenkins.jobs.get(Job.class, jobName);
         job.open();
-        WebElement descriptionElement = job.find(by.xpath("//*[@id=\"description\"]/div[1]"));
-        assertEquals(descriptionElement.getText(), jobDescription);
+        assertThat(job.getDescription(), containsString(jobDescription));
     }
 
     /**
@@ -881,8 +880,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         // Assert
         Job job = jenkins.jobs.get(Job.class, jobName);
         job.open();
-        WebElement displayNameElement = job.find(by.xpath("//*[@id=\"main-panel\"]/h1"));
-        assertTrue(displayNameElement.getText().contains(jobDisplayName));
+        assertThat(job.getDisplayName(), containsString(jobDisplayName));
     }
 
     /**
@@ -995,8 +993,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         // Assert
         Job job = jenkins.jobs.get(Job.class, testedJobName);
         job.open();
-        WebElement descriptionElement = job.find(by.xpath("//*[@id=\"description\"]/div[1]"));
-        assertEquals(jobDescription, descriptionElement.getText());
+        assertThat(job.getDescription(), containsString(jobDescription));
     }
 
     /**
@@ -1019,7 +1016,9 @@ public class JobDslPluginTest extends AbstractJUnitTest {
 
         // Assert
         Job job = jenkins.jobs.get(Job.class, newJobName);
+        Job oldJob = jenkins.jobs.get(Job.class, oldJobName);
         assertThat(job, pageObjectExists());
+        assertThat(oldJob, pageObjectDoesNotExist());
         assertEquals(newJobName, job.name);
     }
 
@@ -1045,6 +1044,8 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         // Assert
         assertTrue(firstBuild.isInProgress());
         assertTrue(secondBuild.isInProgress());
+        firstBuild.stop();
+        secondBuild.stop();
     }
 
     /**
@@ -1068,8 +1069,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
 
         // Assert
         build.open();
-        WebElement displayNameElement = build.find(by.xpath("//*[@id=\"main-panel\"]/h1"));
-        assertTrue(displayNameElement.getText().contains(buildName));
+        assertThat(build.getDisplayName(), containsString(buildName));
     }
 
     /**
@@ -1091,7 +1091,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         Build build = job.startBuild().waitUntilFinished();
 
         // Assert
-        assertTrue(build.getConsole().contains(customWorkspace));
+        assertThat(build.getConsole(), containsString(customWorkspace));
     }
 
     /**
@@ -1171,7 +1171,6 @@ public class JobDslPluginTest extends AbstractJUnitTest {
 
     private Job createSeedJobWithJobDsl(String jobDsl) {
         Job seed = jenkins.jobs.create(FreeStyleJob.class, "Seed");
-        //seed.configure();
         JobDslBuildStep jobDslBuildStep = seed.addBuildStep(JobDslBuildStep.class);
         jobDslBuildStep.setScript(jobDsl);
         seed.save();
