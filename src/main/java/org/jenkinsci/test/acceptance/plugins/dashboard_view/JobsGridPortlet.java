@@ -67,6 +67,7 @@ public class JobsGridPortlet extends AbstractDashboardViewPortlet {
     public Job getJob(int row, int column) throws NoSuchElementException {
         getPage().open();
 
+        getTable().findElement(By.xpath("//tbody/tr[" + row + "]/td[" + column + "]"));
         try {
             WebElement link = getTable().findElement(By.xpath("//tbody/tr[" + row + "]/td[" + column + "]/a[2]"));
             String name = link.getText();
