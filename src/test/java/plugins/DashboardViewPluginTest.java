@@ -557,7 +557,6 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
     SlaveController slave1;
 
     @Test
-    @Ignore("Test criteria still missing")
     public void filterByRegex() {
         jenkins.jobs.create(FreeStyleJob.class, "a");
         jenkins.jobs.create(FreeStyleJob.class, "aa");
