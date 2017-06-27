@@ -16,6 +16,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
+import javax.annotation.CheckForNull;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,19 +34,19 @@ public class DashboardView extends View {
     /**
      * List control for top portlets.
      **/
-    public final Control topPortlet = new Control(this, "/hetero-list-add[topPortlet]");
+    private final Control topPortlet = new Control(this, "/hetero-list-add[topPortlet]");
     /**
      * List control for left portlets.
      **/
-    public final Control leftPortlet = new Control(this, "/hetero-list-add[leftPortlet]");
+    private final Control leftPortlet = new Control(this, "/hetero-list-add[leftPortlet]");
     /**
      * List control for right portlets.
      **/
-    public final Control rightPortlet = new Control(this, "/hetero-list-add[rightPortlet]");
+    private final Control rightPortlet = new Control(this, "/hetero-list-add[rightPortlet]");
     /**
      * List control for bottom portlets.
      **/
-    public final Control bottomPortlet = new Control(this, "/hetero-list-add[bottomPortlet]");
+    private final Control bottomPortlet = new Control(this, "/hetero-list-add[bottomPortlet]");
 
     public final JobFiltersArea jobFilters = new JobFiltersArea(this, "");
     public final MainArea mainArea = new MainArea(this, "");
@@ -136,7 +137,7 @@ public class DashboardView extends View {
                 return portletClass.cast(p);
             }
         }
-        throw new java.util.NoSuchElementException();
+        throw new java.util.NoSuchElementException(portletClass.getSimpleName());
     }
 
     /**
@@ -201,6 +202,7 @@ public class DashboardView extends View {
      * @param name name of portlet.
      * @return web element of the portlet or null if not available.
      */
+    @CheckForNull
     public WebElement getPortletInTopTable(String name) {
         try {
             return getPanel().findElement(By.xpath("//table[1]/tbody/tr/td/div[contains(.,'" + name + "')]"));
@@ -218,6 +220,7 @@ public class DashboardView extends View {
      * @param name name of portlet.
      * @return web element of the portlet or null if not available.
      */
+    @CheckForNull
     public WebElement getPortletInLeftTable(String name) {
         try {
             return getPanel().findElement(By.xpath("//table[2]//td[1]/div[contains(.,'" + name + "')]"));
@@ -234,16 +237,21 @@ public class DashboardView extends View {
      * @param name name of portlet.
      * @return web element of the portlet or null if not available.
      */
+    @CheckForNull
     public WebElement getPortletInRightTable(String name) {
         try {
             if (getPanel().findElements(By.xpath("//table[2]/tbody/tr/td")).size() > 1) {
-                return getPanel().findElement(By.xpath("//table[2]/tbody/tr/td[2]/div[contains(.,'" + name + "')]"));
+                return getRightPortletOnExactPosition(name, 2);
             } else {
-                return getPanel().findElement(By.xpath("//table[2]/tbody/tr/td[1]/div[contains(.,'" + name + "')]"));
+                return getRightPortletOnExactPosition(name, 1);
             }
         } catch (NoSuchElementException ex) {
             return null;
         }
+    }
+
+    private WebElement getRightPortletOnExactPosition(String name, int positionInTable) {
+        return getPanel().findElement(By.xpath("//table[2]/tbody/tr/td[" + positionInTable + "]/div[contains(.,'" + name + "')]"));
     }
 
     /**
@@ -252,6 +260,7 @@ public class DashboardView extends View {
      * @param name name of portlet.
      * @return web element of the portlet or null if not available.
      */
+    @CheckForNull
     public WebElement getPortletInBottomTable(String name) {
         try {
             return getPanel().findElement(By.xpath("//table[3]/tbody/tr/td/div[contains(.,'" + name + "')]"));

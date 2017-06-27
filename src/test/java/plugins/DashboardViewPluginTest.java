@@ -24,7 +24,6 @@ import org.openqa.selenium.NoSuchElementException;
 import javax.inject.Inject;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -43,28 +42,7 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
     public ExpectedException expectedException = ExpectedException.none();
 
     @Test
-    public void configure_dashboard() {
-        DashboardView v = jenkins.views.create(DashboardView.class);
-        v.configure();
-        {
-            v.topPortlet.click();
-            clickLink("Build statistics");
-
-            v.bottomPortlet.click();
-            clickLink("Jenkins jobs list");
-        }
-        v.save();
-
-        FreeStyleJob j = v.jobs.create(FreeStyleJob.class, "job_in_view");
-
-        v.open();
-        v.build(j.name);
-        j.getLastBuild().shouldSucceed();
-
-    }
-
-    @Test
-    public void jobsGridPortlet_fillColumnsFirst() throws MalformedURLException {
+    public void jobsGridPortlet_fillColumnsFirst() {
         createFreeStyleJob();
         createFreeStyleJob();
         createFreeStyleJob();
@@ -81,7 +59,7 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
     }
 
     @Test
-    public void jobsGridPortlet_notFillColumnsFirst() throws MalformedURLException {
+    public void jobsGridPortlet_notFillColumnsFirst() {
         createFreeStyleJob();
         createFreeStyleJob();
         createFreeStyleJob();
@@ -97,7 +75,7 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
     }
 
     @Test
-    public void jobsGridPortlet_numberOfColumns() throws MalformedURLException {
+    public void jobsGridPortlet_numberOfColumns() {
         // One job is required for the portlet to be displayed
         createFreeStyleJob();
 
@@ -110,7 +88,7 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
     }
 
     @Test
-    public void jobsGridPortlet_invalidNumberOfColumn() throws MalformedURLException {
+    public void jobsGridPortlet_invalidNumberOfColumn() {
         // One job is required for the portlet to be displayed
         createFreeStyleJob();
 

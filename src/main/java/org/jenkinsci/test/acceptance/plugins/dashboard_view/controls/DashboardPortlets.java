@@ -11,6 +11,8 @@ import org.jenkinsci.test.acceptance.po.PageObject;
  */
 public class DashboardPortlets extends PageAreaImpl {
 
+    private static final String PERCENTAGE_SYMBOL = "%";
+    private static final String PIXEL_SYMBOL = "px";
     /**
      * Provides a checkbox to show the standard Jenkins list at the top of the page
      */
@@ -69,11 +71,7 @@ public class DashboardPortlets extends PageAreaImpl {
      * @param percent percent %, the desired width of the left portlet
      */
     public void setLeftPortletWidthPercent(int percent) {
-        if (percent < 0) {
-            throw new IllegalArgumentException("Width can't be negative!");
-        }
-        useCssStyle(true);
-        this.cssLeftPortletWidth.set(percent + "%");
+        setPortletWidthOnControl(cssLeftPortletWidth, percent, PERCENTAGE_SYMBOL);
     }
 
     /**
@@ -82,11 +80,7 @@ public class DashboardPortlets extends PageAreaImpl {
      * @param percent percent %, the desired width of the right portlet.
      */
     public void setRightPortletWidthPercent(int percent) {
-        if (percent < 0) {
-            throw new IllegalArgumentException("Width can't be negative!");
-        }
-        useCssStyle(true);
-        this.cssRightPortletWidth.set(percent + "%");
+        setPortletWidthOnControl(cssRightPortletWidth, percent, PERCENTAGE_SYMBOL);
     }
 
     /**
@@ -95,23 +89,23 @@ public class DashboardPortlets extends PageAreaImpl {
      * @param pixel pixel px, the width in pixel unit
      */
     public void setLeftPortletWidthPixel(int pixel) {
-        if (pixel < 0) {
-            throw new IllegalArgumentException("Width can't be negative!");
-        }
-        useCssStyle(true);
-        this.cssLeftPortletWidth.set(pixel + "px");
+        setPortletWidthOnControl(cssLeftPortletWidth, pixel, PIXEL_SYMBOL);
     }
 
     /**
-     * Set the
+     * Set the width of the right portlet in pixels.
      *
-     * @param pixel
+     * @param pixel pixel px, the width in pixel unit
      */
     public void setRightPortletWidthPixel(int pixel) {
-        if (pixel < 0) {
+        setPortletWidthOnControl(cssRightPortletWidth, pixel, PIXEL_SYMBOL);
+    }
+
+    private void setPortletWidthOnControl(Control cssPortletWidth, int width, String symbol) {
+        if (width < 0) {
             throw new IllegalArgumentException("Width can't be negative!");
         }
         useCssStyle(true);
-        this.cssRightPortletWidth.set(pixel + "px");
+        cssPortletWidth.set(width + symbol);
     }
 }
