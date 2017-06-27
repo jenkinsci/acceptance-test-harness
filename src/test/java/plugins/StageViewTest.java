@@ -96,7 +96,7 @@ public class StageViewTest extends AbstractJUnitTest {
             stageBuilder2.append(pre);
             stageBuilder2.append(this.repeatString(singleStage, i + 1));
             stageBuilder2.append(post);
-            job.edit(() -> {
+            job.configure(() -> {
                 job.script.set(stageBuilder2.toString());
             });
             build = job.startBuild().shouldSucceed();
