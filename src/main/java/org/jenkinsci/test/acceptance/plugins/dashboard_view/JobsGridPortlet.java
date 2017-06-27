@@ -7,6 +7,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
+import javax.annotation.CheckForNull;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -62,10 +63,11 @@ public class JobsGridPortlet extends AbstractDashboardViewPortlet {
      * @return The job at the given position. Null if the position exists, but is empty.
      * @throws NoSuchElementException if column or row are below 0 or higher than the column- or row-number of the grid.
      */
-    public Job getJob(int row, int column) throws NoSuchElementException, MalformedURLException {
+    @CheckForNull
+    public Job getJob(int row, int column) throws NoSuchElementException {
         getPage().open();
 
-        WebElement tableElement = getTable().findElement(By.xpath("//tbody/tr[" + row + "]/td[" + column + "]"));
+        getTable().findElement(By.xpath("//tbody/tr[" + row + "]/td[" + column + "]"));
         try {
             WebElement link = getTable().findElement(By.xpath("//tbody/tr[" + row + "]/td[" + column + "]/a[2]"));
             String name = link.getText();
@@ -74,6 +76,8 @@ public class JobsGridPortlet extends AbstractDashboardViewPortlet {
         } catch (NoSuchElementException e) {
             // position exists in grid, but is empty
             return null;
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
         }
     }
 }

@@ -1,6 +1,7 @@
 package plugins;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Container;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
@@ -15,6 +16,7 @@ import java.util.function.Consumer;
  *
  * @author Rene Zarwel
  */
+@WithPlugins("junit")
 public abstract class AbstractJobRelatedTest extends AbstractJUnitTest {
 
     /**
@@ -91,6 +93,7 @@ public abstract class AbstractJobRelatedTest extends AbstractJUnitTest {
             String resultFileName = "status.xml";
 
             //TODO: Remove Hack if job can be set unstable directly.
+            //TODO: And Remove @WithPlugins("junit") after that.
             job.addShellStep(
                 "echo '<testsuite><testcase classname=\"\"><failure>\n" +
                     "</failure></testcase></testsuite>'>" + resultFileName
