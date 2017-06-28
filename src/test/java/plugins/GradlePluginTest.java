@@ -166,7 +166,6 @@ public class GradlePluginTest extends AbstractJUnitTest {
 
     @Test
     public void run_gradle_script_with_wrapper(){
-        GradleInstallation.installLatestGradleVersion(jenkins);
 
         final FreeStyleJob job = jenkins.jobs.create();
         job.copyResource(job.resource("/gradle_plugin/script.gradle"), "build.gradle");
