@@ -300,19 +300,19 @@ public class GradlePluginTest extends AbstractJUnitTest {
 
     @Test
     public void pipeline_test () {
-        final Build build = setUpPipelineTest(JENKINS_FILE);
+        final Build build = setUpAndRunPipelineBuild(JENKINS_FILE);
         assertThat(build.getConsole(), containsString("Hello world!"));
     }
 
     @Test
     public void pipeline_build_scan_link_test () {
-//        build.openStatusPage();
-//        final WebElement buildScanLink = build.find(By.partialLinkText("Gradle Build Scan"));
-//        assertThat(buildScanLink.getAttribute("href"), containsString("https://gradle.com/"));
-//        //ISSUE FÜR BuildScan in GradlePlugin
+        final Build build = setUpAndRunPipelineBuild(JENKINS_FILE);
+        build.openStatusPage();
+        final WebElement buildScanLink = build.find(By.partialLinkText("Gradle Build Scan"));
+        assertThat(buildScanLink.getAttribute("href"), containsString("https://gradle.com/"));
     }
 
-    private Build setUpPipelineTest(final String jenkinsFile) {
+    private Build setUpAndRunPipelineBuild(final String jenkinsFile) {
         GradleInstallation.installLatestGradleVersion(jenkins);
         final WorkflowJob workflowJob = jenkins.jobs.create(WorkflowJob.class);
 
