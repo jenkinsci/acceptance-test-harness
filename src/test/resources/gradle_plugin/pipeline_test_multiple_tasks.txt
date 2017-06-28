@@ -1,0 +1,12 @@
+stage ('build_Project') {
+    steps {
+        script {
+           if(isUnix()) {
+                sh 'gradle firstTask secondTask'
+            }
+            else{
+                bat 'gradle firstTask secondTask'
+            }
+        }
+    }
+}

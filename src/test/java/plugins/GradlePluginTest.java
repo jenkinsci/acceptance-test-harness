@@ -296,20 +296,34 @@ public class GradlePluginTest extends AbstractJUnitTest {
         assertThat(build.getConsole(), containsString("Gradle Properties: hello world"));
     }
 
-    private static final String JENKINS_FILE = "/gradle_plugin/pipeline_test.txt";
+    private static final String JENKINS_FILE_WITH_BUILD_SCAN = "/gradle_plugin/pipeline_test_build_scan.txt";
+    private static final String JENKINS_FILE_MULTIPLE_TASKS = "/gradle_plugin/pipeline_test_multiple_tasks.txt";
 
     @Test
     public void pipeline_test () {
-        final Build build = setUpAndRunPipelineBuild(JENKINS_FILE);
+        final Build build = setUpAndRunPipelineBuild(JENKINS_FILE_WITH_BUILD_SCAN);
         assertThat(build.getConsole(), containsString("Hello world!"));
     }
 
     @Test
     public void pipeline_build_scan_link_test () {
-        final Build build = setUpAndRunPipelineBuild(JENKINS_FILE);
+        final Build build = setUpAndRunPipelineBuild(JENKINS_FILE_WITH_BUILD_SCAN);
         build.openStatusPage();
         final WebElement buildScanLink = build.find(By.partialLinkText("Gradle Build Scan"));
         assertThat(buildScanLink.getAttribute("href"), containsString("https://gradle.com/"));
+    }
+
+    @Test
+    public void pipeline_build_multiple_tasks () {
+        final Build build = setUpAndRunPipelineBuild(JENKINS_FILE_MULTIPLE_TASKS);
+
+        final WebElement firstTaskLink = build.find(By.partialLinkText("firstTask"));
+        final WebElement secondTaskLink = build.find(By.partialLinkText("secondTask"));
+
+        assertThat(firstTaskLink.getAttribute("href"), containsString("#gradle-task-0"));
+        assertThat(secondTaskLink.getAttribute("href"), containsString("#gradle-task-1"));
+        assertThat(build.getConsole(), containsString("First!"));
+        assertThat(build.getConsole(), containsString("Second!"));
     }
 
     private Build setUpAndRunPipelineBuild(final String jenkinsFile) {
