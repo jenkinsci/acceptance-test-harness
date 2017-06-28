@@ -263,7 +263,6 @@ public class GradlePluginTest extends AbstractJUnitTest {
         assertThat(job, Workspace.workspaceContains("caches"));
     }
 
-
     @Test @WithPlugins("gradle@1.27-SNAPSHOT")
     public void run_gradle_add_project_properties(){
         GradleInstallation.installLatestGradleVersion(jenkins);
@@ -284,7 +283,6 @@ public class GradlePluginTest extends AbstractJUnitTest {
     @Test @WithPlugins("gradle@1.27-SNAPSHOT")
     public void run_gradle_add_system_properties(){
         GradleInstallation.installLatestGradleVersion(jenkins);
-
         final FreeStyleJob job = jenkins.jobs.create();
         job.copyResource(resource("/gradle_plugin/script.gradle"), "build.gradle");
 
@@ -338,5 +336,28 @@ public class GradlePluginTest extends AbstractJUnitTest {
         workflowJob.sandbox.check();
         workflowJob.save();
         return workflowJob.startBuild().shouldSucceed();
+    }
+
+    @Test @WithPlugins("gradle@1.27-SNAPSHOT")
+    public void gradle_tasks_link(){
+        GradleInstallation.installLatestGradleVersion(jenkins);
+        final FreeStyleJob job = jenkins.jobs.create();
+        job.copyResource(resource("/gradle_plugin/script.gradle"), "build.gradle");
+
+        final GradleStep step = job.addBuildStep(GradleStep.class);
+
+        step.setTasks("firstTask secondTask");
+        step.setVersion(GradleInstallation.DEFAULT_VERSION_NAME);
+        job.save();
+
+        final Build build = job.startBuild().shouldSucceed();
+
+        final WebElement firstTaskLink = build.find(By.partialLinkText("firstTask"));
+        final WebElement secondTaskLink = build.find(By.partialLinkText("secondTask"));
+
+        assertThat(firstTaskLink.getAttribute("href"), containsString("#gradle-task-0"));
+        assertThat(secondTaskLink.getAttribute("href"), containsString("#gradle-task-1"));
+        assertThat(build.getConsole(), containsString("First!"));
+        assertThat(build.getConsole(), containsString("Second!"));
     }
 }
