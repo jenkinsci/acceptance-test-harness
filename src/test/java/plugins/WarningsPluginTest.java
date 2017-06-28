@@ -46,8 +46,6 @@ import static org.junit.Assert.assertTrue;
  * Tests various aspects of the warnings plug-in. Most tests copy an existing file with several warnings into the
  * workspace. This file is then analyzed by console and workspace parsers.
  */
-@WithDocker
-@Category(DockerTest.class)
 @WithPlugins("warnings")
 public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
     private static final String RESOURCES = "/warnings_plugin/";
@@ -82,15 +80,15 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
             + "Priority test = Priority.NORMAL;\n"
             + "return new Warning(all, 42, all, all, all);";
 
-    public static final String RESOURCE_WARNING_MAIN_JAVA = "WarningMain.java";
-    public static final String RESOURCE_WARNING_MAIN_JAVA_PATH = "/warnings_plugin/"
+    private static final String RESOURCE_WARNING_MAIN_JAVA = "WarningMain.java";
+    private static final String RESOURCE_WARNING_MAIN_JAVA_PATH = "/warnings_plugin/"
                                                                 + RESOURCE_WARNING_MAIN_JAVA;
 
-    public static final String CMD_WARNING_MAIN_JAVA_CONSOLE = "javac -Xlint:all "
+    private static final String CMD_WARNING_MAIN_JAVA_CONSOLE = "javac -Xlint:all "
                                                                 + RESOURCE_WARNING_MAIN_JAVA;
 
-    public static final String RESOURCE_CODE_NARC_REPORT = "CodeNarcXmlReport.xml";
-    public static final String RESOURCE_CODE_NARC_REPORT_PATH = "/warnings_plugin/jenkins-17787/"
+    private static final String RESOURCE_CODE_NARC_REPORT = "CodeNarcXmlReport.xml";
+    private static final String RESOURCE_CODE_NARC_REPORT_PATH = "/warnings_plugin/jenkins-17787/"
                                                                     + RESOURCE_CODE_NARC_REPORT;
 
 
@@ -284,7 +282,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
     @WithDocker
     @Test
     public void dockerMachineTestFileScanner(){
-        DumbSlave dockerSlave = (DumbSlave) getDockerSlave(dockerContainer.get());
+        DumbSlave dockerSlave = getDockerSlave(dockerContainer.get());
         FreeStyleJob job = prepairDockerSlave(dockerSlave);
 
         job.configure();
@@ -301,9 +299,9 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
     @WithDocker
     @Test
     @Issue("JENKINS-17787")
-    @Ignore
+    @Ignore("Reproduces JENKINS-17787")
     public void codenarcParserOnDockerSlave(){
-        DumbSlave dockerSlave = (DumbSlave) getDockerSlave(dockerContainer.get());
+        DumbSlave dockerSlave = getDockerSlave(dockerContainer.get());
         FreeStyleJob job = prepairDockerSlave(dockerSlave);
         assertThatCodeNarcActionExists(job);
     }
@@ -334,7 +332,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
      * @param container     SshContainer for Slave to live in
      * @return
      */
-    private Slave getDockerSlave(SshdContainer container){
+    private DumbSlave getDockerSlave(SshdContainer container){
         DumbSlave slave = jenkins.slaves.create(DumbSlave.class);
 
         slave.setExecutors(1);
