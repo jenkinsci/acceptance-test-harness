@@ -11,13 +11,13 @@ import java.util.List;
  */
 public class Plot extends PageAreaImpl{
 
-    private PlotPublisher parant;
+    private PlotPublisher parent;
     private List<DataSeries> series;
 
 
     protected Plot(PageArea area, String path) {
         super(area, path);
-        parant =  (PlotPublisher) area;
+        parent =  (PlotPublisher) area;
         series = new ArrayList<>();
     }
 
@@ -26,7 +26,7 @@ public class Plot extends PageAreaImpl{
      * @return the plot index
      */
     private int index(){
-        return parant.getPlotIndex(this);
+        return parent.getPlotIndex(this);
     }
 
 
@@ -40,7 +40,7 @@ public class Plot extends PageAreaImpl{
     public <S extends DataSeries> S addDataSeries(Class<S> seriesClass){
         if (this.series.size()>=1){
             control("repeatable-add").click();
-            //todo insert wait period to make sure the new PageArea appers
+            elasticSleep(500);
         }
 
         S series;
