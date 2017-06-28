@@ -1,5 +1,5 @@
 plugins {
-    id 'com.gradle.build-scan' version '1.7'
+    id 'com.gradle.build-scan' version '1.8'
 }
 
 buildScan {
@@ -25,7 +25,6 @@ task secondTask {
     }
 }
 
-
 task environmentVariables << {
     ext.env = System.getenv()
     ext.buildNumber = env.BUILD_NUMBER?.toInteger()
@@ -48,5 +47,5 @@ task jobParametersAsSystemProperties {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '3.5'
+    gradleVersion = '4.0'
 }

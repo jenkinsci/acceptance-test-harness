@@ -1,0 +1,12 @@
+stage ('build_Project') {
+    steps {
+        script {
+           if(isUnix()) {
+                sh 'gradle hello --scan'
+            }
+            else{
+                bat 'gradle hello --scan'
+            }
+        }
+    }
+}

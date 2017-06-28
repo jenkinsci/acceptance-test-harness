@@ -28,10 +28,7 @@ import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.gradle.GradleInstallation;
 import org.jenkinsci.test.acceptance.plugins.gradle.GradleStep;
 import org.jenkinsci.test.acceptance.plugins.gradle.GradleWrapper;
-import org.jenkinsci.test.acceptance.po.Build;
-import org.jenkinsci.test.acceptance.po.FreeStyleJob;
-import org.jenkinsci.test.acceptance.po.StringParameter;
-import org.jenkinsci.test.acceptance.po.Workspace;
+import org.jenkinsci.test.acceptance.po.*;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
 import org.openqa.selenium.By;
@@ -59,9 +56,7 @@ public class GradlePluginTest extends AbstractJUnitTest {
         final Build build = job.startBuild();
         build.shouldSucceed();
         assertThat(build.getConsole(), containsString(SUCCESSFUL_BUILD));
-
     }
-
 
     @Test
     public void run_gradle_task() {
@@ -145,7 +140,7 @@ public class GradlePluginTest extends AbstractJUnitTest {
         assertThat(build.getConsole(), containsString("Invoke Gradle script"));
     }
 
-    @Test @WithPlugins("gradle@1.27")
+    @Test @WithPlugins("gradle@1.27-SNAPSHOT")
     public void run_gradle_script_build_scan_link() {
         GradleInstallation.installLatestGradleVersion(jenkins);
 
@@ -196,7 +191,7 @@ public class GradlePluginTest extends AbstractJUnitTest {
         assertThat(build.getConsole(), containsString("Build Name: " + build.getName()));
     }
 
-    @Test @WithPlugins("gradle@1.27")
+    @Test @WithPlugins("gradle@1.27-SNAPSHOT")
     public void run_gradle_job_parameters_as_project_properties(){
         GradleInstallation.installLatestGradleVersion(jenkins);
 
@@ -215,7 +210,7 @@ public class GradlePluginTest extends AbstractJUnitTest {
         assertThat(build.getConsole(), containsString("Gradle Properties: hello world"));
     }
 
-    @Test @WithPlugins("gradle@1.27")
+    @Test @WithPlugins("gradle@1.27-SNAPSHOT")
     public void run_gradle_job_parameters_as_system_properties(){
         GradleInstallation.installLatestGradleVersion(jenkins);
 
@@ -268,4 +263,80 @@ public class GradlePluginTest extends AbstractJUnitTest {
         assertThat(job, Workspace.workspaceContains("caches"));
     }
 
+
+    @Test @WithPlugins("gradle@1.27-SNAPSHOT")
+    public void run_gradle_add_project_properties(){
+        GradleInstallation.installLatestGradleVersion(jenkins);
+
+        final FreeStyleJob job = jenkins.jobs.create();
+        job.copyResource(resource("/gradle_plugin/script.gradle"), "build.gradle");
+
+        final GradleStep step = job.addBuildStep(GradleStep.class);
+        step.setVersion(GradleInstallation.DEFAULT_VERSION_NAME);
+        step.setProjectProperties("TEST_PARAM_1=hello\nTEST_PARAM_2=world");
+        step.setTasks("jobParametersAsProjectProperties");
+        job.save();
+
+        final Build build = job.startBuild().shouldSucceed();
+        assertThat(build.getConsole(), containsString("Gradle Properties: hello world"));
+    }
+
+    @Test @WithPlugins("gradle@1.27-SNAPSHOT")
+    public void run_gradle_add_system_properties(){
+        GradleInstallation.installLatestGradleVersion(jenkins);
+
+        final FreeStyleJob job = jenkins.jobs.create();
+        job.copyResource(resource("/gradle_plugin/script.gradle"), "build.gradle");
+
+        final GradleStep step = job.addBuildStep(GradleStep.class);
+        step.setVersion(GradleInstallation.DEFAULT_VERSION_NAME);
+        step.setSystemProperties("TEST_PARAM_1=hello\nTEST_PARAM_2=world");
+        step.setTasks("jobParametersAsSystemProperties");
+        job.save();
+
+        final Build build = job.startBuild().shouldSucceed();
+        assertThat(build.getConsole(), containsString("Gradle Properties: hello world"));
+    }
+
+    private static final String JENKINS_FILE = "/gradle_plugin/pipeline_test.txt";
+
+    @Test
+    public void pipeline_test () {
+        final Build build = setUpPipelineTest(JENKINS_FILE);
+        assertThat(build.getConsole(), containsString("Hello world!"));
+    }
+
+    @Test
+    public void pipeline_build_scan_link_test () {
+//        build.openStatusPage();
+//        final WebElement buildScanLink = build.find(By.partialLinkText("Gradle Build Scan"));
+//        assertThat(buildScanLink.getAttribute("href"), containsString("https://gradle.com/"));
+//        //ISSUE FÜR BuildScan in GradlePlugin
+    }
+
+    private Build setUpPipelineTest(final String jenkinsFile) {
+        GradleInstallation.installLatestGradleVersion(jenkins);
+        final WorkflowJob workflowJob = jenkins.jobs.create(WorkflowJob.class);
+
+        String file = workflowJob.copyResourceStep("/gradle_plugin/script.gradle");
+        String test = "" +
+            "pipeline {\n" +
+                "agent any\n" +
+                "stages {\n" +
+                    "stage ('prepare_build') {\n" +
+                        "steps {\n" +
+                            file +
+                        "}\n" +
+                    "}\n"
+                    + resource(jenkinsFile).asText() +
+                "}\n" +
+            "}";
+        test = test.replaceAll("script.gradle", "build.gradle");
+
+        workflowJob.script.set(test);
+
+        workflowJob.sandbox.check();
+        workflowJob.save();
+        return workflowJob.startBuild().shouldSucceed();
+    }
 }
