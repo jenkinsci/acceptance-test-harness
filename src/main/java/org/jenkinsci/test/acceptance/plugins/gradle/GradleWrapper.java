@@ -7,6 +7,7 @@ public class GradleWrapper {
     public static void downloadWrapperFiles(final Job job){
         final GradleStep wrapperDownloadStep = job.addBuildStep(GradleStep.class);
         wrapperDownloadStep.setTasks("wrapper");
+        wrapperDownloadStep.setVersion(GradleInstallation.VERSION_4_0_NAME);
     }
 
     public static void addWrapperStep(final Job job, final String wrapperLocation, final String tasks){
