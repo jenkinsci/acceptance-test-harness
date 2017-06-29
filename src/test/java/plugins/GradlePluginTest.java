@@ -29,6 +29,7 @@ import org.jenkinsci.test.acceptance.plugins.gradle.GradleInstallation;
 import org.jenkinsci.test.acceptance.plugins.gradle.GradleStep;
 import org.jenkinsci.test.acceptance.plugins.gradle.GradleWrapper;
 import org.jenkinsci.test.acceptance.po.*;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
 import org.openqa.selenium.By;
@@ -402,7 +403,7 @@ public class GradlePluginTest extends AbstractJUnitTest {
     /**
      * Runs a pipeline gradle build and verifies that the build scan links are existent
      */
-    @Test
+    @Test @Ignore("JENKINS-45205")
     public void run_gradle_pipeline_build_scan_link() {
         final Build build = setUpAndRunPipelineBuild(JENKINS_FILE_WITH_BUILD_SCAN, GRADLE_SCRIPT);
         build.openStatusPage();
@@ -413,7 +414,7 @@ public class GradlePluginTest extends AbstractJUnitTest {
     /**
      * Runs a pipeline gradle build and verifies that the task links are existent
      */
-    @Test
+    @Test @Ignore("JENKINS-45206")
     public void run_gradle_pipeline_build_task_links() {
         final Build build = setUpAndRunPipelineBuild(JENKINS_FILE_MULTIPLE_TASKS, GRADLE_SCRIPT);
 
