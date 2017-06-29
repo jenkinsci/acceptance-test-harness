@@ -148,6 +148,10 @@ public class GradlePluginTest extends AbstractJUnitTest {
         assertThat(build.getConsole(), containsString(SECOND.getPrintln()));
     }
 
+    /**
+     * Verify the execution of gradle build and check if the console output contains a certain string.
+     * See JENKINS-40778 for details.
+     */
     @Test
     @Issue({"JENKINS-40778"})
     public void run_gradle_script_messages_initialized() {
@@ -165,6 +169,9 @@ public class GradlePluginTest extends AbstractJUnitTest {
         assertThat(build.getConsole(), containsString("Invoke Gradle script"));
     }
 
+    /**
+     * Verify the execution of gradle build and check if build scan links are available
+     */
     @Test @WithPlugins("gradle@1.27-SNAPSHOT")
     public void run_gradle_script_build_scan_link() {
         GradleInstallation.installLatestGradleVersion(jenkins);
@@ -345,62 +352,6 @@ public class GradlePluginTest extends AbstractJUnitTest {
         assertThat(build.getConsole(), containsString("Gradle Properties: hello world"));
     }
 
-    private static final String JENKINS_FILE_WITH_BUILD_SCAN = "/gradle_plugin/pipeline_test_build_scan.txt";
-    private static final String JENKINS_FILE_MULTIPLE_TASKS = "/gradle_plugin/pipeline_test_multiple_tasks.txt";
-
-    @Test
-    public void pipeline_test () {
-        final Build build = setUpAndRunPipelineBuild(JENKINS_FILE_WITH_BUILD_SCAN);
-        assertThat(build.getConsole(), containsString(HELLO.getPrintln()));
-    }
-
-    @Test
-    public void pipeline_build_scan_link_test () {
-        final Build build = setUpAndRunPipelineBuild(JENKINS_FILE_WITH_BUILD_SCAN);
-        build.openStatusPage();
-        final WebElement buildScanLink = build.find(By.partialLinkText("Gradle Build Scan"));
-        assertThat(buildScanLink.getAttribute("href"), containsString("https://gradle.com/"));
-    }
-
-    @Test
-    public void pipeline_build_multiple_tasks () {
-        final Build build = setUpAndRunPipelineBuild(JENKINS_FILE_MULTIPLE_TASKS);
-
-        final WebElement firstTaskLink = build.find(By.partialLinkText(FIRST.getName()));
-        final WebElement secondTaskLink = build.find(By.partialLinkText(SECOND.getName()));
-
-        assertThat(firstTaskLink.getAttribute("href"), containsString("#gradle-task-0"));
-        assertThat(secondTaskLink.getAttribute("href"), containsString("#gradle-task-1"));
-        assertThat(build.getConsole(), containsString(FIRST.getPrintln()));
-        assertThat(build.getConsole(), containsString(SECOND.getPrintln()));
-    }
-
-    private Build setUpAndRunPipelineBuild(final String jenkinsFile) {
-        GradleInstallation.installLatestGradleVersion(jenkins);
-        final WorkflowJob workflowJob = jenkins.jobs.create(WorkflowJob.class);
-
-        String file = workflowJob.copyResourceStep(GRADLE_SCRIPT);
-        String test = "" +
-            "pipeline {\n" +
-                "agent any\n" +
-                "stages {\n" +
-                    "stage ('prepare_build') {\n" +
-                        "steps {\n" +
-                            file +
-                        "}\n" +
-                    "}\n"
-                    + resource(jenkinsFile).asText() +
-                "}\n" +
-            "}";
-        test = test.replaceAll("script.gradle", "build.gradle");
-
-        workflowJob.script.set(test);
-
-        workflowJob.sandbox.check();
-        workflowJob.save();
-        return workflowJob.startBuild().shouldSucceed();
-    }
-
     /**
      * Verify the existence of links for executed tasks.
      */
@@ -426,4 +377,87 @@ public class GradlePluginTest extends AbstractJUnitTest {
         assertThat(build.getConsole(), containsString(FIRST.getPrintln()));
         assertThat(build.getConsole(), containsString(SECOND.getPrintln()));
     }
+
+    //Gradle Plugin Pipeline Tests
+
+    /**
+     * Jenkins File to run a gradle task with the build scan option
+     */
+    private static final String JENKINS_FILE_WITH_BUILD_SCAN = "/gradle_plugin/pipeline_test_build_scan.txt";
+
+    /**
+     * Jenkins File to run multiple gradle tasks
+     */
+    private static final String JENKINS_FILE_MULTIPLE_TASKS = "/gradle_plugin/pipeline_test_multiple_tasks.txt";
+
+    /**
+     * Runs a pipeline gradle build and verifies the build was executed successfully
+     */
+    @Test
+    public void pipeline_basic() {
+        final Build build = setUpAndRunPipelineBuild(JENKINS_FILE_WITH_BUILD_SCAN, GRADLE_SCRIPT);
+        assertThat(build.getConsole(), containsString(HELLO.getPrintln()));
+    }
+
+    /**
+     * Runs a pipeline gradle build and verifies that the build scan links are existent
+     */
+    @Test
+    public void pipeline_build_scan_link() {
+        final Build build = setUpAndRunPipelineBuild(JENKINS_FILE_WITH_BUILD_SCAN, GRADLE_SCRIPT);
+        build.openStatusPage();
+        final WebElement buildScanLink = build.find(By.partialLinkText("Gradle Build Scan"));
+        assertThat(buildScanLink.getAttribute("href"), containsString("https://gradle.com/"));
+    }
+
+    /**
+     * Runs a pipeline gradle build and verifies that the task links are existent
+     */
+    @Test
+    public void pipeline_build_task_links() {
+        final Build build = setUpAndRunPipelineBuild(JENKINS_FILE_MULTIPLE_TASKS, GRADLE_SCRIPT);
+
+        final WebElement firstTaskLink = build.find(By.partialLinkText(FIRST.getName()));
+        final WebElement secondTaskLink = build.find(By.partialLinkText(SECOND.getName()));
+
+        assertThat(firstTaskLink.getAttribute("href"), containsString("#gradle-task-0"));
+        assertThat(secondTaskLink.getAttribute("href"), containsString("#gradle-task-1"));
+        assertThat(build.getConsole(), containsString(FIRST.getPrintln()));
+        assertThat(build.getConsole(), containsString(SECOND.getPrintln()));
+    }
+
+    /**
+     * Method to setup and run a pipeline build with a gradle file.
+     * Copies a gradle file using the pipeline step to have it available.
+     * Also sets up the necessary WorkflowJob runs it and checks for successful execution.
+     * @param jenkinsFile Jenkins File to use.
+     * @param gradleScript Gradle Script to use.
+     * @return The build created by the WorkflowJob
+     */
+    private Build setUpAndRunPipelineBuild(final String jenkinsFile, final String gradleScript) {
+        GradleInstallation.installLatestGradleVersion(jenkins);
+        final WorkflowJob workflowJob = jenkins.jobs.create(WorkflowJob.class);
+
+        String file = workflowJob.copyResourceStep(gradleScript);
+        String test = "" +
+            "pipeline {\n" +
+                "agent any\n" +
+                "stages {\n" +
+                    "stage ('prepare_build') {\n" +
+                        "steps {\n" +
+                            file +
+                        "}\n" +
+                    "}\n"
+                    + resource(jenkinsFile).asText() +
+                "}\n" +
+            "}";
+        test = test.replaceAll("script.gradle", "build.gradle");
+
+        workflowJob.script.set(test);
+
+        workflowJob.sandbox.check();
+        workflowJob.save();
+        return workflowJob.startBuild().shouldSucceed();
+    }
+
 }
