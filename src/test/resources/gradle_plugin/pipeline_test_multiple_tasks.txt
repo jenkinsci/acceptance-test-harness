@@ -2,10 +2,10 @@ stage ('build_Project') {
     steps {
         script {
            if(isUnix()) {
-                sh 'gradle firstTask secondTask'
+                sh '/*/*/tools/hudson.plugins.gradle.GradleInstallation/Gradle_4.0/bin/gradle firstTask secondTask'
             }
             else{
-                bat 'gradle firstTask secondTask'
+                bat '/*/*/tools/hudson.plugins.gradle.GradleInstallation/Gradle_4.0/bin/gradle firstTask secondTask'
             }
         }
     }

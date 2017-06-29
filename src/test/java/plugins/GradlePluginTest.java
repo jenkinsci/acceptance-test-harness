@@ -395,7 +395,7 @@ public class GradlePluginTest extends AbstractJUnitTest {
     /**
      * Runs a pipeline gradle build and verifies the build was executed successfully
      */
-    @Test @Ignore("not yet working")
+    @Test
     public void run_gradle_pipeline_basic() {
         final Build build = setUpAndRunPipelineBuild(JENKINS_FILE_WITH_BUILD_SCAN, GRADLE_SCRIPT);
         assertThat(build.getConsole(), containsString(HELLO.getPrintln()));
@@ -404,7 +404,7 @@ public class GradlePluginTest extends AbstractJUnitTest {
     /**
      * Runs a pipeline gradle build and verifies that the build scan links are existent
      */
-    @Test @Ignore("JENKINS-45205, not yet working")
+    @Test @Ignore("JENKINS-45205")
     public void run_gradle_pipeline_build_scan_link() {
         final Build build = setUpAndRunPipelineBuild(JENKINS_FILE_WITH_BUILD_SCAN, GRADLE_SCRIPT);
         build.openStatusPage();
@@ -415,7 +415,7 @@ public class GradlePluginTest extends AbstractJUnitTest {
     /**
      * Runs a pipeline gradle build and verifies that the task links are existent
      */
-    @Test @Ignore("JENKINS-45206, not yet working")
+    @Test @Ignore("JENKINS-45206")
     public void run_gradle_pipeline_build_task_links() {
         final Build build = setUpAndRunPipelineBuild(JENKINS_FILE_MULTIPLE_TASKS, GRADLE_SCRIPT);
 
