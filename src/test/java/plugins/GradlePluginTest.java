@@ -356,7 +356,7 @@ public class GradlePluginTest extends AbstractJUnitTest {
      * Verify the existence of links for executed tasks.
      */
     @Test @WithPlugins("gradle@1.27-SNAPSHOT")
-    public void gradle_tasks_link(){
+    public void run_gradle_tasks_link(){
         GradleInstallation.installLatestGradleVersion(jenkins);
         final FreeStyleJob job = jenkins.jobs.create();
         job.copyResource(resource(GRADLE_SCRIPT), "build.gradle");
@@ -394,7 +394,7 @@ public class GradlePluginTest extends AbstractJUnitTest {
      * Runs a pipeline gradle build and verifies the build was executed successfully
      */
     @Test
-    public void pipeline_basic() {
+    public void run_gradle_pipeline_basic() {
         final Build build = setUpAndRunPipelineBuild(JENKINS_FILE_WITH_BUILD_SCAN, GRADLE_SCRIPT);
         assertThat(build.getConsole(), containsString(HELLO.getPrintln()));
     }
@@ -403,7 +403,7 @@ public class GradlePluginTest extends AbstractJUnitTest {
      * Runs a pipeline gradle build and verifies that the build scan links are existent
      */
     @Test
-    public void pipeline_build_scan_link() {
+    public void run_gradle_pipeline_build_scan_link() {
         final Build build = setUpAndRunPipelineBuild(JENKINS_FILE_WITH_BUILD_SCAN, GRADLE_SCRIPT);
         build.openStatusPage();
         final WebElement buildScanLink = build.find(By.partialLinkText("Gradle Build Scan"));
@@ -414,7 +414,7 @@ public class GradlePluginTest extends AbstractJUnitTest {
      * Runs a pipeline gradle build and verifies that the task links are existent
      */
     @Test
-    public void pipeline_build_task_links() {
+    public void run_gradle_pipeline_build_task_links() {
         final Build build = setUpAndRunPipelineBuild(JENKINS_FILE_MULTIPLE_TASKS, GRADLE_SCRIPT);
 
         final WebElement firstTaskLink = build.find(By.partialLinkText(FIRST.getName()));
