@@ -45,7 +45,7 @@ public class StageView extends PageAreaImpl {
     /**
      * A StageviewJob represents the build
      */
-    private List<StageViewJob> jobs = new ArrayList<>();
+    private List<StageViewBuild> jobs = new ArrayList<>();
 
     /**
      * root Element
@@ -71,8 +71,8 @@ public class StageView extends PageAreaImpl {
                 StageViewStage stage = new StageViewStage(f);
                 stages.add(stage);
             }
-            StageViewJob stageViewJob = new StageViewJob(e, stages);
-            jobs.add(stageViewJob);
+            StageViewBuild stageViewBuild = new StageViewBuild(e, stages);
+            jobs.add(stageViewBuild);
         }
 
         List<WebElement> headLines = driver.findElements(By.xpath(XPATH_JOB_HEADLINES));
@@ -88,7 +88,7 @@ public class StageView extends PageAreaImpl {
             LOG.debug("StageviewHeadline {} ", stageViewHeadline);
         }
 
-        for (StageViewJob job : jobs) {
+        for (StageViewBuild job : jobs) {
             System.out.println(job);
             for (StageViewStage stageViewStage : job.getAllStageViewItem()) {
                 LOG.debug("StageviewHeadline {} ", stageViewStage);
@@ -101,7 +101,7 @@ public class StageView extends PageAreaImpl {
      *
      * @return All stageview Jobs
      */
-    public List<StageViewJob> getAllStageViewJobs() {
+    public List<StageViewBuild> getAllStageViewJobs() {
         return this.jobs;
     }
 
@@ -110,7 +110,7 @@ public class StageView extends PageAreaImpl {
      *
      * @return All stageview Jobs
      */
-    public StageViewJob getFirstBuild() {
+    public StageViewBuild getFirstBuild() {
         return this.jobs.get(0);
     }
 
@@ -119,7 +119,7 @@ public class StageView extends PageAreaImpl {
      *
      * @return stageview Job
      */
-    public StageViewJob getLatestBuild() {
+    public StageViewBuild getLatestBuild() {
         return this.jobs.get(jobs.size() - 1);
     }
 
@@ -128,7 +128,7 @@ public class StageView extends PageAreaImpl {
      *
      * @return stageview Job
      */
-    public StageViewJob getBuildByBuildNumber(int buildNumber) {
+    public StageViewBuild getBuildByBuildNumber(int buildNumber) {
         return this.jobs.get(buildNumber);
     }
 

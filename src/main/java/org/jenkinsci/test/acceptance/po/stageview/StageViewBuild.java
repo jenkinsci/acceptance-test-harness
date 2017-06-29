@@ -9,7 +9,7 @@ import java.util.List;
  * Representation of buildjobs done. Rows in the table.
  * @author Boris Dippolter
  */
-public class StageViewJob {
+public class StageViewBuild {
 
     /**
      * Webelement locator for this current headline
@@ -37,7 +37,7 @@ public class StageViewJob {
      * @param webElement      theElement of the particular job
      * @param stageViewStages The overall stages
      */
-    public StageViewJob(WebElement webElement, List<StageViewStage> stageViewStages) {
+    public StageViewBuild(WebElement webElement, List<StageViewStage> stageViewStages) {
         this.webWebElement = webElement;
         this.stageViewStages = stageViewStages;
         this.buildNo = webWebElement.getAttribute("data-runid");

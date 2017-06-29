@@ -24,7 +24,6 @@ import static org.hamcrest.Matchers.*;
 @WithPlugins("workflow-aggregator")
 public class StageViewTest extends AbstractJUnitTest {
 
-
     public static final String SINGLE_JOB = "stageview_plugin/single_job.txt";
     public static final String MULTI_JOB = "stageview_plugin/multi_job.txt";
     public static final String MULTI_JOB_IRR_NAMES = "stageview_plugin/multi_job_irregularnames.txt";
