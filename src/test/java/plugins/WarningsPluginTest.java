@@ -4,10 +4,7 @@ import org.jenkinsci.test.acceptance.SshKeyPair;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.JavaContainer;
 import org.jenkinsci.test.acceptance.docker.fixtures.SshdContainer;
-import org.jenkinsci.test.acceptance.junit.DockerTest;
-import org.jenkinsci.test.acceptance.junit.SmokeTest;
-import org.jenkinsci.test.acceptance.junit.WithDocker;
-import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.junit.*;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisAction;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
 import org.jenkinsci.test.acceptance.plugins.envinject.EnvInjectConfig;
@@ -105,92 +102,42 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
     @WithDocker
     @Test
     public void detailsTabContentTest() throws ExecutionException, InterruptedException {
-        sshdDocker = dockerContainer.get();
-        DumbSlave slave = jenkins.slaves.create(DumbSlave.class);
 
-        slave.setExecutors(1);
-        slave.remoteFS.set("/tmp/");
-        SshSlaveLauncher launcher = slave.setLauncher(SshSlaveLauncher.class);
-
-        launcher.host.set(sshdDocker.ipBound(22));
-        launcher.port(sshdDocker.port(22));
-        launcher.setSshHostKeyVerificationStrategy(SshSlaveLauncher.NonVerifyingKeyVerificationStrategy.class);
-        launcher.keyCredentials("test", sshdDocker.getPrivateKeyString());
-
-        slave.save();
-
-        slave.waitUntilOnline();
-
-        assertTrue(slave.isOnline());
-
-        FreeStyleJob job = jenkins.jobs.create();
-        job.configure();
-        job.setLabelExpression(slave.getName());
-        job.save();
-        job.startBuild().shouldSucceed();
-
-        job.configure();
-        job.copyResource(resource("/warnings_plugin/WarningMain.java"));
-        ShellBuildStep shellBuildStep = job.addBuildStep(ShellBuildStep.class);
-        shellBuildStep.command("javac -Xlint:all WarningMain.java");
-        WarningsPublisher warningsPublisher = job.addPublisher(WarningsPublisher.class);
-        warningsPublisher.addConsoleScanner(JAVA_ID);
-
-        job.save();
-
-        Build build = buildSuccessfulJob(job);
-
-        assertThatActionExists(job, build, "Java Warnings");
-
-        WarningsAction action = createJavaResultAction(build);
-
-        action.open();
+        WarningsAction action = getWarningsAction(resource("/warnings_plugin/WarningMain.java"), "javac -Xlint:all WarningMain.java");
 
         SortedMap<String, String> map = action.getDetailsTabContents();
         Set<Map.Entry<String, String>> set = map.entrySet();
 
         assertThat("Assert the proper detail count.", set.size(), is(3));
+        assertProperDetailsTabWithJavaCompilerAndNormalPrio(map, "redundant cast to TextClass", "WarningMain.java:10");
 
-        // String is a comparable -> keys are sorted.
-        String firstKey = map.firstKey();
-        String firstValue = map.get(firstKey);
-        String[] firstHeader = firstKey.split(",");
-        assertThat("Assert the proper header array length." , firstHeader.length, is(3));
-        assertThat("Assert the proper file and line." , firstHeader[0].trim(), is("WarningMain.java:10"));
-        assertThat("Assert the proper parser." , firstHeader[1].trim(), is("Java Compiler (javac)"));
-        assertThat("Assert the proper warning priority." , firstHeader[2].trim(), is("Priority: Normal"));
-        assertThat("Assert the proper detail text" , firstValue.trim(), is("redundant cast to TextClass"));
 
         // removing tested entry from map.
-        map.remove(firstKey);
+        map.remove(map.firstKey());
+        assertProperDetailsTabWithJavaCompilerAndNormalPrio(map, "redundant cast to TextClass", "WarningMain.java:11");
 
-        String secondKey = map.firstKey();
-        String secondValue = map.get(secondKey);
-        String[] secondHeader = secondKey.split(",");
-        assertThat("Assert the proper header array length." , secondHeader.length, is(3));
-        assertThat("Assert the proper file and line." , secondHeader[0].trim(), is("WarningMain.java:11"));
-        assertThat("Assert the proper parser." , secondHeader[1].trim(), is("Java Compiler (javac)"));
-        assertThat("Assert the proper warning priority." , secondHeader[2].trim(), is("Priority: Normal"));
-        assertThat("Assert the proper detail text" , secondValue.trim(), is("redundant cast to TextClass"));
 
         // removing tested entry from map.
-        map.remove(secondKey);
-
-        String thirdKey = map.firstKey();
-        String thirdValue = map.get(thirdKey);
-        String[] thirdHeader = thirdKey.split(",");
-        assertThat("Assert the proper header array length." , thirdHeader.length, is(3));
-        assertThat("Assert the proper file and line." , thirdHeader[0].trim(), is("WarningMain.java:14"));
-        assertThat("Assert the proper parser." , thirdHeader[1].trim(), is("Java Compiler (javac)"));
-        assertThat("Assert the proper warning priority." , thirdHeader[2].trim(), is("Priority: Normal"));
-        assertThat("Assert the proper detail text" , thirdValue.trim(), is("division by zero"));
+        map.remove(map.firstKey());
+        assertProperDetailsTabWithJavaCompilerAndNormalPrio(map, "division by zero", "WarningMain.java:14");
 
     }
 
     @WithDocker
     @Test
     public void detailsTabContentWithOneWarningTest() throws ExecutionException, InterruptedException {
-        // TODO maybe refactoring is necessary - removing duplicates
+        WarningsAction action = getWarningsAction(resource("/warnings_plugin/WarningMain2.java"), "javac -Xlint:all WarningMain2.java");
+
+        SortedMap<String, String> map = action.getDetailsTabContents();
+        Set<Map.Entry<String, String>> set = map.entrySet();
+
+        assertThat("Assert the proper detail count.", set.size(), is(1));
+
+        assertProperDetailsTabWithJavaCompilerAndNormalPrio(map, "redundant cast to TextClass", "WarningMain2.java:9");
+
+    }
+
+    private WarningsAction getWarningsAction(Resource resource, String command) {
         sshdDocker = dockerContainer.get();
         DumbSlave slave = jenkins.slaves.create(DumbSlave.class);
 
@@ -216,9 +163,9 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         job.startBuild().shouldSucceed();
 
         job.configure();
-        job.copyResource(resource("/warnings_plugin/WarningMain2.java"));
+        job.copyResource(resource);
         ShellBuildStep shellBuildStep = job.addBuildStep(ShellBuildStep.class);
-        shellBuildStep.command("javac -Xlint:all WarningMain2.java");
+        shellBuildStep.command(command);
         WarningsPublisher warningsPublisher = job.addPublisher(WarningsPublisher.class);
         warningsPublisher.addConsoleScanner(JAVA_ID);
 
@@ -231,21 +178,19 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         WarningsAction action = createJavaResultAction(build);
 
         action.open();
+        return action;
+    }
 
-        SortedMap<String, String> map = action.getDetailsTabContents();
-        Set<Map.Entry<String, String>> set = map.entrySet();
+    private void assertProperDetailsTabWithJavaCompilerAndNormalPrio(SortedMap<String, String> map, String expectedDetailText, String expectedLineInFile) {
+        String thirdKey = map.firstKey();
+        String detailText = map.get(thirdKey);
+        String[] headerArray = thirdKey.split(",");
 
-        assertThat("Assert the proper detail count.", set.size(), is(1));
-
-        String firstKey = map.firstKey();
-        String firstValue = map.get(firstKey);
-        String[] firstHeader = firstKey.split(",");
-        assertThat("Assert the proper header array length." , firstHeader.length, is(3));
-        assertThat("Assert the proper file and line." , firstHeader[0].trim(), is("WarningMain2.java:9"));
-        assertThat("Assert the proper parser." , firstHeader[1].trim(), is("Java Compiler (javac)"));
-        assertThat("Assert the proper warning priority." , firstHeader[2].trim(), is("Priority: Normal"));
-        assertThat("Assert the proper detail text" , firstValue.trim(), is("redundant cast to TextClass"));
-
+        assertThat("Assert the proper header array length." , headerArray.length, is(3));
+        assertThat("Assert the proper file and line." , headerArray[0].trim(), is(expectedLineInFile));
+        assertThat("Assert the proper parser." , headerArray[1].trim(), is("Java Compiler (javac)"));
+        assertThat("Assert the proper warning priority." , headerArray[2].trim(), is("Priority: Normal"));
+        assertThat("Assert the proper detail text" , detailText.trim(), is(expectedDetailText));
     }
 
     @WithDocker
