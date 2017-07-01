@@ -236,9 +236,12 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         job.save();
 
         Build build = job.startBuild().shouldSucceed();
+        //Build build = buildSuccessfulJob(job);
 
         assertThatActionExists(job, build, "Java Warnings");
 
+        build.open();
+        assertThat(driver, hasContent("Java Warnings: " + 2));
     }
 
     @WithDocker
