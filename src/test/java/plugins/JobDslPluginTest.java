@@ -560,7 +560,6 @@ public class JobDslPluginTest extends AbstractJUnitTest {
 
         // Build should succeed because script is approved now
         seedJob.scheduleBuild().shouldSucceed();
-        getJob("New_Job").open();
     }
 
     /**
@@ -630,7 +629,6 @@ public class JobDslPluginTest extends AbstractJUnitTest {
 
         // Build should succeed because script is approved now
         seedJob.scheduleBuild().shouldSucceed();
-        getJob("New_Job").open();
     }
 
     /**
@@ -670,7 +668,6 @@ public class JobDslPluginTest extends AbstractJUnitTest {
 
         // Build should succeed because job was saved from administrator
         seedJob.scheduleBuild().shouldSucceed();
-        getJob("New_Job").open();
     }
 
     /**
@@ -699,7 +696,6 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         // Build should succeed because the script runs in Groovy sandbox
         // and only Job DSL methods are used.
         seedJob.scheduleBuild().shouldSucceed();
-        getJob("New_Job").open();
     }
 
     /**
@@ -742,7 +738,6 @@ public class JobDslPluginTest extends AbstractJUnitTest {
 
         // Build should succeed because the not whitelisted content was approved.
         seedJob.scheduleBuild().shouldSucceed();
-        getJob("New_Job").open();
     }
 
 
@@ -771,7 +766,6 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         jenkins.login().doLogin(USER);
         // Build should succeed because now a particular user is specified
         seedJob.scheduleBuild().shouldSucceed();
-        getJob("New_Job").open();
     }
 
     /**
