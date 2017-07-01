@@ -88,16 +88,11 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
     private static final String RESOURCE_CODE_NARC_REPORT_PATH = "/warnings_plugin/jenkins-17787/"
                                                                     + RESOURCE_CODE_NARC_REPORT;
 
-
-
     @Inject
     SshKeyPair keyPair;
 
     @Inject
     private DockerContainerHolder<JavaContainer> dockerContainer;
-
-    @Inject
-    private SshdContainer sshdDocker;
 
     @WithDocker
     @Test
@@ -111,16 +106,13 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         assertThat("Assert the proper detail count.", set.size(), is(3));
         assertProperDetailsTabWithJavaCompilerAndNormalPrio(map, "redundant cast to TextClass", "WarningMain.java:10");
 
-
         // removing tested entry from map.
         map.remove(map.firstKey());
         assertProperDetailsTabWithJavaCompilerAndNormalPrio(map, "redundant cast to TextClass", "WarningMain.java:11");
 
-
         // removing tested entry from map.
         map.remove(map.firstKey());
         assertProperDetailsTabWithJavaCompilerAndNormalPrio(map, "division by zero", "WarningMain.java:14");
-
     }
 
     @WithDocker
@@ -134,33 +126,11 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         assertThat("Assert the proper detail count.", set.size(), is(1));
 
         assertProperDetailsTabWithJavaCompilerAndNormalPrio(map, "redundant cast to TextClass", "WarningMain2.java:9");
-
     }
 
     private WarningsAction getWarningsAction(Resource resource, String command) {
-        sshdDocker = dockerContainer.get();
-        DumbSlave slave = jenkins.slaves.create(DumbSlave.class);
-
-        slave.setExecutors(1);
-        slave.remoteFS.set("/tmp/");
-        SshSlaveLauncher launcher = slave.setLauncher(SshSlaveLauncher.class);
-
-        launcher.host.set(sshdDocker.ipBound(22));
-        launcher.port(sshdDocker.port(22));
-        launcher.setSshHostKeyVerificationStrategy(SshSlaveLauncher.NonVerifyingKeyVerificationStrategy.class);
-        launcher.keyCredentials("test", sshdDocker.getPrivateKeyString());
-
-        slave.save();
-
-        slave.waitUntilOnline();
-
-        assertTrue(slave.isOnline());
-
-        FreeStyleJob job = jenkins.jobs.create();
-        job.configure();
-        job.setLabelExpression(slave.getName());
-        job.save();
-        job.startBuild().shouldSucceed();
+        DumbSlave dockerSlave = getDockerSlave(dockerContainer.get());
+        FreeStyleJob job = prepareDockerSlave(dockerSlave);
 
         job.configure();
         job.copyResource(resource);
@@ -197,7 +167,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
     @Test
     public void dockerMachineTestConsoleScanner() throws ExecutionException, InterruptedException {
         DumbSlave dockerSlave = (DumbSlave) getDockerSlave(dockerContainer.get());
-        FreeStyleJob job = prepairDockerSlave(dockerSlave);
+        FreeStyleJob job = prepareDockerSlave(dockerSlave);
 
         job.configure();
         job.copyResource(resource(RESOURCE_WARNING_MAIN_JAVA_PATH));
@@ -214,21 +184,18 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         WarningsAction action = createJavaResultAction(build);
         assertThatWarningsCountInSummaryIs(action, 3);
 
-
-
         String codeLine =  action.getLinkedSourceFileText(AnalysisAction.Tab.DETAILS,"WarningMain.java", 10);
 
         String[] codeLineArr =  codeLine.trim().split("\\s+", 2);
         assertThat("Warning should be at line",codeLineArr[0], is("10"));
-        assertThat("Assert faild comparing code line is",codeLineArr[1], is("text =  (TextClass) text2;"));
-
+        assertThat("Assert failed comparing code line is",codeLineArr[1], is("text =  (TextClass) text2;"));
     }
 
     @WithDocker
     @Test
     public void dockerMachineTestFileScanner(){
         DumbSlave dockerSlave = getDockerSlave(dockerContainer.get());
-        FreeStyleJob job = prepairDockerSlave(dockerSlave);
+        FreeStyleJob job = prepareDockerSlave(dockerSlave);
 
         job.configure();
         job.copyResource(resource("/warnings_plugin/out.txt"));
@@ -236,7 +203,6 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         job.save();
 
         Build build = job.startBuild().shouldSucceed();
-        //Build build = buildSuccessfulJob(job);
 
         assertThatActionExists(job, build, "Java Warnings");
 
@@ -250,7 +216,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
     @Ignore("Reproduces JENKINS-17787")
     public void codenarcParserOnDockerSlave(){
         DumbSlave dockerSlave = getDockerSlave(dockerContainer.get());
-        FreeStyleJob job = prepairDockerSlave(dockerSlave);
+        FreeStyleJob job = prepareDockerSlave(dockerSlave);
         assertThatCodeNarcActionExists(job);
     }
 
@@ -304,7 +270,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
     /**
      * Create {@link FreeStyleJob} and build once to create Workspace on Slave
      */
-    private FreeStyleJob prepairDockerSlave(Slave dockerSlave){
+    private FreeStyleJob prepareDockerSlave(Slave dockerSlave){
         FreeStyleJob job = jenkins.jobs.create();
         job.configure();
         job.setLabelExpression(dockerSlave.getName());
