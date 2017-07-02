@@ -1,5 +1,6 @@
 package plugins;
 
+import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.authorize_project.ProjectDefaultBuildAccessControl;
@@ -10,10 +11,11 @@ import org.jenkinsci.test.acceptance.plugins.matrix_auth.MatrixRow;
 import org.jenkinsci.test.acceptance.plugins.mock_security_realm.MockSecurityRealm;
 import org.jenkinsci.test.acceptance.plugins.script_security.ScriptApproval;
 import org.jenkinsci.test.acceptance.po.*;
+import org.jenkinsci.test.acceptance.po.View;
 import org.jenkinsci.test.acceptance.update_center.PluginSpec;
-import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import java.util.ArrayList;
@@ -25,19 +27,24 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 import static org.junit.Assume.assumeTrue;
+import static org.jenkinsci.test.acceptance.po.View.containsJob;
 
 /**
  * Acceptance tests for the Job DSL plugin.
  *
  * @author Maximilian Oeckler
+ * @author Manuel Reinbold
  */
 @WithPlugins("job-dsl")
 public class JobDslPluginTest extends AbstractJUnitTest {
 
-    private static String ADMIN = "admin";
-    private static String USER = "user";
+    private static final String ADMIN = "admin";
+    private static final String USER = "user";
 
     private static final String LIST_VIEW_NAME = "testListView";
+    private static final String EXAMPLE_ENABLED_NAME = "example-enabled";
+    private static final String EXAMPLE_DISABLED_NAME = "example-disabled";
+    private static final String LIST_VIEW_REGEX = ".*abled.*";
 
     /**
      * Tests if the checkbox ignoreMissingFiles is shown when the
@@ -832,9 +839,8 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         String jobDslScript = "listView('"+ LIST_VIEW_NAME +"') {\n" +
                 "    description('"+descriptionText+"')\n" +
                 "}";
-        openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
-        WebElement description = find(By.xpath("//div[@id='description']/div"));
-        Assert.assertThat(description.getText(), containsString(descriptionText));
+        View view = openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        checkDescription(view, descriptionText);
     }
 
     /**
@@ -858,13 +864,13 @@ public class JobDslPluginTest extends AbstractJUnitTest {
                 "  }\n" +
                 "}";
         openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
-        Assert.assertThat(driver, hasElement(By.xpath("//th[contains(@tooltip, 'Status of the last build')]")));
-        Assert.assertThat(driver, hasElement(By.xpath("//th[contains(@tooltip, 'Weather report showing aggregated status of recent builds')]")));
-        Assert.assertThat(driver, hasElement(By.xpath("//th/a[text() = 'Name']")));
-        Assert.assertThat(driver, hasElement(By.xpath("//th/a[text() = 'Last Success']")));
-        Assert.assertThat(driver, hasElement(By.xpath("//th/a[text() = 'Last Failure']")));
-        Assert.assertThat(driver, hasElement(By.xpath("//th/a[text() = 'Last Duration']")));
-        Assert.assertThat(driver, hasElement(By.xpath("//td/a/img[contains(@src, 'clock.png')]")));
+        assertThat(driver, containsColumnHeaderTooltip("Status of the last build"));
+        assertThat(driver, containsColumnHeaderTooltip("Weather report showing aggregated status of recent builds"));
+        assertThat(driver, containsColumnHeader("Name"));
+        assertThat(driver, containsColumnHeader("Last Success"));
+        assertThat(driver, containsColumnHeader("Last Failure"));
+        assertThat(driver, containsColumnHeader("Last Duration"));
+        assertThat(driver, hasElement(By.xpath("//td/a/img[contains(@src, 'clock.png')]")));
     }
 
     /**
@@ -874,24 +880,21 @@ public class JobDslPluginTest extends AbstractJUnitTest {
     @Test
     public void status_filter_only_shows_enabled_jobs() {
         List<Job> jobs = createAmountOfJobs(3, false);
-        String jobDisabled = "exampled-disabled";
-        String jobDslScript = "job('"+jobDisabled+"') {\n" +
-                "  disabled()\n" +
-                "}\n" +
-                "listView('"+ LIST_VIEW_NAME +"') {\n" +
+        Job jobDisabled = createDisabledJob();
+        String jobDslScript = "listView('"+ LIST_VIEW_NAME +"') {\n" +
                 "  statusFilter(StatusFilter.ENABLED)\n" +
                 "  columns {\n" +
                 "    name()\n" +
                 "  }\n" +
                 "  jobs {\n" +
-                "    names('"+jobs.get(0).name+"', '"+jobs.get(1).name+"', '"+jobs.get(2).name+"', '"+jobDisabled+"')\n" +
+                "    names('"+jobs.get(0).name+"', '"+jobs.get(1).name+"', '"+jobs.get(2).name+"', '"+jobDisabled.name+"')\n" +
                 "  }\n" +
                 "}";
-        openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
-        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobDisabled+"')]"))));
-        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(0).name+"')]")));
-        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(1).name+"')]")));
-        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(2).name+"')]")));
+        View view = openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        assertThat(view, not(containsJob(jobDisabled)));
+        assertThat(view, containsJob(jobs.get(0)));
+        assertThat(view, containsJob(jobs.get(1)));
+        assertThat(view, containsJob(jobs.get(2)));
     }
 
     /**
@@ -900,25 +903,22 @@ public class JobDslPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void status_filter_only_shows_disabled_jobs() {
-        String jobDisabled = "exampled-disabled";
         List<Job> jobs = createAmountOfJobs(3, false);
-        String jobDslScript = "job('"+jobDisabled+"') {\n" +
-                "  disabled()\n" +
-                "}\n" +
-                "listView('"+ LIST_VIEW_NAME +"') {\n" +
+        Job jobDisabled = createDisabledJob();
+        String jobDslScript = "listView('"+ LIST_VIEW_NAME +"') {\n" +
                 "  statusFilter(StatusFilter.DISABLED)\n" +
                 "  columns {\n" +
                 "    name()\n" +
                 "  }\n" +
                 "  jobs {\n" +
-                "    names('"+jobs.get(0).name+"', '"+jobs.get(1).name+"', '"+jobs.get(2).name+"', '"+jobDisabled+"')\n" +
+                "    names('"+jobs.get(0).name+"', '"+jobs.get(1).name+"', '"+jobs.get(2).name+"', '"+jobDisabled.name+"')\n" +
                 "  }\n" +
                 "}";
-        openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
-        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobDisabled+"')]")));
-        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(0).name+"')]"))));
-        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(1).name+"')]"))));
-        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(2).name+"')]"))));
+        View view = openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        assertThat(view, containsJob(jobDisabled));
+        assertThat(view, not(containsJob(jobs.get(0))));
+        assertThat(view, not(containsJob(jobs.get(1))));
+        assertThat(view, not(containsJob(jobs.get(2))));
     }
 
     /**
@@ -927,25 +927,21 @@ public class JobDslPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void status_filter_shows_all_jobs() {
-        String jobDisabled = "exampled-disabled";
-        List<Job> jobs = createAmountOfJobs(3, false);
-        String jobDslScript = "job('"+jobDisabled+"') {\n" +
-                "  disabled()\n" +
-                "}\n" +
-                "listView('"+ LIST_VIEW_NAME +"') {\n" +
+        List<Job> jobs = createAmountOfJobs(4, false);
+        String jobDslScript = "listView('"+ LIST_VIEW_NAME +"') {\n" +
                 "  statusFilter(StatusFilter.ALL)\n" +
                 "  columns {\n" +
                 "    name()\n" +
                 "  }\n" +
                 "  jobs {\n" +
-                "    names('"+jobs.get(0).name+"', '"+jobs.get(1).name+"', '"+jobs.get(2).name+"', '"+jobDisabled+"')\n" +
+                "    names('"+jobs.get(0).name+"', '"+jobs.get(1).name+"', '"+jobs.get(2).name+"', '"+jobs.get(3).name+"')\n" +
                 "  }\n" +
                 "}";
-        openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
-        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobDisabled+"')]")));
-        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(0).name+"')]")));
-        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(1).name+"')]")));
-        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(2).name+"')]")));
+        View view = openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        assertThat(view, containsJob(jobs.get(0)));
+        assertThat(view, containsJob(jobs.get(1)));
+        assertThat(view, containsJob(jobs.get(2)));
+        assertThat(view, containsJob(jobs.get(3)));
     }
 
     /**
@@ -953,27 +949,22 @@ public class JobDslPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void only_jobs_matching_regex_are_added() {
-        String job1 = "exampled-disabled";
-        String job2 = "example-enabled";
+        Job job1 = createJobWithName(EXAMPLE_DISABLED_NAME);
+        Job job2 = createJobWithName(EXAMPLE_ENABLED_NAME);
         List<Job> jobs = createAmountOfJobs(2, false);
-        String regex = ".*abled.*";
-        String jobDslScript = "job('"+job1+"') {\n" +
-                "  disabled()\n" +
-                "}\n" +
-                "job('"+job2+"')\n" +
-                "listView('"+ LIST_VIEW_NAME +"') {\n" +
+        String jobDslScript = "listView('"+ LIST_VIEW_NAME +"') {\n" +
                 "  columns {\n" +
                 "    name()\n" +
                 "  }\n" +
                 "  jobs {\n" +
-                "    regex('"+regex+"')\n" +
+                "    regex('"+LIST_VIEW_REGEX+"')\n" +
                 "  }\n" +
                 "}";
-        openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
-        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+job1+"')]")));
-        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+job2+"')]")));
-        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(0).name+"')]"))));
-        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(1).name+"')]"))));
+        View view = openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        assertThat(view, containsJob(job1));
+        assertThat(view, containsJob(job2));
+        assertThat(view, not(containsJob(jobs.get(0))));
+        assertThat(view, not(containsJob(jobs.get(1))));
     }
 
     /**
@@ -993,10 +984,9 @@ public class JobDslPluginTest extends AbstractJUnitTest {
                 "  }\n" +
                 "\n" +
                 "}";
-        Job seed = openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
-        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(0).name+"')]")));
-        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(1).name+"')]")));
-        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, "+seed.name+")]")));
+        View view = openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        assertThat(view, containsJob(jobs.get(0)));
+        assertThat(view, containsJob(jobs.get(1)));
     }
 
     /**
@@ -1006,13 +996,10 @@ public class JobDslPluginTest extends AbstractJUnitTest {
     @Test
     @WithPlugins("view-job-filters")
     public void job_filters_regex_name_include_matched() {
-        String job1 = "example-disabled";
-        String job2 = "example-enabled";
+        Job job1 = createJobWithName(EXAMPLE_DISABLED_NAME);
+        Job job2 = createJobWithName(EXAMPLE_ENABLED_NAME);
         List<Job> jobs = createAmountOfJobs(2, false);
-        String regex = ".*abled.*";
-        String jobDslScript = "job('"+job1+"')\n" +
-                "job('"+job2+"')\n" +
-                "listView('"+ LIST_VIEW_NAME +"') {\n" +
+        String jobDslScript = "listView('"+ LIST_VIEW_NAME +"') {\n" +
                 "  columns {\n" +
                 "    name()\n" +
                 "  }\n" +
@@ -1020,15 +1007,15 @@ public class JobDslPluginTest extends AbstractJUnitTest {
                 "        regex {\n" +
                 "            matchType(MatchType.INCLUDE_MATCHED)\n" +
                 "            matchValue(RegexMatchValue.NAME)\n" +
-                "            regex('"+regex+"')\n" +
+                "            regex('"+LIST_VIEW_REGEX+"')\n" +
                 "        }\n" +
                 "  }\n" +
                 "}";
-        openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
-        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+job1+"')]")));
-        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+job2+"')]")));
-        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(0).name+"')]"))));
-        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(1).name+"')]"))));
+        View view = openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        assertThat(view, containsJob(job1));
+        assertThat(view, containsJob(job2));
+        assertThat(view, not(containsJob(jobs.get(0))));
+        assertThat(view, not(containsJob(jobs.get(1))));
     }
 
     /**
@@ -1038,32 +1025,29 @@ public class JobDslPluginTest extends AbstractJUnitTest {
     @Test
     @WithPlugins("view-job-filters")
     public void job_filters_regex_name_exclude_matched() {
-        String job1 = "example-disabled";
-        String job2 = "example-enabled";
+        Job job1 = createJobWithName(EXAMPLE_DISABLED_NAME);
+        Job job2 = createJobWithName(EXAMPLE_ENABLED_NAME);
         List<Job> jobs = createAmountOfJobs(2, false);
-        String regex = ".*abled.*";
-        String jobDslScript = "job('"+job1+"')\n" +
-                "job('"+job2+"')\n" +
-                "listView('"+ LIST_VIEW_NAME +"') {\n" +
+        String jobDslScript = "listView('"+ LIST_VIEW_NAME +"') {\n" +
                 "  columns {\n" +
                 "    name()\n" +
                 "  }\n" +
                 "  jobs{\n" +
-                "    names('"+job1+"','"+job2+"','"+jobs.get(0).name+"','"+jobs.get(1).name+"')\n" +
+                "    names('"+job1.name+"','"+job2.name+"','"+jobs.get(0).name+"','"+jobs.get(1).name+"')\n" +
                 "  }\n" +
                 "  jobFilters {\n" +
                 "        regex {\n" +
                 "            matchType(MatchType.EXCLUDE_MATCHED)\n" +
                 "            matchValue(RegexMatchValue.NAME)\n" +
-                "            regex('"+regex+"')\n" +
+                "            regex('"+LIST_VIEW_REGEX+"')\n" +
                 "        }\n" +
                 "  }\n" +
                 "}";
-        openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
-        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+job1+"')]"))));
-        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+job2+"')]"))));
-        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(0).name+"')]")));
-        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(1).name+"')]")));
+        View view = openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        assertThat(view, not(containsJob(job1)));
+        assertThat(view, not(containsJob(job2)));
+        assertThat(view, containsJob(jobs.get(0)));
+        assertThat(view, containsJob(jobs.get(1)));
     }
 
     /**
@@ -1073,13 +1057,10 @@ public class JobDslPluginTest extends AbstractJUnitTest {
     @Test
     @WithPlugins("view-job-filters")
     public void job_filters_regex_name_include_unmatched() {
-        String job1 = "example-disabled";
-        String job2 = "example-enabled";
+        Job job1 = createJobWithName(EXAMPLE_DISABLED_NAME);
+        Job job2 = createJobWithName(EXAMPLE_ENABLED_NAME);
         List<Job> jobs = createAmountOfJobs(2, false);
-        String regex = ".*abled.*";
-        String jobDslScript = "job('"+job1+"')\n" +
-                "job('"+job2+"')\n" +
-                "listView('"+ LIST_VIEW_NAME +"') {\n" +
+        String jobDslScript = "listView('"+ LIST_VIEW_NAME +"') {\n" +
                 "  columns {\n" +
                 "    name()\n" +
                 "  }\n" +
@@ -1087,15 +1068,15 @@ public class JobDslPluginTest extends AbstractJUnitTest {
                 "        regex {\n" +
                 "            matchType(MatchType.INCLUDE_UNMATCHED)\n" +
                 "            matchValue(RegexMatchValue.NAME)\n" +
-                "            regex('"+regex+"')\n" +
+                "            regex('"+LIST_VIEW_REGEX+"')\n" +
                 "        }\n" +
                 "  }\n" +
                 "}";
-        openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
-        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+job1+"')]"))));
-        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+job2+"')]"))));
-        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(0).name+"')]")));
-        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(1).name+"')]")));
+        View view = openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        assertThat(view, not(containsJob(job1)));
+        assertThat(view, not(containsJob(job2)));
+        assertThat(view, containsJob(jobs.get(0)));
+        assertThat(view, containsJob(jobs.get(1)));
     }
 
     /**
@@ -1105,32 +1086,29 @@ public class JobDslPluginTest extends AbstractJUnitTest {
     @Test
     @WithPlugins("view-job-filters")
     public void job_filters_regex_name_exclude_unmatched() {
-        String job1 = "example-disabled";
-        String job2 = "example-enabled";
+        Job job1 = createJobWithName(EXAMPLE_DISABLED_NAME);
+        Job job2 = createJobWithName(EXAMPLE_ENABLED_NAME);
         List<Job> jobs = createAmountOfJobs(2, false);
-        String regex = ".*abled.*";
-        String jobDslScript = "job('"+job1+"')\n" +
-                "job('"+job2+"')\n" +
-                "listView('"+ LIST_VIEW_NAME +"') {\n" +
+        String jobDslScript = "listView('"+ LIST_VIEW_NAME +"') {\n" +
                 "  columns {\n" +
                 "    name()\n" +
                 "  }\n" +
                 "  jobs{\n" +
-                "    names('"+job1+"','"+job2+"','"+jobs.get(0).name+"','"+jobs.get(1).name+"')\n" +
+                "    names('"+job1.name+"','"+job2.name+"','"+jobs.get(0).name+"','"+jobs.get(1).name+"')\n" +
                 "  }\n" +
                 "  jobFilters {\n" +
                 "        regex {\n" +
                 "            matchType(MatchType.EXCLUDE_UNMATCHED)\n" +
                 "            matchValue(RegexMatchValue.NAME)\n" +
-                "            regex('"+regex+"')\n" +
+                "            regex('"+LIST_VIEW_REGEX+"')\n" +
                 "        }\n" +
                 "  }\n" +
                 "}";
-        openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
-        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+job1+"')]")));
-        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+job2+"')]")));
-        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(0).name+"')]"))));
-        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(1).name+"')]"))));
+        View view = openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        assertThat(view, containsJob(job1));
+        assertThat(view, containsJob(job2));
+        assertThat(view, not(containsJob(jobs.get(0))));
+        assertThat(view, not(containsJob(jobs.get(1))));
     }
 
     /**
@@ -1153,12 +1131,12 @@ public class JobDslPluginTest extends AbstractJUnitTest {
                 "        }\n" +
                 "  }\n" +
                 "}";
-        openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
-        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+failedJob.name+"')]")));
-        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(0).name+"')]"))));
-        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(0).name+"')]"))));
-        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(0).name+"')]"))));
-        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(0).name+"')]"))));
+        View view = openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        assertThat(view, containsJob(failedJob));
+        assertThat(view, not(containsJob(jobs.get(0))));
+        assertThat(view, not(containsJob(jobs.get(1))));
+        assertThat(view, not(containsJob(jobs.get(2))));
+        assertThat(view, not(containsJob(jobs.get(3))));
     }
 
     /**
@@ -1184,12 +1162,12 @@ public class JobDslPluginTest extends AbstractJUnitTest {
                 "        }\n" +
                 "  }\n" +
                 "}";
-        openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
-        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+failedJob.name+"')]"))));
-        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(0).name+"')]")));
-        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(1).name+"')]")));
-        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(2).name+"')]")));
-        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(3).name+"')]")));
+        View view = openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        assertThat(view, not(containsJob(failedJob)));
+        assertThat(view, containsJob(jobs.get(0)));
+        assertThat(view, containsJob(jobs.get(1)));
+        assertThat(view, containsJob(jobs.get(2)));
+        assertThat(view, containsJob(jobs.get(3)));
     }
 
     /**
@@ -1212,12 +1190,12 @@ public class JobDslPluginTest extends AbstractJUnitTest {
                 "        }\n" +
                 "  }\n" +
                 "}";
-        openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
-        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+failedJob.name+"')]"))));
-        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(0).name+"')]")));
-        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(1).name+"')]")));
-        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(2).name+"')]")));
-        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(3).name+"')]")));
+        View view = openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        assertThat(view, not(containsJob(failedJob)));
+        assertThat(view, containsJob(jobs.get(0)));
+        assertThat(view, containsJob(jobs.get(1)));
+        assertThat(view, containsJob(jobs.get(2)));
+        assertThat(view, containsJob(jobs.get(3)));
     }
 
     /**
@@ -1243,12 +1221,12 @@ public class JobDslPluginTest extends AbstractJUnitTest {
                 "        }\n" +
                 "  }\n" +
                 "}";
-        openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
-        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+failedJob.name+"')]")));
-        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(0).name+"')]"))));
-        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(1).name+"')]"))));
-        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(2).name+"')]"))));
-        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(3).name+"')]"))));
+        View view = openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        assertThat(view, containsJob(failedJob));
+        assertThat(view, not(containsJob(jobs.get(0))));
+        assertThat(view, not(containsJob(jobs.get(1))));
+        assertThat(view, not(containsJob(jobs.get(2))));
+        assertThat(view, not(containsJob(jobs.get(3))));
     }
 
     /**
@@ -1272,12 +1250,12 @@ public class JobDslPluginTest extends AbstractJUnitTest {
                 "    }\n" +
                 "  }\n" +
                 "}";
-        openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
-        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(0).name+"')]"))));
-        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(1).name+"')]"))));
-        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(2).name+"')]")));
-        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(3).name+"')]")));
-        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(4).name+"')]")));
+        View view = openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        assertThat(view, not(containsJob(jobs.get(0))));
+        assertThat(view, not(containsJob(jobs.get(1))));
+        assertThat(view, containsJob(jobs.get(2)));
+        assertThat(view, containsJob(jobs.get(3)));
+        assertThat(view, containsJob(jobs.get(4)));
     }
 
     /**
@@ -1300,12 +1278,12 @@ public class JobDslPluginTest extends AbstractJUnitTest {
                 "    }\n" +
                 "  }\n" +
                 "}";
-        openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
-        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+notBuiltJobs.get(0).name+"')]"))));
-        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+notBuiltJobs.get(1).name+"')]"))));
-        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+builtJobs.get(0).name+"')]")));
-        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+builtJobs.get(1).name+"')]")));
-        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+builtJobs.get(2).name+"')]")));
+        View view = openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        assertThat(view, not(containsJob(notBuiltJobs.get(0))));
+        assertThat(view, not(containsJob(notBuiltJobs.get(1))));
+        assertThat(view, containsJob(builtJobs.get(0)));
+        assertThat(view, containsJob(builtJobs.get(1)));
+        assertThat(view, containsJob(builtJobs.get(2)));
     }
 
     /**
@@ -1329,10 +1307,10 @@ public class JobDslPluginTest extends AbstractJUnitTest {
                 "    }\n" +
                 "  }\n" +
                 "}";
-        openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
-        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(0).name+"')]"))));
-        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+jobs.get(1).name+"')]"))));
-        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+job3.name+"')]")));
+        View view = openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        assertThat(view, not(containsJob(jobs.get(0))));
+        assertThat(view, not(containsJob(jobs.get(1))));
+        assertThat(view, containsJob(job3));
     }
 
     /**
@@ -1354,12 +1332,12 @@ public class JobDslPluginTest extends AbstractJUnitTest {
                 "    }\n" +
                 "  }\n" +
                 "}";
-        openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
-        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+builtJobs.get(0).name+"')]")));
-        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+builtJobs.get(1).name+"')]")));
-        Assert.assertThat(driver, hasElement(By.xpath("//tbody/tr[contains(@id, '"+builtJobs.get(2).name+"')]")));
-        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+notBuiltJobs.get(0).name+"')]"))));
-        Assert.assertThat(driver, not(hasElement(By.xpath("//tbody/tr[contains(@id, '"+notBuiltJobs.get(1).name+"')]"))));
+        View view = openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        assertThat(view, containsJob(builtJobs.get(0)));
+        assertThat(view, containsJob(builtJobs.get(1)));
+        assertThat(view, containsJob(builtJobs.get(2)));
+        assertThat(view, not(containsJob(notBuiltJobs.get(0))));
+        assertThat(view, not(containsJob(notBuiltJobs.get(1))));
     }
 
     /**
@@ -1371,16 +1349,25 @@ public class JobDslPluginTest extends AbstractJUnitTest {
      */
     private List<Job> createAmountOfJobs(int amount, boolean isBuilt) {
         List<Job> jobs = new ArrayList<>();
-        if (isBuilt) {
-            for (int i = 0; i < amount; i++) {
-                jobs.add(createJobAndBuild());
+        for (int i = 0; i < amount; i++) {
+            Job job;
+            if (isBuilt) {
+                job = createJobAndBuild();
             }
-        } else {
-            for (int i = 0; i < amount; i++) {
-                jobs.add(jenkins.jobs.create(FreeStyleJob.class));
+            else {
+                job = jenkins.jobs.create(FreeStyleJob.class);
             }
+            jobs.add(job);
         }
         return jobs;
+    }
+
+    private Matcher<WebDriver> containsColumnHeaderTooltip(String tooltip) {
+        return hasElement(By.xpath("//th[contains(@tooltip, '"+tooltip+"')]"));
+    }
+
+    private Matcher<WebDriver> containsColumnHeader(String headerName) {
+        return hasElement(By.xpath("//th/a[text() = '"+headerName+"']"));
     }
 
     /**
@@ -1389,7 +1376,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
      */
     private Job createJobThatFails() {
         String jobDslScriptFailed = "fail";
-        FreeStyleJob job = createSeedAndSetJobDslScript(jobDslScriptFailed);
+        FreeStyleJob job = createJobAndSetJobDslScript(jobDslScriptFailed, false);
         job.scheduleBuild().shouldFail();
         return job;
     }
@@ -1404,31 +1391,55 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         return job;
     }
 
+    /**
+     * This method creates a new job and disables it.
+     * @return the disabled job
+     */
+    private Job createDisabledJob() {
+        Job job = jenkins.jobs.create(FreeStyleJob.class);
+        job.disable();
+        job.save();
+        return job;
+    }
+
+    /**
+     * This method creates a Job with a given name.
+     * @param name name of the job
+     * @return newly created job
+     */
+    private Job createJobWithName(String name) {
+        return jenkins.jobs.create(FreeStyleJob.class, name);
+    }
 
     /**
      * This method creates a seed job and configures it with a Job DSL script.
      * @param script The Job DSL scrpt
      * @return The newly created and configured seed job
      */
-    private FreeStyleJob createSeedAndSetJobDslScript(String script) {
-        FreeStyleJob seed = createSeedJob();
-        JobDslBuildStep jobDsl = seed.addBuildStep(JobDslBuildStep.class);
+    private FreeStyleJob createJobAndSetJobDslScript(String script, boolean isSeed) {
+        FreeStyleJob job;
+        if (isSeed) {
+            job = createSeedJob();
+        } else {
+            job = jenkins.jobs.create(FreeStyleJob.class);
+        }
+        JobDslBuildStep jobDsl = job.addBuildStep(JobDslBuildStep.class);
         jobDsl.setScript(script);
-        seed.save();
-        return seed;
+        job.save();
+        return job;
     }
 
     /**
      * Opens a newly created ListView. The View gets created by a seed job via Job DSL script.
      * @param script The Job DSL script
      */
-    private FreeStyleJob openNewlyCreatedListView(String script, String viewName) {
-        FreeStyleJob seed = createSeedAndSetJobDslScript(script);
+    private View openNewlyCreatedListView(String script, String viewName) {
+        FreeStyleJob seed = createJobAndSetJobDslScript(script, true);
         seed.scheduleBuild().shouldSucceed();
         seed.open();
-        WebElement link = seed.find(By.xpath("//a[contains(@href, '" + viewName + "')]"));
-        link.click();
-        return seed;
+        View view = getView(viewName);
+        view.open();
+        return view;
     }
 
     private FreeStyleJob createSeedJob() {
