@@ -28,6 +28,9 @@ import static org.hamcrest.Matchers.is;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 import static org.junit.Assume.assumeTrue;
 import static org.jenkinsci.test.acceptance.po.View.containsJob;
+import static org.jenkinsci.test.acceptance.po.View.containsColumnHeaderTooltip;
+import static org.jenkinsci.test.acceptance.po.View.containsColumnHeader;
+import static org.jenkinsci.test.acceptance.po.View.containsImage;
 
 /**
  * Acceptance tests for the Job DSL plugin.
@@ -863,14 +866,14 @@ public class JobDslPluginTest extends AbstractJUnitTest {
                 "    name('"+job1.name+"')\n" +
                 "  }\n" +
                 "}";
-        openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
-        assertThat(driver, containsColumnHeaderTooltip("Status of the last build"));
-        assertThat(driver, containsColumnHeaderTooltip("Weather report showing aggregated status of recent builds"));
-        assertThat(driver, containsColumnHeader("Name"));
-        assertThat(driver, containsColumnHeader("Last Success"));
-        assertThat(driver, containsColumnHeader("Last Failure"));
-        assertThat(driver, containsColumnHeader("Last Duration"));
-        assertThat(driver, hasElement(By.xpath("//td/a/img[contains(@src, 'clock.png')]")));
+        View view = openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        assertThat(view, containsColumnHeaderTooltip("Status of the last build"));
+        assertThat(view, containsColumnHeaderTooltip("Weather report showing aggregated status of recent builds"));
+        assertThat(view, containsColumnHeader("Name"));
+        assertThat(view, containsColumnHeader("Last Success"));
+        assertThat(view, containsColumnHeader("Last Failure"));
+        assertThat(view, containsColumnHeader("Last Duration"));
+        assertThat(view, containsImage("clock.png"));
     }
 
     /**
@@ -1360,14 +1363,6 @@ public class JobDslPluginTest extends AbstractJUnitTest {
             jobs.add(job);
         }
         return jobs;
-    }
-
-    private Matcher<WebDriver> containsColumnHeaderTooltip(String tooltip) {
-        return hasElement(By.xpath("//th[contains(@tooltip, '"+tooltip+"')]"));
-    }
-
-    private Matcher<WebDriver> containsColumnHeader(String headerName) {
-        return hasElement(By.xpath("//th/a[text() = '"+headerName+"']"));
     }
 
     /**
