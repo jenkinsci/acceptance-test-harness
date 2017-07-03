@@ -377,7 +377,7 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
 
     private String createGitRepositoryInDockerContainer() {
         GitRepo repo = new GitRepo();
-        repo.addFilesIn(getClass().getResource(ANALYSIS_COLLECTOR_PLUGIN_RESOURCES));
+        repo.addFilesIn(ANALYSIS_COLLECTOR_PLUGIN_RESOURCES);
         repo.commit("Initial commit in master");
         repo.createBranch("branch");
 

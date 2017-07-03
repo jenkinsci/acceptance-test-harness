@@ -1,8 +1,13 @@
 package plugins;
 
+import javax.inject.Inject;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
+import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
+import org.jenkinsci.test.acceptance.junit.WithCredentials;
+import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.NullConfigurator;
@@ -10,6 +15,8 @@ import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckStyleAction;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckStyleFreestyleSettings;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckStyleMavenSettings;
 import org.jenkinsci.test.acceptance.plugins.envinject.EnvInjectConfig;
+import org.jenkinsci.test.acceptance.plugins.git.GitRepo;
+import org.jenkinsci.test.acceptance.plugins.git.GitScm;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.plugins.parameterized_trigger.BuildTriggerConfig;
 import org.jenkinsci.test.acceptance.plugins.parameterized_trigger.TriggerCallBuildStep;
@@ -43,6 +50,54 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
     private static final String FILE_WITH_776_WARNINGS = CHECKSTYLE_PLUGIN_ROOT + PATTERN_WITH_776_WARNINGS;
     private static final String FILE_FOR_2ND_RUN = CHECKSTYLE_PLUGIN_ROOT + "forSecondRun/checkstyle-result.xml";
     private static final int TOTAL_NUMBER_OF_WARNINGS = 776;
+
+    // TODO: pull up
+    private static final String CREDENTIALS_ID = "checkstyle";
+    private static final String KEY_FILENAME = "/org/jenkinsci/test/acceptance/docker/fixtures/GitContainer/unsafe";
+    private static final String SAMPLE_CHECKSTYLE_PROJECT = "sample_checkstyle_project";
+
+    @Inject
+    DockerContainerHolder<GitContainer> gitServer;
+
+    @Test @WithPlugins("git") @WithDocker @Issue("JENKINS-33162")
+    @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY,
+            values = {CREDENTIALS_ID, KEY_FILENAME})
+    public void should_show_warnings_per_user() {
+        String gitRepositoryUrl = createGitRepositoryInDockerContainer();
+
+        FreeStyleJob job = createJob(jenkins, CHECKSTYLE_PLUGIN_ROOT + SAMPLE_CHECKSTYLE_PROJECT,
+                FreeStyleJob.class, CheckStyleFreestyleSettings.class,
+                settings -> settings.pattern.set("target/checkstyle-result.xml"));
+        setMavenGoal(job, "clean package checkstyle:checkstyle");
+        job.configure(() -> {
+            job.useScm(GitScm.class)
+                    .url(gitRepositoryUrl)
+                    .credentials(CREDENTIALS_ID);
+        });
+
+        Build build = buildSuccessfulJob(job);
+        CheckStyleAction action = new CheckStyleAction(job);
+        action.open();
+
+    }
+
+    private String createGitRepositoryInDockerContainer() {
+        GitRepo repo = new GitRepo();
+        String main = "src/main/java";
+        repo.mkdir(main);
+        repo.addFilesIn(CHECKSTYLE_PLUGIN_ROOT + SAMPLE_CHECKSTYLE_PROJECT + "/" + main, main);
+        repo.commit("Sources commit.");
+
+        String test = "src/test/java";
+        repo.mkdir(test);
+        repo.addFilesIn(CHECKSTYLE_PLUGIN_ROOT + SAMPLE_CHECKSTYLE_PROJECT + "/" + test, test);
+        repo.commit("Tests commit.");
+
+        GitContainer container = gitServer.get();
+        repo.transferToDockerContainer(container.host(), container.port());
+
+        return container.getRepoUrl();
+    }
 
     /**
      * Verifies that environment variables are expanded in the file name pattern.
@@ -149,7 +204,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
     }
 
     private MavenModuleSet createMavenJob(AnalysisConfigurator<CheckStyleMavenSettings> configurator) {
-        String projectPath = CHECKSTYLE_PLUGIN_ROOT + "sample_checkstyle_project";
+        String projectPath = CHECKSTYLE_PLUGIN_ROOT + SAMPLE_CHECKSTYLE_PROJECT;
         String goal = "clean package checkstyle:checkstyle";
         return createMavenJob(projectPath, goal, CheckStyleMavenSettings.class, configurator);
     }
@@ -161,7 +216,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
      */
     @Test
     public void should_link_to_source_code_in_real_project() {
-        FreeStyleJob job = createJob(jenkins, CHECKSTYLE_PLUGIN_ROOT + "sample_checkstyle_project", FreeStyleJob.class,
+        FreeStyleJob job = createJob(jenkins, CHECKSTYLE_PLUGIN_ROOT + SAMPLE_CHECKSTYLE_PROJECT, FreeStyleJob.class,
                 CheckStyleFreestyleSettings.class,
                 settings -> settings.pattern.set("target/checkstyle-result.xml"));
         setMavenGoal(job, "clean package checkstyle:checkstyle");

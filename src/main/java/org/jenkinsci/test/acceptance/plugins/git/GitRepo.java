@@ -295,22 +295,69 @@ public class GitRepo implements Closeable {
     }
 
     /**
-     * Adds all files of the specified directory to this git repository.
+     * Copies all files of the specified folder to the root folder of this git repository and adds the copied
+     * files using 'git add.
      *
-     * @param directory the files to add
+     * @param sourceFolder the folder with the files to copy
      */
-    public void addFilesIn(final URL directory) {
+    public void addFilesIn(final String sourceFolder) {
+        addFilesIn(getResource(sourceFolder));
+    }
+
+    private URL getResource(final String sourceFolder) {
+        URL resource = getClass().getResource(sourceFolder);
+        if (resource == null) {
+            throw new IllegalArgumentException("No such directory: " + sourceFolder);
+        }
+        return resource;
+    }
+
+    /**
+     * Copies all files of the specified directory to the {@code destinationFolder} of this git repository
+     * and adds the copied files using git add.
+     *
+     * @param sourceFolder      the folder with the files to copy
+     * @param destinationFolder the destination folder for the copied files
+     */
+    public void addFilesIn(final String sourceFolder, final String destinationFolder) {
+        addFilesIn(getResource(sourceFolder), Paths.get(destinationFolder));
+    }
+
+    /**
+     * Copies all files of the specified folder to the root folder of this git repository and adds the copied
+     * files using 'git add.
+     *
+     * @param sourceFolder the folder with the files to copy
+     */
+    public void addFilesIn(final URL sourceFolder) {
+        addFilesIn(sourceFolder, dir.toPath());
+    }
+
+    /**
+     * Copies all files of the specified directory to the {@code destinationFolder} of this git repository
+     * and adds the copied files using git add.
+     *
+     * @param sourceFolder      the folder with the files to copy
+     * @param destinationFolder the destination folder for the copied files
+     */
+    public void addFilesIn(final URL sourceFolder, final Path destinationFolder) {
+        Path gitPath;
+        if (destinationFolder.isAbsolute()) {
+            gitPath = destinationFolder;
+        } else {
+            gitPath = dir.toPath().resolve(destinationFolder);
+        }
         try {
-            Path source = Paths.get(directory.toURI());
+            Path source = Paths.get(sourceFolder.toURI());
 
             try (DirectoryStream<Path> paths = Files.newDirectoryStream(source)) {
                 for (Path path : paths) {
-                    Files.copy(path, path(path.getFileName()));
+                    Files.copy(path, gitPath.resolve(path.getFileName()));
                 }
             }
             git("add", "*");
         } catch (URISyntaxException | IOException e) {
-            throw new AssertionError(String.format("Can't copy files from %s", directory), e);
+            throw new AssertionError(String.format("Can't copy files from %s", sourceFolder), e);
         }
     }
 
@@ -321,5 +368,13 @@ public class GitRepo implements Closeable {
      */
     public void createBranch(final String name) {
         git("branch", name);
+    }
+
+    public Path mkdir(String path) {
+        try {
+            return Files.createDirectories(dir.toPath().resolve(path));
+        } catch (IOException e) {
+            throw new AssertionError(String.format("Can't created directories %s", path), e);
+        }
     }
 }
