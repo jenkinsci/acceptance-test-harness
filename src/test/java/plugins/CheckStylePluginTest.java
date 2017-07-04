@@ -30,6 +30,7 @@ import org.jenkinsci.test.acceptance.po.PageObject;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
+import org.openqa.selenium.By;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
@@ -75,9 +76,31 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
                     .credentials(CREDENTIALS_ID);
         });
 
-        Build build = buildSuccessfulJob(job);
+        buildSuccessfulJob(job);
         CheckStyleAction action = new CheckStyleAction(job);
         action.open();
+
+        SortedMap<String, Integer> expectedPeople = new TreeMap<>();
+        expectedPeople.put("Unknown authors", 1);
+        expectedPeople.put("Jenkins-ATH <jenkins-ath@example.org>", 11);
+        assertThat(action.getPeopleTabContents(), is(expectedPeople));
+
+        action.find(By.partialLinkText("Jenkins-ATH")).click();
+        assertThat(driver, hasContent("Checkstyle Warnings - Jenkins-ATH"));
+
+        action.open();
+        SortedMap<String, String> expectedOrigin = new TreeMap<>();
+        expectedOrigin.put("Main.java:0", "-");
+        expectedOrigin.put("Main.java:2", "Jenkins-ATH");
+        expectedOrigin.put("Main.java:4", "Jenkins-ATH");
+        expectedOrigin.put("Main.java:6", "Jenkins-ATH");
+        expectedOrigin.put("Main.java:9", "Jenkins-ATH");
+        expectedOrigin.put("Main.java:13", "Jenkins-ATH");
+        expectedOrigin.put("Main.java:18", "Jenkins-ATH");
+        expectedOrigin.put("Main.java:23", "Jenkins-ATH");
+        expectedOrigin.put("Main.java:24", "Jenkins-ATH");
+        expectedOrigin.put("Main.java:27", "Jenkins-ATH");
+        assertThat(action.getOriginTabContentsAsStrings(), is(expectedOrigin));
 
     }
 
@@ -92,6 +115,9 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
         repo.mkdir(test);
         repo.addFilesIn(CHECKSTYLE_PLUGIN_ROOT + SAMPLE_CHECKSTYLE_PROJECT + "/" + test, test);
         repo.commit("Tests commit.");
+
+        repo.addFilesIn(CHECKSTYLE_PLUGIN_ROOT + SAMPLE_CHECKSTYLE_PROJECT);
+        repo.commit("POM commit.");
 
         GitContainer container = gitServer.get();
         repo.transferToDockerContainer(container.host(), container.port());

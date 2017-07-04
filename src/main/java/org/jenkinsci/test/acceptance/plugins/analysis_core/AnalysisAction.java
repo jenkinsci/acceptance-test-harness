@@ -332,13 +332,33 @@ public abstract class AnalysisAction extends ContainerPageObject {
     }
 
     /**
+     * Returns the first two columns of the "People"-tab as key => value pairs, skipping the header row.
+     *
+     * @return a map of the first two columns. (first column => second column)
+     */
+    public SortedMap<String, Integer> getPeopleTabContents() {
+        openTab(Tab.AUTHORS);
+        return getContentsOfVisibleTable(true, true);
+    }
+
+    /**
+     * Returns the first two columns of the "Warnings"-tab as key => value pairs, skipping the header row.
+     *
+     * @return a map of the first two columns. (first column => second column)
+     */
+    public SortedMap<String, String> getOriginTabContentsAsStrings() {
+        openTab(Tab.ORIGIN);
+        return mapTableCellsKeyValue(String.class, getVisibleTableRows(true, true), 3);
+    }
+
+    /**
      * Returns the first two columns of the "Warnings"-tab as key => value pairs, skipping the header row.
      *
      * @return a map of the first two columns. (first column => second column)
      */
     public SortedMap<String, String> getWarningsTabContentsAsStrings() {
         openTab(Tab.WARNINGS);
-        return mapTableCellsKeyValue(String.class, getVisibleTableRows(true, false));
+        return mapTableCellsKeyValue(String.class, getVisibleTableRows(true, false), 1);
     }
 
     /**
@@ -386,7 +406,7 @@ public abstract class AnalysisAction extends ContainerPageObject {
      * care about the type of the value part as long as it is derived from {@link java.lang.Object}.
      */
     private <T extends Object> SortedMap<String, T> getContentsOfVisibleTable(Class<T> type, boolean removeHeader, boolean removeFooter) {
-        return mapTableCellsKeyValue(type, getVisibleTableRows(removeHeader, removeFooter));
+        return mapTableCellsKeyValue(type, getVisibleTableRows(removeHeader, removeFooter), 1);
     }
 
     protected List<WebElement> getVisibleTableRows(boolean removeHeader, boolean removeFooter) {
@@ -409,7 +429,7 @@ public abstract class AnalysisAction extends ContainerPageObject {
     }
 
     private SortedMap<String, Integer> mapTableCellsKeyValue(final Collection<WebElement> rows) {
-        return mapTableCellsKeyValue(Integer.class, rows);
+        return mapTableCellsKeyValue(Integer.class, rows, 1);
     }
 
     /**
@@ -419,17 +439,17 @@ public abstract class AnalysisAction extends ContainerPageObject {
      * At the moment the only supported types are Integer and String. Calling this method for other types results in a
      * {@link java.lang.IllegalStateException}.
      */
-    private <T> SortedMap<String, T> mapTableCellsKeyValue(Class<T> type, final Collection<WebElement> rows) {
+    private <T> SortedMap<String, T> mapTableCellsKeyValue(Class<T> type, final Collection<WebElement> rows, final int index) {
         final SortedMap<String, T> result = new TreeMap<>();
         for (WebElement elem : rows) {
             final List<WebElement> cells = elem.findElements(by.xpath("./td"));
             final String key = asTrimmedString(cells.get(0));
             T value = null;
             if (type.isAssignableFrom(Integer.class)) {
-                value = type.cast(asInteger(cells.get(1)));
+                value = type.cast(asInteger(cells.get(index)));
             }
             else if (type.isAssignableFrom(String.class)) {
-                value = type.cast(asTrimmedString(cells.get(1)));
+                value = type.cast(asTrimmedString(cells.get(index)));
             }
             else {
                 throw new IllegalStateException("Parameter type (" +
@@ -536,6 +556,6 @@ public abstract class AnalysisAction extends ContainerPageObject {
     }
 
     public enum Tab {
-        MODULES, FILES, PACKAGES, WARNINGS, DETAILS, FIXED, NEW, CATEGORIES, TYPES
+        MODULES, FILES, PACKAGES, WARNINGS, DETAILS, FIXED, NEW, CATEGORIES, TYPES, AUTHORS, ORIGIN
     }
 }

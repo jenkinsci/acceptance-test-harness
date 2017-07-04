@@ -350,7 +350,7 @@ public class GitRepo implements Closeable {
         try {
             Path source = Paths.get(sourceFolder.toURI());
 
-            try (DirectoryStream<Path> paths = Files.newDirectoryStream(source)) {
+            try (DirectoryStream<Path> paths = Files.newDirectoryStream(source, entry -> !Files.isDirectory(entry))) {
                 for (Path path : paths) {
                     Files.copy(path, gitPath.resolve(path.getFileName()));
                 }
