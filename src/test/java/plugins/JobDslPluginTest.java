@@ -14,6 +14,7 @@ import org.jenkinsci.test.acceptance.update_center.PluginSpec;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.NoSuchElementException;
 
 import java.util.regex.Pattern;
 
@@ -21,12 +22,14 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeTrue;
 
 /**
  * Acceptance tests for the Job DSL plugin.
  *
- * @author Maximilian Oeckler
+ * @author Maximilian Oeckler, Kevin Beck
  */
 @WithPlugins("job-dsl")
 public class JobDslPluginTest extends AbstractJUnitTest {
@@ -815,6 +818,364 @@ public class JobDslPluginTest extends AbstractJUnitTest {
 
         generatedJob.configure(() -> generatedJob.setDescription("New Description"));
         assertThat(driver, hasContent(alert));
+    }
+
+    /**
+     * Tests whether a new job is created by JobDsl when the seed job is build.
+     */
+    @Test
+    public void should_create_new_job() {
+
+        // Arrange
+        String jobName = "MyJob";
+        String jobDslScript = String.format("job('%s')", jobName);
+        Job seed = createSeedJobWithJobDsl(jobDslScript);
+
+        // Act
+        seed.startBuild().waitUntilFinished();
+
+        // Assert
+        Job job = jenkins.jobs.get(Job.class, jobName);
+        assertThat(job, pageObjectExists());
+    }
+
+    /**
+     * Tests whether a job description is registered to a new job build by JobDsl
+     * when the seed job is build.
+     */
+    @Test
+    public void should_create_job_with_description() {
+
+        // Arrange
+        String jobName = "MyJob";
+        String jobDescription = "My sample despription";
+        String jobDslScript = String.format("job('%s') { description('%s') }", jobName, jobDescription);
+        Job seed = createSeedJobWithJobDsl(jobDslScript);
+
+        // Act
+        seed.startBuild().waitUntilFinished();
+
+        // Assert
+        Job job = jenkins.jobs.get(Job.class, jobName);
+        job.open();
+        assertThat(job.getDescription(), containsString(jobDescription));
+    }
+
+    /**
+     * Tests whether a job display name is registered to a new job build by JobDsl
+     * when the seed job is build.
+     */
+    @Test
+    public void should_create_job_with_display_name() {
+
+        // Arrange
+        String jobName = "MyJob";
+        String jobDisplayName = "My job display name";
+        String jobDslScript = String.format("job('%s') { displayName('%s') }", jobName, jobDisplayName);
+        Job seed = createSeedJobWithJobDsl(jobDslScript);
+
+        // Act
+        seed.startBuild().waitUntilFinished();
+
+        // Assert
+        Job job = jenkins.jobs.get(Job.class, jobName);
+        job.open();
+        assertThat(job.getDisplayName(), containsString(jobDisplayName));
+    }
+
+    /**
+     * Tests whether a label is set to a job created by JobDsl when a label text is set
+     * to this job and the seed job is build.
+     */
+    @Test
+    public void should_create_job_with_label() {
+
+        // Arrange
+        String jobName = "MyJob";
+        String jobLabel = "x86 && ubuntu";
+        String jobDslScript = String.format("job('%s') { label('%s') }", jobName, jobLabel);
+        Job seed = createSeedJobWithJobDsl(jobDslScript);
+
+        // Act
+        seed.startBuild().waitUntilFinished();
+
+        // Assert
+        Job job = jenkins.jobs.get(Job.class, jobName);
+        job.open();
+        job.configure();
+        WebElement labelElement = driver.findElement(By.xpath("//input[@name='_.label']"));
+        assertEquals(jobLabel, labelElement.getAttribute("value"));
+    }
+
+    /**
+     * Tests whether a job exists once when two jobs with the same name are created
+     * by JobDsl and the seed job is build.
+     */
+    @Test
+    public void should_create_just_one_job_if_two_with_same_name_are_declared() {
+
+        // Arrange
+        String jobName = "MyJob";
+        String jobDslScript = String.format("job('%s'); job('%s')", jobName, jobName);
+        Job seed = createSeedJobWithJobDsl(jobDslScript);
+
+        // Act
+        seed.startBuild().waitUntilFinished();
+
+        // Assert
+        Job job = jenkins.jobs.get(Job.class, jobName);
+        assertThat(job, pageObjectExists());
+    }
+
+    /**
+     * Tests whether a disabled job created by JobDsl doesn't offer an opportunity
+     * to start the build process and throws an NoSuchElementException when the job
+     * is tried to build.
+     */
+    @Test(expected=NoSuchElementException.class)
+    public void should_not_find_build_button() {
+
+        // Arrange
+        String jobName = "MyJob";
+        String jobDslScript = String.format("job('%s') { disabled() }", jobName);
+        Job seed = createSeedJobWithJobDsl(jobDslScript);
+
+        // Act
+        seed.startBuild().waitUntilFinished();
+        Job job = jenkins.jobs.get(Job.class, jobName);
+        job.startBuild().waitUntilFinished();
+    }
+
+    /**
+     * Tests whether a first job generated by JobDsl and a second job that is specified
+     * in first jobs dsl are created when the seed job is build.
+     */
+    @Test
+    public void should_create_two_jobs_if_first_has_own_dsl() {
+
+        // Arrange
+        String firstJobName = "Level1Job";
+        String secondJobName = "Level2Job";
+        String jobDslScript = String.format("job('%s') { steps { dsl { job('%s') } } }", firstJobName, secondJobName);
+        Job seed = createSeedJobWithJobDsl(jobDslScript);
+
+        // Act
+        seed.startBuild().waitUntilFinished();
+
+        // Assert
+        Job firstJob = jenkins.jobs.get(Job.class, firstJobName);
+        Job secondJob = jenkins.jobs.get(Job.class, secondJobName);
+        assertThat(firstJob, pageObjectExists());
+        assertThat(secondJob, pageObjectExists());
+    }
+
+    /**
+     * Tests whether a new job with template created by JobDsl exists and includes
+     * same description like the template job when the seed job is build.
+     */
+    @Test
+    public void should_create_new_job_by_using_template() {
+
+        // Arrange
+        String testedJobName = "MyJob";
+        String jobDescription = "My sample despription";
+        Job templateJob = jenkins.jobs.create(FreeStyleJob.class, "Template");
+        templateJob.configure();
+        Control descriptionControl = templateJob.control(by.name("description"));
+        descriptionControl.set(jobDescription);
+        templateJob.save();
+        String jobDslScript = String.format("job('%s') { using('%s') }", testedJobName, templateJob.name);
+        Job seed = createSeedJobWithJobDsl(jobDslScript);
+
+        // Act
+        seed.startBuild().waitUntilFinished();
+
+        // Assert
+        Job job = jenkins.jobs.get(Job.class, testedJobName);
+        job.open();
+        assertThat(job.getDescription(), containsString(jobDescription));
+    }
+
+    /**
+     * Tests whether an existing job is renamed by a new job with previous names attribute regex
+     * created by JobDsl when the seed job is build.
+     */
+    @Test
+    public void should_replace_old_job_with_regex() {
+
+        // Arrange
+        String oldJobName = "MyJob01";
+        String newJobName = "MyJob02";
+        String renameRegex = "/MyJob\\d+/";
+        jenkins.jobs.create(FreeStyleJob.class, oldJobName);
+        String jobDslScript = String.format("job('%s') { previousNames( %s ) }", newJobName, renameRegex);
+        Job seed = createSeedJobWithJobDsl(jobDslScript);
+
+        // Act
+        seed.startBuild().waitUntilFinished();
+
+        // Assert
+        Job job = jenkins.jobs.get(Job.class, newJobName);
+        Job oldJob = jenkins.jobs.get(Job.class, oldJobName);
+        assertThat(job, pageObjectExists());
+        assertThat(oldJob, pageObjectDoesNotExist());
+        assertEquals(newJobName, job.name);
+    }
+
+    /**
+     * Tests whether two builds are in progress at the same time of a new job with
+     * concurrent build attribute created by JobDsl when the seed job is build and two
+     * builds are triggered.
+     */
+    @Test
+    public void should_run_two_concurrent_builds() {
+
+        // Arrange
+        String jobName = "MyJob";
+        String jobDslScript = String.format("job('%s') { concurrentBuild(); steps { shell('sleep 10') } }", jobName);
+        Job seed = createSeedJobWithJobDsl(jobDslScript);
+
+        // Act
+        seed.startBuild().waitUntilFinished();
+        Job job = jenkins.jobs.get(Job.class, jobName);
+        Build firstBuild = job.scheduleBuild().waitUntilStarted();
+        Build secondBuild = job.scheduleBuild().waitUntilStarted();
+
+        // Assert
+        assertTrue(firstBuild.isInProgress());
+        assertTrue(secondBuild.isInProgress());
+        firstBuild.stop();
+        secondBuild.stop();
+    }
+
+    /**
+     * Tests whether a build display name is registered to a build of a job created by JobDsl
+     * when a build name is set to this job and the seed job and this job are build.
+     */
+    @Test
+    @WithPlugins("build-name-setter")
+    public void should_create_build_with_given_name() {
+
+        // Arrange
+        String jobName = "MyJob";
+        String buildName = "MyBuild";
+        String jobDslScript = String.format("job('%s') { wrappers { buildName('%s') } }", jobName, buildName);
+        Job seed = createSeedJobWithJobDsl(jobDslScript);
+
+        // Act
+        seed.startBuild().waitUntilFinished();
+        Job job = jenkins.jobs.get(Job.class, jobName);
+        Build build = job.startBuild().waitUntilFinished();
+
+        // Assert
+        build.open();
+        assertThat(build.getDisplayName(), containsString(buildName));
+    }
+
+    /**
+     * Tests whether a custom workspace is set to a build of a job created by JobDsl when a
+     * custom workspace path is set to this job and the seed job and this job are build.
+     */
+    @Test
+    public void should_create_job_with_custom_workspace() {
+
+        // Arrange
+        String jobName = "MyJob";
+        String customWorkspace = "/tmp/my-workspace";
+        String jobDslScript = String.format("job('%s') { customWorkspace('%s') }", jobName, customWorkspace);
+        Job seed = createSeedJobWithJobDsl(jobDslScript);
+
+        // Act
+        seed.startBuild().waitUntilFinished();
+        Job job = jenkins.jobs.get(Job.class, jobName);
+        Build build = job.startBuild().waitUntilFinished();
+
+        // Assert
+        assertThat(build.getConsole(), containsString(customWorkspace));
+    }
+
+    /**
+     * Tests whether an environment variable is set to a build of a job created by JobDsl when
+     * an environment variable is set to this job and the seed job and this job are build.
+     */
+    @Test
+    @WithPlugins("envinject")
+    public void should_create_build_with_environment_variable() {
+
+        // Arrange
+        String jobName = "MyJob";
+        String envVariableKey = "FOO";
+        String envVariableValue = "test";
+        String jobDslScript= String.format("job('%s') { environmentVariables(%s: '%s') }",
+                jobName, envVariableKey, envVariableValue);
+        Job seed = createSeedJobWithJobDsl(jobDslScript);
+
+        // Act
+        seed.startBuild().waitUntilFinished();
+        Job job = jenkins.jobs.get(Job.class, jobName);
+        Build build = job.startBuild().waitUntilFinished();
+
+        // Assert
+        build.open();
+        driver.findElement(By.partialLinkText("Environment Variables")).click();
+        assertThat(driver, hasElement(by.xpath(String.format("//tr/td[contains(text(), '%s')]", envVariableKey))));
+    }
+
+    /**
+     * Tests whether a sidebar link is set to a job created by JobDsl when a link url and link label
+     * are set to this job and the seed job is build.
+     */
+    @Test
+    @WithPlugins("sidebar-link")
+    public void should_create_job_with_sidebar_link() {
+
+        // Arrange
+        String jobName = "MyJob";
+        String linkUrl = "https://jenkins.io";
+        String linkLabel = "jenkins.io";
+        String jobDslScript = String.format("job('%s') { properties { sidebarLinks { link('%s', '%s') } } }",
+                jobName, linkUrl, linkLabel);
+        Job seed = createSeedJobWithJobDsl(jobDslScript);
+
+        // Act
+        seed.startBuild().waitUntilFinished();
+        Job job = jenkins.jobs.get(Job.class, jobName);
+
+        // Assert
+        job.open();
+        assertThat(driver, hasElement(by.href(linkUrl)));
+    }
+
+    /**
+     * Tests whether a github project is set to a job created by JobDsl when a github repository name
+     * is set to this job and the seed job is build.
+     */
+    @Test
+    @WithPlugins("git")
+    public void should_create_job_with_github_repository() {
+
+        // Arrange
+        String jobName = "MyJob";
+        String gitProject = "jenkinsci/job-dsl-plugin";
+        String hrefLocator = "https://github.com/jenkinsci/job-dsl-plugin/";
+        Job seed = createSeedJobWithJobDsl(String.format("job('%s') { scm { github('%s') } }", jobName, gitProject));
+
+        // Act
+        seed.startBuild().waitUntilFinished();
+        Job job = jenkins.jobs.get(Job.class, jobName);
+
+        // Assert
+        job.open();
+        assertThat(driver, hasElement(by.href(hrefLocator)));
+    }
+
+    private Job createSeedJobWithJobDsl(String jobDsl) {
+        Job seed = jenkins.jobs.create(FreeStyleJob.class, "Seed");
+        JobDslBuildStep jobDslBuildStep = seed.addBuildStep(JobDslBuildStep.class);
+        jobDslBuildStep.setScript(jobDsl);
+        seed.save();
+
+        return seed;
     }
 
     private FreeStyleJob createSeedJob() {

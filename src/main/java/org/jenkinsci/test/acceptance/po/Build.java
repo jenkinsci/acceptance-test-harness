@@ -14,6 +14,8 @@ import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.Wait;
 import com.fasterxml.jackson.databind.JsonNode;
+import org.openqa.selenium.Alert;
+import org.openqa.selenium.WebElement;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
@@ -299,6 +301,26 @@ public class Build extends ContainerPageObject {
      */
     public String getName() {
         return job.name + " #" + getNumber();
+    }
+
+    public String getDisplayName() {
+        WebElement displayNameElement = find(by.xpath("//*[@id=\"main-panel\"]/h1"));
+        return displayNameElement.getText();
+    }
+
+    /**
+     * Stops the build if it's in progress.
+     */
+    public void stop() {
+        open();
+
+        if (isInProgress()) {
+            WebElement stopButton = find(by.href("stop"));
+            stopButton.click();
+
+            Alert alt = driver.switchTo().alert();
+            alt.accept();
+        }
     }
 
     @Override

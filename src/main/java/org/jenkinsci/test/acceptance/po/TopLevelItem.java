@@ -58,6 +58,11 @@ public abstract class TopLevelItem extends ContainerPageObject {
         }
     }
 
+    public String getDescription() {
+        WebElement descriptionElement = find(by.xpath("//*[@id=\"description\"]/div[1]"));
+        return descriptionElement.getText();
+    }
+
     /**
      * Changes the description. Opens the configuration section, sets the description and saves the form.
      *
@@ -84,6 +89,11 @@ public abstract class TopLevelItem extends ContainerPageObject {
             descrElem.clear();
             descrElem.sendKeys(description);
         }
+    }
+
+    public String getDisplayName() {
+        WebElement displayNameElement = find(by.xpath("//*[@id=\"main-panel\"]/h1"));
+        return displayNameElement.getText();
     }
 
     /**
