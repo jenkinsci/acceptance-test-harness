@@ -96,14 +96,14 @@ public class GitRepo implements Closeable {
         }
     }
 
-    public void git(Object... args) {
-        gitDir(this.dir, args);
+    public String git(Object... args) {
+        return gitDir(this.dir, args);
     }
 
     /**
      * Execute git command in specified directory.
      */
-    public void gitDir(File dir, Object... args) {
+    public String gitDir(File dir, Object... args) {
         List<String> cmds = new ArrayList<>();
         cmds.add("git");
         for (Object a : args) {
@@ -116,13 +116,27 @@ public class GitRepo implements Closeable {
 
         String errorMessage = cmds + " failed";
         try {
-            int r = pb.directory(dir)
+            Process p = pb.directory(dir)
                     .redirectInput(INHERIT)
                     .redirectError(INHERIT)
-                    .redirectOutput(INHERIT).start().waitFor();
+                    .start();
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            StringBuilder builder = new StringBuilder();
+            String line;
+
+            while ( (line = reader.readLine()) != null) {
+                builder.append(line);
+                builder.append(System.getProperty("line.separator"));
+            }
+
+            int r = p.waitFor();
             if (r != 0) {
                 throw new AssertionError(errorMessage);
             }
+
+            return builder.toString();
+
         } catch (InterruptedException | IOException e) {
             throw new AssertionError(errorMessage, e);
         }
@@ -161,6 +175,19 @@ public class GitRepo implements Closeable {
         } catch (IOException e) {
             throw new AssertionError("Can't change file " + fileName, e);
         }
+    }
+
+    /**
+     * Get sha1 hash of the most recent commit.
+     *
+     * @return Hash value
+     */
+    public String getLastSha1() {
+        return git("rev-parse", "HEAD").trim();
+    }
+
+    public void checkout(String name) {
+        git("checkout", name);
     }
 
     /**
