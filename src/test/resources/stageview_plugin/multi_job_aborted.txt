@@ -1,0 +1,8 @@
+node {
+    stage ('Clone sources'){
+           echo 'cloned'
+    }
+    stage ('Unstable') {
+            currentBuild.result = 'ABORTED'
+    }
+}
