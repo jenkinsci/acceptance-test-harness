@@ -15,9 +15,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jenkinsci.test.acceptance.SshKeyPair;
-import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
-import org.jenkinsci.test.acceptance.docker.fixtures.JavaContainer;
-import org.jenkinsci.test.acceptance.docker.fixtures.SshdContainer;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithDocker;
@@ -28,7 +25,6 @@ import org.jenkinsci.test.acceptance.plugins.envinject.EnvInjectConfig;
 import org.jenkinsci.test.acceptance.plugins.matrix_auth.MatrixAuthorizationStrategy;
 import org.jenkinsci.test.acceptance.plugins.mock_security_realm.MockSecurityRealm;
 import org.jenkinsci.test.acceptance.plugins.script_security.ScriptApproval;
-import org.jenkinsci.test.acceptance.plugins.ssh_slaves.SshSlaveLauncher;
 import org.jenkinsci.test.acceptance.plugins.warnings.GroovyParser;
 import org.jenkinsci.test.acceptance.plugins.warnings.ParsersConfiguration;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsAction;
@@ -60,11 +56,10 @@ import org.openqa.selenium.WebElement;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.is;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 import static org.jenkinsci.test.acceptance.po.PageObject.*;
-import static org.junit.Assert.*;
 
 /**
  * Tests various aspects of the warnings plug-in. Most tests copy an existing file with several warnings into the
@@ -113,8 +108,6 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
     @Inject
     SshKeyPair keyPair;
 
-    @Inject
-    private DockerContainerHolder<JavaContainer> dockerContainer;
 
     @Test @WithDocker
     public void should_have_correct_details() throws ExecutionException, InterruptedException {
@@ -149,7 +142,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
     }
 
     private WarningsAction getWarningsAction(Resource resource, String command) {
-        DumbSlave dockerSlave = getDockerSlave(dockerContainer.get());
+        DumbSlave dockerSlave = createDockerAgent();
         FreeStyleJob job = prepareDockerSlave(dockerSlave);
 
         job.configure();
@@ -185,7 +178,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
 
     @Test @WithDocker
     public void should_scan_console_log_of_slave_build() throws ExecutionException, InterruptedException {
-        DumbSlave dockerSlave = getDockerSlave(dockerContainer.get());
+        DumbSlave dockerSlave = createDockerAgent();
         FreeStyleJob job = prepareDockerSlave(dockerSlave);
 
         job.configure();
@@ -212,7 +205,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
 
     @Test @WithDocker
     public void should_scan_files_on_slave(){
-        DumbSlave dockerSlave = getDockerSlave(dockerContainer.get());
+        DumbSlave dockerSlave = createDockerAgent();
         FreeStyleJob job = prepareDockerSlave(dockerSlave);
 
         job.configure();
@@ -228,9 +221,9 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         assertThat(driver, hasContent("Java Warnings: " + 2));
     }
 
-    @Test @Issue("JENKINS-17787") @WithDocker @Ignore("Reproduces JENKINS-17787")
+    @Test @Issue("JENKINS-17787") @WithPlugins("violations") @WithDocker @Ignore("Reproduces JENKINS-17787")
     public void should_parse_codenarc_on_slave() {
-        DumbSlave dockerSlave = getDockerSlave(dockerContainer.get());
+        DumbSlave dockerSlave = createDockerAgent();
         FreeStyleJob job = prepareDockerSlave(dockerSlave);
         assertThatCodeNarcActionExists(job);
     }
@@ -255,32 +248,6 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         assertThatActionExists(job, build, "Codenarc Warnings");
     }
 
-
-    /**
-     * Create a Slave with the supplied Docker Container
-     * @param container     SshContainer for Slave to live in
-     * @return
-     */
-    private DumbSlave getDockerSlave(SshdContainer container){
-        DumbSlave slave = jenkins.slaves.create(DumbSlave.class);
-
-        slave.setExecutors(1);
-        slave.remoteFS.set("/tmp/");
-        SshSlaveLauncher launcher = slave.setLauncher(SshSlaveLauncher.class);
-
-        launcher.host.set(container.ipBound(22));
-        launcher.port(container.port(22));
-        launcher.setSshHostKeyVerificationStrategy(SshSlaveLauncher.NonVerifyingKeyVerificationStrategy.class);
-        launcher.keyCredentials("test", container.getPrivateKeyString());
-
-        slave.save();
-
-        slave.waitUntilOnline();
-
-        assertTrue(slave.isOnline());
-
-        return slave;
-    }
 
     /**
      * Create {@link FreeStyleJob} and build once to create Workspace on Slave

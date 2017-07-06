@@ -1,10 +1,8 @@
 package plugins;
 
-import javax.inject.Inject;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
 import org.jenkinsci.test.acceptance.junit.WithCredentials;
 import org.jenkinsci.test.acceptance.junit.WithDocker;
@@ -23,6 +21,7 @@ import org.jenkinsci.test.acceptance.plugins.parameterized_trigger.TriggerCallBu
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Build.Result;
 import org.jenkinsci.test.acceptance.po.Container;
+import org.jenkinsci.test.acceptance.po.DumbSlave;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.Node;
@@ -57,23 +56,23 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
     private static final String KEY_FILENAME = "/org/jenkinsci/test/acceptance/docker/fixtures/GitContainer/unsafe";
     private static final String SAMPLE_CHECKSTYLE_PROJECT = "sample_checkstyle_project";
 
-    @Inject
-    DockerContainerHolder<GitContainer> gitServer;
-
     @Test @WithPlugins("git") @WithDocker @Issue("JENKINS-33162")
-    @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY,
-            values = {CREDENTIALS_ID, KEY_FILENAME})
+    @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {CREDENTIALS_ID, KEY_FILENAME})
     public void should_show_warnings_per_user() {
+        DumbSlave slave = createDockerAgent();
+
         String gitRepositoryUrl = createGitRepositoryInDockerContainer();
 
         FreeStyleJob job = createJob(jenkins, CHECKSTYLE_PLUGIN_ROOT + SAMPLE_CHECKSTYLE_PROJECT,
                 FreeStyleJob.class, CheckStyleFreestyleSettings.class,
                 settings -> settings.pattern.set("target/checkstyle-result.xml"));
         setMavenGoal(job, "clean package checkstyle:checkstyle");
+
         job.configure(() -> {
             job.useScm(GitScm.class)
                     .url(gitRepositoryUrl)
                     .credentials(CREDENTIALS_ID);
+            job.setLabelExpression(slave.getName());
         });
 
         buildSuccessfulJob(job);
@@ -101,7 +100,6 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
         expectedOrigin.put("Main.java:24", "Jenkins-ATH");
         expectedOrigin.put("Main.java:27", "Jenkins-ATH");
         assertThat(action.getOriginTabContentsAsStrings(), is(expectedOrigin));
-
     }
 
     private String createGitRepositoryInDockerContainer() {
@@ -119,7 +117,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
         repo.addFilesIn(CHECKSTYLE_PLUGIN_ROOT + SAMPLE_CHECKSTYLE_PROJECT);
         repo.commit("POM commit.");
 
-        GitContainer container = gitServer.get();
+        GitContainer container = dockerContainer.get();
         repo.transferToDockerContainer(container.host(), container.port());
 
         return container.getRepoUrl();

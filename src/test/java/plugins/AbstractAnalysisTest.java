@@ -15,6 +15,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.xerces.jaxp.DocumentBuilderFactoryImpl;
 import org.custommonkey.xmlunit.Diff;
@@ -23,6 +24,8 @@ import org.custommonkey.xmlunit.DifferenceConstants;
 import org.custommonkey.xmlunit.DifferenceListener;
 import org.custommonkey.xmlunit.XMLAssert;
 import org.custommonkey.xmlunit.XMLUnit;
+import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
+import org.jenkinsci.test.acceptance.docker.fixtures.JavaGitContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Since;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
@@ -39,8 +42,10 @@ import org.jenkinsci.test.acceptance.plugins.maven.MavenBuildStep;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.plugins.nested_view.NestedView;
+import org.jenkinsci.test.acceptance.plugins.ssh_slaves.SshSlaveLauncher;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Container;
+import org.jenkinsci.test.acceptance.po.DumbSlave;
 import org.jenkinsci.test.acceptance.po.Folder;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
@@ -65,8 +70,8 @@ import com.google.inject.Inject;
 import static java.util.Collections.*;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Base class for tests of the static analysis plug-ins. Contains several generic test cases that run for all
@@ -81,6 +86,45 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
  */
 public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends AbstractJUnitTest {
     private static final List<String> PRIORITIES = Arrays.asList("HIGH", "LOW", "NORMAL");
+
+    @Inject
+    protected DockerContainerHolder<JavaGitContainer> dockerContainer;
+
+    /**
+     * Creates an agent in a Docker container.
+     *
+     * @return the new agent ready for new builds
+     */
+    protected DumbSlave createDockerAgent() {
+        DumbSlave slave = jenkins.slaves.create(DumbSlave.class);
+
+        slave.setExecutors(1);
+        slave.remoteFS.set("/tmp/");
+        SshSlaveLauncher launcher = slave.setLauncher(SshSlaveLauncher.class);
+
+        JavaGitContainer container = dockerContainer.get();
+        launcher.host.set(container.ipBound(22));
+        launcher.port(container.port(22));
+        launcher.setSshHostKeyVerificationStrategy(SshSlaveLauncher.NonVerifyingKeyVerificationStrategy.class);
+
+        launcher.keyCredentials("test", key());
+
+        slave.save();
+
+        slave.waitUntilOnline();
+
+        assertThat(slave.isOnline(), is(true));
+
+        return slave;
+    }
+
+    private String key() {
+        try {
+            return IOUtils.toString(JavaGitContainer.class.getResourceAsStream("JavaGitContainer/unsafe"));
+        } catch (IOException ex) {
+            throw new AssertionError(ex);
+        }
+    }
 
     /**
      * Checks that the plug-in sends a mail after a build has been failed. The content of the mail contains several
