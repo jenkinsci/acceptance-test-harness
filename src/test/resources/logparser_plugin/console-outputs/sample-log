@@ -1,0 +1,75 @@
+[INFO] Scanning for projects...
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building Acceptance Test Harness 1.55-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] --- maven-enforcer-plugin:1.0.1:enforce (enforce-maven) @ acceptance-test-harness ---
+[INFO] 
+[INFO] --- maven-enforcer-plugin:1.0.1:display-info (display-info) @ acceptance-test-harness ---
+[INFO] Maven Version: 3.3.9
+[INFO] JDK Version: 1.8.0_121 normalized as: 1.8.0-121
+[INFO] OS Info: Arch: amd64 Family: unix Name: linux Version: 4.8.0-36-generic
+[INFO] 
+[INFO] --- gmaven-plugin:1.5-jenkins-3:generateStubs (default) @ acceptance-test-harness ---
+[INFO] No sources found for Java stub generation
+[INFO] 
+[INFO] --- maven-antrun-plugin:1.7:run (default) @ acceptance-test-harness ---
+[INFO] Executing tasks
+
+main:
+[INFO] Executed tasks
+[INFO] 
+[INFO] --- maven-resources-plugin:2.5:resources (default-resources) @ acceptance-test-harness ---
+[debug] execute contextualize
+[WARNING] Using platform encoding (UTF-8 actually) to copy filtered resources, i.e. build is platform dependent!
+[INFO] Copying 49 resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.2:compile (default-compile) @ acceptance-test-harness ---
+[INFO] Changes detected - recompiling the module!
+[WARNING] File encoding has not been set, using platform encoding UTF-8, i.e. build is platform dependent!
+[INFO] Compiling 457 source files to /home/daniel/acceptance-test-harness/target/classes
+[INFO] /home/daniel/acceptance-test-harness/src/main/java/org/jenkinsci/test/acceptance/update_center/PluginMetadata.java: Some input files use or override a deprecated API.
+[INFO] /home/daniel/acceptance-test-harness/src/main/java/org/jenkinsci/test/acceptance/update_center/PluginMetadata.java: Recompile with -Xlint:deprecation for details.
+[INFO] /home/daniel/acceptance-test-harness/src/main/java/org/jenkinsci/test/acceptance/po/TopLevelItem.java: Some input files use unchecked or unsafe operations.
+[INFO] /home/daniel/acceptance-test-harness/src/main/java/org/jenkinsci/test/acceptance/po/TopLevelItem.java: Recompile with -Xlint:unchecked for details.
+[INFO] 
+[INFO] --- gmaven-plugin:1.5-jenkins-3:compile (default) @ acceptance-test-harness ---
+[INFO] No sources found to compile
+[INFO] 
+[INFO] --- gmaven-plugin:1.5-jenkins-3:generateTestStubs (default) @ acceptance-test-harness ---
+[INFO] No sources found for Java stub generation
+[INFO] 
+[INFO] --- maven-resources-plugin:2.5:testResources (default-testResources) @ acceptance-test-harness ---
+[debug] execute contextualize
+[WARNING] Using platform encoding (UTF-8 actually) to copy filtered resources, i.e. build is platform dependent!
+[INFO] Copying 150 resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.2:testCompile (default-testCompile) @ acceptance-test-harness ---
+[INFO] Changes detected - recompiling the module!
+[WARNING] File encoding has not been set, using platform encoding UTF-8, i.e. build is platform dependent!
+[INFO] Compiling 112 source files to /home/daniel/acceptance-test-harness/target/test-classes
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /home/daniel/acceptance-test-harness/src/test/java/plugins/LogParserTest.java:[45,9] not a statement
+[ERROR] /home/daniel/acceptance-test-harness/src/test/java/plugins/LogParserTest.java:[45,14] ';' expected
+[INFO] 2 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 24.871 s
+[INFO] Finished at: 2017-05-18T16:14:58+02:00
+[INFO] Final Memory: 43M/385M
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.2:testCompile (default-testCompile) on project acceptance-test-harness: Compilation failure: Compilation failure:
+[ERROR] /home/daniel/acceptance-test-harness/src/test/java/plugins/LogParserTest.java:[45,9] not a statement
+[ERROR] /home/daniel/acceptance-test-harness/src/test/java/plugins/LogParserTest.java:[45,14] ';' expected
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

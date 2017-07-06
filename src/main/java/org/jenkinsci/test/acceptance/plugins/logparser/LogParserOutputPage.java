@@ -5,6 +5,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * The logparser plugin uses two frames.
@@ -96,6 +98,51 @@ public class LogParserOutputPage extends PageObject {
         try {
             switchToFrame(LogParserFrame.SIDEBAR);
             return driver.findElements(By.xpath("//ul[@id='" + category + "']/li"));
+        } finally {
+            switchToDefaultContent();
+        }
+    }
+
+    /**
+     * Get the fragment part of the URL of the content frame after a link in the sidebar was clicked.
+     * @param category The parser category of the link.
+     * @param index The index of the link in the category, starting with 1.
+     * @return The fragment part of the URL.
+     * @throws Exception There is no such link.
+     */
+    public String getFragmentOfContentFrame(String category, int index) throws Exception {
+        try {
+            switchToFrame(LogParserFrame.SIDEBAR);
+            driver.findElement(By.partialLinkText(category)).click();
+            driver.findElement(By.xpath("//ul[@id='" + category + "']/li[" + index + "]/a")).click();
+            switchToDefaultContent();
+            switchToFrame(LogParserFrame.CONTENT);
+            String[] parts = getCurrentUrlWithFragment().split("#");
+            return parts[parts.length - 1];
+        } finally {
+            switchToDefaultContent();
+        }
+    }
+
+    /**
+     * Get the color of the text identified by logparser.
+     * @param category The category of the logparser.
+     * @param index The index of matches for this category, starting by 1.
+     * @return The color of the text.
+     * @throws Exception The text couldn't be found.
+     */
+    public String getColor(String category, int index) throws Exception {
+        try {
+            switchToFrame(LogParserFrame.CONTENT);
+            WebElement span = driver.findElement(
+                    By.xpath("//a[@name='" + category.toUpperCase() + index + "']/following-sibling::span[1]"));
+            Pattern colorPattern = Pattern.compile("color: (\\S*);");
+            Matcher match = colorPattern.matcher(span.getAttribute("style"));
+            if (match.find()) {
+                return match.group(1);
+            } else {
+                return "";
+            }
         } finally {
             switchToDefaultContent();
         }
