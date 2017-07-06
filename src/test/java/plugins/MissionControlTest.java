@@ -1,25 +1,26 @@
 package plugins;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.jenkinsci.test.acceptance.Matchers.containsString;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.mission_control.MissionControlView;
+import org.jenkinsci.test.acceptance.po.DumbSlave;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.junit.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
-
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.jenkinsci.test.acceptance.Matchers.*;
 
 @WithPlugins("mission-control-view")
 public class MissionControlTest extends AbstractJUnitTest {
 
     /**
-     * Test Case:
-     * Check the existence and size of the build history, as well as the correct highlighting of the builds.
+     * Test Case: Check the existence and size of the build history, as well as
+     * the correct highlighting of the builds.
      */
     @Test
     public void testBuildHistory() {
@@ -64,9 +65,8 @@ public class MissionControlTest extends AbstractJUnitTest {
         assertThat(view.getBuildHistoryArea().getSuccessfulBuildsOfJob(strSimpleJob), hasSize(historySize - 1));
     }
 
-    /****
-     * Test Case:
-     * Check the correct highlighting of different jobs statuses.
+    /**
+     * Test Case: Check the correct highlighting of different jobs statuses.
      */
     @Test
     public void testJobStatuses() {
@@ -97,5 +97,57 @@ public class MissionControlTest extends AbstractJUnitTest {
         assertThat(view.getJobStatusArea().getStatusOfJob(strJobNotBuild), containsString("invert-text-color"));
         assertThat(view.getJobStatusArea().getStatusOfJob(strBuildSuccess), containsString("success"));
         assertThat(view.getJobStatusArea().getStatusOfJob(strBuildFailed), containsString("danger"));
+    }
+
+    /**
+     * Test the correct highlighting of jenkins nodes.
+     */
+    @Test
+    public void testNodeStatuses() {
+        MissionControlView view = jenkins.views.create(MissionControlView.class, "mission-control-sample-view");
+        view.configure(() -> view.setHideNodes(true));
+
+        view.open();
+        assertThat(driver, not(hasContent("Nodes")));
+
+        DumbSlave slave = jenkins.slaves.create(DumbSlave.class, "test");
+        slave.configure(() -> slave.setExecutors(15));
+
+        view.configure(() -> view.setHideNodes(false));
+
+        view.open();
+        assertThat(view.getNodeStatusArea().getNumberOfNodes(), is(2));
+        assertThat(view.getNodeStatusArea().getStatusOfNode("test / 15"), containsString("danger"));
+        assertThat(view.getNodeStatusArea().getStatusOfNode("master / 2"), containsString("success"));
+    }
+
+    /**
+     * Test the existence and number of builds in the queue.
+     */
+    @Test
+    public void testBuildQueue() {
+        MissionControlView view = jenkins.views.create(MissionControlView.class, "mission-control-sample-view");
+        view.configure(() -> view.setHideBuildQueue(true));
+
+        view.open();
+        assertThat(driver, not(hasContent("Build queue")));
+
+        view.configure(() -> view.setHideBuildQueue(false));
+
+        JenkinsConfig master = jenkins.getConfigPage();
+        master.configure(() -> master.labels.set("notQueued"));
+
+        FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class, "queuedJob");
+        job.configure(() -> job.setLabelExpression("queued"));
+        job.scheduleBuild();
+
+        view.open();
+        assertThat(view.getBuildQueueArea().getBuildQueueSize(), is(1));
+
+        job.configure(() -> job.setLabelExpression("notQueued"));
+        job.getLastBuild().waitUntilFinished();
+
+        view.open();
+        assertThat(view.getBuildQueueArea().getBuildQueueSize(), is(0));
     }
 }
