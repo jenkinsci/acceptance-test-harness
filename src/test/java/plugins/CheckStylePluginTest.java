@@ -34,6 +34,7 @@ import org.openqa.selenium.By;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisAction.Origin.*;
 import static org.junit.Assume.*;
 
 /**
@@ -52,14 +53,14 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
     private static final int TOTAL_NUMBER_OF_WARNINGS = 776;
 
     // TODO: pull up
-    private static final String CREDENTIALS_ID = "checkstyle";
+    private static final String CREDENTIALS_ID = "git";
     private static final String KEY_FILENAME = "/org/jenkinsci/test/acceptance/docker/fixtures/GitContainer/unsafe";
     private static final String SAMPLE_CHECKSTYLE_PROJECT = "sample_checkstyle_project";
 
     @Test @WithPlugins("git") @WithDocker @Issue("JENKINS-33162")
     @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {CREDENTIALS_ID, KEY_FILENAME})
     public void should_show_warnings_per_user() {
-        DumbSlave slave = createDockerAgent();
+        DumbSlave slave = createDockerAgent(CREDENTIALS_ID);
 
         String gitRepositoryUrl = createGitRepositoryInDockerContainer();
 
@@ -76,6 +77,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
         });
 
         buildSuccessfulJob(job);
+
         CheckStyleAction action = new CheckStyleAction(job);
         action.open();
 
@@ -99,7 +101,20 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
         expectedOrigin.put("Main.java:23", "Jenkins-ATH");
         expectedOrigin.put("Main.java:24", "Jenkins-ATH");
         expectedOrigin.put("Main.java:27", "Jenkins-ATH");
-        assertThat(action.getOriginTabContentsAsStrings(), is(expectedOrigin));
+        assertThat(action.getOriginTabContentsAsStrings(AUTHOR), is(expectedOrigin));
+
+        assertThatAgeIsAt(action, expectedOrigin, 1);
+
+        buildSuccessfulJob(job);
+
+        assertThatAgeIsAt(action, expectedOrigin, 2);
+    }
+
+    private void assertThatAgeIsAt(CheckStyleAction action, SortedMap<String, String> expectedOrigin, final int age) {
+        for (String key : expectedOrigin.keySet()) {
+            expectedOrigin.put(key, String.valueOf(age));
+        }
+        assertThat(action.getOriginTabContentsAsStrings(AGE), is(expectedOrigin));
     }
 
     private String createGitRepositoryInDockerContainer() {

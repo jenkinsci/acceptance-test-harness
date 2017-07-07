@@ -1,15 +1,16 @@
 package org.jenkinsci.test.acceptance.plugins.ssh_slaves;
 
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import org.jenkinsci.test.acceptance.plugins.credentials.UserPwdCredential;
 import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshCredentialDialog;
 import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshPrivateKeyCredential;
-import org.jenkinsci.test.acceptance.po.*;
-import org.openqa.selenium.By;
+import org.jenkinsci.test.acceptance.po.ComputerLauncher;
+import org.jenkinsci.test.acceptance.po.Control;
+import org.jenkinsci.test.acceptance.po.Describable;
+import org.jenkinsci.test.acceptance.po.PageObject;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -98,7 +99,17 @@ public class SshSlaveLauncher extends ComputerLauncher {
                 credentialsId.resolve().getText().contains(credUsername))
         );
         // Select the new credentials. Control.selectDropdownMenu seems to be YUI-only.
-        credentialsId.select(credUsername);
+        selectCredentials(credUsername);
+    }
+
+    /**
+     * Select the credentials to use by ID. The credentials need to be created before this method
+     * is invoked, e.g. using the {@code @WithCredentials} annotation.
+     *
+     * @param credentialsId the ID of the credentials to use
+     */
+    public void selectCredentials(final String credentialsId) {
+        this.credentialsId.select(credentialsId);
     }
 
     public void setSshHostKeyVerificationStrategy(Class<? extends SshHostKeyVerificationStrategy> type) {

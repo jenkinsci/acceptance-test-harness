@@ -93,9 +93,10 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
     /**
      * Creates an agent in a Docker container.
      *
+     * @param credentialsId the SSH credentials ID
      * @return the new agent ready for new builds
      */
-    protected DumbSlave createDockerAgent() {
+    protected DumbSlave createDockerAgent(String credentialsId) {
         DumbSlave slave = jenkins.slaves.create(DumbSlave.class);
 
         slave.setExecutors(1);
@@ -106,8 +107,7 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
         launcher.host.set(container.ipBound(22));
         launcher.port(container.port(22));
         launcher.setSshHostKeyVerificationStrategy(SshSlaveLauncher.NonVerifyingKeyVerificationStrategy.class);
-
-        launcher.keyCredentials("test", key());
+        launcher.selectCredentials(credentialsId);
 
         slave.save();
 

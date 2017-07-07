@@ -67,6 +67,7 @@ import static org.jenkinsci.test.acceptance.po.PageObject.*;
  */
 @WithPlugins("warnings")
 public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
+    private static final String CREDENTIALS_ID = "warnings";
     private static final String RESOURCES = "/warnings_plugin/";
     /** Contains warnings for Javac parser. Warnings have file names preset for include/exclude filter tests. */
     private static final String WARNINGS_FILE_FOR_INCLUDE_EXCLUDE_TESTS = RESOURCES + "warningsForRegEx.txt";
@@ -142,7 +143,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
     }
 
     private WarningsAction getWarningsAction(Resource resource, String command) {
-        DumbSlave dockerSlave = createDockerAgent();
+        DumbSlave dockerSlave = createDockerAgent(CREDENTIALS_ID);
         FreeStyleJob job = prepareDockerSlave(dockerSlave);
 
         job.configure();
@@ -178,7 +179,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
 
     @Test @WithDocker
     public void should_scan_console_log_of_slave_build() throws ExecutionException, InterruptedException {
-        DumbSlave dockerSlave = createDockerAgent();
+        DumbSlave dockerSlave = createDockerAgent(CREDENTIALS_ID);
         FreeStyleJob job = prepareDockerSlave(dockerSlave);
 
         job.configure();
@@ -205,7 +206,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
 
     @Test @WithDocker
     public void should_scan_files_on_slave(){
-        DumbSlave dockerSlave = createDockerAgent();
+        DumbSlave dockerSlave = createDockerAgent(CREDENTIALS_ID);
         FreeStyleJob job = prepareDockerSlave(dockerSlave);
 
         job.configure();
@@ -223,7 +224,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
 
     @Test @Issue("JENKINS-17787") @WithPlugins("violations") @WithDocker @Ignore("Reproduces JENKINS-17787")
     public void should_parse_codenarc_on_slave() {
-        DumbSlave dockerSlave = createDockerAgent();
+        DumbSlave dockerSlave = createDockerAgent(CREDENTIALS_ID);
         FreeStyleJob job = prepareDockerSlave(dockerSlave);
         assertThatCodeNarcActionExists(job);
     }

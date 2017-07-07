@@ -342,13 +342,16 @@ public abstract class AnalysisAction extends ContainerPageObject {
     }
 
     /**
-     * Returns the first two columns of the "Warnings"-tab as key => value pairs, skipping the header row.
+     * Returns the first and the specified columns of the "Origin"-tab as key => value pairs,
+     * skipping the header row.
      *
-     * @return a map of the first two columns. (first column => second column)
+     * @param selectedColumn the column to extract
+     * @return a map of the specified two columns. (first column => selectedColumn)
      */
-    public SortedMap<String, String> getOriginTabContentsAsStrings() {
+    public SortedMap<String, String> getOriginTabContentsAsStrings(final Origin selectedColumn) {
         openTab(Tab.ORIGIN);
-        return mapTableCellsKeyValue(String.class, getVisibleTableRows(true, true), 3);
+        return mapTableCellsKeyValue(String.class, getVisibleTableRows(true, false),
+                selectedColumn.column);
     }
 
     /**
@@ -555,6 +558,15 @@ public abstract class AnalysisAction extends ContainerPageObject {
         return new GraphConfigurationView(parent, pluginUrl);
     }
 
+    public enum Origin {
+        AGE(2), AUTHOR(3), COMMIT(4);
+
+        private int column;
+
+        Origin(int column) {
+            this.column = column;
+        }
+    }
     public enum Tab {
         MODULES, FILES, PACKAGES, WARNINGS, DETAILS, FIXED, NEW, CATEGORIES, TYPES, AUTHORS, ORIGIN
     }
