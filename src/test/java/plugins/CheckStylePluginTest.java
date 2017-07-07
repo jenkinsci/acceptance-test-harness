@@ -57,23 +57,26 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
     private static final String KEY_FILENAME = "/org/jenkinsci/test/acceptance/docker/fixtures/GitContainer/unsafe";
     private static final String SAMPLE_CHECKSTYLE_PROJECT = "sample_checkstyle_project";
 
-    @Test @WithPlugins("git") @WithDocker @Issue("JENKINS-33162")
+    /**
+     * Verifies that blaming of warnings works on agents: creates a new project in a Git repository in a docker
+     * container. Registers the same docker container as slave agent to build the project. Uses the recorded build
+     * results in checkstyle-result.xml (no actual maven goal is invoked). Verifies that the blame information is
+     * correctly assigned for each of the warnings. Also checks, that the age is increased for yet another build.
+     */
+    @Test @WithPlugins("git") @WithDocker @Issue("JENKINS-6748")
     @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {CREDENTIALS_ID, KEY_FILENAME})
     public void should_show_warnings_per_user() {
-        DumbSlave slave = createDockerAgent(CREDENTIALS_ID);
+        DumbSlave agent = createDockerAgent(CREDENTIALS_ID);
 
         String gitRepositoryUrl = createGitRepositoryInDockerContainer();
 
-        FreeStyleJob job = createJob(jenkins, CHECKSTYLE_PLUGIN_ROOT + SAMPLE_CHECKSTYLE_PROJECT,
-                FreeStyleJob.class, CheckStyleFreestyleSettings.class,
-                settings -> settings.pattern.set("target/checkstyle-result.xml"));
-        setMavenGoal(job, "clean package checkstyle:checkstyle");
-
+        FreeStyleJob job = createFreeStyleJob(jenkins, null,
+                settings -> settings.pattern.set("**/checkstyle-result.xml"));
         job.configure(() -> {
             job.useScm(GitScm.class)
                     .url(gitRepositoryUrl)
                     .credentials(CREDENTIALS_ID);
-            job.setLabelExpression(slave.getName());
+            job.setLabelExpression(agent.getName());
         });
 
         buildSuccessfulJob(job);
