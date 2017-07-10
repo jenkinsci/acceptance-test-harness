@@ -1,6 +1,5 @@
 package org.jenkinsci.test.acceptance.po;
 
-import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
 import java.lang.reflect.Constructor;
@@ -443,14 +442,21 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
         throw cause;
     }
 
-    public static String pageText(WebDriver driver) {
+    public static String getPageSource(WebDriver driver) {
         return (String) ((JavascriptExecutor) driver).executeScript(
                 "return document.getElementsByTagName('html')[0].outerHTML"
         );
     }
 
-    public String pageText() {
-        return pageText(driver);
+    public String getPageSource() {
+        return getPageSource(driver);
+    }
+
+    /**
+     * Get visible text on the page.
+     */
+    public static String getPageContent(WebDriver driver) {
+        return driver.findElement(by.css("html")).getText();
     }
 
     /**

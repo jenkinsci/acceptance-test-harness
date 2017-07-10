@@ -149,5 +149,8 @@ public interface CapybaraPortingLayer {
      */
     void confirmAlert(int timeout);
 
-    String pageText();
+    /**
+     * Get all text of the page including markup.
+     */
+    String getPageSource();
 }
