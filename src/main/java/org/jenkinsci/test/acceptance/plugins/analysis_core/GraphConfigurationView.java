@@ -21,6 +21,7 @@ public class GraphConfigurationView extends ContainerPageObject {
     private final Control priority = control("/graphType[PRIORITY]");
     private final Control totals = control("/graphType[TOTALS]");
     private final Control difference = control("/graphType[DIFFERENCE]");
+    private final Control user = control("/graphType[USERS]");
     private final Control none = control("/graphType[NONE]");
 
     public GraphConfigurationView(final ContainerPageObject parent, final String plugin) {
@@ -44,5 +45,9 @@ public class GraphConfigurationView extends ContainerPageObject {
 
     public void deactivateTrend() {
         none.click();
+    }
+
+    public void setUserGraph() {
+        user.click();
     }
 }

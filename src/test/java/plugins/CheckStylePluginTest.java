@@ -8,6 +8,7 @@ import org.jenkinsci.test.acceptance.junit.WithCredentials;
 import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.GraphConfigurationView;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.NullConfigurator;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckStyleAction;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckStyleFreestyleSettings;
@@ -111,6 +112,11 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
         buildSuccessfulJob(job);
 
         assertThatAgeIsAt(action, expectedOrigin, 2);
+
+        GraphConfigurationView view = action.configureTrendGraphForUser();
+        view.configure(() -> view.setUserGraph());
+
+
     }
 
     private void assertThatAgeIsAt(CheckStyleAction action, SortedMap<String, String> expectedOrigin, final int age) {

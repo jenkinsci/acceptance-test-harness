@@ -7,9 +7,4 @@ RUN apt-get update -y && apt-get install --no-install-recommends -y software-pro
 RUN add-apt-repository ppa:openjdk-r/ppa
 RUN apt-get update
 RUN apt-get install --no-install-recommends -y \
-    openjdk-8-jdk \
-    openjdk-7-jdk \
-    curl \
-    wget \
-    ant \
-    maven
+    openjdk-8-jdk
