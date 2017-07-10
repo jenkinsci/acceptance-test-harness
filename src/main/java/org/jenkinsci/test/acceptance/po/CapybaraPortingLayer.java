@@ -150,5 +150,4 @@ public interface CapybaraPortingLayer {
     void confirmAlert(int timeout);
 
     String pageText();
-    String elementText(@Nonnull WebElement e);
 }

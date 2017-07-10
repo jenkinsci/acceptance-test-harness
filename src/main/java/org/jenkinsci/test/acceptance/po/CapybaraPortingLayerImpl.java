@@ -453,16 +453,6 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
         return pageText(driver);
     }
 
-    public static String elementText(@Nonnull WebDriver driver, @Nonnull WebElement e) {
-        return (String) ((JavascriptExecutor) driver).executeScript(
-                "return arguments[0].outerHTML", e
-        );
-    }
-
-    public String elementText(@Nonnull WebElement e) {
-        return elementText(driver, e);
-    }
-
     /**
      * Obtains a resource in a wrapper.
      */
