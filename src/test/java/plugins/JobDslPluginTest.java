@@ -10,12 +10,15 @@ import org.jenkinsci.test.acceptance.plugins.matrix_auth.MatrixRow;
 import org.jenkinsci.test.acceptance.plugins.mock_security_realm.MockSecurityRealm;
 import org.jenkinsci.test.acceptance.plugins.script_security.ScriptApproval;
 import org.jenkinsci.test.acceptance.po.*;
+import org.jenkinsci.test.acceptance.po.View;
 import org.jenkinsci.test.acceptance.update_center.PluginSpec;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.NoSuchElementException;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -25,17 +28,27 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeTrue;
+import static org.jenkinsci.test.acceptance.po.View.containsJob;
+import static org.jenkinsci.test.acceptance.po.View.containsColumnHeaderTooltip;
+import static org.jenkinsci.test.acceptance.po.View.containsColumnHeader;
+import static org.jenkinsci.test.acceptance.po.View.containsImage;
 
 /**
  * Acceptance tests for the Job DSL plugin.
  *
- * @author Maximilian Oeckler, Kevin Beck
+ * @author Maximilian Oeckler, Kevin Beck, Manuel Reinbold
  */
 @WithPlugins("job-dsl")
 public class JobDslPluginTest extends AbstractJUnitTest {
 
-    private static String ADMIN = "admin";
-    private static String USER = "user";
+    private static final String ADMIN = "admin";
+    private static final String USER = "user";
+
+    private static final String LIST_VIEW_NAME = "testListView";
+    private static final String EXAMPLE_ENABLED_NAME = "example-enabled";
+    private static final String EXAMPLE_DISABLED_NAME = "example-disabled";
+    private static final String LIST_VIEW_REGEX = ".*abled.*";
+
     /**
      * Tests if the checkbox ignoreMissingFiles is shown when the
      * radiobutton 'Look on Filesystem' is selected,
@@ -57,7 +70,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
      * Verifies that all configurations, done on the job configuration page,
      * are saved correctly.
      */
-    @Test
+    @Test @WithPlugins({"matrix-auth","mock-security-realm"})
     public void should_save_configurations() {
         FreeStyleJob seedJob = createSeedJob();
         JobDslBuildStep jobDsl = seedJob.addBuildStep(JobDslBuildStep.class);
@@ -347,7 +360,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
      * Verifies whether a previously generated config file will be deleted if it
      * is not referenced anymore.
      */
-    @Test
+    @Test @WithPlugins("config-file-provider")
     public void should_delete_removed_config_files() {
         FreeStyleJob seedJob = executeRemovedConfigFilesAction(JobDslRemovedConfigFilesAction.DELETE);
         Build build = seedJob.scheduleBuild().shouldSucceed();
@@ -742,7 +755,6 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         // Build should succeed because the not whitelisted content was approved.
         seedJob.scheduleBuild().shouldSucceed();
     }
-
 
     /**
      * Verifies that Groovy sandbox can only used if 'Access Control for Builds'
@@ -1170,6 +1182,611 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         seed.save();
 
         return seed;
+    }
+
+    /**
+     * Test if a new ListView is created via Job DSL script TextBox.
+     * The created View shall contain a description.
+     */
+    @Test
+    public void is_ListView_created() {
+        String descriptionText = "This is the description of testView";
+        String jobDslScript = "listView('"+ LIST_VIEW_NAME +"') {\n" +
+                "    description('"+descriptionText+"')\n" +
+                "}";
+        View view = openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        checkDescription(view, descriptionText);
+    }
+
+    /**
+     * Test if all native columns of a ListView are created and shown correctly.
+     */
+    @Test
+    public void are_columns_created() {
+        Job job1 = createJobAndBuild();
+        String jobDslScript = "listView('"+ LIST_VIEW_NAME +"') {\n" +
+                "  columns {\n" +
+                "    status()\n" +
+                "    weather()\n" +
+                "    name()\n" +
+                "    lastSuccess()\n" +
+                "    lastFailure()\n" +
+                "    lastDuration()\n" +
+                "    buildButton()\n" +
+                "  }\n" +
+                "  jobs{\n" +
+                "    name('"+job1.name+"')\n" +
+                "  }\n" +
+                "}";
+        View view = openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        assertThat(view, containsColumnHeaderTooltip("Status of the last build"));
+        assertThat(view, containsColumnHeaderTooltip("Weather report showing aggregated status of recent builds"));
+        assertThat(view, containsColumnHeader("Name"));
+        assertThat(view, containsColumnHeader("Last Success"));
+        assertThat(view, containsColumnHeader("Last Failure"));
+        assertThat(view, containsColumnHeader("Last Duration"));
+        assertThat(view, containsImage("clock.png"));
+    }
+
+    /**
+     * Test if the created jobs are correctly added to the ListView and if the status filter works correctly.
+     * In this case only enabled jobs shall be shown.
+     */
+    @Test
+    public void status_filter_only_shows_enabled_jobs() {
+        List<Job> jobs = createAmountOfJobs(3, false);
+        Job jobDisabled = createDisabledJob();
+        String jobDslScript = "listView('"+ LIST_VIEW_NAME +"') {\n" +
+                "  statusFilter(StatusFilter.ENABLED)\n" +
+                "  columns {\n" +
+                "    name()\n" +
+                "  }\n" +
+                "  jobs {\n" +
+                "    names('"+jobs.get(0).name+"', '"+jobs.get(1).name+"', '"+jobs.get(2).name+"', '"+jobDisabled.name+"')\n" +
+                "  }\n" +
+                "}";
+        View view = openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        assertThat(view, not(containsJob(jobDisabled)));
+        assertThat(view, containsJob(jobs.get(0)));
+        assertThat(view, containsJob(jobs.get(1)));
+        assertThat(view, containsJob(jobs.get(2)));
+    }
+
+    /**
+     * Test if the created jobs are correctly added to the ListView and if the status filter works correctly.
+     * In this case only disabled jobs shall be shown.
+     */
+    @Test
+    public void status_filter_only_shows_disabled_jobs() {
+        List<Job> jobs = createAmountOfJobs(3, false);
+        Job jobDisabled = createDisabledJob();
+        String jobDslScript = "listView('"+ LIST_VIEW_NAME +"') {\n" +
+                "  statusFilter(StatusFilter.DISABLED)\n" +
+                "  columns {\n" +
+                "    name()\n" +
+                "  }\n" +
+                "  jobs {\n" +
+                "    names('"+jobs.get(0).name+"', '"+jobs.get(1).name+"', '"+jobs.get(2).name+"', '"+jobDisabled.name+"')\n" +
+                "  }\n" +
+                "}";
+        View view = openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        assertThat(view, containsJob(jobDisabled));
+        assertThat(view, not(containsJob(jobs.get(0))));
+        assertThat(view, not(containsJob(jobs.get(1))));
+        assertThat(view, not(containsJob(jobs.get(2))));
+    }
+
+    /**
+     * Test if the created jobs are correctly added to the ListView and if the status filter works correctly.
+     * In this case all jobs shall be shown.
+     */
+    @Test
+    public void status_filter_shows_all_jobs() {
+        List<Job> jobs = createAmountOfJobs(4, false);
+        String jobDslScript = "listView('"+ LIST_VIEW_NAME +"') {\n" +
+                "  statusFilter(StatusFilter.ALL)\n" +
+                "  columns {\n" +
+                "    name()\n" +
+                "  }\n" +
+                "  jobs {\n" +
+                "    names('"+jobs.get(0).name+"', '"+jobs.get(1).name+"', '"+jobs.get(2).name+"', '"+jobs.get(3).name+"')\n" +
+                "  }\n" +
+                "}";
+        View view = openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        assertThat(view, containsJob(jobs.get(0)));
+        assertThat(view, containsJob(jobs.get(1)));
+        assertThat(view, containsJob(jobs.get(2)));
+        assertThat(view, containsJob(jobs.get(3)));
+    }
+
+    /**
+     * Test if the created jobs are correctly added to the ListView using a regex.
+     */
+    @Test
+    public void only_jobs_matching_regex_are_added() {
+        Job job1 = createJobWithName(EXAMPLE_DISABLED_NAME);
+        Job job2 = createJobWithName(EXAMPLE_ENABLED_NAME);
+        List<Job> jobs = createAmountOfJobs(2, false);
+        String jobDslScript = "listView('"+ LIST_VIEW_NAME +"') {\n" +
+                "  columns {\n" +
+                "    name()\n" +
+                "  }\n" +
+                "  jobs {\n" +
+                "    regex('"+LIST_VIEW_REGEX+"')\n" +
+                "  }\n" +
+                "}";
+        View view = openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        assertThat(view, containsJob(job1));
+        assertThat(view, containsJob(job2));
+        assertThat(view, not(containsJob(jobs.get(0))));
+        assertThat(view, not(containsJob(jobs.get(1))));
+    }
+
+    /**
+     * This test creates a listView and creates two additional jobs. The job filter of the script is set to "all jobs".
+     * The two additional jobs as well as the seed job is added to the listView.
+     */
+    @Test
+    @WithPlugins("view-job-filters")
+    public void job_filters_all_jobs_are_added() {
+        List<Job> jobs = createAmountOfJobs(2, false);
+        String jobDslScript = "listView('"+ LIST_VIEW_NAME +"') {\n" +
+                "  columns {\n" +
+                "    name()\n" +
+                "  }\n" +
+                "  jobFilters {\n" +
+                "        all()\n" +
+                "  }\n" +
+                "\n" +
+                "}";
+        View view = openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        assertThat(view, containsJob(jobs.get(0)));
+        assertThat(view, containsJob(jobs.get(1)));
+    }
+
+    /**
+     * This test creates a listView and 4 jobs. The job filters are checking the name with a regex and
+     * jobs matching the regex are included in the listView.
+     */
+    @Test
+    @WithPlugins("view-job-filters")
+    public void job_filters_regex_name_include_matched() {
+        Job job1 = createJobWithName(EXAMPLE_DISABLED_NAME);
+        Job job2 = createJobWithName(EXAMPLE_ENABLED_NAME);
+        List<Job> jobs = createAmountOfJobs(2, false);
+        String jobDslScript = "listView('"+ LIST_VIEW_NAME +"') {\n" +
+                "  columns {\n" +
+                "    name()\n" +
+                "  }\n" +
+                "  jobFilters {\n" +
+                "        regex {\n" +
+                "            matchType(MatchType.INCLUDE_MATCHED)\n" +
+                "            matchValue(RegexMatchValue.NAME)\n" +
+                "            regex('"+LIST_VIEW_REGEX+"')\n" +
+                "        }\n" +
+                "  }\n" +
+                "}";
+        View view = openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        assertThat(view, containsJob(job1));
+        assertThat(view, containsJob(job2));
+        assertThat(view, not(containsJob(jobs.get(0))));
+        assertThat(view, not(containsJob(jobs.get(1))));
+    }
+
+    /**
+     * This test creates a listView and 4 jobs. The job filters are checking the name with a regex and
+     * jobs matching the regex are excluded in the listView.
+     */
+    @Test
+    @WithPlugins("view-job-filters")
+    public void job_filters_regex_name_exclude_matched() {
+        Job job1 = createJobWithName(EXAMPLE_DISABLED_NAME);
+        Job job2 = createJobWithName(EXAMPLE_ENABLED_NAME);
+        List<Job> jobs = createAmountOfJobs(2, false);
+        String jobDslScript = "listView('"+ LIST_VIEW_NAME +"') {\n" +
+                "  columns {\n" +
+                "    name()\n" +
+                "  }\n" +
+                "  jobs{\n" +
+                "    names('"+job1.name+"','"+job2.name+"','"+jobs.get(0).name+"','"+jobs.get(1).name+"')\n" +
+                "  }\n" +
+                "  jobFilters {\n" +
+                "        regex {\n" +
+                "            matchType(MatchType.EXCLUDE_MATCHED)\n" +
+                "            matchValue(RegexMatchValue.NAME)\n" +
+                "            regex('"+LIST_VIEW_REGEX+"')\n" +
+                "        }\n" +
+                "  }\n" +
+                "}";
+        View view = openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        assertThat(view, not(containsJob(job1)));
+        assertThat(view, not(containsJob(job2)));
+        assertThat(view, containsJob(jobs.get(0)));
+        assertThat(view, containsJob(jobs.get(1)));
+    }
+
+    /**
+     * This test creates a listView and 4 jobs. The job filters are checking the name with a regex and
+     * jobs not matching the regex are included in the listView.
+     */
+    @Test
+    @WithPlugins("view-job-filters")
+    public void job_filters_regex_name_include_unmatched() {
+        Job job1 = createJobWithName(EXAMPLE_DISABLED_NAME);
+        Job job2 = createJobWithName(EXAMPLE_ENABLED_NAME);
+        List<Job> jobs = createAmountOfJobs(2, false);
+        String jobDslScript = "listView('"+ LIST_VIEW_NAME +"') {\n" +
+                "  columns {\n" +
+                "    name()\n" +
+                "  }\n" +
+                "  jobFilters {\n" +
+                "        regex {\n" +
+                "            matchType(MatchType.INCLUDE_UNMATCHED)\n" +
+                "            matchValue(RegexMatchValue.NAME)\n" +
+                "            regex('"+LIST_VIEW_REGEX+"')\n" +
+                "        }\n" +
+                "  }\n" +
+                "}";
+        View view = openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        assertThat(view, not(containsJob(job1)));
+        assertThat(view, not(containsJob(job2)));
+        assertThat(view, containsJob(jobs.get(0)));
+        assertThat(view, containsJob(jobs.get(1)));
+    }
+
+    /**
+     * This test creates a listView and 4 jobs. The job filters are checking the name with a regex and
+     * jobs not matching the regex are excluded in the listView.
+     */
+    @Test
+    @WithPlugins("view-job-filters")
+    public void job_filters_regex_name_exclude_unmatched() {
+        Job job1 = createJobWithName(EXAMPLE_DISABLED_NAME);
+        Job job2 = createJobWithName(EXAMPLE_ENABLED_NAME);
+        List<Job> jobs = createAmountOfJobs(2, false);
+        String jobDslScript = "listView('"+ LIST_VIEW_NAME +"') {\n" +
+                "  columns {\n" +
+                "    name()\n" +
+                "  }\n" +
+                "  jobs{\n" +
+                "    names('"+job1.name+"','"+job2.name+"','"+jobs.get(0).name+"','"+jobs.get(1).name+"')\n" +
+                "  }\n" +
+                "  jobFilters {\n" +
+                "        regex {\n" +
+                "            matchType(MatchType.EXCLUDE_UNMATCHED)\n" +
+                "            matchValue(RegexMatchValue.NAME)\n" +
+                "            regex('"+LIST_VIEW_REGEX+"')\n" +
+                "        }\n" +
+                "  }\n" +
+                "}";
+        View view = openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        assertThat(view, containsJob(job1));
+        assertThat(view, containsJob(job2));
+        assertThat(view, not(containsJob(jobs.get(0))));
+        assertThat(view, not(containsJob(jobs.get(1))));
+    }
+
+    /**
+     * This test creates a job and runs a build which fails. Afterwards 4 new jobs get created as well as a listView.
+     * The job filter of the listView is set to show jobs which build status is 'FAILED'.
+     */
+    @Test
+    @WithPlugins("view-job-filters")
+    public void job_filters_status_failed_include_matched() {
+        Job failedJob = createJobThatFails();
+        List<Job> jobs = createAmountOfJobs(4, true);
+        String jobDslScript = "listView('"+ LIST_VIEW_NAME +"') {\n" +
+                "  columns {\n" +
+                "    name()\n" +
+                "  }\n" +
+                "  jobFilters {\n" +
+                "        status {\n" +
+                "            matchType(MatchType.INCLUDE_MATCHED)\n" +
+                "            status(Status.FAILED)\n" +
+                "        }\n" +
+                "  }\n" +
+                "}";
+        View view = openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        assertThat(view, containsJob(failedJob));
+        assertThat(view, not(containsJob(jobs.get(0))));
+        assertThat(view, not(containsJob(jobs.get(1))));
+        assertThat(view, not(containsJob(jobs.get(2))));
+        assertThat(view, not(containsJob(jobs.get(3))));
+    }
+
+    /**
+     * This test creates a job and runs a build which fails. Afterwards 4 new jobs get created as well as a listView.
+     * The job filter of the listView is set to not show jobs which build status is 'FAILED'.
+     */
+    @Test
+    @WithPlugins("view-job-filters")
+    public void job_filters_status_failed_exclude_matched() {
+        Job failedJob = createJobThatFails();
+        List<Job> jobs = createAmountOfJobs(4, true);
+        String jobDslScript = "listView('"+ LIST_VIEW_NAME +"') {\n" +
+                "  columns {\n" +
+                "    name()\n" +
+                "  }\n" +
+                "  jobs{\n" +
+                "    names('"+failedJob.name+"','"+jobs.get(0).name+"','"+jobs.get(1).name+"','"+jobs.get(2).name+"','"+jobs.get(3).name+"')\n" +
+                "  }\n" +
+                "  jobFilters {\n" +
+                "        status {\n" +
+                "            matchType(MatchType.EXCLUDE_MATCHED)\n" +
+                "            status(Status.FAILED)\n" +
+                "        }\n" +
+                "  }\n" +
+                "}";
+        View view = openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        assertThat(view, not(containsJob(failedJob)));
+        assertThat(view, containsJob(jobs.get(0)));
+        assertThat(view, containsJob(jobs.get(1)));
+        assertThat(view, containsJob(jobs.get(2)));
+        assertThat(view, containsJob(jobs.get(3)));
+    }
+
+    /**
+     * This test creates a job and runs a build which fails. Afterwards 4 new jobs get created as well as a listView.
+     * The job filter of the listView is set to show jobs which build status is not 'FAILED'.
+     */
+    @Test
+    @WithPlugins("view-job-filters")
+    public void job_filters_status_failed_include_unmatched() {
+        Job failedJob = createJobThatFails();
+        List<Job> jobs = createAmountOfJobs(4, true);
+        String jobDslScript = "listView('"+ LIST_VIEW_NAME +"') {\n" +
+                "  columns {\n" +
+                "    name()\n" +
+                "  }\n" +
+                "  jobFilters {\n" +
+                "        status {\n" +
+                "            matchType(MatchType.INCLUDE_UNMATCHED)\n" +
+                "            status(Status.FAILED)\n" +
+                "        }\n" +
+                "  }\n" +
+                "}";
+        View view = openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        assertThat(view, not(containsJob(failedJob)));
+        assertThat(view, containsJob(jobs.get(0)));
+        assertThat(view, containsJob(jobs.get(1)));
+        assertThat(view, containsJob(jobs.get(2)));
+        assertThat(view, containsJob(jobs.get(3)));
+    }
+
+    /**
+     * This test creates a job and runs a build which fails. Afterwards 4 new jobs get created as well as a listView.
+     * The job filter of the listView is set to not show jobs which build status is not 'FAILED'.
+     */
+    @Test
+    @WithPlugins("view-job-filters")
+    public void job_filters_status_failed_exclude_unmatched() {
+        Job failedJob = createJobThatFails();
+        List<Job> jobs = createAmountOfJobs(4, true);
+        String jobDslScript = "listView('"+ LIST_VIEW_NAME +"') {\n" +
+                "  columns {\n" +
+                "    name()\n" +
+                "  }\n" +
+                "  jobs{\n" +
+                "    names('"+failedJob.name+"','"+jobs.get(0).name+"','"+jobs.get(1).name+"','"+jobs.get(2).name+"','"+jobs.get(3).name+"')\n" +
+                "  }\n" +
+                "  jobFilters {\n" +
+                "        status {\n" +
+                "            matchType(MatchType.EXCLUDE_UNMATCHED)\n" +
+                "            status(Status.FAILED)\n" +
+                "        }\n" +
+                "  }\n" +
+                "}";
+        View view = openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        assertThat(view, containsJob(failedJob));
+        assertThat(view, not(containsJob(jobs.get(0))));
+        assertThat(view, not(containsJob(jobs.get(1))));
+        assertThat(view, not(containsJob(jobs.get(2))));
+        assertThat(view, not(containsJob(jobs.get(3))));
+    }
+
+    /**
+     * This test creates 5 jobs and builds them immediately. A list view is created with its job filter set to show the
+     * 3 jobs which were most recently built.
+     */
+    @Test
+    @WithPlugins("view-job-filters")
+    public void job_filters_most_recent_3_jobs() {
+        List<Job> jobs = createAmountOfJobs(5, true);
+        String jobDslScript = "listView('"+ LIST_VIEW_NAME +"') {\n" +
+                "  columns {\n" +
+                "    name()\n" +
+                "  }\n" +
+                "  jobs{\n" +
+                "    names('"+jobs.get(0).name+"','"+jobs.get(1).name+"','"+jobs.get(2).name+"','"+jobs.get(3).name+"','"+jobs.get(4).name+"')\n" +
+                "  }\n" +
+                "  jobFilters {\n" +
+                "    mostRecent {\n" +
+                "      maxToInclude(3)\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+        View view = openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        assertThat(view, not(containsJob(jobs.get(0))));
+        assertThat(view, not(containsJob(jobs.get(1))));
+        assertThat(view, containsJob(jobs.get(2)));
+        assertThat(view, containsJob(jobs.get(3)));
+        assertThat(view, containsJob(jobs.get(4)));
+    }
+
+    /**
+     * This test creates 5 jobs and builds 3 of them immediately. A list view is created with its job filter set to only
+     * include jobs that were built at least once.
+     */
+    @Test
+    @WithPlugins("view-job-filters")
+    public void job_filters_include_jobs_built_at_least_once() {
+        List<Job> notBuiltJobs = createAmountOfJobs(2, false);
+        List<Job> builtJobs = createAmountOfJobs(3, true);
+        String jobDslScript = "listView('"+ LIST_VIEW_NAME +"') {\n" +
+                "  columns {\n" +
+                "    name()\n" +
+                "  }\n" +
+                "  jobFilters {\n" +
+                "    buildTrend {\n" +
+                "      matchType(MatchType.INCLUDE_MATCHED)\n" +
+                "      buildCountType(BuildCountType.AT_LEAST_ONE)\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+        View view = openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        assertThat(view, not(containsJob(notBuiltJobs.get(0))));
+        assertThat(view, not(containsJob(notBuiltJobs.get(1))));
+        assertThat(view, containsJob(builtJobs.get(0)));
+        assertThat(view, containsJob(builtJobs.get(1)));
+        assertThat(view, containsJob(builtJobs.get(2)));
+    }
+
+    /**
+     * This test creates 3 jobs and builds 3 of them immediately. One of the fails. A list view is created with its job filter set to only
+     * include jobs that failed.
+     */
+    @Test
+    @WithPlugins("view-job-filters")
+    public void job_filters_include_failed_jobs_built_at_least_once() {
+        List<Job> jobs = createAmountOfJobs(2, true);
+        Job job3 = createJobThatFails();
+        String jobDslScript = "listView('"+ LIST_VIEW_NAME +"') {\n" +
+                "  columns {\n" +
+                "    name()\n" +
+                "  }\n" +
+                "  jobFilters {\n" +
+                "    buildTrend {\n" +
+                "      matchType(MatchType.INCLUDE_MATCHED)\n" +
+                "      buildCountType(BuildCountType.AT_LEAST_ONE)\n" +
+                "      status(BuildStatusType.FAILED)\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+        View view = openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        assertThat(view, not(containsJob(jobs.get(0))));
+        assertThat(view, not(containsJob(jobs.get(1))));
+        assertThat(view, containsJob(job3));
+    }
+
+    /**
+     * This test creates jobs and a list view. The job filter only allows jobs that have been built yet.
+     */
+    @Test
+    @WithPlugins("view-job-filters")
+    public void job_filters_include_jobs_that_have_been_built() {
+        List<Job> notBuiltJobs = createAmountOfJobs(2, false);
+        List<Job> builtJobs = createAmountOfJobs(3, true);
+        String jobDslScript = "listView('"+ LIST_VIEW_NAME +"') {\n" +
+                "  columns {\n" +
+                "    name()\n" +
+                "  }\n" +
+                "  jobFilters {\n" +
+                "    buildTrend {\n" +
+                "      matchType(MatchType.INCLUDE_MATCHED)\n" +
+                "      amountType(AmountType.BUILDS)\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+        View view = openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
+        assertThat(view, containsJob(builtJobs.get(0)));
+        assertThat(view, containsJob(builtJobs.get(1)));
+        assertThat(view, containsJob(builtJobs.get(2)));
+        assertThat(view, not(containsJob(notBuiltJobs.get(0))));
+        assertThat(view, not(containsJob(notBuiltJobs.get(1))));
+    }
+
+    /**
+     * This method creates a given amount of jobs and returns them in a List.
+     * The caller can choose whether to build the jobs or not.
+     * @param amount amount to be created
+     * @param isBuilt flag if the jobs should be built
+     * @return List of Jobs
+     */
+    private List<Job> createAmountOfJobs(int amount, boolean isBuilt) {
+        List<Job> jobs = new ArrayList<>();
+        for (int i = 0; i < amount; i++) {
+            Job job;
+            if (isBuilt) {
+                job = createJobAndBuild();
+            }
+            else {
+                job = jenkins.jobs.create(FreeStyleJob.class);
+            }
+            jobs.add(job);
+        }
+        return jobs;
+    }
+
+    /**
+     * This method creates a job which uses a job DSL script that fails its build.
+     * @return job that failed
+     */
+    private Job createJobThatFails() {
+        String jobDslScriptFailed = "fail";
+        FreeStyleJob job = createJobAndSetJobDslScript(jobDslScriptFailed, false);
+        job.scheduleBuild().shouldFail();
+        return job;
+    }
+
+    /**
+     * This method creates a new job and builds it.
+     * @return the newly created job
+     */
+    private Job createJobAndBuild() {
+        FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class);
+        job.scheduleBuild();
+        return job;
+    }
+
+    /**
+     * This method creates a new job and disables it.
+     * @return the disabled job
+     */
+    private Job createDisabledJob() {
+        Job job = jenkins.jobs.create(FreeStyleJob.class);
+        job.disable();
+        job.save();
+        return job;
+    }
+
+    /**
+     * This method creates a Job with a given name.
+     * @param name name of the job
+     * @return newly created job
+     */
+    private Job createJobWithName(String name) {
+        return jenkins.jobs.create(FreeStyleJob.class, name);
+    }
+
+    /**
+     * This method creates a seed job and configures it with a Job DSL script.
+     * @param script The Job DSL scrpt
+     * @return The newly created and configured seed job
+     */
+    private FreeStyleJob createJobAndSetJobDslScript(String script, boolean isSeed) {
+        FreeStyleJob job;
+        if (isSeed) {
+            job = createSeedJob();
+        } else {
+            job = jenkins.jobs.create(FreeStyleJob.class);
+        }
+        JobDslBuildStep jobDsl = job.addBuildStep(JobDslBuildStep.class);
+        jobDsl.setScript(script);
+        job.save();
+        return job;
+    }
+
+    /**
+     * Opens a newly created ListView. The View gets created by a seed job via Job DSL script.
+     * @param script The Job DSL script
+     */
+    private View openNewlyCreatedListView(String script, String viewName) {
+        FreeStyleJob seed = createJobAndSetJobDslScript(script, true);
+        seed.scheduleBuild().shouldSucceed();
+        seed.open();
+        View view = getView(viewName);
+        view.open();
+        return view;
     }
 
     private FreeStyleJob createSeedJob() {
