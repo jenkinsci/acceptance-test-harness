@@ -31,6 +31,7 @@ import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
@@ -114,9 +115,11 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
         assertThatAgeIsAt(action, expectedOrigin, 2);
 
         GraphConfigurationView view = action.configureTrendGraphForUser();
-        view.configure(() -> view.setUserGraph());
+        view.open();
+        view.setUserGraph();
+        view.save();
 
-
+        WebElement graph = find(By.xpath("//img[@src='checkstyle/trendGraph/png?url=USERS']"));
     }
 
     private void assertThatAgeIsAt(CheckStyleAction action, SortedMap<String, String> expectedOrigin, final int age) {
