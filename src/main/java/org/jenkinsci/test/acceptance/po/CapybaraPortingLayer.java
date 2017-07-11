@@ -7,6 +7,8 @@ import org.jenkinsci.test.acceptance.junit.Wait;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+import javax.annotation.Nonnull;
+
 /**
  * Interface for assisting porting from Capybara.
  *
@@ -146,4 +148,9 @@ public interface CapybaraPortingLayer {
      *  @param timeout Maximun time to wait for the alert to appear, in seconds
      */
     void confirmAlert(int timeout);
+
+    /**
+     * Get all text of the page including markup.
+     */
+    String getPageSource();
 }

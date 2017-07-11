@@ -451,15 +451,21 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
         throw cause;
     }
 
-    public static String pageText(WebDriver driver) {
-        final By html = by.xpath("/html");
+    public static String getPageSource(WebDriver driver) {
+        return (String) ((JavascriptExecutor) driver).executeScript(
+                "return document.getElementsByTagName('html')[0].outerHTML"
+        );
+    }
 
-        try {
-            return driver.findElement(html).getText();
-        } catch (StaleElementReferenceException ex) {
-            // Retry once to avoid random failures in case of bad timing (reload, js, etc.)
-            return driver.findElement(html).getText();
-        }
+    public String getPageSource() {
+        return getPageSource(driver);
+    }
+
+    /**
+     * Get visible text on the page.
+     */
+    public static String getPageContent(WebDriver driver) {
+        return driver.findElement(by.css("html")).getText();
     }
 
     /**

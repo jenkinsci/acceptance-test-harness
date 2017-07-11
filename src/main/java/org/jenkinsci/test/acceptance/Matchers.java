@@ -42,7 +42,7 @@ public class Matchers {
 
             @Override
             public boolean matchesSafely(WebDriver item) {
-                pageText = CapybaraPortingLayerImpl.pageText(item);
+                pageText = CapybaraPortingLayerImpl.getPageContent(item);
                 return pattern.matcher(pageText).find();
             }
 

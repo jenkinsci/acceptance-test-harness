@@ -73,7 +73,7 @@ public class UpdateCenter extends ContainerPageObject {
         // Wait for all plugins to get installed
         waitFor(driver, not(Matchers.hasElement(by.xpath("//*[@id='log']//*[contains(.,'Pending') or contains(.,'Installing')]"))), 60);
 
-        String uc = pageText(driver);
+        String uc = getPageContent(driver);
         // "IOException: Failed to dynamically deploy this plugin" can be reported (by at least some Jenkins versions)
         // in case update of plugin dependency is needed (and is in fact performed in sibling UC job). Restart should fix that.
         boolean restartRequired = uc.contains("restarted") || uc.contains("Failure");
