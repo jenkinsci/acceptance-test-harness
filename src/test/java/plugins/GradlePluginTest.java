@@ -173,7 +173,7 @@ public class GradlePluginTest extends AbstractJUnitTest {
     /**
      * Verify the execution of gradle build and check if build scan links are available
      */
-    @Test @WithPlugins("gradle@1.27-SNAPSHOT")
+    @Test
     public void run_gradle_script_build_scan_link() {
         GradleInstallation.installGradleVersion_4_0(jenkins);
 
@@ -255,7 +255,7 @@ public class GradlePluginTest extends AbstractJUnitTest {
     /**
      * Verify the execution of gradle build script with committed parameters as gradle project properties.
      */
-    @Test @WithPlugins("gradle@1.27-SNAPSHOT")
+    @Test
     public void run_gradle_job_parameters_as_project_properties(){
         GradleInstallation.installGradleVersion_4_0(jenkins);
 
@@ -277,7 +277,7 @@ public class GradlePluginTest extends AbstractJUnitTest {
     /**
      * Verify the execution of gradle build script with committed parameters as gradle system properties.
      */
-    @Test @WithPlugins("gradle@1.27-SNAPSHOT")
+    @Test
     public void run_gradle_job_parameters_as_system_properties(){
         GradleInstallation.installGradleVersion_4_0(jenkins);
 
@@ -318,7 +318,7 @@ public class GradlePluginTest extends AbstractJUnitTest {
     /**
      * Verify the execution of gradle build script with committed gradle project properties.
      */
-    @Test @WithPlugins("gradle@1.27-SNAPSHOT")
+    @Test
     public void run_gradle_add_project_properties(){
         GradleInstallation.installGradleVersion_4_0(jenkins);
 
@@ -338,7 +338,7 @@ public class GradlePluginTest extends AbstractJUnitTest {
     /**
      * Verify the execution of gradle build script with committed gradle system properties.
      */
-    @Test @WithPlugins("gradle@1.27-SNAPSHOT")
+    @Test
     public void run_gradle_add_system_properties(){
         GradleInstallation.installGradleVersion_4_0(jenkins);
         final FreeStyleJob job = jenkins.jobs.create();
@@ -357,7 +357,7 @@ public class GradlePluginTest extends AbstractJUnitTest {
     /**
      * Verify the existence of links for executed tasks.
      */
-    @Test @WithPlugins("gradle@1.27-SNAPSHOT")
+    @Test
     public void run_gradle_tasks_link(){
         GradleInstallation.installGradleVersion_4_0(jenkins);
         final FreeStyleJob job = jenkins.jobs.create();
