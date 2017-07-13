@@ -13,6 +13,7 @@ import org.jenkinsci.test.acceptance.po.AbstractListViewColumn;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.ContainerPageObject;
 import org.jenkinsci.test.acceptance.po.Job;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 /**
@@ -319,11 +320,21 @@ public abstract class AnalysisAction extends ContainerPageObject {
     /**
      * Returns the first two columns of the "Warnings"-tab as key => value pairs, skipping the header row.
      *
+     * @param column the column to return as value
      * @return a map of the first two columns. (first column => second column)
      */
-    public SortedMap<String, Integer> getWarningsTabContents() {
+    public SortedMap<String, String> getWarningsTabContents(final int column) {
         openTab(Tab.WARNINGS);
-        return getContentsOfVisibleTable(true, false);
+        return mapTableCellsKeyValue(String.class, getVisibleTableRows(true, false), column);
+    }
+
+    /**
+     * Returns the first two columns of the "Warnings"-tab as key => value pairs, skipping the header row.
+     *
+     * @return a map of the first two columns. (first column => second column)
+     */
+    public SortedMap<String, String> getWarningsTabContents() {
+        return getWarningsTabContents(2);
     }
 
     public SortedMap<String, String> getDetailsTabContents() {
@@ -465,13 +476,27 @@ public abstract class AnalysisAction extends ContainerPageObject {
     }
 
     /**
+     * Returns whether the specified Tab in the details page is visible.
+     *
+     * @param id the tab
+     * @return {@code true} if the tab is visible, {@code false} otherwise
+     */
+    public boolean hasTab(final Tab id) {
+        return getElement(getTabXpath(id)) != null;
+
+    }
+    /**
      * This is method ensures to be on the correct tab of the build result page.
      *
      * @param id the id of the tab to select
      */
     protected void openTab(final Tab id) {
         open();
-        find(by.xpath(".//A[@href]/em/div[@id='" + id.name().toLowerCase(Locale.ENGLISH) + "']")).click();
+        find(getTabXpath(id)).click();
+    }
+
+    private By getTabXpath(Tab id) {
+        return by.xpath(".//A[@href]/em/div[@id='" + id.name().toLowerCase(Locale.ENGLISH) + "']");
     }
 
 

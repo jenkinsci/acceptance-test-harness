@@ -8,6 +8,7 @@ import org.jenkinsci.test.acceptance.junit.WithCredentials;
 import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.GlobalAnalysisConfiguration;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.GraphConfigurationView;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.NullConfigurator;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckStyleAction;
@@ -37,6 +38,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 import static org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisAction.Origin.*;
+import static org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisAction.Tab.*;
 import static org.junit.Assume.*;
 
 /**
@@ -65,7 +67,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
      * results in checkstyle-result.xml (no actual maven goal is invoked). Verifies that the blame information is
      * correctly assigned for each of the warnings. Also checks, that the age is increased for yet another build.
      */
-    @Test @WithPlugins("git") @WithDocker @Issue("JENKINS-6748")
+    @Test @WithPlugins({"git", "analysis-core@1.88-SNAPSHOT"}) @WithDocker @Issue("JENKINS-6748")
     @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {CREDENTIALS_ID, KEY_FILENAME})
     public void should_show_warnings_per_user() {
         DumbSlave agent = createDockerAgent(CREDENTIALS_ID);
@@ -119,7 +121,30 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
         view.setUserGraph();
         view.save();
 
-        WebElement graph = find(By.xpath("//img[@src='checkstyle/trendGraph/png?url=USERS']"));
+        WebElement graph = find(getUsersTrendGraphXpath());
+        assertThat(graph.isDisplayed(), is(true));
+
+        verifyNoAuthors(action, true);
+
+        WebElement nothing = getElement(getUsersTrendGraphXpath());
+        assertThat(nothing, nullValue());
+
+        verifyNoAuthors(action, false);
+    }
+
+    private void verifyNoAuthors(final CheckStyleAction action, final boolean doNotShowAuthors) {
+        jenkins.configure(() -> {
+            GlobalAnalysisConfiguration config = new GlobalAnalysisConfiguration(jenkins.getConfigPage());
+            config.setNoAuthors(doNotShowAuthors);
+        });
+
+        action.open();
+        assertThat(action.hasTab(ORIGIN), is(not(doNotShowAuthors)));
+        assertThat(action.hasTab(AUTHORS), is(not(doNotShowAuthors)));
+    }
+
+    private By getUsersTrendGraphXpath() {
+        return By.xpath("//img[@src='checkstyle/trendGraph/png?url=USERS']");
     }
 
     private void assertThatAgeIsAt(CheckStyleAction action, SortedMap<String, String> expectedOrigin, final int age) {
@@ -220,27 +245,27 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
         CheckStyleAction action = new CheckStyleAction(build);
 
         assertThatWarningsCountInSummaryIs(action, 679);
-        assertThatNewWarningsCountInSummaryIs(action, 3);
-        assertThatFixedWarningsCountInSummaryIs(action, 97);
+        assertThatNewWarningsCountInSummaryIs(action, 2);
+        assertThatFixedWarningsCountInSummaryIs(action, 99);
 
         action.open();
 
         assertThat(action.getNumberOfWarnings(), is(679));
-        assertThat(action.getNumberOfNewWarnings(), is(3));
-        assertThat(action.getNumberOfFixedWarnings(), is(97));
+        assertThat(action.getNumberOfNewWarnings(), is(2));
+        assertThat(action.getNumberOfFixedWarnings(), is(99));
         assertThat(action.getNumberOfWarningsWithHighPriority(), is(679));
         assertThat(action.getNumberOfWarningsWithNormalPriority(), is(0));
         assertThat(action.getNumberOfWarningsWithLowPriority(), is(0));
 
         action.openNew();
 
-        assertThat(action.getNumberOfWarningsWithHighPriority(), is(3));
+        assertThat(action.getNumberOfWarningsWithHighPriority(), is(2));
         assertThat(action.getNumberOfWarningsWithNormalPriority(), is(0));
         assertThat(action.getNumberOfWarningsWithLowPriority(), is(0));
 
         action.openFixed();
 
-        assertThat(action.getNumberOfRowsInFixedWarningsTable(), is(97));
+        assertThat(action.getNumberOfRowsInFixedWarningsTable(), is(99));
     }
 
     private void assertThatCheckStyleResultExists(final Job job, final PageObject build) {
@@ -283,17 +308,17 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
 
         assertThat(checkstyle.getNumberOfNewWarnings(), is(12));
 
-        SortedMap<String, Integer> expectedContent = new TreeMap<>();
-        expectedContent.put("Main.java:0", 0);
-        expectedContent.put("Main.java:2", 2);
-        expectedContent.put("Main.java:4", 4);
-        expectedContent.put("Main.java:6", 6);
-        expectedContent.put("Main.java:9", 9);
-        expectedContent.put("Main.java:13", 13);
-        expectedContent.put("Main.java:18", 18);
-        expectedContent.put("Main.java:23", 23);
-        expectedContent.put("Main.java:24", 24);
-        expectedContent.put("Main.java:27", 27);
+        SortedMap<String, String> expectedContent = new TreeMap<>();
+        expectedContent.put("Main.java:0", "JavadocPackageCheck");
+        expectedContent.put("Main.java:2", "HideUtilityClassConstructorCheck");
+        expectedContent.put("Main.java:4", "JavadocVariableCheck");
+        expectedContent.put("Main.java:6", "FinalParametersCheck");
+        expectedContent.put("Main.java:9", "WhitespaceAroundCheck");
+        expectedContent.put("Main.java:13", "WhitespaceAroundCheck");
+        expectedContent.put("Main.java:18", "WhitespaceAroundCheck");
+        expectedContent.put("Main.java:23", "JavadocMethodCheck");
+        expectedContent.put("Main.java:24", "MagicNumberCheck");
+        expectedContent.put("Main.java:27", "JavadocMethodCheck");
         assertThat(checkstyle.getWarningsTabContents(), is(expectedContent));
 
         verifySourceLine(checkstyle, "Main.java", 27,
