@@ -56,9 +56,6 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
     private static final String FILE_FOR_2ND_RUN = CHECKSTYLE_PLUGIN_ROOT + "forSecondRun/checkstyle-result.xml";
     private static final int TOTAL_NUMBER_OF_WARNINGS = 776;
 
-    // TODO: pull up
-    private static final String CREDENTIALS_ID = "git";
-    private static final String KEY_FILENAME = "/org/jenkinsci/test/acceptance/docker/fixtures/GitContainer/unsafe";
     private static final String SAMPLE_CHECKSTYLE_PROJECT = "sample_checkstyle_project";
 
     /**
@@ -67,19 +64,17 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
      * results in checkstyle-result.xml (no actual maven goal is invoked). Verifies that the blame information is
      * correctly assigned for each of the warnings. Also checks, that the age is increased for yet another build.
      */
-    @Test @WithPlugins({"git", "analysis-core@1.88-SNAPSHOT"}) @WithDocker @Issue("JENKINS-6748")
-    @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {CREDENTIALS_ID, KEY_FILENAME})
+    @Test @WithPlugins({"git", "dashboard-view", "analysis-core@1.88-SNAPSHOT"}) @WithDocker @Issue("JENKINS-6748")
+    @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {CREDENTIALS_ID, CREDENTIALS_KEY})
     public void should_show_warnings_per_user() {
-        DumbSlave agent = createDockerAgent(CREDENTIALS_ID);
+        DumbSlave agent = createDockerAgent();
 
         String gitRepositoryUrl = createGitRepositoryInDockerContainer();
 
         FreeStyleJob job = createFreeStyleJob(jenkins, null,
                 settings -> settings.pattern.set("**/checkstyle-result.xml"));
         job.configure(() -> {
-            job.useScm(GitScm.class)
-                    .url(gitRepositoryUrl)
-                    .credentials(CREDENTIALS_ID);
+            job.useScm(GitScm.class).url(gitRepositoryUrl).credentials(CREDENTIALS_ID);
             job.setLabelExpression(agent.getName());
         });
 
@@ -169,7 +164,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
         repo.addFilesIn(CHECKSTYLE_PLUGIN_ROOT + SAMPLE_CHECKSTYLE_PROJECT);
         repo.commit("POM commit.");
 
-        GitContainer container = dockerContainer.get();
+        GitContainer container = getDockerContainer();
         repo.transferToDockerContainer(container.host(), container.port());
 
         return container.getRepoUrl();

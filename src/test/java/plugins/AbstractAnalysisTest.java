@@ -15,7 +15,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.xerces.jaxp.DocumentBuilderFactoryImpl;
 import org.custommonkey.xmlunit.Diff;
@@ -87,43 +86,59 @@ import static org.junit.Assert.*;
 public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends AbstractJUnitTest {
     private static final List<String> PRIORITIES = Arrays.asList("HIGH", "LOW", "NORMAL");
 
+    /**
+     * Credentials to access the docker container. The credentials are stored with the specified ID and use the
+     * provided SSH key. Use the following annotation on your test case to use the specified docker container as
+     * git server or build agent:
+     * <blockquote>
+     *     <pre>@Test @WithDocker @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY,
+     *                                    values = {CREDENTIALS_ID, CREDENTIALS_KEY})}
+     * public void shouldTestWithDocker() {
+     * }
+     * </pre></blockquote>
+     */
+    protected static final String CREDENTIALS_ID = "git";
+    protected static final String CREDENTIALS_KEY = "/org/jenkinsci/test/acceptance/docker/fixtures/GitContainer/unsafe";
+
     @Inject
-    protected DockerContainerHolder<JavaGitContainer> dockerContainer;
+    private DockerContainerHolder<JavaGitContainer> dockerContainer;
+
+    /**
+     * Returns a docker container that can be used to host git repositories and which can be used as build agent.
+     * If the container is used as agent and git server, then you need to use the file protocol to access the git repository
+     * within Jenkins.
+     *
+     * @return the container
+     */
+    protected JavaGitContainer getDockerContainer() {
+        return dockerContainer.get();
+    }
 
     /**
      * Creates an agent in a Docker container.
      *
-     * @param credentialsId the SSH credentials ID
      * @return the new agent ready for new builds
      */
-    protected DumbSlave createDockerAgent(String credentialsId) {
-        DumbSlave slave = jenkins.slaves.create(DumbSlave.class);
+    protected DumbSlave createDockerAgent() {
+        DumbSlave agent = jenkins.slaves.create(DumbSlave.class);
 
-        slave.setExecutors(1);
-        slave.remoteFS.set("/tmp/");
-        SshSlaveLauncher launcher = slave.setLauncher(SshSlaveLauncher.class);
+        agent.setExecutors(1);
+        agent.remoteFS.set("/tmp/");
+        SshSlaveLauncher launcher = agent.setLauncher(SshSlaveLauncher.class);
 
-        JavaGitContainer container = dockerContainer.get();
+        JavaGitContainer container = getDockerContainer();
         launcher.host.set(container.ipBound(22));
         launcher.port(container.port(22));
         launcher.setSshHostKeyVerificationStrategy(SshSlaveLauncher.NonVerifyingKeyVerificationStrategy.class);
-        launcher.selectCredentials(credentialsId);
+        launcher.selectCredentials(CREDENTIALS_ID);
 
-        slave.save();
+        agent.save();
 
-        slave.waitUntilOnline();
+        agent.waitUntilOnline();
 
-        assertThat(slave.isOnline(), is(true));
+        assertThat(agent.isOnline(), is(true));
 
-        return slave;
-    }
-
-    private String key() {
-        try {
-            return IOUtils.toString(JavaGitContainer.class.getResourceAsStream("JavaGitContainer/unsafe"));
-        } catch (IOException ex) {
-            throw new AssertionError(ex);
-        }
+        return agent;
     }
 
     /**
