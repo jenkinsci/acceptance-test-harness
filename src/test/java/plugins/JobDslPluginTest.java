@@ -1,37 +1,47 @@
 package plugins;
 
-import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.plugins.authorize_project.ProjectDefaultBuildAccessControl;
-import org.jenkinsci.test.acceptance.plugins.config_file_provider.ConfigFileProvider;
-import org.jenkinsci.test.acceptance.plugins.job_dsl.*;
-import org.jenkinsci.test.acceptance.plugins.matrix_auth.MatrixAuthorizationStrategy;
-import org.jenkinsci.test.acceptance.plugins.matrix_auth.MatrixRow;
-import org.jenkinsci.test.acceptance.plugins.mock_security_realm.MockSecurityRealm;
-import org.jenkinsci.test.acceptance.plugins.script_security.ScriptApproval;
-import org.jenkinsci.test.acceptance.po.*;
-import org.jenkinsci.test.acceptance.po.View;
-import org.jenkinsci.test.acceptance.update_center.PluginSpec;
-import org.junit.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.NoSuchElementException;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import static org.hamcrest.CoreMatchers.*;
+import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.plugins.authorize_project.ProjectDefaultBuildAccessControl;
+import org.jenkinsci.test.acceptance.plugins.config_file_provider.ConfigFileProvider;
+import org.jenkinsci.test.acceptance.plugins.job_dsl.JobDslBuildStep;
+import org.jenkinsci.test.acceptance.plugins.job_dsl.JobDslLookupStrategy;
+import org.jenkinsci.test.acceptance.plugins.job_dsl.JobDslRemovedConfigFilesAction;
+import org.jenkinsci.test.acceptance.plugins.job_dsl.JobDslRemovedJobAction;
+import org.jenkinsci.test.acceptance.plugins.job_dsl.JobDslRemovedViewAction;
+import org.jenkinsci.test.acceptance.plugins.matrix_auth.MatrixAuthorizationStrategy;
+import org.jenkinsci.test.acceptance.plugins.matrix_auth.MatrixRow;
+import org.jenkinsci.test.acceptance.plugins.mock_security_realm.MockSecurityRealm;
+import org.jenkinsci.test.acceptance.plugins.script_security.ScriptApproval;
+import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.po.ContainerPageObject;
+import org.jenkinsci.test.acceptance.po.Control;
+import org.jenkinsci.test.acceptance.po.Folder;
+import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
+import org.jenkinsci.test.acceptance.po.Job;
+import org.jenkinsci.test.acceptance.po.ListView;
+import org.jenkinsci.test.acceptance.po.PluginManager;
+import org.jenkinsci.test.acceptance.po.View;
+import org.jenkinsci.test.acceptance.update_center.PluginSpec;
+import org.junit.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebElement;
+
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.jenkinsci.test.acceptance.Matchers.*;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeTrue;
-import static org.jenkinsci.test.acceptance.po.View.containsJob;
-import static org.jenkinsci.test.acceptance.po.View.containsColumnHeaderTooltip;
-import static org.jenkinsci.test.acceptance.po.View.containsColumnHeader;
-import static org.jenkinsci.test.acceptance.po.View.containsImage;
+import static org.jenkinsci.test.acceptance.po.View.*;
+import static org.junit.Assert.*;
+import static org.junit.Assume.*;
 
 /**
  * Acceptance tests for the Job DSL plugin.
@@ -1156,8 +1166,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
      * Tests whether a github project is set to a job created by JobDsl when a github repository name
      * is set to this job and the seed job is build.
      */
-    @Test
-    @WithPlugins("git")
+    @Test @WithPlugins({"git", "github"})
     public void should_create_job_with_github_repository() {
 
         // Arrange
