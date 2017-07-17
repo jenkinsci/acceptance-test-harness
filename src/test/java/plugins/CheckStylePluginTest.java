@@ -3,19 +3,27 @@ package plugins;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
+import org.jenkinsci.test.acceptance.junit.WithCredentials;
+import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.GlobalAnalysisConfiguration;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.GraphConfigurationView;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.NullConfigurator;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckStyleAction;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckStyleFreestyleSettings;
 import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckStyleMavenSettings;
 import org.jenkinsci.test.acceptance.plugins.envinject.EnvInjectConfig;
+import org.jenkinsci.test.acceptance.plugins.git.GitRepo;
+import org.jenkinsci.test.acceptance.plugins.git.GitScm;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.plugins.parameterized_trigger.BuildTriggerConfig;
 import org.jenkinsci.test.acceptance.plugins.parameterized_trigger.TriggerCallBuildStep;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Build.Result;
 import org.jenkinsci.test.acceptance.po.Container;
+import org.jenkinsci.test.acceptance.po.DumbSlave;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.Node;
@@ -23,10 +31,14 @@ import org.jenkinsci.test.acceptance.po.PageObject;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisAction.Origin.*;
+import static org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisAction.Tab.*;
 import static org.junit.Assume.*;
 
 /**
@@ -43,6 +55,120 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
     private static final String FILE_WITH_776_WARNINGS = CHECKSTYLE_PLUGIN_ROOT + PATTERN_WITH_776_WARNINGS;
     private static final String FILE_FOR_2ND_RUN = CHECKSTYLE_PLUGIN_ROOT + "forSecondRun/checkstyle-result.xml";
     private static final int TOTAL_NUMBER_OF_WARNINGS = 776;
+
+    private static final String SAMPLE_CHECKSTYLE_PROJECT = "sample_checkstyle_project";
+
+    /**
+     * Verifies that blaming of warnings works on agents: creates a new project in a Git repository in a docker
+     * container. Registers the same docker container as slave agent to build the project. Uses the recorded build
+     * results in checkstyle-result.xml (no actual maven goal is invoked). Verifies that the blame information is
+     * correctly assigned for each of the warnings. Also checks, that the age is increased for yet another build.
+     */
+    @Test @WithPlugins({"git", "dashboard-view", "analysis-core@1.88-SNAPSHOT"}) @WithDocker @Issue("JENKINS-6748")
+    @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {CREDENTIALS_ID, CREDENTIALS_KEY})
+    public void should_show_warnings_per_user() {
+        DumbSlave agent = createDockerAgent();
+
+        String gitRepositoryUrl = createGitRepositoryInDockerContainer();
+
+        FreeStyleJob job = createFreeStyleJob(jenkins, null,
+                settings -> settings.pattern.set("**/checkstyle-result.xml"));
+        job.configure(() -> {
+            job.useScm(GitScm.class).url(gitRepositoryUrl).credentials(CREDENTIALS_ID);
+            job.setLabelExpression(agent.getName());
+        });
+
+        buildSuccessfulJob(job);
+
+        CheckStyleAction action = new CheckStyleAction(job);
+        action.open();
+
+        SortedMap<String, Integer> expectedPeople = new TreeMap<>();
+        expectedPeople.put("Unknown authors", 1);
+        expectedPeople.put("Jenkins-ATH <jenkins-ath@example.org>", 11);
+        assertThat(action.getPeopleTabContents(), is(expectedPeople));
+
+        action.find(By.partialLinkText("Jenkins-ATH")).click();
+        assertThat(driver, hasContent("Checkstyle Warnings - Jenkins-ATH"));
+
+        action.open();
+        SortedMap<String, String> expectedOrigin = new TreeMap<>();
+        expectedOrigin.put("Main.java:0", "-");
+        expectedOrigin.put("Main.java:2", "Jenkins-ATH");
+        expectedOrigin.put("Main.java:4", "Jenkins-ATH");
+        expectedOrigin.put("Main.java:6", "Jenkins-ATH");
+        expectedOrigin.put("Main.java:9", "Jenkins-ATH");
+        expectedOrigin.put("Main.java:13", "Jenkins-ATH");
+        expectedOrigin.put("Main.java:18", "Jenkins-ATH");
+        expectedOrigin.put("Main.java:23", "Jenkins-ATH");
+        expectedOrigin.put("Main.java:24", "Jenkins-ATH");
+        expectedOrigin.put("Main.java:27", "Jenkins-ATH");
+        assertThat(action.getOriginTabContentsAsStrings(AUTHOR), is(expectedOrigin));
+
+        assertThatAgeIsAt(action, expectedOrigin, 1);
+
+        buildSuccessfulJob(job);
+
+        assertThatAgeIsAt(action, expectedOrigin, 2);
+
+        GraphConfigurationView view = action.configureTrendGraphForUser();
+        view.open();
+        view.setUserGraph();
+        view.save();
+
+        WebElement graph = find(getUsersTrendGraphXpath());
+        assertThat(graph.isDisplayed(), is(true));
+
+        verifyNoAuthors(action, true);
+
+        WebElement nothing = getElement(getUsersTrendGraphXpath());
+        assertThat(nothing, nullValue());
+
+        verifyNoAuthors(action, false);
+    }
+
+    private void verifyNoAuthors(final CheckStyleAction action, final boolean doNotShowAuthors) {
+        jenkins.configure(() -> {
+            GlobalAnalysisConfiguration config = new GlobalAnalysisConfiguration(jenkins.getConfigPage());
+            config.setNoAuthors(doNotShowAuthors);
+        });
+
+        action.open();
+        assertThat(action.hasTab(ORIGIN), is(not(doNotShowAuthors)));
+        assertThat(action.hasTab(AUTHORS), is(not(doNotShowAuthors)));
+    }
+
+    private By getUsersTrendGraphXpath() {
+        return By.xpath("//img[@src='checkstyle/trendGraph/png?url=USERS']");
+    }
+
+    private void assertThatAgeIsAt(CheckStyleAction action, SortedMap<String, String> expectedOrigin, final int age) {
+        for (String key : expectedOrigin.keySet()) {
+            expectedOrigin.put(key, String.valueOf(age));
+        }
+        assertThat(action.getOriginTabContentsAsStrings(AGE), is(expectedOrigin));
+    }
+
+    private String createGitRepositoryInDockerContainer() {
+        GitRepo repo = new GitRepo();
+        String main = "src/main/java";
+        repo.mkdir(main);
+        repo.addFilesIn(CHECKSTYLE_PLUGIN_ROOT + SAMPLE_CHECKSTYLE_PROJECT + "/" + main, main);
+        repo.commit("Sources commit.");
+
+        String test = "src/test/java";
+        repo.mkdir(test);
+        repo.addFilesIn(CHECKSTYLE_PLUGIN_ROOT + SAMPLE_CHECKSTYLE_PROJECT + "/" + test, test);
+        repo.commit("Tests commit.");
+
+        repo.addFilesIn(CHECKSTYLE_PLUGIN_ROOT + SAMPLE_CHECKSTYLE_PROJECT);
+        repo.commit("POM commit.");
+
+        GitContainer container = getDockerContainer();
+        repo.transferToDockerContainer(container.host(), container.port());
+
+        return container.getRepoUrl();
+    }
 
     /**
      * Verifies that environment variables are expanded in the file name pattern.
@@ -114,27 +240,27 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
         CheckStyleAction action = new CheckStyleAction(build);
 
         assertThatWarningsCountInSummaryIs(action, 679);
-        assertThatNewWarningsCountInSummaryIs(action, 3);
-        assertThatFixedWarningsCountInSummaryIs(action, 97);
+        assertThatNewWarningsCountInSummaryIs(action, 2);
+        assertThatFixedWarningsCountInSummaryIs(action, 99);
 
         action.open();
 
         assertThat(action.getNumberOfWarnings(), is(679));
-        assertThat(action.getNumberOfNewWarnings(), is(3));
-        assertThat(action.getNumberOfFixedWarnings(), is(97));
+        assertThat(action.getNumberOfNewWarnings(), is(2));
+        assertThat(action.getNumberOfFixedWarnings(), is(99));
         assertThat(action.getNumberOfWarningsWithHighPriority(), is(679));
         assertThat(action.getNumberOfWarningsWithNormalPriority(), is(0));
         assertThat(action.getNumberOfWarningsWithLowPriority(), is(0));
 
         action.openNew();
 
-        assertThat(action.getNumberOfWarningsWithHighPriority(), is(3));
+        assertThat(action.getNumberOfWarningsWithHighPriority(), is(2));
         assertThat(action.getNumberOfWarningsWithNormalPriority(), is(0));
         assertThat(action.getNumberOfWarningsWithLowPriority(), is(0));
 
         action.openFixed();
 
-        assertThat(action.getNumberOfRowsInFixedWarningsTable(), is(97));
+        assertThat(action.getNumberOfRowsInFixedWarningsTable(), is(99));
     }
 
     private void assertThatCheckStyleResultExists(final Job job, final PageObject build) {
@@ -149,7 +275,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
     }
 
     private MavenModuleSet createMavenJob(AnalysisConfigurator<CheckStyleMavenSettings> configurator) {
-        String projectPath = CHECKSTYLE_PLUGIN_ROOT + "sample_checkstyle_project";
+        String projectPath = CHECKSTYLE_PLUGIN_ROOT + SAMPLE_CHECKSTYLE_PROJECT;
         String goal = "clean package checkstyle:checkstyle";
         return createMavenJob(projectPath, goal, CheckStyleMavenSettings.class, configurator);
     }
@@ -161,7 +287,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
      */
     @Test
     public void should_link_to_source_code_in_real_project() {
-        FreeStyleJob job = createJob(jenkins, CHECKSTYLE_PLUGIN_ROOT + "sample_checkstyle_project", FreeStyleJob.class,
+        FreeStyleJob job = createJob(jenkins, CHECKSTYLE_PLUGIN_ROOT + SAMPLE_CHECKSTYLE_PROJECT, FreeStyleJob.class,
                 CheckStyleFreestyleSettings.class,
                 settings -> settings.pattern.set("target/checkstyle-result.xml"));
         setMavenGoal(job, "clean package checkstyle:checkstyle");
@@ -177,17 +303,17 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
 
         assertThat(checkstyle.getNumberOfNewWarnings(), is(12));
 
-        SortedMap<String, Integer> expectedContent = new TreeMap<>();
-        expectedContent.put("Main.java:0", 0);
-        expectedContent.put("Main.java:2", 2);
-        expectedContent.put("Main.java:4", 4);
-        expectedContent.put("Main.java:6", 6);
-        expectedContent.put("Main.java:9", 9);
-        expectedContent.put("Main.java:13", 13);
-        expectedContent.put("Main.java:18", 18);
-        expectedContent.put("Main.java:23", 23);
-        expectedContent.put("Main.java:24", 24);
-        expectedContent.put("Main.java:27", 27);
+        SortedMap<String, String> expectedContent = new TreeMap<>();
+        expectedContent.put("Main.java:0", "JavadocPackageCheck");
+        expectedContent.put("Main.java:2", "HideUtilityClassConstructorCheck");
+        expectedContent.put("Main.java:4", "JavadocVariableCheck");
+        expectedContent.put("Main.java:6", "FinalParametersCheck");
+        expectedContent.put("Main.java:9", "WhitespaceAroundCheck");
+        expectedContent.put("Main.java:13", "WhitespaceAroundCheck");
+        expectedContent.put("Main.java:18", "WhitespaceAroundCheck");
+        expectedContent.put("Main.java:23", "JavadocMethodCheck");
+        expectedContent.put("Main.java:24", "MagicNumberCheck");
+        expectedContent.put("Main.java:27", "JavadocMethodCheck");
         assertThat(checkstyle.getWarningsTabContents(), is(expectedContent));
 
         verifySourceLine(checkstyle, "Main.java", 27,

@@ -290,13 +290,13 @@ public class FindBugsPluginTest extends AbstractAnalysisTest<FindBugsAction> {
     }
 
     private void assertThatWarningsTabIsCorrectlyFilled(FindBugsAction action) {
-        SortedMap<String, Integer> expectedContent = new TreeMap<>();
-        expectedContent.put("SSHConnector.java:138", 138);
-        expectedContent.put("SSHLauncher.java:437", 437);
-        expectedContent.put("SSHLauncher.java:679", 679);
-        expectedContent.put("SSHLauncher.java:960", 960);
-        expectedContent.put("SSHLauncher.java:960", 960);
-        expectedContent.put("SSHLauncher.java:971", 971);
-        assertThat(action.getWarningsTabContents(), is(expectedContent));
+        SortedMap<String, String> expectedContent = new TreeMap<>();
+        expectedContent.put("SSHConnector.java:138", "NP_NULL_PARAM_DEREF");
+        expectedContent.put("SSHLauncher.java:437", "NP_NULL_PARAM_DEREF");
+        expectedContent.put("SSHLauncher.java:679", "NP_NULL_ON_SOME_PATH");
+        expectedContent.put("SSHLauncher.java:960", "DE_MIGHT_IGNORE");
+        expectedContent.put("SSHLauncher.java:960", "REC_CATCH_EXCEPTION");
+        expectedContent.put("SSHLauncher.java:971", "REC_CATCH_EXCEPTION");
+        assertThat(action.getWarningsTabContents(3), is(expectedContent));
     }
 }

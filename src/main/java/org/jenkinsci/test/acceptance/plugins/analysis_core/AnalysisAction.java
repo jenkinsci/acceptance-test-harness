@@ -13,6 +13,7 @@ import org.jenkinsci.test.acceptance.po.AbstractListViewColumn;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.ContainerPageObject;
 import org.jenkinsci.test.acceptance.po.Job;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 /**
@@ -319,16 +320,49 @@ public abstract class AnalysisAction extends ContainerPageObject {
     /**
      * Returns the first two columns of the "Warnings"-tab as key => value pairs, skipping the header row.
      *
+     * @param column the column to return as value
      * @return a map of the first two columns. (first column => second column)
      */
-    public SortedMap<String, Integer> getWarningsTabContents() {
+    public SortedMap<String, String> getWarningsTabContents(final int column) {
         openTab(Tab.WARNINGS);
-        return getContentsOfVisibleTable(true, false);
+        return mapTableCellsKeyValue(String.class, getVisibleTableRows(true, false), column);
+    }
+
+    /**
+     * Returns the first two columns of the "Warnings"-tab as key => value pairs, skipping the header row.
+     *
+     * @return a map of the first two columns. (first column => second column)
+     */
+    public SortedMap<String, String> getWarningsTabContents() {
+        return getWarningsTabContents(2);
     }
 
     public SortedMap<String, String> getDetailsTabContents() {
         openTab(Tab.DETAILS);
         return mapContentsOfHeaderValueRows("details");
+    }
+
+    /**
+     * Returns the first two columns of the "People"-tab as key => value pairs, skipping the header row.
+     *
+     * @return a map of the first two columns. (first column => second column)
+     */
+    public SortedMap<String, Integer> getPeopleTabContents() {
+        openTab(Tab.AUTHORS);
+        return getContentsOfVisibleTable(true, true);
+    }
+
+    /**
+     * Returns the first and the specified columns of the "Origin"-tab as key => value pairs,
+     * skipping the header row.
+     *
+     * @param selectedColumn the column to extract
+     * @return a map of the specified two columns. (first column => selectedColumn)
+     */
+    public SortedMap<String, String> getOriginTabContentsAsStrings(final Origin selectedColumn) {
+        openTab(Tab.ORIGIN);
+        return mapTableCellsKeyValue(String.class, getVisibleTableRows(true, false),
+                selectedColumn.column);
     }
 
     /**
@@ -338,7 +372,7 @@ public abstract class AnalysisAction extends ContainerPageObject {
      */
     public SortedMap<String, String> getWarningsTabContentsAsStrings() {
         openTab(Tab.WARNINGS);
-        return mapTableCellsKeyValue(String.class, getVisibleTableRows(true, false));
+        return mapTableCellsKeyValue(String.class, getVisibleTableRows(true, false), 1);
     }
 
     /**
@@ -386,7 +420,7 @@ public abstract class AnalysisAction extends ContainerPageObject {
      * care about the type of the value part as long as it is derived from {@link java.lang.Object}.
      */
     private <T extends Object> SortedMap<String, T> getContentsOfVisibleTable(Class<T> type, boolean removeHeader, boolean removeFooter) {
-        return mapTableCellsKeyValue(type, getVisibleTableRows(removeHeader, removeFooter));
+        return mapTableCellsKeyValue(type, getVisibleTableRows(removeHeader, removeFooter), 1);
     }
 
     protected List<WebElement> getVisibleTableRows(boolean removeHeader, boolean removeFooter) {
@@ -409,7 +443,7 @@ public abstract class AnalysisAction extends ContainerPageObject {
     }
 
     private SortedMap<String, Integer> mapTableCellsKeyValue(final Collection<WebElement> rows) {
-        return mapTableCellsKeyValue(Integer.class, rows);
+        return mapTableCellsKeyValue(Integer.class, rows, 1);
     }
 
     /**
@@ -419,17 +453,17 @@ public abstract class AnalysisAction extends ContainerPageObject {
      * At the moment the only supported types are Integer and String. Calling this method for other types results in a
      * {@link java.lang.IllegalStateException}.
      */
-    private <T> SortedMap<String, T> mapTableCellsKeyValue(Class<T> type, final Collection<WebElement> rows) {
+    private <T> SortedMap<String, T> mapTableCellsKeyValue(Class<T> type, final Collection<WebElement> rows, final int index) {
         final SortedMap<String, T> result = new TreeMap<>();
         for (WebElement elem : rows) {
             final List<WebElement> cells = elem.findElements(by.xpath("./td"));
             final String key = asTrimmedString(cells.get(0));
             T value = null;
             if (type.isAssignableFrom(Integer.class)) {
-                value = type.cast(asInteger(cells.get(1)));
+                value = type.cast(asInteger(cells.get(index)));
             }
             else if (type.isAssignableFrom(String.class)) {
-                value = type.cast(asTrimmedString(cells.get(1)));
+                value = type.cast(asTrimmedString(cells.get(index)));
             }
             else {
                 throw new IllegalStateException("Parameter type (" +
@@ -442,13 +476,27 @@ public abstract class AnalysisAction extends ContainerPageObject {
     }
 
     /**
+     * Returns whether the specified Tab in the details page is visible.
+     *
+     * @param id the tab
+     * @return {@code true} if the tab is visible, {@code false} otherwise
+     */
+    public boolean hasTab(final Tab id) {
+        return getElement(getTabXpath(id)) != null;
+
+    }
+    /**
      * This is method ensures to be on the correct tab of the build result page.
      *
      * @param id the id of the tab to select
      */
     protected void openTab(final Tab id) {
         open();
-        find(by.xpath(".//A[@href]/em/div[@id='" + id.name().toLowerCase(Locale.ENGLISH) + "']")).click();
+        find(getTabXpath(id)).click();
+    }
+
+    private By getTabXpath(Tab id) {
+        return by.xpath(".//A[@href]/em/div[@id='" + id.name().toLowerCase(Locale.ENGLISH) + "']");
     }
 
 
@@ -535,7 +583,16 @@ public abstract class AnalysisAction extends ContainerPageObject {
         return new GraphConfigurationView(parent, pluginUrl);
     }
 
+    public enum Origin {
+        AGE(2), AUTHOR(3), COMMIT(4);
+
+        private int column;
+
+        Origin(int column) {
+            this.column = column;
+        }
+    }
     public enum Tab {
-        MODULES, FILES, PACKAGES, WARNINGS, DETAILS, FIXED, NEW, CATEGORIES, TYPES
+        MODULES, FILES, PACKAGES, WARNINGS, DETAILS, FIXED, NEW, CATEGORIES, TYPES, AUTHORS, ORIGIN
     }
 }

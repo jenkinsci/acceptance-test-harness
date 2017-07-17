@@ -23,6 +23,8 @@ import org.custommonkey.xmlunit.DifferenceConstants;
 import org.custommonkey.xmlunit.DifferenceListener;
 import org.custommonkey.xmlunit.XMLAssert;
 import org.custommonkey.xmlunit.XMLUnit;
+import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
+import org.jenkinsci.test.acceptance.docker.fixtures.JavaGitContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Since;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
@@ -39,8 +41,10 @@ import org.jenkinsci.test.acceptance.plugins.maven.MavenBuildStep;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.plugins.nested_view.NestedView;
+import org.jenkinsci.test.acceptance.plugins.ssh_slaves.SshSlaveLauncher;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Container;
+import org.jenkinsci.test.acceptance.po.DumbSlave;
 import org.jenkinsci.test.acceptance.po.Folder;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
@@ -65,8 +69,8 @@ import com.google.inject.Inject;
 import static java.util.Collections.*;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Base class for tests of the static analysis plug-ins. Contains several generic test cases that run for all
@@ -81,6 +85,61 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
  */
 public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends AbstractJUnitTest {
     private static final List<String> PRIORITIES = Arrays.asList("HIGH", "LOW", "NORMAL");
+
+    /**
+     * Credentials to access the docker container. The credentials are stored with the specified ID and use the
+     * provided SSH key. Use the following annotation on your test case to use the specified docker container as
+     * git server or build agent:
+     * <blockquote>
+     *     <pre>@Test @WithDocker @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY,
+     *                                    values = {CREDENTIALS_ID, CREDENTIALS_KEY})}
+     * public void shouldTestWithDocker() {
+     * }
+     * </pre></blockquote>
+     */
+    protected static final String CREDENTIALS_ID = "git";
+    protected static final String CREDENTIALS_KEY = "/org/jenkinsci/test/acceptance/docker/fixtures/GitContainer/unsafe";
+
+    @Inject
+    private DockerContainerHolder<JavaGitContainer> dockerContainer;
+
+    /**
+     * Returns a docker container that can be used to host git repositories and which can be used as build agent.
+     * If the container is used as agent and git server, then you need to use the file protocol to access the git repository
+     * within Jenkins.
+     *
+     * @return the container
+     */
+    protected JavaGitContainer getDockerContainer() {
+        return dockerContainer.get();
+    }
+
+    /**
+     * Creates an agent in a Docker container.
+     *
+     * @return the new agent ready for new builds
+     */
+    protected DumbSlave createDockerAgent() {
+        DumbSlave agent = jenkins.slaves.create(DumbSlave.class);
+
+        agent.setExecutors(1);
+        agent.remoteFS.set("/tmp/");
+        SshSlaveLauncher launcher = agent.setLauncher(SshSlaveLauncher.class);
+
+        JavaGitContainer container = getDockerContainer();
+        launcher.host.set(container.ipBound(22));
+        launcher.port(container.port(22));
+        launcher.setSshHostKeyVerificationStrategy(SshSlaveLauncher.NonVerifyingKeyVerificationStrategy.class);
+        launcher.selectCredentials(CREDENTIALS_ID);
+
+        agent.save();
+
+        agent.waitUntilOnline();
+
+        assertThat(agent.isOnline(), is(true));
+
+        return agent;
+    }
 
     /**
      * Checks that the plug-in sends a mail after a build has been failed. The content of the mail contains several
