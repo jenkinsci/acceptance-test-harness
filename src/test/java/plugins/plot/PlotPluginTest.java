@@ -73,9 +73,10 @@ public class PlotPluginTest extends AbstractJUnitTest {
 
     /**
      * Test if NumberFormatException is logged only if a non-zero length string is found in the data set.
+     * Fix introduced in plot@1.10
      */
     @Test
-    @WithPlugins("plot@1.10") @Issue("JENKINS-25849")
+    @Issue("JENKINS-25849")
     public void no_exception_visit_plot_page() {
         job.configure();
         job.copyResource(resource(csvWithStringsFilePath));
