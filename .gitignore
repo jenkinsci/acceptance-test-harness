@@ -23,4 +23,3 @@ jenkins*home/
 jenkins-plugins/
 .jenkins_test/
 !src/test/resources/jacoco/test/target
-jut.sh
