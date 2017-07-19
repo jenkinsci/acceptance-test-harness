@@ -192,4 +192,9 @@ public class Wait<Subject> extends FluentWait<Subject> {
     public Wait<Subject> ignoring(Class<? extends Throwable> exceptionType) {
         return (Wait<Subject>) super.ignoring(exceptionType);
     }
+
+    @Override
+    public Wait<Subject> ignoring(Class<? extends Throwable> firstType, Class<? extends Throwable> secondType) {
+        return (Wait<Subject>) super.ignoring(firstType, secondType);
+    }
 }
