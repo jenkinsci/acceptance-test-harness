@@ -1,0 +1,11 @@
+stage ('build_Project') {
+    tools {
+        gradle 'Gradle 4.0'
+    }
+
+    steps {
+        script {
+            sh "gradle hello --scan"
+        }
+    }
+}
