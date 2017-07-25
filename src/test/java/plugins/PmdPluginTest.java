@@ -131,13 +131,13 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
 
         assertThatWarningsCountInSummaryIs(action, 8);
         assertThatNewWarningsCountInSummaryIs(action, 1);
-        assertThatFixedWarningsCountInSummaryIs(action, 1);
+        assertThatFixedWarningsCountInSummaryIs(action, 2);
 
         action.open();
 
         assertThat(action.getNumberOfWarnings(), is(8));
         assertThat(action.getNumberOfNewWarnings(), is(1));
-        assertThat(action.getNumberOfFixedWarnings(), is(1));
+        assertThat(action.getNumberOfFixedWarnings(), is(2));
         assertThat(action.getNumberOfWarningsWithHighPriority(), is(0));
         assertThat(action.getNumberOfWarningsWithNormalPriority(), is(2));
         assertThat(action.getNumberOfWarningsWithLowPriority(), is(6));
@@ -150,7 +150,7 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
 
         action.openFixed();
 
-        assertThat(action.getNumberOfRowsInFixedWarningsTable(), is(1));
+        assertThat(action.getNumberOfRowsInFixedWarningsTable(), is(2));
     }
 
     /**
@@ -358,16 +358,16 @@ public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
     }
 
     private void assertThatWarningsTabIsCorrectlyFilled(PmdAction action) {
-        SortedMap<String, Integer> expectedContent = new TreeMap<>();
-        expectedContent.put("ChannelContentAPIClient.m:28", 28);
-        expectedContent.put("ChannelContentAPIClient.m:28", 28);
-        expectedContent.put("ChannelContentAPIClient.m:28", 28);
-        expectedContent.put("ChannelContentAPIClient.m:32", 32);
-        expectedContent.put("ChannelContentAPIClient.m:36", 36);
-        expectedContent.put("ChannelContentAPIClient.m:40", 40);
-        expectedContent.put("ProductDetailAPIClient.m:37", 37);
-        expectedContent.put("ProductDetailAPIClient.m:38", 38);
-        expectedContent.put("ViewAllHoldingsAPIClient.m:23", 23);
+        SortedMap<String, String> expectedContent = new TreeMap<>();
+        expectedContent.put("ChannelContentAPIClient.m:28", "unused method parameter");
+        expectedContent.put("ChannelContentAPIClient.m:28", "unused method parameter");
+        expectedContent.put("ChannelContentAPIClient.m:28", "unused method parameter");
+        expectedContent.put("ChannelContentAPIClient.m:32", "long line");
+        expectedContent.put("ChannelContentAPIClient.m:36", "long line");
+        expectedContent.put("ChannelContentAPIClient.m:40", "long line");
+        expectedContent.put("ProductDetailAPIClient.m:37", "long line");
+        expectedContent.put("ProductDetailAPIClient.m:38", "long line");
+        expectedContent.put("ViewAllHoldingsAPIClient.m:23", "long line");
         assertThat(action.getWarningsTabContents(), is(expectedContent));
     }
 

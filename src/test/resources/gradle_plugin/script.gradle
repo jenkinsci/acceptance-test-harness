@@ -1,5 +1,51 @@
+plugins {
+    id 'com.gradle.build-scan' version '1.8'
+}
+
+buildScan {
+    licenseAgreementUrl = 'https://gradle.com/terms-of-service'
+    licenseAgree = 'yes'
+}
+
 task hello {
     doLast {
         println 'Hello world!'
     }
+}
+
+task firstTask {
+    doLast {
+        println 'First!'
+    }
+}
+
+task secondTask {
+    doLast {
+        println 'Second!'
+    }
+}
+
+task environmentVariables << {
+    ext.env = System.getenv()
+    ext.buildNumber = env.BUILD_NUMBER?.toInteger()
+    println "Build Number: $buildNumber"
+    
+    ext.buildName = env.BUILD_DISPLAY_NAME?.toString()
+
+    ext.jobName = env.JOB_NAME?.toString()
+    println "Build Name: $jobName $buildName"
+}
+
+task jobParametersAsProjectProperties << {
+    println "Gradle Properties: $project.TEST_PARAM_1 $project.TEST_PARAM_2"
+}
+
+task jobParametersAsSystemProperties {
+    doLast {
+        println "Gradle Properties: " + System.properties.getProperty('TEST_PARAM_1') + " " + System.properties.getProperty('TEST_PARAM_2')
+    }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.0'
 }

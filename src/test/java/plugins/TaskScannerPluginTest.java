@@ -852,16 +852,16 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
      * @param tsa the {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerAction} object for the current job
      */
     private void assertWarningsTabFS1E1(TaskScannerAction tsa) {
-        SortedMap<String, Integer> expectedContent = new TreeMap<>();
+        SortedMap<String, String> expectedContent = new TreeMap<>();
 
-        expectedContent.put("TSRGitRepo.java:38", 38);
-        expectedContent.put("TSRGitRepo.java:69", 69);
-        expectedContent.put("TSRDockerImage.java:84", 84);
-        expectedContent.put("TSRJenkinsAcceptanceTestRule.java:51", 51);
-        expectedContent.put("TSRWinstoneDockerController.java:73", 73);
-        expectedContent.put("TSRCleaner.java:40", 40);
+        expectedContent.put("TSRGitRepo.java:38", "TODO");
+        expectedContent.put("TSRGitRepo.java:69", "FIXME");
+        expectedContent.put("TSRDockerImage.java:84", "TODO");
+        expectedContent.put("TSRJenkinsAcceptanceTestRule.java:51", "TODO");
+        expectedContent.put("TSRWinstoneDockerController.java:73", "TODO");
+        expectedContent.put("TSRCleaner.java:40", "@Deprecated");
 
-        assertThat(tsa.getWarningsTabContents(), is(expectedContent));
+        assertThat(tsa.getWarningsTabContents(2), is(expectedContent));
     }
 
     /**
@@ -871,20 +871,20 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
      * @param tsa the {@link org.jenkinsci.test.acceptance.plugins.tasks.TaskScannerAction} object for the current job
      */
     private void assertWarningsTabFS1E2(TaskScannerAction tsa) {
-        SortedMap<String, Integer> expectedContent = new TreeMap<>();
+        SortedMap<String, String> expectedContent = new TreeMap<>();
 
-        expectedContent.put("TSRGitRepo.java:38", 38);
-        expectedContent.put("TSRGitRepo.java:69", 69);
-        expectedContent.put("TSRGitRepo.java:88", 88);
-        expectedContent.put("TSRDockerImage.java:56", 56);
-        expectedContent.put("TSRDockerImage.java:84", 84);
-        expectedContent.put("TSRDockerImage.java:102", 102);
-        expectedContent.put("TSRJenkinsAcceptanceTestRule.java:51", 51);
-        expectedContent.put("TSRWinstoneDockerController.java:73", 73);
-        expectedContent.put("TSRCleaner.java:40", 40);
-        expectedContent.put("TSREc2Provider.java:133", 133);
+        expectedContent.put("TSRGitRepo.java:38", "TODO");
+        expectedContent.put("TSRGitRepo.java:69", "FIXME");
+        expectedContent.put("TSRGitRepo.java:88", "BUG");
+        expectedContent.put("TSRDockerImage.java:56", "???");
+        expectedContent.put("TSRDockerImage.java:84", "TODO");
+        expectedContent.put("TSRDockerImage.java:102", "XXX");
+        expectedContent.put("TSRJenkinsAcceptanceTestRule.java:51", "TODO");
+        expectedContent.put("TSRWinstoneDockerController.java:73", "TODO");
+        expectedContent.put("TSRCleaner.java:40", "@DEPRECATED");
+        expectedContent.put("TSREc2Provider.java:133", "FIXME");
 
-        assertThat(tsa.getWarningsTabContents(), is(expectedContent));
+        assertThat(tsa.getWarningsTabContents(2), is(expectedContent));
     }
 
 
@@ -919,8 +919,8 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
             String type, String warningText) {
         final List<String> cellStrings = tsa.getCertainWarningsTabRow(filename + ":" + lineNumber);
 
-        assertThat(cellStrings.get(3), is(type));
-        assertThat(cellStrings.get(4), is(warningText));
+        assertThat(cellStrings.get(2), is(type));
+        assertThat(cellStrings.get(3), is(warningText));
     }
 
     @Override

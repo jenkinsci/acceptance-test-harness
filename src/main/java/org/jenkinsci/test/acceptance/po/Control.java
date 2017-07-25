@@ -112,6 +112,14 @@ public class Control extends CapybaraPortingLayerImpl {
         ((JavascriptExecutor)driver).executeScript("arguments[0].value = arguments[1];", e, text);
     }
 
+    /**
+     * Returns the value of the input field.
+     *
+     * @return the value of the input field.
+     */
+    public String get() {
+        return resolve().getAttribute("value");
+    }
 
     /**
      * Sets the value of the input field to the specified text.
@@ -268,6 +276,27 @@ public class Control extends CapybaraPortingLayerImpl {
         return resolve().getText();
     }
 
+    public FormValidation getFormValidation() {
+        WebElement control = resolve();
+
+        // Fire validation if it was not already
+        control.sendKeys(Keys.TAB);
+
+        WebElement validationArea;
+
+        // Special handling for validation buttons and their markup
+        if (control.getTagName().equals("button")) {
+            WebElement spinner = control.findElement(by.xpath("./../../../following-sibling::div[1]"));
+            // Wait as long as there is some spinner shown on the page
+            waitFor().until(() -> !spinner.isDisplayed());
+            validationArea = control.findElement(by.xpath("./../../../following-sibling::div[2]"));
+        } else {
+            validationArea = control.findElement(by.xpath("./../../following-sibling::tr/td[2]"));
+        }
+
+        return new FormValidation(validationArea);
+    }
+
     /**
      * Determines whether an object is existing on the current page
      * @return TRUE if it exists
@@ -283,12 +312,11 @@ public class Control extends CapybaraPortingLayerImpl {
         }
     }
 
-
-
     public interface Owner {
         /**
          * Resolves relative path into a selector.
          */
         By path(String rel);
     }
+
 }

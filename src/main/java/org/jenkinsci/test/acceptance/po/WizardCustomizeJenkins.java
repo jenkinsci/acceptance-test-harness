@@ -27,6 +27,7 @@ package org.jenkinsci.test.acceptance.po;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -62,19 +63,18 @@ public class WizardCustomizeJenkins extends PageObject {
 
     @SuppressWarnings("deprecation") // FIXME: change the detection method when we have id or name in the frame.
     public void shouldFinishInstallSuccessfully() {
-        waitForCond(new Callable<Boolean>() {
-            @Override
-            public Boolean call() throws Exception {
-                try {
-                    WebElement element = driver.switchTo().defaultContent().switchTo().frame(1).findElement(by.name("username"));
-                    return element != null;
-                } catch (NoSuchElementException | NoSuchFrameException e) {
-                    return false;
-                } finally {
-                    driver.switchTo().defaultContent();
-                }
-            }
-        }, 300);
+        waitFor()
+                .withTimeout(300, TimeUnit.SECONDS)
+                .ignoring(NoSuchElementException.class, NoSuchFrameException.class)
+                .until(() -> {
+                    try {
+                        WebElement element = driver.switchTo().defaultContent().switchTo().frame(1).findElement(by.name("username"));
+                        return element != null;
+                    } finally {
+                        driver.switchTo().defaultContent();
+                    }
+                })
+        ;
     }
 
     public void searchPlugin(String searchSring) {

@@ -2,8 +2,8 @@ package org.jenkinsci.test.acceptance.update_center;
 
 import com.cloudbees.sdk.extensibility.ExtensionList;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import org.apache.commons.io.FileUtils;
+import org.jenkinsci.test.acceptance.po.Jenkins;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -18,34 +18,36 @@ import java.util.concurrent.TimeUnit;
  * @author Kohsuke Kawaguchi
  */
 @Singleton
-public class CachedUpdateCenterMetadataLoader implements Provider<UpdateCenterMetadata>, javax.inject.Provider<UpdateCenterMetadata> {
+public class CachedUpdateCenterMetadataLoader implements UpdateCenterMetadataProvider {
     UpdateCenterMetadata metadata;
 
     @Inject(optional=true) @Named("update_center_url_cache")
-    File cache = new File(System.getProperty("java.io.tmpdir"), "update-center.json");
+    File cacheBase = new File(System.getProperty("java.io.tmpdir"), "update-center");
 
     @Inject(optional=true) @Named("update_center_url")
-    String url = "https://updates.jenkins-ci.org/update-center.json";
+    String url = "https://updates.jenkins-ci.org/update-center.json"; // TODO consider using update-center.actual.json so we do not need to strip preamble/postamble
 
     @Inject
     ExtensionList<UpdateCenterMetadataDecorator> decorators;
 
     @Override
-    public UpdateCenterMetadata get() {
-        try {
-            if (metadata==null) {
-                if (!cache.exists() || System.currentTimeMillis()-cache.lastModified() > TimeUnit.DAYS.toMillis(1)) {
-                    // load cache
-                    FileUtils.copyURLToFile(new URL(url),cache);
-                }
-                metadata = UpdateCenterMetadata.parse(cache);
-                for (UpdateCenterMetadataDecorator decorator : decorators) {
-                    decorator.decorate(metadata);
-                }
+    public UpdateCenterMetadata get(Jenkins jenkins) throws IOException {
+        if (metadata==null) {
+            String version = jenkins.getVersion().toString();
+            File cache = new File(cacheBase + "-" + version + ".jsonp");
+            if (!cache.exists() || System.currentTimeMillis()-cache.lastModified() > TimeUnit.DAYS.toMillis(1)) {
+                // load cache
+                URL versionedUrl = new URL(url + "?version=" + version);
+                System.err.println("Downloading " + versionedUrl + " to " + cache);
+                FileUtils.copyURLToFile(versionedUrl, cache);
+            } else {
+                System.err.println("Using cached " + cache);
             }
-            return metadata;
-        } catch (IOException e) {
-            throw new AssertionError("Failed to parse update center data of "+url+" at "+cache, e);
+            metadata = UpdateCenterMetadata.parse(cache);
+            for (UpdateCenterMetadataDecorator decorator : decorators) {
+                decorator.decorate(metadata);
+            }
         }
+        return metadata;
     }
 }

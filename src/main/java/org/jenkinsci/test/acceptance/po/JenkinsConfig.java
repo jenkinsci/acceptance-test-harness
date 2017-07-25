@@ -17,6 +17,8 @@ public class JenkinsConfig extends ConfigurablePageObject {
 
     public final Control addCloudButton = control("/jenkins-model-GlobalCloudConfiguration/hetero-list-add[cloud]");
 
+    public final Control labels = control("/jenkins-model-MasterBuildConfiguration/labelString");
+
     public JenkinsConfig(Jenkins jenkins) {
         super(jenkins.injector, jenkins.url("configure"));
         this.jenkins = jenkins;

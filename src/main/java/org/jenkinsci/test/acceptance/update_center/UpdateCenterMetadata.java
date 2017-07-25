@@ -2,7 +2,6 @@ package org.jenkinsci.test.acceptance.update_center;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.inject.ProvidedBy;
 
 import hudson.util.VersionNumber;
 
@@ -24,7 +23,6 @@ import org.junit.internal.AssumptionViolatedException;
  *
  * @author Kohsuke Kawaguchi
  */
-@ProvidedBy(CachedUpdateCenterMetadataLoader.class)
 public class UpdateCenterMetadata {
     /**
      * Details of plugins by {@linkplain PluginMetadata#name their name}.

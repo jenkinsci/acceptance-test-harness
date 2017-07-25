@@ -4,6 +4,7 @@ import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshCredentialDialog
 import org.jenkinsci.test.acceptance.po.Cloud;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
+import org.jenkinsci.test.acceptance.po.FormValidation;
 import org.jenkinsci.test.acceptance.po.PageObject;
 
 /**
@@ -73,11 +74,10 @@ public class ForemanSharedNodeCloudPageArea extends Cloud {
      * Test connection.
      * @return ForemanCloudPageArea.
      */
-    public ForemanSharedNodeCloudPageArea testConnection() {
-        Control button = control(by.xpath("//div[@descriptorid='com.redhat.foreman.ForemanSharedNodeCloud']//button[contains(.,'Test " +
-                "Connection')]"));
+    public FormValidation testConnection() {
+        Control button = control("validate-button");
         button.click();
-        return this;
+        return button.getFormValidation();
     }
 
     /**

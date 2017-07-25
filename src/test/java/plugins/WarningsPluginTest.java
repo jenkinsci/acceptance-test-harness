@@ -8,23 +8,29 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
+import org.jenkinsci.test.acceptance.junit.WithCredentials;
+import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisAction;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
 import org.jenkinsci.test.acceptance.plugins.envinject.EnvInjectConfig;
 import org.jenkinsci.test.acceptance.plugins.matrix_auth.MatrixAuthorizationStrategy;
 import org.jenkinsci.test.acceptance.plugins.mock_security_realm.MockSecurityRealm;
-import org.jenkinsci.test.acceptance.plugins.script_security.ScriptApproval;
 import org.jenkinsci.test.acceptance.plugins.warnings.GroovyParser;
 import org.jenkinsci.test.acceptance.plugins.warnings.ParsersConfiguration;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsAction;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsBuildSettings;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsColumn;
+import org.jenkinsci.test.acceptance.plugins.warnings.WarningsPublisher;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Container;
+import org.jenkinsci.test.acceptance.po.DumbSlave;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.FreeStyleMultiBranchJob;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
@@ -33,6 +39,8 @@ import org.jenkinsci.test.acceptance.po.ListView;
 import org.jenkinsci.test.acceptance.po.MatrixConfiguration;
 import org.jenkinsci.test.acceptance.po.MatrixProject;
 import org.jenkinsci.test.acceptance.po.Node;
+import org.jenkinsci.test.acceptance.po.ShellBuildStep;
+import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.po.StringParameter;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.junit.Ignore;
@@ -43,8 +51,11 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.is;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 import static org.jenkinsci.test.acceptance.po.PageObject.*;
 
@@ -113,8 +124,169 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         assertThat(driver.getPageSource(), containsString("<div id=\"packages\">BEEFs</div>"));
     }
 
+    private static final String RESOURCE_WARNING_MAIN_JAVA = "WarningMain.java";
+    private static final String RESOURCE_WARNING_MAIN_JAVA_PATH = "/warnings_plugin/" + RESOURCE_WARNING_MAIN_JAVA;
+    private static final String CMD_WARNING_MAIN_JAVA_CONSOLE = "javac -Xlint:all " + RESOURCE_WARNING_MAIN_JAVA;
+    private static final String RESOURCE_CODE_NARC_REPORT = "CodeNarcXmlReport.xml";
+    private static final String RESOURCE_CODE_NARC_REPORT_PATH = "/warnings_plugin/jenkins-17787/" + RESOURCE_CODE_NARC_REPORT;
+
+    @Test @WithDocker @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {CREDENTIALS_ID, CREDENTIALS_KEY})
+    public void should_have_correct_details() throws ExecutionException, InterruptedException {
+        WarningsAction action = createAndBuildCompileJobOnAgent(resource("/warnings_plugin/WarningMain.java"),
+                "javac -Xlint:all WarningMain.java");
+
+        SortedMap<String, String> details = action.getDetailsTabContents();
+        assertThat("Assert the proper detail count.", details.entrySet(), hasSize(3));
+        assertThatDetailsAre(details, "redundant cast to TextClass", "WarningMain.java:10");
+
+        // removing tested entry from details.
+        details.remove(details.firstKey());
+        assertThatDetailsAre(details, "redundant cast to TextClass", "WarningMain.java:11");
+
+        // removing tested entry from details.
+        details.remove(details.firstKey());
+        assertThatDetailsAre(details, "division by zero", "WarningMain.java:14");
+    }
+
+    @Test @WithDocker @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {CREDENTIALS_ID, CREDENTIALS_KEY})
+    public void detailsTabContentWithOneWarningTest() throws ExecutionException, InterruptedException {
+        WarningsAction action = createAndBuildCompileJobOnAgent(resource("/warnings_plugin/WarningMain2.java"),
+                "javac -Xlint:all WarningMain2.java");
+
+        SortedMap<String, String> details = action.getDetailsTabContents();
+
+        assertThat("Assert the proper detail count.", details.entrySet(), hasSize(1));
+
+        assertThatDetailsAre(details, "redundant cast to TextClass", "WarningMain2.java:9");
+    }
+
+    private WarningsAction createAndBuildCompileJobOnAgent(Resource resource, String command) {
+        DumbSlave dockerSlave = createDockerAgent();
+        FreeStyleJob job = prepareDockerSlave(dockerSlave);
+
+        job.configure();
+
+        job.copyResource(resource);
+
+        ShellBuildStep shellBuildStep = job.addBuildStep(ShellBuildStep.class);
+        shellBuildStep.command(command);
+        WarningsPublisher warningsPublisher = job.addPublisher(WarningsPublisher.class);
+        warningsPublisher.addConsoleScanner(JAVA_ID);
+
+        job.save();
+
+        Build build = buildSuccessfulJob(job);
+
+        assertThatActionExists(job, build, "Java Warnings");
+
+        WarningsAction action = createJavaResultAction(build);
+
+        action.open();
+        return action;
+    }
+
+    private void assertThatDetailsAre(SortedMap<String, String> map, String expectedDetailText, String expectedLineInFile) {
+        String thirdKey = map.firstKey();
+        String detailText = map.get(thirdKey);
+        String[] headerArray = thirdKey.split(",");
+
+        assertThat("Assert the proper header array length." , headerArray.length, is(3));
+        assertThat("Assert the proper file and line." , headerArray[0].trim(), is(expectedLineInFile));
+        assertThat("Assert the proper parser." , headerArray[1].trim(), is("Java Compiler (javac)"));
+        assertThat("Assert the proper warning priority." , headerArray[2].trim(), is("Priority: Normal"));
+        assertThat("Assert the proper detail text" , detailText.trim(), is(expectedDetailText));
+    }
+
+    @Test @WithDocker @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {CREDENTIALS_ID, CREDENTIALS_KEY})
+    public void should_scan_console_log_of_slave_build() throws ExecutionException, InterruptedException {
+        DumbSlave dockerSlave = createDockerAgent();
+        FreeStyleJob job = prepareDockerSlave(dockerSlave);
+
+        job.configure();
+        job.copyResource(resource(RESOURCE_WARNING_MAIN_JAVA_PATH));
+        ShellBuildStep shellBuildStep = job.addBuildStep(ShellBuildStep.class);
+        shellBuildStep.command(CMD_WARNING_MAIN_JAVA_CONSOLE);
+        WarningsPublisher warningsPublisher = job.addPublisher(WarningsPublisher.class);
+        warningsPublisher.addConsoleScanner(JAVA_ID);
+
+        job.save();
+        Build build = job.startBuild().shouldSucceed();
+
+        assertThatActionExists(job, build, "Java Warnings");
+
+        WarningsAction action = createJavaResultAction(build);
+        assertThatWarningsCountInSummaryIs(action, 3);
+
+        String codeLine =  action.getLinkedSourceFileText(AnalysisAction.Tab.DETAILS,"WarningMain.java", 10);
+
+        String[] codeLineArr =  codeLine.trim().split("\\s+", 2);
+        assertThat("Warning should be at line",codeLineArr[0], is("10"));
+        assertThat("Assert failed comparing code line is",codeLineArr[1], is("text =  (TextClass) text2;"));
+    }
+
+    @Test @WithDocker
+    @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {CREDENTIALS_ID, CREDENTIALS_KEY})
+    public void should_scan_files_on_slave(){
+        DumbSlave dockerSlave = createDockerAgent();
+        FreeStyleJob job = prepareDockerSlave(dockerSlave);
+
+        job.configure();
+        job.copyResource(resource("/warnings_plugin/out.txt"));
+        job.addPublisher(WarningsPublisher.class).addWorkspaceFileScanner(JAVA_ID, "out.txt");
+        job.save();
+
+        Build build = job.startBuild().shouldSucceed();
+
+        assertThatActionExists(job, build, "Java Warnings");
+
+        build.open();
+        assertThat(driver, hasContent("Java Warnings: " + 2));
+    }
+
+    @Test @Issue("JENKINS-17787") @WithPlugins("violations") @WithDocker @Ignore("Reproduces JENKINS-17787")
+    @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {CREDENTIALS_ID, CREDENTIALS_KEY})
+    public void should_parse_codenarc_on_agent() {
+        DumbSlave dockerSlave = createDockerAgent();
+        FreeStyleJob job = prepareDockerSlave(dockerSlave);
+        assertThatCodeNarcActionExists(job);
+    }
+
+    @Test @WithPlugins("violations")
+    public void should_parse_codenarc_on_master() {
+        FreeStyleJob job = createFreeStyleJob(RESOURCE_CODE_NARC_REPORT_PATH,
+                settings -> settings.addWorkspaceScanner("Codenarc", RESOURCE_CODE_NARC_REPORT));
+        Build build = buildSuccessfulJob(job);
+
+        assertThatActionExists(job, build, "Codenarc Warnings");
+    }
+
+    private void assertThatCodeNarcActionExists(FreeStyleJob job){
+        job.configure();
+        job.copyResource(resource(RESOURCE_CODE_NARC_REPORT_PATH));
+
+        WarningsPublisher warningsPublisher = job.addPublisher(WarningsPublisher.class);
+        warningsPublisher.addWorkspaceFileScanner("Codenarc", RESOURCE_CODE_NARC_REPORT);
+
+        job.save();
+
+        Build build = job.startBuild().shouldSucceed();
+
+        assertThatActionExists(job, build, "Codenarc Warnings");
+    }
+
+
     /**
-     * Checks that a dynamic parser with only methods from the whitelist correctly detects a warning.
+     * Create {@link FreeStyleJob} and build once to create Workspace on Slave
+     */
+    private FreeStyleJob prepareDockerSlave(final Slave dockerSlave){
+        FreeStyleJob job = jenkins.jobs.create();
+        job.configure();
+        job.setLabelExpression(dockerSlave.getName());
+        return job;
+    }
+
+    /**
+     * Checks that a dynamic Groovy parser correctly detects a warning.
      */
     @Test
     public void should_detect_warnings_with_groovy_parser() {
@@ -127,27 +299,6 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         String header = parserName + GroovyParser.LINK_SUFFIX;
         assertThatActionExists(job, build, header);
         assertThat(driver, hasContent(header + ": 2 warnings from one analysis."));
-    }
-
-    /**
-     * Checks that a dynamic parser with a blacklisted method is rejected and the rejected
-     * method is handled over to the script approval console.
-     */
-    @Test
-    public void should_be_refused_by_sandbox() {
-        String parserName = createParser(ILLEGAL_PARSER_SCRIPT);
-
-        FreeStyleJob job = createJobWithParser(parserName);
-
-        Build build = buildSuccessfulJob(job);
-
-        assertThatActionIsMissing(job, build, parserName + GroovyParser.LINK_SUFFIX);
-        assertThat(build.getConsole(),
-                containsString("Groovy sandbox rejected the parsing script for parser " + parserName));
-
-        ScriptApproval approval = new ScriptApproval(jenkins);
-        approval.open();
-        approval.findSignature("staticMethod hudson.plugins.analysis.util.model.Priority fromString java.lang.String");
     }
 
     private String createParser(final String script) {

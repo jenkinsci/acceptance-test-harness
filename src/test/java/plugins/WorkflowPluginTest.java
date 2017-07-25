@@ -24,15 +24,12 @@
 
 package plugins;
 
+import javax.inject.Inject;
 import java.io.File;
 import java.util.concurrent.Callable;
-import javax.inject.Inject;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.LocalController;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
@@ -59,18 +56,24 @@ import org.jenkinsci.test.acceptance.po.DumbSlave;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.jenkinsci.utils.process.CommandBuilder;
-import static org.junit.Assert.*;
 import org.junit.Assume;
-import static org.junit.Assume.*;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.*;
+import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.junit.Assert.*;
+import static org.junit.Assume.*;
 
 /**
  * Roughly follows <a href="https://github.com/jenkinsci/workflow-plugin/blob/master/TUTORIAL.md">the tutorial</a>.
  */
 public class WorkflowPluginTest extends AbstractJUnitTest {
-
+    private static final String CREDENTIALS_ID = "pipeline";
+    private static final String KEY_FILENAME = "/org/jenkinsci/test/acceptance/docker/fixtures/GitContainer/unsafe";
     private static final String SHARED_LIBRARY_NAME = "Greeting";
     private static final String NAME = "myname";
     private static final String EXPECTED_OUTPUT_FROM_LIBRARY_VARS = "Hello from vars my friend " + NAME;
@@ -81,13 +84,40 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
     @Inject DockerContainerHolder<DockerAgentContainer> agent;
     @Inject JenkinsController controller;
 
+    @Test @WithPlugins({"workflow-aggregator", "git"}) @WithDocker
+    @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {CREDENTIALS_ID, KEY_FILENAME})
+    public void hello_world_from_git() {
+        String gitRepositoryUrl = createGitRepositoryInDockerContainer();
+
+        WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
+        job.setJenkinsFileRepository(gitRepositoryUrl, CREDENTIALS_ID);
+        job.save();
+        Build build = job.startBuild().shouldSucceed();
+        assertThat(build.getConsole(), containsString("Hello Jenkinsfile in Git"));
+    }
+
+    private String createGitRepositoryInDockerContainer() {
+        GitRepo repo = new GitRepo();
+        repo.addFilesIn(getClass().getResource("/pipelines/hello-world"));
+        repo.commit("Initial commit.");
+
+        GitContainer container = gitServer.get();
+        repo.transferToDockerContainer(container.host(), container.port());
+
+        return container.getRepoUrl();
+    }
+
     @WithPlugins("workflow-aggregator@1.1")
-    @Test public void helloWorld() throws Exception {
+    @Test public void hello_World() {
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
         job.script.set("echo 'hello from Workflow'");
         job.sandbox.check();
         job.save();
-        job.startBuild().shouldSucceed().shouldContainsConsoleOutput("hello from Workflow");
+
+        Build build = job.startBuild();
+        build.shouldSucceed();
+
+        assertThat(build.getConsole(), containsString("hello from Workflow"));
     }
 
     @WithPlugins({"workflow-aggregator@2.0", "workflow-cps@2.10", "workflow-basic-steps@2.1", "junit@1.18", "git@2.3"})
@@ -132,7 +162,8 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
                 return "Console output:\n" + build.getConsole() + "\n";
             }
         });
-        build.shouldContainsConsoleOutput("Building version 1.0-SNAPSHOT");
+        assertThat(build.getConsole(), containsString("Building version 1.0-SNAPSHOT"));
+
         jenkins.restart();
         // Default 120s timeout of Build.waitUntilFinished sometimes expires waiting for RetentionStrategy.Always to tick (after initial failure of CommandLauncher.launch: EOFException: unexpected stream termination):
         slave.waitUntilOnline(); // TODO rather wait for build output: "Ready to run"
@@ -189,14 +220,15 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         } catch (AssertionError x) { // cf. linearFlow
             build.shouldBeUnstable();
         }
-        build.shouldContainsConsoleOutput("No record available"); // first run
+        assertThat(build.getConsole(), containsString("No record available"));
+
         build = job.startBuild();
         try {
             build.shouldSucceed();
         } catch (AssertionError x) {
             build.shouldBeUnstable();
         }
-        build.shouldContainsConsoleOutput("divided into 3 sets");
+        assertThat(build.getConsole(), containsString("divided into 3 sets"));
     }
 
     @Category(DockerTest.class)
@@ -207,7 +239,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
     @Test public void sshGitInsideDocker() throws Exception {
         GitContainer gitContainer = gitServer.get();
         GitRepo repo = new GitRepo();
-        repo.commit("Initial commit");
+        repo.changeAndCommitFoo("Initial commit");
         repo.transferToDockerContainer(gitContainer.host(), gitContainer.port());
         DumbSlave slave = jenkins.slaves.create(DumbSlave.class);
         slave.setExecutors(1);

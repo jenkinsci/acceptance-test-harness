@@ -27,9 +27,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.jenkinsci.test.acceptance.po.FormValidation.Kind.OK;
 import static org.junit.Assert.assertEquals;
-
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Named;
 
@@ -44,6 +43,7 @@ import org.jenkinsci.test.acceptance.plugins.openstack.OpenstackOneOffSlave;
 import org.jenkinsci.test.acceptance.plugins.openstack.OpenstackSlaveTemplate;
 import org.jenkinsci.test.acceptance.plugins.openstack.UserDataConfig;
 import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.po.FormValidation;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.jenkinsci.test.acceptance.po.MatrixBuild;
@@ -111,8 +111,8 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
         JenkinsConfig config = jenkins.getConfigPage();
         config.configure();
         OpenstackCloud cloud = addCloud(config);
-        cloud.testConnection();
-        waitFor(driver, hasContent("Connection succeeded!"), 60);
+        FormValidation val = cloud.testConnection();
+        assertThat(val, FormValidation.reports(OK, "Connection succeeded!"));
     }
 
     @Test

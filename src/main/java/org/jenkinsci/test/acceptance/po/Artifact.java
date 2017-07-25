@@ -40,7 +40,7 @@ public class Artifact extends PageObject {
 
     public String getTextContent() {
         visit(url("%s/*view*/", path));
-        return pageText(driver);
+        return getPageContent(driver);
     }
 
     /**

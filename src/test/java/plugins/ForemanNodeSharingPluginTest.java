@@ -13,6 +13,7 @@ import org.jenkinsci.test.acceptance.plugins.credentials.CredentialsPage;
 import org.jenkinsci.test.acceptance.plugins.foreman_node_sharing.ForemanSharedNodeCloudPageArea;
 import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshPrivateKeyCredential;
 import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.po.FormValidation;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.JenkinsConfig;
@@ -31,7 +32,9 @@ import java.net.URL;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.startsWith;
+import static org.jenkinsci.test.acceptance.po.FormValidation.Kind.OK;
 
 /**
  * Acceptance Test Harness Test for Foreman Node Sharing Plugin.
@@ -51,7 +54,6 @@ public class ForemanNodeSharingPluginTest extends AbstractJUnitTest {
     private String jobLabelExpression1 = "label1 && aix";
     private String jobLabelExpression2 = labelExpression2;
 
-    private static final int FOREMAN_CLOUD_INIT_WAIT = 180;
     private static final int PROVISION_TIMEOUT = 480;
     private static final int EXTENDED_PROVISION_TIMEOUT = 900;
     private static final String DEFAULTJOBSLEEPTIME = "15";
@@ -159,9 +161,8 @@ public class ForemanNodeSharingPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void testConnection() throws IOException {
-        System.out.println(foreman.getIpAddress());
-        cloud.testConnection();
-        waitFor(driver, hasContent("Foreman version is"), FOREMAN_CLOUD_INIT_WAIT);
+        FormValidation validation = cloud.testConnection();
+        assertThat(validation, FormValidation.reports(OK, startsWith("Foreman version is")));
     }
 
     /**

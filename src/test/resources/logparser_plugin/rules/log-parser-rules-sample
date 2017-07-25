@@ -1,0 +1,7 @@
+info /Building in workspace.*/
+info /Finished: SUCCESS/
+
+start /Started by user.*/
+warning /\[WARNING\].*/
+
+error /\[ERROR\].*/

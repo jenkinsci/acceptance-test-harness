@@ -1,12 +1,7 @@
 package plugins;
 
 import javax.inject.Inject;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -41,7 +36,6 @@ import org.jenkinsci.test.acceptance.po.Folder;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.ListView;
-import org.jenkinsci.test.acceptance.po.TopLevelItem;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.jenkinsci.test.acceptance.po.WorkflowMultiBranchJob;
 import org.junit.Test;
@@ -50,13 +44,9 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.SftpException;
-
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.collection.IsCollectionWithSize.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 import static org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisPlugin.*;
 import static org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView.*;
@@ -71,6 +61,8 @@ import static org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView
 public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCollectorAction> {
     private static final String ANALYSIS_COLLECTOR_PLUGIN_RESOURCES = "/analysis_collector_plugin";
     private static final String XPATH_LISTVIEW_WARNING_TD = "//table[@id='projectstatus']/tbody/tr[2]/td[last()-1]";
+    private static final String CREDENTIALS_ID = "collector";
+    private static final String KEY_FILENAME = "/org/jenkinsci/test/acceptance/docker/fixtures/GitContainer/unsafe";
 
     private static final int CHECKSTYLE_ALL = 776;
     private static final int FINDBUGS_ALL = 6;
@@ -93,9 +85,28 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
     private static final int WARNINGS_LOW = 0;
     private static final int LOW_COUNT = CHECKSTYLE_LOW + FINDBUGS_LOW + PMD_LOW + TASKS_LOW + WARNINGS_LOW;
     private static final int NORMAL_COUNT = TOTAL - LOW_COUNT - HIGH_COUNT;
+    private static final List<AnalysisPlugin> ANALYSIS_PLUGINS = Arrays.asList(CHECKSTYLE, PMD, FINDBUGS, TASKS, WARNINGS);
 
     @Inject
-    DockerContainerHolder<GitContainer> gitForMultiBranch;
+    DockerContainerHolder<GitContainer> gitServer;
+
+    /**
+     * Creates and builds a pipeline that is version controlled in Git. Basically the same test case as
+     * {@link AbstractAnalysisTest#should_navigate_to_result_action_from_pipeline()}. Rather than using the script
+     * text box a Git repository is connected.
+     */
+    @Test @WithPlugins({"git", "workflow-job"}) @WithDocker
+    @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {CREDENTIALS_ID, KEY_FILENAME})
+    public void should_checkout_pipeline_from_git() {
+        String gitRepositoryUrl = createGitRepositoryInDockerContainer();
+
+        WorkflowJob job = jenkins.getJobs().create(WorkflowJob.class);
+        job.setJenkinsFileRepository(gitRepositoryUrl, CREDENTIALS_ID);
+        job.save();
+
+        Build build = buildSuccessfulJob(job);
+        verifyJobResults(job, build);
+    }
 
     /**
      * Builds a freestyle job. Verifies that afterwards a trend graph exists for each of the participating plug-ins.
@@ -155,7 +166,7 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
     }
 
     private void assertThatNumberOfGraphsIs(final FreeStyleJob job, final int expectedCount) {
-        Map<String, Integer> trends = job.getTrendGraphContent(".*");
+        Map<String, Integer> trends = getTrendGraphContent(".*");
         assertThat(trends.size(), is(expectedCount));
     }
 
@@ -268,7 +279,7 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
         FreeStyleJob job = createFreeStyleJob();
         buildSuccessfulJob(job);
 
-        ListView view = jenkins.views.create(ListView.class, createRandomName());
+        ListView view = jenkins.views.create(ListView.class, "list");
         view.configure();
         view.matchAllJobs();
         view.addColumn(AnalysisCollectorColumn.class);
@@ -281,10 +292,10 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
         String tooltip = warningsCell.getAttribute("tooltip");
         assertThat(tooltip,
                 allOf(
-                        containsString("<a href=\"job/" + job.name + "/checkstyle\">" + CHECKSTYLE_ALL + "</a>"),
-                        containsString("<a href=\"job/" + job.name + "/findbugs\">" + FINDBUGS_ALL + "</a>"),
-                        containsString("<a href=\"job/" + job.name + "/pmd\">" + PMD_ALL + "</a>"),
-                        containsString("<a href=\"job/" + job.name + "/warnings\">" + WARNINGS_ALL + "</a>")
+                        containsString("<a href=\"view/list/job/" + job.name + "/checkstyle\">" + CHECKSTYLE_ALL + "</a>"),
+                        containsString("<a href=\"view/list/job/" + job.name + "/findbugs\">" + FINDBUGS_ALL + "</a>"),
+                        containsString("<a href=\"view/list/job/" + job.name + "/pmd\">" + PMD_ALL + "</a>"),
+                        containsString("<a href=\"view/list/job/" + job.name + "/warnings\">" + WARNINGS_ALL + "</a>")
                 )
         );
 
@@ -308,20 +319,21 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
      * Each branch contains a Jenkinsfile and several warnings results files.
      * Builds the jobs and verifies that the portlet is correctly filled and that all links open the correct page.
      */
-    @Test @Issue("JENKINS-39950") @WithPlugins({"dashboard-view", "nested-view"})
+    @Test @Issue({"JENKINS-39950"}) @WithPlugins({"dashboard-view", "nested-view", "git", "workflow-job", "workflow-cps", "workflow-basic-steps", "workflow-durable-task-step", "workflow-multibranch"})
     @WithDocker @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {"warnings", "/org/jenkinsci/test/acceptance/docker/fixtures/GitContainer/unsafe"})
-    public void should_show_correct_links() throws InterruptedException, SftpException, JSchException, IOException {
-        NestedView nested = jenkins.getViews().create(NestedView.class, "Nested");
+    public void should_open_links_in_folder_dashboard_and_nested_views() {
+        // Given
+        NestedView nested = jenkins.getViews().create(NestedView.class);
 
-        DashboardView dashboard = nested.getViews().create(DashboardView.class, "Dashboard");
-        dashboard.configure();
-        dashboard.matchAllJobs();
-        dashboard.checkRecurseIntoFolders();
+        DashboardView dashboard = nested.getViews().create(DashboardView.class);
+        dashboard.configure( () -> {
+            dashboard.matchAllJobs();
+            dashboard.checkRecurseIntoFolders();
 
-        addWarningsPortlet(dashboard);
-        dashboard.save();
+            addWarningsPortlet(dashboard);
+        });
 
-        Folder folder = dashboard.jobs.create(Folder.class, "Folder");
+        Folder folder = dashboard.jobs.create(Folder.class);
         folder.save();
         folder.open();
 
@@ -335,44 +347,44 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
         job.save();
         job.waitForBranchIndexingFinished(20);
 
-        WorkflowJob master = job.getJob("master");
-        master.build(1).waitUntilFinished().shouldSucceed();
-        WorkflowJob branch = job.getJob("branch");
-        branch.build(1).waitUntilFinished().shouldSucceed();
+        // When
+        List<String> jobs = Arrays.asList("master", "branch");
+        for (String name : jobs) {
+            buildBranch(job, name);
+        }
 
+        // Then
         dashboard.open();
 
-        verifyWarningsCountInPortlet(master, dashboard);
-        verifyWarningsCountInPortlet(branch, dashboard);
+        for (String name : jobs) {
+            verifyWarningsCountInPortlet(name, dashboard);
+        }
 
-        // FIXME: check that the links are broken
-        List<WebElement> links = all(By.linkText(String.valueOf(CHECKSTYLE_ALL)));
-        assertThat(links, hasSize(2));
+        for (AnalysisPlugin plugin : ANALYSIS_PLUGINS) {
+            for (String name : jobs) {
+                dashboard.open();
+                findPortletLink(dashboard, name, plugin.getId()).click();
+                assertThat(driver, hasContent(plugin.getName()));
+            }
+        }
+    }
 
+    private WorkflowJob buildBranch(WorkflowMultiBranchJob job, String branchName) {
+        WorkflowJob master = job.getJob(branchName);
+        master.build(1).waitUntilFinished().shouldSucceed();
+        return master;
     }
 
     private String createGitRepositoryInDockerContainer() {
-        try {
-            GitRepo repo = new GitRepo();
-            Path source = Paths.get(getClass().getResource(ANALYSIS_COLLECTOR_PLUGIN_RESOURCES).toURI());
+        GitRepo repo = new GitRepo();
+        repo.addFilesIn(ANALYSIS_COLLECTOR_PLUGIN_RESOURCES);
+        repo.commit("Initial commit in master");
+        repo.createBranch("branch");
 
-            try (DirectoryStream<Path> paths = Files.newDirectoryStream(source)) {
-                for (Path path : paths) {
-                    Files.copy(path, repo.path(path.getFileName()));
-                }
-            }
-            repo.git("add", "*");
-            repo.git("commit", "-m", "Initial commit in master");
-            repo.git("branch", "branch");
+        GitContainer container = gitServer.get();
+        repo.transferToDockerContainer(container.host(), container.port());
 
-            GitContainer container = gitForMultiBranch.get();
-            repo.transferToDockerContainer(container.host(), container.port());
-
-            return container.getRepoUrl();
-        }
-        catch (IOException | InterruptedException | URISyntaxException | JSchException | SftpException e) {
-            throw new AssertionError(e);
-        }
+        return container.getRepoUrl();
     }
 
     private WarningsPerProjectPortlet addWarningsPortlet(DashboardView dashboard) {
@@ -400,21 +412,24 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
         dashboard.save();
 
         dashboard.open();
-        verifyWarningsCountInPortlet(job, dashboard);
+        verifyWarningsCountInPortlet(job.name, dashboard);
 
         // uncheck Open Tasks
         dashboard.configure(() -> portlet.checkCollectedPlugin(TASKS, false));
         dashboard.open();
 
-        assertThat(dashboard, not(hasWarningsFor(job, TASKS, TASKS_ALL)));
+        assertThat(dashboard, not(hasWarnings(job.name, TASKS.getId(), TASKS_ALL)));
     }
 
-    private void verifyWarningsCountInPortlet(TopLevelItem job, DashboardView dashboard) {
-        assertThat(dashboard, hasWarningsFor(job, CHECKSTYLE, CHECKSTYLE_ALL));
-        assertThat(dashboard, hasWarningsFor(job, PMD, PMD_ALL));
-        assertThat(dashboard, hasWarningsFor(job, FINDBUGS, FINDBUGS_ALL));
-        assertThat(dashboard, hasWarningsFor(job, TASKS, TASKS_ALL));
-        assertThat(dashboard, hasWarningsFor(job, WARNINGS, WARNINGS_ALL));
+    private void verifyWarningsCountInPortlet(String name, DashboardView dashboard) {
+        for (AnalysisPlugin plugin : ANALYSIS_PLUGINS) {
+            assertThat(dashboard, hasWarnings(name, CHECKSTYLE.getId(), CHECKSTYLE_ALL));
+
+        }
+        assertThat(dashboard, hasWarnings(name, PMD.getId(), PMD_ALL));
+        assertThat(dashboard, hasWarnings(name, FINDBUGS.getId(), FINDBUGS_ALL));
+        assertThat(dashboard, hasWarnings(name, TASKS.getId(), TASKS_ALL));
+        assertThat(dashboard, hasWarnings(name, WARNINGS.getId(), WARNINGS_ALL));
     }
 
     @Test @WithPlugins("workflow-aggregator")
@@ -564,13 +579,13 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
         configurator.accept(taskScannerSettings);
     }
 
-    public static Matcher<DashboardView> hasWarningsFor(final TopLevelItem job, final AnalysisPlugin plugin, final int warningsCount) {
-        return new Matcher<DashboardView>(" shows %s warnings for plugin %s and job %s", warningsCount, plugin.getId(), job.name) {
+    public static Matcher<DashboardView> hasWarnings(final String jobName, final String pluginId, final int warningsCount) {
+        return new Matcher<DashboardView>(" shows %s warnings for plugin %s and job %s", warningsCount, pluginId, jobName) {
             @Override
             public boolean matchesSafely(final DashboardView view) {
                 view.open();
                 try {
-                    WebElement warningsLink = view.find(by.css("a[href='job/" + job.name + "/" + plugin.getId() + "']"));
+                    WebElement warningsLink = findPortletLink(view, jobName, pluginId);
                     String linkText = warningsLink.getText();
                     return Integer.parseInt(linkText) == warningsCount;
                 } catch (NoSuchElementException | NumberFormatException e) {
@@ -580,8 +595,12 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
 
             @Override
             public void describeMismatchSafely(final DashboardView view, final Description desc) {
-                desc.appendText("Portlet does not show expected warnings for plugin " + plugin.getId());
+                desc.appendText("Portlet does not show expected warnings for plugin " + pluginId);
             }
         };
+    }
+
+    private static WebElement findPortletLink(DashboardView view, String jobName, String pluginId) {
+        return view.find(by.css("a[href*='%s'][href$='%s']", jobName, pluginId));
     }
 }

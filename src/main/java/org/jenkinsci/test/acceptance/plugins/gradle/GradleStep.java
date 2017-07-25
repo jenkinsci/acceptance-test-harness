@@ -27,22 +27,98 @@ import org.jenkinsci.test.acceptance.po.*;
 
 @Describable("Invoke Gradle script")
 public class GradleStep extends AbstractStep implements BuildStep {
-    public final Control name = control("");
-    public final Control file = control("buildFile");
-    public final Control dir = control("rootBuildScriptDir");
-    public final Control switches = control("switches");
-    public final Control tasks = control("tasks");
+
+    private final Control file = control("buildFile");
+    private final Control dir = control("rootBuildScriptDir");
+    private final Control switches = control("switches");
+    private final Control tasks = control("tasks");
+    private final Control useWrapper = control("useWrapper[true]");
+    private final Control wrapperLocation = control("wrapperLocation");
+    private final Control makeWrapperExecutable = control("makeExecutable");
+    private final Control projectProperties = control("projectProperties");
+    private final Control passAllAsProjectProperties = control("passAllAsProjectProperties");
+    private final Control systemProperties = control("systemProperties");
+    private final Control passAllAsSystemProperties = control("passAllAsSystemProperties");
+    private final Control forceGradleHomeToUseWorkspace = control("useWorkspaceAsHome");
 
     public GradleStep(Job parent, String path) {
         super(parent, path);
     }
 
-    public void useVersion(String version) {
+    private void ensureAdvancedOptionsOpen() {
+        Control advancedButton = control("advanced-button");
+        if(advancedButton.exists()) {
+            advancedButton.click();
+        }
+    }
+
+    public void setVersion(String version) {
         String path = parent.getJenkins().getPlugin("gradle").isOlderThan("1.24")
-                ? "useWrapper[false]/gradleName"
-                : "gradleName"
-        ;
+            ? "useWrapper[false]/gradleName"
+            : "gradleName"
+            ;
 
         control(path).select(version);
     }
+
+    public void setFile(final String file) {
+        ensureAdvancedOptionsOpen();
+        this.file.set(file);
+    }
+
+    public void setDir(final String dir) {
+        ensureAdvancedOptionsOpen();
+        this.dir.set(dir);
+    }
+
+    public void setSwitches(final String switches) {
+        ensureAdvancedOptionsOpen();
+        this.switches.set(switches);
+    }
+
+    public void setTasks(final String tasks) {
+        ensureAdvancedOptionsOpen();
+        this.tasks.set(tasks);
+    }
+
+    public void setUseWrapper(){
+        ensureAdvancedOptionsOpen();
+        this.useWrapper.click();
+    }
+
+    public void setWrapperLocation(final String wrapperLocation){
+        ensureAdvancedOptionsOpen();
+        this.wrapperLocation.set(wrapperLocation);
+    }
+
+    public void setMakeWrapperExecutable(){
+        ensureAdvancedOptionsOpen();
+        this.makeWrapperExecutable.click();
+    }
+
+    public void setProjectProperties(final String projectProperties){
+        ensureAdvancedOptionsOpen();
+        this.projectProperties.set(projectProperties);
+    }
+
+    public void setPassAllAsProjectProperties(){
+        ensureAdvancedOptionsOpen();
+        this.passAllAsProjectProperties.click();
+    }
+
+    public void setSystemProperties(final String systemProperties){
+        ensureAdvancedOptionsOpen();
+        this.systemProperties.set(systemProperties);
+    }
+
+    public void setPassAllAsSystemProperties(){
+        ensureAdvancedOptionsOpen();
+        this.passAllAsSystemProperties.click();
+    }
+
+    public void setForceGradleHomeToUseWorkspace(){
+        ensureAdvancedOptionsOpen();
+        this.forceGradleHomeToUseWorkspace.click();
+    }
+
 }

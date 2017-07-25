@@ -1,0 +1,9 @@
+node {
+    stage ('Clone sources'){
+           echo 'cloned'
+    }
+    stage ('Build'){
+               echo 'Meant to fail'
+               sh 'exit 1'
+    }
+}

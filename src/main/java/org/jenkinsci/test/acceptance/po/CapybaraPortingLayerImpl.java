@@ -74,6 +74,15 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     }
 
     /**
+     * Get a string representing the current URL with fragment part that the browser is looking at.
+     *
+     * @return The URL with fragment part of the page currently loaded in the browser.
+     */
+    public String getCurrentUrlWithFragment() {
+        return executeScript("return document.location.href").toString();
+    }
+
+    /**
      * Navigates the browser to the page.
      *
      * @param url URL relative to the context path of Jenkins, such as "/about" or "/job/foo/configure".
@@ -258,7 +267,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
 
     @Override
     public void fillIn(String formFieldName, Object value) {
-        WebElement e = find(By.name(formFieldName));
+        WebElement e = waitFor(by.name(formFieldName));
         e.clear();
         e.sendKeys(value.toString());
     }
@@ -442,15 +451,21 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
         throw cause;
     }
 
-    public static String pageText(WebDriver driver) {
-        final By html = by.xpath("/html");
+    public static String getPageSource(WebDriver driver) {
+        return (String) ((JavascriptExecutor) driver).executeScript(
+                "return document.getElementsByTagName('html')[0].outerHTML"
+        );
+    }
 
-        try {
-            return driver.findElement(html).getText();
-        } catch (StaleElementReferenceException ex) {
-            // Retry once to avoid random failures in case of bad timing (reload, js, etc.)
-            return driver.findElement(html).getText();
-        }
+    public String getPageSource() {
+        return getPageSource(driver);
+    }
+
+    /**
+     * Get visible text on the page.
+     */
+    public static String getPageContent(WebDriver driver) {
+        return driver.findElement(by.css("html")).getText();
     }
 
     /**

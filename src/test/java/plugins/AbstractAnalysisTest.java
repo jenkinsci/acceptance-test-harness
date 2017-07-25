@@ -7,9 +7,11 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FilenameUtils;
@@ -21,6 +23,8 @@ import org.custommonkey.xmlunit.DifferenceConstants;
 import org.custommonkey.xmlunit.DifferenceListener;
 import org.custommonkey.xmlunit.XMLAssert;
 import org.custommonkey.xmlunit.XMLUnit;
+import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
+import org.jenkinsci.test.acceptance.docker.fixtures.JavaGitContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Since;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
@@ -36,8 +40,11 @@ import org.jenkinsci.test.acceptance.plugins.email_ext.EmailExtPublisher;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenBuildStep;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
+import org.jenkinsci.test.acceptance.plugins.nested_view.NestedView;
+import org.jenkinsci.test.acceptance.plugins.ssh_slaves.SshSlaveLauncher;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Container;
+import org.jenkinsci.test.acceptance.po.DumbSlave;
 import org.jenkinsci.test.acceptance.po.Folder;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
@@ -62,8 +69,8 @@ import com.google.inject.Inject;
 import static java.util.Collections.*;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Base class for tests of the static analysis plug-ins. Contains several generic test cases that run for all
@@ -78,6 +85,61 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
  */
 public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends AbstractJUnitTest {
     private static final List<String> PRIORITIES = Arrays.asList("HIGH", "LOW", "NORMAL");
+
+    /**
+     * Credentials to access the docker container. The credentials are stored with the specified ID and use the
+     * provided SSH key. Use the following annotation on your test case to use the specified docker container as
+     * git server or build agent:
+     * <blockquote>
+     *     <pre>@Test @WithDocker @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY,
+     *                                    values = {CREDENTIALS_ID, CREDENTIALS_KEY})}
+     * public void shouldTestWithDocker() {
+     * }
+     * </pre></blockquote>
+     */
+    protected static final String CREDENTIALS_ID = "git";
+    protected static final String CREDENTIALS_KEY = "/org/jenkinsci/test/acceptance/docker/fixtures/GitContainer/unsafe";
+
+    @Inject
+    private DockerContainerHolder<JavaGitContainer> dockerContainer;
+
+    /**
+     * Returns a docker container that can be used to host git repositories and which can be used as build agent.
+     * If the container is used as agent and git server, then you need to use the file protocol to access the git repository
+     * within Jenkins.
+     *
+     * @return the container
+     */
+    protected JavaGitContainer getDockerContainer() {
+        return dockerContainer.get();
+    }
+
+    /**
+     * Creates an agent in a Docker container.
+     *
+     * @return the new agent ready for new builds
+     */
+    protected DumbSlave createDockerAgent() {
+        DumbSlave agent = jenkins.slaves.create(DumbSlave.class);
+
+        agent.setExecutors(1);
+        agent.remoteFS.set("/tmp/");
+        SshSlaveLauncher launcher = agent.setLauncher(SshSlaveLauncher.class);
+
+        JavaGitContainer container = getDockerContainer();
+        launcher.host.set(container.ipBound(22));
+        launcher.port(container.port(22));
+        launcher.setSshHostKeyVerificationStrategy(SshSlaveLauncher.NonVerifyingKeyVerificationStrategy.class);
+        launcher.selectCredentials(CREDENTIALS_ID);
+
+        agent.save();
+
+        agent.waitUntilOnline();
+
+        assertThat(agent.isOnline(), is(true));
+
+        return agent;
+    }
 
     /**
      * Checks that the plug-in sends a mail after a build has been failed. The content of the mail contains several
@@ -128,16 +190,23 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
     }
 
     /**
-     * Sets up a job within a folder. Verifies that the project action from the job redirects to the result
-     * of the last build. Checks the correct number of warnings in the project overview and
-     * result details view. Finally checks if the warnings-per-project portlet and warnings column show the
+     * Sets up a nested view that contains a dashboard view with a warnings-per-project portlet.
+     * Creates a folder in this view and a freestyle job in this folder.
+     * Finally checks if the warnings-per-project portlet and warnings column show the
      * correct number of warnings and provide a direct link to the actual warning results.
      */
-    @Test @Issue({"JENKINS-39947", "JENKINS-39950"}) @WithPlugins({"dashboard-view", "cloudbees-folder"})
+    @Test @Issue("JENKINS-39947") @WithPlugins({"dashboard-view", "nested-view", "cloudbees-folder", "analysis-core@1.87"})
     public void should_show_warnings_in_folder() {
-        Folder folder = jenkins.jobs.create(Folder.class, jenkins.createRandomName());
-        folder.save();
+        NestedView nested = jenkins.getViews().create(NestedView.class);
 
+        DashboardView dashboard = nested.getViews().create(DashboardView.class);
+        dashboard.configure(() -> {
+            dashboard.matchAllJobs();
+            dashboard.checkRecurseIntoFolders();
+        });
+
+        Folder folder = dashboard.jobs.create(Folder.class);
+        folder.save();
         folder.open();
 
         FreeStyleJob job = createFreeStyleJob(folder);
@@ -145,7 +214,10 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
 
         P projectAction = createProjectAction(job);
 
-        addDashboardViewAndBottomPortlet(projectAction.getTablePortlet(), folder);
+        dashboard.configure(() -> {
+            dashboard.addBottomPortlet(projectAction.getTablePortlet());
+        });
+
         verifyPortlet(projectAction);
 
         addListViewColumn(projectAction.getViewColumn(), folder);
@@ -290,7 +362,7 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
         verifyJobResults(job, build);
     }
 
-    private void verifyJobResults(final Job job, final Build build) {
+    protected void verifyJobResults(final Job job, final Build build) {
         P resultAction = createResultAction(build);
         P projectAction = createProjectAction(job);
 
@@ -370,7 +442,7 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
             final int numberOfWarnings) {
         elasticSleep(500);
 
-        Map<String, Integer> trend = job.getTrendGraphContent(action.getUrl());
+        Map<String, Integer> trend = getTrendGraphContent(action.getUrl());
         assertThat(trend.size(), is(6));
 
         List<String> actualUrls = new ArrayList<>();
@@ -388,6 +460,33 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
             }
             assertThat(sum, is(numberOfWarnings));
         }
+    }
+
+    /**
+     * Returns the relevant information of the trend graph image map. A trend graph shows for each build three
+     * values: the number of warnings for priority HIGH, NORMAL, and LOW. These results are returned in a map.
+     * The key is the URL to the warnings results of each build (and priority). The value is the number of warnings
+     * for each result.
+     *
+     * @param url the URL of the graph to look at
+     * @return the content of the trend graph
+     */
+    public Map<String, Integer> getTrendGraphContent(final String url) {
+        Map<String, Integer> links = new HashMap<String, Integer>();
+        Pattern resultLink = Pattern.compile("href=\"(.*" + url +".*)\"");
+        Pattern warningsCount = Pattern.compile("title=\"(\\d+).*\"");
+        for (WebElement area : all(by.xpath(".//div/map/area"))) {
+            String outerHtml = area.getAttribute("outerHTML");
+            Matcher linkMatcher = resultLink.matcher(outerHtml);
+            if (linkMatcher.find()) {
+                Matcher countMatcher = warningsCount.matcher(outerHtml);
+                if (countMatcher.find()) {
+                    links.put(linkMatcher.group(1), Integer.valueOf(countMatcher.group(1)));
+                }
+            }
+        }
+
+        return links;
     }
 
     /**
