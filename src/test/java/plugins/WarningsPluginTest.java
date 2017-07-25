@@ -86,11 +86,43 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
     private static final String JAVA_TITLE = JAVA_ID;
     private static final String CLANG_TITLE = "LLVM/Clang Warnings";
     private static final String GROOVY_LINE_FILE_NAME = "groovy-line.txt";
+    private static final String GROOVY_TWO_LINES_FILE_NAME = "groovy-two-lines.txt";
+    private static final String ILLEGAL_PARSER_SCRIPT = "import hudson.plugins.warnings.parser.Warning\n"
+            + "import hudson.plugins.analysis.util.model.Priority;\n"
+            + "String all = matcher.group(1);\n"
+            + "Priority test = Priority.fromString('NORMAL');\n" // not on whitelist!!
+            + "return new Warning(all, 42, all, all, all);";
     private static final String LEGAL_PARSER_SCRIPT = "import hudson.plugins.warnings.parser.Warning\n"
             + "import hudson.plugins.analysis.util.model.Priority;\n"
             + "String all = matcher.group(1);\n"
             + "Priority test = Priority.NORMAL;\n"
             + "return new Warning(all, 42, all, all, all);";
+    private static final String OVERRIDE_PARSER_SCRIPT = "import hudson.plugins.warnings.parser.Warning\n"
+            + "String all = matcher.group(1);\n"
+            + "Warning warning = new Warning(all, 42, all, all, all);\n"
+            + "warning.setPackageName('DEAD_' + all);\n"
+            + "warning.setOverridePackageCategoryName('BEEF');\n"
+            + "return warning;";
+
+    /**
+     * Checks that a dynamic Groovy parser can override package tab title.
+     */
+    @Test
+    public void should_override_tab_name_with_groovy_parser() {
+        String parserName = createParser(OVERRIDE_PARSER_SCRIPT);
+
+        FreeStyleJob job = createFreeStyleJob(RESOURCES + GROOVY_TWO_LINES_FILE_NAME,
+                settings -> settings.addWorkspaceScanner(parserName, "**/" + GROOVY_TWO_LINES_FILE_NAME));
+
+        Build build = buildSuccessfulJob(job);
+
+        WarningsAction action = createJavaResultAction(build);
+        action.open();
+        assertThat(driver, hasContent("DEAD_A"));
+        assertThat(driver, hasContent("DEAD_B"));
+        assertThat(driver, hasContent("BEEF"));
+        assertThat(driver.getPageSource(), containsString("<div id=\"packages\">BEEFs</div>"));
+    }
 
     private static final String RESOURCE_WARNING_MAIN_JAVA = "WarningMain.java";
     private static final String RESOURCE_WARNING_MAIN_JAVA_PATH = "/warnings_plugin/" + RESOURCE_WARNING_MAIN_JAVA;
