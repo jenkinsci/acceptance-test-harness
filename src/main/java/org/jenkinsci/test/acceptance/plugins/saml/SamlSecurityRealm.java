@@ -12,9 +12,18 @@ public class SamlSecurityRealm extends SecurityRealm {
     private final Control userNaneAttr = control("usernameAttributeName");
     private final Control groupsAttr = control("groupsAttributeName");
     private final Control emailAttr = control("emailAttributeName");
+
     private final Control adavancedConfig = control("advancedConfiguration");
     private final Control spEntityId = control("advancedConfiguration/spEntityId");
     private final Control samlMetadata = control("idpMetadata");
+
+    private final Control encryption = control("encryptionData");
+    private final Control keyStorePath = control("encryptionData/keystorePath");
+    private final Control keyStorePassword = control("encryptionData/keystorePassword");
+    private final Control privateKeyPassword = control("encryptionData/privateKeyPassword");
+
+
+
 
 
     public SamlSecurityRealm(GlobalSecurityConfig context, String path) {
@@ -44,6 +53,21 @@ public class SamlSecurityRealm extends SecurityRealm {
     }
     public void setSamlMetadata(String value) {
         samlMetadata.set(value);
+    }
+    public void encryptionConfig() {
+        encryption.click();
+        // wait a bit for the encryption section to render
+        // "Keystore path" is one of its elements
+        waitFor(by.xpath("//td[.='Keystore path']"), 2);
+    }
+    public void setKeyStorePath(String value) {
+        keyStorePath.set(value);
+    }
+    public void setKeyStorePassword(String value) {
+        keyStorePassword.set(value);
+    }
+    public void setPrivateKeyPassword(String value) {
+        privateKeyPassword.set(value);
     }
 
 }

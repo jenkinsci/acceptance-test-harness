@@ -69,17 +69,21 @@ public class SAMLPluginTest extends AbstractJUnitTest {
         URLConnection connection = metadata.openConnection();
         realm.setSamlMetadata(IOUtils.toString(connection.getInputStream()));
 
+        // encryption
+        realm.encryptionConfig();
+        realm.setKeyStorePath(new File("src/test/resources/saml_plugin/saml-key.jks").getAbsolutePath());
+        realm.setKeyStorePassword("changeit");
+        realm.setPrivateKeyPassword("changeit");
+
+
         // Authorization
         MatrixAuthorizationStrategy mas = sc.useAuthorizationStrategy(MatrixAuthorizationStrategy.class);
-
         // groups coming from the SAML IdP
         MatrixRow group1 = mas.addUser("group1"); // admins
         group1.admin();
-
         MatrixRow group2 = mas.addUser("group2"); // readers
         group2.on(OVERALL_READ);
-
-        sc.save();
+        sc.save(); // after save the user has no login, so automatic redirect to the auth service
 
         waitFor().withTimeout(10, TimeUnit.SECONDS).until(() -> hasContent("Enter your username and password")); // SAML service login page
 
