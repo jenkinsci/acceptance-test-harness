@@ -26,6 +26,15 @@ import org.openqa.selenium.WebElement;
 import com.google.inject.Inject;
 
 import hudson.util.VersionNumber;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import static org.apache.http.entity.ContentType.APPLICATION_OCTET_STREAM;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.eclipse.aether.resolution.ArtifactResolutionException;
 
 
 /**
@@ -208,8 +217,11 @@ public class PluginManager extends ContainerPageObject {
                         throw new AssumptionViolatedException(
                                 name + " has version " + availableVersion + " but " + requiredVersion + " was requested");
                     }
-                    File localFile = newPlugin.resolve(injector, availableVersion);
-                    installPlugin(localFile);
+                    try {
+                        newPlugin.uploadTo(jenkins, injector, availableVersion);
+                    } catch (ArtifactResolutionException x) {
+                        throw new UnableToResolveDependencies(x);
+                    }
                 }
             }
         } else {
@@ -274,16 +286,22 @@ public class PluginManager extends ContainerPageObject {
     /**
      * Installs a plugin by uploading the *.jpi image.
      */
-    public void installPlugin(File localFile) {
-        visit("advanced");
-        WebElement form = find(by.name("uploadPlugin"));
-        WebElement upload = form.findElement(by.input("name"));
-        try {
-            upload.sendKeys(localFile.getCanonicalPath());
-        } catch (IOException e) {
-            throw new Error(e);
+    public void installPlugin(File localFile) throws IOException {
+        HttpClient httpclient = new DefaultHttpClient();
+
+        HttpPost post = new HttpPost(jenkins.url("pluginManager/uploadPlugin").toExternalForm());
+        HttpEntity e = MultipartEntityBuilder.create()
+                .addBinaryBody("name", localFile, APPLICATION_OCTET_STREAM, "x.jpi")
+                .build();
+        post.setEntity(e);
+
+        HttpResponse response = httpclient.execute(post);
+        if (response.getStatusLine().getStatusCode() >= 400) {
+            throw new IOException("Failed to upload plugin: " + response.getStatusLine() + "\n" +
+                    IOUtils.toString(response.getEntity().getContent()));
+        } else {
+            System.out.format("Plugin %s installed\n", localFile);
         }
-        form.submit();
     }
 
     /**

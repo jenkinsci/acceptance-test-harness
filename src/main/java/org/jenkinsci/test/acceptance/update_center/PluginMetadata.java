@@ -12,13 +12,6 @@ import java.util.jar.JarFile;
 
 import javax.annotation.Nonnull;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.eclipse.aether.resolution.ArtifactResult;
@@ -29,8 +22,6 @@ import org.jenkinsci.test.acceptance.utils.aether.ArtifactResolverUtil;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.inject.Injector;
-
-import static org.apache.http.entity.ContentType.*;
 
 /**
  * Databinding for installable plugin in UC.
@@ -66,26 +57,11 @@ public class PluginMetadata {
     }
 
     /**
-     * @deprecated in favour of {@link PluginManager#installPlugin(File)}.
+     * Calls {@link PluginManager#installPlugin(File)}.
      */
-    @Deprecated
     public void uploadTo(Jenkins jenkins, Injector i, String version) throws ArtifactResolutionException, IOException {
-        HttpClient httpclient = new DefaultHttpClient();
-
-        HttpPost post = new HttpPost(jenkins.url("pluginManager/uploadPlugin").toExternalForm());
         File f = resolve(i, version);
-        HttpEntity e = MultipartEntityBuilder.create()
-                .addBinaryBody("name", f, APPLICATION_OCTET_STREAM, getName() + ".jpi")
-                .build();
-        post.setEntity(e);
-
-        HttpResponse response = httpclient.execute(post);
-        if (response.getStatusLine().getStatusCode() >= 400) {
-            throw new IOException("Failed to upload plugin: " + response.getStatusLine() + "\n" +
-                    IOUtils.toString(response.getEntity().getContent()));
-        } else {
-            System.out.format("Plugin %s installed\n", f);
-        }
+        jenkins.getPluginManager().installPlugin(f);
     }
 
     public File resolve(Injector i, String version) {

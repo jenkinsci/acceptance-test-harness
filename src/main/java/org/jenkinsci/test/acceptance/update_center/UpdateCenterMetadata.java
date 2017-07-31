@@ -140,5 +140,10 @@ public class UpdateCenterMetadata {
         public UnableToResolveDependencies(String format) {
             super(format);
         }
+
+        public UnableToResolveDependencies(Throwable cause) {
+            super(cause);
+        }
+
     }
 }
