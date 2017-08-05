@@ -44,11 +44,13 @@ public class SAMLPluginTest extends AbstractJUnitTest {
         String rootUrl = jenkins.getCurrentUrl();
         DockerImage.Starter<SAMLContainer> starter = samlContainer.starter();
         File users = new File("src/test/resources/saml_plugin/users.php");
+        File config = new File("src/test/resources/saml_plugin/config.php");
         starter.withOptions(new CommandBuilder(
                 "-e", "SIMPLESAMLPHP_SP_ENTITY_ID=" + SERVICE_PROVIDER_ID, // service provider ID
                 "-e", "SIMPLESAMLPHP_SP_ASSERTION_CONSUMER_SERVICE=" + rootUrl + "securityRealm/finishLogin", // login back URL
                 "-e", "SIMPLESAMLPHP_SP_SINGLE_LOGOUT_SERVICE=" + rootUrl + "logout", // unused
-                "-v", users.getAbsolutePath() + ":/var/www/simplesamlphp/config/authsources.php" // users info
+                "-v", users.getAbsolutePath() + ":/var/www/simplesamlphp/config/authsources.php", // users info
+                "-v", config.getAbsolutePath() + ":/var/www/simplesamlphp/config/config.php" // config info
         ));
         SAMLContainer samlServer = starter.start();
         System.out.println("============ SAML Server: " + samlServer.host() + ":" + samlServer.port());
