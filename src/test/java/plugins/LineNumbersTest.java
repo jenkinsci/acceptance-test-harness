@@ -12,7 +12,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.internal.Coordinates;
 import org.openqa.selenium.internal.Locatable;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Tests for the linenumbers plug-in.
@@ -36,13 +36,17 @@ public class LineNumbersTest extends AbstractJUnitTest {
         build.open();
 
         driver.findElement(By.partialLinkText("Console Output")).click();
+        elasticSleep(1000);
         WebElement target = driver.findElement(By.id("L100"));
         target.click();
         elasticSleep(1000);
- 
+
         Coordinates coordinates = ((Locatable) target).getCoordinates();
         Point point = coordinates.inViewPort();
-		WebElement breadcrumbBar = driver.findElement(By.id("breadcrumbBar"));
-        assertEquals(breadcrumbBar.getSize().getHeight(), point.getY());
+        WebElement breadcrumbBar = driver.findElement(By.id("breadcrumbBar"));
+        int breadcrumbBarHeight = breadcrumbBar.getSize().getHeight();
+        int yPosition = point.getY();
+        assertTrue( (yPosition > breadcrumbBarHeight) &&
+                    (yPosition < breadcrumbBarHeight + 5) );
     }
 }
