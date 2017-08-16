@@ -9,6 +9,8 @@ fi
 
 vncserver -kill $display
 vncserver -geometry 1750x1250 $display > /dev/null
-vncviewer localhost$display > /dev/null &
+if command -v vncviewer >/dev/null 2>&1; then
+  vncviewer localhost$display > /dev/null &
+fi
 
 echo export BROWSER_DISPLAY=$display
