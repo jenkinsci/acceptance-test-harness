@@ -25,6 +25,7 @@ package plugins;
 
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.function.Consumer;
 
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
@@ -172,6 +173,28 @@ public class FindBugsPluginTest extends AbstractAnalysisTest<FindBugsAction> {
         MavenModuleSet job = createMavenJob(settings -> settings.setBuildUnstableTotalAll("0"));
 
         buildJobAndWait(job).shouldBeUnstable();
+    }
+
+    /**
+     * Builds a pipeline project and checks if it is unstable.
+     */
+    @Test
+    public void should_set_pipeline_result() {
+        verifyResult("unstable", Build::shouldBeUnstable);
+        verifyResult("failed", Build::shouldFail);
+    }
+
+    private void verifyResult(final String result, final Consumer<Build> buildResultCheck) {
+        String[] parameters = {", " + result + "TotalAll: '5'",
+                ", " + result + "TotalHigh: '1'",
+                ", " + result + "TotalNormal: '3'"};
+
+        for (String additionalParameters : parameters) {
+            WorkflowJob job = createPipelineWith(FILE_WITH_6_WARNINGS, "FindBugsPublisher",
+                    additionalParameters);
+            Build build = buildJobAndWait(job);
+            buildResultCheck.accept(build);
+        }
     }
 
     /**
