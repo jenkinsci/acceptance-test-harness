@@ -589,10 +589,9 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      * Creates a pipeline that enables the specified {@code stepName}. The first step of the pipeline copies the
      * specified resource {@code fileName} as first instruction to the pipeline.
      *
-     * @param fileName             the name of the resource that will be copied to the pipeline (this file will be scanned for
-     *                             warnings)
-     * @param stepName             the name of the publisher to run (as a pipeline step)
-     * @param additionalParameters additional parameters for the step (need to start with a comma)
+     * @param fileName the name of the resource that will be copied to the pipeline (this file will be scanned for
+     *                 warnings)
+     * @param stepName the name of the publisher to run (as a pipeline step)
      * @return the created pipeline
      */
     protected WorkflowJob createPipelineWith(final String fileName, final String stepName,
@@ -600,9 +599,10 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
         String script = "node {\n"
                 + job.copyResourceStep(fileName)
-                + "  step([$class: '" + stepName
-                + "', pattern: '**/" + FilenameUtils.getName(fileName)
-                + "'])\n" +
+                + "  step([$class: '" + stepName + "'"
+                + ", pattern: '**/" + FilenameUtils.getName(fileName) + "'"
+                + additionalParameters
+                + "])\n" +
                 "}";
         job.script.set(script);
         job.sandbox.check();
