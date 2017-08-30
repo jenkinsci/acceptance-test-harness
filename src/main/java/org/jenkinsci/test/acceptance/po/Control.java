@@ -1,5 +1,6 @@
 package org.jenkinsci.test.acceptance.po;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.openqa.selenium.*;
 
@@ -133,7 +134,7 @@ public class Control extends CapybaraPortingLayerImpl {
         else {
             WebElement e = resolve();
             e.clear();
-            e.sendKeys(text);
+            e.sendKeys(StringUtils.isEmpty(text) ? StringUtils.EMPTY : text);
         }
     }
 

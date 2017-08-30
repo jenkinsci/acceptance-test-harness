@@ -16,30 +16,31 @@ public class LdapSecurityRealm<T extends LdapGroupMembershipStrategy> extends Se
 
     private GlobalSecurityConfig context;
 
-    protected final Control ldapServer = control("server");
+    protected final Control ldapServer = control("configurations/server");
     protected final Control advanced = control("advanced-button");
-    protected final Control rootDn = control("rootDN");
-    protected final Control managerDn = control("managerDN");
-    protected final Control managerPassword = control("managerPasswordSecret"/* >= 1.9*/, "managerPassword");
-    protected final Control userSearchBase = control("userSearchBase");
-    protected final Control userSearchFilter = control("userSearch");
-    protected final Control groupSearchBase = control("groupSearchBase");
-    protected final Control groupSearchFilter = control("groupSearchFilter");
+    protected final Control advancedServer = control("configurations/advanced-button");
+    protected final Control rootDn = control("configurations/rootDN");
+    protected final Control managerDn = control("configurations/managerDN");
+    protected final Control managerPassword = control("configurations/managerPasswordSecret"/* >= 1.9*/, "configurations/managerPassword");
+    protected final Control userSearchBase = control("configurations/userSearchBase");
+    protected final Control userSearchFilter = control("configurations/userSearch");
+    protected final Control groupSearchBase = control("configurations/groupSearchBase");
+    protected final Control groupSearchFilter = control("configurations/groupSearchFilter");
     /**
      * only available prior ldap plugin version 1.10
      */
     protected final Control groupMembershipFilter = control("groupMembershipFilter");
     protected final Control disableLdapEmailResolver = control("disableMailAddressResolver");
     protected final Control enableCache = control("cache");
-    protected final Control addEnvVariableButton = control("repeatable-add");
+    protected final Control addEnvVariableButton = control("repeatable-add[1]");
     /**
      * since version 1.8
      */
-    private final Control displayNameAttributeName = control("displayNameAttributeName");
+    private final Control displayNameAttributeName = control("configurations/displayNameAttributeName");
     /**
      * since version 1.8
      */
-    private final Control mailAddressAttributeName = control("mailAddressAttributeName");
+    private final Control mailAddressAttributeName = control("configurations/mailAddressAttributeName");
 
     public LdapSecurityRealm(GlobalSecurityConfig context, String path) {
         super(context, path);
@@ -62,7 +63,7 @@ public class LdapSecurityRealm<T extends LdapGroupMembershipStrategy> extends Se
      */
     public void configure(LdapDetails<T> ldapDetails) {
         ldapServer.set(ldapDetails.getHostWithPort());
-        advanced.click();
+        advancedServer.click();
         rootDn.set(ldapDetails.getRootDn());
         managerDn.set(ldapDetails.getManagerDn());
         managerPassword.set(ldapDetails.getManagerPassword());
@@ -71,6 +72,7 @@ public class LdapSecurityRealm<T extends LdapGroupMembershipStrategy> extends Se
         groupSearchBase.set(ldapDetails.getGroupSearchBase());
         groupSearchFilter.set(ldapDetails.getGroupSearchFilter());
         configureGroupMembership(ldapDetails);
+        advanced.click();
         disableLdapEmailResolver.check(ldapDetails.isDisableLdapEmailResolver());
         if (ldapDetails.isEnableCache()) {
             enableCache.check(true);
