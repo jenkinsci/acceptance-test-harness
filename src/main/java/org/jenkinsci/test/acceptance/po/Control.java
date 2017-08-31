@@ -134,7 +134,7 @@ public class Control extends CapybaraPortingLayerImpl {
         else {
             WebElement e = resolve();
             e.clear();
-            e.sendKeys(StringUtils.isEmpty(text) ? StringUtils.EMPTY : text);
+            e.sendKeys(StringUtils.defaultString(text));
         }
     }
 
