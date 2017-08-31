@@ -3,6 +3,7 @@ package plugins;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.config_file_provider.ConfigFileProvider;
+import org.jenkinsci.test.acceptance.plugins.config_file_provider.CustomConfig;
 import org.jenkinsci.test.acceptance.plugins.config_file_provider.MavenSettingsConfig;
 import org.jenkinsci.test.acceptance.plugins.config_file_provider.ServerCredentialMapping;
 import org.jenkinsci.test.acceptance.plugins.credentials.CredentialsPage;
@@ -91,4 +92,36 @@ public class ConfigFileProviderTest extends AbstractJUnitTest {
         return b.getConsole();
     }
 
+    @Test
+    public void testCustomConfigFile() {
+        final CustomConfig customConfig = this.createCustomConfig();
+        final String jobLog = this.createPipelineAndGetConsole(customConfig);
+
+        assertThat(jobLog, containsString("anonymous"));
+    }
+
+    private CustomConfig createCustomConfig() {
+        final CustomConfig customConfig = new ConfigFileProvider(jenkins).addFile(CustomConfig.class);
+
+        customConfig.content("echo test_custom");
+
+        customConfig.save();
+        return customConfig;
+    }
+
+    private String createPipelineAndGetConsole(final CustomConfig customConfig) {
+        final WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
+        job.script.set(String.format("node {\n" +
+                "    configFileProvider(\n" +
+                "        [configFile(fileId: '%s')]) {\n" +
+                "            \n" +
+                "        sh 'echo test_custom '\n" +
+                "    }\n" +
+                "}", customConfig.id()));
+
+        job.save();
+
+        final Build b = job.startBuild().shouldSucceed();
+        return b.getConsole();
+    }
 }
