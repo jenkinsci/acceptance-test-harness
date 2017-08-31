@@ -27,6 +27,8 @@ public class ConfigFileProviderTest extends AbstractJUnitTest {
     private static final String CRED_USR = "fakeUser";
     private static final String CRED_PWD = "fakePass";
     private static final String SERVER_ID = "fakeServer";
+    private static final String CUSTOM_CONF_CONTENT = "test_custom";
+
 
     @Before
     public void setup() {
@@ -97,13 +99,13 @@ public class ConfigFileProviderTest extends AbstractJUnitTest {
         final CustomConfig customConfig = this.createCustomConfig();
         final String jobLog = this.createPipelineAndGetConsole(customConfig);
 
-        assertThat(jobLog, containsString("anonymous"));
+        assertThat(jobLog, containsString(CUSTOM_CONF_CONTENT));
     }
 
     private CustomConfig createCustomConfig() {
         final CustomConfig customConfig = new ConfigFileProvider(jenkins).addFile(CustomConfig.class);
 
-        customConfig.content("echo test_custom");
+        customConfig.content(CUSTOM_CONF_CONTENT);
 
         customConfig.save();
         return customConfig;
