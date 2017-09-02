@@ -31,6 +31,8 @@ You can also do this from [the groovy wiring script](WIRING.md).
 
 Since newer shells do not support environment variables with hyphens in the name, rather than `scm-api.jpi` you may use `SCM_API_JPI`.
 
+This same scheme works for a plugin that's not yet released.
+
 ### Install plugins from local maven repository
 
 As a convenience, you can also run with the variable `LOCAL_SNAPSHOTS=true`.
