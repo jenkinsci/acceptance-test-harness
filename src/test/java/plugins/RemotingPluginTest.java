@@ -4,11 +4,13 @@ import hudson.util.VersionNumber;
 import org.apache.commons.io.FileUtils;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadataProvider;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.util.jar.Attributes;
@@ -23,6 +25,9 @@ import static org.junit.Assert.*;
 public class RemotingPluginTest extends AbstractJUnitTest {
     @Rule
     public TemporaryFolder tmp = new TemporaryFolder();
+
+    @Inject
+    UpdateCenterMetadataProvider ucmp;
 
     /**
      * When installing a core component override plugin, we should see that plugin functioning.
@@ -40,7 +45,8 @@ public class RemotingPluginTest extends AbstractJUnitTest {
     @WithPlugins({"remoting"})
     @Ignore // meant to be used to locally demonstrate JENKINS-41196 support
     public void test() throws IOException, InterruptedException {
-        final String version = "3.12-SNAPSHOT";
+        // expected version
+        final String version = ucmp.get(jenkins).plugins.get("remoting").getVersion();
 
         assertThat(trimSnapshot(jenkins.getPlugin("remoting").getVersion()), is(version));
 
