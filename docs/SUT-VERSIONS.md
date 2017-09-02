@@ -21,17 +21,10 @@ When you are testing locally developed Jenkins plugin, you'd like the test harne
 local version as opposed to download the plugin from update center. This can be done by instructing the harness
 accordingly.
 
-One way to do so is to set the environment variable:
-
-    $ env ldap.jpi=/path/to/your/ldap.jpi mvn test
+    $ env LOCAL_JARS=path/to/your/ldap.jpi:path/to/another.jpi
 
 You can also do this from [the groovy wiring script](WIRING.md).
-
-    envs['ldap.jpi'] = '/path/to/your.ldap.jpi'
-
-Since newer shells do not support environment variables with hyphens in the name, rather than `scm-api.jpi` you may use `SCM_API_JPI`.
-
-This same scheme works for a plugin that's not yet released.
+This scheme also works for a plugin that's not yet released.
 
 ### Install plugins from local maven repository
 

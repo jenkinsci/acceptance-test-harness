@@ -10,7 +10,6 @@ import org.w3c.dom.NodeList;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 import java.util.Iterator;
-import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -59,23 +58,45 @@ public class LocalOverrideUpdateCenterMetadataDecoratorImpl implements UpdateCen
                 }
             }
         }
+
+        // deprecated mechanism, as of 1.57
         for (Map.Entry<String,String> e : System.getenv().entrySet()) {
             String key = e.getKey();
             if (!isPluginEnvironmentVariable(key))
                 continue;
 
-            File file = new File(e.getValue());
-            if (!file.exists()) throw new IllegalArgumentException("Plugin file for " + key + " does not exist: " + file.getAbsolutePath());
-
-            PluginMetadata m = PluginMetadata.LocalOverride.create(file);
-            PluginMetadata stock = ucm.plugins.get(m.getName());
-            if (stock == null) {
-                System.err.println("Creating new plugin " + m.getName() + " with local build of " + m.getVersion());
-            } else {
-                System.err.println("Overriding " + m.getName() + " " + stock.getVersion() + " with local build of " + m.getVersion());
+            try {
+                override(ucm, e.getValue());
+            } catch (Exception x) {
+                throw new IllegalArgumentException("Unable to honor environment variable "+key, x);
             }
-            ucm.plugins.put(m.getName(), m);
         }
+
+        // past 1.57, preferred way
+        String localJars = System.getenv("LOCAL_JARS");
+        if (localJars!=null) {
+            for (String jar : localJars.split(File.pathSeparator)) {
+                try {
+                    override(ucm, jar);
+                } catch (Exception x) {
+                    throw new IllegalArgumentException("Unable to honor LOCAL_JARS environment variable", x);
+                }
+            }
+        }
+    }
+
+    private void override(UpdateCenterMetadata ucm, String jpi) {
+        File file = new File(jpi);
+        if (!file.exists()) throw new IllegalArgumentException("Plugin file does not exist: " + file.getAbsolutePath());
+
+        PluginMetadata m = PluginMetadata.LocalOverride.create(file);
+        PluginMetadata stock = ucm.plugins.get(m.getName());
+        if (stock == null) {
+            System.err.println("Creating new plugin " + m.getName() + " with local build of " + m.getVersion());
+        } else {
+            System.err.println("Overriding " + m.getName() + " " + stock.getVersion() + " with local build of " + m.getVersion());
+        }
+        ucm.plugins.put(m.getName(), m);
     }
 
     /**
