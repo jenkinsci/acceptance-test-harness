@@ -78,6 +78,9 @@ public class LocalOverrideUpdateCenterMetadataDecoratorImpl implements UpdateCen
         }
     }
 
+    /**
+     * Returns true if the given environment variable name is an override to point to a local JPI file.
+     */
     private boolean isPluginEnvironmentVariable(String name) {
         if (name.endsWith(".jpi"))
             return true;
