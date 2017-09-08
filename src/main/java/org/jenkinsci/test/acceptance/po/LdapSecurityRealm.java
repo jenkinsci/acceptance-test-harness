@@ -17,41 +17,40 @@ public class LdapSecurityRealm<T extends LdapGroupMembershipStrategy> extends Se
 
     private GlobalSecurityConfig context;
 
-    protected Control ldapServer;
-    protected Control advanced;
-    protected Control advancedServer;
-    protected Control rootDn;
-    protected Control managerDn;
-    protected Control managerPassword;
-    protected Control userSearchBase;
-    protected Control userSearchFilter;
-    protected Control groupSearchBase;
-    protected Control groupSearchFilter;
+    protected final Control ldapServer = control("configurations/server" /* >= 1.16 */, "server");
+    protected final Control advancedServer = control("configurations/advanced-button" /* >= 1.16 */, "advanced-button");
+    protected final Control rootDn = control("configurations/rootDN" /* >= 1.16 */, "rootDN");
+    protected final Control managerDn = control("configurations/managerDN" /* >= 1.16 */, "managerDN");
+    protected final Control managerPassword = control("configurations/managerPasswordSecret" /* >= 1.16 */, "managerPasswordSecret" /* >=1.9 */, "managerPassword");
+    protected final Control userSearchBase = control("configurations/userSearchBase" /* >= 1.16 */, "userSearchBase");
+    protected final Control userSearchFilter = control("configurations/userSearch" /* >= 1.16 */, "userSearch");
+    protected final Control groupSearchBase = control("configurations/groupSearchBase" /* >= 1.16 */, "groupSearchBase");
+    protected final Control groupSearchFilter = control("configurations/groupSearchFilter" /* >= 1.16 */, "groupSearchFilter");
     /**
      * only available prior ldap plugin version 1.10
      */
-    protected Control groupMembershipFilter;
-    protected Control disableLdapEmailResolver;
-    protected Control enableCache;
-    protected Control addEnvVariableButton;
+    protected final Control groupMembershipFilter  = control("groupMembershipFilter");
+    protected final Control disableLdapEmailResolver = control("disableMailAddressResolver");
+    protected final Control enableCache = control("cache");
+    protected final Control addEnvVariableButton = control("repeatable-add[1]" /* >= 1.16 */, "repeatable-add");
     /**
      * since version 1.8
      */
-    private Control displayNameAttributeName;
+    private final Control displayNameAttributeName = control("configurations/displayNameAttributeName" /* >= 1.16 */, "displayNameAttributeName");
     /**
      * since version 1.8
      */
-    private Control mailAddressAttributeName;
+    private final Control mailAddressAttributeName = control("configurations/mailAddressAttributeName" /* >= 1.16 */, "mailAddressAttributeName");
 
     /**
      * For changes in GUI in version 1.16
      */
-    private final boolean version116 = isVersionEqualsOrGreater116();
+    private final boolean sinceVersion116 = isVersionEqualsOrGreater116();
+    protected final Control advanced = control("advanced-button" /* >= 1.16 only */);
 
     public LdapSecurityRealm(GlobalSecurityConfig context, String path) {
         super(context, path);
         this.context = context;
-        initControls();
     }
 
     private boolean isVersionEqualsOrGreater116() {
@@ -63,45 +62,6 @@ public class LdapSecurityRealm<T extends LdapGroupMembershipStrategy> extends Se
         }
 
         return isVersion116;
-    }
-
-    /*
-     * Controls for configureSecurity page must be setted depending on the current version of ldap plugins due to changes in GUI
-     */
-    private void initControls() {
-        if(this.version116) {
-            this.ldapServer = control("configurations/server");
-            this.advanced = control("advanced-button");
-            this.advancedServer = control("configurations/advanced-button");
-            this.rootDn = control("configurations/rootDN");
-            this.managerDn = control("configurations/managerDN");
-            this.managerPassword = control("configurations/managerPasswordSecret"/* >= 1.9*/, "configurations/managerPassword");
-            this.userSearchBase = control("configurations/userSearchBase");
-            this.userSearchFilter = control("configurations/userSearch");
-            this.groupSearchBase = control("configurations/groupSearchBase");
-            this.groupSearchFilter = control("configurations/groupSearchFilter");
-            this.addEnvVariableButton = control("repeatable-add[1]");
-            this.displayNameAttributeName = control("configurations/displayNameAttributeName");
-            this.mailAddressAttributeName = control("configurations/mailAddressAttributeName");
-        } else {
-            this.ldapServer = control("server");
-            this.advanced = control("advanced-button");
-            this.advancedServer = null;
-            this.rootDn = control("rootDN");
-            this.managerDn = control("managerDN");
-            this.managerPassword = control("managerPasswordSecret"/* >= 1.9*/, "configurations/managerPassword");
-            this.userSearchBase = control("userSearchBase");
-            this.userSearchFilter = control("userSearch");
-            this.groupSearchBase = control("groupSearchBase");
-            this.groupSearchFilter = control("groupSearchFilter");
-            this.addEnvVariableButton = control("repeatable-add");
-            this.displayNameAttributeName = control("displayNameAttributeName");
-            this.mailAddressAttributeName = control("mailAddressAttributeName");
-        }
-
-        this.groupMembershipFilter = control("groupMembershipFilter");
-        this.disableLdapEmailResolver = control("disableMailAddressResolver");
-        this.enableCache = control("cache");
     }
 
     private T useGroupMembershipStrategy(Class<T> type) {
@@ -120,11 +80,7 @@ public class LdapSecurityRealm<T extends LdapGroupMembershipStrategy> extends Se
      */
     public void configure(LdapDetails<T> ldapDetails) {
         ldapServer.set(ldapDetails.getHostWithPort());
-        if(this.version116) {
-            advancedServer.click();
-        } else {
-            advanced.click();
-        }
+        advancedServer.click();
         rootDn.set(ldapDetails.getRootDn());
         managerDn.set(ldapDetails.getManagerDn());
         managerPassword.set(ldapDetails.getManagerPassword());
@@ -133,7 +89,7 @@ public class LdapSecurityRealm<T extends LdapGroupMembershipStrategy> extends Se
         groupSearchBase.set(ldapDetails.getGroupSearchBase());
         groupSearchFilter.set(ldapDetails.getGroupSearchFilter());
         configureGroupMembership(ldapDetails);
-        if(this.version116) {
+        if (this.sinceVersion116) {
             advanced.click();
         }
         disableLdapEmailResolver.check(ldapDetails.isDisableLdapEmailResolver());
