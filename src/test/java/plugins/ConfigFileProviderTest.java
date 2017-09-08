@@ -27,7 +27,7 @@ public class ConfigFileProviderTest extends AbstractJUnitTest {
     private static final String CRED_USR = "fakeUser";
     private static final String CRED_PWD = "fakePass";
     private static final String SERVER_ID = "fakeServer";
-    private static final String CUSTOM_CONF_CONTENT = "test_custom";
+    private static final String CUSTOM_CONF_CONTENT = "test_custom_content for custom file";
 
 
     @Before
@@ -115,9 +115,9 @@ public class ConfigFileProviderTest extends AbstractJUnitTest {
         final WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
         job.script.set(String.format("node {\n" +
                 "    configFileProvider(\n" +
-                "        [configFile(fileId: '%s')]) {\n" +
+                "        [configFile(fileId: '%s', variable: 'CUSTOM_SETTINGS')]) {\n" +
                 "            \n" +
-                "        sh 'echo test_custom '\n" +
+                "        sh 'cat $CUSTOM_SETTINGS '\n" +
                 "    }\n" +
                 "}", customConfig.id()));
 
