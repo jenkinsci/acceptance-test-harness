@@ -10,6 +10,7 @@ import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.credentials.CredentialsPage;
+import org.jenkinsci.test.acceptance.plugins.credentials.ManagedCredentials;
 import org.jenkinsci.test.acceptance.plugins.foreman_node_sharing.ForemanSharedNodeCloudPageArea;
 import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshPrivateKeyCredential;
 import org.jenkinsci.test.acceptance.po.Build;
@@ -65,28 +66,26 @@ public class ForemanNodeSharingPluginTest extends AbstractJUnitTest {
     @Before public void setUp() throws Exception {
 
         jenkins.runScript("import hudson.slaves.NodeProvisioner; NodeProvisioner.NodeProvisionerInvoker."
-                + "INITIALDELAY = NodeProvisioner.NodeProvisionerInvoker.RECURRENCEPERIOD = 100;");
+                + "INITIALDELAY = NodeProvisioner.NodeProvisionerInvoker.RECURRENCEPERIOD = 60;");
 
         foreman = dockerForeman.get();
         sshslave1 = docker1.get();
 
-        CredentialsPage c = new CredentialsPage(jenkins, "_");
+        CredentialsPage c = new CredentialsPage(jenkins, ManagedCredentials.DEFAULT_DOMAIN);
         c.open();
-
         final SshPrivateKeyCredential sc = c.add(SshPrivateKeyCredential.class);
         sc.username.set("test");
         sc.selectEnterDirectly().privateKey.set(sshslave1.getPrivateKeyString());
+        sc.scope.select("GLOBAL");
+        sc.setId("test");
         c.create();
-
         //CS IGNORE MagicNumber FOR NEXT 2 LINES. REASON: Mock object.
         elasticSleep(10000);
 
-        if (populateForeman(foreman.getUrl().toString()+"/api/v2", sshslave1.getCid(),
-                sshslave1.getIpAddress(), labelExpression1, "1") != 0) {
+        if (populateForeman(foreman.getUrl().toString()+"/api/v2", sshslave1.getIpAddress(), labelExpression1) != 0) {
             throw new Exception("failed to populate foreman");
         }
-        if (populateForeman(foreman.getUrl().toString()+"/api/v2", "dummy",
-                "9.9.9.9", labelExpression2, "2") != 0) {
+        if (populateForeman(foreman.getUrl().toString()+"/api/v2", "dummy", labelExpression2) != 0) {
             throw new Exception("failed to populate foreman");
         }
 
@@ -94,7 +93,6 @@ public class ForemanNodeSharingPluginTest extends AbstractJUnitTest {
         cloud = addCloud(jenkins.getConfigPage());
         //CS IGNORE MagicNumber FOR NEXT 2 LINES. REASON: Mock object.
         elasticSleep(10000);
-
     }
 
     /**
@@ -172,7 +170,7 @@ public class ForemanNodeSharingPluginTest extends AbstractJUnitTest {
     @Test
     public void testCheckForCompatible() throws IOException {
         jenkins.save();
-        waitForHostsMap(sshslave1.getCid(), EXTENDED_PROVISION_TIMEOUT);
+        waitForHostsMap(sshslave1.getIpAddress(), EXTENDED_PROVISION_TIMEOUT);
     }
 
     private void waitForHostsMap(final String pattern, final int timeout) {
@@ -251,14 +249,12 @@ public class ForemanNodeSharingPluginTest extends AbstractJUnitTest {
      * @param server Foreman server url.
      * @param hostToCreate host name for creation.
      * @param labels list of labels to add to host.
-     * @param hostID id of host.
      * @return exit code of script execution.
      * @throws URISyntaxException if occurs.
      * @throws IOException if occurs.
      * @throws InterruptedException if occurs.
      */
-    private int populateForeman(String server, String hostToCreate, String ipAddress,
-                                String labels, String hostID) throws
+    private int populateForeman(String server, String hostToCreate, String labels) throws
         URISyntaxException, IOException, InterruptedException {
 
         URL script =
@@ -271,9 +267,7 @@ public class ForemanNodeSharingPluginTest extends AbstractJUnitTest {
         ProcessBuilder pb = new ProcessBuilder("/bin/bash", tempScriptFile.getAbsolutePath(),
                 server,
                 hostToCreate,
-                ipAddress,
-                labels,
-                hostID);
+                labels);
 
         pb.directory(tempScriptFile.getParentFile());
         pb.redirectOutput(Redirect.INHERIT);
@@ -297,5 +291,4 @@ public class ForemanNodeSharingPluginTest extends AbstractJUnitTest {
                 .password("changeme")
                 .setCredentials("test");
     }
-
 }
