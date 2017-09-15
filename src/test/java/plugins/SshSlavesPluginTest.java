@@ -23,14 +23,11 @@
  */
 package plugins;
 
-import static org.junit.Assert.assertTrue;
-
+import com.google.inject.Inject;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
-
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
-import org.jenkinsci.test.acceptance.docker.fixtures.SshdContainer;
-import org.jenkinsci.test.acceptance.docker.fixtures.JavaContainer;
+import org.jenkinsci.test.acceptance.docker.fixtures.SshAgentContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.DockerTest;
 import org.jenkinsci.test.acceptance.junit.WithDocker;
@@ -38,11 +35,11 @@ import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.ssh_slaves.SshSlaveLauncher;
 import org.jenkinsci.test.acceptance.po.DumbSlave;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.google.inject.Inject;
 import org.junit.experimental.categories.Category;
+import org.jvnet.hudson.test.Issue;
 
 @WithPlugins({"ssh-slaves@1.11", "credentials@2.1.10", "ssh-credentials@1.12"})
 @Category(DockerTest.class)
@@ -51,9 +48,9 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
 
     public static final String REMOTE_FS = "/tmp";
 
-    @Inject private DockerContainerHolder<JavaContainer> docker;
+    @Inject private DockerContainerHolder<SshAgentContainer> docker;
 
-    private SshdContainer sshd;
+    private SshAgentContainer sshd;
     private DumbSlave slave;
 
     @Before public void setUp() {
@@ -74,9 +71,17 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
 
     @Test public void connectWithKey() {
         configureDefaultSSHSlaveLauncher()
-            .keyCredentials("test", sshd.getPrivateKeyString());
+            .keyCredentials("test", sshd.getPrivateKeyString(), null);
         slave.save();
 
+        verify();
+    }
+
+    @Issue("JENKINS-46754")
+    @Test public void connectWithEd25519EncKey() {
+        configureDefaultSSHSlaveLauncher()
+            .keyCredentials("test", sshd.getEncryptedEd25519PrivateKey(), sshd.getEncryptedEd25519PrivateKeyPassphrase());
+        slave.save();
         verify();
     }
 

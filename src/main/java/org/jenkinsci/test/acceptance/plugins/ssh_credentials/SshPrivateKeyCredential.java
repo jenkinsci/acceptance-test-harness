@@ -13,6 +13,7 @@ import org.openqa.selenium.WebElement;
 @Describable("SSH Username with private key")
 public class SshPrivateKeyCredential extends BaseStandardCredentials {
     public final Control username = control(by.name("_.username"));
+    public final Control passphrase = control(by.name("_.passphrase"));
 
     public SshPrivateKeyCredential(PageObject context, String path) {
         super(context, path);
