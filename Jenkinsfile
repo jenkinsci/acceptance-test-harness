@@ -6,6 +6,7 @@ pipeline {
         dockerfile {
             dir 'src/main/resources/ath-container'
             args '-v /var/run/docker.sock:/var/run/docker.sock'
+            label 'docker && highmem'
         }
     }
     stages {
