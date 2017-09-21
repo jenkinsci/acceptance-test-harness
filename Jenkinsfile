@@ -1,25 +1,26 @@
 // For ci.jenkins.io
 // https://github.com/jenkins-infra/documentation/blob/master/ci.adoc
 
-def mavenName = 'mvn'
-def jdkName = 'jdk8'
-
-node('docker') {
-    checkout scm
-
-    def uid = sh returnStdout: true, script: "id -u | tr -d '\n'"
-    def gid = sh returnStdout: true, script: "id -g | tr -d '\n'"
-
-    def buildArgs = "--build-arg=uid=${uid} --build-arg=gid=${gid} src/main/resources/ath-container"
-    def image = docker.build('jenkins/ath', buildArgs)
-
-    String containerArgs = '-v /var/run/docker.sock:/var/run/docker.sock'
-    image.inside(containerArgs) {
-        sh '''
-            eval $(./vnc.sh)
-            ./run.sh firefox latest -Dmaven.test.failure.ignore=true -DforkCount=1 -B
-        '''
+pipeline {
+    agent {
+        dockerfile {
+            dir 'src/main/resources/ath-container'
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
+        }
     }
-
-    junit 'target/surefire-reports/TEST-*.xml'
+    stages {
+        stage('Run ATH') {
+            steps {
+                sh '''
+                    eval $(./vnc.sh)
+                    ./run.sh firefox latest -Dmaven.test.failure.ignore=true -DforkCount=1 -B
+                    '''
+            }
+        }
+    }
+    post {
+        always {
+            junit 'target/surefire-reports/TEST-*.xml'
+        }
+    }
 }
