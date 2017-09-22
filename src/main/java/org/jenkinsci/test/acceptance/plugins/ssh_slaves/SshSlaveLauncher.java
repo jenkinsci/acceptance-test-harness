@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.plugins.ssh_slaves;
 
 import java.util.concurrent.TimeUnit;
+import javax.annotation.CheckForNull;
 
 import org.jenkinsci.test.acceptance.plugins.credentials.UserPwdCredential;
 import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshCredentialDialog;
@@ -80,10 +81,13 @@ public class SshSlaveLauncher extends ComputerLauncher {
      * @param key for the private key to use
      * @return the SshSlaveLauncher to be configured
      */
-    public SshSlaveLauncher keyCredentials(String username, String key) {
+    public SshSlaveLauncher keyCredentials(String username, String key, @CheckForNull String passphrase) {
         final SshCredentialDialog dia = this.addCredential();
         final SshPrivateKeyCredential cred = dia.select(SshPrivateKeyCredential.class);
         cred.username.set(username);
+        if (passphrase != null) {
+            cred.passphrase.set(passphrase);
+        }
         cred.enterDirectly(key);
         cred.add();
         waitForCredentialVisible(username);
