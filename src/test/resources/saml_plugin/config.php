@@ -95,7 +95,7 @@ $config = array(
      * also as the technical contact in generated metadata.
      */
     'technicalcontact_name' => 'Administrator',
-    'technicalcontact_email' => 'na@example.org',
+    'technicalcontact_email' => 'none@example.org',
 
     /*
      * The timezone of the server. This option should be set to the timezone you want
