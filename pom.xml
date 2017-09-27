@@ -173,7 +173,7 @@
     <dependency>
       <groupId>com.codeborne</groupId>
       <artifactId>phantomjsdriver</artifactId>
-      <version>1.3.0</version>
+      <version>1.4.2</version>
       <exclusions>
         <exclusion>
           <groupId>org.bouncycastle</groupId>
