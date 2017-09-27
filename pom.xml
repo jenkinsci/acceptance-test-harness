@@ -28,6 +28,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <selenium.version>3.6.0</selenium.version>
+    <guava.version>23.0</guava.version>
     <aether.version>0.9.0.v20140226</aether.version>
     <maven.version>3.1.0</maven.version>
     <groovy.version>2.3.1</groovy.version>
@@ -110,6 +111,11 @@
       <artifactId>sisu-guice</artifactId>
       <version>3.2.0</version>
       <classifier>no_aop</classifier>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>${guava.version}</version>
     </dependency>
     <dependency><!-- to align the version of ASM we use -->
       <groupId>org.eclipse.sisu</groupId>
