@@ -46,7 +46,7 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeDriverService;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.firefox.FirefoxProfile;
+import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.firefox.GeckoDriverService;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
@@ -98,16 +98,13 @@ public class FallbackConfig extends AbstractModule {
         String display = getBrowserDisplay();
         switch (browser) {
         case "firefox":
-            FirefoxProfile profile = new FirefoxProfile();
-            profile.setAlwaysLoadNoFocusLib(true);
-
-            profile.setPreference(LANGUAGE_SELECTOR, "en");
-
+            FirefoxOptions firefoxOptions = new FirefoxOptions();
+            firefoxOptions.addPreference(LANGUAGE_SELECTOR, "en");
             // Config screen with many plugins can cause FF to complain JS takes too long to complete - set longer timeout
-            profile.setPreference(DOM_MAX_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
-            profile.setPreference(DOM_MAX_CHROME_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
+            firefoxOptions.addPreference(DOM_MAX_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
+            firefoxOptions.addPreference(DOM_MAX_CHROME_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
             setDriverProperty("geckodriver", GeckoDriverService.GECKO_DRIVER_EXE_PROPERTY);
-            return new FirefoxDriver(profile);
+            return new FirefoxDriver(firefoxOptions);
         case "ie":
         case "iexplore":
         case "iexplorer":
