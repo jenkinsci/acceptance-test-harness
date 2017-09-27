@@ -16,6 +16,7 @@ RUN apt-get clean && \
         firefox-esr \
         maven \
         openjdk-8-jdk \
+        phantomjs \
         unzip \
         vnc4server
 

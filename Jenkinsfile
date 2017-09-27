@@ -12,10 +12,7 @@ pipeline {
     stages {
         stage('Run ATH') {
             steps {
-                sh '''
-                    eval $(./vnc.sh)
-                    ./run.sh firefox latest -Dmaven.test.failure.ignore=true -DforkCount=1 -B
-                    '''
+                sh 'eval $(./vnc.sh) ; ./run.sh phantomjs latest -Dmaven.test.failure.ignore=true -DforkCount=1 -B'
             }
         }
     }
