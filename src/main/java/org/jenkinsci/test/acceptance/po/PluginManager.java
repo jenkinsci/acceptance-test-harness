@@ -301,6 +301,13 @@ public class PluginManager extends ContainerPageObject {
                     IOUtils.toString(response.getEntity().getContent()));
         } else {
             System.out.format("Plugin %s installed\n", localFile);
+            if (System.getenv("LOCAL_JARS") != null) {
+                try {
+                    Thread.sleep(3000); // TODO find a better way to ensure that core has actually applied the update
+                } catch (InterruptedException x) {
+                    x.printStackTrace();
+                }
+            }
         }
     }
 
