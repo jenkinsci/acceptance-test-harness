@@ -47,12 +47,12 @@ public class GitContainer extends DockerContainer {
 
     /**
      * Add an additional certificate to <code>~/.ssh/authorized_keys</code>
-     * @param cert the certificate public key
+     * @param pubKey the certificate public key
      */
-    public void addSSHCertificate(String cert) throws IOException, InterruptedException {
-        Docker.cmd("exec", getCid()).add("/bin/bash",  "-c",  "echo " + cert + " >> /home/git/.ssh/authorized_keys")
+    public void addSSHCertificate(String pubKey) throws IOException, InterruptedException {
+        Docker.cmd("exec", getCid()).add("/bin/bash",  "-c",  "echo " + pubKey + " >> /home/git/.ssh/authorized_keys")
                 .popen()
-                .verifyOrDieWith("Unable to add SSH key to authorized keys");
+                .verifyOrDieWith("Unable to add SSH public key to authorized keys");
     }
 
 }
