@@ -3,6 +3,7 @@ package org.jenkinsci.test.acceptance.docker.fixtures;
 import java.io.IOException;
 import java.net.URL;
 
+import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.docker.DockerContainer;
 import org.jenkinsci.test.acceptance.docker.DockerFixture;
 
@@ -42,6 +43,16 @@ public class GitContainer extends DockerContainer {
      */
     public String getRepoUrlInsideDocker(String alias) throws IOException {
         return "ssh://git@" + alias + REPO_DIR;
+    }
+
+    /**
+     * Add an additional certificate to <code>~/.ssh/authorized_keys</code>
+     * @param cert the certificate public key
+     */
+    public void addSSHCertificate(String cert) throws IOException, InterruptedException {
+        Docker.cmd("exec", getCid()).add("/bin/bash",  "-c",  "echo " + cert + " >> /home/git/.ssh/authorized_keys")
+                .popen()
+                .verifyOrDieWith("Unable to add SSH key to authorized keys");
     }
 
 }
