@@ -247,7 +247,6 @@ public class LdapPluginTest extends AbstractJUnitTest {
     }
     
     @Test
-    @Ignore("Regression - Environment variables are not working. Test is failing.")
     public void use_environment_varibales() {
         // Given
         LdapDetails details = createDefaultsWithoutManagerCred(ldap.get());
