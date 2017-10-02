@@ -3,6 +3,7 @@ package plugins;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.config_file_provider.ConfigFileProvider;
+import org.jenkinsci.test.acceptance.plugins.config_file_provider.CustomConfig;
 import org.jenkinsci.test.acceptance.plugins.config_file_provider.MavenSettingsConfig;
 import org.jenkinsci.test.acceptance.plugins.config_file_provider.ServerCredentialMapping;
 import org.jenkinsci.test.acceptance.plugins.credentials.CredentialsPage;
@@ -26,6 +27,8 @@ public class ConfigFileProviderTest extends AbstractJUnitTest {
     private static final String CRED_USR = "fakeUser";
     private static final String CRED_PWD = "fakePass";
     private static final String SERVER_ID = "fakeServer";
+    private static final String CUSTOM_CONF_CONTENT = "test_custom_content for custom file";
+
 
     @Before
     public void setup() {
@@ -91,4 +94,36 @@ public class ConfigFileProviderTest extends AbstractJUnitTest {
         return b.getConsole();
     }
 
+    @Test
+    public void testCustomConfigFile() {
+        final CustomConfig customConfig = this.createCustomConfig();
+        final String jobLog = this.createPipelineAndGetConsole(customConfig);
+
+        assertThat(jobLog, containsString(CUSTOM_CONF_CONTENT));
+    }
+
+    private CustomConfig createCustomConfig() {
+        final CustomConfig customConfig = new ConfigFileProvider(jenkins).addFile(CustomConfig.class);
+
+        customConfig.content(CUSTOM_CONF_CONTENT);
+
+        customConfig.save();
+        return customConfig;
+    }
+
+    private String createPipelineAndGetConsole(final CustomConfig customConfig) {
+        final WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
+        job.script.set(String.format("node {\n" +
+                "    configFileProvider(\n" +
+                "        [configFile(fileId: '%s', variable: 'CUSTOM_SETTINGS')]) {\n" +
+                "            \n" +
+                "        sh 'cat $CUSTOM_SETTINGS '\n" +
+                "    }\n" +
+                "}", customConfig.id()));
+
+        job.save();
+
+        final Build b = job.startBuild().shouldSucceed();
+        return b.getConsole();
+    }
 }
