@@ -33,9 +33,12 @@ import java.util.ArrayList;
 
 @Describable("Git")
 public class GitScm extends Scm {
+
     private final Control branch = control("branches/name");
     private final Control url = control("userRemoteConfigs/url");
     private final Control tool = control("gitTool");
+    private final Control repositoryBrowser = this.control(new String[]{"/"});
+    private final Control urlRepositoryBrowser = this.control(new String[]{"browser/repoUrl"});
 
     public GitScm(Job job, String path) {
         super(job, path);
@@ -187,6 +190,27 @@ public class GitScm extends Scm {
     public GitScm remoteName(String name) {
         remoteAdvanced();
         control("userRemoteConfigs/name").set(name);
+        return this;
+    }
+
+    /**
+     * Select repository browser type
+     * @param name Type of repository browser
+     * @return this, to allow function chaining
+     */
+    public GitScm repositoryBrowser(String name) {
+        Select select = new Select(this.repositoryBrowser.resolve());
+        select.selectByVisibleText(name);
+        return this;
+    }
+
+    /**
+     * Set URL for repository browser
+     * @param url
+     * @return this, to allow function chaining
+     */
+    public GitScm urlRepositoryBrowser(String url) {
+        this.urlRepositoryBrowser.set(url);
         return this;
     }
 
