@@ -1,17 +1,16 @@
 package org.jenkinsci.test.acceptance.update_center;
 
 import com.cloudbees.sdk.extensibility.Extension;
-import java.io.File;
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.Map;
-import javax.xml.parsers.DocumentBuilderFactory;
-
 import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.util.version.GenericVersionScheme;
 import org.eclipse.aether.version.Version;
 import org.eclipse.aether.version.VersionScheme;
 import org.w3c.dom.NodeList;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.File;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Allow local plugins specified via environment variables to override plugin metadata from update center.
@@ -59,34 +58,55 @@ public class LocalOverrideUpdateCenterMetadataDecoratorImpl implements UpdateCen
                 }
             }
         }
+
+        // deprecated mechanism, as of 1.57
         for (Map.Entry<String,String> e : System.getenv().entrySet()) {
             String key = e.getKey();
-            String name;
-            if (key.endsWith(".jpi")) {
-                name = key.replace(".jpi", "");
-            } else if (key.endsWith("_JPI")) { // http://stackoverflow.com/a/36992531/12916
-                name = null;
-                for (String _name : ucm.plugins.keySet()) {
-                    if ((_name.toUpperCase(Locale.ENGLISH).replaceAll("[^A-Z0-9_]", "_") + "_JPI").equals(key)) {
-                        name = _name;
-                        break;
-                    }
-                }
-                if (name == null) {
-                    throw new IllegalArgumentException("Could not identify plugin name from " + key + " given " + ucm.plugins.keySet());
-                }
-            } else {
+            if (!isPluginEnvironmentVariable(key))
                 continue;
+
+            try {
+                override(ucm, e.getValue());
+            } catch (Exception x) {
+                throw new IllegalArgumentException("Unable to honor environment variable "+key, x);
             }
-            PluginMetadata stock = ucm.plugins.get(name);
-            if (stock == null) {
-                throw new IllegalArgumentException("Plugin does not exists in update center: " + name);
-            }
-            File file = new File(e.getValue());
-            if (!file.exists()) throw new IllegalArgumentException("Plugin file for " + name + " does not exist: " + file.getAbsolutePath());
-            PluginMetadata m = PluginMetadata.LocalOverride.create(file);
-            System.err.println("Overriding " + name + " " + stock.getVersion() + " with local build of " + m.getVersion());
-            ucm.plugins.put(m.getName(), m);
         }
+
+        // past 1.57, preferred way
+        String localJars = System.getenv("LOCAL_JARS");
+        if (localJars!=null) {
+            for (String jar : localJars.split(File.pathSeparator)) {
+                try {
+                    override(ucm, jar);
+                } catch (Exception x) {
+                    throw new IllegalArgumentException("Unable to honor LOCAL_JARS environment variable", x);
+                }
+            }
+        }
+    }
+
+    private void override(UpdateCenterMetadata ucm, String jpi) {
+        File file = new File(jpi);
+        if (!file.exists()) throw new IllegalArgumentException("Plugin file does not exist: " + file.getAbsolutePath());
+
+        PluginMetadata m = PluginMetadata.LocalOverride.create(file);
+        PluginMetadata stock = ucm.plugins.get(m.getName());
+        if (stock == null) {
+            System.err.println("Creating new plugin " + m.getName() + " with local build of " + m.getVersion());
+        } else {
+            System.err.println("Overriding " + m.getName() + " " + stock.getVersion() + " with local build of " + m.getVersion());
+        }
+        ucm.plugins.put(m.getName(), m);
+    }
+
+    /**
+     * Returns true if the given environment variable name is an override to point to a local JPI file.
+     */
+    private boolean isPluginEnvironmentVariable(String name) {
+        if (name.endsWith(".jpi"))
+            return true;
+        if (name.endsWith("_JPI"))   // http://stackoverflow.com/a/36992531/12916
+            return true;
+        return false;
     }
 }
