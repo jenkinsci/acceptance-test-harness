@@ -152,6 +152,19 @@ public class GitScm extends Scm {
     }
 
     /**
+     * Add behaviour "Custom user name/e-mail address"
+     *
+     * @param name Custom name
+     * @return  this, to allow function chaining
+     */
+    public GitScm customNameAndMail(String name, String email) {
+        CustomNameAndMail behaviour = addBehaviour(CustomNameAndMail.class);
+        behaviour.txtName.set(name);
+        behaviour.txtEmail.set(email);
+        return this;
+    }
+
+    /**
      * Add behaviour "Sparse checkout"
      *
      * @return behaviour, to access .addPath() method
