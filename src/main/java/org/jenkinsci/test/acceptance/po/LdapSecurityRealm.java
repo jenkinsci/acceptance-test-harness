@@ -32,7 +32,7 @@ public class LdapSecurityRealm<T extends LdapGroupMembershipStrategy> extends Se
     protected final Control groupMembershipFilter  = control("groupMembershipFilter");
     protected final Control disableLdapEmailResolver = control("disableMailAddressResolver");
     protected final Control enableCache = control("cache");
-    protected final Control addEnvVariableButton = control("repeatable-add[1]" /* >= 1.16 */, "repeatable-add");
+    protected final Control addEnvVariableButton = control("configurations/repeatable-add" /* >= 1.16 */, "repeatable-add");
     /**
      * since version 1.8
      */
@@ -110,8 +110,8 @@ public class LdapSecurityRealm<T extends LdapGroupMembershipStrategy> extends Se
             for (LdapEnvironmentVariable envVariable : ldapDetails.getEnvironmentVariables()) {
                 addEnvVariableButton.click();
                 envVarSelector = i == 0 ? "" : "[" + i + "]";
-                control("/environmentProperties" + envVarSelector + "/name").set(envVariable.getName());
-                control("/environmentProperties" + envVarSelector + "/value").set(envVariable.getValue());
+                control("configurations/environmentProperties" + envVarSelector + "/name" /* >= 1.16 */, "/environmentProperties" + envVarSelector + "/name").set(envVariable.getName());
+                control("configurations/environmentProperties" + envVarSelector + "/value" /* >= 1.16 */, "/environmentProperties" + envVarSelector + "/value").set(envVariable.getValue());
                 i++;
             }
         }
