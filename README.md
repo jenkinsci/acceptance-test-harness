@@ -30,8 +30,8 @@ it's own sandboxed workspace.
 * [Running one test](docs/SINGLE-TEST.md)
 * [Using a http proxy](docs/USING-A-HTTP-PROXY.md)
 * [Prelaunch JUT](docs/PRELAUNCH.md)
-* [Obtaining a report of plugins that were exercised](docs/EXERCISEDPLUGINSREPORTER.md)
 * [Managing the versions of Jenkins and plugins](docs/SUT-VERSIONS.md)
+* [Obtaining a report of plugins that were exercised](docs/EXERCISEDPLUGINSREPORTER.md)
 * [Investigation](docs/INVESTIGATION.md)
 * [Running tests in container](docs/DOCKER.md)
 * Selecting tests based on plugins they cover (TODO)
@@ -44,10 +44,8 @@ it's own sandboxed workspace.
 * Writing tests
     * [Video tutorial](https://www.youtube.com/watch?v=ZHAiywgMG-M) by Kohsuke on how to write tests
     * [Writing JUnit test](docs/JUNIT.md)
-    * Writing Cucumber test (TODO)
 * [Testing slaves](docs/SLAVE.md)
 * [Testing emails](docs/EMAIL.md)
-* explain how cucumber hooks into Guice (TODO)
 * [Hamcrest matchers](docs/MATCHERS.md)
 * [How to use this from your own module](docs/EXTERNAL.md)
 * [EC2 provider configuration](docs/EC2-CONFIG.md)
