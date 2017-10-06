@@ -38,7 +38,6 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
     SlaveController slave2;
 
     @Test
-    @Category(SmokeTest.class)
     public void build_on_a_particular_slave() throws Exception {
         FreeStyleJob j = jenkins.jobs.create();
 

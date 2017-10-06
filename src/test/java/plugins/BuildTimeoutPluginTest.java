@@ -1,10 +1,12 @@
 package plugins;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.build_timeout.BuildTimeout;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 @WithPlugins("build-timeout")
 public class BuildTimeoutPluginTest extends AbstractJUnitTest {
@@ -25,6 +27,7 @@ public class BuildTimeoutPluginTest extends AbstractJUnitTest {
     }
 
     @Test
+    @Category(SmokeTest.class)
     public void fail_build_if_likely_stuck() {
         FreeStyleJob j = jenkins.jobs.create();
         j.configure();

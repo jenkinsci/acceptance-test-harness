@@ -24,15 +24,18 @@
 package core;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.ListView;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.jenkinsci.test.acceptance.po.View.*;
 
 public class ViewTest extends AbstractJUnitTest {
     @Test
+    @Category(SmokeTest.class)
     public void renameJob() {
         FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class, "original_name");
         ListView view = jenkins.views.create(ListView.class, "a_view");
@@ -48,6 +51,7 @@ public class ViewTest extends AbstractJUnitTest {
     }
 
     @Test
+    @Category(SmokeTest.class)
     public void findJobThroughRegexp() {
         FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class, "my_name");
         ListView view = jenkins.views.create(ListView.class, "a_view");

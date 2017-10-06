@@ -2,12 +2,14 @@ package plugins;
 
 import com.google.inject.Inject;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.email_ext.EmailExtPublisher;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.utils.mail.MailService;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import javax.mail.MessagingException;
 import java.io.IOException;
@@ -20,6 +22,7 @@ public class EmailExtPluginTest extends AbstractJUnitTest {
     private MailService mail;
 
     @Test
+    @Category(SmokeTest.class)
     public void build() throws MessagingException, IOException {
         mail.setup(jenkins);
 
