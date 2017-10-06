@@ -80,10 +80,6 @@ public class ForemanNodeSharingPluginTest extends AbstractJUnitTest {
         sc.username.set("test");
         sc.selectEnterDirectly().privateKey.set(sshslave1.getPrivateKeyString());
         sc.scope.select("GLOBAL");
-
-        // Not supported in 1.x Jenkins
-        // sc.setId("test");
-
         c.create();
         //CS IGNORE MagicNumber FOR NEXT 2 LINES. REASON: Mock object.
         elasticSleep(10000);
