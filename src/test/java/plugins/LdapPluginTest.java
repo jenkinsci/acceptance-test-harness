@@ -10,6 +10,7 @@ import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
 import org.jenkinsci.test.acceptance.po.LdapSecurityRealm;
 import org.jenkinsci.test.acceptance.po.Login;
 import org.jenkinsci.test.acceptance.po.User;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
