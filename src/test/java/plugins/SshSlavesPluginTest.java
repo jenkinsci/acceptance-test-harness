@@ -30,6 +30,7 @@ import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.SshAgentContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.DockerTest;
+import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.ssh_slaves.SshSlaveLauncher;
@@ -69,6 +70,7 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
         verify();
     }
 
+    @Category(SmokeTest.class)
     @Test public void connectWithKey() {
         configureDefaultSSHSlaveLauncher()
             .keyCredentials("test", sshd.getPrivateKeyString(), null);

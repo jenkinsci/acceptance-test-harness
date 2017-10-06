@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.Wait;
 import org.jenkinsci.test.acceptance.po.Artifact;
 import org.jenkinsci.test.acceptance.po.ArtifactArchiver;
@@ -19,6 +20,7 @@ import org.jenkinsci.test.acceptance.po.ShellBuildStep;
 import org.jenkinsci.test.acceptance.po.StringParameter;
 import org.jenkinsci.test.acceptance.po.TimerTrigger;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -136,6 +138,7 @@ public class FreestyleJobTest extends AbstractJUnitTest {
     }
 
     @Test
+    @Category(SmokeTest.class)
     public void buildParametrized() throws Exception {
         FreeStyleJob j = jenkins.jobs.create(FreeStyleJob.class);
         j.configure();
@@ -183,6 +186,7 @@ public class FreestyleJobTest extends AbstractJUnitTest {
     }
 
     @Test
+    @Category(SmokeTest.class)
     public void doNotDiscardSuccessfulBuilds() throws Exception {
         FreeStyleJob j = jenkins.jobs.create(FreeStyleJob.class);
 
@@ -210,6 +214,7 @@ public class FreestyleJobTest extends AbstractJUnitTest {
     }
 
     @Test
+    @Category(SmokeTest.class)
     public void archiveArtifacts() throws Exception {
         FreeStyleJob j = jenkins.jobs.create(FreeStyleJob.class);
         j.configure();
@@ -226,6 +231,7 @@ public class FreestyleJobTest extends AbstractJUnitTest {
     }
 
     @Test
+    @Category(SmokeTest.class)
     public void buildPeriodically() throws Exception {
         FreeStyleJob j = jenkins.jobs.create(FreeStyleJob.class);
         j.configure();

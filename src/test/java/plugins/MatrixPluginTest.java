@@ -2,6 +2,8 @@ package plugins;
 
 import com.google.inject.Inject;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.SmokeTest;
+import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
 import org.jenkinsci.test.acceptance.junit.Since;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
@@ -104,6 +106,7 @@ public class MatrixPluginTest extends AbstractJUnitTest {
     }
 
     @Test
+    @Category(SmokeTest.class)
     public void run_configurations_on_with_a_given_label() throws Exception {
         Slave s = slaves.get().install(jenkins).get();
         s.configure();

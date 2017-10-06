@@ -24,11 +24,13 @@
 package core;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
 import org.jenkinsci.test.acceptance.po.ServletSecurityRealm;
 import org.jenkinsci.test.acceptance.po.StringParameter;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 /**
  * Test to trigger builds remotely.
@@ -36,6 +38,7 @@ import org.junit.Test;
 public class TriggerRemoteBuildsTest extends AbstractJUnitTest {
 
     @Test
+    @Category(SmokeTest.class)
     public void triggerBuildRemotely() {
 
         GlobalSecurityConfig sc = new GlobalSecurityConfig(jenkins);
