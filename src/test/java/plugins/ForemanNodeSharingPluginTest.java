@@ -7,6 +7,7 @@ import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.ForemanContainer;
 import org.jenkinsci.test.acceptance.docker.fixtures.JavaContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.DockerTest;
 import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.credentials.CredentialsPage;
@@ -24,6 +25,7 @@ import org.jenkinsci.test.acceptance.po.MatrixProject;
 import org.jenkinsci.test.acceptance.po.MatrixRun;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,6 +44,7 @@ import static org.jenkinsci.test.acceptance.po.FormValidation.Kind.OK;
  *
  */
 @WithPlugins("foreman-node-sharing")
+@Category(DockerTest.class)
 @WithDocker
 public class ForemanNodeSharingPluginTest extends AbstractJUnitTest {
     @Inject private DockerContainerHolder<ForemanContainer> dockerForeman;
@@ -77,7 +80,6 @@ public class ForemanNodeSharingPluginTest extends AbstractJUnitTest {
         sc.username.set("test");
         sc.selectEnterDirectly().privateKey.set(sshslave1.getPrivateKeyString());
         sc.scope.select("GLOBAL");
-        sc.setId("test");
         c.create();
         //CS IGNORE MagicNumber FOR NEXT 2 LINES. REASON: Mock object.
         elasticSleep(10000);
