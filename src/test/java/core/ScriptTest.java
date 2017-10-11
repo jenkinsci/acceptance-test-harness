@@ -19,15 +19,12 @@ public class ScriptTest extends AbstractJUnitTest {
 
     @Test
     @Category(SmokeTest.class)
-    public void execute_system_script() {
+    public void execute_system_script() throws Exception {
         String output = jenkins.runScript("println Jenkins.instance.displayName;");
         assertThat(output, is("Jenkins"));
-    }
 
-    @Test
-    public void execute_system_script_on_slave() throws ExecutionException, InterruptedException {
         Slave s = slave.install(jenkins).get();
-        String output = s.runScript("println 6 * 7");
+        output = s.runScript("println 6 * 7");
         assertThat(output, is("42"));
     }
 }

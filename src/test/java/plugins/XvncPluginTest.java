@@ -46,16 +46,6 @@ public class XvncPluginTest extends AbstractJUnitTest {
     @Test
     public void run_xvnc_during_the_build() {
         FreeStyleJob job = createJob();
-        new XvncJobConfig(job).useXvnc();
-        job.save();
-
-        Build build = job.startBuild().shouldSucceed();
-        assertThat(build, runXvnc());
-    }
-
-    @Test
-    public void take_screenshot_at_the_end_of_the_build() {
-        FreeStyleJob job = createJob();
         new XvncJobConfig(job).useXvnc().takeScreenshot();
         job.save();
 

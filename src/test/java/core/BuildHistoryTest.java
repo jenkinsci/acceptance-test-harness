@@ -23,14 +23,8 @@ public class BuildHistoryTest extends AbstractJUnitTest {
         BuildHistory history = jenkins.getBuildHistory();
         assertThat(history.getBuilds(), contains(build));
         assertThat(history.getBuildsOf(job), contains(build));
-    }
 
-    @Test
-    public void slave_build_history() {
-        FreeStyleJob job = jenkins.jobs.create();
-        Build build = job.startBuild().waitUntilFinished();
-
-        BuildHistory history = build.getNode().getBuildHistory();
+        history = build.getNode().getBuildHistory();
         assertThat(history.getBuilds(), contains(build));
         assertThat(history.getBuildsOf(job), contains(build));
     }

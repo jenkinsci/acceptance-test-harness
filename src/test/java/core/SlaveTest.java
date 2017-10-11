@@ -25,12 +25,20 @@ package core;
 
 import com.google.inject.Inject;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.SmokeTest;
+import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.Node;
 import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.util.concurrent.ExecutionException;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * @author Orjan Percy <orjan.percy@sonymobile.com>
@@ -64,5 +72,22 @@ public class SlaveTest extends AbstractJUnitTest {
         slave.launchSlaveAgent();
         slave.waitUntilOnline();
         assert(slave.isOnline());
+    }
+
+    @Test
+    @Category(SmokeTest.class)
+    public void tie_job_to_specified_label() throws Exception {
+        FreeStyleJob j = jenkins.jobs.create();
+        slave.configure();
+        slave.setLabels("test");
+        slave.save();
+
+        j.configure();
+        j.setLabelExpression("test");
+        j.save();
+
+        Build b = j.startBuild().shouldSucceed();
+        j.shouldBeTiedToLabel("test");
+        assertThat(b.getNode(), is(slave));
     }
 }

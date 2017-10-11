@@ -27,6 +27,7 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 import static org.junit.Assert.*;
@@ -302,5 +303,33 @@ public class FreestyleJobTest extends AbstractJUnitTest {
 
         assertThat(waitFor(error).getText(), containsString("Invalid input: \"not_a_time_either\""));
         clickLink("Close");
+    }
+
+    @Test
+    public void delete_a_simple_job() {
+        FreeStyleJob j = jenkins.jobs.create(FreeStyleJob.class, "simple-job");
+        assertThat(j, pageObjectExists());
+
+        j.delete();
+
+        elasticSleep(1000); // wait for delete to complete.
+        assertThat(j,pageObjectDoesNotExist());
+    }
+
+    @Test
+    public void copy_a_simple_job() {
+        FreeStyleJob j = jenkins.jobs.create(FreeStyleJob.class, "simple-job");
+        jenkins.jobs.copy(j, "simple-job-copy");
+        assertThat(driver, hasContent("simple-job-copy"));
+
+        FreeStyleJob k = jenkins.jobs.get(FreeStyleJob.class, "simple-job-copy");
+
+        j.visit("config.xml");
+        String jxml = driver.getPageSource();
+
+        k.visit("config.xml");
+        String kxml = driver.getPageSource();
+
+        assertThat(jxml, is(kxml));
     }
 }

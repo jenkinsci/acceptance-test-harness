@@ -93,5 +93,4 @@ public class ArtifactsTest extends AbstractJUnitTest {
         assertThat(artifacts, is(notNullValue()));
         assertThat("Incorrect number of artifacts", artifacts.size(), is(equalTo(NO_SMALL_FILES)));
     }
-
 }
