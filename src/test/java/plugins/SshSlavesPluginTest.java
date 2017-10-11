@@ -24,23 +24,24 @@
 package plugins;
 
 import com.google.inject.Inject;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.SshAgentContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.DockerTest;
-import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.ssh_slaves.SshSlaveLauncher;
 import org.jenkinsci.test.acceptance.po.DumbSlave;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
-import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
+
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+
+import static org.junit.Assert.assertTrue;
 
 @WithPlugins({"ssh-slaves@1.11", "credentials@2.1.10", "ssh-credentials@1.12"})
 @Category(DockerTest.class)
@@ -70,7 +71,6 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
         verify();
     }
 
-    @Category(SmokeTest.class)
     @Test public void connectWithKey() {
         configureDefaultSSHSlaveLauncher()
             .keyCredentials("test", sshd.getPrivateKeyString(), null);

@@ -168,7 +168,6 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
     }
 
     @Test
-    @Category(SmokeTest.class)
     public void ssh_key_path_and_key_password_publishing() throws IOException {
         SshdContainer sshd = docker.get();
         Resource cp_file = resource(resourceFilePath);

@@ -30,28 +30,24 @@ import java.io.IOException;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Since;
-import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithInstallWizard;
 import org.jenkinsci.test.acceptance.po.Login;
 import org.jenkinsci.test.acceptance.po.WizardCreateAdminUser;
 import org.jenkinsci.test.acceptance.po.WizardCustomizeJenkins;
 import org.jenkinsci.test.acceptance.po.WizardLogin;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import com.google.inject.Inject;
-import org.junit.experimental.categories.Category;
 
 @WithInstallWizard
-@Category(SmokeTest.class)
 public class InstallWizardTest extends AbstractJUnitTest {
     @Inject
     public JenkinsController controller;
 
     @Since("2.0")
     @Test
-    public void wizardInstallSugestedTest() throws IOException {
+    public void wizardInstallSuggestedTest() throws IOException {
 
         jenkins.open();
 

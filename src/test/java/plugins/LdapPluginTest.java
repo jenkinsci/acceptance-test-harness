@@ -312,7 +312,6 @@ public class LdapPluginTest extends AbstractJUnitTest {
 
     @Test
     @Issue("JENKINS-18355")
-    @Category(SmokeTest.class)
     public void custom_display_name() {
         // Given
         useLdapAsSecurityRealm(createDefaults(ldap.get()).displayNameAttributeName("cn"));

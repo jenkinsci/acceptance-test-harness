@@ -1,13 +1,11 @@
 package plugins;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.ws_cleanup.WsCleanup;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
 
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -44,7 +42,6 @@ public class WsCleanupPluginTest extends AbstractJUnitTest {
     }
 
     @Test
-    @Category(SmokeTest.class)
     public void clean_up_before_build() {
         job.configure();
         job.addShellStep("mkdir ws_dir");

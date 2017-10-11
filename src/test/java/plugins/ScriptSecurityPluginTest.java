@@ -25,7 +25,6 @@
 package plugins;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.groovy_postbuild.GroovyPostBuildStep;
 import org.jenkinsci.test.acceptance.plugins.matrix_auth.MatrixAuthorizationStrategy;
@@ -35,7 +34,6 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
 
 @WithPlugins({"script-security", "mock-security-realm", "matrix-auth", "groovy-postbuild"})
 public class ScriptSecurityPluginTest extends AbstractJUnitTest {
@@ -93,7 +91,6 @@ public class ScriptSecurityPluginTest extends AbstractJUnitTest {
     }
 
     @Test
-    @Category(SmokeTest.class)
     public void signatureNeedsApproval() throws Exception {
         final FreeStyleJob job = createFailedJob("def h = java.lang.System.identityHashCode(0)", true);
         login(ADMIN);

@@ -73,7 +73,6 @@ public class GitPluginTest extends AbstractJUnitTest {
     }
 
     @Test
-    @Category(SmokeTest.class)
     public void simple_checkout() {
         buildGitRepo()
                 .transferToDockerContainer(host, port);

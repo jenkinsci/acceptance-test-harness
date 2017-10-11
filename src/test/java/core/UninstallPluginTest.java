@@ -26,12 +26,10 @@ package core;
 import com.google.inject.Inject;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
 import org.openqa.selenium.WebElement;
 
 import java.util.concurrent.ExecutionException;
@@ -50,7 +48,6 @@ public class UninstallPluginTest extends AbstractJUnitTest {
 
     /** Uninstall a plugin (gerrit-trigger), restart jenkins and verify that the plugin is not installed */
     @Test
-    @Category(SmokeTest.class)
     @WithPlugins("gerrit-trigger")
     public void gerrit_uninstall_plugin() throws InterruptedException, ExecutionException {
         assumeTrue("This test requires a restartable Jenkins", jenkins.canRestart());
