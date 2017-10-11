@@ -1,6 +1,11 @@
-# Running one test
-Generally speaking, running one test is the easiest from your IDE. Select one test method of JUnit
-or one test scenario of Cucumber, then ask the IDE to run it.
+# Specifying tests to run
+
+There are several profile that might be handy for specifying tests to run:
+
+- `-PrunSmokeTests` - only the essential tests to execute the most fundamental use cases.
+- `-PrunDockerTests` - only tests that require docker.
+- `-PskipCucumberTests` - skip tests implementing in Cucumber.
+- `-PtestOnlyPlugins` - only tests that require plugins specified in `TEST_ONLY_PLUGINS` environment variable (comma separated artifact ids).
 
 ## JUnit
 To run a single JUnit test from command line, specify the name of the test with the `-Dtest=` option:
@@ -17,4 +22,3 @@ with a line number to specify a specific scenario
 
     mvn -Dcucumber.test=features/freestyle_build.feature:6 test
 
-TODO: use a driver directly to skip all Maven stuff
