@@ -175,6 +175,24 @@ public class GitScm extends Scm {
     }
 
     /**
+     * Add behaviour "Advanced clone behaviours"
+     *
+     * @return behaviour, to access its method
+     */
+    public AdvancedClone advancedClone() {
+        return addBehaviour(AdvancedClone.class);
+    }
+
+    /**
+     * Add behaviour "Advanced checkout behaviours"
+     *
+     * @return behaviour, to access its method
+     */
+    public AdvancedCheckout advancedCheckout() {
+        return addBehaviour(AdvancedCheckout.class);
+    }
+
+    /**
      * Select strategy for choosing what to build
      *
      * @param strategy Strategy to use ("Default" || "Inverse")
@@ -318,6 +336,12 @@ public class GitScm extends Scm {
             super(git, path);
             clickLink("Advanced checkout behaviours");
         }
+
+        public AdvancedCheckout setTimeOut(String timeOut) {
+            this.timeout.set(timeOut);
+
+            return this;
+        }
     }
 
     public static class AdvancedClone extends Behaviour {
@@ -332,6 +356,44 @@ public class GitScm extends Scm {
             super(git, path);
             clickLink("Advanced clone behaviours");
         }
+
+        public AdvancedClone checkShallowClone(boolean state) {
+            cbShallowClone.check(state);
+
+            return this;
+        }
+
+        public AdvancedClone checkNoTags(boolean state) {
+            cbNoTags.check(state);
+
+            return this;
+        }
+
+        public AdvancedClone checkHonorRefspec(boolean state) {
+            cbHonorRefspec.check(state);
+
+            return this;
+        }
+
+        public AdvancedClone setNumDepth(String numDepth) {
+            this.numDepth.set(numDepth);
+
+            return this;
+        }
+
+        public AdvancedClone setNumTimeout(String numTimeout) {
+            this.numTimeout.set(numTimeout);
+
+            return this;
+        }
+
+        public AdvancedClone setTxtReference(String txtReference) {
+            this.txtReference.set(txtReference);
+
+            return this;
+        }
+
+
     }
 
     public static class CalculateChangelog extends Behaviour {
