@@ -1,9 +1,7 @@
 package plugins;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
@@ -57,7 +55,6 @@ public class JUnitPluginTest extends AbstractJUnitTest {
 
     @Test
     @Issue("JENKINS-22833")
-    @Category(SmokeTest.class)
     public void publish_parametrized_tests() {
         FreeStyleJob j = jenkins.jobs.create();
         j.configure();

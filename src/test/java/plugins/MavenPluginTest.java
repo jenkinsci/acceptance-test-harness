@@ -28,8 +28,6 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.junit.SmokeTest;
-import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
 import org.jenkinsci.test.acceptance.junit.Since;
 import org.jenkinsci.test.acceptance.plugins.mailer.Mailer;
@@ -160,7 +158,6 @@ public class MavenPluginTest extends AbstractJUnitTest {
     }
 
     @Test
-    @Category(SmokeTest.class)
     public void build_multimodule() {
         installSomeMaven(jenkins);
 

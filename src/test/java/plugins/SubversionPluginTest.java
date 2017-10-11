@@ -6,7 +6,6 @@ import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.SvnContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.DockerTest;
-import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithCredentials;
 import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
@@ -158,7 +157,6 @@ public class SubversionPluginTest extends AbstractJUnitTest {
     }
 
     @Test
-    @Category(SmokeTest.class)
     public void build_has_changes_and_repoBrowser() throws SubversionPluginTestException {
         final SvnContainer svnContainer = svn.get();
         final FreeStyleJob f = jenkins.jobs.create();
