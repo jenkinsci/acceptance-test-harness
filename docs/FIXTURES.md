@@ -12,7 +12,6 @@ defined in `./fixtures/*`
 ## Running/skipping Docker tests
 
 JUnit Tests that require docker fixtures are marked with `@WithDocker` annotation.
-Cucumber tests are likewise annotated with `@native(docker)` annotation.
 If docker is not installed when you run tests, these tests are automatically skipped.
 
 ##Docker injections
@@ -45,14 +44,6 @@ Pick the fixture type you want to use, then insert `DockerContainerHolder` for i
 
 The public function ipBound(n) and port(n) allow easily to find out to which host ip address and port a docker container
 ip address is bound to.
-
-## Writing a cucumber test that relies on Docker fixtures
-`DockerSteps` defines steps that get the fixtures running, such as this:
-
-    Given a docker fixture "tomcat7"
-
-In Cucumber we refer to docker fixtures by their IDs, which is specified via `@DockerFixture` on the fixture type.
-The containers are automatically terminated and cleaned up at the end of test.
 
 ## Defining a fixture
 Each fixture is defined in terms of a `DockerContainer` subtype with `@DockerFixture` annotation. This type
