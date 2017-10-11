@@ -19,7 +19,7 @@ That can be avoided by selecting a subset of tests to be run - smoke tests for i
 The harness provides a variety of ways to configure the execution including:
 
 * [Selecting web browser](docs/BROWSER.md)
-* [Specifing test(s) to run](docs/SINGLE-TEST.md)
+* [Specifying test(s) to run](docs/SINGLE-TEST.md)
 * [Managing the versions of Jenkins and plugins](docs/SUT-VERSIONS.md)
 * [Using a http proxy](docs/USING-A-HTTP-PROXY.md)
 * [Prelaunching Jenkins](docs/PRELAUNCH.md)
