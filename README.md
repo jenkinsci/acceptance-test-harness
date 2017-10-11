@@ -35,7 +35,13 @@ use-cases to maximize the value of the test suite. Tests that can or already are
 should be avoided here as well as tests unlikely to catch future regressions (reproducers for individual bugs, boundary
 condition testing, etc.). Individual maintainers are expected to update their tests reflecting core/plugin changes as
 well as ensuring the tests does not produce false positives. Tests identified to violate this guideline might be removed
-without author's notice for the sake of suite reliability. 
+without author's notice for the sake of suite reliability.
+
+Areas where acceptance-tests-harness is more suitable then jenkins-test-harness are:
+
+- Installing plugins for cross-plugin integration
+- Running tests in realistic classloader environment
+- Verifying UI behaviour in actual web browser
 
 * [Docker fixtures](docs/FIXTURES.md)
 * [Page objects](docs/PAGE-OBJECTS.md)
