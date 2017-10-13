@@ -2,9 +2,11 @@ package core;
 
 import com.google.inject.Inject;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.util.concurrent.ExecutionException;
 
@@ -16,6 +18,7 @@ public class ScriptTest extends AbstractJUnitTest {
     SlaveController slave;
 
     @Test
+    @Category(SmokeTest.class)
     public void execute_system_script() {
         String output = jenkins.runScript("println Jenkins.instance.displayName;");
         assertThat(output, is("Jenkins"));

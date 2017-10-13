@@ -8,7 +8,7 @@ can be written easily.
 
 ## Getting Started
 
-The simplest way to start the harness is calling `BROWSER=firefox JENKINS_VERSION=latest mvn test`. Complete test suite
+The simplest way to start the harness is calling `BROWSER=firefox JENKINS_VERSION=2.73 mvn test`. Complete test suite
 takes hours to run due to the number of covered components/use-cases, the cost of Jenkins setup and selenium interactions.
 That can be avoided by selecting a subset of tests to be run - smoke tests for instance.
 
@@ -37,12 +37,6 @@ condition testing, etc.). Individual maintainers are expected to update their te
 well as ensuring the tests does not produce false positives. Tests identified to violate this guideline might be removed
 without author's notice for the sake of suite reliability.
 
-Areas where acceptance-tests-harness is more suitable then jenkins-test-harness are:
-
-- Installing plugins for cross-plugin integration
-- Running tests in realistic classloader environment
-- Verifying UI behaviour in actual web browser
-
 * [Docker fixtures](docs/FIXTURES.md)
 * [Page objects](docs/PAGE-OBJECTS.md)
     * [Mix-ins](docs/MIXIN.md)
@@ -56,3 +50,9 @@ Areas where acceptance-tests-harness is more suitable then jenkins-test-harness 
 * [How to use this from your own module](docs/EXTERNAL.md)
 * [EC2 provider configuration](docs/EC2-CONFIG.md)
 * [Investigation](docs/INVESTIGATION.md)
+
+Areas where acceptance-tests-harness is more suitable then jenkins-test-harness are:
+
+- Installing plugins for cross-plugin integration
+- Running tests in realistic classloader environment
+- Verifying UI behaviour in actual web browser

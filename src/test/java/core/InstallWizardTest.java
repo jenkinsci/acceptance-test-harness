@@ -36,7 +36,6 @@ import org.jenkinsci.test.acceptance.po.WizardCreateAdminUser;
 import org.jenkinsci.test.acceptance.po.WizardCustomizeJenkins;
 import org.jenkinsci.test.acceptance.po.WizardLogin;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import com.google.inject.Inject;
@@ -48,7 +47,7 @@ public class InstallWizardTest extends AbstractJUnitTest {
 
     @Since("2.0")
     @Test
-    public void wizardInstallSugestedTest() throws IOException {
+    public void wizardInstallSuggestedTest() throws IOException {
 
         jenkins.open();
 

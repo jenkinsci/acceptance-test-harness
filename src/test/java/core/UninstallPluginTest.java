@@ -41,7 +41,6 @@ import static org.junit.Assume.assumeTrue;
  * Feature: Uninstall plugin test
  * @author Orjan Percy <orjan.percy@sonymobile.com>
  */
-@WithPlugins("gerrit-trigger")
 public class UninstallPluginTest extends AbstractJUnitTest {
 
     @Inject
@@ -49,6 +48,7 @@ public class UninstallPluginTest extends AbstractJUnitTest {
 
     /** Uninstall a plugin (gerrit-trigger), restart jenkins and verify that the plugin is not installed */
     @Test
+    @WithPlugins("gerrit-trigger")
     public void gerrit_uninstall_plugin() throws InterruptedException, ExecutionException {
         assumeTrue("This test requires a restartable Jenkins", jenkins.canRestart());
         jenkins.getPluginManager().visit("installed");

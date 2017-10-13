@@ -27,7 +27,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.Consumer;
 
-import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.AnalysisConfigurator;
 import org.jenkinsci.test.acceptance.plugins.analysis_core.NullConfigurator;
@@ -42,7 +41,6 @@ import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -149,7 +147,7 @@ public class FindBugsPluginTest extends AbstractAnalysisTest<FindBugsAction> {
     /**
      * Builds a maven project and checks if a new warning is displayed.
      */
-    @Test @Category(SmokeTest.class)
+    @Test
     public void should_retrieve_results_from_maven_job() {
         MavenModuleSet job = createMavenJob();
 

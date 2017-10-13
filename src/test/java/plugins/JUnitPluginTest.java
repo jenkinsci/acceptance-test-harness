@@ -55,7 +55,7 @@ public class JUnitPluginTest extends AbstractJUnitTest {
 
     @Test
     @Issue("JENKINS-22833")
-    public void publish_rest_of_parameterized_tests() {
+    public void publish_parametrized_tests() {
         FreeStyleJob j = jenkins.jobs.create();
         j.configure();
         j.copyResource(resource("/junit/parameterized/junit.xml"));
