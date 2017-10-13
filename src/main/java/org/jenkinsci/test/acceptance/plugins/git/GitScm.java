@@ -29,6 +29,7 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.support.ui.Select;
 
 import javax.swing.text.html.HTMLDocument;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
 @Describable("Git")
@@ -106,6 +107,16 @@ public class GitScm extends Scm {
         CalculateChangelog behaviour = addBehaviour(CalculateChangelog.class);
         behaviour.txtCompareRemote.set(remote);
         behaviour.txtCompareTarget.set(branch);
+        return this;
+    }
+
+    /**
+     * Add behaviour "Use commit author in changelog"
+     *
+     * @return this, to allow function chaining
+     */
+    public GitScm commitAuthorInChangelog() {
+        CommitAuthorInChangelog behaviour = addBehaviour(CommitAuthorInChangelog.class);
         return this;
     }
 
@@ -281,7 +292,30 @@ public class GitScm extends Scm {
 
     public <T extends Behaviour> T addBehaviour(Class<T> type) {
         control("hetero-list-add[extensions]").click();
-        return newInstance(type, this, "extensions");   // FIXME: find the last extension added
+        Control bottomScrollBar = control(By.className("bottomscrollbar"));
+
+        // Adding functionality for the case the drop-down does not show all its elements and could be necessary to scroll
+        T newBehaviour = null;
+        boolean enabledBottomScrollBar = false;
+        boolean found = false;
+        do {
+            try {
+                try {
+                    // check if the end of the list of Addtional behaviours has been reached.
+                    // When that happens, a class called bottomscrollbar_disabledis added
+                    control(By.className("bottomscrollbar_disabled")).click();
+                    enabledBottomScrollBar = false;
+                } catch (Exception e1) {
+                    enabledBottomScrollBar = true;
+                }
+                newBehaviour = newInstance(type, this, "extensions"); // FIXME: find the last extension added
+                found = true;
+            } catch (AssertionError e) {
+                bottomScrollBar.click();
+            }
+        } while(!found && enabledBottomScrollBar);
+
+        return newBehaviour;
     }
 
     private void advanced() {
