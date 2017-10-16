@@ -53,6 +53,11 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+
+import static org.junit.Assert.assertTrue;
+
 @WithPlugins({"ssh-slaves@1.11", "credentials@2.1.10", "ssh-credentials@1.12"})
 @Category(DockerTest.class)
 @WithDocker
