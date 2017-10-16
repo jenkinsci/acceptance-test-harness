@@ -43,6 +43,7 @@ import java.util.regex.Pattern;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.fail;
 
 @WithDocker
 @Category(DockerTest.class)
@@ -370,6 +371,331 @@ public class GitPluginTest extends AbstractJUnitTest {
                 )
         );
     }
+
+
+    @Test
+    public void merge_before_build_test() {
+        final String TEST_COMMIT_MESSAGE = "Branch test";
+        final String BRANCH_NAME = "testBranch";
+        final String TEST_FILE = "foo_test_branch";
+
+        Build b;
+        GitRepo repo = buildGitRepo();
+
+        repo.createBranch(BRANCH_NAME);
+        repo.touch(TEST_FILE);
+        repo.git("add", TEST_FILE);
+        repo.git("commit", "-m", TEST_COMMIT_MESSAGE);
+
+        repo.transferToDockerContainer(host, port);
+
+        job.useScm(GitScm.class)
+                .url(repoUrl)
+                .credentials(USERNAME)
+                .mergeBeforeBuild()
+                .setTxtMergeRemote("origin")
+                .setTxtMergeTarget(BRANCH_NAME);
+
+        job.save();
+
+        b = job.startBuild();
+        b.shouldSucceed();
+
+        String console = b.getConsole();
+        String revision = getRevisionFromConsole(console);
+
+        assertThat(
+                console,
+                Matchers.containsRegexp(
+                        "Merging Revision .* \\(refs/remotes/origin/master\\) to origin/"+BRANCH_NAME,
+                        Pattern.MULTILINE
+                )
+        );
+        assertThat(
+                console,
+                Matchers.containsRegexp("git merge --ff "+revision, Pattern.MULTILINE)
+        );
+        assertThat(
+                console,
+                Matchers.containsRegexp(
+                        "Checking out Revision .* \\(origin/master, origin/"+BRANCH_NAME+"\\)", Pattern.MULTILINE
+                )
+        );
+    }
+
+    @Test
+    public void commit_author_in_changelog_test() {
+        URL changesUrl;
+        final String TEST_COMMIT_MESSAGE = "Second commit";
+        final String BRANCH_NAME = "testBranch";
+        final String TEST_FILE = "foo_test_branch";
+
+        Build b;
+        GitRepo repo = buildGitRepo();
+
+        repo.createBranch(BRANCH_NAME);
+        repo.touch(TEST_FILE);
+        repo.git("add", TEST_FILE);
+        repo.git("commit", "-m", TEST_COMMIT_MESSAGE, "--author", "New-Author <other-email@example.org>");
+        repo.transferToDockerContainer(host, port);
+
+        job.useScm(GitScm.class)
+                .url(repoUrl)
+                .credentials(USERNAME)
+                .calculateChangelog("origin", BRANCH_NAME);
+        job.save();
+
+        b = job.startBuild();
+        b.shouldSucceed();
+        changesUrl = b.url("changes");
+
+        assertThat(
+                visit(changesUrl).getPageSource(),
+                Matchers.containsRegexp("/user/jenkins-ath/", Pattern.MULTILINE)
+        );
+
+        job.configure();
+        job.useScm(GitScm.class).commitAuthorInChangelog();
+
+        job.save();
+
+        b = job.startBuild();
+        b.shouldSucceed();
+        changesUrl = b.url("changes");
+
+        assertThat(
+                visit(changesUrl).getPageSource(),
+                Matchers.containsRegexp("/user/other-email/", Pattern.MULTILINE)
+        );
+    }
+
+    @Test
+    public void advanced_clone_test() {
+        final String TEST_INITIAL_COMMIT = "Initial commit";
+        final String TEST_COMMIT1_MESSAGE = "First commit";
+        final String TEST_COMMIT2_MESSAGE = "Second commit";
+        Build b;
+
+        GitRepo repo = buildGitRepo();
+        repo.changeAndCommitFoo(TEST_COMMIT1_MESSAGE);
+        repo.changeAndCommitFoo(TEST_COMMIT2_MESSAGE);
+        repo.transferToDockerContainer(host, port);
+
+        GitScm gitScm = job.useScm(GitScm.class)
+                .url(repoUrl)
+                .credentials(USERNAME);
+        job.addShellStep("git log");
+        job.save();
+
+        b = job.startBuild();
+        b.shouldSucceed();
+        String console = b.getConsole();
+        assertThat(
+                console,
+                Matchers.containsRegexp(TEST_INITIAL_COMMIT, Pattern.MULTILINE)
+        );
+        assertThat(
+                console,
+                Matchers.containsRegexp(TEST_COMMIT1_MESSAGE, Pattern.MULTILINE)
+        );
+        assertThat(
+                console,
+                Matchers.containsRegexp(TEST_COMMIT2_MESSAGE, Pattern.MULTILINE)
+        );
+
+        job.configure();
+        GitScm.AdvancedClone behaviour = gitScm.advancedClone()
+                .checkShallowClone(true)
+                .setNumDepth("2");
+        job.save();
+
+        b = job.startBuild();
+        b.shouldSucceed();
+        console = b.getConsole();
+        try {
+            assertThat(
+                    console,
+                    Matchers.containsRegexp(TEST_INITIAL_COMMIT, Pattern.MULTILINE)
+            );
+            fail("Shallow clone depth is 2");
+        } catch (AssertionError e) {
+            // It is expected an AssertionError to be thrown
+        }
+        assertThat(
+                console,
+                Matchers.containsRegexp(TEST_COMMIT1_MESSAGE, Pattern.MULTILINE)
+        );
+        assertThat(
+                console,
+                Matchers.containsRegexp(TEST_COMMIT2_MESSAGE, Pattern.MULTILINE)
+        );
+
+        job.configure();
+        behaviour.setNumDepth("1");
+        job.save();
+
+        b = job.startBuild();
+        b.shouldSucceed();
+        console = b.getConsole();
+        try {
+            assertThat(
+                    console,
+                    Matchers.containsRegexp(TEST_INITIAL_COMMIT, Pattern.MULTILINE)
+            );
+            fail("Shallow clone depth is 1");
+        } catch (AssertionError e) {
+            // It is expected an AssertionError to be thrown
+        }
+        try {
+            assertThat(
+                    console,
+                    Matchers.containsRegexp(TEST_COMMIT1_MESSAGE, Pattern.MULTILINE)
+            );
+            fail("Shallow clone depth is 1");
+        } catch (AssertionError e) {
+            // It is expected an AssertionError to be thrown
+        }
+        assertThat(
+                console,
+                Matchers.containsRegexp(TEST_COMMIT2_MESSAGE, Pattern.MULTILINE)
+        );
+    }
+
+    @Test
+    public void advanced_checkout_test() {
+        final String TEST_COMMIT_MESSAGE = "First commit";
+        final String TEST_TIME_OUT = "2";
+        Build b;
+
+        GitRepo repo = buildGitRepo();
+        repo.changeAndCommitFoo(TEST_COMMIT_MESSAGE);
+        repo.transferToDockerContainer(host, port);
+
+        GitScm gitScm = job.useScm(GitScm.class)
+                .url(repoUrl)
+                .credentials(USERNAME);
+        job.save();
+
+        b = job.startBuild();
+        b.shouldSucceed();
+        String console = b.getConsole();
+        String revision = getRevisionFromConsole(console);
+        try {
+            assertThat(
+                    console,
+                    Matchers.containsRegexp("git checkout -f "+revision+" # timeout="+TEST_TIME_OUT, Pattern.MULTILINE)
+            );
+            fail("Timeout for checkout not set");
+        } catch (AssertionError e) {
+            // It is expected an AssertionError to be thrown
+        }
+
+        job.configure();
+        gitScm.advancedCheckout().setTimeOut(TEST_TIME_OUT);
+        job.save();
+
+        b = job.startBuild();
+        b.shouldSucceed();
+        console = b.getConsole();
+        assertThat(
+                console,
+                Matchers.containsRegexp("git checkout -f "+revision+" # timeout="+TEST_TIME_OUT, Pattern.MULTILINE)
+        );
+    }
+
+
+    @Test
+    public void default_strategy_to_choose_build() {
+        final String BRANCH_NAME = "secondBranch";
+
+        GitRepo repo = buildGitRepo();
+        repo.createBranch(BRANCH_NAME);
+        repo.transferToDockerContainer(host, port);
+
+        // Default Strategy for master
+        job.useScm(GitScm.class)
+                .url(repoUrl)
+                .credentials(USERNAME)
+                .chooseBuildStrategy("Default");
+
+        job.save();
+        Build b = job.startBuild();
+        b.shouldSucceed();
+
+        assertThat(
+                b.getConsole(),
+                Matchers.containsRegexp(
+                        "Checking out Revision .* \\(refs/remotes/origin/master\\)",
+                        Pattern.MULTILINE
+                )
+        );
+
+        // Default Strategy for secondBranch
+        job.configure();
+        job.useScm(GitScm.class)
+                .branch(BRANCH_NAME);
+
+        job.save();
+        b = job.startBuild();
+        b.shouldSucceed();
+
+        assertThat(
+                b.getConsole(),
+                Matchers.containsRegexp(
+                        "Checking out Revision .* \\(origin/"+BRANCH_NAME+"\\)",
+                        Pattern.MULTILINE
+                )
+        );
+
+        // Default Strategy for any branch
+        job.configure();
+        job.useScm(GitScm.class)
+                .branch("");
+
+        job.save();
+        b = job.startBuild();
+        b.shouldSucceed();
+
+        assertThat(
+                b.getConsole(),
+                Matchers.containsRegexp(
+                        "Checking out Revision .* \\(origin/master, origin/"+BRANCH_NAME+"\\)",
+                        Pattern.MULTILINE
+                )
+        );
+    }
+
+    @Test
+    public void custom_name_and_email() {
+        final String USER_NAME = "fake";
+        final String EMAIL = "fake@mail.net";
+        GitRepo repo = buildGitRepo();
+        repo.transferToDockerContainer(host, port);
+
+        job.useScm(GitScm.class)
+                .url(repoUrl)
+                .credentials(USERNAME)
+                .customNameAndMail(USER_NAME, EMAIL);
+        job.addShellStep("touch test.txt &&\n" +
+                "git add test.txt &&\n" +
+                "git commit -m \"Next commit\" &&\n" +
+                "git show");
+
+        job.save();
+        Build b = job.startBuild();
+        b.shouldSucceed();
+
+        String console = b.getConsole();
+        assertThat(
+                console,
+                Matchers.containsRegexp(USER_NAME, Pattern.MULTILINE)
+        );
+        assertThat(
+                console,
+                Matchers.containsRegexp(EMAIL, Pattern.MULTILINE)
+        );
+    }
+
 
     ////////////////////
     // HELPER METHODS //
