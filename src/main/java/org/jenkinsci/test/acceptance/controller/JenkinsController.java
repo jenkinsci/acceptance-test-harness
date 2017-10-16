@@ -37,7 +37,6 @@ public abstract class JenkinsController implements IJenkinsController, AutoClean
     protected boolean isQuite;
     @Inject @Named("WORKSPACE")
     protected String WORKSPACE;
-    protected String JENKINS_DEBUG_LOG;
 
     public static final int STARTUP_TIMEOUT;
     static {
@@ -54,8 +53,6 @@ public abstract class JenkinsController implements IJenkinsController, AutoClean
 
     private boolean isRunning;
 
-    protected final OutputStream logger;
-
     protected JenkinsController(Injector i) {
         i.injectMembers(this);
 
@@ -63,18 +60,6 @@ public abstract class JenkinsController implements IJenkinsController, AutoClean
             LogManager.getLogManager().reset();
             Logger globalLogger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
             globalLogger.setLevel(Level.OFF);
-        }
-
-        JENKINS_DEBUG_LOG  = WORKSPACE + "/last_test.log";
-        if(FileUtils.fileExists(JENKINS_DEBUG_LOG)){
-            FileUtils.removePath(JENKINS_DEBUG_LOG);
-        }
-        try {
-            File f = new File(JENKINS_DEBUG_LOG);
-            f.createNewFile();
-            this.logger = new FileOutputStream(f);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to create log file "+ JENKINS_DEBUG_LOG, e);
         }
     }
 

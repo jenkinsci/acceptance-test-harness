@@ -274,10 +274,6 @@ public abstract class LocalController extends JenkinsController implements LogLi
     @Override
     public void tearDown(){
         try {
-            if (logger != null) {
-                logger.close();
-            }
-
             FileUtils.forceDelete(jenkinsHome);
         } catch (IOException e) {
             System.out.println("Cleaning up temporary JENKINS_HOME failed, retrying in 5 sec.");
