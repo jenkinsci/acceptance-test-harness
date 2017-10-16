@@ -26,7 +26,6 @@ package plugins;
 
 import javax.inject.Inject;
 import java.io.File;
-import java.util.concurrent.Callable;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -123,28 +122,23 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
     @WithPlugins({"workflow-aggregator@2.0", "workflow-cps@2.10", "workflow-basic-steps@2.1", "junit@1.18", "git@2.3"})
     @Test public void linearFlow() throws Exception {
         assumeTrue("This test requires a restartable Jenkins", jenkins.canRestart());
-        MavenInstallation.installMaven(jenkins, "M3", "3.1.0");
+        MavenInstallation.installMaven(jenkins, "M3", "3.5.0");
         final DumbSlave slave = (DumbSlave) slaveController.install(jenkins).get();
-        slave.configure(new Callable<Void>() {
-            @Override public Void call() throws Exception {
-                slave.labels.set("remote");
-                return null;
-            }
-        });
+        slave.configure(() -> slave.labels.set("remote"));
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
         job.script.set(
             "node('remote') {\n" +
             "  git 'https://github.com/jglick/simple-maven-project-with-tests.git'\n" +
             "  def v = version()\n" +
             "  if (v) {\n" +
-            "    echo \"Building version ${v}\"\n" +
+            "    echo(/Building version $v/)\n" +
             "  }\n" +
             "  def mvnHome = tool 'M3'\n" +
-            "  withEnv([\"PATH+MAVEN=${mvnHome}/bin\", \"M2_HOME=${mvnHome}\"]) {\n" +
+            "  withEnv([\"PATH+MAVEN=$mvnHome/bin\", \"M2_HOME=$mvnHome\"]) {\n" +
             "    sh 'mvn -B -Dmaven.test.failure.ignore verify'\n" +
             "  }\n" +
             "  input 'Ready to go?'\n" +
-            "  step([$class: 'ArtifactArchiver', artifacts: '**/target/*.jar', fingerprint: true])\n" + // TODO Jenkins 2.2+: archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
+            "  archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true\n" +
             "  junit '**/target/surefire-reports/TEST-*.xml'\n" +
             "}\n" +
             "def version() {\n" +
