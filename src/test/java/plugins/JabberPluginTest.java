@@ -48,11 +48,6 @@ public class JabberPluginTest extends AbstractJUnitTest {
     private final String jabberIdString = "jenkins-ci@localhost/master";
     private final String jabberPasswordString = "jenkins-pw";
     private final String mucNameString = "test";
-    private final String pwMucNameString = "test-room";
-    private final String pwMucPasswordString = "test-room-pw";
-    private final String localhostString = "localhost";
-    //private final String confRoom = "*test@conference.localhost";
-    //private final String confRoom = "*test@127.0.0.1";
     private final String confRoom = "test@conference.localhost";
 
     @Test

@@ -71,25 +71,6 @@ public class GradlePluginTest extends AbstractJUnitTest {
     }
 
     /**
-     * Verify the execution of specific task in gradle build script.
-     */
-    @Test
-    public void run_gradle_task() {
-        GradleInstallation.installGradle(jenkins);
-        final FreeStyleJob job = jenkins.jobs.create();
-        job.copyResource(resource(GRADLE_SCRIPT), "build.gradle");
-        final GradleStep step = job.addBuildStep(GradleStep.class);
-        step.setVersion(GradleInstallation.DEFAULT);
-        step.setTasks(HELLO.getName());
-        job.save();
-
-        final Build build = job.startBuild().shouldSucceed();
-
-        assertThat(build.getConsole(), containsString(HELLO.getPrintln()));
-        assertThat(build.getConsole(), containsString(SUCCESSFUL_BUILD));
-    }
-
-    /**
      * Verify the execution of gradle build script with switch parameter.
      */
     @Test
@@ -100,6 +81,7 @@ public class GradlePluginTest extends AbstractJUnitTest {
         final GradleStep step = job.addBuildStep(GradleStep.class);
         step.setVersion(GradleInstallation.DEFAULT);
         step.setSwitches("--quiet");
+        step.setTasks(FIRST.getName()+ " " + SECOND.getName());
         job.save();
 
         final Build build = job.startBuild().shouldSucceed();
@@ -127,47 +109,6 @@ public class GradlePluginTest extends AbstractJUnitTest {
         final Build build = job.startBuild();
         build.shouldSucceed();
         assertThat(build.getConsole(), containsString(HELLO.getPrintln()));
-    }
-
-    /**
-     * Verify the execution of gradle build script with multiple tasks.
-     */
-    @Test
-    public void run_gradle_script_multiple_tasks() {
-        GradleInstallation.installGradle(jenkins);
-
-        final FreeStyleJob job = jenkins.jobs.create();
-        job.copyResource(resource(GRADLE_SCRIPT), "build.gradle");
-        final GradleStep step = job.addBuildStep(GradleStep.class);
-        step.setVersion(GradleInstallation.DEFAULT);
-        step.setTasks(FIRST.getName()+ " " + SECOND.getName());
-        job.save();
-
-        final Build build = job.startBuild();
-        build.shouldSucceed();
-        assertThat(build.getConsole(), containsString(FIRST.getPrintln()));
-        assertThat(build.getConsole(), containsString(SECOND.getPrintln()));
-    }
-
-    /**
-     * Verify the execution of gradle build and check if the console output contains a certain string.
-     * See JENKINS-40778 for details.
-     */
-    @Test
-    @Issue({"JENKINS-40778"})
-    public void run_gradle_script_messages_initialized() {
-        GradleInstallation.installGradle(jenkins);
-
-        final FreeStyleJob job = jenkins.jobs.create();
-        job.copyResource(resource(GRADLE_SCRIPT), "build.gradle");
-        final GradleStep step = job.addBuildStep(GradleStep.class);
-        step.setVersion(GradleInstallation.DEFAULT);
-        step.setTasks(HELLO.getName());
-        job.save();
-
-        final Build build = job.startBuild();
-        build.shouldSucceed();
-        assertThat(build.getConsole(), containsString("Invoke Gradle script"));
     }
 
     /**

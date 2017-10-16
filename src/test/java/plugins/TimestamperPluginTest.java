@@ -42,43 +42,29 @@ public class TimestamperPluginTest extends AbstractJUnitTest {
     }
 
     @Test
-    public void display_no_timestamp() {
+    public void display() {
         job.startBuild().waitUntilFinished();
+
         setTimestamp("timestamper-none");
         assertThatTimeStampMatchesRegexp("^$");
-    }
 
-    @Test
-    public void display_system_time_timestamp() {
-        job.startBuild().waitUntilFinished();
         setTimestamp("timestamper-systemTime");
         assertThatTimeStampMatchesRegexp("^\\d\\d:\\d\\d:\\d\\d$");
-    }
 
-    @Test
-    public void display_elapsed_time_timestamp() {
-        job.startBuild().waitUntilFinished();
         setTimestamp("timestamper-elapsedTime");
         assertThatTimeStampMatchesRegexp("^\\d\\d:\\d\\d:\\d\\d.\\d\\d\\d$");
     }
 
     @Test
-    public void display_specific_system_time_timestamps() {
+    public void display_specific_timestamps() {
         jenkins.configure();
         new TimstamperGlobalConfig(jenkins).systemTimeFormat.set("'At 'HH:mm:ss' system time'");
+        new TimstamperGlobalConfig(jenkins).elapsedTimeFormat.set("'Exactly 'HH:mm:ss.S' after launch");
         jenkins.save();
         job.startBuild().waitUntilFinished();
 
         setTimestamp("timestamper-systemTime");
         assertThatTimeStampMatchesRegexp("^At \\d\\d:\\d\\d:\\d\\d system time$");
-    }
-
-    @Test
-    public void display_specific_elapsed_time_timestamps() {
-        jenkins.configure();
-        new TimstamperGlobalConfig(jenkins).elapsedTimeFormat.set("'Exactly 'HH:mm:ss.S' after launch");
-        jenkins.save();
-        job.startBuild().waitUntilFinished();
 
         setTimestamp("timestamper-elapsedTime");
         assertThatTimeStampMatchesRegexp("^Exactly \\d\\d:\\d\\d:\\d\\d.\\d\\d\\d after launch$");

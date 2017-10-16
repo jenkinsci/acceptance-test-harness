@@ -14,6 +14,7 @@ import org.eclipse.aether.connector.basic.BasicRepositoryConnectorFactory;
 import org.eclipse.aether.repository.LocalRepository;
 import org.eclipse.aether.spi.connector.RepositoryConnectorFactory;
 import org.eclipse.aether.spi.connector.transport.TransporterFactory;
+import org.eclipse.aether.transfer.TransferEvent;
 import org.eclipse.aether.transport.file.FileTransporterFactory;
 import org.eclipse.aether.transport.http.HttpTransporterFactory;
 
@@ -49,7 +50,11 @@ public class AetherModule extends AbstractModule implements ExtensionModule {
         LocalRepository localRepo = new LocalRepository(new File(System.getProperty("user.home"),".m2/repository"));
         session.setLocalRepositoryManager(system.newLocalRepositoryManager(session, localRepo));
 
-        session.setTransferListener(new ConsoleTransferListener());
+        session.setTransferListener(new ConsoleTransferListener() {
+            @Override public void transferProgressed(TransferEvent event) {
+                // NOOP
+            }
+        });
 //        session.setRepositoryListener(new ConsoleRepositoryListener());
 
         // uncomment to generate dirty trees

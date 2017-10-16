@@ -57,30 +57,25 @@ public class CompressArtifactsPluginTest extends AbstractJUnitTest {
     private static final String ARTIFACT_NAME = "the.artifact";
 
     @Test
-    public void archive_compressed_artifacts() {
-        CompressingArtifactManager.setup(jenkins);
-        Build build = generateArtifact();
-
-        assertThat(build.getArtifacts(), hasSize(1));
-        build.getArtifact(ARTIFACT_NAME).shouldHaveContent("content");
-        assertThat(build, hasCompressedArtifacts());
-    }
-
-    @Test
     public void access_uncompressed_artifact_after_plugin_was_installed() {
-        Build build = generateArtifact();
+        Build uncompressedBuild = generateArtifact();
 
-        // Works after installation
-        assertThat(build.getArtifacts(), hasSize(1));
-        assertThat(build.getArtifact(ARTIFACT_NAME).getTextContent(), equalTo("content"));
-        assertThat(build, not(hasCompressedArtifacts()));
+        // Works before installation/configuration
+        assertThat(uncompressedBuild.getArtifacts(), hasSize(1));
+        assertThat(uncompressedBuild.getArtifact(ARTIFACT_NAME).getTextContent(), equalTo("content"));
+        assertThat(uncompressedBuild, not(hasCompressedArtifacts()));
 
         CompressingArtifactManager.setup(jenkins);
 
         // Works after configuration
-        assertThat(build.getArtifacts(), hasSize(1));
-        assertThat(build.getArtifact(ARTIFACT_NAME).getTextContent(), equalTo("content"));
-        assertThat(build, not(hasCompressedArtifacts()));
+        assertThat(uncompressedBuild.getArtifacts(), hasSize(1));
+        assertThat(uncompressedBuild.getArtifact(ARTIFACT_NAME).getTextContent(), equalTo("content"));
+        assertThat(uncompressedBuild, not(hasCompressedArtifacts()));
+
+        Build compressedBuild = generateArtifact();
+        assertThat(compressedBuild.getArtifacts(), hasSize(1));
+        compressedBuild.getArtifact(ARTIFACT_NAME).shouldHaveContent("content");
+        assertThat(compressedBuild, hasCompressedArtifacts());
     }
 
     @Test @Issue("JENKINS-27558")
@@ -121,11 +116,11 @@ public class CompressArtifactsPluginTest extends AbstractJUnitTest {
 
     private Build generateArtifact() {
         FreeStyleJob job = jenkins.jobs.create();
+        String command = "echo 'content' > " + ARTIFACT_NAME;
         if (SystemUtils.IS_OS_UNIX) {
-            job.addBuildStep(ShellBuildStep.class).command("echo 'content' > " + ARTIFACT_NAME);
-        }
-        else {
-            job.addBuildStep(BatchCommandBuildStep.class).command("echo 'content' > " + ARTIFACT_NAME);
+            job.addBuildStep(ShellBuildStep.class).command(command);
+        } else {
+            job.addBuildStep(BatchCommandBuildStep.class).command(command);
         }
         job.addPublisher(ArtifactArchiver.class).includes(ARTIFACT_NAME);
         job.save();

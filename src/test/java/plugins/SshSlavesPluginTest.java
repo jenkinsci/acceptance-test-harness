@@ -28,20 +28,30 @@ import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.SshAgentContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.DockerTest;
+import org.jenkinsci.test.acceptance.junit.Since;
 import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.plugins.credentials.CredentialsPage;
+import org.jenkinsci.test.acceptance.plugins.credentials.ManagedCredentials;
+import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshCredentialDialog;
+import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshPrivateKeyCredential;
 import org.jenkinsci.test.acceptance.plugins.ssh_slaves.SshSlaveLauncher;
+import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.DumbSlave;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
+import org.openqa.selenium.NoSuchElementException;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 @WithPlugins({"ssh-slaves@1.11", "credentials@2.1.10", "ssh-credentials@1.12"})
 @Category(DockerTest.class)
@@ -61,6 +71,81 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
         slave = jenkins.slaves.create(DumbSlave.class);
         slave.setExecutors(1);
         slave.remoteFS.set(REMOTE_FS);
+    }
+
+    @Test
+    @Since("1.560")
+    public void newSlave() {
+        // Just to make sure the dumb slave is set up properly, we should seed it
+        // with a FS root and executors
+        final DumbSlave s = jenkins.slaves.create(DumbSlave.class);
+        {
+            SshSlaveLauncher l = s.setLauncher(SshSlaveLauncher.class);
+
+            String username = "user1";
+            String privateKey = "1212122112";
+            String description = "Ssh key";
+
+            l.host.set("127.0.0.1");
+            l.credentialsId.resolve();  // make sure this exists
+
+            try {
+                l.credentialsId.select(String.format("%s (%s)", username, description));
+                fail();
+            } catch (NoSuchElementException e) {
+                //ignore
+            }
+
+            SshCredentialDialog f = l.addCredential();
+            {
+                SshPrivateKeyCredential sc = f.select(SshPrivateKeyCredential.class);
+                sc.description.set(description);
+                sc.username.set(username);
+                sc.selectEnterDirectly().privateKey.set(privateKey);
+            }
+            f.add();
+
+            l.credentialsId.select(String.format("%s (%s)", username, description));
+        }
+        s.save();
+    }
+
+    @Test
+    public void newSlaveWithExistingCredential() throws Exception {
+        String username = "xyz";
+        String description = "ssh_creds";
+        String privateKey = "1212121122121212";
+
+        CredentialsPage c = new CredentialsPage(jenkins, "_");
+        c.open();
+
+        SshPrivateKeyCredential sc = c.add(SshPrivateKeyCredential.class);
+        sc.username.set(username);
+        sc.description.set(description);
+        sc.selectEnterDirectly().privateKey.set(privateKey);
+
+        c.create();
+
+        //now verify
+        ManagedCredentials mc = new ManagedCredentials(jenkins);
+        String href = mc.credentialById("ssh_creds");
+        c.setConfigUrl(href);
+        verifyValueForCredential(c, sc.username, username);
+        verifyValueForCredential(c, sc.selectEnterDirectly().privateKey, privateKey);
+
+        // Just to make sure the dumb slave is set up properly, we should seed it
+        // with a FS root and executors
+        final DumbSlave s = jenkins.slaves.create(DumbSlave.class);
+        SshSlaveLauncher l = s.setLauncher(SshSlaveLauncher.class);
+        l.host.set("127.0.0.1");
+
+        l.credentialsId.select(String.format("%s (%s)", username, description));
+    }
+
+    private void verifyValueForCredential(CredentialsPage cp, Control element, String expected) {
+        cp.configure();
+        assert(element.exists());
+        assertThat(element.resolve().getAttribute("value"), containsString(expected));
     }
 
     @Test public void connectWithPassword() {

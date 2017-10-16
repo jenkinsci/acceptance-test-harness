@@ -38,7 +38,7 @@ public class PostBuildScriptPluginTest extends AbstractJUnitTest {
     }
 
     @Test
-    public void skip_for_jobs_that_suceeded() {
+    public void skip_for_jobs_that_succeeded() {
         j.configure();
         addMarkerPostBuildStep().runWhenFailed();
         j.save();
