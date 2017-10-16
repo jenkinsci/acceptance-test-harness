@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Field;
 import java.net.ServerSocket;
-import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
@@ -52,7 +51,7 @@ public abstract class LocalController extends JenkinsController implements LogLi
     /**
      * JENKINS_HOME directory for jenkins.war to be launched.
      */
-    protected final File tempDir;
+    protected final File jenkinsHome;
 
     protected ProcessInputStream process;
 
@@ -87,21 +86,21 @@ public abstract class LocalController extends JenkinsController implements LogLi
     protected LocalController(Injector i) {
         super(i);
         try {
-            tempDir = File.createTempFile("jenkins", "home", new File(WORKSPACE));
-            tempDir.delete();
-            tempDir.mkdirs();
+            jenkinsHome = File.createTempFile("jenkins", "home", new File(WORKSPACE));
+            jenkinsHome.delete();
+            jenkinsHome.mkdirs();
         } catch (IOException e) {
             throw new RuntimeException("Failed to create a temp file",e);
         }
 
-        this.logFile = new File(this.tempDir.getParentFile(), this.tempDir.getName()+".log");
+        this.logFile = new File(this.jenkinsHome.getParentFile(), this.jenkinsHome.getName()+".log");
     }
 
     @Override
     public void postConstruct(Injector injector) {
         super.postConstruct(injector);
 
-        File pluginDir = new File(tempDir,"plugins");
+        File pluginDir = new File(jenkinsHome,"plugins");
         pluginDir.mkdirs();
 
         File givenPluginDir = null;
@@ -149,15 +148,6 @@ public abstract class LocalController extends JenkinsController implements LogLi
     }
 
     /**
-     * @deprecated
-     *      Use {@link #getJenkinsHome()}, which explains the nature of the directory better.
-     */
-    @Deprecated
-    public File getTempDir() {
-        return tempDir;
-    }
-
-    /**
      * @deprecated Will not work correctly in Jenkins 2.33 and later. Apparently unused anyway.
      */
     @Deprecated
@@ -166,18 +156,18 @@ public abstract class LocalController extends JenkinsController implements LogLi
     }
 
 
-    public File getJenkinsHome(){
-        return tempDir;
+    public File getJenkinsHome() {
+        return jenkinsHome;
     }
 
     @Override
     public void populateJenkinsHome(byte[] _template, boolean clean) throws IOException {
         try {
-            if (clean && tempDir.isDirectory()) {
-                FileUtils.cleanDirectory(tempDir);
+            if (clean && jenkinsHome.isDirectory()) {
+                FileUtils.cleanDirectory(jenkinsHome);
             }
-            if (!tempDir.isDirectory() && ! tempDir.mkdirs()) {
-                throw new IOException("Could not create directory: " + tempDir);
+            if (!jenkinsHome.isDirectory() && ! jenkinsHome.mkdirs()) {
+                throw new IOException("Could not create directory: " + jenkinsHome);
             }
             File template = File.createTempFile("template", ".dat");
             try {
@@ -185,7 +175,7 @@ public abstract class LocalController extends JenkinsController implements LogLi
                 Expand expand = new Expand();
                 expand.setSrc(template);
                 expand.setOverwrite(true);
-                expand.setDest(tempDir);
+                expand.setDest(jenkinsHome);
                 expand.execute();
             } finally {
                 template.delete();
@@ -288,13 +278,13 @@ public abstract class LocalController extends JenkinsController implements LogLi
                 logger.close();
             }
 
-            FileUtils.forceDelete(tempDir);
+            FileUtils.forceDelete(jenkinsHome);
         } catch (IOException e) {
             System.out.println("Cleaning up temporary JENKINS_HOME failed, retrying in 5 sec.");
             //maybe process is shutting down, wait for a sec then try again
             try {
                 Thread.sleep(5000);
-                FileUtils.forceDelete(tempDir);
+                FileUtils.forceDelete(jenkinsHome);
             } catch (InterruptedException | IOException e1) {
                 System.out.println("Cleaning up temporary JENKINS_HOME failed again, giving up.");
                 throw new RuntimeException(e);
