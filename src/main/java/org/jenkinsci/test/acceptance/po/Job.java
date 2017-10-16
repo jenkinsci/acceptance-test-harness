@@ -11,7 +11,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -31,7 +30,6 @@ import org.zeroturnaround.zip.ZipUtil;
 
 import com.google.inject.Injector;
 
-import cucumber.api.DataTable;
 import static org.hamcrest.CoreMatchers.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 import static org.junit.Assert.*;
@@ -305,14 +303,6 @@ public class Job extends TopLevelItem {
 
     public URL getBuildUrl() {
         return url("build?delay=0sec");
-    }
-
-    public Build startBuild(DataTable table) {
-        Map<String, String> params = new HashMap<>();
-        for (List<String> row : table.raw()) {
-            params.put(row.get(0), row.get(1));
-        }
-        return startBuild(params);
     }
 
     public Build startBuild() {

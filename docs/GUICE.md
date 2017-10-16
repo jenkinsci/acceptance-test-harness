@@ -2,7 +2,6 @@
 
 We use Guice to wire up components and test execution settings. This is because:
 
-  * We need to support multiple test frameworks (JUnit & Cucumber) and didn't want it to glue components together
   * People who run tests can configure how they run tests by directly manipulating Guice bindings
     (see [WIRING.md](WIRING.md))
 

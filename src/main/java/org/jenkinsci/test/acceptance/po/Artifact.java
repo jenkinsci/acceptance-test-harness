@@ -1,7 +1,5 @@
 package org.jenkinsci.test.acceptance.po;
 
-import org.jenkinsci.test.acceptance.cucumber.Should;
-
 import java.io.IOException;
 import java.net.HttpURLConnection;
 
@@ -41,13 +39,6 @@ public class Artifact extends PageObject {
     public String getTextContent() {
         visit(url("%s/*view*/", path));
         return getPageContent(driver);
-    }
-
-    /**
-     * Asserts that this artifact should or shouldn't exist.
-     */
-    public void assertThatExists(Should should) {
-        assertThatExists(should.value);
     }
 
     public void assertThatExists(Boolean should) {
