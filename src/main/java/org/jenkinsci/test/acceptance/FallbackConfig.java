@@ -291,8 +291,6 @@ public class FallbackConfig extends AbstractModule {
      */
     @Provides @Named("WORKSPACE")
     public String getWorkspace() {
-        String ws = System.getenv("WORKSPACE");
-        if (ws != null) return ws;
         return new File(System.getProperty("user.dir"), "target").getPath();
     }
 

@@ -8,8 +8,6 @@ import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-import java.util.concurrent.ExecutionException;
-
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
