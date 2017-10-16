@@ -290,6 +290,16 @@ public class GitScm extends Scm {
         return this;
     }
 
+    /**
+     * Add behaviour "Merge before build"
+     *
+     * @return behaviour, to access its method
+     */
+    public MergeBeforeBuild mergeBeforeBuild() {
+        return addBehaviour(MergeBeforeBuild.class);
+    }
+
+
     public <T extends Behaviour> T addBehaviour(Class<T> type) {
         control("hetero-list-add[extensions]").click();
         Control bottomScrollBar = control(By.className("bottomscrollbar"));
@@ -508,15 +518,40 @@ public class GitScm extends Scm {
     }
 
     public static class MergeBeforeBuild extends Behaviour {
-        private final Control txtMergeRemote = control("mergeRemote");
-        private final Control txtMergeTarget = control("mergeTarget");
-        private final Control selMergeStrategy = control("mergeStrategy");
-        private final Control selFastForwardMode = control("fastForwardMode");
+        private final Control txtMergeRemote = control("options/mergeRemote");
+        private final Control txtMergeTarget = control("options/mergeTarget");
+        private final Control selMergeStrategy = control("options/mergeStrategy");
+        private final Control selFastForwardMode = control("options/fastForwardMode");
 
         public MergeBeforeBuild(GitScm git, String path) {
             super(git, path);
             clickLink("Merge before build");
         }
+
+        public MergeBeforeBuild setTxtMergeRemote(String txtMergeRemote) {
+            this.txtMergeRemote.set(txtMergeRemote);
+
+            return this;
+        }
+
+        public MergeBeforeBuild setTxtMergeTarget(String txtMergeTarget) {
+            this.txtMergeTarget.set(txtMergeTarget);
+
+            return this;
+        }
+
+        public MergeBeforeBuild setSelMergeStrategy(String selMergeStrategy) {
+            this.selMergeStrategy.set(selMergeStrategy);
+
+            return this;
+        }
+
+        public MergeBeforeBuild setSelFastForwardMode(String selFastForwardMode) {
+            this.selFastForwardMode.set(selFastForwardMode);
+
+            return this;
+        }
+
     }
 
     public static class PollingIgnoresUser extends Behaviour {
