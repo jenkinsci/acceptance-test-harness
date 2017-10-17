@@ -116,7 +116,7 @@ public class GitScm extends Scm {
      * @return this, to allow function chaining
      */
     public GitScm commitAuthorInChangelog() {
-        CommitAuthorInChangelog behaviour = addBehaviour(CommitAuthorInChangelog.class);
+        addBehaviour(CommitAuthorInChangelog.class);
         return this;
     }
 

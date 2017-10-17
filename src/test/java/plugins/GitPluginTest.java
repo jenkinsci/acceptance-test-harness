@@ -512,15 +512,7 @@ public class GitPluginTest extends AbstractJUnitTest {
         b = job.startBuild();
         b.shouldSucceed();
         console = b.getConsole();
-        try {
-            assertThat(
-                    console,
-                    Matchers.containsRegexp(TEST_INITIAL_COMMIT, Pattern.MULTILINE)
-            );
-            fail("Shallow clone depth is 2");
-        } catch (AssertionError e) {
-            // It is expected an AssertionError to be thrown
-        }
+        assertThatFail(console, TEST_INITIAL_COMMIT, "Shallow clone depth is 2");
         assertThat(
                 console,
                 Matchers.containsRegexp(TEST_COMMIT1_MESSAGE, Pattern.MULTILINE)
@@ -537,24 +529,8 @@ public class GitPluginTest extends AbstractJUnitTest {
         b = job.startBuild();
         b.shouldSucceed();
         console = b.getConsole();
-        try {
-            assertThat(
-                    console,
-                    Matchers.containsRegexp(TEST_INITIAL_COMMIT, Pattern.MULTILINE)
-            );
-            fail("Shallow clone depth is 1");
-        } catch (AssertionError e) {
-            // It is expected an AssertionError to be thrown
-        }
-        try {
-            assertThat(
-                    console,
-                    Matchers.containsRegexp(TEST_COMMIT1_MESSAGE, Pattern.MULTILINE)
-            );
-            fail("Shallow clone depth is 1");
-        } catch (AssertionError e) {
-            // It is expected an AssertionError to be thrown
-        }
+        assertThatFail(console, TEST_INITIAL_COMMIT, "Shallow clone depth is 1");
+        assertThatFail(console, TEST_COMMIT1_MESSAGE, "Shallow clone depth is 1");
         assertThat(
                 console,
                 Matchers.containsRegexp(TEST_COMMIT2_MESSAGE, Pattern.MULTILINE)
@@ -580,15 +556,7 @@ public class GitPluginTest extends AbstractJUnitTest {
         b.shouldSucceed();
         String console = b.getConsole();
         String revision = getRevisionFromConsole(console);
-        try {
-            assertThat(
-                    console,
-                    Matchers.containsRegexp("git checkout -f "+revision+" # timeout="+TEST_TIME_OUT, Pattern.MULTILINE)
-            );
-            fail("Timeout for checkout not set");
-        } catch (AssertionError e) {
-            // It is expected an AssertionError to be thrown
-        }
+        assertThatFail(console, "git checkout -f "+revision+" # timeout="+TEST_TIME_OUT, "Timeout for checkout not set");
 
         job.configure();
         gitScm.advancedCheckout().setTimeOut(TEST_TIME_OUT);
@@ -748,5 +716,17 @@ public class GitPluginTest extends AbstractJUnitTest {
         job.save();
 
         job.startBuild().shouldSucceed();
+    }
+
+    private void assertThatFail(String actual, String regexp, String failMessage) {
+        try {
+            assertThat(
+                    actual,
+                    Matchers.containsRegexp(regexp, Pattern.MULTILINE)
+            );
+            fail(failMessage);
+        } catch (AssertionError e) {
+            // It is expected an AssertionError to be thrown
+        }
     }
 }
