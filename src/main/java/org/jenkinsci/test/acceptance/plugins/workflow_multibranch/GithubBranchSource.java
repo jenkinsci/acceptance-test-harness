@@ -18,7 +18,7 @@ public class GithubBranchSource extends BranchSource {
 
     public final Control owner = control("repoOwner");
     public final Control repository = control("repository");
-    public final Control credential = control("scanCredentialsId");
+    public final Control credential = control("credentialsId" /* >= 2.2.0 */, "scanCredentialsId");
 
     public GithubBranchSource(WorkflowMultiBranchJob job, String path) {
         super(job, path);
