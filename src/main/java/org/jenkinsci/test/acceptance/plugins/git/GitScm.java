@@ -38,12 +38,8 @@ public class GitScm extends Scm {
     private final Control branch = control("branches/name");
     private final Control url = control("userRemoteConfigs/url");
     private final Control tool = control("gitTool");
-    private final Control repositoryBrowser = this.control(new String[]{"/"});
-    private final Control urlRepositoryBrowser = this.control(new String[]{"browser/repoUrl"});
-    // UI components for additional configuration for some repository browsers
-    private final Control projectName = this.control(new String[]{"browser/projectName"}); // gitlib & viewgit
-    private final Control gitlabVersion = this.control(new String[]{"browser/version"}); // gitlab
-    private final Control phabricatorRepo = this.control(new String[]{"browser/repo"}); // phabricator
+    private final Control repositoryBrowser = control("/");
+    private final Control urlRepositoryBrowser = control("browser/repoUrl");
 
     public GitScm(Job job, String path) {
         super(job, path);
@@ -257,36 +253,6 @@ public class GitScm extends Scm {
      */
     public GitScm urlRepositoryBrowser(String url) {
         this.urlRepositoryBrowser.set(url);
-        return this;
-    }
-
-    /**
-     * Set project name for gitblit and viewgit
-     * @param projectName value to be set
-     * @return this, to allow function chaining
-     */
-    public GitScm projectName(String projectName) {
-        this.projectName.set(projectName);
-        return this;
-    }
-
-    /**
-     * Set version for gitlab
-     * @param version value to be set
-     * @return this, to allow function chaining
-     */
-    public GitScm gitlabVersion(String version) {
-        this.gitlabVersion.set(version);
-        return this;
-    }
-
-    /**
-     * Set repository for phabricator
-     * @param repo value to be set
-     * @return this, to allow function chaining
-     */
-    public GitScm phabricatorRepo(String repo) {
-        this.phabricatorRepo.set(repo);
         return this;
     }
 

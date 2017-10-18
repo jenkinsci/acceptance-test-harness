@@ -43,6 +43,7 @@ import java.util.regex.Pattern;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.fail;
 
 @WithDocker
@@ -512,7 +513,10 @@ public class GitPluginTest extends AbstractJUnitTest {
         b = job.startBuild();
         b.shouldSucceed();
         console = b.getConsole();
-        assertThatFail(console, TEST_INITIAL_COMMIT, "Shallow clone depth is 2");
+        assertThat(
+                console,
+                not(Matchers.containsRegexp(TEST_INITIAL_COMMIT, Pattern.MULTILINE))
+        );
         assertThat(
                 console,
                 Matchers.containsRegexp(TEST_COMMIT1_MESSAGE, Pattern.MULTILINE)
@@ -529,8 +533,14 @@ public class GitPluginTest extends AbstractJUnitTest {
         b = job.startBuild();
         b.shouldSucceed();
         console = b.getConsole();
-        assertThatFail(console, TEST_INITIAL_COMMIT, "Shallow clone depth is 1");
-        assertThatFail(console, TEST_COMMIT1_MESSAGE, "Shallow clone depth is 1");
+        assertThat(
+                console,
+                not(Matchers.containsRegexp(TEST_INITIAL_COMMIT, Pattern.MULTILINE))
+        );
+        assertThat(
+                console,
+                not(Matchers.containsRegexp(TEST_COMMIT1_MESSAGE, Pattern.MULTILINE))
+        );
         assertThat(
                 console,
                 Matchers.containsRegexp(TEST_COMMIT2_MESSAGE, Pattern.MULTILINE)
@@ -556,7 +566,10 @@ public class GitPluginTest extends AbstractJUnitTest {
         b.shouldSucceed();
         String console = b.getConsole();
         String revision = getRevisionFromConsole(console);
-        assertThatFail(console, "git checkout -f "+revision+" # timeout="+TEST_TIME_OUT, "Timeout for checkout not set");
+        assertThat(
+                console,
+                not(Matchers.containsRegexp("git checkout -f "+revision+" # timeout="+TEST_TIME_OUT, Pattern.MULTILINE))
+        );
 
         job.configure();
         gitScm.advancedCheckout().setTimeOut(TEST_TIME_OUT);
@@ -718,7 +731,7 @@ public class GitPluginTest extends AbstractJUnitTest {
         job.startBuild().shouldSucceed();
     }
 
-    private void assertThatFail(String actual, String regexp, String failMessage) {
+    private void assertThatFail2(String actual, String regexp, String failMessage) {
         try {
             assertThat(
                     actual,
@@ -729,4 +742,5 @@ public class GitPluginTest extends AbstractJUnitTest {
             // It is expected an AssertionError to be thrown
         }
     }
+
 }
