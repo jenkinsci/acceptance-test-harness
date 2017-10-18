@@ -12,14 +12,14 @@ public class JdkTest extends AbstractJUnitTest {
 
     @Test @TestActivation({"ORACLE_LOGIN", "ORACLE_PASSWORD"})
     public void autoinstallJdk() {
-        final String login = System.getenv("ORACLE_LOGIN");
-        final String passwd = System.getenv("ORACLE_PASSWORD");
+        final String login = System.getProperty("JdkTest.ORACLE_LOGIN");
+        final String passwd = System.getProperty("JdkTest.ORACLE_PASSWORD");
 
         ToolInstallation.waitForUpdates(jenkins, JdkInstallation.class);
 
         JdkInstallation jdk = ToolInstallation.addTool(jenkins, JdkInstallation.class);
-        jdk.name.set("jdk_1.7.0");
-        jdk.installVersion("jdk-7u11-oth-JPR");
+        jdk.name.set("jdk_1.8.0");
+        jdk.installVersion("jdk-8u141-oth-JPR");
         jdk.getPage().save();
 
         jdk.setCredentials(login, passwd);
@@ -31,7 +31,7 @@ public class JdkTest extends AbstractJUnitTest {
 
         int tenMinutes = 600000;
         job.startBuild().waitUntilFinished(tenMinutes).shouldSucceed()
-                .shouldContainsConsoleOutput("Installing JDK jdk-7u11-oth-JPR")
+                .shouldContainsConsoleOutput("Installing JDK jdk-8u141-oth-JPR")
                 .shouldContainsConsoleOutput("Downloading JDK from http://download.oracle.com")
         ;
     }
