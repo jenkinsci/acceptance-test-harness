@@ -44,7 +44,6 @@ import java.util.regex.Pattern;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
-import static org.junit.Assert.fail;
 
 @WithDocker
 @Category(DockerTest.class)
@@ -637,10 +636,11 @@ public class GitPluginTest extends AbstractJUnitTest {
         b = job.startBuild();
         b.shouldSucceed();
 
+        // 2 branches discovered
         assertThat(
                 b.getConsole(),
                 Matchers.containsRegexp(
-                        "Checking out Revision .* \\(origin/master, origin/"+BRANCH_NAME+"\\)",
+                        "Checking out Revision .* \\(origin/.*, origin/.*\\)",
                         Pattern.MULTILINE
                 )
         );
@@ -729,18 +729,6 @@ public class GitPluginTest extends AbstractJUnitTest {
         job.save();
 
         job.startBuild().shouldSucceed();
-    }
-
-    private void assertThatFail2(String actual, String regexp, String failMessage) {
-        try {
-            assertThat(
-                    actual,
-                    Matchers.containsRegexp(regexp, Pattern.MULTILINE)
-            );
-            fail(failMessage);
-        } catch (AssertionError e) {
-            // It is expected an AssertionError to be thrown
-        }
     }
 
 }
