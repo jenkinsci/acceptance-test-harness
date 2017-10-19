@@ -28,16 +28,16 @@ import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Job;
 
 @Describable("Git")
-public class ViewgitScm extends GitScm {
+public class GitblitScm extends GitScm {
 
     private final Control projectName = control("browser/projectName");
 
-    public ViewgitScm(Job job, String path) {
+    public GitblitScm(Job job, String path) {
         super(job, path);
     }
 
     /**
-     * Set project name for viewgit
+     * Set project name for gitblit
      * @param projectName value to be set
      * @return this, to allow function chaining
      */
