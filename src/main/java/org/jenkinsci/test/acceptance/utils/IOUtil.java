@@ -25,6 +25,8 @@ package org.jenkinsci.test.acceptance.utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Arrays;
 
 import javax.annotation.Nonnull;
@@ -47,5 +49,15 @@ public class IOUtil {
         }
 
         throw new IOException("None of the paths exist: " + Arrays.asList(candidatePaths).toString());
+    }
+
+    /**
+     * Open URL connection with sanity timeout.
+     */
+    public static HttpURLConnection openConnection(@Nonnull URL url) throws IOException {
+        HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
+        httpURLConnection.setConnectTimeout(10000);
+        httpURLConnection.setReadTimeout(10000);
+        return httpURLConnection;
     }
 }

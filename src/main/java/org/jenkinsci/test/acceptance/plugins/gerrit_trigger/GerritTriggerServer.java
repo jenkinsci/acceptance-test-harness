@@ -26,6 +26,7 @@ package org.jenkinsci.test.acceptance.plugins.gerrit_trigger;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.PageObject;
+import org.jenkinsci.test.acceptance.utils.IOUtil;
 import org.openqa.selenium.NoSuchElementException;
 
 import java.io.IOException;
@@ -88,7 +89,7 @@ public class GerritTriggerServer extends PageObject {
             start.click();
         } catch (NoSuchElementException e) {
             try {
-                HttpURLConnection c = (HttpURLConnection) new URL(url + "/wakeup").openConnection();
+                HttpURLConnection c = IOUtil.openConnection(new URL(url + "/wakeup"));
                 c.setRequestMethod("GET");
                 c.setConnectTimeout(10000);
                 c.setReadTimeout(10000);

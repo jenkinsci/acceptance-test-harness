@@ -9,6 +9,7 @@ import java.util.logging.Level;
 
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
+import org.jenkinsci.test.acceptance.utils.IOUtil;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 
@@ -66,7 +67,7 @@ public class Jenkins extends Node implements Container {
 
         String text;
         try {
-            URLConnection urlConnection = url.openConnection();
+            URLConnection urlConnection = IOUtil.openConnection(url);
             text = urlConnection.getHeaderField("X-Jenkins");
             if (text == null) {
 

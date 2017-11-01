@@ -1,5 +1,7 @@
 package org.jenkinsci.test.acceptance.po;
 
+import org.jenkinsci.test.acceptance.utils.IOUtil;
+
 import java.io.IOException;
 import java.net.HttpURLConnection;
 
@@ -43,7 +45,7 @@ public class Artifact extends PageObject {
 
     public void assertThatExists(Boolean should) {
         try {
-            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            HttpURLConnection con = IOUtil.openConnection(url);
             assertThat(con.getResponseCode(), is(should ? 200 : 404));
         } catch (IOException e) {
             throw new AssertionError("Failed to check status of " + url, e);

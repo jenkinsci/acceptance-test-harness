@@ -17,6 +17,7 @@ import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.Login;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.jenkinsci.test.acceptance.po.User;
+import org.jenkinsci.test.acceptance.utils.IOUtil;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
@@ -164,7 +165,7 @@ public class Matchers {
             @Override
             public boolean matchesSafely(PageObject item) {
                 try {
-                    conn = (HttpURLConnection) item.url.openConnection();
+                    conn = IOUtil.openConnection(item.url);
                     IOUtils.toByteArray(conn.getInputStream());
                     return true;
                 } catch (IOException e) {
@@ -185,7 +186,7 @@ public class Matchers {
             @Override
             public boolean matchesSafely(PageObject item) {
                 try {
-                    conn = (HttpURLConnection) item.url.openConnection();
+                    conn = IOUtil.openConnection(item.url);
                     return conn.getResponseCode() == 404;
                 } catch (IOException e) {
                     return false;
