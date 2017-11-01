@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jenkinsci.test.acceptance.utils.IOUtil;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
@@ -64,7 +65,7 @@ public abstract class ContainerPageObject extends ConfigurablePageObject {
 
             // Pass in all the cookies (in particular the session cookie.)
             // This ensures that the API call sees what the current user sees.
-            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            HttpURLConnection con = IOUtil.openConnection(url);
             con.setRequestProperty("Cookie", StringUtils.join(driver.manage().getCookies(), ";"));
 
             return jsonParser.readTree(con.getInputStream());
