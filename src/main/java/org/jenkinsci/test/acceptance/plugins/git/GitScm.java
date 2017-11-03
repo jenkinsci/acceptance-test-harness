@@ -29,13 +29,17 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.support.ui.Select;
 
 import javax.swing.text.html.HTMLDocument;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
 @Describable("Git")
 public class GitScm extends Scm {
+
     private final Control branch = control("branches/name");
     private final Control url = control("userRemoteConfigs/url");
     private final Control tool = control("gitTool");
+    private final Control repositoryBrowser = control("/");
+    private final Control urlRepositoryBrowser = control("browser/repoUrl");
 
     public GitScm(Job job, String path) {
         super(job, path);
@@ -103,6 +107,16 @@ public class GitScm extends Scm {
     }
 
     /**
+     * Add behaviour "Use commit author in changelog"
+     *
+     * @return this, to allow function chaining
+     */
+    public GitScm commitAuthorInChangelog() {
+        addBehaviour(CommitAuthorInChangelog.class);
+        return this;
+    }
+
+    /**
      * Add behaviour "Clean after checkout"
      *
      * @return this, to allow function chaining
@@ -145,6 +159,19 @@ public class GitScm extends Scm {
     }
 
     /**
+     * Add behaviour "Custom user name/e-mail address"
+     *
+     * @param name Custom name
+     * @return  this, to allow function chaining
+     */
+    public GitScm customNameAndMail(String name, String email) {
+        CustomNameAndMail behaviour = addBehaviour(CustomNameAndMail.class);
+        behaviour.txtName.set(name);
+        behaviour.txtEmail.set(email);
+        return this;
+    }
+
+    /**
      * Add behaviour "Sparse checkout"
      *
      * @return behaviour, to access .addPath() method
@@ -152,6 +179,24 @@ public class GitScm extends Scm {
     public SparseCheckoutPaths sparseCheckout() {
         SparseCheckoutPaths behaviour = addBehaviour(SparseCheckoutPaths.class);
         return behaviour;
+    }
+
+    /**
+     * Add behaviour "Advanced clone behaviours"
+     *
+     * @return behaviour, to access its method
+     */
+    public AdvancedClone advancedClone() {
+        return addBehaviour(AdvancedClone.class);
+    }
+
+    /**
+     * Add behaviour "Advanced checkout behaviours"
+     *
+     * @return behaviour, to access its method
+     */
+    public AdvancedCheckout advancedCheckout() {
+        return addBehaviour(AdvancedCheckout.class);
     }
 
     /**
@@ -190,8 +235,39 @@ public class GitScm extends Scm {
         return this;
     }
 
+    /**
+     * Select repository browser type
+     * @param name Type of repository browser
+     * @return this, to allow function chaining
+     */
+    public GitScm repositoryBrowser(String name) {
+        Select select = new Select(this.repositoryBrowser.resolve());
+        select.selectByVisibleText(name);
+        return this;
+    }
+
+    /**
+     * Set URL for repository browser
+     * @param url URL to be set
+     * @return this, to allow function chaining
+     */
+    public GitScm urlRepositoryBrowser(String url) {
+        this.urlRepositoryBrowser.set(url);
+        return this;
+    }
+
+    /**
+     * Add behaviour "Merge before build"
+     *
+     * @return behaviour, to access its method
+     */
+    public MergeBeforeBuild mergeBeforeBuild() {
+        return addBehaviour(MergeBeforeBuild.class);
+    }
+
+
     public <T extends Behaviour> T addBehaviour(Class<T> type) {
-        control("hetero-list-add[extensions]").click();
+        control("hetero-list-add[extensions]").selectDropdownMenu(type);
         return newInstance(type, this, "extensions");   // FIXME: find the last extension added
     }
 
@@ -213,42 +289,49 @@ public class GitScm extends Scm {
         }
     }
 
+    @Describable("Check out to specific local branch")
     public static class CheckoutToLocalBranch extends Behaviour {
         private final Control name = control("localBranch");
 
         public CheckoutToLocalBranch(GitScm git, String path) {
             super(git, path);
-            clickLink("Check out to specific local branch");
         }
     }
 
+    @Describable("Check out to a sub-directory")
     public static class CheckoutToLocalDir extends Behaviour {
         private final Control name = control("relativeTargetDir");
 
         public CheckoutToLocalDir(GitScm git, String path) {
             super(git, path);
-            clickLink("Check out to a sub-directory");
         }
     }
 
+    @Describable("Advanced sub-modules behaviours")
     public static class RecursiveSubmodules extends Behaviour {
         private final Control enable = control("recursiveSubmodules");
 
         public RecursiveSubmodules(GitScm git, String path) {
             super(git, path);
-            clickLink("Advanced sub-modules behaviours");
         }
     }
 
+    @Describable("Advanced checkout behaviours")
     public static class AdvancedCheckout extends Behaviour {
         private final Control timeout = control("timeout");
 
         public AdvancedCheckout(GitScm git, String path) {
             super(git, path);
-            clickLink("Advanced checkout behaviours");
+        }
+
+        public AdvancedCheckout setTimeOut(String timeOut) {
+            this.timeout.set(timeOut);
+
+            return this;
         }
     }
 
+    @Describable("Advanced clone behaviours")
     public static class AdvancedClone extends Behaviour {
         private final Control cbShallowClone = control("shallow");
         private final Control numDepth = control("depth");
@@ -259,142 +342,204 @@ public class GitScm extends Scm {
 
         public AdvancedClone(GitScm git, String path) {
             super(git, path);
-            clickLink("Advanced clone behaviours");
         }
+
+        public AdvancedClone checkShallowClone(boolean state) {
+            cbShallowClone.check(state);
+
+            return this;
+        }
+
+        public AdvancedClone checkNoTags(boolean state) {
+            cbNoTags.check(state);
+
+            return this;
+        }
+
+        public AdvancedClone checkHonorRefspec(boolean state) {
+            cbHonorRefspec.check(state);
+
+            return this;
+        }
+
+        public AdvancedClone setNumDepth(String numDepth) {
+            this.numDepth.set(numDepth);
+
+            return this;
+        }
+
+        public AdvancedClone setNumTimeout(String numTimeout) {
+            this.numTimeout.set(numTimeout);
+
+            return this;
+        }
+
+        public AdvancedClone setTxtReference(String txtReference) {
+            this.txtReference.set(txtReference);
+
+            return this;
+        }
+
+
     }
 
+    @Describable("Calculate changelog against a specific branch")
     public static class CalculateChangelog extends Behaviour {
         private final Control txtCompareRemote = control("options/compareRemote");
         private final Control txtCompareTarget = control("options/compareTarget");
 
         public CalculateChangelog(GitScm git, String path) {
             super(git, path);
-            clickLink("Calculate changelog against a specific branch");
         }
     }
 
+    @Describable("Clean after checkout")
     public static class CleanAfterCheckout extends Behaviour {
 
         public CleanAfterCheckout(GitScm git, String path) {
             super(git, path);
-            clickLink("Clean after checkout");
         }
     }
 
+    @Describable("Clean before checkout")
     public static class CleanBeforeCheckout extends Behaviour {
 
         public CleanBeforeCheckout(GitScm git, String path) {
             super(git, path);
-            clickLink("Clean before checkout");
         }
     }
 
+    @Describable("Create a tag for every build")
     public static class CreateTagForBuild extends Behaviour {
 
         public CreateTagForBuild(GitScm git, String path) {
             super(git, path);
-            clickLink("Create a tag for every build");
         }
     }
 
+    @Describable("Custom SCM name")
     public static class CustomSCMName extends Behaviour {
         private final Control txtName = control("name");
 
         public CustomSCMName(GitScm git, String path) {
             super(git, path);
-            clickLink("Custom SCM name");
         }
     }
 
+    @Describable("Custom user name/e-mail address")
     public static class CustomNameAndMail extends Behaviour {
         private final Control txtName = control("name");
         private final Control txtEmail = control("email");
 
         public CustomNameAndMail(GitScm git, String path) {
             super(git, path);
-            clickLink("Custom user name/e-mail address");
         }
     }
 
+    @Describable("Don't trigger a build on commit notifications")
     public static class NoBuildOnCommit extends Behaviour {
 
         public NoBuildOnCommit(GitScm git, String path) {
             super(git, path);
-            clickLink("Don't trigger a build on commit notifications");
         }
     }
 
+    @Describable("Force polling using workspace")
     public static class ForcePollingUsingWorkspace extends Behaviour {
 
         public ForcePollingUsingWorkspace(GitScm git, String path) {
             super(git, path);
-            clickLink("Force polling using workspace");
         }
     }
 
+    @Describable("Git LFS pull after checkout")
     public static class GitLfsPull extends Behaviour {
 
         public GitLfsPull(GitScm git, String path) {
             super(git, path);
-            clickLink("Git LFS pull after checkout");
         }
     }
 
+    @Describable("Merge before build")
     public static class MergeBeforeBuild extends Behaviour {
-        private final Control txtMergeRemote = control("mergeRemote");
-        private final Control txtMergeTarget = control("mergeTarget");
-        private final Control selMergeStrategy = control("mergeStrategy");
-        private final Control selFastForwardMode = control("fastForwardMode");
+        private final Control txtMergeRemote = control("options/mergeRemote");
+        private final Control txtMergeTarget = control("options/mergeTarget");
+        private final Control selMergeStrategy = control("options/mergeStrategy");
+        private final Control selFastForwardMode = control("options/fastForwardMode");
 
         public MergeBeforeBuild(GitScm git, String path) {
             super(git, path);
-            clickLink("Merge before build");
         }
+
+        public MergeBeforeBuild setTxtMergeRemote(String txtMergeRemote) {
+            this.txtMergeRemote.set(txtMergeRemote);
+
+            return this;
+        }
+
+        public MergeBeforeBuild setTxtMergeTarget(String txtMergeTarget) {
+            this.txtMergeTarget.set(txtMergeTarget);
+
+            return this;
+        }
+
+        public MergeBeforeBuild setSelMergeStrategy(String selMergeStrategy) {
+            this.selMergeStrategy.set(selMergeStrategy);
+
+            return this;
+        }
+
+        public MergeBeforeBuild setSelFastForwardMode(String selFastForwardMode) {
+            this.selFastForwardMode.set(selFastForwardMode);
+
+            return this;
+        }
+
     }
 
+    @Describable("Polling ignores commits from certain users")
     public static class PollingIgnoresUser extends Behaviour {
         private final Control txtExcludeUsers = control("excludeUsers");
 
         public PollingIgnoresUser(GitScm git, String path) {
             super(git, path);
-            clickLink("Polling ignores commits from certain users");
         }
     }
 
+    @Describable("Pollinig ignores commits in certain paths")
     public static class PollingIgnoresPath extends Behaviour {
         private final Control txtIncludedRegions = control("includedRegions");
         private final Control txtExcludedRegions = control("excludedRegions");
 
         public PollingIgnoresPath(GitScm git, String path) {
             super(git, path);
-            clickLink("Pollinig ignores commits in certain paths");
         }
     }
 
+    @Describable("Polling ignores commits with certain messages")
     public static class PollingIgnoresMessage extends Behaviour {
         private final Control txtExcludedMessage = control("excludedMessage");
 
         public PollingIgnoresMessage(GitScm git, String path) {
             super(git, path);
-            clickLink("Polling ignores commits with certain messages");
         }
     }
 
+    @Describable("Prune stable remote-tracking branches")
     public static class PruneStableRemoteBranches extends Behaviour {
 
         public PruneStableRemoteBranches(GitScm git, String path) {
             super(git, path);
-            clickLink("Prune stable remote-tracking branches");
         }
     }
 
+    @Describable("Sparse Checkout paths")
     public static class SparseCheckoutPaths extends Behaviour {
         private  int pathCounter = 0;
         private final Control btnAdd = control("repeatable-add");
 
         public SparseCheckoutPaths(GitScm git, String path) {
             super(git, path);
-            clickLink("Sparse Checkout paths");
         }
 
         public SparseCheckoutPaths addPath (String name) {
@@ -413,6 +558,7 @@ public class GitScm extends Scm {
         }
     }
 
+    @Describable("Strategy for choosing what to build")
     public static class StrategyToChooseBuild extends Behaviour {
         private final Control selStrategy = control("/"); //absolute path is "/scm[1]/extensions/"
         private final Control numMaxAge = control("buildChooser/maximumAgeInDays");
@@ -420,23 +566,22 @@ public class GitScm extends Scm {
 
         public StrategyToChooseBuild(GitScm git, String path) {
             super(git, path);
-            clickLink("Strategy for choosing what to build");
         }
     }
 
+    @Describable("Use commit author in changelog")
     public static class CommitAuthorInChangelog extends Behaviour {
 
         public CommitAuthorInChangelog(GitScm git, String path) {
             super(git, path);
-            clickLink("Use commit author in changelog");
         }
     }
 
+    @Describable("Wipe out repository & force clone")
     public static class WipeAndForceClone extends Behaviour {
 
         public WipeAndForceClone(GitScm git, String path) {
             super(git, path);
-            clickLink("Wipe out repository & force clone");
         }
     }
 }
