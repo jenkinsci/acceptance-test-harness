@@ -10,7 +10,7 @@ import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 public class ProjectMatrixProperty extends PageAreaImpl {
     public final Control enable = control("useProjectSecurity");
 
-    public final Control name = control("useProjectSecurity/");
+    public final Control name = control(/* 2.x */"useProjectSecurity/[1]", /* 1.x */"useProjectSecurity/");
 
     public ProjectMatrixProperty(Job job) {
         super(job, "/properties/hudson-security-AuthorizationMatrixProperty");
