@@ -71,7 +71,7 @@ public class UpdateCenter extends ContainerPageObject {
     public boolean waitForInstallationToComplete(final PluginSpec... specs) throws InstallationFailedException {
         open();
         // Wait for all plugins to get installed
-        waitFor(driver, not(Matchers.hasElement(by.xpath("//*[@id='log']//*[contains(.,'Pending') or contains(.,'Installing')]"))), 60);
+        waitFor(driver, not(Matchers.hasElement(by.xpath("//*[@id='log']//*[contains(.,'Pending') or contains(.,'Installing')]"))), 300);
 
         String uc = getPageContent(driver);
         // "IOException: Failed to dynamically deploy this plugin" can be reported (by at least some Jenkins versions)
