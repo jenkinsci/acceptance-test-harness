@@ -67,9 +67,6 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
 import static org.junit.Assert.*;
 import static org.junit.Assume.*;
 
-/**
- * Roughly follows <a href="https://github.com/jenkinsci/workflow-plugin/blob/master/TUTORIAL.md">the tutorial</a>.
- */
 public class WorkflowPluginTest extends AbstractJUnitTest {
     private static final String CREDENTIALS_ID = "pipeline";
     private static final String KEY_FILENAME = "/org/jenkinsci/test/acceptance/docker/fixtures/GitContainer/unsafe";
@@ -83,8 +80,11 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
     @Inject DockerContainerHolder<DockerAgentContainer> agent;
     @Inject JenkinsController controller;
 
-    @Test @WithPlugins({"workflow-aggregator", "git"}) @WithDocker
+    @Category(DockerTest.class)
+    @WithDocker
     @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {CREDENTIALS_ID, KEY_FILENAME})
+    @WithPlugins({"workflow-job", "workflow-cps", "workflow-basic-steps", "git"})
+    @Test
     public void hello_world_from_git() {
         String gitRepositoryUrl = createGitRepositoryInDockerContainer();
 
@@ -106,20 +106,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         return container.getRepoUrl();
     }
 
-    @WithPlugins("workflow-aggregator@1.1")
-    @Test public void hello_World() {
-        WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
-        job.script.set("echo 'hello from Workflow'");
-        job.sandbox.check();
-        job.save();
-
-        Build build = job.startBuild();
-        build.shouldSucceed();
-
-        assertThat(build.getConsole(), containsString("hello from Workflow"));
-    }
-
-    @WithPlugins({"workflow-aggregator@2.0", "workflow-cps@2.10", "workflow-basic-steps@2.1", "junit@1.18", "git@2.3"})
+    @WithPlugins({"workflow-job", "workflow-cps@2.10", "workflow-basic-steps@2.1", "workflow-durable-task-step", "pipeline-input-step", "junit@1.18", "git@2.3"})
     @Test public void linearFlow() throws Exception {
         assumeTrue("This test requires a restartable Jenkins", jenkins.canRestart());
         MavenInstallation.installMaven(jenkins, "M3", "3.5.0");
@@ -176,7 +163,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         assertThat(driver, hasContent("All Tests"));
     }
 
-    @WithPlugins({"workflow-aggregator@2.0", "workflow-cps@2.10", "workflow-basic-steps@2.1", "parallel-test-executor@1.9", "junit@1.18", "git@2.3"})
+    @WithPlugins({"workflow-job", "workflow-cps@2.10", "workflow-basic-steps@2.1", "workflow-durable-task-step", "parallel-test-executor@1.9", "junit@1.18", "git@2.3"})
     @Native("mvn")
     @Test public void parallelTests() throws Exception {
         for (int i = 0; i < 3; i++) {
