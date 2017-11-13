@@ -35,6 +35,7 @@ import static org.apache.http.entity.ContentType.APPLICATION_OCTET_STREAM;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
+import org.jenkinsci.test.acceptance.update_center.MockUpdateCenter;
 
 
 /**
@@ -69,6 +70,9 @@ public class PluginManager extends ContainerPageObject {
     @Named("forceRestartAfterPluginInstallation")
     public boolean forceRestart;
 
+    @Inject
+    public MockUpdateCenter mockUpdateCenter;
+
     public PluginManager(Jenkins jenkins) {
         super(jenkins.injector, jenkins.url("pluginManager/"));
         this.jenkins = jenkins;
@@ -76,13 +80,14 @@ public class PluginManager extends ContainerPageObject {
         // injection happens in the base class, so for us to differentiate default state vs false state,
         // we need to use Boolean
         if (uploadPlugins==null)
-            uploadPlugins = true;
+            uploadPlugins = false;
     }
 
     /**
      * Force update the plugin update center metadata.
      */
     public void checkForUpdates() {
+        mockUpdateCenter.ensureRunning();
         visit("advanced");
         final String current = getCurrentUrl();
         // The check now button is a form submit (POST) with a redirect to the same page only if the check is successful.

@@ -31,6 +31,8 @@ public class UpdateCenterMetadata {
 
     public String id;
 
+    String originalJSON;
+
     /**
      * Create metadata parsing Jenkins update center file.
      *
@@ -46,6 +48,7 @@ public class UpdateCenterMetadata {
         ObjectMapper om = new ObjectMapper();
         om.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         UpdateCenterMetadata v = om.readValue(json, UpdateCenterMetadata.class);
+        v.originalJSON = json;
         v.init();
         return v;
     }
