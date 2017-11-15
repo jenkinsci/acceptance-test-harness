@@ -35,7 +35,7 @@ import javax.annotation.Nonnull;
 
 public class IOUtil {
 
-    private static final int CONNECTION_TIMEOUT = Integer.parseInt(SystemEnvironmentVariables.getPropertyVariableOrEnvironment("CONNECTION_TIMEOUT", "10000"));
+    private static final int CONNECTION_TIMEOUT = Integer.parseInt(SystemEnvironmentVariables.getPropertyVariableOrEnvironment("CONNECTION_TIMEOUT", "1"));
 
     /**
      * Get First existing file or directory.
