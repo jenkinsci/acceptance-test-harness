@@ -199,7 +199,7 @@ public class MockUpdateCenter implements AutoCleaned {
     @Override
     public void close() throws IOException {
         if (original != null) {
-            LOGGER.log(Level.INFO, "stopping MockUpdateCenter on http://{0}:{1}/update-center.json", new Object[] {server.getInetAddress().getHostAddress(), server.getLocalPort()});
+            LOGGER.log(Level.INFO, () -> "stopping MockUpdateCenter on http://" + server.getInetAddress().getHostAddress() + ":" + server.getLocalPort() + "/update-center.json");
             server.shutdown(5, TimeUnit.SECONDS);
             server = null;
             /* TODO only if RemoteController etc.:
