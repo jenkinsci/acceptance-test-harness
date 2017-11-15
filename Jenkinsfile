@@ -12,6 +12,9 @@ pipeline {
     stages {
         stage('Run ATH') {
             steps {
+                script { // TODO pending proper solution for JENKINS-43353
+                    for (int i = 0; i < (BUILD_NUMBER as int); i++) {milestone()}
+                }
                 realtimeJUnit(testResults: 'target/surefire-reports/TEST-*.xml', testDataPublishers: [[$class: 'AttachmentPublisher']]) {
                     sh '''
                         eval $(./vnc.sh)
