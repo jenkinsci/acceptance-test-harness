@@ -26,7 +26,6 @@ package org.jenkinsci.test.acceptance.update_center;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -54,6 +53,7 @@ import org.apache.http.protocol.ResponseContent;
 import org.apache.http.protocol.ResponseServer;
 import org.apache.http.protocol.UriHttpRequestHandlerMapper;
 import org.jenkinsci.test.acceptance.guice.AutoCleaned;
+import org.jenkinsci.test.acceptance.guice.TestScope;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.UpdateCenter;
 import org.json.JSONException;
@@ -62,7 +62,7 @@ import org.json.JSONObject;
 /**
  * Serves a fake update center locally.
  */
-@Singleton
+@TestScope
 public class MockUpdateCenter implements AutoCleaned {
 
     private static final Logger LOGGER = Logger.getLogger(MockUpdateCenter.class.getName());
@@ -110,6 +110,7 @@ public class MockUpdateCenter implements AutoCleaned {
                 }
                 plugin.put("url", name + ".hpi");
                 plugin.put("version", version);
+                plugin.remove("sha1");
                 // TODO update dependencies, requiredCore
             }
         } catch (JSONException x) {
