@@ -164,6 +164,7 @@ public class MockUpdateCenter implements AutoCleaned {
              */
             HttpURLConnection uc = (HttpURLConnection) new URL(location).openConnection();
             uc.setInstanceFollowRedirects(true);
+            // TODO consider caching these downloads locally like CachedUpdateCenterMetadataLoader does for the main update-center.json
             byte[] data = IOUtils.toByteArray(uc);
             String contentType = uc.getContentType();
             response.setStatusCode(HttpStatus.SC_OK);
