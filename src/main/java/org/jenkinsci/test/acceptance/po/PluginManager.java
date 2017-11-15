@@ -61,10 +61,12 @@ public class PluginManager extends ContainerPageObject {
      * Optional configuration value that selects whether to resolve plugins locally and upload to Jenkins
      * (better performing when Jenkins is closer to the test execution), or install plugins from within Jenkins
      * (more accurate testing.)
+     * @deprecated Blocks use of {@link MockUpdateCenter}.
      */
     @Inject(optional = true)
     @Named("uploadPlugins")
-    public Boolean uploadPlugins;
+    @Deprecated
+    public boolean uploadPlugins;
 
     @Inject(optional = true)
     @Named("forceRestartAfterPluginInstallation")
@@ -76,11 +78,6 @@ public class PluginManager extends ContainerPageObject {
     public PluginManager(Jenkins jenkins) {
         super(jenkins.injector, jenkins.url("pluginManager/"));
         this.jenkins = jenkins;
-
-        // injection happens in the base class, so for us to differentiate default state vs false state,
-        // we need to use Boolean
-        if (uploadPlugins==null)
-            uploadPlugins = false;
     }
 
     /**
@@ -188,8 +185,8 @@ public class PluginManager extends ContainerPageObject {
             checkForUpdates();
         }
 
-        LOGGER.info("Installing plugins by direct upload: " + uploadPlugins);
         if (uploadPlugins) {
+            LOGGER.warning("Installing plugins by direct upload. Better to use the default MockUpdateCenter.");
             // First check to see whether we need to do anything.
             // If not, do not consider transitive dependencies of the requested plugins,
             // which might force updates (and thus restarts) even though we already have
@@ -290,7 +287,9 @@ public class PluginManager extends ContainerPageObject {
 
     /**
      * Installs a plugin by uploading the *.jpi image.
+     * @deprecated Not used when running {@link MockUpdateCenter}.
      */
+    @Deprecated
     public void installPlugin(File localFile) throws IOException {
         HttpClient httpclient = new DefaultHttpClient();
 
@@ -306,13 +305,6 @@ public class PluginManager extends ContainerPageObject {
                     IOUtils.toString(response.getEntity().getContent()));
         } else {
             System.out.format("Plugin %s installed\n", localFile);
-            if (System.getenv("LOCAL_JARS") != null) {
-                try {
-                    Thread.sleep(3000); // TODO find a better way to ensure that core has actually applied the update
-                } catch (InterruptedException x) {
-                    x.printStackTrace();
-                }
-            }
         }
     }
 

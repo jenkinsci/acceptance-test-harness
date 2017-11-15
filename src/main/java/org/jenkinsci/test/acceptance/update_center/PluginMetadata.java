@@ -58,7 +58,9 @@ public class PluginMetadata {
 
     /**
      * Calls {@link PluginManager#installPlugin(File)}.
+     * @deprecated Not used when running {@link MockUpdateCenter}.
      */
+    @Deprecated
     public void uploadTo(Jenkins jenkins, Injector i, String version) throws ArtifactResolutionException, IOException {
         File f = resolve(i, version);
         jenkins.getPluginManager().installPlugin(f);

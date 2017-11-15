@@ -157,6 +157,7 @@ public class MockUpdateCenter implements AutoCleaned {
 
         });
         server = ServerBootstrap.bootstrap().
+            // could setLocalAddress if using a JenkinsController that requires it
             setHttpProcessor(proc).
             setHandlerMapper(handlerMapper).
             setExceptionLogger((Exception x) -> LOGGER.log(x instanceof ConnectionClosedException ? Level.FINE : Level.WARNING, null, x)).
@@ -178,6 +179,7 @@ public class MockUpdateCenter implements AutoCleaned {
     @Override
     public void close() throws IOException {
         if (original != null) {
+            LOGGER.log(Level.INFO, "stopping MockUpdateCenter on http://{0}:{1}/update-center.json", new Object[] {server.getInetAddress().getHostAddress(), server.getLocalPort()});
             server.shutdown(5, TimeUnit.SECONDS);
             server = null;
             /* TODO only if RemoteController etc.:
