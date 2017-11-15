@@ -31,7 +31,7 @@ import com.google.inject.Injector;
 public class PluginMetadata {
     private final String name;
     private final String version;
-    private final String gav;
+    final String gav;
     private final String requiredCore;
     private final List<Dependency> dependencies;
 

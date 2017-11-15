@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.ConnectionClosedException;
 import org.apache.http.HttpRequest;
@@ -56,6 +57,7 @@ import org.jenkinsci.test.acceptance.guice.AutoCleaned;
 import org.jenkinsci.test.acceptance.guice.TestScope;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.UpdateCenter;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -100,18 +102,28 @@ public class MockUpdateCenter implements AutoCleaned {
             all = new JSONObject(ucm.originalJSON);
             all.remove("signature");
             JSONObject plugins = all.getJSONObject("plugins");
+            LOGGER.log(Level.INFO, "editing JSON with {0} plugins to reflect {1} possible overrides", new Object[] {plugins.length(), ucm.plugins.size()});
             for (PluginMetadata meta : ucm.plugins.values()) {
                 String name = meta.getName();
                 String version = meta.getVersion();
-                JSONObject plugin = plugins.getJSONObject(name);
+                JSONObject plugin = plugins.optJSONObject(name);
                 if (plugin == null) {
+                    LOGGER.log(Level.INFO, "adding plugin {0}", name);
                     plugin = new JSONObject().accumulate("name", name);
                     plugins.put(name, plugin);
                 }
                 plugin.put("url", name + ".hpi");
-                plugin.put("version", version);
+                updating(plugin, "version", version);
+                updating(plugin, "gav", meta.gav);
+                updating(plugin, "requiredCore", meta.requiredCore().toString());
+                updating(plugin, "dependencies", new JSONArray(meta.getDependencies().stream().map(d -> {
+                    try {
+                        return new JSONObject().accumulate("name", d.name).accumulate("version", d.version).accumulate("optional", d.optional);
+                    } catch (JSONException x) {
+                        throw new AssertionError(x);
+                    }
+                }).collect(Collectors.toList())));
                 plugin.remove("sha1");
-                // TODO update dependencies, requiredCore
             }
         } catch (JSONException x) {
             LOGGER.log(Level.WARNING, "cannot prepare mock update center", x);
@@ -174,6 +186,14 @@ public class MockUpdateCenter implements AutoCleaned {
         String override = "http://" + server.getInetAddress().getHostAddress() + ":" + server.getLocalPort() + "/update-center.json";
         LOGGER.log(Level.INFO, "replacing update site {0} with {1}", new Object[] {original, override});
         jenkins.runScript("DownloadService.signatureCheck = false; Jenkins.instance.updateCenter.sites.replaceBy([new UpdateSite(UpdateCenter.ID_DEFAULT, '%s')])", override);
+    }
+
+    private void updating(JSONObject plugin, String key, Object val) throws JSONException {
+        Object old = plugin.opt(key);
+        plugin.put(key, val);
+        if (!String.valueOf(val).equals(String.valueOf(old))) {
+            LOGGER.log(Level.INFO, "for {0} updating {1} from {2} to {3}", new Object[] {plugin.getString("name"), key, old, val});
+        }
     }
 
     @Override
