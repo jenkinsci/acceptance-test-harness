@@ -84,6 +84,7 @@ public class MockUpdateCenter implements AutoCleaned {
         if (original != null) {
             return;
         }
+        // TODO this will likely not work on arbitrary controllers, so perhaps limit to the default WinstoneController
         Jenkins jenkins = injector.getInstance(Jenkins.class);
         List<String> sites = new UpdateCenter(jenkins).getJson("tree=sites[url]").findValuesAsText("url");
         if (sites.size() != 1) {
