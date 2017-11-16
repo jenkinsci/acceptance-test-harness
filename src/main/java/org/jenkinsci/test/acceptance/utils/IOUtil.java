@@ -33,7 +33,7 @@ import javax.annotation.Nonnull;
 
 public class IOUtil {
 
-    private final static ElasticTime  time = new ElasticTime();
+    private final static ElasticTime time = new ElasticTime();
 
     /**
      * Get First existing file or directory.
