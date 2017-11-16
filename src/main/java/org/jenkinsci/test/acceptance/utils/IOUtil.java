@@ -23,8 +23,6 @@
  */
 package org.jenkinsci.test.acceptance.utils;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -35,7 +33,7 @@ import javax.annotation.Nonnull;
 
 public class IOUtil {
 
-    private static final int CONNECTION_TIMEOUT = Integer.parseInt(SystemEnvironmentVariables.getPropertyVariableOrEnvironment("CONNECTION_TIMEOUT", "10000"));
+    private final static ElasticTime  time = new ElasticTime();
 
     /**
      * Get First existing file or directory.
@@ -59,9 +57,11 @@ public class IOUtil {
      * Open URL connection with sanity timeout.
      */
     public static HttpURLConnection openConnection(@Nonnull URL url) throws IOException {
+        int timeout = (int) time.milliseconds(10000);
+
         HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
-        httpURLConnection.setConnectTimeout(CONNECTION_TIMEOUT);
-        httpURLConnection.setReadTimeout(CONNECTION_TIMEOUT);
+        httpURLConnection.setConnectTimeout(timeout);
+        httpURLConnection.setReadTimeout(timeout);
         return httpURLConnection;
     }
 }
