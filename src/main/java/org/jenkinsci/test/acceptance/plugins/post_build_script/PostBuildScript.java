@@ -25,7 +25,7 @@ package org.jenkinsci.test.acceptance.plugins.post_build_script;
 
 import org.jenkinsci.test.acceptance.po.*;
 
-@Describable({"Execute a set of scripts", "[PostBuildScript] - Execute a set of scripts"})
+@Describable({"Execute Scripts", "Execute a set of scripts", "[PostBuildScript] - Execute a set of scripts"})
 public class PostBuildScript extends AbstractStep implements PostBuildStep {
     private final Control whenSucceeded = control("scriptOnlyIfSuccess");
     private final Control whenFailed = control("scriptOnlyIfFailure");
