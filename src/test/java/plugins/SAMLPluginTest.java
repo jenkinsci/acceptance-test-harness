@@ -45,12 +45,14 @@ public class SAMLPluginTest extends AbstractJUnitTest {
         DockerImage.Starter<SAMLContainer> starter = samlContainer.starter();
         File users = new File("src/test/resources/saml_plugin/users.php");
         File config = new File("src/test/resources/saml_plugin/config.php");
+        File idp_metadata = new File("src/test/resources/saml_plugin/saml20-idp-remote.php");
         starter.withOptions(new CommandBuilder(
                 "-e", "SIMPLESAMLPHP_SP_ENTITY_ID=" + SERVICE_PROVIDER_ID, // service provider ID
                 "-e", "SIMPLESAMLPHP_SP_ASSERTION_CONSUMER_SERVICE=" + rootUrl + "securityRealm/finishLogin", // login back URL
                 "-e", "SIMPLESAMLPHP_SP_SINGLE_LOGOUT_SERVICE=" + rootUrl + "logout", // unused
                 "-v", users.getAbsolutePath() + ":/var/www/simplesamlphp/config/authsources.php", // users info
-                "-v", config.getAbsolutePath() + ":/var/www/simplesamlphp/config/config.php" // config info
+                "-v", config.getAbsolutePath() + ":/var/www/simplesamlphp/config/config.php" // config info,
+                "-v", idp_metadata.getAbsolutePath() + ":/var/www/simplesamlphp/config/saml20-idp-remote.php" //IdP advanced configuration
         ));
         SAMLContainer samlServer = starter.start();
         System.out.println("============ SAML Server: " + samlServer.host() + ":" + samlServer.port());
