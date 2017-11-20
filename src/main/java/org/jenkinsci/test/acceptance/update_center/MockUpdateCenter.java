@@ -104,7 +104,7 @@ public class MockUpdateCenter implements AutoCleaned {
             all = new JSONObject(ucm.originalJSON);
             all.remove("signature");
             JSONObject plugins = all.getJSONObject("plugins");
-            LOGGER.log(Level.INFO, "editing JSON with {0} plugins to reflect {1} possible overrides", new Object[] {plugins.length(), ucm.plugins.size()});
+            LOGGER.info(() -> "editing JSON with " + plugins.length() + " plugins to reflect " + ucm.plugins.size() + " possible overrides");
             for (PluginMetadata meta : ucm.plugins.values()) {
                 String name = meta.getName();
                 String version = meta.getVersion();
