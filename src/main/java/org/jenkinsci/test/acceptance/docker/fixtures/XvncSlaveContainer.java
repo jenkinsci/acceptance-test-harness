@@ -24,10 +24,7 @@
 
 package org.jenkinsci.test.acceptance.docker.fixtures;
 
-import org.jenkinsci.test.acceptance.docker.DockerContainer;
 import org.jenkinsci.test.acceptance.docker.DockerFixture;
-import org.jenkinsci.test.acceptance.plugins.credentials.UserPwdCredential;
-import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshCredentialDialog;
 import org.jenkinsci.test.acceptance.plugins.ssh_slaves.SshSlaveLauncher;
 import org.jenkinsci.test.acceptance.po.DumbSlave;
 import org.jenkinsci.test.acceptance.po.Jenkins;
@@ -37,7 +34,7 @@ import org.jenkinsci.test.acceptance.po.Slave;
  * A fixture consisting of a Jenkins slave which can run XVNC.
  */
 @DockerFixture(id="xvnc-slave", ports=22)
-public class XvncSlaveContainer extends DockerContainer {
+public class XvncSlaveContainer extends JavaContainer {
 
     /**
      * Attaches the slave to Jenkins.

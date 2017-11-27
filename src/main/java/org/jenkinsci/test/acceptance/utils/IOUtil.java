@@ -33,6 +33,8 @@ import javax.annotation.Nonnull;
 
 public class IOUtil {
 
+    private final static ElasticTime time = new ElasticTime();
+
     /**
      * Get First existing file or directory.
      * @param directory true if looking for file.
@@ -55,9 +57,11 @@ public class IOUtil {
      * Open URL connection with sanity timeout.
      */
     public static HttpURLConnection openConnection(@Nonnull URL url) throws IOException {
+        int timeout = (int) time.milliseconds(10000);
+
         HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
-        httpURLConnection.setConnectTimeout(10000);
-        httpURLConnection.setReadTimeout(10000);
+        httpURLConnection.setConnectTimeout(timeout);
+        httpURLConnection.setReadTimeout(timeout);
         return httpURLConnection;
     }
 }

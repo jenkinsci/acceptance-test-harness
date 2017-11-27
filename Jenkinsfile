@@ -12,16 +12,16 @@ pipeline {
     stages {
         stage('Run ATH') {
             steps {
-                sh '''
-                    eval $(./vnc.sh)
-                    ./run.sh firefox latest -Dmaven.test.failure.ignore=true -DforkCount=1 -B
+                script { // TODO pending proper solution for JENKINS-43353
+                    for (int i = 0; i < (BUILD_NUMBER as int); i++) {milestone()}
+                }
+                realtimeJUnit(testResults: 'target/surefire-reports/TEST-*.xml', testDataPublishers: [[$class: 'AttachmentPublisher']]) {
+                    sh '''
+                        eval $(./vnc.sh)
+                        ./run.sh firefox latest -Dmaven.test.failure.ignore=true -DforkCount=1 -B
                     '''
+                }
             }
-        }
-    }
-    post {
-        always {
-            junit 'target/surefire-reports/TEST-*.xml'
         }
     }
 }
