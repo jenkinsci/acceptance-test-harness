@@ -9,6 +9,11 @@ To allow us to define such fixtures in a portable and reusable manner, this test
 a mechanism and convention to define/use fixtures inside [Docker](http://docker.io/). They are
 defined in `./fixtures/*`
 
+## General instructions
+
+See the [documentation for the `docker-fixtures` library](https://github.com/jenkinsci/docker-fixtures/blob/master/README.md#usage) for general usage.
+Acceptance tests however use a different injection style rather than `DockerRule`; see below.
+
 ## Running/skipping Docker tests
 
 JUnit Tests that require docker fixtures are marked with `@WithDocker` annotation.
@@ -41,29 +46,3 @@ Pick the fixture type you want to use, then insert `DockerContainerHolder` for i
     }
 
 `DockerContainerHolder` starts a container, and it'll automatically clean-up the container at the end of the test.
-
-The public function ipBound(n) and port(n) allow easily to find out to which host ip address and port a docker container
-ip address is bound to.
-
-## Defining a fixture
-Each fixture is defined in terms of a `DockerContainer` subtype with `@DockerFixture` annotation. This type
-exposes various methods needed to interact with the running fixture.
-
-The `@DockerFixture` bindIp allows you to bind the accessible ports of the docker container to a local ip address.
-
-A fixture also needs to define `Dockerfile` in the resources directory. If a fixture class is
-`org/acme/FooContainer.java`, then the docker file must be located at `org/acme/FooContainer/Dockerfile`.
-
-In case of inner classes, dollar sign ( $ ) is replaced with a slash ( / ).
-
-You can also set custom location of `Dockerfile` by using `dockerfileFolder` attribute from`@DockerFixture` annotation.
-A simple example might be:
-
-```java
-@DockerFixture(id="test", ports="8080", dockerfileFolder="org/acme/fixture/test")
-public class TestContainer extends DockerContainer {
-//...
-}
-```
-
-In this case the docker file must be located at classpath and in `org/ame/fixture/test` instead of the default location.
