@@ -5,7 +5,9 @@ import java.io.IOException;
 
 import org.apache.commons.lang.SystemUtils;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
+import org.jenkinsci.test.acceptance.update_center.PluginSpec;
 import org.jenkinsci.utils.process.CommandBuilder;
+import org.openqa.selenium.NoSuchElementException;
 
 /**
  * Built-in standard slave type.
@@ -30,12 +32,32 @@ public class DumbSlave extends Slave {
      * Selects the specified launcher, and return the page object to bind to it.
      */
     public <T extends ComputerLauncher> T setLauncher(Class<T> type) {
+        try {
+            selectType(type);
+        } catch (NoSuchElementException x) {
+            if (type == CommandSlaveLauncher.class) {
+                // Possibly need to install split command-launcher.
+                save();
+                try {
+                    getJenkins().getPluginManager().installPlugins(new PluginSpec("command-launcher", null));
+                } catch (IOException x2) {
+                    throw new AssertionError(x2);
+                }
+                configure();
+                selectType(type);
+            } else {
+                throw x;
+            }
+        }
+        return newInstance(type, this, "/launcher");
+    }
+
+    private <T extends ComputerLauncher> void selectType(Class<T> type) throws NoSuchElementException {
         findCaption(type, new Resolver() {
             @Override protected void resolve(String caption) {
                 launchMethod.select(caption);
             }
         });
-        return newInstance(type, this, "/launcher");
     }
 
     /**
