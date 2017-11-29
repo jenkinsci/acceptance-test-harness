@@ -31,6 +31,8 @@ public class UpdateCenterMetadata {
 
     public String id;
 
+    String originalJSON;
+
     /**
      * Create metadata parsing Jenkins update center file.
      *
@@ -46,6 +48,7 @@ public class UpdateCenterMetadata {
         ObjectMapper om = new ObjectMapper();
         om.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         UpdateCenterMetadata v = om.readValue(json, UpdateCenterMetadata.class);
+        v.originalJSON = json;
         v.init();
         return v;
     }
@@ -72,7 +75,9 @@ public class UpdateCenterMetadata {
      * Transitive dependencies will not be included if there is an already valid version of the plugin installed.
      *
      * @throws UnableToResolveDependencies When there requested plugin version can not be installed.
+     * @deprecated Not used when running {@link MockUpdateCenter}.
      */
+    @Deprecated
     public List<PluginMetadata> transitiveDependenciesOf(Jenkins jenkins, Collection<PluginSpec> plugins) throws UnableToResolveDependencies {
         List<PluginMetadata> set = new ArrayList<>();
         for (PluginSpec n : plugins) {
@@ -95,6 +100,7 @@ public class UpdateCenterMetadata {
         return set;
     }
 
+    @Deprecated
     private void transitiveDependenciesOf(Jenkins jenkins, PluginMetadata p, String v, List<PluginMetadata> result) {
         for (Dependency d : p.getDependencies()) {
             if (d.optional || !shouldBeIncluded(jenkins, d)) continue;
@@ -124,6 +130,7 @@ public class UpdateCenterMetadata {
      * @param d the dependency
      * @return true if the dependency should be installed/upgraded. Otherwise, false.
      */
+    @Deprecated
     private boolean shouldBeIncluded(Jenkins jenkins, Dependency d) {
         try {
             VersionNumber installedVersion = jenkins.getPlugin(d.name).getVersion();
@@ -135,6 +142,10 @@ public class UpdateCenterMetadata {
         }
     }
 
+    /**
+     * @deprecated Not used when running {@link MockUpdateCenter}.
+     */
+    @Deprecated
     public static class UnableToResolveDependencies extends RuntimeException {
 
         public UnableToResolveDependencies(String format) {

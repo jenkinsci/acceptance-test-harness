@@ -33,6 +33,7 @@ import org.jenkinsci.test.acceptance.plugins.scriptler.Scriptler;
 import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -40,6 +41,7 @@ import java.util.HashMap;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+@Ignore("TODO not currently on the update center, so not testable")
 @WithPlugins("scriptler")
 public class ScriptlerPluginTest extends AbstractJUnitTest {
 
