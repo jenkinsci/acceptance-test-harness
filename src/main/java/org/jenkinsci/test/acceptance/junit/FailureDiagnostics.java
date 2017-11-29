@@ -11,6 +11,8 @@ import org.jenkinsci.test.acceptance.guice.TestScope;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 import com.google.inject.Inject;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Attach diagnostic file related to a test failure.
@@ -106,12 +108,15 @@ public class FailureDiagnostics extends TestWatcher {
     @Override
     public void failed(Throwable e, Description description) {
         if (dir.exists()) {
-            File[] files = dir.listFiles();
-            if (files != null) {
-                for (File file : files) {
-                    //https://wiki.jenkins-ci.org/display/JENKINS/JUnit+Attachments+Plugin#JUnitAttachmentsPlugin-ByprintingoutthefilenameinaformatthatJenkinswillunderstand
-                    System.out.println(String.format(JUNIT_ATTACHMENT, file.getAbsolutePath()));
-                }
+            try {
+                Files.walk(dir.toPath()).forEach(p -> {
+                    if (Files.isRegularFile(p)) {
+                        //https://wiki.jenkins-ci.org/display/JENKINS/JUnit+Attachments+Plugin#JUnitAttachmentsPlugin-ByprintingoutthefilenameinaformatthatJenkinswillunderstand
+                        System.out.println(String.format(JUNIT_ATTACHMENT, p.toAbsolutePath()));
+                    }
+                });
+            } catch (IOException x) {
+                Logger.getLogger(FailureDiagnostics.class.getName()).log(Level.WARNING, "failed to search " + dir + " for attachments", x);
             }
         }
     }
