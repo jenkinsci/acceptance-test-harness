@@ -76,7 +76,7 @@ public class PluginManager extends ContainerPageObject {
         // injection happens in the base class, so for us to differentiate default state vs false state,
         // we need to use Boolean
         if (uploadPlugins==null)
-            uploadPlugins = true;
+            uploadPlugins = false;
     }
 
     /**
