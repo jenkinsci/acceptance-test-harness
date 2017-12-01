@@ -5,8 +5,6 @@
 
 FROM ubuntu:xenial
 
-# make sure the package repository is up to date
-RUN echo "deb http://archive.ubuntu.com/ubuntu xenial main universe" > /etc/apt/sources.list
 # install SSHD
 RUN apt-get update && apt-get install -y openssh-server
 
