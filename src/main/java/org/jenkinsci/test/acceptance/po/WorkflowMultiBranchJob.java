@@ -45,7 +45,7 @@ public class WorkflowMultiBranchJob extends Folder {
 
     public WorkflowMultiBranchJob waitForBranchIndexingFinished(final int timeout) {
         waitFor()
-            .withTimeout(timeout, TimeUnit.SECONDS)
+            .withTimeout(super.time.seconds(timeout), TimeUnit.MILLISECONDS)
             .until(new Callable<Boolean>() {
                 @Override
                 public Boolean call() {
