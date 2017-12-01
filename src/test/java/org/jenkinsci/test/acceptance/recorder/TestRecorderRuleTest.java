@@ -116,7 +116,7 @@ public class TestRecorderRuleTest {
     }
 
     private Description description(String method) {
-        return Description.createTestDescription(getClass(), "shouldNotRecordWhenRecorderIsDisabled");
+        return Description.createTestDescription(getClass(), method);
     }
 
     private TestRecorderRule rule(Description desc) {
