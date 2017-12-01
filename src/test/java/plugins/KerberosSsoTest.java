@@ -61,6 +61,8 @@ import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -301,7 +303,7 @@ public class KerberosSsoTest extends AbstractJUnitTest {
      */
     private KerberosContainer startKdc() throws IOException {
         KerberosContainer kdc = kerberos.get();
-        File target = diag.mkdirs("target"); // Keep the data for diagnostics
+        File target = Files.createTempDirectory(getClass().getSimpleName()).toFile();
         kdc.populateTargetDir(target);
         return kdc;
     }
