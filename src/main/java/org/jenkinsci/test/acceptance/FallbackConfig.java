@@ -317,11 +317,9 @@ public class FallbackConfig extends AbstractModule {
      */
     @Provides @Named("jenkins.war")
     public File getJenkinsWar(RepositorySystem repositorySystem, RepositorySystemSession repositorySystemSession) {
-        IOException error;
         try {
             return IOUtil.firstExisting(false, System.getenv("JENKINS_WAR"));
         } catch (IOException ex) {
-            error = ex;
         }
 
         String version = System.getenv("JENKINS_VERSION");
@@ -335,12 +333,10 @@ public class FallbackConfig extends AbstractModule {
 
         try {
             // Lowest priority of all
-            return IOUtil.firstExisting(false, getWorkspace() + "/jenkins.war", "./jenkins.war");
+            return IOUtil.firstExisting(false, System.getenv("JENKINS_WAR"), getWorkspace() + "/jenkins.war", "./jenkins.war");
         } catch (IOException ex) {
-            error = ex;
+            throw new Error("Could not find jenkins.war, use JENKINS_WAR or JENKINS_VERSION to specify it.", ex);
         }
-
-        throw new Error("Could not find jenkins.war, use JENKINS_WAR or JENKINS_VERSION to specify it.", error);
     }
 
     /**
