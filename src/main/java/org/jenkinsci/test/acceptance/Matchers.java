@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance;
 
 import javax.annotation.CheckForNull;
+import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -335,6 +336,19 @@ public class Matchers {
         };
     }
 
+    public static Matcher<File> existingFile() {
+        return new Matcher<File>("an existing file") {
+            @Override
+            public boolean matchesSafely(final File item) {
+                return item.exists() && item.isFile();
+            }
+
+            @Override
+            public void describeMismatchSafely(final File item, final Description desc) {
+                desc.appendText("File does not exists " + item.getAbsolutePath());
+            }
+        };
+    }
 
     public static final ByFactory by = new ByFactory();
 }

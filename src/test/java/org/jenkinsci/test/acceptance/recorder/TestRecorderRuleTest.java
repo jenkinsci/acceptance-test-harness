@@ -7,7 +7,9 @@ import org.junit.runner.Description;
 
 import java.io.File;
 
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.Is.is;
+import static org.jenkinsci.test.acceptance.Matchers.existingFile;
 import static org.junit.Assert.assertThat;
 
 public class TestRecorderRuleTest {
@@ -28,7 +30,7 @@ public class TestRecorderRuleTest {
             testRecorderRule.finished(desc);
 
             File outputFile = outputFile(desc);
-            assertThat(outputFile.exists(), is(false));
+            assertThat(outputFile, is(not(existingFile())));
 
             //Clean the field
             outputFile.delete();
@@ -53,7 +55,7 @@ public class TestRecorderRuleTest {
             testRecorderRule.finished(desc);
 
             File outputFile = outputFile(desc);
-            assertThat(outputFile.exists(), is(true));
+            assertThat(outputFile, is(existingFile()));
 
             //Clean the field
             outputFile.delete();
@@ -81,7 +83,7 @@ public class TestRecorderRuleTest {
             testRecorderRule.finished(desc);
 
             File outputFile = outputFile(desc);
-            assertThat(outputFile.exists(), is(true));
+            assertThat(outputFile, is(existingFile()));
 
             TestRecorderRule.RECORDER_OPTION = TestRecorderRule.FAILURES;
             outputFile.delete();
@@ -107,7 +109,7 @@ public class TestRecorderRuleTest {
             testRecorderRule.finished(desc);
 
             File outputFile = outputFile(desc);
-            assertThat(outputFile.exists(), is(false));
+            assertThat(outputFile, is(not(existingFile())));
             outputFile.delete();
         } finally {
             //Clean the field
