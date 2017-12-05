@@ -41,7 +41,8 @@ RUN groupadd ath-user -g $gid && \
 ENV XAUTHORITY /home/ath-user/.Xauthority
 
 USER ath-user
-RUN mkdir /home/ath-user/.vnc && (echo ath-user; echo ath-user) | vncpasswd /home/ath-user/.vnc/passwd
+# 'n' for "Would you like to enter a view-only password (y/n)?"
+RUN mkdir /home/ath-user/.vnc && (echo ath-user; echo ath-user; echo "n") | vncpasswd /home/ath-user/.vnc/passwd
 # Default content includes x-window-manager, which is not installed, plus other stuff we do not need (vncconfig, x-terminal-emulator, etc.):
 RUN touch /home/ath-user/.vnc/xstartup && chmod a+x /home/ath-user/.vnc/xstartup
 # Prevent xauth to complain in a confusing way
