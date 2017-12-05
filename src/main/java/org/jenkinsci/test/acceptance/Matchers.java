@@ -345,7 +345,7 @@ public class Matchers {
 
             @Override
             public void describeMismatchSafely(final File item, final Description desc) {
-                desc.appendText("File does not exists " + item.getAbsolutePath());
+                desc.appendText("File does not exist " + item.getAbsolutePath());
             }
         };
     }
