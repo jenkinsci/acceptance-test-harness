@@ -37,6 +37,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.ConnectionClosedException;
+import org.apache.http.ExceptionLogger;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -175,8 +176,9 @@ public class MockUpdateCenter implements AutoCleaned {
             // could setLocalAddress if using a JenkinsController that requires it
             setHttpProcessor(proc).
             setHandlerMapper(handlerMapper).
-            setExceptionLogger((Exception x) -> LOGGER.log(x instanceof ConnectionClosedException ? Level.FINE : Level.WARNING, null, x)).
+            setExceptionLogger(serverExceptionHandler()).
             create();
+
         try {
             server.start();
         } catch (IOException x) {
@@ -191,6 +193,14 @@ public class MockUpdateCenter implements AutoCleaned {
         jenkins.runScript("DownloadService.signatureCheck = false; Jenkins.instance.updateCenter.sites.replaceBy([new UpdateSite(UpdateCenter.ID_DEFAULT, '%s')])", override);
     }
 
+    private ExceptionLogger serverExceptionHandler() {
+        return (Exception x) -> {
+            if (server == null) return; // Going down
+            Level level = x instanceof ConnectionClosedException ? Level.FINE: Level.WARNING;
+            LOGGER.log(level, "Exception thrown while serving request", x);
+        };
+    }
+
     private void updating(JSONObject plugin, String key, Object val) throws JSONException {
         Object old = plugin.opt(key);
         plugin.put(key, val);
@@ -203,13 +213,13 @@ public class MockUpdateCenter implements AutoCleaned {
     public void close() throws IOException {
         if (original != null) {
             LOGGER.log(Level.INFO, () -> "stopping MockUpdateCenter on http://" + server.getInetAddress().getHostAddress() + ":" + server.getLocalPort() + "/update-center.json");
-            server.shutdown(5, TimeUnit.SECONDS);
-            server = null;
+            HttpServer s = server;
+            server = null; // make sure this.server holds a server that is guaranteed to be up
+            s.shutdown(5, TimeUnit.SECONDS);
             /* TODO only if RemoteController etc.:
             injector.getInstance(Jenkins.class).runScript("DownloadService.signatureCheck = true; Jenkins.instance.updateCenter.sites.replaceBy([new UpdateSite(UpdateCenter.ID_DEFAULT, '%s')])", original);
             */
             original = null;
         }
     }
-
 }
