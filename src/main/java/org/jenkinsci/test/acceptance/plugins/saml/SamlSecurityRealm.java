@@ -15,16 +15,17 @@ public class SamlSecurityRealm extends SecurityRealm {
 
     private final Control adavancedConfig = control("advancedConfiguration");
     private final Control spEntityId = control("advancedConfiguration/spEntityId");
-    private final Control samlMetadata = control("idpMetadata");
+    private final Control IdpMetadataConfiguration = control("idpMetadataConfiguration");
+    private final Control xml = control("idpMetadataConfiguration/xml");
+    private final Control url = control("idpMetadataConfiguration/url");
+    private final Control period = control("IdpMetadataConfiguration/period");
 
     private final Control encryption = control("encryptionData");
     private final Control keyStorePath = control("encryptionData/keystorePath");
     private final Control keyStorePassword = control("encryptionData/keystorePassword");
     private final Control privateKeyPassword = control("encryptionData/privateKeyPassword");
 
-
-
-
+    private final Control binding = control("binding");
 
     public SamlSecurityRealm(GlobalSecurityConfig context, String path) {
         super(context, path);
@@ -51,8 +52,11 @@ public class SamlSecurityRealm extends SecurityRealm {
     public void setSpEntityIdAttribute(String value) {
         spEntityId.set(value);
     }
-    public void setSamlMetadata(String value) {
-        samlMetadata.set(value);
+    public void setXml(String value) {
+        xml.set(value);
+    }
+    public void setUrl(String value) {
+        url.set(value);
     }
     public void encryptionConfig() {
         encryption.click();
@@ -69,5 +73,7 @@ public class SamlSecurityRealm extends SecurityRealm {
     public void setPrivateKeyPassword(String value) {
         privateKeyPassword.set(value);
     }
-
+    public void setBinding(String value){
+        binding.select(value);
+    }
 }
