@@ -7,7 +7,7 @@ if [ ! -z "$1" ]; then
   display=":$1"
 fi
 
-vncserver -kill $display
+vncserver -kill $display > /dev/null
 vncserver -geometry 1750x1250 $display > /dev/null
 if command -v vncviewer >/dev/null 2>&1; then
   vncviewer localhost$display > /dev/null &
