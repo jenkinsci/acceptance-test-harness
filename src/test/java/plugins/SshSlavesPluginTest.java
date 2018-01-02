@@ -70,7 +70,7 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
     private SshAgentContainer sshd;
     private DumbSlave slave;
 
-    @Before public void setUp() {
+    private void setUp() {
         sshd = docker.get();
 
         slave = jenkins.slaves.create(DumbSlave.class);
@@ -154,6 +154,7 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
     }
 
     @Test public void connectWithPassword() {
+        setUp();
         configureDefaultSSHSlaveLauncher()
             .pwdCredentials("test", "test");
         slave.save();
@@ -162,6 +163,7 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
     }
 
     @Test public void connectWithKey() {
+        setUp();
         configureDefaultSSHSlaveLauncher()
             .keyCredentials("test", sshd.getPrivateKeyString(), null);
         slave.save();
@@ -171,6 +173,7 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
 
     @Issue("JENKINS-46754")
     @Test public void connectWithEd25519EncKey() {
+        setUp();
         configureDefaultSSHSlaveLauncher()
             .keyCredentials("test", sshd.getEncryptedEd25519PrivateKey(), sshd.getEncryptedEd25519PrivateKeyPassphrase());
         slave.save();
@@ -178,6 +181,7 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
     }
 
     @Test public void unableToConnectWrongPort() {
+        setUp();
         configureSSHSlaveLauncher(sshd.ipBound(22), 1234).pwdCredentials("test", "test");
         slave.save();
         
@@ -186,6 +190,7 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
     }
     
     @Test public void unableToConnectWrongCredentials() {
+        setUp();
         configureDefaultSSHSlaveLauncher().pwdCredentials("unexsisting", "unexsisting");
         slave.save();
         
@@ -194,6 +199,7 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
     }
     
     @Test public void customJavaPath() {
+        setUp();
         SshSlaveLauncher launcher = configureDefaultSSHSlaveLauncher().pwdCredentials("test", "test");
         
         launcher.javaPath.set("/usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java");
@@ -205,7 +211,8 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
     
     @Test public void jvmOptions() {
         String option = "-XX:-PrintGC";
-        
+
+        setUp();
         SshSlaveLauncher launcher = configureDefaultSSHSlaveLauncher().pwdCredentials("test", "test");
         
         launcher.jvmOptions.set(option);
@@ -216,6 +223,7 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
     }
     
     @Test public void customStartup() {
+        setUp();
         SshSlaveLauncher launcher = configureDefaultSSHSlaveLauncher().pwdCredentials("test", "test");
         
         launcher.prefixCmd.set("sh -c \"");
