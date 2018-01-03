@@ -2,7 +2,6 @@ package org.jenkinsci.test.acceptance;
 
 import javax.annotation.CheckForNull;
 import javax.inject.Named;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -35,9 +34,10 @@ import org.jenkinsci.test.acceptance.utils.SauceLabsConnection;
 import org.jenkinsci.test.acceptance.utils.aether.ArtifactResolverUtil;
 import org.jenkinsci.test.acceptance.utils.mail.MailService;
 import org.jenkinsci.test.acceptance.utils.mail.Mailtrap;
+import org.jenkinsci.test.acceptance.utils.pluginreporter.ConsoleExercisedPluginReporter;
 import org.jenkinsci.test.acceptance.utils.pluginreporter.ExercisedPluginsReporter;
 import org.jenkinsci.test.acceptance.utils.pluginreporter.TextFileExercisedPluginReporter;
-import org.jenkinsci.test.acceptance.utils.pluginreporter.ConsoleExercisedPluginReporter;
+import org.jenkinsci.utils.process.CommandBuilder;
 import org.junit.runners.model.Statement;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.UnsupportedCommandException;
@@ -45,9 +45,9 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeDriverService;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.firefox.FirefoxBinary;
 import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.firefox.FirefoxProfile;
+import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.firefox.GeckoDriverService;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.phantomjs.PhantomJSDriver;
@@ -98,33 +98,25 @@ public class FallbackConfig extends AbstractModule {
         String display = getBrowserDisplay();
         switch (browser) {
         case "firefox":
-            FirefoxProfile profile = new FirefoxProfile();
-            profile.setAlwaysLoadNoFocusLib(true);
-
-            profile.setPreference(LANGUAGE_SELECTOR, "en");
-
+            FirefoxOptions firefoxOptions = new FirefoxOptions();
+            firefoxOptions.addPreference(LANGUAGE_SELECTOR, "en");
             // Config screen with many plugins can cause FF to complain JS takes too long to complete - set longer timeout
-            profile.setPreference(DOM_MAX_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
-            profile.setPreference(DOM_MAX_CHROME_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
-
-            FirefoxBinary binary = new FirefoxBinary();
-            if (display != null) {
-                binary.setEnvironmentProperty("DISPLAY", display);
-            }
-            return new FirefoxDriver(binary, profile);
+            firefoxOptions.addPreference(DOM_MAX_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
+            firefoxOptions.addPreference(DOM_MAX_CHROME_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
+            setDriverProperty("geckodriver", GeckoDriverService.GECKO_DRIVER_EXE_PROPERTY);
+            return new FirefoxDriver(firefoxOptions);
         case "ie":
         case "iexplore":
         case "iexplorer":
             return new InternetExplorerDriver();
         case "chrome":
+            Map<String, String> prefs = new HashMap<String, String>();
+            prefs.put(LANGUAGE_SELECTOR, "en");
             ChromeOptions options = new ChromeOptions();
-            options.setExperimentalOption("prefs", Collections.singletonMap(LANGUAGE_SELECTOR, "en"));
+            options.setExperimentalOption("prefs", prefs);
 
-            ChromeDriverService.Builder builder = new ChromeDriverService.Builder();
-            if (display != null) {
-                builder.withEnvironment(Collections.singletonMap("DISPLAY", display));
-            }
-            return new ChromeDriver(builder.build(), options);
+            setDriverProperty("chromedriver", ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY);
+            return new ChromeDriver(options);
         case "safari":
             return new SafariDriver();
         case "htmlunit":
@@ -161,6 +153,26 @@ public class FallbackConfig extends AbstractModule {
         }
     }
 
+    private void setDriverProperty(final String driverCommand, final String property) {
+        String executable = locateDriver(driverCommand);
+        if (StringUtils.isNotBlank(executable)) {
+            System.setProperty(property, executable);
+        }
+        else {
+            System.out.println("Unable to locate " + driverCommand);
+        }
+    }
+
+    // TODO: add Windows support
+    private String locateDriver(final String name) {
+        try {
+            return new CommandBuilder("which", name).popen().asText().trim();
+        }
+        catch (IOException | InterruptedException exception) {
+            return StringUtils.EMPTY;
+        }
+    }
+
     /**
      * Get display number to run browser on.
      *
@@ -181,7 +193,7 @@ public class FallbackConfig extends AbstractModule {
     public WebDriver createWebDriver(TestCleaner cleaner, TestName testName, ElasticTime time) throws IOException {
         WebDriver base = createWebDriver(testName);
 
-        // Make sue the window have minimal resolution set, even when out of the visible screen.
+        // Make sure the window has minimal resolution set, even when out of the visible screen.
         // Note - not maximizing here any more because that doesn't do anything.
         Dimension oldSize = base.manage().window().getSize();
         if (oldSize.height < 1050 || oldSize.width < 1680) {

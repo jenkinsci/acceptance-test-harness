@@ -14,3 +14,4 @@ if command -v vncviewer >/dev/null 2>&1; then
 fi
 
 echo export BROWSER_DISPLAY=$display
+echo export DISPLAY=$display

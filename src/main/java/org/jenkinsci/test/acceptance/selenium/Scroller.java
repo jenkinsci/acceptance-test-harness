@@ -1,12 +1,12 @@
 package org.jenkinsci.test.acceptance.selenium;
 
+import java.io.IOException;
+
 import org.apache.commons.io.IOUtils;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.events.AbstractWebDriverEventListener;
-
-import java.io.IOException;
 
 /**
  * Automatically scrolls the element into view.
@@ -73,7 +73,7 @@ public class Scroller extends AbstractWebDriverEventListener {
     }
 
     @Override
-    public void beforeChangeValueOf(WebElement element, WebDriver driver) {
+    public void beforeChangeValueOf(WebElement element, WebDriver driver, CharSequence[] keysToSend) {
         scrollIntoView(element, driver);
     }
 

@@ -3,7 +3,7 @@
 # see docs/DOCKER.md for usage
 
 
-FROM debian:stretch
+FROM ubuntu:xenial
 MAINTAINER ogondza@gmail.com
 
 RUN apt-get clean && \
@@ -13,7 +13,7 @@ RUN apt-get clean && \
         git \
         imagemagick \
         iptables \
-        firefox-esr \
+        firefox \
         maven \
         openjdk-8-jdk \
         unzip \
@@ -22,6 +22,9 @@ RUN apt-get clean && \
 # All we need is a statically linked client library - no need to install daemon deps: https://get.docker.com/builds/
 RUN curl -fsSLO https://get.docker.com/builds/Linux/x86_64/docker-17.04.0-ce.tgz && \
     tar --strip-components=1 -xvzf docker-17.04.0-ce.tgz -C /usr/local/bin
+# Selenium needs a geckodriver in order to work properly
+RUN curl -fsSLO https://github.com/mozilla/geckodriver/releases/download/v0.19.0/geckodriver-v0.19.0-linux64.tar.gz && \
+    tar -xvzf geckodriver-v0.19.0-linux64.tar.gz -C /usr/local/bin
 
 # Allow injecting uid and git to match directory ownership
 ARG uid=1000
