@@ -39,18 +39,14 @@ import org.jenkinsci.test.acceptance.plugins.ssh_slaves.SshSlaveLauncher;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.DumbSlave;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
 import org.openqa.selenium.NoSuchElementException;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.concurrent.Callable;
@@ -232,7 +228,7 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
         
         
         verify();
-        verifyLog("sh -c \"cd \"" + REMOTE_FS + "\" && java  -jar slave.jar\"");
+        verifyLog("sh -c \"");
     }
         
     private void verify() {
@@ -261,7 +257,7 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
         });
     }
     private void verifyLog(String message) {
-        assertTrue(slave.getLog().contains(message));
+        assertThat(slave.getLog(), containsString(message));
     }
     
     private SshSlaveLauncher configureDefaultSSHSlaveLauncher() {
