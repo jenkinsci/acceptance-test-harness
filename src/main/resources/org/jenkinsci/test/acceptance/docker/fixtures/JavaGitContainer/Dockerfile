@@ -1,6 +1,6 @@
 # Adds Java tooling to the git container so that this docker image can be used as agent as well
 
-FROM jenkins/git:3e22c64d038a
+FROM jenkins/git:a22007fa1ffb
 
 RUN apt-get update -y && apt-get install --no-install-recommends -y software-properties-common
 

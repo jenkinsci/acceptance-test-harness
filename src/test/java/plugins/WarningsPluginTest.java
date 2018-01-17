@@ -125,7 +125,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         assertThat(driver.getPageSource(), containsString("<div id=\"packages\">BEEFs</div>"));
     }
 
-    @Test @WithDocker @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {CREDENTIALS_ID, CREDENTIALS_KEY})
+    @Test @WithDocker @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {CREDENTIALS_ID, CREDENTIALS_KEY}) @WithPlugins("ssh-slaves")
     public void should_have_correct_details() throws ExecutionException, InterruptedException {
         WarningsAction action = createAndBuildCompileJobOnAgent(resource("/warnings_plugin/WarningMain.java"),
                 "javac -Xlint:all WarningMain.java");
@@ -143,7 +143,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         assertThatDetailsAre(details, "division by zero", "WarningMain.java:14");
     }
 
-    @Test @WithDocker @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {CREDENTIALS_ID, CREDENTIALS_KEY})
+    @Test @WithDocker @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {CREDENTIALS_ID, CREDENTIALS_KEY}) @WithPlugins("ssh-slaves")
     public void detailsTabContentWithOneWarningTest() throws ExecutionException, InterruptedException {
         WarningsAction action = createAndBuildCompileJobOnAgent(resource("/warnings_plugin/WarningMain2.java"),
                 "javac -Xlint:all WarningMain2.java");
@@ -192,7 +192,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         assertThat("Assert the proper detail text" , detailText.trim(), is(expectedDetailText));
     }
 
-    @Test @WithDocker @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {CREDENTIALS_ID, CREDENTIALS_KEY})
+    @Test @WithDocker @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {CREDENTIALS_ID, CREDENTIALS_KEY}) @WithPlugins("ssh-slaves")
     public void should_scan_console_log_of_slave_build() throws ExecutionException, InterruptedException {
         DumbSlave dockerSlave = createDockerAgent();
         FreeStyleJob job = prepareDockerSlave(dockerSlave);
@@ -220,7 +220,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
     }
 
     @Test @WithDocker
-    @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {CREDENTIALS_ID, CREDENTIALS_KEY})
+    @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {CREDENTIALS_ID, CREDENTIALS_KEY}) @WithPlugins("ssh-slaves")
     public void should_scan_files_on_slave(){
         DumbSlave dockerSlave = createDockerAgent();
         FreeStyleJob job = prepareDockerSlave(dockerSlave);
@@ -238,7 +238,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
         assertThat(driver, hasContent("Java Warnings: " + 2));
     }
 
-    @Test @Issue("JENKINS-17787") @WithPlugins("violations") @WithDocker @Ignore("Reproduces JENKINS-17787")
+    @Test @Issue("JENKINS-17787") @WithPlugins({"violations", "ssh-slaves"}) @WithDocker @Ignore("Reproduces JENKINS-17787")
     @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {CREDENTIALS_ID, CREDENTIALS_KEY})
     public void should_parse_codenarc_on_agent() {
         DumbSlave dockerSlave = createDockerAgent();
