@@ -34,7 +34,7 @@ public class OwnershipGlobalConfig extends GlobalPluginConfiguration {
 
     public OwnershipGlobalConfig setImplicitJobOwnership() {
         // New radio item added by plugin changing the semantics of path value we relied on
-        control(by.radioButton("Assign job creators as owners")).check();
+        control(by.radioButton("Assign job creator as owner")).check();
         return this;
     }
 }
