@@ -51,7 +51,7 @@ public class GroovyPluginTest extends AbstractJUnitTest {
         createDefaultGroovyBuildStep().script("println 'inline groovy script';");
         job.addShellStep("echo println \\'file groovy script\\' > script.groovy");
         createDefaultGroovyBuildStep().file("script.groovy");
-
+        job.save();
         shouldReport("inline groovy script");
         shouldReport("file groovy script");
     }
@@ -70,6 +70,7 @@ public class GroovyPluginTest extends AbstractJUnitTest {
                 "job = jenkins.model.Jenkins.instance.getJob('my_job');" +
                 "println \"name: ${job.displayName}. number: ${job.lastBuild.number}\""
         , false);
+        job.save();
 
         shouldReport("name: my_job. number: 1");
     }
@@ -80,7 +81,6 @@ public class GroovyPluginTest extends AbstractJUnitTest {
 
         job.addShellStep("echo println \\'running groovy file\\' > script.groovy");
         job.addBuildStep(SystemGroovyStep.class).file("script.groovy");
-
         /* TODO cf. FileSystemScriptSourceTest.smokes; when added to generic-whitelist, simplify to:
         shouldReport("running groovy file");
         */
@@ -108,7 +108,7 @@ public class GroovyPluginTest extends AbstractJUnitTest {
         step.script(
                 "println 'version: ' + groovy.lang.GroovySystem.getVersion()"
         );
-
+        job.save();
         shouldReport("version: 2.2.1");
     }
 
@@ -139,7 +139,6 @@ public class GroovyPluginTest extends AbstractJUnitTest {
     }
 
     private void shouldReport(String out) {
-        job.save();
         job.startBuild().shouldSucceed().shouldContainsConsoleOutput(out);
     }
 
