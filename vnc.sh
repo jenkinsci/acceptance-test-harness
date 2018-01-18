@@ -8,7 +8,7 @@ if [ ! -z "$1" ]; then
 fi
 
 vncserver -kill $display > /dev/null
-vncserver -geometry 1750x1250 $display > /dev/null
+vncserver -geometry 1750x1250 -localhost no $display > /dev/null
 if command -v vncviewer >/dev/null 2>&1; then
   vncviewer localhost$display > /dev/null &
 fi
