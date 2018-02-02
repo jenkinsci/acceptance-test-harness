@@ -113,7 +113,7 @@ public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should us
                         try {
                             body = rule.apply(body, description);
                         } catch (Exception e) { //This is to note which rule is failing when a rule does fail as the evaluate method hinds this information
-                            System.err.println("Test Rule " + rule.getClass() + " failed to apply. Failed with: " + e.getCause());
+                            System.out.println("Test Rule " + rule.getClass() + " failed to apply. Failed with: " + e.getCause());
                             throw e;
                         }
                     }
