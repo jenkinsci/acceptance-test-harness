@@ -105,6 +105,8 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
 
     @Before
     public void setUp() {
+        if ("".equals(USER_DOMAIN)) USER_DOMAIN = null;
+        if ("".equals(PROJECT_DOMAIN)) PROJECT_DOMAIN = null;
         assertNull("IDENTITY field is deprecated, Use USER and PROJECT", IDENTITY);
     }
 
