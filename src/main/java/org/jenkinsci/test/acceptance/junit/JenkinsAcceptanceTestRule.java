@@ -113,7 +113,7 @@ public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should us
                         try {
                             body = rule.apply(body, description);
                         } catch (Exception e) {
-                            throw new TestRuleException(e, rule);
+                            throw new RuleFailedException(e, rule);
                         }
                     }
                 }
