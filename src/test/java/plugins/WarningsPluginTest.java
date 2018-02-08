@@ -704,6 +704,9 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
     // TODO: check if we can remove this test since a similar one in parent
     @Test @Issue("25501") @WithPlugins("email-ext")
     public void should_send_mail_with_expanded_tokens() {
+        //avoid JENKINS-49026
+        jenkins.restart();;
+        
         setUpMailer();
 
         FreeStyleJob job = createFreeStyleJob(settings -> {
