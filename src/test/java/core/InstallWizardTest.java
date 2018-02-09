@@ -70,7 +70,7 @@ public class InstallWizardTest extends AbstractJUnitTest {
 
         // Check that the new user is logged in
         Login login = new Login(jenkins);
-        Assert.assertThat(login, loggedInAs("adminUser"));
+        Assert.assertThat(login, loggedInAs("adminuser"));
     }
 
     @Since("2.0")
@@ -102,6 +102,6 @@ public class InstallWizardTest extends AbstractJUnitTest {
 
         // Check that the new user is logged in
         Login login = new Login(jenkins);
-        Assert.assertThat(login, loggedInAs("adminUser"));
+        Assert.assertThat(login, loggedInAs("adminuser"));
     }
 }
