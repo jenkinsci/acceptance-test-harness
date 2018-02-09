@@ -95,7 +95,7 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
      * {@link AbstractAnalysisTest#should_navigate_to_result_action_from_pipeline()}. Rather than using the script
      * text box a Git repository is connected.
      */
-    @Test @WithPlugins({"git", "workflow-job"}) @WithDocker
+    @Test @WithPlugins({"git",  "workflow-basic-steps", "workflow-multibranch", "workflow-job", "workflow-durable-task-step"}) @WithDocker
     @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {CREDENTIALS_ID, KEY_FILENAME})
     public void should_checkout_pipeline_from_git() {
         String gitRepositoryUrl = createGitRepositoryInDockerContainer();
