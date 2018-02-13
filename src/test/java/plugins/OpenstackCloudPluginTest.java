@@ -268,7 +268,7 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
 
         assertEquals(created, reconnected);
 
-        Slave slave = ((Slave) reconnected);
+        Slave slave = (Slave) reconnected;
         slave.open();
         slave.clickLink("Schedule Termination");
         waitFor(slave, pageObjectDoesNotExist(), 1000);

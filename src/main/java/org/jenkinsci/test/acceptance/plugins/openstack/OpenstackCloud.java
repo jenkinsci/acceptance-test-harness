@@ -110,7 +110,7 @@ public class OpenstackCloud extends Cloud {
     }
 
     private void ensureAdvancedOpen() {
-        if (advancedOpen == false) {
+        if (!advancedOpen) {
             control("advanced-button").click();
             advancedOpen = true;
         }
