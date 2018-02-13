@@ -39,6 +39,7 @@ public class ArtifactoryGlobalConfig extends PageAreaImpl {
     }
 
     public static class Server extends PageAreaImpl {
+        public final Control id = control("serverId");
         public final Control url = control("artifactoryUrl");
         public final Control username = control("deployerCredentialsConfig/username");
         public final Control password = control("deployerCredentialsConfig/password");

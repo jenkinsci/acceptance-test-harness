@@ -74,7 +74,7 @@ public class FailureDiagnostics extends TestWatcher {
                 if (writer != null) writer.close();
             }
         } catch (IOException e) {
-            new Error(e);
+            throw new Error(e);
         }
     }
 
@@ -83,7 +83,7 @@ public class FailureDiagnostics extends TestWatcher {
         try {
             Files.createDirectories(subdir.toPath());
         } catch (IOException e) {
-            new Error(e);
+            throw new Error(e);
         }
         return subdir;
     }

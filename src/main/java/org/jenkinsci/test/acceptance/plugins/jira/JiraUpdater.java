@@ -8,7 +8,7 @@ import org.jenkinsci.test.acceptance.po.PostBuildStep;
 /**
  * @author Kohsuke Kawaguchi
  */
-@Describable("Update relevant JIRA issues")
+@Describable("JIRA: Update relevant issues")
 public class JiraUpdater extends AbstractStep implements PostBuildStep {
     public JiraUpdater(Job parent, String path) {
         super(parent, path);

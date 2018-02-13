@@ -24,6 +24,7 @@ import org.jenkinsci.test.acceptance.po.MatrixBuild;
 import org.jenkinsci.test.acceptance.po.MatrixProject;
 import org.jenkinsci.test.acceptance.po.MatrixRun;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -46,6 +47,7 @@ import static org.jenkinsci.test.acceptance.po.FormValidation.Kind.OK;
 @WithPlugins("foreman-node-sharing")
 @Category(DockerTest.class)
 @WithDocker
+@Ignore
 public class ForemanNodeSharingPluginTest extends AbstractJUnitTest {
     @Inject private DockerContainerHolder<ForemanContainer> dockerForeman;
     @Inject private DockerContainerHolder<JavaContainer> docker1;

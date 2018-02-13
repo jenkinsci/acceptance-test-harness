@@ -120,6 +120,7 @@ public class ArtifactoryPluginTest extends AbstractJUnitTest {
         config.configure();
         ArtifactoryGlobalConfig global = new ArtifactoryGlobalConfig(config);
         Server server = global.addServer();
+        server.id.set("artifactoryId");
         server.url.set(artifactory.getURL());
         server.username.set("admin");
         server.password.set("password");

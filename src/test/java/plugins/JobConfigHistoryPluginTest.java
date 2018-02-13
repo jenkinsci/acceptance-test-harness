@@ -79,7 +79,7 @@ public class JobConfigHistoryPluginTest extends AbstractJUnitTest {
         assertThat("New changes saved", newOnes.size(), greaterThan(original.size()));
     }
 
-    @Test @Issue("JENKINS-24410")
+    @Test @Issue("JENKINS-24410") @WithPlugins("maven-plugin")
     public void track_change_in_maven_project() {
         MavenModuleSet job = jenkins.jobs.create(MavenModuleSet.class);
 

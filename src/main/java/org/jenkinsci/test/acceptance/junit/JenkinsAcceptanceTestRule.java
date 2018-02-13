@@ -110,7 +110,11 @@ public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should us
 
                 for (Set<TestRule> rulesGroup: rules.values()) {
                     for (TestRule rule: rulesGroup) {
-                        body = rule.apply(body, description);
+                        try {
+                            body = rule.apply(body, description);
+                        } catch (Exception e) {
+                            throw new RuleFailedException(e, rule);
+                        }
                     }
                 }
                 return body;
