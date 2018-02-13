@@ -16,7 +16,6 @@ public class ScriptTest extends AbstractJUnitTest {
     SlaveController slave;
 
     @Test
-    @Category(SmokeTest.class)
     public void execute_system_script() throws Exception {
         String output = jenkins.runScript("println Jenkins.instance.displayName;");
         assertThat(output, is("Jenkins"));
