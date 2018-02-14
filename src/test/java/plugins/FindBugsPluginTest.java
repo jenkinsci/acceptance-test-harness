@@ -177,6 +177,7 @@ public class FindBugsPluginTest extends AbstractAnalysisTest<FindBugsAction> {
      * Builds a pipeline project and checks if it is unstable.
      */
     @Test
+    @WithPlugins({"workflow-job", "workflow-cps", "workflow-durable-task-step", "workflow-basic-steps"})
     public void should_set_pipeline_result() {
         verifyResult("unstable", Build::shouldBeUnstable);
         verifyResult("failed", Build::shouldFail);
