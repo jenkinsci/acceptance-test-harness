@@ -60,7 +60,8 @@ public class JenkinsDatabaseSecurityRealmTest extends AbstractJUnitTest {
     }
 
     @Test
-    @Category(SmokeTest.class)
+    //TODO Re enable category once JENKINS-49524 is done
+    //@Category(SmokeTest.class)
     public void login_and_logout() {
 
         User user = realm.signup().fullname(FULL_NAME).email(EMAIL).password(PWD).signup(NAME);

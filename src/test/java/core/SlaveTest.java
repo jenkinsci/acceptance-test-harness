@@ -75,7 +75,6 @@ public class SlaveTest extends AbstractJUnitTest {
     }
 
     @Test
-    @Category(SmokeTest.class)
     public void tie_job_to_specified_label() throws Exception {
         FreeStyleJob j = jenkins.jobs.create();
         slave.configure();
