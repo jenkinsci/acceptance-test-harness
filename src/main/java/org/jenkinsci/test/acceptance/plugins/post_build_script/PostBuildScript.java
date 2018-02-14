@@ -24,32 +24,36 @@
 package org.jenkinsci.test.acceptance.plugins.post_build_script;
 
 import org.jenkinsci.test.acceptance.po.*;
+import org.openqa.selenium.By;
 
 @Describable({"Execute Scripts", "Execute a set of scripts", "[PostBuildScript] - Execute a set of scripts"})
 public class PostBuildScript extends AbstractStep implements PostBuildStep {
-    private final Control whenSucceeded = control("scriptOnlyIfSuccess");
-    private final Control whenFailed = control("scriptOnlyIfFailure");
+    private final Control buildResult = control("buildSteps/results");
 
     public PostBuildScript(Job parent, String path) {
         super(parent, path);
     }
 
     public <T extends Step> T addStep(final Class<T> type) {
-        String path = createPageArea("buildStep", new Runnable() {
+        String path = createPageArea("buildSteps/buildSteps", new Runnable() {
             @Override public void run() {
-                control("hetero-list-add[buildStep]").selectDropdownMenu(type);
+                control("/buildSteps/hetero-list-add[postBuild.buildStep.buildSteps]").selectDropdownMenu(type);
             }
         });
         return newInstance(type, parent, path);
     }
 
     public void runWhenFailed() {
-        whenSucceeded.uncheck();
-        whenFailed.check();
+        if(buildResult.resolve().findElement(By.xpath(".//option[@selected='true']")).getAttribute("value").equals("SUCCESS")) {
+            //unselect default in multiple selection
+            buildResult.select("SUCCESS");
+        }
+        buildResult.select("FAILURE");
     }
 
     public void runWhenSucceeded() {
-        whenSucceeded.check();
-        whenFailed.uncheck();
+        if(!buildResult.resolve().findElement(By.xpath(".//option[@selected='true']")).getAttribute("value").equals("SUCCESS")) {
+            buildResult.select("SUCCESS");
+        }
     }
 }

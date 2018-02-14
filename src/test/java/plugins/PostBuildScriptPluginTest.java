@@ -62,6 +62,7 @@ public class PostBuildScriptPluginTest extends AbstractJUnitTest {
 
     private PostBuildScript addMarkerPostBuildStep() {
         PostBuildScript post = j.addPublisher(PostBuildScript.class);
+        j.control("/publisher[PostBuildScript]/repeatable-add[3]").click();
         post.addStep(ShellBuildStep.class).command("echo RUNNING_POST_BUILD_STEP");
 
         return post;
