@@ -45,6 +45,11 @@ public class InstallWizardTest extends AbstractJUnitTest {
     @Inject
     public JenkinsController controller;
 
+    private static final String USERNAME = "adminuser";
+    private static final String PASSWORD = "adminPassword";
+    private static final String FULL_NAME = "admin full name";
+    private static final String EMAIL = "admin@email.com";
+
     @Since("2.0")
     @Test
     public void wizardInstallSuggestedTest() throws IOException {
@@ -64,13 +69,13 @@ public class InstallWizardTest extends AbstractJUnitTest {
         // Create user test
         WizardCreateAdminUser createAdmin = new WizardCreateAdminUser(jenkins);
 
-        createAdmin.createAdminUser("adminUser", "adminPassword", "admin full name", "admin@email.com");
+        createAdmin.createAdminUser(USERNAME, PASSWORD, FULL_NAME, EMAIL);
         createAdmin.shouldCreateTheUserSuccessfully();
         createAdmin.wizardShouldFinishSuccessfully();
 
         // Check that the new user is logged in
         Login login = new Login(jenkins);
-        Assert.assertThat(login, loggedInAs("adminUser"));
+        Assert.assertThat(login, loggedInAs("adminuser"));
     }
 
     @Since("2.0")
@@ -96,12 +101,12 @@ public class InstallWizardTest extends AbstractJUnitTest {
         // Create user test
         WizardCreateAdminUser createAdmin = new WizardCreateAdminUser(jenkins);
 
-        createAdmin.createAdminUser("adminUser", "adminPassword", "admin full name", "admin@email.com");
+        createAdmin.createAdminUser(USERNAME, PASSWORD, FULL_NAME, EMAIL);
         createAdmin.shouldCreateTheUserSuccessfully();
         createAdmin.wizardShouldFinishSuccessfully();
 
         // Check that the new user is logged in
         Login login = new Login(jenkins);
-        Assert.assertThat(login, loggedInAs("adminUser"));
+        Assert.assertThat(login, loggedInAs("adminuser"));
     }
 }
