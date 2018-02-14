@@ -13,9 +13,11 @@ public class DeployPublisher extends AbstractStep implements PostBuildStep {
 
     public final Control war = control("war");
     public final Control contextPath = control("contextPath");
-    public final Control user = control("adapters/userName");
-    public final Control password = control("adapters/password");
     public final Control url = control("adapters/url");
+
+    public void setCredentials(String credentials){
+        control("adapters/credentialsId").select(credentials);
+    }
 
     public void useContainer(String container) {
         control("hetero-list-add[adapters]").selectDropdownMenu(container);

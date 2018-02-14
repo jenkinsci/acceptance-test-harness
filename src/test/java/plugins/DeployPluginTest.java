@@ -4,11 +4,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.Tomcat7Container;
-import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.junit.DockerTest;
-import org.jenkinsci.test.acceptance.junit.Native;
-import org.jenkinsci.test.acceptance.junit.WithDocker;
-import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.junit.*;
 import org.jenkinsci.test.acceptance.plugins.deploy.DeployPublisher;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
@@ -36,6 +32,7 @@ public class DeployPluginTest extends AbstractJUnitTest {
 
     @Test
     @Native("bash")
+    @WithCredentials(credentialType = WithCredentials.USERNAME_PASSWORD, values = {"admin", "tomcat"}, id = "tomcat")
     public void deploy_sample_webapp_to_tomcat7() throws IOException, InterruptedException {
         if (SystemUtils.IS_OS_WINDOWS) {
             // TODO move somewhere else...
@@ -59,8 +56,7 @@ public class DeployPluginTest extends AbstractJUnitTest {
             d.war.set("my-webapp/target/*.war");
             d.contextPath.set("test");
             d.useContainer("Tomcat 7.x");
-            d.user.set("admin");
-            d.password.set("tomcat");
+            d.setCredentials("tomcat");
             d.url.set(f.getUrl().toExternalForm());
         }
         j.save();
