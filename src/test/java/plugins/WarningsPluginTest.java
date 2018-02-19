@@ -705,8 +705,8 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
     @Test @Issue("25501") @WithPlugins("email-ext")
     public void should_send_mail_with_expanded_tokens() {
         //avoid JENKINS-49026
-        jenkins.restart();;
-        
+        checkExtensionAreDeployed("hudson.plugins.warnings.tokens.WarningsResultTokenMacro", "hudson.plugins.analysis.tokens.AbstractTokenMacro");
+
         setUpMailer();
 
         FreeStyleJob job = createFreeStyleJob(settings -> {

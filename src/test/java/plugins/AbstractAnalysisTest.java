@@ -149,7 +149,7 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
     @Test @Issue("JENKINS-25501") @WithPlugins("email-ext")
     public void should_send_mail_with_expanded_tokens() {
         //avoid JENKINS-49026
-        jenkins.restart();
+        checkExtensionAreDeployed(null,"hudson.plugins.analysis.tokens.AbstractTokenMacro");
 
         setUpMailer();
 
@@ -169,6 +169,17 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
 
         verifyReceivedMail(String.format("%s: FAILURE", title),
                 String.format("%s: %d-0-%d", title, getNumberOfWarnings(), getNumberOfWarnings()));
+    }
+
+
+    /**
+     * Restart Jenkins if there is not required extension - see JENKINS-49026
+     */
+    protected void checkExtensionAreDeployed(String extensionName, String extensionPointName){
+        String result = jenkins.runScript("Jenkins.instance.getExtensionList(" + extensionPointName + ".class)");
+        if(result.contains("[]") || (extensionName!=null && result.contains(extensionName))){
+            jenkins.restart();
+        }
     }
 
     /**
@@ -201,7 +212,7 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
     @Test @Issue("JENKINS-39947") @WithPlugins({"dashboard-view", "nested-view", "cloudbees-folder", "analysis-core@1.87"})
     public void should_show_warnings_in_folder() {
         //avoid JENKINS-49026
-        jenkins.restart();
+        checkExtensionAreDeployed(null, "hudson.plugins.analysis.dashboard.AbstractPortlet");
 
         NestedView nested = jenkins.getViews().create(NestedView.class);
 
@@ -237,7 +248,7 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
     @Test @WithPlugins("dashboard-view")
     public void should_show_warning_totals_in_dashboard_portlet_with_link_to_results() {
         //avoid JENKINS-49026
-        jenkins.restart();
+        checkExtensionAreDeployed(null, "hudson.plugins.analysis.dashboard.AbstractPortlet");
 
         FreeStyleJob job = createFreeStyleJob();
 
