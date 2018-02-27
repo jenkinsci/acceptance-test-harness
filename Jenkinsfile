@@ -19,6 +19,7 @@
                         writeFile file: 'excludes.txt', text: exclusions
                         realtimeJUnit(testResults: 'target/surefire-reports/TEST-*.xml', testDataPublishers: [[$class: 'AttachmentPublisher']]) {
                             sh '''
+                                export SHARED_DOCKER_SERVICE=true
                                 eval $(./vnc.sh)
                                 ./run.sh firefox latest -Dmaven.test.failure.ignore=true -DforkCount=1 -B
                             '''
