@@ -218,9 +218,17 @@ public class Build extends ContainerPageObject {
         return this;
     }
 
+    public Build shouldSucceedWithin(final int timeoutInS) {
+        return waitUntilFinished(timeoutInS).shouldSucceed();
+    }
+
     public Build shouldFail() {
         assertThat(this, resultIs(Result.FAILURE));
         return this;
+    }
+
+    public Build shouldFailWithin(final int timeoutInS) {
+        return waitUntilFinished(timeoutInS).shouldFail();
     }
 
     public Build shouldAbort() {
@@ -228,14 +236,26 @@ public class Build extends ContainerPageObject {
         return this;
     }
 
+    public Build shouldAbortWithin(final int timeoutInS) {
+        return waitUntilFinished(timeoutInS).shouldAbort();
+    }
+
     public Build shouldBeUnstable() {
         assertThat(this, resultIs(Result.UNSTABLE));
         return this;
     }
 
+    public Build shouldBeUnstableWithin(final int timeoutInS) {
+        return waitUntilFinished(timeoutInS).shouldBeUnstable();
+    }
+
     public Build shouldBe(final Result result) {
         assertThat(this, resultIs(result));
         return this;
+    }
+
+    public Build shouldBeWithin(int timeoutInS, final Result result) {
+        return waitUntilFinished(timeoutInS).shouldBe(result);
     }
 
     private Matcher<Build> resultIs(final Result expected) {
