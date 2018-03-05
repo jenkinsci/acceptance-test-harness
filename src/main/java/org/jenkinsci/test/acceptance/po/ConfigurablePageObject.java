@@ -105,6 +105,7 @@ public abstract class ConfigurablePageObject extends PageObject {
         }
         visit(getConfigUrl());
         waitFor(By.xpath("//form[contains(@name, 'config')]"), 10);
+        waitFor(By.xpath("//span[contains(@class, 'submit-button')]//button[contains(text(), 'Save')]"), 5);
     }
 
     /**
