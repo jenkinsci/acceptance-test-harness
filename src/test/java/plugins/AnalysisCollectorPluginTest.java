@@ -2,6 +2,7 @@ package plugins;
 
 import javax.inject.Inject;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -323,7 +324,7 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
     @WithDocker @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {"warnings", "/org/jenkinsci/test/acceptance/docker/fixtures/GitContainer/unsafe"})
     public void should_open_links_in_folder_dashboard_and_nested_views() {
         //avoid JENKINS-49026
-        checkExtensionAreDeployed(null, "hudson.plugins.analysis.dashboard.AbstractPortlet");
+        checkExtensionAreDeployed("hudson.plugins.analysis.dashboard.AbstractPortlet", Collections.EMPTY_SET);
 
         // Given
         NestedView nested = jenkins.getViews().create(NestedView.class);
@@ -406,7 +407,7 @@ public class AnalysisCollectorPluginTest extends AbstractAnalysisTest<AnalysisCo
     @Test @WithPlugins("dashboard-view")
     public void should_aggregate_warnings_in_dashboard_portlet() {
         //avoid JENKINS-49026
-        checkExtensionAreDeployed(null, "hudson.plugins.analysis.dashboard.AbstractPortlet");
+        checkExtensionAreDeployed("hudson.plugins.analysis.dashboard.AbstractPortlet", Collections.EMPTY_SET);
 
         FreeStyleJob job = createFreeStyleJob();
         buildSuccessfulJob(job);
