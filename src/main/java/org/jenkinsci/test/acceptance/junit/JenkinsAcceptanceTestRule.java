@@ -44,8 +44,6 @@ public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should us
         return new Statement() {
             @Inject JenkinsController controller;
             @Inject Injector injector;
-            @Inject FailureDiagnostics diagnostics;
-            @Inject WebDriver driver;
 
             @Override
             public void evaluate() throws Throwable {
@@ -61,15 +59,6 @@ public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should us
                 } catch (AssumptionViolatedException e) {
                     System.out.printf("Skipping %s%n", description.getDisplayName());
                     e.printStackTrace();
-                    throw e;
-                } catch (Exception|AssertionError e) { // Errors and failures
-                    if (causedBy(e, NoSuchElementException.class) != null) {
-                        diagnostics.write(
-                                "last-page.html",
-                                CapybaraPortingLayerImpl.getPageSource(driver)
-                        );
-                    }
-                    controller.diagnose(e);
                     throw e;
                 } finally {
                     world.endTestScope();
