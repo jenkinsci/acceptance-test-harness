@@ -56,12 +56,8 @@ public class SubversionScm extends Scm {
     }
 
     public <T extends SvnRepositoryBrowser> T useRepositoryBrowser(final Class<T> type) {
-        String path = createPageArea("configs", new Runnable() {
-            @Override public void run() {
-                repositoryBrowser.selectDropdownMenu(type);
-            }
-        });
-        return this.newInstance(type, this, this.getPage().url(path));
+        repositoryBrowser.selectDropdownMenuAlt(type);
+        return this.newInstance(type, this, this.getPage().url(getPath("[1]")));
     }
 
     public SubversionSvmAdvanced advanced() {
