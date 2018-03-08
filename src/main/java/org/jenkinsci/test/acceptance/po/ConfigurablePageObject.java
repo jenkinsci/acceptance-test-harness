@@ -29,6 +29,7 @@ import java.util.concurrent.Callable;
 import com.google.inject.Injector;
 
 import groovy.lang.Closure;
+import org.openqa.selenium.By;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
@@ -103,7 +104,8 @@ public abstract class ConfigurablePageObject extends PageObject {
             return;
         }
         visit(getConfigUrl());
-        elasticSleep(1000); // configure page requires some time to load
+        waitFor(By.xpath("//form[contains(@name, 'config')]"), 10);
+        waitFor(By.xpath("//span[contains(@class, 'submit-button')]//button[contains(text(), 'Save')]"), 5);
     }
 
     /**
