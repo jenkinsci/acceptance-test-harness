@@ -16,6 +16,7 @@ import javax.mail.internet.MimeMultipart;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import static javax.mail.Message.RecipientType.*;
@@ -59,7 +60,7 @@ public abstract class MailService extends Assert {
     public void assertMail(final Pattern subject, String recipient, Pattern body) throws MessagingException, IOException {
         CapybaraPortingLayer hackish = new CapybaraPortingLayerImpl(World.get().getInjector());
 
-        MimeMessage msg = hackish.waitFor().withMessage("Email whose subject matches: %s", subject)
+        MimeMessage msg = hackish.waitFor().withMessage("Email whose subject matches: %s", subject).pollingEvery(5, TimeUnit.SECONDS)
                 .until(new MailArrives(subject))
         ;
 
