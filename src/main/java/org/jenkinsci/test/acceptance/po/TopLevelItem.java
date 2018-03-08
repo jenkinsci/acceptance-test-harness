@@ -43,12 +43,12 @@ public abstract class TopLevelItem extends ContainerPageObject {
      */
     @CheckReturnValue
     public <T extends TopLevelItem> T renameTo(final String newName) {
-        configure();
+        open();
         String oldName = name;
-        control("/name").set(newName);
-        save();
-        waitFor(by.button("Yes")).click();
-
+        control(by.href("/job/" + oldName + "/confirm-rename")).click();
+        WebElement renameButton = waitFor(by.button("Rename"));
+        control(by.name("newName")).set(newName);
+        renameButton.click();
         try {
             return (T) newInstance(getClass(),
                     injector, new URL(url.toExternalForm().replace(oldName, newName)), newName);
