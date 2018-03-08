@@ -1,5 +1,6 @@
 package plugins;
 
+import com.google.common.collect.Sets;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.junit.WithCredentials;
 import org.jenkinsci.test.acceptance.junit.WithDocker;
@@ -40,11 +41,7 @@ import org.openqa.selenium.WebElement;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -704,6 +701,9 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
     // TODO: check if we can remove this test since a similar one in parent
     @Test @Issue("25501") @WithPlugins("email-ext")
     public void should_send_mail_with_expanded_tokens() {
+        //avoid JENKINS-49026
+        checkExtensionAreDeployed( "hudson.plugins.analysis.tokens.AbstractTokenMacro", Sets.newHashSet("hudson.plugins.warnings.tokens.WarningsResultTokenMacro"));
+
         setUpMailer();
 
         FreeStyleJob job = createFreeStyleJob(settings -> {

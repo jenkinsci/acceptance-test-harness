@@ -10,6 +10,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.Collections;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -148,6 +150,9 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
     // TODO: we should have two builds so that the numbers are different
     @Test @Issue("JENKINS-25501") @WithPlugins("email-ext")
     public void should_send_mail_with_expanded_tokens() {
+        //avoid JENKINS-49026
+        checkExtensionAreDeployed("hudson.plugins.analysis.tokens.AbstractTokenMacro", Collections.EMPTY_SET);
+
         setUpMailer();
 
         FreeStyleJob job = createFreeStyleJob();
@@ -166,6 +171,25 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
 
         verifyReceivedMail(String.format("%s: FAILURE", title),
                 String.format("%s: %d-0-%d", title, getNumberOfWarnings(), getNumberOfWarnings()));
+    }
+
+
+    /**
+     * Restart Jenkins if there is not required extension - see JENKINS-49026
+     */
+    protected void checkExtensionAreDeployed(String extensionPointName, Set<String> extensionNames){
+        String result = jenkins.runScript("Jenkins.instance.getExtensionList(" + extensionPointName + ")");
+        boolean contains = false;
+        for(String s:extensionNames){
+            if(!result.contains(s)){
+                contains = false;
+                break;
+            }
+            contains = true;
+        }
+        if(result.contains("[]") || (!extensionNames.isEmpty() && !contains)){
+            jenkins.restart();
+        }
     }
 
     /**
@@ -197,6 +221,9 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      */
     @Test @Issue("JENKINS-39947") @WithPlugins({"dashboard-view", "nested-view", "cloudbees-folder", "analysis-core@1.87"})
     public void should_show_warnings_in_folder() {
+        //avoid JENKINS-49026
+        checkExtensionAreDeployed("hudson.plugins.analysis.dashboard.AbstractPortlet", Collections.EMPTY_SET);
+
         NestedView nested = jenkins.getViews().create(NestedView.class);
 
         DashboardView dashboard = nested.getViews().create(DashboardView.class);
@@ -230,6 +257,9 @@ public abstract class AbstractAnalysisTest<P extends AnalysisAction> extends Abs
      */
     @Test @WithPlugins("dashboard-view")
     public void should_show_warning_totals_in_dashboard_portlet_with_link_to_results() {
+        //avoid JENKINS-49026
+        checkExtensionAreDeployed("hudson.plugins.analysis.dashboard.AbstractPortlet", Collections.EMPTY_SET);
+
         FreeStyleJob job = createFreeStyleJob();
 
         buildJobAndWait(job).shouldSucceed();

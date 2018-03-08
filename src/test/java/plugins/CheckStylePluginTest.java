@@ -67,6 +67,9 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
     @Test @WithPlugins({"git", "dashboard-view", "analysis-core@1.88-SNAPSHOT"}) @WithDocker @Issue("JENKINS-6748")
     @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {CREDENTIALS_ID, CREDENTIALS_KEY})
     public void should_show_warnings_per_user() {
+        //avoid JENKINS-49026
+        jenkins.restart();
+
         DumbSlave agent = createDockerAgent();
 
         String gitRepositoryUrl = createGitRepositoryInDockerContainer();
