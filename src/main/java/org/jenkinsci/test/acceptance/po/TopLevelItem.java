@@ -6,6 +6,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import hudson.util.VersionNumber;
+import org.jenkinsci.test.acceptance.junit.Since;
 import org.openqa.selenium.WebElement;
 
 import com.google.inject.Injector;
@@ -43,12 +45,20 @@ public abstract class TopLevelItem extends ContainerPageObject {
      */
     @CheckReturnValue
     public <T extends TopLevelItem> T renameTo(final String newName) {
-        configure();
         String oldName = name;
-        control("/name").set(newName);
-        save();
-        waitFor(by.button("Yes")).click();
-
+        // Change in behaviour of the rename is in versions > 2.110 see JENKINS-22936
+        if (getJenkins().getVersion().isOlderThan(new VersionNumber("2.110"))) {
+            configure();
+            control("/name").set(newName);
+            save();
+            waitFor(by.button("Yes")).click();
+        } else {
+            open();
+            control(by.href("/job/" + oldName + "/confirm-rename")).click();
+            WebElement renameButton = waitFor(by.button("Rename"), 5);
+            control(by.name("newName")).set(newName);
+            renameButton.click();
+        }
         try {
             return (T) newInstance(getClass(),
                     injector, new URL(url.toExternalForm().replace(oldName, newName)), newName);
