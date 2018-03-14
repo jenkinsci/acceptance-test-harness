@@ -64,7 +64,7 @@ public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction>
      * results in checkstyle-result.xml (no actual maven goal is invoked). Verifies that the blame information is
      * correctly assigned for each of the warnings. Also checks, that the age is increased for yet another build.
      */
-    @Test @WithPlugins({"git", "dashboard-view", "analysis-core@1.88-SNAPSHOT"}) @WithDocker @Issue("JENKINS-6748")
+    @Test @WithPlugins({"git", "dashboard-view", "analysis-core@1.88-SNAPSHOT", "ssh-slaves"}) @WithDocker @Issue("JENKINS-6748")
     @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {CREDENTIALS_ID, CREDENTIALS_KEY})
     public void should_show_warnings_per_user() {
         //avoid JENKINS-49026
