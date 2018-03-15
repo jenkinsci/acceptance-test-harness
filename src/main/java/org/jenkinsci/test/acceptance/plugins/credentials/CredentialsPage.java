@@ -82,4 +82,8 @@ public class CredentialsPage extends ConfigurablePageObject {
         waitFor(by.name("_.id"));
         return wd;
     }
+
+    public String getFormName() {
+        return "update";
+    }
 }
