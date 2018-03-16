@@ -38,11 +38,11 @@ import java.util.regex.Pattern;
 public class Mailtrap extends MailService {
     // these default values is the account that the project "owns".
     private static final int PORT = 2525;
-    private static final String HOST = "mailtrap.io";
-    private String MAILBOX = "19251ad93afaab19b";
-    private String PASSWORD = "c9039d1f090624";
-    private String TOKEN = "2c04434bd66dfc37c130171f9d061af2";
-    private String INBOX_ID = "23170";
+    private static final String HOST = "smtp.mailtrap.io";
+    private String MAILBOX = "selenium-tests-69507a9ef0aa7fa5";
+    private String PASSWORD = "72a80a49ae5ab81d";
+    private String TOKEN = "28314ab4b06951db3531370d82d9232d";
+    private String INBOX_ID = "16868";
 
     /**
      * Unique ID for this test run.
