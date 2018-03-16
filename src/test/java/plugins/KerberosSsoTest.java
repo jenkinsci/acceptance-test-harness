@@ -47,7 +47,9 @@ import org.jenkinsci.test.acceptance.po.GlobalPluginConfiguration;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
 import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.jenkinsci.test.acceptance.po.JenkinsDatabaseSecurityRealm;
+import org.jenkinsci.test.acceptance.po.Login;
 import org.jenkinsci.test.acceptance.po.User;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runners.model.Statement;
@@ -67,6 +69,7 @@ import java.nio.file.Path;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
+import static org.jenkinsci.test.acceptance.Matchers.loggedInAs;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -116,6 +119,11 @@ public class KerberosSsoTest extends AbstractJUnitTest {
 
         // Correctly negotiate in browser
         FirefoxDriver negotiatingDriver = getNegotiatingFirefox(kdc, tokenCache);
+
+        //assure first that user is logged before visiting unprotected root action
+        Assert.assertThat(new Login(jenkins), loggedInAs("user"));
+        negotiatingDriver.get(jenkins.url.toExternalForm());
+
         negotiatingDriver.get(jenkins.url("/whoAmI").toExternalForm());
         String out = negotiatingDriver.getPageSource();
         assertThat(out, containsString(AUTHORIZED));
