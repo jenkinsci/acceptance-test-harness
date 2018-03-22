@@ -120,8 +120,7 @@ public class KerberosSsoTest extends AbstractJUnitTest {
         // Correctly negotiate in browser
         FirefoxDriver negotiatingDriver = getNegotiatingFirefox(kdc, tokenCache);
 
-        //assure first that user is logged before visiting unprotected root action
-        Assert.assertThat(new Login(jenkins), loggedInAs("user"));
+        //visit the page who requires authorization and asks for credentials before visiting unprotected root action "/whoAmI"
         negotiatingDriver.get(jenkins.url.toExternalForm());
 
         negotiatingDriver.get(jenkins.url("/whoAmI").toExternalForm());
