@@ -23,6 +23,7 @@
  */
 package core;
 
+import hudson.util.VersionNumber;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.po.FormValidation;
 import org.jenkinsci.test.acceptance.po.JenkinsConfig;
@@ -43,6 +44,9 @@ public class FormValidationTest extends AbstractJUnitTest {
 
         c.numExecutors.set(-16);
         formValidation = c.numExecutors.getFormValidation();
-        assertThat(formValidation, reports(Kind.ERROR, "Not a non-negative number"));
+
+        //support older jenkins versions
+        String errorMessage = jenkins.getVersion().isNewerThan(new VersionNumber("2.204"))? "Not a non-negative number" : "Not an integer";
+        assertThat(formValidation, reports(Kind.ERROR, errorMessage));
     }
 }
