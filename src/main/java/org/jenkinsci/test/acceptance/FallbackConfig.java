@@ -193,7 +193,7 @@ public class FallbackConfig extends AbstractModule {
         d.register(new Scroller());
 
         try {
-            d.manage().timeouts().pageLoadTimeout(time.seconds(30), TimeUnit.MILLISECONDS);
+            d.manage().timeouts().pageLoadTimeout(time.seconds(50), TimeUnit.MILLISECONDS);
             d.manage().timeouts().implicitlyWait(time.seconds(1), TimeUnit.MILLISECONDS);
         } catch (UnsupportedCommandException e) {
             // sauce labs RemoteWebDriver doesn't support this
