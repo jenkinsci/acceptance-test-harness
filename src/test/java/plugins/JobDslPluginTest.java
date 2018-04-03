@@ -502,7 +502,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
      * If the function is used, the build will be marked as unstable.
      */
     @Test @WithPlugins("config-file-provider")
-    @Ignore
+    @Ignore //customConfigFile  has been removed since job-dsl-1.66
     public void should_unstable_on_deprecated_features() {
         FreeStyleJob seedJob = createSeedJob();
         JobDslBuildStep jobDsl = seedJob.addBuildStep(JobDslBuildStep.class);
