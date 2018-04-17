@@ -80,8 +80,8 @@ public class FallbackConfig extends AbstractModule {
 
     public static final String DOM_MAX_SCRIPT_RUN_TIME = "dom.max_script_run_time";
     public static final String DOM_MAX_CHROME_SCRIPT_RUN_TIME = "dom.max_chrome_script_run_time";
-    public static int PAGE_LOAD_TIMEOUT = 30;
-    public static int IMPLICIT_WAIT_TIMEOUT = 1;
+    public static final int PAGE_LOAD_TIMEOUT = 30;
+    public static final int IMPLICIT_WAIT_TIMEOUT = 1;
 
     @Override
     protected void configure() {

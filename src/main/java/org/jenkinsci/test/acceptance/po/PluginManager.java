@@ -228,12 +228,16 @@ public class PluginManager extends ContainerPageObject {
                 }
             }
         } else {
+
             // JENKINS-50790 It seems that this page takes too much time to load when running in the new ci.jenkins.io
-            driver.manage().timeouts().pageLoadTimeout(time.seconds(60), TimeUnit.MILLISECONDS);
-            visit("available");
-            driver.manage().timeouts().pageLoadTimeout(time.seconds(FallbackConfig.PAGE_LOAD_TIMEOUT), TimeUnit.MILLISECONDS);
+            try {
+                driver.manage().timeouts().pageLoadTimeout(time.seconds(60), TimeUnit.MILLISECONDS);
+                visit("available");
+            } finally {
+                driver.manage().timeouts().pageLoadTimeout(time.seconds(FallbackConfig.PAGE_LOAD_TIMEOUT), TimeUnit.MILLISECONDS);
+            }
             // End JENKINS-50790
-            
+
             final ArrayList<PluginSpec> update = new ArrayList<>();
             for (final PluginSpec n : specs) {
                 switch (installationStatus(n)) {
