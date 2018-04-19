@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 
 import com.google.common.base.Predicate;
 import org.apache.commons.lang3.StringUtils;
+import org.jenkinsci.test.acceptance.FallbackConfig;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.update_center.PluginMetadata;
 import org.jenkinsci.test.acceptance.update_center.PluginSpec;
@@ -227,7 +228,15 @@ public class PluginManager extends ContainerPageObject {
                 }
             }
         } else {
-            visit("available");
+
+            // JENKINS-50790 It seems that this page takes too much time to load when running in the new ci.jenkins.io
+            try {
+                driver.manage().timeouts().pageLoadTimeout(time.seconds(60), TimeUnit.MILLISECONDS);
+                visit("available");
+            } finally {
+                driver.manage().timeouts().pageLoadTimeout(time.seconds(FallbackConfig.PAGE_LOAD_TIMEOUT), TimeUnit.MILLISECONDS);
+            }
+            // End JENKINS-50790
 
             final ArrayList<PluginSpec> update = new ArrayList<>();
             for (final PluginSpec n : specs) {

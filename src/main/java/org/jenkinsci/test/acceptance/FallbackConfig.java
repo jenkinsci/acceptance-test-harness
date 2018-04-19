@@ -80,6 +80,8 @@ public class FallbackConfig extends AbstractModule {
 
     public static final String DOM_MAX_SCRIPT_RUN_TIME = "dom.max_script_run_time";
     public static final String DOM_MAX_CHROME_SCRIPT_RUN_TIME = "dom.max_chrome_script_run_time";
+    public static final int PAGE_LOAD_TIMEOUT = 30;
+    public static final int IMPLICIT_WAIT_TIMEOUT = 1;
 
     @Override
     protected void configure() {
@@ -193,8 +195,8 @@ public class FallbackConfig extends AbstractModule {
         d.register(new Scroller());
 
         try {
-            d.manage().timeouts().pageLoadTimeout(time.seconds(30), TimeUnit.MILLISECONDS);
-            d.manage().timeouts().implicitlyWait(time.seconds(1), TimeUnit.MILLISECONDS);
+            d.manage().timeouts().pageLoadTimeout(time.seconds(PAGE_LOAD_TIMEOUT), TimeUnit.MILLISECONDS);
+            d.manage().timeouts().implicitlyWait(time.seconds(IMPLICIT_WAIT_TIMEOUT), TimeUnit.MILLISECONDS);
         } catch (UnsupportedCommandException e) {
             // sauce labs RemoteWebDriver doesn't support this
             System.out.println(base + " doesn't support page load timeout");

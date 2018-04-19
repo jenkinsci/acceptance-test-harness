@@ -249,12 +249,11 @@ public class GitPluginTest extends AbstractJUnitTest {
     public void create_tag_for_build() {
         GitRepo repo = buildGitRepo();
         repo.transferToDockerContainer(host, port);
-
         job.useScm(GitScm.class)
                 .url(repoUrl)
                 .credentials(USERNAME)
+                .customNameAndMail("fake", "fake@mail.com")
                 .createTagForBuild();
-
         job.addShellStep("git tag -n1");
         job.save();
         Build b = job.startBuild();
