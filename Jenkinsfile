@@ -21,6 +21,7 @@
                             sh '''
                                 export SHARED_DOCKER_SERVICE=true
                                 eval $(./vnc.sh)
+                                export DISPLAY=$BROWSER_DISPLAY # No need to use separate variable in automation
                                 ./run.sh firefox latest -Dmaven.test.failure.ignore=true -DforkCount=1 -B
                             '''
                         }
