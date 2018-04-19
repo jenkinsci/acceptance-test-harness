@@ -1,9 +1,33 @@
 // For ci.jenkins.io
 // https://github.com/jenkins-infra/documentation/blob/master/ci.adoc
 
+def imageName = 'jenkinsciinfra/ath'
+
+def container
+/* Assuming we're not inside of a pull request or multibranch pipeline */
+if (!(env.CHANGE_ID || env.BRANCH_NAME)) {
+    node('docker') {
+        stage('Prepare Container') {
+            timestamps {
+                checkout scm
+                sh 'git rev-parse HEAD > GIT_COMMIT'
+                shortCommit = readFile('GIT_COMMIT').take(6)
+                def imageTag = "${env.BUILD_ID}-build${shortCommit}"
+                echo "Creating the container ${imageName}:${imageTag}"
+                container = docker.build("${imageName}:${imageTag}", 'src/main/resources/ath-container')
+            }
+        }
+
+        stage('Publish container') {
+            infra.withDockerCredentials {
+                timestamps { container.push() }
+            }
+        }
+    }
+} else { // PR or multibranch pipeline
 
     for (int i = 0; i < (BUILD_NUMBER as int); i++) {
-      milestone()
+        milestone()
     }
     def splits = splitTests count(10)
     def branches = [:]
@@ -11,7 +35,7 @@
         int index = i;
         branches["split${i}"] = {
             stage("Run ATH - split${index}") {
-                node('docker && highmem'){
+                node('docker && highmem') {
                     checkout scm
                     def image = docker.build('jenkins/ath', 'src/main/resources/ath-container')
                     image.inside('-v /var/run/docker.sock:/var/run/docker.sock') {
@@ -30,3 +54,4 @@
         }
     }
     parallel branches
+}
