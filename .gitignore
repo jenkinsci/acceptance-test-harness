@@ -16,7 +16,6 @@ target
 .classpath
 .settings/
 jenkins*home/
-.idea/
 *.iml
 *.iws
 *.ipr
