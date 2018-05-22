@@ -54,7 +54,7 @@ public abstract class TopLevelItem extends ContainerPageObject {
             waitFor(by.button("Yes")).click();
         } else {
             open();
-            control(by.href("/job/" + oldName + "/confirm-rename")).click();
+            control(by.href(url.getPath() + "confirm-rename")).click();
             WebElement renameButton = waitFor(by.button("Rename"), 5);
             control(by.name("newName")).set(newName);
             renameButton.click();
