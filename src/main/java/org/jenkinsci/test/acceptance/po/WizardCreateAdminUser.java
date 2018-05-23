@@ -63,7 +63,7 @@ public class WizardCreateAdminUser extends PageObject {
         }
 
         driver.switchTo().defaultContent();
-        clickButton("Save and Finish");
+        clickButton("Save and Continue");
         return this;
     }
 
