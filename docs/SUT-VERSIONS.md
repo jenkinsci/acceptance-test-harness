@@ -60,11 +60,13 @@ so e.g. use `TYPE=winstone` in order to get the `PLUGINS_DIR` option working.
 
 ### Running in pre configured plugin mode
 
-You can provide a war file that somehow, for example by being created by the [CWP](https://github.com/jenkinsci/custom-war-packager),
-contains an already pre configured set of plugins, in this case you may want to ATH to not manage plugins installations at all
-but only validate that the existing configured plugins are enough to run the tests.
+In some cases you may be running the ATH against a pre configured instance, for example you can provide a war file that
+somehow, for example by being created by the [CWP](https://github.com/jenkinsci/custom-war-packager),
+contains an already pre configured set of plugins, or against an existing environment by using some specific Controller.
+In this case you may want to ATH to not manage plugins installations at all but only validate that the existing configured
+plugins are enough to run the tests.
 
-You can activate this mode by adding a CONFIG file with the property `pluginEvaluationOutcome`, possible values for this property are:
+You can activate this mode with the property `pluginEvaluationOutcome`, possible values for this property are:
 * `"skipOnInvalid"` Which means the test will be skipped if the installed plugins are not enough to cover the test requisites
 * `"failOnInvalid"` Which means the test will fail if the installed plugins are not enough to cover the test requisites
 
