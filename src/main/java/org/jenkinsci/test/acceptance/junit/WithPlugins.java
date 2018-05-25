@@ -98,9 +98,6 @@ public @interface WithPlugins {
         @Inject @Named("ExercisedPluginReporter")
         ExercisedPluginsReporter pluginReporter;
 
-        @Inject(optional=true) @Named("neverReplaceExistingPlugins")
-        boolean neverReplaceExistingPlugins;
-
         String pluginEvaluationOutcome = System.getProperty("pluginEvaluationOutcome", PRECONFIGURED_MODE_DISABLED);
 
         @VisibleForTesting static List<PluginSpec> combinePlugins(List<WithPlugins> wp) {
@@ -188,11 +185,7 @@ public @interface WithPlugins {
                                 iterator.remove(); // Already installed
                                 break;
                             case OUTDATED:
-                                if (neverReplaceExistingPlugins) {
-                                    throw new AssumptionViolatedException(String.format(
-                                            "Test requires %s plugin", spec
-                                    ));
-                                }
+                                LOGGER.info(spec + " is outdated");
                                 break;
                             default:
                                 assert false;
