@@ -58,16 +58,13 @@ executed during your tests).
 Note that this option is not yet supported by all [Jenkins controllers](CONTROLLER.md), 
 so e.g. use `TYPE=winstone` in order to get the `PLUGINS_DIR` option working.
 
-### Running in pre configured plugin mode
-
-In some cases you may be running the ATH against a pre configured instance, for example you can provide a war file that
-somehow, for example by being created by the [CWP](https://github.com/jenkinsci/custom-war-packager),
-contains an already pre configured set of plugins, or against an existing environment by using some specific Controller.
-In this case you may want to ATH to not manage plugins installations at all but only validate that the existing configured
+In some cases, when you are providing the full plugins colection, you are running the ATH against a war with a pre configured
+set of plugins (for example by being created by the [CWP](https://github.com/jenkinsci/custom-war-packager))
+or running against an already existing environment, you may want the ATH to not manage plugins at all but only validate that the existing configured
 plugins are enough to run the tests.
 
-You can activate this mode with the property `pluginEvaluationOutcome`, possible values for this property are:
+You can activate this `pre configured plugins` mode with the System property `pluginEvaluationOutcome`, possible values for this property are:
 * `"skipOnInvalid"` Which means the test will be skipped if the installed plugins are not enough to cover the test requisites
 * `"failOnInvalid"` Which means the test will fail if the installed plugins are not enough to cover the test requisites
 
-This property has to be provided via [the groovy wiring script](WIRING.md) and this mode is disabled if the property is not specified
+Note this mode is disabled if the property is not specified

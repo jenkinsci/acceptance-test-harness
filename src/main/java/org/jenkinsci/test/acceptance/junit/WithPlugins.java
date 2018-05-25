@@ -90,6 +90,7 @@ public @interface WithPlugins {
         private static final Logger LOGGER = Logger.getLogger(WithPlugins.class.getName());
         private static final String FAIL_ON_INVALID = "failOnInvalid";
         private static final String SKIP_ON_INVALID = "skipOnInvalid";
+        private static final String PRECONFIGURED_MODE_DISABLED = "validationDisabled";
 
         @Inject
         Injector injector;
@@ -100,8 +101,7 @@ public @interface WithPlugins {
         @Inject(optional=true) @Named("neverReplaceExistingPlugins")
         boolean neverReplaceExistingPlugins;
 
-        @Inject(optional = true) @Named("pluginEvaluationOutcome")
-        String pluginEvaluationOutcome;
+        String pluginEvaluationOutcome = System.getProperty("pluginEvaluationOutcome", PRECONFIGURED_MODE_DISABLED);
 
         @VisibleForTesting static List<PluginSpec> combinePlugins(List<WithPlugins> wp) {
             Map<String, PluginSpec> plugins = new LinkedHashMap<>();
@@ -148,17 +148,7 @@ public @interface WithPlugins {
                     List<PluginSpec> plugins = combinePlugins(wp);
 
                     // Check if we are in preconfigured plugins mode
-                    if(pluginEvaluationOutcome != null) {
-
-                        PluginManager pm = jenkins.getPluginManager();
-
-                        for (PluginSpec spec : plugins) {
-                            PluginManager.InstallationStatus status = pm.installationStatus(spec);
-                            if (!PluginManager.InstallationStatus.UP_TO_DATE.equals(status)) {
-                                handleInvalidState(pluginEvaluationOutcome, spec, d);
-                            }
-                        }
-                    } else { // Not in preconfigured plugins mode, ATH will take care of installation/update of plugins
+                    if(pluginEvaluationOutcome.equals(PRECONFIGURED_MODE_DISABLED)) {
 
                         installPlugins(plugins);
 
@@ -171,6 +161,15 @@ public @interface WithPlugins {
                                     plugin.getName(),
                                     version
                             );
+                        }
+                    } else { // In preconfigured plugins mode, ATH will just validate plugins
+                        PluginManager pm = jenkins.getPluginManager();
+
+                        for (PluginSpec spec : plugins) {
+                            PluginManager.InstallationStatus status = pm.installationStatus(spec);
+                            if (!PluginManager.InstallationStatus.UP_TO_DATE.equals(status)) {
+                                handleInvalidState(pluginEvaluationOutcome, spec, d);
+                            }
                         }
                     }
                     base.evaluate();
