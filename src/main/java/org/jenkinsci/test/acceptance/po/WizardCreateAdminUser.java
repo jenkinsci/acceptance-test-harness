@@ -73,7 +73,7 @@ public class WizardCreateAdminUser extends PageObject {
     }
 
     public void wizardShouldFinishSuccessfully() {
-        By installDoneButtonSelector = by.button(".btn-primary.install-done");
+        By installDoneButtonSelector = by.css(".btn-primary.install-done");
         waitFor(installDoneButtonSelector);
         control(installDoneButtonSelector).click();
         waitFor(driver, hasContent("Welcome to Jenkins!"), 30);
