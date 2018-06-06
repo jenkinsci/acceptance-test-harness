@@ -53,3 +53,6 @@ RUN touch /home/ath-user/.Xauthority
 # have in ENTRYPOINT as the container is started as ath-user.
 USER root
 RUN chmod ug+s "$(which docker)"
+
+# Make sure you can start vnc as root also
+RUN (echo ath-user; echo ath-user; echo "n") | vncpasswd 
