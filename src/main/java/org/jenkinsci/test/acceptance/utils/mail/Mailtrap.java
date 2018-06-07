@@ -41,7 +41,7 @@ public class Mailtrap extends MailService {
     private static final String HOST = "smtp.mailtrap.io";
     private String MAILBOX = "selenium-tests-69507a9ef0aa7fa5";
     private String PASSWORD = "72a80a49ae5ab81d";
-    private String TOKEN = "28314ab4b06951db3531370d82d9232d";
+    private String TOKEN = "ceb98fc6d89ea0cf44e368916cec41c7";
     private String INBOX_ID = "16868";
 
     /**
