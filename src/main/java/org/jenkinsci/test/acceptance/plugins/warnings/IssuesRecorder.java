@@ -21,6 +21,9 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
     private Control toolsRepeatable = control("repeatable-add");
     private Control advancedButton = control("advanced-button");
     private Control enabledForFailureCheckBox = control("enabledForFailure");
+    private Control ignoreAnalysisResultCheckBox = control("ignoreAnalysisResult");
+    private Control overallResultMustBeSuccessCheckBox = control("overallResultMustBeSuccess");
+    private Control referenceJobField = control("referenceJob");
 
     /**
      * Creates a new page object.
@@ -76,6 +79,35 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
      */
     public void setEnabledForFailure(final boolean isChecked) {
         enabledForFailureCheckBox.check(isChecked);
+    }
+
+    /**
+     * Enables or disables the checkbox 'ignoreAnalysisResult'.
+     *
+     * @param isChecked
+     *         determines if the checkbox should be checked or not
+     */
+    public void setIgnoreAnalysisResult(final boolean isChecked) {
+        ignoreAnalysisResultCheckBox.check(isChecked);
+    }
+
+    /**
+     * Enables or disables the checkbox 'overallResultMustBeSuccess'.
+     *
+     * @param isChecked
+     *         determines if the checkbox should be checked or not
+     */
+    public void setOverallResultMustBeSuccess(final boolean isChecked) {
+        overallResultMustBeSuccessCheckBox.check(isChecked);
+    }
+
+    /**
+     * Sets the value of the input field 'referenceJob'.
+     * @param referenceJob
+     *          the name of the referenceJob
+     */
+    public void setReferenceJobField(final String referenceJob){
+        referenceJobField.set(referenceJob);
     }
 
     /**
