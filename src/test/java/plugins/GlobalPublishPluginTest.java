@@ -10,6 +10,7 @@ import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.plugins.publish_over.PublishGlobalConfig;
 import org.jenkinsci.test.acceptance.plugins.publish_over.PublishGlobalPublisher;
+import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.jenkinsci.test.acceptance.po.Slave;
@@ -25,6 +26,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -100,7 +104,8 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
         }
         j.save();
 
-        j.startBuild().shouldSucceed();
+        Build build = j.startBuild().shouldSucceed();
+        assertThat(build.getConsole(), not(containsString("Transferred 0 file(s)")));
         assertEquals(cpFile.asText(), fileContents(dock, "/tmp/odes.txt"));
     }
 
@@ -123,7 +128,8 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
         }
         j.save();
 
-        j.startBuild().shouldSucceed();
+        Build build = j.startBuild().shouldSucceed();
+        assertThat(build.getConsole(), not(containsString("Transferred 0 file(s)")));
         assertEquals(cpFile.asText(), fileContents(dock, randomPath + "odes.txt"));
     }
 
@@ -143,7 +149,8 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
             fps.getDefaultTransfer().removePrefix.set("prefix_");
         }
         j.save();
-        j.startBuild().shouldSucceed();
+        Build build = j.startBuild().shouldSucceed();
+        assertThat(build.getConsole(), not(containsString("Transferred 0 file(s)")));
         assertEquals(test.asText(), fileContents(dock, "/tmp/odes.txt"));
     }
 
@@ -163,7 +170,8 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
             fps.getDefaultTransfer().excludes.set("**/*.exclude");
         }
         j.save();
-        j.startBuild().shouldSucceed();
+        Build build = j.startBuild().shouldSucceed();
+        assertThat(build.getConsole(), not(containsString("Transferred 0 file(s)")));
         assertTrue(fileExists(dock, "/tmp/prefix_/"));
         assertFalse(fileExists(dock, "/tmp/prefix_/.exclude"));
     }
@@ -183,7 +191,8 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
             fps.getDefaultTransfer().sourceFile.set("prefix_/test.txt,odes.txt");
         }
         j.save();
-        j.startBuild().shouldSucceed();
+        Build build = j.startBuild().shouldSucceed();
+        assertThat(build.getConsole(), not(containsString("Transferred 0 file(s)")));
         assertTrue(fileExists(dock, "/tmp/prefix_/test.txt"));
         assertTrue(fileExists(dock, "/tmp/odes.txt"));
     }
@@ -204,7 +213,8 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
             fps.getDefaultTransfer().sourceFile.set("te,st.txt;odes.txt");
         }
         j.save();
-        j.startBuild().shouldSucceed();
+        Build build = j.startBuild().shouldSucceed();
+        assertThat(build.getConsole(), not(containsString("Transferred 0 file(s)")));
         assertTrue(fileExists(dock, "/tmp/te,st.txt"));
         assertTrue(fileExists(dock, "/tmp/odes.txt"));
     }
@@ -226,7 +236,8 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
             fps.getDefaultTransfer().sourceFile.set(".svn,CVS,odes.txt");
         }
         j.save();
-        j.startBuild().shouldSucceed();
+        Build build = j.startBuild().shouldSucceed();
+        assertThat(build.getConsole(), not(containsString("Transferred 0 file(s)")));
         assertTrue(fileExists(dock, "/tmp/odes.txt"));
         assertFalse(fileExists(dock, "/tmp/.svn"));
         assertFalse(fileExists(dock, "/tmp/CVS"));
@@ -250,7 +261,8 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
             fps.getDefaultTransfer().noDefaultExcludes.check();
         }
         j.save();
-        j.startBuild().shouldSucceed();
+        Build build = j.startBuild().shouldSucceed();
+        assertThat(build.getConsole(), not(containsString("Transferred 0 file(s)")));
         assertTrue(fileExists(dock, "/tmp/odes.txt"));
         assertTrue(fileExists(dock, "/tmp/.svn"));
         assertTrue(fileExists(dock, "/tmp/CVS"));
@@ -302,7 +314,8 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
         }
 
         j.save();
-        j.startBuild().shouldSucceed();
+        Build build = j.startBuild().shouldSucceed();
+        assertThat(build.getConsole(), not(containsString("Transferred 0 file(s)")));
         assertTrue(fileExists(dock, "/tmp/odes.txt"));
         assertFalse(fileExists(dock, "/tmp/dockertmp/empty"));
     }
@@ -322,7 +335,8 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
             fps.getDefaultTransfer().sourceFile.set("flat/odes.txt,odes.txt");
         }
         j.save();
-        j.startBuild().shouldSucceed();
+        Build build = j.startBuild().shouldSucceed();
+        assertThat(build.getConsole(), not(containsString("Transferred 0 file(s)")));
         assertTrue(fileExists(dock, "/tmp/flat/odes.txt"));
         assertTrue(fileExists(dock, "/tmp/odes.txt"));
     }
@@ -365,7 +379,8 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
         DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHH");
         Date date = new Date();
         j.save();
-        j.startBuild().shouldSucceed();
+        Build build = j.startBuild().shouldSucceed();
+        assertThat(build.getConsole(), not(containsString("Transferred 0 file(s)")));
         assertTrue(fileExists(dock, "/tmp/" + dateFormat.format(date) + "/odes.txt"));
     }
 
@@ -384,7 +399,8 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
             fps.getDefaultTransfer().sourceFile.set("odes.txt");
         }
         j.save();
-        j.startBuild().shouldSucceed();
+        Build build = j.startBuild().shouldSucceed();
+        assertThat(build.getConsole(), not(containsString("Transferred 0 file(s)")));
         assertTrue(fileExists(dock, "/tmp/odes.txt"));
         assertFalse(fileExists(dock, "/tmp/old.txt"));
     }
@@ -408,7 +424,8 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
             fps.addTransferSet().sourceFile.set("odes3.txt");
         }
         j.save();
-        j.startBuild().shouldSucceed();
+        Build build = j.startBuild().shouldSucceed();
+        assertThat(build.getConsole(), not(containsString("Transferred 0 file(s)")));
         assertTrue(fileExists(dock, "/tmp/odes.txt"));
         assertTrue(fileExists(dock, "/tmp/odes2.txt"));
         assertTrue(fileExists(dock, "/tmp/odes3.txt"));
@@ -435,7 +452,8 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
             fps2.getDefaultTransfer().sourceFile.set("odes.txt");
         }
         j.save();
-        j.startBuild().shouldSucceed();
+        Build build = j.startBuild().shouldSucceed();
+        assertThat(build.getConsole(), not(containsString("Transferred 0 file(s)")));
         assertTrue(fileExists(dock, "/tmp/odes.txt"));
         assertTrue(fileExists(dock2, "/tmp/odes.txt"));
     }
@@ -459,7 +477,8 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
             fps.getDefaultTransfer().sourceFile.set("odes.txt");
         }
         j.save();
-        j.startBuild().shouldSucceed();
+        Build build = j.startBuild().shouldSucceed();
+        assertThat(build.getConsole(), not(containsString("Transferred 0 file(s)")));
         assertEquals(cpFile.asText(), fileContents(dock, "/tmp/odes.txt"));
     }
 
