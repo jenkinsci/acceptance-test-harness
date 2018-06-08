@@ -45,15 +45,21 @@ import java.io.IOException;
  *
  * The latter example declares that running the test with older version is pointless, typically because of missing feature.
  *
- * The annotation guarantees that the plugin is installed in required or later version.
- * If the plugin is already installed but not in correct version then
- * the environment variable NEVER_REPLACE_EXISTING_PLUGINS is evaluated:
+ * In normal mode the annotation guarantees that the plugin is installed in required or later version.
+ *
+ * There is also a pre configured plugins mode, running in this mode means that the ATH is using a war file that (somehow)
+ * has already preconfigured all the plugins that are to be tested, in that case the ATH only validates that the
+ * pre configured plugin universe is enough to run the tests and don't try to modify the existing plugins in any way.
+ *
+ * If the existing plugin configuration is not enough to run the test the end result depends on the configured value
+ * for the configuration property pluginEvaluationOutcome
  * <ul>
- *     <li>if the environment variable is set then the test will be skipped.</li>
- *     <li>if the environment variable is undefined then the installed version
- *     of the plugin is overwritten with the latest version of the plugin. If
- *     required version is not available in update center, the test will fail.</li>
-*  </ul>
+ *     <li>failOnInvalid means the test is to fail if the plugin configuration is not valid for the test</li>
+ *     <li>skipOnInvalid means the test is to be skipped if the plugin configuration is not valid for the test</li>
+ * </ul>
+ *
+ * Pre configured plugins mode is activated if and only if pluginEvaluationOutcome has a not null value, by default is
+ * not active
  *
  * @author Kohsuke Kawaguchi
  */
@@ -74,6 +80,9 @@ public @interface WithPlugins {
     class RuleImpl implements TestRule {
 
         private static final Logger LOGGER = Logger.getLogger(WithPlugins.class.getName());
+        private static final String FAIL_ON_INVALID = "failOnInvalid";
+        private static final String SKIP_ON_INVALID = "skipOnInvalid";
+        private static final String PRECONFIGURED_MODE_DISABLED = "validationDisabled";
 
         @Inject
         Injector injector;
@@ -81,8 +90,7 @@ public @interface WithPlugins {
         @Inject @Named("ExercisedPluginReporter")
         ExercisedPluginsReporter pluginReporter;
 
-        @Inject(optional=true) @Named("neverReplaceExistingPlugins")
-        boolean neverReplaceExistingPlugins;
+        String pluginEvaluationOutcome = System.getProperty("pluginEvaluationOutcome", PRECONFIGURED_MODE_DISABLED);
 
         @VisibleForTesting static List<PluginSpec> combinePlugins(List<WithPlugins> wp) {
             Map<String, PluginSpec> plugins = new LinkedHashMap<>();
@@ -99,7 +107,7 @@ public @interface WithPlugins {
                         } else if (candidate.getVersion() == null) {
                             // Existing is equally or more specific - noop
                         } else if (candidate.getVersionNumber().isNewerThan(existing.getVersionNumber())) {
-                            // Candidate requires never version - replace
+                            // Candidate requires newer version - replace
                             plugins.put(candidate.getName(), candidate);
                         }
                     }
@@ -127,17 +135,31 @@ public @interface WithPlugins {
                     }
 
                     List<PluginSpec> plugins = combinePlugins(wp);
-                    installPlugins(plugins);
 
-                    for (PluginSpec plugin : plugins) {
-                        Plugin installedPlugin = jenkins.getPlugin(plugin.getName());
-                        VersionNumber installedVersion = installedPlugin.getVersion();
-                        String version = installedVersion.toString();
-                        pluginReporter.log(
-                                d.getClassName() + "." + d.getMethodName(),
-                                plugin.getName(),
-                                version
-                        );
+                    // Check if we are in preconfigured plugins mode
+                    if(pluginEvaluationOutcome.equals(PRECONFIGURED_MODE_DISABLED)) {
+
+                        installPlugins(plugins);
+
+                        for (PluginSpec plugin : plugins) {
+                            Plugin installedPlugin = jenkins.getPlugin(plugin.getName());
+                            VersionNumber installedVersion = installedPlugin.getVersion();
+                            String version = installedVersion.toString();
+                            pluginReporter.log(
+                                    d.getClassName() + "." + d.getMethodName(),
+                                    plugin.getName(),
+                                    version
+                            );
+                        }
+                    } else { // In preconfigured plugins mode, ATH will just validate plugins
+                        PluginManager pm = jenkins.getPluginManager();
+
+                        for (PluginSpec spec : plugins) {
+                            PluginManager.InstallationStatus status = pm.installationStatus(spec);
+                            if (!PluginManager.InstallationStatus.UP_TO_DATE.equals(status)) {
+                                handleInvalidState(pluginEvaluationOutcome, spec, d, status);
+                            }
+                        }
                     }
                     base.evaluate();
                 }
@@ -155,11 +177,7 @@ public @interface WithPlugins {
                                 iterator.remove(); // Already installed
                                 break;
                             case OUTDATED:
-                                if (neverReplaceExistingPlugins) {
-                                    throw new AssumptionViolatedException(String.format(
-                                            "Test requires %s plugin", spec
-                                    ));
-                                }
+                                LOGGER.info(spec + " is outdated");
                                 break;
                             default:
                                 assert false;
@@ -181,6 +199,23 @@ public @interface WithPlugins {
                     }
                 }
             };
+        }
+
+        private void handleInvalidState(String pluginEvaluationOutcome, PluginSpec spec, Description d, PluginManager.InstallationStatus status) {
+            String format = String.format("%s plugin is required by test %s but it is not installed in a valid version and ATH is running in preconfigured mode", spec, d.getDisplayName());
+            if (status.equals(PluginManager.InstallationStatus.OUTDATED)) {
+                Jenkins jenkins = injector.getInstance(Jenkins.class);
+                Plugin existingPlugin = jenkins.getPlugin(spec.getName());
+                format = String.format("%s Existing installed version of plugin %s is %s", format, spec.getName(), existingPlugin.getVersion());
+            }
+
+            if (pluginEvaluationOutcome.equals(FAIL_ON_INVALID)) {
+                throw new AssertionError(format);
+            } else if (pluginEvaluationOutcome.equals(SKIP_ON_INVALID)) {
+                throw new AssumptionViolatedException(format);
+            } else {
+                assert false : "unrecognized pluginEvaluationOutcome=" + pluginEvaluationOutcome;
+            }
         }
     }
 }
