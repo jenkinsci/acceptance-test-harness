@@ -46,14 +46,6 @@ import java.io.IOException;
  * The latter example declares that running the test with older version is pointless, typically because of missing feature.
  *
  * In normal mode the annotation guarantees that the plugin is installed in required or later version.
- * If the plugin is already installed but not in correct version then
- * the environment variable NEVER_REPLACE_EXISTING_PLUGINS is evaluated:
- * <ul>
- *     <li>if the environment variable is set then the test will be skipped.</li>
- *     <li>if the environment variable is undefined then the installed version
- *     of the plugin is overwritten with the latest version of the plugin. If
- *     required version is not available in update center, the test will fail.</li>
- *  </ul>
  *
  * There is also a pre configured plugins mode, running in this mode means that the ATH is using a war file that (somehow)
  * has already preconfigured all the plugins that are to be tested, in that case the ATH only validates that the
@@ -165,7 +157,7 @@ public @interface WithPlugins {
                         for (PluginSpec spec : plugins) {
                             PluginManager.InstallationStatus status = pm.installationStatus(spec);
                             if (!PluginManager.InstallationStatus.UP_TO_DATE.equals(status)) {
-                                handleInvalidState(pluginEvaluationOutcome, spec, d);
+                                handleInvalidState(pluginEvaluationOutcome, spec, d, status);
                             }
                         }
                     }
@@ -209,12 +201,20 @@ public @interface WithPlugins {
             };
         }
 
-        private void handleInvalidState(String pluginEvaluationOutcome, PluginSpec spec, Description d) {
-            final String format = String.format("%s plugin is required by test %s but it is not installed in a valid version and ATH is running in preconfigured mode", spec, d.getDisplayName());
+        private void handleInvalidState(String pluginEvaluationOutcome, PluginSpec spec, Description d, PluginManager.InstallationStatus status) {
+            String format = String.format("%s plugin is required by test %s but it is not installed in a valid version and ATH is running in preconfigured mode", spec, d.getDisplayName());
+            if (status.equals(PluginManager.InstallationStatus.OUTDATED)) {
+                Jenkins jenkins = injector.getInstance(Jenkins.class);
+                Plugin existingPlugin = jenkins.getPlugin(spec.getName());
+                format = String.format("%s Existing installed version of plugin %s is %s", format, spec.getName(), existingPlugin.getVersion());
+            }
+
             if (pluginEvaluationOutcome.equals(FAIL_ON_INVALID)) {
-                throw new IllegalStateException(format);
+                throw new AssertionError(format);
             } else if (pluginEvaluationOutcome.equals(SKIP_ON_INVALID)) {
                 throw new AssumptionViolatedException(format);
+            } else {
+                assert false : "unrecognized pluginEvaluationOutcome=" + pluginEvaluationOutcome;
             }
         }
     }
