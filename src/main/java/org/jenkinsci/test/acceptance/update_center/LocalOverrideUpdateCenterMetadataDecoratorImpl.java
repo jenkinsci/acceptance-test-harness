@@ -67,6 +67,7 @@ public class LocalOverrideUpdateCenterMetadataDecoratorImpl implements UpdateCen
 
             try {
                 override(ucm, e.getValue());
+                System.err.println("Using XXX.jpi/XXX_JPI env vars is deprecated. Use LOCAL_JARS instead.");
             } catch (Exception x) {
                 throw new IllegalArgumentException("Unable to honor environment variable "+key, x);
             }

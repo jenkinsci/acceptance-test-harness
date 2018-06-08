@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
+import java.util.regex.Pattern;
 
 import javax.annotation.Nonnull;
 
@@ -94,8 +95,8 @@ public class PluginMetadata {
 
     public PluginMetadata withVersion(@Nonnull String v) {
         if (v == null) throw new IllegalArgumentException();
-
-        return new PluginMetadata(name, gav, v, requiredCore, dependencies);
+        String newGav = gav.replaceAll("\\b" + Pattern.quote(version) + "\\b", v);
+        return new PluginMetadata(name, newGav, v, requiredCore, dependencies);
     }
 
     @Override
