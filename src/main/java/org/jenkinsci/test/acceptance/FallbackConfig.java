@@ -340,19 +340,7 @@ public class FallbackConfig extends AbstractModule {
             throw new Error("Could not find jenkins.war, use JENKINS_WAR or JENKINS_VERSION to specify it.", ex);
         }
     }
-
-    /**
-     * Switch to control if an existing plugin should be updated.
-     *
-     * <p>
-     * If true, a test will be skipped when it requires a newer version of a plugin that's already installed.
-     * If false, an existing plugin will be updated to the requirements of the test.
-     */
-    @Provides @Named("neverReplaceExistingPlugins")
-    public boolean neverReplaceExistingPlugins() {
-        return System.getenv("NEVER_REPLACE_EXISTING_PLUGINS") != null;
-    }
-
+    
     /**
      *  Provides a mechanism to create a report on which plugins were used
      *  during the test execution

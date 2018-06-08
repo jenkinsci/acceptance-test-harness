@@ -5,16 +5,14 @@
 
 FROM ubuntu:xenial
 
-# install SSHD
-RUN apt-get update && apt-get install -y openssh-server
-
 RUN mkdir -p /var/run/sshd
 
-# install git
-RUN apt-get install -y git
-
-# install zip
-RUN apt-get install -y zip
+# install SSHD, Git and zip
+RUN apt-get update && apt-get install -y \
+    openssh-server \
+    git \
+    zip \
+    && rm -rf /var/lib/apt/lists/*
 
 # create a git user and create .ssh dir
 RUN useradd git -d /home/git && \

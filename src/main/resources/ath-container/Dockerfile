@@ -22,6 +22,7 @@ RUN apt-get clean && \
 # All we need is a statically linked client library - no need to install daemon deps: https://get.docker.com/builds/
 RUN curl -fsSLO https://get.docker.com/builds/Linux/x86_64/docker-17.04.0-ce.tgz && \
     tar --strip-components=1 -xvzf docker-17.04.0-ce.tgz -C /usr/local/bin
+ENV SHARED_DOCKER_SERVICE true
 
 # Allow injecting uid and git to match directory ownership
 ARG uid=1000

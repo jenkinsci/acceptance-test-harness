@@ -14,3 +14,7 @@ if command -v vncviewer >/dev/null 2>&1; then
 fi
 
 echo export BROWSER_DISPLAY=$display
+if [ "$SHARED_DOCKER_SERVICE" == "true" ]; then
+    # No need to use separate variable when in container
+    echo export DISPLAY=$display
+fi

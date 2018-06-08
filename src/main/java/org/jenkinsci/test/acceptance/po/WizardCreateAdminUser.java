@@ -29,6 +29,7 @@ import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 
 import com.google.inject.Inject;
+import org.openqa.selenium.By;
 
 /**
  * Page object for Wizard Create admin user
@@ -36,7 +37,6 @@ import com.google.inject.Inject;
  */
 public class WizardCreateAdminUser extends PageObject {
 
-    private static final String START_BUTTON_TEXT = "Start using";
     Control cUsername = control(by.name("username"));
     Control cPassword1 = control(by.name("password1"));
     Control cPassword2 = control(by.name("password2"));
@@ -63,7 +63,7 @@ public class WizardCreateAdminUser extends PageObject {
         }
 
         driver.switchTo().defaultContent();
-        clickButton("Save and Finish");
+        control(by.css(".btn-primary.save-first-user")).click();
         return this;
     }
 
@@ -73,8 +73,9 @@ public class WizardCreateAdminUser extends PageObject {
     }
 
     public void wizardShouldFinishSuccessfully() {
-        waitFor(by.button(START_BUTTON_TEXT));
-        clickButton(START_BUTTON_TEXT);
+        By installDoneButtonSelector = by.css(".btn-primary.install-done");
+        waitFor(installDoneButtonSelector);
+        control(installDoneButtonSelector).click();
         waitFor(driver, hasContent("Welcome to Jenkins!"), 30);
     }
 
