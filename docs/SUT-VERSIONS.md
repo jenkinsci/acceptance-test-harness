@@ -11,9 +11,9 @@ the update center. There are several ways to override this:
 
 ### Use custom plugin version
 
-Environment variables like `<ARTIFACT_ID>.version` can be used to specify what version will be installed:
+Environment variable `VERSION_OVERRIDES` can be used to specify what plugin version should be used instead of those in update center:
 
-    $ env git.version=2.3 mvn test
+    $ export VERSION_OVERRIDES=foo=1.2,bar=1.0
 
 ### Use custom plugin file
 
@@ -21,7 +21,7 @@ When you are testing locally developed Jenkins plugin, you'd like the test harne
 local version as opposed to download the plugin from update center. This can be done by instructing the harness
 accordingly.
 
-    $ env LOCAL_JARS=path/to/your/ldap.jpi:path/to/another.jpi
+    $ export LOCAL_JARS=path/to/your/ldap.jpi:path/to/another.jpi
 
 You can also do this from [the groovy wiring script](WIRING.md).
 This scheme also works for a plugin that's not yet released.
