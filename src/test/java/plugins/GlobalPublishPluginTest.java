@@ -1,6 +1,7 @@
 package plugins;
 
 import com.google.inject.Inject;
+import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.docker.DockerContainer;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
@@ -27,11 +28,9 @@ import java.util.Date;
 import java.util.concurrent.ExecutionException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Abstract class for the publisher class.
@@ -155,7 +154,7 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
     }
 
     @Test
-    public void publish_resources_with_excludes() throws Exception {
+    public void publish_resources_with_excludes() {
         DockerContainer dock = container.get();
         Resource cpDir = resource("/ftp_plugin/");
 
@@ -172,12 +171,12 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
         j.save();
         Build build = j.startBuild().shouldSucceed();
         assertThat(build.getConsole(), not(containsString("Transferred 0 file(s)")));
-        assertTrue(fileExists(dock, "/tmp/prefix_/"));
-        assertFalse(fileExists(dock, "/tmp/prefix_/.exclude"));
+        assertThat(dock, fileExists("/tmp/prefix_/"));
+        assertThat(dock, not(fileExists("/tmp/prefix_/.exclude")));
     }
 
     @Test
-    public void publish_with_default_pattern() throws Exception {
+    public void publish_with_default_pattern() {
         DockerContainer dock = container.get();
         Resource cpDir = resource("/ftp_plugin/");
 
@@ -193,12 +192,12 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
         j.save();
         Build build = j.startBuild().shouldSucceed();
         assertThat(build.getConsole(), not(containsString("Transferred 0 file(s)")));
-        assertTrue(fileExists(dock, "/tmp/prefix_/test.txt"));
-        assertTrue(fileExists(dock, "/tmp/odes.txt"));
+        assertThat(dock, fileExists("/tmp/prefix_/test.txt"));
+        assertThat(dock, fileExists("/tmp/odes.txt"));
     }
 
     @Test
-    public void publish_with_own_pattern() throws Exception {
+    public void publish_with_own_pattern() {
         DockerContainer dock = container.get();
         Resource cpDir = resource("/ftp_plugin/");
 
@@ -215,12 +214,12 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
         j.save();
         Build build = j.startBuild().shouldSucceed();
         assertThat(build.getConsole(), not(containsString("Transferred 0 file(s)")));
-        assertTrue(fileExists(dock, "/tmp/te,st.txt"));
-        assertTrue(fileExists(dock, "/tmp/odes.txt"));
+        assertThat(dock, fileExists("/tmp/te,st.txt"));
+        assertThat(dock, fileExists("/tmp/odes.txt"));
     }
 
     @Test
-    public void publish_with_default_exclude() throws Exception {
+    public void publish_with_default_exclude() {
         DockerContainer dock = container.get();
         Resource cpTxt = resource("/ftp_plugin/odes.txt");
 
@@ -238,13 +237,13 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
         j.save();
         Build build = j.startBuild().shouldSucceed();
         assertThat(build.getConsole(), not(containsString("Transferred 0 file(s)")));
-        assertTrue(fileExists(dock, "/tmp/odes.txt"));
-        assertFalse(fileExists(dock, "/tmp/.svn"));
-        assertFalse(fileExists(dock, "/tmp/CVS"));
+        assertThat(dock, fileExists("/tmp/odes.txt"));
+        assertThat(dock, not(fileExists("/tmp/.svn")));
+        assertThat(dock, not(fileExists("/tmp/CVS")));
     }
 
     @Test
-    public void publish_with_no_default_exclude() throws Exception {
+    public void publish_with_no_default_exclude() {
         DockerContainer dock = container.get();
         Resource cpTxt = resource("/ftp_plugin/odes.txt");
 
@@ -263,9 +262,9 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
         j.save();
         Build build = j.startBuild().shouldSucceed();
         assertThat(build.getConsole(), not(containsString("Transferred 0 file(s)")));
-        assertTrue(fileExists(dock, "/tmp/odes.txt"));
-        assertTrue(fileExists(dock, "/tmp/.svn"));
-        assertTrue(fileExists(dock, "/tmp/CVS"));
+        assertThat(dock, fileExists("/tmp/odes.txt"));
+        assertThat(dock, fileExists("/tmp/.svn"));
+        assertThat(dock, fileExists("/tmp/CVS"));
     }
 
     @Test
@@ -289,8 +288,8 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
         }
 
         j.save();
-        assertTrue(fileExists(dock, "/tmp/odes.txt"));
-        assertTrue(fileExists(dock, "/tmp/empty"));
+        assertThat(dock, fileExists("/tmp/odes.txt"));
+        assertThat(dock, fileExists("/tmp/empty"));
     }
 
     @Test
@@ -316,12 +315,12 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
         j.save();
         Build build = j.startBuild().shouldSucceed();
         assertThat(build.getConsole(), not(containsString("Transferred 0 file(s)")));
-        assertTrue(fileExists(dock, "/tmp/odes.txt"));
-        assertFalse(fileExists(dock, "/tmp/dockertmp/empty"));
+        assertThat(dock, fileExists("/tmp/odes.txt"));
+        assertThat(dock, not(fileExists("/tmp/dockertmp/empty")));
     }
 
     @Test  @Ignore
-    public void publish_without_flatten_files() throws Exception {
+    public void publish_without_flatten_files() {
         DockerContainer dock = container.get();
         Resource cpDir = resource("/ftp_plugin/");
 
@@ -337,8 +336,8 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
         j.save();
         Build build = j.startBuild().shouldSucceed();
         assertThat(build.getConsole(), not(containsString("Transferred 0 file(s)")));
-        assertTrue(fileExists(dock, "/tmp/flat/odes.txt"));
-        assertTrue(fileExists(dock, "/tmp/odes.txt"));
+        assertThat(dock, fileExists("/tmp/flat/odes.txt"));
+        assertThat(dock, fileExists("/tmp/odes.txt"));
     }
 
     @Test
@@ -361,7 +360,7 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
     }
 
     @Test
-    public void publish_with_date_format() throws Exception {
+    public void publish_with_date_format() {
         DockerContainer dock = container.get();
         Resource cpTxt = resource("/ftp_plugin/odes.txt");
 
@@ -381,11 +380,11 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
         j.save();
         Build build = j.startBuild().shouldSucceed();
         assertThat(build.getConsole(), not(containsString("Transferred 0 file(s)")));
-        assertTrue(fileExists(dock, "/tmp/" + dateFormat.format(date) + "/odes.txt"));
+        assertThat(dock, fileExists("/tmp/" + dateFormat.format(date) + "/odes.txt"));
     }
 
     @Test
-    public void publish_with_clean_remote() throws Exception {
+    public void publish_with_clean_remote() {
         DockerContainer dock = container.get();
         Resource cpTxt = resource("/ftp_plugin/odes.txt");
         FreeStyleJob j = jenkins.jobs.create();
@@ -401,12 +400,12 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
         j.save();
         Build build = j.startBuild().shouldSucceed();
         assertThat(build.getConsole(), not(containsString("Transferred 0 file(s)")));
-        assertTrue(fileExists(dock, "/tmp/odes.txt"));
-        assertFalse(fileExists(dock, "/tmp/old.txt"));
+        assertThat(dock, fileExists("/tmp/odes.txt"));
+        assertThat(dock, not(fileExists("/tmp/old.txt")));
     }
 
     @Test
-    public void publish_multiple_sets() throws Exception {
+    public void publish_multiple_sets() {
         DockerContainer dock = container.get();
         Resource cpTxt = resource("/ftp_plugin/odes.txt");
 
@@ -426,13 +425,13 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
         j.save();
         Build build = j.startBuild().shouldSucceed();
         assertThat(build.getConsole(), not(containsString("Transferred 0 file(s)")));
-        assertTrue(fileExists(dock, "/tmp/odes.txt"));
-        assertTrue(fileExists(dock, "/tmp/odes2.txt"));
-        assertTrue(fileExists(dock, "/tmp/odes3.txt"));
+        assertThat(dock, fileExists("/tmp/odes.txt"));
+        assertThat(dock, fileExists("/tmp/odes2.txt"));
+        assertThat(dock, fileExists("/tmp/odes3.txt"));
     }
 
     @Test @Ignore
-    public void publish_multiple_servers() throws Exception {
+    public void publish_multiple_servers() {
         DockerContainer dock = container.get();
         DockerContainer dock2 = injector.getInstance(DockerContainerHolder.class).get();
         Resource cpTxt = resource("/ftp_plugin/odes.txt");
@@ -454,8 +453,8 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
         j.save();
         Build build = j.startBuild().shouldSucceed();
         assertThat(build.getConsole(), not(containsString("Transferred 0 file(s)")));
-        assertTrue(fileExists(dock, "/tmp/odes.txt"));
-        assertTrue(fileExists(dock2, "/tmp/odes.txt"));
+        assertThat(dock, fileExists("/tmp/odes.txt"));
+        assertThat(dock2, fileExists("/tmp/odes.txt"));
     }
 
     @Test
@@ -482,11 +481,20 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
         assertEquals(cpFile.asText(), fileContents(dock, "/tmp/odes.txt"));
     }
 
-    private boolean fileExists(DockerContainer dock, String path) throws IOException, InterruptedException {
-        int exit = Docker.cmd("exec", dock.getCid(), "test", "-f", path).system();
-        if (exit == 0) return true;
-        if (exit == 1) return false;
-        throw new Error("Unexpected return code while checking for file existence: " + exit);
+    private Matcher<DockerContainer> fileExists(final String path) {
+        return new Matcher<DockerContainer>("container with file '%s' in it", path) {
+            @Override public boolean matchesSafely(DockerContainer dock) {
+                try {
+                    int exit = Docker.cmd("exec", dock.getCid(), "test", "-f", path).system();
+                    if (exit == 0) return true;
+                    if (exit == 1) return false;
+                    throw new Error("Unexpected return code while checking for file existence: " + exit);
+                } catch (IOException|InterruptedException e) {
+                    throw new Error("Failed testing for file existence in the container", e);
+                }
+            }
+        };
+
     }
 
     private String fileContents(DockerContainer dock, String path) throws IOException, InterruptedException {
