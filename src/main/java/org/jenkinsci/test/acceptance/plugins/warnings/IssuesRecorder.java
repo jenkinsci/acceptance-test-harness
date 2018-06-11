@@ -8,8 +8,7 @@ import org.jenkinsci.test.acceptance.po.PageArea;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.PostBuildStep;
 import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.Select;
 
 /**
  * Page object for the IssuesRecorder of the warnings plugin (white mountains release).
@@ -103,10 +102,11 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
 
     /**
      * Sets the value of the input field 'referenceJob'.
+     *
      * @param referenceJob
-     *          the name of the referenceJob
+     *         the name of the referenceJob
      */
-    public void setReferenceJobField(final String referenceJob){
+    public void setReferenceJobField(final String referenceJob) {
         referenceJobField.set(referenceJob);
     }
 
@@ -136,10 +136,8 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
         }
 
         public void setTool(final String toolName) {
-            WebElement select = self().findElement(By.className("dropdownList"));
-            select.click();
-            select.findElement(by.option(toolName)).click();
-            select.sendKeys(Keys.TAB);
+            Select select = new Select(self().findElement(By.className("dropdownList")));
+            select.selectByVisibleText(toolName);
         }
 
         public void setPattern(final String pattern) {
