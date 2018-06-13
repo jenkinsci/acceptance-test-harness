@@ -41,10 +41,13 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
      *
      * @param toolName
      *         the tool name
+     * @return
+     *      the subpage of the tool
      */
-    public void setTool(final String toolName) {
+    public StaticAnalysisTool setTool(final String toolName) {
         StaticAnalysisTool tool = new StaticAnalysisTool(this, "tools");
         tool.setTool(toolName);
+        return tool;
     }
 
     /**
@@ -52,9 +55,11 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
      *
      * @param toolName
      *         the tool name
+     * @return
+     *      the subpage of the tool
      */
-    public void addTool(final String toolName) {
-        createToolPageArea(toolName);
+    public StaticAnalysisTool addTool(final String toolName) {
+        return createToolPageArea(toolName);
     }
 
     /**
@@ -64,10 +69,13 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
      *         the tool name
      * @param pattern
      *         the file name pattern
+     * @return
+     *      the subpage of the tool
      */
-    public void addTool(final String toolName, final String pattern) {
-        StaticAnalysisTool tool = createToolPageArea(toolName);
+    public StaticAnalysisTool addTool(final String toolName, final String pattern) {
+        StaticAnalysisTool tool = addTool(toolName);
         tool.setPattern(pattern);
+        return tool;
     }
 
     /**
@@ -128,8 +136,10 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
     /**
      * Page area of a static analysis tool configuration.
      */
-    private static class StaticAnalysisTool extends PageAreaImpl {
+    public static class StaticAnalysisTool extends PageAreaImpl {
         private final Control pattern = control("pattern");
+        private final Control normalThreshold = control("tool/normalThreshold");
+        private final Control highThreshold = control("tool/highThreshold");
 
         StaticAnalysisTool(final PageArea issuesRecorder, final String path) {
             super(issuesRecorder, path);
@@ -142,6 +152,24 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
 
         public void setPattern(final String pattern) {
             this.pattern.set(pattern);
+        }
+
+        /**
+         * Sets the normal threshold for duplicate code warnings.
+         * @param normalThreshold
+         *          threshold to be set
+         */
+        public void setNormalThreshold(int normalThreshold){
+            this.normalThreshold.set(normalThreshold);
+        }
+
+        /**
+         * Sets the high threshold for duplicate code warnings.
+         * @param highThreshold
+         *          threshold to be set
+         */
+        public void setHighThreshold(int highThreshold){
+            this.highThreshold.set(highThreshold);
         }
     }
 }
