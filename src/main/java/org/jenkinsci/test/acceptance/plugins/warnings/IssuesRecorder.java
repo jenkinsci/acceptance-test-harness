@@ -9,6 +9,7 @@ import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.jenkinsci.test.acceptance.po.PostBuildStep;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 
 /**
@@ -149,8 +150,7 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
     }
 
     private static class IssueFilterPanel extends PageAreaImpl {
-        private final Control pattern = control("filters");
-
+        private final Control pattern = control("pattern");
 
 
         protected IssueFilterPanel(final PageObject context, final String path) {
@@ -161,14 +161,15 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
             super(area, path);
         }
 
-        public void setFilter(final String filter, final String regex){
-            Select filters = new Select(self().findElement(By.name("filters")));
+        public void setFirstFilter(final String filter, final String regex){
+            pattern.set("test");
         }
     }
 
-    private IssueFilterPanel createIssueFilterPanel(){
-
-        return null;
+    public IssueFilterPanel createIssueFilterPanel(){
+        IssueFilterPanel tool = new IssueFilterPanel(this, "filters");
+        tool.setFirstFilter("bla", "bla");
+        return tool;
     }
 
 

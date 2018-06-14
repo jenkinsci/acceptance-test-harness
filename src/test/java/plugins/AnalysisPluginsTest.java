@@ -48,7 +48,7 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
         recorder.setTool("CheckStyle");
         recorder.openAdvancedOptions();
         recorder.setEnabledForFailure(true);
-        recorder.getIssueFilterPanel();
+        recorder.createIssueFilterPanel();
         job.save();
 
         Build build = job.startBuild().waitUntilFinished();
