@@ -33,4 +33,27 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
 
         assertThat(build.getConsole()).contains("[CheckStyle] [ERROR] No files found for pattern '**/checkstyle-result.xml'. Configuration error?\n");
     }
+
+    /**
+     * Simple test to check that the console log shows an error message if no report file has been found.
+     */
+    @Test
+    public void should_log_filter() {
+        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
+        job.copyResource("/warnings_plugin/checkstyle-result.xml");
+
+        // return createJob(owner, fileName, FreeStyleJob.class, CheckStyleFreestyleSettings.class, buildConfigurator);
+
+        IssuesRecorder recorder = job.addPublisher(IssuesRecorder.class);
+        recorder.setTool("CheckStyle");
+        recorder.openAdvancedOptions();
+        recorder.setEnabledForFailure(true);
+        recorder.getIssueFilterPanel();
+        job.save();
+
+        Build build = job.startBuild().waitUntilFinished();
+
+        assertThat(build.getConsole()).contains("[CheckStyle] [ERROR] No files found for pattern '**/checkstyle-result.xml'. Configuration error?\n");
+    }
 }
+

@@ -6,6 +6,7 @@ import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.PageArea;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
+import org.jenkinsci.test.acceptance.po.PageObject;
 import org.jenkinsci.test.acceptance.po.PostBuildStep;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.Select;
@@ -23,6 +24,8 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
     private Control ignoreAnalysisResultCheckBox = control("ignoreAnalysisResult");
     private Control overallResultMustBeSuccessCheckBox = control("overallResultMustBeSuccess");
     private Control referenceJobField = control("referenceJob");
+    private Control issueFilterPanel = control("filters");
+    private Control issueFilterExpressionField = control("pattern");
 
     /**
      * Creates a new page object.
@@ -144,4 +147,46 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
             this.pattern.set(pattern);
         }
     }
+
+    private static class IssueFilterPanel extends PageAreaImpl {
+        private final Control pattern = control("filters");
+
+
+
+        protected IssueFilterPanel(final PageObject context, final String path) {
+            super(context, path);
+        }
+
+        protected IssueFilterPanel(final PageArea area, final String path) {
+            super(area, path);
+        }
+
+        public void setFilter(final String filter, final String regex){
+            Select filters = new Select(self().findElement(By.name("filters")));
+        }
+    }
+
+    private IssueFilterPanel createIssueFilterPanel(){
+
+        return null;
+    }
+
+
+    public Control getIssueFilterPanel() {
+        return issueFilterPanel;
+    }
+
+    public void setIssueFilterPanel(final Control issueFilterPanel) {
+        this.issueFilterPanel = issueFilterPanel;
+    }
+
+    public Control getIssueFilterExpressionField() {
+        return issueFilterExpressionField;
+    }
+
+    public void setIssueFilterExpressionField(final String expression) {
+        issueFilterExpressionField.set(expression);
+    }
+
+
 }
