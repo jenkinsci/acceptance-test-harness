@@ -6,6 +6,8 @@ import org.jenkinsci.test.acceptance.plugins.warnings.IssuesRecorder;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -48,11 +50,22 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
         recorder.setTool("CheckStyle");
         recorder.openAdvancedOptions();
         recorder.setEnabledForFailure(true);
-        recorder.createIssueFilterPanel();
+
+        recorder.addIssueFilter("type", "regex");
+        recorder.addIssueFilter("type", "qwer");
+        //IssueFilterPanel issueFilterPanel = recorder.createIssueFilterPanel();
         job.save();
 
         Build build = job.startBuild().waitUntilFinished();
 
+        //issueFilterPanel.setFilter("Exclude categories", "Block");
+
+
+        WebElement webLink = job.find(By.partialLinkText("CheckStyle Warnings"));
+        webLink.click();
+
+        //job.getElement(By.id("category"));
+        //by.xpath("//table[@class='fileList']//a[text()='%s']"
         assertThat(build.getConsole()).contains("[CheckStyle] [ERROR] No files found for pattern '**/checkstyle-result.xml'. Configuration error?\n");
     }
 }

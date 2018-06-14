@@ -1,12 +1,14 @@
 package org.jenkinsci.test.acceptance.plugins.warnings;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jenkinsci.test.acceptance.po.AbstractStep;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.PageArea;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
-import org.jenkinsci.test.acceptance.po.PageObject;
 import org.jenkinsci.test.acceptance.po.PostBuildStep;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -25,8 +27,7 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
     private Control ignoreAnalysisResultCheckBox = control("ignoreAnalysisResult");
     private Control overallResultMustBeSuccessCheckBox = control("overallResultMustBeSuccess");
     private Control referenceJobField = control("referenceJob");
-    private Control issueFilterPanel = control("filters");
-    private Control issueFilterExpressionField = control("pattern");
+    private IssueFilterPanel issueFilterPanel;
 
     /**
      * Creates a new page object.
@@ -150,44 +151,32 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
     }
 
     private static class IssueFilterPanel extends PageAreaImpl {
-        private final Control pattern = control("pattern");
-
-
-        protected IssueFilterPanel(final PageObject context, final String path) {
-            super(context, path);
-        }
+        private Control filterRepeatable = control(By.xpath("//button"));
 
         protected IssueFilterPanel(final PageArea area, final String path) {
             super(area, path);
         }
 
-        public void setFirstFilter(final String filter, final String regex){
-            pattern.set("test");
+        public void setFilter(final String filter, final String regex) {
+            Control pattern = control("pattern");
+            pattern.set(regex);
+        }
+
+        public void addFilter(final String filter, final String regex) {
+            String path = createPageArea("filters", () -> filterRepeatable.click());
+            Control currentFilter = control(By.xpath("filters[last()]"));
+            currentFilter.set(regex);
         }
     }
 
-    public IssueFilterPanel createIssueFilterPanel(){
-        IssueFilterPanel tool = new IssueFilterPanel(this, "filters");
-        tool.setFirstFilter("bla", "bla");
-        return tool;
+    public void addIssueFilter(final String type, final String regex) {
+        if (issueFilterPanel == null) {
+            issueFilterPanel = new IssueFilterPanel(this, "filters");
+            issueFilterPanel.setFilter(type, regex);
+        }
+        else {
+            issueFilterPanel.addFilter(type, regex);
+        }
     }
-
-
-    public Control getIssueFilterPanel() {
-        return issueFilterPanel;
-    }
-
-    public void setIssueFilterPanel(final Control issueFilterPanel) {
-        this.issueFilterPanel = issueFilterPanel;
-    }
-
-    public Control getIssueFilterExpressionField() {
-        return issueFilterExpressionField;
-    }
-
-    public void setIssueFilterExpressionField(final String expression) {
-        issueFilterExpressionField.set(expression);
-    }
-
 
 }
