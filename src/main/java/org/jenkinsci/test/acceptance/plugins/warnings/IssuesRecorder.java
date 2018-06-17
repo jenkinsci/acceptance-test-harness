@@ -1,5 +1,9 @@
 package org.jenkinsci.test.acceptance.plugins.warnings;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.jenkinsci.test.acceptance.po.AbstractStep;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
@@ -9,6 +13,8 @@ import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.PostBuildStep;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.Select;
+
+import static java.util.Arrays.asList;
 
 /**
  * Page object for the IssuesRecorder of the warnings plugin (white mountains release).
@@ -142,6 +148,16 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
 
         public void setPattern(final String pattern) {
             this.pattern.set(pattern);
+        }
+    }
+
+    void addQualityGateConfiguration(){
+        List<String> inputFieldNames = asList("unstableTotalAll","unstableTotalHigh","unstableTotalNormal","unstableTotalLow",
+                                             "failedTotalAll","failedTotalHigh","failedTotalNormal","failedTotalLow",
+                                             "unstableNewAll","unstableNewHigh","unstableNewNormal","unstableNewLow",
+                                             "failedNewAll","failedNewHigh","failedNewNormal","failedNewLow");
+        for(String inputFieldName:inputFieldNames){
+            control(By.name(inputFieldName)).set("5");
         }
     }
 }
