@@ -6,8 +6,6 @@ import org.jenkinsci.test.acceptance.plugins.warnings.IssuesRecorder;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -37,36 +35,27 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
     }
 
     /**
-     * Simple test to check that the console log shows an error message if no report file has been found.
+     * Test to check that the issue filter can be configured and is applied.
      */
     @Test
-    public void should_log_filter() {
+    public void should_log_filter_applied_in_console() {
         FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
-        job.copyResource("/warnings_plugin/checkstyle-result.xml");
-
-        // return createJob(owner, fileName, FreeStyleJob.class, CheckStyleFreestyleSettings.class, buildConfigurator);
-
+        job.copyResource("/warnings_plugin/issue_filter_test/checkstyle-result.xml");
         IssuesRecorder recorder = job.addPublisher(IssuesRecorder.class);
+
         recorder.setTool("CheckStyle");
         recorder.openAdvancedOptions();
         recorder.setEnabledForFailure(true);
 
-        recorder.addIssueFilter("type", "regex");
-        recorder.addIssueFilter("type", "qwer");
-        //IssueFilterPanel issueFilterPanel = recorder.createIssueFilterPanel();
+        // set filters
+        recorder.addIssueFilter("Exclude categories", "Checks");
+        recorder.addIssueFilter("Include types", "JavadocMethodCheck");
+
         job.save();
 
         Build build = job.startBuild().waitUntilFinished();
 
-        //issueFilterPanel.setFilter("Exclude categories", "Block");
-
-
-        WebElement webLink = job.find(By.partialLinkText("CheckStyle Warnings"));
-        webLink.click();
-
-        //job.getElement(By.id("category"));
-        //by.xpath("//table[@class='fileList']//a[text()='%s']"
-        assertThat(build.getConsole()).contains("[CheckStyle] [ERROR] No files found for pattern '**/checkstyle-result.xml'. Configuration error?\n");
+        assertThat(build.getConsole()).contains("[checkstyle] Applying 2 filters on the set of 4 issues (3 issues have been removed)");
     }
 }
 

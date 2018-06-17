@@ -22,6 +22,7 @@ import org.openqa.selenium.support.ui.Select;
 @Describable("Record static analysis results")
 public class IssuesRecorder extends AbstractStep implements PostBuildStep {
     private Control toolsRepeatable = control("repeatable-add");
+    private Control filtersRepeatable = control("repeatable-add[1]");
     private Control advancedButton = control("advanced-button");
     private Control enabledForFailureCheckBox = control("enabledForFailure");
     private Control ignoreAnalysisResultCheckBox = control("ignoreAnalysisResult");
@@ -150,32 +151,40 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
         }
     }
 
+    /**
+     * Page area of a issue filter configuration.
+     */
     private static class IssueFilterPanel extends PageAreaImpl {
-        private Control filterRepeatable = control(By.xpath("//button"));
+        private final Control regexField = control("pattern");
 
-        protected IssueFilterPanel(final PageArea area, final String path) {
+        IssueFilterPanel(final PageArea area, final String path) {
             super(area, path);
         }
 
-        public void setFilter(final String filter, final String regex) {
-            Control pattern = control("pattern");
-            pattern.set(regex);
+        private void setFilter(final String filter, final String regex) {
+            Select filterField = new Select(self().findElement(By.className("dropdownList")));
+            filterField.selectByVisibleText(filter);
+            regexField.set(regex);
         }
 
-        public void addFilter(final String filter, final String regex) {
-            String path = createPageArea("filters", () -> filterRepeatable.click());
-            Control currentFilter = control(By.xpath("filters[last()]"));
-            currentFilter.set(regex);
-        }
     }
 
-    public void addIssueFilter(final String type, final String regex) {
+    /**
+     * Adds a new issue filter.
+     * @param filterName name of the filter
+     * @param regex regular expression to apply
+     */
+    public void addIssueFilter(final String filterName, final String regex) {
         if (issueFilterPanel == null) {
+            // fill initial existing filter
             issueFilterPanel = new IssueFilterPanel(this, "filters");
-            issueFilterPanel.setFilter(type, regex);
+            issueFilterPanel.setFilter(filterName, regex);
         }
         else {
-            issueFilterPanel.addFilter(type, regex);
+            // create new filter
+            String path = createPageArea("filters", () -> filtersRepeatable.click());
+            IssueFilterPanel filter = new IssueFilterPanel(this, path);
+            filter.setFilter(filterName, regex);
         }
     }
 
