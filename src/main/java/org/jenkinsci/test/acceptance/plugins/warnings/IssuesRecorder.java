@@ -1,5 +1,8 @@
 package org.jenkinsci.test.acceptance.plugins.warnings;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jenkinsci.test.acceptance.po.AbstractStep;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
@@ -8,8 +11,8 @@ import org.jenkinsci.test.acceptance.po.PageArea;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.PostBuildStep;
 import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.Select;
 
 /**
  * Page object for the IssuesRecorder of the warnings plugin (white mountains release).
@@ -19,8 +22,13 @@ import org.openqa.selenium.WebElement;
 @Describable("Record static analysis results")
 public class IssuesRecorder extends AbstractStep implements PostBuildStep {
     private Control toolsRepeatable = control("repeatable-add");
+    private Control filtersRepeatable = control("repeatable-add[1]");
     private Control advancedButton = control("advanced-button");
     private Control enabledForFailureCheckBox = control("enabledForFailure");
+    private Control ignoreAnalysisResultCheckBox = control("ignoreAnalysisResult");
+    private Control overallResultMustBeSuccessCheckBox = control("overallResultMustBeSuccess");
+    private Control referenceJobField = control("referenceJob");
+    private IssueFilterPanel issueFilterPanel;
 
     /**
      * Creates a new page object.
@@ -79,6 +87,36 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
     }
 
     /**
+     * Enables or disables the checkbox 'ignoreAnalysisResult'.
+     *
+     * @param isChecked
+     *         determines if the checkbox should be checked or not
+     */
+    public void setIgnoreAnalysisResult(final boolean isChecked) {
+        ignoreAnalysisResultCheckBox.check(isChecked);
+    }
+
+    /**
+     * Enables or disables the checkbox 'overallResultMustBeSuccess'.
+     *
+     * @param isChecked
+     *         determines if the checkbox should be checked or not
+     */
+    public void setOverallResultMustBeSuccess(final boolean isChecked) {
+        overallResultMustBeSuccessCheckBox.check(isChecked);
+    }
+
+    /**
+     * Sets the value of the input field 'referenceJob'.
+     *
+     * @param referenceJob
+     *         the name of the referenceJob
+     */
+    public void setReferenceJobField(final String referenceJob) {
+        referenceJobField.set(referenceJob);
+    }
+
+    /**
      * Opens the advanced section.
      */
     public void openAdvancedOptions() {
@@ -104,14 +142,50 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
         }
 
         public void setTool(final String toolName) {
-            WebElement select = self().findElement(By.className("dropdownList"));
-            select.click();
-            select.findElement(by.option(toolName)).click();
-            select.sendKeys(Keys.TAB);
+            Select select = new Select(self().findElement(By.className("dropdownList")));
+            select.selectByVisibleText(toolName);
         }
 
         public void setPattern(final String pattern) {
             this.pattern.set(pattern);
         }
     }
+
+    /**
+     * Page area of a issue filter configuration.
+     */
+    private static class IssueFilterPanel extends PageAreaImpl {
+        private final Control regexField = control("pattern");
+
+        IssueFilterPanel(final PageArea area, final String path) {
+            super(area, path);
+        }
+
+        private void setFilter(final String filter, final String regex) {
+            Select filterField = new Select(self().findElement(By.className("dropdownList")));
+            filterField.selectByVisibleText(filter);
+            regexField.set(regex);
+        }
+
+    }
+
+    /**
+     * Adds a new issue filter.
+     * @param filterName name of the filter
+     * @param regex regular expression to apply
+     */
+    public void addIssueFilter(final String filterName, final String regex) {
+        if (issueFilterPanel == null) {
+            // fill initial existing filter
+            issueFilterPanel = new IssueFilterPanel(this, "filters");
+            issueFilterPanel.setFilter(filterName, regex);
+        }
+        else {
+            // create new filter
+            String path = createPageArea("filters", () -> filtersRepeatable.click());
+            IssueFilterPanel filter = new IssueFilterPanel(this, path);
+            filter.setFilter(filterName, regex);
+        }
+    }
+
 }

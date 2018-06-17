@@ -33,4 +33,29 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
 
         assertThat(build.getConsole()).contains("[CheckStyle] [ERROR] No files found for pattern '**/checkstyle-result.xml'. Configuration error?\n");
     }
+
+    /**
+     * Test to check that the issue filter can be configured and is applied.
+     */
+    @Test
+    public void should_log_filter_applied_in_console() {
+        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
+        job.copyResource("/warnings_plugin/issue_filter_test/checkstyle-result.xml");
+        IssuesRecorder recorder = job.addPublisher(IssuesRecorder.class);
+
+        recorder.setTool("CheckStyle");
+        recorder.openAdvancedOptions();
+        recorder.setEnabledForFailure(true);
+
+        // set filters
+        recorder.addIssueFilter("Exclude categories", "Checks");
+        recorder.addIssueFilter("Include types", "JavadocMethodCheck");
+
+        job.save();
+
+        Build build = job.startBuild().waitUntilFinished();
+
+        assertThat(build.getConsole()).contains("[checkstyle] Applying 2 filters on the set of 4 issues (3 issues have been removed)");
+    }
 }
+
