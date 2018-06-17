@@ -7,7 +7,7 @@ import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Acceptance tests for the White Mountains release of the warnings plug-in.
@@ -55,7 +55,35 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
 
         Build build = job.startBuild().waitUntilFinished();
 
-        assertThat(build.getConsole()).contains("[checkstyle] Applying 2 filters on the set of 4 issues (3 issues have been removed)");
+        assertThat(build.getConsole()).contains(
+                "[checkstyle] Applying 2 filters on the set of 4 issues (3 issues have been removed)");
+    }
+
+    /**
+     * Test to check that the issue filter can be configured and is applied.
+     */
+    @Test
+    public void should_find_some_methode_name() {
+        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
+        job.copyResource("/warnings_plugin/test/build_01");
+        IssuesRecorder recorder = job.addPublisher(IssuesRecorder.class);
+
+        recorder.setTool("CheckStyle");
+        recorder.addTool("FindBugs");
+        recorder.addTool("PMD");
+        recorder.openAdvancedOptions();
+        recorder.setEnabledForFailure(true);
+
+        job.save();
+
+        Build build1 = job.startBuild().waitUntilFinished();
+        visit(job.getConfigUrl());
+        job.copyResource("/warnings_plugin/test/build_02");
+        job.save();
+        Build build2 = job.startBuild().waitUntilFinished();
+
+        assertThat(build2.getConsole()).contains(
+                "[checkstyle] Applying 2 filters on the set of 4 issues (3 issues have been removed)");
     }
 }
 
