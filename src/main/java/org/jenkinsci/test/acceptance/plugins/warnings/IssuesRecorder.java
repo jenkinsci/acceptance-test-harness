@@ -41,8 +41,8 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
      *
      * @param toolName
      *         the tool name
-     * @return
-     *      the subpage of the tool
+     *
+     * @return the sub page of the tool
      */
     public StaticAnalysisTool setTool(final String toolName) {
         StaticAnalysisTool tool = new StaticAnalysisTool(this, "tools");
@@ -55,8 +55,8 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
      *
      * @param toolName
      *         the tool name
-     * @return
-     *      the subpage of the tool
+     *
+     * @return the sub page of the tool
      */
     public StaticAnalysisTool addTool(final String toolName) {
         return createToolPageArea(toolName);
@@ -69,8 +69,8 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
      *         the tool name
      * @param pattern
      *         the file name pattern
-     * @return
-     *      the subpage of the tool
+     *
+     * @return the sub page of the tool
      */
     public StaticAnalysisTool addTool(final String toolName, final String pattern) {
         StaticAnalysisTool tool = addTool(toolName);
@@ -145,30 +145,44 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
             super(issuesRecorder, path);
         }
 
+        /**
+         * Sets the name of the tool.
+         *
+         * @param toolName
+         *         the name of the tool, e.g. CheckStyle, CPD, etc.
+         */
         public void setTool(final String toolName) {
             Select select = new Select(self().findElement(By.className("dropdownList")));
             select.selectByVisibleText(toolName);
         }
 
+        /**
+         * Sets the pattern of the files to parse.
+         *
+         * @param pattern
+         *         the pattern
+         */
         public void setPattern(final String pattern) {
             this.pattern.set(pattern);
         }
 
         /**
          * Sets the normal threshold for duplicate code warnings.
+         *
          * @param normalThreshold
-         *          threshold to be set
+         *         threshold to be set
          */
-        public void setNormalThreshold(int normalThreshold){
+        public void setNormalThreshold(int normalThreshold) {
             this.normalThreshold.set(normalThreshold);
         }
 
         /**
          * Sets the high threshold for duplicate code warnings.
+         *
          * @param highThreshold
-         *          threshold to be set
+         *         threshold to be set
          */
-        public void setHighThreshold(int highThreshold){
+        public void setHighThreshold(int highThreshold) {
             this.highThreshold.set(highThreshold);
         }
     }
