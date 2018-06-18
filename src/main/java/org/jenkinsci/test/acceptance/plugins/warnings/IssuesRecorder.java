@@ -23,6 +23,7 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
     private Control ignoreAnalysisResultCheckBox = control("ignoreAnalysisResult");
     private Control overallResultMustBeSuccessCheckBox = control("overallResultMustBeSuccess");
     private Control referenceJobField = control("referenceJob");
+    private Control aggregatingResultsCheckBox = control("aggregatingResults");
 
     /**
      * Creates a new page object.
@@ -48,6 +49,20 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
         StaticAnalysisTool tool = new StaticAnalysisTool(this, "tools");
         tool.setTool(toolName);
         return tool;
+    }
+
+    /**
+     * Sets the name and the pattern of the static analysis tool to use.
+     *
+     * @param toolName
+     *         the tool name
+     * @param pattern
+     *         the file name pattern
+     */
+    public void setTool(final String toolName, final String pattern) {
+        StaticAnalysisTool tool = new StaticAnalysisTool(this, "tools");
+        tool.setTool(toolName);
+        tool.setPattern(pattern);
     }
 
     /**
@@ -116,6 +131,16 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
      */
     public void setReferenceJobField(final String referenceJob) {
         referenceJobField.set(referenceJob);
+    }
+
+    /**
+     * Enables or disables the checkbox 'aggregatingResultsCheckBox'.
+     *
+     * @param isChecked
+     *         determines if the checkbox should be checked or not
+     */
+    public void setEnabledForAggregation(final boolean isChecked) {
+        aggregatingResultsCheckBox.check(isChecked);
     }
 
     /**
