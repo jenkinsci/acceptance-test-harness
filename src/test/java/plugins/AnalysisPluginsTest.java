@@ -5,7 +5,6 @@ import java.util.Map;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.plugins.checkstyle.CheckStyleFreestyleSettings;
 import org.jenkinsci.test.acceptance.plugins.warnings.IssuesRecorder;
 import org.jenkinsci.test.acceptance.plugins.warnings.IssuesRecorder.StaticAnalysisTool;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsResultDetailsPage;
@@ -103,52 +102,5 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
             job.copyResource(resource(WARNINGS_PLUGIN_PREFIX + resource));
         }
         return job;
-    }
-
-    /**
-     * Simple test to check that warnings of checkstyle and pmd file are handled separately if aggregation is not activated.
-     */
-    @Test
-    public void should_log_ok_in_console_with_not_activated_aggregation() {
-        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
-
-        job.copyResource(resource("/aggregation/checkstyle.xml"));
-        job.copyResource(resource("/aggregation/pmd-warnings.xml"));
-
-        IssuesRecorder recorder = job.addPublisher(IssuesRecorder.class);
-        recorder.setTool("CheckStyle","**/checkstyle.xml");
-        recorder.addTool("PMD", "**/pmd-warnings.xml");
-
-        recorder.setEnabledForAggregation(false);
-
-        job.save();
-
-        Build build = job.startBuild().waitUntilFinished();
-
-        assertThat(build.getConsole()).contains("[CheckStyle] Resolved module names for 6 issues\n");
-        assertThat(build.getConsole()).contains("[pmd] Resolved module names for 4 issues\n");
-    }
-
-    /**
-     * Simple test to check that warnings of checkstyle and pmd file are summed up if aggregation is activated.
-     */
-    @Test
-    public void should_log_ok_in_console_with_activated_aggregation() {
-        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
-
-        job.copyResource(resource("/aggregation/checkstyle.xml"));
-        job.copyResource(resource("/aggregation/pmd-warnings.xml"));
-
-        IssuesRecorder recorder = job.addPublisher(IssuesRecorder.class);
-        recorder.setTool("CheckStyle","**/checkstyle.xml");
-        recorder.addTool("PMD", "**/pmd-warnings.xml");
-
-        recorder.setEnabledForAggregation(true);
-
-        job.save();
-
-        Build build = job.startBuild().waitUntilFinished();
-
-        assertThat(build.getConsole()).contains("[analysis] Created analysis result for 10 issues (found 10 new issues, fixed 0 issues)\n");
     }
 }
