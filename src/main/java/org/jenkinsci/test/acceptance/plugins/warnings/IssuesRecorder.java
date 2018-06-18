@@ -1,8 +1,5 @@
 package org.jenkinsci.test.acceptance.plugins.warnings;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.jenkinsci.test.acceptance.po.AbstractStep;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
@@ -11,7 +8,6 @@ import org.jenkinsci.test.acceptance.po.PageArea;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.PostBuildStep;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 
 /**
@@ -29,7 +25,8 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
     private Control overallResultMustBeSuccessCheckBox = control("overallResultMustBeSuccess");
     private Control referenceJobField = control("referenceJob");
     private Control aggregatingResultsCheckBox = control("aggregatingResults");
-
+    private IssueFilterPanel issueFilterPanel;
+    
     /**
      * Creates a new page object.
      *

@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.*;
 /**
  * Acceptance tests for the White Mountains release of the warnings plug-in.
  *
+ * @author Manuel Hampp
  * @author Anna-Maria Hardi
  * @author Stephan Plöderl
  */
@@ -109,23 +110,22 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
      */
     @Test
     public void should_log_filter_applied_in_console() {
-        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
-        job.copyResource("/warnings_plugin/issue_filter_test/checkstyle-result.xml");
-        IssuesRecorder recorder = job.addPublisher(IssuesRecorder.class);
+        FreeStyleJob job = createFreeStyleJob("issue_filter/checkstyle-result.xml");
 
-        recorder.setTool("CheckStyle");
-        recorder.openAdvancedOptions();
-        recorder.setEnabledForFailure(true);
-
-        // set filters
-        recorder.addIssueFilter("Exclude categories", "Checks");
-        recorder.addIssueFilter("Include types", "JavadocMethodCheck");
-
+        job.addPublisher(IssuesRecorder.class, recorder -> {
+            recorder.setTool("CheckStyle");
+            recorder.openAdvancedOptions();
+            recorder.setEnabledForFailure(true);
+            recorder.addIssueFilter("Exclude categories", "Checks");
+            recorder.addIssueFilter("Include types", "JavadocMethodCheck");
+        });
+        
         job.save();
 
         Build build = job.startBuild().waitUntilFinished();
 
-        assertThat(build.getConsole()).contains("[checkstyle] Applying 2 filters on the set of 4 issues (3 issues have been removed)");
+        assertThat(build.getConsole()).contains(
+                "[CheckStyle] Applying 2 filters on the set of 4 issues (3 issues have been removed)");
     }
 }
 
