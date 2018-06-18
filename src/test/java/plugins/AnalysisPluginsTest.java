@@ -19,40 +19,19 @@ import static org.assertj.core.api.Assertions.*;
 /**
  * Acceptance tests for the White Mountains release of the warnings plug-in.
  *
+ * @author Anna-Maria Hardi
  * @author Stephan Plöderl
- * @author Ullrich Hafner
  */
 @WithPlugins("warnings")
 public class AnalysisPluginsTest extends AbstractJUnitTest {
-    private static final String WARNINGS_PLUGIN_PREFIX = "/warnings_plugin/";
-
-    /**
-     * Simple test to check that the console log shows an error message if no report file has been found.
-     */
-    @Test
-    public void should_log_error_in_console_if_no_report_file_found() {
-        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
-
-        IssuesRecorder recorder = job.addPublisher(IssuesRecorder.class);
-        recorder.setTool("CheckStyle");
-        recorder.openAdvancedOptions();
-        recorder.setEnabledForFailure(true);
-        job.save();
-
-        Build build = job.startBuild().waitUntilFinished();
-
-        assertThat(build.getConsole()).contains(
-                "[CheckStyle] [ERROR] No files found for pattern '**/checkstyle-result.xml'. Configuration error?\n");
-    }
+    private static final String WARNINGS_PLUGIN_PREFIX = "/warnings_plugin/white-mountains/";
 
     /**
      * Simple test to check that there are some duplicate code warnings.
      */
     @Test
     public void should_have_duplicate_code_warnings() {
-        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
-        job.copyResource(resource(WARNINGS_PLUGIN_PREFIX + "duplicate_code/cpd.xml"));
-        job.copyResource(resource(WARNINGS_PLUGIN_PREFIX + "duplicate_code/Main.java"));
+        FreeStyleJob job = createFreeStyleJob("duplicate_code/cpd.xml", "duplicate_code/Main.java");
 
         IssuesRecorder recorder = job.addPublisher(IssuesRecorder.class);
         StaticAnalysisTool tool = recorder.setTool("CPD");
@@ -75,4 +54,53 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
         return resultPage;
     }
 
+    /**
+     * Simple test to check that warnings of checkstyle and pmd file are handled separately if aggregation is not
+     * activated.
+     */
+    @Test
+    public void should_log_ok_in_console_with_not_activated_aggregation() {
+        FreeStyleJob job = createFreeStyleJob("aggregation/checkstyle.xml", "aggregation/pmd.xml");
+
+        job.addPublisher(IssuesRecorder.class, recorder -> {
+            recorder.setTool("CheckStyle", "**/checkstyle.xml");
+            recorder.addTool("PMD", "**/pmd.xml");
+            recorder.setEnabledForAggregation(false);
+        });
+
+        job.save();
+
+        Build build = job.startBuild().waitUntilFinished();
+
+        assertThat(build.getConsole()).contains("[CheckStyle] Created analysis result for 6 issues");
+        assertThat(build.getConsole()).contains("[PMD] Created analysis result for 4 issues");
+    }
+
+    /**
+     * Simple test to check that warnings of checkstyle and pmd file are summed up if aggregation is activated.
+     */
+    @Test
+    public void should_log_ok_in_console_with_activated_aggregation() {
+        FreeStyleJob job = createFreeStyleJob("aggregation/checkstyle.xml", "aggregation/pmd.xml");
+
+        job.addPublisher(IssuesRecorder.class, recorder -> {
+            recorder.setTool("CheckStyle", "**/checkstyle.xml");
+            recorder.addTool("PMD", "**/pmd.xml");
+            recorder.setEnabledForAggregation(true);
+        });
+
+        job.save();
+
+        Build build = job.startBuild().waitUntilFinished();
+
+        assertThat(build.getConsole()).contains("[Static Analysis] Created analysis result for 10 issues");
+    }
+
+    private FreeStyleJob createFreeStyleJob(final String... resourcesToCopy) {
+        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
+        for (String resource : resourcesToCopy) {
+            job.copyResource(resource(WARNINGS_PLUGIN_PREFIX + resource));
+        }
+        return job;
+    }
 }
