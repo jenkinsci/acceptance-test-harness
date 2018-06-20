@@ -23,12 +23,15 @@
  */
 package org.jenkinsci.test.acceptance.docker.fixtures;
 
+import org.apache.commons.io.IOUtils;
 import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.docker.DockerFixture;
 import org.jenkinsci.test.acceptance.docker.DynamicDockerContainer;
 import org.jenkinsci.utils.process.CommandBuilder;
 
+
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -66,17 +69,44 @@ public class KerberosContainer extends DynamicDockerContainer {
         }
     }
 
+    public String getIpAddress(){
+        String address = null;
+        try {
+            address = Docker.cmd(new String[]{"inspect"}).add(getCid()).popen().asText();
+            address = address.split("IPAddress")[2].split(":")[1].split(",",2)[0].trim().replaceAll("\"", "").replaceAll(",","");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return address;
+    }
+
     private File targetDir = null;
     private File loginConf = null;
     private File krb5Conf = null;
 
     public File populateTargetDir(File target) {
+        try {
+            int count = 0;
+            while(!isKerberosRunning()){
+                if(count > 30){
+                    throw new Error("Kerberos is still not running after 30 seconds.");
+                }
+                Thread.sleep(1000);
+                count++;
+            }
+        } catch (Exception e) {
+            throw new Error(e);
+        }
         // No need to do this twice
         if (targetDir == null) {
             targetDir = target;
+            File keytabFile = new File(targetDir, "keytab");
+            keytabFile.mkdirs();
 
             // Get the keytabs out of the container
-            cp("/target/keytab/", target.getAbsolutePath());
+            copyContentOfFile("/target/keytab/user", new File(keytabFile,"user").getAbsolutePath());
+            copyContentOfFile("/target/keytab/service", new File(keytabFile,"service").getAbsolutePath());
+
             if (!new File(targetDir, "keytab/service").exists()) throw new AssertionError("Service keytab not created");
             if (!new File(targetDir, "keytab/user").exists()) throw new AssertionError("User keytab not created");
 
@@ -94,14 +124,30 @@ public class KerberosContainer extends DynamicDockerContainer {
             krb5Conf = new File(targetDir, "krb5.conf");
             try (FileWriter fw = new FileWriter(krb5Conf)) {
                 fw.write(resource("src/etc.krb5.conf").asText()
-                        .replaceAll("__KDC_PORT__", String.valueOf(port(88)))
-                        .replaceAll("__ADMIN_PORT__", String.valueOf(port(749)))
+                        .replaceAll("__KDC_PORT__", String.valueOf(88))
+                        .replaceAll("__ADMIN_PORT__", String.valueOf(749))
+                        .replaceAll("_ADDRESS_", getIpAddress())
                 );
             } catch (IOException e) {
                 throw new Error(e);
             }
         }
         return targetDir;
+    }
+
+    public boolean isKerberosRunning() throws IOException, InterruptedException {
+        return Docker.cmd("exec").add(getCid()).add ("cat", "/tmp/kerberos_running").popen().waitFor() == 0;
+    }
+
+
+    public void copyContentOfFile(String from, String to){
+        try {
+            IOUtils.copy(Docker.cmd("exec").add(getCid()).add ("base64", from).popen().getInputStream(), new FileOutputStream(new File("/tmp/coded")));
+            ProcessBuilder builder = new ProcessBuilder();
+            builder.command("base64", "-d", "/tmp/coded").redirectOutput(new File(to)).start().waitFor();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public String getLoginConfPath() {
@@ -145,7 +191,7 @@ public class KerberosContainer extends DynamicDockerContainer {
                 .verifyOrDieWith("Unable to get ticket granting ticket")
         );
 
-        cp(innerPath, outerPath);
+        copyContentOfFile("/target/keytab/client_tmp", outerPath);
         assertTrue("Token cache exported", new File(outerPath).exists());
         return outerPath;
     }
