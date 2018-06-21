@@ -1,8 +1,5 @@
 package org.jenkinsci.test.acceptance.plugins.warnings;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.jenkinsci.test.acceptance.po.AbstractStep;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
@@ -11,7 +8,6 @@ import org.jenkinsci.test.acceptance.po.PageArea;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.PostBuildStep;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 
 /**
@@ -28,8 +24,9 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
     private Control ignoreAnalysisResultCheckBox = control("ignoreAnalysisResult");
     private Control overallResultMustBeSuccessCheckBox = control("overallResultMustBeSuccess");
     private Control referenceJobField = control("referenceJob");
+    private Control aggregatingResultsCheckBox = control("aggregatingResults");
     private IssueFilterPanel issueFilterPanel;
-
+    
     /**
      * Creates a new page object.
      *
@@ -47,10 +44,27 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
      *
      * @param toolName
      *         the tool name
+     *
+     * @return the sub page of the tool
      */
-    public void setTool(final String toolName) {
+    public StaticAnalysisTool setTool(final String toolName) {
         StaticAnalysisTool tool = new StaticAnalysisTool(this, "tools");
         tool.setTool(toolName);
+        return tool;
+    }
+
+    /**
+     * Sets the name and the pattern of the static analysis tool to use.
+     *
+     * @param toolName
+     *         the tool name
+     * @param pattern
+     *         the file name pattern
+     */
+    public void setTool(final String toolName, final String pattern) {
+        StaticAnalysisTool tool = new StaticAnalysisTool(this, "tools");
+        tool.setTool(toolName);
+        tool.setPattern(pattern);
     }
 
     /**
@@ -58,9 +72,11 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
      *
      * @param toolName
      *         the tool name
+     *
+     * @return the sub page of the tool
      */
-    public void addTool(final String toolName) {
-        createToolPageArea(toolName);
+    public StaticAnalysisTool addTool(final String toolName) {
+        return createToolPageArea(toolName);
     }
 
     /**
@@ -70,10 +86,13 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
      *         the tool name
      * @param pattern
      *         the file name pattern
+     *
+     * @return the sub page of the tool
      */
-    public void addTool(final String toolName, final String pattern) {
-        StaticAnalysisTool tool = createToolPageArea(toolName);
+    public StaticAnalysisTool addTool(final String toolName, final String pattern) {
+        StaticAnalysisTool tool = addTool(toolName);
         tool.setPattern(pattern);
+        return tool;
     }
 
     /**
@@ -117,6 +136,16 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
     }
 
     /**
+     * Enables or disables the checkbox 'aggregatingResultsCheckBox'.
+     *
+     * @param isChecked
+     *         determines if the checkbox should be checked or not
+     */
+    public void setEnabledForAggregation(final boolean isChecked) {
+        aggregatingResultsCheckBox.check(isChecked);
+    }
+
+    /**
      * Opens the advanced section.
      */
     public void openAdvancedOptions() {
@@ -134,20 +163,54 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
     /**
      * Page area of a static analysis tool configuration.
      */
-    private static class StaticAnalysisTool extends PageAreaImpl {
+    public static class StaticAnalysisTool extends PageAreaImpl {
         private final Control pattern = control("pattern");
+        private final Control normalThreshold = control("tool/normalThreshold");
+        private final Control highThreshold = control("tool/highThreshold");
 
         StaticAnalysisTool(final PageArea issuesRecorder, final String path) {
             super(issuesRecorder, path);
         }
 
+        /**
+         * Sets the name of the tool.
+         *
+         * @param toolName
+         *         the name of the tool, e.g. CheckStyle, CPD, etc.
+         */
         public void setTool(final String toolName) {
             Select select = new Select(self().findElement(By.className("dropdownList")));
             select.selectByVisibleText(toolName);
         }
 
+        /**
+         * Sets the pattern of the files to parse.
+         *
+         * @param pattern
+         *         the pattern
+         */
         public void setPattern(final String pattern) {
             this.pattern.set(pattern);
+        }
+
+        /**
+         * Sets the normal threshold for duplicate code warnings.
+         *
+         * @param normalThreshold
+         *         threshold to be set
+         */
+        public void setNormalThreshold(int normalThreshold) {
+            this.normalThreshold.set(normalThreshold);
+        }
+
+        /**
+         * Sets the high threshold for duplicate code warnings.
+         *
+         * @param highThreshold
+         *         threshold to be set
+         */
+        public void setHighThreshold(int highThreshold) {
+            this.highThreshold.set(highThreshold);
         }
     }
 
