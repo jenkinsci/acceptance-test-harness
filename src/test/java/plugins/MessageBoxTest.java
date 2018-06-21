@@ -7,8 +7,9 @@ import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.warnings.IssuesRecorder;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.MessageBox;
-import org.junit.Assert;
 import org.junit.Test;
+
+import static plugins.MessageBoxAssert.*;
 
 /**
  * @author Alexander Praegla, Nikolai Wohlgemuth, Arne Schöntag
@@ -23,15 +24,15 @@ public class MessageBoxTest extends AbstractJUnitTest {
     @Test
     public void shouldBeOkIfContentsOfMsgBoxesAreCorrect() {
 
-        FreeStyleJob job = createFreeStyleJob(WARNINGS_XML);
-        job.addPublisher(IssuesRecorder.class, recorder -> {
+        FreeStyleJob leeroy = createFreeStyleJob(WARNINGS_XML);
+        leeroy.addPublisher(IssuesRecorder.class, recorder -> {
             recorder.setTool("CheckStyle", "**/checkstyle-result.xml");
             recorder.setEnabledForAggregation(false);
         });
-        job.save();
-        job.startBuild().waitUntilFinished();
+        leeroy.save();
+        leeroy.startBuild().waitUntilFinished();
 
-        MessageBox messageBox = new MessageBox(job);
+        MessageBox messageBox = new MessageBox(leeroy);
         messageBox.open();
 
         // Check Error Panel
@@ -40,13 +41,15 @@ public class MessageBoxTest extends AbstractJUnitTest {
                 + "/src/main/java/hudson/plugins/sshslaves/RemoteLauncher.java': java.nio.file.NoSuchFileException:"
                 + " \\mnt\\hudson_workspace\\workspace\\HTS-CheckstyleTest\\ssh-slaves\\src\\main\\java\\hudson\\plugins"
                 + "\\sshslaves\\RemoteLauncher.java";
-        Assert.assertTrue(errors.get(1).contains(errno1));
+        assertThat(messageBox).hasErrorMessagesSize(3);
+        assertThat(messageBox).containsErrorMessage(errno1);
 
         // Check Info Panel
         List<String> infos = messageBox.getInfoMsgContent();
-        Assert.assertTrue(infos.get(1).contains("found 1 file"));
-        Assert.assertTrue(infos.get(3).contains("for 2 issues"));
-        Assert.assertTrue(infos.get(6).contains("No quality gates have been set - skipping"));
+        assertThat(messageBox).hasInfoMessagesSize(7);
+        assertThat(messageBox).containsInfoMessage("found 1 file");
+        assertThat(messageBox).containsInfoMessage("for 2 issues");
+        assertThat(messageBox).containsInfoMessage("No quality gates have been set - skipping");
     }
 
     private FreeStyleJob createFreeStyleJob(final String... resourcesToCopy) {

@@ -6,7 +6,7 @@ import org.jenkinsci.test.acceptance.po.MessageBox;
 public class MessageBoxAssert extends AbstractAssert<MessageBoxAssert, MessageBox> {
 
 	public MessageBoxAssert(MessageBox actual) {
-		super(actual, actual.getClass());
+		super(actual, MessageBoxAssert.class);
 	}
 
 	public static MessageBoxAssert assertThat(MessageBox actual) {
