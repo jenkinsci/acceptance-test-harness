@@ -224,7 +224,11 @@ public class Job extends TopLevelItem {
 	 * base64 and put it as a heredoc in the shell script.
 	 */
 	public void copyResource(Resource resource, String fileName) {
-		addShellStep(copyResourceShell(resource, fileName));
+	    if(SystemUtils.IS_OS_WINDOWS) {
+            addBatchStep(copyResourceShell(resource, fileName));
+        } else {
+            addShellStep(copyResourceShell(resource, fileName));
+        }
 	}
 
 	protected String copyResourceShell(Resource resource, String fileName) {
@@ -236,7 +240,12 @@ public class Job extends TopLevelItem {
 			}
 
 			if (SystemUtils.IS_OS_WINDOWS) {
-				return "xcopy " + resource.url + " %cd% /E";
+                String path = resource.url.getPath();
+				if(path.startsWith("/")){
+					path = path.substring(1);
+				}
+				path = path.replace("/","\\");
+				return "xcopy \"" + path + "\" . /E";
 			} else {
 				// fileName can include path portion like foo/bar/zot
 				return String.format("(mkdir -p %1$s || true) && rm -r %1$s && base64 --decode << ENDOFFILE | gunzip > %1$s \n%2$s\nENDOFFILE",
