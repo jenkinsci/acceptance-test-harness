@@ -1,69 +1,124 @@
 package org.jenkinsci.test.acceptance.plugins.warnings;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.StringUtils;
-import org.jenkinsci.test.acceptance.po.Build;
-import org.jenkinsci.test.acceptance.po.ContainerPageObject;
-import org.jenkinsci.test.acceptance.po.Job;
+import org.jenkinsci.test.acceptance.po.*;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
-public class WarningsResultDetailsPage extends ContainerPageObject {
-    public enum Tabs {
-        ISSUES, DETAILS, PACKAGES, MODULES;
-        
-        public By getXpath() {
-            return By.xpath("//a[text()='" + StringUtils.capitalize(name().toLowerCase()) + "']");
+import java.util.HashMap;
+import java.util.List;
+
+public class StatusPage extends ContainerPageObject {
+
+    private HashMap<String, SummaryBoxPageArea> summaryBoxes = new HashMap<>();
+
+    public StatusPage(Build build, List<String> pluginNames) {
+        super(build, build.url("/"));
+        for (String plugin : pluginNames) {
+            summaryBoxes.put(plugin, new SummaryBoxPageArea(plugin));
         }
     }
 
-    private static final String RESULT_PATH_END = "Result/";
-
-    public WarningsResultDetailsPage(final Job parent, final String id) {
-        super(parent, parent.url(id.toLowerCase() + RESULT_PATH_END));
+    public SummaryBoxPageArea getSummaryBoxByName(String pluginName) {
+        return summaryBoxes.get(pluginName);
     }
 
-    public WarningsResultDetailsPage(final Build parent, final String id) {
-        super(parent, parent.url(id.toLowerCase() + RESULT_PATH_END));
-    }
+    public class SummaryBoxPageArea {
+        private WebElement warningDiv;
+        private WebElement titleDiv;
+        private List<WebElement> resultList;
+        private WebElement titleDivResultLink;
+        private WebElement titleDivResultInfoLink;
+        private String titleDivResultLinkString;
+        private String titleDivResultInfoLinkString;
 
-    private WebElement getTabs() {
-        return getElement(By.id("tab-details"));
-    }
 
-    private List<Map<String, WebElement>> parseTable(final WebElement element) {
-        List<Map<String, WebElement>> parsedTable = new ArrayList<>();
-        List<String> tableHeaders = element.findElements(By.xpath(".//thead/tr/th"))
-                .stream()
-                .map(WebElement::getText)
-                .collect(Collectors.toList());
-        for (WebElement row : element.findElements(By.xpath(".//tbody/tr"))) {
-            List<WebElement> cellsOfRow = row.findElements(By.tagName("td"));
-            HashMap<String, WebElement> cellData = new HashMap<>();
-            for (int i = 0; i < tableHeaders.size(); i++) {
-                cellData.put(tableHeaders.get(i), cellsOfRow.get(i));
+        SummaryBoxPageArea(String parserName) {
+
+            warningDiv = find(By.id(parserName + "-summary"));
+            titleDiv = find(By.id(parserName + "-title"));
+
+            resultList = initResultList(parserName);
+            titleDivResultLink = initTitleDivResultLink(parserName);
+            titleDivResultLinkString = titleDivResultLink != null ? titleDivResultLink.getAttribute("href") : "";
+            titleDivResultInfoLink = initTitleDivResultInfoLink(parserName);
+            titleDivResultInfoLinkString = titleDivResultInfoLink != null ? titleDivResultInfoLink.getAttribute("href") : "";
+        }
+
+        private List<WebElement> initResultList(String parserName) {
+            try {
+                return warningDiv.findElements(by.xpath("./ul/li"));
             }
-            parsedTable.add(cellData);
+            catch (NoSuchElementException e) {
+                return null;
+            }
         }
-        return parsedTable;
-    }
 
-    public void openTab(final Tabs tab) {
-        open();
-        WebElement tabs = getTabs();
-        WebElement tabElement = tabs.findElement(tab.getXpath());
-        tabElement.click();
-    }
+        private WebElement initTitleDivResultInfoLink(String parserName) {
+            try {
+                return warningDiv.findElement(by.href(parserName + "Result/info"));
+            }
+            catch (NoSuchElementException e) {
+                return null;
+            }
+        }
 
-    public List<Map<String, WebElement>> getIssuesTable() {
-        openTab(Tabs.ISSUES);
-        WebElement issuesTable = find(By.id("issues"));
-        return parseTable(issuesTable);
+        private WebElement initTitleDivResultLink(String parserName) {
+            try {
+                return warningDiv.findElement(by.href(parserName + "Result"));
+            }
+            catch (NoSuchElementException e) {
+                return null;
+            }
+        }
+
+        public WebElement findClickableResultEntryByNamePart(String namePart) {
+            for (WebElement el : resultList) {
+                if (el.getText().contains(namePart)) {
+                    return el.findElement(by.tagName("a"));
+                }
+            }
+            return null;
+        }
+
+        public String findResultEntryTextByNamePart(String namePart) {
+            for (WebElement el : resultList) {
+                if (el.getText().contains(namePart)) {
+                    return el.getText();
+                }
+            }
+            return null;
+        }
+
+        public WebElement getWarningDiv() {
+            return warningDiv;
+        }
+
+        public WebElement getTitleDiv() {
+            return titleDiv;
+        }
+
+        public List<WebElement> getResultList() {
+
+            return resultList;
+        }
+
+        public String getTitleDivResultLinkString() {
+            return titleDivResultLinkString;
+        }
+
+        public String getTitleDivResultInfoLinkString() {
+            return titleDivResultInfoLinkString;
+        }
+
+        public WebElement getTitleDivResultLink() {
+            return titleDivResultLink;
+        }
+
+        public WebElement getTitleDivResultInfoLink() {
+            return titleDivResultInfoLink;
+        }
     }
 
 }

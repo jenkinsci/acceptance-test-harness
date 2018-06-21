@@ -1,5 +1,6 @@
 package plugins;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -7,6 +8,8 @@ import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.warnings.IssuesRecorder;
 import org.jenkinsci.test.acceptance.plugins.warnings.IssuesRecorder.StaticAnalysisTool;
+import org.jenkinsci.test.acceptance.plugins.warnings.StatusPage;
+import org.jenkinsci.test.acceptance.plugins.warnings.SummaryBoxPageAreaAssert;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsResultDetailsPage;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsResultDetailsPage.Tabs;
 import org.jenkinsci.test.acceptance.po.Build;
@@ -15,6 +18,8 @@ import org.junit.Test;
 import org.openqa.selenium.WebElement;
 
 import static org.assertj.core.api.Assertions.*;
+
+
 
 /**
  * Acceptance tests for the White Mountains release of the warnings plug-in.
@@ -134,7 +139,7 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
     @Test
     public void should_find_some_methode_name() {
         FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
-        job.copyResource("/warnings_plugin/test/build_01");
+        job.copyResource(WARNINGS_PLUGIN_PREFIX+ "build_status_test/build_01");
         IssuesRecorder recorder = job.addPublisher(IssuesRecorder.class);
 
         recorder.setTool("CheckStyle");
@@ -147,12 +152,54 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
 
         Build build1 = job.startBuild().waitUntilFinished();
         visit(job.getConfigUrl());
-        job.copyResource("/warnings_plugin/test/build_02");
+        job.copyResource(WARNINGS_PLUGIN_PREFIX+ "build_status_test/build_02");
         job.save();
         Build build2 = job.startBuild().waitUntilFinished();
 
-        assertThat(build2.getConsole()).contains(
-                "[checkstyle] Applying 2 filters on the set of 4 issues (3 issues have been removed)");
+        List<String> plugins = new ArrayList<>();
+        plugins.add("checkstyle");
+        plugins.add("pmd");
+        plugins.add("findbugs");
+
+        visit(build2.url);
+
+        StatusPage statusPage = new StatusPage( build2, plugins);
+
+        SummaryBoxPageAreaAssert.assertThat(statusPage.getSummaryBoxByName("checkstyle")).hasWarningDiv();
+        SummaryBoxPageAreaAssert.assertThat(statusPage.getSummaryBoxByName("pmd")).hasWarningDiv();
+        SummaryBoxPageAreaAssert.assertThat(statusPage.getSummaryBoxByName("findbugs")).hasWarningDiv();
+
+        statusPage.getSummaryBoxByName("checkstyle").getTitleDivResultLink().click();
+        assertThat(jenkins.getCurrentUrl()).isEqualTo(build2.url + "checkstyleResult/");
+
+        // TODO: Ask why we have to reinit statusPage object
+        visit(build2.url);
+        statusPage = new StatusPage( build2, plugins);
+
+        statusPage.getSummaryBoxByName("checkstyle").getTitleDivResultInfoLink().click();
+        assertThat(jenkins.getCurrentUrl()).isEqualTo(build2.url + "checkstyleResult/info/");
+
+        visit(build2.url);
+        statusPage = new StatusPage( build2, plugins);
+
+        statusPage.getSummaryBoxByName("checkstyle").findClickableResultEntryByNamePart("new").click();
+        assertThat(jenkins.getCurrentUrl()).isEqualTo(build2.url + "checkstyleResult/new/");
+
+        visit(build2.url);
+        statusPage = new StatusPage( build2, plugins);
+
+        statusPage.getSummaryBoxByName("checkstyle").findClickableResultEntryByNamePart("Reference").click();
+        assertThat(jenkins.getCurrentUrl()).isEqualTo(build1.url  +  "checkstyleResult/");
+
+        visit(build2.url);
+        statusPage = new StatusPage( build2, plugins);
+
+        String noWarningsResult = statusPage.getSummaryBoxByName("findbugs").findResultEntryTextByNamePart("No warnings for");
+        assertThat(noWarningsResult).isEqualTo("No warnings for 2 builds, i.e. since build 1");
+
+        visit(build2.url);
+        statusPage = new StatusPage( build2, plugins);
+
     }
 }
 
