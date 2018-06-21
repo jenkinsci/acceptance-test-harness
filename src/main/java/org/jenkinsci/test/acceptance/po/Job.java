@@ -50,7 +50,7 @@ public class Job extends TopLevelItem {
      */
     @Inject
     public JenkinsController controller;
-    
+
     private List<Parameter> parameters = new ArrayList<>();
 
     // TODO these controls (and some methods) actually belong in a subclass corresponding to AbstractProject
@@ -66,7 +66,7 @@ public class Job extends TopLevelItem {
     public Job(PageObject context, URL url, String name) {
         super(context, url, name);
     }
-    
+
     public <T extends Scm> T useScm(Class<T> type) {
         ensureConfigPage();
 
@@ -223,7 +223,12 @@ public class Job extends TopLevelItem {
      * base64 and put it as a heredoc in the shell script.
      */
     public void copyResource(Resource resource, String fileName) {
-        addShellStep(copyResourceShell(resource, fileName));
+        if (SystemUtils.IS_OS_WINDOWS) {
+            addBatchStep(copyResourceBatch(resource, fileName));
+        }
+        else {
+            addShellStep(copyResourceShell(resource, fileName));
+        }
     }
 
     protected String copyResourceShell(Resource resource, String fileName) {
@@ -242,6 +247,15 @@ public class Job extends TopLevelItem {
         }
     }
 
+    protected String copyResourceBatch(Resource resource, String fileName) {
+        String path = resource.url.getPath();
+        if (path.startsWith("/")) {
+            path = path.substring(1);
+        }
+        path = path.replace("/", "\\");
+        return "xcopy \"" + path + "\" . /E";
+    }
+
     public void copyResource(Resource resource) {
         copyResource(resource, resource.getName());
     }
@@ -250,7 +264,7 @@ public class Job extends TopLevelItem {
      * "Copy" any file from the System into the Workspace using a zipFIle.
      *
      * Differentiates when the file is being run on Windows or Unix based machines.
-     * 
+     *
      * @param file
      */
     public void copyFile(File file) {
