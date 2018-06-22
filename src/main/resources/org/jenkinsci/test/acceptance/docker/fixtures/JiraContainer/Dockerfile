@@ -12,7 +12,7 @@ FROM ubuntu:xenial
 ENV JIRA_VERSION 6.3
 
 # base package installation
-RUN apt-get update -y && apt-get install -y apt-transport-https && echo "deb https://sdkrepo.atlassian.com/debian/ stable contrib" >> /etc/apt/sources.list && apt-get update
+RUN apt-get update -y && apt-get install -y apt-transport-https && echo "deb https://packages.atlassian.com/atlassian-sdk-deb stable contrib" >> /etc/apt/sources.list && apt-get update
 RUN apt-get install -y --allow-unauthenticated openjdk-8-jdk atlassian-plugin-sdk netcat
 
 # this will install the whole thing, launches Tomcat,
