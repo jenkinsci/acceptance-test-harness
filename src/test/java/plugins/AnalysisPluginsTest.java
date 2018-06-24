@@ -8,8 +8,8 @@ import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.warnings.IssuesRecorder;
 import org.jenkinsci.test.acceptance.plugins.warnings.IssuesRecorder.StaticAnalysisTool;
-import org.jenkinsci.test.acceptance.plugins.warnings.StatusPage;
 import org.jenkinsci.test.acceptance.plugins.warnings.SummaryBoxPageAreaAssert;
+import org.jenkinsci.test.acceptance.plugins.warnings.SummaryPage;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsResultDetailsPage;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsResultDetailsPage.Tabs;
 import org.jenkinsci.test.acceptance.po.Build;
@@ -135,86 +135,73 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
     }
 
     /**
-     * Test to check that the issue filter can be configured and is applied.
+     * Tests the result overview by running two builds with three issue parsers enabled. Checks if the result boxes for
+     * each parser contain the expected contents.
      */
     @Test
     public void should_show_correct_plugin_result_boxes() {
         FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
         job.copyResource(WARNINGS_PLUGIN_PREFIX + "build_status_test/build_01");
-        IssuesRecorder recorder = job.addPublisher(IssuesRecorder.class);
-
-        recorder.setTool("CheckStyle");
-        recorder.addTool("FindBugs");
-        recorder.addTool("PMD");
-        recorder.openAdvancedOptions();
-        recorder.setEnabledForFailure(true);
-
+        applyIssueRecorder(job);
         job.save();
 
         Build build1 = job.startBuild().waitUntilFinished();
+
         visit(job.getConfigUrl());
         job.copyResource(WARNINGS_PLUGIN_PREFIX + "build_status_test/build_02");
         job.save();
-        Build build2 = job.startBuild().waitUntilFinished();
 
+        Build build2 = job.startBuild().waitUntilFinished();
         visit(build2.url);
 
         List<String> plugins = Arrays.asList("checkstyle", "pmd", "findbugs");
 
-        StatusPage statusPage = new StatusPage(build2, plugins, false);
+        SummaryPage summaryPage = new SummaryPage(build2, plugins, false);
 
-        SummaryBoxPageAreaAssert.assertThat(statusPage.getSummaryBoxByName("checkstyle")).hasWarningDiv();
-        SummaryBoxPageAreaAssert.assertThat(statusPage.getSummaryBoxByName("pmd")).hasWarningDiv();
-        SummaryBoxPageAreaAssert.assertThat(statusPage.getSummaryBoxByName("findbugs")).hasWarningDiv();
+        // assert that all configured plugins have a corresponding summary box
+        SummaryBoxPageAreaAssert.assertThat(summaryPage.getSummaryBoxByName("checkstyle")).hasWarningDiv();
+        SummaryBoxPageAreaAssert.assertThat(summaryPage.getSummaryBoxByName("pmd")).hasWarningDiv();
+        SummaryBoxPageAreaAssert.assertThat(summaryPage.getSummaryBoxByName("findbugs")).hasWarningDiv();
 
-        statusPage.getSummaryBoxByName("checkstyle").getTitleDivResultLink().click();
+        // assert that boxes contain correct links and content
+        summaryPage.getSummaryBoxByName("checkstyle").getTitleDivResultLink().click();
         assertThat(jenkins.getCurrentUrl()).isEqualTo(build2.url + "checkstyleResult/");
 
-        // TODO: Ask why we have to reinit statusPage object
+        //TODO: Check if there is a possibility to keep the pageobject after visting a different page, for example by opening a tab to visit the second url
         visit(build2.url);
-        statusPage = new StatusPage(build2, plugins, false);
+        summaryPage = new SummaryPage(build2, plugins, false);
 
-        statusPage.getSummaryBoxByName("checkstyle").getTitleDivResultInfoLink().click();
+        summaryPage.getSummaryBoxByName("checkstyle").getTitleDivResultInfoLink().click();
         assertThat(jenkins.getCurrentUrl()).isEqualTo(build2.url + "checkstyleResult/info/");
 
         visit(build2.url);
-        statusPage = new StatusPage(build2, plugins, false);
+        summaryPage = new SummaryPage(build2, plugins, false);
 
-        statusPage.getSummaryBoxByName("checkstyle").findClickableResultEntryByNamePart("new").click();
+        summaryPage.getSummaryBoxByName("checkstyle").findClickableResultEntryByNamePart("new").click();
         assertThat(jenkins.getCurrentUrl()).isEqualTo(build2.url + "checkstyleResult/new/");
 
         visit(build2.url);
-        statusPage = new StatusPage(build2, plugins, false);
+        summaryPage = new SummaryPage(build2, plugins, false);
 
-        statusPage.getSummaryBoxByName("checkstyle").findClickableResultEntryByNamePart("Reference").click();
+        summaryPage.getSummaryBoxByName("checkstyle").findClickableResultEntryByNamePart("Reference").click();
         assertThat(jenkins.getCurrentUrl()).isEqualTo(build1.url + "checkstyleResult/");
 
         visit(build2.url);
-        statusPage = new StatusPage(build2, plugins, false);
+        summaryPage = new SummaryPage(build2, plugins, false);
 
-        String noWarningsResult = statusPage.getSummaryBoxByName("findbugs")
+        String noWarningsResult = summaryPage.getSummaryBoxByName("findbugs")
                 .findResultEntryTextByNamePart("No warnings for");
         assertThat(noWarningsResult).isEqualTo("No warnings for 2 builds, i.e. since build 1");
-
-        visit(build2.url);
-        statusPage = new StatusPage(build2, plugins, false);
-
     }
 
     /**
-     * Test to check that the issue filter can be configured and is applied.
+     * Tests the result overview with aggregated results by running two builds with three issue parsers.
      */
     @Test
-    public void should_show_correct_aggregation_result_box() {
+    public void should_show_expected_aggregations_in_result_box() {
         FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
         job.copyResource(WARNINGS_PLUGIN_PREFIX + "build_status_test/build_01");
-        IssuesRecorder recorder = job.addPublisher(IssuesRecorder.class);
-
-        recorder.setTool("CheckStyle");
-        recorder.addTool("FindBugs");
-        recorder.addTool("PMD");
-        recorder.openAdvancedOptions();
-        recorder.setEnabledForFailure(true);
+        IssuesRecorder recorder = applyIssueRecorder(job);
         recorder.setEnabledForAggregation(true);
         job.save();
 
@@ -229,52 +216,73 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
 
         List<String> plugins = Arrays.asList("checkstyle", "pmd", "findbugs");
 
-        StatusPage statusPage = new StatusPage(build2, plugins, true);
+        SummaryPage summaryPage = new SummaryPage(build2, plugins, true);
 
-        SummaryBoxPageAreaAssert.assertThat(statusPage.getSummaryBoxByName("analysis")).hasWarningDiv();
-        String resultsFrom = statusPage.getSummaryBoxByName("analysis")
-                .findResultEntryTextByNamePart("Static analysis results from");
-        // FIXME: Field should also contains findbugs, even if there is no issue...
+        SummaryBoxPageAreaAssert.assertThat(summaryPage.getSummaryBoxByName("analysis")).hasWarningDiv();
+        // FIXME: Field should also contain findbugs, even if there is no issue...
+        //String resultsFrom = summaryPage.getSummaryBoxByName("analysis")
+        //        .findResultEntryTextByNamePart("Static analysis results from");
         //assertThat(resultsFrom.toLowerCase()).contains(plugins);
 
-        statusPage.getSummaryBoxByName("analysis").getTitleDivResultLink().click();
+        summaryPage.getSummaryBoxByName("analysis").getTitleDivResultLink().click();
         assertThat(jenkins.getCurrentUrl()).isEqualTo(build2.url + "analysisResult/");
 
         visit(build2.url);
-        statusPage = new StatusPage(build2, plugins, true);
+        summaryPage = new SummaryPage(build2, plugins, true);
 
-        statusPage.getSummaryBoxByName("analysis").getTitleDivResultInfoLink().click();
+        summaryPage.getSummaryBoxByName("analysis").getTitleDivResultInfoLink().click();
         assertThat(jenkins.getCurrentUrl()).isEqualTo(build2.url + "analysisResult/info/");
 
         visit(build2.url);
-        statusPage = new StatusPage(build2, plugins, true);
+        summaryPage = new SummaryPage(build2, plugins, true);
 
-        statusPage.getSummaryBoxByName("analysis").findClickableResultEntryByNamePart("2 new warnings").click();
+        summaryPage.getSummaryBoxByName("analysis").findClickableResultEntryByNamePart("2 new warnings").click();
         assertThat(jenkins.getCurrentUrl()).isEqualTo(build2.url + "analysisResult/new/");
 
         visit(build2.url);
-        statusPage = new StatusPage(build2, plugins, true);
+        summaryPage = new SummaryPage(build2, plugins, true);
 
-        statusPage.getSummaryBoxByName("analysis").findClickableResultEntryByNamePart("One fixed warning").click();
+        summaryPage.getSummaryBoxByName("analysis").findClickableResultEntryByNamePart("One fixed warning").click();
         assertThat(jenkins.getCurrentUrl()).isEqualTo(build2.url + "analysisResult/fixed/");
 
         visit(build2.url);
-        statusPage = new StatusPage(build2, plugins, true);
+        summaryPage = new SummaryPage(build2, plugins, true);
 
-        statusPage.getSummaryBoxByName("analysis").findClickableResultEntryByNamePart("Reference build").click();
+        summaryPage.getSummaryBoxByName("analysis").findClickableResultEntryByNamePart("Reference build").click();
         assertThat(jenkins.getCurrentUrl()).isEqualTo(build1.url + "analysisResult/");
-
-        visit(build2.url);
-        statusPage = new StatusPage(build2, plugins, true);
     }
 
     /**
-     * Test to check that the issue filter can be configured and is applied.
+     * Tests the functionality of the result overview with qualitygate enabled.
      */
     @Test
-    public void should_show_correct_plugin_result_boxes_with_qualitiy_gate() {
+    public void should_contain_expected_qualitygate_results() {
         FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
         job.copyResource(WARNINGS_PLUGIN_PREFIX + "build_status_test/build_01");
+        IssuesRecorder recorder = applyIssueRecorder(job);
+        recorder.addQualityGateConfiguration(2);
+
+        job.save();
+
+        Build build1 = job.startBuild().waitUntilFinished();
+
+        List<String> plugins = Arrays.asList("checkstyle", "pmd", "findbugs");
+        visit(build1.url);
+
+        SummaryPage summaryPage = new SummaryPage(build1, plugins, false);
+
+        //Checks if the whole build is marked as failed (in the title)
+        assertThat(summaryPage.getBuildState()).isEqualTo("Failed");
+
+        //Checks if the issue parser boxes contain the expected quality gate states
+        SummaryBoxPageAreaAssert.assertThat(summaryPage.getSummaryBoxByName("checkstyle"))
+                .hasQualityGateState("Success");
+        SummaryBoxPageAreaAssert.assertThat(summaryPage.getSummaryBoxByName("findbugs")).hasQualityGateState("Success");
+        SummaryBoxPageAreaAssert.assertThat(summaryPage.getSummaryBoxByName("pmd")).hasQualityGateState("Failed");
+
+    }
+
+    private IssuesRecorder applyIssueRecorder(final FreeStyleJob job) {
         IssuesRecorder recorder = job.addPublisher(IssuesRecorder.class);
 
         recorder.setTool("CheckStyle");
@@ -282,18 +290,7 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
         recorder.addTool("PMD");
         recorder.openAdvancedOptions();
         recorder.setEnabledForFailure(true);
-
-        //recorder.set
-        job.save();
-
-        Build build1 = job.startBuild().waitUntilFinished();
-        visit(job.getConfigUrl());
-        job.copyResource(WARNINGS_PLUGIN_PREFIX + "build_status_test/build_02");
-        job.save();
-
-        Build build2 = job.startBuild().waitUntilFinished();
-
-        visit(build2.url);
+        return recorder;
     }
 
     /**

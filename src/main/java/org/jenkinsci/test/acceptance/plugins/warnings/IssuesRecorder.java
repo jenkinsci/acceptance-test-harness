@@ -1,9 +1,5 @@
 package org.jenkinsci.test.acceptance.plugins.warnings;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import org.jenkinsci.test.acceptance.po.AbstractStep;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
@@ -13,8 +9,6 @@ import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.PostBuildStep;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.Select;
-
-import static java.util.Arrays.asList;
 
 /**
  * Page object for the IssuesRecorder of the warnings plugin (white mountains release).
@@ -32,7 +26,7 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
     private Control referenceJobField = control("referenceJob");
     private Control aggregatingResultsCheckBox = control("aggregatingResults");
     private IssueFilterPanel issueFilterPanel;
-    
+
     /**
      * Creates a new page object.
      *
@@ -264,10 +258,10 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
      *         - threshold for issues with low severity
      */
     public void unstableTotalQualityGateConfiguration(int total, int high, int normal, int low) {
-        control(By.name("unstableTotalAll")).set(total);
-        control(By.name("unstableTotalHigh")).set(high);
-        control(By.name("unstableTotalNormal")).set(normal);
-        control(By.name("unstableTotalLow")).set(low);
+        control(By.name("_.unstableTotalAll")).set(total);
+        control(By.name("_.unstableTotalHigh")).set(high);
+        control(By.name("_.unstableTotalNormal")).set(normal);
+        control(By.name("_.unstableTotalLow")).set(low);
     }
 
     /**
@@ -283,10 +277,10 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
      *         - threshold for issues with low severity
      */
     void failedTotalQualityGateConfiguration(int total, int high, int normal, int low) {
-        control(By.name("failedTotalAll")).set(total);
-        control(By.name("failedTotalHigh")).set(high);
-        control(By.name("failedTotalNormal")).set(normal);
-        control(By.name("failedTotalLow")).set(low);
+        control(By.name("_.failedTotalAll")).set(total);
+        control(By.name("_.failedTotalHigh")).set(high);
+        control(By.name("_.failedTotalNormal")).set(normal);
+        control(By.name("_.failedTotalLow")).set(low);
     }
 
     /**
@@ -302,10 +296,10 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
      *         - threshold for issues with low severity
      */
     void unstableNewQualityGateConfiguration(int total, int high, int normal, int low) {
-        control(By.name("unstableNewAll")).set(total);
-        control(By.name("unstableNewHigh")).set(high);
-        control(By.name("unstableNewNormal")).set(normal);
-        control(By.name("unstableNewLow")).set(low);
+        control(By.name("_.unstableNewAll")).set(total);
+        control(By.name("_.unstableNewHigh")).set(high);
+        control(By.name("_.unstableNewNormal")).set(normal);
+        control(By.name("_.unstableNewLow")).set(low);
     }
 
     /**
@@ -321,14 +315,19 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
      *         - threshold for issues with low severity
      */
     void failedNewQualityGateConfiguration(int total, int high, int normal, int low) {
-        control(By.name("failedNewAll")).set(total);
-        control(By.name("failedNewHigh")).set(high);
-        control(By.name("failedNewNormal")).set(normal);
-        control(By.name("failedNewLow")).set(low);
+        control(By.name("_.failedNewAll")).set(total);
+        control(By.name("_.failedNewHigh")).set(high);
+        control(By.name("_.failedNewNormal")).set(normal);
+        control(By.name("_.failedNewLow")).set(low);
     }
+
+    /**
      * Adds a new issue filter.
-     * @param filterName name of the filter
-     * @param regex regular expression to apply
+     *
+     * @param filterName
+     *         name of the filter
+     * @param regex
+     *         regular expression to apply
      */
     public void addIssueFilter(final String filterName, final String regex) {
         if (issueFilterPanel == null) {
