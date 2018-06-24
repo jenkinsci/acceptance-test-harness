@@ -1,22 +1,27 @@
 package org.jenkinsci.test.acceptance.plugins.warnings;
 
-import org.jenkinsci.test.acceptance.po.*;
-import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-
 import java.util.HashMap;
 import java.util.List;
+
+import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.po.ContainerPageObject;
+import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebElement;
 
 public class StatusPage extends ContainerPageObject {
 
     private HashMap<String, SummaryBoxPageArea> summaryBoxes = new HashMap<>();
 
-    public StatusPage(Build build, List<String> pluginNames) {
+    public StatusPage(Build build, List<String> pluginNames, Boolean aggregatedResults) {
         super(build, build.url("/"));
-        for (String plugin : pluginNames) {
-            summaryBoxes.put(plugin, new SummaryBoxPageArea(plugin));
+        if (aggregatedResults) {
+            summaryBoxes.put("analysis", new SummaryBoxPageArea("analysis"));
+        }
+        else {
+            for (String plugin : pluginNames) {
+                summaryBoxes.put(plugin, new SummaryBoxPageArea(plugin.toLowerCase()));
+            }
         }
     }
 
