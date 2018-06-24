@@ -24,12 +24,15 @@ import static java.util.Arrays.asList;
 @Describable("Record static analysis results")
 public class IssuesRecorder extends AbstractStep implements PostBuildStep {
     private Control toolsRepeatable = control("repeatable-add");
+    private Control filtersRepeatable = control("repeatable-add[1]");
     private Control advancedButton = control("advanced-button");
     private Control enabledForFailureCheckBox = control("enabledForFailure");
     private Control ignoreAnalysisResultCheckBox = control("ignoreAnalysisResult");
     private Control overallResultMustBeSuccessCheckBox = control("overallResultMustBeSuccess");
     private Control referenceJobField = control("referenceJob");
-
+    private Control aggregatingResultsCheckBox = control("aggregatingResults");
+    private IssueFilterPanel issueFilterPanel;
+    
     /**
      * Creates a new page object.
      *
@@ -47,10 +50,27 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
      *
      * @param toolName
      *         the tool name
+     *
+     * @return the sub page of the tool
      */
-    public void setTool(final String toolName) {
+    public StaticAnalysisTool setTool(final String toolName) {
         StaticAnalysisTool tool = new StaticAnalysisTool(this, "tools");
         tool.setTool(toolName);
+        return tool;
+    }
+
+    /**
+     * Sets the name and the pattern of the static analysis tool to use.
+     *
+     * @param toolName
+     *         the tool name
+     * @param pattern
+     *         the file name pattern
+     */
+    public void setTool(final String toolName, final String pattern) {
+        StaticAnalysisTool tool = new StaticAnalysisTool(this, "tools");
+        tool.setTool(toolName);
+        tool.setPattern(pattern);
     }
 
     /**
@@ -58,9 +78,11 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
      *
      * @param toolName
      *         the tool name
+     *
+     * @return the sub page of the tool
      */
-    public void addTool(final String toolName) {
-        createToolPageArea(toolName);
+    public StaticAnalysisTool addTool(final String toolName) {
+        return createToolPageArea(toolName);
     }
 
     /**
@@ -70,10 +92,13 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
      *         the tool name
      * @param pattern
      *         the file name pattern
+     *
+     * @return the sub page of the tool
      */
-    public void addTool(final String toolName, final String pattern) {
-        StaticAnalysisTool tool = createToolPageArea(toolName);
+    public StaticAnalysisTool addTool(final String toolName, final String pattern) {
+        StaticAnalysisTool tool = addTool(toolName);
         tool.setPattern(pattern);
+        return tool;
     }
 
     /**
@@ -117,6 +142,16 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
     }
 
     /**
+     * Enables or disables the checkbox 'aggregatingResultsCheckBox'.
+     *
+     * @param isChecked
+     *         determines if the checkbox should be checked or not
+     */
+    public void setEnabledForAggregation(final boolean isChecked) {
+        aggregatingResultsCheckBox.check(isChecked);
+    }
+
+    /**
      * Opens the advanced section.
      */
     public void openAdvancedOptions() {
@@ -134,21 +169,73 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
     /**
      * Page area of a static analysis tool configuration.
      */
-    private static class StaticAnalysisTool extends PageAreaImpl {
+    public static class StaticAnalysisTool extends PageAreaImpl {
         private final Control pattern = control("pattern");
+        private final Control normalThreshold = control("tool/normalThreshold");
+        private final Control highThreshold = control("tool/highThreshold");
 
         StaticAnalysisTool(final PageArea issuesRecorder, final String path) {
             super(issuesRecorder, path);
         }
 
+        /**
+         * Sets the name of the tool.
+         *
+         * @param toolName
+         *         the name of the tool, e.g. CheckStyle, CPD, etc.
+         */
         public void setTool(final String toolName) {
             Select select = new Select(self().findElement(By.className("dropdownList")));
             select.selectByVisibleText(toolName);
         }
 
+        /**
+         * Sets the pattern of the files to parse.
+         *
+         * @param pattern
+         *         the pattern
+         */
         public void setPattern(final String pattern) {
             this.pattern.set(pattern);
         }
+
+        /**
+         * Sets the normal threshold for duplicate code warnings.
+         *
+         * @param normalThreshold
+         *         threshold to be set
+         */
+        public void setNormalThreshold(int normalThreshold) {
+            this.normalThreshold.set(normalThreshold);
+        }
+
+        /**
+         * Sets the high threshold for duplicate code warnings.
+         *
+         * @param highThreshold
+         *         threshold to be set
+         */
+        public void setHighThreshold(int highThreshold) {
+            this.highThreshold.set(highThreshold);
+        }
+    }
+
+    /**
+     * Page area of a issue filter configuration.
+     */
+    private static class IssueFilterPanel extends PageAreaImpl {
+        private final Control regexField = control("pattern");
+
+        IssueFilterPanel(final PageArea area, final String path) {
+            super(area, path);
+        }
+
+        private void setFilter(final String filter, final String regex) {
+            Select filterField = new Select(self().findElement(By.className("dropdownList")));
+            filterField.selectByVisibleText(filter);
+            regexField.set(regex);
+        }
+
     }
 
     /**
@@ -238,6 +325,23 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
         control(By.name("failedNewHigh")).set(high);
         control(By.name("failedNewNormal")).set(normal);
         control(By.name("failedNewLow")).set(low);
+    }
+     * Adds a new issue filter.
+     * @param filterName name of the filter
+     * @param regex regular expression to apply
+     */
+    public void addIssueFilter(final String filterName, final String regex) {
+        if (issueFilterPanel == null) {
+            // fill initial existing filter
+            issueFilterPanel = new IssueFilterPanel(this, "filters");
+            issueFilterPanel.setFilter(filterName, regex);
+        }
+        else {
+            // create new filter
+            String path = createPageArea("filters", () -> filtersRepeatable.click());
+            IssueFilterPanel filter = new IssueFilterPanel(this, path);
+            filter.setFilter(filterName, regex);
+        }
     }
 
 }
