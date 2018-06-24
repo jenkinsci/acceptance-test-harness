@@ -151,13 +151,93 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
         }
     }
 
-    void addQualityGateConfiguration(){
-        List<String> inputFieldNames = asList("unstableTotalAll","unstableTotalHigh","unstableTotalNormal","unstableTotalLow",
-                                             "failedTotalAll","failedTotalHigh","failedTotalNormal","failedTotalLow",
-                                             "unstableNewAll","unstableNewHigh","unstableNewNormal","unstableNewLow",
-                                             "failedNewAll","failedNewHigh","failedNewNormal","failedNewLow");
-        for(String inputFieldName:inputFieldNames){
-            control(By.name(inputFieldName)).set("5");
-        }
+    /**
+     * Sets a qualitygate configuration where all sixteen fields are filled with the same value.
+     *
+     * @param valueForAll
+     *         -threshold for all configuration fields of qualitygate.
+     */
+    public void addQualityGateConfiguration(int valueForAll) {
+        unstableTotalQualityGateConfiguration(valueForAll, valueForAll, valueForAll, valueForAll);
+        failedTotalQualityGateConfiguration(valueForAll, valueForAll, valueForAll, valueForAll);
+        unstableNewQualityGateConfiguration(valueForAll, valueForAll, valueForAll, valueForAll);
+        failedNewQualityGateConfiguration(valueForAll, valueForAll, valueForAll, valueForAll);
     }
+
+    /**
+     * Sets the thresholds for the build to be considered as unstable for issues overall.
+     *
+     * @param total
+     *         - threshold for overall issues
+     * @param high
+     *         - threshold for issues with high severity
+     * @param normal
+     *         - threshold for issues with normal severity
+     * @param low
+     *         - threshold for issues with low severity
+     */
+    public void unstableTotalQualityGateConfiguration(int total, int high, int normal, int low) {
+        control(By.name("unstableTotalAll")).set(total);
+        control(By.name("unstableTotalHigh")).set(high);
+        control(By.name("unstableTotalNormal")).set(normal);
+        control(By.name("unstableTotalLow")).set(low);
+    }
+
+    /**
+     * Sets the thresholds for the build to be considered as failed for issues overall.
+     *
+     * @param total
+     *         - threshold for overall issues
+     * @param high
+     *         - threshold for issues with high severity
+     * @param normal
+     *         - threshold for issues with normal severity
+     * @param low
+     *         - threshold for issues with low severity
+     */
+    void failedTotalQualityGateConfiguration(int total, int high, int normal, int low) {
+        control(By.name("failedTotalAll")).set(total);
+        control(By.name("failedTotalHigh")).set(high);
+        control(By.name("failedTotalNormal")).set(normal);
+        control(By.name("failedTotalLow")).set(low);
+    }
+
+    /**
+     * Sets the thresholds for the build to be considered as unstable for new issues.
+     *
+     * @param total
+     *         - threshold for overall issues
+     * @param high
+     *         - threshold for issues with high severity
+     * @param normal
+     *         - threshold for issues with normal severity
+     * @param low
+     *         - threshold for issues with low severity
+     */
+    void unstableNewQualityGateConfiguration(int total, int high, int normal, int low) {
+        control(By.name("unstableNewAll")).set(total);
+        control(By.name("unstableNewHigh")).set(high);
+        control(By.name("unstableNewNormal")).set(normal);
+        control(By.name("unstableNewLow")).set(low);
+    }
+
+    /**
+     * Sets the thresholds for the build to be considered as failed for new issues.
+     *
+     * @param total
+     *         - threshold for overall issues
+     * @param high
+     *         - threshold for issues with high severity
+     * @param normal
+     *         - threshold for issues with normal severity
+     * @param low
+     *         - threshold for issues with low severity
+     */
+    void failedNewQualityGateConfiguration(int total, int high, int normal, int low) {
+        control(By.name("failedNewAll")).set(total);
+        control(By.name("failedNewHigh")).set(high);
+        control(By.name("failedNewNormal")).set(normal);
+        control(By.name("failedNewLow")).set(low);
+    }
+
 }

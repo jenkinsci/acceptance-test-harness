@@ -13,6 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Acceptance tests for the White Mountains release of the warnings plug-in.
  *
  * @author Ullrich Hafner
+ * @author Michaela Reitschuster
  */
 @WithPlugins("warnings")
 public class AnalysisPluginsTest extends AbstractJUnitTest {
@@ -33,4 +34,24 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
 
         assertThat(build.getConsole()).contains("[CheckStyle] [ERROR] No files found for pattern '**/checkstyle-result.xml'. Configuration error?\n");
     }
+
+    /**
+     * Simple test to check that the console log shows that build was a failure when thresholds of qualitygate have been
+     * reached.
+     */
+    @Test
+    public void should_log_failure__when_qualitygate_thresholds_are_reached() {
+        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
+        job.copyResource("/warnings_plugin/checkstyle-result.xml");
+        IssuesRecorder recorder = job.addPublisher(IssuesRecorder.class);
+        recorder.setTool("CheckStyle");
+        recorder.openAdvancedOptions();
+        recorder.setEnabledForFailure(true);
+        recorder.addQualityGateConfiguration(5);
+        job.save();
+
+        Build build = job.startBuild().waitUntilFinished();
+        assertThat(build.getConsole()).contains("Finished: FAILURE");
+    }
+
 }
