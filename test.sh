@@ -13,5 +13,5 @@ fi
 
 mvnOptions="-Dsurefire.rerunFailingTestsCount=${RETRY} -Dwebdriver.gecko.driver=${GECKO_DRIVER_PATH} -DElasticTime.factor=${ELASTIC} -Dwebdriver.chrome.driver=${CHROME_DRIVER_PATH}"
 
-echo env LC_NUMERIC=”en_US.UTF-8″ BROWSER=${BROWSER} mvn -q test -o -Dtest=WarningsPluginTest${TEST_CASE} ${mvnOptions}
-env LC_NUMERIC=”en_US.UTF-8″ BROWSER=${BROWSER} mvn -q test -o -Dtest=WarningsPluginTest${TEST_CASE} ${mvnOptions}
+echo env LC_NUMERIC="en_US.UTF-8" BROWSER=${BROWSER} mvn -q test -o -Dtest=WarningsPluginTest${TEST_CASE} ${mvnOptions}
+env LC_NUMERIC="en_US.UTF-8" BROWSER=${BROWSER} mvn -q test -o -Dtest=WarningsPluginTest${TEST_CASE} ${mvnOptions}

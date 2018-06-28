@@ -12,7 +12,7 @@ import org.jenkinsci.test.acceptance.plugins.warnings.SummaryPage.SummaryBoxPage
  */
 public class SummaryBoxPageAreaAssert extends AbstractAssert<SummaryBoxPageAreaAssert, SummaryBoxPageArea> {
 
-    public SummaryBoxPageAreaAssert(SummaryBoxPageArea summaryBoxPageArea) {
+    SummaryBoxPageAreaAssert(SummaryBoxPageArea summaryBoxPageArea) {
         super(summaryBoxPageArea, SummaryBoxPageAreaAssert.class);
     }
 

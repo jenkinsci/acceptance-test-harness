@@ -8,8 +8,11 @@ import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.warnings.IssuesRecorder;
 import org.jenkinsci.test.acceptance.plugins.warnings.IssuesRecorder.StaticAnalysisTool;
 import org.jenkinsci.test.acceptance.plugins.warnings.SummaryPage;
+import org.jenkinsci.test.acceptance.plugins.warnings.WarningsCharts;
+import org.jenkinsci.test.acceptance.plugins.warnings.WarningsPriorityChart;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsResultDetailsPage;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsResultDetailsPage.Tabs;
+import org.jenkinsci.test.acceptance.plugins.warnings.WarningsTrendChart;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
@@ -20,12 +23,13 @@ import static plugins.warnings.assertions.Assertions.*;
 /**
  * Acceptance tests for the White Mountains release of the warnings plug-in.
  *
- * @author Ullrich Hafner
- * @author Michaela Reitschuster
- * @author Alexandra Wenzel
  * @author Manuel Hampp
  * @author Anna-Maria Hardi
+ * @author Elvira Hauer
+ * @author Michaela Reitschuster
  * @author Stephan Plöderl
+ * @author Alexandra Wenzel
+ * @author Ullrich Hafner
  */
 @WithPlugins("warnings")
 public class AnalysisPluginsTest extends AbstractJUnitTest {
@@ -46,14 +50,14 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
 
         Build build = job.startBuild().waitUntilFinished();
 
-        WarningsResultDetailsPage page = getWarningsResultDetailsPage("cpd", build);
+        WarningsResultDetailsPage page = getWarningsResultDetailsPage(build, "cpd");
         page.openTab(Tabs.DETAILS);
         List<Map<String, WebElement>> issuesTable = page.getIssuesTable();
         Map<String, WebElement> firstRowOfIssuesTable = issuesTable.get(0);
         assertThat(firstRowOfIssuesTable.keySet()).contains("Details");
     }
 
-    private WarningsResultDetailsPage getWarningsResultDetailsPage(final String id, final Build build) {
+    private WarningsResultDetailsPage getWarningsResultDetailsPage(final Build build, final String id) {
         WarningsResultDetailsPage resultPage = new WarningsResultDetailsPage(build, id);
         resultPage.open();
         return resultPage;
@@ -123,7 +127,7 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
             recorder.addIssueFilter("Exclude categories", "Checks");
             recorder.addIssueFilter("Include types", "JavadocMethodCheck");
         });
-
+        
         job.save();
 
         Build build = job.startBuild().waitUntilFinished();
@@ -138,19 +142,18 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
      */
     @Test
     public void should_show_correct_plugin_result_boxes() {
-        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
-        job.copyResource(WARNINGS_PLUGIN_PREFIX + "build_status_test/build_01");
+        FreeStyleJob job = createFreeStyleJob(WARNINGS_PLUGIN_PREFIX + "build_status_test/build_01");
         applyIssueRecorder(job);
         job.save();
 
-        Build build1 = job.startBuild().waitUntilFinished();
+        Build referenceBuild = job.startBuild().waitUntilFinished();
 
         job.configure(() -> job.copyResource(WARNINGS_PLUGIN_PREFIX + "build_status_test/build_02"));
 
-        Build build2 = job.startBuild().waitUntilFinished();
-        build2.open();
+        Build build = job.startBuild().waitUntilFinished();
+        build.open();
 
-        SummaryPage summaryPage = new SummaryPage(build2, false);
+        SummaryPage summaryPage = new SummaryPage(build, false);
 
         // assert that all configured plugins have a corresponding summary box
         assertThat(summaryPage.getSummaryBoxByName("checkstyle")).hasSummary();
@@ -159,23 +162,23 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
 
         // assert that boxes contain correct links and content
         summaryPage.getSummaryBoxByName("checkstyle").getTitleResultLink().click();
-        assertThat(jenkins.getCurrentUrl()).isEqualTo(build2.url + "checkstyleResult/");
-        build2.open();
+        assertThat(jenkins.getCurrentUrl()).isEqualTo(build.url + "checkstyleResult/");
+        build.open();
 
         summaryPage.getSummaryBoxByName("checkstyle").getTitleResultInfoLink().click();
-        assertThat(jenkins.getCurrentUrl()).isEqualTo(build2.url + "checkstyleResult/info/");
+        assertThat(jenkins.getCurrentUrl()).isEqualTo(build.url + "checkstyleResult/info/");
 
-        build2.open();
+        build.open();
 
         summaryPage.getSummaryBoxByName("checkstyle").findClickableResultEntryByNamePart("new").click();
-        assertThat(jenkins.getCurrentUrl()).isEqualTo(build2.url + "checkstyleResult/new/");
+        assertThat(jenkins.getCurrentUrl()).isEqualTo(build.url + "checkstyleResult/new/");
 
-        build2.open();
+        build.open();
 
         summaryPage.getSummaryBoxByName("checkstyle").findClickableResultEntryByNamePart("Reference").click();
-        assertThat(jenkins.getCurrentUrl()).isEqualTo(build1.url + "checkstyleResult/");
+        assertThat(jenkins.getCurrentUrl()).isEqualTo(referenceBuild.url + "checkstyleResult/");
 
-        build2.open();
+        build.open();
 
         String noWarningsResult = summaryPage.getSummaryBoxByName("findbugs")
                 .findResultEntryTextByNamePart("No warnings for");
@@ -187,20 +190,19 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
      */
     @Test
     public void should_show_expected_aggregations_in_result_box() {
-        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
-        job.copyResource(WARNINGS_PLUGIN_PREFIX + "build_status_test/build_01");
+        FreeStyleJob job = createFreeStyleJob(WARNINGS_PLUGIN_PREFIX + "build_status_test/build_01");
         IssuesRecorder recorder = applyIssueRecorder(job);
         recorder.setEnabledForAggregation(true);
         job.save();
 
-        Build build1 = job.startBuild().waitUntilFinished();
+        Build referenceBuild = job.startBuild().waitUntilFinished();
         job.configure(() -> job.copyResource(WARNINGS_PLUGIN_PREFIX + "build_status_test/build_02"));
 
-        Build build2 = job.startBuild().waitUntilFinished();
+        Build build = job.startBuild().waitUntilFinished();
 
-        build2.open();
+        build.open();
 
-        SummaryPage summaryPage = new SummaryPage(build2, true);
+        SummaryPage summaryPage = new SummaryPage(build, true);
 
         assertThat(summaryPage.getSummaryBoxByName("analysis")).hasSummary();
         // FIXME: @uhafner Field should also contain findbugs, even if there is no issue...
@@ -209,46 +211,44 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
         //assertThat(resultsFrom.toLowerCase()).contains(plugins);
 
         summaryPage.getSummaryBoxByName("analysis").getTitleResultLink().click();
-        assertThat(jenkins.getCurrentUrl()).isEqualTo(build2.url + "analysisResult/");
+        assertThat(jenkins.getCurrentUrl()).isEqualTo(build.url + "analysisResult/");
 
-        build2.open();
+        build.open();
 
         summaryPage.getSummaryBoxByName("analysis").getTitleResultInfoLink().click();
-        assertThat(jenkins.getCurrentUrl()).isEqualTo(build2.url + "analysisResult/info/");
+        assertThat(jenkins.getCurrentUrl()).isEqualTo(build.url + "analysisResult/info/");
 
-        build2.open();
+        build.open();
 
         summaryPage.getSummaryBoxByName("analysis").findClickableResultEntryByNamePart("2 new warnings").click();
-        assertThat(jenkins.getCurrentUrl()).isEqualTo(build2.url + "analysisResult/new/");
+        assertThat(jenkins.getCurrentUrl()).isEqualTo(build.url + "analysisResult/new/");
 
-        build2.open();
+        build.open();
 
         summaryPage.getSummaryBoxByName("analysis").findClickableResultEntryByNamePart("One fixed warning").click();
-        assertThat(jenkins.getCurrentUrl()).isEqualTo(build2.url + "analysisResult/fixed/");
+        assertThat(jenkins.getCurrentUrl()).isEqualTo(build.url + "analysisResult/fixed/");
 
-        build2.open();
+        build.open();
 
         summaryPage.getSummaryBoxByName("analysis").findClickableResultEntryByNamePart("Reference build").click();
-        assertThat(jenkins.getCurrentUrl()).isEqualTo(build1.url + "analysisResult/");
+        assertThat(jenkins.getCurrentUrl()).isEqualTo(referenceBuild.url + "analysisResult/");
     }
 
     /**
-     * Tests the functionality of the result overview with qualitygate enabled.
+     * Tests the functionality of the result overview with quality gate enabled.
      */
     @Test
-    public void should_contain_expected_qualitygate_results() {
-        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
-        job.copyResource(WARNINGS_PLUGIN_PREFIX + "build_status_test/build_01");
+    public void should_contain_expected_quality_gate_results() {
+        FreeStyleJob job = createFreeStyleJob(WARNINGS_PLUGIN_PREFIX + "build_status_test/build_01");
         IssuesRecorder recorder = applyIssueRecorder(job);
         recorder.addQualityGateConfiguration(2);
-
         job.save();
 
-        Build build1 = job.startBuild().waitUntilFinished();
+        Build build = job.startBuild().waitUntilFinished();
 
-        build1.open();
+        build.open();
 
-        SummaryPage summaryPage = new SummaryPage(build1, false);
+        SummaryPage summaryPage = new SummaryPage(build, false);
 
         //Checks if the whole build is marked as failed (in the title)
         assertThat(summaryPage.getBuildState()).isEqualTo("Failed");
@@ -272,13 +272,12 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
     }
 
     /**
-     * Simple test to check that the console log shows that build was a failure when thresholds of qualitygate have been
+     * Simple test to check that the console log shows that build was a failure when thresholds of quality gate have been
      * reached.
      */
     @Test
-    public void should_log_failure__when_qualitygate_thresholds_are_reached() {
-        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
-        job.copyResource("/warnings_plugin/checkstyle-result.xml");
+    public void should_log_failure__when_quality_gate_thresholds_are_reached() {
+        FreeStyleJob job = createFreeStyleJob("/warnings_plugin/checkstyle-result.xml");
         IssuesRecorder recorder = job.addPublisher(IssuesRecorder.class);
         recorder.setTool("CheckStyle");
         recorder.openAdvancedOptions();
@@ -290,5 +289,53 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
         assertThat(build.getConsole()).contains("Finished: FAILURE");
     }
 
+    /**
+     * Starts two builds with different configurations and checks the values of the new, fixed and outstanding issues of
+     * the trend chart.
+     */
+    @Test
+    public void should_log_values_in_trend_chart() {
+        FreeStyleJob job = createFreeStyleJob("aggregation/checkstyle1.xml", "aggregation/checkstyle2.xml",
+                "aggregation/pmd.xml");
+        job.addPublisher(IssuesRecorder.class, recorder -> {
+            recorder.setTool("CheckStyle", "**/checkstyle1.xml");
+            recorder.addTool("PMD", "**/pmd.xml");
+            recorder.setEnabledForAggregation(true);
+        });
+        job.save();
+
+        job.startBuild().waitUntilFinished();
+
+        job.editPublisher(IssuesRecorder.class, recorder -> recorder.setTool("CheckStyle", "**/checkstyle2.xml"));
+
+        Build build = job.startBuild().waitUntilFinished();
+        build.open();
+
+        WarningsCharts page = getWarningsCharts(build);
+
+        WarningsTrendChart trend = page.getTrendChart();
+        assertThat(trend).hasNewIssues(3);
+        assertThat(trend).hasFixedIssues(2);
+        assertThat(trend).hasOutstandingIssues(5);
+
+        WarningsPriorityChart priorities = page.getPriorityChart();
+        assertThat(priorities).hasLowPriority(1);
+        assertThat(priorities).hasNormalPriority(2);
+        assertThat(priorities).hasHighPriority(5);
+    }
+    
+    /**
+     * Open the warnings chart page and return the page.
+     *
+     * @param build
+     *         the build
+     *
+     * @return the warnings chart page
+     */
+    private WarningsCharts getWarningsCharts(final Build build) {
+        WarningsCharts resultPage = new WarningsCharts(build, "analysis");
+        resultPage.open();
+        return resultPage;
+    }
 }
 
