@@ -9,6 +9,7 @@ import org.jenkinsci.test.acceptance.plugins.warnings.IssuesRecorder;
 import org.jenkinsci.test.acceptance.plugins.warnings.IssuesRecorder.StaticAnalysisTool;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsResultDetailsPage;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsResultDetailsPage.Tabs;
+import org.jenkinsci.test.acceptance.plugins.warnings.WarningsTrendChart;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
@@ -54,6 +55,18 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
         resultPage.open();
         return resultPage;
     }
+
+    private WarningsTrendChart getWarningsTrendChart(final String id, final Build build) {
+        WarningsTrendChart resultPage = new WarningsTrendChart(build, id);
+        resultPage.open();
+        return resultPage;
+    }
+
+//    private WarningsPriorityChart getWarningsPriorityChart(final String id, final Build build) {
+//        WarningsPriorityChart resultPage = new WarningsPriorityChart(build, id);
+//        resultPage.open();
+//        return resultPage;
+//    }
 
     /**
      * Simple test to check that warnings of checkstyle and pmd file are handled separately if aggregation is not
@@ -127,5 +140,48 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
         assertThat(build.getConsole()).contains(
                 "[CheckStyle] Applying 2 filters on the set of 4 issues (3 issues have been removed)");
     }
+
+    /**
+     * Test to check the values in the priority chart in the analysis mode.
+     */
+    @Test
+    public void should_log_values_in_priority_chart() {
+        FreeStyleJob job = createFreeStyleJob("aggregation/checkstyle.xml", "aggregation/pmd.xml");
+
+        job.addPublisher(IssuesRecorder.class, recorder -> {
+            recorder.setTool("CheckStyle", "**/checkstyle.xml");
+            recorder.addTool("PMD", "**/pmd.xml");
+            recorder.setEnabledForAggregation(true);
+        });
+
+        job.save();
+
+        Build build = job.startBuild().waitUntilFinished();
+        build.open();
+
+        WarningsTrendChart page = getWarningsTrendChart("analysis", build);
+
+
+        WebElement test1 = page.getNewIssues();
+        String t = test1.getText();
+        String a = test1.getAttribute("data_new");
+        String b = test1.getAttribute("data_fixed");
+
+
+
+
+
+//
+//        String test = "TEst";
+//
+//        WarningsAction warningsAction = new WarningsAction(build);
+//
+//        job.url( "/job/MultipleToolsAndAggregation/10/analysisResult");
+//
+//        String asdf = "TEst";
+//
+    }
+
+
 }
 
