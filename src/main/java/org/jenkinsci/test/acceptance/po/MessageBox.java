@@ -13,18 +13,26 @@ public class MessageBox extends PageObject {
     public static final String INFO_PANEL_XPATH = "//*[@id=\"main-panel\"]/div/div[2]/div/div/div/pre/samp";
     public static final String ERROR_PANEL_XPATH = "//*[@id=\"main-panel\"]/div/div[1]/div/div/div/pre/samp";
 
-    public MessageBox(Job job) {super(job, job.url("lastBuild/checkstyleResult/info/"));}
+    public MessageBox(Job job, String relUrl) {super(job, job.url(relUrl));}
 
+    /**
+     * Get content (error messages) of error message box web element.
+     * @return All messages of error message box web element.
+     */
     public List<String> getErrorMsgContent(){
         WebElement content = driver.findElement(by.xpath(ERROR_PANEL_XPATH));
-        List result = new ArrayList();
+        List<String> result = new ArrayList();
         content.findElements(by.xpath("div")).forEach(webElement -> result.add(webElement.getText()));
         return result;
     }
 
+    /**
+     * Get content (info messages) of info message box web element.
+     * @return All messages of info message box web element.
+     */
     public List<String> getInfoMsgContent(){
         WebElement content = driver.findElement(by.xpath(INFO_PANEL_XPATH));
-        List result = new ArrayList();
+        List<String> result = new ArrayList();
         content.findElements(by.xpath("div")).forEach(webElement -> result.add(webElement.getText()));
         return result;
     }
