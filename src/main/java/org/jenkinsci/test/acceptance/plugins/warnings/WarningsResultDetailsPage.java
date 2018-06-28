@@ -66,4 +66,21 @@ public class WarningsResultDetailsPage extends ContainerPageObject {
         return parseTable(issuesTable);
     }
 
+    /**
+     * Returns the trend chart page object.
+     *
+     * @return the trend chart
+     */
+    public WarningsTrendChart getTrendChart() {
+        return new WarningsTrendChart(this);
+    }
+
+    /**
+     * Returns the priority chart page object.
+     *
+     * @return the priority chart
+     */
+    public WarningsPriorityChart getPriorityChart() {
+        return new WarningsPriorityChart(this);
+    }
 }

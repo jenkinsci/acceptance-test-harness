@@ -24,21 +24,4 @@ public class WarningsCharts extends ContainerPageObject {
         super(parent, parent.url(id.toLowerCase() + RESULT_PATH_END));
     }
 
-    /**
-     * Getter for the trend chart.
-     *
-     * @return the trend chart
-     */
-    public WarningsTrendChart getTrendChart() {
-        return new WarningsTrendChart(this);
-    }
-
-    /**
-     * Getter for the priority chart.
-     *
-     * @return the priority chart
-     */
-    public WarningsPriorityChart getPriorityChart() {
-        return new WarningsPriorityChart(this);
-    }
 }

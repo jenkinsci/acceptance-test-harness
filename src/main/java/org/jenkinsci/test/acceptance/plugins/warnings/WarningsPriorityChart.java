@@ -1,5 +1,6 @@
 package org.jenkinsci.test.acceptance.plugins.warnings;
 
+import org.jenkinsci.test.acceptance.po.PageObject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
@@ -19,7 +20,7 @@ public class WarningsPriorityChart {
      * @param parent
      *         the parent PageObject
      */
-    WarningsPriorityChart(final WarningsCharts parent) {
+    WarningsPriorityChart(final PageObject parent) {
         priorityChart = parent.getElement(By.id("number-priorities"));
     }
 

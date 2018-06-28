@@ -8,7 +8,6 @@ import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.warnings.IssuesRecorder;
 import org.jenkinsci.test.acceptance.plugins.warnings.IssuesRecorder.StaticAnalysisTool;
 import org.jenkinsci.test.acceptance.plugins.warnings.SummaryPage;
-import org.jenkinsci.test.acceptance.plugins.warnings.WarningsCharts;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsPriorityChart;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsResultDetailsPage;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsResultDetailsPage.Tabs;
@@ -142,13 +141,13 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
      */
     @Test
     public void should_show_correct_plugin_result_boxes() {
-        FreeStyleJob job = createFreeStyleJob(WARNINGS_PLUGIN_PREFIX + "build_status_test/build_01");
+        FreeStyleJob job = createFreeStyleJob("build_status_test/build_01");
         applyIssueRecorder(job);
         job.save();
 
         Build referenceBuild = job.startBuild().waitUntilFinished();
 
-        job.configure(() -> job.copyResource(WARNINGS_PLUGIN_PREFIX + "build_status_test/build_02"));
+        reconfigureJobWithResource(job, "build_status_test/build_02");
 
         Build build = job.startBuild().waitUntilFinished();
         build.open();
@@ -162,7 +161,13 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
 
         // assert that boxes contain correct links and content
         summaryPage.getSummaryBoxByName("checkstyle").getTitleResultLink().click();
-        assertThat(jenkins.getCurrentUrl()).isEqualTo(build.url + "checkstyleResult/");
+        WarningsResultDetailsPage checkstyleDetails = getWarningsResultDetailsPage(build, "checkstyle");
+        assertThat(checkstyleDetails.getTrendChart())
+                .hasNewIssues(3)
+                .hasFixedIssues(0)
+                .hasOutstandingIssues(0);
+        assertThat(jenkins.getCurrentUrl()).isEqualTo(checkstyleDetails.url.toString());
+        
         build.open();
 
         summaryPage.getSummaryBoxByName("checkstyle").getTitleResultInfoLink().click();
@@ -190,13 +195,13 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
      */
     @Test
     public void should_show_expected_aggregations_in_result_box() {
-        FreeStyleJob job = createFreeStyleJob(WARNINGS_PLUGIN_PREFIX + "build_status_test/build_01");
+        FreeStyleJob job = createFreeStyleJob("build_status_test/build_01");
         IssuesRecorder recorder = applyIssueRecorder(job);
         recorder.setEnabledForAggregation(true);
         job.save();
 
         Build referenceBuild = job.startBuild().waitUntilFinished();
-        job.configure(() -> job.copyResource(WARNINGS_PLUGIN_PREFIX + "build_status_test/build_02"));
+        reconfigureJobWithResource(job, "build_status_test/build_02");
 
         Build build = job.startBuild().waitUntilFinished();
 
@@ -234,12 +239,16 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
         assertThat(jenkins.getCurrentUrl()).isEqualTo(referenceBuild.url + "analysisResult/");
     }
 
+    private void reconfigureJobWithResource(final FreeStyleJob job, final String fileName) {
+        job.configure(() -> job.copyResource(WARNINGS_PLUGIN_PREFIX + fileName));
+    }
+
     /**
      * Tests the functionality of the result overview with quality gate enabled.
      */
     @Test
     public void should_contain_expected_quality_gate_results() {
-        FreeStyleJob job = createFreeStyleJob(WARNINGS_PLUGIN_PREFIX + "build_status_test/build_01");
+        FreeStyleJob job = createFreeStyleJob("build_status_test/build_01");
         IssuesRecorder recorder = applyIssueRecorder(job);
         recorder.addQualityGateConfiguration(2);
         job.save();
@@ -311,7 +320,7 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
         Build build = job.startBuild().waitUntilFinished();
         build.open();
 
-        WarningsCharts page = getWarningsCharts(build);
+        WarningsResultDetailsPage page = getWarningsResultDetailsPage(build, "analysis");
 
         WarningsTrendChart trend = page.getTrendChart();
         assertThat(trend).hasNewIssues(3);
@@ -322,20 +331,8 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
         assertThat(priorities).hasLowPriority(1);
         assertThat(priorities).hasNormalPriority(2);
         assertThat(priorities).hasHighPriority(5);
-    }
-    
-    /**
-     * Open the warnings chart page and return the page.
-     *
-     * @param build
-     *         the build
-     *
-     * @return the warnings chart page
-     */
-    private WarningsCharts getWarningsCharts(final Build build) {
-        WarningsCharts resultPage = new WarningsCharts(build, "analysis");
-        resultPage.open();
-        return resultPage;
+
+        assertThat(page.getIssuesTable()).hasSize(8);
     }
 }
 

@@ -1,5 +1,6 @@
 package org.jenkinsci.test.acceptance.plugins.warnings;
 
+import org.jenkinsci.test.acceptance.po.PageObject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
@@ -19,7 +20,7 @@ public class WarningsTrendChart {
      * @param parent
      *         the parent PageObject
      */
-    WarningsTrendChart(final WarningsCharts parent) {
+    WarningsTrendChart(final PageObject parent) {
         trendChart = parent.getElement(By.id("number-issues"));
     }
 
