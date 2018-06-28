@@ -35,8 +35,8 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
- * Job Page object superclass. As with other {@link TopLevelItem}s, use {@link Describable} annotation to register an
- * implementation.
+ * Job Page object superclass.
+ * As with other {@link TopLevelItem}s, use {@link Describable} annotation to register an implementation.
  *
  * @author Kohsuke Kawaguchi
  */
@@ -97,14 +97,11 @@ public class Job extends TopLevelItem {
     }
 
     /**
-     * Adds the specified publisher to this job. Publishers are stored in a list member to provide later access for
-     * modification.
+     * Adds the specified publisher to this job. Publishers are stored in a list member to provide
+     * later access for modification.
      *
-     * @param publisherClass
-     *         the publisher to configure
-     * @param <T>
-     *         the type of the publisher
-     *
+     * @param publisherClass the publisher to configure
+     * @param <T>            the type of the publisher
      * @see #getPublisher(Class)
      * @see #editPublisher(Class, Consumer)
      */
@@ -117,17 +114,14 @@ public class Job extends TopLevelItem {
     }
 
     /**
-     * Adds the specified publisher to this job. Publishers are stored in a list member to provide later access for
-     * modification. After the publisher has been added the publisher is configured with the specified configuration
-     * lambda. Afterwards, the job configuration page still is visible and not saved.
+     * Adds the specified publisher to this job. Publishers are stored in a list member to provide
+     * later access for modification. After the publisher has been added the publisher is configured
+     * with the specified configuration lambda. Afterwards, the job configuration page still is visible and
+     * not saved.
      *
-     * @param type
-     *         the publisher to configure
-     * @param configuration
-     *         the additional configuration options for this job
-     * @param <T>
-     *         the type of the publisher
-     *
+     * @param type          the publisher to configure
+     * @param configuration the additional configuration options for this job
+     * @param <T>           the type of the publisher
      * @see #getPublisher(Class)
      * @see #editPublisher(Class, Consumer)
      */
@@ -144,12 +138,9 @@ public class Job extends TopLevelItem {
      * publisher page object, runs the specified configuration lambda, and saves the changes. Afterwards, the job
      * configuration page still is visible and not saved.
      *
-     * @param type
-     *         the publisher to configure
-     * @param configuration
-     *         the additional configuration options for this job
-     * @param <T>
-     *         the type of the publisher
+     * @param type          the publisher to configure
+     * @param configuration the additional configuration options for this job
+     * @param <T>           the type of the publisher
      */
     public <T extends PostBuildStep> void editPublisher(final Class<T> type, final Consumer<T> configuration) {
         configure();
@@ -159,15 +150,15 @@ public class Job extends TopLevelItem {
     }
 
     /**
-     * Getter for a specific publisher previously added to the job. If a publisher of a class is requested which has not
-     * been added previously this will result in a {@link java.util.NoSuchElementException}.
+     * Getter for a specific publisher previously added to the job.
+     * If a publisher of a class is requested which has not been added previously
+     * this will result in a {@link java.util.NoSuchElementException}.
      */
     @SuppressWarnings("unchecked") // The check is performed in the method
     public <T extends PostBuildStep> T getPublisher(Class<T> type) {
         for (PostBuildStep p : publishers) {
-            if (type.isAssignableFrom(p.getClass())) {
+            if (type.isAssignableFrom(p.getClass()))
                 return (T) p;
-            }
         }
 
         throw new NoSuchElementException();
@@ -178,8 +169,7 @@ public class Job extends TopLevelItem {
         ensureConfigPage();
 
         String path = createPageArea('/' + section, new Runnable() {
-            @Override
-            public void run() {
+            @Override public void run() {
                 control(by.path("/hetero-list-add[%s]", section)).selectDropdownMenu(type);
             }
         });
@@ -229,8 +219,8 @@ public class Job extends TopLevelItem {
     /**
      * Adds a shell step that copies a resource inside the test project into a file on the build machine.
      * <p/>
-     * Because there's no direct file system access to Jenkins master, we do this by packing file content in base64 and
-     * put it as a heredoc in the shell script.
+     * Because there's no direct file system access to Jenkins master, we do this by packing file content in
+     * base64 and put it as a heredoc in the shell script.
      */
     public void copyResource(Resource resource, String fileName) {
         if (SystemUtils.IS_OS_WINDOWS) {
@@ -248,12 +238,11 @@ public class Job extends TopLevelItem {
             try (OutputStream gz = new GZIPOutputStream(out)) {
                 IOUtils.copy(in, gz);
             }
+
             // fileName can include path portion like foo/bar/zot
-            return String.format(
-                    "(mkdir -p %1$s || true) && rm -r %1$s && base64 --decode << ENDOFFILE | gunzip > %1$s \n%2$s\nENDOFFILE",
+            return String.format("(mkdir -p %1$s || true) && rm -r %1$s && base64 --decode << ENDOFFILE | gunzip > %1$s \n%2$s\nENDOFFILE",
                     fileName, new String(Base64.encodeBase64Chunked(out.toByteArray())));
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new AssertionError(e);
         }
     }
@@ -273,8 +262,10 @@ public class Job extends TopLevelItem {
 
     /**
      * "Copy" any file from the System into the Workspace using a zipFIle.
-     * <p>
+     *
      * Differentiates when the file is being run on Windows or Unix based machines.
+     *
+     * @param file
      */
     public void copyFile(File file) {
         File tmp = null;
@@ -286,22 +277,18 @@ public class Job extends TopLevelItem {
             if (SystemUtils.IS_OS_WINDOWS) {
                 if (!(controller instanceof LocalController)) {
                     // TODO: Make it work for RemoteJenkinsController like in Unix (below)
-                    throw new AssumptionViolatedException(
-                            "Copying files in Windows is only supported if a LocalController is in use. Test will be skipped.");
+                    throw new AssumptionViolatedException("Copying files in Windows is only supported if a LocalController is in use. Test will be skipped.");
                 }
                 addBatchStep("xcopy " + file.getAbsolutePath() + " %cd% /E");
-            }
-            else {
+            } else {
                 addShellStep(String.format(
                         "base64 --decode << ENDOFFILE > archive.zip && unzip -o archive.zip \n%s\nENDOFFILE",
                         new String(Base64.encodeBase64Chunked(archive))
                 ));
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new AssertionError(e);
-        }
-        finally {
+        } finally {
             if (tmp != null) {
                 tmp.delete();
             }
@@ -315,8 +302,7 @@ public class Job extends TopLevelItem {
     /**
      * "Copies" a resource (can be a single file or a directory) to the jobs workspace by utilizing a shell step.
      *
-     * @param resourcePath
-     *         the resource to copy
+     * @param resourcePath the resource to copy
      */
     public void copyResource(String resourcePath) {
         ensureConfigPage();
@@ -324,8 +310,7 @@ public class Job extends TopLevelItem {
         //decide whether to utilize copyResource or copyDir
         if (res.asFile().isDirectory()) {
             copyDir(res);
-        }
-        else {
+        } else {
             copyResource(res);
         }
     }
@@ -351,14 +336,12 @@ public class Job extends TopLevelItem {
         int nb = getJson().get("nextBuildNumber").intValue();
         if (parameters.isEmpty()) {
             clickLink("Build Now");
-        }
-        else {
+        } else {
             clickLink("Build with Parameters");
             try {
                 BuildWithParameters paramsPage = new BuildWithParameters(this, new URL(driver.getCurrentUrl()));
                 paramsPage.enter(parameters, params).start();
-            }
-            catch (MalformedURLException e) {
+            } catch (MalformedURLException e) {
                 throw new Error(e);
             }
         }
@@ -389,9 +372,7 @@ public class Job extends TopLevelItem {
         elasticSleep(500);
 
         // 1.636-: …/parameter (or …/parameter[1] etc.); 1.637+: …/parameterDefinitions
-        String path = last(
-                by.xpath("//div[starts-with(@path,'/properties/hudson-model-ParametersDefinitionProperty/parameter')]"))
-                .getAttribute("path");
+        String path = last(by.xpath("//div[starts-with(@path,'/properties/hudson-model-ParametersDefinitionProperty/parameter')]")).getAttribute("path");
 
         T p = newInstance(type, this, path);
         parameters.add(p);
@@ -439,8 +420,9 @@ public class Job extends TopLevelItem {
     }
 
     /**
-     * Verify that the job contains some builds on exact one of the given list of nodes. To test whether the the job has
-     * built on the master, the jenkins instance has to be passed in the parameter.
+     * Verify that the job contains some builds on exact one of the given list of nodes.
+     * To test whether the the job has built on the master, the jenkins instance has to be
+     * passed in the parameter.
      */
     public void shouldHaveBuiltOnOneOfNNodes(List<Node> nodes) {
         int noOfNodes = 0;
