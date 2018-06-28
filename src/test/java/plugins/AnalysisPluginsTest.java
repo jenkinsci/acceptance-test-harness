@@ -8,25 +8,31 @@ import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.warnings.IssuesRecorder;
 import org.jenkinsci.test.acceptance.plugins.warnings.IssuesRecorder.StaticAnalysisTool;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsCharts;
+import org.jenkinsci.test.acceptance.plugins.warnings.WarningsPriorityChart;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsResultDetailsPage;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsResultDetailsPage.Tabs;
+import org.jenkinsci.test.acceptance.plugins.warnings.WarningsTrendChart;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
 import org.openqa.selenium.WebElement;
 
 import static org.assertj.core.api.Assertions.*;
+import utils.WarningsPriorityChartAssert;
+import utils.WarningsTrendChartAssert;
 
 /**
  * Acceptance tests for the White Mountains release of the warnings plug-in.
  *
  * @author Manuel Hampp
  * @author Anna-Maria Hardi
+ * @author Elvira Hauer
  * @author Stephan Plöderl
  */
 @WithPlugins("warnings")
 public class AnalysisPluginsTest extends AbstractJUnitTest {
     private static final String WARNINGS_PLUGIN_PREFIX = "/warnings_plugin/white-mountains/";
+    private WarningsTrendChartAssert warningsTrendChartAssert;
 
     /**
      * Simple test to check that there are some duplicate code warnings.
@@ -56,8 +62,16 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
         return resultPage;
     }
 
-    private WarningsCharts getWarningsCharts(final String id, final Build build) {
-        WarningsCharts resultPage = new WarningsCharts(build, id);
+    /**
+     * Open the warnings chart page and return the page.
+     *
+     * @param build
+     *         the build
+     *
+     * @return the warnings chart page
+     */
+    private WarningsCharts getWarningsCharts(final Build build) {
+        WarningsCharts resultPage = new WarningsCharts(build, "analysis");
         resultPage.open();
         return resultPage;
     }
@@ -126,7 +140,7 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
             recorder.addIssueFilter("Exclude categories", "Checks");
             recorder.addIssueFilter("Include types", "JavadocMethodCheck");
         });
-        
+
         job.save();
 
         Build build = job.startBuild().waitUntilFinished();
@@ -136,38 +150,39 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
     }
 
     /**
-     * Test to check the values in the trend chart in the analysis mode.
+     * Starts two builds with different configurations and checks the values of the new, fixed and outstanding issues of
+     * the trend chart.
      */
     @Test
     public void should_log_values_in_trend_chart() {
-        FreeStyleJob job = createFreeStyleJob("aggregation/checkstyle.xml", "aggregation/pmd.xml");
+        FreeStyleJob job = createFreeStyleJob("aggregation/checkstyle1.xml", "aggregation/checkstyle2.xml",
+                "aggregation/pmd.xml");
 
         job.addPublisher(IssuesRecorder.class, recorder -> {
-            recorder.setTool("CheckStyle", "**/checkstyle.xml");
+            recorder.setTool("CheckStyle", "**/checkstyle1.xml");
             recorder.addTool("PMD", "**/pmd.xml");
             recorder.setEnabledForAggregation(true);
         });
 
         job.save();
+        job.startBuild().waitUntilFinished();
+        job.configure();
+
+        job.editPublisher(IssuesRecorder.class, recorder -> recorder.setTool("CheckStyle", "**/checkstyle2.xml"));
 
         Build build = job.startBuild().waitUntilFinished();
         build.open();
 
-        WarningsCharts page = getWarningsCharts("analysis", build);
+        WarningsCharts page = getWarningsCharts(build);
+        WarningsTrendChart chart = page.getTrendChart();
 
-        String newIssues = page.getNewIssues();
-        String fixedIssues = page.getFixedIssues();
-        String outstandingIssues = page.getOutstandingIssues();
-
-        assertThat(newIssues).isEqualTo(10);
-        assertThat(fixedIssues).isEqualTo(0);
-        assertThat(outstandingIssues).isEqualTo(0);
-
-
+        WarningsTrendChartAssert.assertThat(chart).hasNewIssues(4);
+        WarningsTrendChartAssert.assertThat(chart).hasFixedIssues(3);
+        WarningsTrendChartAssert.assertThat(chart).hasOutstandingIssues(4);
     }
 
     /**
-     * Test to check the values in the priority chart in the analysis mode.
+     * Starts a build with and checks the values of the low, normal and high priorities of the priority chart.
      */
     @Test
     public void should_log_values_in_priority_chart() {
@@ -184,18 +199,12 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
         Build build = job.startBuild().waitUntilFinished();
         build.open();
 
-        WarningsCharts page = getWarningsCharts("analysis", build);
+        WarningsCharts page = getWarningsCharts(build);
+        WarningsPriorityChart chart = page.getPriorityChart();
 
-
-        String lowPriority = page.getLowPriority();
-        String normalPriority = page.getNormalPriority();
-        String highPriority = page.getHighPriority();
-
-        assertThat(lowPriority).isEqualTo(1);
-        assertThat(normalPriority).isEqualTo(2);
-        assertThat(highPriority).isEqualTo(7);
-
-
+        WarningsPriorityChartAssert.assertThat(chart).hasLowPriority(1);
+        WarningsPriorityChartAssert.assertThat(chart).hasNormalPriority(2);
+        WarningsPriorityChartAssert.assertThat(chart).hasHighPriority(7);
     }
 }
 

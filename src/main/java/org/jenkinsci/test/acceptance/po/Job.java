@@ -253,7 +253,7 @@ public class Job extends TopLevelItem {
             path = path.substring(1);
         }
         path = path.replace("/", "\\");
-        return "xcopy \"" + path + "\" . /E";
+        return "xcopy \"" + path + "\" . /E /Y";
     }
 
     public void copyResource(Resource resource) {
