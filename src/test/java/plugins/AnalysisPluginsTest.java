@@ -14,6 +14,7 @@ import org.jenkinsci.test.acceptance.plugins.warnings.WarningsResultDetailsPage.
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsTrendChart;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.MessageBox;
 import org.junit.Test;
 import org.openqa.selenium.WebElement;
 
@@ -22,17 +23,22 @@ import static plugins.warnings.assertions.Assertions.*;
 /**
  * Acceptance tests for the White Mountains release of the warnings plug-in.
  *
+ * @author Ullrich Hafner
  * @author Manuel Hampp
  * @author Anna-Maria Hardi
  * @author Elvira Hauer
- * @author Michaela Reitschuster
  * @author Stephan Plöderl
+ * @author Alexander Praegla
+ * @author Michaela Reitschuster
+ * @author Arne Schöntag
  * @author Alexandra Wenzel
- * @author Ullrich Hafner
+ * @author Nikolai Wohlgemuth
  */
 @WithPlugins("warnings")
 public class AnalysisPluginsTest extends AbstractJUnitTest {
     private static final String WARNINGS_PLUGIN_PREFIX = "/warnings_plugin/white-mountains/";
+    private static final String CHECKSTYLE_XML = "checkstyle-result.xml";
+    private static final String CHECKSTYLE_ID = "checkstyle";
 
     /**
      * Simple test to check that there are some duplicate code warnings.
@@ -154,14 +160,12 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
 
         SummaryPage summaryPage = new SummaryPage(build, false);
 
-        // assert that all configured plugins have a corresponding summary box
-        assertThat(summaryPage.getSummaryBoxByName("checkstyle")).hasSummary();
+        assertThat(summaryPage.getSummaryBoxByName(CHECKSTYLE_ID)).hasSummary();
         assertThat(summaryPage.getSummaryBoxByName("pmd")).hasSummary();
         assertThat(summaryPage.getSummaryBoxByName("findbugs")).hasSummary();
 
-        // assert that boxes contain correct links and content
-        summaryPage.getSummaryBoxByName("checkstyle").getTitleResultLink().click();
-        WarningsResultDetailsPage checkstyleDetails = getWarningsResultDetailsPage(build, "checkstyle");
+        summaryPage.getSummaryBoxByName(CHECKSTYLE_ID).getTitleResultLink().click();
+        WarningsResultDetailsPage checkstyleDetails = getWarningsResultDetailsPage(build, CHECKSTYLE_ID);
         assertThat(checkstyleDetails.getTrendChart())
                 .hasNewIssues(3)
                 .hasFixedIssues(0)
@@ -170,17 +174,19 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
         
         build.open();
 
-        summaryPage.getSummaryBoxByName("checkstyle").getTitleResultInfoLink().click();
-        assertThat(jenkins.getCurrentUrl()).isEqualTo(build.url + "checkstyleResult/info/");
+        summaryPage.getSummaryBoxByName(CHECKSTYLE_ID).getTitleResultInfoLink().click();
+        MessageBox messageBox = new MessageBox(build, CHECKSTYLE_ID);
+        assertThat(messageBox).containsInfoMessage("checkstyle-result.xml: found 3 issues");
+        assertThat(jenkins.getCurrentUrl()).isEqualTo(messageBox.url.toString());
 
         build.open();
 
-        summaryPage.getSummaryBoxByName("checkstyle").findClickableResultEntryByNamePart("new").click();
+        summaryPage.getSummaryBoxByName(CHECKSTYLE_ID).findClickableResultEntryByNamePart("new").click();
         assertThat(jenkins.getCurrentUrl()).isEqualTo(build.url + "checkstyleResult/new/");
 
         build.open();
 
-        summaryPage.getSummaryBoxByName("checkstyle").findClickableResultEntryByNamePart("Reference").click();
+        summaryPage.getSummaryBoxByName(CHECKSTYLE_ID).findClickableResultEntryByNamePart("Reference").click();
         assertThat(jenkins.getCurrentUrl()).isEqualTo(referenceBuild.url + "checkstyleResult/");
 
         build.open();
@@ -333,6 +339,37 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
         assertThat(priorities).hasHighPriority(5);
 
         assertThat(page.getIssuesTable()).hasSize(8);
+    }
+
+    /**
+     * Builds a FreeStyle build and that builds with a xml file
+     * and checks if the results shown in the MessageBox are as expected.
+     */
+    @Test
+    public void shouldBeOkIfContentsOfMsgBoxesAreCorrectForFreeStyleJob() {
+        FreeStyleJob job = createFreeStyleJob(CHECKSTYLE_XML);
+        job.addPublisher(IssuesRecorder.class, recorder -> recorder.setTool("CheckStyle", "**/checkstyle-result.xml"));
+        job.save();
+        Build build = job.startBuild().waitUntilFinished();
+
+        MessageBox messageBox = new MessageBox(build, CHECKSTYLE_ID);
+        messageBox.open();
+
+        // Check Error Panel
+        messageBox.getErrorMsgContent();
+        String errno1 = "Can't read file '/mnt/hudson_workspace/workspace/HTS-CheckstyleTest/ssh-slaves"
+                + "/src/main/java/hudson/plugins/sshslaves/RemoteLauncher.java': java.nio.file.NoSuchFileException:"
+                + " \\mnt\\hudson_workspace\\workspace\\HTS-CheckstyleTest\\ssh-slaves\\src\\main\\java\\hudson\\plugins"
+                + "\\sshslaves\\RemoteLauncher.java";
+        assertThat(messageBox).hasErrorMessagesSize(3);
+        assertThat(messageBox).containsErrorMessage(errno1);
+
+        // Check Info Panel
+        messageBox.getInfoMsgContent();
+        assertThat(messageBox).hasInfoMessagesSize(7);
+        assertThat(messageBox).containsInfoMessage("found 1 file");
+        assertThat(messageBox).containsInfoMessage("for 2 issues");
+        assertThat(messageBox).containsInfoMessage("No quality gates have been set - skipping");
     }
 }
 

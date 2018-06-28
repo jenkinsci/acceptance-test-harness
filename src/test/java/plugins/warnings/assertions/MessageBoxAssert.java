@@ -1,4 +1,4 @@
-package plugins;
+package plugins.warnings.assertions;
 
 import org.assertj.core.api.AbstractAssert;
 import org.jenkinsci.test.acceptance.po.MessageBox;

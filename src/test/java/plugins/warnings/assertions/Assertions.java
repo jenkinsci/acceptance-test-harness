@@ -3,6 +3,7 @@ package plugins.warnings.assertions;
 import org.jenkinsci.test.acceptance.plugins.warnings.SummaryPage.SummaryBoxPageArea;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsPriorityChart;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsTrendChart;
+import org.jenkinsci.test.acceptance.po.MessageBox;
 
 /**
  * Custom assertions for ui tests.
@@ -51,4 +52,7 @@ public class Assertions extends org.assertj.core.api.Assertions {
         return new WarningsTrendChartAssert(actual);
     }
 
+    public static MessageBoxAssert assertThat(MessageBox actual) {
+        return new MessageBoxAssert(actual);
+    }
 }
