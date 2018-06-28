@@ -26,7 +26,7 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
     private Control referenceJobField = control("referenceJob");
     private Control aggregatingResultsCheckBox = control("aggregatingResults");
     private IssueFilterPanel issueFilterPanel;
-    
+
     /**
      * Creates a new page object.
      *
@@ -233,9 +233,101 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
     }
 
     /**
+     * Sets a qualitygate configuration where all sixteen fields are filled with the same value.
+     *
+     * @param valueForAll
+     *         threshold for all configuration fields of qualitygate.
+     */
+    public void addQualityGateConfiguration(int valueForAll) {
+        setUnstableTotalQualityGateConfiguration(valueForAll, valueForAll, valueForAll, valueForAll);
+        setFailedTotalQualityGateConfiguration(valueForAll, valueForAll, valueForAll, valueForAll);
+        setUnstableNewQualityGateConfiguration(valueForAll, valueForAll, valueForAll, valueForAll);
+        setFailedNewQualityGateConfiguration(valueForAll, valueForAll, valueForAll, valueForAll);
+    }
+
+    /**
+     * Sets the thresholds for the build to be considered as unstable for issues overall.
+     *
+     * @param total
+     *         threshold for overall issues
+     * @param high
+     *         threshold for issues with high severity
+     * @param normal
+     *         threshold for issues with normal severity
+     * @param low
+     *         threshold for issues with low severity
+     */
+    public void setUnstableTotalQualityGateConfiguration(int total, int high, int normal, int low) {
+        control(By.name("_.unstableTotalAll")).set(total);
+        control(By.name("_.unstableTotalHigh")).set(high);
+        control(By.name("_.unstableTotalNormal")).set(normal);
+        control(By.name("_.unstableTotalLow")).set(low);
+    }
+
+    /**
+     * Sets the thresholds for the build to be considered as failed for issues overall.
+     *
+     * @param total
+     *         threshold for overall issues
+     * @param high
+     *         threshold for issues with high severity
+     * @param normal
+     *         threshold for issues with normal severity
+     * @param low
+     *         threshold for issues with low severity
+     */
+    void setFailedTotalQualityGateConfiguration(int total, int high, int normal, int low) {
+        control(By.name("_.failedTotalAll")).set(total);
+        control(By.name("_.failedTotalHigh")).set(high);
+        control(By.name("_.failedTotalNormal")).set(normal);
+        control(By.name("_.failedTotalLow")).set(low);
+    }
+
+    /**
+     * Sets the thresholds for the build to be considered as unstable for new issues.
+     *
+     * @param total
+     *         threshold for overall issues
+     * @param high
+     *         threshold for issues with high severity
+     * @param normal
+     *         threshold for issues with normal severity
+     * @param low
+     *         threshold for issues with low severity
+     */
+    void setUnstableNewQualityGateConfiguration(int total, int high, int normal, int low) {
+        control(By.name("_.unstableNewAll")).set(total);
+        control(By.name("_.unstableNewHigh")).set(high);
+        control(By.name("_.unstableNewNormal")).set(normal);
+        control(By.name("_.unstableNewLow")).set(low);
+    }
+
+    /**
+     * Sets the thresholds for the build to be considered as failed for new issues.
+     *
+     * @param total
+     *         threshold for overall issues
+     * @param high
+     *         threshold for issues with high severity
+     * @param normal
+     *         threshold for issues with normal severity
+     * @param low
+     *         threshold for issues with low severity
+     */
+    void setFailedNewQualityGateConfiguration(int total, int high, int normal, int low) {
+        control(By.name("_.failedNewAll")).set(total);
+        control(By.name("_.failedNewHigh")).set(high);
+        control(By.name("_.failedNewNormal")).set(normal);
+        control(By.name("_.failedNewLow")).set(low);
+    }
+
+    /**
      * Adds a new issue filter.
-     * @param filterName name of the filter
-     * @param regex regular expression to apply
+     *
+     * @param filterName
+     *         name of the filter
+     * @param regex
+     *         regular expression to apply
      */
     public void addIssueFilter(final String filterName, final String regex) {
         if (issueFilterPanel == null) {
