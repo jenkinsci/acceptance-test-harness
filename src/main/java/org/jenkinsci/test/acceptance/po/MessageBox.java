@@ -14,7 +14,7 @@ public class MessageBox extends PageObject {
     public static final String ERROR_PANEL_XPATH = "//*[@id=\"main-panel\"]/div/div[1]/div/div/div/pre/samp";
 
     public MessageBox(Build job, String id) {
-        super(job, job.url(id + "Result/info"));
+        super(job, job.url(id + "Result/info/"));
     }
 
     /**
