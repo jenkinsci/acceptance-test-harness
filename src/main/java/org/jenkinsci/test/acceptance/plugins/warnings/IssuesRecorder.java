@@ -1,5 +1,7 @@
 package org.jenkinsci.test.acceptance.plugins.warnings;
 
+import java.util.function.Consumer;
+
 import org.jenkinsci.test.acceptance.po.AbstractStep;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
@@ -26,7 +28,7 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
     private Control referenceJobField = control("referenceJob");
     private Control aggregatingResultsCheckBox = control("aggregatingResults");
     private IssueFilterPanel issueFilterPanel;
-    
+
     /**
      * Creates a new page object.
      *
@@ -62,9 +64,22 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
      *         the file name pattern
      */
     public void setTool(final String toolName, final String pattern) {
-        StaticAnalysisTool tool = new StaticAnalysisTool(this, "tools");
-        tool.setTool(toolName);
-        tool.setPattern(pattern);
+        setTool(toolName, tool->tool.setPattern(pattern));
+    }
+
+    /**
+     * Sets a static analysis tool configuration.
+     *
+     * @param toolName
+     *         the tool name
+     * @param configuration the additional configuration options for this tool
+     *
+     * @return the sub page of the tool
+     */
+    public StaticAnalysisTool setTool(final String toolName, final Consumer<StaticAnalysisTool> configuration) {
+        StaticAnalysisTool tool = setTool(toolName);
+        configuration.accept(tool);
+        return tool;
     }
 
     /**
@@ -84,15 +99,30 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
      *
      * @param toolName
      *         the tool name
+     *
+     * @param configuration
+     *         the additional configuration options for this tool
+     *
+     * @return the sub page of the tool
+     */
+    public StaticAnalysisTool addTool(final String toolName, final Consumer<StaticAnalysisTool> configuration){
+        StaticAnalysisTool tool = addTool(toolName);
+        configuration.accept(tool);
+        return tool;
+    }
+
+    /**
+     * Adds a new static analysis tool configuration.
+     *
+     * @param toolName
+     *         the tool name
      * @param pattern
      *         the file name pattern
      *
      * @return the sub page of the tool
      */
     public StaticAnalysisTool addTool(final String toolName, final String pattern) {
-        StaticAnalysisTool tool = addTool(toolName);
-        tool.setPattern(pattern);
-        return tool;
+        return addTool(toolName, tool->tool.setPattern(pattern));
     }
 
     /**
@@ -158,6 +188,28 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
         StaticAnalysisTool tool = new StaticAnalysisTool(this, path);
         tool.setTool(toolName);
         return tool;
+    }
+
+    /**
+     * Adds a new issue filter.
+     *
+     * @param filterName
+     *         name of the filter
+     * @param regex
+     *         regular expression to apply
+     */
+    public void addIssueFilter(final String filterName, final String regex) {
+        if (issueFilterPanel == null) {
+            // fill initial existing filter
+            issueFilterPanel = new IssueFilterPanel(this, "filters");
+            issueFilterPanel.setFilter(filterName, regex);
+        }
+        else {
+            // create new filter
+            String path = createPageArea("filters", () -> filtersRepeatable.click());
+            IssueFilterPanel filter = new IssueFilterPanel(this, path);
+            filter.setFilter(filterName, regex);
+        }
     }
 
     /**
@@ -230,25 +282,6 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
             regexField.set(regex);
         }
 
-    }
-
-    /**
-     * Adds a new issue filter.
-     * @param filterName name of the filter
-     * @param regex regular expression to apply
-     */
-    public void addIssueFilter(final String filterName, final String regex) {
-        if (issueFilterPanel == null) {
-            // fill initial existing filter
-            issueFilterPanel = new IssueFilterPanel(this, "filters");
-            issueFilterPanel.setFilter(filterName, regex);
-        }
-        else {
-            // create new filter
-            String path = createPageArea("filters", () -> filtersRepeatable.click());
-            IssueFilterPanel filter = new IssueFilterPanel(this, path);
-            filter.setFilter(filterName, regex);
-        }
     }
 
 }
