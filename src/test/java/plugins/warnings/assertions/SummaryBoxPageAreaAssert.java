@@ -1,4 +1,4 @@
-package org.jenkinsci.test.acceptance.plugins.warnings;
+package plugins.warnings.assertions;
 
 import org.assertj.core.api.AbstractAssert;
 import org.jenkinsci.test.acceptance.plugins.warnings.SummaryPage.SummaryBoxPageArea;
@@ -9,21 +9,20 @@ import org.jenkinsci.test.acceptance.plugins.warnings.SummaryPage.SummaryBoxPage
  * @author Manuel Hampp
  * @author Michaela Reitschuster
  * @author Alexandra Wenzel
- *
  */
-public class SummaryBoxPageAreaAssert extends AbstractAssert<SummaryBoxPageAreaAssert, SummaryPage.SummaryBoxPageArea> {
+public class SummaryBoxPageAreaAssert extends AbstractAssert<SummaryBoxPageAreaAssert, SummaryBoxPageArea> {
 
-    public SummaryBoxPageAreaAssert(SummaryPage.SummaryBoxPageArea summaryBoxPageArea) {
+    public SummaryBoxPageAreaAssert(SummaryBoxPageArea summaryBoxPageArea) {
         super(summaryBoxPageArea, SummaryBoxPageAreaAssert.class);
     }
 
-    public static SummaryBoxPageAreaAssert assertThat(SummaryPage.SummaryBoxPageArea actual) {
+    public static SummaryBoxPageAreaAssert assertThat(SummaryBoxPageArea actual) {
         return new SummaryBoxPageAreaAssert(actual);
     }
 
-    public SummaryBoxPageAreaAssert hasWarningDiv() {
+    public SummaryBoxPageAreaAssert hasSummary() {
         isNotNull();
-        if (actual.getWarningDiv() == null) {
+        if (actual.getSummary() == null) {
             failWithMessage("Summary element does not exist.");
         }
         return this;
@@ -36,6 +35,5 @@ public class SummaryBoxPageAreaAssert extends AbstractAssert<SummaryBoxPageAreaA
         }
         return this;
     }
-
 
 }

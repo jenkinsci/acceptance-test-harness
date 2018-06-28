@@ -1,6 +1,5 @@
 package plugins;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -8,7 +7,6 @@ import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.warnings.IssuesRecorder;
 import org.jenkinsci.test.acceptance.plugins.warnings.IssuesRecorder.StaticAnalysisTool;
-import org.jenkinsci.test.acceptance.plugins.warnings.SummaryBoxPageAreaAssert;
 import org.jenkinsci.test.acceptance.plugins.warnings.SummaryPage;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsResultDetailsPage;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsResultDetailsPage.Tabs;
@@ -17,7 +15,7 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
 import org.openqa.selenium.WebElement;
 
-import static org.assertj.core.api.Assertions.*;
+import static plugins.warnings.assertions.Assertions.*;
 
 /**
  * Acceptance tests for the White Mountains release of the warnings plug-in.
@@ -147,47 +145,37 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
 
         Build build1 = job.startBuild().waitUntilFinished();
 
-        visit(job.getConfigUrl());
-        job.copyResource(WARNINGS_PLUGIN_PREFIX + "build_status_test/build_02");
-        job.save();
+        job.configure(() -> job.copyResource(WARNINGS_PLUGIN_PREFIX + "build_status_test/build_02"));
 
         Build build2 = job.startBuild().waitUntilFinished();
-        visit(build2.url);
+        build2.open();
 
-        List<String> plugins = Arrays.asList("checkstyle", "pmd", "findbugs");
-
-        SummaryPage summaryPage = new SummaryPage(build2, plugins, false);
+        SummaryPage summaryPage = new SummaryPage(build2, false);
 
         // assert that all configured plugins have a corresponding summary box
-        SummaryBoxPageAreaAssert.assertThat(summaryPage.getSummaryBoxByName("checkstyle")).hasWarningDiv();
-        SummaryBoxPageAreaAssert.assertThat(summaryPage.getSummaryBoxByName("pmd")).hasWarningDiv();
-        SummaryBoxPageAreaAssert.assertThat(summaryPage.getSummaryBoxByName("findbugs")).hasWarningDiv();
+        assertThat(summaryPage.getSummaryBoxByName("checkstyle")).hasSummary();
+        assertThat(summaryPage.getSummaryBoxByName("pmd")).hasSummary();
+        assertThat(summaryPage.getSummaryBoxByName("findbugs")).hasSummary();
 
         // assert that boxes contain correct links and content
-        summaryPage.getSummaryBoxByName("checkstyle").getTitleDivResultLink().click();
+        summaryPage.getSummaryBoxByName("checkstyle").getTitleResultLink().click();
         assertThat(jenkins.getCurrentUrl()).isEqualTo(build2.url + "checkstyleResult/");
+        build2.open();
 
-        //TODO: Check if there is a possibility to keep the pageobject after visting a different page, for example by opening a tab to visit the second url
-        visit(build2.url);
-        summaryPage = new SummaryPage(build2, plugins, false);
-
-        summaryPage.getSummaryBoxByName("checkstyle").getTitleDivResultInfoLink().click();
+        summaryPage.getSummaryBoxByName("checkstyle").getTitleResultInfoLink().click();
         assertThat(jenkins.getCurrentUrl()).isEqualTo(build2.url + "checkstyleResult/info/");
 
-        visit(build2.url);
-        summaryPage = new SummaryPage(build2, plugins, false);
+        build2.open();
 
         summaryPage.getSummaryBoxByName("checkstyle").findClickableResultEntryByNamePart("new").click();
         assertThat(jenkins.getCurrentUrl()).isEqualTo(build2.url + "checkstyleResult/new/");
 
-        visit(build2.url);
-        summaryPage = new SummaryPage(build2, plugins, false);
+        build2.open();
 
         summaryPage.getSummaryBoxByName("checkstyle").findClickableResultEntryByNamePart("Reference").click();
         assertThat(jenkins.getCurrentUrl()).isEqualTo(build1.url + "checkstyleResult/");
 
-        visit(build2.url);
-        summaryPage = new SummaryPage(build2, plugins, false);
+        build2.open();
 
         String noWarningsResult = summaryPage.getSummaryBoxByName("findbugs")
                 .findResultEntryTextByNamePart("No warnings for");
@@ -206,47 +194,39 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
         job.save();
 
         Build build1 = job.startBuild().waitUntilFinished();
-        visit(job.getConfigUrl());
-        job.copyResource(WARNINGS_PLUGIN_PREFIX + "build_status_test/build_02");
-        job.save();
+        job.configure(() -> job.copyResource(WARNINGS_PLUGIN_PREFIX + "build_status_test/build_02"));
 
         Build build2 = job.startBuild().waitUntilFinished();
 
-        visit(build2.url);
+        build2.open();
 
-        List<String> plugins = Arrays.asList("checkstyle", "pmd", "findbugs");
+        SummaryPage summaryPage = new SummaryPage(build2, true);
 
-        SummaryPage summaryPage = new SummaryPage(build2, plugins, true);
-
-        SummaryBoxPageAreaAssert.assertThat(summaryPage.getSummaryBoxByName("analysis")).hasWarningDiv();
-        // FIXME: Field should also contain findbugs, even if there is no issue...
+        assertThat(summaryPage.getSummaryBoxByName("analysis")).hasSummary();
+        // FIXME: @uhafner Field should also contain findbugs, even if there is no issue...
         //String resultsFrom = summaryPage.getSummaryBoxByName("analysis")
         //        .findResultEntryTextByNamePart("Static analysis results from");
         //assertThat(resultsFrom.toLowerCase()).contains(plugins);
 
-        summaryPage.getSummaryBoxByName("analysis").getTitleDivResultLink().click();
+        summaryPage.getSummaryBoxByName("analysis").getTitleResultLink().click();
         assertThat(jenkins.getCurrentUrl()).isEqualTo(build2.url + "analysisResult/");
 
-        visit(build2.url);
-        summaryPage = new SummaryPage(build2, plugins, true);
+        build2.open();
 
-        summaryPage.getSummaryBoxByName("analysis").getTitleDivResultInfoLink().click();
+        summaryPage.getSummaryBoxByName("analysis").getTitleResultInfoLink().click();
         assertThat(jenkins.getCurrentUrl()).isEqualTo(build2.url + "analysisResult/info/");
 
-        visit(build2.url);
-        summaryPage = new SummaryPage(build2, plugins, true);
+        build2.open();
 
         summaryPage.getSummaryBoxByName("analysis").findClickableResultEntryByNamePart("2 new warnings").click();
         assertThat(jenkins.getCurrentUrl()).isEqualTo(build2.url + "analysisResult/new/");
 
-        visit(build2.url);
-        summaryPage = new SummaryPage(build2, plugins, true);
+        build2.open();
 
         summaryPage.getSummaryBoxByName("analysis").findClickableResultEntryByNamePart("One fixed warning").click();
         assertThat(jenkins.getCurrentUrl()).isEqualTo(build2.url + "analysisResult/fixed/");
 
-        visit(build2.url);
-        summaryPage = new SummaryPage(build2, plugins, true);
+        build2.open();
 
         summaryPage.getSummaryBoxByName("analysis").findClickableResultEntryByNamePart("Reference build").click();
         assertThat(jenkins.getCurrentUrl()).isEqualTo(build1.url + "analysisResult/");
@@ -266,19 +246,17 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
 
         Build build1 = job.startBuild().waitUntilFinished();
 
-        List<String> plugins = Arrays.asList("checkstyle", "pmd", "findbugs");
-        visit(build1.url);
+        build1.open();
 
-        SummaryPage summaryPage = new SummaryPage(build1, plugins, false);
+        SummaryPage summaryPage = new SummaryPage(build1, false);
 
         //Checks if the whole build is marked as failed (in the title)
         assertThat(summaryPage.getBuildState()).isEqualTo("Failed");
 
         //Checks if the issue parser boxes contain the expected quality gate states
-        SummaryBoxPageAreaAssert.assertThat(summaryPage.getSummaryBoxByName("checkstyle"))
-                .hasQualityGateState("Success");
-        SummaryBoxPageAreaAssert.assertThat(summaryPage.getSummaryBoxByName("findbugs")).hasQualityGateState("Success");
-        SummaryBoxPageAreaAssert.assertThat(summaryPage.getSummaryBoxByName("pmd")).hasQualityGateState("Failed");
+        assertThat(summaryPage.getSummaryBoxByName("checkstyle")).hasQualityGateState("Success");
+        assertThat(summaryPage.getSummaryBoxByName("findbugs")).hasQualityGateState("Success");
+        assertThat(summaryPage.getSummaryBoxByName("pmd")).hasQualityGateState("Failed");
 
     }
 

@@ -236,28 +236,28 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
      * Sets a qualitygate configuration where all sixteen fields are filled with the same value.
      *
      * @param valueForAll
-     *         -threshold for all configuration fields of qualitygate.
+     *         threshold for all configuration fields of qualitygate.
      */
     public void addQualityGateConfiguration(int valueForAll) {
-        unstableTotalQualityGateConfiguration(valueForAll, valueForAll, valueForAll, valueForAll);
-        failedTotalQualityGateConfiguration(valueForAll, valueForAll, valueForAll, valueForAll);
-        unstableNewQualityGateConfiguration(valueForAll, valueForAll, valueForAll, valueForAll);
-        failedNewQualityGateConfiguration(valueForAll, valueForAll, valueForAll, valueForAll);
+        setUnstableTotalQualityGateConfiguration(valueForAll, valueForAll, valueForAll, valueForAll);
+        setFailedTotalQualityGateConfiguration(valueForAll, valueForAll, valueForAll, valueForAll);
+        setUnstableNewQualityGateConfiguration(valueForAll, valueForAll, valueForAll, valueForAll);
+        setFailedNewQualityGateConfiguration(valueForAll, valueForAll, valueForAll, valueForAll);
     }
 
     /**
      * Sets the thresholds for the build to be considered as unstable for issues overall.
      *
      * @param total
-     *         - threshold for overall issues
+     *         threshold for overall issues
      * @param high
-     *         - threshold for issues with high severity
+     *         threshold for issues with high severity
      * @param normal
-     *         - threshold for issues with normal severity
+     *         threshold for issues with normal severity
      * @param low
-     *         - threshold for issues with low severity
+     *         threshold for issues with low severity
      */
-    public void unstableTotalQualityGateConfiguration(int total, int high, int normal, int low) {
+    public void setUnstableTotalQualityGateConfiguration(int total, int high, int normal, int low) {
         control(By.name("_.unstableTotalAll")).set(total);
         control(By.name("_.unstableTotalHigh")).set(high);
         control(By.name("_.unstableTotalNormal")).set(normal);
@@ -268,15 +268,15 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
      * Sets the thresholds for the build to be considered as failed for issues overall.
      *
      * @param total
-     *         - threshold for overall issues
+     *         threshold for overall issues
      * @param high
-     *         - threshold for issues with high severity
+     *         threshold for issues with high severity
      * @param normal
-     *         - threshold for issues with normal severity
+     *         threshold for issues with normal severity
      * @param low
-     *         - threshold for issues with low severity
+     *         threshold for issues with low severity
      */
-    void failedTotalQualityGateConfiguration(int total, int high, int normal, int low) {
+    void setFailedTotalQualityGateConfiguration(int total, int high, int normal, int low) {
         control(By.name("_.failedTotalAll")).set(total);
         control(By.name("_.failedTotalHigh")).set(high);
         control(By.name("_.failedTotalNormal")).set(normal);
@@ -287,15 +287,15 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
      * Sets the thresholds for the build to be considered as unstable for new issues.
      *
      * @param total
-     *         - threshold for overall issues
+     *         threshold for overall issues
      * @param high
-     *         - threshold for issues with high severity
+     *         threshold for issues with high severity
      * @param normal
-     *         - threshold for issues with normal severity
+     *         threshold for issues with normal severity
      * @param low
-     *         - threshold for issues with low severity
+     *         threshold for issues with low severity
      */
-    void unstableNewQualityGateConfiguration(int total, int high, int normal, int low) {
+    void setUnstableNewQualityGateConfiguration(int total, int high, int normal, int low) {
         control(By.name("_.unstableNewAll")).set(total);
         control(By.name("_.unstableNewHigh")).set(high);
         control(By.name("_.unstableNewNormal")).set(normal);
@@ -306,15 +306,15 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
      * Sets the thresholds for the build to be considered as failed for new issues.
      *
      * @param total
-     *         - threshold for overall issues
+     *         threshold for overall issues
      * @param high
-     *         - threshold for issues with high severity
+     *         threshold for issues with high severity
      * @param normal
-     *         - threshold for issues with normal severity
+     *         threshold for issues with normal severity
      * @param low
-     *         - threshold for issues with low severity
+     *         threshold for issues with low severity
      */
-    void failedNewQualityGateConfiguration(int total, int high, int normal, int low) {
+    void setFailedNewQualityGateConfiguration(int total, int high, int normal, int low) {
         control(By.name("_.failedNewAll")).set(total);
         control(By.name("_.failedNewHigh")).set(high);
         control(By.name("_.failedNewNormal")).set(normal);

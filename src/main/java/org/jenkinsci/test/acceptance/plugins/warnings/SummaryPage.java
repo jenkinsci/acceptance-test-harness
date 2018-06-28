@@ -1,12 +1,10 @@
 package org.jenkinsci.test.acceptance.plugins.warnings;
 
-import java.util.HashMap;
 import java.util.List;
 
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.ContainerPageObject;
 import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
 /**
@@ -18,31 +16,19 @@ import org.openqa.selenium.WebElement;
  */
 public class SummaryPage extends ContainerPageObject {
 
-    private HashMap<String, SummaryBoxPageArea> summaryBoxes = new HashMap<>();
-    private WebElement buildTitle;
-
     /**
      * Creates a new PageObject which represents the summary page of a build.
      */
-    public SummaryPage(Build build, List<String> pluginNames, Boolean aggregatedResults) {
+    public SummaryPage(Build build, boolean aggregatedResults) {
         super(build, build.url("/"));
-        this.buildTitle = find(By.className("build-caption"));
-        if (aggregatedResults) {
-            summaryBoxes.put("analysis", new SummaryBoxPageArea("analysis"));
-        }
-        else {
-            for (String plugin : pluginNames) {
-                summaryBoxes.put(plugin, new SummaryBoxPageArea(plugin.toLowerCase()));
-            }
-        }
     }
 
     public SummaryBoxPageArea getSummaryBoxByName(String pluginName) {
-        return summaryBoxes.get(pluginName);
+        return new SummaryBoxPageArea(pluginName.toLowerCase());
     }
 
     private WebElement getBuildTitle() {
-        return buildTitle;
+        return find(By.className("build-caption"));
     }
 
     public String getBuildState() {
@@ -57,45 +43,20 @@ public class SummaryPage extends ContainerPageObject {
      * @author Manuel Hampp
      */
     public class SummaryBoxPageArea {
-        private WebElement warningDiv;
-        private WebElement titleDiv;
+        private WebElement summary;
+        private WebElement title;
         private List<WebElement> resultList;
-        private WebElement titleDivResultLink;
-        private WebElement titleDivResultInfoLink;
+        String parserName;
 
         SummaryBoxPageArea(String parserName) {
-            warningDiv = find(By.id(parserName + "-summary"));
-            titleDiv = find(By.id(parserName + "-title"));
+            this.parserName = parserName;
+            summary = find(By.id(parserName + "-summary"));
+            title = find(By.id(parserName + "-title"));
             resultList = initResultList();
-            titleDivResultLink = initTitleDivResultLink(parserName);
-            titleDivResultInfoLink = initTitleDivResultInfoLink(parserName);
         }
 
         private List<WebElement> initResultList() {
-            try {
-                return warningDiv.findElements(by.xpath("./ul/li"));
-            }
-            catch (NoSuchElementException e) {
-                return null;
-            }
-        }
-
-        private WebElement initTitleDivResultInfoLink(String parserName) {
-            try {
-                return warningDiv.findElement(by.href(parserName + "Result/info"));
-            }
-            catch (NoSuchElementException e) {
-                return null;
-            }
-        }
-
-        private WebElement initTitleDivResultLink(String parserName) {
-            try {
-                return warningDiv.findElement(by.href(parserName + "Result"));
-            }
-            catch (NoSuchElementException e) {
-                return null;
-            }
+            return summary.findElements(by.xpath("./ul/li"));
         }
 
         /**
@@ -146,20 +107,20 @@ public class SummaryPage extends ContainerPageObject {
             return null;
         }
 
-        public WebElement getWarningDiv() {
-            return warningDiv;
+        public WebElement getSummary() {
+            return summary;
         }
 
-        public WebElement getTitleDivResultLink() {
-            return titleDivResultLink;
+        public WebElement getTitleResultLink() {
+            return summary.findElement(by.href(this.parserName + "Result"));
         }
 
-        public WebElement getTitleDivResultInfoLink() {
-            return titleDivResultInfoLink;
+        public WebElement getTitleResultInfoLink() {
+            return summary.findElement(by.href(this.parserName + "Result/info"));
         }
 
-        public WebElement getTitleDiv() {
-            return titleDiv;
+        public WebElement getTitle() {
+            return title;
         }
     }
 
