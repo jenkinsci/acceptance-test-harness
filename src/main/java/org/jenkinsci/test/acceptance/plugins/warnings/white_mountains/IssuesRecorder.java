@@ -27,6 +27,7 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
     private Control overallResultMustBeSuccessCheckBox = control("overallResultMustBeSuccess");
     private Control referenceJobField = control("referenceJob");
     private Control aggregatingResultsCheckBox = control("aggregatingResults");
+    private Control deleteButton = control("repeatable-delete");
     private IssueFilterPanel issueFilterPanel;
 
     /**
@@ -188,6 +189,20 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
         StaticAnalysisTool tool = new StaticAnalysisTool(this, path);
         tool.setTool(toolName);
         return tool;
+    }
+
+    /**
+     * Sets the name of the static analysis tool to use and the pattern.
+     *
+     * @param toolName
+     *         the tool name
+     * @param pattern
+     *         the pattern
+     */
+    public void setToolWithPattern(final String toolName, final String pattern) {
+        StaticAnalysisTool tool = new StaticAnalysisTool(this, "tools");
+        tool.setTool(toolName);
+        tool.setPattern(pattern);
     }
 
     /**
@@ -365,6 +380,13 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
         control(By.name("_.failedNewHigh")).set(high);
         control(By.name("_.failedNewNormal")).set(normal);
         control(By.name("_.failedNewLow")).set(low);
+    }
+
+    /**
+     * Remove the exclude filter view during job creation.
+     */
+    public void deleteFilter() {
+        deleteButton.find(by.path("/publisher[IssuesRecorder]/filters/repeatable-delete")).click();
     }
 
     /**
