@@ -1,11 +1,10 @@
-package plugins.warnings.assertions;
+package org.jenkinsci.test.acceptance.plugins.warnings.white_mountains;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jenkinsci.test.acceptance.plugins.warnings.WarningsResultDetailsPage;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -80,7 +79,7 @@ public class IssuesTable {
         String rowType = row.getAttribute("role");
         if (StringUtils.equals(rowType, "row")) {
             if (type == type.DRY) {
-                retVal = new DRYIssuesTableRow(row, this);
+                retVal = new DryIssuesTableRow(row, this);
             }
             else {
                 retVal = new DefaultWarningsTableRow(row, this);

@@ -1,21 +1,20 @@
-package plugins.warnings.assertions;
+package org.jenkinsci.test.acceptance.plugins.warnings.white_mountains;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import org.jenkinsci.test.acceptance.plugins.warnings.SourceCodeView;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 /**
  * Class representing a duplicate code warnings issue table row in the issues table.
  */
-public class DRYIssuesTableRow extends AbstractNonDetailsIssuesTableRow {
-
+public class DryIssuesTableRow extends AbstractNonDetailsIssuesTableRow {
     public static final String DUPLICATED_IN = "Duplicated In";
     public static final String AMOUNT_OF_LINES = "#Lines";
-    private final String FILE_LINE_SEPARATOR = ":";
+    
+    private static final String FILE_LINE_SEPARATOR = ":";
 
     /**
      * Creates an instance representing a duplicate code warnings table row.
@@ -25,7 +24,7 @@ public class DRYIssuesTableRow extends AbstractNonDetailsIssuesTableRow {
      * @param issuesTable
      *         the issues table in which this row is displayed in
      */
-    DRYIssuesTableRow(final WebElement element, final IssuesTable issuesTable) {
+    DryIssuesTableRow(final WebElement element, final IssuesTable issuesTable) {
         super(element, issuesTable);
     }
 
@@ -48,17 +47,16 @@ public class DRYIssuesTableRow extends AbstractNonDetailsIssuesTableRow {
                 .findElements(By.tagName("li"))
                 .stream()
                 .map(WebElement::getText)
-                .collect(
-                        Collectors.toList());
+                .collect(Collectors.toList());
     }
 
     /**
-     * Returns the file name in which the duplicate code was detected in
+     * Returns the file name in which the duplicate code was detected in.
      *
      * @return the file name
      */
     public String getFile() {
-        return getCellContent(FILE).split(FILE_LINE_SEPARATOR)[0];
+        return getCellContent(AbstractNonDetailsIssuesTableRow.FILE).split(FILE_LINE_SEPARATOR)[0];
     }
 
     /**
@@ -67,7 +65,7 @@ public class DRYIssuesTableRow extends AbstractNonDetailsIssuesTableRow {
      * @return the line number
      */
     public int getLineNumber() {
-        return Integer.parseInt(getCellContent(FILE).split(FILE_LINE_SEPARATOR)[1]);
+        return Integer.parseInt(getCellContent(AbstractNonDetailsIssuesTableRow.FILE).split(FILE_LINE_SEPARATOR)[1]);
     }
 
     @Override
@@ -75,7 +73,7 @@ public class DRYIssuesTableRow extends AbstractNonDetailsIssuesTableRow {
         if (obj == null || obj.getClass() != getClass()) {
             return false;
         }
-        DRYIssuesTableRow that = (DRYIssuesTableRow) obj;
+        DryIssuesTableRow that = (DryIssuesTableRow) obj;
         return Objects.equals(that.getFile(), this.getFile()) && Objects.equals(that.getLineNumber(),
                 this.getLineNumber()) && Objects.equals(that.getLines(), this.getLines());
     }
@@ -86,7 +84,7 @@ public class DRYIssuesTableRow extends AbstractNonDetailsIssuesTableRow {
      * @return the representation of the source code page.
      */
     public SourceCodeView clickOnFileLink() {
-        return clickOnLink(getCell(FILE).findElement(By.tagName("a")), SourceCodeView.class);
+        return clickOnLink(getCell(AbstractNonDetailsIssuesTableRow.FILE).findElement(By.tagName("a")), SourceCodeView.class);
     }
 
     /**

@@ -55,6 +55,7 @@ public class MessageBoxAssert extends AbstractAssert<MessageBoxAssert, MessageBo
 			}
 		}
 
+		// FIXME: show message box content
 		failWithMessage("Expected message box to have info message <%s>", infoMessage);
 		return this;
 	}

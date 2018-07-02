@@ -1,4 +1,4 @@
-package org.jenkinsci.test.acceptance.plugins.warnings;
+package org.jenkinsci.test.acceptance.plugins.warnings.white_mountains;
 
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.ContainerPageObject;
@@ -23,5 +23,4 @@ public class WarningsCharts extends ContainerPageObject {
     public WarningsCharts(final Build parent, final String id) {
         super(parent, parent.url(id.toLowerCase() + RESULT_PATH_END));
     }
-
 }

@@ -1,8 +1,7 @@
-package plugins.warnings.assertions;
+package org.jenkinsci.test.acceptance.plugins.warnings.white_mountains;
 
 import java.util.List;
 
-import org.jenkinsci.test.acceptance.plugins.warnings.WarningsResultDetailsPage;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -13,7 +12,6 @@ import org.openqa.selenium.WebElement;
  * @author Stephan Plöderl
  */
 public abstract class AbstractNonDetailsIssuesTableRow extends AbstractIssuesTableRow {
-
     public static final String PRIORITY = "Priority";
     public static final String DETAILS = "Details";
     public static final String AGE = "Age";

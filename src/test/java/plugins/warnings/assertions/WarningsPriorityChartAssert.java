@@ -3,7 +3,7 @@ package plugins.warnings.assertions;
 import java.util.Objects;
 
 import org.assertj.core.api.AbstractAssert;
-import org.jenkinsci.test.acceptance.plugins.warnings.WarningsPriorityChart;
+import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.WarningsPriorityChart;
 
 /**
  * Assertions for {@link WarningsPriorityChart}.

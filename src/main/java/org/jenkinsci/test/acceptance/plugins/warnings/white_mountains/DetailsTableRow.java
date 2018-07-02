@@ -1,4 +1,4 @@
-package plugins.warnings.assertions;
+package org.jenkinsci.test.acceptance.plugins.warnings.white_mountains;
 
 import org.openqa.selenium.WebElement;
 
@@ -9,7 +9,6 @@ import org.openqa.selenium.WebElement;
  * @author Stephan Plöderl
  */
 public class DetailsTableRow extends AbstractIssuesTableRow {
-
     private final String details;
 
     /**

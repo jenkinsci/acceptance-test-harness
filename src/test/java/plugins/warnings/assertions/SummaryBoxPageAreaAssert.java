@@ -1,7 +1,7 @@
 package plugins.warnings.assertions;
 
 import org.assertj.core.api.AbstractAssert;
-import org.jenkinsci.test.acceptance.plugins.warnings.SummaryPage.SummaryBoxPageArea;
+import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.SummaryPage.SummaryBoxPageArea;
 
 /**
  * Assertion class of {@link SummaryBoxPageArea}.

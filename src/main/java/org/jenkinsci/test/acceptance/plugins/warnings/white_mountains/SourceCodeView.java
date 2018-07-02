@@ -1,4 +1,4 @@
-package org.jenkinsci.test.acceptance.plugins.warnings;
+package org.jenkinsci.test.acceptance.plugins.warnings.white_mountains;
 
 import java.net.URL;
 

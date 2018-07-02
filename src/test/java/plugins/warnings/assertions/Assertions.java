@@ -1,8 +1,13 @@
 package plugins.warnings.assertions;
 
-import org.jenkinsci.test.acceptance.plugins.warnings.SummaryPage.SummaryBoxPageArea;
-import org.jenkinsci.test.acceptance.plugins.warnings.WarningsPriorityChart;
-import org.jenkinsci.test.acceptance.plugins.warnings.WarningsTrendChart;
+import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.AbstractNonDetailsIssuesTableRow;
+import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.DryIssuesTableRow;
+import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.DefaultWarningsTableRow;
+import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.DetailsTableRow;
+import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.IssuesTable;
+import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.SummaryPage.SummaryBoxPageArea;
+import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.WarningsPriorityChart;
+import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.WarningsTrendChart;
 import org.jenkinsci.test.acceptance.po.MessageBox;
 
 /**
@@ -54,5 +59,71 @@ public class Assertions extends org.assertj.core.api.Assertions {
 
     public static MessageBoxAssert assertThat(MessageBox actual) {
         return new MessageBoxAssert(actual);
+    }
+
+    /**
+     * Creates a new instance of <code>{@link AbstractNonDetailsIssuesTableRowAssert}</code>.
+     *
+     * @param actual
+     *         the actual value.
+     *
+     * @return the created assertion object.
+     */
+    @org.assertj.core.util.CheckReturnValue
+    public static AbstractNonDetailsIssuesTableRowAssert assertThat(AbstractNonDetailsIssuesTableRow actual) {
+        return new AbstractNonDetailsIssuesTableRowAssert(actual);
+    }
+
+    /**
+     * Creates a new instance of <code>{@link DryNonDetailsIssuesTableRowAssert}</code>.
+     *
+     * @param actual
+     *         the actual value.
+     *
+     * @return the created assertion object.
+     */
+    @org.assertj.core.util.CheckReturnValue
+    public static DryNonDetailsIssuesTableRowAssert assertThat(DryIssuesTableRow actual) {
+        return new DryNonDetailsIssuesTableRowAssert(actual);
+    }
+
+    /**
+     * Creates a new instance of <code>{@link DetailsTableRowAssert}</code>.
+     *
+     * @param actual
+     *         the actual value.
+     *
+     * @return the created assertion object.
+     */
+    @org.assertj.core.util.CheckReturnValue
+    public static DetailsTableRowAssert assertThat(DetailsTableRow actual) {
+        return new DetailsTableRowAssert(actual);
+    }
+
+    /**
+     * Creates a new instance of <code>{@link IssuesTableAssert}</code>.
+     *
+     * @param actual
+     *         the actual value.
+     *
+     * @return the created assertion object.
+     */
+    @org.assertj.core.util.CheckReturnValue
+    public static IssuesTableAssert assertThat(
+            IssuesTable actual) {
+        return new IssuesTableAssert(actual);
+    }
+
+    /**
+     * Creates a new instance of <code>{@link DefaultWarningsTableRowAssert}</code>.
+     *
+     * @param actual
+     *         the actual value.
+     *
+     * @return the created assertion object.
+     */
+    @org.assertj.core.util.CheckReturnValue
+    public static DefaultWarningsTableRowAssert assertThat(DefaultWarningsTableRow actual) {
+        return new DefaultWarningsTableRowAssert(actual);
     }
 }
