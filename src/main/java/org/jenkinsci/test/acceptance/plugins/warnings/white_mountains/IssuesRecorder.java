@@ -1,5 +1,7 @@
 package org.jenkinsci.test.acceptance.plugins.warnings;
 
+import java.util.function.Consumer;
+
 import org.jenkinsci.test.acceptance.po.AbstractStep;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
@@ -62,9 +64,22 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
      *         the file name pattern
      */
     public void setTool(final String toolName, final String pattern) {
-        StaticAnalysisTool tool = new StaticAnalysisTool(this, "tools");
-        tool.setTool(toolName);
-        tool.setPattern(pattern);
+        setTool(toolName, tool->tool.setPattern(pattern));
+    }
+
+    /**
+     * Sets a static analysis tool configuration.
+     *
+     * @param toolName
+     *         the tool name
+     * @param configuration the additional configuration options for this tool
+     *
+     * @return the sub page of the tool
+     */
+    public StaticAnalysisTool setTool(final String toolName, final Consumer<StaticAnalysisTool> configuration) {
+        StaticAnalysisTool tool = setTool(toolName);
+        configuration.accept(tool);
+        return tool;
     }
 
     /**
@@ -84,15 +99,30 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
      *
      * @param toolName
      *         the tool name
+     *
+     * @param configuration
+     *         the additional configuration options for this tool
+     *
+     * @return the sub page of the tool
+     */
+    public StaticAnalysisTool addTool(final String toolName, final Consumer<StaticAnalysisTool> configuration){
+        StaticAnalysisTool tool = addTool(toolName);
+        configuration.accept(tool);
+        return tool;
+    }
+
+    /**
+     * Adds a new static analysis tool configuration.
+     *
+     * @param toolName
+     *         the tool name
      * @param pattern
      *         the file name pattern
      *
      * @return the sub page of the tool
      */
     public StaticAnalysisTool addTool(final String toolName, final String pattern) {
-        StaticAnalysisTool tool = addTool(toolName);
-        tool.setPattern(pattern);
-        return tool;
+        return addTool(toolName, tool->tool.setPattern(pattern));
     }
 
     /**

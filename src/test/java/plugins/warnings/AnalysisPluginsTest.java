@@ -1,7 +1,6 @@
 package plugins;
 
-import java.util.List;
-import java.util.Map;
+import java.util.function.Consumer;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
@@ -10,15 +9,18 @@ import org.jenkinsci.test.acceptance.plugins.warnings.IssuesRecorder.StaticAnaly
 import org.jenkinsci.test.acceptance.plugins.warnings.SummaryPage;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsPriorityChart;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsResultDetailsPage;
-import org.jenkinsci.test.acceptance.plugins.warnings.WarningsResultDetailsPage.Tabs;
 import org.jenkinsci.test.acceptance.plugins.warnings.WarningsTrendChart;
+import plugins.warnings.assertions.AbstractNonDetailsIssuesTableRow;
+import plugins.warnings.assertions.DRYIssuesTableRow;
+import plugins.warnings.assertions.DetailsTableRow;
+import plugins.warnings.assertions.IssuesTable;
+import org.jenkinsci.test.acceptance.plugins.warnings.SourceCodeView;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.MessageBox;
 import org.junit.Test;
-import org.openqa.selenium.WebElement;
 
-import static plugins.warnings.assertions.Assertions.*;
+import static plugins.warnings.assertions.Assertions.assertThat;
 
 /**
  * Acceptance tests for the White Mountains release of the warnings plug-in.
@@ -45,24 +47,149 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
      */
     @Test
     public void should_have_duplicate_code_warnings() {
-        FreeStyleJob job = createFreeStyleJob("duplicate_code/cpd.xml", "duplicate_code/Main.java");
+        String id = "CPD";
+        Build build = createAndBuildFreeStyleJob(id, tool -> {
+            tool.setHighThreshold(2);
+            tool.setNormalThreshold(1);
+        }, "duplicate_code/cpd.xml", "duplicate_code/Main.java");
 
-        IssuesRecorder recorder = job.addPublisher(IssuesRecorder.class);
-        StaticAnalysisTool tool = recorder.setTool("CPD");
-        tool.setNormalThreshold(1);
-        tool.setHighThreshold(2);
-        job.save();
-
-        Build build = job.startBuild().waitUntilFinished();
-
-        WarningsResultDetailsPage page = getWarningsResultDetailsPage(build, "cpd");
-        page.openTab(Tabs.DETAILS);
-        List<Map<String, WebElement>> issuesTable = page.getIssuesTable();
-        Map<String, WebElement> firstRowOfIssuesTable = issuesTable.get(0);
-        assertThat(firstRowOfIssuesTable.keySet()).contains("Details");
+        WarningsResultDetailsPage page = getWarningsResultDetailsPage(id, build);
+        IssuesTable issuesTable = page.getIssuesTable();
+        assertThat(issuesTable).hasSize(10);
     }
 
-    private WarningsResultDetailsPage getWarningsResultDetailsPage(final Build build, final String id) {
+    /**
+     * Verifies that clicking on the icon within the details column of the issues table, the row which shows the issues
+     * details will be displayed or hidden.
+     */
+    @Test
+    public void should_be_able_to_open_details_row() {
+        String id = "CPD";
+        Build build = createAndBuildFreeStyleJob(id, tool -> {
+            tool.setHighThreshold(2);
+            tool.setNormalThreshold(1);
+        }, "duplicate_code/cpd.xml", "duplicate_code/Main.java");
+
+        WarningsResultDetailsPage page = getWarningsResultDetailsPage(id, build);
+        IssuesTable issuesTable = page.getIssuesTable();
+        DRYIssuesTableRow firstRow = issuesTable.getRowAs(0, DRYIssuesTableRow.class);
+        DRYIssuesTableRow secondRow = issuesTable.getRowAs(1, DRYIssuesTableRow.class);
+        assertThat(issuesTable).hasSize(10);
+
+        firstRow.toggleDetailsRow();
+        assertThat(issuesTable).hasSize(11);
+
+        DetailsTableRow newSecondRow = issuesTable.getRowAs(1, DetailsTableRow.class);
+        assertThat(newSecondRow).hasDetails("public static void functionOne()\n"
+                + "  {\n"
+                + "    System.out.println(\"testfile for redundancy\");");
+        assertThat(issuesTable.getRowAs(2, DRYIssuesTableRow.class)).isEqualTo(secondRow);
+
+        firstRow.toggleDetailsRow();
+        assertThat(issuesTable).hasSize(10);
+        assertThat(issuesTable.getRowAs(1, DRYIssuesTableRow.class)).isEqualTo(secondRow);
+    }
+
+    /**
+     * Verifies that the links to the source code view are working. todo replace {@link SourceCodeView} instances by the
+     * one written by another team
+     */
+    @Test
+    public void should_be_able_to_open_the_source_code_page_by_clicking_the_links() {
+        String id = "CPD";
+        String fileName = "Main.java";
+        int expectedAmountOfDuplications = 5;
+        Build build = createAndBuildFreeStyleJob(id, tool -> {
+            tool.setHighThreshold(2);
+            tool.setNormalThreshold(1);
+        }, "duplicate_code/cpd.xml", "duplicate_code/Main.java");
+        WarningsResultDetailsPage page = getWarningsResultDetailsPage(id, build);
+        IssuesTable issuesTable = page.getIssuesTable();
+
+        SourceCodeView sourceCodeView = issuesTable.getRowAs(0, DRYIssuesTableRow.class).clickOnFileLink();
+        assertThat(sourceCodeView.getFileName()).isEqualTo(fileName);
+
+        issuesTable = page.getIssuesTable();
+        DRYIssuesTableRow firstRow = issuesTable.getRowAs(0, DRYIssuesTableRow.class);
+        assertThat(firstRow.getDuplicatedIn()).hasSize(expectedAmountOfDuplications);
+
+        for (int i = 0; i < expectedAmountOfDuplications; i++) {
+            issuesTable = page.getIssuesTable();
+            firstRow = issuesTable.getRowAs(0, DRYIssuesTableRow.class);
+            sourceCodeView = firstRow.clickOnDuplicatedInLink(i);
+            assertThat(sourceCodeView.getFileName()).isEqualTo(fileName);
+        }
+    }
+
+    /**
+     * Verifies that the priority filter link is working.
+     */
+    @Test
+    public void should_be_able_to_use_the_filter_links() {
+        String id = "CPD";
+        String highPriority = "High";
+        String lowPriority = "Low";
+        Build build = createAndBuildFreeStyleJob(id, tool -> {
+            tool.setHighThreshold(3);
+            tool.setNormalThreshold(2);
+        }, "duplicate_code/cpd.xml", "duplicate_code/Main.java");
+
+        WarningsResultDetailsPage page = getWarningsResultDetailsPage(id, build);
+        IssuesTable issuesTable = page.getIssuesTable();
+
+        DRYIssuesTableRow firstRow = issuesTable.getRowAs(0, DRYIssuesTableRow.class);
+        assertThat(firstRow).hasPriority(highPriority);
+        WarningsResultDetailsPage highPriorityPage = firstRow.clickOnPriorityLink();
+        highPriorityPage.getIssuesTable()
+                .getTableRows()
+                .stream()
+                .map(row -> row.getAs(AbstractNonDetailsIssuesTableRow.class))
+                .forEach(row -> assertThat(row).hasPriority(highPriority));
+
+        issuesTable = page.getIssuesTable();
+        DRYIssuesTableRow sixthRow = issuesTable.getRowAs(5, DRYIssuesTableRow.class);
+        assertThat(sixthRow).hasPriority(lowPriority);
+        WarningsResultDetailsPage lowPriorityPage = sixthRow.clickOnPriorityLink();
+        lowPriorityPage.getIssuesTable()
+                .getTableRows()
+                .stream()
+                .map(row -> row.getAs(AbstractNonDetailsIssuesTableRow.class))
+                .forEach(row -> assertThat(row).hasPriority(lowPriority));
+    }
+
+    /**
+     * Creates and builds a FreestyleJob for a specific static analysis tool.
+     *
+     * @param toolName
+     *         the name of the tool
+     * @param configuration
+     *         the configuration steps for the static analysis tool
+     * @param resourcesToCopy
+     *         the resources which shall be copied to the workspace
+     *
+     * @return the finished build
+     */
+    private Build createAndBuildFreeStyleJob(final String toolName, final Consumer<StaticAnalysisTool> configuration,
+            final String... resourcesToCopy) {
+        FreeStyleJob job = createFreeStyleJob(resourcesToCopy);
+        IssuesRecorder recorder = job.addPublisher(IssuesRecorder.class);
+        recorder.setTool(toolName, configuration);
+        job.save();
+
+        return job.startBuild().waitUntilFinished();
+    }
+
+    /**
+     * Opens the WarningsResultDetailsPage and returns the corresponding PageObject representing it.
+     *
+     * @param id
+     *         the id of the static analysis tool
+     * @param build
+     *         the build
+     *
+     * @return the PageObject representing the WarningsResultDetailsPage
+     */
+    private WarningsResultDetailsPage getWarningsResultDetailsPage(final String id, final Build build) {
         WarningsResultDetailsPage resultPage = new WarningsResultDetailsPage(build, id);
         resultPage.open();
         return resultPage;
@@ -132,7 +259,7 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
             recorder.addIssueFilter("Exclude categories", "Checks");
             recorder.addIssueFilter("Include types", "JavadocMethodCheck");
         });
-        
+
         job.save();
 
         Build build = job.startBuild().waitUntilFinished();
@@ -165,13 +292,13 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
         assertThat(summaryPage.getSummaryBoxByName("findbugs")).hasSummary();
 
         summaryPage.getSummaryBoxByName(CHECKSTYLE_ID).getTitleResultLink().click();
-        WarningsResultDetailsPage checkstyleDetails = getWarningsResultDetailsPage(build, CHECKSTYLE_ID);
+        WarningsResultDetailsPage checkstyleDetails = getWarningsResultDetailsPage(CHECKSTYLE_ID, build);
         assertThat(checkstyleDetails.getTrendChart())
                 .hasNewIssues(3)
                 .hasFixedIssues(0)
                 .hasOutstandingIssues(0);
         assertThat(jenkins.getCurrentUrl()).isEqualTo(checkstyleDetails.url.toString());
-        
+
         build.open();
 
         summaryPage.getSummaryBoxByName(CHECKSTYLE_ID).getTitleResultInfoLink().click();
@@ -287,8 +414,8 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
     }
 
     /**
-     * Simple test to check that the console log shows that build was a failure when thresholds of quality gate have been
-     * reached.
+     * Simple test to check that the console log shows that build was a failure when thresholds of quality gate have
+     * been reached.
      */
     @Test
     public void should_log_failure__when_quality_gate_thresholds_are_reached() {
@@ -326,7 +453,7 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
         Build build = job.startBuild().waitUntilFinished();
         build.open();
 
-        WarningsResultDetailsPage page = getWarningsResultDetailsPage(build, "analysis");
+        WarningsResultDetailsPage page = getWarningsResultDetailsPage("analysis", build);
 
         WarningsTrendChart trend = page.getTrendChart();
         assertThat(trend).hasNewIssues(3);
@@ -342,8 +469,8 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
     }
 
     /**
-     * Builds a FreeStyle build and that builds with a xml file
-     * and checks if the results shown in the MessageBox are as expected.
+     * Builds a FreeStyle build and that builds with a xml file and checks if the results shown in the MessageBox are as
+     * expected.
      */
     @Test
     public void shouldBeOkIfContentsOfMsgBoxesAreCorrectForFreeStyleJob() {
@@ -371,5 +498,6 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
         assertThat(messageBox).containsInfoMessage("for 2 issues");
         assertThat(messageBox).containsInfoMessage("No quality gates have been set - skipping");
     }
+
 }
 
