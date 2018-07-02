@@ -52,10 +52,7 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
     @Test
     public void should_have_duplicate_code_warnings() {
         String id = "CPD";
-        Build build = createAndBuildFreeStyleJob(id, cpd -> {
-                    cpd.setHighThreshold(2);
-                    cpd.setNormalThreshold(1);
-                },
+        Build build = createAndBuildFreeStyleJob(id, cpd -> cpd.setHighThreshold(2).setNormalThreshold(1),
                 "duplicate_code/cpd.xml", "duplicate_code/Main.java");
 
         WarningsResultDetailsPage page = getWarningsResultDetailsPage(id, build);
@@ -70,10 +67,7 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
     @Test
     public void should_be_able_to_open_details_row() {
         String id = "CPD";
-        Build build = createAndBuildFreeStyleJob(id, tool -> {
-                    tool.setHighThreshold(2);
-                    tool.setNormalThreshold(1);
-                },
+        Build build = createAndBuildFreeStyleJob(id, cpd -> cpd.setHighThreshold(2).setNormalThreshold(1),
                 "duplicate_code/cpd.xml", "duplicate_code/Main.java");
 
         WarningsResultDetailsPage page = getWarningsResultDetailsPage(id, build);
@@ -104,10 +98,7 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
     @Test
     public void should_be_able_to_open_the_source_code_page_by_clicking_the_links() {
         String id = "CPD";
-        Build build = createAndBuildFreeStyleJob(id, tool -> {
-                    tool.setHighThreshold(2);
-                    tool.setNormalThreshold(1);
-                },
+        Build build = createAndBuildFreeStyleJob(id, cpd -> cpd.setHighThreshold(2).setNormalThreshold(1),
                 "duplicate_code/cpd.xml", "duplicate_code/Main.java");
         WarningsResultDetailsPage page = getWarningsResultDetailsPage(id, build);
         IssuesTable issuesTable = page.getIssuesTable();
@@ -137,10 +128,7 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
     @Test
     public void should_be_able_to_use_the_filter_links() {
         String id = "CPD";
-        Build build = createAndBuildFreeStyleJob(id, tool -> {
-                    tool.setHighThreshold(3);
-                    tool.setNormalThreshold(2);
-                },
+        Build build = createAndBuildFreeStyleJob(id, cpd -> cpd.setHighThreshold(3).setNormalThreshold(2),
                 "duplicate_code/cpd.xml", "duplicate_code/Main.java");
 
         WarningsResultDetailsPage page = getWarningsResultDetailsPage(id, build);
@@ -212,7 +200,6 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
     @Test
     public void should_log_ok_in_console_with_not_activated_aggregation() {
         FreeStyleJob job = createFreeStyleJob("aggregation/checkstyle.xml", "aggregation/pmd.xml");
-
         job.addPublisher(IssuesRecorder.class, recorder -> {
             recorder.setTool("CheckStyle", "**/checkstyle.xml");
             recorder.addTool("PMD", "**/pmd.xml");
@@ -233,7 +220,6 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
     @Test
     public void should_log_ok_in_console_with_activated_aggregation() {
         FreeStyleJob job = createFreeStyleJob("aggregation/checkstyle.xml", "aggregation/pmd.xml");
-
         job.addPublisher(IssuesRecorder.class, recorder -> {
             recorder.setTool("CheckStyle", "**/checkstyle.xml");
             recorder.addTool("PMD", "**/pmd.xml");
@@ -261,7 +247,6 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
     @Test
     public void should_log_filter_applied_in_console() {
         FreeStyleJob job = createFreeStyleJob("issue_filter/checkstyle-result.xml");
-
         job.addPublisher(IssuesRecorder.class, recorder -> {
             recorder.setTool("CheckStyle");
             recorder.openAdvancedOptions();
@@ -414,10 +399,10 @@ public class AnalysisPluginsTest extends AbstractJUnitTest {
 
         SummaryPage summaryPage = new SummaryPage(build, false);
 
-        //Checks if the whole build is marked as failed (in the title)
+        // Checks if the whole build is marked as failed (in the title)
         assertThat(summaryPage.getBuildState()).isEqualTo("Failed");
 
-        //Checks if the issue parser boxes contain the expected quality gate states
+        // Checks if the issue parser boxes contain the expected quality gate states
         assertThat(summaryPage.getSummaryBoxByName("checkstyle")).hasQualityGateState("Success");
         assertThat(summaryPage.getSummaryBoxByName("findbugs")).hasQualityGateState("Success");
         assertThat(summaryPage.getSummaryBoxByName("pmd")).hasQualityGateState("Failed");

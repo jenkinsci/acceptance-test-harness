@@ -64,7 +64,7 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
      *         the file name pattern
      */
     public void setTool(final String toolName, final String pattern) {
-        setTool(toolName, tool->tool.setPattern(pattern));
+        setTool(toolName, tool -> tool.setPattern(pattern));
     }
 
     /**
@@ -72,7 +72,8 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
      *
      * @param toolName
      *         the tool name
-     * @param configuration the additional configuration options for this tool
+     * @param configuration
+     *         the additional configuration options for this tool
      *
      * @return the sub page of the tool
      */
@@ -99,13 +100,12 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
      *
      * @param toolName
      *         the tool name
-     *
      * @param configuration
      *         the additional configuration options for this tool
      *
      * @return the sub page of the tool
      */
-    public StaticAnalysisTool addTool(final String toolName, final Consumer<StaticAnalysisTool> configuration){
+    public StaticAnalysisTool addTool(final String toolName, final Consumer<StaticAnalysisTool> configuration) {
         StaticAnalysisTool tool = addTool(toolName);
         configuration.accept(tool);
         return tool;
@@ -122,7 +122,7 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
      * @return the sub page of the tool
      */
     public StaticAnalysisTool addTool(final String toolName, final String pattern) {
-        return addTool(toolName, tool->tool.setPattern(pattern));
+        return addTool(toolName, tool -> tool.setPattern(pattern));
     }
 
     /**
@@ -207,10 +207,14 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
          *
          * @param toolName
          *         the name of the tool, e.g. CheckStyle, CPD, etc.
+         *
+         * @return this
          */
-        public void setTool(final String toolName) {
+        public StaticAnalysisTool setTool(final String toolName) {
             Select select = new Select(self().findElement(By.className("dropdownList")));
             select.selectByVisibleText(toolName);
+
+            return this;
         }
 
         /**
@@ -218,9 +222,13 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
          *
          * @param pattern
          *         the pattern
+         *
+         * @return this
          */
-        public void setPattern(final String pattern) {
+        public StaticAnalysisTool setPattern(final String pattern) {
             this.pattern.set(pattern);
+
+            return this;
         }
 
         /**
@@ -228,9 +236,13 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
          *
          * @param normalThreshold
          *         threshold to be set
+         *
+         * @return this
          */
-        public void setNormalThreshold(int normalThreshold) {
+        public StaticAnalysisTool setNormalThreshold(int normalThreshold) {
             this.normalThreshold.set(normalThreshold);
+
+            return this;
         }
 
         /**
@@ -238,9 +250,13 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
          *
          * @param highThreshold
          *         threshold to be set
+         *
+         * @return this
          */
-        public void setHighThreshold(int highThreshold) {
+        public StaticAnalysisTool setHighThreshold(int highThreshold) {
             this.highThreshold.set(highThreshold);
+
+            return this;
         }
     }
 
