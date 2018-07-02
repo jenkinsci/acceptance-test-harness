@@ -38,7 +38,7 @@ import static plugins.warnings.assertions.Assertions.*;
  * @author Nikolai Wohlgemuth
  */
 @WithPlugins("warnings")
-public class AnalysisPluginsTest extends AbstractJUnitTest {
+public class WarningsPluginTest extends AbstractJUnitTest {
     private static final String WARNINGS_PLUGIN_PREFIX = "/warnings_plugin/white-mountains/";
     private static final String CHECKSTYLE_XML = "checkstyle-result.xml";
     private static final String CHECKSTYLE_ID = "checkstyle";
