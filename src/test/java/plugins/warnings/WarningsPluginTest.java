@@ -260,7 +260,7 @@ public class WarningsPluginTest extends AbstractJUnitTest {
         Build build = job.startBuild().waitUntilFinished();
 
         assertThat(build.getConsole()).contains(
-                "[CheckStyle] Applying 2 filters on the set of 4 issues (3 issues have been removed)");
+                "Applying 2 filters on the set of 4 issues (3 issues have been removed, 1 issues will be published)");
     }
 
     /**
