@@ -63,9 +63,11 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
      *         the tool name
      * @param pattern
      *         the file name pattern
+     *
+     * @return the sub page of the tool
      */
-    public void setTool(final String toolName, final String pattern) {
-        setTool(toolName, tool -> tool.setPattern(pattern));
+    public StaticAnalysisTool setTool(final String toolName, final String pattern) {
+        return setTool(toolName, tool -> tool.setPattern(pattern));
     }
 
     /**
@@ -206,94 +208,6 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
     }
 
     /**
-     * Page area of a static analysis tool configuration.
-     */
-    public static class StaticAnalysisTool extends PageAreaImpl {
-        private final Control pattern = control("pattern");
-        private final Control normalThreshold = control("tool/normalThreshold");
-        private final Control highThreshold = control("tool/highThreshold");
-
-        StaticAnalysisTool(final PageArea issuesRecorder, final String path) {
-            super(issuesRecorder, path);
-        }
-
-        /**
-         * Sets the name of the tool.
-         *
-         * @param toolName
-         *         the name of the tool, e.g. CheckStyle, CPD, etc.
-         *
-         * @return this
-         */
-        public StaticAnalysisTool setTool(final String toolName) {
-            Select select = new Select(self().findElement(By.className("dropdownList")));
-            select.selectByVisibleText(toolName);
-
-            return this;
-        }
-
-        /**
-         * Sets the pattern of the files to parse.
-         *
-         * @param pattern
-         *         the pattern
-         *
-         * @return this
-         */
-        public StaticAnalysisTool setPattern(final String pattern) {
-            this.pattern.set(pattern);
-
-            return this;
-        }
-
-        /**
-         * Sets the normal threshold for duplicate code warnings.
-         *
-         * @param normalThreshold
-         *         threshold to be set
-         *
-         * @return this
-         */
-        public StaticAnalysisTool setNormalThreshold(int normalThreshold) {
-            this.normalThreshold.set(normalThreshold);
-
-            return this;
-        }
-
-        /**
-         * Sets the high threshold for duplicate code warnings.
-         *
-         * @param highThreshold
-         *         threshold to be set
-         *
-         * @return this
-         */
-        public StaticAnalysisTool setHighThreshold(int highThreshold) {
-            this.highThreshold.set(highThreshold);
-
-            return this;
-        }
-    }
-
-    /**
-     * Page area of a issue filter configuration.
-     */
-    private static class IssueFilterPanel extends PageAreaImpl {
-        private final Control regexField = control("pattern");
-
-        IssueFilterPanel(final PageArea area, final String path) {
-            super(area, path);
-        }
-
-        private void setFilter(final String filter, final String regex) {
-            Select filterField = new Select(self().findElement(By.className("dropdownList")));
-            filterField.selectByVisibleText(filter);
-            regexField.set(regex);
-        }
-
-    }
-
-    /**
      * Sets a qualitygate configuration where all sixteen fields are filled with the same value.
      *
      * @param valueForAll
@@ -411,4 +325,91 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
         }
     }
 
+    /**
+     * Page area of a static analysis tool configuration.
+     */
+    public static class StaticAnalysisTool extends PageAreaImpl {
+        private final Control pattern = control("pattern");
+        private final Control normalThreshold = control("tool/normalThreshold");
+        private final Control highThreshold = control("tool/highThreshold");
+
+        StaticAnalysisTool(final PageArea issuesRecorder, final String path) {
+            super(issuesRecorder, path);
+        }
+
+        /**
+         * Sets the name of the tool.
+         *
+         * @param toolName
+         *         the name of the tool, e.g. CheckStyle, CPD, etc.
+         *
+         * @return this
+         */
+        public StaticAnalysisTool setTool(final String toolName) {
+            Select select = new Select(self().findElement(By.className("dropdownList")));
+            select.selectByVisibleText(toolName);
+
+            return this;
+        }
+
+        /**
+         * Sets the pattern of the files to parse.
+         *
+         * @param pattern
+         *         the pattern
+         *
+         * @return this
+         */
+        public StaticAnalysisTool setPattern(final String pattern) {
+            this.pattern.set(pattern);
+
+            return this;
+        }
+
+        /**
+         * Sets the normal threshold for duplicate code warnings.
+         *
+         * @param normalThreshold
+         *         threshold to be set
+         *
+         * @return this
+         */
+        public StaticAnalysisTool setNormalThreshold(int normalThreshold) {
+            this.normalThreshold.set(normalThreshold);
+
+            return this;
+        }
+
+        /**
+         * Sets the high threshold for duplicate code warnings.
+         *
+         * @param highThreshold
+         *         threshold to be set
+         *
+         * @return this
+         */
+        public StaticAnalysisTool setHighThreshold(int highThreshold) {
+            this.highThreshold.set(highThreshold);
+
+            return this;
+        }
+    }
+
+    /**
+     * Page area of a issue filter configuration.
+     */
+    private static class IssueFilterPanel extends PageAreaImpl {
+        private final Control regexField = control("pattern");
+
+        IssueFilterPanel(final PageArea area, final String path) {
+            super(area, path);
+        }
+
+        private void setFilter(final String filter, final String regex) {
+            Select filterField = new Select(self().findElement(By.className("dropdownList")));
+            filterField.selectByVisibleText(filter);
+            regexField.set(regex);
+        }
+
+    }
 }

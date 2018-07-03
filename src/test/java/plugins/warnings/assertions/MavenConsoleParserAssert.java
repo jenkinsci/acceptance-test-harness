@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.assertj.core.api.AbstractAssert;
-import org.jenkinsci.test.acceptance.plugins.warnings.MavenConsoleParser;
+import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.MavenConsoleParser;
 
 /**
  * A simple custom assertion for the MavenConsoleParser.

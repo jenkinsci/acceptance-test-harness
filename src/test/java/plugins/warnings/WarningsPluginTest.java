@@ -1,9 +1,22 @@
 package plugins.warnings;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.Consumer;
 
+import org.apache.commons.io.IOUtils;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation;
+import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
+import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.MavenConsoleParser;
 import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.AbstractNonDetailsIssuesTableRow;
 import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.DetailsTableRow;
 import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.DryIssuesTableRow;
@@ -26,10 +39,12 @@ import static plugins.warnings.assertions.Assertions.*;
 /**
  * Acceptance tests for the White Mountains release of the warnings plug-in.
  *
+ * @author Frank Christian Geyer
  * @author Ullrich Hafner
  * @author Manuel Hampp
  * @author Anna-Maria Hardi
  * @author Elvira Hauer
+ * @author Deniz Mardin
  * @author Stephan Plöderl
  * @author Alexander Praegla
  * @author Michaela Reitschuster
@@ -45,6 +60,13 @@ public class WarningsPluginTest extends AbstractJUnitTest {
     private static final String HIGH_PRIORITY = "High";
     private static final String LOW_PRIORITY = "Low";
     private static final String ANALYSIS_ID = "analysis";
+    private static final String DEFAULT_ENTRY_PATH_ECLIPSE = "/eclipseResult/";
+    private static final String DEFAULT_ENTRY_PATH_MAVEN = "/mavenResult/";
+
+    private static final String DIRECTORY_WITH_TESTFILES = WARNINGS_PLUGIN_PREFIX + "source-view/";
+    private static final String PREFIX_TESTFILE_PATH = "src/test/resources";
+
+    private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
     /**
      * Simple test to check that there are some duplicate code warnings.
@@ -503,6 +525,132 @@ public class WarningsPluginTest extends AbstractJUnitTest {
         assertThat(messageBox).containsInfoMessage(
                 "Creating fingerprints for all affected code blocks to track issues over different builds");
         assertThat(messageBox).containsInfoMessage("No quality gates have been set - skipping");
+    }
+
+    /**
+     * Verifies that source codes shown on the web page (headers + file contents) are displayed correctly.
+     */
+    @Test
+    public void shouldVerifyThatHeadersAndFileContentsAreShownCorrectlyInTheSourceCodeView() throws IOException {
+        List<String> files = new ArrayList<>(Arrays.asList(
+                DIRECTORY_WITH_TESTFILES + "SampleClassWithBrokenPackageNaming.java",
+                DIRECTORY_WITH_TESTFILES + "SampleClassWithNamespace.cs",
+                DIRECTORY_WITH_TESTFILES + "SampleClassWithNamespaceBetweenCode.cs",
+                DIRECTORY_WITH_TESTFILES + "SampleClassWithNestedAndNormalNamespace.cs",
+                DIRECTORY_WITH_TESTFILES + "SampleClassWithoutNamespace.cs",
+                DIRECTORY_WITH_TESTFILES + "SampleClassWithoutPackage.java",
+                DIRECTORY_WITH_TESTFILES + "SampleClassWithPackage.java",
+                DIRECTORY_WITH_TESTFILES + "SampleClassWithUnconventionalPackageNaming.java"));
+
+        List<String> headers = new ArrayList<>(Arrays.asList("Content of file NOT_EXISTING_FILE",
+                "Content of file SampleClassWithBrokenPackageNaming.java",
+                "Content of file SampleClassWithNamespace.cs",
+                "Content of file SampleClassWithNamespaceBetweenCode.cs",
+                "Content of file SampleClassWithNestedAndNormalNamespace.cs",
+                "Content of file SampleClassWithoutNamespace.cs",
+                "Content of file SampleClassWithoutPackage.java",
+                "Content of file SampleClassWithPackage.java",
+                "Content of file SampleClassWithUnconventionalPackageNaming.java"));
+
+        List<String> fileContentList = new ArrayList<>();
+        prepareFileContentList(files, fileContentList);
+
+        files.add(DIRECTORY_WITH_TESTFILES + "DUMMY_FILE_WITH_CONTENT");
+
+        MavenModuleSet job = installMavenAndCreateMavenProject();
+        copyDirectoryToWorkspace(job, PREFIX_TESTFILE_PATH + DIRECTORY_WITH_TESTFILES);
+        configureJob(job, "Eclipse ECJ", "**/*Classes.txt");
+        job.save();
+
+        buildMavenJobWithExpectedFailureResult(job);
+
+        String eclipseResultPath = job.getLastBuild().getNumber() + DEFAULT_ENTRY_PATH_ECLIPSE;
+
+        org.jenkinsci.test.acceptance.plugins.warnings.SourceCodeView sourceCodeView = new org.jenkinsci.test.acceptance.plugins.warnings.SourceCodeView(job, jenkins.getName(),
+                eclipseResultPath).processSourceCodeData();
+
+        assertThat(sourceCodeView).hasCorrectFileSize(fileContentList.size());
+        assertThat(sourceCodeView).hasCorrectHeaderSize(headers.size());
+        assertThat(sourceCodeView).fileSizeIsMatchingHeaderSize();
+        assertThat(sourceCodeView).hasCorrectSources(fileContentList);
+        assertThat(sourceCodeView).hasCorrectHeaders(headers);
+    }
+
+    /**
+     * Verifies that messages from the MavenConsoleParser are displayed correctly.
+     */
+    @Test
+    public void shouldVerifyThatMessagesFromTheMavenConsoleParserAreDisplayedCorrectly() {
+        String fileWithModuleConfiguration = DIRECTORY_WITH_TESTFILES + "pom.xml";
+
+        List<String> parserExpectedMessages = new ArrayList<>(Arrays.asList(
+                "[WARNING] For this reason, future Maven versions might no longer support building such malformed projects."
+                        + LINE_SEPARATOR + "[WARNING]",
+                "[WARNING] Using platform encoding (UTF-8 actually) to copy filtered resources, i.e. build is platform dependent!",
+                "[ERROR] For more information about the errors and possible solutions, please read the following articles:"
+                        + LINE_SEPARATOR
+                        + "[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/PluginConfigurationException"
+        ));
+
+        MavenModuleSet job = installMavenAndCreateMavenProject();
+        copyResourceFilesToWorkspace(job, fileWithModuleConfiguration);
+        configureJob(job, "Maven", "");
+        job.save();
+
+        buildMavenJobWithExpectedFailureResult(job);
+
+        String mavenResultPath = job.getLastBuild().getNumber() + DEFAULT_ENTRY_PATH_MAVEN;
+
+        MavenConsoleParser mavenConsoleParser = new MavenConsoleParser(job, jenkins.getName(),
+                mavenResultPath).processMavenConsoleParserOutput();
+
+        String headerMessage = "Console Details";
+        assertThat(mavenConsoleParser).fileSizeIsMatchingHeaderSize();
+        assertThat(mavenConsoleParser).containsMessage(parserExpectedMessages);
+        assertThat(mavenConsoleParser).hasCorrectHeader(headerMessage);
+    }
+
+    private MavenModuleSet installMavenAndCreateMavenProject() {
+        MavenInstallation.installSomeMaven(jenkins);
+        return jenkins.getJobs().create(MavenModuleSet.class);
+    }
+    
+    private void configureJob(final MavenModuleSet job, final String toolName, final String pattern) {
+        IssuesRecorder recorder = job.addPublisher(IssuesRecorder.class);
+        recorder.setToolWithPattern(toolName, pattern);
+        recorder.openAdvancedOptions();
+        recorder.deleteFilter();
+        recorder.setEnabledForFailure(true);
+    }
+
+    private void buildMavenJobWithExpectedFailureResult(final MavenModuleSet job) {
+        Build build = job.startBuild().waitUntilFinished();
+        build.shouldFail();
+    }
+
+    private void copyResourceFilesToWorkspace(final MavenModuleSet job, final String... resources) {
+        for (String file : resources) {
+            job.copyResource(file);
+        }
+    }
+
+    private void prepareFileContentList(final List<String> files, final List<String> fileContentList)
+            throws IOException {
+        fileContentList.add("Content of file NOT_EXISTING_FILE" + LINE_SEPARATOR
+                + "Can't read file: java.io.FileNotFoundException: /NOT/EXISTING/PATH/TO/NOT_EXISTING_FILE (No such file or directory)");
+        addFileContentToList(files, fileContentList);
+    }
+
+    private void addFileContentToList(final List<String> files, final List<String> fileContentList) throws IOException {
+        for (String fileContent : files) {
+            InputStream encoded = this.getClass().getResourceAsStream(fileContent);
+            fileContentList.add(IOUtils.toString(encoded, Charset.defaultCharset()));
+        }
+    }
+
+    private void copyDirectoryToWorkspace(final MavenModuleSet job,
+            final String directory) throws MalformedURLException {
+        job.copyDir(new Resource(new File(new File(directory).getAbsolutePath()).toURI().toURL()));
     }
 }
 

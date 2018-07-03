@@ -1,6 +1,6 @@
 package plugins.warnings.assertions;
 
-import org.jenkinsci.test.acceptance.plugins.warnings.MavenConsoleParser;
+import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.MavenConsoleParser;
 import org.jenkinsci.test.acceptance.plugins.warnings.SourceCodeView;
 import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.AbstractNonDetailsIssuesTableRow;
 import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.DryIssuesTableRow;

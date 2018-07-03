@@ -1,8 +1,9 @@
-package org.jenkinsci.test.acceptance.plugins.warnings;
+package org.jenkinsci.test.acceptance.plugins.warnings.white_mountains;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jenkinsci.test.acceptance.plugins.warnings.TableView;
 import org.jenkinsci.test.acceptance.po.AbstractStep;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.openqa.selenium.WebElement;
