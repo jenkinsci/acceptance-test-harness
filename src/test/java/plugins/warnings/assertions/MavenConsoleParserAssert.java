@@ -14,7 +14,7 @@ import org.jenkinsci.test.acceptance.plugins.warnings.MavenConsoleParser;
  */
 public class MavenConsoleParserAssert extends AbstractAssert<MavenConsoleParserAssert, MavenConsoleParser> {
 
-    private MavenConsoleParserAssert(final MavenConsoleParser actual) {
+    MavenConsoleParserAssert(final MavenConsoleParser actual) {
         super(actual, MavenConsoleParserAssert.class);
     }
 

@@ -13,7 +13,7 @@ import org.jenkinsci.test.acceptance.plugins.warnings.SourceCodeView;
  */
 public class SourceCodeViewAssert extends AbstractAssert<SourceCodeViewAssert, SourceCodeView> {
 
-    private SourceCodeViewAssert(final SourceCodeView actual) {
+    SourceCodeViewAssert(final SourceCodeView actual) {
         super(actual, SourceCodeViewAssert.class);
     }
 

@@ -21,8 +21,7 @@ import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.IssuesReco
 import org.jenkinsci.test.acceptance.po.Build;
 import org.junit.Test;
 
-import plugins.warnings.assertions.MavenConsoleParserAssert;
-import plugins.warnings.assertions.SourceCodeViewAssert;
+import static plugins.warnings.assertions.Assertions.*;
 
 /**
  * This class is an UI test for the source code view and the MavenConsoleParser view and is intended to be merged with
@@ -33,7 +32,6 @@ import plugins.warnings.assertions.SourceCodeViewAssert;
  */
 @WithPlugins("warnings")
 public class MavenConsoleParserAndSourceCodeViewTest extends AbstractJUnitTest {
-
     private static final String DEFAULT_ENTRY_PATH_ECLIPSE = "/eclipseResult/";
     private static final String DEFAULT_ENTRY_PATH_MAVEN = "/mavenResult/";
 
@@ -47,7 +45,6 @@ public class MavenConsoleParserAndSourceCodeViewTest extends AbstractJUnitTest {
      */
     @Test
     public void shouldVerifyThatHeadersAndFileContentsAreShownCorrectlyInTheSourceCodeView() throws IOException {
-
         List<String> files = new ArrayList<>(Arrays.asList(
                 DIRECTORY_WITH_TESTFILES + "SampleClassWithBrokenPackageNaming.java",
                 DIRECTORY_WITH_TESTFILES + "SampleClassWithNamespace.cs",
@@ -85,11 +82,11 @@ public class MavenConsoleParserAndSourceCodeViewTest extends AbstractJUnitTest {
         SourceCodeView sourceCodeView = new SourceCodeView(job, jenkins.getName(),
                 eclipseResultPath).processSourceCodeData();
 
-        SourceCodeViewAssert.assertThat(sourceCodeView).hasCorrectFileSize(fileContentList.size());
-        SourceCodeViewAssert.assertThat(sourceCodeView).hasCorrectHeaderSize(headers.size());
-        SourceCodeViewAssert.assertThat(sourceCodeView).fileSizeIsMatchingHeaderSize();
-        SourceCodeViewAssert.assertThat(sourceCodeView).hasCorrectSources(fileContentList);
-        SourceCodeViewAssert.assertThat(sourceCodeView).hasCorrectHeaders(headers);
+        assertThat(sourceCodeView).hasCorrectFileSize(fileContentList.size());
+        assertThat(sourceCodeView).hasCorrectHeaderSize(headers.size());
+        assertThat(sourceCodeView).fileSizeIsMatchingHeaderSize();
+        assertThat(sourceCodeView).hasCorrectSources(fileContentList);
+        assertThat(sourceCodeView).hasCorrectHeaders(headers);
     }
 
     /**
@@ -97,18 +94,16 @@ public class MavenConsoleParserAndSourceCodeViewTest extends AbstractJUnitTest {
      */
     @Test
     public void shouldVerifyThatMessagesFromTheMavenConsoleParserAreDisplayedCorrectly() {
-
         String fileWithModuleConfiguration =
                 DIRECTORY_WITH_TESTFILES + "pom.xml";
 
         List<String> parserExpectedMessages = new ArrayList<>(Arrays.asList(
                 "[WARNING] For this reason, future Maven versions might no longer support building such malformed projects."
-                        + LINE_SEPARATOR +
-                        "[WARNING]",
+                        + LINE_SEPARATOR + "[WARNING]",
                 "[WARNING] Using platform encoding (UTF-8 actually) to copy filtered resources, i.e. build is platform dependent!",
                 "[ERROR] For more information about the errors and possible solutions, please read the following articles:"
-                        + LINE_SEPARATOR +
-                        "[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/PluginConfigurationException"
+                        + LINE_SEPARATOR
+                        + "[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/PluginConfigurationException"
         ));
 
         MavenModuleSet job = installMavenAndCreateMavenProject();
@@ -124,9 +119,9 @@ public class MavenConsoleParserAndSourceCodeViewTest extends AbstractJUnitTest {
                 mavenResultPath).processMavenConsoleParserOutput();
 
         String headerMessage = "Console Details";
-        MavenConsoleParserAssert.assertThat(mavenConsoleParser).fileSizeIsMatchingHeaderSize();
-        MavenConsoleParserAssert.assertThat(mavenConsoleParser).containsMessage(parserExpectedMessages);
-        MavenConsoleParserAssert.assertThat(mavenConsoleParser).hasCorrectHeader(headerMessage);
+        assertThat(mavenConsoleParser).fileSizeIsMatchingHeaderSize();
+        assertThat(mavenConsoleParser).containsMessage(parserExpectedMessages);
+        assertThat(mavenConsoleParser).hasCorrectHeader(headerMessage);
     }
 
     private MavenModuleSet installMavenAndCreateMavenProject() {
@@ -142,14 +137,12 @@ public class MavenConsoleParserAndSourceCodeViewTest extends AbstractJUnitTest {
         recorder.setEnabledForFailure(true);
     }
 
-    private void buildMavenJobWithExpectedFailureResult(
-            final MavenModuleSet job) {
+    private void buildMavenJobWithExpectedFailureResult(final MavenModuleSet job) {
         Build build = job.startBuild().waitUntilFinished();
         build.shouldFail();
     }
 
-    private void copyResourceFilesToWorkspace(final MavenModuleSet job,
-            final String... resources) {
+    private void copyResourceFilesToWorkspace(final MavenModuleSet job, final String... resources) {
         for (String file : resources) {
             job.copyResource(file);
         }
@@ -158,7 +151,7 @@ public class MavenConsoleParserAndSourceCodeViewTest extends AbstractJUnitTest {
     private void prepareFileContentList(final List<String> files, final List<String> fileContentList)
             throws IOException {
         fileContentList.add("Content of file NOT_EXISTING_FILE" + LINE_SEPARATOR
-                + "Can't read file: /NOT/EXISTING/PATH/TO/NOT_EXISTING_FILE (No such file or directory)");
+                + "Can't read file: java.io.FileNotFoundException: /NOT/EXISTING/PATH/TO/NOT_EXISTING_FILE (No such file or directory)");
         addFileContentToList(files, fileContentList);
     }
 
@@ -173,5 +166,4 @@ public class MavenConsoleParserAndSourceCodeViewTest extends AbstractJUnitTest {
             final String directory) throws MalformedURLException {
         job.copyDir(new Resource(new File(new File(directory).getAbsolutePath()).toURI().toURL()));
     }
-
 }

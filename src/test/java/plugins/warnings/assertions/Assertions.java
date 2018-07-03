@@ -1,5 +1,7 @@
 package plugins.warnings.assertions;
 
+import org.jenkinsci.test.acceptance.plugins.warnings.MavenConsoleParser;
+import org.jenkinsci.test.acceptance.plugins.warnings.SourceCodeView;
 import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.AbstractNonDetailsIssuesTableRow;
 import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.DryIssuesTableRow;
 import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.DefaultWarningsTableRow;
@@ -125,5 +127,28 @@ public class Assertions extends org.assertj.core.api.Assertions {
     @org.assertj.core.util.CheckReturnValue
     public static DefaultWarningsTableRowAssert assertThat(DefaultWarningsTableRow actual) {
         return new DefaultWarningsTableRowAssert(actual);
+    }
+    /**
+     * A simple constructor.
+     *
+     * @param actual
+     *         the actual MavenConsoleParser object
+     *
+     * @return the MavenConsoleParserAssert object
+     */
+    public static MavenConsoleParserAssert assertThat(final MavenConsoleParser actual) {
+        return new MavenConsoleParserAssert(actual);
+    }
+    
+    /**
+     * A simple constructor.
+     *
+     * @param actual
+     *         the actual SourceCodeView object
+     *
+     * @return the SourceCodeViewAssert object
+     */
+    public static SourceCodeViewAssert assertThat(final SourceCodeView actual) {
+        return new SourceCodeViewAssert(actual);
     }
 }
