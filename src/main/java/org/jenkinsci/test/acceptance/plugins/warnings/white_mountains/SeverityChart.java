@@ -5,22 +5,22 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 /**
- * A part of the PageObject {@link WarningsCharts}.
+ * Severity chart page object that provides the number of warnings per severity.
  *
  * @author Anna-Maria Hardi
  * @author Elvira Hauer
  */
-public class WarningsPriorityChart {
+public class SeverityChart {
 
     private WebElement priorityChart;
 
     /**
-     * Constructor of the class {@link WarningsPriorityChart}.
+     * Constructor of the class {@link SeverityChart}.
      *
      * @param parent
      *         the parent PageObject
      */
-    WarningsPriorityChart(final PageObject parent) {
+    SeverityChart(final PageObject parent) {
         priorityChart = parent.getElement(By.id("number-priorities"));
     }
 

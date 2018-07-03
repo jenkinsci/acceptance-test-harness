@@ -11,9 +11,8 @@ import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.DetailsTab
 @javax.annotation.Generated(value = "assertj-assertions-generator")
 public class DetailsTableRowAssert extends
         AbstractDetailsTableRowAssert<DetailsTableRowAssert, DetailsTableRow> {
-
     /**
-     * Creates a new <code>{@link DetailsTableRowAssert}</code> to make assertions on actual DetailsTableRow.
+     * Creates a new {@link DetailsTableRowAssert} to make assertions on actual DetailsTableRow.
      *
      * @param actual
      *         the DetailsTableRow we want to make assertions on.
@@ -30,7 +29,7 @@ public class DetailsTableRowAssert extends
      * @param actual
      *         the DetailsTableRow we want to make assertions on.
      *
-     * @return a new <code>{@link DetailsTableRowAssert}</code>
+     * @return a new {@link DetailsTableRowAssert}
      */
     @org.assertj.core.util.CheckReturnValue
     public static DetailsTableRowAssert assertThat(DetailsTableRow actual) {

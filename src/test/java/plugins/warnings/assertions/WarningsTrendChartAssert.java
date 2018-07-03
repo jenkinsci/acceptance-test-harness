@@ -3,31 +3,31 @@ package plugins.warnings.assertions;
 import java.util.Objects;
 
 import org.assertj.core.api.AbstractAssert;
-import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.WarningsTrendChart;
+import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.TrendChart;
 
 /**
- * Assertions for {@link WarningsTrendChart}.
+ * Assertions for {@link TrendChart}.
  *
  * @author Anna-Maria Hardi
  * @author Elvira Hauer
  */
 @SuppressWarnings({"ParameterHidesMemberVariable", "NonBooleanMethodNameMayNotStartWithQuestion"})
-public class WarningsTrendChartAssert extends AbstractAssert<WarningsTrendChartAssert, WarningsTrendChart> {
+public class WarningsTrendChartAssert extends AbstractAssert<WarningsTrendChartAssert, TrendChart> {
     private static final String EXPECTED_BUT_WAS_MESSAGE = "%nExpecting %s of:%n <%s>%nto be:%n <%s>%nbut was:%n <%s>.";
 
     /**
-     * Creates a new {@link WarningsTrendChartAssert} to make assertions on actual {@link WarningsTrendChart}.
+     * Creates a new {@link WarningsTrendChartAssert} to make assertions on actual {@link TrendChart}.
      *
      * @param actual
-     *         the issue we want to make assertions on
+     *         the trend chart we want to make assertions on
      */
-    WarningsTrendChartAssert(final WarningsTrendChart actual) {
+    WarningsTrendChartAssert(final TrendChart actual) {
         super(actual, WarningsTrendChartAssert.class);
     }
 
     /**
      * An entry point for {@link WarningsTrendChartAssert} to follow AssertJ standard {@code assertThat()}. With a
-     * static import, one can write directly {@code assertThat(myIssues)} and get a specific assertion with code
+     * static import, one can write directly {@code assertThat(trendChart)} and get a specific assertion with code
      * completion.
      *
      * @param actual
@@ -35,12 +35,12 @@ public class WarningsTrendChartAssert extends AbstractAssert<WarningsTrendChartA
      *
      * @return a new {@link WarningsTrendChartAssert}
      */
-    public static WarningsTrendChartAssert assertThat(final WarningsTrendChart actual) {
+    public static WarningsTrendChartAssert assertThat(final TrendChart actual) {
         return new WarningsTrendChartAssert(actual);
     }
 
     /**
-     * Verifies the new issues of the {@link WarningsTrendChart} instance are equal to the expected ones.
+     * Verifies the new issues of the {@link TrendChart} instance are equal to the expected ones.
      *
      * @param expectedNumberOfIssues
      *         the expected number of issues.
@@ -59,7 +59,7 @@ public class WarningsTrendChartAssert extends AbstractAssert<WarningsTrendChartA
     }
 
     /**
-     * Verifies the fixed issues of the {@link WarningsTrendChart} instance are equal to the expected ones.
+     * Verifies the fixed issues of the {@link TrendChart} instance are equal to the expected ones.
      *
      * @param expectedNumberOfIssues
      *         the expected number of issues.
@@ -79,7 +79,7 @@ public class WarningsTrendChartAssert extends AbstractAssert<WarningsTrendChartA
     }
 
     /**
-     * Verifies the outstanding issues of the {@link WarningsTrendChart} instance are equal to the expected ones.
+     * Verifies the outstanding issues of the {@link TrendChart} instance are equal to the expected ones.
      *
      * @param expectedNumberOfIssues
      *         the expected number of issues.

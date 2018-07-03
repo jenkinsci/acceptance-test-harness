@@ -2,6 +2,7 @@ package org.jenkinsci.test.acceptance.plugins.warnings.white_mountains;
 
 import java.net.URL;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.IssuesTable.Type;
 import org.jenkinsci.test.acceptance.po.Build;
@@ -14,7 +15,8 @@ import com.google.inject.Injector;
 /**
  * PageObject representing the details page of static analysis tool results.
  */
-public class WarningsResultDetailsPage extends PageObject {
+public class AnalysisResult extends PageObject {
+    private static final String[] DRY_TOOLS = new String[] {"cpd", "simian", "dupfinder"};
     private static final String RESULT_PATH_END = "Result/";
     private final String id;
 
@@ -26,15 +28,15 @@ public class WarningsResultDetailsPage extends PageObject {
      * @param id
      *         the type of the result page (e.g. simian or cpd)
      */
-    public WarningsResultDetailsPage(final Build parent, final String id) {
+    public AnalysisResult(final Build parent, final String id) {
         super(parent, parent.url(id.toLowerCase() + RESULT_PATH_END));
         this.id = id;
     }
 
     /**
-     * Creates an instance of the page displaying the details of the issues. This Constructor is used for injecting a
+     * Creates an instance of the page displaying the details of the issues. This constructor is used for injecting a
      * filtered instance of the page (e.g. by clicking on links which open a filtered instance of a
-     * WarningsResultDetailsPage.
+     * AnalysisResult.
      *
      * @param injector
      *         the injector of the page
@@ -44,9 +46,9 @@ public class WarningsResultDetailsPage extends PageObject {
      *         the id of  the result page (e.g simian or cpd)
      */
     @SuppressWarnings("unused")
-    public WarningsResultDetailsPage(final Injector injector, final URL url,
-            final String id) {
+    public AnalysisResult(final Injector injector, final URL url, final String id) {
         super(injector, url);
+        
         this.id = id;
     }
 
@@ -56,11 +58,10 @@ public class WarningsResultDetailsPage extends PageObject {
      * @return the table type
      */
     private Type getIssuesTableType() {
-        Type type = Type.Default;
-        if (StringUtils.equalsIgnoreCase(id, "cpd") || StringUtils.equalsIgnoreCase(id, "cpd")) {
-            type = Type.DRY;
+        if (ArrayUtils.contains(DRY_TOOLS, id)) {
+            return Type.DRY;
         }
-        return type;
+        return Type.DEFAULT;
     }
 
     /**
@@ -73,7 +74,7 @@ public class WarningsResultDetailsPage extends PageObject {
     }
 
     /**
-     * Opens the WarningsResultDetailsPage and opens a specific tab in it.
+     * Opens the AnalysisResult and opens a specific tab in it.
      *
      * @param tab
      *         the tab which shall be opened
@@ -90,7 +91,7 @@ public class WarningsResultDetailsPage extends PageObject {
      *
      * @return the issues-table.
      */
-    public IssuesTable getIssuesTable() {
+    public IssuesTable openIssuesTable() {
         openTab(Tabs.ISSUES);
         WebElement issuesTable = find(By.id("issues"));
         return new IssuesTable(issuesTable, this, getIssuesTableType());
@@ -108,29 +109,28 @@ public class WarningsResultDetailsPage extends PageObject {
      */
     public <T extends PageObject> T openLinkOnSite(final WebElement element, final Class<T> type) {
         String link = element.getAttribute("href");
-        System.out.println(link);
         T retVal = newInstance(type, injector, url(link));
         element.click();
         return retVal;
     }
 
     /**
-     * Opens a link to a filtered version of this WarningsResultDetailsPage by clicking on a link.
+     * Opens a link to a filtered version of this AnalysisResult by clicking on a link.
      *
      * @param element
      *         the WebElement representing the link to be clicked
      *
-     * @return the instance of the filtered WarningsResultDetailsPage
+     * @return the instance of the filtered AnalysisResult
      */
-    public WarningsResultDetailsPage openFilterLinkOnSite(final WebElement element) {
+    public AnalysisResult openFilterLinkOnSite(final WebElement element) {
         String link = element.getAttribute("href");
-        WarningsResultDetailsPage retVal = newInstance(WarningsResultDetailsPage.class, injector, url(link), id);
+        AnalysisResult retVal = newInstance(AnalysisResult.class, injector, url(link), id);
         element.click();
         return retVal;
     }
 
     /**
-     * Enum representing the possible tabs which can be opened on a WarningsResultDetailsPage.
+     * Enum representing the possible tabs which can be opened on a AnalysisResult.
      */
     public enum Tabs {
         ISSUES, DETAILS, PACKAGES, MODULES;
@@ -149,8 +149,8 @@ public class WarningsResultDetailsPage extends PageObject {
      *
      * @return the trend chart
      */
-    public WarningsTrendChart getTrendChart() {
-        return new WarningsTrendChart(this);
+    public TrendChart getTrendChart() {
+        return new TrendChart(this);
     }
 
     /**
@@ -158,7 +158,7 @@ public class WarningsResultDetailsPage extends PageObject {
      *
      * @return the priority chart
      */
-    public WarningsPriorityChart getPriorityChart() {
-        return new WarningsPriorityChart(this);
+    public SeverityChart getPriorityChart() {
+        return new SeverityChart(this);
     }
 }

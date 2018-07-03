@@ -1,16 +1,16 @@
 package plugins.warnings.assertions;
 
-import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.MavenConsoleParser;
-import org.jenkinsci.test.acceptance.plugins.warnings.SourceCodeView;
 import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.AbstractNonDetailsIssuesTableRow;
-import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.DryIssuesTableRow;
+import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.ConsoleLogView;
 import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.DefaultWarningsTableRow;
 import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.DetailsTableRow;
+import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.DryIssuesTableRow;
 import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.IssuesTable;
-import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.SummaryPage.SummaryBoxPageArea;
-import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.WarningsPriorityChart;
-import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.WarningsTrendChart;
-import org.jenkinsci.test.acceptance.po.MessageBox;
+import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.LogMessagesView;
+import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.SourceView;
+import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.AnalysisSummary.SummaryBoxPageArea;
+import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.SeverityChart;
+import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.TrendChart;
 
 /**
  * Custom assertions for ui tests.
@@ -28,6 +28,7 @@ public class Assertions extends org.assertj.core.api.Assertions {
      *
      * @return a new {@link SummaryBoxPageAreaAssert}
      */
+    @org.assertj.core.util.CheckReturnValue
     public static SummaryBoxPageAreaAssert assertThat(final SummaryBoxPageArea actual) {
         return new SummaryBoxPageAreaAssert(actual);
     }
@@ -41,7 +42,8 @@ public class Assertions extends org.assertj.core.api.Assertions {
      *
      * @return a new {@link WarningsPriorityChartAssert}
      */
-    public static WarningsPriorityChartAssert assertThat(final WarningsPriorityChart actual) {
+    @org.assertj.core.util.CheckReturnValue
+    public static WarningsPriorityChartAssert assertThat(final SeverityChart actual) {
         return new WarningsPriorityChartAssert(actual);
     }
 
@@ -55,11 +57,13 @@ public class Assertions extends org.assertj.core.api.Assertions {
      *
      * @return a new {@link WarningsTrendChartAssert}
      */
-    public static WarningsTrendChartAssert assertThat(final WarningsTrendChart actual) {
+    @org.assertj.core.util.CheckReturnValue
+    public static WarningsTrendChartAssert assertThat(final TrendChart actual) {
         return new WarningsTrendChartAssert(actual);
     }
 
-    public static MessageBoxAssert assertThat(MessageBox actual) {
+    @org.assertj.core.util.CheckReturnValue
+    public static MessageBoxAssert assertThat(LogMessagesView actual) {
         return new MessageBoxAssert(actual);
     }
 
@@ -128,27 +132,32 @@ public class Assertions extends org.assertj.core.api.Assertions {
     public static DefaultWarningsTableRowAssert assertThat(DefaultWarningsTableRow actual) {
         return new DefaultWarningsTableRowAssert(actual);
     }
+   
     /**
-     * A simple constructor.
+     * An entry point for {@link ConsoleLogViewAssert} to follow AssertJ standard {@code assertThat()}. With a static import,
+     * one can write directly {@code assertThat(view)} and get a specific assertion with code completion.
      *
      * @param actual
-     *         the actual MavenConsoleParser object
+     *         the view we want to make assertions on
      *
-     * @return the MavenConsoleParserAssert object
+     * @return a new {@link ConsoleLogViewAssert}
      */
-    public static MavenConsoleParserAssert assertThat(final MavenConsoleParser actual) {
-        return new MavenConsoleParserAssert(actual);
+    @org.assertj.core.util.CheckReturnValue
+    public static ConsoleLogViewAssert assertThat(final ConsoleLogView actual) {
+        return new ConsoleLogViewAssert(actual);
     }
-    
+
     /**
-     * A simple constructor.
+     * An entry point for {@link SourceViewAssert} to follow AssertJ standard {@code assertThat()}. With a static import,
+     * one can write directly {@code assertThat(view)} and get a specific assertion with code completion.
      *
      * @param actual
-     *         the actual SourceCodeView object
+     *         the issues we want to make assertions on
      *
-     * @return the SourceCodeViewAssert object
+     * @return a new {@link SourceViewAssert}
      */
-    public static SourceCodeViewAssert assertThat(final SourceCodeView actual) {
-        return new SourceCodeViewAssert(actual);
+    @org.assertj.core.util.CheckReturnValue
+    public static SourceViewAssert assertThat(final SourceView actual) {
+        return new SourceViewAssert(actual);
     }
 }

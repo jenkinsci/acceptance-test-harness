@@ -4,22 +4,22 @@ import java.util.List;
 
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.ContainerPageObject;
+import org.jenkinsci.test.acceptance.po.PageObject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 /**
- * Page object for the SummaryPage (Result-Page) of the warnings plugin (white mountains release).
+ * Page object for the AnalysisSummary (Result-Page) of the warnings plugin (white mountains release).
  *
  * @author Michaela Reitschuster
  * @author Alexandra Wenzel
  * @author Manuel Hampp
  */
-public class SummaryPage extends ContainerPageObject {
-
+public class AnalysisSummary extends ContainerPageObject {
     /**
      * Creates a new PageObject which represents the summary page of a build.
      */
-    public SummaryPage(Build build, boolean aggregatedResults) {
+    public AnalysisSummary(final Build build) {
         super(build, build.url("/"));
     }
 
@@ -43,20 +43,64 @@ public class SummaryPage extends ContainerPageObject {
      * @author Manuel Hampp
      */
     public class SummaryBoxPageArea {
-        private WebElement summary;
-        private WebElement title;
-        private List<WebElement> resultList;
-        String parserName;
+        private final WebElement summary;
+        private final WebElement title;
+        private final List<WebElement> resultList;
+        private final String id;
 
-        SummaryBoxPageArea(String parserName) {
-            this.parserName = parserName;
-            summary = find(By.id(parserName + "-summary"));
-            title = find(By.id(parserName + "-title"));
+        SummaryBoxPageArea(String id) {
+            this.id = id;
+            summary = find(By.id(id + "-summary"));
+            title = find(By.id(id + "-title"));
             resultList = initResultList();
         }
 
         private List<WebElement> initResultList() {
             return summary.findElements(by.xpath("./ul/li"));
+        }
+
+        /**
+         * Clicks the title link that opens the details page with the analysis results.
+         *
+         * @return the details page with the analysis result
+         */
+        public AnalysisResult clickTitleLink() {
+            return openPage(getTitleResultLink(), AnalysisResult.class);
+        }
+
+        /**
+         * Clicks the info link that opens the messages page showing all info and error messages.
+         *
+         * @return the messages page showing all info and error messages
+         */
+        public LogMessagesView clickInfoLink() {
+            return openPage(getTitleResultInfoLink(), LogMessagesView.class);
+        }
+
+        /**
+         * Clicks the new link that opens details page with the analysis results - filtered by new issues.
+         *
+         * @return the details page with the analysis result
+         */
+        public AnalysisResult clickNewLink() {
+            return openPage(findClickableResultEntryByNamePart("new"), AnalysisResult.class);
+        }
+
+        /**
+         * Clicks the reference build link that opens details page with the analysis results of the reference build.
+         *
+         * @return the details page with the analysis result of the reference build
+         */
+        public AnalysisResult clickReferenceBuildLink() {
+            return openPage(findClickableResultEntryByNamePart("Reference"), AnalysisResult.class);
+        }
+
+        private <T extends PageObject> T openPage(final WebElement link, final Class<T> type) {
+            String href = link.getAttribute("href");
+            T result = newInstance(type, injector, url(href), id);
+            link.click();
+
+            return result;
         }
 
         /**
@@ -112,16 +156,15 @@ public class SummaryPage extends ContainerPageObject {
         }
 
         public WebElement getTitleResultLink() {
-            return summary.findElement(by.href(this.parserName + "Result"));
+            return summary.findElement(by.href(this.id + "Result"));
         }
 
         public WebElement getTitleResultInfoLink() {
-            return summary.findElement(by.href(this.parserName + "Result/info"));
+            return summary.findElement(by.href(this.id + "Result/info"));
         }
 
         public WebElement getTitle() {
             return title;
         }
     }
-
 }

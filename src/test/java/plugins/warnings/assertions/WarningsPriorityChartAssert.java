@@ -3,25 +3,25 @@ package plugins.warnings.assertions;
 import java.util.Objects;
 
 import org.assertj.core.api.AbstractAssert;
-import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.WarningsPriorityChart;
+import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.SeverityChart;
 
 /**
- * Assertions for {@link WarningsPriorityChart}.
+ * Assertions for {@link SeverityChart}.
  *
  * @author Anna-Maria Hardi
  * @author Elvira Hauer
  */
 @SuppressWarnings({"ParameterHidesMemberVariable", "NonBooleanMethodNameMayNotStartWithQuestion"})
-public class WarningsPriorityChartAssert extends AbstractAssert<WarningsPriorityChartAssert, WarningsPriorityChart> {
+public class WarningsPriorityChartAssert extends AbstractAssert<WarningsPriorityChartAssert, SeverityChart> {
     private static final String EXPECTED_BUT_WAS_MESSAGE = "%nExpecting %s of:%n <%s>%nto be:%n <%s>%nbut was:%n <%s>.";
 
     /**
-     * Creates a new {@link WarningsPriorityChartAssert} to make assertions on actual {@link WarningsPriorityChart}.
+     * Creates a new {@link WarningsPriorityChartAssert} to make assertions on actual {@link SeverityChart}.
      *
      * @param actual
-     *         the issue we want to make assertions on
+     *         the trend chart we want to make assertions on
      */
-    WarningsPriorityChartAssert(final WarningsPriorityChart actual) {
+    WarningsPriorityChartAssert(final SeverityChart actual) {
         super(actual, WarningsPriorityChartAssert.class);
     }
 
@@ -34,12 +34,12 @@ public class WarningsPriorityChartAssert extends AbstractAssert<WarningsPriority
      *
      * @return a new {@link WarningsPriorityChartAssert}
      */
-    public static WarningsPriorityChartAssert assertThat(final WarningsPriorityChart actual) {
+    public static WarningsPriorityChartAssert assertThat(final SeverityChart actual) {
         return new WarningsPriorityChartAssert(actual);
     }
 
     /**
-     * Verifies the issues with low priority of the {@link WarningsPriorityChart} instance are equal to the expected ones.
+     * Verifies the issues with low priority of the {@link SeverityChart} instance are equal to the expected ones.
      *
      * @param expectedNumberOfIssues
      *         the expected number of issues.
@@ -58,7 +58,7 @@ public class WarningsPriorityChartAssert extends AbstractAssert<WarningsPriority
     }
 
     /**
-     * Verifies the issues with normal priority of the {@link WarningsPriorityChart} instance are equal to the expected ones.
+     * Verifies the issues with normal priority of the {@link SeverityChart} instance are equal to the expected ones.
      *
      * @param expectedNumberOfIssues
      *         the expected number of issues.
@@ -77,7 +77,7 @@ public class WarningsPriorityChartAssert extends AbstractAssert<WarningsPriority
     }
 
     /**
-     * Verifies the issues with high priority of the {@link WarningsPriorityChart} instance are equal to the expected ones.
+     * Verifies the issues with high priority of the {@link SeverityChart} instance are equal to the expected ones.
      *
      * @param expectedNumberOfIssues
      *         the expected number of issues.

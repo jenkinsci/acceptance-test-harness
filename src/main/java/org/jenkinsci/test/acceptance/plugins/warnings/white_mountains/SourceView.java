@@ -1,0 +1,70 @@
+package org.jenkinsci.test.acceptance.plugins.warnings.white_mountains;
+
+import java.net.URL;
+import java.util.List;
+
+import org.jenkinsci.test.acceptance.po.PageObject;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebElement;
+
+import com.google.inject.Injector;
+
+/**
+ * Page object that represents the source code view.
+ *
+ * @author Frank Christian Geyer
+ * @author Ullric Hafner
+ * @author Deniz Mardin
+ * @author Stephan Plöderl
+ */
+public class SourceView extends PageObject {
+    /**
+     * Creates a new source code view.
+     *
+     * @param injector
+     *         injector
+     * @param url
+     *         the URL of the view
+     */
+    public SourceView(final Injector injector, final URL url) {
+        super(injector, url);
+    }
+
+    private void removeSourceLinesFromView() {
+        if (driver instanceof JavascriptExecutor) {
+            ((JavascriptExecutor) driver).executeScript("inputs = document.getElementsByTagName('code')[1];"
+                    + "document.querySelectorAll(\"a[name]\").forEach(e => e.parentNode.removeChild(e));");
+        }
+        else {
+            throw new AssertionError("Execution requires an instance of JavascriptExecutor");
+        }
+    }
+
+    /**
+     * Returns the file name displayed in the header.
+     *
+     * @return the file name
+     */
+    public String getFileName() {
+        String[] headerWords = find(By.tagName("h1")).getText().trim().split(" ");
+        
+        return headerWords[headerWords.length - 1];
+    }
+
+    /**
+     * Returns the source code.
+     *
+     * @return the source code
+     */
+    public String getSourceCode() {
+        removeSourceLinesFromView();
+
+        List<WebElement> code = all(by.tagName("code"));
+        StringBuilder sourceCode = new StringBuilder();
+        for (WebElement webElement : code) {
+            sourceCode.append(webElement.getText());
+        }
+        return sourceCode.toString();
+    }
+}

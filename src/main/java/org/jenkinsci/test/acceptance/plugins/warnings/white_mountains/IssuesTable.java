@@ -10,12 +10,12 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 /**
- * Class representing an issues-table on the {@link WarningsResultDetailsPage}.
+ * Class representing an issues-table on the {@link AnalysisResult}.
  *
  * @author Stephan Plöderl
  */
 public class IssuesTable {
-    private final WarningsResultDetailsPage resultDetailsPage;
+    private final AnalysisResult resultDetailsPage;
     private final List<AbstractIssuesTableRow> tableRows = new ArrayList<>();
     private final List<String> headers;
     private final WebElement tableElement;
@@ -27,11 +27,11 @@ public class IssuesTable {
      * @param element
      *         the WebElement representing the issues-table
      * @param resultDetailsPage
-     *         the WarningsResultDetailsPage on which the issues-table is displayed on
+     *         the AnalysisResult on which the issues-table is displayed on
      * @param type
      *         the type of the issues-table (e.g. Default or DRY)
      */
-    public IssuesTable(final WebElement element, final WarningsResultDetailsPage resultDetailsPage, Type type) {
+    public IssuesTable(final WebElement element, final AnalysisResult resultDetailsPage, Type type) {
         headers = element.findElements(By.xpath(".//thead/tr/th"))
                 .stream()
                 .map(WebElement::getText)
@@ -75,20 +75,18 @@ public class IssuesTable {
      * @return the table row
      */
     private AbstractIssuesTableRow getRightTableRow(final WebElement row) {
-        AbstractIssuesTableRow retVal;
         String rowType = row.getAttribute("role");
         if (StringUtils.equals(rowType, "row")) {
-            if (type == type.DRY) {
-                retVal = new DryIssuesTableRow(row, this);
+            if (type == Type.DRY) {
+                return new DryIssuesTableRow(row, this);
             }
             else {
-                retVal = new DefaultWarningsTableRow(row, this);
+                return new DefaultWarningsTableRow(row, this);
             }
         }
         else {
-            retVal = new DetailsTableRow(row);
+            return new DetailsTableRow(row);
         }
-        return retVal;
     }
 
     /**
@@ -142,16 +140,16 @@ public class IssuesTable {
     }
 
     /**
-     * Performs a click on a link which opens a filtered instance of the WarningsResultDetailsPage.
+     * Performs a click on a link which opens a filtered instance of the AnalysisResult.
      *
      * @param element
      *         the WebElement representing the link
      *
-     * @return the filtered WarningsResultDetailsPage
+     * @return the filtered AnalysisResult
      */
-    public WarningsResultDetailsPage clickFilterLinkOnSite(final WebElement element) {
+    public AnalysisResult clickFilterLinkOnSite(final WebElement element) {
         return this.resultDetailsPage.openFilterLinkOnSite(element);
     }
 
-    public enum Type {Default, DRY}
+    public enum Type {DEFAULT, DRY}
 }

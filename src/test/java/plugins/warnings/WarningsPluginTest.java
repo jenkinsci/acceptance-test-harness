@@ -1,37 +1,34 @@
 package plugins.warnings;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.function.Consumer;
 
-import org.apache.commons.io.IOUtils;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
-import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.MavenConsoleParser;
 import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.AbstractNonDetailsIssuesTableRow;
+import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.AnalysisResult;
+import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.AnalysisSummary;
+import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.ConsoleLogView;
+import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.DefaultWarningsTableRow;
 import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.DetailsTableRow;
 import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.DryIssuesTableRow;
 import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.IssuesRecorder;
 import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.IssuesRecorder.StaticAnalysisTool;
 import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.IssuesTable;
-import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.SourceCodeView;
-import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.SummaryPage;
-import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.SummaryPage.SummaryBoxPageArea;
-import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.WarningsPriorityChart;
-import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.WarningsResultDetailsPage;
-import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.WarningsTrendChart;
+import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.LogMessagesView;
+import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.SourceView;
+import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.AnalysisSummary.SummaryBoxPageArea;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
-import org.jenkinsci.test.acceptance.po.MessageBox;
+import org.jenkinsci.test.acceptance.po.Job;
 import org.junit.Test;
 
 import static plugins.warnings.assertions.Assertions.*;
@@ -55,32 +52,24 @@ import static plugins.warnings.assertions.Assertions.*;
 @WithPlugins("warnings")
 public class WarningsPluginTest extends AbstractJUnitTest {
     private static final String WARNINGS_PLUGIN_PREFIX = "/warnings_plugin/white-mountains/";
-    private static final String CHECKSTYLE_XML = "checkstyle-result.xml";
+
     private static final String CHECKSTYLE_ID = "checkstyle";
+    private static final String ANALYSIS_ID = "analysis";
+    private static final String CPD_ID = "cpd";
+
     private static final String HIGH_PRIORITY = "High";
     private static final String LOW_PRIORITY = "Low";
-    private static final String ANALYSIS_ID = "analysis";
-    private static final String DEFAULT_ENTRY_PATH_ECLIPSE = "/eclipseResult/";
-    private static final String DEFAULT_ENTRY_PATH_MAVEN = "/mavenResult/";
 
-    private static final String DIRECTORY_WITH_TESTFILES = WARNINGS_PLUGIN_PREFIX + "source-view/";
-    private static final String PREFIX_TESTFILE_PATH = "src/test/resources";
+    private static final String CHECKSTYLE_XML = "checkstyle-result.xml";
+    private static final String SOURCE_VIEW_FOLDER = WARNINGS_PLUGIN_PREFIX + "source-view/";
 
     private static final String LINE_SEPARATOR = System.getProperty("line.separator");
-
-    /**
-     * Simple test to check that there are some duplicate code warnings.
-     */
-    @Test
-    public void should_have_duplicate_code_warnings() {
-        String id = "CPD";
-        Build build = createAndBuildFreeStyleJob(id, cpd -> cpd.setHighThreshold(2).setNormalThreshold(1),
-                "duplicate_code/cpd.xml", "duplicate_code/Main.java");
-
-        WarningsResultDetailsPage page = getWarningsResultDetailsPage(id, build);
-        IssuesTable issuesTable = page.getIssuesTable();
-        assertThat(issuesTable).hasSize(10);
-    }
+    private static final String CPD_REPORT = "duplicate_code/cpd.xml";
+    private static final String CPD_SOURCE_NAME = "Main.java";
+    private static final String CPD_SOURCE_PATH = "duplicate_code/Main.java";
+    private static final String PMD_ID = "pmd";
+    private static final String FINDBUGS_ID = "findbugs";
+    private static final String MAVEN_ID = "maven";
 
     /**
      * Verifies that clicking on the icon within the details column of the issues table, the row which shows the issues
@@ -88,12 +77,11 @@ public class WarningsPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void should_be_able_to_open_details_row() {
-        String id = "CPD";
-        Build build = createAndBuildFreeStyleJob(id, cpd -> cpd.setHighThreshold(2).setNormalThreshold(1),
-                "duplicate_code/cpd.xml", "duplicate_code/Main.java");
+        Build build = createAndBuildFreeStyleJob("CPD", cpd -> cpd.setHighThreshold(2).setNormalThreshold(1),
+                CPD_REPORT, CPD_SOURCE_PATH);
 
-        WarningsResultDetailsPage page = getWarningsResultDetailsPage(id, build);
-        IssuesTable issuesTable = page.getIssuesTable();
+        AnalysisResult result = openAnalysisResult(build, CPD_ID);
+        IssuesTable issuesTable = result.openIssuesTable();
         assertThat(issuesTable).hasSize(10);
 
         DryIssuesTableRow firstRow = issuesTable.getRowAs(0, DryIssuesTableRow.class);
@@ -116,31 +104,31 @@ public class WarningsPluginTest extends AbstractJUnitTest {
     /**
      * Verifies that the links to the source code view are working.
      */
-    // TODO: replace with new {@link SourceCodeView}
     @Test
     public void should_be_able_to_open_the_source_code_page_by_clicking_the_links() {
-        String id = "CPD";
-        Build build = createAndBuildFreeStyleJob(id, cpd -> cpd.setHighThreshold(2).setNormalThreshold(1),
-                "duplicate_code/cpd.xml", "duplicate_code/Main.java");
-        WarningsResultDetailsPage page = getWarningsResultDetailsPage(id, build);
-        IssuesTable issuesTable = page.getIssuesTable();
+        String expectedSourceCode = toString(WARNINGS_PLUGIN_PREFIX + CPD_SOURCE_PATH);
+        Build build = createAndBuildFreeStyleJob("CPD", cpd -> cpd.setHighThreshold(2).setNormalThreshold(1),
+                CPD_REPORT, CPD_SOURCE_PATH);
+        AnalysisResult result = openAnalysisResult(build, CPD_ID);
+        IssuesTable issuesTable = result.openIssuesTable();
 
-        SourceCodeView sourceCodeView = issuesTable.getRowAs(0, DryIssuesTableRow.class).clickOnFileLink();
+        SourceView sourceView = issuesTable.getRowAs(0, DryIssuesTableRow.class).clickOnFileLink();
 
-        String fileName = "Main.java";
-        assertThat(sourceCodeView.getFileName()).isEqualTo(fileName);
+        assertThat(sourceView).hasFileName(CPD_SOURCE_NAME);
+        assertThat(sourceView).hasSourceCode(expectedSourceCode);
 
-        issuesTable = page.getIssuesTable();
+        issuesTable = result.openIssuesTable();
         DryIssuesTableRow firstRow = issuesTable.getRowAs(0, DryIssuesTableRow.class);
 
         int expectedAmountOfDuplications = 5;
         assertThat(firstRow.getDuplicatedIn()).hasSize(expectedAmountOfDuplications);
 
         for (int i = 0; i < expectedAmountOfDuplications; i++) {
-            issuesTable = page.getIssuesTable();
+            issuesTable = result.openIssuesTable();
             firstRow = issuesTable.getRowAs(0, DryIssuesTableRow.class);
-            sourceCodeView = firstRow.clickOnDuplicatedInLink(i);
-            assertThat(sourceCodeView.getFileName()).isEqualTo(fileName);
+            sourceView = firstRow.clickOnDuplicatedInLink(i);
+            assertThat(sourceView.getFileName()).isEqualTo(CPD_SOURCE_NAME);
+            assertThat(sourceView).hasSourceCode(expectedSourceCode);
         }
     }
 
@@ -149,118 +137,31 @@ public class WarningsPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void should_be_able_to_use_the_filter_links() {
-        String id = "CPD";
-        Build build = createAndBuildFreeStyleJob(id, cpd -> cpd.setHighThreshold(3).setNormalThreshold(2),
-                "duplicate_code/cpd.xml", "duplicate_code/Main.java");
+        Build build = createAndBuildFreeStyleJob("CPD", cpd -> cpd.setHighThreshold(3).setNormalThreshold(2),
+                CPD_REPORT, CPD_SOURCE_PATH);
 
-        WarningsResultDetailsPage page = getWarningsResultDetailsPage(id, build);
-        IssuesTable issuesTable = page.getIssuesTable();
+        AnalysisResult page = openAnalysisResult(build, CPD_ID);
+        IssuesTable issuesTable = page.openIssuesTable();
 
         DryIssuesTableRow firstRow = issuesTable.getRowAs(0, DryIssuesTableRow.class);
         assertThat(firstRow).hasPriority(HIGH_PRIORITY);
-        WarningsResultDetailsPage highPriorityPage = firstRow.clickOnPriorityLink();
-        highPriorityPage.getIssuesTable()
+        AnalysisResult highPriorityPage = firstRow.clickOnPriorityLink();
+        highPriorityPage.openIssuesTable()
                 .getTableRows()
                 .stream()
                 .map(row -> row.getAs(AbstractNonDetailsIssuesTableRow.class))
                 .forEach(row -> assertThat(row).hasPriority(HIGH_PRIORITY));
 
-        issuesTable = page.getIssuesTable();
+        issuesTable = page.openIssuesTable();
         DryIssuesTableRow sixthRow = issuesTable.getRowAs(5, DryIssuesTableRow.class);
         assertThat(sixthRow).hasPriority(LOW_PRIORITY);
 
-        WarningsResultDetailsPage lowPriorityPage = sixthRow.clickOnPriorityLink();
-        lowPriorityPage.getIssuesTable()
+        AnalysisResult lowPriorityPage = sixthRow.clickOnPriorityLink();
+        lowPriorityPage.openIssuesTable()
                 .getTableRows()
                 .stream()
                 .map(row -> row.getAs(AbstractNonDetailsIssuesTableRow.class))
                 .forEach(row -> assertThat(row).hasPriority(LOW_PRIORITY));
-    }
-
-    /**
-     * Creates and builds a FreestyleJob for a specific static analysis tool.
-     *
-     * @param toolName
-     *         the name of the tool
-     * @param configuration
-     *         the configuration steps for the static analysis tool
-     * @param resourcesToCopy
-     *         the resources which shall be copied to the workspace
-     *
-     * @return the finished build
-     */
-    private Build createAndBuildFreeStyleJob(final String toolName, final Consumer<StaticAnalysisTool> configuration,
-            final String... resourcesToCopy) {
-        FreeStyleJob job = createFreeStyleJob(resourcesToCopy);
-        IssuesRecorder recorder = job.addPublisher(IssuesRecorder.class);
-        recorder.setTool(toolName, configuration);
-        job.save();
-
-        return job.startBuild().waitUntilFinished();
-    }
-
-    /**
-     * Opens the WarningsResultDetailsPage and returns the corresponding PageObject representing it.
-     *
-     * @param id
-     *         the id of the static analysis tool
-     * @param build
-     *         the build
-     *
-     * @return the PageObject representing the WarningsResultDetailsPage
-     */
-    private WarningsResultDetailsPage getWarningsResultDetailsPage(final String id, final Build build) {
-        WarningsResultDetailsPage resultPage = new WarningsResultDetailsPage(build, id);
-        resultPage.open();
-        return resultPage;
-    }
-
-    /**
-     * Simple test to check that warnings of checkstyle and pmd file are handled separately if aggregation is not
-     * activated.
-     */
-    @Test
-    public void should_log_ok_in_console_with_not_activated_aggregation() {
-        FreeStyleJob job = createFreeStyleJob("aggregation/checkstyle.xml", "aggregation/pmd.xml");
-        job.addPublisher(IssuesRecorder.class, recorder -> {
-            recorder.setTool("CheckStyle", "**/checkstyle.xml");
-            recorder.addTool("PMD", "**/pmd.xml");
-            recorder.setEnabledForAggregation(false);
-        });
-
-        job.save();
-
-        Build build = job.startBuild().waitUntilFinished();
-
-        assertThat(build.getConsole()).contains("[CheckStyle] Created analysis result for 6 issues");
-        assertThat(build.getConsole()).contains("[PMD] Created analysis result for 4 issues");
-    }
-
-    /**
-     * Simple test to check that warnings of checkstyle and pmd file are summed up if aggregation is activated.
-     */
-    @Test
-    public void should_log_ok_in_console_with_activated_aggregation() {
-        FreeStyleJob job = createFreeStyleJob("aggregation/checkstyle.xml", "aggregation/pmd.xml");
-        job.addPublisher(IssuesRecorder.class, recorder -> {
-            recorder.setTool("CheckStyle", "**/checkstyle.xml");
-            recorder.addTool("PMD", "**/pmd.xml");
-            recorder.setEnabledForAggregation(true);
-        });
-
-        job.save();
-
-        Build build = job.startBuild().waitUntilFinished();
-
-        assertThat(build.getConsole()).contains("[Static Analysis] Created analysis result for 10 issues");
-    }
-
-    private FreeStyleJob createFreeStyleJob(final String... resourcesToCopy) {
-        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
-        for (String resource : resourcesToCopy) {
-            job.copyResource(WARNINGS_PLUGIN_PREFIX + resource);
-        }
-        return job;
     }
 
     /**
@@ -302,39 +203,41 @@ public class WarningsPluginTest extends AbstractJUnitTest {
         Build build = job.startBuild().waitUntilFinished();
         build.open();
 
-        SummaryPage summaryPage = new SummaryPage(build, false);
-        assertThat(summaryPage.getSummaryBoxByName(CHECKSTYLE_ID)).hasSummary();
-        assertThat(summaryPage.getSummaryBoxByName("pmd")).hasSummary();
-        assertThat(summaryPage.getSummaryBoxByName("findbugs")).hasSummary();
+        AnalysisSummary analysisSummary = new AnalysisSummary(build);
+        assertThat(analysisSummary.getSummaryBoxByName(CHECKSTYLE_ID)).hasSummary();
+        assertThat(analysisSummary.getSummaryBoxByName(PMD_ID)).hasSummary();
+        assertThat(analysisSummary.getSummaryBoxByName(FINDBUGS_ID)).hasSummary();
 
-        summaryPage.getSummaryBoxByName(CHECKSTYLE_ID).getTitleResultLink().click();
-        WarningsResultDetailsPage checkstyleDetails = getWarningsResultDetailsPage(CHECKSTYLE_ID, build);
+        AnalysisResult checkstyleDetails = analysisSummary.getSummaryBoxByName(CHECKSTYLE_ID).clickTitleLink();
         assertThat(checkstyleDetails.getTrendChart())
                 .hasNewIssues(3)
                 .hasFixedIssues(1)
                 .hasOutstandingIssues(0);
-        assertThat(jenkins.getCurrentUrl()).isEqualTo(checkstyleDetails.url.toString());
 
         build.open();
 
-        summaryPage.getSummaryBoxByName(CHECKSTYLE_ID).getTitleResultInfoLink().click();
-        MessageBox messageBox = new MessageBox(build, CHECKSTYLE_ID);
-        assertThat(messageBox).containsInfoMessage("checkstyle-result.xml: found 3 issues");
-        assertThat(jenkins.getCurrentUrl()).isEqualTo(messageBox.url.toString());
+        LogMessagesView logMessagesView = analysisSummary.getSummaryBoxByName(CHECKSTYLE_ID).clickInfoLink();
+        assertThat(logMessagesView).containsInfoMessage("checkstyle-result.xml: found 3 issues");
 
         build.open();
 
-        summaryPage.getSummaryBoxByName(CHECKSTYLE_ID).findClickableResultEntryByNamePart("new").click();
-        assertThat(jenkins.getCurrentUrl()).isEqualTo(build.url + "checkstyleResult/new/");
+        AnalysisResult newResult = analysisSummary.getSummaryBoxByName(CHECKSTYLE_ID).clickNewLink();
+        assertThat(newResult.getTrendChart())
+                .hasNewIssues(3)
+                .hasFixedIssues(0)
+                .hasOutstandingIssues(0);
 
         build.open();
 
-        summaryPage.getSummaryBoxByName(CHECKSTYLE_ID).findClickableResultEntryByNamePart("Reference").click();
-        assertThat(jenkins.getCurrentUrl()).isEqualTo(referenceBuild.url + "checkstyleResult/");
+        AnalysisResult referenceResult = analysisSummary.getSummaryBoxByName(CHECKSTYLE_ID).clickReferenceBuildLink();
+        assertThat(referenceResult.getTrendChart())
+                .hasNewIssues(0)
+                .hasFixedIssues(0)
+                .hasOutstandingIssues(1);
 
         build.open();
 
-        String noWarningsResult = summaryPage.getSummaryBoxByName("findbugs")
+        String noWarningsResult = analysisSummary.getSummaryBoxByName(FINDBUGS_ID)
                 .findResultEntryTextByNamePart("No warnings for");
         assertThat(noWarningsResult).isEqualTo("No warnings for 2 builds, i.e. since build 1");
     }
@@ -352,9 +255,9 @@ public class WarningsPluginTest extends AbstractJUnitTest {
         Build referenceBuild = job.startBuild().waitUntilFinished();
         referenceBuild.open();
 
-        SummaryPage referenceSummary = new SummaryPage(referenceBuild, false);
+        AnalysisSummary referenceSummary = new AnalysisSummary(referenceBuild);
         referenceSummary.getSummaryBoxByName(ANALYSIS_ID).getTitleResultLink().click();
-        WarningsResultDetailsPage referenceDetails = getWarningsResultDetailsPage(ANALYSIS_ID, referenceBuild);
+        AnalysisResult referenceDetails = openAnalysisResult(referenceBuild, ANALYSIS_ID);
         assertThat(referenceDetails.getTrendChart()).hasNewIssues(0).hasFixedIssues(0).hasOutstandingIssues(4);
 
         reconfigureJobWithResource(job, "build_status_test/build_02");
@@ -363,41 +266,41 @@ public class WarningsPluginTest extends AbstractJUnitTest {
 
         build.open();
 
-        SummaryPage summaryPage = new SummaryPage(build, true);
+        AnalysisSummary analysisSummary = new AnalysisSummary(build);
 
-        SummaryBoxPageArea aggregatedSummary = summaryPage.getSummaryBoxByName(ANALYSIS_ID);
+        SummaryBoxPageArea aggregatedSummary = analysisSummary.getSummaryBoxByName(ANALYSIS_ID);
         assertThat(aggregatedSummary).hasSummary();
 
-        String resultsFrom = summaryPage.getSummaryBoxByName(ANALYSIS_ID)
+        String resultsFrom = analysisSummary.getSummaryBoxByName(ANALYSIS_ID)
                 .findResultEntryTextByNamePart("Static analysis results from");
-        assertThat(resultsFrom).containsIgnoringCase("findbugs");
-        assertThat(resultsFrom).containsIgnoringCase("pmd");
+        assertThat(resultsFrom).containsIgnoringCase(FINDBUGS_ID);
+        assertThat(resultsFrom).containsIgnoringCase(PMD_ID);
         assertThat(resultsFrom).containsIgnoringCase("checkstyle");
 
-        summaryPage.getSummaryBoxByName(ANALYSIS_ID).getTitleResultLink().click();
+        analysisSummary.getSummaryBoxByName(ANALYSIS_ID).getTitleResultLink().click();
         assertThat(jenkins.getCurrentUrl()).isEqualTo(build.url + "analysisResult/");
 
-        WarningsResultDetailsPage details = new WarningsResultDetailsPage(build, ANALYSIS_ID);
+        AnalysisResult details = new AnalysisResult(build, ANALYSIS_ID);
         assertThat(details.getTrendChart()).hasNewIssues(3).hasFixedIssues(2).hasOutstandingIssues(2);
 
         build.open();
 
-        summaryPage.getSummaryBoxByName(ANALYSIS_ID).getTitleResultInfoLink().click();
+        analysisSummary.getSummaryBoxByName(ANALYSIS_ID).getTitleResultInfoLink().click();
         assertThat(jenkins.getCurrentUrl()).isEqualTo(build.url + "analysisResult/info/");
 
         build.open();
 
-        summaryPage.getSummaryBoxByName(ANALYSIS_ID).findClickableResultEntryByNamePart("3 new warnings").click();
+        analysisSummary.getSummaryBoxByName(ANALYSIS_ID).findClickableResultEntryByNamePart("3 new warnings").click();
         assertThat(jenkins.getCurrentUrl()).isEqualTo(build.url + "analysisResult/new/");
 
         build.open();
 
-        summaryPage.getSummaryBoxByName(ANALYSIS_ID).findClickableResultEntryByNamePart("2 fixed warnings").click();
+        analysisSummary.getSummaryBoxByName(ANALYSIS_ID).findClickableResultEntryByNamePart("2 fixed warnings").click();
         assertThat(jenkins.getCurrentUrl()).isEqualTo(build.url + "analysisResult/fixed/");
 
         build.open();
 
-        summaryPage.getSummaryBoxByName(ANALYSIS_ID).findClickableResultEntryByNamePart("Reference build").click();
+        analysisSummary.getSummaryBoxByName(ANALYSIS_ID).findClickableResultEntryByNamePart("Reference build").click();
         assertThat(jenkins.getCurrentUrl()).isEqualTo(referenceBuild.url + "analysisResult/");
     }
 
@@ -419,15 +322,12 @@ public class WarningsPluginTest extends AbstractJUnitTest {
 
         build.open();
 
-        SummaryPage summaryPage = new SummaryPage(build, false);
+        AnalysisSummary analysisSummary = new AnalysisSummary(build);
 
-        // Checks if the whole build is marked as failed (in the title)
-        assertThat(summaryPage.getBuildState()).isEqualTo("Failed");
-
-        // Checks if the issue parser boxes contain the expected quality gate states
-        assertThat(summaryPage.getSummaryBoxByName("checkstyle")).hasQualityGateState("Success");
-        assertThat(summaryPage.getSummaryBoxByName("findbugs")).hasQualityGateState("Success");
-        assertThat(summaryPage.getSummaryBoxByName("pmd")).hasQualityGateState("Failed");
+        assertThat(analysisSummary.getBuildState()).isEqualTo("Failed");
+        assertThat(analysisSummary.getSummaryBoxByName("checkstyle")).hasQualityGateState("Success");
+        assertThat(analysisSummary.getSummaryBoxByName(FINDBUGS_ID)).hasQualityGateState("Success");
+        assertThat(analysisSummary.getSummaryBoxByName(PMD_ID)).hasQualityGateState("Failed");
 
     }
 
@@ -441,25 +341,7 @@ public class WarningsPluginTest extends AbstractJUnitTest {
         recorder.setEnabledForFailure(true);
         return recorder;
     }
-
-    /**
-     * Simple test to check that the console log shows that build was a failure when thresholds of quality gate have
-     * been reached.
-     */
-    @Test
-    public void should_log_failure__when_quality_gate_thresholds_are_reached() {
-        FreeStyleJob job = createFreeStyleJob("/checkstyle-result.xml");
-        IssuesRecorder recorder = job.addPublisher(IssuesRecorder.class);
-        recorder.setTool("CheckStyle");
-        recorder.openAdvancedOptions();
-        recorder.setEnabledForFailure(true);
-        recorder.addQualityGateConfiguration(5);
-        job.save();
-
-        Build build = job.startBuild().waitUntilFinished();
-        assertThat(build.getConsole()).contains("Finished: FAILURE");
-    }
-
+    
     /**
      * Starts two builds with different configurations and checks the values of the new, fixed and outstanding issues of
      * the trend chart.
@@ -482,139 +364,163 @@ public class WarningsPluginTest extends AbstractJUnitTest {
         Build build = job.startBuild().waitUntilFinished();
         build.open();
 
-        WarningsResultDetailsPage page = getWarningsResultDetailsPage(ANALYSIS_ID, build);
+        AnalysisResult page = openAnalysisResult(build, ANALYSIS_ID);
 
-        WarningsTrendChart trend = page.getTrendChart();
-        assertThat(trend).hasNewIssues(3);
-        assertThat(trend).hasFixedIssues(2);
-        assertThat(trend).hasOutstandingIssues(5);
+        assertThat(page.getTrendChart())
+                .hasNewIssues(3)
+                .hasFixedIssues(2)
+                .hasOutstandingIssues(5);
 
-        WarningsPriorityChart priorities = page.getPriorityChart();
-        assertThat(priorities).hasLowPriority(1);
-        assertThat(priorities).hasNormalPriority(2);
-        assertThat(priorities).hasHighPriority(5);
+        assertThat(page.getPriorityChart())
+                .hasLowPriority(1)
+                .hasNormalPriority(2)
+                .hasHighPriority(5);
 
-        assertThat(page.getIssuesTable()).hasSize(8);
+        assertThat(page.openIssuesTable()).hasSize(8);
     }
 
     /**
-     * Builds a FreeStyle build and that builds with a xml file and checks if the results shown in the MessageBox are as
-     * expected.
+     * Runs a job that publishes checkstyle warnings. Verifies the content of the info and error log view.
      */
     @Test
-    public void shouldBeOkIfContentsOfMsgBoxesAreCorrectForFreeStyleJob() {
-        FreeStyleJob job = createFreeStyleJob(CHECKSTYLE_XML);
-        job.addPublisher(IssuesRecorder.class, recorder -> recorder.setTool("CheckStyle", "**/checkstyle-result.xml"));
-        job.save();
-        Build build = job.startBuild().waitUntilFinished();
+    public void should_show_info_and_error_messages() {
+        Build build = createAndBuildFreeStyleJob("CheckStyle", CHECKSTYLE_XML);
 
-        MessageBox messageBox = new MessageBox(build, CHECKSTYLE_ID);
-        messageBox.open();
+        LogMessagesView logMessagesView = new LogMessagesView(build, CHECKSTYLE_ID);
+        logMessagesView.open();
 
-        messageBox.getErrorMsgContent();
-        assertThat(messageBox).hasErrorMessagesSize(11 + 1);
-        assertThat(messageBox).containsErrorMessage("Can't resolve absolute paths for 11 files");
+        assertThat(logMessagesView).hasErrorMessagesSize(11 + 1);
+        assertThat(logMessagesView).containsErrorMessage("Can't resolve absolute paths for 11 files");
 
-        messageBox.getInfoMsgContent();
-        assertThat(messageBox).containsInfoMessage("-> found 1 file");
-        assertThat(messageBox).containsInfoMessage("checkstyle-result.xml: found 11 issues");
-        assertThat(messageBox).containsInfoMessage("Post processing issues on 'Master' with encoding 'UTF-8'");
-        assertThat(messageBox).containsInfoMessage("Resolved absolute paths for 1 files");
-        assertThat(messageBox).containsInfoMessage("11 unresolved");
-        assertThat(messageBox).containsInfoMessage("Resolved package names of 1 affected files");
-        assertThat(messageBox).containsInfoMessage(
+        assertThat(logMessagesView).containsInfoMessage("-> found 1 file");
+        assertThat(logMessagesView).containsInfoMessage("checkstyle-result.xml: found 11 issues");
+        assertThat(logMessagesView).containsInfoMessage("Post processing issues on 'Master' with encoding 'UTF-8'");
+        assertThat(logMessagesView).containsInfoMessage("Resolved absolute paths for 1 files");
+        assertThat(logMessagesView).containsInfoMessage("11 unresolved");
+        assertThat(logMessagesView).containsInfoMessage("Resolved package names of 1 affected files");
+        assertThat(logMessagesView).containsInfoMessage(
                 "Creating fingerprints for all affected code blocks to track issues over different builds");
-        assertThat(messageBox).containsInfoMessage("No quality gates have been set - skipping");
+        assertThat(logMessagesView).containsInfoMessage("No quality gates have been set - skipping");
     }
 
     /**
-     * Verifies that source codes shown on the web page (headers + file contents) are displayed correctly.
+     * Creates and builds a maven job and verifies that all warnings and errors are shown in the console log view.
      */
     @Test
-    public void shouldVerifyThatHeadersAndFileContentsAreShownCorrectlyInTheSourceCodeView() throws IOException {
-        List<String> files = new ArrayList<>(Arrays.asList(
-                DIRECTORY_WITH_TESTFILES + "SampleClassWithBrokenPackageNaming.java",
-                DIRECTORY_WITH_TESTFILES + "SampleClassWithNamespace.cs",
-                DIRECTORY_WITH_TESTFILES + "SampleClassWithNamespaceBetweenCode.cs",
-                DIRECTORY_WITH_TESTFILES + "SampleClassWithNestedAndNormalNamespace.cs",
-                DIRECTORY_WITH_TESTFILES + "SampleClassWithoutNamespace.cs",
-                DIRECTORY_WITH_TESTFILES + "SampleClassWithoutPackage.java",
-                DIRECTORY_WITH_TESTFILES + "SampleClassWithPackage.java",
-                DIRECTORY_WITH_TESTFILES + "SampleClassWithUnconventionalPackageNaming.java"));
-
-        List<String> headers = new ArrayList<>(Arrays.asList("Content of file NOT_EXISTING_FILE",
-                "Content of file SampleClassWithBrokenPackageNaming.java",
-                "Content of file SampleClassWithNamespace.cs",
-                "Content of file SampleClassWithNamespaceBetweenCode.cs",
-                "Content of file SampleClassWithNestedAndNormalNamespace.cs",
-                "Content of file SampleClassWithoutNamespace.cs",
-                "Content of file SampleClassWithoutPackage.java",
-                "Content of file SampleClassWithPackage.java",
-                "Content of file SampleClassWithUnconventionalPackageNaming.java"));
-
-        List<String> fileContentList = new ArrayList<>();
-        prepareFileContentList(files, fileContentList);
-
-        files.add(DIRECTORY_WITH_TESTFILES + "DUMMY_FILE_WITH_CONTENT");
-
-        MavenModuleSet job = installMavenAndCreateMavenProject();
-        copyDirectoryToWorkspace(job, PREFIX_TESTFILE_PATH + DIRECTORY_WITH_TESTFILES);
-        configureJob(job, "Eclipse ECJ", "**/*Classes.txt");
-        job.save();
-
-        buildMavenJobWithExpectedFailureResult(job);
-
-        String eclipseResultPath = job.getLastBuild().getNumber() + DEFAULT_ENTRY_PATH_ECLIPSE;
-
-        org.jenkinsci.test.acceptance.plugins.warnings.SourceCodeView sourceCodeView = new org.jenkinsci.test.acceptance.plugins.warnings.SourceCodeView(job, jenkins.getName(),
-                eclipseResultPath).processSourceCodeData();
-
-        assertThat(sourceCodeView).hasCorrectFileSize(fileContentList.size());
-        assertThat(sourceCodeView).hasCorrectHeaderSize(headers.size());
-        assertThat(sourceCodeView).fileSizeIsMatchingHeaderSize();
-        assertThat(sourceCodeView).hasCorrectSources(fileContentList);
-        assertThat(sourceCodeView).hasCorrectHeaders(headers);
-    }
-
-    /**
-     * Verifies that messages from the MavenConsoleParser are displayed correctly.
-     */
-    @Test
-    public void shouldVerifyThatMessagesFromTheMavenConsoleParserAreDisplayedCorrectly() {
-        String fileWithModuleConfiguration = DIRECTORY_WITH_TESTFILES + "pom.xml";
-
-        List<String> parserExpectedMessages = new ArrayList<>(Arrays.asList(
-                "[WARNING] For this reason, future Maven versions might no longer support building such malformed projects."
-                        + LINE_SEPARATOR + "[WARNING]",
-                "[WARNING] Using platform encoding (UTF-8 actually) to copy filtered resources, i.e. build is platform dependent!",
-                "[ERROR] For more information about the errors and possible solutions, please read the following articles:"
-                        + LINE_SEPARATOR
-                        + "[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/PluginConfigurationException"
-        ));
-
-        MavenModuleSet job = installMavenAndCreateMavenProject();
-        copyResourceFilesToWorkspace(job, fileWithModuleConfiguration);
+    public void should_show_maven_warnings_in_console_log_view() {
+        MavenModuleSet job = createMavenProject();
+        copyResourceFilesToWorkspace(job, SOURCE_VIEW_FOLDER + "pom.xml");
         configureJob(job, "Maven", "");
         job.save();
 
-        buildMavenJobWithExpectedFailureResult(job);
+        Build build = buildMavenJobWithExpectedFailureResult(job);
+        build.open();
 
-        String mavenResultPath = job.getLastBuild().getNumber() + DEFAULT_ENTRY_PATH_MAVEN;
+        AnalysisSummary analysisSummary = new AnalysisSummary(build);
+        assertThat(analysisSummary.getSummaryBoxByName(MAVEN_ID)).hasSummary();
 
-        MavenConsoleParser mavenConsoleParser = new MavenConsoleParser(job, jenkins.getName(),
-                mavenResultPath).processMavenConsoleParserOutput();
+        AnalysisResult mavenDetails = analysisSummary.getSummaryBoxByName(MAVEN_ID).clickTitleLink();
+        assertThat(mavenDetails.getTrendChart())
+                .hasNewIssues(0)
+                .hasFixedIssues(0)
+                .hasOutstandingIssues(5);
+        assertThat(mavenDetails.getPriorityChart())
+                .hasHighPriority(2)
+                .hasNormalPriority(3);
 
-        String headerMessage = "Console Details";
-        assertThat(mavenConsoleParser).fileSizeIsMatchingHeaderSize();
-        assertThat(mavenConsoleParser).containsMessage(parserExpectedMessages);
-        assertThat(mavenConsoleParser).hasCorrectHeader(headerMessage);
+        IssuesTable issuesTable = mavenDetails.openIssuesTable();
+
+        DefaultWarningsTableRow firstRow = issuesTable.getRowAs(0, DefaultWarningsTableRow.class);
+        ConsoleLogView sourceView = firstRow.openConsoleLog();
+        assertThat(sourceView).hasTitle("Console Details");
+        assertThat(sourceView).hasHighlightedText(
+                "[WARNING] For this reason, future Maven versions might no longer support building such malformed projects."
+                + LINE_SEPARATOR + "[WARNING]");
     }
 
-    private MavenModuleSet installMavenAndCreateMavenProject() {
+    /**
+     * Creates and builds a FreestyleJob for a specific static analysis tool.
+     *
+     * @param toolName
+     *         the name of the tool
+     * @param configuration
+     *         the configuration steps for the static analysis tool
+     * @param resourcesToCopy
+     *         the resources which shall be copied to the workspace
+     *
+     * @return the finished build
+     */
+    private Build createAndBuildFreeStyleJob(final String toolName, final Consumer<StaticAnalysisTool> configuration,
+            final String... resourcesToCopy) {
+        FreeStyleJob job = createFreeStyleJob(toolName, configuration, resourcesToCopy);
+
+        return job.startBuild().waitUntilFinished();
+    }
+
+    /**
+     * Creates a FreestyleJob for a specific static analysis tool.
+     *
+     * @param toolName
+     *         the name of the tool
+     * @param configuration
+     *         the configuration steps for the static analysis tool
+     * @param resourcesToCopy
+     *         the resources which shall be copied to the workspace
+     *
+     * @return the created job
+     */
+    private FreeStyleJob createFreeStyleJob(final String toolName, final Consumer<StaticAnalysisTool> configuration,
+            final String... resourcesToCopy) {
+        FreeStyleJob job = createFreeStyleJob(resourcesToCopy);
+        IssuesRecorder recorder = job.addPublisher(IssuesRecorder.class);
+        recorder.setTool(toolName, configuration);
+        job.save();
+        return job;
+    }
+
+    /**
+     * Creates and builds a FreestyleJob for a specific static analysis tool.
+     *
+     * @param toolName
+     *         the name of the tool
+     * @param resourcesToCopy
+     *         the resources which shall be copied to the workspace
+     *
+     * @return the finished build
+     */
+    private Build createAndBuildFreeStyleJob(final String toolName, final String... resourcesToCopy) {
+        return createAndBuildFreeStyleJob(toolName, c -> {}, resourcesToCopy);
+    }
+
+    /**
+     * Opens the AnalysisResult and returns the corresponding PageObject representing it.
+     *
+     * @param build
+     *         the build
+     * @param id
+     *         the id of the static analysis tool
+     *
+     * @return the PageObject representing the AnalysisResult
+     */
+    private AnalysisResult openAnalysisResult(final Build build, final String id) {
+        AnalysisResult resultPage = new AnalysisResult(build, id);
+        resultPage.open();
+        return resultPage;
+    }
+
+    private FreeStyleJob createFreeStyleJob(final String... resourcesToCopy) {
+        FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
+        for (String resource : resourcesToCopy) {
+            job.copyResource(WARNINGS_PLUGIN_PREFIX + resource);
+        }
+        return job;
+    }
+
+    private MavenModuleSet createMavenProject() {
         MavenInstallation.installSomeMaven(jenkins);
         return jenkins.getJobs().create(MavenModuleSet.class);
     }
-    
+
     private void configureJob(final MavenModuleSet job, final String toolName, final String pattern) {
         IssuesRecorder recorder = job.addPublisher(IssuesRecorder.class);
         recorder.setToolWithPattern(toolName, pattern);
@@ -623,34 +529,65 @@ public class WarningsPluginTest extends AbstractJUnitTest {
         recorder.setEnabledForFailure(true);
     }
 
-    private void buildMavenJobWithExpectedFailureResult(final MavenModuleSet job) {
-        Build build = job.startBuild().waitUntilFinished();
-        build.shouldFail();
+    private Build buildMavenJobWithExpectedFailureResult(final MavenModuleSet job) {
+        return job.startBuild().waitUntilFinished().shouldFail();
     }
 
-    private void copyResourceFilesToWorkspace(final MavenModuleSet job, final String... resources) {
+    private void copyResourceFilesToWorkspace(final Job job, final String... resources) {
         for (String file : resources) {
             job.copyResource(file);
         }
     }
 
-    private void prepareFileContentList(final List<String> files, final List<String> fileContentList)
-            throws IOException {
-        fileContentList.add("Content of file NOT_EXISTING_FILE" + LINE_SEPARATOR
-                + "Can't read file: java.io.FileNotFoundException: /NOT/EXISTING/PATH/TO/NOT_EXISTING_FILE (No such file or directory)");
-        addFileContentToList(files, fileContentList);
+    /**
+     * Finds a resource with the given name and returns the content (decoded with UTF-8) as String.
+     *
+     * @param fileName
+     *         name of the desired resource
+     *
+     * @return the content represented as {@link String}
+     */
+    private String toString(final String fileName) {
+        return new String(readAllBytes(fileName), StandardCharsets.UTF_8);
     }
 
-    private void addFileContentToList(final List<String> files, final List<String> fileContentList) throws IOException {
-        for (String fileContent : files) {
-            InputStream encoded = this.getClass().getResourceAsStream(fileContent);
-            fileContentList.add(IOUtils.toString(encoded, Charset.defaultCharset()));
+    /**
+     * Reads the contents of the desired resource. The rules for searching resources associated with this test class are
+     * implemented by the defining {@linkplain ClassLoader class loader} of this test class.  This method delegates to
+     * this object's class loader.  If this object was loaded by the bootstrap class loader, the method delegates to
+     * {@link ClassLoader#getSystemResource}.
+     * <p>
+     * Before delegation, an absolute resource name is constructed from the given resource name using this algorithm:
+     * <p>
+     * <ul>
+     * <li> If the {@code name} begins with a {@code '/'} (<tt>'&#92;u002f'</tt>), then the absolute name of the
+     * resource is the portion of the {@code name} following the {@code '/'}.</li>
+     * <li> Otherwise, the absolute name is of the following form:
+     * <blockquote> {@code modified_package_name/name} </blockquote>
+     * <p> Where the {@code modified_package_name} is the package name of this object with {@code '/'}
+     * substituted for {@code '.'} (<tt>'&#92;u002e'</tt>).</li>
+     * </ul>
+     *
+     * @param fileName
+     *         name of the desired resource
+     *
+     * @return the content represented by a byte array
+     */
+    private byte[] readAllBytes(final String fileName) {
+        try {
+            return Files.readAllBytes(getPath(fileName));
+        }
+        catch (IOException | URISyntaxException e) {
+            throw new AssertionError("Can't read resource " + fileName, e);
         }
     }
 
-    private void copyDirectoryToWorkspace(final MavenModuleSet job,
-            final String directory) throws MalformedURLException {
-        job.copyDir(new Resource(new File(new File(directory).getAbsolutePath()).toURI().toURL()));
+    private Path getPath(final String name) throws URISyntaxException {
+        URL resource = getClass().getResource(name);
+        if (resource == null) {
+            throw new AssertionError("Can't find resource " + name);
+        }
+        return Paths.get(resource.toURI());
     }
 }
 

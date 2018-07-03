@@ -12,12 +12,14 @@ import org.openqa.selenium.WebElement;
  * @author Stephan Plöderl
  */
 public abstract class AbstractNonDetailsIssuesTableRow extends AbstractIssuesTableRow {
-    public static final String PRIORITY = "Priority";
-    public static final String DETAILS = "Details";
-    public static final String AGE = "Age";
-    public static final String FILE = "File";
-    private WebElement element;
-    private IssuesTable issuesTable;
+    private static final String PRIORITY = "Priority";
+    private static final String DETAILS = "Details";
+    private static final String AGE = "Age";
+    private static final String FILE = "File";
+    private static final String FILE_LINE_SEPARATOR = ":";
+    
+    private final WebElement element;
+    private final IssuesTable issuesTable;
 
     /**
      * Creates a new instance of the table row.
@@ -35,15 +37,15 @@ public abstract class AbstractNonDetailsIssuesTableRow extends AbstractIssuesTab
     /**
      * Performs a click on a link.
      *
-     * @param element
+     * @param link
      *         the WebElement representing the link
      * @param targetPageClass
      *         the PageObject class representing the target page
      *
      * @return the PageObject representing the target page
      */
-    <T extends PageObject> T clickOnLink(final WebElement element, final Class<T> targetPageClass) {
-        return issuesTable.clickLinkOnSite(element, targetPageClass);
+    <T extends PageObject> T clickOnLink(final WebElement link, final Class<T> targetPageClass) {
+        return issuesTable.clickLinkOnSite(link, targetPageClass);
     }
 
     /**
@@ -139,24 +141,45 @@ public abstract class AbstractNonDetailsIssuesTableRow extends AbstractIssuesTab
     }
 
     /**
-     * Performs a click on a link which filters the WarningsResultDetailsPage.
+     * Performs a click on a link which filters the AnalysisResult.
      *
      * @param columnName
      *         the columnName holding the link
      *
-     * @return the representation of the filtered WarningsResultDetailsPage
+     * @return the representation of the filtered AnalysisResult
      */
-    private WarningsResultDetailsPage clickOnFilterLink(String columnName) {
+    private AnalysisResult clickOnFilterLink(String columnName) {
         return issuesTable.clickFilterLinkOnSite(findLink(getCell(columnName)));
     }
 
     /**
      * Performs a click on the priority link.
      *
-     * @return the representation of the filtered WarningsResultDetailsPage
+     * @return the representation of the filtered AnalysisResult
      */
-    public WarningsResultDetailsPage clickOnPriorityLink() {
+    public AnalysisResult clickOnPriorityLink() {
         return clickOnFilterLink(PRIORITY);
     }
 
+    protected WebElement getFileLink() {
+        return getCell(AbstractNonDetailsIssuesTableRow.FILE).findElement(By.tagName("a"));
+    }
+
+    /**
+     * Returns the line number of the duplicated code warning.
+     *
+     * @return the line number
+     */
+    public int getLineNumber() {
+        return Integer.parseInt(getCellContent(AbstractNonDetailsIssuesTableRow.FILE).split(FILE_LINE_SEPARATOR)[1]);
+    }
+
+    /**
+     * Returns the file name in which the duplicate code was detected in.
+     *
+     * @return the file name
+     */
+    public String getFileName() {
+        return getCellContent(AbstractNonDetailsIssuesTableRow.FILE).split(FILE_LINE_SEPARATOR)[0];
+    }
 }

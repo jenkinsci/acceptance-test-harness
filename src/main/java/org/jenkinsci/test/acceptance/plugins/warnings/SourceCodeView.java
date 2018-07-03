@@ -76,7 +76,7 @@ public class SourceCodeView extends AbstractStep {
      * For convenience reasons the page object returns a finished object where all operations, like data extraction of
      * the important parts of the page is already done. Important parts are e.g. HEADERS, file contents etc.
      *
-     * @return the prepared SourceCodeView object which is ready for a custom assertion
+     * @return the prepared SourceView object which is ready for a custom assertion
      */
     public SourceCodeView processSourceCodeData() {
 

@@ -11,10 +11,8 @@ import org.openqa.selenium.WebElement;
  * Class representing a duplicate code warnings issue table row in the issues table.
  */
 public class DryIssuesTableRow extends AbstractNonDetailsIssuesTableRow {
-    public static final String DUPLICATED_IN = "Duplicated In";
-    public static final String AMOUNT_OF_LINES = "#Lines";
-    
-    private static final String FILE_LINE_SEPARATOR = ":";
+    private static final String DUPLICATED_IN = "Duplicated In";
+    private static final String AMOUNT_OF_LINES = "#Lines";
 
     /**
      * Creates an instance representing a duplicate code warnings table row.
@@ -50,31 +48,13 @@ public class DryIssuesTableRow extends AbstractNonDetailsIssuesTableRow {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Returns the file name in which the duplicate code was detected in.
-     *
-     * @return the file name
-     */
-    public String getFile() {
-        return getCellContent(AbstractNonDetailsIssuesTableRow.FILE).split(FILE_LINE_SEPARATOR)[0];
-    }
-
-    /**
-     * Returns the line number of the duplicated code warning.
-     *
-     * @return the line number
-     */
-    public int getLineNumber() {
-        return Integer.parseInt(getCellContent(AbstractNonDetailsIssuesTableRow.FILE).split(FILE_LINE_SEPARATOR)[1]);
-    }
-
     @Override
     public boolean equals(final Object obj) {
         if (obj == null || obj.getClass() != getClass()) {
             return false;
         }
         DryIssuesTableRow that = (DryIssuesTableRow) obj;
-        return Objects.equals(that.getFile(), this.getFile()) && Objects.equals(that.getLineNumber(),
+        return Objects.equals(that.getFileName(), this.getFileName()) && Objects.equals(that.getLineNumber(),
                 this.getLineNumber()) && Objects.equals(that.getLines(), this.getLines());
     }
 
@@ -83,8 +63,8 @@ public class DryIssuesTableRow extends AbstractNonDetailsIssuesTableRow {
      *
      * @return the representation of the source code page.
      */
-    public SourceCodeView clickOnFileLink() {
-        return clickOnLink(getCell(AbstractNonDetailsIssuesTableRow.FILE).findElement(By.tagName("a")), SourceCodeView.class);
+    public SourceView clickOnFileLink() {
+        return clickOnLink(getFileLink(), SourceView.class);
     }
 
     /**
@@ -95,7 +75,7 @@ public class DryIssuesTableRow extends AbstractNonDetailsIssuesTableRow {
      *
      * @return the representation of the source code page.
      */
-    public SourceCodeView clickOnDuplicatedInLink(int number) {
-        return clickOnLink(findAllLinks(getCell(DUPLICATED_IN)).get(number), SourceCodeView.class);
+    public SourceView clickOnDuplicatedInLink(final int number) {
+        return clickOnLink(findAllLinks(getCell(DUPLICATED_IN)).get(number), SourceView.class);
     }
 }

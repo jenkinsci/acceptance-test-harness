@@ -8,9 +8,22 @@ import org.openqa.selenium.WebElement;
  *
  * @author Stephan Plöderl
  */
- // TODO: implement necessary methods for this table row type
 public class DefaultWarningsTableRow extends AbstractNonDetailsIssuesTableRow {
     DefaultWarningsTableRow(WebElement element, IssuesTable issuesTable) {
         super(element, issuesTable);
+    }
+
+    /**
+     * Opens the source code of the affected file.
+     */
+    public SourceView openFile() {
+        return clickOnLink(getFileLink(), SourceView.class);
+    }
+
+    /**
+     * Opens the source code of the affected file.
+     */
+    public ConsoleLogView openConsoleLog() {
+        return clickOnLink(getFileLink(), ConsoleLogView.class);
     }
 }

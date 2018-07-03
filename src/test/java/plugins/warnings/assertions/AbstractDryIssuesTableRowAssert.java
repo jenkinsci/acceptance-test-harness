@@ -209,7 +209,7 @@ public abstract class AbstractDryIssuesTableRowAssert<S extends AbstractDryIssue
     String assertjErrorMessage = "\nExpecting file of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
 
     // null safe check
-    String actualFile = actual.getFile();
+    String actualFile = actual.getFileName();
     if (!Objects.areEqual(actualFile, file)) {
       failWithMessage(assertjErrorMessage, actual, file, actualFile);
     }

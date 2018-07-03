@@ -1,23 +1,23 @@
 package plugins.warnings.assertions;
 
 import org.assertj.core.api.AbstractAssert;
-import org.jenkinsci.test.acceptance.po.MessageBox;
+import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.LogMessagesView;
 
-public class MessageBoxAssert extends AbstractAssert<MessageBoxAssert, MessageBox> {
+public class MessageBoxAssert extends AbstractAssert<MessageBoxAssert, LogMessagesView> {
 
-	public MessageBoxAssert(MessageBox actual) {
+	public MessageBoxAssert(LogMessagesView actual) {
 		super(actual, MessageBoxAssert.class);
 	}
 
-	public static MessageBoxAssert assertThat(MessageBox actual) {
+	public static MessageBoxAssert assertThat(LogMessagesView actual) {
 		return new MessageBoxAssert(actual);
 	}
 
 	public MessageBoxAssert hasErrorMessagesSize(int size) {
 		isNotNull();
 
-		if (actual.getErrorMsgContent().size() != size) {
-			failWithMessage("Expected size of error message box to be <%d> but was <%d>", size, actual.getErrorMsgContent().size());
+		if (actual.getErrorMessages().size() != size) {
+			failWithMessage("Expected size of error message box to be <%d> but was <%d>", size, actual.getErrorMessages().size());
 		}
 
 		return this;
@@ -26,8 +26,8 @@ public class MessageBoxAssert extends AbstractAssert<MessageBoxAssert, MessageBo
 	public MessageBoxAssert hasInfoMessagesSize(int size) {
 		isNotNull();
 
-		if (actual.getInfoMsgContent().size() != size) {
-			failWithMessage("Expected size of info message box to be <%d> but was <%d>", size, actual.getErrorMsgContent().size());
+		if (actual.getInfoMessages().size() != size) {
+			failWithMessage("Expected size of info message box to be <%d> but was <%d>", size, actual.getErrorMessages().size());
 		}
 
 		return this;
@@ -36,7 +36,7 @@ public class MessageBoxAssert extends AbstractAssert<MessageBoxAssert, MessageBo
 	public MessageBoxAssert containsErrorMessage(String errorMessage) {
 		isNotNull();
 
-		for (String message : actual.getErrorMsgContent()) {
+		for (String message : actual.getErrorMessages()) {
 			if (message.contains(errorMessage)) {
 				return this;
 			}
@@ -49,7 +49,7 @@ public class MessageBoxAssert extends AbstractAssert<MessageBoxAssert, MessageBo
 	public MessageBoxAssert containsInfoMessage(String infoMessage) {
 		isNotNull();
 
-		for (String message : actual.getInfoMsgContent()) {
+		for (String message : actual.getInfoMessages()) {
 			if (message.contains(infoMessage)) {
 				return this;
 			}
