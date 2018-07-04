@@ -7,6 +7,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.LinkedHashMap;
+import java.util.Map.Entry;
 import java.util.function.Consumer;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
@@ -16,6 +18,7 @@ import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.AbstractNonDetailsIssuesTableRow;
 import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.AnalysisResult;
 import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.AnalysisSummary;
+import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.AnalysisSummary.SummaryBoxPageArea;
 import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.ConsoleLogView;
 import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.DefaultWarningsTableRow;
 import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.DetailsTableRow;
@@ -25,7 +28,6 @@ import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.IssuesReco
 import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.IssuesTable;
 import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.LogMessagesView;
 import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.SourceView;
-import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.AnalysisSummary.SummaryBoxPageArea;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
@@ -70,6 +72,7 @@ public class WarningsPluginTest extends AbstractJUnitTest {
     private static final String PMD_ID = "pmd";
     private static final String FINDBUGS_ID = "findbugs";
     private static final String MAVEN_ID = "maven";
+    private static final String NO_PACKAGE = "-";
 
     /**
      * Verifies that clicking on the icon within the details column of the issues table, the row which shows the issues
@@ -436,6 +439,51 @@ public class WarningsPluginTest extends AbstractJUnitTest {
         assertThat(sourceView).hasHighlightedText(
                 "[WARNING] For this reason, future Maven versions might no longer support building such malformed projects."
                 + LINE_SEPARATOR + "[WARNING]");
+    }
+
+    /**
+     * Verifies that package and namespace names are resolved. 
+     */
+    @Test
+    public void should_resolve_packages_and_namespaces() {
+        MavenModuleSet job = createMavenProject();
+        job.copyDir(job.resource(SOURCE_VIEW_FOLDER));
+        configureJob(job, "Eclipse ECJ", "**/*Classes.txt");
+        job.save();
+
+        buildMavenJobWithExpectedFailureResult(job);
+
+        Build build = buildMavenJobWithExpectedFailureResult(job);
+        build.open();
+
+        AnalysisSummary analysisSummary = new AnalysisSummary(build);
+        assertThat(analysisSummary.getSummaryBoxByName("eclipse")).hasSummary();
+
+        AnalysisResult result = analysisSummary.getSummaryBoxByName("eclipse").clickTitleLink();
+        assertThat(result.getTrendChart()).hasOutstandingIssues(9);
+        assertThat(result.getPriorityChart()).hasNormalPriority(9);
+
+        IssuesTable issuesTable = result.openIssuesTable();
+
+        LinkedHashMap<String, String> filesToPackages = new LinkedHashMap<>();
+        filesToPackages.put("NOT_EXISTING_FILE", NO_PACKAGE);
+        filesToPackages.put("SampleClassWithBrokenPackageNaming.java", NO_PACKAGE);
+        filesToPackages.put("SampleClassWithNamespace.cs", "SampleClassWithNamespace");
+        filesToPackages.put("SampleClassWithNamespaceBetweenCode.cs", "NestedNamespace");
+        filesToPackages.put("SampleClassWithNestedAndNormalNamespace.cs", "SampleClassWithNestedAndNormalNamespace");
+        filesToPackages.put("SampleClassWithoutNamespace.cs", NO_PACKAGE);
+        filesToPackages.put("SampleClassWithoutPackage.java", NO_PACKAGE);
+        filesToPackages.put("SampleClassWithPackage.java", "edu.hm.hafner.analysis._123.int.naming.structure");
+        filesToPackages.put("SampleClassWithUnconventionalPackageNaming.java", NO_PACKAGE);
+
+        int row = 0;
+        for (Entry<String, String> fileToPackage : filesToPackages.entrySet()) {
+            DefaultWarningsTableRow tableRow = issuesTable.getRowAs(row, DefaultWarningsTableRow.class); // TODO: create custom assertions
+            assertThat(tableRow.getFileName()).as("File name in row %d", row).isEqualTo(fileToPackage.getKey());
+            assertThat(tableRow.getPackageName()).as("Package name in row %d", row).isEqualTo(fileToPackage.getValue());
+            
+            row++;
+        }
     }
 
     /**

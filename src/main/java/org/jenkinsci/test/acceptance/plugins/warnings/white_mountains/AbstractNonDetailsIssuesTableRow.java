@@ -162,24 +162,33 @@ public abstract class AbstractNonDetailsIssuesTableRow extends AbstractIssuesTab
     }
 
     protected WebElement getFileLink() {
-        return getCell(AbstractNonDetailsIssuesTableRow.FILE).findElement(By.tagName("a"));
+        return getCell(FILE).findElement(By.tagName("a"));
     }
 
     /**
-     * Returns the line number of the duplicated code warning.
+     * Returns the line number of the affected file.
      *
      * @return the line number
      */
     public int getLineNumber() {
-        return Integer.parseInt(getCellContent(AbstractNonDetailsIssuesTableRow.FILE).split(FILE_LINE_SEPARATOR)[1]);
+        return Integer.parseInt(getCellContent(FILE).split(FILE_LINE_SEPARATOR)[1]);
     }
 
     /**
-     * Returns the file name in which the duplicate code was detected in.
+     * Returns the file name of the affected file.
      *
      * @return the file name
      */
     public String getFileName() {
-        return getCellContent(AbstractNonDetailsIssuesTableRow.FILE).split(FILE_LINE_SEPARATOR)[0];
+        return getCellContent(FILE).split(FILE_LINE_SEPARATOR)[0];
+    }
+
+    /**
+     * Returns the package or namespace name of the affected file.
+     *
+     * @return the package or namespace name
+     */
+    public String getPackageName() {
+        return getCellContent("Package");
     }
 }
