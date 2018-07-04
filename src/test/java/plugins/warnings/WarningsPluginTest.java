@@ -31,6 +31,7 @@ import org.jenkinsci.test.acceptance.plugins.warnings.white_mountains.SourceView
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
+import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.junit.Test;
 
 import static plugins.warnings.assertions.Assertions.*;
@@ -183,7 +184,7 @@ public class WarningsPluginTest extends AbstractJUnitTest {
 
         job.save();
 
-        Build build = job.startBuild().waitUntilFinished();
+        Build build = buildJob(job);
 
         assertThat(build.getConsole()).contains(
                 "Applying 2 filters on the set of 4 issues (3 issues have been removed, 1 issues will be published)");
@@ -199,11 +200,11 @@ public class WarningsPluginTest extends AbstractJUnitTest {
         applyIssueRecorder(job);
         job.save();
 
-        job.startBuild().waitUntilFinished();
+        buildJob(job);
 
         reconfigureJobWithResource(job, "build_status_test/build_02");
 
-        Build build = job.startBuild().waitUntilFinished();
+        Build build = buildJob(job);
         build.open();
 
         AnalysisSummary analysisSummary = new AnalysisSummary(build);
@@ -255,7 +256,7 @@ public class WarningsPluginTest extends AbstractJUnitTest {
         recorder.setEnabledForAggregation(true);
         job.save();
 
-        Build referenceBuild = job.startBuild().waitUntilFinished();
+        Build referenceBuild = buildJob(job);
         referenceBuild.open();
 
         AnalysisSummary referenceSummary = new AnalysisSummary(referenceBuild);
@@ -265,7 +266,7 @@ public class WarningsPluginTest extends AbstractJUnitTest {
 
         reconfigureJobWithResource(job, "build_status_test/build_02");
 
-        Build build = job.startBuild().waitUntilFinished();
+        Build build = buildJob(job);
 
         build.open();
 
@@ -321,7 +322,7 @@ public class WarningsPluginTest extends AbstractJUnitTest {
         recorder.addQualityGateConfiguration(2);
         job.save();
 
-        Build build = job.startBuild().waitUntilFinished();
+        Build build = buildJob(job);
 
         build.open();
 
@@ -360,11 +361,11 @@ public class WarningsPluginTest extends AbstractJUnitTest {
         });
         job.save();
 
-        job.startBuild().waitUntilFinished();
+        buildJob(job);
 
         job.editPublisher(IssuesRecorder.class, recorder -> recorder.setTool("CheckStyle", "**/checkstyle2.xml"));
 
-        Build build = job.startBuild().waitUntilFinished();
+        Build build = buildJob(job);
         build.open();
 
         AnalysisResult page = openAnalysisResult(build, ANALYSIS_ID);
@@ -383,12 +384,20 @@ public class WarningsPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     * Runs a job that publishes checkstyle warnings. Verifies the content of the info and error log view.
+     * Runs a freestyle job and pipeline that publishes checkstyle warnings. Verifies the content of the info and error log view.
      */
     @Test
     public void should_show_info_and_error_messages() {
         Build build = createAndBuildFreeStyleJob("CheckStyle", CHECKSTYLE_XML);
 
+        verifyInfoAndErrorMessages(build);
+
+        buildJob(createPipeline(CHECKSTYLE_XML));
+
+        verifyInfoAndErrorMessages(build);
+    }
+
+    private void verifyInfoAndErrorMessages(final Build build) {
         LogMessagesView logMessagesView = new LogMessagesView(build, CHECKSTYLE_ID);
         logMessagesView.open();
 
@@ -416,7 +425,7 @@ public class WarningsPluginTest extends AbstractJUnitTest {
         configureJob(job, "Maven", "");
         job.save();
 
-        Build build = buildMavenJobWithExpectedFailureResult(job);
+        Build build = buildFailingJob(job);
         build.open();
 
         AnalysisSummary analysisSummary = new AnalysisSummary(build);
@@ -451,7 +460,7 @@ public class WarningsPluginTest extends AbstractJUnitTest {
         configureJob(job, "Eclipse ECJ", "**/*Classes.txt");
         job.save();
 
-        Build build = buildMavenJobWithExpectedFailureResult(job);
+        Build build = buildFailingJob(job);
         build.open();
 
         AnalysisSummary analysisSummary = new AnalysisSummary(build);
@@ -495,6 +504,17 @@ public class WarningsPluginTest extends AbstractJUnitTest {
         }
     }
 
+    private WorkflowJob createPipeline(final String resourceToCopy) {
+        WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
+        String resource = job.copyResourceStep(WARNINGS_PLUGIN_PREFIX + resourceToCopy);
+        job.script.set("node {\n" + resource.replace("\\", "\\\\") 
+                + "recordIssues enabledForFailure: true, tools: [[pattern: '', tool: [$class: 'CheckStyle']]]" 
+                + "}");
+        job.sandbox.check();
+        job.save();
+        return job;
+    }
+
     /**
      * Creates and builds a FreestyleJob for a specific static analysis tool.
      *
@@ -511,7 +531,7 @@ public class WarningsPluginTest extends AbstractJUnitTest {
             final String... resourcesToCopy) {
         FreeStyleJob job = createFreeStyleJob(toolName, configuration, resourcesToCopy);
 
-        return job.startBuild().waitUntilFinished();
+        return buildJob(job);
     }
 
     /**
@@ -586,8 +606,12 @@ public class WarningsPluginTest extends AbstractJUnitTest {
         recorder.setEnabledForFailure(true);
     }
 
-    private Build buildMavenJobWithExpectedFailureResult(final MavenModuleSet job) {
-        return job.startBuild().waitUntilFinished().shouldFail();
+    private Build buildFailingJob(final Job job) {
+        return buildJob(job).shouldFail();
+    }
+
+    private Build buildJob(final Job job) {
+        return job.startBuild().waitUntilFinished();
     }
 
     private void copyResourceFilesToWorkspace(final Job job, final String... resources) {
