@@ -3,6 +3,7 @@ package org.jenkinsci.test.acceptance.plugins.warnings.white_mountains;
 import java.net.URL;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -65,6 +66,10 @@ public class SourceView extends PageObject {
         for (WebElement webElement : code) {
             sourceCode.append(webElement.getText());
         }
-        return sourceCode.toString();
+        String text = sourceCode.toString();
+        if (StringUtils.isBlank(text)) { // fallback if no source code has been found
+            return find(by.xpath("//*[@id=\"main-panel\"]")).getText();
+        }
+        return text;
     }
 }

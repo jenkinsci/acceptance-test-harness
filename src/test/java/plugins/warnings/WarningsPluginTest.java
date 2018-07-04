@@ -199,7 +199,7 @@ public class WarningsPluginTest extends AbstractJUnitTest {
         applyIssueRecorder(job);
         job.save();
 
-        Build referenceBuild = job.startBuild().waitUntilFinished();
+        job.startBuild().waitUntilFinished();
 
         reconfigureJobWithResource(job, "build_status_test/build_02");
 
@@ -451,8 +451,6 @@ public class WarningsPluginTest extends AbstractJUnitTest {
         configureJob(job, "Eclipse ECJ", "**/*Classes.txt");
         job.save();
 
-        buildMavenJobWithExpectedFailureResult(job);
-
         Build build = buildMavenJobWithExpectedFailureResult(job);
         build.open();
 
@@ -463,7 +461,6 @@ public class WarningsPluginTest extends AbstractJUnitTest {
         assertThat(result.getTrendChart()).hasOutstandingIssues(9);
         assertThat(result.getPriorityChart()).hasNormalPriority(9);
 
-        IssuesTable issuesTable = result.openIssuesTable();
 
         LinkedHashMap<String, String> filesToPackages = new LinkedHashMap<>();
         filesToPackages.put("NOT_EXISTING_FILE", NO_PACKAGE);
@@ -478,10 +475,22 @@ public class WarningsPluginTest extends AbstractJUnitTest {
 
         int row = 0;
         for (Entry<String, String> fileToPackage : filesToPackages.entrySet()) {
+            IssuesTable issuesTable = result.openIssuesTable();
             DefaultWarningsTableRow tableRow = issuesTable.getRowAs(row, DefaultWarningsTableRow.class); // TODO: create custom assertions
-            assertThat(tableRow.getFileName()).as("File name in row %d", row).isEqualTo(fileToPackage.getKey());
+            String actualFileName = fileToPackage.getKey();
+            assertThat(tableRow.getFileName()).as("File name in row %d", row).isEqualTo(actualFileName);
             assertThat(tableRow.getPackageName()).as("Package name in row %d", row).isEqualTo(fileToPackage.getValue());
-            
+            SourceView sourceView = tableRow.openFile();
+            assertThat(sourceView).hasFileName(actualFileName);
+            if (row == 0) {
+                assertThat(sourceView).hasSourceCode("Content of file NOT_EXISTING_FILE" + LINE_SEPARATOR
+                        + "Can't read file: java.io.FileNotFoundException: " 
+                        + "/NOT/EXISTING/PATH/TO/NOT_EXISTING_FILE (No such file or directory)");
+            }
+            else {
+                String expectedSourceCode = toString(SOURCE_VIEW_FOLDER + actualFileName);
+                assertThat(sourceView).hasSourceCode(expectedSourceCode);
+            }
             row++;
         }
     }
