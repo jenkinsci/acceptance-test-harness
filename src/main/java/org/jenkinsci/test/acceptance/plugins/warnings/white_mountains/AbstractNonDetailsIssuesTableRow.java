@@ -10,6 +10,8 @@ import org.openqa.selenium.WebElement;
  * Abstract representation of a table row displaying an issue.
  *
  * @author Stephan Plöderl
+ * @author Anna-Maria Hardi
+ * @author Elvira Hauer
  */
 public abstract class AbstractNonDetailsIssuesTableRow extends AbstractIssuesTableRow {
     private static final String PRIORITY = "Priority";
@@ -191,4 +193,23 @@ public abstract class AbstractNonDetailsIssuesTableRow extends AbstractIssuesTab
     public String getPackageName() {
         return getCellContent("Package");
     }
+
+    /**
+     * Returns the category of the issue.
+     *
+     * @return the category name
+     */
+    public String getCategoryName() {
+        return getCellContent("Category");
+    }
+
+    /**
+     * Returns the type of the issue.
+     *
+     * @return the type of the issue
+     */
+    public String getTypeName() {
+        return getCellContent("Type");
+    }
+
 }

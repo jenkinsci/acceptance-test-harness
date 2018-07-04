@@ -345,13 +345,14 @@ public class WarningsPluginTest extends AbstractJUnitTest {
         recorder.setEnabledForFailure(true);
         return recorder;
     }
-    
+
     /**
      * Starts two builds with different configurations and checks the values of the new, fixed and outstanding issues of
-     * the trend chart.
+     * the trend chart as well as the low, normal and high priorities of the priority chart.
+     * Check the entries of the issues table.
      */
     @Test
-    public void should_log_values_in_trend_chart() {
+    public void should_log_values_in_trend_and_priority_chart() {
         FreeStyleJob job = createFreeStyleJob("aggregation/checkstyle1.xml", "aggregation/checkstyle2.xml",
                 "aggregation/pmd.xml");
         job.addPublisher(IssuesRecorder.class, recorder -> {
@@ -373,14 +374,22 @@ public class WarningsPluginTest extends AbstractJUnitTest {
         assertThat(page.getTrendChart())
                 .hasNewIssues(3)
                 .hasFixedIssues(2)
-                .hasOutstandingIssues(5);
+                .hasOutstandingIssues(4);
 
         assertThat(page.getPriorityChart())
-                .hasLowPriority(1)
-                .hasNormalPriority(2)
-                .hasHighPriority(5);
+                .hasLowPriority(0)
+                .hasNormalPriority(3)
+                .hasHighPriority(4);
 
-        assertThat(page.openIssuesTable()).hasSize(8);
+        IssuesTable issuesTable = page.openIssuesTable();
+        assertThat(issuesTable).hasSize(7);
+        DefaultWarningsTableRow tableRow = issuesTable.getRowAs(0, DefaultWarningsTableRow.class);
+        assertThat(tableRow.getFileName()).isEqualTo("AjcParser.java");
+        assertThat(tableRow.getPackageName()).isEqualTo("edu.hm.hafner.analysis.parser");
+        assertThat(tableRow.getCategoryName()).isEqualTo("Design");
+        assertThat(tableRow.getTypeName()).isEqualTo("CyclomaticComplexity");
+        assertThat(tableRow.getPriority()).isEqualTo("Normal");
+        assertThat(tableRow.getAge()).isEqualTo(3);
     }
 
     /**
@@ -447,11 +456,11 @@ public class WarningsPluginTest extends AbstractJUnitTest {
         assertThat(sourceView).hasTitle("Console Details");
         assertThat(sourceView).hasHighlightedText(
                 "[WARNING] For this reason, future Maven versions might no longer support building such malformed projects."
-                + LINE_SEPARATOR + "[WARNING]");
+                        + LINE_SEPARATOR + "[WARNING]");
     }
 
     /**
-     * Verifies that package and namespace names are resolved. 
+     * Verifies that package and namespace names are resolved.
      */
     @Test
     public void should_resolve_packages_and_namespaces() {
@@ -493,7 +502,7 @@ public class WarningsPluginTest extends AbstractJUnitTest {
             assertThat(sourceView).hasFileName(actualFileName);
             if (row == 0) {
                 assertThat(sourceView).hasSourceCode("Content of file NOT_EXISTING_FILE" + LINE_SEPARATOR
-                        + "Can't read file: java.io.FileNotFoundException: " 
+                        + "Can't read file: java.io.FileNotFoundException: "
                         + "/NOT/EXISTING/PATH/TO/NOT_EXISTING_FILE (No such file or directory)");
             }
             else {
@@ -507,8 +516,8 @@ public class WarningsPluginTest extends AbstractJUnitTest {
     private WorkflowJob createPipeline(final String resourceToCopy) {
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
         String resource = job.copyResourceStep(WARNINGS_PLUGIN_PREFIX + resourceToCopy);
-        job.script.set("node {\n" + resource.replace("\\", "\\\\") 
-                + "recordIssues enabledForFailure: true, tools: [[pattern: '', tool: [$class: 'CheckStyle']]]" 
+        job.script.set("node {\n" + resource.replace("\\", "\\\\")
+                + "recordIssues enabledForFailure: true, tools: [[pattern: '', tool: [$class: 'CheckStyle']]]"
                 + "}");
         job.sandbox.check();
         job.save();
