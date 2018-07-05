@@ -385,10 +385,11 @@ public class WarningsPluginTest extends AbstractJUnitTest {
         assertThat(issuesTable).hasSize(8);
         
         DefaultWarningsTableRow tableRow = issuesTable.getRowAs(0, DefaultWarningsTableRow.class);
-        assertThat(tableRow.getFileName()).isEqualTo("AjcParser.java");
-        assertThat(tableRow.getPackageName()).isEqualTo("edu.hm.hafner.analysis.parser");
-        assertThat(tableRow.getCategoryName()).isEqualTo("Design");
-        assertThat(tableRow.getTypeName()).isEqualTo("CyclomaticComplexity");
+        assertThat(tableRow.getFileName()).isEqualTo("ChangeSelectionAction.java");
+        assertThat(tableRow.getLineNumber()).isEqualTo(14);
+        assertThat(tableRow.getPackageName()).isEqualTo("com.avaloq.adt.env.internal.ui.actions.change");
+        assertThat(tableRow.getCategoryName()).isEqualTo("Import Statement Rules");
+        assertThat(tableRow.getTypeName()).isEqualTo("UnusedImports");
         assertThat(tableRow.getPriority()).isEqualTo("Normal");
         assertThat(tableRow.getAge()).isEqualTo(3);
     }
