@@ -35,6 +35,9 @@ public class IOUtil {
 
     private final static ElasticTime time = new ElasticTime();
 
+    private static int connectTimeoutInMs = 10_000;
+    private static int readTimeoutInMs = 10_000;
+
     /**
      * Get First existing file or directory.
      * @param directory true if looking for file.
@@ -57,11 +60,25 @@ public class IOUtil {
      * Open URL connection with sanity timeout.
      */
     public static HttpURLConnection openConnection(@Nonnull URL url) throws IOException {
-        int timeout = (int) time.milliseconds(10000);
-
         HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
-        httpURLConnection.setConnectTimeout(timeout);
-        httpURLConnection.setReadTimeout(timeout);
+        httpURLConnection.setConnectTimeout((int)time.milliseconds(connectTimeoutInMs));
+        httpURLConnection.setReadTimeout((int)time.milliseconds(readTimeoutInMs));
         return httpURLConnection;
+    }
+
+    /**
+     * Sets the connect timeout for connections made through this class
+     * @param timeoutInMs the timeout in milliseconds
+     */
+    public static void setConnectTimeout(int timeoutInMs) {
+        connectTimeoutInMs = timeoutInMs;
+    }
+
+    /**
+     * Sets the read timeout for connections made through this class
+     * @param timeoutInMs the timeout in milliseconds
+     */
+    public static void setReadTimeout(int timeoutInMs) {
+        readTimeoutInMs = timeoutInMs;
     }
 }
