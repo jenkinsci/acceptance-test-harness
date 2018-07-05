@@ -374,15 +374,16 @@ public class WarningsPluginTest extends AbstractJUnitTest {
         assertThat(page.getTrendChart())
                 .hasNewIssues(3)
                 .hasFixedIssues(2)
-                .hasOutstandingIssues(4);
+                .hasOutstandingIssues(5);
 
         assertThat(page.getPriorityChart())
-                .hasLowPriority(0)
-                .hasNormalPriority(3)
-                .hasHighPriority(4);
+                .hasLowPriority(1)
+                .hasNormalPriority(2)
+                .hasHighPriority(5);
 
         IssuesTable issuesTable = page.openIssuesTable();
-        assertThat(issuesTable).hasSize(7);
+        assertThat(issuesTable).hasSize(8);
+        
         DefaultWarningsTableRow tableRow = issuesTable.getRowAs(0, DefaultWarningsTableRow.class);
         assertThat(tableRow.getFileName()).isEqualTo("AjcParser.java");
         assertThat(tableRow.getPackageName()).isEqualTo("edu.hm.hafner.analysis.parser");

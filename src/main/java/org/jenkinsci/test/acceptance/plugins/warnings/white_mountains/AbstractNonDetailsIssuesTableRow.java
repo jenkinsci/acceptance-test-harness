@@ -19,7 +19,8 @@ public abstract class AbstractNonDetailsIssuesTableRow extends AbstractIssuesTab
     private static final String AGE = "Age";
     private static final String FILE = "File";
     private static final String FILE_LINE_SEPARATOR = ":";
-    
+    private static final By A_TAG = By.tagName("a");
+
     private final WebElement element;
     private final IssuesTable issuesTable;
 
@@ -127,7 +128,8 @@ public abstract class AbstractNonDetailsIssuesTableRow extends AbstractIssuesTab
      * @return the WebElement representing the link
      */
     private WebElement findLink(final WebElement element) {
-        return element.findElement(By.tagName("a"));
+        return element.findElement(A_TAG);
+        
     }
 
     /**
@@ -139,7 +141,7 @@ public abstract class AbstractNonDetailsIssuesTableRow extends AbstractIssuesTab
      * @return a List of the WebElements representing links
      */
     List<WebElement> findAllLinks(final WebElement element) {
-        return element.findElements(By.tagName("a"));
+        return element.findElements(A_TAG);
     }
 
     /**
@@ -150,7 +152,7 @@ public abstract class AbstractNonDetailsIssuesTableRow extends AbstractIssuesTab
      *
      * @return the representation of the filtered AnalysisResult
      */
-    private AnalysisResult clickOnFilterLink(String columnName) {
+    private AnalysisResult clickOnFilterLink(final String columnName) {
         return issuesTable.clickFilterLinkOnSite(findLink(getCell(columnName)));
     }
 
@@ -193,23 +195,4 @@ public abstract class AbstractNonDetailsIssuesTableRow extends AbstractIssuesTab
     public String getPackageName() {
         return getCellContent("Package");
     }
-
-    /**
-     * Returns the category of the issue.
-     *
-     * @return the category name
-     */
-    public String getCategoryName() {
-        return getCellContent("Category");
-    }
-
-    /**
-     * Returns the type of the issue.
-     *
-     * @return the type of the issue
-     */
-    public String getTypeName() {
-        return getCellContent("Type");
-    }
-
 }

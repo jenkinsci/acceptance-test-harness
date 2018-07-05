@@ -26,4 +26,22 @@ public class DefaultWarningsTableRow extends AbstractNonDetailsIssuesTableRow {
     public ConsoleLogView openConsoleLog() {
         return clickOnLink(getFileLink(), ConsoleLogView.class);
     }
+
+    /**
+     * Returns the category of the issue.
+     *
+     * @return the category name
+     */
+    public String getCategoryName() {
+        return getCellContent("Category");
+    }
+
+    /**
+     * Returns the type of the issue.
+     *
+     * @return the type of the issue
+     */
+    public String getTypeName() {
+        return getCellContent("Type");
+    }
 }
