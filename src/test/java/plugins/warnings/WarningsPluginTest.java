@@ -76,6 +76,38 @@ public class WarningsPluginTest extends AbstractJUnitTest {
     private static final String NO_PACKAGE = "-";
 
     /**
+     * Runs a pipeline job with checkstyle and pmd. Verifies the expansion of tokens with the token-macro plugin.
+     */
+    @Test @WithPlugins("token-macro")
+    public void should_expand_token() {
+        WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
+        String checkstyle = job.copyResourceStep(WARNINGS_PLUGIN_PREFIX + "aggregation/checkstyle1.xml");
+        String pmd = job.copyResourceStep(WARNINGS_PLUGIN_PREFIX + "aggregation/pmd.xml");
+        job.script.set("node {\n" 
+                + checkstyle.replace("\\", "\\\\")
+                + pmd.replace("\\", "\\\\")
+                + "recordIssues tools: [[pattern: '**/checkstyle*', tool: [$class: 'CheckStyle']]]\n"
+                + "recordIssues tools: [[pattern: '**/pmd*', tool: [$class: 'Pmd']]]\n"
+                + "def total = tm('${ANALYSIS_ISSUES_COUNT}')\n"
+                + "echo '[total=' + total + ']' \n"
+                + "def checkstyle = tm('${ANALYSIS_ISSUES_COUNT, tool=\"checkstyle\"}')\n"
+                + "echo '[checkstyle=' + checkstyle + ']' \n"
+                + "def pmd = tm('${ANALYSIS_ISSUES_COUNT, tool=\"pmd\"}')\n"
+                + "echo '[pmd=' + pmd + ']' \n"
+                + "}");
+        job.sandbox.check();
+        job.save();
+        WorkflowJob pipeline = job;
+        buildJob(pipeline);
+
+        Build build = buildJob(job);
+
+        assertThat(build.getConsole()).contains("[total=7]");
+        assertThat(build.getConsole()).contains("[checkstyle=3]");
+        assertThat(build.getConsole()).contains("[pmd=4]");
+    }
+
+    /**
      * Verifies that clicking on the icon within the details column of the issues table, the row which shows the issues
      * details will be displayed or hidden.
      */
@@ -391,7 +423,7 @@ public class WarningsPluginTest extends AbstractJUnitTest {
         assertThat(tableRow.getCategoryName()).isEqualTo("Import Statement Rules");
         assertThat(tableRow.getTypeName()).isEqualTo("UnusedImports");
         assertThat(tableRow.getPriority()).isEqualTo("Normal");
-        assertThat(tableRow.getAge()).isEqualTo(3);
+        assertThat(tableRow.getAge()).isEqualTo(2);
     }
 
     /**
