@@ -110,12 +110,13 @@ public class KerberosContainer extends DynamicDockerContainer {
                 throw new Error(e);
             }
 
+
             krb5Conf = new File(targetDir, "krb5.conf");
             try (FileWriter fw = new FileWriter(krb5Conf)) {
                 fw.write(resource("src/etc.krb5.conf").asText()
                         .replaceAll("__KDC_PORT__", String.valueOf(88))
                         .replaceAll("__ADMIN_PORT__", String.valueOf(749))
-                        .replaceAll("_ADDRESS_", inspect().get("NetworkSettings").get("Networks").get("IPAddress").textValue())
+                        .replaceAll("_ADDRESS_", inspect().get("NetworkSettings").get("Networks").findValue("IPAddress").asText())
                 );
             } catch (IOException e) {
                 throw new Error(e);
