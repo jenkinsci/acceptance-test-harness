@@ -69,17 +69,6 @@ public class KerberosContainer extends DynamicDockerContainer {
         }
     }
 
-    public String getIpAddress(){
-        String address = null;
-        try {
-            address = Docker.cmd(new String[]{"inspect"}).add(getCid()).popen().asText();
-            address = address.split("IPAddress")[2].split(":")[1].split(",",2)[0].trim().replaceAll("\"", "").replaceAll(",","");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return address;
-    }
-
     private File targetDir = null;
     private File loginConf = null;
     private File krb5Conf = null;
@@ -126,7 +115,7 @@ public class KerberosContainer extends DynamicDockerContainer {
                 fw.write(resource("src/etc.krb5.conf").asText()
                         .replaceAll("__KDC_PORT__", String.valueOf(88))
                         .replaceAll("__ADMIN_PORT__", String.valueOf(749))
-                        .replaceAll("_ADDRESS_", getIpAddress())
+                        .replaceAll("_ADDRESS_", inspect().get("IPAddress").textValue())
                 );
             } catch (IOException e) {
                 throw new Error(e);
@@ -146,7 +135,7 @@ public class KerberosContainer extends DynamicDockerContainer {
             ProcessBuilder builder = new ProcessBuilder();
             builder.command("base64", "-d", "/tmp/coded").redirectOutput(new File(to)).start().waitFor();
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new Error(e);
         }
     }
 
