@@ -1,7 +1,6 @@
 package org.jenkinsci.test.acceptance.po;
 
 import org.junit.Assert;
-import org.openqa.selenium.By;
 
 import static org.jenkinsci.test.acceptance.Matchers.hasInvalidLoginInformation;
 import static org.jenkinsci.test.acceptance.Matchers.loggedInAs;
@@ -13,9 +12,9 @@ import static org.jenkinsci.test.acceptance.Matchers.loggedInAs;
  */
 public class Login extends PageObject {
 
-    private Control cUser = control(By.name("j_username"));
-    private Control cPassword = control(By.name("j_password"));
-    private Control cLogin = control(By.name("Submit"));
+    private Control cUser = control(by.name("j_username"));
+    private Control cPassword = control(by.name("j_password"));
+    private Control cLogin = control(by.name("Submit"));
 
     public Login(Jenkins jenkins) {
         super(jenkins.injector, jenkins.url("login"));
