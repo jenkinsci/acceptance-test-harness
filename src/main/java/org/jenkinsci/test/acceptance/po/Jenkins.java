@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.utils.IOUtil;
 import org.openqa.selenium.NoSuchElementException;
@@ -35,7 +36,7 @@ public class Jenkins extends Node implements Container {
 
     private Jenkins(Injector injector, URL url) {
         super(injector,url);
-        getVersion();
+        waitForStarted();
         jobs = new JobsMixIn(this);
         views = new ViewsMixIn(this);
         slaves = new SlavesMixIn(this);
@@ -63,8 +64,10 @@ public class Jenkins extends Node implements Container {
      * Get the version of Jenkins under test.
      */
     public VersionNumber getVersion() {
-        if (version!=null)      return  version;
+        return ObjectUtils.defaultIfNull(version, getVersionNumber());
+    }
 
+    private VersionNumber getVersionNumber() {
         String text;
         try {
             URLConnection urlConnection = IOUtil.openConnection(url);
@@ -86,7 +89,16 @@ public class Jenkins extends Node implements Container {
 
         return version = new VersionNumber(text);
     }
-    
+
+    /**
+     * Wait for Jenkins to become up and running
+     */
+    public void waitForStarted() {
+        waitFor().withTimeout(1, TimeUnit.MINUTES)
+                 .ignoring(AssertionError.class)
+                 .until(() -> getVersionNumber() != null);
+    }
+
     /**
      * Tells if Jenkins version under test is 1.X
      */
