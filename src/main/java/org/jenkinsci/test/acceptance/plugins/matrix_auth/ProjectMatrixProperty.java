@@ -3,6 +3,11 @@ package org.jenkinsci.test.acceptance.plugins.matrix_auth;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
+import org.openqa.selenium.Alert;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -10,7 +15,7 @@ import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 public class ProjectMatrixProperty extends PageAreaImpl {
     public final Control enable = control("useProjectSecurity");
 
-    public final Control name = control(/* 2.x */"useProjectSecurity/[1]", /* 1.x */"useProjectSecurity/");
+    public final Control name = control(/* 2.x */"useProjectSecurity/[1]/data", /* 1.x */"useProjectSecurity/data");
 
     public ProjectMatrixProperty(Job job) {
         super(job, "/properties/hudson-security-AuthorizationMatrixProperty");
@@ -20,8 +25,11 @@ public class ProjectMatrixProperty extends PageAreaImpl {
      * Adds a new user/group to this matrix.
      */
     public MatrixRow addUser(String name) {
-        this.name.set(name);
-        this.name.resolve().findElement(by.parent()).findElement(by.button("Add")).click();
+        this.name.resolve().findElement(by.parent()).findElement(by.button("Add user or group…")).click();
+        WebDriverWait wait = new WebDriverWait(driver, 10);
+        Alert promptAlert = wait.until(ExpectedConditions.alertIsPresent());
+        promptAlert.sendKeys(name);
+        promptAlert.accept();
         return getUser(name);
     }
 
