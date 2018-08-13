@@ -27,6 +27,7 @@ import static org.jenkinsci.test.acceptance.Matchers.loggedInAs;
 
 import java.io.IOException;
 
+import hudson.util.VersionNumber;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Since;
@@ -71,6 +72,9 @@ public class InstallWizardTest extends AbstractJUnitTest {
 
         createAdmin.createAdminUser(USERNAME, PASSWORD, FULL_NAME, EMAIL);
         createAdmin.shouldCreateTheUserSuccessfully();
+        if(jenkins.getVersion().isNewerThan(new VersionNumber("2.118"))) {
+            createAdmin.confirmURLSettings();
+        }
         createAdmin.wizardShouldFinishSuccessfully();
 
         // Check that the new user is logged in
@@ -103,6 +107,9 @@ public class InstallWizardTest extends AbstractJUnitTest {
 
         createAdmin.createAdminUser(USERNAME, PASSWORD, FULL_NAME, EMAIL);
         createAdmin.shouldCreateTheUserSuccessfully();
+        if(jenkins.getVersion().isNewerThan(new VersionNumber("2.118"))) {
+            createAdmin.confirmURLSettings();
+        }
         createAdmin.wizardShouldFinishSuccessfully();
 
         // Check that the new user is logged in

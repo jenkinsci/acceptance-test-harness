@@ -28,6 +28,7 @@ import org.jenkinsci.test.acceptance.po.ListView;
 import org.jenkinsci.test.acceptance.po.PluginManager;
 import org.jenkinsci.test.acceptance.po.View;
 import org.jenkinsci.test.acceptance.update_center.PluginSpec;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -501,6 +502,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
      * If the function is used, the build will be marked as unstable.
      */
     @Test @WithPlugins("config-file-provider")
+    @Ignore //customConfigFile  has been removed since job-dsl-1.66
     public void should_unstable_on_deprecated_features() {
         FreeStyleJob seedJob = createSeedJob();
         JobDslBuildStep jobDsl = seedJob.addBuildStep(JobDslBuildStep.class);

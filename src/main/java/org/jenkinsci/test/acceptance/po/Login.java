@@ -12,9 +12,9 @@ import static org.jenkinsci.test.acceptance.Matchers.loggedInAs;
  */
 public class Login extends PageObject {
 
-    private Control cUser = control("/j_username");
-    private Control cPassword = control("/j_password");
-    private Control cLogin = control("/Submit");
+    private Control cUser = control(by.name("j_username"));
+    private Control cPassword = control(by.name("j_password"));
+    private Control cLogin = control(by.name("Submit"));
 
     public Login(Jenkins jenkins) {
         super(jenkins.injector, jenkins.url("login"));
@@ -40,7 +40,7 @@ public class Login extends PageObject {
     public Login doLoginDespiteNoPaths(String user, String password){
         driver.findElement(by.name("j_username")).sendKeys(user);
         driver.findElement(by.name("j_password")).sendKeys(password);
-        clickButton("log in");
+        driver.findElement(by.name("Submit")).click();
         return this;
     }
 

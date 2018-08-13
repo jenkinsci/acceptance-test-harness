@@ -23,8 +23,8 @@
  */
 package org.jenkinsci.test.acceptance.po;
 
-import hudson.util.VersionNumber;
 import org.openqa.selenium.NoSuchElementException;
+import hudson.util.VersionNumber;
 
 @Describable({"Jenkins’ own user database", "Jenkins’s own user database"})
 public class JenkinsDatabaseSecurityRealm extends SecurityRealm {
@@ -59,7 +59,7 @@ public class JenkinsDatabaseSecurityRealm extends SecurityRealm {
 
         public Signup password(String pwd) {
             control(by.input("password1")).set(pwd);
-            if(getJenkins().getVersion().isOlderThan(new VersionNumber("2.128"))) {
+            if (getContext().getJenkins().getVersion().isOlderThan(new VersionNumber("2.128"))) {
                 control(by.input("password2")).set(pwd);
             }
             return this;
@@ -81,12 +81,7 @@ public class JenkinsDatabaseSecurityRealm extends SecurityRealm {
 
         public User signup(String name) {
             control(by.input("username")).set(name);
-            if(getJenkins().getVersion().isOlderThan(new VersionNumber("2.128"))){
-                clickButton("Sign up");
-            }
-            else {
-                clickButton("Create account");
-            }
+            control(by.name("Submit")).click();
 
             return new User(getJenkins(), name);
         }

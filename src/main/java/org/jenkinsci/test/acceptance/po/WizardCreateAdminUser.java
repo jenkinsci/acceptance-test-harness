@@ -72,6 +72,13 @@ public class WizardCreateAdminUser extends PageObject {
         waitFor(hasContent("Jenkins is ready!"));
     }
 
+    public void confirmURLSettings(){
+        By confirmJenkinsUrl = by.css(".btn-primary.save-configure-instance");
+        waitFor(confirmJenkinsUrl,2);
+        Control control = control(confirmJenkinsUrl);
+        control.click();
+    }
+
     public void wizardShouldFinishSuccessfully() {
         By installDoneButtonSelector = by.css(".btn-primary.install-done");
         waitFor(installDoneButtonSelector);
