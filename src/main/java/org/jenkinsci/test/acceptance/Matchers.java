@@ -23,6 +23,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import hudson.util.VersionNumber;
 
 /**
  * Hamcrest matchers.
@@ -238,8 +239,11 @@ public class Matchers {
         return new Matcher<Login>("has invalid login information message") {
             @Override
             public boolean matchesSafely(final Login login) {
+                String invalidLoginMessage = login.getJenkins().getVersion().isOlderThan(new VersionNumber("2.128"))
+                                             ? "Invalid login information. Please try again."
+                                             : "Invalid username or password";
                 try {
-                    login.find(by.xpath("//div[contains(text(), 'Invalid login information. Please try again.')]"));
+                    login.find(by.xpath("//div[contains(text(), '%s')]", invalidLoginMessage));
                     return true;
                 } catch (NoSuchElementException e) {
                     return false;
