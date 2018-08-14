@@ -35,7 +35,7 @@ import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
 import org.junit.Before;
 import org.junit.Test;
 
-@WithPlugins({"script-security", "mock-security-realm", "matrix-auth", "groovy-postbuild"})
+@WithPlugins({"script-security", "mock-security-realm", "matrix-auth@2.3", "groovy-postbuild"})
 public class ScriptSecurityPluginTest extends AbstractJUnitTest {
     /** Admin user. */
     private static final String ADMIN = "admin";

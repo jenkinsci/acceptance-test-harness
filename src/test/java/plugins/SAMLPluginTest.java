@@ -39,7 +39,7 @@ public class SAMLPluginTest extends AbstractJUnitTest {
     private static final String SERVICE_PROVIDER_ID = "jenkins-dev";
 
     @Test @WithDocker
-    @WithPlugins({"saml", "matrix-auth"})
+    @WithPlugins({"saml", "matrix-auth@2.3"})
     public void authenticationOK() throws IOException, InterruptedException {
         jenkins.open(); // navigate to root
         String rootUrl = jenkins.getCurrentUrl();
@@ -62,7 +62,7 @@ public class SAMLPluginTest extends AbstractJUnitTest {
     }
 
     @Test @WithDocker
-    @WithPlugins({"saml", "matrix-auth"})
+    @WithPlugins({"saml", "matrix-auth@2.3"})
     public void authenticationOKFromURL() throws IOException, InterruptedException {
         jenkins.open(); // navigate to root
         String rootUrl = jenkins.getCurrentUrl();
@@ -85,7 +85,7 @@ public class SAMLPluginTest extends AbstractJUnitTest {
     }
 
     @Test @WithDocker
-    @WithPlugins({"saml", "matrix-auth"})
+    @WithPlugins({"saml", "matrix-auth@2.3"})
     public void authenticationOKPostBinding() throws IOException, InterruptedException {
         jenkins.open(); // navigate to root
         String rootUrl = jenkins.getCurrentUrl();
@@ -109,7 +109,7 @@ public class SAMLPluginTest extends AbstractJUnitTest {
     }
 
     @Test @WithDocker
-    @WithPlugins({"saml", "matrix-auth"})
+    @WithPlugins({"saml", "matrix-auth@2.3"})
     public void authenticationFail() throws IOException, InterruptedException {
         jenkins.open(); // navigate to root
         String rootUrl = jenkins.getCurrentUrl();
