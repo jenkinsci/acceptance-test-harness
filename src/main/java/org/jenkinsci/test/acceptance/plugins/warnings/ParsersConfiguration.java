@@ -36,6 +36,7 @@ public class ParsersConfiguration extends PageAreaImpl {
     }
 
     public void add(final String name, final String script) {
+        control("/advanced-button").resolve().click();
         String path = createPageArea(PARSERS, () -> parsers.click());
         GroovyParser parser = new GroovyParser(getPage(), path);
         parser.setScript(name, script);
