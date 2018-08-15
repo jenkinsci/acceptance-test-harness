@@ -288,6 +288,7 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
         }
 
         j.save();
+        j.startBuild().shouldSucceed();
         assertThat(dock, fileExists("/tmp/odes.txt"));
         assertThat(dock, fileExists("/tmp/empty"));
     }
