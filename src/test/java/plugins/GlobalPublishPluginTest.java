@@ -150,7 +150,7 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
         j.save();
         Build build = j.startBuild().shouldSucceed();
         assertThat(build.getConsole(), not(containsString("Transferred 0 file(s)")));
-        assertEquals(test.asText(), fileContents(dock, "/tmp/odes.txt"));
+        assertEquals(test.asText(), fileContents(dock, "/tmp/test.txt"));
     }
 
     @Test
@@ -485,7 +485,7 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
         return new Matcher<DockerContainer>("container with file '%s' in it", path) {
             @Override public boolean matchesSafely(DockerContainer dock) {
                 try {
-                    int exit = Docker.cmd("exec", dock.getCid(), "test", "-f", path).system();
+                    int exit = Docker.cmd("exec", dock.getCid(), "test", "-e", path).system();
                     if (exit == 0) return true;
                     if (exit == 1) return false;
                     throw new Error("Unexpected return code while checking for file existence: " + exit);
