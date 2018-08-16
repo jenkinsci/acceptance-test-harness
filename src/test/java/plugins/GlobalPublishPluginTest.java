@@ -483,7 +483,7 @@ public abstract class GlobalPublishPluginTest<T extends DockerContainer> extends
     }
 
     private Matcher<DockerContainer> fileExists(final String path) {
-        return new Matcher<DockerContainer>("container with file '%s' in it", path) {
+        return new Matcher<DockerContainer>("container with file/directory '%s' in it", path) {
             @Override public boolean matchesSafely(DockerContainer dock) {
                 try {
                     int exit = Docker.cmd("exec", dock.getCid(), "test", "-e", path).system();
