@@ -18,7 +18,7 @@ import static org.junit.Assert.assertFalse;
 /**
  * @author Kohsuke Kawaguchi
  */
-@WithPlugins({"matrix-auth","mock-security-realm"})
+@WithPlugins({"matrix-auth@2.3","mock-security-realm"})
 public class MatrixAuthPluginTest extends AbstractJUnitTest {
     /**
      * Test scenario:

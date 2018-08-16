@@ -313,7 +313,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
      *
      * @throws UnsupportedEncodingException if the created URL is invalid
      */
-    @Test @WithPlugins({"mock-security-realm", "matrix-auth"})
+    @Test @WithPlugins({"mock-security-realm", "matrix-auth@2.3"})
     public void should_validate_parser_script() throws UnsupportedEncodingException {
         loginAsAdmin();
 
@@ -333,7 +333,7 @@ public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
      *
      * @throws MalformedURLException if the URL is invalid
      */
-    @Test @WithPlugins({"mock-security-realm", "matrix-auth"})
+    @Test @WithPlugins({"mock-security-realm", "matrix-auth@2.3"})
     public void should_require_script_permission() throws MalformedURLException {
         loginAsUser();
 
