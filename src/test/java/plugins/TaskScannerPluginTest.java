@@ -738,11 +738,11 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
                 "  for f in `ls`\n" +
                 "  do\n" +
                 "    if [ -f $f -a -r $f ]; then\n" +
-                "      if file --mime-type $f | grep -q \"^${f}: text/\"; then\n" +
+                "      if [ $f = ${f%.java*}.java ]; then\n" +
                 "        sed \"s/$OLD/$NEW/\" \"$f\" > \"${f}.new\"\n" +
                 "        mv \"${f}.new\" \"$f\"\n" +
                 "      else\n" +
-                "        echo \"Info: $f is not a text file. Skipped.\"\n" +
+                "        echo \"Info: $f is not a *.java file. Skipped.\"\n" +
                 "      fi" +
                 "    else\n" +
                 "      echo \"Error: Cannot read $f\"\n" +
