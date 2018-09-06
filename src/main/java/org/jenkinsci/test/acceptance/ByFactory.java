@@ -188,7 +188,7 @@ public class ByFactory {
 
     public By option(String name) {
         return xpath(
-            ".//option[contains(normalize-space(.), '%1$s') or @value='%1$s']", name
+            ".//option[normalize-space(.)='%1$s' or @value='%1$s']", name
         );
     }
 
