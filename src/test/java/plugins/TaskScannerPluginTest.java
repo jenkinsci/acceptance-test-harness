@@ -735,15 +735,11 @@ public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerActio
                 "for t in \"todo\" \"TODO\" \"XXX\" \"fixme\" \"FIXME\" \"Deprecated\"\n" +
                 "do\n" +
                 "  OLD=$t\n" +
-                "  for f in `ls`\n" +
+                "  for f in `ls *.java`\n" +
                 "  do\n" +
                 "    if [ -f $f -a -r $f ]; then\n" +
-                "      if [ $f = ${f%.java*}.java ]; then\n" +
                 "        sed \"s/$OLD/$NEW/\" \"$f\" > \"${f}.new\"\n" +
                 "        mv \"${f}.new\" \"$f\"\n" +
-                "      else\n" +
-                "        echo \"Info: $f is not a *.java file. Skipped.\"\n" +
-                "      fi" +
                 "    else\n" +
                 "      echo \"Error: Cannot read $f\"\n" +
                 "    fi\n" +
