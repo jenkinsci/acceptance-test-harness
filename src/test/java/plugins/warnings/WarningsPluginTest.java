@@ -321,6 +321,7 @@ public class WarningsPluginTest extends AbstractJUnitTest {
 
         build.open();
 
+        analysisSummary = new AnalysisSummary(build);
         analysisSummary.getSummaryBoxByName(ANALYSIS_ID).getTitleResultInfoLink().click();
         assertThat(jenkins.getCurrentUrl()).isEqualTo(build.url + "analysisResult/info/");
 
