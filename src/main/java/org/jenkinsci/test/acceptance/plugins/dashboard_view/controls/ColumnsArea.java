@@ -4,8 +4,10 @@ import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Provides the control area for setting the Columns to display in the default job list.
@@ -55,9 +57,11 @@ public class ColumnsArea extends PageAreaImpl {
      * Removes all Columns as present in the default configuration.
      */
     public void removeAll() {
-        Arrays.stream(Column.values())
-                .filter(c -> !Column.LAST_STABLE.equals(c))
-                .forEach(this::remove);
+        By form = By.xpath("//form[@name='viewConfig']");
+        By xpath = By.xpath("//div[@name='columns' and not(contains(.,'" + Column.LAST_STABLE.getText()+ "'))]//button[@title='Delete']");
+        List<WebElement> columns = control(form).resolve().findElements(xpath);
+        Arrays.stream(columns.toArray(new WebElement[columns.size()]))
+                .forEach(WebElement::click);
     }
 
     /**
