@@ -55,7 +55,9 @@ import org.junit.experimental.categories.Category;
 import org.junit.runners.model.Statement;
 import org.openqa.selenium.firefox.FirefoxBinary;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.firefox.FirefoxProfile;
+import org.openqa.selenium.firefox.GeckoDriverService;
 import org.openqa.selenium.remote.UnreachableBrowserException;
 
 import java.io.File;
@@ -65,6 +67,8 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -230,19 +234,24 @@ public class KerberosSsoTest extends AbstractJUnitTest {
         profile.setPreference("network.negotiate-auth.delegation-uris", trustedUris);
 
         FirefoxBinary binary = new FirefoxBinary();
+        Map<String,String> environment = new HashMap<String,String>();
         // Inject config and TGT
-        binary.setEnvironmentProperty("KRB5CCNAME", tokenCache);
-        binary.setEnvironmentProperty("KRB5_CONFIG", kdc.getKrb5ConfPath());
+        environment.put("KRB5CCNAME", tokenCache);
+        environment.put("KRB5_CONFIG", kdc.getKrb5ConfPath());
         // Turn debug on
-        binary.setEnvironmentProperty("KRB5_TRACE", diag.touch("krb5_trace.log").getAbsolutePath());
-        binary.setEnvironmentProperty("NSPR_LOG_MODULES", "negotiateauth:5");
-        binary.setEnvironmentProperty("NSPR_LOG_FILE", diag.touch("firefox.nego.log").getAbsolutePath());
+        environment.put("KRB5_TRACE", diag.touch("krb5_trace.log").getAbsolutePath());
+        environment.put("NSPR_LOG_MODULES", "negotiateauth:5");
+        environment.put("NSPR_LOG_FILE", diag.touch("firefox.nego.log").getAbsolutePath());
 
         String display = FallbackConfig.getBrowserDisplay();
         if (display != null) {
-            binary.setEnvironmentProperty("DISPLAY", display);
+            environment.put("DISPLAY", display);
         }
-        final FirefoxDriver driver = new FirefoxDriver(binary, profile);
+        GeckoDriverService.Builder builder = new GeckoDriverService.Builder();
+        builder.withEnvironment(environment);
+        builder.usingFirefoxBinary(binary);
+
+        final FirefoxDriver driver = new FirefoxDriver(builder.build(), new FirefoxOptions().setProfile(profile));
         cleaner.addTask(new Statement() {
             @Override
             public void evaluate() throws Throwable {

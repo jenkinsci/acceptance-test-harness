@@ -14,7 +14,7 @@ import org.jenkinsci.test.acceptance.utils.IOUtil;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 
-import com.google.common.base.Predicate;
+import com.google.common.base.Function;
 import com.google.inject.Injector;
 
 import hudson.util.VersionNumber;
@@ -167,13 +167,10 @@ public class Jenkins extends Node implements Container {
                         AssertionError.class, // Still waiting
                         NoSuchElementException.class // No page served at all
                 )
-                .until(new Predicate<WebDriver>() {
-                    @Override
-                    public boolean apply(WebDriver driver) {
-                        visit(driver.getCurrentUrl()); // the page sometimes does not reload (fast enough)
-                        getJson("tree=nodeName"); // HudsonIsRestarting will serve a 503 to the index page, and will refuse api/json
-                        return true;
-                    }
+                .until((Function<WebDriver, Boolean>) driver -> {
+                    visit(driver.getCurrentUrl()); // the page sometimes does not reload (fast enough)
+                    getJson("tree=nodeName"); // HudsonIsRestarting will serve a 503 to the index page, and will refuse api/json
+                    return true;
                 })
         ;
     }

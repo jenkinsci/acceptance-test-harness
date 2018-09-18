@@ -4,9 +4,16 @@ Depending on the CI infrastructure setup one may need to run the ATH itself in a
 
 Interactive shell:
 
+<<<<<<< HEAD
     harry@devbox $ ./ath-container.sh
     ath-user@0b968f00a942:~$ eval $(./vnc.sh)
     ath-user@0b968f00a942:~$ ./run.sh firefox latest -Dmaven.test.failure.ignore=true -DforkCount=1 -B -Dtest=...
+=======
+    $ docker build --build-arg=uid=$(id -u) --build-arg=gid=$(id -g) -t jenkins/ath src/main/resources/ath-container
+    $ docker run -it --rm -P -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/.m2:/home/ath/.m2 -v $PWD:$PWD -w $PWD --user ath-user jenkins/ath bash
+    $ eval $(./vnc.sh)
+    $ ./run.sh firefox latest -Dmaven.test.failure.ignore=true -DforkCount=1 -B
+>>>>>>> 4ca1b2de08372b8ae8878f7953d1b3195ba69c9a
 
 Jenkinsfile:
 
