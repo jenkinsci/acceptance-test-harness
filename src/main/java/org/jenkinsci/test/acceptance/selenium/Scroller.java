@@ -80,6 +80,16 @@ public class Scroller extends AbstractWebDriverEventListener {
     private void scrollIntoView(WebElement e, WebDriver driver) {
         int eYCoord = e.getLocation().getY();
         int eXCoord = e.getLocation().getX();
-        ((JavascriptExecutor)driver).executeScript(scrollJs, eYCoord, eXCoord);
+        String id = e.getAttribute("id");
+
+        WebElement response = (WebElement) ((JavascriptExecutor)driver).executeScript(scrollJs, eYCoord, eXCoord, id);
+        if(response!=null && response.getAttribute("style").contains("bottom: 0px")){
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e1) {
+                    e1.printStackTrace();
+                }
+
+        }
     }
 }
