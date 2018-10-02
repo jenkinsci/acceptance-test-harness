@@ -3,10 +3,13 @@ package org.jenkinsci.test.acceptance.po;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
+import com.google.common.base.Throwables;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
@@ -18,6 +21,7 @@ import com.google.common.base.Function;
 import com.google.inject.Injector;
 
 import hudson.util.VersionNumber;
+import org.openqa.selenium.WebDriverException;
 
 /**
  * Top-level object that acts as an entry point to various systems.
@@ -161,12 +165,18 @@ public class Jenkins extends Node implements Container {
         visit("restart");
         clickButton("Yes");
 
+        waitForLoad(JenkinsController.STARTUP_TIMEOUT);
+    }
+
+    public void waitForLoad(int seconds){
+        List<Class<? extends Throwable>> ignoring = new ArrayList<Class<? extends Throwable>>();
+        ignoring.add(AssertionError.class);
+        ignoring.add(NoSuchElementException.class);
+        ignoring.add(WebDriverException.class);
+        //Ignore WebDriverException during restart.
         // Poll until we have the real page
-        waitFor(driver).withTimeout(JenkinsController.STARTUP_TIMEOUT, TimeUnit.SECONDS)
-                .ignoring(
-                        AssertionError.class, // Still waiting
-                        NoSuchElementException.class // No page served at all
-                )
+        waitFor(driver).withTimeout(seconds, TimeUnit.SECONDS)
+                .ignoreAll(ignoring)
                 .until((Function<WebDriver, Boolean>) driver -> {
                     visit(driver.getCurrentUrl()); // the page sometimes does not reload (fast enough)
                     getJson("tree=nodeName"); // HudsonIsRestarting will serve a 503 to the index page, and will refuse api/json
