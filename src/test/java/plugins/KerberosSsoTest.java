@@ -213,6 +213,7 @@ public class KerberosSsoTest extends AbstractJUnitTest {
     }
 
     private FirefoxDriver getNegotiatingFirefox(KerberosContainer kdc, String tokenCache) {
+        FirefoxOptions firefoxOptions = new FirefoxOptions();
         FirefoxProfile profile = new FirefoxProfile();
         profile.setAlwaysLoadNoFocusLib(true);
         // Allow auth negotiation for jenkins under test
@@ -248,10 +249,11 @@ public class KerberosSsoTest extends AbstractJUnitTest {
             environment.put("DISPLAY", display);
         }
         GeckoDriverService.Builder builder = new GeckoDriverService.Builder();
-        builder.withEnvironment(environment);
-        builder.usingFirefoxBinary(binary);
-
-        final FirefoxDriver driver = new FirefoxDriver(builder.build(), new FirefoxOptions().setProfile(profile));
+        builder.usingDriverExecutable(new File(System.getProperty(GeckoDriverService.GECKO_DRIVER_EXE_PROPERTY))).usingFirefoxBinary(binary).withEnvironment(environment);
+        //builder.usingFirefoxBinary(binary);
+        firefoxOptions.setBinary(binary);
+        firefoxOptions.setProfile(profile);
+        final FirefoxDriver driver = new FirefoxDriver(builder.build(), firefoxOptions);
         cleaner.addTask(new Statement() {
             @Override
             public void evaluate() throws Throwable {
