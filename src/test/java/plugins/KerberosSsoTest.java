@@ -217,7 +217,11 @@ public class KerberosSsoTest extends AbstractJUnitTest {
         FirefoxProfile profile = new FirefoxProfile();
         profile.setAlwaysLoadNoFocusLib(true);
         // Allow auth negotiation for jenkins under test
-        String trustedUris = jenkins.url.toExternalForm();
+        String url = jenkins.url.toExternalForm();
+        if(url.endsWith("/")){
+            url = url.substring(0, url.length()-1);
+        }
+        String trustedUris = url;
         String jenkins_local_hostname = System.getenv("JENKINS_LOCAL_HOSTNAME");
         // if JENKINS_LOCAL_HOSTNAME is set, we add this to FF nego uris
         if (jenkins_local_hostname != null && !jenkins_local_hostname.isEmpty()) {
