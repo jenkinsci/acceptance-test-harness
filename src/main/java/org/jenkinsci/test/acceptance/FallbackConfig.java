@@ -39,6 +39,7 @@ import org.jenkinsci.test.acceptance.utils.pluginreporter.ExercisedPluginsReport
 import org.jenkinsci.test.acceptance.utils.pluginreporter.TextFileExercisedPluginReporter;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.junit.runners.model.Statement;
+import org.openqa.selenium.Alert;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.UnsupportedCommandException;
 import org.openqa.selenium.WebDriver;
@@ -61,6 +62,7 @@ import com.cloudbees.sdk.extensibility.ExtensionList;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 
 /**
  * The default configuration for running tests.
@@ -217,6 +219,19 @@ public class FallbackConfig extends AbstractModule {
             @Override
             public void evaluate() throws Throwable {
                 try {
+                    String browser = System.getenv("BROWSER");
+                    if(browser == null || browser.equals("firefox")) {
+                        //https://github.com/mozilla/geckodriver/issues/1151
+                        //https://bugzilla.mozilla.org/show_bug.cgi?id=1264259
+                        //https://bugzilla.mozilla.org/show_bug.cgi?id=1434872
+                        d.navigate().to("about:mozilla");
+                        Alert alert = ExpectedConditions.alertIsPresent().apply(d);
+                        if (alert != null) {
+                            alert.accept();
+                            d.navigate().refresh();
+                        }
+                    }
+
                     d.quit();
                 } catch (UnreachableBrowserException ex) {
                     System.err.println("Browser died already");
