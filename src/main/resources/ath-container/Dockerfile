@@ -26,8 +26,8 @@ RUN curl -fsSLO https://get.docker.com/builds/Linux/x86_64/docker-17.04.0-ce.tgz
 ENV SHARED_DOCKER_SERVICE true
 
 # Selenium needs a geckodriver in order to work properly
-RUN curl -fsSLO https://github.com/mozilla/geckodriver/releases/download/v0.19.0/geckodriver-v0.19.0-linux64.tar.gz && \
-    tar -xvzf geckodriver-v0.19.0-linux64.tar.gz -C /usr/local/bin
+RUN curl -fsSLO https://github.com/mozilla/geckodriver/releases/download/v0.22.0/geckodriver-v0.22.0-linux64.tar.gz && \
+    tar -xvzf geckodriver-v0.22.0-linux64.tar.gz -C /usr/local/bin
 
 # Allow injecting uid and git to match directory ownership
 ARG uid=1000
