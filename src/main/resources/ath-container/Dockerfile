@@ -6,8 +6,6 @@
 FROM debian:buster
 MAINTAINER ogondza@gmail.com
 
-ARG java_version
-
 RUN apt-get clean && \
     apt-get -y update && \
     apt-get install -y \
@@ -17,7 +15,6 @@ RUN apt-get clean && \
         iptables \
         firefox-esr \
         maven \
-        openjdk-$java_version-jdk \
         unzip \
         vnc4server
 
@@ -57,3 +54,7 @@ RUN touch /home/ath-user/.Xauthority
 # have in ENTRYPOINT as the container is started as ath-user.
 USER root
 RUN chmod ug+s "$(which docker)"
+
+# The variable seems to prevent docker to cache the install command so moving it towards the end
+ARG java_version
+RUN apt-get install -y openjdk-$java_version-jdk
