@@ -1,16 +1,16 @@
 // For ci.jenkins.io
 // https://github.com/jenkins-infra/documentation/blob/master/ci.adoc
 
+for (int i = 0; i < (BUILD_NUMBER as int); i++) {
+    milestone()
+}
+def branches = [:]
 for (javaVersion in [8, 11]) {
-    for (int i = 0; i < (BUILD_NUMBER as int); i++) {
-        milestone()
-    }
     def splits = splitTests count(10)
-    def branches = [:]
     for (int i = 0; i < splits.size(); i++) {
         int index = i
         branches["split${i}"] = {
-            stage("Run ATH - split${index}") {
+            stage("Run ATH on java ${javaVersion} - split${index}") {
                 node('docker && highmem') {
                     checkout scm
                     def image = docker.build('jenkins/ath', "src/main/resources/ath-container --build-arg=java_version=$javaVersion")
@@ -28,5 +28,5 @@ for (javaVersion in [8, 11]) {
             }
         }
     }
-    parallel branches
 }
+parallel branches
