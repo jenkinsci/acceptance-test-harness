@@ -3,8 +3,10 @@
 # see docs/DOCKER.md for usage
 
 
-FROM debian:stretch
+FROM debian:buster
 MAINTAINER ogondza@gmail.com
+
+ARG java_version
 
 RUN apt-get clean && \
     apt-get -y update && \
@@ -15,7 +17,7 @@ RUN apt-get clean && \
         iptables \
         firefox-esr \
         maven \
-        openjdk-8-jdk \
+        openjdk-$java_version-jdk \
         unzip \
         vnc4server
 
