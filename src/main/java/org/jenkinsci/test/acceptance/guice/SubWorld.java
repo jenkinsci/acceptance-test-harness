@@ -2,15 +2,10 @@ package org.jenkinsci.test.acceptance.guice;
 
 import com.google.inject.Injector;
 import com.google.inject.Provider;
-import org.jenkinsci.test.acceptance.machine.MachineProvider;
 
 /**
  * Represents a parallel Guice {@link Injector} inside {@link World}
  * so that components can be selectively bound to {@link World}.
- *
- * <p>
- * For example, this mechanism allows sophisticated test launcher configurations to
- * use different {@link MachineProvider} implementations for master and slaves, etc.
  *
  * <p>
  * See WIRING.md
