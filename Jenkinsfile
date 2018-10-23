@@ -13,7 +13,7 @@ for (javaVersion in [8, 11]) {
             stage("Run ATH on java ${javaVersion} - split${index}") {
                 node('docker && highmem') {
                     checkout scm
-                    def image = docker.build('jenkins/ath', "src/main/resources/ath-container --build-arg=java_version=$javaVersion")
+                    def image = docker.build('jenkins/ath', "--build-arg=java_version=$javaVersion src/main/resources/ath-container")
                     image.inside('-v /var/run/docker.sock:/var/run/docker.sock') {
                         def exclusions = splits.get(index).join("\n")
                         writeFile file: 'excludes.txt', text: exclusions
