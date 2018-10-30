@@ -20,7 +20,7 @@ RUN apt-get clean && \
         vnc4server
 
 # All we need is a statically linked client library - no need to install daemon deps: https://get.docker.com/builds/
-RUN curl -fsSLO curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh
+RUN curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh
 ENV SHARED_DOCKER_SERVICE true
 
 # Allow injecting uid and git to match directory ownership
