@@ -3,7 +3,7 @@
 # see docs/DOCKER.md for usage
 
 
-FROM ubuntu:xenial
+FROM debian:stretch
 MAINTAINER ogondza@gmail.com
 
 RUN apt-get clean && \
@@ -13,7 +13,7 @@ RUN apt-get clean && \
         git \
         imagemagick \
         iptables \
-        firefox \
+        firefox-esr \
         maven \
         openjdk-8-jdk \
         unzip \
