@@ -20,8 +20,8 @@ RUN apt-get clean && \
         vnc4server
 
 # All we need is a statically linked client library - no need to install daemon deps: https://get.docker.com/builds/
-RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-18.06.1-ce.tgz && \
-    tar --strip-components=1 -xvzf docker-18.06.1-ce.tgz -C /usr/local/bin
+RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-17.03.2-ce.tgz && \
+    tar --strip-components=1 -xvzf docker-17.03.2-ce.tgz -C /usr/local/bin
 
 ENV SHARED_DOCKER_SERVICE true
 
