@@ -13,15 +13,15 @@ RUN apt-get clean && \
         git \
         imagemagick \
         iptables \
-        firefox-esr \
+        firefox-esr=52.9.0esr-1~deb9u1 \
         maven \
         openjdk-8-jdk \
         unzip \
         vnc4server
 
 # All we need is a statically linked client library - no need to install daemon deps: https://get.docker.com/builds/
-RUN curl -fsSLO https://get.docker.com/builds/Linux/x86_64/docker-17.04.0-ce.tgz && \
-    tar --strip-components=1 -xvzf docker-17.04.0-ce.tgz -C /usr/local/bin
+RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-17.03.2-ce.tgz && \
+    tar --strip-components=1 -xvzf docker-17.03.2-ce.tgz -C /usr/local/bin
 ENV SHARED_DOCKER_SERVICE true
 
 # Allow injecting uid and git to match directory ownership
