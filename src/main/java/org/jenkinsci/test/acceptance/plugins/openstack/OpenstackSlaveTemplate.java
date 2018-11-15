@@ -23,8 +23,6 @@
  */
 package org.jenkinsci.test.acceptance.plugins.openstack;
 
-import java.util.concurrent.Callable;
-
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.openqa.selenium.NoSuchElementException;
@@ -53,35 +51,39 @@ public class OpenstackSlaveTemplate extends PageAreaImpl {
 
     public OpenstackSlaveTemplate hardwareId(final String value) {
         ensureAdvancedOpened();
-        waitFor().withMessage("Hardware ID select populates").ignoring(NoSuchElementException.class).until(new Callable<Boolean>() {
-            @Override public Boolean call() throws Exception {
-                control("slaveOptions/hardwareId", "hardwareId").select(value);
-                return true;
-            }
+        waitFor().withMessage("Hardware ID select populates").ignoring(NoSuchElementException.class).until(() -> {
+            control("slaveOptions/hardwareId", "hardwareId").select(value);
+            return true;
         });
         return this;
     }
 
     public OpenstackSlaveTemplate imageId(final String value) {
         ensureAdvancedOpened();
-        waitFor().withMessage("Image ID select populates").ignoring(NoSuchElementException.class).until(new Callable<Boolean>() {
-            @Override public Boolean call() throws Exception {
-                control("slaveOptions/imageId", "imageId").select(value);
-                return true;
-            }
+        String[] pathComponents;
+        try {
+            control("slaveOptions").select("Image");
+            pathComponents = new String[] { "slaveOptions/bootSource/name" };
+        }  catch (NoSuchElementException ex) {
+            pathComponents = new String[] { "slaveOptions/imageId", "imageId" };
+        }
+        final String[] pc = pathComponents;
+        waitFor().withMessage("Image ID select populates").ignoring(NoSuchElementException.class).until(() -> {
+            control(pc).select(value);
+            return true;
         });
         return this;
     }
 
-    public OpenstackSlaveTemplate credentials(String value) {
+    public OpenstackSlaveTemplate sshCredentials(String value) {
         ensureAdvancedOpened();
-        control("slaveOptions/credentialsId", "credentialsId").select(value);
+        control("slaveOptions/launcherFactory/credentialsId", "slaveOptions/credentialsId", "credentialsId").select(value);
         return this;
     }
 
-    public OpenstackSlaveTemplate slaveType(String type) {
+    public OpenstackSlaveTemplate connectionType(String type) {
         ensureAdvancedOpened();
-        control("slaveOptions/slaveType", "slaveType").select(type);
+        control("slaveOptions/[1]", "slaveOptions/slaveType", "slaveType").select(type);
         return this;
     }
 
@@ -93,14 +95,13 @@ public class OpenstackSlaveTemplate extends PageAreaImpl {
 
     public OpenstackSlaveTemplate networkId(String id) {
         ensureAdvancedOpened();
-        waitFor().withMessage("Network ID select populates").ignoring(NoSuchElementException.class).until(new Callable<Boolean>() {
-            @Override public Boolean call() throws Exception {
-                control("slaveOptions/networkId", "networkId").select(id);
-                return true;
-            }
+        waitFor().withMessage("Network ID select populates").ignoring(NoSuchElementException.class).until(() -> {
+            control("slaveOptions/networkId", "networkId").select(id);
+            return true;
         });
         return this;
     }
+
     public OpenstackSlaveTemplate keyPair(String name) {
         ensureAdvancedOpened();
         Control control = control("slaveOptions/keyPairName", "keyPairName");

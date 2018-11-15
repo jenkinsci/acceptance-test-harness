@@ -48,9 +48,9 @@ import org.jenkinsci.test.acceptance.plugins.credentials.BaseStandardCredentials
 @RuleAnnotation(value=WithCredentials.RuleImpl.class, priority = WithPlugins.PRIORITY + 1) // requires plugins
 public @interface WithCredentials {
 
-    public static final int USERNAME_PASSWORD = 1;
+    int USERNAME_PASSWORD = 1;
 
-    public static final int SSH_USERNAME_PRIVATE_KEY = 2;
+    int SSH_USERNAME_PRIVATE_KEY = 2;
 
     int credentialType();
 
@@ -59,7 +59,7 @@ public @interface WithCredentials {
     /** Optional ID to specify. */
     String id() default "";
 
-    public class RuleImpl implements TestRule {
+    class RuleImpl implements TestRule {
 
         @Inject
         Injector injector;
@@ -155,8 +155,6 @@ public @interface WithCredentials {
                     return new Resource(resource);
                 }
             };
-
-
         }
     }
 }

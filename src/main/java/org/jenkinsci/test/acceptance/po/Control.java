@@ -164,7 +164,7 @@ public class Control extends CapybaraPortingLayerImpl {
      * Given a menu button that shows a list of build steps, select the right item from the menu
      * to insert the said build step.
      */
-    private Finder<WebElement> findDropDownMenuItem = new Finder<WebElement>() {
+    private final Finder<WebElement> findDropDownMenuItem = new Finder<WebElement>() {
         @Override
         protected WebElement find(String caption) {
             WebElement menuButton = resolve();
@@ -197,7 +197,7 @@ public class Control extends CapybaraPortingLayerImpl {
         elasticSleep(1000);
     }
 
-    private Finder<WebElement> findDropDownMenuItemBySelector = new Finder<WebElement>() {
+    private final Finder<WebElement> findDropDownMenuItemBySelector = new Finder<WebElement>() {
         @Override
         protected WebElement find(String caption) {
             WebElement menuButton = resolve();
