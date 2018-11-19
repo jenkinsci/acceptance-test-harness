@@ -13,7 +13,7 @@ RUN apt-get clean && \
         git \
         imagemagick \
         iptables \
-        firefox-esr=52.9.0esr-1~deb9u1 \
+        firefox-esr \
         maven \
         openjdk-8-jdk \
         unzip \
