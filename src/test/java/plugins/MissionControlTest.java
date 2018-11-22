@@ -14,6 +14,7 @@ import org.jenkinsci.test.acceptance.po.DumbSlave;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.junit.Test;
+import org.openqa.selenium.Keys;
 
 @WithPlugins("mission-control-view")
 public class MissionControlTest extends AbstractJUnitTest {
@@ -111,7 +112,10 @@ public class MissionControlTest extends AbstractJUnitTest {
         assertThat(driver, not(hasContent("Nodes")));
 
         DumbSlave slave = jenkins.slaves.create(DumbSlave.class, "test");
-        slave.configure(() -> slave.setExecutors(15));
+        slave.setExecutors(15);
+        //not sure why it is needed, but it is not possible to click save without it.
+        slave.executors.resolve().sendKeys(Keys.TAB);
+        slave.save();
 
         view.configure(() -> view.setHideNodes(false));
 

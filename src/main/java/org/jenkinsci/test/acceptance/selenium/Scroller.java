@@ -1,12 +1,17 @@
 package org.jenkinsci.test.acceptance.selenium;
 
+import java.io.IOException;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.io.IOUtils;
+import org.jenkinsci.test.acceptance.junit.Wait;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.events.AbstractWebDriverEventListener;
 
-import java.io.IOException;
+import static org.jenkinsci.test.acceptance.Matchers.pageObjectExists;
 
 /**
  * Automatically scrolls the element into view.
@@ -73,13 +78,26 @@ public class Scroller extends AbstractWebDriverEventListener {
     }
 
     @Override
-    public void beforeChangeValueOf(WebElement element, WebDriver driver) {
+    public void beforeChangeValueOf(WebElement element, WebDriver driver, CharSequence[] keysToSend) {
         scrollIntoView(element, driver);
     }
 
     private void scrollIntoView(WebElement e, WebDriver driver) {
-        int eYCoord = e.getLocation().getY();
-        int eXCoord = e.getLocation().getX();
-        ((JavascriptExecutor)driver).executeScript(scrollJs, eYCoord, eXCoord);
+        final int eYCoord = e.getLocation().getY();
+        final int eXCoord = e.getLocation().getX();
+        final String id = e.getAttribute("id");
+        final JavascriptExecutor executor = (JavascriptExecutor) driver;
+        //Wait until web element is successfully scrolled.
+        new Wait<>(Boolean.TRUE)
+                .withTimeout(5, TimeUnit.SECONDS) // Wall-clock time
+                .until(new Callable<Boolean>() {
+
+                    @Override
+                    public Boolean call() throws Exception {
+                        return (Boolean)executor.executeScript(scrollJs, eYCoord, eXCoord, id);
+                    }
+                })
+         ;
+
     }
 }

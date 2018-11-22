@@ -321,6 +321,7 @@ public class MissionControlView extends View {
             driver.findElement(By.xpath("//a[@class='task-link' and @href='/manage']")).click();
             driver.findElement(By.xpath("//a[@href='#']")).click();
             driver.switchTo().alert().accept();
+            getJenkins().waitForLoad(5);
         } finally {
             driver.switchTo().defaultContent();
         }

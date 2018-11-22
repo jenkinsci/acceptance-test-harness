@@ -13,7 +13,7 @@ RUN apt-get clean && \
         git \
         imagemagick \
         iptables \
-        firefox-esr=52.9.0esr-1~deb9u1 \
+        firefox-esr \
         maven \
         openjdk-8-jdk \
         unzip \
@@ -22,7 +22,12 @@ RUN apt-get clean && \
 # All we need is a statically linked client library - no need to install daemon deps: https://get.docker.com/builds/
 RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-17.03.2-ce.tgz && \
     tar --strip-components=1 -xvzf docker-17.03.2-ce.tgz -C /usr/local/bin
+
 ENV SHARED_DOCKER_SERVICE true
+
+# Selenium needs a geckodriver in order to work properly
+RUN curl -fsSLO https://github.com/mozilla/geckodriver/releases/download/v0.22.0/geckodriver-v0.22.0-linux64.tar.gz && \
+    tar -xvzf geckodriver-v0.22.0-linux64.tar.gz -C /usr/local/bin
 
 # Allow injecting uid and git to match directory ownership
 ARG uid=1000
