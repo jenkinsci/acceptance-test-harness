@@ -20,6 +20,7 @@ for (javaVersion in [8, 11]) {
                         realtimeJUnit(testResults: 'target/surefire-reports/TEST-*.xml', testDataPublishers: [[$class: 'AttachmentPublisher']]) {
                             sh '''
                                 eval $(./vnc.sh)
+                                export JENKINS_OPTS="--enable-future-java"
                                 ./run.sh firefox latest -Dmaven.test.failure.ignore=true -DforkCount=1 -B
                             '''
                         }
