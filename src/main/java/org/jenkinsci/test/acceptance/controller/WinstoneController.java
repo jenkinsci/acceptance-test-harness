@@ -27,13 +27,11 @@ public class WinstoneController extends LocalController {
     private static final List<String> JENKINS_OPTS = Arrays.asList(Optional.of(System.getenv("JENKINS_OPTS")).orElse("").split("\\s+"));
 
     private final int httpPort;
-    private final int controlPort;
 
     @Inject
     public WinstoneController(Injector i) {
         super(i);
         httpPort = randomLocalPort();
-        controlPort = randomLocalPort();
     }
 
     @Override
