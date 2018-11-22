@@ -15,6 +15,7 @@ import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.Wait;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.openqa.selenium.Alert;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -156,7 +157,7 @@ public class Build extends ContainerPageObject {
     }
 
     public String getConsole() {
-        return visit(getConsoleTextUrl()).getPageSource();
+        return visit(getConsoleTextUrl()).findElement(By.tagName("pre")).getText();
     }
 
     /**
