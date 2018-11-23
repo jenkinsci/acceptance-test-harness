@@ -6,8 +6,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.logging.Logger;
 
 import org.jenkinsci.utils.process.CommandBuilder;
@@ -23,8 +23,14 @@ import com.google.inject.Injector;
  */
 public class WinstoneController extends LocalController {
 
-    private static final List<String> JENKINS_JAVA_OPTS = Arrays.asList(Optional.of(System.getenv("JENKINS_JAVA_OPTS")).orElse("").split("\\s+"));
-    private static final List<String> JENKINS_OPTS = Arrays.asList(Optional.of(System.getenv("JENKINS_OPTS")).orElse("").split("\\s+"));
+    private static final List<String> JENKINS_JAVA_OPTS = envVarOpts("JENKINS_JAVA_OPTS");
+    private static final List<String> JENKINS_OPTS = envVarOpts("JENKINS_OPTS");
+
+    private static List<String> envVarOpts(String jenkins_opts) {
+        String getenv = System.getenv(jenkins_opts);
+        if (getenv == null) return Collections.emptyList();
+        return Arrays.asList(getenv.split("\\s+"));
+    }
 
     private final int httpPort;
 
