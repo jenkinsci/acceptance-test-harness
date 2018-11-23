@@ -9,7 +9,7 @@ for (javaVersion in [8, 11]) {
     def splits = splitTests count(10)
     for (int i = 0; i < splits.size(); i++) {
         int index = i
-        branches["split${i}"] = {
+        branches["java-${javaVersion}-split${i}"] = {
             stage("Run ATH on java ${javaVersion} - split${index}") {
                 node('docker && highmem') {
                     checkout scm
