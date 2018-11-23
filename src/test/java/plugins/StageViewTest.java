@@ -19,7 +19,7 @@ import static org.hamcrest.Matchers.*;
  * Base Implementation of the stageview test as a component. Important aspect of this
  * testclass is the correct visualisation depending of stages and builds (matrix). Might
  * needs adaption for future blue ocean
- * @Boris Dippolter
+ * @author Boris Dippolter
  */
 @WithPlugins("workflow-aggregator")
 public class StageViewTest extends AbstractJUnitTest {
@@ -33,15 +33,10 @@ public class StageViewTest extends AbstractJUnitTest {
 
     public static final String JOB_PATH = "/job/Pipeline-Test/";
 
-    /**
-     * This tests create a simple stage. It checks if after the first build the stage view is now part of the job page.
-     *
-     * @throws Exception
-     */
     @Test
-    public void jobShouldContainStageView() throws Exception {
+    public void jobShouldContainStageView() {
         WorkflowJob job = this.createPipelineFromFile(SINGLE_JOB);
-        Build build = job.startBuild().shouldSucceed();
+        job.startBuild().shouldSucceed();
         job.open();
         StageView stageView = new StageView(job, JOB_PATH);
         assertThat(stageView.getRootElementName().getText(), containsString("Stage View"));
@@ -91,13 +86,8 @@ public class StageViewTest extends AbstractJUnitTest {
         Build build = job.startBuild().shouldSucceed();
 
         for (int i = 0; i < 10; i++) {
-            final StringBuilder stageBuilder2 = new StringBuilder();
-            stageBuilder2.append(pre);
-            stageBuilder2.append(this.repeatString(singleStage, i + 1));
-            stageBuilder2.append(post);
-            job.configure(() -> {
-                job.script.set(stageBuilder2.toString());
-            });
+            String text = pre + repeatString(singleStage, i + 1) + post;
+            job.configure(() -> job.script.set(text));
             build = job.startBuild().shouldSucceed();
         }
 
@@ -109,9 +99,6 @@ public class StageViewTest extends AbstractJUnitTest {
 
     }
 
-    /**
-     * Test validates against the current build number. Every row(aka build) contains the correct build number.
-     */
     @Test
     public void jobNumberShouldbeCorrect() {
         WorkflowJob job = this.createPipelineFromFile(SINGLE_JOB);
@@ -125,20 +112,18 @@ public class StageViewTest extends AbstractJUnitTest {
     /**
      * Does check multiple jobs in the stage view. Second part uses long name to verify the display.
      * Note: emptyjob names are not allowed
-     *
-     * @throws Exception
      */
     @Test
-    public void stageViewContainsMultipleStages() throws Exception {
+    public void stageViewContainsMultipleStages() {
         WorkflowJob job = this.createPipelineFromFile(MULTI_JOB);
-        Build build = job.startBuild().shouldSucceed();
+        job.startBuild().shouldSucceed();
         job.open();
         StageView stageView = new StageView(job, JOB_PATH);
         assertThat(stageView.getStageViewHeadlines().get(0).getName(), containsString("Clone sources"));
         assertThat(stageView.getStageViewHeadlines().get(1).getName(), containsString("Build"));
 
         job = this.createPipelineFromFile(MULTI_JOB_IRR_NAMES);
-        build = job.startBuild().shouldSucceed();
+        job.startBuild().shouldSucceed();
         job.open();
         stageView = new StageView(job, JOB_PATH);
         assertThat(stageView.getStageViewHeadlines().get(0).getName(), containsString("-"));
@@ -149,13 +134,11 @@ public class StageViewTest extends AbstractJUnitTest {
 
     /**
      * Does check multiple jobs in the stage view. One with a failed, and one with a success.
-     *
-     * @throws Exception
      */
     @Test
-    public void stageViewContainsMultipleStagesWithFail() throws Exception {
+    public void stageViewContainsMultipleStagesWithFail() {
         WorkflowJob job = this.createPipelineFromFile(MUTLI_JOB_FAIL);
-        Build build = job.startBuild().shouldFail();
+        job.startBuild().shouldFail();
         job.open();
         job.getNavigationLinks();
         StageView stageView = new StageView(job, JOB_PATH);
@@ -169,18 +152,15 @@ public class StageViewTest extends AbstractJUnitTest {
     /**
      * Does check multiple jobs in the stage view. One with a unstable, and one with a success. Unstable jobs
      * are represented with yellow color and represented with the css class "UNSTABLE".
-     *
-     * @throws Exception
      */
     @Test
-    public void stageViewContainsMultipleStagesWithUnstable() throws Exception {
+    public void stageViewContainsMultipleStagesWithUnstable() {
         WorkflowJob job = this.createPipelineFromFile(MUTLI_JOB_UNSTABLE);
-        Build build = job.startBuild().shouldBeUnstable();
+        job.startBuild().shouldBeUnstable();
         job.open();
         job.getNavigationLinks();
         StageView stageView = new StageView(job, JOB_PATH);
         String firstJob = stageView.getLatestBuild().getStageViewItem(0).toString();
-        String secondJob = stageView.getLatestBuild().getStageViewItem(1).toString();
         assertThat(stageView.getLatestBuild().getCssClasses(), containsString("UNSTABLE"));
         assertThat(firstJob, containsString("ms"));
     }
@@ -189,17 +169,15 @@ public class StageViewTest extends AbstractJUnitTest {
      * Does check multiple jobs in the stage view. One with a success, and one with aborted.
      * Aborted jobs are not represented in the satgeview. They are also shown green.
      *
-     * @throws Exception
      */
     @Test
-    public void stageViewContainsMultipleStagesWithAborted() throws Exception {
+    public void stageViewContainsMultipleStagesWithAborted() {
         WorkflowJob job = this.createPipelineFromFile(MUTLI_JOB_ABORTED);
-        Build build = job.startBuild().shouldAbort();
+        job.startBuild().shouldAbort();
         job.open();
         job.getNavigationLinks();
         StageView stageView = new StageView(job, JOB_PATH);
         String firstJob = stageView.getLatestBuild().getStageViewItem(0).toString();
-        String secondJob = stageView.getLatestBuild().getStageViewItem(1).toString();
         assertThat(stageView.getLatestBuild().getCssClasses(), containsString("ABORTED"));
         assertThat(firstJob, containsString("ms"));
     }
