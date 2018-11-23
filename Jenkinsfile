@@ -20,7 +20,8 @@ for (javaVersion in [8, 11]) {
                         realtimeJUnit(testResults: 'target/surefire-reports/TEST-*.xml', testDataPublishers: [[$class: 'AttachmentPublisher']]) {
                             sh '''
                                 eval $(./vnc.sh)
-                                export JENKINS_OPTS="--enable-future-java"
+                                # Temporary to get Java 11 going: https://github.com/jenkinsci/workflow-support-plugin/pull/68#issuecomment-440971292 
+                                export JENKINS_OPTS="--enable-future-java"; export VERSION_OVERRIDES="workflow-support=2.23-20181122.094059-1"
                                 ./run.sh firefox latest -Dmaven.test.failure.ignore=true -DforkCount=1 -B
                             '''
                         }
