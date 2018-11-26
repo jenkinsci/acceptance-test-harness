@@ -10,8 +10,9 @@ for (int j in [8, 11]) {
     def splits = splitTests count(10)
     for (int i = 0; i < splits.size(); i++) {
         int index = i
-        branches["java-${javaVersion}-split${index}"] = {
-            stage("Run ATH on java ${javaVersion} - split${index}") {
+        def name = "java-${javaVersion}-split${index}"
+        branches[name] = {
+            stage(name) {
                 node('docker && highmem') {
                     checkout scm
                     def image = docker.build('jenkins/ath', "--build-arg=java_version=$javaVersion src/main/resources/ath-container")
