@@ -25,19 +25,23 @@ task secondTask {
     }
 }
 
-task environmentVariables << {
-    ext.env = System.getenv()
-    ext.buildNumber = env.BUILD_NUMBER?.toInteger()
-    println "Build Number: $buildNumber"
-    
-    ext.buildName = env.BUILD_DISPLAY_NAME?.toString()
+task environmentVariables {
+    doLast {
+        ext.env = System.getenv()
+        ext.buildNumber = env.BUILD_NUMBER?.toInteger()
+        println "Build Number: $buildNumber"
 
-    ext.jobName = env.JOB_NAME?.toString()
-    println "Build Name: $jobName $buildName"
+        ext.buildName = env.BUILD_DISPLAY_NAME?.toString()
+
+        ext.jobName = env.JOB_NAME?.toString()
+        println "Build Name: $jobName $buildName"
+    }
 }
 
-task jobParametersAsProjectProperties << {
-    println "Gradle Properties: $project.TEST_PARAM_1 $project.TEST_PARAM_2"
+task jobParametersAsProjectProperties {
+    doLast {
+        println "Gradle Properties: $project.TEST_PARAM_1 $project.TEST_PARAM_2"
+    }
 }
 
 task jobParametersAsSystemProperties {
@@ -46,6 +50,6 @@ task jobParametersAsSystemProperties {
     }
 }
 
-task wrapper(type: Wrapper) {
+wrapper {
     gradleVersion = '4.0'
 }
