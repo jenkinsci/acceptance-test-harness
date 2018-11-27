@@ -74,7 +74,7 @@ public class SubversionPluginTest extends AbstractJUnitTest {
     }
 
     @Test
-    @WithCredentials(credentialType = WithCredentials.USERNAME_PASSWORD, values = {SvnContainer.USER, SvnContainer.PWD})
+    @WithCredentials(credentialType = WithCredentials.USERNAME_PASSWORD, values = {SvnContainer.USER, SvnContainer.PWD}, id = SvnContainer.USER)
     public void run_basic_subversion_build_userPwd() throws SubversionPluginTestException {
         final SvnContainer svnContainer = svn.get();
 
@@ -91,7 +91,7 @@ public class SubversionPluginTest extends AbstractJUnitTest {
     }
 
     @Test
-    @WithCredentials(credentialType = WithCredentials.USERNAME_PASSWORD, values = {SvnContainer.USER, SvnContainer.PWD})
+    @WithCredentials(credentialType = WithCredentials.USERNAME_PASSWORD, values = {SvnContainer.USER, SvnContainer.PWD}, id = SvnContainer.USER)
     public void run_basic_subversion_build_svn_userPwd() throws SubversionPluginTestException {
         final SvnContainer svnContainer = svn.get();
 

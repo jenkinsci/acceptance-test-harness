@@ -69,6 +69,28 @@ public class SshSlaveLauncher extends ComputerLauncher {
         final UserPwdCredential cred = dia.select(UserPwdCredential.class);
         cred.username.set(username);
         cred.password.set(password);
+        //credentials are identified by their id. Set username as id so it can be found by it
+        cred.setId(username);
+        cred.add();
+        waitForCredentialVisible(username);
+        return this;
+    }
+
+    /**
+     * Add username/password and id based credentials to the configuration
+     *
+     * @param username to use
+     * @param password for the username
+     * @id for unique identification
+     * @return the SshSlaveLauncher to be configured
+     */
+    public SshSlaveLauncher pwdCredentials(String username, String password, String id) {
+        final SshCredentialDialog dia = this.addCredential();
+        final UserPwdCredential cred = dia.select(UserPwdCredential.class);
+        cred.username.set(username);
+        cred.password.set(password);
+        //credentials are identified by their id.
+        cred.setId(id);
         cred.add();
         waitForCredentialVisible(username);
         return this;
