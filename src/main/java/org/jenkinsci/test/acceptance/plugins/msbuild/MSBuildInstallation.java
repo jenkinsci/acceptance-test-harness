@@ -1,4 +1,4 @@
-package org.jenkinsci.test.acceptance.msbuild;
+package org.jenkinsci.test.acceptance.plugins.msbuild;
 
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.ToolInstallation;
