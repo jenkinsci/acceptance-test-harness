@@ -1,8 +1,7 @@
-package org.jenkinsci.test.acceptance.po.stageview;
+package org.jenkinsci.test.acceptance.plugins.stageview;
 
 import org.openqa.selenium.WebElement;
 
-import java.util.Collection;
 import java.util.List;
 
 /**

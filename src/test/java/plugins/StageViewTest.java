@@ -4,7 +4,7 @@ import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
-import org.jenkinsci.test.acceptance.po.stageview.StageView;
+import org.jenkinsci.test.acceptance.plugins.stageview.StageView;
 import org.junit.Test;
 
 import java.io.BufferedReader;
