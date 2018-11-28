@@ -32,7 +32,6 @@
     <aether.version>0.9.0.v20140226</aether.version>
     <maven.version>3.1.0</maven.version>
     <groovy.version>2.3.1</groovy.version>
-    <shrinkwrap.version>1.2.2</shrinkwrap.version>
     <monte.version>0.7.7.0</monte.version>
     <mockito.version>1.10.19</mockito.version>
     <trimStackTrace>false</trimStackTrace> <!-- surefire -->
@@ -387,13 +386,6 @@
       <groupId>org.json</groupId>
       <artifactId>json</artifactId>
       <version>20080701</version>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.shrinkwrap</groupId>
-      <artifactId>shrinkwrap-depchain</artifactId>
-      <version>${shrinkwrap.version}</version>
-      <type>pom</type>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
