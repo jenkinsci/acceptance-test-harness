@@ -30,7 +30,7 @@ public class JacocoPluginTest extends AbstractJUnitTest {
             job.copyDir(resource("/jacoco/test"));
 
             MavenBuildStep maven = job.addBuildStep(MavenBuildStep.class);
-            maven.targets.set("clean package");
+            maven.targets.set("clean package -B");
             // https://wiki.jenkins-ci.org/display/JENKINS/JaCoCo+Plugin
             // Unfortunately JaCoCo 0.7.5 breaks compatibility to previous binary formats of the jacoco.exec files. The JaCoCo plugin up to version
             // 1.0.19 is based on JaCoCo 0.7.4, thus you cannot use this version with projects which already use JaCoCo 0.7.5 or newer. JaCoCo plugin
