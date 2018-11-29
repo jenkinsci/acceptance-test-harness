@@ -1,4 +1,4 @@
-package org.jenkinsci.test.acceptance.po.stageview;
+package org.jenkinsci.test.acceptance.plugins.stageview;
 
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.PageObject;

@@ -18,7 +18,6 @@ import java.net.SocketException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import static org.jenkinsci.test.acceptance.po.PageObject.*;
@@ -41,17 +40,15 @@ public class JiraContainer extends DockerContainer {
      */
     public void waitForReady(CapybaraPortingLayer p) {
         p.waitFor().withMessage("Waiting for jira to come up")
-                .withTimeout(1500, TimeUnit.SECONDS) // [INFO] jira started successfully in 1064s
-                .until(new Callable<Boolean>() {
-                    @Override
-                    public Boolean call() throws Exception {
+                .withTimeout(2000, TimeUnit.SECONDS) // [INFO] jira started successfully in 1064s
+                .until( () ->  {
                         try {
                             String s = IOUtils.toString(getURL().openStream());
                             return s.contains("System Dashboard");
                         } catch (SocketException e) {
                             return null;
                         }
-                    }
+
         });
     }
 
