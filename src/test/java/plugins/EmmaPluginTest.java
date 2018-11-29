@@ -44,8 +44,6 @@ import java.util.List;
 @WithPlugins("emma")
 public class EmmaPluginTest extends AbstractJUnitTest {
 
-    private Job job;
-
     /*
      * Performs a coverage test by enabling coverage reporting and when
      * tests are run a coverage report is created.
@@ -54,13 +52,13 @@ public class EmmaPluginTest extends AbstractJUnitTest {
     @Test
     public void coverage_test() {
 
-        job = jenkins.jobs.create();
+        Job job = jenkins.jobs.create();
         job.configure();
         job.copyDir(resource("/emma/test"));
 
         // In the maven build step an Emma goal is added to enable coverage reporting.
         MavenBuildStep mbs = job.addBuildStep(MavenBuildStep.class);
-        mbs.targets.set("clean emma:emma package");
+        mbs.targets.set("clean emma:emma package -B");
         EmmaPublisher ep = job.addPublisher(EmmaPublisher.class);
         ep.setReportingThresholds(100, 70, 80, 80, 80, 0, 0, 0, 0, 0);
         job.save();
