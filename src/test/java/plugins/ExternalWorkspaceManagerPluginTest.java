@@ -137,8 +137,10 @@ public class ExternalWorkspaceManagerPluginTest extends AbstractJUnitTest {
 
         Build build = job.startBuild();
         build.shouldSucceed();
-        assertThat(build.getConsole(), containsString(String.format("Running in %s/%s/%s", fakeNodeMountingPoint, job.name, build.getNumber())));
-        assertThat(build.getConsole(), containsString("[WS-CLEANUP] Deleting project workspace...[WS-CLEANUP] done"));
+        String console = build.getConsole();
+        assertThat(console, containsString(String.format("Running in %s/%s/%s", fakeNodeMountingPoint, job.name, build.getNumber())));
+        assertThat(console, containsString("[WS-CLEANUP] Deleting project workspace"));
+        assertThat(console, containsString("[WS-CLEANUP] done"));
         assertThat(listFiles(tmp.getRoot(), nameFileFilter("foobar.txt"), directoryFileFilter()), hasSize(0));
     }
 
