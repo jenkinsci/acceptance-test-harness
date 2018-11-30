@@ -5,7 +5,7 @@ stage ('build_Project') {
 
     steps {
         script {
-            sh "gradle hello --scan"
+            sh "gradle hello --scan --no-daemon"
         }
     }
 }

@@ -5,7 +5,7 @@ stage ('build_Project') {
 
     steps {
         script {
-            sh "gradle firstTask secondTask"
+            sh "gradle firstTask secondTask --no-daemon"
         }
     }
 }

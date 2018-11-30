@@ -20,7 +20,7 @@
                         realtimeJUnit(testResults: 'target/surefire-reports/TEST-*.xml', testDataPublishers: [[$class: 'AttachmentPublisher']]) {
                             sh '''
                                 eval $(./vnc.sh)
-                                ./run.sh firefox latest -Dmaven.test.failure.ignore=true -DforkCount=1 -B
+                                ./run.sh firefox latest -Dmaven.test.failure.ignore=true -DforkCount=1 -B -Dtest=GradlePluginTest
                             '''
                         }
                     }
