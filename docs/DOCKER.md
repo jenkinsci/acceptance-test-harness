@@ -11,3 +11,39 @@ Interactive shell:
 Jenkinsfile:
 
 See the repository `Jenkinsfile` for inspiration.
+
+# Debugging tests in a docker container
+If you need to debug the tests running in a docker container, you need to run the tests inside the container with:
+
+    ./run.sh firefox latest -Dmaven.surefire.debug="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=*:5005 -Xnoagent -Djava.compiler=NONE" -Dtest=...`
+
+With this instruction, the tests will stop until you connect a remote debugger. You can do that connecting your IDE to the **IP** used by the container in the port **5005**. You can figure out the IP used by the container with:
+
+    docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' NAME_OF_THE_CONTAINER_RUNNING
+
+TIP: to know the name of the container execute `docker ps`
+
+It's best explained with an example:
+
+Launch the container:
+
+    mramonleon@laptop:~/acceptance-test-harness$ ./ath-container.sh
+
+In the container shell, run the tests with debugging :
+
+    ath-user@1803848e337f:~/ath-sources$ ./run.sh firefox latest -Dmaven.surefire.debug="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=*:5005 -Xnoagent -Djava.compiler=NONE" -DrunSmokeTests`
+
+In other terminal of the host, not in the container, get the name and IP of the container used:
+
+    mramonleon@laptop:~/acceptance-test-harness$ docker ps
+    CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS                     NAMES
+    1803848e337f        jenkins/ath         "/bin/bash"         13 seconds ago      Up 13 seconds       0.0.0.0:32818->5942/tcp   musing_euler
+
+    mramonleon@laptop:~/acceptance-test-harness$ docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' musing_euler
+    172.17.0.2
+
+The container is running with the IP **172.17.0.2**. To connect your IDE (IntelliJ IDEA in this example) just do:
+
+![Debugging ATH tests from IntelliJ IDEA](img/debuging-ath-containerized-from-idea.png)
+
+After that, the tests will continue. You can set breakpoints and debug as usual.
