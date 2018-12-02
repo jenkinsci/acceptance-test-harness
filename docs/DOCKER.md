@@ -33,7 +33,7 @@ It's best explained with an example:
 
     ath-user@1803848e337f:~/ath-sources$ ./run.sh firefox latest -Dmaven.surefire.debug="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=*:5005 -Xnoagent -Djava.compiler=NONE" -DrunSmokeTests`
 
-1. In other terminal of the host, not in the container, get the name and IP of the container used:
+1. In another terminal on the host, not in the container, get the name and IP of the container used:
 
     harry@devbox:~/acceptance-test-harness$ docker ps
     CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS                     NAMES
@@ -44,6 +44,6 @@ It's best explained with an example:
 
 1. The container is running with the IP **172.17.0.2**. To connect your IDE (IntelliJ IDEA in this example) just do:
 
-![Debugging ATH tests from IntelliJ IDEA](img/debuging-ath-containerized-from-idea.png)
+    ![Debugging ATH tests from IntelliJ IDEA](img/debuging-ath-containerized-from-idea.png)
 
 1. After that, the tests will continue. You can set breakpoints and debug as usual.
