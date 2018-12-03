@@ -27,6 +27,7 @@ The harness provides a variety of ways to configure the execution including:
 * [Obtaining a report of plugins that were exercised](docs/EXERCISEDPLUGINSREPORTER.md)
 * [Running tests in container](docs/DOCKER.md)
 * [Running tests on Java 11 (WIP)](docs/JAVA11.md)
+* [Debugging tests in container](docs/DOCKER.md#debugging-tests-in-a-docker-container)
 * Selecting tests based on plugins they cover (TODO)
 
 ### Writing tests
