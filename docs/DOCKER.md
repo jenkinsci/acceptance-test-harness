@@ -35,7 +35,11 @@ It's best explained with an example:
    harry@devbox:~/acceptance-test-harness$ ./ath-container.sh
    ```
 
-1. In the container shell, run the tests with debugging:
+1. In the container shell, set up the vnc server and run the tests with debugging:
+
+   ```bash
+   ath-user@1803848e337f:~/ath-sources$ eval $(./vnc.sh)
+   ```
 
    ```bash
    ath-user@1803848e337f:~/ath-sources$ ./run.sh firefox latest -Dmaven.surefire.debug="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=*:5005 -Xnoagent -Djava.compiler=NONE" -DrunSmokeTests
