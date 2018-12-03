@@ -94,4 +94,4 @@ shift 2
 
 set -x
 
-BROWSER=$browser JENKINS_WAR=$war mvn test "$@"
+BROWSER=$browser JENKINS_WAR=$war mvn --show-version test "$@"
