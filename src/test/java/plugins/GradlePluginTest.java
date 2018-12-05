@@ -97,14 +97,13 @@ public class GradlePluginTest extends AbstractJUnitTest {
      */
     @Test
     public void run_gradle_script_in_dir() {
-        final String gradleInstallationName = "gradle-1.5";
-        GradleInstallation.installGradle(jenkins, gradleInstallationName, "1.5");
+        GradleInstallation.installGradle(jenkins);
 
         FreeStyleJob job = jenkins.jobs.create();
         job.copyResource(resource(GRADLE_SCRIPT_NO_PLUGIN), "gradle/hello.gradle");
         GradleStep step = job.addBuildStep(GradleStep.class);
         step.setFile("hello.gradle");
-        step.setVersion(gradleInstallationName);
+        step.setVersion(GradleInstallation.DEFAULT);
         step.setTasks(HELLO.getName());
         step.setDir("gradle");
         step.setSwitches("--no-daemon");

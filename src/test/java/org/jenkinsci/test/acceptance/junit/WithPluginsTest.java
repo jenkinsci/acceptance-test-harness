@@ -23,13 +23,10 @@
  */
 package org.jenkinsci.test.acceptance.junit;
 
-import org.hamcrest.Matchers;
 import org.jenkinsci.test.acceptance.update_center.PluginSpec;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -62,7 +59,7 @@ public class WithPluginsTest {
     }
 
     @WithPlugins(          {"keep", "keepv@1", "specify",    "keepspecific@42", "override@1", "donotoverride@2", "inherit"})
-    private static final class FakeTestClass {
+    public static final class FakeTestClass {
         @Test @WithPlugins({"keep", "keepv@1", "specify@42", "keepspecific",    "override@2", "donotoverride@1", "add"})
         public void test() throws Exception {
 

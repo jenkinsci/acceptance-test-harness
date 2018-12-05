@@ -5,16 +5,15 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
-import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.jenkinsci.utils.process.ProcessInputStream;
 
 import com.cloudbees.sdk.extensibility.Extension;
-import com.google.common.base.Splitter;
 import com.google.inject.Injector;
 
 /**
@@ -24,28 +23,21 @@ import com.google.inject.Injector;
  */
 public class WinstoneController extends LocalController {
 
-    private static final List<String> JAVA_OPTS;
+    private static final List<String> JENKINS_JAVA_OPTS = envVarOpts("JENKINS_JAVA_OPTS");
+    private static final List<String> JENKINS_OPTS = envVarOpts("JENKINS_OPTS");
 
-    static {
-        String opts = StringUtils.defaultString(System.getenv("JENKINS_JAVA_OPTS"));
-        if (opts.isEmpty()) {
-            JAVA_OPTS = null;
-        } else {
-            //Since we are only expecting opts in the form of "-Xms=XXm -Xmx=XXXm" we'll just do a simple split.
-            JAVA_OPTS = Collections.unmodifiableList(
-                    Splitter.onPattern("\\s+").splitToList(opts)
-            );
-        }
+    private static List<String> envVarOpts(String jenkins_opts) {
+        String getenv = System.getenv(jenkins_opts);
+        if (getenv == null) return Collections.emptyList();
+        return Arrays.asList(getenv.split("\\s+"));
     }
 
     private final int httpPort;
-    private final int controlPort;
 
     @Inject
     public WinstoneController(Injector i) {
         super(i);
         httpPort = randomLocalPort();
-        controlPort = randomLocalPort();
     }
 
     @Override
@@ -53,14 +45,15 @@ public class WinstoneController extends LocalController {
         File javaHome = getJavaHome();
         String java = javaHome == null ? "java" : String.format("%s/bin/java",javaHome.getAbsolutePath());
         CommandBuilder cb = new CommandBuilder(java);
-        if(JAVA_OPTS != null && !JAVA_OPTS.isEmpty()) {
-            cb.addAll(JAVA_OPTS);
-        }
+        cb.addAll(JENKINS_JAVA_OPTS);
         cb.add(
                 "-Duser.language=en",
                 "-jar", war,
                 "--ajp13Port=-1",
-                "--httpPort=" + httpPort);
+                "--httpPort=" + httpPort
+        );
+        cb.addAll(JENKINS_OPTS);
+
         cb.env.putAll(commonLaunchEnv());
         LOGGER.info("Starting Jenkins: " + cb.toString());
         return cb.popen();
