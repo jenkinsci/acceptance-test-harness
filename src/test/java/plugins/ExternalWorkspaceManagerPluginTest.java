@@ -56,24 +56,18 @@ public class ExternalWorkspaceManagerPluginTest extends AbstractJUnitTest {
     }
 
     @Test
-    public void shareWorkspaceOneJobTwoNodes() throws Exception {
-        WorkflowJob job = createWorkflowJob(String.format("" +
+    public void shareWorkspaceOneJobTwoNodes() {
+        WorkflowJob job = createWorkflowJob(String.format(
                 "def extWorkspace = exwsAllocate '%s' \n" +
                 "node ('linux') { \n" +
                 "   exws (extWorkspace) { \n" +
-                "       git 'https://github.com/alexsomai/dummy-hello-world.git' \n" +
-                "       def mvnHome = tool 'M3' \n" +
-                "       withEnv([\"PATH+MAVEN=${mvnHome}/bin\", \"M2_HOME=${mvnHome}\"]) { \n" +
-                "           sh 'mvn clean install -DskipTests' \n" +
-                "       } \n" +
+                "      writeFile file: 'marker', text: 'content' \n" +
                 "   } \n" +
                 "} \n" +
                 "node ('test') { \n" +
                 "   exws (extWorkspace) { \n" +
-                "       def mvnHome = tool 'M3' \n" +
-                "       withEnv([\"PATH+MAVEN=${mvnHome}/bin\", \"M2_HOME=${mvnHome}\"]) { \n" +
-                "           sh 'mvn test' \n" +
-                "       } \n" +
+                "       def content = readFile(file: 'marker') \n" +
+                "       if (content != 'content') error('Content mismatch: ' + content) \n" +
                 "   } \n" +
                 "}", DISK_POOL_ID));
 
@@ -85,16 +79,12 @@ public class ExternalWorkspaceManagerPluginTest extends AbstractJUnitTest {
     }
 
     @Test
-    public void shareWorkspaceTwoJobsTwoNodes() throws Exception {
-        WorkflowJob upstreamJob = createWorkflowJob(String.format("" +
+    public void shareWorkspaceTwoJobsTwoNodes() {
+        WorkflowJob upstreamJob = createWorkflowJob(String.format(
                 "def extWorkspace = exwsAllocate '%s' \n" +
                 "node ('linux') { \n" +
                 "   exws (extWorkspace) { \n" +
-                "       git 'https://github.com/alexsomai/dummy-hello-world.git' \n" +
-                "       def mvnHome = tool 'M3' \n" +
-                "       withEnv([\"PATH+MAVEN=${mvnHome}/bin\", \"M2_HOME=${mvnHome}\"]) { \n" +
-                "           sh 'mvn clean install -DskipTests' \n" +
-                "       } \n" +
+                "      writeFile file: 'marker', text: 'content' \n " +
                 "   } \n" +
                 "}", DISK_POOL_ID));
 
@@ -108,21 +98,19 @@ public class ExternalWorkspaceManagerPluginTest extends AbstractJUnitTest {
                 "def extWorkspace = exwsAllocate selectedRun: run \n" +
                 "node ('test') { \n" +
                 "   exws (extWorkspace) { \n" +
-                "       def mvnHome = tool 'M3' \n" +
-                "       withEnv([\"PATH+MAVEN=${mvnHome}/bin\", \"M2_HOME=${mvnHome}\"]) { \n" +
-                "           sh 'mvn test' \n" +
-                "       } \n" +
+                "       def content = readFile(file: 'marker') \n" +
+                "       if (content != 'content') error('Content mismatch: ' + content) \n" +
                 "   } \n" +
                 "}", upstreamJob.name));
 
         Build downstreamBuild = downstreamJob.startBuild();
         downstreamBuild.shouldSucceed();
         assertThat(downstreamBuild.getConsole(), containsString(String.format("Running in %s/%s/%s", fakeNodeMountingPoint, upstreamJob.name, upstreamBuild.getNumber())));
-        verifyExternalWorkspacesAction(upstreamJob.name, upstreamBuild);
+        verifyExternalWorkspacesAction(upstreamJob.name, downstreamBuild);
     }
 
     @Test
-    public void externalWorkspaceCleanup() throws Exception {
+    public void externalWorkspaceCleanup() {
         WorkflowJob job = createWorkflowJob(String.format("" +
                 "def extWorkspace = exwsAllocate '%s' \n" +
                 "node ('linux') { \n" +
@@ -137,8 +125,10 @@ public class ExternalWorkspaceManagerPluginTest extends AbstractJUnitTest {
 
         Build build = job.startBuild();
         build.shouldSucceed();
-        assertThat(build.getConsole(), containsString(String.format("Running in %s/%s/%s", fakeNodeMountingPoint, job.name, build.getNumber())));
-        assertThat(build.getConsole(), containsString("[WS-CLEANUP] Deleting project workspace...[WS-CLEANUP] done"));
+        String console = build.getConsole();
+        assertThat(console, containsString(String.format("Running in %s/%s/%s", fakeNodeMountingPoint, job.name, build.getNumber())));
+        assertThat(console, containsString("[WS-CLEANUP] Deleting project workspace"));
+        assertThat(console, containsString("[WS-CLEANUP] done"));
         assertThat(listFiles(tmp.getRoot(), nameFileFilter("foobar.txt"), directoryFileFilter()), hasSize(0));
     }
 

@@ -8,12 +8,14 @@ public class GradleWrapper {
         final GradleStep wrapperDownloadStep = job.addBuildStep(GradleStep.class);
         wrapperDownloadStep.setTasks("wrapper");
         wrapperDownloadStep.setVersion(GradleInstallation.DEFAULT);
+        wrapperDownloadStep.setSwitches("--no-daemon");
     }
 
     public static void addWrapperStep(final Job job, final String wrapperLocation, final String tasks){
         final GradleStep wrapperExecutionStep = job.addBuildStep(GradleStep.class);
         wrapperExecutionStep.setUseWrapper();
         wrapperExecutionStep.setMakeWrapperExecutable();
+        wrapperExecutionStep.setSwitches("--no-daemon");
         if(tasks != null) {
             wrapperExecutionStep.setTasks(tasks);
         }

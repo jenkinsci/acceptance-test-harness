@@ -26,15 +26,6 @@ package org.jenkinsci.test.acceptance.update_center;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import java.io.File;
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.ConnectionClosedException;
 import org.apache.http.ExceptionLogger;
@@ -61,6 +52,17 @@ import org.jenkinsci.test.acceptance.po.UpdateCenter;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.security.NoSuchAlgorithmException;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * Serves a fake update center locally.
@@ -126,9 +128,14 @@ public class MockUpdateCenter implements AutoCleaned {
                         throw new AssertionError(x);
                     }
                 }).collect(Collectors.toList())));
-                plugin.remove("sha1");
+                // The fingerprints are not going to match after injecting different binary so we need to recalculate.
+                // It is enough to use the strongest cypher
+                if (meta instanceof PluginMetadata.ModifyingMetadata) {
+                    String checksum = ((PluginMetadata.ModifyingMetadata) meta).getSha512Checksum(injector);
+                    plugin.put("sha512", checksum);
+                }
             }
-        } catch (JSONException x) {
+        } catch (JSONException | NoSuchAlgorithmException | IOException x) {
             LOGGER.log(Level.WARNING, "cannot prepare mock update center", x);
             return;
         }

@@ -229,9 +229,6 @@ public class Control extends CapybaraPortingLayerImpl {
     public void select(String option) {
         WebElement e = resolve();
         findElement(e, by.option(option)).click();
-
-        // move the focus away from the select control to fire onchange event
-        e.sendKeys(Keys.TAB);
     }
 
     private WebElement findElement(WebElement context, By selector) {

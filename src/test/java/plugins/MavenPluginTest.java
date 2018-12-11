@@ -109,10 +109,10 @@ public class MavenPluginTest extends AbstractJUnitTest {
         job.configure();
         job.copyDir(resource("/maven_plugin/multimodule/"));
         job.goals.set("clean");
-        job.options("-verbose");
+        job.options("-showversion");
         job.save();
 
-        job.startBuild().waitUntilFinished().shouldContainsConsoleOutput("\\[Loaded java.lang.Object");
+        job.startBuild().waitUntilFinished().shouldContainsConsoleOutput(" Runtime Environment ");
     }
 
     @Test
@@ -120,7 +120,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
         installSomeMaven(jenkins);
 
         jenkins.configure();
-        new MavenProjectConfig(jenkins.getConfigPage()).opts.set("-verbose");
+        new MavenProjectConfig(jenkins.getConfigPage()).opts.set("-showversion");
         jenkins.save();
 
         MavenModuleSet job = jenkins.jobs.create(MavenModuleSet.class);
@@ -129,7 +129,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
         job.goals.set("clean");
         job.save();
 
-        job.startBuild().shouldSucceed().shouldContainsConsoleOutput("\\[Loaded java.lang.Object");
+        job.startBuild().shouldSucceed().shouldContainsConsoleOutput(" Runtime Environment ");
     }
 
     @Test

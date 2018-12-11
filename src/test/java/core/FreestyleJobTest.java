@@ -1,10 +1,6 @@
 package core;
 
-import java.net.URL;
-import java.util.Collections;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
-
+import org.apache.commons.io.IOUtils;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.Wait;
@@ -14,11 +10,12 @@ import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.BuildWithParameters;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.UpstreamJobTrigger;
 import org.jenkinsci.test.acceptance.po.ListView;
 import org.jenkinsci.test.acceptance.po.ShellBuildStep;
 import org.jenkinsci.test.acceptance.po.StringParameter;
 import org.jenkinsci.test.acceptance.po.TimerTrigger;
+import org.jenkinsci.test.acceptance.po.UpstreamJobTrigger;
+import org.jenkinsci.test.acceptance.utils.IOUtil;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
@@ -26,11 +23,24 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
-import static org.hamcrest.CoreMatchers.*;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.Collections;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
+
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.jenkinsci.test.acceptance.Matchers.*;
-import static org.junit.Assert.*;
+import static org.jenkinsci.test.acceptance.Matchers.containsRegexp;
+import static org.jenkinsci.test.acceptance.Matchers.containsString;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+import static org.jenkinsci.test.acceptance.Matchers.pageObjectDoesNotExist;
+import static org.jenkinsci.test.acceptance.Matchers.pageObjectExists;
+import static org.junit.Assert.assertTrue;
 
 public class FreestyleJobTest extends AbstractJUnitTest {
     @Test
@@ -103,13 +113,12 @@ public class FreestyleJobTest extends AbstractJUnitTest {
         j.apply();
         j.save();
 
-        j.visit("config.xml");
-
-        assertTrue("job config.xml should contain the step \"echo 1\"",driver.getPageSource().contains("echo 1"));
+        String src = getConfigXml(j);
+        assertThat(src, containsString("echo 1"));
     }
 
     @Test
-    public void runCurrentBuilds() throws Exception {
+    public void runCurrentBuilds() {
         FreeStyleJob j = jenkins.jobs.create(FreeStyleJob.class);
         j.configure();
         j.concurrentBuild.check();
@@ -123,7 +132,7 @@ public class FreestyleJobTest extends AbstractJUnitTest {
     }
 
     @Test
-    public void disableJob() throws Exception {
+    public void disableJob() {
         FreeStyleJob j = jenkins.jobs.create(FreeStyleJob.class);
         assertThat(driver, not(Job.disabled()));
 
@@ -140,7 +149,7 @@ public class FreestyleJobTest extends AbstractJUnitTest {
 
     @Test
     @Category(SmokeTest.class)
-    public void buildParametrized() throws Exception {
+    public void buildParametrized() {
         FreeStyleJob j = jenkins.jobs.create(FreeStyleJob.class);
         j.configure();
         j.addParameter(StringParameter.class).setName("text").setDefault("foo").setDescription("Bar");
@@ -152,7 +161,7 @@ public class FreestyleJobTest extends AbstractJUnitTest {
     }
 
     @Test
-    public void discardBuilds() throws Exception {
+    public void discardBuilds() {
         FreeStyleJob j = jenkins.jobs.create(FreeStyleJob.class);
 
         j.configure();
@@ -188,7 +197,7 @@ public class FreestyleJobTest extends AbstractJUnitTest {
 
     @Test
     @Category(SmokeTest.class)
-    public void doNotDiscardSuccessfulBuilds() throws Exception {
+    public void doNotDiscardSuccessfulBuilds() {
         FreeStyleJob j = jenkins.jobs.create(FreeStyleJob.class);
 
         j.configure();
@@ -216,7 +225,7 @@ public class FreestyleJobTest extends AbstractJUnitTest {
 
     @Test
     @Category(SmokeTest.class)
-    public void archiveArtifacts() throws Exception {
+    public void archiveArtifacts() {
         FreeStyleJob j = jenkins.jobs.create(FreeStyleJob.class);
         j.configure();
         j.addShellStep("echo 'yes' > include; echo 'no' > exclude;");
@@ -233,7 +242,7 @@ public class FreestyleJobTest extends AbstractJUnitTest {
 
     @Test
     @Category(SmokeTest.class)
-    public void buildPeriodically() throws Exception {
+    public void buildPeriodically() {
         FreeStyleJob j = jenkins.jobs.create(FreeStyleJob.class);
         j.configure();
         TimerTrigger trigger = j.addTrigger(TimerTrigger.class);
@@ -251,7 +260,7 @@ public class FreestyleJobTest extends AbstractJUnitTest {
     }
 
     @Test
-    public void customWorkspace() throws Exception {
+    public void customWorkspace() {
         FreeStyleJob j = jenkins.jobs.create(FreeStyleJob.class);
         j.configure();
         j.useCustomWorkspace("custom_workspace");
@@ -284,7 +293,7 @@ public class FreestyleJobTest extends AbstractJUnitTest {
     }
 
     @Test @Issue({"JENKINS-21457", "JENKINS-20772", "JENKINS-21478"})
-    public void showErrorSavingConfig() throws Exception {
+    public void showErrorSavingConfig() {
         FreeStyleJob j = jenkins.jobs.create(FreeStyleJob.class);
         j.configure();
         TimerTrigger trigger = j.addTrigger(TimerTrigger.class);
@@ -324,12 +333,18 @@ public class FreestyleJobTest extends AbstractJUnitTest {
 
         FreeStyleJob k = jenkins.jobs.get(FreeStyleJob.class, "simple-job-copy");
 
-        j.visit("config.xml");
-        String jxml = driver.getPageSource();
-
-        k.visit("config.xml");
-        String kxml = driver.getPageSource();
-
+        String jxml = getConfigXml(j);
+        String kxml = getConfigXml(k);
         assertThat(jxml, is(kxml));
+    }
+
+    // Workaround for https://support.mozilla.org/en-US/questions/1193967
+    private String getConfigXml(FreeStyleJob j) {
+        try {
+            HttpURLConnection con = IOUtil.openConnection(new URL(j.url, "config.xml"));
+            return IOUtils.toString(con.getInputStream());
+        } catch (IOException e) {
+            throw new Error(e);
+        }
     }
 }

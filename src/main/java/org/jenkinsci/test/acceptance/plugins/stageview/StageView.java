@@ -1,4 +1,4 @@
-package org.jenkinsci.test.acceptance.po.stageview;
+package org.jenkinsci.test.acceptance.plugins.stageview;
 
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.PageObject;
@@ -111,6 +111,7 @@ public class StageView extends PageAreaImpl {
      * @return All stageview Jobs
      */
     public StageViewBuild getFirstBuild() {
+        if (this.jobs.isEmpty()) throw new IllegalStateException("There are no builds loaded");
         return this.jobs.get(0);
     }
 
@@ -120,16 +121,8 @@ public class StageView extends PageAreaImpl {
      * @return stageview Job
      */
     public StageViewBuild getLatestBuild() {
+        if (this.jobs.isEmpty()) throw new IllegalStateException("There are no builds loaded");
         return this.jobs.get(jobs.size() - 1);
-    }
-
-    /**
-     * Returns a stageviewJob wiht a specific bild number
-     *
-     * @return stageview Job
-     */
-    public StageViewBuild getBuildByBuildNumber(int buildNumber) {
-        return this.jobs.get(buildNumber);
     }
 
     /**

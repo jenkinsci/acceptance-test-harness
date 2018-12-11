@@ -1,11 +1,11 @@
 stage ('build_Project') {
     tools {
-        gradle 'Gradle 4.0'
+        gradle 'Gradle 4.10.2'
     }
 
     steps {
         script {
-            sh "gradle firstTask secondTask"
+            sh "gradle firstTask secondTask --no-daemon"
         }
     }
 }

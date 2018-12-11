@@ -22,8 +22,17 @@ $ ./run chrome 1.512 -Dtest=AntPluginTest
 # Run full suite in FF against LTS release candidate
 $ ./run firefox lts-rc
 USAGE
-  exit -2
+  exit 2
 fi
+
+function download() {
+    echo "Fetching $1 to $2"
+    status=$(curl -sL --write-out "%{http_code}" -o $2 $1)
+    if [ "$status" -ne 200 ]; then
+        echo >&2 "Failed to fetch the $1 ($status) to $2"
+        return 1
+    fi
+}
 
 browser=$1
 war=$2
@@ -51,14 +60,14 @@ if [ ! -f $war ]; then
     if [ -n "$url" ]; then
         find $war -maxdepth 0 -mtime +1 -delete 2> /dev/null
         if [ ! -f $war ]; then
-            echo "Fetching $war"
-            curl -sL -o $war $url
+            download "$url" "$war" || exit 1
         fi
     fi
 fi
 
 if [ ! -f $war ] && [[ $war == *.war ]]; then
-    curl -sL -o jenkins.war $war && war=jenkins.war
+    download "$war" "jenkins.war" || exit 1
+    war=jenkins.war
 fi
 
 if [ ! -f $war ]; then
@@ -68,7 +77,7 @@ if [ ! -f $war ]; then
     war=$wardir/$2/jenkins-war-$2.war
     if [ ! -f $war ]; then
 
-        mvn org.apache.maven.plugins:maven-dependency-plugin:2.7:get\
+        mvn -B org.apache.maven.plugins:maven-dependency-plugin:2.7:get\
             -DremoteRepositories=repo.jenkins-ci.org::::http://repo.jenkins-ci.org/public/\
             -Dartifact=org.jenkins-ci.main:jenkins-war:$2:war
     fi
@@ -77,7 +86,7 @@ if [ ! -f $war ]; then
 
         echo "No such jenkins.war. Available local versions:"
         ls $wardir/*/jenkins-war-*.war | sed -r -e 's/.*jenkins-war-(.+)\.war/\1/'
-        exit -1
+        exit 1
     fi
 fi
 
@@ -85,4 +94,4 @@ shift 2
 
 set -x
 
-BROWSER=$browser JENKINS_WAR=$war mvn test "$@"
+BROWSER=$browser JENKINS_WAR=$war mvn --show-version test "$@"

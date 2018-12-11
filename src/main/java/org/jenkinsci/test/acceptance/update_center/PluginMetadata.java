@@ -4,6 +4,11 @@ import hudson.util.VersionNumber;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.security.DigestOutputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -13,6 +18,8 @@ import java.util.regex.Pattern;
 
 import javax.annotation.Nonnull;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.output.NullOutputStream;
 import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.eclipse.aether.resolution.ArtifactResult;
@@ -96,7 +103,7 @@ public class PluginMetadata {
     public PluginMetadata withVersion(@Nonnull String v) {
         if (v == null) throw new IllegalArgumentException();
         String newGav = gav.replaceAll("\\b" + Pattern.quote(version) + "\\b", v);
-        return new PluginMetadata(name, newGav, v, requiredCore, dependencies);
+        return new VersionOverride(name, newGav, v, requiredCore, dependencies);
     }
 
     @Override
@@ -116,12 +123,19 @@ public class PluginMetadata {
         return Collections.unmodifiableList(dependencies);
     }
 
+    public static final class VersionOverride extends ModifyingMetadata {
+
+        public VersionOverride(String name, String gav, String version, String requiredCore, List<Dependency> dependencies) {
+            super(name, gav, version, requiredCore, dependencies);
+        }
+    }
+
     /**
      * Use local file instead of what is configured.
      *
      * @author ogondza
      */
-    public static final class LocalOverride extends PluginMetadata {
+    public static final class LocalOverride extends ModifyingMetadata {
         private @Nonnull File override;
 
         /**
@@ -185,6 +199,25 @@ public class PluginMetadata {
         @Override
         public String toString() {
             return getClass().getSimpleName() + "[" + getName() + "," + override.getAbsolutePath() + "]";
+        }
+    }
+
+    /**
+     * Metadata that alters what is coming from the update center. All modifications *must* use a subclass of this.
+     */
+    public static abstract class ModifyingMetadata extends PluginMetadata {
+
+        public ModifyingMetadata(String name, String gav, String version, String requiredCore, List<Dependency> dependencies) {
+            super(name, gav, version, requiredCore, dependencies);
+        }
+
+        public final String getSha512Checksum(Injector injector) throws NoSuchAlgorithmException, IOException {
+            MessageDigest sha512 = MessageDigest.getInstance("SHA-512");
+            Path overrideFile = resolve(injector, getVersion()).toPath();
+            try (DigestOutputStream dos512 = new DigestOutputStream(new NullOutputStream(), sha512)) {
+                Files.copy(overrideFile, dos512);
+            }
+            return Base64.encodeBase64String(sha512.digest());
         }
     }
 }

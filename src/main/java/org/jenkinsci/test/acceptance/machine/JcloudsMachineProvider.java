@@ -8,6 +8,7 @@ import com.google.inject.Inject;
 import com.google.inject.Module;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import org.apache.commons.codec.binary.Hex;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.jclouds.ContextBuilder;
@@ -31,7 +32,6 @@ import org.jenkinsci.utils.process.ProcessInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.xml.bind.DatatypeConverter;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -332,10 +332,11 @@ public abstract class JcloudsMachineProvider implements MachineProvider,Closeabl
             }
             md.update(sb.toString().getBytes("UTF-8"));
             byte[] digest = md.digest();
+            String hex = new String(Hex.encodeHex(digest), 0, 7).toLowerCase();
             if(seed != null){
-                return String.format("jat-%s-%s-%s-%s",username,localHost,seed,DatatypeConverter.printHexBinary(digest).substring(0,7).toLowerCase());
+                return String.format("jat-%s-%s-%s-%s",username,localHost,seed,hex);
             }else{
-                return String.format("jat-%s-%s-%s",username,localHost,DatatypeConverter.printHexBinary(digest).substring(0,7).toLowerCase());
+                return String.format("jat-%s-%s-%s",username,localHost,hex);
             }
 
         } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {

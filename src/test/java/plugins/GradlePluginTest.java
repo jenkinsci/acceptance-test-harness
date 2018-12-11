@@ -54,6 +54,8 @@ public class GradlePluginTest extends AbstractJUnitTest {
 
     /**
      * Verify the execution of a basic gradle build script.
+     *
+     * Prevent to run gradle daemon because attempt to clean processes after build put daemon into defunct mode and build timeout.
      */
     @Test
     public void run_gradle_script() {
@@ -63,6 +65,7 @@ public class GradlePluginTest extends AbstractJUnitTest {
         job.copyResource(resource(GRADLE_SCRIPT), "build.gradle");
         final GradleStep step = job.addBuildStep(GradleStep.class);
         step.setVersion(GradleInstallation.DEFAULT);
+        step.setSwitches("--no-daemon");
         job.save();
 
         final Build build = job.startBuild();
@@ -80,7 +83,7 @@ public class GradlePluginTest extends AbstractJUnitTest {
         job.copyResource(resource(GRADLE_SCRIPT), "build.gradle");
         final GradleStep step = job.addBuildStep(GradleStep.class);
         step.setVersion(GradleInstallation.DEFAULT);
-        step.setSwitches("--quiet");
+        step.setSwitches("--quiet --no-daemon");
         step.setTasks(FIRST.getName()+ " " + SECOND.getName());
         job.save();
 
@@ -94,16 +97,16 @@ public class GradlePluginTest extends AbstractJUnitTest {
      */
     @Test
     public void run_gradle_script_in_dir() {
-        final String gradleInstallationName = "gradle-1.5";
-        GradleInstallation.installGradle(jenkins, gradleInstallationName, "1.5");
+        GradleInstallation.installGradle(jenkins);
 
         FreeStyleJob job = jenkins.jobs.create();
         job.copyResource(resource(GRADLE_SCRIPT_NO_PLUGIN), "gradle/hello.gradle");
         GradleStep step = job.addBuildStep(GradleStep.class);
         step.setFile("hello.gradle");
-        step.setVersion(gradleInstallationName);
+        step.setVersion(GradleInstallation.DEFAULT);
         step.setTasks(HELLO.getName());
         step.setDir("gradle");
+        step.setSwitches("--no-daemon");
         job.save();
 
         final Build build = job.startBuild();
@@ -123,7 +126,7 @@ public class GradlePluginTest extends AbstractJUnitTest {
         final GradleStep step = job.addBuildStep(GradleStep.class);
         step.setVersion(GradleInstallation.DEFAULT);
         step.setTasks(HELLO.getName());
-        step.setSwitches("--scan");
+        step.setSwitches("--scan --no-daemon");
         job.save();
 
         final Build build = job.startBuild();
@@ -186,6 +189,7 @@ public class GradlePluginTest extends AbstractJUnitTest {
         final GradleStep step = job.addBuildStep(GradleStep.class);
         step.setVersion(GradleInstallation.DEFAULT);
         step.setTasks(ENVIRONMENT_VARIABLES.getName());
+        step.setSwitches("--no-daemon");
         job.save();
 
         final Build build = job.startBuild().shouldSucceed();
@@ -209,6 +213,7 @@ public class GradlePluginTest extends AbstractJUnitTest {
         step.setVersion(GradleInstallation.DEFAULT);
         step.setTasks(JOB_PARAM_AS_PROJECT_PROPERTIES.getName());
         step.setPassAllAsProjectProperties();
+        step.setSwitches("--no-daemon");
         job.save();
 
         final Build build = job.startBuild().shouldSucceed();
@@ -231,6 +236,7 @@ public class GradlePluginTest extends AbstractJUnitTest {
         step.setVersion(GradleInstallation.DEFAULT);
         step.setTasks(JOB_PARAM_AS_SYSTEM_PROPERTIES.getName());
         step.setPassAllAsSystemProperties();
+        step.setSwitches("--no-daemon");
         job.save();
 
         final Build build = job.startBuild().shouldSucceed();
@@ -248,10 +254,10 @@ public class GradlePluginTest extends AbstractJUnitTest {
 
         final GradleStep step = job.addBuildStep(GradleStep.class);
         step.setTasks(HELLO.getName());
+        step.setSwitches("--no-daemon");
         step.setVersion(GradleInstallation.DEFAULT);
         step.setForceGradleHomeToUseWorkspace();
         job.save();
-
         job.startBuild().shouldSucceed();
         assertThat(job, Workspace.workspaceContains("caches"));
     }
@@ -270,6 +276,7 @@ public class GradlePluginTest extends AbstractJUnitTest {
         step.setVersion(GradleInstallation.DEFAULT);
         step.setProjectProperties("TEST_PARAM_1=hello\nTEST_PARAM_2=world");
         step.setTasks(JOB_PARAM_AS_PROJECT_PROPERTIES.getName());
+        step.setSwitches("--no-daemon");
         job.save();
 
         final Build build = job.startBuild().shouldSucceed();
@@ -289,6 +296,7 @@ public class GradlePluginTest extends AbstractJUnitTest {
         step.setVersion(GradleInstallation.DEFAULT);
         step.setSystemProperties("TEST_PARAM_1=hello\nTEST_PARAM_2=world");
         step.setTasks(JOB_PARAM_AS_SYSTEM_PROPERTIES.getName());
+        step.setSwitches("--no-daemon");
         job.save();
 
         final Build build = job.startBuild().shouldSucceed();
@@ -308,6 +316,7 @@ public class GradlePluginTest extends AbstractJUnitTest {
 
         step.setTasks(FIRST.getName() + " " + SECOND.getName());
         step.setVersion(GradleInstallation.DEFAULT);
+        step.setSwitches("--no-daemon");
         job.save();
 
         final Build build = job.startBuild().shouldSucceed();

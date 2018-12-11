@@ -3,7 +3,7 @@
 # see docs/DOCKER.md for usage
 
 
-FROM debian:stretch
+FROM debian:buster
 MAINTAINER ogondza@gmail.com
 
 RUN apt-get clean && \
@@ -15,13 +15,17 @@ RUN apt-get clean && \
         iptables \
         firefox-esr \
         maven \
-        openjdk-8-jdk \
         unzip \
         vnc4server
 
 # All we need is a statically linked client library - no need to install daemon deps: https://get.docker.com/builds/
-RUN curl -fsSLO https://get.docker.com/builds/Linux/x86_64/docker-17.04.0-ce.tgz && \
-    tar --strip-components=1 -xvzf docker-17.04.0-ce.tgz -C /usr/local/bin
+RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-17.03.2-ce.tgz && \
+    tar --strip-components=1 -xvzf docker-17.03.2-ce.tgz -C /usr/local/bin
+
+# Selenium needs a geckodriver in order to work properly
+RUN curl -fsSLO https://github.com/mozilla/geckodriver/releases/download/v0.22.0/geckodriver-v0.22.0-linux64.tar.gz && \
+    tar -xvzf geckodriver-v0.22.0-linux64.tar.gz -C /usr/local/bin
+
 ENV SHARED_DOCKER_SERVICE true
 
 # Allow injecting uid and git to match directory ownership
@@ -55,3 +59,11 @@ RUN touch /home/ath-user/.Xauthority
 # have in ENTRYPOINT as the container is started as ath-user.
 USER root
 RUN chmod ug+s "$(which docker)"
+
+# The variable seems to prevent docker to cache the install command so moving it towards the end
+ARG java_version
+RUN apt-get install -y openjdk-$java_version-jdk
+# Installing some apps like maven can cause latest java to be installed at the same time preventing us to control what is
+# used in the end. Since preventing the install is cumbersome, let's enforce the desired version through alternatives.
+RUN update-java-alternatives -s java-1.$java_version.0-openjdk-amd64
+RUN java -version
