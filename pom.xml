@@ -488,7 +488,7 @@
             </property>
           </properties>
           <!-- SUREFIRE-1588 workaround; too late for systemProperties: -->
-          <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
+          <argLine>-Xmx768M -Djava.awt.headless=true -Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
         </configuration>
       </plugin>
       <plugin>
