@@ -4,7 +4,7 @@
 if [ "$1" == "11" ]; then
     # Java 11
     selection="1"
-    runcommand="env JAVA_OPTS=\"${JAVA_OPTS} -p /home/ath-user/jdk11-libs/jaxb-api.jar:/home/ath-user/jdk11-libs/javax.activation.jar --add-modules java.xml.bind,java.activation -cp /home/ath-user/jdk11-libs/jaxb-impl.jar:/home/ath-user/jdk11-libs/jaxb-core.jar\" JENKINS_OPTS=\"--enable-future-java\" ./run.sh firefox latest -DforkCount=1 -Dmaven.test.failure.ignore=true -B -Dtest=..."
+    runcommand="env JAVA_OPTS=\"-p /home/ath-user/jdk11-libs/jaxb-api.jar:/home/ath-user/jdk11-libs/javax.activation.jar --add-modules java.xml.bind,java.activation -cp /home/ath-user/jdk11-libs/jaxb-impl.jar:/home/ath-user/jdk11-libs/jaxb-core.jar\" JENKINS_OPTS=\"--enable-future-java\" ./run.sh firefox latest -DforkCount=1 -Dmaven.test.failure.ignore=true -B -Dtest=..."
 else
     # Java 8 is set as second option, default
     selection="2"
