@@ -23,7 +23,7 @@ for (int j in [8, 11]) {
                             sh '''
                                 eval $(./vnc.sh)
                                 # Temporary to get Java 11 going: https://github.com/jenkinsci/workflow-support-plugin/pull/68#issuecomment-440971292 
-                                export JENKINS_OPTS="--enable-future-java"; export VERSION_OVERRIDES="workflow-support=2.23-20181122.094059-1"
+                                export JENKINS_OPTS="--enable-future-java"; export VERSION_OVERRIDES="workflow-support=3.0-java11-alpha-1"
                                 java -version
                                 ./run.sh firefox latest -Dmaven.test.failure.ignore=true -DforkCount=1 -B
                             '''
