@@ -20,13 +20,19 @@ for (int j in [8, 11]) {
                         def exclusions = splits.get(index).join("\n")
                         writeFile file: 'excludes.txt', text: exclusions
                         realtimeJUnit(testResults: 'target/surefire-reports/TEST-*.xml', testDataPublishers: [[$class: 'AttachmentPublisher']]) {
-                            sh '''
-                                eval $(./vnc.sh)
+                            def java11mods = (javaVersion == 11) ? '''
                                 # Temporary to get Java 11 going: https://github.com/jenkinsci/workflow-support-plugin/pull/68#issuecomment-440971292 
-                                export JENKINS_OPTS="--enable-future-java"; export VERSION_OVERRIDES="workflow-support=2.23-20181122.094059-1"
+                                export JENKINS_OPTS="--enable-future-java"
+                                export VERSION_OVERRIDES="workflow-support=3.0-java11-alpha-1"
+                                export JAVA_OPTS="-p /home/ath-user/jdk11-libs/jaxb-api.jar:/home/ath-user/jdk11-libs/javax.activation.jar --add-modules java.xml.bind,java.activation -cp /home/ath-user/jdk11-libs/jaxb-impl.jar:/home/ath-user/jdk11-libs/jaxb-core.jar"
+                            ''' : '';
+
+                            sh """
+                                eval \$(./vnc.sh)
                                 java -version
+                                ${java11mods}
                                 ./run.sh firefox latest -Dmaven.test.failure.ignore=true -DforkCount=1 -B
-                            '''
+                               """
                         }
                     }
                 }
