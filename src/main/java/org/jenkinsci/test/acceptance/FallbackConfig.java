@@ -234,7 +234,7 @@ public class FallbackConfig extends AbstractModule {
                     }
 
                     d.quit();
-                } catch (UnreachableBrowserException | NoSuchSessionException ex) {
+                } catch (UnreachableBrowserException ex) {
                     System.err.println("Browser died already");
                     ex.printStackTrace();
                 }
