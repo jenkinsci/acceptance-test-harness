@@ -41,6 +41,7 @@ import org.jenkinsci.utils.process.CommandBuilder;
 import org.junit.runners.model.Statement;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.Dimension;
+import org.openqa.selenium.NoSuchSessionException;
 import org.openqa.selenium.UnsupportedCommandException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -233,7 +234,7 @@ public class FallbackConfig extends AbstractModule {
                     }
 
                     d.quit();
-                } catch (UnreachableBrowserException ex) {
+                } catch (UnreachableBrowserException | NoSuchSessionException ex) {
                     System.err.println("Browser died already");
                     ex.printStackTrace();
                 }
