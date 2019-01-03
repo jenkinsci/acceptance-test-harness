@@ -28,7 +28,7 @@ for (int j in [8, 11]) {
                             ''' : '';
 
                             sh """
-                                ./set-java.sh $java_version
+                                ./set-java.sh $javaVersion
                                 eval \$(./vnc.sh)
                                 java -version
                                 ${java11mods}
