@@ -109,7 +109,13 @@ public class FallbackConfig extends AbstractModule {
             firefoxOptions.addPreference(DOM_MAX_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
             firefoxOptions.addPreference(DOM_MAX_CHROME_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
             setDriverProperty("geckodriver", GeckoDriverService.GECKO_DRIVER_EXE_PROPERTY);
-            return new FirefoxDriver(firefoxOptions);
+
+            GeckoDriverService.Builder builder = new GeckoDriverService.Builder();
+            if (display != null) {
+                builder.withEnvironment(Collections.singletonMap("DISPLAY", display));
+            }
+            GeckoDriverService service = builder.build();
+            return new FirefoxDriver(service, firefoxOptions);
         case "ie":
         case "iexplore":
         case "iexplorer":
