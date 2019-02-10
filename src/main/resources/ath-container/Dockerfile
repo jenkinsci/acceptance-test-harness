@@ -67,3 +67,20 @@ RUN chmod ug+s "$(which docker)"
 
 # Java 8 by default
 RUN update-java-alternatives -s java-1.8.0-openjdk-amd64
+
+# We keep downloading the libraries because they are needed if you want to run Jenkins < 2.163 on Java 11
+# Set at the end to allow docker cache
+ARG JAXB_API_VERSION="2.3.0"
+ARG JAXB_VERSION="2.3.0.1"
+ARG JAF_VERSION="1.2.0"
+
+# Checksum for JavaBean Activation Framework lib is not matching the Maven Central one.
+RUN mkdir -p /home/ath-user/jdk11-libs && \
+    curl -LSs https://repo1.maven.org/maven2/javax/xml/bind/jaxb-api/${JAXB_API_VERSION}/jaxb-api-${JAXB_API_VERSION}.jar -o /home/ath-user/jdk11-libs/jaxb-api.jar && \
+    curl -LSs https://repo1.maven.org/maven2/com/sun/xml/bind/jaxb-core/${JAXB_VERSION}/jaxb-core-${JAXB_VERSION}.jar -o /home/ath-user/jdk11-libs/jaxb-core.jar && \
+    curl -LSs https://repo1.maven.org/maven2/com/sun/xml/bind/jaxb-impl/${JAXB_VERSION}/jaxb-impl-${JAXB_VERSION}.jar -o /home/ath-user/jdk11-libs/jaxb-impl.jar && \
+    curl -LSs https://repo1.maven.org/maven2/com/sun/activation/${JAF_VERSION}/javax.activation-${JAF_VERSION}.jar -o /home/ath-user/jdk11-libs/javax.activation.jar && \
+    echo "99f802e0cb3e953ba3d6e698795c4aeb98d37c48  /home/ath-user/jdk11-libs/jaxb-api.jar\n\
+    23574ca124d0a694721ce3ef13cd720095f18fdd  /home/ath-user/jdk11-libs/jaxb-core.jar\n\
+    2e979dabb3e5e74a0686115075956391a14dece8  /home/ath-user/jdk11-libs/jaxb-impl.jar\n\
+    84e709cb8271e5e7ff7da61528d52d36298aa733  /home/ath-user/jdk11-libs/javax.activation.jar" | sha1sum -c
