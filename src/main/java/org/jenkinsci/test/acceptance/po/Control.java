@@ -1,13 +1,18 @@
 package org.jenkinsci.test.acceptance.po;
 
-import org.apache.commons.lang3.StringUtils;
-import org.jenkinsci.test.acceptance.junit.Resource;
-import org.openqa.selenium.*;
+import javax.annotation.Nullable;
 
-import com.google.inject.Injector;
+import org.apache.commons.lang3.StringUtils;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 
-import javax.annotation.Nullable;
+import com.google.inject.Injector;
+
+import org.jenkinsci.test.acceptance.junit.Resource;
 
 /**
  * Wraps a specific form element in {@link PageAreaImpl} to provide operations.
@@ -156,6 +161,7 @@ public class Control extends CapybaraPortingLayerImpl {
 
     public void selectDropdownMenu(String displayName) {
         click();
+        elasticSleep(1000);
         findDropDownMenuItem.find(displayName).click();
         elasticSleep(1000);
     }
