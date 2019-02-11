@@ -113,7 +113,7 @@ do
 done
 
 echo
-#To avoid us get confused whether this commands are executed or are just documentation when looking at the logs
+#To avoid us getting confused whether this commands are executed or are just documentation when looking at the logs
 echo -------------------- INFORMATION --------------------
 echo Running on...
 java -version
