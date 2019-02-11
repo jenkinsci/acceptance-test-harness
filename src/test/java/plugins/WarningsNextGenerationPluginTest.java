@@ -20,7 +20,6 @@ import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.AbstractNonDetailsIssuesTableRow;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.AnalysisResult;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.AnalysisSummary;
-import org.jenkinsci.test.acceptance.plugins.warnings_ng.AnalysisSummary.SummaryBoxPageArea;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.ConsoleLogView;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.DefaultWarningsTableRow;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.DetailsTableRow;
@@ -36,7 +35,7 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
 
-import static plugins.warnings.assertions.Assertions.*;
+import static org.jenkinsci.test.acceptance.plugins.warnings_ng.Assertions.*;
 
 /**
  * Acceptance tests for the White Mountains release of the warnings plug-in.
@@ -221,6 +220,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
                 "Applying 2 filters on the set of 4 issues (3 issues have been removed, 1 issues will be published)");
 
         AnalysisResult result = openAnalysisResult(build, "checkstyle");
+
         IssuesTable issuesTable = result.openIssuesTable();
         assertThat(issuesTable).hasSize(1);
     }
@@ -242,12 +242,19 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         Build build = buildJob(job);
         build.open();
 
-        AnalysisSummary analysisSummary = new AnalysisSummary(build);
-        assertThat(analysisSummary.getSummaryBoxByName(CHECKSTYLE_ID)).hasSummary();
-        assertThat(analysisSummary.getSummaryBoxByName(PMD_ID)).hasSummary();
-        assertThat(analysisSummary.getSummaryBoxByName(FINDBUGS_ID)).hasSummary();
+        AnalysisSummary checkstyle = new AnalysisSummary(build, CHECKSTYLE_ID);
+        assertThat(checkstyle).isDisplayed();
+        assertThat(checkstyle).hasTitleText("CheckStyle: 3 warnings");
 
-        AnalysisResult checkstyleDetails = analysisSummary.getSummaryBoxByName(CHECKSTYLE_ID).clickTitleLink();
+        AnalysisSummary pmd = new AnalysisSummary(build, PMD_ID);
+        assertThat(pmd).isDisplayed();
+        assertThat(pmd).hasTitleText("PMD: 2 warnings");
+
+        AnalysisSummary findBugs = new AnalysisSummary(build, FINDBUGS_ID);
+        assertThat(findBugs).isDisplayed();
+        assertThat(findBugs).hasTitleText("FindBugs: No warnings");
+
+        AnalysisResult checkstyleDetails = new AnalysisSummary(build, CHECKSTYLE_ID).clickTitleLink();
 //        assertThat(checkstyleDetails.getTrendChart())
 //                .hasNewIssues(3)
 //                .hasFixedIssues(1)
@@ -255,13 +262,14 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
 
         build.open();
 
-        LogMessagesView logMessagesView = analysisSummary.getSummaryBoxByName(CHECKSTYLE_ID).clickInfoLink();
-        assertThat(logMessagesView).containsInfoMessage("-> found 1 file");
-        assertThat(logMessagesView).containsInfoMessage("-> found 3 issues (skipped 0 duplicates)");
+        LogMessagesView logMessagesView = new AnalysisSummary(build, CHECKSTYLE_ID).clickInfoLink();
+        assertThat(logMessagesView).hasInfoMessages(
+                "-> found 1 file",
+                "-> found 3 issues (skipped 0 duplicates)");
 
         build.open();
 
-        AnalysisResult newResult = analysisSummary.getSummaryBoxByName(CHECKSTYLE_ID).clickNewLink();
+        AnalysisResult newResult = new AnalysisSummary(build, CHECKSTYLE_ID).clickNewLink();
 //        assertThat(newResult.getTrendChart())
 //                .hasNewIssues(3)
 //                .hasFixedIssues(0)
@@ -269,7 +277,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
 
         build.open();
 
-        AnalysisResult referenceResult = analysisSummary.getSummaryBoxByName(CHECKSTYLE_ID).clickReferenceBuildLink();
+        AnalysisResult referenceResult = new AnalysisSummary(build, CHECKSTYLE_ID).clickReferenceBuildLink();
 //        assertThat(referenceResult.getTrendChart())
 //                .hasNewIssues(0)
 //                .hasFixedIssues(0)
@@ -277,7 +285,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
 
         build.open();
 
-        String noWarningsResult = analysisSummary.getSummaryBoxByName(FINDBUGS_ID)
+        String noWarningsResult = new AnalysisSummary(build, FINDBUGS_ID)
                 .findResultEntryTextByNamePart("No warnings for");
         assertThat(noWarningsResult).isEqualTo("No warnings for 2 builds, i.e. since build 1");
     }
@@ -295,8 +303,8 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         Build referenceBuild = buildJob(job);
         referenceBuild.open();
 
-        AnalysisSummary referenceSummary = new AnalysisSummary(referenceBuild);
-        referenceSummary.getSummaryBoxByName(ANALYSIS_ID).getTitleResultLink().click();
+        AnalysisSummary referenceSummary = new AnalysisSummary(referenceBuild, ANALYSIS_ID);
+        referenceSummary.getTitleResultLink().click();
         AnalysisResult referenceDetails = openAnalysisResult(referenceBuild, ANALYSIS_ID);
 
         // assertThat(referenceDetails.getTrendChart()).hasNewIssues(0).hasFixedIssues(0).hasOutstandingIssues(4);
@@ -307,18 +315,14 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
 
         build.open();
 
-        AnalysisSummary analysisSummary = new AnalysisSummary(build);
+        AnalysisSummary analysisSummary = new AnalysisSummary(build, ANALYSIS_ID);
 
-        SummaryBoxPageArea aggregatedSummary = analysisSummary.getSummaryBoxByName(ANALYSIS_ID);
-        assertThat(aggregatedSummary).hasSummary();
-
-        String resultsFrom = analysisSummary.getSummaryBoxByName(ANALYSIS_ID)
-                .findResultEntryTextByNamePart("Static analysis results from");
+        String resultsFrom = analysisSummary.findResultEntryTextByNamePart("Static analysis results from");
         assertThat(resultsFrom).containsIgnoringCase(FINDBUGS_ID);
         assertThat(resultsFrom).containsIgnoringCase(PMD_ID);
         assertThat(resultsFrom).containsIgnoringCase("checkstyle");
 
-        analysisSummary.getSummaryBoxByName(ANALYSIS_ID).getTitleResultLink().click();
+        analysisSummary.getTitleResultLink().click();
         assertThat(jenkins.getCurrentUrl()).isEqualTo(build.url + "analysis/");
 
         AnalysisResult details = new AnalysisResult(build, ANALYSIS_ID);
@@ -326,23 +330,23 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
 
         build.open();
 
-        analysisSummary = new AnalysisSummary(build);
-        analysisSummary.getSummaryBoxByName(ANALYSIS_ID).getTitleResultInfoLink().click();
+        analysisSummary = new AnalysisSummary(build, ANALYSIS_ID);
+        analysisSummary.getTitleResultInfoLink().click();
         assertThat(jenkins.getCurrentUrl()).isEqualTo(build.url + "analysis/info/");
 
         build.open();
 
-        analysisSummary.getSummaryBoxByName(ANALYSIS_ID).findClickableResultEntryByNamePart("3 new warnings").click();
+        analysisSummary.findClickableResultEntryByNamePart("3 new warnings").click();
         assertThat(jenkins.getCurrentUrl()).isEqualTo(build.url + "analysis/new/");
 
         build.open();
 
-        analysisSummary.getSummaryBoxByName(ANALYSIS_ID).findClickableResultEntryByNamePart("2 fixed warnings").click();
+        analysisSummary.findClickableResultEntryByNamePart("2 fixed warnings").click();
         assertThat(jenkins.getCurrentUrl()).isEqualTo(build.url + "analysis/fixed/");
 
         build.open();
 
-        analysisSummary.getSummaryBoxByName(ANALYSIS_ID).findClickableResultEntryByNamePart("Reference build").click();
+        analysisSummary.findClickableResultEntryByNamePart("Reference build").click();
         assertThat(jenkins.getCurrentUrl()).isEqualTo(referenceBuild.url + "analysis/");
     }
 
@@ -364,12 +368,12 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
 
         build.open();
 
-        AnalysisSummary analysisSummary = new AnalysisSummary(build);
+        assertThat(new AnalysisSummary(build, CHECKSTYLE_ID)).hasQualityGateResult("Success");
 
-        assertThat(analysisSummary.getBuildState()).isEqualTo("Failed");
-        assertThat(analysisSummary.getSummaryBoxByName("checkstyle")).hasQualityGateState("Success");
-        assertThat(analysisSummary.getSummaryBoxByName(FINDBUGS_ID)).hasQualityGateState("Success");
-        assertThat(analysisSummary.getSummaryBoxByName(PMD_ID)).hasQualityGateState("Failed");
+        // build: assertThat(analysisSummary.getBuildState()).isEqualTo("Failed");
+        assertThat(new AnalysisSummary(build, CHECKSTYLE_ID)).hasQualityGateResult("Success");
+        assertThat(new AnalysisSummary(build, FINDBUGS_ID)).hasQualityGateResult("Success");
+        assertThat(new AnalysisSummary(build, PMD_ID)).hasQualityGateResult("Failed");
 
     }
 
@@ -451,24 +455,23 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         LogMessagesView logMessagesView = new LogMessagesView(build, CHECKSTYLE_ID);
         logMessagesView.open();
 
-        assertThat(logMessagesView).hasErrorMessagesSize(1 + 1 + 1 + 11);
-        assertThat(logMessagesView).containsErrorMessage("Can't resolve absolute paths for some files");
-        assertThat(logMessagesView).containsErrorMessage("Can't create fingerprints for some files");
+        assertThat(logMessagesView.getErrorMessages()).hasSize(1 + 1 + 1 + 11);
+        assertThat(logMessagesView).hasErrorMessages("Can't resolve absolute paths for some files",
+                "Can't create fingerprints for some files");
 
-        assertThat(logMessagesView).containsInfoMessage("-> found 1 file");
-        assertThat(logMessagesView).containsInfoMessage("-> found 11 issues (skipped 0 duplicates)");
-        assertThat(logMessagesView).containsInfoMessage("Post processing issues on 'Master' with encoding 'UTF-8'");
-        assertThat(logMessagesView).containsInfoMessage("-> 0 resolved, 1 unresolved, 0 already resolved");
-        assertThat(logMessagesView).containsInfoMessage(
-                "-> 0 copied, 0 not in workspace, 1 not-found, 0 with I/O error");
-        assertThat(logMessagesView).containsInfoMessage("-> resolved module names for 11 issues");
-        assertThat(logMessagesView).containsInfoMessage("-> resolved package names of 1 affected files");
-        assertThat(logMessagesView).containsInfoMessage("-> created fingerprints for 0 issues");
-        assertThat(logMessagesView).containsInfoMessage(
-                "No valid reference build found that meets the criteria (NO_JOB_FAILURE - SUCCESSFUL_QUALITY_GATE)");
-        assertThat(logMessagesView).containsInfoMessage("All reported issues will be considered outstanding");
-        assertThat(logMessagesView).containsInfoMessage("No quality gates have been set - skipping");
-        assertThat(logMessagesView).containsInfoMessage("Health report is disabled - skipping");
+        assertThat(logMessagesView).hasInfoMessages(
+                "-> found 1 file",
+                "-> found 11 issues (skipped 0 duplicates)",
+                "Post processing issues on 'Master' with encoding 'UTF-8'",
+                "-> 0 resolved, 1 unresolved, 0 already resolved",
+                "-> 0 copied, 0 not in workspace, 1 not-found, 0 with I/O error",
+                "-> resolved module names for 11 issues",
+                "-> resolved package names of 1 affected files",
+                "-> created fingerprints for 0 issues",
+                "No valid reference build found that meets the criteria (NO_JOB_FAILURE - SUCCESSFUL_QUALITY_GATE)",
+                "All reported issues will be considered outstanding",
+                "No quality gates have been set - skipping",
+                "Health report is disabled - skipping");
     }
 
     /**
@@ -484,10 +487,9 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         Build build = buildFailingJob(job);
         build.open();
 
-        AnalysisSummary analysisSummary = new AnalysisSummary(build);
-        assertThat(analysisSummary.getSummaryBoxByName(MAVEN_ID)).hasSummary();
+        AnalysisSummary analysisSummary = new AnalysisSummary(build, MAVEN_ID);
 
-        AnalysisResult mavenDetails = analysisSummary.getSummaryBoxByName(MAVEN_ID).clickTitleLink();
+        AnalysisResult mavenDetails = analysisSummary.clickTitleLink();
 //        assertThat(mavenDetails.getTrendChart())
 //                .hasNewIssues(0)
 //                .hasFixedIssues(0)
@@ -524,10 +526,9 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         Build build = buildFailingJob(job);
         build.open();
 
-        AnalysisSummary analysisSummary = new AnalysisSummary(build);
-        assertThat(analysisSummary.getSummaryBoxByName("eclipse")).hasSummary();
+        AnalysisSummary analysisSummary = new AnalysisSummary(build, "eclipse");
 
-        AnalysisResult result = analysisSummary.getSummaryBoxByName("eclipse").clickTitleLink();
+        AnalysisResult result = analysisSummary.clickTitleLink();
 //        assertThat(result.getTrendChart()).hasOutstandingIssues(9);
 //        assertThat(result.getPriorityChart()).hasNormalPriority(9);
 
