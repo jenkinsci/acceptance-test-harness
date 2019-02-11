@@ -4,7 +4,7 @@
 if [ "$1" == "11" ]; then
     # Java 11
     selection="1"
-    runcommand="Depending on the Jenkins version and your tests you will likely need some extra params. See https://github.com/jenkinsci/acceptance-test-harness/blob/master/docs/JAVA11.md"
+    runcommand="Depending on the Jenkins version you will likely need some extra params. See https://github.com/jenkinsci/acceptance-test-harness/blob/master/docs/JAVA11.md"
 else
     # Java 8 is set as second option, default
     selection="2"

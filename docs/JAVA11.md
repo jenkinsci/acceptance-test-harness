@@ -17,19 +17,19 @@ To run the tests using a Java 11 virtual machine:
 
 1. And run the tests with Java11 support:
 
-   Most likely, you will need to add some modules left apart from Java 9, like `JAVA_OPTS="--add-modules java.sql"` used by _pipeline-maven-plugin_ for example. It depends on the Jenkins version and the plugins to test. You can find the most updated documentation on how to run Jenkins on Java 11 at: https://jenkins.io/doc/administration/requirements/jenkins-on-java-11. Basically:
+   It depends on the Jenkins version to test. You can find the most updated documentation on how to run Jenkins on Java 11 at: https://jenkins.io/doc/administration/requirements/jenkins-on-java-11. Basically:
 
-   For Jenkins [2.155, 2.163), add modules, _enable-future-java_ and dependencies from tests:
+   For Jenkins [2.155, 2.163), add modules and _enable-future-java_:
    ```bash
    ath-user@1803848e337f:~/ath-sources$ env JAVA_OPTS=\"${JAVA_OPTS} -p /home/ath-user/jdk11-libs/jaxb-api.jar:/home/ath-user/jdk11-libs/javax.activation.jar --add-modules java.xml.bind,java.activation -cp /home/ath-user/jdk11-libs/jaxb-impl.jar:/home/ath-user/jdk11-libs/jaxb-core.jar\" JENKINS_OPTS=\"--enable-future-java\" ./run.sh ...
    ```
 
-    For Jenkins 2.163, add _enable-future-java_ and dependencies from tests:
+    For Jenkins 2.163, add _enable-future-java_:
    ```bash
    ath-user@1803848e337f:~/ath-sources$ JENKINS_OPTS=\"--enable-future-java\" ./run.sh ...
    ```
 
-   From Jenkins 2.164 onwards, just dependencies from tests:
+   From Jenkins 2.164 onwards:
    ```bash
    ath-user@1803848e337f:~/ath-sources$ ./run.sh ...
 
