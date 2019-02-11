@@ -76,11 +76,12 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
     private static final String NO_PACKAGE = "-";
 
     /**
-     * Runs a pipeline job with checkstyle and pmd. Verifies the expansion of tokens with the token-macro plugin.
+     * Runs a pipeline with checkstyle and pmd. Verifies the expansion of tokens with the token-macro plugin.
      */
     @Test @WithPlugins("token-macro")
     public void should_expand_token() {
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
+
         String checkstyle = job.copyResourceStep(WARNINGS_PLUGIN_PREFIX + "aggregation/checkstyle1.xml");
         String pmd = job.copyResourceStep(WARNINGS_PLUGIN_PREFIX + "aggregation/pmd.xml");
         job.script.set("node {\n"
@@ -103,6 +104,123 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         assertThat(build.getConsole()).contains("[total=7]");
         assertThat(build.getConsole()).contains("[checkstyle=3]");
         assertThat(build.getConsole()).contains("[pmd=4]");
+    }
+
+    /**
+     * Tests the build overview page by running two builds with three different tools enabled. Checks the contents
+     * of the result summaries for each tool.
+     */
+    @Test
+    public void should_show_build_summary() {
+        FreeStyleJob job = createFreeStyleJob("build_status_test/build_01");
+        addRecorderWith3Tools(job);
+        job.save();
+
+        buildJob(job);
+
+        reconfigureJobWithResource(job, "build_status_test/build_02");
+
+        Build build = buildJob(job);
+        build.open();
+
+        AnalysisSummary checkstyle = new AnalysisSummary(build, CHECKSTYLE_ID);
+        assertThat(checkstyle).isDisplayed();
+        assertThat(checkstyle).hasTitleText("CheckStyle: 3 warnings");
+        assertThat(checkstyle).hasNewSize(3);
+        assertThat(checkstyle).hasFixedSize(1);
+        assertThat(checkstyle).hasReferenceBuild(1);
+
+        AnalysisSummary pmd = new AnalysisSummary(build, PMD_ID);
+        assertThat(pmd).isDisplayed();
+        assertThat(pmd).hasTitleText("PMD: 2 warnings");
+        assertThat(pmd).hasNewSize(0);
+        assertThat(pmd).hasFixedSize(1);
+        assertThat(pmd).hasReferenceBuild(1);
+
+        AnalysisSummary findBugs = new AnalysisSummary(build, FINDBUGS_ID);
+        assertThat(findBugs).isDisplayed();
+        assertThat(findBugs).hasTitleText("FindBugs: No warnings");
+        assertThat(findBugs).hasNewSize(0);
+        assertThat(findBugs).hasFixedSize(0);
+        assertThat(findBugs).hasReferenceBuild(1);
+
+        AnalysisResult checkstyleDetails = checkstyle.clickTitleLink();
+//        assertThat(checkstyleDetails.getTrendChart())
+//                .hasNewIssues(3)
+//                .hasFixedIssues(1)
+//                .hasOutstandingIssues(0);
+
+        build.open();
+
+        LogMessagesView logMessagesView = new AnalysisSummary(build, CHECKSTYLE_ID).clickInfoLink();
+        assertThat(logMessagesView).hasInfoMessages(
+                "-> found 1 file",
+                "-> found 3 issues (skipped 0 duplicates)");
+
+        build.open();
+
+        AnalysisResult newResult = new AnalysisSummary(build, CHECKSTYLE_ID).clickNewLink();
+//        assertThat(newResult.getTrendChart())
+//                .hasNewIssues(3)
+//                .hasFixedIssues(0)
+//                .hasOutstandingIssues(0);
+
+        build.open();
+
+        AnalysisResult referenceResult = new AnalysisSummary(build, CHECKSTYLE_ID).clickReferenceBuildLink();
+//        assertThat(referenceResult.getTrendChart())
+//                .hasNewIssues(0)
+//                .hasFixedIssues(0)
+//                .hasOutstandingIssues(1);
+
+        build.open();
+
+        String noWarningsResult = new AnalysisSummary(build, FINDBUGS_ID)
+                .findResultEntryTextByNamePart("No warnings for");
+        assertThat(noWarningsResult).isEqualTo("No warnings for 2 builds, i.e. since build 1");
+    }
+
+    /**
+     * Tests the result overview with aggregated results by running two builds with three issue parsers.
+     */
+    @Test
+    public void should_show_expected_aggregations_in_result_box() {
+        FreeStyleJob job = createFreeStyleJob("build_status_test/build_01");
+        IssuesRecorder recorder = addRecorderWith3Tools(job);
+        recorder.setEnabledForAggregation(true);
+        job.save();
+
+        Build referenceBuild = buildJob(job);
+        referenceBuild.open();
+
+        assertThat(new AnalysisSummary(referenceBuild, CHECKSTYLE_ID)).isNotDisplayed();
+        assertThat(new AnalysisSummary(referenceBuild, PMD_ID)).isNotDisplayed();
+        assertThat(new AnalysisSummary(referenceBuild, FINDBUGS_ID)).isNotDisplayed();
+
+        AnalysisSummary referenceSummary = new AnalysisSummary(referenceBuild, ANALYSIS_ID);
+        assertThat(referenceSummary).isDisplayed();
+        assertThat(referenceSummary).hasTitleText("Static Analysis: 4 warnings");
+        assertThat(referenceSummary).hasAggregation("FindBugs, CheckStyle, PMD");
+        assertThat(referenceSummary).hasNewSize(0);
+        assertThat(referenceSummary).hasFixedSize(0);
+        assertThat(referenceSummary).hasReferenceBuild(0);
+
+        AnalysisResult referenceDetails = referenceSummary.clickTitleLink();
+        // assertThat(referenceDetails.getTrendChart()).hasNewIssues(0).hasFixedIssues(0).hasOutstandingIssues(4);
+
+        reconfigureJobWithResource(job, "build_status_test/build_02");
+
+        Build build = buildJob(job);
+
+        build.open();
+
+        AnalysisSummary analysisSummary = new AnalysisSummary(build, ANALYSIS_ID);
+        assertThat(analysisSummary).isDisplayed();
+        assertThat(analysisSummary).hasTitleText("Static Analysis: 5 warnings");
+        assertThat(analysisSummary).hasAggregation("FindBugs, CheckStyle, PMD");
+        assertThat(analysisSummary).hasNewSize(3);
+        assertThat(analysisSummary).hasFixedSize(2);
+        assertThat(analysisSummary).hasReferenceBuild(1);
     }
 
     /**
@@ -225,140 +343,6 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         assertThat(issuesTable).hasSize(1);
     }
 
-    /**
-     * Tests the build overview page by running two builds with three different tools enabled. Checks the contents
-     * of the result summaries for each tool.
-     */
-    @Test
-    public void should_show_build_summary() {
-        FreeStyleJob job = createFreeStyleJob("build_status_test/build_01");
-        applyIssueRecorder(job);
-        job.save();
-
-        buildJob(job);
-
-        reconfigureJobWithResource(job, "build_status_test/build_02");
-
-        Build build = buildJob(job);
-        build.open();
-
-        AnalysisSummary checkstyle = new AnalysisSummary(build, CHECKSTYLE_ID);
-        assertThat(checkstyle).isDisplayed();
-        assertThat(checkstyle).hasTitleText("CheckStyle: 3 warnings");
-        assertThat(checkstyle).hasNewSize(3);
-        assertThat(checkstyle).hasFixedSize(1);
-        assertThat(checkstyle).hasReferenceBuild(1);
-
-        AnalysisSummary pmd = new AnalysisSummary(build, PMD_ID);
-        assertThat(pmd).isDisplayed();
-        assertThat(pmd).hasTitleText("PMD: 2 warnings");
-        assertThat(pmd).hasNewSize(0);
-        assertThat(pmd).hasFixedSize(1);
-        assertThat(pmd).hasReferenceBuild(1);
-
-        AnalysisSummary findBugs = new AnalysisSummary(build, FINDBUGS_ID);
-        assertThat(findBugs).isDisplayed();
-        assertThat(findBugs).hasTitleText("FindBugs: No warnings");
-        assertThat(findBugs).hasNewSize(0);
-        assertThat(findBugs).hasFixedSize(0);
-        assertThat(findBugs).hasReferenceBuild(1);
-
-        AnalysisResult checkstyleDetails = new AnalysisSummary(build, CHECKSTYLE_ID).clickTitleLink();
-//        assertThat(checkstyleDetails.getTrendChart())
-//                .hasNewIssues(3)
-//                .hasFixedIssues(1)
-//                .hasOutstandingIssues(0);
-
-        build.open();
-
-        LogMessagesView logMessagesView = new AnalysisSummary(build, CHECKSTYLE_ID).clickInfoLink();
-        assertThat(logMessagesView).hasInfoMessages(
-                "-> found 1 file",
-                "-> found 3 issues (skipped 0 duplicates)");
-
-        build.open();
-
-        AnalysisResult newResult = new AnalysisSummary(build, CHECKSTYLE_ID).clickNewLink();
-//        assertThat(newResult.getTrendChart())
-//                .hasNewIssues(3)
-//                .hasFixedIssues(0)
-//                .hasOutstandingIssues(0);
-
-        build.open();
-
-        AnalysisResult referenceResult = new AnalysisSummary(build, CHECKSTYLE_ID).clickReferenceBuildLink();
-//        assertThat(referenceResult.getTrendChart())
-//                .hasNewIssues(0)
-//                .hasFixedIssues(0)
-//                .hasOutstandingIssues(1);
-
-        build.open();
-
-        String noWarningsResult = new AnalysisSummary(build, FINDBUGS_ID)
-                .findResultEntryTextByNamePart("No warnings for");
-        assertThat(noWarningsResult).isEqualTo("No warnings for 2 builds, i.e. since build 1");
-    }
-
-    /**
-     * Tests the result overview with aggregated results by running two builds with three issue parsers.
-     */
-    @Test
-    public void should_show_expected_aggregations_in_result_box() {
-        FreeStyleJob job = createFreeStyleJob("build_status_test/build_01");
-        IssuesRecorder recorder = applyIssueRecorder(job);
-        recorder.setEnabledForAggregation(true);
-        job.save();
-
-        Build referenceBuild = buildJob(job);
-        referenceBuild.open();
-
-        AnalysisSummary referenceSummary = new AnalysisSummary(referenceBuild, ANALYSIS_ID);
-        referenceSummary.getTitleResultLink().click();
-        AnalysisResult referenceDetails = openAnalysisResult(referenceBuild, ANALYSIS_ID);
-
-        // assertThat(referenceDetails.getTrendChart()).hasNewIssues(0).hasFixedIssues(0).hasOutstandingIssues(4);
-
-        reconfigureJobWithResource(job, "build_status_test/build_02");
-
-        Build build = buildJob(job);
-
-        build.open();
-
-        AnalysisSummary analysisSummary = new AnalysisSummary(build, ANALYSIS_ID);
-
-        String resultsFrom = analysisSummary.findResultEntryTextByNamePart("Static analysis results from");
-        assertThat(resultsFrom).containsIgnoringCase(FINDBUGS_ID);
-        assertThat(resultsFrom).containsIgnoringCase(PMD_ID);
-        assertThat(resultsFrom).containsIgnoringCase("checkstyle");
-
-        analysisSummary.getTitleResultLink().click();
-        assertThat(jenkins.getCurrentUrl()).isEqualTo(build.url + "analysis/");
-
-        AnalysisResult details = new AnalysisResult(build, ANALYSIS_ID);
-        // assertThat(details.getTrendChart()).hasNewIssues(3).hasFixedIssues(2).hasOutstandingIssues(2);
-
-        build.open();
-
-        analysisSummary = new AnalysisSummary(build, ANALYSIS_ID);
-        analysisSummary.getTitleResultInfoLink().click();
-        assertThat(jenkins.getCurrentUrl()).isEqualTo(build.url + "analysis/info/");
-
-        build.open();
-
-        analysisSummary.clickNewLink();
-        assertThat(jenkins.getCurrentUrl()).isEqualTo(build.url + "analysis/new/");
-
-        build.open();
-
-        analysisSummary.clickFixedLink();
-        assertThat(jenkins.getCurrentUrl()).isEqualTo(build.url + "analysis/fixed/");
-
-        build.open();
-
-        analysisSummary.clickReferenceBuildLink();
-        assertThat(jenkins.getCurrentUrl()).isEqualTo(referenceBuild.url + "analysis/");
-    }
-
     private void reconfigureJobWithResource(final FreeStyleJob job, final String fileName) {
         job.configure(() -> job.copyResource(WARNINGS_PLUGIN_PREFIX + fileName));
     }
@@ -369,7 +353,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
     @Test
     public void should_contain_expected_quality_gate_results() {
         FreeStyleJob job = createFreeStyleJob("build_status_test/build_01");
-        IssuesRecorder recorder = applyIssueRecorder(job);
+        IssuesRecorder recorder = addRecorderWith3Tools(job);
         recorder.addQualityGateConfiguration(2, QualityGateType.TOTAL, true);
         job.save();
 
@@ -386,7 +370,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
 
     }
 
-    private IssuesRecorder applyIssueRecorder(final FreeStyleJob job) {
+    private IssuesRecorder addRecorderWith3Tools(final FreeStyleJob job) {
         IssuesRecorder recorder = job.addPublisher(IssuesRecorder.class);
 
         recorder.setTool("CheckStyle");

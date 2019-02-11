@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
@@ -24,8 +25,8 @@ public class AnalysisSummary extends PageObject {
     private static final Pattern NUMBER = Pattern.compile(".*(\\d)+.*");
 
     private final WebElement summary;
-    private final WebElement title;
-    private final List<WebElement> results;
+    private WebElement title;
+    private List<WebElement> results;
     private final String id;
 
     /**
@@ -35,13 +36,15 @@ public class AnalysisSummary extends PageObject {
         super(parent, parent.url(id.toLowerCase()));
 
         this.id = id;
-        summary = find(By.id(id + "-summary"));
-        title = find(By.id(id + "-title"));
-        results = initResultList();
+        summary = getElement(By.id(id + "-summary"));
+        if (summary != null) {
+            title = find(By.id(id + "-title"));
+            results = initResultList();
+        }
     }
 
     public boolean isDisplayed() {
-        return summary.isDisplayed();
+        return summary != null && summary.isDisplayed();
     }
 
     public String getTitleText() {
@@ -58,6 +61,17 @@ public class AnalysisSummary extends PageObject {
 
     public int getReferenceBuild() {
         return getSize("#");
+    }
+
+    public String getAggregation() {
+        for (WebElement result : results) {
+            String message = result.getText();
+            String aggregation = "Static analysis results from: ";
+            if (message.startsWith(aggregation)) {
+                return StringUtils.removeStart(message, aggregation);
+            }
+        }
+        return "-";
     }
 
     private int getSize(final String linkName) {
