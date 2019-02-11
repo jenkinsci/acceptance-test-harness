@@ -31,6 +31,7 @@ import org.jenkinsci.test.acceptance.plugins.warnings_ng.IssuesTable;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.LogMessagesView;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.SourceView;
 import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.po.Build.Result;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
@@ -38,7 +39,7 @@ import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import static org.jenkinsci.test.acceptance.plugins.warnings_ng.Assertions.*;
 
 /**
- * Acceptance tests for the White Mountains release of the warnings plug-in.
+ * Acceptance tests for the Warnings Next Generation Plugin.
  *
  * @author Frank Christian Geyer
  * @author Ullrich Hafner
@@ -224,12 +225,36 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
     }
 
     /**
+     * Verifies that the quality gate is evaluated and fails the build.
+     */
+    @Test
+    public void should_fail_build_if_quality_gate_is_failed() {
+        runJobWithQualityGate(false);
+        runJobWithQualityGate(true);
+    }
+
+    private void runJobWithQualityGate(final boolean isUnstable) {
+        FreeStyleJob job = createFreeStyleJob("build_status_test/build_01");
+        IssuesRecorder recorder = addRecorderWith3Tools(job);
+        recorder.addQualityGateConfiguration(2, QualityGateType.TOTAL, isUnstable);
+        job.save();
+
+        Build build = buildJob(job).shouldBe(isUnstable ? Result.UNSTABLE : Result.FAILURE);
+        build.open();
+
+        assertThat(new AnalysisSummary(build, CHECKSTYLE_ID)).hasQualityGateResult("Success");
+        assertThat(new AnalysisSummary(build, FINDBUGS_ID)).hasQualityGateResult("Success");
+        assertThat(new AnalysisSummary(build, PMD_ID)).hasQualityGateResult(isUnstable ? "Unstable" : "Failed");
+    }
+
+    /**
      * Verifies that clicking on the (+) icon within the details column of the issues table will show and hide
      * the details child row.
      */
     @Test
     public void should_be_able_to_open_and_hide_details_row() {
-        Build build = createAndBuildFreeStyleJob("CPD", cpd -> cpd.setHighThreshold(2).setNormalThreshold(1),
+        Build build = createAndBuildFreeStyleJob("CPD",
+                cpd -> cpd.setHighThreshold(2).setNormalThreshold(1),
                 CPD_REPORT, CPD_SOURCE_PATH);
 
         AnalysisResult result = openAnalysisResult(build, CPD_ID);
@@ -345,29 +370,6 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
 
     private void reconfigureJobWithResource(final FreeStyleJob job, final String fileName) {
         job.configure(() -> job.copyResource(WARNINGS_PLUGIN_PREFIX + fileName));
-    }
-
-    /**
-     * Tests the functionality of the result overview with quality gate enabled.
-     */
-    @Test
-    public void should_contain_expected_quality_gate_results() {
-        FreeStyleJob job = createFreeStyleJob("build_status_test/build_01");
-        IssuesRecorder recorder = addRecorderWith3Tools(job);
-        recorder.addQualityGateConfiguration(2, QualityGateType.TOTAL, true);
-        job.save();
-
-        Build build = buildJob(job);
-
-        build.open();
-
-        assertThat(new AnalysisSummary(build, CHECKSTYLE_ID)).hasQualityGateResult("Success");
-
-        // build: assertThat(analysisSummary.getBuildState()).isEqualTo("Failed");
-        assertThat(new AnalysisSummary(build, CHECKSTYLE_ID)).hasQualityGateResult("Success");
-        assertThat(new AnalysisSummary(build, FINDBUGS_ID)).hasQualityGateResult("Success");
-        assertThat(new AnalysisSummary(build, PMD_ID)).hasQualityGateResult("Failed");
-
     }
 
     private IssuesRecorder addRecorderWith3Tools(final FreeStyleJob job) {

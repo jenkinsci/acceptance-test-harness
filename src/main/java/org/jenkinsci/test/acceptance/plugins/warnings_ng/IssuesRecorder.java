@@ -404,7 +404,7 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
         }
 
         public void setUnstable(final boolean isUnstable) {
-
+            find(by.xpath("//input[@type='radio' and contains(@path,'unstable[" + isUnstable + "]')]")).click();
         }
     }
 }
