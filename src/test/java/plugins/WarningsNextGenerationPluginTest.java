@@ -226,11 +226,11 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     * Tests the build overview page by running two builds with three issue parsers enabled. Checks the contents
-     * of the result summary boxes for each parser.
+     * Tests the build overview page by running two builds with three different tools enabled. Checks the contents
+     * of the result summaries for each tool.
      */
     @Test
-    public void should_show_correct_plugin_result_boxes() {
+    public void should_show_build_summary() {
         FreeStyleJob job = createFreeStyleJob("build_status_test/build_01");
         applyIssueRecorder(job);
         job.save();
@@ -245,14 +245,23 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         AnalysisSummary checkstyle = new AnalysisSummary(build, CHECKSTYLE_ID);
         assertThat(checkstyle).isDisplayed();
         assertThat(checkstyle).hasTitleText("CheckStyle: 3 warnings");
+        assertThat(checkstyle).hasNewSize(3);
+        assertThat(checkstyle).hasFixedSize(1);
+        assertThat(checkstyle).hasReferenceBuild(1);
 
         AnalysisSummary pmd = new AnalysisSummary(build, PMD_ID);
         assertThat(pmd).isDisplayed();
         assertThat(pmd).hasTitleText("PMD: 2 warnings");
+        assertThat(pmd).hasNewSize(0);
+        assertThat(pmd).hasFixedSize(1);
+        assertThat(pmd).hasReferenceBuild(1);
 
         AnalysisSummary findBugs = new AnalysisSummary(build, FINDBUGS_ID);
         assertThat(findBugs).isDisplayed();
         assertThat(findBugs).hasTitleText("FindBugs: No warnings");
+        assertThat(findBugs).hasNewSize(0);
+        assertThat(findBugs).hasFixedSize(0);
+        assertThat(findBugs).hasReferenceBuild(1);
 
         AnalysisResult checkstyleDetails = new AnalysisSummary(build, CHECKSTYLE_ID).clickTitleLink();
 //        assertThat(checkstyleDetails.getTrendChart())
@@ -336,17 +345,17 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
 
         build.open();
 
-        analysisSummary.findClickableResultEntryByNamePart("3 new warnings").click();
+        analysisSummary.clickNewLink();
         assertThat(jenkins.getCurrentUrl()).isEqualTo(build.url + "analysis/new/");
 
         build.open();
 
-        analysisSummary.findClickableResultEntryByNamePart("2 fixed warnings").click();
+        analysisSummary.clickFixedLink();
         assertThat(jenkins.getCurrentUrl()).isEqualTo(build.url + "analysis/fixed/");
 
         build.open();
 
-        analysisSummary.findClickableResultEntryByNamePart("Reference build").click();
+        analysisSummary.clickReferenceBuildLink();
         assertThat(jenkins.getCurrentUrl()).isEqualTo(referenceBuild.url + "analysis/");
     }
 

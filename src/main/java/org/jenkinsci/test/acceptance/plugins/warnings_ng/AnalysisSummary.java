@@ -1,6 +1,10 @@
 package org.jenkinsci.test.acceptance.plugins.warnings_ng;
 
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -9,16 +13,19 @@ import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.PageObject;
 
 /**
- * Page object for the AnalysisSummary (Result-Page) of the warnings plugin (white mountains release).
+ * Page object for the analysis summary on the build page of a job.
  *
+ * @author Ullrich Hafner
+ * @author Manuel Hampp
  * @author Michaela Reitschuster
  * @author Alexandra Wenzel
- * @author Manuel Hampp
  */
 public class AnalysisSummary extends PageObject {
+    private static final Pattern NUMBER = Pattern.compile(".*(\\d)+.*");
+
     private final WebElement summary;
     private final WebElement title;
-    private final List<WebElement> resultList;
+    private final List<WebElement> results;
     private final String id;
 
     /**
@@ -30,7 +37,7 @@ public class AnalysisSummary extends PageObject {
         this.id = id;
         summary = find(By.id(id + "-summary"));
         title = find(By.id(id + "-title"));
-        resultList = initResultList();
+        results = initResultList();
     }
 
     public boolean isDisplayed() {
@@ -39,6 +46,37 @@ public class AnalysisSummary extends PageObject {
 
     public String getTitleText() {
         return title.getText();
+    }
+
+    public int getNewSize() {
+        return getSize("new");
+    }
+
+    public int getFixedSize() {
+        return getSize("fixed");
+    }
+
+    public int getReferenceBuild() {
+        return getSize("#");
+    }
+
+    private int getSize(final String linkName) {
+        Optional<WebElement> newLink = findClickableResultEntryByNamePart(linkName);
+
+        return newLink.map(webElement -> extractNumber(webElement.getText())).orElse(0);
+    }
+
+    private int extractNumber(final String linkText) {
+        Matcher matcher = NUMBER.matcher(linkText);
+        if (matcher.matches()) {
+            return Integer.parseInt(matcher.group(1));
+        }
+        else if (linkText.startsWith("One")) {
+            return 1;
+        }
+        else {
+            return 0;
+        }
     }
 
     private List<WebElement> initResultList() {
@@ -69,7 +107,16 @@ public class AnalysisSummary extends PageObject {
      * @return the details page with the analysis result
      */
     public AnalysisResult clickNewLink() {
-        return openPage(findClickableResultEntryByNamePart("new"), AnalysisResult.class);
+        return openLink("new", "No new link found");
+    }
+
+    /**
+     * Clicks the fixed link that opens details page with the fixed issues.
+     *
+     * @return the details page with the analysis result
+     */
+    public AnalysisResult clickFixedLink() {
+        return openLink("fixed", "No fixed link found");
     }
 
     /**
@@ -78,7 +125,15 @@ public class AnalysisSummary extends PageObject {
      * @return the details page with the analysis result of the reference build
      */
     public AnalysisResult clickReferenceBuildLink() {
-        return openPage(findClickableResultEntryByNamePart("Reference"), AnalysisResult.class);
+        return openLink("Reference", "No reference build link found");
+    }
+
+    private AnalysisResult openLink(final String s, final String s2) {
+        Optional<WebElement> newLink = findClickableResultEntryByNamePart(s);
+        if (newLink.isPresent()) {
+            return openPage(newLink.get(), AnalysisResult.class);
+        }
+        throw new NoSuchElementException(s2);
     }
 
     private <T extends PageObject> T openPage(final WebElement link, final Class<T> type) {
@@ -95,7 +150,7 @@ public class AnalysisSummary extends PageObject {
      * @return Success - if the quality gate thresholds have not been reached. Failed - otherwise.
      */
     public String getQualityGateResult() {
-        for (WebElement el : resultList) {
+        for (WebElement el : results) {
             if (el.getText().contains("Quality gate")) {
                 return el.findElement(by.tagName("img")).getAttribute("title");
             }
@@ -111,13 +166,13 @@ public class AnalysisSummary extends PageObject {
      *
      * @return WebElement that belongs to the name part
      */
-    public WebElement findClickableResultEntryByNamePart(String namePart) {
-        for (WebElement el : resultList) {
+    public Optional<WebElement> findClickableResultEntryByNamePart(String namePart) {
+        for (WebElement el : results) {
             if (el.getText().contains(namePart)) {
-                return el.findElement(by.tagName("a"));
+                return Optional.of(el.findElement(by.tagName("a")));
             }
         }
-        return null;
+        return Optional.empty();
     }
 
     /**
@@ -129,7 +184,7 @@ public class AnalysisSummary extends PageObject {
      * @return String that belongs to the name part
      */
     public String findResultEntryTextByNamePart(String namePart) {
-        for (WebElement el : resultList) {
+        for (WebElement el : results) {
             if (el.getText().contains(namePart)) {
                 return el.getText();
             }
