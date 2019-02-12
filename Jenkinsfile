@@ -16,7 +16,7 @@ for (int j in [8, 11]) {
                 node('docker && highmem') {
                     checkout scm
                     def image = docker.build('jenkins/ath', "src/main/resources/ath-container")
-                    image.inside('-v /home/rleon/.m2/repository:/home/ath-user/.m2/repository -v /var/run/docker.sock:/var/run/docker.sock --shm-size 2g') {
+                    image.inside('-v /var/run/docker.sock:/var/run/docker.sock --shm-size 2g') {
                         def exclusions = splits.get(index).join("\n")
                         writeFile file: 'excludes.txt', text: exclusions
                         realtimeJUnit(testResults: 'target/surefire-reports/TEST-*.xml', testDataPublishers: [[$class: 'AttachmentPublisher']]) {
@@ -24,7 +24,7 @@ for (int j in [8, 11]) {
                                 ./set-java.sh $javaVersion
                                 eval \$(./vnc.sh)
                                 java -version
-                                ./run.sh firefox latest -Dmaven.test.failure.ignore=true -DforkCount=1 -B -PrunSmokeTests
+                                ./run.sh firefox latest -Dmaven.test.failure.ignore=true -DforkCount=1 -B
                             """
                         }
                     }
