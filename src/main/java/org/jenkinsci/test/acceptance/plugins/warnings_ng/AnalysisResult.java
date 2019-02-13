@@ -12,15 +12,19 @@ import org.openqa.selenium.WebElement;
 
 import com.google.inject.Injector;
 
-import org.jenkinsci.test.acceptance.plugins.warnings_ng.IssuesTable.Type;
+import org.jenkinsci.test.acceptance.plugins.warnings_ng.IssuesTable.IssuesTableRowType;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.PageObject;
 
 /**
- * PageObject representing the details page of static analysis tool results.
+ * {@link PageObject} representing the details page of the static analysis tool results.
+ *
+ * @author Stephan Plöderl
+ * @author Ullrich Hafner
  */
 public class AnalysisResult extends PageObject {
     private static final String[] DRY_TOOLS = new String[] {"cpd", "simian", "dupfinder"};
+
     private final String id;
 
     /**
@@ -29,10 +33,11 @@ public class AnalysisResult extends PageObject {
      * @param parent
      *         a finished build configured with a static analysis tool
      * @param id
-     *         the type of the result page (e.g. simian or cpd)
+     *         the type of the result page (e.g. simian, checkstyle, cpd, etc.)
      */
     public AnalysisResult(final Build parent, final String id) {
         super(parent, parent.url(id.toLowerCase()));
+
         this.id = id;
     }
 
@@ -54,6 +59,22 @@ public class AnalysisResult extends PageObject {
         this.id = id;
     }
 
+    /**
+     * Returns the active and visible tab that has the focus in the tab bar.
+     *
+     * @return the active tab
+     */
+    public Tab getActiveTab() {
+        WebElement activeTab = find(By.xpath("//a[@role='tab' and contains(@class, 'active')]"));
+
+        return Tab.valueWithHref(extractRelativeUrl(activeTab.getAttribute("href")));
+    }
+
+    /**
+     * Returns the list of available tabs. These tabs depend on the available properites of the set of shown issues.
+     *
+     * @return the available tabs
+     */
     public Collection<Tab> getAvailableTabs() {
         return all(By.xpath("//a[@role='tab']")).stream()
                 .map(tab -> tab.getAttribute("href"))
@@ -66,12 +87,10 @@ public class AnalysisResult extends PageObject {
         return "#" + StringUtils.substringAfterLast(absoluteUrl, "#");
     }
 
-    public Tab getVisibleTab() {
-        WebElement activeTab = find(By.xpath("//a[@role='tab' and contains(@class, 'active')]"));
-
-        return Tab.valueWithHref(extractRelativeUrl(activeTab.getAttribute("href")));
-    }
-
+    /**
+     * Returns the total number of issues. This method requires that one of the tabs is shown that shows the total
+     * number of issues in the footer. I.e. the {@link Tab#ISSUES} and {@link Tab#BLAMES}.
+     */
     public int getTotal() {
         String total = find(By.tagName("tfoot")).getText();
 
@@ -79,46 +98,40 @@ public class AnalysisResult extends PageObject {
     }
 
     /**
-     * Returns the table type of the issues table.
+     * Returns the type of the rows in the issues table. Currently, code duplications have a different representation
+     * than all other static analysis tools.
      *
-     * @return the table type
+     * @return the row type
      */
-    private Type getIssuesTableType() {
+    private IssuesTableRowType getIssuesTableType() {
         if (ArrayUtils.contains(DRY_TOOLS, id)) {
-            return Type.DRY;
+            return IssuesTableRowType.DRY;
         }
-        return Type.DEFAULT;
+        return IssuesTableRowType.DEFAULT;
     }
 
     /**
-     * Returns the WebElement containing the tabs.
-     *
-     * @return the WebElement
-     */
-    private WebElement getTabs() {
-        return getElement(By.id("tab-details"));
-    }
-
-    /**
-     * Opens the AnalysisResult and opens a specific tab in it.
+     * Opens the analysis details page and selects the specified tab.
      *
      * @param tab
-     *         the tab which shall be opened
+     *         the tab that should be selected
      */
     public void openTab(final Tab tab) {
         open();
-        WebElement tabs = getTabs();
-        WebElement tabElement = tabs.findElement(tab.getXpath());
+
+        WebElement tabElement = getElement(By.id("tab-details")).findElement(tab.getXpath());
         tabElement.click();
     }
 
     /**
-     * Opens the issues tab and returns the table displayed in it as {@link IssuesTable} object.
+     * Opens the analysis details page, selects the tab {@link Tab#ISSUES} and returns the {@link PageObject} of the
+     * issues table.
      *
-     * @return the issues-table.
+     * @return page object of the issues table.
      */
     public IssuesTable openIssuesTable() {
         openTab(Tab.ISSUES);
+
         WebElement issuesTable = find(By.id("issues"));
         return new IssuesTable(issuesTable, this, getIssuesTableType());
     }
@@ -133,6 +146,7 @@ public class AnalysisResult extends PageObject {
      *
      * @return the instance of the PageObject to which the link leads to
      */
+    // FIXME: IssuesTable should not depend on AnalysisResult
     public <T extends PageObject> T openLinkOnSite(final WebElement element, final Class<T> type) {
         String link = element.getAttribute("href");
         T retVal = newInstance(type, injector, url(link));
@@ -148,6 +162,7 @@ public class AnalysisResult extends PageObject {
      *
      * @return the instance of the filtered AnalysisResult
      */
+    // FIXME: IssuesTable should not depend on AnalysisResult
     public AnalysisResult openFilterLinkOnSite(final WebElement element) {
         String link = element.getAttribute("href");
         AnalysisResult retVal = newInstance(AnalysisResult.class, injector, url(link), id);
@@ -156,7 +171,7 @@ public class AnalysisResult extends PageObject {
     }
 
     /**
-     * Enum representing the possible tabs which can be opened on a AnalysisResult.
+     * Enum representing the possible tabs which can be opened in the {@link AnalysisResult} details view.
      */
     public enum Tab {
         TOOLS("origin"),
@@ -176,15 +191,25 @@ public class AnalysisResult extends PageObject {
         }
 
         /**
-         * Returns the selenium filter rule to find the specific tab.
+         * Returns the selenium {@link By} selector to find the specific tab.
          *
          * @return the selenium filter rule
          */
-        public By getXpath() {
+        By getXpath() {
             return By.xpath("//a[@href='" + href + "']");
         }
 
-        public static Tab valueWithHref(final String href) {
+        /**
+         * Returns the enum element that has the specified href property.
+         *
+         * @param href
+         *         the href to select the tab
+         *
+         * @return the tab
+         * @throws NoSuchElementException
+         *         if the tab could not be found
+         */
+        static Tab valueWithHref(final String href) {
             for (Tab tab : Tab.values()) {
                 if (tab.href.equals(href)) {
                     return tab;

@@ -15,7 +15,7 @@ import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.PageObject;
 
 /**
- * Page object for the analysis summary on the build page of a job.
+ * {@link PageObject} representing the analysis summary on the build page of a job.
  *
  * @author Ullrich Hafner
  * @author Manuel Hampp
@@ -32,7 +32,12 @@ public class AnalysisSummary extends PageObject {
     private final String id;
 
     /**
-     * Creates a new PageObject which represents the summary page of a build.
+     * Creates a new page object representing the analysis summary on the build page of a job.
+     *
+     * @param parent
+     *         a finished build configured with a static analysis tool
+     * @param id
+     *         the type of the result page (e.g. simian, checkstyle, cpd, etc.)
      */
     public AnalysisSummary(final Build parent, final String id) {
         super(parent, parent.url(id.toLowerCase()));
@@ -45,32 +50,68 @@ public class AnalysisSummary extends PageObject {
         }
     }
 
+    /**
+     * Determines whether this summary page exists.
+     *
+     * @return {@code true} if the page exists, {@code false} otherwise
+     */
     public boolean isDisplayed() {
         return summary != null && summary.isDisplayed();
     }
 
+    /**
+     * Return the title text of the summary.
+     *
+     * @return the title text
+     */
     public String getTitleText() {
         return title.getText();
     }
 
+    /**
+     * Returns the number of new issues.
+     *
+     * @return the number of new issues
+     */
     public int getNewSize() {
         return getSize("new");
     }
 
+    /**
+     * Returns the number of fixed issues.
+     *
+     * @return the number of fixed issues
+     */
     public int getFixedSize() {
         return getSize("fixed");
     }
 
+    /**
+     * Returns the reference build that is used to compute the number of new issues. If there is no such reference
+     * build, then 0 is returned.
+     *
+     * @return the reference build
+     */
     public int getReferenceBuild() {
         return getSize("#");
     }
 
+    /**
+     * Returns whether the tool produced some errors or not. If there are errors, then the info messages view will
+     * contain errors and info messages. Otherwise, only info messages are shown.
+     *
+     * @return the type of the icon that links to the info messages view
+     */
     public InfoType getInfoType() {
         String iconName = find(by.xpath("//a[@href='" + id + "/info']/i")).getAttribute("class");
 
         return InfoType.valueOfClass(iconName);
     }
 
+    /**
+     * Returns the tools that are part of the aggregated results. If aggregation is disabled, then {@link #UNDEFINED} is
+     * returned.
+     */
     public String getAggregation() {
         for (WebElement result : results) {
             String message = result.getText();
@@ -82,6 +123,11 @@ public class AnalysisSummary extends PageObject {
         return UNDEFINED;
     }
 
+    /**
+     * Returns the texts of the detail elements of the summary.
+     *
+     * @return the details
+     */
     public List<String> getDetails() {
         return results.stream().map(WebElement::getText).collect(Collectors.toList());
     }
@@ -174,7 +220,8 @@ public class AnalysisSummary extends PageObject {
     public QualityGateResult getQualityGateResult() {
         for (WebElement result : results) {
             if (result.getText().contains("Quality gate")) {
-                return QualityGateResult.valueOf(result.findElement(by.tagName("img")).getAttribute("title").toUpperCase());
+                return QualityGateResult.valueOf(
+                        result.findElement(by.tagName("img")).getAttribute("title").toUpperCase());
             }
         }
         return QualityGateResult.INACTIVE;

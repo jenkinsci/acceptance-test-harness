@@ -20,7 +20,7 @@ public class IssuesTable {
     private final List<AbstractIssuesTableRow> tableRows = new ArrayList<>();
     private final List<String> headers;
     private final WebElement tableElement;
-    private final Type type;
+    private final IssuesTableRowType type;
 
     /**
      * Creates an IssuesTable of a specific type.
@@ -32,7 +32,7 @@ public class IssuesTable {
      * @param type
      *         the type of the issues-table (e.g. Default or DRY)
      */
-    public IssuesTable(final WebElement element, final AnalysisResult resultDetailsPage, Type type) {
+    public IssuesTable(final WebElement element, final AnalysisResult resultDetailsPage, IssuesTableRowType type) {
         headers = element.findElements(By.xpath(".//thead/tr/th"))
                 .stream()
                 .map(WebElement::getText)
@@ -78,7 +78,7 @@ public class IssuesTable {
     private AbstractIssuesTableRow getRightTableRow(final WebElement row) {
         String rowType = row.getAttribute("role");
         if (StringUtils.equals(rowType, "row")) {
-            if (type == Type.DRY) {
+            if (type == IssuesTableRowType.DRY) {
                 return new DryIssuesTableRow(row, this);
             }
             else {
@@ -152,5 +152,5 @@ public class IssuesTable {
         return this.resultDetailsPage.openFilterLinkOnSite(element);
     }
 
-    public enum Type {DEFAULT, DRY}
+    public enum IssuesTableRowType {DEFAULT, DRY}
 }
