@@ -4,12 +4,13 @@
 if [ "$1" == "11" ]; then
     # Java 11
     selection="1"
-    runcommand="env JAVA_OPTS=\"-p /home/ath-user/jdk11-libs/jaxb-api.jar:/home/ath-user/jdk11-libs/javax.activation.jar --add-modules java.xml.bind,java.activation -cp /home/ath-user/jdk11-libs/jaxb-impl.jar:/home/ath-user/jdk11-libs/jaxb-core.jar\" JENKINS_OPTS=\"--enable-future-java\" ./run.sh firefox latest -DforkCount=1 -Dmaven.test.failure.ignore=true -B -Dtest=..."
 else
     # Java 8 is set as second option, default
     selection="2"
-    runcommand="./run.sh firefox latest -DforkCount=1 -Dmaven.test.failure.ignore=true -B -Dtest=..."
 fi
+
+# Same command for both verions, no modules, libraries or enable-java anymore since 2.164
+runcommand="./run.sh firefox latest -DforkCount=1 -Dmaven.test.failure.ignore=true -B -Dtest=..."
 
 # Change all java programs, not only java and javac
 # List of programs you can find at the etc/alternatives directory (due to java8 and java11)
@@ -111,13 +112,18 @@ do
 done
 
 echo
+#To avoid us getting confused whether this commands are executed or are just documentation when looking at the logs
+echo -------------------- INFORMATION --------------------
 echo Running on...
 java -version
 echo
 javac -version
 echo
 echo Start running tests with...
+echo
 echo 'eval $(./vnc.sh)'
 echo
-echo $runcommand
+echo -e $runcommand
+echo
+echo ------------------ END INFORMATION ------------------
 echo
