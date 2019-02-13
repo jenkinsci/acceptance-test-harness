@@ -58,6 +58,8 @@ public class DryIssuesTableRow extends AbstractNonDetailsIssuesTableRow {
                 this.getLineNumber()) && Objects.equals(that.getLines(), this.getLines());
     }
 
+
+
     /**
      * Performs a click on the link to the source code page.
      *

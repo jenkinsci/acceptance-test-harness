@@ -5,6 +5,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.By;
@@ -23,6 +24,7 @@ import org.jenkinsci.test.acceptance.po.PageObject;
  */
 public class AnalysisSummary extends PageObject {
     private static final Pattern NUMBER = Pattern.compile(".*(\\d)+.*");
+    private static final String UNDEFINED = "-";
 
     private final WebElement summary;
     private WebElement title;
@@ -39,7 +41,7 @@ public class AnalysisSummary extends PageObject {
         summary = getElement(By.id(id + "-summary"));
         if (summary != null) {
             title = find(By.id(id + "-title"));
-            results = initResultList();
+            results = summary.findElements(by.xpath("./ul/li"));
         }
     }
 
@@ -63,6 +65,12 @@ public class AnalysisSummary extends PageObject {
         return getSize("#");
     }
 
+    public InfoType getInfoType() {
+        String iconName = find(by.xpath("//a[@href='" + id + "/info']/i")).getAttribute("class");
+
+        return InfoType.valueOfClass(iconName);
+    }
+
     public String getAggregation() {
         for (WebElement result : results) {
             String message = result.getText();
@@ -71,7 +79,11 @@ public class AnalysisSummary extends PageObject {
                 return StringUtils.removeStart(message, aggregation);
             }
         }
-        return "-";
+        return UNDEFINED;
+    }
+
+    public List<String> getDetails() {
+        return results.stream().map(WebElement::getText).collect(Collectors.toList());
     }
 
     private int getSize(final String linkName) {
@@ -93,16 +105,12 @@ public class AnalysisSummary extends PageObject {
         }
     }
 
-    private List<WebElement> initResultList() {
-        return summary.findElements(by.xpath("./ul/li"));
-    }
-
     /**
      * Clicks the title link that opens the details page with the analysis results.
      *
      * @return the details page with the analysis result
      */
-    public AnalysisResult clickTitleLink() {
+    public AnalysisResult openOverallResult() {
         return openPage(getTitleResultLink(), AnalysisResult.class);
     }
 
@@ -111,8 +119,8 @@ public class AnalysisSummary extends PageObject {
      *
      * @return the messages page showing all info and error messages
      */
-    public LogMessagesView clickInfoLink() {
-        return openPage(getTitleResultInfoLink(), LogMessagesView.class);
+    public InfoView openInfoView() {
+        return openPage(getTitleResultInfoLink(), InfoView.class);
     }
 
     /**
@@ -120,7 +128,7 @@ public class AnalysisSummary extends PageObject {
      *
      * @return the details page with the analysis result
      */
-    public AnalysisResult clickNewLink() {
+    public AnalysisResult openNewIssues() {
         return openLink("new", "No new link found");
     }
 
@@ -129,7 +137,7 @@ public class AnalysisSummary extends PageObject {
      *
      * @return the details page with the analysis result
      */
-    public AnalysisResult clickFixedLink() {
+    public AnalysisResult openFixedIssues() {
         return openLink("fixed", "No fixed link found");
     }
 
@@ -138,16 +146,16 @@ public class AnalysisSummary extends PageObject {
      *
      * @return the details page with the analysis result of the reference build
      */
-    public AnalysisResult clickReferenceBuildLink() {
+    public AnalysisResult openReferenceBuildResults() {
         return openLink("Reference", "No reference build link found");
     }
 
-    private AnalysisResult openLink(final String s, final String s2) {
-        Optional<WebElement> newLink = findClickableResultEntryByNamePart(s);
-        if (newLink.isPresent()) {
-            return openPage(newLink.get(), AnalysisResult.class);
+    private AnalysisResult openLink(final String linkText, final String errorMessage) {
+        Optional<WebElement> link = findClickableResultEntryByNamePart(linkText);
+        if (link.isPresent()) {
+            return openPage(link.get(), AnalysisResult.class);
         }
-        throw new NoSuchElementException(s2);
+        throw new NoSuchElementException(errorMessage);
     }
 
     private <T extends PageObject> T openPage(final WebElement link, final Class<T> type) {
@@ -159,17 +167,17 @@ public class AnalysisSummary extends PageObject {
     }
 
     /**
-     * Returns the qualitygate result of this parser, if set.
+     * Returns the quality gate result of this parser, if set.
      *
      * @return Success - if the quality gate thresholds have not been reached. Failed - otherwise.
      */
-    public String getQualityGateResult() {
-        for (WebElement el : results) {
-            if (el.getText().contains("Quality gate")) {
-                return el.findElement(by.tagName("img")).getAttribute("title");
+    public QualityGateResult getQualityGateResult() {
+        for (WebElement result : results) {
+            if (result.getText().contains("Quality gate")) {
+                return QualityGateResult.valueOf(result.findElement(by.tagName("img")).getAttribute("title").toUpperCase());
             }
         }
-        return null;
+        return QualityGateResult.INACTIVE;
     }
 
     /**
@@ -180,7 +188,7 @@ public class AnalysisSummary extends PageObject {
      *
      * @return WebElement that belongs to the name part
      */
-    public Optional<WebElement> findClickableResultEntryByNamePart(String namePart) {
+    private Optional<WebElement> findClickableResultEntryByNamePart(final String namePart) {
         for (WebElement el : results) {
             if (el.getText().contains(namePart)) {
                 return Optional.of(el.findElement(by.tagName("a")));
@@ -197,7 +205,7 @@ public class AnalysisSummary extends PageObject {
      *
      * @return String that belongs to the name part
      */
-    public String findResultEntryTextByNamePart(String namePart) {
+    public String findResultEntryTextByNamePart(final String namePart) {
         for (WebElement el : results) {
             if (el.getText().contains(namePart)) {
                 return el.getText();
@@ -206,19 +214,52 @@ public class AnalysisSummary extends PageObject {
         return null;
     }
 
-    public WebElement getSummary() {
+    private WebElement getSummary() {
         return summary;
     }
 
-    public WebElement getTitleResultLink() {
+    private WebElement getTitleResultLink() {
         return summary.findElement(by.href(this.id));
     }
 
-    public WebElement getTitleResultInfoLink() {
+    private WebElement getTitleResultInfoLink() {
         return summary.findElement(by.href(this.id + "/info"));
     }
 
-    public WebElement getTitle() {
+    private WebElement getTitle() {
         return title;
+    }
+
+    /**
+     * Determines which icon is shown to represent the info messages view.
+     */
+    public enum InfoType {
+        /** Info messages only. */
+        INFO("fa-info-circle"),
+        /** Info and error messages. */
+        ERROR("fa-exclamation-triangle");
+
+        private String iconName;
+
+        InfoType(final String iconName) {
+            this.iconName = iconName;
+        }
+
+        static InfoType valueOfClass(final String iconName) {
+            if (iconName.contains(INFO.iconName)) {
+                return INFO;
+            }
+            if (iconName.contains(ERROR.iconName)) {
+                return ERROR;
+            }
+            throw new NoSuchElementException("No such info type with classes " + iconName);
+        }
+    }
+
+    /**
+     * Determines the quality gate result.
+     */
+    public enum QualityGateResult {
+        SUCCESS, FAILED, UNSTABLE, INACTIVE;
     }
 }

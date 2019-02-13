@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.plugins.warnings_ng;
 
 import java.net.URL;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,11 +21,11 @@ import org.jenkinsci.test.acceptance.po.PageObject;
  * @author Arne Schöntag
  * @author Nikolai Wohlgemuth
  */
-public class LogMessagesView extends PageObject {
+public class InfoView extends PageObject {
     private final Control errors = control(By.id("errors"));
     private final Control info = control(By.id("info"));
     
-    public LogMessagesView(final Build job, final String id) {
+    public InfoView(final Build job, final String id) {
         super(job, job.url(id + "/info/"));
     }
 
@@ -36,7 +37,7 @@ public class LogMessagesView extends PageObject {
      * @param url
      *         the URL of the view
      */
-    public LogMessagesView(final Injector injector, final URL url, final String id) {
+    public InfoView(final Injector injector, final URL url, final String id) {
         super(injector, url);
     }
 
@@ -46,7 +47,12 @@ public class LogMessagesView extends PageObject {
      * @return all error messages
      */
     public List<String> getErrorMessages() {
-        return getElementsFromContainingDivs(errors);
+        if (errors.exists()) {
+            return getElementsFromContainingDivs(errors);
+        }
+        else {
+            return Collections.emptyList();
+        }
     }
 
     /**

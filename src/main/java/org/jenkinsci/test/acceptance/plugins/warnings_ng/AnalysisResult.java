@@ -1,6 +1,9 @@
 package org.jenkinsci.test.acceptance.plugins.warnings_ng;
 
 import java.net.URL;
+import java.util.Collection;
+import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -51,6 +54,30 @@ public class AnalysisResult extends PageObject {
         this.id = id;
     }
 
+    public Collection<Tab> getAvailableTabs() {
+        return all(By.xpath("//a[@role='tab']")).stream()
+                .map(tab -> tab.getAttribute("href"))
+                .map(this::extractRelativeUrl)
+                .map(Tab::valueWithHref)
+                .collect(Collectors.toList());
+    }
+
+    private String extractRelativeUrl(final String absoluteUrl) {
+        return "#" + StringUtils.substringAfterLast(absoluteUrl, "#");
+    }
+
+    public Tab getVisibleTab() {
+        WebElement activeTab = find(By.xpath("//a[@role='tab' and contains(@class, 'active')]"));
+
+        return Tab.valueWithHref(extractRelativeUrl(activeTab.getAttribute("href")));
+    }
+
+    public int getTotal() {
+        String total = find(By.tagName("tfoot")).getText();
+
+        return Integer.parseInt(StringUtils.substringAfter(total, "Total "));
+    }
+
     /**
      * Returns the table type of the issues table.
      *
@@ -78,7 +105,7 @@ public class AnalysisResult extends PageObject {
      * @param tab
      *         the tab which shall be opened
      */
-    public void openTab(final Tabs tab) {
+    public void openTab(final Tab tab) {
         open();
         WebElement tabs = getTabs();
         WebElement tabElement = tabs.findElement(tab.getXpath());
@@ -91,7 +118,7 @@ public class AnalysisResult extends PageObject {
      * @return the issues-table.
      */
     public IssuesTable openIssuesTable() {
-        openTab(Tabs.ISSUES);
+        openTab(Tab.ISSUES);
         WebElement issuesTable = find(By.id("issues"));
         return new IssuesTable(issuesTable, this, getIssuesTableType());
     }
@@ -131,8 +158,22 @@ public class AnalysisResult extends PageObject {
     /**
      * Enum representing the possible tabs which can be opened on a AnalysisResult.
      */
-    public enum Tabs {
-        ISSUES, DETAILS, PACKAGES, MODULES;
+    public enum Tab {
+        TOOLS("origin"),
+        MODULES("moduleName"),
+        PACKAGES("packageName"),
+        FOLDERS("folder"),
+        FILES("fileName"),
+        CATEGORIES("category"),
+        TYPES("type"),
+        ISSUES("issues"),
+        BLAMES("scm");
+
+        private final String href;
+
+        Tab(final String property) {
+            href = "#" + property + "Content";
+        }
 
         /**
          * Returns the selenium filter rule to find the specific tab.
@@ -140,7 +181,16 @@ public class AnalysisResult extends PageObject {
          * @return the selenium filter rule
          */
         public By getXpath() {
-            return By.xpath("//a[text()='" + StringUtils.capitalize(name().toLowerCase()) + "']");
+            return By.xpath("//a[@href='" + href + "']");
+        }
+
+        public static Tab valueWithHref(final String href) {
+            for (Tab tab : Tab.values()) {
+                if (tab.href.equals(href)) {
+                    return tab;
+                }
+            }
+            throw new NoSuchElementException("No such tab with href " + href);
         }
     }
 }

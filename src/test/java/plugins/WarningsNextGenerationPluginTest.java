@@ -19,16 +19,19 @@ import org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.AbstractNonDetailsIssuesTableRow;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.AnalysisResult;
+import org.jenkinsci.test.acceptance.plugins.warnings_ng.AnalysisResult.Tab;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.AnalysisSummary;
+import org.jenkinsci.test.acceptance.plugins.warnings_ng.AnalysisSummary.InfoType;
+import org.jenkinsci.test.acceptance.plugins.warnings_ng.AnalysisSummary.QualityGateResult;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.ConsoleLogView;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.DefaultWarningsTableRow;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.DetailsTableRow;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.DryIssuesTableRow;
+import org.jenkinsci.test.acceptance.plugins.warnings_ng.InfoView;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.IssuesRecorder;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.IssuesRecorder.QualityGateType;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.IssuesRecorder.StaticAnalysisTool;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.IssuesTable;
-import org.jenkinsci.test.acceptance.plugins.warnings_ng.LogMessagesView;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.SourceView;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Build.Result;
@@ -112,7 +115,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
      * of the result summaries for each tool.
      */
     @Test
-    public void should_show_build_summary() {
+    public void should_show_build_summary_and_link_to_details() {
         FreeStyleJob job = createFreeStyleJob("build_status_test/build_01");
         addRecorderWith3Tools(job);
         job.save();
@@ -122,70 +125,70 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         reconfigureJobWithResource(job, "build_status_test/build_02");
 
         Build build = buildJob(job);
-        build.open();
 
+        build.open();
         AnalysisSummary checkstyle = new AnalysisSummary(build, CHECKSTYLE_ID);
         assertThat(checkstyle).isDisplayed();
         assertThat(checkstyle).hasTitleText("CheckStyle: 3 warnings");
         assertThat(checkstyle).hasNewSize(3);
         assertThat(checkstyle).hasFixedSize(1);
         assertThat(checkstyle).hasReferenceBuild(1);
+        assertThat(checkstyle).hasInfoType(InfoType.ERROR);
 
+        AnalysisResult checkstyleDetails = checkstyle.openOverallResult();
+        assertThat(checkstyleDetails).hasVisibleTab(Tab.CATEGORIES);
+        assertThat(checkstyleDetails).hasTotal(3);
+        assertThat(checkstyleDetails).hasOnlyAvailableTabs(Tab.CATEGORIES, Tab.TYPES, Tab.ISSUES);
+
+        build.open();
         AnalysisSummary pmd = new AnalysisSummary(build, PMD_ID);
         assertThat(pmd).isDisplayed();
         assertThat(pmd).hasTitleText("PMD: 2 warnings");
         assertThat(pmd).hasNewSize(0);
         assertThat(pmd).hasFixedSize(1);
         assertThat(pmd).hasReferenceBuild(1);
+        assertThat(pmd).hasInfoType(InfoType.ERROR);
 
+        AnalysisResult pmdDetails = pmd.openOverallResult();
+        assertThat(pmdDetails).hasVisibleTab(Tab.CATEGORIES);
+        assertThat(pmdDetails).hasTotal(2);
+        assertThat(pmdDetails).hasOnlyAvailableTabs(Tab.CATEGORIES, Tab.TYPES, Tab.ISSUES);
+
+        build.open();
         AnalysisSummary findBugs = new AnalysisSummary(build, FINDBUGS_ID);
         assertThat(findBugs).isDisplayed();
         assertThat(findBugs).hasTitleText("FindBugs: No warnings");
         assertThat(findBugs).hasNewSize(0);
         assertThat(findBugs).hasFixedSize(0);
         assertThat(findBugs).hasReferenceBuild(1);
-
-        AnalysisResult checkstyleDetails = checkstyle.clickTitleLink();
-//        assertThat(checkstyleDetails.getTrendChart())
-//                .hasNewIssues(3)
-//                .hasFixedIssues(1)
-//                .hasOutstandingIssues(0);
+        assertThat(findBugs).hasInfoType(InfoType.INFO);
+        assertThat(findBugs).hasDetails("No warnings for 2 builds, i.e. since build 1");
 
         build.open();
-
-        LogMessagesView logMessagesView = new AnalysisSummary(build, CHECKSTYLE_ID).clickInfoLink();
-        assertThat(logMessagesView).hasInfoMessages(
+        assertThat(new AnalysisSummary(build, CHECKSTYLE_ID).openInfoView()).hasInfoMessages(
                 "-> found 1 file",
-                "-> found 3 issues (skipped 0 duplicates)");
+                "-> found 3 issues (skipped 0 duplicates)",
+                "Issues delta (vs. reference build): outstanding: 0, new: 3, fixed: 1");
 
         build.open();
-
-        AnalysisResult newResult = new AnalysisSummary(build, CHECKSTYLE_ID).clickNewLink();
-//        assertThat(newResult.getTrendChart())
-//                .hasNewIssues(3)
-//                .hasFixedIssues(0)
-//                .hasOutstandingIssues(0);
+        assertThat(new AnalysisSummary(build, PMD_ID).openInfoView()).hasInfoMessages(
+                "-> found 1 file",
+                "-> found 2 issues (skipped 0 duplicates)",
+                "Issues delta (vs. reference build): outstanding: 2, new: 0, fixed: 1");
 
         build.open();
-
-        AnalysisResult referenceResult = new AnalysisSummary(build, CHECKSTYLE_ID).clickReferenceBuildLink();
-//        assertThat(referenceResult.getTrendChart())
-//                .hasNewIssues(0)
-//                .hasFixedIssues(0)
-//                .hasOutstandingIssues(1);
-
-        build.open();
-
-        String noWarningsResult = new AnalysisSummary(build, FINDBUGS_ID)
-                .findResultEntryTextByNamePart("No warnings for");
-        assertThat(noWarningsResult).isEqualTo("No warnings for 2 builds, i.e. since build 1");
+        assertThat(new AnalysisSummary(build, FINDBUGS_ID).openInfoView()).hasInfoMessages(
+                "-> found 1 file",
+                "-> found 0 issues (skipped 0 duplicates)",
+                "Issues delta (vs. reference build): outstanding: 0, new: 0, fixed: 0");
     }
 
     /**
-     * Tests the result overview with aggregated results by running two builds with three issue parsers.
+     * Tests the build overview page by running two builds that aggregate the three different tools into a single result. Checks the contents
+     * of the result summary.
      */
     @Test
-    public void should_show_expected_aggregations_in_result_box() {
+    public void should_aggregate_tools_into_signle_result() {
         FreeStyleJob job = createFreeStyleJob("build_status_test/build_01");
         IssuesRecorder recorder = addRecorderWith3Tools(job);
         recorder.setEnabledForAggregation(true);
@@ -206,7 +209,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         assertThat(referenceSummary).hasFixedSize(0);
         assertThat(referenceSummary).hasReferenceBuild(0);
 
-        AnalysisResult referenceDetails = referenceSummary.clickTitleLink();
+        AnalysisResult referenceDetails = referenceSummary.openOverallResult();
         // assertThat(referenceDetails.getTrendChart()).hasNewIssues(0).hasFixedIssues(0).hasOutstandingIssues(4);
 
         reconfigureJobWithResource(job, "build_status_test/build_02");
@@ -222,13 +225,18 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         assertThat(analysisSummary).hasNewSize(3);
         assertThat(analysisSummary).hasFixedSize(2);
         assertThat(analysisSummary).hasReferenceBuild(1);
+
+        AnalysisResult result = analysisSummary.openOverallResult();
+        assertThat(result).hasVisibleTab(Tab.TOOLS);
+        assertThat(result).hasTotal(5);
+        assertThat(result).hasOnlyAvailableTabs(Tab.TOOLS, Tab.PACKAGES, Tab.FILES, Tab.CATEGORIES, Tab.TYPES, Tab.ISSUES);
     }
 
     /**
-     * Verifies that the quality gate is evaluated and fails the build.
+     * Verifies that the quality gate is evaluated and changes the result of the build to UNSTABLE or FAILED.
      */
     @Test
-    public void should_fail_build_if_quality_gate_is_failed() {
+    public void should_change_build_result_if_quality_gate_is_not_passed() {
         runJobWithQualityGate(false);
         runJobWithQualityGate(true);
     }
@@ -242,9 +250,10 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         Build build = buildJob(job).shouldBe(isUnstable ? Result.UNSTABLE : Result.FAILURE);
         build.open();
 
-        assertThat(new AnalysisSummary(build, CHECKSTYLE_ID)).hasQualityGateResult("Success");
-        assertThat(new AnalysisSummary(build, FINDBUGS_ID)).hasQualityGateResult("Success");
-        assertThat(new AnalysisSummary(build, PMD_ID)).hasQualityGateResult(isUnstable ? "Unstable" : "Failed");
+        assertThat(new AnalysisSummary(build, CHECKSTYLE_ID)).hasQualityGateResult(QualityGateResult.SUCCESS);
+        assertThat(new AnalysisSummary(build, FINDBUGS_ID)).hasQualityGateResult(QualityGateResult.SUCCESS);
+        assertThat(new AnalysisSummary(build, PMD_ID))
+                .hasQualityGateResult(isUnstable ? QualityGateResult.UNSTABLE : QualityGateResult.FAILED);
     }
 
     /**
@@ -268,9 +277,11 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         assertThat(issuesTable).hasSize(11);
 
         DetailsTableRow detailsRow = issuesTable.getRowAs(1, DetailsTableRow.class);
-        assertThat(detailsRow).hasDetails("Found duplicated code.\npublic static void functionOne()\n"
+        assertThat(detailsRow).hasDetails(
+                "Found duplicated code.\npublic static void functionOne()\n"
                 + "  {\n"
                 + "    System.out.println(\"testfile for redundancy\");");
+
         assertThat(issuesTable.getRowAs(2, DryIssuesTableRow.class)).isEqualTo(secondRow);
 
         firstRow.toggleDetailsRow();
@@ -283,15 +294,15 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void should_be_able_to_open_the_source_code_page_by_clicking_the_links() {
-        String expectedSourceCode = toString(WARNINGS_PLUGIN_PREFIX + CPD_SOURCE_PATH);
         Build build = createAndBuildFreeStyleJob("CPD", cpd -> cpd.setHighThreshold(2).setNormalThreshold(1),
                 CPD_REPORT, CPD_SOURCE_PATH);
         AnalysisResult result = openAnalysisResult(build, CPD_ID);
         IssuesTable issuesTable = result.openIssuesTable();
 
         SourceView sourceView = issuesTable.getRowAs(0, DryIssuesTableRow.class).clickOnFileLink();
-
         assertThat(sourceView).hasFileName(CPD_SOURCE_NAME);
+
+        String expectedSourceCode = toString(WARNINGS_PLUGIN_PREFIX + CPD_SOURCE_PATH);
         assertThat(sourceView).hasSourceCode(expectedSourceCode);
 
         issuesTable = result.openIssuesTable();
@@ -322,6 +333,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
 
         DryIssuesTableRow firstRow = issuesTable.getRowAs(0, DryIssuesTableRow.class);
         assertThat(firstRow).hasPriority(HIGH_PRIORITY);
+
         AnalysisResult highPriorityPage = firstRow.clickOnPriorityLink();
         highPriorityPage.openIssuesTable()
                 .getTableRows()
@@ -330,6 +342,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
                 .forEach(row -> assertThat(row).hasPriority(HIGH_PRIORITY));
 
         issuesTable = page.openIssuesTable();
+
         DryIssuesTableRow sixthRow = issuesTable.getRowAs(5, DryIssuesTableRow.class);
         assertThat(sixthRow).hasPriority(LOW_PRIORITY);
 
@@ -380,16 +393,15 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         recorder.addTool("PMD");
         recorder.openAdvancedOptions();
         recorder.setEnabledForFailure(true);
+
         return recorder;
     }
 
     /**
-     * Starts two builds with different configurations and checks the values of the new, fixed and outstanding issues of
-     * the trend chart as well as the low, normal and high priorities of the priority chart. Check the entries of the
-     * issues table.
+     * Starts two builds with different configurations and checks the entries of the issues table.
      */
     @Test
-    public void should_log_values_in_trend_and_priority_chart() {
+    public void should_show_details_in_issues_table() {
         FreeStyleJob job = createFreeStyleJob("aggregation/checkstyle1.xml", "aggregation/checkstyle2.xml",
                 "aggregation/pmd.xml");
         job.addPublisher(IssuesRecorder.class, recorder -> {
@@ -408,27 +420,17 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
 
         AnalysisResult page = openAnalysisResult(build, ANALYSIS_ID);
 
-//        assertThat(page.getTrendChart())
-//                .hasNewIssues(3)
-//                .hasFixedIssues(2)
-//                .hasOutstandingIssues(5);
-
-//        assertThat(page.getPriorityChart())
-//                .hasLowPriority(1)
-//                .hasNormalPriority(2)
-//                .hasHighPriority(5);
-
         IssuesTable issuesTable = page.openIssuesTable();
         assertThat(issuesTable).hasSize(8);
 
         DefaultWarningsTableRow tableRow = issuesTable.getRowAs(0, DefaultWarningsTableRow.class);
-        assertThat(tableRow.getFileName()).isEqualTo("ChangeSelectionAction.java");
-        assertThat(tableRow.getLineNumber()).isEqualTo(14);
-        assertThat(tableRow.getPackageName()).isEqualTo("com.avaloq.adt.env.internal.ui.actions.change");
-        assertThat(tableRow.getCategoryName()).isEqualTo("Import Statement Rules");
-        assertThat(tableRow.getTypeName()).isEqualTo("UnusedImports");
-        assertThat(tableRow.getPriority()).isEqualTo("Normal");
-        assertThat(tableRow.getAge()).isEqualTo(2);
+        assertThat(tableRow).hasFileName("ChangeSelectionAction.java");
+        assertThat(tableRow).hasLineNumber(14);
+        assertThat(tableRow).hasPackageName("com.avaloq.adt.env.internal.ui.actions.change");
+        assertThat(tableRow).hasCategoryName("Import Statement Rules");
+        assertThat(tableRow).hasTypeName("UnusedImports");
+        assertThat(tableRow).hasPriority("Normal");
+        assertThat(tableRow).hasAge(2);
     }
 
     /**
@@ -438,23 +440,21 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
     @Test
     public void should_show_info_and_error_messages() {
         Build build = createAndBuildFreeStyleJob("CheckStyle", CHECKSTYLE_XML);
-
         verifyInfoAndErrorMessages(build);
 
-        buildJob(createPipeline(CHECKSTYLE_XML));
-
-        verifyInfoAndErrorMessages(build);
+        Build pipeline = buildJob(createPipelineWithCheckStyle(CHECKSTYLE_XML));
+        verifyInfoAndErrorMessages(pipeline);
     }
 
     private void verifyInfoAndErrorMessages(final Build build) {
-        LogMessagesView logMessagesView = new LogMessagesView(build, CHECKSTYLE_ID);
-        logMessagesView.open();
+        InfoView infoView = new InfoView(build, CHECKSTYLE_ID);
+        infoView.open();
 
-        assertThat(logMessagesView.getErrorMessages()).hasSize(1 + 1 + 1 + 11);
-        assertThat(logMessagesView).hasErrorMessages("Can't resolve absolute paths for some files",
-                "Can't create fingerprints for some files");
+        assertThat(infoView.getErrorMessages()).hasSize(1 + 1 + 1 + 11);
+        assertThat(infoView).hasErrorMessages("Can't resolve absolute paths for some files:",
+                "Can't create fingerprints for some files:");
 
-        assertThat(logMessagesView).hasInfoMessages(
+        assertThat(infoView).hasInfoMessages(
                 "-> found 1 file",
                 "-> found 11 issues (skipped 0 duplicates)",
                 "Post processing issues on 'Master' with encoding 'UTF-8'",
@@ -470,10 +470,10 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     * Creates and builds a maven job and verifies that all warnings and errors are shown in the console log view.
+     * Creates and builds a maven job and verifies that all warnings are shown in the summary and details views.
      */
     @Test
-    public void should_show_maven_warnings_in_console_log_view() {
+    public void should_show_maven_warnings_in_maven_project() {
         MavenModuleSet job = createMavenProject();
         copyResourceFilesToWorkspace(job, SOURCE_VIEW_FOLDER + "pom.xml");
         configureJob(job, "Maven", "");
@@ -482,16 +482,17 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         Build build = buildFailingJob(job);
         build.open();
 
-        AnalysisSummary analysisSummary = new AnalysisSummary(build, MAVEN_ID);
+        AnalysisSummary summary = new AnalysisSummary(build, MAVEN_ID);
+        assertThat(summary).isDisplayed();
+        assertThat(summary).hasTitleText("Maven: 2 warnings");
+        assertThat(summary).hasNewSize(0);
+        assertThat(summary).hasFixedSize(0);
+        assertThat(summary).hasReferenceBuild(0);
 
-        AnalysisResult mavenDetails = analysisSummary.clickTitleLink();
-//        assertThat(mavenDetails.getTrendChart())
-//                .hasNewIssues(0)
-//                .hasFixedIssues(0)
-//                .hasOutstandingIssues(5);
-//        assertThat(mavenDetails.getPriorityChart())
-//                .hasHighPriority(2)
-//                .hasNormalPriority(3);
+        AnalysisResult mavenDetails = summary.openOverallResult();
+        assertThat(mavenDetails).hasVisibleTab(Tab.TYPES);
+        assertThat(mavenDetails).hasTotal(2);
+        assertThat(mavenDetails).hasOnlyAvailableTabs(Tab.TYPES, Tab.ISSUES);
 
         IssuesTable issuesTable = mavenDetails.openIssuesTable();
 
@@ -522,10 +523,10 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         build.open();
 
         AnalysisSummary analysisSummary = new AnalysisSummary(build, "eclipse");
-
-        AnalysisResult result = analysisSummary.clickTitleLink();
-//        assertThat(result.getTrendChart()).hasOutstandingIssues(9);
-//        assertThat(result.getPriorityChart()).hasNormalPriority(9);
+        AnalysisResult result = analysisSummary.openOverallResult();
+        assertThat(result).hasVisibleTab(Tab.MODULES);
+        assertThat(result).hasTotal(9);
+        assertThat(result).hasOnlyAvailableTabs(Tab.MODULES, Tab.PACKAGES, Tab.FILES, Tab.ISSUES);
 
         LinkedHashMap<String, String> filesToPackages = new LinkedHashMap<>();
         filesToPackages.put("NOT_EXISTING_FILE", NO_PACKAGE);
@@ -546,10 +547,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
             String actualFileName = fileToPackage.getKey();
             assertThat(tableRow.getFileName()).as("File name in row %d", row).isEqualTo(actualFileName);
             assertThat(tableRow.getPackageName()).as("Package name in row %d", row).isEqualTo(fileToPackage.getValue());
-            if (row == 0) {
-                // TODO: validate
-            }
-            else {
+            if (row != 0) { // first row has no file attached
                 SourceView sourceView = tableRow.openFile();
                 assertThat(sourceView).hasFileName(actualFileName);
                 String expectedSourceCode = toString(SOURCE_VIEW_FOLDER + actualFileName);
@@ -559,11 +557,12 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         }
     }
 
-    private WorkflowJob createPipeline(final String resourceToCopy) {
+    private WorkflowJob createPipelineWithCheckStyle(final String resourceToCopy) {
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
         String resource = job.copyResourceStep(WARNINGS_PLUGIN_PREFIX + resourceToCopy);
-        job.script.set("node {\n" + resource.replace("\\", "\\\\")
-                + "recordIssues enabledForFailure: true, tools: [[pattern: '', tool: [$class: 'CheckStyle']]]"
+        job.script.set("node {\n"
+                + resource.replace("\\", "\\\\")
+                + "recordIssues enabledForFailure: true, tool: checkStyle()"
                 + "}");
         job.sandbox.check();
         job.save();
@@ -621,8 +620,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
      * @return the finished build
      */
     private Build createAndBuildFreeStyleJob(final String toolName, final String... resourcesToCopy) {
-        return createAndBuildFreeStyleJob(toolName, c -> {
-        }, resourcesToCopy);
+        return createAndBuildFreeStyleJob(toolName, c -> { }, resourcesToCopy);
     }
 
     /**

@@ -33,7 +33,7 @@ public abstract class AbstractNonDetailsIssuesTableRow extends AbstractIssuesTab
      * @param table
      *         the table to which this row belongs to
      */
-    AbstractNonDetailsIssuesTableRow(WebElement element, final IssuesTable table) {
+    AbstractNonDetailsIssuesTableRow(final WebElement element, final IssuesTable table) {
         this.element = element;
         this.issuesTable = table;
     }
@@ -69,7 +69,7 @@ public abstract class AbstractNonDetailsIssuesTableRow extends AbstractIssuesTab
      *
      * @return the WebElement of the table data field
      */
-    WebElement getCell(String header) {
+    WebElement getCell(final String header) {
         return getCells().get(getHeaders().indexOf(header));
     }
 
@@ -90,7 +90,7 @@ public abstract class AbstractNonDetailsIssuesTableRow extends AbstractIssuesTab
      *
      * @return the String representation of the cell
      */
-    String getCellContent(String header) {
+    String getCellContent(final String header) {
         return getCell(header).getText();
     }
 
@@ -123,26 +123,26 @@ public abstract class AbstractNonDetailsIssuesTableRow extends AbstractIssuesTab
     /**
      * Returns the child WebElement representing a link.
      *
-     * @param element
+     * @param parent
      *         the WebElement which is a parent of the link to be searched for
      *
      * @return the WebElement representing the link
      */
-    private WebElement findLink(final WebElement element) {
-        return element.findElement(A_TAG);
+    private WebElement findLink(final WebElement parent) {
+        return parent.findElement(A_TAG);
         
     }
 
     /**
      * Returns a list of all the links which are children nodes of a specific WebElement.
      *
-     * @param element
+     * @param parent
      *         the WebElement which is the parent of the links to be returned
      *
      * @return a List of the WebElements representing links
      */
-    List<WebElement> findAllLinks(final WebElement element) {
-        return element.findElements(A_TAG);
+    List<WebElement> findAllLinks(final WebElement parent) {
+        return parent.findElements(A_TAG);
     }
 
     /**
@@ -166,6 +166,11 @@ public abstract class AbstractNonDetailsIssuesTableRow extends AbstractIssuesTab
         return clickOnFilterLink(PRIORITY);
     }
 
+    /**
+     * Returns the file link that will navigate to the source content.
+     *
+     * @return the file link
+     */
     protected WebElement getFileLink() {
         return getCell(FILE).findElement(By.tagName("a"));
     }
