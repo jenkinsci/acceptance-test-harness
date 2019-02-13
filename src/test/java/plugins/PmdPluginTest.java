@@ -34,7 +34,7 @@ import static org.junit.Assume.*;
  * @author Fabian Trampusch
  * @author Ullrich Hafner
  */
-@WithPlugins("pmd")
+@WithPlugins("pmd") @Ignore("replaced by Warnings Next Generation Plugin (warnings-ng)")
 public class PmdPluginTest extends AbstractAnalysisTest<PmdAction> {
     private static final String PLUGIN_ROOT = "/pmd_plugin/";
     private static final String PATTERN_WITHOUT_WARNINGS = "pmd.xml";
