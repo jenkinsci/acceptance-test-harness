@@ -303,7 +303,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         assertThat(sourceView).hasFileName(CPD_SOURCE_NAME);
 
         String expectedSourceCode = toString(WARNINGS_PLUGIN_PREFIX + CPD_SOURCE_PATH);
-        assertThat(sourceView).hasSourceCode(expectedSourceCode);
+        assertThat(sourceView.getSourceCode()).isEqualToIgnoringWhitespace(expectedSourceCode);
 
         issuesTable = result.openIssuesTable();
         DryIssuesTableRow firstRow = issuesTable.getRowAs(0, DryIssuesTableRow.class);
@@ -315,8 +315,8 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
             issuesTable = result.openIssuesTable();
             firstRow = issuesTable.getRowAs(0, DryIssuesTableRow.class);
             sourceView = firstRow.clickOnDuplicatedInLink(i);
-            assertThat(sourceView.getFileName()).isEqualTo(CPD_SOURCE_NAME);
-            assertThat(sourceView).hasSourceCode(expectedSourceCode);
+            assertThat(sourceView).hasFileName(CPD_SOURCE_NAME);
+            assertThat(sourceView.getSourceCode()).isEqualToIgnoringWhitespace(expectedSourceCode);
         }
     }
 
@@ -551,7 +551,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
                 SourceView sourceView = tableRow.openFile();
                 assertThat(sourceView).hasFileName(actualFileName);
                 String expectedSourceCode = toString(SOURCE_VIEW_FOLDER + actualFileName);
-                assertThat(sourceView).hasSourceCode(expectedSourceCode);
+                assertThat(sourceView.getSourceCode()).isEqualToIgnoringWhitespace(expectedSourceCode);
             }
             row++;
         }
