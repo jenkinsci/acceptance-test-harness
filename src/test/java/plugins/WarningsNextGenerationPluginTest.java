@@ -136,7 +136,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         assertThat(checkstyle).hasInfoType(InfoType.ERROR);
 
         AnalysisResult checkstyleDetails = checkstyle.openOverallResult();
-        assertThat(checkstyleDetails).hasVisibleTab(Tab.CATEGORIES);
+        assertThat(checkstyleDetails).hasActiveTab(Tab.CATEGORIES);
         assertThat(checkstyleDetails).hasTotal(3);
         assertThat(checkstyleDetails).hasOnlyAvailableTabs(Tab.CATEGORIES, Tab.TYPES, Tab.ISSUES);
 
@@ -150,7 +150,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         assertThat(pmd).hasInfoType(InfoType.ERROR);
 
         AnalysisResult pmdDetails = pmd.openOverallResult();
-        assertThat(pmdDetails).hasVisibleTab(Tab.CATEGORIES);
+        assertThat(pmdDetails).hasActiveTab(Tab.CATEGORIES);
         assertThat(pmdDetails).hasTotal(2);
         assertThat(pmdDetails).hasOnlyAvailableTabs(Tab.CATEGORIES, Tab.TYPES, Tab.ISSUES);
 
@@ -227,7 +227,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         assertThat(analysisSummary).hasReferenceBuild(1);
 
         AnalysisResult result = analysisSummary.openOverallResult();
-        assertThat(result).hasVisibleTab(Tab.TOOLS);
+        assertThat(result).hasActiveTab(Tab.TOOLS);
         assertThat(result).hasTotal(5);
         assertThat(result).hasOnlyAvailableTabs(Tab.TOOLS, Tab.PACKAGES, Tab.FILES, Tab.CATEGORIES, Tab.TYPES, Tab.ISSUES);
     }
@@ -490,7 +490,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         assertThat(summary).hasReferenceBuild(0);
 
         AnalysisResult mavenDetails = summary.openOverallResult();
-        assertThat(mavenDetails).hasVisibleTab(Tab.TYPES);
+        assertThat(mavenDetails).hasActiveTab(Tab.TYPES);
         assertThat(mavenDetails).hasTotal(2);
         assertThat(mavenDetails).hasOnlyAvailableTabs(Tab.TYPES, Tab.ISSUES);
 
@@ -524,7 +524,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
 
         AnalysisSummary analysisSummary = new AnalysisSummary(build, "eclipse");
         AnalysisResult result = analysisSummary.openOverallResult();
-        assertThat(result).hasVisibleTab(Tab.MODULES);
+        assertThat(result).hasActiveTab(Tab.MODULES);
         assertThat(result).hasTotal(9);
         assertThat(result).hasOnlyAvailableTabs(Tab.MODULES, Tab.PACKAGES, Tab.FILES, Tab.ISSUES);
 
