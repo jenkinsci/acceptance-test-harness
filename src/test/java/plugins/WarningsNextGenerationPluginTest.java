@@ -209,9 +209,6 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         assertThat(referenceSummary).hasFixedSize(0);
         assertThat(referenceSummary).hasReferenceBuild(0);
 
-        AnalysisResult referenceDetails = referenceSummary.openOverallResult();
-        // assertThat(referenceDetails.getTrendChart()).hasNewIssues(0).hasFixedIssues(0).hasOutstandingIssues(4);
-
         reconfigureJobWithResource(job, "build_status_test/build_02");
 
         Build build = buildJob(job);
@@ -544,9 +541,11 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
             IssuesTable issuesTable = result.openIssuesTable();
             DefaultWarningsTableRow tableRow = issuesTable.getRowAs(row,
                     DefaultWarningsTableRow.class); // TODO: create custom assertions
+
             String actualFileName = fileToPackage.getKey();
-            assertThat(tableRow.getFileName()).as("File name in row %d", row).isEqualTo(actualFileName);
-            assertThat(tableRow.getPackageName()).as("Package name in row %d", row).isEqualTo(fileToPackage.getValue());
+            assertThat(tableRow).as("Row %d", row).hasFileName(actualFileName);
+            assertThat(tableRow).as("Row %d", row).hasPackageName(fileToPackage.getValue());
+
             if (row != 0) { // first row has no file attached
                 SourceView sourceView = tableRow.openFile();
                 assertThat(sourceView).hasFileName(actualFileName);
