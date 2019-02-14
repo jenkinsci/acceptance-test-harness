@@ -188,7 +188,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
      * of the result summary.
      */
     @Test
-    public void should_aggregate_tools_into_signle_result() {
+    public void should_aggregate_tools_into_single_result() {
         FreeStyleJob job = createFreeStyleJob("build_status_test/build_01");
         IssuesRecorder recorder = addRecorderWith3Tools(job);
         recorder.setEnabledForAggregation(true);
@@ -261,7 +261,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
      * the details child row.
      */
     @Test
-    public void should_be_able_to_open_and_hide_details_row() {
+    public void should_open_and_hide_details_row() {
         Build build = createAndBuildFreeStyleJob("CPD",
                 cpd -> cpd.setHighThreshold(2).setNormalThreshold(1),
                 CPD_REPORT, CPD_SOURCE_PATH);
@@ -293,7 +293,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
      * Verifies that the links to the source code view are working.
      */
     @Test
-    public void should_be_able_to_open_the_source_code_page_by_clicking_the_links() {
+    public void should_open_source_code_view_from_issues_table() {
         Build build = createAndBuildFreeStyleJob("CPD", cpd -> cpd.setHighThreshold(2).setNormalThreshold(1),
                 CPD_REPORT, CPD_SOURCE_PATH);
         AnalysisResult result = openAnalysisResult(build, CPD_ID);
@@ -321,10 +321,10 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     * Verifies that the priority filter link is working and opens a new details page with the correct priorities only.
+     * Verifies that the severity links in the issues table filter the results by the selected severity.
      */
     @Test
-    public void should_be_able_to_use_the_filter_links() {
+    public void should_filter_results_by_severity() {
         Build build = createAndBuildFreeStyleJob("CPD", cpd -> cpd.setHighThreshold(3).setNormalThreshold(2),
                 CPD_REPORT, CPD_SOURCE_PATH);
 
@@ -358,7 +358,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
      * Test to check that the issue filter can be configured and is applied.
      */
     @Test
-    public void should_log_filter_applied_in_console() {
+    public void should_filter_issues_by_include_and_exclude_filters() {
         FreeStyleJob job = createFreeStyleJob("issue_filter/checkstyle-result.xml");
         job.addPublisher(IssuesRecorder.class, recorder -> {
             recorder.setTool("CheckStyle");
@@ -472,7 +472,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
     /**
      * Creates and builds a maven job and verifies that all warnings are shown in the summary and details views.
      */
-    @Test
+    @Test @WithPlugins({"maven-plugin", ""})
     public void should_show_maven_warnings_in_maven_project() {
         MavenModuleSet job = createMavenProject();
         copyResourceFilesToWorkspace(job, SOURCE_VIEW_FOLDER + "pom.xml");
