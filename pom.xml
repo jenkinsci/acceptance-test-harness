@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.jenkins-ci</groupId>
     <artifactId>jenkins</artifactId>
-    <version>1.36</version>
+    <version>1.51</version>
   </parent>
 
   <artifactId>acceptance-test-harness</artifactId>
@@ -28,7 +28,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <selenium.version>3.14.0</selenium.version>
-    <guava.version>23.0</guava.version>
+    <guava.version>25.0-jre</guava.version>
     <aether.version>0.9.0.v20140226</aether.version>
     <maven.version>3.1.0</maven.version>
     <groovy.version>2.3.1</groovy.version>
@@ -280,7 +280,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.11</version>
+      <version>4.12</version>
     </dependency>
     <dependency>
       <groupId>org.hamcrest</groupId>
@@ -305,7 +305,7 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
-      <version>1.6.1</version>
+      <version>1.7.2</version>
     </dependency>
     <dependency>
       <groupId>com.github.jnr</groupId>
@@ -547,6 +547,14 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <configuration>
+          <rules>
+            <requireUpperBoundDeps/>
+          </rules>
+        </configuration>
       </plugin>
     </plugins>
   </build>
