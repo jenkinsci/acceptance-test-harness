@@ -10,7 +10,7 @@ else
 fi
 
 # Same command for both verions, no modules, libraries or enable-java anymore since 2.164
-runcommand="./run.sh firefox latest -DforkCount=1 -Dmaven.test.failure.ignore=true -B -Dtest=..."
+runcommand="run.sh firefox latest -DforkCount=1 -Dmaven.test.failure.ignore=true -B -Dtest=..."
 
 # Change all java programs, not only java and javac
 # List of programs you can find at the etc/alternatives directory (due to java8 and java11)
@@ -121,7 +121,7 @@ javac -version
 echo
 echo Start running tests with...
 echo
-echo 'eval $(./vnc.sh)'
+echo 'eval $(vnc.sh)'
 echo
 echo -e $runcommand
 echo

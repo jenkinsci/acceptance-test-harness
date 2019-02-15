@@ -5,7 +5,6 @@ if [ $# -lt 2 ]; then
 	cat <<USAGE
 Usage: $0 BROWSER JENKINS [ARGS]
 
-The script runs dryrun tests first to discover trivial problems immediately.
 It can use jenkins.war from local maven repository or download it when missing.
 
 BROWSER: Value for BROWSER variable
