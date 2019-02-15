@@ -13,10 +13,17 @@ import java.util.function.Consumer;
 
 import org.junit.Test;
 
+import com.google.inject.Inject;
+
+import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
+import org.jenkinsci.test.acceptance.docker.fixtures.JavaGitContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.WithCredentials;
+import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
+import org.jenkinsci.test.acceptance.plugins.ssh_slaves.SshSlaveLauncher;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.AbstractNonDetailsIssuesTableRow;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.AnalysisResult;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.AnalysisResult.Tab;
@@ -35,8 +42,10 @@ import org.jenkinsci.test.acceptance.plugins.warnings_ng.IssuesTable;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.SourceView;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Build.Result;
+import org.jenkinsci.test.acceptance.po.DumbSlave;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
+import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
 
 import static org.jenkinsci.test.acceptance.plugins.warnings_ng.Assertions.*;
@@ -80,9 +89,27 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
     private static final String NO_PACKAGE = "-";
 
     /**
+     * Credentials to access the docker container. The credentials are stored with the specified ID and use the provided
+     * SSH key. Use the following annotation on your test case to use the specified docker container as git server or
+     * build agent:
+     * <blockquote>
+     * <pre>@Test @WithDocker @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY,
+     *                                    values = {CREDENTIALS_ID, CREDENTIALS_KEY})}
+     * public void shouldTestWithDocker() {
+     * }
+     * </pre></blockquote>
+     */
+    private static final String CREDENTIALS_ID = "git";
+    private static final String CREDENTIALS_KEY = "/org/jenkinsci/test/acceptance/docker/fixtures/GitContainer/unsafe";
+
+    @Inject
+    private DockerContainerHolder<JavaGitContainer> dockerContainer;
+
+    /**
      * Runs a pipeline with checkstyle and pmd. Verifies the expansion of tokens with the token-macro plugin.
      */
-    @Test @WithPlugins({"token-macro", "workflow-cps", "pipeline-stage-step", "workflow-durable-task-step", "workflow-basic-steps"})
+    @Test
+    @WithPlugins({"token-macro", "workflow-cps", "pipeline-stage-step", "workflow-durable-task-step", "workflow-basic-steps"})
     public void should_expand_token() {
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
 
@@ -111,8 +138,8 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     * Tests the build overview page by running two builds with three different tools enabled. Checks the contents
-     * of the result summaries for each tool.
+     * Tests the build overview page by running two builds with three different tools enabled. Checks the contents of
+     * the result summaries for each tool.
      */
     @Test
     public void should_show_build_summary_and_link_to_details() {
@@ -184,8 +211,8 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     * Tests the build overview page by running two builds that aggregate the three different tools into a single result. Checks the contents
-     * of the result summary.
+     * Tests the build overview page by running two builds that aggregate the three different tools into a single
+     * result. Checks the contents of the result summary.
      */
     @Test
     public void should_aggregate_tools_into_single_result() {
@@ -226,7 +253,8 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         AnalysisResult result = analysisSummary.openOverallResult();
         assertThat(result).hasActiveTab(Tab.TOOLS);
         assertThat(result).hasTotal(5);
-        assertThat(result).hasOnlyAvailableTabs(Tab.TOOLS, Tab.PACKAGES, Tab.FILES, Tab.CATEGORIES, Tab.TYPES, Tab.ISSUES);
+        assertThat(result).hasOnlyAvailableTabs(Tab.TOOLS, Tab.PACKAGES, Tab.FILES, Tab.CATEGORIES, Tab.TYPES,
+                Tab.ISSUES);
     }
 
     /**
@@ -254,8 +282,8 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     * Verifies that clicking on the (+) icon within the details column of the issues table will show and hide
-     * the details child row.
+     * Verifies that clicking on the (+) icon within the details column of the issues table will show and hide the
+     * details child row.
      */
     @Test
     public void should_open_and_hide_details_row() {
@@ -276,8 +304,8 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         DetailsTableRow detailsRow = issuesTable.getRowAs(1, DetailsTableRow.class);
         assertThat(detailsRow).hasDetails(
                 "Found duplicated code.\npublic static void functionOne()\n"
-                + "  {\n"
-                + "    System.out.println(\"testfile for redundancy\");");
+                        + "  {\n"
+                        + "    System.out.println(\"testfile for redundancy\");");
 
         assertThat(issuesTable.getRowAs(2, DryIssuesTableRow.class)).isEqualTo(secondRow);
 
@@ -556,6 +584,75 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         }
     }
 
+    /**
+     * Verifies that warnings can be parsed on a agent as well.
+     */
+    @Test @WithDocker @WithPlugins("ssh-slaves")
+    @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {CREDENTIALS_ID, CREDENTIALS_KEY})
+    public void should_parse_warnings_on_agent() {
+        DumbSlave dockerAgent = createDockerAgent();
+        FreeStyleJob job = createFreeStyleJobForDockerAgent(dockerAgent, "issue_filter/checkstyle-result.xml");
+        job.addPublisher(IssuesRecorder.class, recorder -> {
+            recorder.setTool("CheckStyle", "**/checkstyle-result.xml");
+        });
+        job.save();
+
+        Build build = buildJob(job);
+        build.open();
+
+        AnalysisSummary summary = new AnalysisSummary(build, "checkstyle");
+        assertThat(summary).isDisplayed();
+        assertThat(summary).hasTitleText("CheckStyle: 4 warnings");
+        assertThat(summary).hasNewSize(0);
+        assertThat(summary).hasFixedSize(0);
+        assertThat(summary).hasReferenceBuild(0);
+    }
+
+    private FreeStyleJob createFreeStyleJobForDockerAgent(final Slave dockerAgent, final String... resourcesToCopy) {
+        FreeStyleJob job = createFreeStyleJob(resourcesToCopy);
+        job.configure();
+        job.setLabelExpression(dockerAgent.getName());
+        return job;
+    }
+
+    /**
+     * Returns a docker container that can be used to host git repositories and which can be used as build agent. If the
+     * container is used as agent and git server, then you need to use the file protocol to access the git repository
+     * within Jenkins.
+     *
+     * @return the container
+     */
+    private JavaGitContainer getDockerContainer() {
+        return dockerContainer.get();
+    }
+
+    /**
+     * Creates an agent in a Docker container.
+     *
+     * @return the new agent ready for new builds
+     */
+    private DumbSlave createDockerAgent() {
+        DumbSlave agent = jenkins.slaves.create(DumbSlave.class);
+
+        agent.setExecutors(1);
+        agent.remoteFS.set("/tmp/");
+        SshSlaveLauncher launcher = agent.setLauncher(SshSlaveLauncher.class);
+
+        JavaGitContainer container = getDockerContainer();
+        launcher.host.set(container.ipBound(22));
+        launcher.port(container.port(22));
+        launcher.setSshHostKeyVerificationStrategy(SshSlaveLauncher.NonVerifyingKeyVerificationStrategy.class);
+        launcher.selectCredentials(CREDENTIALS_ID);
+
+        agent.save();
+
+        agent.waitUntilOnline();
+
+        assertThat(agent.isOnline()).isTrue();
+
+        return agent;
+    }
+
     private WorkflowJob createPipelineWithCheckStyle(final String resourceToCopy) {
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
         String resource = job.copyResourceStep(WARNINGS_PLUGIN_PREFIX + resourceToCopy);
@@ -619,7 +716,8 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
      * @return the finished build
      */
     private Build createAndBuildFreeStyleJob(final String toolName, final String... resourcesToCopy) {
-        return createAndBuildFreeStyleJob(toolName, c -> { }, resourcesToCopy);
+        return createAndBuildFreeStyleJob(toolName, c -> {
+        }, resourcesToCopy);
     }
 
     /**
