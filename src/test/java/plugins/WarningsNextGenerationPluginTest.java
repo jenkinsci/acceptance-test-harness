@@ -39,6 +39,7 @@ import org.jenkinsci.test.acceptance.plugins.warnings_ng.IssuesRecorder;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.IssuesRecorder.QualityGateType;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.IssuesRecorder.StaticAnalysisTool;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.IssuesTable;
+import org.jenkinsci.test.acceptance.plugins.warnings_ng.ScrollerUtil;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.SourceView;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Build.Result;
@@ -73,6 +74,9 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
     private static final String CHECKSTYLE_ID = "checkstyle";
     private static final String ANALYSIS_ID = "analysis";
     private static final String CPD_ID = "cpd";
+    private static final String PMD_ID = "pmd";
+    private static final String FINDBUGS_ID = "findbugs";
+    private static final String MAVEN_ID = "maven";
 
     private static final String HIGH_PRIORITY = "High";
     private static final String LOW_PRIORITY = "Low";
@@ -83,9 +87,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
     private static final String CPD_REPORT = "duplicate_code/cpd.xml";
     private static final String CPD_SOURCE_NAME = "Main.java";
     private static final String CPD_SOURCE_PATH = "duplicate_code/Main.java";
-    private static final String PMD_ID = "pmd";
-    private static final String FINDBUGS_ID = "findbugs";
-    private static final String MAVEN_ID = "maven";
+
     private static final String NO_PACKAGE = "-";
 
     /**
@@ -253,8 +255,8 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         AnalysisResult result = analysisSummary.openOverallResult();
         assertThat(result).hasActiveTab(Tab.TOOLS);
         assertThat(result).hasTotal(5);
-        assertThat(result).hasOnlyAvailableTabs(Tab.TOOLS, Tab.PACKAGES, Tab.FILES, Tab.CATEGORIES, Tab.TYPES,
-                Tab.ISSUES);
+        assertThat(result).hasOnlyAvailableTabs(
+                Tab.TOOLS, Tab.PACKAGES, Tab.FILES, Tab.CATEGORIES, Tab.TYPES, Tab.ISSUES);
     }
 
     /**
@@ -411,15 +413,13 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
     }
 
     private IssuesRecorder addRecorderWith3Tools(final FreeStyleJob job) {
-        IssuesRecorder recorder = job.addPublisher(IssuesRecorder.class);
-
-        recorder.setTool("CheckStyle");
-        recorder.addTool("FindBugs");
-        recorder.addTool("PMD");
-        recorder.openAdvancedOptions();
-        recorder.setEnabledForFailure(true);
-
-        return recorder;
+        return job.addPublisher(IssuesRecorder.class, recorder -> {
+            recorder.setTool("CheckStyle");
+            recorder.addTool("FindBugs");
+            recorder.addTool("PMD");
+            recorder.openAdvancedOptions();
+            recorder.setEnabledForFailure(true);
+        });
     }
 
     /**
@@ -738,6 +738,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
 
     private FreeStyleJob createFreeStyleJob(final String... resourcesToCopy) {
         FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
+        ScrollerUtil.hideScrollerTabBar(driver);
         for (String resource : resourcesToCopy) {
             job.copyResource(WARNINGS_PLUGIN_PREFIX + resource);
         }

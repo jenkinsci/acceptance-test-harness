@@ -33,7 +33,9 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
     /**
      * Returns the repeatable add button for the specified property.
      *
-     * @param propertyName the name of the repeatable property
+     * @param propertyName
+     *         the name of the repeatable property
+     *
      * @return the selected repeatable add button
      */
     protected Control findRepeatableAddButtonFor(final String propertyName) {
@@ -50,6 +52,8 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
      */
     public IssuesRecorder(final Job parent, final String path) {
         super(parent, path);
+
+        ScrollerUtil.hideScrollerTabBar(driver);
     }
 
     /**
@@ -295,8 +299,6 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
             return displayName;
         }
     }
-
-
 
     /**
      * Page area of a static analysis tool configuration.
