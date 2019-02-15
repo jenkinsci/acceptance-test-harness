@@ -16,8 +16,6 @@ import org.jenkinsci.test.acceptance.po.Container;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
-
-import org.junit.Ignore;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
 
@@ -31,7 +29,7 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
  * @author Martin Ende
  * @author Ullrich Hafner
  */
-@WithPlugins("tasks")  @Ignore("replaced by Warnings Next Generation Plugin (warnings-ng)")
+@WithPlugins("tasks")
 public class TaskScannerPluginTest extends AbstractAnalysisTest<TaskScannerAction> {
     private static final String TASKS_PLUGIN_PREFIX = "/tasks_plugin/";
     private static final String TASKS_FILES = TASKS_PLUGIN_PREFIX + "fileset1";

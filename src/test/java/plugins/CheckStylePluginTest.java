@@ -3,12 +3,6 @@ package plugins;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import org.junit.Ignore;
-import org.junit.Test;
-import org.jvnet.hudson.test.Issue;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
-
 import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
 import org.jenkinsci.test.acceptance.junit.WithCredentials;
 import org.jenkinsci.test.acceptance.junit.WithDocker;
@@ -35,6 +29,10 @@ import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.Node;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
+import org.junit.Test;
+import org.jvnet.hudson.test.Issue;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
@@ -50,7 +48,7 @@ import static org.junit.Assume.*;
  * @author Fabian Trampusch
  * @author Ullrich Hafner
  */
-@WithPlugins("checkstyle") @Ignore("replaced by Warnings Next Generation Plugin (warnings-ng)")
+@WithPlugins("checkstyle")
 public class CheckStylePluginTest extends AbstractAnalysisTest<CheckStyleAction> {
     private static final String PATTERN_WITH_776_WARNINGS = "checkstyle-result.xml";
     private static final String CHECKSTYLE_PLUGIN_ROOT = "/checkstyle_plugin/";

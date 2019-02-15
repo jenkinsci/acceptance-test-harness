@@ -1,26 +1,6 @@
 package plugins;
 
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import java.util.concurrent.ExecutionException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.junit.Ignore;
-import org.junit.Test;
-import org.jvnet.hudson.test.Issue;
-import org.openqa.selenium.By;
-import org.openqa.selenium.StaleElementReferenceException;
-import org.openqa.selenium.WebElement;
-
 import com.google.common.collect.Sets;
-
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.junit.WithCredentials;
 import org.jenkinsci.test.acceptance.junit.WithDocker;
@@ -51,20 +31,36 @@ import org.jenkinsci.test.acceptance.po.ShellBuildStep;
 import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.po.StringParameter;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.jvnet.hudson.test.Issue;
+import org.openqa.selenium.By;
+import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.WebElement;
+
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URLEncoder;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.*;
-import static org.jenkinsci.test.acceptance.Matchers.*;
-import static org.jenkinsci.test.acceptance.po.PageObject.*;
+import static org.jenkinsci.test.acceptance.Matchers.containsRegexp;
+import static org.jenkinsci.test.acceptance.Matchers.hasAction;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+import static org.jenkinsci.test.acceptance.po.PageObject.createRandomName;
 
 /**
  * Tests various aspects of the warnings plug-in. Most tests copy an existing file with several warnings into the
  * workspace. This file is then analyzed by console and workspace parsers.
  */
-@WithPlugins("warnings") @Ignore("replaced by Warnings Next Generation Plugin (warnings-ng)")
+@WithPlugins("warnings")
 public class WarningsPluginTest extends AbstractAnalysisTest<WarningsAction> {
     private static final String RESOURCES = "/warnings_plugin/";
     /** Contains warnings for Javac parser. Warnings have file names preset for include/exclude filter tests. */
