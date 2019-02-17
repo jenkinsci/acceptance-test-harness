@@ -76,7 +76,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
     private static final String CPD_ID = "cpd";
     private static final String PMD_ID = "pmd";
     private static final String FINDBUGS_ID = "findbugs";
-    private static final String MAVEN_ID = "maven";
+    private static final String MAVEN_ID = "maven-warnings";
 
     private static final String HIGH_PRIORITY = "High";
     private static final String LOW_PRIORITY = "Low";
