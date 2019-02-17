@@ -18,7 +18,7 @@ public final class ScrollerUtil {
      *         web driver
      */
     public static void hideScrollerTabBar(final WebDriver driver) {
-        WebElement element = driver.findElement(By.xpath("//div[contains(@class, 'tabBarFrame')]"));
+        WebElement element = driver.findElement(By.xpath("//div[contains(@class, 'jenkins-config-widgets')]"));
         ((JavascriptExecutor) driver).executeScript("arguments[0].style.visibility='hidden'", element);
     }
 
