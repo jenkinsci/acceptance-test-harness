@@ -3,21 +3,31 @@ package org.jenkinsci.test.acceptance.plugins.warnings_ng;
 import org.openqa.selenium.WebElement;
 
 /**
- * Representation for default issues-table table row.
- * <p>
+ * Default row of the issues table that is used by most of the static analysis tools.
  *
  * @author Stephan Plöderl
  */
 public class DefaultWarningsTableRow extends AbstractNonDetailsIssuesTableRow {
-    DefaultWarningsTableRow(WebElement element, IssuesTable issuesTable) {
-        super(element, issuesTable);
+    DefaultWarningsTableRow(final WebElement rowElement, final IssuesTable issuesTable) {
+        super(rowElement, issuesTable);
     }
 
     /**
-     * Opens the source code of the affected file.
+     * Returns the category of the issue in this row.
+     *
+     * @return the category
      */
-    public SourceView openFile() {
-        return clickOnLink(getFileLink(), SourceView.class);
+    public String getCategory() {
+        return getCellContent("Category");
+    }
+
+    /**
+     * Returns the type of the issue in this row.
+     *
+     * @return the type
+     */
+    public String getType() {
+        return getCellContent("Type");
     }
 
     /**
@@ -25,23 +35,5 @@ public class DefaultWarningsTableRow extends AbstractNonDetailsIssuesTableRow {
      */
     public ConsoleLogView openConsoleLog() {
         return clickOnLink(getFileLink(), ConsoleLogView.class);
-    }
-
-    /**
-     * Returns the category of the issue.
-     *
-     * @return the category name
-     */
-    public String getCategoryName() {
-        return getCellContent("Category");
-    }
-
-    /**
-     * Returns the type of the issue.
-     *
-     * @return the type of the issue
-     */
-    public String getTypeName() {
-        return getCellContent("Type");
     }
 }

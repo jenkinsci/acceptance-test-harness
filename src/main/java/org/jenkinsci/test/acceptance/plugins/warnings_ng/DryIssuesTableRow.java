@@ -1,7 +1,6 @@
 package org.jenkinsci.test.acceptance.plugins.warnings_ng;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.openqa.selenium.By;
@@ -27,7 +26,7 @@ public class DryIssuesTableRow extends AbstractNonDetailsIssuesTableRow {
     }
 
     /**
-     * Returns the value displayed in the #Lines column.
+     * Returns the number of duplicated code lines.
      *
      * @return the number of lines
      */
@@ -36,7 +35,7 @@ public class DryIssuesTableRow extends AbstractNonDetailsIssuesTableRow {
     }
 
     /**
-     * Returns the duplications as a list of Strings.
+     * Returns the other files that duplicate the same code fragment.
      *
      * @return the duplications
      */
@@ -46,27 +45,6 @@ public class DryIssuesTableRow extends AbstractNonDetailsIssuesTableRow {
                 .stream()
                 .map(WebElement::getText)
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (obj == null || obj.getClass() != getClass()) {
-            return false;
-        }
-        DryIssuesTableRow that = (DryIssuesTableRow) obj;
-        return Objects.equals(that.getFileName(), this.getFileName()) && Objects.equals(that.getLineNumber(),
-                this.getLineNumber()) && Objects.equals(that.getLines(), this.getLines());
-    }
-
-
-
-    /**
-     * Performs a click on the link to the source code page.
-     *
-     * @return the representation of the source code page.
-     */
-    public SourceView clickOnFileLink() {
-        return clickOnLink(getFileLink(), SourceView.class);
     }
 
     /**

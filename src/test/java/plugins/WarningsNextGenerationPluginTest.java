@@ -78,8 +78,8 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
     private static final String FINDBUGS_ID = "findbugs";
     private static final String MAVEN_ID = "maven-warnings";
 
-    private static final String HIGH_PRIORITY = "High";
-    private static final String LOW_PRIORITY = "Low";
+    private static final String WARNING_HIGH_PRIORITY = "High";
+    private static final String WARNING_LOW_PRIORITY = "Low";
 
     private static final String CHECKSTYLE_XML = "checkstyle-result.xml";
     private static final String SOURCE_VIEW_FOLDER = WARNINGS_PLUGIN_PREFIX + "source-view/";
@@ -326,7 +326,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         AnalysisResult result = openAnalysisResult(build, CPD_ID);
         IssuesTable issuesTable = result.openIssuesTable();
 
-        SourceView sourceView = issuesTable.getRowAs(0, DryIssuesTableRow.class).clickOnFileLink();
+        SourceView sourceView = issuesTable.getRowAs(0, DryIssuesTableRow.class).openSourceCode();
         assertThat(sourceView).hasFileName(CPD_SOURCE_NAME);
 
         String expectedSourceCode = toString(WARNINGS_PLUGIN_PREFIX + CPD_SOURCE_PATH);
@@ -359,26 +359,26 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         IssuesTable issuesTable = page.openIssuesTable();
 
         DryIssuesTableRow firstRow = issuesTable.getRowAs(0, DryIssuesTableRow.class);
-        assertThat(firstRow).hasPriority(HIGH_PRIORITY);
+        assertThat(firstRow).hasSeverity(WARNING_HIGH_PRIORITY);
 
-        AnalysisResult highPriorityPage = firstRow.clickOnPriorityLink();
+        AnalysisResult highPriorityPage = firstRow.clickOnSeverityLink();
         highPriorityPage.openIssuesTable()
                 .getTableRows()
                 .stream()
                 .map(row -> row.getAs(AbstractNonDetailsIssuesTableRow.class))
-                .forEach(row -> assertThat(row).hasPriority(HIGH_PRIORITY));
+                .forEach(row -> assertThat(row).hasSeverity(WARNING_HIGH_PRIORITY));
 
         issuesTable = page.openIssuesTable();
 
         DryIssuesTableRow sixthRow = issuesTable.getRowAs(5, DryIssuesTableRow.class);
-        assertThat(sixthRow).hasPriority(LOW_PRIORITY);
+        assertThat(sixthRow).hasSeverity(WARNING_LOW_PRIORITY);
 
-        AnalysisResult lowPriorityPage = sixthRow.clickOnPriorityLink();
+        AnalysisResult lowPriorityPage = sixthRow.clickOnSeverityLink();
         lowPriorityPage.openIssuesTable()
                 .getTableRows()
                 .stream()
                 .map(row -> row.getAs(AbstractNonDetailsIssuesTableRow.class))
-                .forEach(row -> assertThat(row).hasPriority(LOW_PRIORITY));
+                .forEach(row -> assertThat(row).hasSeverity(WARNING_LOW_PRIORITY));
     }
 
     /**
@@ -452,9 +452,9 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         assertThat(tableRow).hasFileName("ChangeSelectionAction.java");
         assertThat(tableRow).hasLineNumber(14);
         assertThat(tableRow).hasPackageName("com.avaloq.adt.env.internal.ui.actions.change");
-        assertThat(tableRow).hasCategoryName("Import Statement Rules");
-        assertThat(tableRow).hasTypeName("UnusedImports");
-        assertThat(tableRow).hasPriority("Normal");
+        assertThat(tableRow).hasCategory("Import Statement Rules");
+        assertThat(tableRow).hasType("UnusedImports");
+        assertThat(tableRow).hasSeverity("Normal");
         assertThat(tableRow).hasAge(2);
     }
 
@@ -575,7 +575,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
             assertThat(tableRow).as("Row %d", row).hasPackageName(fileToPackage.getValue());
 
             if (row != 0) { // first row has no file attached
-                SourceView sourceView = tableRow.openFile();
+                SourceView sourceView = tableRow.openSourceCode();
                 assertThat(sourceView).hasFileName(actualFileName);
                 String expectedSourceCode = toString(SOURCE_VIEW_FOLDER + actualFileName);
                 assertThat(sourceView.getSourceCode()).isEqualToIgnoringWhitespace(expectedSourceCode);

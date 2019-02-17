@@ -11,7 +11,7 @@ import com.google.inject.Injector;
 import org.jenkinsci.test.acceptance.po.PageObject;
 
 /**
- * Page object that represents the source code view.
+ * Page object that represents the part of the console log that contains the issue.
  *
  * @author Frank Christian Geyer
  * @author Ullric Hafner

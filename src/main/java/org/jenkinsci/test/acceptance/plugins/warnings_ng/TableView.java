@@ -11,7 +11,6 @@ import org.jenkinsci.test.acceptance.po.Job;
  * @author Deniz Mardin
  */
 public class TableView extends AbstractStep {
-
     private final Control issues = control("#issuesContent");
 
     /**

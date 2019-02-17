@@ -15,27 +15,65 @@ import org.jenkinsci.test.acceptance.po.PageObject;
  * @author Elvira Hauer
  */
 public abstract class AbstractNonDetailsIssuesTableRow extends AbstractIssuesTableRow {
-    private static final String PRIORITY = "Severity";
+    private static final String SEVERITY = "Severity";
     private static final String DETAILS = "Details";
     private static final String AGE = "Age";
     private static final String FILE = "File";
+    private static final String PACKAGE = "Package";
     private static final String FILE_LINE_SEPARATOR = ":";
     private static final By A_TAG = By.tagName("a");
 
-    private final WebElement element;
+    private final WebElement row;
     private final IssuesTable issuesTable;
 
-    /**
-     * Creates a new instance of the table row.
-     *
-     * @param element
-     *         the WebElement representing the row
-     * @param table
-     *         the table to which this row belongs to
-     */
-    AbstractNonDetailsIssuesTableRow(final WebElement element, final IssuesTable table) {
-        this.element = element;
+    AbstractNonDetailsIssuesTableRow(final WebElement rowElement, final IssuesTable table) {
+        this.row = rowElement;
         this.issuesTable = table;
+    }
+
+    /**
+     * Returns the severity of the issue in this row.
+     *
+     * @return the severity
+     */
+    public String getSeverity() {
+        return getCellContent(SEVERITY);
+    }
+
+    /**
+     * Returns the age of the issue in this row. The age is the total number of builds since the issue has been found.
+     *
+     * @return the age
+     */
+    public int getAge() {
+        return Integer.parseInt(getCellContent(AGE));
+    }
+
+    /**
+     * Returns the file name of the affected file.
+     *
+     * @return the file name
+     */
+    public String getFileName() {
+        return getCellContent(FILE).split(FILE_LINE_SEPARATOR)[0];
+    }
+
+    /**
+     * Returns the line number of the affected file.
+     *
+     * @return the line number
+     */
+    public int getLineNumber() {
+        return Integer.parseInt(getCellContent(FILE).split(FILE_LINE_SEPARATOR)[1]);
+    }
+
+    /**
+     * Returns the package or namespace name of the affected file.
+     *
+     * @return the package or namespace name
+     */
+    public String getPackageName() {
+        return getCellContent(PACKAGE);
     }
 
     /**
@@ -58,7 +96,7 @@ public abstract class AbstractNonDetailsIssuesTableRow extends AbstractIssuesTab
      * @return the table data fields
      */
     List<WebElement> getCells() {
-        return element.findElements(By.tagName("td"));
+        return row.findElements(By.tagName("td"));
     }
 
     /**
@@ -95,29 +133,11 @@ public abstract class AbstractNonDetailsIssuesTableRow extends AbstractIssuesTab
     }
 
     /**
-     * Returns the priority as String.
-     *
-     * @return the priority
-     */
-    public String getPriority() {
-        return getCellContent(PRIORITY);
-    }
-
-    /**
      * Performs a click on the icon showing and hiding the details row.
      */
     public void toggleDetailsRow() {
         getCell(DETAILS).findElement(By.tagName("div")).click();
         issuesTable.updateTableRows();
-    }
-
-    /**
-     * Returns the age of the issue as String.
-     *
-     * @return the age
-     */
-    public int getAge() {
-        return Integer.parseInt(getCellContent(AGE));
     }
 
     /**
@@ -130,7 +150,7 @@ public abstract class AbstractNonDetailsIssuesTableRow extends AbstractIssuesTab
      */
     private WebElement findLink(final WebElement parent) {
         return parent.findElement(A_TAG);
-        
+
     }
 
     /**
@@ -158,12 +178,12 @@ public abstract class AbstractNonDetailsIssuesTableRow extends AbstractIssuesTab
     }
 
     /**
-     * Performs a click on the priority link.
+     * Performs a click on the severity link.
      *
      * @return the representation of the filtered AnalysisResult
      */
-    public AnalysisResult clickOnPriorityLink() {
-        return clickOnFilterLink(PRIORITY);
+    public AnalysisResult clickOnSeverityLink() {
+        return clickOnFilterLink(SEVERITY);
     }
 
     /**
@@ -171,34 +191,14 @@ public abstract class AbstractNonDetailsIssuesTableRow extends AbstractIssuesTab
      *
      * @return the file link
      */
-    protected WebElement getFileLink() {
+    WebElement getFileLink() {
         return getCell(FILE).findElement(By.tagName("a"));
     }
 
     /**
-     * Returns the line number of the affected file.
-     *
-     * @return the line number
+     * Opens the source code of the affected file.
      */
-    public int getLineNumber() {
-        return Integer.parseInt(getCellContent(FILE).split(FILE_LINE_SEPARATOR)[1]);
-    }
-
-    /**
-     * Returns the file name of the affected file.
-     *
-     * @return the file name
-     */
-    public String getFileName() {
-        return getCellContent(FILE).split(FILE_LINE_SEPARATOR)[0];
-    }
-
-    /**
-     * Returns the package or namespace name of the affected file.
-     *
-     * @return the package or namespace name
-     */
-    public String getPackageName() {
-        return getCellContent("Package");
+    public SourceView openSourceCode() {
+        return clickOnLink(getFileLink(), SourceView.class);
     }
 }

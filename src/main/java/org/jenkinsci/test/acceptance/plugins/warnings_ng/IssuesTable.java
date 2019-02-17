@@ -32,7 +32,7 @@ public class IssuesTable {
      * @param type
      *         the type of the issues-table (e.g. Default or DRY)
      */
-    public IssuesTable(final WebElement element, final AnalysisResult resultDetailsPage, IssuesTableRowType type) {
+    public IssuesTable(final WebElement element, final AnalysisResult resultDetailsPage, final IssuesTableRowType type) {
         headers = element.findElements(By.xpath(".//thead/tr/th"))
                 .stream()
                 .map(WebElement::getText)
