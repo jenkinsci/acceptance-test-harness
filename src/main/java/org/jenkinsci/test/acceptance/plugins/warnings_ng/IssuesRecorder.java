@@ -222,10 +222,16 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
     }
 
     /**
-     * Sets a quality gate configuration TODO
+     * Adds a new quality gate.
      *
+     * @param threshold
+     *         the minimum number of issues that fails the quality gate
+     * @param type
+     *         the type of the quality gate
+     * @param isUnstable
+     *         determines whether the quality gate sets the build result to Unstable or Failed
      */
-    public void addQualityGateConfiguration(int threshold, final QualityGateType type, final boolean isUnstable) {
+    public void addQualityGateConfiguration(final int threshold, final QualityGateType type, final boolean isUnstable) {
         String path = createPageArea("qualityGates", () -> qualityGatesRepeatable.click());
         QualityGatePanel qualityGate = new QualityGatePanel(this, path);
         qualityGate.setThreshold(threshold);
