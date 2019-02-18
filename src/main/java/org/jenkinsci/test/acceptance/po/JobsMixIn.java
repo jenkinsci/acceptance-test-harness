@@ -96,17 +96,14 @@ public class JobsMixIn extends MixIn {
 
     public void copy(String from, String to) {
         visit("newJob");
-        fillIn("name",to);
-        fillIn("from",from);
+        fillIn("from", from);
         if (getJenkins().isJenkins1X()) { 
             // no radio buttons on Jenkins 2.X
             choose("copy");
-        } else {
-            // a bit hacky: send a tab to enable the OK button
-            WebElement fromElem = find(By.name("from"));
-            fromElem.sendKeys("\t");
-            blur(fromElem);
         }
+        // There is a javascript magic bound to loss of focus on 'from' field that is a pain to duplicate through selenium
+        // explicitly. Here, it is done so by setting 'to' afterwards.
+        fillIn("name", to);
         clickButton("OK");
     }
     
