@@ -1,11 +1,14 @@
 package org.jenkinsci.test.acceptance.plugins.warnings_ng;
 
+import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+
+import com.google.inject.Injector;
 
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Control;
@@ -21,6 +24,7 @@ import org.jenkinsci.test.acceptance.po.PageObject;
 public class InfoView extends PageObject {
     private final Control errors = control(By.id("errors"));
     private final Control info = control(By.id("info"));
+    private final String id;
 
     /**
      * Creates a new info and error view.
@@ -32,6 +36,24 @@ public class InfoView extends PageObject {
      */
     public InfoView(final Build build, final String id) {
         super(build, build.url(id + "/info/"));
+
+        this.id = id;
+    }
+
+    /**
+     * Creates a new info and error view.
+     *
+     * @param injector
+     *         injector
+     * @param url
+     *         the URL of the view
+     * @param id
+     *         the id of the analysis tool
+     */
+    @SuppressWarnings("unused") // Required to dynamically create page object using reflection
+    public InfoView(final Injector injector, final URL url, final String id) {
+        super(injector, url);
+        this.id = id;
     }
 
     /**

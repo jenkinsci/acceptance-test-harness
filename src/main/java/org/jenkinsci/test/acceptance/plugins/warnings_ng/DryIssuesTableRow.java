@@ -1,8 +1,11 @@
 package org.jenkinsci.test.acceptance.plugins.warnings_ng;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
@@ -12,6 +15,8 @@ import org.openqa.selenium.WebElement;
 public class DryIssuesTableRow extends AbstractNonDetailsIssuesTableRow {
     private static final String DUPLICATED_IN = "Duplicated In";
     private static final String AMOUNT_OF_LINES = "#Lines";
+
+    private int bla;
 
     /**
      * Creates an instance representing a duplicate code warnings table row.
@@ -57,5 +62,34 @@ public class DryIssuesTableRow extends AbstractNonDetailsIssuesTableRow {
      */
     public SourceView clickOnDuplicatedInLink(final int number) {
         return clickOnLink(findAllLinks(getCell(DUPLICATED_IN)).get(number), SourceView.class);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        DryIssuesTableRow that = (DryIssuesTableRow) o;
+
+        EqualsBuilder builder = new EqualsBuilder();
+        builder.append(this.getLines(), that.getLines())
+                .append(this.getDuplicatedIn(), that.getDuplicatedIn());
+        return builder.isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        HashCodeBuilder builder = new HashCodeBuilder();
+
+        builder.append(this.getLines())
+                .append(this.getDuplicatedIn());
+
+        return Objects.hash(super.hashCode(), builder.toHashCode());
     }
 }

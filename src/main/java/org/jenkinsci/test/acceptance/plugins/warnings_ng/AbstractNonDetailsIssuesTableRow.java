@@ -2,6 +2,8 @@ package org.jenkinsci.test.acceptance.plugins.warnings_ng;
 
 import java.util.List;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
@@ -129,6 +131,9 @@ public abstract class AbstractNonDetailsIssuesTableRow extends AbstractIssuesTab
      * @return the String representation of the cell
      */
     String getCellContent(final String header) {
+        if (getHeaders().indexOf(header) == -1) {
+            return "-";
+        }
         return getCell(header).getText();
     }
 
@@ -200,5 +205,36 @@ public abstract class AbstractNonDetailsIssuesTableRow extends AbstractIssuesTab
      */
     public SourceView openSourceCode() {
         return clickOnLink(getFileLink(), SourceView.class);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        AbstractNonDetailsIssuesTableRow that = (AbstractNonDetailsIssuesTableRow) o;
+
+        EqualsBuilder builder = new EqualsBuilder();
+        builder.append(this.getAge(), that.getAge())
+                .append(this.getFileName(), that.getFileName())
+                .append(this.getLineNumber(), that.getLineNumber())
+                .append(this.getPackageName(), that.getPackageName())
+                .append(this.getSeverity(), that.getSeverity());
+        return builder.isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        HashCodeBuilder builder = new HashCodeBuilder();
+
+        builder.append(this.getAge())
+                .append(this.getFileName())
+                .append(this.getLineNumber())
+                .append(this.getPackageName())
+                .append(this.getSeverity());
+        return builder.toHashCode();
     }
 }

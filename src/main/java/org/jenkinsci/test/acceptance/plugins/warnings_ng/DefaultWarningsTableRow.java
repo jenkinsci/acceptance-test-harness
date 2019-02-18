@@ -1,5 +1,9 @@
 package org.jenkinsci.test.acceptance.plugins.warnings_ng;
 
+import java.util.Objects;
+
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.openqa.selenium.WebElement;
 
 /**
@@ -8,6 +12,8 @@ import org.openqa.selenium.WebElement;
  * @author Stephan Plöderl
  */
 public class DefaultWarningsTableRow extends AbstractNonDetailsIssuesTableRow {
+    int bla;
+
     DefaultWarningsTableRow(final WebElement rowElement, final IssuesTable issuesTable) {
         super(rowElement, issuesTable);
     }
@@ -35,5 +41,34 @@ public class DefaultWarningsTableRow extends AbstractNonDetailsIssuesTableRow {
      */
     public ConsoleLogView openConsoleLog() {
         return clickOnLink(getFileLink(), ConsoleLogView.class);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        DefaultWarningsTableRow that = (DefaultWarningsTableRow) o;
+
+        EqualsBuilder builder = new EqualsBuilder();
+        builder.append(this.getCategory(), that.getCategory())
+                .append(this.getType(), that.getType());
+        return builder.isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        HashCodeBuilder builder = new HashCodeBuilder();
+
+        builder.append(this.getCategory())
+                .append(this.getType());
+
+        return Objects.hash(super.hashCode(), builder.toHashCode());
     }
 }

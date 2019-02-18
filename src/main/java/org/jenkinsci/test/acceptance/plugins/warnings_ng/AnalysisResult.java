@@ -52,7 +52,7 @@ public class AnalysisResult extends PageObject {
      * @param id
      *         the id of  the result page (e.g simian or cpd)
      */
-    @SuppressWarnings("unused")
+    @SuppressWarnings("unused") // Required to dynamically create page object using reflection
     public AnalysisResult(final Injector injector, final URL url, final String id) {
         super(injector, url);
 
