@@ -489,7 +489,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         assertThat(infoView).hasInfoMessages(
                 "-> found 1 file",
                 "-> found 11 issues (skipped 0 duplicates)",
-                "Post processing issues on 'Master' with encoding 'UTF-8'",
+                "Post processing issues on 'Master' with source code encoding 'UTF-8'",
                 "-> 0 resolved, 1 unresolved, 0 already resolved",
                 "-> 0 copied, 0 not in workspace, 1 not-found, 0 with I/O error",
                 "-> resolved module names for 11 issues",
