@@ -253,6 +253,8 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
      *         determines whether the quality gate sets the build result to Unstable or Failed
      */
     public void addQualityGateConfiguration(final int threshold, final QualityGateType type, final boolean isUnstable) {
+        openAdvancedOptions();
+
         String path = createPageArea("qualityGates", () -> qualityGatesRepeatable.click());
         QualityGatePanel qualityGate = new QualityGatePanel(this, path);
         qualityGate.setThreshold(threshold);
@@ -269,6 +271,8 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
      *         regular expression to apply
      */
     public void addIssueFilter(final String filterName, final String regex) {
+        openAdvancedOptions();
+
         String path = createPageArea("filters", () -> filtersRepeatable.selectDropdownMenu(filterName));
         IssueFilterPanel filter = new IssueFilterPanel(this, path);
         filter.setFilter(regex);
