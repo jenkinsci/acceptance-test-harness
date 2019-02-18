@@ -6,6 +6,8 @@ import java.io.Closeable;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.concurrent.Callable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Performs clean-up tasks at the end of scope.
@@ -16,6 +18,7 @@ import java.util.concurrent.Callable;
  * @author Kohsuke Kawaguchi
  */
 public class Cleaner {
+    private static final Logger LOGGER = Logger.getLogger(Cleaner.class.getName());
     private final Deque<Statement> tasks = new ArrayDeque<>();
 
     public void addTask(Statement stmt) {
@@ -53,7 +56,7 @@ public class Cleaner {
             try {
                 task.evaluate();
             } catch (Throwable t) {
-                throw new AssertionError(task+" failed",t);
+                LOGGER.log(Level.SEVERE, task + " failed", t);
             }
         }
         tasks.clear();
