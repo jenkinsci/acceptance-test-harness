@@ -27,29 +27,27 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
+
+import com.google.inject.Inject;
+
+import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Since;
+import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.mailer.Mailer;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenBuild;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenBuildStep;
-import org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenProjectConfig;
-import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.StringParameter;
 import org.jenkinsci.test.acceptance.utils.mail.MailService;
-import org.junit.Test;
-
-import com.google.inject.Inject;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
-import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import static org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation.*;
-import org.jenkinsci.test.acceptance.plugins.tasks.TasksMavenSettings;
 
 @WithPlugins("maven-plugin")
 public class MavenPluginTest extends AbstractJUnitTest {
@@ -211,20 +209,4 @@ public class MavenPluginTest extends AbstractJUnitTest {
         find(by.xpath("//a[@href='%s/']", name)).click();
         assertThat(driver.getCurrentUrl(), equalTo(build.module(name).url.toExternalForm()));
     }
-
-    @Issue("JENKINS-22252")
-    @WithPlugins({"maven-plugin@2.12", "tasks"})
-    @Test
-    public void useWithTasks() throws InterruptedException {
-        MavenInstallation.installMaven(jenkins, "Maven 3.2.x", "3.2.1");
-        MavenModuleSet job = jenkins.jobs.create(MavenModuleSet.class);
-        job.configure();
-        job.copyDir(resource("/maven_plugin/multimodule/"));
-        job.goals.set("package");
-        job.addBuildSettings(TasksMavenSettings.class);
-        job.save();
-        Build build = job.startBuild().shouldSucceed();
-        assertThat(build.getConsole(), not(containsString("IllegalAccessError")));
-    }
-
 }
