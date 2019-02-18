@@ -21,10 +21,10 @@ for (int j in [8, 11]) {
                         writeFile file: 'excludes.txt', text: exclusions
                         realtimeJUnit(testResults: 'target/surefire-reports/TEST-*.xml', testDataPublishers: [[$class: 'AttachmentPublisher']]) {
                             sh """
-                                ./set-java.sh $javaVersion
-                                eval \$(./vnc.sh)
+                                set-java.sh $javaVersion
+                                eval \$(vnc.sh)
                                 java -version
-                                ./run.sh firefox latest -Dmaven.test.failure.ignore=true -DforkCount=1 -B
+                                run.sh firefox latest -Dmaven.test.failure.ignore=true -DforkCount=1 -B
                             """
                         }
                     }
