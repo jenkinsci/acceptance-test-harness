@@ -321,7 +321,8 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void should_open_source_code_view_from_issues_table() {
-        Build build = createAndBuildFreeStyleJob("CPD", cpd -> cpd.setHighThreshold(2).setNormalThreshold(1),
+        Build build = createAndBuildFreeStyleJob("CPD",
+                cpd -> cpd.setHighThreshold(2).setNormalThreshold(1),
                 CPD_REPORT, CPD_SOURCE_PATH);
         AnalysisResult result = openAnalysisResult(build, CPD_ID);
         IssuesTable issuesTable = result.openIssuesTable();
@@ -352,7 +353,8 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void should_filter_results_by_severity() {
-        Build build = createAndBuildFreeStyleJob("CPD", cpd -> cpd.setHighThreshold(3).setNormalThreshold(2),
+        Build build = createAndBuildFreeStyleJob("CPD",
+                cpd -> cpd.setHighThreshold(3).setNormalThreshold(2),
                 CPD_REPORT, CPD_SOURCE_PATH);
 
         AnalysisResult page = openAnalysisResult(build, CPD_ID);
@@ -389,7 +391,6 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         FreeStyleJob job = createFreeStyleJob("issue_filter/checkstyle-result.xml");
         job.addPublisher(IssuesRecorder.class, recorder -> {
             recorder.setTool("CheckStyle");
-            recorder.openAdvancedOptions();
             recorder.setEnabledForFailure(true);
             recorder.addIssueFilter("Exclude categories", "Checks");
             recorder.addIssueFilter("Include types", "JavadocMethodCheck");
@@ -417,7 +418,6 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
             recorder.setTool("CheckStyle");
             recorder.addTool("FindBugs");
             recorder.addTool("PMD");
-            recorder.openAdvancedOptions();
             recorder.setEnabledForFailure(true);
         });
     }
@@ -464,10 +464,17 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void should_show_info_and_error_messages() {
-        Build build = createAndBuildFreeStyleJob("CheckStyle", CHECKSTYLE_XML);
+        FreeStyleJob job = createFreeStyleJob(CHECKSTYLE_XML);
+        job.addPublisher(IssuesRecorder.class, recorder -> {
+            recorder.setTool("CheckStyle");
+            recorder.setSourceCodeEncoding("UTF-8");
+        });
+        job.save();
+
+        Build build = buildJob(job);
         verifyInfoAndErrorMessages(build);
 
-        Build pipeline = buildJob(createPipelineWithCheckStyle(CHECKSTYLE_XML));
+        Build pipeline = buildJob(createPipelineWithCheckStyle());
         verifyInfoAndErrorMessages(pipeline);
     }
 
@@ -653,12 +660,12 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         return agent;
     }
 
-    private WorkflowJob createPipelineWithCheckStyle(final String resourceToCopy) {
+    private WorkflowJob createPipelineWithCheckStyle() {
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
-        String resource = job.copyResourceStep(WARNINGS_PLUGIN_PREFIX + resourceToCopy);
+        String resource = job.copyResourceStep(WARNINGS_PLUGIN_PREFIX + CHECKSTYLE_XML);
         job.script.set("node {\n"
                 + resource.replace("\\", "\\\\")
-                + "recordIssues enabledForFailure: true, tool: checkStyle()"
+                + "recordIssues enabledForFailure: true, tool: checkStyle(), sourceCodeEncoding: 'UTF-8'"
                 + "}");
         job.sandbox.check();
         job.save();
@@ -706,21 +713,6 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     * Creates and builds a FreestyleJob for a specific static analysis tool.
-     *
-     * @param toolName
-     *         the name of the tool
-     * @param resourcesToCopy
-     *         the resources which shall be copied to the workspace
-     *
-     * @return the finished build
-     */
-    private Build createAndBuildFreeStyleJob(final String toolName, final String... resourcesToCopy) {
-        return createAndBuildFreeStyleJob(toolName, c -> {
-        }, resourcesToCopy);
-    }
-
-    /**
      * Opens the AnalysisResult and returns the corresponding PageObject representing it.
      *
      * @param build
@@ -753,7 +745,6 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
     private void configureJob(final MavenModuleSet job, final String toolName, final String pattern) {
         IssuesRecorder recorder = job.addPublisher(IssuesRecorder.class);
         recorder.setToolWithPattern(toolName, pattern);
-        recorder.openAdvancedOptions();
         recorder.setEnabledForFailure(true);
     }
 

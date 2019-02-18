@@ -29,6 +29,7 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
     private Control overallResultMustBeSuccessCheckBox = control("overallResultMustBeSuccess");
     private Control referenceJobField = control("referenceJob");
     private Control aggregatingResultsCheckBox = control("aggregatingResults");
+    private Control sourceCodeEncoding = control("sourceCodeEncoding");
 
     /**
      * Returns the repeatable add button for the specified property.
@@ -143,6 +144,18 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
     }
 
     /**
+     * Sets the source code encoding to the specified value.
+     *
+     * @param encoding
+     *         the encoding to use when reading source files
+     */
+    public void setSourceCodeEncoding(final String encoding) {
+        openAdvancedOptions();
+
+        this.sourceCodeEncoding.set(encoding);
+    }
+
+    /**
      * Enables or disables the checkbox 'enabledForFailure'.
      *
      * @param isChecked
@@ -150,36 +163,6 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
      */
     public void setEnabledForFailure(final boolean isChecked) {
         enabledForFailureCheckBox.check(isChecked);
-    }
-
-    /**
-     * Enables or disables the checkbox 'ignoreAnalysisResult'.
-     *
-     * @param isChecked
-     *         determines if the checkbox should be checked or not
-     */
-    public void setIgnoreAnalysisResult(final boolean isChecked) {
-        ignoreAnalysisResultCheckBox.check(isChecked);
-    }
-
-    /**
-     * Enables or disables the checkbox 'overallResultMustBeSuccess'.
-     *
-     * @param isChecked
-     *         determines if the checkbox should be checked or not
-     */
-    public void setOverallResultMustBeSuccess(final boolean isChecked) {
-        overallResultMustBeSuccessCheckBox.check(isChecked);
-    }
-
-    /**
-     * Sets the value of the input field 'referenceJob'.
-     *
-     * @param referenceJob
-     *         the name of the referenceJob
-     */
-    public void setReferenceJobField(final String referenceJob) {
-        referenceJobField.set(referenceJob);
     }
 
     /**
@@ -193,10 +176,48 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
     }
 
     /**
+     * Enables or disables the checkbox 'ignoreAnalysisResult'.
+     *
+     * @param isChecked
+     *         determines if the checkbox should be checked or not
+     */
+    public void setIgnoreAnalysisResult(final boolean isChecked) {
+        openAdvancedOptions();
+
+        ignoreAnalysisResultCheckBox.check(isChecked);
+    }
+
+    /**
+     * Enables or disables the checkbox 'overallResultMustBeSuccess'.
+     *
+     * @param isChecked
+     *         determines if the checkbox should be checked or not
+     */
+    public void setOverallResultMustBeSuccess(final boolean isChecked) {
+        openAdvancedOptions();
+
+        overallResultMustBeSuccessCheckBox.check(isChecked);
+    }
+
+    /**
+     * Sets the value of the input field 'referenceJob'.
+     *
+     * @param referenceJob
+     *         the name of the referenceJob
+     */
+    public void setReferenceJobField(final String referenceJob) {
+        openAdvancedOptions();
+
+        referenceJobField.set(referenceJob);
+    }
+
+    /**
      * Opens the advanced section.
      */
-    public void openAdvancedOptions() {
-        advancedButton.click();
+    private void openAdvancedOptions() {
+        if (advancedButton != null && advancedButton.exists()) {
+            advancedButton.click();
+        }
     }
 
     private StaticAnalysisTool createToolPageArea(final String toolName) {
