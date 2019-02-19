@@ -18,7 +18,8 @@ RUN apt-get clean && \
         unzip \
         vnc4server \
         openjdk-8-jdk \
-        openjdk-11-jdk
+        openjdk-11-jdk && \
+    apt-get clean
 
 # All we need is a statically linked client library - no need to install daemon deps: https://get.docker.com/builds/
 RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-17.03.2-ce.tgz && \
@@ -67,3 +68,7 @@ RUN chmod ug+s "$(which docker)"
 
 # Java 8 by default
 RUN update-java-alternatives -s java-1.8.0-openjdk-amd64
+
+ADD vnc.sh /usr/bin/
+ADD set-java.sh /usr/bin/
+ADD run.sh /usr/bin/
