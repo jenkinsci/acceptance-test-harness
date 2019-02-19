@@ -662,6 +662,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
 
     private WorkflowJob createPipelineWithCheckStyle() {
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
+        ScrollerUtil.hideScrollerTabBar(driver);
         String resource = job.copyResourceStep(WARNINGS_PLUGIN_PREFIX + CHECKSTYLE_XML);
         job.script.set("node {\n"
                 + resource.replace("\\", "\\\\")
