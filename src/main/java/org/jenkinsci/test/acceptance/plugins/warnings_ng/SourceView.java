@@ -4,12 +4,12 @@ import java.net.URL;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jenkinsci.test.acceptance.po.PageObject;
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
 
 import com.google.inject.Injector;
+
+import org.jenkinsci.test.acceptance.po.PageObject;
 
 /**
  * Page object that represents the source code view.
@@ -33,13 +33,8 @@ public class SourceView extends PageObject {
     }
 
     private void removeSourceLinesFromView() {
-        if (driver instanceof JavascriptExecutor) {
-            ((JavascriptExecutor) driver).executeScript("inputs = document.getElementsByTagName('code')[1];"
+        executeScript("inputs = document.getElementsByTagName('code')[1];"
                     + "document.querySelectorAll(\"a[name]\").forEach(e => e.parentNode.removeChild(e));");
-        }
-        else {
-            throw new AssertionError("Execution requires an instance of JavascriptExecutor");
-        }
     }
 
     /**
