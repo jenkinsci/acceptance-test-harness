@@ -459,11 +459,11 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     * Runs a freestyle job and pipeline that publishes checkstyle warnings. Verifies the content of the info and error
+     * Runs a freestyle job that publishes checkstyle warnings. Verifies the content of the info and error
      * log view.
      */
     @Test
-    public void should_show_info_and_error_messages() {
+    public void should_show_info_and_error_messages_in_freestyle_job() {
         FreeStyleJob job = createFreeStyleJob(CHECKSTYLE_XML);
         job.addPublisher(IssuesRecorder.class, recorder -> {
             recorder.setTool("CheckStyle");
@@ -473,8 +473,24 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
 
         Build build = buildJob(job);
         verifyInfoAndErrorMessages(build);
+    }
 
-        Build pipeline = buildJob(createPipelineWithCheckStyle());
+    /**
+     * Runs a pipeline that publishes checkstyle warnings. Verifies the content of the info and error
+     * log view.
+     */
+    @Test
+    public void should_show_info_and_error_messages_in_pipeline() {
+        WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
+        String resource = job.copyResourceStep(WARNINGS_PLUGIN_PREFIX + CHECKSTYLE_XML);
+        job.script.set("node {\n"
+                + resource.replace("\\", "\\\\")
+                + "recordIssues enabledForFailure: true, tool: checkStyle(), sourceCodeEncoding: 'UTF-8'"
+                + "}");
+        job.sandbox.check();
+        job.save();
+
+        Build pipeline = buildJob(job);
         verifyInfoAndErrorMessages(pipeline);
     }
 
@@ -658,19 +674,6 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         assertThat(agent.isOnline()).isTrue();
 
         return agent;
-    }
-
-    private WorkflowJob createPipelineWithCheckStyle() {
-        WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
-        ScrollerUtil.hideScrollerTabBar(driver);
-        String resource = job.copyResourceStep(WARNINGS_PLUGIN_PREFIX + CHECKSTYLE_XML);
-        job.script.set("node {\n"
-                + resource.replace("\\", "\\\\")
-                + "recordIssues enabledForFailure: true, tool: checkStyle(), sourceCodeEncoding: 'UTF-8'"
-                + "}");
-        job.sandbox.check();
-        job.save();
-        return job;
     }
 
     /**
