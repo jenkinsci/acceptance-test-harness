@@ -24,11 +24,11 @@
 
 package org.jenkinsci.test.acceptance.po;
 
-import javax.annotation.Nonnull;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.Nonnull;
 
-import org.jenkinsci.test.acceptance.junit.Resource;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.TimeoutException;
@@ -37,11 +37,23 @@ import org.openqa.selenium.support.ui.Select;
 
 import com.google.inject.Injector;
 
+import org.jenkinsci.test.acceptance.junit.Resource;
+
 @Describable("org.jenkinsci.plugins.workflow.job.WorkflowJob")
 public class WorkflowJob extends Job {
+    private Control aceLayerTextArea = control(By.cssSelector(".ace_text-layer .ace_line"));
 
     public WorkflowJob(Injector injector, URL url, String name) {
         super(injector, url, name);
+    }
+
+    public void setScript(final String script) {
+        aceLayerTextArea.resolve();
+
+        String escaped = StringEscapeUtils.escapeEcmaScript(script);
+        String jsCommand = String.format("var editor = document.getElementById('workflow-editor-1');\n"
+                + "editor.aceEditor.setValue('%s');", escaped);
+        executeScript(jsCommand);
     }
 
     public final Control script = new Control(this, "/definition/script") {
