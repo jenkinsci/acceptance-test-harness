@@ -163,7 +163,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         assertThat(driver, hasContent("All Tests"));
     }
 
-    @WithPlugins({"workflow-job", "workflow-cps@2.10", "workflow-basic-steps@2.1", "workflow-durable-task-step", "parallel-test-executor@1.9", "junit@1.18", "git@2.3"})
+    @WithPlugins({"workflow-job", "workflow-cps@2.10", "workflow-basic-steps@2.1", "workflow-durable-task-step", "parallel-test-executor@1.11", "junit@1.18", "git@2.3"})
     @Native("mvn")
     @Test public void parallelTests() throws Exception {
         for (int i = 0; i < 3; i++) {
@@ -176,7 +176,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
             "  git 'https://github.com/jenkinsci/parallel-test-executor-plugin-sample.git'\n" +
             "  stash 'sources'\n" +
             "}\n" +
-            "def splits = splitTests count(3)\n" +
+            "def splits = splitTests parallelism: count(3), estimateTestsFromFiles: true\n" +
             "def branches = [:]\n" +
             "for (int i = 0; i < splits.size(); i++) {\n" +
             "  def exclusions = splits.get(i);\n" +
