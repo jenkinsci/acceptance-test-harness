@@ -58,4 +58,8 @@ public class JenkinsConfig extends ConfigurablePageObject {
     public void setShell(String path) {
         control("/hudson-tasks-Shell/shell").set(path);
     }
+
+    public void setQuietPeriod(int seconds) {
+        control("/jenkins-model-GlobalQuietPeriodConfiguration/quietPeriod").set(seconds);
+    }
 }
