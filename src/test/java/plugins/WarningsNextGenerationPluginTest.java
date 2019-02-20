@@ -117,7 +117,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
 
         String checkstyle = job.copyResourceStep(WARNINGS_PLUGIN_PREFIX + "aggregation/checkstyle1.xml");
         String pmd = job.copyResourceStep(WARNINGS_PLUGIN_PREFIX + "aggregation/pmd.xml");
-        job.setScript("node {\n"
+        job.script.set("node {\n"
                 + checkstyle.replace("\\", "\\\\")
                 + pmd.replace("\\", "\\\\")
                 + "recordIssues tool: checkStyle(pattern: '**/checkstyle*')\n"
