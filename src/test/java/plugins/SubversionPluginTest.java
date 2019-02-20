@@ -197,8 +197,7 @@ public class SubversionPluginTest extends AbstractJUnitTest {
         f.addShellStep("test -d .svn");
         f.save();
 
-        elasticSleep(70000);
-//assertTrue(false);
+        elasticSleep(10000);
 
         f.build(1).waitUntilFinished().shouldSucceed();
     }
