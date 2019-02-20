@@ -480,6 +480,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
      * log view.
      */
     @Test
+    @WithPlugins({"workflow-cps", "pipeline-stage-step", "workflow-durable-task-step", "workflow-basic-steps"})
     public void should_show_info_and_error_messages_in_pipeline() {
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
         String resource = job.copyResourceStep(WARNINGS_PLUGIN_PREFIX + CHECKSTYLE_XML);
