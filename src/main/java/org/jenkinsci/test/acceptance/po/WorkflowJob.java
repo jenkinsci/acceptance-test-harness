@@ -45,7 +45,7 @@ public class WorkflowJob extends Job {
     }
 
     public void setScript(final String script) {
-        waitFor(find(By.cssSelector(".ace_text-layer .ace_line"))).withTimeout(10, TimeUnit.SECONDS);
+        waitFor(By.cssSelector(".ace_text-layer .ace_line"), 10);
 
         executeScript("var editor = document.getElementById('workflow-editor-1');\n"
                 + "editor.aceEditor.setValue(arguments[0]);", script);
