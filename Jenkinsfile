@@ -24,6 +24,10 @@ for (int j in [8, 11]) {
                                 set-java.sh $javaVersion
                                 eval \$(vnc.sh)
                                 java -version
+
+                                echo "Excludes:"
+                                cat excludes.txt
+
                                 run.sh firefox latest -Dmaven.test.failure.ignore=true -DforkCount=1 -B
                             """
                         }
