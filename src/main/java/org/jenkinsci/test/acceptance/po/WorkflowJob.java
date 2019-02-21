@@ -25,14 +25,12 @@
 package org.jenkinsci.test.acceptance.po;
 
 import java.net.URL;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
 
-import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.TimeoutException;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.Select;
 
 import com.google.inject.Injector;
 
@@ -40,15 +38,9 @@ import org.jenkinsci.test.acceptance.junit.Resource;
 
 @Describable("org.jenkinsci.plugins.workflow.job.WorkflowJob")
 public class WorkflowJob extends Job {
+
     public WorkflowJob(Injector injector, URL url, String name) {
         super(injector, url, name);
-    }
-
-    public void setScript(final String script) {
-        waitFor(By.cssSelector(".ace_text-layer .ace_line"), 10);
-
-        executeScript("var editor = document.getElementById('workflow-editor-1');\n"
-                + "editor.aceEditor.setValue(arguments[0]);", script);
     }
 
     public final Control script = new Control(this, "/definition/script") {
@@ -63,19 +55,19 @@ public class WorkflowJob extends Job {
                 String cssSelector;
                 try {
                     cssSelector = waitFor("#workflow-editor-1");
-                } catch (TimeoutException e) {
+                } catch(TimeoutException e) {
                     cssSelector = waitFor("#workflow-editor");
                 }
                 executeScript(
-                        "var targets = document.getElementsBySelector(arguments[0]);" +
-                                "if (!targets || targets.length === 0) {" +
-                                "    throw '**** Failed to find ACE Editor target object on page. Selector: ' + arguments[0];" +
-                                "}" +
-                                "if (!targets[0].aceEditor) {" +
-                                "    throw '**** Selected ACE Editor target object is not an active ACE Editor. Selector: ' + arguments[0];" +
-                                "}" +
-                                "targets[0].aceEditor.setValue(arguments[1]);",
-                        cssSelector, text);
+                    "var targets = document.getElementsBySelector(arguments[0]);" +
+                            "if (!targets || targets.length === 0) {" +
+                            "    throw '**** Failed to find ACE Editor target object on page. Selector: ' + arguments[0];" +
+                            "}" +
+                            "if (!targets[0].aceEditor) {" +
+                            "    throw '**** Selected ACE Editor target object is not an active ACE Editor. Selector: ' + arguments[0];" +
+                            "}" +
+                            "targets[0].aceEditor.setValue(arguments[1]);",
+                    cssSelector, text);
             }
         }
 
@@ -84,14 +76,16 @@ public class WorkflowJob extends Job {
             return selector;
         }
     };
-
     private static void waitForRenderOf(@Nonnull final String cssSelector, @Nonnull final Jenkins jenkins) {
         jenkins.waitFor().withMessage("Timed out waiting on '" + cssSelector + "' to be rendered.")
                 .withTimeout(20, TimeUnit.SECONDS)
-                .until(() -> isRendered(cssSelector, jenkins))
+                .until(new Callable<Boolean>() {
+                    @Override public Boolean call() throws Exception {
+                        return isRendered(cssSelector, jenkins);
+                    }
+                })
         ;
     }
-
     private static boolean isRendered(@Nonnull String cssSelector, @Nonnull Jenkins jenkins) {
         return (boolean) jenkins.executeScript(
                 "var targets = document.getElementsBySelector(arguments[0]);" +
@@ -115,24 +109,4 @@ public class WorkflowJob extends Job {
         confirmAlert(2);
     }
 
-    /**
-     * Selects the location of the Jenkinsfile to be a Git repository with the specified URL. The provided credentials
-     * key is used to connect to the Git repository.
-     *
-     * @param gitRepositoryUrl the URL to the Git repository that contains the Jenkinsfile
-     * @param credentialsKey   the key of the credentials to be used to connect to the repository
-     */
-    // TODO: provide a generic way of setting the source of the repository
-    public void setJenkinsFileRepository(final String gitRepositoryUrl, final String credentialsKey) {
-        select("Pipeline script from SCM");
-        select("Git");
-        WebElement gitUrl = waitFor(by.path("/definition/scm/userRemoteConfigs/url"), 10);
-        gitUrl.sendKeys(gitRepositoryUrl);
-        Select credentials = new Select(control(By.className("credentials-select")).resolve());
-        credentials.selectByVisibleText(credentialsKey);
-    }
-
-    private void select(final String option) {
-        find(by.option(option)).click();
-    }
 }

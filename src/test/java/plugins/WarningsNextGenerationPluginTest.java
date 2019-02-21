@@ -117,7 +117,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
 
         String checkstyle = job.copyResourceStep(WARNINGS_PLUGIN_PREFIX + "aggregation/checkstyle1.xml");
         String pmd = job.copyResourceStep(WARNINGS_PLUGIN_PREFIX + "aggregation/pmd.xml");
-        job.setScript("node {\n"
+        job.script.set("node {\n"
                 + checkstyle.replace("\\", "\\\\")
                 + pmd.replace("\\", "\\\\")
                 + "recordIssues tool: checkStyle(pattern: '**/checkstyle*')\n"
@@ -484,7 +484,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
     public void should_show_info_and_error_messages_in_pipeline() {
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
         String resource = job.copyResourceStep(WARNINGS_PLUGIN_PREFIX + CHECKSTYLE_XML);
-        job.setScript("node {\n"
+        job.script.set("node {\n"
                 + resource.replace("\\", "\\\\")
                 + "recordIssues enabledForFailure: true, tool: checkStyle(), sourceCodeEncoding: 'UTF-8'"
                 + "}");
