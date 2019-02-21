@@ -29,8 +29,11 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
 
+import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.Select;
 
 import com.google.inject.Injector;
 
@@ -109,4 +112,24 @@ public class WorkflowJob extends Job {
         confirmAlert(2);
     }
 
+    /**
+     * Selects the location of the Jenkinsfile to be a Git repository with the specified URL. The provided credentials
+     * key is used to connect to the Git repository.
+     *
+     * @param gitRepositoryUrl the URL to the Git repository that contains the Jenkinsfile
+     * @param credentialsKey   the key of the credentials to be used to connect to the repository
+     */
+    // TODO: provide a generic way of setting the source of the repository
+    public void setJenkinsFileRepository(final String gitRepositoryUrl, final String credentialsKey) {
+        select("Pipeline script from SCM");
+        select("Git");
+        WebElement gitUrl = waitFor(by.path("/definition/scm/userRemoteConfigs/url"), 10);
+        gitUrl.sendKeys(gitRepositoryUrl);
+        Select credentials = new Select(control(By.className("credentials-select")).resolve());
+        credentials.selectByVisibleText(credentialsKey);
+    }
+
+    private void select(final String option) {
+        find(by.option(option)).click();
+    }
 }
