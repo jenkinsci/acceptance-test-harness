@@ -10,6 +10,7 @@ import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.MatrixConfiguration;
 import org.jenkinsci.test.acceptance.po.MatrixProject;
 import org.junit.Test;
+import org.openqa.selenium.NoSuchFrameException;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
@@ -23,7 +24,7 @@ public class JavadocPluginTest extends AbstractJUnitTest {
     @Test
     public void publish_javadoc_from_freestyle_job() {
         FreeStyleJob job = jenkins.jobs.create();
-        setup(job);
+        setup(job, "single_package");
 
         job.startBuild().shouldSucceed();
         assertThat(job, hasAction(JAVADOC_ACTION));
@@ -34,7 +35,7 @@ public class JavadocPluginTest extends AbstractJUnitTest {
     @Test @WithPlugins("matrix-project")
     public void publish_javadoc_from_matrix_job() {
         MatrixProject job = jenkins.jobs.create(MatrixProject.class);
-        setup(job);
+        setup(job, "multi_package");
 
         job.startBuild().shouldSucceed();
         MatrixConfiguration def = job.getConfiguration("default");
@@ -46,7 +47,7 @@ public class JavadocPluginTest extends AbstractJUnitTest {
     @Test
     public void validate_javadoc_retention() {
         FreeStyleJob job = jenkins.jobs.create();
-        setup(job);
+        setup(job, "single_package");
         Build b = job.startBuild().shouldSucceed();
 
         assertThat(job, hasAction(JAVADOC_ACTION));
@@ -59,18 +60,16 @@ public class JavadocPluginTest extends AbstractJUnitTest {
         assertThat(b, hasAction(JAVADOC_ACTION));
     }
 
-    private void setup(Job job) {
+    private void setup(Job job, String app) {
         // https://wiki.jenkins.io/display/JENKINS/Configuring+Content+Security+Policy#ConfiguringContentSecurityPolicy-JavadocPlugin
         jenkins.runScript("System.setProperty('hudson.model.DirectoryBrowserSupport.CSP', \"default-src 'none'; img-src 'self'; style-src 'self'; child-src 'self'; frame-src 'self';\")");
 
         job.configure();
-        MavenBuildStep m = job.addBuildStep(MavenBuildStep.class);
-        m.targets.set("archetype:generate -DarchetypeGroupId=org.apache.maven.archetypes -DgroupId=com.mycompany.app -DartifactId=my-app -Dversion=1.0 -B");
-        m = job.addBuildStep(MavenBuildStep.class);
-        m.targets.set("javadoc:javadoc -f my-app/pom.xml");
+        job.copyDir(resource("/javadoc_plugin/" + app));
+        job.addBuildStep(MavenBuildStep.class).targets.set("javadoc:javadoc");
 
         JavadocPublisher jd = job.addPublisher(JavadocPublisher.class);
-        jd.javadocDir.set("my-app/target/site/apidocs/");
+        jd.javadocDir.set("target/site/apidocs/");
         job.save();
     }
 
@@ -84,7 +83,22 @@ public class JavadocPluginTest extends AbstractJUnitTest {
     private void assertJavadoc(Job job) {
         job.open();
         find(by.link(JAVADOC_ACTION)).click();
-        driver.switchTo().frame("classFrame");
+
+        // Prior Java 9 the main content ware in frame. Also, JENKINS-32619 points directly of the main content in some cases.
+        try {
+            try {
+                driver.switchTo().frame("classFrame");
+                verify();
+            } finally {
+                driver.switchTo().parentFrame();
+            }
+        } catch (NoSuchFrameException nf) {
+            // Verify directly otherwise
+            verify();
+        }
+    }
+
+    private void verify() {
         assertThat(driver, hasContent("com.mycompany.app"));
     }
 }
