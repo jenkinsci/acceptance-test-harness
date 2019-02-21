@@ -485,7 +485,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
      * which is failing on Java 11. This test can be used to fix the root cause.
      */
     @Ignore("Currently failing on Java 11, use this test to fix https://issues.jenkins-ci.org/browse/JENKINS-54942")
-    @Issue("https://issues.jenkins-ci.org/browse/JENKINS-54942")
+    @Issue("JENKINS-54942")
     @Test
     public void should_fail_on_missing_plugin_but_doesnt_on_java_11() {
         assumeTrue("This test requires a restartable Jenkins", jenkins.canRestart());
