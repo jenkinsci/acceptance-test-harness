@@ -61,8 +61,9 @@ public class JavadocPluginTest extends AbstractJUnitTest {
     }
 
     private void setup(Job job, String app) {
+        // Not needed after https://github.com/jenkinsci/javadoc-plugin/pull/10. Reevaluate if needs to be brought back for older javadoc versions
         // https://wiki.jenkins.io/display/JENKINS/Configuring+Content+Security+Policy#ConfiguringContentSecurityPolicy-JavadocPlugin
-        jenkins.runScript("System.setProperty('hudson.model.DirectoryBrowserSupport.CSP', \"default-src 'none'; img-src 'self'; style-src 'self'; child-src 'self'; frame-src 'self';\")");
+        // jenkins.runScript("System.setProperty('hudson.model.DirectoryBrowserSupport.CSP', \"default-src 'none'; img-src 'self'; style-src 'self'; child-src 'self'; frame-src 'self';\")");
 
         job.configure();
         job.copyDir(resource("/javadoc_plugin/" + app));
