@@ -2,24 +2,27 @@
 
 ## Jenkins
 
-Jenkins accepts `JENKINS_WAR` parameter to provide a local Jenkins war file to use. Alternatively, `JENKINS_VERSION` can be used to specify a version (like 1.625.3) to be downloaded and used instead.
+Jenkins accepts `JENKINS_WAR` parameter to provide a local Jenkins war file to use.
+Alternatively, `JENKINS_VERSION` can be used to specify a version (like 1.625.3) to be downloaded and used instead.
 
 ## Plugins
 
 When tests require the presence of plugins, by default the harness will install necessary plugins from
-the update center. There are several ways to override this:
+the update center.
+There are several ways to override this:
 
 ### Use custom plugin version
 
-Environment variable `VERSION_OVERRIDES` can be used to specify what plugin version should be used instead of those in update center:
+The environment variable `VERSION_OVERRIDES` can be used to specify what plugin version should be used instead of those in update center:
 
     $ export VERSION_OVERRIDES=foo=1.2,bar=1.0
 
 ### Use custom plugin file
 
 When you are testing locally developed Jenkins plugin, you'd like the test harness to pick up your
-local version as opposed to download the plugin from update center. This can be done by instructing the harness
-accordingly.
+local version as opposed to download the plugin from update center.
+This can be done by instructing the harness
+accordingly:
 
     $ export LOCAL_JARS=path/to/your/ldap.jpi:path/to/another.jpi
 
@@ -48,23 +51,25 @@ and then `mvn -DskipTests install` on Jenkins core or any plugin before running 
 
 ### Provide full plugins collection
 
-Contrary to previous ways to alter the plugin versions used, `PLUGINS_DIR` 
+Contrary to previous ways to alter the plugin versions used, the `PLUGINS_DIR` 
 environment variable specifies a path to a directory with plugins that will all be 
-installed into Jenkins for every test. If test require some plugin that is not part of the collection, 
-it will be installed from update center. This is useful to verify whether particular set of plugins works 
+installed into Jenkins for every test.
+If tests require some plugin that is not part of the collection, 
+it will be installed from update center.
+This is useful to verify whether particular set of plugins works 
 as expected (and it is also a good way to speed up your tests since no slow plugin installations are 
 executed during your tests).
 
 Note that this option is not yet supported by all [Jenkins controllers](CONTROLLER.md), 
 so e.g. use `TYPE=winstone` in order to get the `PLUGINS_DIR` option working.
 
-In some cases, when you are providing the full plugins colection, you are running the ATH against a war with a pre configured
+In some cases, when you are providing the full plugins colection, you are running the ATH against a war with a pre-configured
 set of plugins (for example by being created by the [CWP](https://github.com/jenkinsci/custom-war-packager))
 or running against an already existing environment, you may want the ATH to not manage plugins at all but only validate that the existing configured
 plugins are enough to run the tests.
 
-You can activate this `pre configured plugins` mode with the System property `pluginEvaluationOutcome`, possible values for this property are:
+You can activate this `pre-configured plugins` mode with the System property `pluginEvaluationOutcome`, possible values for this property are:
 * `"skipOnInvalid"` Which means the test will be skipped if the installed plugins are not enough to cover the test requisites
 * `"failOnInvalid"` Which means the test will fail if the installed plugins are not enough to cover the test requisites
 
-Note this mode is disabled if the property is not specified
+Note this mode is disabled if the property is not specified.

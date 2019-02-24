@@ -1,6 +1,10 @@
-# Running tests in docker container
+# Running tests in a Docker container
 
-Depending on the CI infrastructure setup one may need to run the ATH itself in a docker container with access to the host docker service, following a strategy similar to the one described in [this article](http://jpetazzo.github.io/2015/09/03/do-not-use-docker-in-docker-for-ci/). When this is needed, the docker fixtures should not be accessed through mapped ports on the docker host, but directly through their container IP and port since they are "sibling" containers to the ATH. To enable this, set the environment variable SHARED_DOCKER_SERVICE=true, and then the functions ipBound(n) and port(n) will just return the container's IP and port where the fixture can be accessed.
+Depending on the CI infrastructure setup one may need to run the ATH itself in a Docker container with access to the host Docker service,
+following a strategy similar to the one described in [this article](http://jpetazzo.github.io/2015/09/03/do-not-use-docker-in-docker-for-ci/).
+When this is needed, the Docker fixtures should not be accessed through mapped ports on the Docker host,
+but directly through their container IP and port since they are "sibling" containers to the ATH.
+To enable this, set the environment variable SHARED_DOCKER_SERVICE=true, and then the functions ipBound(n) and port(n) will just return the container's IP and port where the fixture can be accessed.
 
 Interactive shell:
 ```
@@ -13,14 +17,16 @@ Jenkinsfile:
 
 See the repository `Jenkinsfile` for inspiration.
 
-# Debugging tests in a docker container
-If you need to debug the tests running in a docker container, run the tests with:
+# Debugging tests in a Docker container
+If you need to debug the tests running in a Docker container, run the tests with:
 
 ```bash
 run.sh firefox latest -Dmaven.surefire.debug="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=*:5005 -Xnoagent -Djava.compiler=NONE" -Dtest=...
 ```
 
-With this instruction, the tests will stop until you connect a remote debugger. You can do that by connecting your IDE to the **IP** used by the container at port **5005**. You can figure out the IP used by the container with:
+With this instruction, the tests will stop until you connect a remote debugger.
+You can do that by connecting your IDE to the **IP** used by the container at port **5005**.
+You can figure out the IP used by the container with:
 
 ```bash
 docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' NAME_OF_THE_CONTAINER_RUNNING
@@ -35,7 +41,7 @@ It's best explained with an example:
    harry@devbox:~/acceptance-test-harness$ ./ath-container.sh
    ```
 
-1. In the container shell, set up the vnc server and run the tests with debugging:
+1. In the container shell, set up the VNC server and run the tests with debugging:
 
    ```bash
    ath-user@1803848e337f:~/ath-sources$ eval $(vnc.sh)

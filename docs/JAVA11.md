@@ -19,5 +19,6 @@ To run the tests using a Java 11 virtual machine:
    ath-user@1803848e337f:~/ath-sources$ run.sh ...
    ```
 
-**Note**: It was possible to run Jenkins on Java 11 since the version `2.155`, but its usage was then more complex. We do not recommend to use any version prior to `2.164`.
-To have up-to-date information see https://jenkins.io/doc/administration/requirements/jenkins-on-java-11
+**Note**: It was possible to run Jenkins on Java 11 since the version `2.155`, but its usage was then more complex.
+We do not recommend to use any version prior to `2.164`.
+To have up-to-date information see [jenkins-on-java-11](https://jenkins.io/doc/administration/requirements/jenkins-on-java-11).
