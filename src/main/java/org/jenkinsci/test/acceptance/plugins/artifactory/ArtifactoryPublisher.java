@@ -31,13 +31,12 @@ public class ArtifactoryPublisher extends AbstractStep implements PostBuildStep 
     }
 
     public void refresh() {
-        control("details/validate-button").click();
+        control("deployerDetails/validate-button").click();
         waitFor(hasContent("Items refreshed successfully"));
 
-        control("details/deployReleaseRepository/validate-button").click();
-        control("details/deployReleaseRepository/keyFromText").sendKeys(DEFAULT_REPO);
-        control("details/deploySnapshotRepository/validate-button").click();
-        control("details/deploySnapshotRepository/keyFromText").sendKeys(DEFAULT_REPO);
-
+        control("deployerDetails/deployReleaseRepository/validate-button").click();
+        control("deployerDetails/deployReleaseRepository/keyFromText").sendKeys(DEFAULT_REPO);
+        control("deployerDetails/deploySnapshotRepository/validate-button").click();
+        control("deployerDetails/deploySnapshotRepository/keyFromText").sendKeys(DEFAULT_REPO);
     }
 }

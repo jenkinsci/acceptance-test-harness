@@ -60,6 +60,9 @@ public class JavadocPluginTest extends AbstractJUnitTest {
     }
 
     private void setup(Job job) {
+        // https://wiki.jenkins.io/display/JENKINS/Configuring+Content+Security+Policy#ConfiguringContentSecurityPolicy-JavadocPlugin
+        jenkins.runScript("System.setProperty('hudson.model.DirectoryBrowserSupport.CSP', \"default-src 'none'; img-src 'self'; style-src 'self'; child-src 'self'; frame-src 'self';\")");
+
         job.configure();
         MavenBuildStep m = job.addBuildStep(MavenBuildStep.class);
         m.targets.set("archetype:generate -DarchetypeGroupId=org.apache.maven.archetypes -DgroupId=com.mycompany.app -DartifactId=my-app -Dversion=1.0 -B");

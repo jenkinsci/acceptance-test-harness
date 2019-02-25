@@ -109,7 +109,13 @@ public class FallbackConfig extends AbstractModule {
             firefoxOptions.addPreference(DOM_MAX_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
             firefoxOptions.addPreference(DOM_MAX_CHROME_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
             setDriverProperty("geckodriver", GeckoDriverService.GECKO_DRIVER_EXE_PROPERTY);
-            return new FirefoxDriver(firefoxOptions);
+
+            GeckoDriverService.Builder builder = new GeckoDriverService.Builder();
+            if (display != null) {
+                builder.withEnvironment(Collections.singletonMap("DISPLAY", display));
+            }
+            GeckoDriverService service = builder.build();
+            return new FirefoxDriver(service, firefoxOptions);
         case "ie":
         case "iexplore":
         case "iexplorer":
@@ -218,26 +224,21 @@ public class FallbackConfig extends AbstractModule {
         }
         cleaner.addTask(new Statement() {
             @Override
-            public void evaluate() throws Throwable {
-                try {
-                    String browser = System.getenv("BROWSER");
-                    if(browser == null || browser.equals("firefox")) {
-                        //https://github.com/mozilla/geckodriver/issues/1151
-                        //https://bugzilla.mozilla.org/show_bug.cgi?id=1264259
-                        //https://bugzilla.mozilla.org/show_bug.cgi?id=1434872
-                        d.navigate().to("about:mozilla");
-                        Alert alert = ExpectedConditions.alertIsPresent().apply(d);
-                        if (alert != null) {
-                            alert.accept();
-                            d.navigate().refresh();
-                        }
+            public void evaluate() {
+                String browser = System.getenv("BROWSER");
+                if(browser == null || browser.equals("firefox")) {
+                    //https://github.com/mozilla/geckodriver/issues/1151
+                    //https://bugzilla.mozilla.org/show_bug.cgi?id=1264259
+                    //https://bugzilla.mozilla.org/show_bug.cgi?id=1434872
+                    d.navigate().to("about:mozilla");
+                    Alert alert = ExpectedConditions.alertIsPresent().apply(d);
+                    if (alert != null) {
+                        alert.accept();
+                        d.navigate().refresh();
                     }
-
-                    d.quit();
-                } catch (UnreachableBrowserException | NoSuchSessionException ex) {
-                    System.err.println("Browser died already");
-                    ex.printStackTrace();
                 }
+
+                d.quit();
             }
 
             @Override public String toString() {

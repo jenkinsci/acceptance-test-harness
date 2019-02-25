@@ -5,8 +5,8 @@ Depending on the CI infrastructure setup one may need to run the ATH itself in a
 Interactive shell:
 ```
 harry@devbox $ ./ath-container.sh
-ath-user@0b968f00a942:~$ eval $(./vnc.sh)
-ath-user@0b968f00a942:~$ ./run.sh firefox latest -Dmaven.test.failure.ignore=true -DforkCount=1 -B -Dtest=...
+ath-user@0b968f00a942:~$ eval $(vnc.sh)
+ath-user@0b968f00a942:~$ run.sh firefox latest -Dmaven.test.failure.ignore=true -DforkCount=1 -B -Dtest=...
 ```
 
 Jenkinsfile:
@@ -17,7 +17,7 @@ See the repository `Jenkinsfile` for inspiration.
 If you need to debug the tests running in a docker container, run the tests with:
 
 ```bash
-./run.sh firefox latest -Dmaven.surefire.debug="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=*:5005 -Xnoagent -Djava.compiler=NONE" -Dtest=...
+run.sh firefox latest -Dmaven.surefire.debug="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=*:5005 -Xnoagent -Djava.compiler=NONE" -Dtest=...
 ```
 
 With this instruction, the tests will stop until you connect a remote debugger. You can do that by connecting your IDE to the **IP** used by the container at port **5005**. You can figure out the IP used by the container with:
@@ -38,11 +38,11 @@ It's best explained with an example:
 1. In the container shell, set up the vnc server and run the tests with debugging:
 
    ```bash
-   ath-user@1803848e337f:~/ath-sources$ eval $(./vnc.sh)
+   ath-user@1803848e337f:~/ath-sources$ eval $(vnc.sh)
    ```
 
    ```bash
-   ath-user@1803848e337f:~/ath-sources$ ./run.sh firefox latest -Dmaven.surefire.debug="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=*:5005 -Xnoagent -Djava.compiler=NONE" -DrunSmokeTests
+   ath-user@1803848e337f:~/ath-sources$ run.sh firefox latest -Dmaven.surefire.debug="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=*:5005 -Xnoagent -Djava.compiler=NONE" -DrunSmokeTests
    ```
 1. In another terminal on the host, not in the container, get the name and IP of the container used:
 

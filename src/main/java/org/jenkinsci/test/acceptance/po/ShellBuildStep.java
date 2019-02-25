@@ -7,18 +7,16 @@ import org.openqa.selenium.NoSuchElementException;
  */
 @Describable("Execute shell")
 public class ShellBuildStep extends AbstractStep implements BuildStep {
-
     public ShellBuildStep(Job parent, String path) {
         super(parent, path);
     }
 
     public void command(String command) {
         try {
-
-            control("command").set(command);
-        } catch (NoSuchElementException e) {
-
             new CodeMirror(this, "command").set(command);
+        }
+        catch (NoSuchElementException e) {
+            control("command").set(command);
         }
     }
 }

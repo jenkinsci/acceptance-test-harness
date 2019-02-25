@@ -1,7 +1,0 @@
-WarningMain.java:26: warning: [cast] redundant cast to TextClass
-		TextClass text2 = (TextClass) text;
-		                  ^
-WarningMain.java:29: warning: [cast] redundant cast to int
-		int x = (int) 10;
-		        ^
-2 warnings
