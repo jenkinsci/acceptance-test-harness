@@ -27,8 +27,7 @@ For example, to run tests with Safari, you'd execute:
 
 See `FallbackConfig.java` for how the browser is selected.
 
-Please note that since the tests use Selenium 2.x, you will need the Firefox ESR in order to run the tests against Firefox.
-For more information about Selenium supported platforms visit [this page](http://www.seleniumhq.org/about/platforms.jsp).
+Please note selenium library is sensitive to verions of browser used so it is better to stick with recent stable versions of mainstream web browsers. For more information about Selenium supported platforms visit [this page](http://www.seleniumhq.org/about/platforms.jsp).
 
 ## Advanced Browser Configuration
 [This test harness internally uses Guice](GUICE.md) to wire components, and that is how we control
