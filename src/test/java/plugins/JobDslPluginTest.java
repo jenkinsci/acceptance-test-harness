@@ -28,7 +28,9 @@ import org.jenkinsci.test.acceptance.po.ListView;
 import org.jenkinsci.test.acceptance.po.PluginManager;
 import org.jenkinsci.test.acceptance.po.View;
 import org.jenkinsci.test.acceptance.update_center.PluginSpec;
+import org.junit.Ignore;
 import org.junit.Test;
+import org.jvnet.hudson.test.Issue;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
@@ -470,11 +472,11 @@ public class JobDslPluginTest extends AbstractJUnitTest {
                          "}");
         seedJob.save();
         Build build = seedJob.scheduleBuild().shouldBeUnstable();
-        assertThat(build.getConsole(), containsString("Warning: (script, line 3) plugin 'chucknorris' needs to be installed"));
+        assertThat(build.getConsole(), containsString("plugin 'chucknorris' needs to be installed"));
 
         seedJob.configure(() -> jobDsl.setFailOnMissingPlugin(true));
         build = seedJob.scheduleBuild().shouldFail();
-        assertThat(build.getConsole(), containsString("ERROR: (script, line 3) plugin 'chucknorris' needs to be installed"));
+        assertThat(build.getConsole(), containsString("plugin 'chucknorris' needs to be installed"));
     }
 
     /**
