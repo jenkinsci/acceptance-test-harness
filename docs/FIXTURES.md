@@ -1,7 +1,7 @@
 # Docker Test Fixtures
 
 End-to-end testing requires a lot of non-trivial test fixtures that you want Jenkins to interact with,
-such as SSH daemon, JIRA server, LDAP server, etc.
+such as an SSH daemon, a JIRA server, an LDAP server, etc.
 
 To allow us to define such fixtures in a portable and reusable manner, this test harness comes with
 a mechanism and convention to define/use fixtures inside [Docker](http://docker.io/). They are
@@ -18,7 +18,6 @@ JUnit Tests that require docker fixtures are marked with `@WithDocker` annotatio
 If docker is not installed when you run tests, these tests are automatically skipped.
 
 ##Docker injections
-
 
 To control docker 2 injections are available.
 

@@ -4,12 +4,12 @@ this test harness allows test runners to control how slaves are set up to run te
 
 For this purpose, we define `SlaveProvider` and `SlaveController`.
 
-`SlaveProvider` abstraction is such that a test case would simply request more slaves by calling
+The `SlaveProvider` abstraction is such that a test case would simply request more slaves by calling
 its `get()` method, and it's up to the implementation how this slave is provisioned and connected to Jenkins.
 
-For example, one implementation might launch EC2 instance to run slaves in there, while another implementation
+For example, one implementation might launch an EC2 instance to run slaves in there, while another implementation
 might just launch a slave locally on the same computer that the test harness is running (which happens to be the
-default implementation `LocalSlaveProvider`.)
+default implementation `LocalSlaveProvider`).
 
 You can inject `SlaveProvider` to do this:
 
@@ -24,7 +24,7 @@ You can inject `SlaveProvider` to do this:
         ...
     }
 
-Or if your test case only need one, you can just inject SlaveController directly:
+Or if your test case only needs one, you can just inject SlaveController directly:
 
     @Inject SlaveController slave;
 
