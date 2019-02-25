@@ -480,43 +480,6 @@ public class JobDslPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     * Verifies whether the build will be marked as failed or unstable if a plugin must
-     * be installed to support all features used in the DSL script. To check the right behavior we used the old assert
-     * which is failing on Java 11. This test can be used to fix the root cause.
-     */
-    @Ignore("Currently failing on Java 11, use this test to fix https://issues.jenkins-ci.org/browse/JENKINS-54942")
-    @Issue("https://issues.jenkins-ci.org/browse/JENKINS-54942")
-    @Test
-    public void should_fail_on_missing_plugin_but_doesnt_on_java_11() {
-        assumeTrue("This test requires a restartable Jenkins", jenkins.canRestart());
-        // check if plugin is installed. if true, disable plugin
-        PluginSpec pluginSpec = new PluginSpec("chucknorris");
-        PluginManager pm = jenkins.getPluginManager();
-        if (pm.isInstalled(pluginSpec)) {
-            pm.enablePlugin(pluginSpec.getName(), false);
-            jenkins.restart();
-        }
-
-        FreeStyleJob seedJob = createSeedJob();
-        JobDslBuildStep jobDsl = seedJob.addBuildStep(JobDslBuildStep.class);
-        jobDsl.setScript("job('New_Job') {\n" +
-                "   publishers {\n" +
-                "      chucknorris()\n" +
-                "   }\n" +
-                "}");
-        seedJob.save();
-        Build build = seedJob.scheduleBuild().shouldBeUnstable();
-        // On Java 11 the "(script, line 3)" is changed by "NativeMethodAccessorImpl.java"
-        assertThat(build.getConsole(), containsString("Warning: (script, line 3) plugin 'chucknorris' needs to be installed"));
-
-
-        seedJob.configure(() -> jobDsl.setFailOnMissingPlugin(true));
-        build = seedJob.scheduleBuild().shouldFail();
-        // On Java 11 the "(script, line 3)" is changed by "NativeMethodAccessorImpl.java"
-        assertThat(build.getConsole(), containsString("ERROR: (script, line 3) plugin 'chucknorris' needs to be installed"));
-    }
-
-    /**
      * Verifies that a newline separated list of additional classpath entries will be considered.
      * If Groovy classes are located in subfolders in the workspace or in JAR files,
      * the additional classpath option is needed to import these classes.
