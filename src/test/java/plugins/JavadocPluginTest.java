@@ -1,5 +1,7 @@
 package plugins;
 
+import hudson.util.VersionNumber;
+import io.jenkins.lib.versionnumber.JavaSpecificationVersion;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.javadoc.JavadocPublisher;
@@ -11,9 +13,10 @@ import org.jenkinsci.test.acceptance.po.MatrixConfiguration;
 import org.jenkinsci.test.acceptance.po.MatrixProject;
 import org.junit.Test;
 
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.Matchers.*;
-import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.not;
+import static org.jenkinsci.test.acceptance.Matchers.hasAction;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 @WithPlugins("javadoc")
 public class JavadocPluginTest extends AbstractJUnitTest {
@@ -84,7 +87,22 @@ public class JavadocPluginTest extends AbstractJUnitTest {
     private void assertJavadoc(Job job) {
         job.open();
         find(by.link(JAVADOC_ACTION)).click();
-        driver.switchTo().frame("classFrame");
+
+        VersionNumber javadocPluginVersionInstalled = jenkins.getPlugin("javadoc").getVersion();
+        JavaSpecificationVersion javaVersion = JavaSpecificationVersion.forCurrentJVM();
+        VersionNumber javadocPLuginVersionChangingLandingPage = new VersionNumber("1.5");
+
+        // The old plugin doesn't redirect, we also need to manage each case depending on the java version used
+        if(javadocPluginVersionInstalled.isOlderThan(javadocPLuginVersionChangingLandingPage)) {
+            if (javaVersion.isOlderThanOrEqualTo(JavaSpecificationVersion.JAVA_8)) {
+                // Former behavior, javadoc generating frames and plugin without redirection
+                driver.switchTo().frame("classFrame");
+            } else {
+                // With Java11 a link to the package-summary is shown, no frames
+                find(by.partialLinkText("package-summary.html")).click();
+            }
+        }
+
         assertThat(driver, hasContent("com.mycompany.app"));
     }
 }

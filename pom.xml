@@ -263,7 +263,8 @@
     <dependency>
       <groupId>org.jenkins-ci</groupId>
       <artifactId>version-number</artifactId>
-      <version>1.1</version>
+      <!-- For JavadocTest where Java version matters -->
+      <version>1.6</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci</groupId>
@@ -368,7 +369,8 @@
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
       <artifactId>jsr305</artifactId>
-      <version>2.0.3</version>
+      <!-- Updated to avoid RequireUpperBoundDeps due to version-number:1.6 -->
+      <version>3.0.1</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.main</groupId>
