@@ -335,6 +335,7 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
      * Page area of a static analysis tool configuration.
      */
     public static class StaticAnalysisTool extends PageAreaImpl {
+        private final Control tool = control("");
         private final Control pattern = control("tool/pattern");
         private final Control normalThreshold = control("tool/normalThreshold");
         private final Control highThreshold = control("tool/highThreshold");
@@ -352,9 +353,7 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
          * @return this
          */
         public StaticAnalysisTool setTool(final String toolName) {
-            Select select = new Select(self().findElement(By.className("dropdownList")));
-            select.selectByVisibleText(toolName);
-
+            tool.select(toolName);
             return this;
         }
 

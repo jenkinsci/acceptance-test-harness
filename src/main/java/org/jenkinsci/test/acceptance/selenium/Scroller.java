@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.selenium;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -83,6 +84,11 @@ public class Scroller extends AbstractWebDriverEventListener {
     }
 
     private void scrollIntoView(WebElement e, WebDriver driver) {
+        // Do not scroll select's options into view since they are considered to be on the position where they appear when
+        // select is clicked, but aligning some option with the top of the window often causes the select itself gets
+        // scrolled above the window causing the very issues we are trying to avoid here...
+        if (Objects.equals(e.getTagName(), "option")) return;
+
         final int eYCoord = e.getLocation().getY();
         final int eXCoord = e.getLocation().getX();
         final String id = e.getAttribute("id");
