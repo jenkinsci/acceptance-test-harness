@@ -77,6 +77,12 @@ public abstract class ToolInstallation extends PageAreaImpl {
         final ConfigurablePageObject page = ensureConfigPage(jenkins);
 
         final String name = type.getAnnotation(ToolInstallationPageObject.class).name();
+        final Control expandButton = page.control(by.button(name + " installations..."));
+        try {
+            expandButton.click();
+        } catch (Exception e) {
+            // Ignore, this is likely because this is the first installation of this tool
+        }
         final Control button = page.control(by.button("Add " + name));
 
         String pathPrefix = button.resolve().getAttribute("path").replaceAll("repeatable-add", "tool");
