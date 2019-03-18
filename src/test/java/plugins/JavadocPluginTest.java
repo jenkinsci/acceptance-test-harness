@@ -90,10 +90,10 @@ public class JavadocPluginTest extends AbstractJUnitTest {
 
         VersionNumber javadocPluginVersionInstalled = jenkins.getPlugin("javadoc").getVersion();
         JavaSpecificationVersion javaVersion = JavaSpecificationVersion.forCurrentJVM();
-        VersionNumber javadocPLuginVersionChangingLandingPage = new VersionNumber("1.5");
+        VersionNumber javadocPluginVersionChangingLandingPage = new VersionNumber("1.5");
 
         // The old plugin doesn't redirect, we also need to manage each case depending on the java version used
-        if(javadocPluginVersionInstalled.isOlderThan(javadocPLuginVersionChangingLandingPage)) {
+        if(javadocPluginVersionInstalled.isOlderThan(javadocPluginVersionChangingLandingPage)) {
             if (javaVersion.isOlderThanOrEqualTo(JavaSpecificationVersion.JAVA_8)) {
                 // Former behavior, javadoc generating frames and plugin without redirection
                 driver.switchTo().frame("classFrame");
