@@ -18,11 +18,11 @@ import java.util.regex.Pattern;
 @WithPlugins("ant")
 public class AntPluginTest extends AbstractJUnitTest {
 
-    public static final String INSTALL_VERSION_1_8 = "1.8.4";
-    public static final String INSTALL_NAME_1_8 = "ant_" + INSTALL_VERSION_1_8;
+    private static final String INSTALL_VERSION_1_8 = "1.8.4";
+    private static final String INSTALL_NAME_1_8 = "ant_" + INSTALL_VERSION_1_8;
 
-    public static final String INSTALL_VERSION_1_10 = "1.10.5";
-    public static final String INSTALL_NAME_1_10 = "ant_" + INSTALL_VERSION_1_10;
+    private static final String INSTALL_VERSION_1_10 = "1.10.5";
+    private static final String INSTALL_NAME_1_10 = "ant_" + INSTALL_VERSION_1_10;
 
     FreeStyleJob job;
 
