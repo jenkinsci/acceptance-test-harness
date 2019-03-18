@@ -33,6 +33,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.utils.process.CommandBuilder;
+import org.openqa.selenium.NoSuchElementException;
 
 /**
  * @author ogondza
@@ -77,6 +78,12 @@ public abstract class ToolInstallation extends PageAreaImpl {
         final ConfigurablePageObject page = ensureConfigPage(jenkins);
 
         final String name = type.getAnnotation(ToolInstallationPageObject.class).name();
+        final Control expandButton = page.control(by.button(name + " installations..."));
+        try {
+            expandButton.click();
+        } catch (NoSuchElementException e) {
+            // Ignore, this is likely because this is the first installation of this tool
+        }
         final Control button = page.control(by.button("Add " + name));
 
         String pathPrefix = button.resolve().getAttribute("path").replaceAll("repeatable-add", "tool");
