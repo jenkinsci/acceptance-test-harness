@@ -108,7 +108,7 @@ public class FallbackConfig extends AbstractModule {
             // Config screen with many plugins can cause FF to complain JS takes too long to complete - set longer timeout
             firefoxOptions.addPreference(DOM_MAX_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
             firefoxOptions.addPreference(DOM_MAX_CHROME_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
-            setDriverProperty("geckodriver", GeckoDriverService.GECKO_DRIVER_EXE_PROPERTY);
+            setDriverPropertyIfMissing("geckodriver", GeckoDriverService.GECKO_DRIVER_EXE_PROPERTY);
 
             GeckoDriverService.Builder builder = new GeckoDriverService.Builder();
             if (display != null) {
@@ -126,7 +126,7 @@ public class FallbackConfig extends AbstractModule {
             ChromeOptions options = new ChromeOptions();
             options.setExperimentalOption("prefs", prefs);
 
-            setDriverProperty("chromedriver", ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY);
+            setDriverPropertyIfMissing("chromedriver", ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY);
             return new ChromeDriver(options);
         case "safari":
             return new SafariDriver();
@@ -164,7 +164,10 @@ public class FallbackConfig extends AbstractModule {
         }
     }
 
-    private void setDriverProperty(final String driverCommand, final String property) {
+    private void setDriverPropertyIfMissing(final String driverCommand, final String property) {
+        if (System.getProperty(property) != null) {
+          return;
+        }
         String executable = locateDriver(driverCommand);
         if (StringUtils.isNotBlank(executable)) {
             System.setProperty(property, executable);
