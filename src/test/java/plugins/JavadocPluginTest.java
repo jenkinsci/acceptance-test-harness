@@ -1,7 +1,5 @@
 package plugins;
 
-import hudson.util.VersionNumber;
-import io.jenkins.lib.versionnumber.JavaSpecificationVersion;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.javadoc.JavadocPublisher;
