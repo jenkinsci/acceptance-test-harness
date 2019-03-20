@@ -33,9 +33,16 @@ import org.jenkinsci.test.acceptance.po.User;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.openqa.selenium.Cookie;
 
-import static org.hamcrest.Matchers.any;
-import static org.hamcrest.Matchers.equalTo;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Random;
+
+import static org.hamcrest.Matchers.*;
+import static org.openqa.selenium.WebDriver.Options;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
@@ -57,6 +64,54 @@ public class JenkinsDatabaseSecurityRealmTest extends AbstractJUnitTest {
         security.configure();
         realm = security.useRealm(JenkinsDatabaseSecurityRealm.class);
         security.save();
+    }
+
+    static void addSessionCookie(Options manager, String path, Date date) {
+        manager.addCookie(new Cookie("JSESSIONID."+Integer.toHexString(new Random().nextInt()),
+                "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                path,
+                date));
+    }
+
+    @Test
+    public void many_sessions_logout() {
+        User user = realm.signup().fullname(FULL_NAME).email(EMAIL).password(PWD).signup(NAME);
+
+        jenkins.login().doLogin(user.id(), PWD);
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_YEAR, 1);
+        Date tomorrow = calendar.getTime();
+        byte[] array = new byte[7];
+        Options manager = driver.manage();
+        Collections.nCopies(8, 1)
+                .stream()
+                .forEach(i -> addSessionCookie(manager, "/", tomorrow));
+        addSessionCookie(manager, "/will-not-be-sent", tomorrow);
+
+        jenkins.logout();
+
+        StringBuilder builder = new StringBuilder();
+        int sessionCookies = 0;
+
+        final boolean debugCookies = false;
+        for (Cookie cookie : manager.getCookies()) {
+            if (cookie.getName().startsWith("JSESSIONID.")) {
+                ++sessionCookies;
+
+                if (debugCookies) {
+                    builder.append(cookie.getName());
+                    String path = cookie.getPath();
+                    if (path != null)
+                        builder.append("; Path=").append(path);
+                    builder.append("\n");
+                }
+            }
+        }
+        if (debugCookies) {
+            assertThat(builder.toString(), is(equalTo("")));
+        }
+        assertThat(sessionCookies, is(equalTo(1)));
     }
 
     @Test
