@@ -6,6 +6,7 @@ import org.apache.commons.lang.SystemUtils;
 import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.selenium.Scroller;
 import org.jvnet.hudson.test.Issue;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.nodelabelparameter.LabelParameter;
@@ -455,6 +456,10 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         assertThat("Amount of possible nodes does not match", p.getPossibleNodesOptions().size(), is(4));
 
         p.allowMultiple.check();
+
+        //JENKINS-56928: Avoid the control to be overlapped by the config tab menu
+        Scroller s = new Scroller();
+        s.beforeClickOn(p.allowedNodes.resolve(), driver);
         p.allowedNodes.select(s1.getName());
         p.allowedNodes.select(s2.getName());
 
