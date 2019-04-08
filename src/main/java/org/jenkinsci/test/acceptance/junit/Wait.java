@@ -23,6 +23,7 @@
  */
 package org.jenkinsci.test.acceptance.junit;
 
+import java.time.Clock;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -31,7 +32,6 @@ import org.hamcrest.StringDescription;
 import org.jenkinsci.test.acceptance.utils.ElasticTime;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.Sleeper;
-import org.openqa.selenium.support.ui.SystemClock;
 
 import com.google.common.base.Function;
 
@@ -44,17 +44,6 @@ import com.google.common.base.Function;
  */
 public class Wait<Subject> extends FluentWait<Subject> {
 
-    private static final class ElasticClock extends SystemClock {
-        private final ElasticTime time;
-        public ElasticClock(ElasticTime time) {
-            this.time = time;
-        }
-
-        @Override public long laterBy(long durationInMillis) {
-            return System.currentTimeMillis() + time.milliseconds(durationInMillis);
-        }
-    }
-
     /** Predicate and input reference stored when {@link Predicate} is used so we can diagnose. */
     private Predicate<?> predicate;
     private Subject input;
@@ -65,7 +54,7 @@ public class Wait<Subject> extends FluentWait<Subject> {
      * This is useful for timeout waiting for tasks to complete that might be dependent on test environment.
      */
     public Wait(Subject input, ElasticTime time) {
-        super(input, new ElasticClock(time), Sleeper.SYSTEM_SLEEPER);
+        super(input, Clock.systemUTC(), Sleeper.SYSTEM_SLEEPER);
         this.input = input;
     }
 
