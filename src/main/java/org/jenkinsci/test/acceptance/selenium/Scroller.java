@@ -88,8 +88,8 @@ public class Scroller extends AbstractWebDriverEventListener {
     }
 
     /**
-     * The framework is expected take care of the correct scrolling. When you are tempted to scroll from PageObjects or
-     * tests, there is likely a problem to be fixed.
+     * The framework is expected to take care of the correct scrolling. When you are tempted to scroll from PageObjects
+     * or tests, there is likely a framework problem to be fixed.
      */
     public void scrollIntoView(WebElement e, WebDriver driver) {
         // Do not scroll select's options into view since they are considered to be on the position where they appear when
