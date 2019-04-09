@@ -101,17 +101,10 @@ public class Scroller extends AbstractWebDriverEventListener {
         final int eXCoord = e.getLocation().getX();
         final String id = e.getAttribute("id");
         final JavascriptExecutor executor = (JavascriptExecutor) driver;
-        //Wait until web element is successfully scrolled.
+        // Wait until web element is successfully scrolled.
         new Wait<>(Boolean.TRUE)
                 .withTimeout(5, TimeUnit.SECONDS) // Wall-clock time
-                .until(new Callable<Boolean>() {
-
-                    @Override
-                    public Boolean call() throws Exception {
-                        return (Boolean)executor.executeScript(scrollJs, eYCoord, eXCoord, id);
-                    }
-                })
-         ;
-
+                .until(() -> (Boolean)executor.executeScript(scrollJs, eYCoord, eXCoord, id))
+        ;
     }
 }
