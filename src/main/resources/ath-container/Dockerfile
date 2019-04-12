@@ -68,6 +68,7 @@ ADD set-java.sh /usr/bin/
 ADD run.sh /usr/bin/
 
 RUN chmod u+s "$(which update-alternatives)"
+RUN dbus-uuidgen > /etc/machine-id
 
 # Java 8 by default
 USER ath-user
