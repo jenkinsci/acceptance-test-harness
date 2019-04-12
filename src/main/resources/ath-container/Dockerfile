@@ -61,7 +61,7 @@ RUN touch /home/ath-user/.Xauthority
 # approach used for this is adding ath-user to the group of /var/run/docker.sock but that require root permission we do not
 # have in ENTRYPOINT as the container is started as ath-user.
 USER root
-RUN chmod ug+s "$(which docker)"
+RUN chmod ug+s /usr/bin/docker* # In Centos, the actual binaries are hidden behind a shim so update them all
 
 ADD vnc.sh /usr/bin/
 ADD set-java.sh /usr/bin/
