@@ -2,32 +2,32 @@
 #
 # see docs/DOCKER.md for usage
 
-
-FROM debian:buster
+FROM centos:7
 MAINTAINER ogondza@gmail.com
 
-RUN apt-get clean && \
-    apt-get -y update && \
-    apt-get install -y \
+RUN yum -y install \
         curl \
+        docker \
         git \
-        imagemagick \
+        ImageMagick \
         iptables \
-        firefox-esr \
-        maven \
+        firefox \
         unzip \
-        vnc4server \
-        openjdk-8-jdk \
-        openjdk-11-jdk && \
-    apt-get clean
-
-# All we need is a statically linked client library - no need to install daemon deps: https://get.docker.com/builds/
-RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-17.03.2-ce.tgz && \
-    tar --strip-components=1 -xvzf docker-17.03.2-ce.tgz -C /usr/local/bin
+        tigervnc-server \
+        which \
+        java-1.8.0-openjdk-devel \
+        java-11-openjdk-devel && \
+    yum clean all && rm -rf /var/cache/yum
 
 # Selenium needs a geckodriver in order to work properly
 RUN curl -fsSLO https://github.com/mozilla/geckodriver/releases/download/v0.22.0/geckodriver-v0.22.0-linux64.tar.gz && \
     tar -xvzf geckodriver-v0.22.0-linux64.tar.gz -C /usr/local/bin
+
+# Maven in repo is not new enough for ATH
+RUN curl -ffSLO https://www.apache.org/dist/maven/maven-3/3.6.0/binaries/apache-maven-3.6.0-bin.tar.gz && \
+    tar -xvzf apache-maven-3.6.0-bin.tar.gz -C /opt/ && \
+    mv /opt/apache-maven-* /opt/maven
+ENV PATH="$PATH:/opt/maven/bin"
 
 ENV SHARED_DOCKER_SERVICE true
 
@@ -38,9 +38,6 @@ ARG gid=1000
 ENV gid $gid
 
 EXPOSE 5942
-
-# So it is owned by root and has the permissions vncserver seems to require:
-RUN mkdir /tmp/.X11-unix && chmod 1777 /tmp/.X11-unix/
 
 RUN groupadd ath-user -g $gid && \
     useradd ath-user -u $uid -g $gid -m -d /home/ath-user && \
@@ -64,11 +61,15 @@ RUN touch /home/ath-user/.Xauthority
 # approach used for this is adding ath-user to the group of /var/run/docker.sock but that require root permission we do not
 # have in ENTRYPOINT as the container is started as ath-user.
 USER root
-RUN chmod ug+s "$(which docker)"
-
-# Java 8 by default
-RUN update-java-alternatives -s java-1.8.0-openjdk-amd64
+RUN chmod ug+s /usr/bin/docker* # In Centos, the actual binaries are hidden behind a shim so update them all
 
 ADD vnc.sh /usr/bin/
 ADD set-java.sh /usr/bin/
 ADD run.sh /usr/bin/
+
+RUN chmod u+s "$(which update-alternatives)"
+RUN dbus-uuidgen > /etc/machine-id
+
+# Java 8 by default
+USER ath-user
+RUN set-java.sh 8
