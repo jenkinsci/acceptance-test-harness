@@ -69,8 +69,12 @@ import static org.jenkinsci.test.acceptance.Matchers.pageObjectExists;
 public class Scroller extends AbstractWebDriverEventListener {
     private final String scrollJs;
 
-    public Scroller() throws IOException {
-        scrollJs = IOUtils.toString(Scroller.class.getResourceAsStream("scroller.js"));
+    public Scroller() {
+        try {
+            scrollJs = IOUtils.toString(Scroller.class.getResourceAsStream("scroller.js"));
+        } catch (IOException e) {
+            throw new Error("Failed to load the JavaScript file", e);
+        }
     }
 
     @Override
@@ -83,7 +87,11 @@ public class Scroller extends AbstractWebDriverEventListener {
         scrollIntoView(element, driver);
     }
 
-    private void scrollIntoView(WebElement e, WebDriver driver) {
+    /**
+     * The framework is expected to take care of the correct scrolling. When you are tempted to scroll from PageObjects
+     * or tests, there is likely a framework problem to be fixed.
+     */
+    public void scrollIntoView(WebElement e, WebDriver driver) {
         // Do not scroll select's options into view since they are considered to be on the position where they appear when
         // select is clicked, but aligning some option with the top of the window often causes the select itself gets
         // scrolled above the window causing the very issues we are trying to avoid here...
@@ -93,17 +101,10 @@ public class Scroller extends AbstractWebDriverEventListener {
         final int eXCoord = e.getLocation().getX();
         final String id = e.getAttribute("id");
         final JavascriptExecutor executor = (JavascriptExecutor) driver;
-        //Wait until web element is successfully scrolled.
+        // Wait until web element is successfully scrolled.
         new Wait<>(Boolean.TRUE)
                 .withTimeout(5, TimeUnit.SECONDS) // Wall-clock time
-                .until(new Callable<Boolean>() {
-
-                    @Override
-                    public Boolean call() throws Exception {
-                        return (Boolean)executor.executeScript(scrollJs, eYCoord, eXCoord, id);
-                    }
-                })
-         ;
-
+                .until(() -> (Boolean)executor.executeScript(scrollJs, eYCoord, eXCoord, id))
+        ;
     }
 }
