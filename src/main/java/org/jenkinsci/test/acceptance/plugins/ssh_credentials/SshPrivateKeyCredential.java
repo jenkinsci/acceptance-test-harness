@@ -30,6 +30,7 @@ public class SshPrivateKeyCredential extends BaseStandardCredentials {
 
     public Direct selectEnterDirectly() {
         WebElement e = choose("Enter directly");
+        find(by.input("./@class='secret-update-btn'")).click();
         return new Direct(getPage(), e.getAttribute("path"));
     }
 
