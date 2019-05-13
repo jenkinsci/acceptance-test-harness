@@ -25,7 +25,7 @@ import org.junit.experimental.categories.Category;
 
 import static org.junit.Assert.fail;
 
-@WithPlugins({"jira", "git"})
+@WithPlugins({"jira@3.0.7", "git"})
 @Category(DockerTest.class)
 @WithDocker
 @Since( "2.73.3" )

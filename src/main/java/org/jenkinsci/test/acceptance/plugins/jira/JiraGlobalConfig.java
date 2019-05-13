@@ -13,7 +13,7 @@ public class JiraGlobalConfig extends PageAreaImpl {
 
     @Inject
     public JiraGlobalConfig(Jenkins jenkins) {
-        super(jenkins, "/hudson-plugins-jira-JiraProjectProperty");
+        super(jenkins, "/hudson-plugins-jira-JiraGlobalConfiguration");
     }
 
     // TODO: make this work properly when the site exists already
