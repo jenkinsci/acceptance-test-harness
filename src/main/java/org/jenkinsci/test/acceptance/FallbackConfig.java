@@ -302,7 +302,7 @@ public class FallbackConfig extends AbstractModule {
     public File getFormElementsPathFile(RepositorySystem repositorySystem, RepositorySystemSession repositorySystemSession) {
         ArtifactResolverUtil resolverUtil = new ArtifactResolverUtil(repositorySystem, repositorySystemSession);
         String version = System.getenv("FORM_ELEMENT_PATH_VERSION");
-        version = version == null ? "1.8" : version;
+        version = version == null ? "1.9" : version;
         ArtifactResult resolvedArtifact = resolverUtil.resolve(new DefaultArtifact("org.jenkins-ci.plugins", "form-element-path", "hpi", version));
         return resolvedArtifact.getArtifact().getFile();
     }
