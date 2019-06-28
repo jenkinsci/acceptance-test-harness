@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance;
 
 import javax.annotation.CheckForNull;
+import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.File;
 import java.io.IOException;
@@ -11,6 +12,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import net.lightbody.bmp.BrowserMobProxy;
+import net.lightbody.bmp.BrowserMobProxyServer;
+import net.lightbody.bmp.client.ClientUtil;
+import net.lightbody.bmp.core.har.Har;
+import net.lightbody.bmp.proxy.CaptureType;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
@@ -21,7 +27,9 @@ import org.jenkinsci.test.acceptance.controller.JenkinsControllerFactory;
 import org.jenkinsci.test.acceptance.guice.TestCleaner;
 import org.jenkinsci.test.acceptance.guice.TestName;
 import org.jenkinsci.test.acceptance.guice.TestScope;
+import org.jenkinsci.test.acceptance.junit.FailureDiagnostics;
 import org.jenkinsci.test.acceptance.po.Jenkins;
+import org.jenkinsci.test.acceptance.recorder.HarRecorder;
 import org.jenkinsci.test.acceptance.selenium.SanityChecker;
 import org.jenkinsci.test.acceptance.selenium.Scroller;
 import org.jenkinsci.test.acceptance.server.JenkinsControllerPoolProcess;
@@ -42,6 +50,7 @@ import org.junit.runners.model.Statement;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.NoSuchSessionException;
+import org.openqa.selenium.Proxy;
 import org.openqa.selenium.UnsupportedCommandException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -53,6 +62,7 @@ import org.openqa.selenium.firefox.GeckoDriverService;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.phantomjs.PhantomJSDriver;
+import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.UnreachableBrowserException;
@@ -64,6 +74,8 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+
+import static org.jenkinsci.test.acceptance.recorder.HarRecorder.isCaptureHarEnabled;
 
 /**
  * The default configuration for running tests.
@@ -108,6 +120,9 @@ public class FallbackConfig extends AbstractModule {
             // Config screen with many plugins can cause FF to complain JS takes too long to complete - set longer timeout
             firefoxOptions.addPreference(DOM_MAX_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
             firefoxOptions.addPreference(DOM_MAX_CHROME_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
+            if (isCaptureHarEnabled()) {
+                firefoxOptions.setProxy(createSeleniumProxy(testName.get()));
+            }
             setDriverPropertyIfMissing("geckodriver", GeckoDriverService.GECKO_DRIVER_EXE_PROPERTY);
 
             GeckoDriverService.Builder builder = new GeckoDriverService.Builder();
@@ -125,6 +140,9 @@ public class FallbackConfig extends AbstractModule {
             prefs.put(LANGUAGE_SELECTOR, "en");
             ChromeOptions options = new ChromeOptions();
             options.setExperimentalOption("prefs", prefs);
+            if (isCaptureHarEnabled()) {
+                options.setProxy(createSeleniumProxy(testName.get()));
+            }
 
             setDriverPropertyIfMissing("chromedriver", ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY);
             return new ChromeDriver(options);
@@ -138,6 +156,9 @@ public class FallbackConfig extends AbstractModule {
             caps.setCapability("version", "29");
             caps.setCapability("platform", "Windows 7");
             caps.setCapability("name", testName.get());
+            if (isCaptureHarEnabled()) {
+                caps.setCapability(CapabilityType.PROXY, createSeleniumProxy(testName.get()));
+            }
 
             // if running inside Jenkins, expose build ID
             String tag = System.getenv("BUILD_TAG");
@@ -162,6 +183,12 @@ public class FallbackConfig extends AbstractModule {
         default:
             throw new Error("Unrecognized browser type: "+browser);
         }
+    }
+
+    private Proxy createSeleniumProxy(String testName) {
+        BrowserMobProxy browserMobProxy = HarRecorder.getBrowserMobProxy();
+        browserMobProxy.newHar(testName);
+        return ClientUtil.createSeleniumProxy(browserMobProxy);
     }
 
     private void setDriverPropertyIfMissing(final String driverCommand, final String property) {
