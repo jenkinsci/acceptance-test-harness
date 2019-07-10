@@ -14,6 +14,11 @@ import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 
+/**
+ * By setting the system property HAR to a non-null value when launching tests, this will record a HAR
+ * (https://en.wikipedia.org/wiki/.har) file based on all network interactions between the browser and the Jenkins
+ * instance and then add it as JUnit attachment to the test result.
+ */
 @GlobalRule
 public class HarRecorder extends TestWatcher {
     static String CAPTURE_HAR = SystemEnvironmentVariables.getPropertyVariableOrEnvironment("HAR", null);
