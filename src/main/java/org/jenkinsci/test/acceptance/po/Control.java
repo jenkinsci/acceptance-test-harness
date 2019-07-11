@@ -298,7 +298,12 @@ public class Control extends CapybaraPortingLayerImpl {
             waitFor().until(() -> !spinner.isDisplayed());
             validationArea = control.findElement(by.xpath("./../../../following-sibling::div[2]"));
         } else {
-            validationArea = control.findElement(by.xpath("./../../following-sibling::tr/td[2]"));
+            // Wait for validation area to stop being <div></div>
+            validationArea = waitFor().until(() -> {
+                WebElement va = control.findElement(by.xpath("./../../following-sibling::tr/td[2]"));
+                String cls = va.findElement(by.xpath("./div")).getAttribute("class");
+                return (cls == null || cls.isEmpty()) ? null : va;
+            });
         }
 
         return new FormValidation(validationArea);
