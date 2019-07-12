@@ -62,4 +62,8 @@ public class JenkinsConfig extends ConfigurablePageObject {
     public void setQuietPeriod(int seconds) {
         control("/jenkins-model-GlobalQuietPeriodConfiguration/quietPeriod").set(seconds);
     }
+
+    public void setDescription(String desc) {
+        control("/system_message").set(desc);
+    }
 }
