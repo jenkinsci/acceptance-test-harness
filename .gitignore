@@ -1,7 +1,6 @@
 jenkins*.war
 *.swp
 *.swn
-*.log
 *~
 .vagrant
 iso
