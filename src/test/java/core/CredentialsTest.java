@@ -45,7 +45,7 @@ public class CredentialsTest extends AbstractJUnitTest {
         String href = c.credentialById("ssh_creds");
         cp.setConfigUrl(href);
         verifyValueForCredential(cp, sc.username, CRED_USER);
-        verifyValueForCredential(cp, sc.selectEnterDirectly().privateKey, CRED_PWD);
+        // cannot view private key when updating
     }
 
     @Test
