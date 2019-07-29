@@ -34,7 +34,7 @@ public class WorkflowMultibranchTest extends AbstractJUnitTest {
         MavenInstallation.installMaven(jenkins, "M3", "3.3.9");
     }
 
-    @Ignore("cannot run quickly as anonymous")
+    // @Ignore("cannot run quickly as anonymous")
     @Test
     public void testMultibranchPipeline() throws IOException, MessagingException {
         final WorkflowMultiBranchJob multibranchJob = jenkins.jobs.create(WorkflowMultiBranchJob.class);
