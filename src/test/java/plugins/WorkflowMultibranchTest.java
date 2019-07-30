@@ -24,7 +24,8 @@ import static org.jenkinsci.test.acceptance.Matchers.hasAction;
 import static org.junit.Assert.assertEquals;
 
 /**
- * Tests a multibranch pipeline flow
+ * Tests a multibranch pipeline flow.
+ * Once we are testing with GitHub Branch Source 2.5.5 or greater, we should specify github-branch-source@2.5.5
  */
 @WithPlugins({"git", "javadoc@1.4", "workflow-basic-steps", "workflow-durable-task-step", "workflow-multibranch", "github-branch-source"})
 public class WorkflowMultibranchTest extends AbstractJUnitTest {
@@ -34,7 +35,7 @@ public class WorkflowMultibranchTest extends AbstractJUnitTest {
         MavenInstallation.installMaven(jenkins, "M3", "3.3.9");
     }
 
-    // @Ignore("cannot run quickly as anonymous")
+    @Ignore("cannot run quickly as anonymous")
     @Test
     public void testMultibranchPipeline() throws IOException, MessagingException {
         final WorkflowMultiBranchJob multibranchJob = jenkins.jobs.create(WorkflowMultiBranchJob.class);
@@ -59,8 +60,11 @@ public class WorkflowMultibranchTest extends AbstractJUnitTest {
 
     private void configureJobWithGithubBranchSource(final WorkflowMultiBranchJob job) {
         final GithubBranchSource ghBranchSource = job.addBranchSource(GithubBranchSource.class);
+        // TODO: Switch over to the new UI once we un-Ignore this test and run with GHBS 2.5.5 or higher
         ghBranchSource.owner("varyvoltest");
         ghBranchSource.selectRepository("maven-basic");
+        // Equivalent to the above with GHBS >= 2.5.5 will be:
+        // ghBranchSource.singleRepositoryUrl("https://github.com/varyvoltest/maven-basic.git");
     }
 
     private void assertBranchIndexing(final WorkflowMultiBranchJob job) {
