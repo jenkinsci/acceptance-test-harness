@@ -58,6 +58,7 @@ public abstract class ContainerPageObject extends ConfigurablePageObject {
     public JsonNode getJson(String queryString) {
 
         URL url = getJsonApiUrl();
+        HttpURLConnection con = null;
         try {
             if (queryString != null) {
                 url = new URL(url + "?" + queryString);
@@ -65,14 +66,17 @@ public abstract class ContainerPageObject extends ConfigurablePageObject {
 
             // Pass in all the cookies (in particular the session cookie.)
             // This ensures that the API call sees what the current user sees.
-            HttpURLConnection con = IOUtil.openConnection(url);
+            con = IOUtil.openConnection(url);
             con.setRequestProperty("Cookie", StringUtils.join(driver.manage().getCookies(), ";"));
-
             return jsonParser.readTree(con.getInputStream());
         } catch (MalformedURLException e) {
             throw new Error(e);
         } catch (IOException e) {
             throw new NoSuchElementException("Failed to read from " + url, e);
+        } finally {
+            if(con != null) {
+                con.disconnect();
+            }
         }
     }
 

@@ -33,7 +33,8 @@ public class GradleInstallation extends ToolInstallation {
         super(context, path);
     }
 
-    public static final String DEFAULT = "Gradle 4.10.2";
+    public static final String DEFAULT_VERSION = "4.10.2";
+    public static final String DEFAULT = "Gradle " + DEFAULT_VERSION;
 
     public static void installGradle(final Jenkins jenkins, final String name, final String version) {
         installTool(jenkins, GradleInstallation.class, name, version);

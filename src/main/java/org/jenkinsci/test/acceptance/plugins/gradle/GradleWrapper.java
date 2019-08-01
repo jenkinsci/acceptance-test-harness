@@ -6,7 +6,7 @@ public class GradleWrapper {
 
     public static void downloadWrapperFiles(final Job job){
         final GradleStep wrapperDownloadStep = job.addBuildStep(GradleStep.class);
-        wrapperDownloadStep.setTasks("wrapper");
+        wrapperDownloadStep.setTasks("wrapper --gradle-version " + GradleInstallation.DEFAULT_VERSION);
         wrapperDownloadStep.setVersion(GradleInstallation.DEFAULT);
         wrapperDownloadStep.setSwitches("--no-daemon");
     }

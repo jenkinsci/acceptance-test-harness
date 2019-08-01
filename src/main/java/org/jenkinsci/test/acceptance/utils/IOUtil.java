@@ -64,4 +64,13 @@ public class IOUtil {
         httpURLConnection.setReadTimeout(timeout);
         return httpURLConnection;
     }
+
+    public static String multiline(String... lines) {
+        String newline = System.lineSeparator();
+        StringBuilder sb = new StringBuilder();
+        for (String line : lines) {
+            sb.append(line).append(newline);
+        }
+        return sb.toString();
+    }
 }

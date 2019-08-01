@@ -23,11 +23,13 @@ import static java.lang.annotation.RetentionPolicy.*;
  * If any of these commands do not exist, the test gets skipped.
  *
  * @author Kohsuke Kawaguchi
+ * @deprecated Refactor to use containers for any kind of expected setup
  */
 @Retention(RUNTIME)
 @Target({METHOD, TYPE})
 @Inherited
 @Documented
+@Deprecated
 @RuleAnnotation(Native.RuleImpl.class)
 public @interface Native {
     String[] value();

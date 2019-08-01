@@ -16,7 +16,7 @@ import java.net.URL;
 @Describable("Subversion")
 public class SubversionScm extends Scm {
     public static final String ALWAYS_FRESH_COPY = "Always check out a fresh copy";
-    public static final String CLEAN_CHECKOUT = "Emulate clean checkout by first deleting";
+    public static final String CLEAN_CHECKOUT = "Emulate clean checkout by first deleting unversioned/ignored files, then 'svn update'";
 
     public final Control url = control("locations/remote");
     public final Control btAdvanced = control(by.xpath("//td[table/tbody/tr/td[@class='setting-main']/input[@name='_.ignoreDirPropChanges']]/div[@class='advancedLink']//button"));

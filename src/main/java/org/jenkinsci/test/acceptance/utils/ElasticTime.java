@@ -26,7 +26,15 @@ package org.jenkinsci.test.acceptance.utils;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Represent proportional to execution speed.
+ * Scale time measurement to support individual execution schemes.
+ *
+ * Due to the nature of the harness, the framework is full of timeouts waiting for things to happen. Given the number of
+ * modes of execution, environments and configurations there is, there are no right timeouts to balance the desire to
+ * abort operations that takes too long and necessity not to interrupt operations taking a bit more time to complete
+ * successfully.
+ *
+ * To reflect that, use <tt>-DElasticTime.factor</tt> and configure the factor to slow down / speed up the measured time
+ * for your executions. Floating point values are accepted too.
  *
  * This implementation takes number of concurrent threads into account.
  *
@@ -35,12 +43,12 @@ import java.util.concurrent.TimeUnit;
 public class ElasticTime {
 
     /**
-     * Amount of threads executing concurrently. Time is slowed down proportionally.
+     * Amount of threads executing concurrently. Time is slowed down proportionally multiplying the time;
      */
     private final int concurrency = Integer.parseInt(System.getProperty("forkCount", "1"));
 
     /**
-     * Relative performance difference compared to reference environment.
+     * Relative performance difference compared to reference environment (Upstream CI).
      *
      * Default is 1.0 (no difference). Use >1 in case of slower environment, <1 in case of faster one.
      */
@@ -51,7 +59,7 @@ public class ElasticTime {
     }
 
     public long milliseconds(long ms) {
-        double coeficient = concurrency * factor;
-        return Math.round(ms * coeficient);
+        double actualSeconds = concurrency * factor;
+        return Math.round(ms * actualSeconds);
     }
 }

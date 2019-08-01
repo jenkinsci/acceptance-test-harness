@@ -16,6 +16,7 @@ import org.jenkinsci.test.acceptance.plugins.subversion.SvnRepositoryBrowserWebS
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Changes;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -178,6 +179,12 @@ public class SubversionPluginTest extends AbstractJUnitTest {
     @Test
     public void poll_for_changes() throws SubversionPluginTestException {
         final SvnContainer svnContainer = svn.get();
+
+        JenkinsConfig jc = new JenkinsConfig(jenkins);
+        jc.configure();
+        jc.setQuietPeriod(0);
+        jc.save();
+
         final FreeStyleJob f = jenkins.jobs.create();
         final SubversionScm subversionScm = f.useScm(SubversionScm.class);
         subversionScm.url.set(svnContainer.getUrlUnsaveRepoAtRevision(1));
@@ -190,35 +197,8 @@ public class SubversionPluginTest extends AbstractJUnitTest {
         f.addShellStep("test -d .svn");
         f.save();
 
-        elasticSleep(70000);
+        elasticSleep(10000);
 
-        // We should have a second build after 70 seconds
-        assertThat(f.getNextBuildNumber(), CoreMatchers.is(3));
-
-    }
-
-    @Test
-    public void poll_for_changes_excluded() throws SubversionPluginTestException {
-        final SvnContainer svnContainer = svn.get();
-        final FreeStyleJob f = jenkins.jobs.create();
-        final SubversionScm subversionScm = f.useScm(SubversionScm.class);
-        subversionScm.url.set(svnContainer.getUrlUnsaveRepoAtRevision(1));
-
-        //EXCLUDE THE CHANGES TO REV 2
-        final SubversionSvmAdvanced scmAdvanced = subversionScm.advanced();
-        scmAdvanced.excludedRegions.set(".*\\.txt");
-
-        f.save();
-        f.startBuild().shouldSucceed();
-
-        f.configure();
-        subversionScm.url.set(svnContainer.getUrlUnsaveRepoAtRevision(2));
-        f.pollScm().schedule("* * * * *");
-        f.save();
-
-        elasticSleep(70000);
-
-        // We should not have a second build after 70 seconds
-        assertThat(f.getNextBuildNumber(), CoreMatchers.is(2));
+        f.build(1).waitUntilFinished().shouldSucceed();
     }
 }

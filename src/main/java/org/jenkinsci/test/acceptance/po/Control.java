@@ -1,13 +1,19 @@
 package org.jenkinsci.test.acceptance.po;
 
-import org.apache.commons.lang3.StringUtils;
-import org.jenkinsci.test.acceptance.junit.Resource;
-import org.openqa.selenium.*;
+import javax.annotation.Nullable;
 
-import com.google.inject.Injector;
+import org.apache.commons.lang3.StringUtils;
+import org.jenkinsci.test.acceptance.selenium.Scroller;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 
-import javax.annotation.Nullable;
+import com.google.inject.Injector;
+
+import org.jenkinsci.test.acceptance.junit.Resource;
 
 /**
  * Wraps a specific form element in {@link PageAreaImpl} to provide operations.
@@ -156,6 +162,7 @@ public class Control extends CapybaraPortingLayerImpl {
 
     public void selectDropdownMenu(String displayName) {
         click();
+        elasticSleep(1000);
         findDropDownMenuItem.find(displayName).click();
         elasticSleep(1000);
     }
@@ -228,6 +235,8 @@ public class Control extends CapybaraPortingLayerImpl {
      */
     public void select(String option) {
         WebElement e = resolve();
+        // Make sure the select is scrolled into view before interacting with its options that has got special handling by scroller.
+        new Scroller().scrollIntoView(e, driver);
         findElement(e, by.option(option)).click();
     }
 
@@ -289,7 +298,12 @@ public class Control extends CapybaraPortingLayerImpl {
             waitFor().until(() -> !spinner.isDisplayed());
             validationArea = control.findElement(by.xpath("./../../../following-sibling::div[2]"));
         } else {
-            validationArea = control.findElement(by.xpath("./../../following-sibling::tr/td[2]"));
+            // Wait for validation area to stop being <div></div>
+            validationArea = waitFor().until(() -> {
+                WebElement va = control.findElement(by.xpath("./../../following-sibling::tr/td[2]"));
+                String cls = va.findElement(by.xpath("./div")).getAttribute("class");
+                return (cls == null || cls.isEmpty()) ? null : va;
+            });
         }
 
         return new FormValidation(validationArea);

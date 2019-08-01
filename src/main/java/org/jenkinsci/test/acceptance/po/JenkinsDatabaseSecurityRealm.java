@@ -34,7 +34,7 @@ public class JenkinsDatabaseSecurityRealm extends SecurityRealm {
     }
 
     public void allowUsersToSignUp(boolean allow) {
-        control("allowSignup").check(allow);
+        control("allowsSignup").check(allow);
     }
 
     public Signup signup() {

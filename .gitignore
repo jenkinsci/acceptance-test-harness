@@ -1,7 +1,6 @@
 jenkins*.war
 *.swp
 *.swn
-*.log
 *~
 .vagrant
 iso
@@ -23,3 +22,4 @@ jenkins*home/
 jenkins-plugins/
 .jenkins_test/
 !src/test/resources/jacoco/test/target
+.history

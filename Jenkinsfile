@@ -15,18 +15,27 @@ for (int j in [8, 11]) {
             stage(name) {
                 node('docker && highmem') {
                     checkout scm
-                    def image = docker.build('jenkins/ath', "--build-arg=java_version=$javaVersion src/main/resources/ath-container")
+                    def image = docker.build('jenkins/ath', "src/main/resources/ath-container")
                     image.inside('-v /var/run/docker.sock:/var/run/docker.sock --shm-size 2g') {
                         def exclusions = splits.get(index).join("\n")
                         writeFile file: 'excludes.txt', text: exclusions
-                        realtimeJUnit(testResults: 'target/surefire-reports/TEST-*.xml', testDataPublishers: [[$class: 'AttachmentPublisher']]) {
-                            sh '''
-                                eval $(./vnc.sh)
-                                # Temporary to get Java 11 going: https://github.com/jenkinsci/workflow-support-plugin/pull/68#issuecomment-440971292 
-                                export JENKINS_OPTS="--enable-future-java"; export VERSION_OVERRIDES="workflow-support=2.23-20181122.094059-1"
+                        realtimeJUnit(
+                                testResults: 'target/surefire-reports/TEST-*.xml',
+                                testDataPublishers: [[$class: 'AttachmentPublisher']],
+                                // Slow test(s) removal can causes a split to get empty which otherwise fails the build.
+                                // The build failure prevents parallel tests executor to realize the tests are gone so same
+                                // split is run to execute and report zero tests - which fails the build. Permit the test
+                                // results to be empty to break the circle: build after removal executes one empty split
+                                // but not letting the build to fail will cause next build not to try those tests again.
+                                allowEmptyResults: true
+                        ) {
+                            sh """
+                                set-java.sh $javaVersion
+                                eval \$(vnc.sh)
                                 java -version
-                                ./run.sh firefox latest -Dmaven.test.failure.ignore=true -DforkCount=1 -B
-                            '''
+
+                                run.sh firefox latest -Dmaven.test.failure.ignore=true -DforkCount=1 -B
+                            """
                         }
                     }
                 }

@@ -48,18 +48,6 @@ public class PostBuildScriptPluginTest extends AbstractJUnitTest {
         assertThat(build, not(runPostBuildStep()));
     }
 
-    @Test
-    public void skip_for_jobs_that_failed() {
-        j.configure();
-        j.addShellStep("exit 1");
-        addMarkerPostBuildStep().runWhenSucceeded();
-        j.save();
-
-        Build build = j.startBuild().shouldFail();
-
-        assertThat(build, not(runPostBuildStep()));
-    }
-
     private PostBuildScript addMarkerPostBuildStep() {
         PostBuildScript post = j.addPublisher(PostBuildScript.class);
         j.control("/publisher[PostBuildScript]/repeatable-add[3]").click();

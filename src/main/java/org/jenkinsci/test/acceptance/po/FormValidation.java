@@ -84,7 +84,7 @@ public class FormValidation {
             case "ok":
                 return Kind.OK;
             default:
-                throw new RuntimeException("Unknown kind class provided: " + kindClass);
+                throw new RuntimeException("Unknown kind class provided '" + kindClass + "' in " + element.getAttribute("outerHTML"));
         }
     }
 

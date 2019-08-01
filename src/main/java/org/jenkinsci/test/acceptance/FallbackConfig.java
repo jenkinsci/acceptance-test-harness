@@ -41,6 +41,7 @@ import org.jenkinsci.utils.process.CommandBuilder;
 import org.junit.runners.model.Statement;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.Dimension;
+import org.openqa.selenium.NoSuchSessionException;
 import org.openqa.selenium.UnsupportedCommandException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -107,8 +108,14 @@ public class FallbackConfig extends AbstractModule {
             // Config screen with many plugins can cause FF to complain JS takes too long to complete - set longer timeout
             firefoxOptions.addPreference(DOM_MAX_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
             firefoxOptions.addPreference(DOM_MAX_CHROME_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
-            setDriverProperty("geckodriver", GeckoDriverService.GECKO_DRIVER_EXE_PROPERTY);
-            return new FirefoxDriver(firefoxOptions);
+            setDriverPropertyIfMissing("geckodriver", GeckoDriverService.GECKO_DRIVER_EXE_PROPERTY);
+
+            GeckoDriverService.Builder builder = new GeckoDriverService.Builder();
+            if (display != null) {
+                builder.withEnvironment(Collections.singletonMap("DISPLAY", display));
+            }
+            GeckoDriverService service = builder.build();
+            return new FirefoxDriver(service, firefoxOptions);
         case "ie":
         case "iexplore":
         case "iexplorer":
@@ -119,7 +126,7 @@ public class FallbackConfig extends AbstractModule {
             ChromeOptions options = new ChromeOptions();
             options.setExperimentalOption("prefs", prefs);
 
-            setDriverProperty("chromedriver", ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY);
+            setDriverPropertyIfMissing("chromedriver", ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY);
             return new ChromeDriver(options);
         case "safari":
             return new SafariDriver();
@@ -157,7 +164,10 @@ public class FallbackConfig extends AbstractModule {
         }
     }
 
-    private void setDriverProperty(final String driverCommand, final String property) {
+    private void setDriverPropertyIfMissing(final String driverCommand, final String property) {
+        if (System.getProperty(property) != null) {
+          return;
+        }
         String executable = locateDriver(driverCommand);
         if (StringUtils.isNotBlank(executable)) {
             System.setProperty(property, executable);
@@ -217,26 +227,21 @@ public class FallbackConfig extends AbstractModule {
         }
         cleaner.addTask(new Statement() {
             @Override
-            public void evaluate() throws Throwable {
-                try {
-                    String browser = System.getenv("BROWSER");
-                    if(browser == null || browser.equals("firefox")) {
-                        //https://github.com/mozilla/geckodriver/issues/1151
-                        //https://bugzilla.mozilla.org/show_bug.cgi?id=1264259
-                        //https://bugzilla.mozilla.org/show_bug.cgi?id=1434872
-                        d.navigate().to("about:mozilla");
-                        Alert alert = ExpectedConditions.alertIsPresent().apply(d);
-                        if (alert != null) {
-                            alert.accept();
-                            d.navigate().refresh();
-                        }
+            public void evaluate() {
+                String browser = System.getenv("BROWSER");
+                if(browser == null || browser.equals("firefox")) {
+                    //https://github.com/mozilla/geckodriver/issues/1151
+                    //https://bugzilla.mozilla.org/show_bug.cgi?id=1264259
+                    //https://bugzilla.mozilla.org/show_bug.cgi?id=1434872
+                    d.navigate().to("about:mozilla");
+                    Alert alert = ExpectedConditions.alertIsPresent().apply(d);
+                    if (alert != null) {
+                        alert.accept();
+                        d.navigate().refresh();
                     }
-
-                    d.quit();
-                } catch (UnreachableBrowserException ex) {
-                    System.err.println("Browser died already");
-                    ex.printStackTrace();
                 }
+
+                d.quit();
             }
 
             @Override public String toString() {
@@ -297,7 +302,7 @@ public class FallbackConfig extends AbstractModule {
     public File getFormElementsPathFile(RepositorySystem repositorySystem, RepositorySystemSession repositorySystemSession) {
         ArtifactResolverUtil resolverUtil = new ArtifactResolverUtil(repositorySystem, repositorySystemSession);
         String version = System.getenv("FORM_ELEMENT_PATH_VERSION");
-        version = version == null ? "1.8" : version;
+        version = version == null ? "1.9" : version;
         ArtifactResult resolvedArtifact = resolverUtil.resolve(new DefaultArtifact("org.jenkins-ci.plugins", "form-element-path", "hpi", version));
         return resolvedArtifact.getArtifact().getFile();
     }
