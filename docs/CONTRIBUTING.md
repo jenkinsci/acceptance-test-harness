@@ -30,7 +30,7 @@ Test is determined fragile/broken when it is failing despite no defects is prese
 
 - JIRA issue will be created notifying author of the test or plugin authors.
   - Test can be fixed or moved away to the sources of the plugin.
-- Test would be @Ignored while the JIRA is open
+- Test would be `@Ignore`d while the JIRA is open
 - At the end of the time period, the test would be removed from ATH.
   - Test can still be resurrected from history if needed - in ATH or plugin itself.
 
