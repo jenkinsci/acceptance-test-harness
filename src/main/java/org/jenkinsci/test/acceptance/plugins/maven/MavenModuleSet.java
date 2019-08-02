@@ -26,6 +26,7 @@ package org.jenkinsci.test.acceptance.plugins.maven;
 import java.net.URL;
 import java.util.function.Consumer;
 
+import org.jenkinsci.test.acceptance.po.BatchCommandBuildStep;
 import org.jenkinsci.test.acceptance.po.BuildStep;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
@@ -120,6 +121,13 @@ public class MavenModuleSet extends Job {
     @Override
     public <T extends BuildStep> T addBuildStep(Class<T> type) {
         throw new UnsupportedOperationException("There are no build steps in maven projects");
+    }
+
+    @Override
+    public BatchCommandBuildStep addBatchStep(String batch) {
+        BatchCommandBuildStep step = addPreBuildStep(BatchCommandBuildStep.class);
+        step.command(batch);
+        return step;
     }
 
     @Override
