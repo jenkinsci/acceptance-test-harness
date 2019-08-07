@@ -26,7 +26,7 @@ Existing tests that do not adhere to these guidelines will be reevaluated and pr
 
 ## Dealing with fragile/broken tests
 
-Test is determined fragile/broken when it is failing despite no defects is present in tested component.
+Test is determined fragile/broken when it is failing despite no defects are present in tested component.
 
 - JIRA issue will be created notifying author of the test or plugin authors.
   - Test can be fixed or moved away to the sources of the plugin.
