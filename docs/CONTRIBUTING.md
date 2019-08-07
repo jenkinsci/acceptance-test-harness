@@ -15,14 +15,14 @@ This test harness is maintained with following use-cases in mind. In case you ar
 
 ## Test contribution
 
-In order for tests to be added it should:
+In order for tests to be added they should:
 
 - have significant user-base (prominent core feature, feature of a plugin installed by at least 1% of deployments)
 - represent realistic, nontrivial and fundamental use-case
 - covering sufficiently distinct use-case than other ATH tests
 - plugin tests should have whole testsuite executed in less than 20 minutes on public CI server
 
-Existing tests that does not adhere to these guidelines will be reevaluated and proposed for restructure or move to the component test suite by test/component maintainers. In case of not enough interest, the test will be dropped.
+Existing tests that do not adhere to these guidelines will be reevaluated and proposed for restructure or move to the component test suite by test/component maintainers. In case of not enough interest, the test will be dropped.
 
 ## Dealing with fragile/broken tests
 
