@@ -27,6 +27,7 @@ import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriverException;
+import org.openqa.selenium.WebElement;
 
 /**
  * Single slave template of JClouds cloud.
@@ -45,7 +46,7 @@ public class OpenstackSlaveTemplate extends PageAreaImpl {
     }
 
     public OpenstackSlaveTemplate labels(String labels) {
-        control("labelString").set(labels);
+        control("labels", "labelString").set(labels);
         return this;
     }
 
@@ -95,10 +96,16 @@ public class OpenstackSlaveTemplate extends PageAreaImpl {
 
     public OpenstackSlaveTemplate networkId(String id) {
         ensureAdvancedOpened();
-        waitFor().withMessage("Network ID select populates").ignoring(NoSuchElementException.class).until(() -> {
-            control("slaveOptions/networkId", "networkId").select(id);
-            return true;
-        });
+        Control control = control("slaveOptions/networkId", "networkId");
+        WebElement we = control.resolve();
+        if (we.getTagName().equals("input") && we.getAttribute("type").equals("text")) {
+            control.set(id);
+        } else {
+            waitFor().withMessage("Network ID select populates").ignoring(NoSuchElementException.class).until(() -> {
+                control.select(id);
+                return true;
+            });
+        }
         return this;
     }
 

@@ -72,7 +72,7 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
     private static final String CLOUD_DEFAULT_TEMPLATE = "ath-integration-test";
     private static final String MACHINE_USERNAME = "jenkins";
     private static final String SSH_CRED_ID = "ssh-cred-id";
-    private static final int PROVISIONING_TIMEOUT = 240;
+    private static final int PROVISIONING_TIMEOUT = 480;
 
     @Inject(optional = true) @Named("OpenstackCloudPluginTest.ENDPOINT")
     public String ENDPOINT;
@@ -292,7 +292,10 @@ public class OpenstackCloudPluginTest extends AbstractJUnitTest {
 
     private void configureProvisioning(String type, String labels) {
         jenkins.configure();
-        OpenstackCloud cloud = addCloud(jenkins.getConfigPage()).associateFloatingIp(FIP_POOL_NAME);
+        OpenstackCloud cloud = addCloud(jenkins.getConfigPage());
+        if (FIP_POOL_NAME != null) {
+            cloud.associateFloatingIp(FIP_POOL_NAME);
+        }
         cloud.instanceCap(3);
         OpenstackSlaveTemplate template = cloud.addSlaveTemplate();
 
