@@ -1,5 +1,6 @@
 package org.jenkinsci.test.acceptance.po;
 
+import java.time.Duration;
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
@@ -94,9 +95,38 @@ public class Control extends CapybaraPortingLayerImpl {
         check(resolve(), state);
     }
 
+    /**
+     * sends a click on the underlying element.
+     * You should not use this on any page where the click will cause another page to be loaded as it will not
+     * gaurantee that the new page has been loaded.
+     * @see #clickAndWaitToBecomeStale()
+     * @see #clickAndWaitToBecomeStale(Duration)
+     */
     public void click() {
         resolve().click();
     }
+
+
+    /**
+     * like click but will block for up to 30 seconds until the underlying web element has become stale.
+     * see https://blog.codeship.com/get-selenium-to-wait-for-page-load/
+     */
+    public void clickAndWaitToBecomeStale() {
+        clickAndWaitToBecomeStale(Duration.ofSeconds(30));
+    }
+
+    /**
+     * like click but will block until the underlying web element has become stale.
+     * see https://blog.codeship.com/get-selenium-to-wait-for-page-load/
+     * @param timeout the amount of time to wait
+     */
+    public void clickAndWaitToBecomeStale(Duration timeout) {
+        WebElement webElement = resolve();
+        // webElement.submit() despite advertising it does exactly this just blows up :(
+        webElement.submit();
+        waitFor(webElement).withTimeout(timeout).until(Control::isStale);
+    }
+
 
     /**
      * The existing {@link org.jenkinsci.test.acceptance.po.Control#set(String)}

@@ -340,6 +340,22 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     }
 
     /**
+     * Returns {@code true} if the webElement is stale (that is accessing it would cause a
+     * @{link StaleElementReferenceException} to be thrown
+     * @param element the element to check.
+     * @return {@code true} iff the element is stale.
+     */
+    protected static boolean isStale(WebElement element) {
+        try {
+            // Calling any method forces a staleness check
+            element.isEnabled();
+            return false;
+        } catch (StaleElementReferenceException expected) {
+            return true;
+        }
+    }
+
+    /**
      * Executes JavaScript.
      */
     @Override
