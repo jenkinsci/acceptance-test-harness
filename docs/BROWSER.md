@@ -47,14 +47,18 @@ See [WIRING.md](WIRING.md) for details of where to put this.
 
 ## Recording network interactions
 
-It is possible to record network interactions between the browser and the Jenkins instance.
+Network interactions between the browser and the Jenkins instance are recorded by default and saved on failures.
 
 This works by setting up a proxy recording everything that goes through it and then configure the browser to use it.
 Supported drivers are: `firefox`, `chrome`, and `saucelabs-firefox`
 
-To achieve that, you'd run
+This feature can be disabled using 
 
-    RECORD_BROWSER_TRAFFIC=true mvn install
+    RECORD_BROWSER_TRAFFIC=off mvn install
+    
+It can also be set to save results even on success using
+
+    RECORD_BROWSER_TRAFFIC=always mvn install
 
 ## Avoid focus steal with Xvnc on Linux
 If you select a real GUI browser, such as Firefox,
