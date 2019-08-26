@@ -21,12 +21,12 @@ public class HarRecorderTest {
     public void shouldRecordFailingTestExecutionByDefault() {
         Description desc = description();
         HarRecorder harRecorder = rule(desc);
-        HarRecorder.CAPTURE_HAR = "yes";
+        HarRecorder.CAPTURE_HAR = HarRecorder.State.FAILURES_ONLY;
         BrowserMobProxy proxy = HarRecorder.getBrowserMobProxy();
         proxy.newHar("jenkins");
 
         System.out.println("Good Bye World");
-        harRecorder.finished(desc);
+        harRecorder.failed(new Exception(),desc);
 
         File outputFile = outputFile(desc);
         assertThat(outputFile, is(existingFile()));
