@@ -54,7 +54,7 @@ Supported drivers are: `firefox`, `chrome`, and `saucelabs-firefox`
 
 To achieve that, you'd run
 
-    HAR=true mvn install
+    RECORD_BROWSER_TRAFFIC=true mvn install
 
 ## Avoid focus steal with Xvnc on Linux
 If you select a real GUI browser, such as Firefox,

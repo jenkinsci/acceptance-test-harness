@@ -14,14 +14,57 @@ import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 
+import static org.jenkinsci.test.acceptance.recorder.HarRecorder.State.*;
+
 /**
- * By setting the system property HAR to a non-null value when launching tests, this will record a HAR
- * (https://en.wikipedia.org/wiki/.har) file based on all network interactions between the browser and the Jenkins
- * instance and then add it as JUnit attachment to the test result.
+ * The system property RECORD_BROWSER_TRAFFIC can be set to either off, failuresOnly or always to control when browser
+ * traffic should be recorded when launching tests.
+ * Traffic is recorded as a HAR (https://en.wikipedia.org/wiki/.har) file based on all network interactions between the
+ * browser and the Jenkins instance and then add it as JUnit attachment to the test result.
  */
 @GlobalRule
 public class HarRecorder extends TestWatcher {
-    static String CAPTURE_HAR = SystemEnvironmentVariables.getPropertyVariableOrEnvironment("HAR", null);
+    public enum State {
+        OFF("off", false, false), FAILURES_ONLY("failuresOnly", true, false), ALWAYS("always", true, true);
+
+        private final String value;
+        private final boolean saveOnSuccess;
+        private final boolean saveOnFailure;
+
+        State(String value, boolean saveOnFailure, boolean saveOnSuccess) {
+            this.value = value;
+            this.saveOnFailure = saveOnFailure;
+            this.saveOnSuccess = saveOnSuccess;
+        }
+
+        public boolean isSaveOnSuccess() {
+            return saveOnSuccess;
+        }
+
+        public boolean isSaveOnFailure() {
+            return saveOnFailure;
+        }
+
+        public boolean isRecordingEnabled() {
+            return saveOnFailure || saveOnSuccess;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+
+        public static State value(String value) {
+            for (State s : values()) {
+                if (s.value.equals(value)) {
+                    return s;
+                }
+            }
+            return FAILURES_ONLY;
+        }
+    }
+
+    static final State CAPTURE_HAR = value(SystemEnvironmentVariables.getPropertyVariableOrEnvironment("RECORD_BROWSER_TRAFFIC", FAILURES_ONLY.getValue()));
 
     private static BrowserMobProxy proxy;
 
@@ -36,7 +79,7 @@ public class HarRecorder extends TestWatcher {
         return proxy;
     }
 
-    FailureDiagnostics diagnostics;
+    private FailureDiagnostics diagnostics;
 
     @Inject
     public HarRecorder(FailureDiagnostics diagnostics) {
@@ -44,12 +87,25 @@ public class HarRecorder extends TestWatcher {
     }
 
     public static boolean isCaptureHarEnabled() {
-        return CAPTURE_HAR != null;
+        return CAPTURE_HAR.isRecordingEnabled();
     }
 
     @Override
-    protected void finished(Description description) {
-        if (isCaptureHarEnabled() && proxy != null) {
+    protected void succeeded(Description description) {
+        if (CAPTURE_HAR.isSaveOnSuccess()) {
+            recordHar();
+        }
+    }
+
+    @Override
+    protected void failed(Throwable e, Description description) {
+        if (CAPTURE_HAR.isSaveOnFailure()) {
+            recordHar();
+        }
+    }
+
+    private void recordHar() {
+        if (proxy != null) {
             Har har = proxy.getHar();
             File file = diagnostics.touch("jenkins.har");
             try {
