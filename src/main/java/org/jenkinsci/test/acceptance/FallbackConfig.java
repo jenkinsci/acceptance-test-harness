@@ -1,7 +1,6 @@
 package org.jenkinsci.test.acceptance;
 
 import javax.annotation.CheckForNull;
-import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.File;
 import java.io.IOException;
@@ -13,10 +12,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import net.lightbody.bmp.BrowserMobProxy;
-import net.lightbody.bmp.BrowserMobProxyServer;
 import net.lightbody.bmp.client.ClientUtil;
-import net.lightbody.bmp.core.har.Har;
-import net.lightbody.bmp.proxy.CaptureType;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
@@ -49,7 +45,6 @@ import org.jenkinsci.utils.process.CommandBuilder;
 import org.junit.runners.model.Statement;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.Dimension;
-import org.openqa.selenium.NoSuchSessionException;
 import org.openqa.selenium.Proxy;
 import org.openqa.selenium.UnsupportedCommandException;
 import org.openqa.selenium.WebDriver;
@@ -65,7 +60,6 @@ import org.openqa.selenium.phantomjs.PhantomJSDriver;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
-import org.openqa.selenium.remote.UnreachableBrowserException;
 import org.openqa.selenium.safari.SafariDriver;
 import org.openqa.selenium.support.events.EventFiringWebDriver;
 
