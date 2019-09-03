@@ -123,7 +123,7 @@ public class Control extends CapybaraPortingLayerImpl {
     public void clickAndWaitToBecomeStale(Duration timeout) {
         WebElement webElement = resolve();
         // webElement.submit() despite advertising it does exactly this just blows up :(
-        webElement.submit();
+        webElement.click();
         waitFor(webElement).withTimeout(timeout).until(Control::isStale);
     }
 
