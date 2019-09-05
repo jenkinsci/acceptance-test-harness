@@ -32,7 +32,7 @@ public class Login extends PageObject {
         cUser.set(user);
         cPassword.set(password);
         // for some reason submit it just bogus...
-        cLogin.clickAndWaitToBecomeStale();
+        cLogin.click(Duration.ofSeconds(30));
         return this;
     }
 
