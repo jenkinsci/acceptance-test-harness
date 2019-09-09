@@ -24,6 +24,7 @@
 package plugins;
 
 import com.google.inject.Inject;
+import hudson.util.VersionNumber;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.SshAgentContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
@@ -47,6 +48,7 @@ import org.openqa.selenium.NoSuchElementException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.fail;
 
 import java.util.concurrent.Callable;
@@ -132,7 +134,12 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
         String href = mc.credentialById("ssh_creds");
         c.setConfigUrl(href);
         verifyValueForCredential(c, sc.username, username);
-        verifyValueForCredential(c, sc.selectEnterDirectly().privateKey, privateKey);
+
+        // See https://jenkins.io/doc/developer/security/secrets/#secrets-and-configuration-forms, available from Jenkins 2.171
+        if (jenkins.getVersion().isNewerThan(new VersionNumber("2.170"))) {
+            verifyUnexpectedValueForCredential("Credentials in plain text should not be accessible from Web UI",
+                    c, sc.selectEnterDirectly().privateKey, privateKey);
+        }
 
         // Just to make sure the dumb slave is set up properly, we should seed it
         // with a FS root and executors
@@ -147,6 +154,12 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
         cp.configure();
         assert(element.exists());
         assertThat(element.resolve().getAttribute("value"), containsString(expected));
+    }
+
+    private void verifyUnexpectedValueForCredential(String message, CredentialsPage cp, Control element, String notExpected) {
+        cp.configure();
+        assert(element.exists());
+        assertThat(message, element.resolve().getAttribute("value"), not(containsString(notExpected)));
     }
 
     @Test public void connectWithPassword() {
