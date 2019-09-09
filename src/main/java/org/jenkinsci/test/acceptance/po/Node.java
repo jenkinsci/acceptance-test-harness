@@ -27,6 +27,7 @@ import com.google.inject.Injector;
 import org.openqa.selenium.NoSuchElementException;
 
 import java.net.URL;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Common base for Jenkins and Slave.
@@ -60,18 +61,33 @@ public abstract class Node extends ContainerPageObject {
 
     /**
      * Run groovy string in groovy console.
+     * Defaults to a 30 second timeout.
      *
      * @param script Script text to run.
      * @param args Arguments to String#format in the script.
      * @return String output of the script or null if there is none.
      */
     public String runScript(String script, Object... args) {
+        return runScript(script, 30, args);
+    }
+
+    /**
+     * Run groovy string in groovy console.
+     *
+     * @param script Script text to run.
+     * @param args Arguments to String#format in the script.
+     * @param timeoutSeconds Script execution timeout in seconds
+     * @return String output of the script or null if there is none.
+     * @since TODO
+     */
+    public String runScript(String script, int timeoutSeconds, Object... args) {
         visit("script");
         CodeMirror cm = new CodeMirror(this, "/script");
         cm.set(String.format(script, args));
         clickButton("Run");
 
-        find(by.xpath("//h2[text() = 'Result']")); // Ensure we are looking at the page with completed script
+        waitFor(by.xpath("//h2[text() = 'Result']"), timeoutSeconds);
+
         try {
             return find(by.css("h2 + pre")).getText().replaceAll("^Result: ", "");
         } catch (NoSuchElementException ex) {
