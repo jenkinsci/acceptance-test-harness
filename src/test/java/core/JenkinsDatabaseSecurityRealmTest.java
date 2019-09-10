@@ -56,6 +56,7 @@ public class JenkinsDatabaseSecurityRealmTest extends AbstractJUnitTest {
         GlobalSecurityConfig security = new GlobalSecurityConfig(jenkins);
         security.configure();
         realm = security.useRealm(JenkinsDatabaseSecurityRealm.class);
+        realm.allowUsersToSignUp(true);
         security.save();
     }
 
