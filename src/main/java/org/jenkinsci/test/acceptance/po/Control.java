@@ -111,7 +111,7 @@ public class Control extends CapybaraPortingLayerImpl {
      * like click but will block for up to 30 seconds until the underlying web element has become stale.
      * see https://blog.codeship.com/get-selenium-to-wait-for-page-load/
      */
-    public void clickAndWaitToBecomeStale() {
+    /*package*/ void clickAndWaitToBecomeStale() {
         clickAndWaitToBecomeStale(Duration.ofSeconds(30));
     }
 
@@ -120,7 +120,7 @@ public class Control extends CapybaraPortingLayerImpl {
      * see https://blog.codeship.com/get-selenium-to-wait-for-page-load/
      * @param timeout the amount of time to wait
      */
-    public void clickAndWaitToBecomeStale(Duration timeout) {
+    /*package*/ void clickAndWaitToBecomeStale(Duration timeout) {
         WebElement webElement = resolve();
         // webElement.submit() despite advertising it does exactly this just blows up :(
         webElement.click();
