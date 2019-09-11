@@ -1,6 +1,9 @@
 package org.jenkinsci.test.acceptance.po;
 
+import java.time.Duration;
+
 import org.junit.Assert;
+import org.openqa.selenium.WebElement;
 
 import static org.jenkinsci.test.acceptance.Matchers.hasInvalidLoginInformation;
 import static org.jenkinsci.test.acceptance.Matchers.loggedInAs;
@@ -28,7 +31,8 @@ public class Login extends PageObject {
     public Login doLogin(String user, String password){
         cUser.set(user);
         cPassword.set(password);
-        cLogin.click();
+        // for some reason submit it just bogus...
+        cLogin.clickAndWaitToBecomeStale();
         return this;
     }
 
@@ -40,7 +44,10 @@ public class Login extends PageObject {
     public Login doLoginDespiteNoPaths(String user, String password){
         driver.findElement(by.name("j_username")).sendKeys(user);
         driver.findElement(by.name("j_password")).sendKeys(password);
-        driver.findElement(by.name("Submit")).click();
+        WebElement we = driver.findElement(by.name("Submit"));
+        // for some reason submit() is bogus
+        we.click();
+        cUser.waitFor(we).withTimeout(Duration.ofSeconds(30)).until(CapybaraPortingLayerImpl::isStale);
         return this;
     }
 
