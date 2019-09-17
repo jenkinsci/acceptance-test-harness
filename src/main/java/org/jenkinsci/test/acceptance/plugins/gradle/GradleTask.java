@@ -5,7 +5,6 @@ public enum  GradleTask {
     HELLO("hello", "Hello world!"),
     FIRST("firstTask", "First!"),
     SECOND("secondTask", "Second!"),
-    ENVIRONMENT_VARIABLES("environmentVariables"),
     JOB_PARAM_AS_PROJECT_PROPERTIES("jobParametersAsProjectProperties"),
     JOB_PARAM_AS_SYSTEM_PROPERTIES("jobParametersAsSystemProperties");
 
