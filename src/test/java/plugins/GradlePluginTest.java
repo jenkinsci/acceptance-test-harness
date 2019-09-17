@@ -352,33 +352,6 @@ public class GradlePluginTest extends AbstractJUnitTest {
     }
 
     /**
-     * Runs a pipeline gradle build and verifies that the build scan links are existent
-     */
-    @Test @WithPlugins("workflow-aggregator") @Ignore("JENKINS-45205")
-    public void run_gradle_pipeline_build_scan_link() {
-        final Build build = setUpAndRunPipelineBuild(JENKINS_FILE_WITH_BUILD_SCAN, GRADLE_SCRIPT);
-        build.openStatusPage();
-        final WebElement buildScanLink = build.find(By.partialLinkText("Gradle Build Scan"));
-        assertThat(buildScanLink.getAttribute("href"), containsString("https://gradle.com/"));
-    }
-
-    /**
-     * Runs a pipeline gradle build and verifies that the task links are existent
-     */
-    @Test @WithPlugins("workflow-aggregator") @Ignore("JENKINS-45206")
-    public void run_gradle_pipeline_build_task_links() {
-        final Build build = setUpAndRunPipelineBuild(JENKINS_FILE_MULTIPLE_TASKS, GRADLE_SCRIPT);
-
-        final WebElement firstTaskLink = build.find(By.partialLinkText(FIRST.getName()));
-        final WebElement secondTaskLink = build.find(By.partialLinkText(SECOND.getName()));
-
-        assertThat(firstTaskLink.getAttribute("href"), containsString("#gradle-task-0"));
-        assertThat(secondTaskLink.getAttribute("href"), containsString("#gradle-task-1"));
-        assertThat(build.getConsole(), containsString(FIRST.getPrintln()));
-        assertThat(build.getConsole(), containsString(SECOND.getPrintln()));
-    }
-
-    /**
      * Method to setup and run a pipeline build with a gradle file.
      * Copies a gradle file using the pipeline step to have it available.
      * Also sets up the necessary WorkflowJob runs it and checks for successful execution.
