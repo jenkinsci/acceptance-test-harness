@@ -96,71 +96,20 @@ public class GradlePluginTest extends AbstractJUnitTest {
         final FreeStyleJob job = jenkins.jobs.create();
         job.copyResource(resource(GRADLE_SCRIPT), "build.gradle");
         job.addParameter(StringParameter.class).setName("PROJ_PARAM_1").setDefault("hello");
-        job.addParameter(StringParameter.class).setName("PROJ_PARAM_2").setDefault("world");
-
-        final GradleStep step = job.addBuildStep(GradleStep.class);
-        step.setVersion(GradleInstallation.DEFAULT);
-        step.setTasks(JOB_PARAM_AS_PROJECT_PROPERTIES.getName());
-        step.setPassAllAsProjectProperties();
-        step.setSwitches("--no-daemon");
-        job.save();
-
-        final Build build = job.startBuild().shouldSucceed();
-        assertThat(build.getConsole(), containsString("Project Properties: hello world"));
-    }
-
-    @Test
-    public void run_gradle_job_parameters_as_system_properties(){
-        GradleInstallation.installGradle(jenkins);
-
-        final FreeStyleJob job = jenkins.jobs.create();
-        job.copyResource(resource(GRADLE_SCRIPT), "build.gradle");
         job.addParameter(StringParameter.class).setName("SYS_PARAM_1").setDefault("hello");
-        job.addParameter(StringParameter.class).setName("SYS_PARAM_2").setDefault("world");
 
         final GradleStep step = job.addBuildStep(GradleStep.class);
         step.setVersion(GradleInstallation.DEFAULT);
-        step.setTasks(JOB_PARAM_AS_SYSTEM_PROPERTIES.getName());
+        step.setTasks("jobParametersAsProjectProperties jobParametersAsSystemProperties");
+        step.setProjectProperties("PROJ_PARAM_2=world");
+        step.setSystemProperties("SYS_PARAM_2=world");
+        step.setPassAllAsProjectProperties();
         step.setPassAllAsSystemProperties();
         step.setSwitches("--no-daemon");
         job.save();
 
         final Build build = job.startBuild().shouldSucceed();
-        assertThat(build.getConsole(), containsString("System Properties: hello world"));
-    }
-
-    @Test
-    public void run_gradle_add_project_properties(){
-        GradleInstallation.installGradle(jenkins);
-
-        final FreeStyleJob job = jenkins.jobs.create();
-        job.copyResource(resource(GRADLE_SCRIPT), "build.gradle");
-
-        final GradleStep step = job.addBuildStep(GradleStep.class);
-        step.setVersion(GradleInstallation.DEFAULT);
-        step.setProjectProperties("PROJ_PARAM_1=hello\nPROJ_PARAM_2=world");
-        step.setTasks(JOB_PARAM_AS_PROJECT_PROPERTIES.getName());
-        step.setSwitches("--no-daemon");
-        job.save();
-
-        final Build build = job.startBuild().shouldSucceed();
         assertThat(build.getConsole(), containsString("Project Properties: hello world"));
-    }
-
-    @Test
-    public void run_gradle_add_system_properties(){
-        GradleInstallation.installGradle(jenkins);
-        final FreeStyleJob job = jenkins.jobs.create();
-        job.copyResource(resource(GRADLE_SCRIPT), "build.gradle");
-
-        final GradleStep step = job.addBuildStep(GradleStep.class);
-        step.setVersion(GradleInstallation.DEFAULT);
-        step.setSystemProperties("SYS_PARAM_1=hello\nSYS_PARAM_2=world");
-        step.setTasks(JOB_PARAM_AS_SYSTEM_PROPERTIES.getName());
-        step.setSwitches("--no-daemon");
-        job.save();
-
-        final Build build = job.startBuild().shouldSucceed();
         assertThat(build.getConsole(), containsString("System Properties: hello world"));
     }
 
@@ -206,5 +155,4 @@ public class GradlePluginTest extends AbstractJUnitTest {
         workflowJob.save();
         return workflowJob.startBuild().shouldSucceed();
     }
-
 }
