@@ -26,7 +26,9 @@ package plugins;
 import com.google.inject.Inject;
 import org.jenkinsci.test.acceptance.docker.fixtures.MailhogContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.DockerTest;
 import org.jenkinsci.test.acceptance.junit.Since;
+import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.mail_watcher.OnlineStatusNotification;
 import org.jenkinsci.test.acceptance.po.Slave;
@@ -34,6 +36,7 @@ import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.jenkinsci.test.acceptance.utils.mail.MailhogProvider;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
 
 import java.util.concurrent.Future;
@@ -42,6 +45,8 @@ import java.util.regex.Pattern;
 import static org.junit.Assume.assumeTrue;
 
 @WithPlugins("mail-watcher-plugin")
+@Category(DockerTest.class)
+@WithDocker
 public class MailWatcherPluginTest extends AbstractJUnitTest {
 
     @Inject

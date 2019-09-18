@@ -27,7 +27,9 @@ import com.google.inject.Inject;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.MailhogContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.DockerTest;
 import org.jenkinsci.test.acceptance.junit.Since;
+import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.mailer.Mailer;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenBuild;
@@ -37,6 +39,7 @@ import org.jenkinsci.test.acceptance.plugins.maven.MavenProjectConfig;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.StringParameter;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
 
 import java.util.HashMap;
@@ -50,6 +53,8 @@ import static org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation.inst
 import static org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation.installSomeMaven;
 
 @WithPlugins("maven-plugin")
+@Category(DockerTest.class)
+@WithDocker
 public class MavenPluginTest extends AbstractJUnitTest {
 
     private static final String GENERATE = "archetype:generate -DarchetypeGroupId=org.apache.maven.archetypes -DgroupId=com.mycompany.app -DartifactId=my-app -Dversion=1.0 -B";

@@ -3,6 +3,8 @@ package plugins;
 import com.google.inject.Inject;
 import org.jenkinsci.test.acceptance.docker.fixtures.MailhogContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.DockerTest;
+import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.mailer.Mailer;
 import org.jenkinsci.test.acceptance.plugins.mailer.MailerGlobalConfig;
@@ -10,11 +12,14 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.utils.mail.MailhogProvider;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.io.IOException;
 import java.util.regex.Pattern;
 
 @WithPlugins("mailer")
+@Category(DockerTest.class)
+@WithDocker
 public class MailerPluginTest extends AbstractJUnitTest {
     @Inject
     private MailhogProvider mailhogProvider;
