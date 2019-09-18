@@ -1,44 +1,45 @@
 package plugins;
 
 import com.google.inject.Inject;
+import org.jenkinsci.test.acceptance.docker.fixtures.MailhogContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.mailer.Mailer;
 import org.jenkinsci.test.acceptance.plugins.mailer.MailerGlobalConfig;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
-import org.jenkinsci.test.acceptance.utils.mail.MailService;
+import org.jenkinsci.test.acceptance.utils.mail.MailhogProvider;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.mail.MessagingException;
 import java.io.IOException;
 import java.util.regex.Pattern;
 
 @WithPlugins("mailer")
 public class MailerPluginTest extends AbstractJUnitTest {
     @Inject
-    MailerGlobalConfig mailer;
+    private MailhogProvider mailhogProvider;
+    private MailhogContainer mailhog;
 
     @Inject
-    MailService mail;
+    private MailerGlobalConfig mailer;
 
     @Before
     public void setup() {
-        mail.setup(jenkins);
+        mailhog = mailhogProvider.get();
     }
 
     @Test
-    public void send_test_mail() throws IOException, MessagingException {
+    public void send_test_mail() throws IOException {
         jenkins.configure();
         mailer.sendTestMail("admin@example.com");
-        mail.assertMail(
+        mailhog.assertMail(
                 Pattern.compile("Test email #1"),
                 "admin@example.com",
                 Pattern.compile("This is test email #1 sent from Jenkins"));
     }
 
     @Test
-    public void send_mail_for_failed_build() throws IOException, MessagingException {
+    public void send_mail_for_failed_build() throws IOException {
         FreeStyleJob job = jenkins.jobs.create();
         job.configure();
         job.addShellStep("fail");
@@ -47,7 +48,7 @@ public class MailerPluginTest extends AbstractJUnitTest {
         job.save();
 
         job.startBuild().shouldFail();
-        mail.assertMail(
+        mailhog.assertMail(
                 Pattern.compile("Build failed in Jenkins: .* #1"),
                 "dev@example.com mngmnt@example.com",
                 Pattern.compile("failure"));

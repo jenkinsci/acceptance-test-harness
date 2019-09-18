@@ -23,20 +23,21 @@
  */
 package plugins;
 
-import java.util.concurrent.Future;
-import java.util.regex.Pattern;
-
+import com.google.inject.Inject;
+import org.jenkinsci.test.acceptance.docker.fixtures.MailhogContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jvnet.hudson.test.Issue;
 import org.jenkinsci.test.acceptance.junit.Since;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.mail_watcher.OnlineStatusNotification;
 import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
-import org.jenkinsci.test.acceptance.utils.mail.MailService;
+import org.jenkinsci.test.acceptance.utils.mail.MailhogProvider;
+import org.junit.Before;
 import org.junit.Test;
+import org.jvnet.hudson.test.Issue;
 
-import com.google.inject.Inject;
+import java.util.concurrent.Future;
+import java.util.regex.Pattern;
 
 import static org.junit.Assume.assumeTrue;
 
@@ -44,17 +45,21 @@ import static org.junit.Assume.assumeTrue;
 public class MailWatcherPluginTest extends AbstractJUnitTest {
 
     @Inject
-    private MailService mail;
+    SlaveController slaveController;
 
     @Inject
-    SlaveController slaveController;
+    MailhogProvider mailhogProvider;
+    private MailhogContainer mailhog;
+
+    @Before
+    public void setUp() {
+        mailhog = mailhogProvider.get();
+    }
 
     @Test
     public void notify_slave_on_restart() throws Exception {
         assumeTrue("This test requires a restartable Jenkins", jenkins.canRestart());
         Future<Slave> futureSlave = slaveController.install(jenkins);
-
-        mail.setup(jenkins);
 
         Slave slave = futureSlave.get();
         slave.configure();
@@ -67,14 +72,13 @@ public class MailWatcherPluginTest extends AbstractJUnitTest {
 
         jenkins.restart();
 
-        mail.assertMail(regex("Computer %s marked offline", slave.getName()), "on@offline.com");
-        mail.assertMail(regex("Computer %s marked online", slave.getName()), "on@online.com");
+        mailhog.assertMail(regex("Computer %s marked offline", slave.getName()), "on@offline.com");
+        mailhog.assertMail(regex("Computer %s marked online", slave.getName()), "on@online.com");
     }
 
     @Test @Issue("JENKINS-20538") @Since("1.571") @WithPlugins("mail-watcher-plugin@1.7")
     public void notify_master_on_jenkins_restart() throws Exception {
         assumeTrue("This test requires a restartable Jenkins", jenkins.canRestart());
-        mail.setup(jenkins);
 
         jenkins.configure();
         {
@@ -86,8 +90,8 @@ public class MailWatcherPluginTest extends AbstractJUnitTest {
 
         jenkins.restart();
 
-        mail.assertMail(regex("Computer master marked offline"), "on@offline.com", regex("Jenkins is restarting"));
-        mail.assertMail(regex("Computer master marked online"), "on@online.com");
+        mailhog.assertMail(regex("Computer master marked offline"), "on@offline.com", regex("Jenkins is restarting"));
+        mailhog.assertMail(regex("Computer master marked online"), "on@online.com");
     }
 
     private Pattern regex(String expression, Object... args) {

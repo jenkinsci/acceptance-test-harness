@@ -32,8 +32,6 @@ import org.jenkinsci.test.acceptance.utils.ElasticTime;
 import org.jenkinsci.test.acceptance.utils.IOUtil;
 import org.jenkinsci.test.acceptance.utils.SauceLabsConnection;
 import org.jenkinsci.test.acceptance.utils.aether.ArtifactResolverUtil;
-import org.jenkinsci.test.acceptance.utils.mail.MailService;
-import org.jenkinsci.test.acceptance.utils.mail.Mailtrap;
 import org.jenkinsci.test.acceptance.utils.pluginreporter.ConsoleExercisedPluginReporter;
 import org.jenkinsci.test.acceptance.utils.pluginreporter.ExercisedPluginsReporter;
 import org.jenkinsci.test.acceptance.utils.pluginreporter.TextFileExercisedPluginReporter;
@@ -41,7 +39,6 @@ import org.jenkinsci.utils.process.CommandBuilder;
 import org.junit.runners.model.Statement;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.Dimension;
-import org.openqa.selenium.NoSuchSessionException;
 import org.openqa.selenium.UnsupportedCommandException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -55,7 +52,6 @@ import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.phantomjs.PhantomJSDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
-import org.openqa.selenium.remote.UnreachableBrowserException;
 import org.openqa.selenium.safari.SafariDriver;
 import org.openqa.selenium.support.events.EventFiringWebDriver;
 
@@ -90,9 +86,6 @@ public class FallbackConfig extends AbstractModule {
     protected void configure() {
         // default in case nothing is specified
         bind(SlaveProvider.class).to(LocalSlaveProvider.class);
-
-        // default email service provider
-        bind(MailService.class).to(Mailtrap.class);
     }
 
     private WebDriver createWebDriver(TestName testName) throws IOException {
