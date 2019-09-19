@@ -38,85 +38,6 @@ import static org.junit.Assert.assertThat;
 
 @WithPlugins("dashboard-view")
 public class DashboardViewPluginTest extends AbstractJobRelatedTest {
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
-    @Test
-    public void jobsGridPortlet_fillColumnsFirst() {
-        createFreeStyleJob();
-        createFreeStyleJob();
-        createFreeStyleJob();
-        createFreeStyleJob();
-
-        DashboardView v = createDashboardView();
-        JobsGridPortlet jobsGridPortlet = v.addBottomPortlet(JobsGridPortlet.class);
-        jobsGridPortlet.setNumberOfColumns(3);
-        jobsGridPortlet.setFillColumnFirst(true);
-        v.save();
-
-        assertThat(jobsGridPortlet.getJob(1, 3), nullValue());
-        assertThat(jobsGridPortlet.getJob(2, 2), notNullValue());
-    }
-
-    @Test
-    public void jobsGridPortlet_notFillColumnsFirst() {
-        createFreeStyleJob();
-        createFreeStyleJob();
-        createFreeStyleJob();
-        createFreeStyleJob();
-
-        DashboardView v = createDashboardView();
-        JobsGridPortlet jobsGridPortlet = v.addBottomPortlet(JobsGridPortlet.class);
-        jobsGridPortlet.setNumberOfColumns(3);
-        jobsGridPortlet.setFillColumnFirst(false);
-        v.save();
-        assertThat(jobsGridPortlet.getJob(1, 3), notNullValue());
-        assertThat(jobsGridPortlet.getJob(2, 2), nullValue());
-    }
-
-    @Test
-    public void jobsGridPortlet_numberOfColumns() {
-        // One job is required for the portlet to be displayed
-        createFreeStyleJob();
-
-        DashboardView v = createDashboardView();
-        JobsGridPortlet jobsGridPortlet = v.addBottomPortlet(JobsGridPortlet.class);
-
-        jobsGridPortlet.setNumberOfColumns(10);
-        v.save();
-        assertThat(jobsGridPortlet.getJob(1, 10), nullValue());
-    }
-
-    @Test
-    public void jobsGridPortlet_invalidNumberOfColumn() {
-        // One job is required for the portlet to be displayed
-        createFreeStyleJob();
-
-        DashboardView v = createDashboardView();
-        JobsGridPortlet jobsGridPortlet = v.addBottomPortlet(JobsGridPortlet.class);
-
-        jobsGridPortlet.setNumberOfColumns(2);
-        v.save();
-
-        expectedException.expect(NoSuchElementException.class);
-        jobsGridPortlet.getJob(1, 3);
-    }
-
-    @Test
-    public void unstableJobsPortlet_notShowOnlyFailedJobs() {
-        DashboardView v = createDashboardView();
-        UnstableJobsPortlet unstableJobsPortlet = v.addBottomPortlet(UnstableJobsPortlet.class);
-        unstableJobsPortlet.setShowOnlyFailedJobs(false);
-        v.save();
-
-        FreeStyleJob unstableJob = createUnstableFreeStyleJob();
-        buildUnstableJob(unstableJob);
-        assertJobInUnstableJobsPortlet(unstableJobsPortlet, unstableJob.name, true);
-
-        FreeStyleJob failingJob = createFailingFreeStyleJob();
-        buildFailingJob(failingJob);
-        assertJobInUnstableJobsPortlet(unstableJobsPortlet, failingJob.name, true);
-    }
 
     @Test
     public void unstableJobsPortlet_showOnlyFailedJobs() {
@@ -226,19 +147,6 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
     }
 
     @Test
-    public void buildStatisticsPortlet_unstableNr() {
-        DashboardView v = createDashboardView();
-        BuildStatisticsPortlet stats = v.addBottomPortlet(BuildStatisticsPortlet.class);
-        v.save();
-
-        buildUnstableJob(createUnstableFreeStyleJob());
-
-        v.open();
-
-        assertThat(stats.getNumberOfBuilds(JobType.UNSTABLE), is(1));
-    }
-
-    @Test
     public void buildStatisticsPortlet_totalBuilds() {
         DashboardView v = createDashboardView();
         BuildStatisticsPortlet stats = v.addBottomPortlet(BuildStatisticsPortlet.class);
@@ -278,37 +186,6 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
         assertThat(latestBuilds.hasJob(job.name), is(true));
         assertThat(latestBuilds.hasBuild(build1.getNumber()), is(true));
         assertThat(latestBuilds.hasBuild(build2.getNumber()), is(true));
-    }
-
-    @Test
-    public void latestsBuildsPortlet_correctJobLink() {
-        DashboardView v = createDashboardView();
-        LatestBuildsPortlet latestBuilds = v.addBottomPortlet(LatestBuildsPortlet.class);
-        v.save();
-
-
-        FreeStyleJob job = createFreeStyleJob();
-        buildSuccessfulJob(job);
-
-        v.open();
-        latestBuilds.openJob(job.name);
-
-        assertThat(driver, hasContent("Project " + job.name));
-    }
-
-    @Test
-    public void latestsBuildsPortlet_correctBuildLink() {
-        DashboardView v = createDashboardView();
-        LatestBuildsPortlet latestBuilds = v.addBottomPortlet(LatestBuildsPortlet.class);
-        v.save();
-
-
-        Build build = buildSuccessfulJob(createFreeStyleJob());
-
-        v.open();
-        latestBuilds.openBuild(build.getNumber());
-
-        assertThat(driver, hasContent("Build #" + build.getNumber()));
     }
 
     @Test
@@ -447,64 +324,6 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
     }
 
     @Test
-    public void testPortletPositioning_topPortlets(){
-        DashboardView v = createDashboardView();
-        v.addTopPortlet(TestStatisticsChartPortlet.class);
-        v.save();
-
-        createFreeStyleJob();
-
-        assertThat(v.getPortletInTopTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), notNullValue());
-        assertThat(v.getPortletInLeftTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), nullValue());
-        assertThat(v.getPortletInRightTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), nullValue());
-        assertThat(v.getPortletInBottomTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), nullValue());
-    }
-
-    @Test
-    public void testPortletPositioning_leftPortlets(){
-        DashboardView v = createDashboardView();
-        v.addLeftPortlet(TestStatisticsChartPortlet.class);
-        v.addRightPortlet(BuildStatisticsPortlet.class);
-        v.save();
-
-        createFreeStyleJob();
-
-        assertThat(v.getPortletInTopTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), nullValue());
-        assertThat(v.getPortletInLeftTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), notNullValue());
-        assertThat(v.getPortletInRightTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), nullValue());
-        assertThat(v.getPortletInBottomTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), nullValue());
-    }
-
-    @Test
-    public void testPortletPositioning_rightPortlets(){
-        DashboardView v = createDashboardView();
-        v.addRightPortlet(TestStatisticsChartPortlet.class);
-        v.addLeftPortlet(BuildStatisticsPortlet.class);
-        v.save();
-
-        createFreeStyleJob();
-
-        assertThat(v.getPortletInTopTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), nullValue());
-        assertThat(v.getPortletInLeftTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), nullValue());
-        assertThat(v.getPortletInRightTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), notNullValue());
-        assertThat(v.getPortletInBottomTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), nullValue());
-    }
-
-    @Test
-    public void testPortletPositioning_bottomPortlets(){
-        DashboardView v = createDashboardView();
-        v.addBottomPortlet(TestStatisticsChartPortlet.class);
-        v.save();
-
-        createFreeStyleJob();
-
-        assertThat(v.getPortletInTopTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), nullValue());
-        assertThat(v.getPortletInLeftTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), nullValue());
-        assertThat(v.getPortletInRightTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), nullValue());
-        assertThat(v.getPortletInBottomTable(TestStatisticsChartPortlet.TEST_STATISTICS_CHART), notNullValue());
-    }
-
-    @Test
     public void configureDashboardNameAndDescription() {
         final String name = "MyDashboard";
         final String description = "My Description";
@@ -588,30 +407,6 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
     }
 
     @Test
-    public void changeColumns() {
-
-        DashboardView v = createDashboardView();
-        v.configure(() -> {
-
-            v.columnsArea.removeAll();
-            v.columnsArea.add(ColumnsArea.Column.NAME);
-            v.columnsArea.add(ColumnsArea.Column.LAST_FAILURE);
-            v.dashboardPortlets.checkIncludeStdJobList(true);
-        });
-
-        createFreeStyleJob();
-        v.open();
-
-        final List<String> titles = v.projectStatus.getHeaders();
-        titles.remove(titles.size() - 1); // last is not a name
-
-        assertThat(titles, hasSize(2));
-
-        assertThat(titles.get(0), containsString(ColumnsArea.Column.NAME.getText()));
-        assertThat(titles.get(1), containsString(ColumnsArea.Column.LAST_FAILURE.getText()));
-    }
-
-    @Test
     public void configureDashboardFilterOnlyActivatedJobs() {
         DashboardView v = createDashboardView();
         BuildStatisticsPortlet stats = v.addBottomPortlet(BuildStatisticsPortlet.class);
@@ -636,36 +431,11 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
         assertThat(stats.getNumberOfBuilds(JobType.DISABLED), is(0));
     }
 
-    @Test
-    @Ignore("The statistics portlet shows only one job in total (the disabled one). it is shown as successful (1) but disabled(0)." +
-            "I found no way to get a disabled number other than zero when status filter is set to disabled. ")
-    public void configureDashboardFilterOnlyDisabledJobs() {
-
-        DashboardView v = createDashboardView();
-        BuildStatisticsPortlet stats = v.addBottomPortlet(BuildStatisticsPortlet.class);
-        v.configure(() -> {
-            v.jobFilters.setStatusFilter(JobFiltersArea.StatusFilter.DISABLED);
-        });
-
-        final FreeStyleJob active = createFreeStyleJob();
-        final FreeStyleJob disabled = createFreeStyleJob();
-
-        buildSuccessfulJob(active);
-        buildSuccessfulJob(disabled);
-        disabled.configure(disabled::disable);
-
-        v.open();
-        assertThat(stats.getNumberOfBuilds(JobType.TOTAL), is(1));
-        // When run the number of disabled jobs is zero.
-        assertThat(stats.getNumberOfBuilds(JobType.DISABLED), is(1));
-    }
-
     /**
      * Creates a default dashboard view matching all jobs.
      *
      * @return default dashboard view
      */
-
     private DashboardView createDashboardView() {
         DashboardView v = jenkins.views.create(DashboardView.class);
         v.configure();
