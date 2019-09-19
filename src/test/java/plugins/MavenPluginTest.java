@@ -23,17 +23,13 @@
  */
 package plugins;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.regex.Pattern;
-
-import org.junit.Test;
-import org.jvnet.hudson.test.Issue;
-
 import com.google.inject.Inject;
-
+import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
+import org.jenkinsci.test.acceptance.docker.fixtures.MailhogContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.DockerTest;
 import org.jenkinsci.test.acceptance.junit.Since;
+import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.mailer.Mailer;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenBuild;
@@ -42,20 +38,29 @@ import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenProjectConfig;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.StringParameter;
-import org.jenkinsci.test.acceptance.utils.mail.MailService;
+import org.junit.Test;
+import org.junit.experimental.categories.Category;
+import org.jvnet.hudson.test.Issue;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.*;
-import static org.jenkinsci.test.acceptance.Matchers.*;
-import static org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Pattern;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.jenkinsci.test.acceptance.Matchers.pageObjectExists;
+import static org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation.installMaven;
+import static org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation.installSomeMaven;
 
 @WithPlugins("maven-plugin")
+@Category(DockerTest.class)
+@WithDocker
 public class MavenPluginTest extends AbstractJUnitTest {
 
     private static final String GENERATE = "archetype:generate -DarchetypeGroupId=org.apache.maven.archetypes -DgroupId=com.mycompany.app -DartifactId=my-app -Dversion=1.0 -B";
 
     @Inject
-    MailService mail;
+    DockerContainerHolder<MailhogContainer> mailhogProvider;
 
     @Test
     public void autoinstall_maven_for_freestyle_job() {
@@ -178,7 +183,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
 
     @Test @Issue({"JENKINS-20209", "JENKINS-21045"})
     public void send_mail() throws Exception {
-        mail.setup(jenkins);
+        MailhogContainer mailhog = mailhogProvider.get();
 
         MavenModuleSet job = jenkins.jobs.create(MavenModuleSet.class);
         job.configure();
@@ -188,7 +193,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
 
         job.startBuild().shouldFail();
 
-        mail.assertMail(
+        mailhog.assertMail(
                 Pattern.compile("Build failed in Jenkins: .* #1"),
                 "root@example.com",
                 Pattern.compile(job.name)
