@@ -8,9 +8,11 @@ import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
 import org.junit.Test;
+import org.openqa.selenium.By;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -45,7 +47,7 @@ public class CredentialsTest extends AbstractJUnitTest {
         String href = c.credentialById("ssh_creds");
         cp.setConfigUrl(href);
         verifyValueForCredential(cp, sc.username, CRED_USER);
-        verifyValueForCredential(cp, sc.selectEnterDirectly().privateKey, CRED_PWD);
+        verifyValueForCredentialKey(sc, CRED_PWD, false);
     }
 
     @Test
@@ -199,6 +201,15 @@ public class CredentialsTest extends AbstractJUnitTest {
         cp.configure();
         assert(element.exists());
         assertThat(element.resolve().getAttribute("value"), containsString(expected));
+    }
+
+    private void verifyValueForCredentialKey(SshPrivateKeyCredential credential, String expected, boolean isUserScopedCredentials) {
+        String id = credential.control(By.name("_.id")).resolve().getAttribute("value");
+        String script = String.format(
+                "println(com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials(com.cloudbees.jenkins.plugins.sshcredentials.impl.BasicSSHUserPrivateKey.class, Jenkins.instance, %s, null).find {it.id == \"%s\" }.privateKey);",
+                isUserScopedCredentials ? "hudson.model.User.current().impersonate()" : "null",
+                id);
+        assertEquals("Expect private key and real one do not match", expected, jenkins.runScript(script));
     }
 
     private void verifyValueInDomain(String domain, String user, Control element, String expected) {

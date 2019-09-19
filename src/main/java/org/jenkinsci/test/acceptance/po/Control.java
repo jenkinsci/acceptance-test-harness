@@ -1,5 +1,6 @@
 package org.jenkinsci.test.acceptance.po;
 
+import java.time.Duration;
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
@@ -94,9 +95,38 @@ public class Control extends CapybaraPortingLayerImpl {
         check(resolve(), state);
     }
 
+    /**
+     * sends a click on the underlying element.
+     * You should not use this on any page where the click will cause another page to be loaded as it will not
+     * gaurantee that the new page has been loaded.
+     * @see #clickAndWaitToBecomeStale()
+     * @see #clickAndWaitToBecomeStale(Duration)
+     */
     public void click() {
         resolve().click();
     }
+
+
+    /**
+     * like click but will block for up to 30 seconds until the underlying web element has become stale.
+     * see https://blog.codeship.com/get-selenium-to-wait-for-page-load/
+     */
+    /*package*/ void clickAndWaitToBecomeStale() {
+        clickAndWaitToBecomeStale(Duration.ofSeconds(30));
+    }
+
+    /**
+     * like click but will block until the underlying web element has become stale.
+     * see https://blog.codeship.com/get-selenium-to-wait-for-page-load/
+     * @param timeout the amount of time to wait
+     */
+    /*package*/ void clickAndWaitToBecomeStale(Duration timeout) {
+        WebElement webElement = resolve();
+        // webElement.submit() despite advertising it does exactly this just blows up :(
+        webElement.click();
+        waitFor(webElement).withTimeout(timeout).until(Control::isStale);
+    }
+
 
     /**
      * The existing {@link org.jenkinsci.test.acceptance.po.Control#set(String)}
@@ -298,7 +328,12 @@ public class Control extends CapybaraPortingLayerImpl {
             waitFor().until(() -> !spinner.isDisplayed());
             validationArea = control.findElement(by.xpath("./../../../following-sibling::div[2]"));
         } else {
-            validationArea = control.findElement(by.xpath("./../../following-sibling::tr/td[2]"));
+            // Wait for validation area to stop being <div></div>
+            validationArea = waitFor().until(() -> {
+                WebElement va = control.findElement(by.xpath("./../../following-sibling::tr/td[2]"));
+                String cls = va.findElement(by.xpath("./div")).getAttribute("class");
+                return (cls == null || cls.isEmpty()) ? null : va;
+            });
         }
 
         return new FormValidation(validationArea);

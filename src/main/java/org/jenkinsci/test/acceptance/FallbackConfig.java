@@ -36,8 +36,6 @@ import org.jenkinsci.test.acceptance.utils.ElasticTime;
 import org.jenkinsci.test.acceptance.utils.IOUtil;
 import org.jenkinsci.test.acceptance.utils.SauceLabsConnection;
 import org.jenkinsci.test.acceptance.utils.aether.ArtifactResolverUtil;
-import org.jenkinsci.test.acceptance.utils.mail.MailService;
-import org.jenkinsci.test.acceptance.utils.mail.Mailtrap;
 import org.jenkinsci.test.acceptance.utils.pluginreporter.ConsoleExercisedPluginReporter;
 import org.jenkinsci.test.acceptance.utils.pluginreporter.ExercisedPluginsReporter;
 import org.jenkinsci.test.acceptance.utils.pluginreporter.TextFileExercisedPluginReporter;
@@ -96,9 +94,6 @@ public class FallbackConfig extends AbstractModule {
     protected void configure() {
         // default in case nothing is specified
         bind(SlaveProvider.class).to(LocalSlaveProvider.class);
-
-        // default email service provider
-        bind(MailService.class).to(Mailtrap.class);
     }
 
     private WebDriver createWebDriver(TestName testName) throws IOException {

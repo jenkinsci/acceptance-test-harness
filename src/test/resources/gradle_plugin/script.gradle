@@ -40,13 +40,13 @@ task environmentVariables {
 
 task jobParametersAsProjectProperties {
     doLast {
-        println "Gradle Properties: $project.TEST_PARAM_1 $project.TEST_PARAM_2"
+        println "Project Properties: $project.PROJ_PARAM_1 $project.PROJ_PARAM_2"
     }
 }
 
 task jobParametersAsSystemProperties {
     doLast {
-        println "Gradle Properties: " + System.properties.getProperty('TEST_PARAM_1') + " " + System.properties.getProperty('TEST_PARAM_2')
+        println "System Properties: " + System.properties.getProperty('SYS_PARAM_1') + " " + System.properties.getProperty('SYS_PARAM_2')
     }
 }
 

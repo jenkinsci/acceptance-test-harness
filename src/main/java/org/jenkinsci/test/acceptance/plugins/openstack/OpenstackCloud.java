@@ -58,8 +58,8 @@ public class OpenstackCloud extends Cloud {
     }
 
     public OpenstackCloud credential(String user, String userDomain, String project, String projectDomain, String password) {
+        boolean keystoneV3 = userDomain != null || projectDomain != null;
         try {
-            boolean keystoneV3 = userDomain != null || projectDomain != null;
             String identity = keystoneV3
                     ? user + ":" + project + ":" + projectDomain
                     : user + ":" + project
@@ -68,17 +68,16 @@ public class OpenstackCloud extends Cloud {
             control("credential").set(password);
         } catch (NoSuchElementException ex) {
             // 2.30+
-            Control creds = control("credentialId");
-            creds.resolve().findElement(by.xpath("./following-sibling::span/*/button[@class='credentials-add-menu']")).click();
+            Control creds = control("credentialsId", "credentialId");
+            creds.resolve().findElement(by.xpath("./following-sibling::span/*/button[contains(@class,'credentials-add-menu')]")).click();
             creds.resolve().findElement(by.xpath("./following-sibling::div[contains(@class,'credentials-add-menu-items')]//*[normalize-space(text())='Jenkins']")).click();
             SshCredentialDialog d = new SshCredentialDialog(getPage(), "/credentials");
-            boolean keystoneV3 = userDomain != null || projectDomain != null;
             if (keystoneV3) {
                 getPage().control("/").select("OpenStack auth v3");
                 d.control("projectDomain").set(projectDomain);
                 d.control("projectName").set(project);
                 d.control("userDomain").set(userDomain);
-                d.control("username").set(user);
+                d.control("username", "userName").set(user);
             } else {
                 getPage().control("/").select("OpenStack auth v2");
                 d.control("tenant").set(project);
