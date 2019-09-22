@@ -1,4 +1,4 @@
-FROM jenkins/java:6894df180381
+FROM jenkins/java:d93654cc6239
 
 RUN cd /tmp && \
     wget -nv -O - https://get.docker.com/builds/Linux/x86_64/docker-1.13.1.tgz | tar xvfz - docker/docker && \
