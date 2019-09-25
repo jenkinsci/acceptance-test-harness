@@ -40,7 +40,7 @@ The situation is expected to be handled in 90 days since reported. In case of no
 
 ### Click and wait
 
-When writing acceptance tests using Selenium it is common to click on an element and then run some other action on the resulting page.
+When writing acceptance tests using Selenium, it is common to click on an element that modifies the current page and then run some other action on the resulting page.
 Most of the time the page is updated really quick (specially if there is not a network request involved), but on slow infrastructure this can take some time so that the next test action after clicking could be checking on something which is not the expected.
 
 To avoid this, use the click and wait pattern:
@@ -48,9 +48,13 @@ To avoid this, use the click and wait pattern:
 ```
 WebElement clickableElement = ...;
 clickableElement.click();
-waitFor(by.id("my-element")).withTimeout(10);
-... now run actions safely on my-element ...
+// "my-element" is the element you expect visible in the DOM after click
+waitFor(by.id("my-element"), 10); // wait with 10 sec timeout
+// now run actions safely on my-element
 ```
+
+In the test API there are some DOM search methods that already use this pattern, like `CapybaraPortingLayerImpl#find(By selector)`.
+These find methods are also checking for visible elements, as opposed to plain `waitFor` which is just checking if the element is in the DOM (visible ot not).
 
 This way the test will not be affected by an underlying slow infrastructure.
 
@@ -79,3 +83,6 @@ A few examples:
 
 If your test needs to interact with Jenkins Core (or other plugins UI), check if there is already a PageObject for it instead of writing the code by yourself.
 Existing PageObjects are usually well tested so they are possibly more stable than your newly added code.
+
+Also, try to create PageObjects to interact with the UI instead of hardcoding elements searches and interactions in your test.
+These PageObjects can be reused by others and they are much more maintainable as it's clear what's the UI they are handling.
