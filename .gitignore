@@ -1,4 +1,5 @@
 jenkins*.war
+.DS_Store
 *.swp
 *.swn
 *~
