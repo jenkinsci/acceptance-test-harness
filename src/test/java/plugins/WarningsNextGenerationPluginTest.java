@@ -156,20 +156,95 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
 
         Build build = buildJob(job);
 
+        verifyCheckStyle(build);
+        verifyPmd(build);
+        verifyFindBugs(build);
+        verifyCpd(build);
+    }
+
+    private void verifyCpd(final Build build) {
         build.open();
-        AnalysisSummary checkstyle = new AnalysisSummary(build, CHECKSTYLE_ID);
-        assertThat(checkstyle).isDisplayed();
-        assertThat(checkstyle).hasTitleText("CheckStyle: 3 warnings");
-        assertThat(checkstyle).hasNewSize(3);
-        assertThat(checkstyle).hasFixedSize(1);
-        assertThat(checkstyle).hasReferenceBuild(1);
-        assertThat(checkstyle).hasInfoType(InfoType.ERROR);
+        AnalysisSummary cpd = new AnalysisSummary(build, CPD_ID);
+        assertThat(cpd).isDisplayed();
+        assertThat(cpd).hasTitleText("CPD: 20 warnings");
+        assertThat(cpd).hasNewSize(20);
+        assertThat(cpd).hasFixedSize(0);
+        assertThat(cpd).hasReferenceBuild(1);
+        assertThat(cpd).hasInfoType(InfoType.INFO);
 
-        AnalysisResult checkstyleDetails = checkstyle.openOverallResult();
-        assertThat(checkstyleDetails).hasActiveTab(Tab.CATEGORIES);
-        assertThat(checkstyleDetails).hasTotal(3);
-        assertThat(checkstyleDetails).hasOnlyAvailableTabs(Tab.CATEGORIES, Tab.TYPES, Tab.ISSUES);
+        AnalysisResult cpdDetails = cpd.openOverallResult();
+        assertThat(cpdDetails).hasActiveTab(Tab.ISSUES);
+        assertThat(cpdDetails).hasOnlyAvailableTabs(Tab.ISSUES);
 
+        IssuesTable issuesTable = cpdDetails.openIssuesTable();
+        assertThat(issuesTable).hasSize(10);
+        assertThat(issuesTable).hasTotal(20);
+
+        DryIssuesTableRow firstRow = issuesTable.getRowAs(0, DryIssuesTableRow.class);
+        DryIssuesTableRow secondRow = issuesTable.getRowAs(1, DryIssuesTableRow.class);
+
+        firstRow.toggleDetailsRow();
+        assertThat(issuesTable).hasSize(11);
+
+        DetailsTableRow detailsRow = issuesTable.getRowAs(1, DetailsTableRow.class);
+        assertThat(detailsRow).hasDetails("Found duplicated code.\nfunctionOne();");
+
+        assertThat(issuesTable.getRowAs(2, DryIssuesTableRow.class)).isEqualTo(secondRow);
+
+        firstRow.toggleDetailsRow();
+        assertThat(issuesTable).hasSize(10);
+        assertThat(issuesTable.getRowAs(1, DryIssuesTableRow.class)).isEqualTo(secondRow);
+
+        SourceView sourceView = firstRow.openSourceCode();
+        assertThat(sourceView).hasFileName(CPD_SOURCE_NAME);
+
+        String expectedSourceCode = toString(WARNINGS_PLUGIN_PREFIX + CPD_SOURCE_PATH);
+        assertThat(sourceView.getSourceCode()).isEqualToIgnoringWhitespace(expectedSourceCode);
+
+        cpdDetails.open();
+        issuesTable = cpdDetails.openIssuesTable();
+        firstRow = issuesTable.getRowAs(0, DryIssuesTableRow.class);
+
+        AnalysisResult lowSeverity = firstRow.clickOnSeverityLink();
+        IssuesTable lowSeverityTable = lowSeverity.openIssuesTable();
+        assertThat(lowSeverityTable).hasSize(6);
+        assertThat(lowSeverityTable).hasTotal(6);
+
+        for (int i = 0; i < 6; i++) {
+            DryIssuesTableRow row = lowSeverityTable.getRowAs(i, DryIssuesTableRow.class);
+            assertThat(row).hasSeverity("Low");
+        }
+
+        build.open();
+        assertThat(openInfoView(build, CPD_ID))
+                .hasNoErrorMessages()
+                .hasInfoMessages("-> found 1 file",
+                        "-> found 20 issues (skipped 0 duplicates)",
+                        "-> 1 copied, 0 not in workspace, 0 not-found, 0 with I/O error",
+                        "Issues delta (vs. reference build): outstanding: 0, new: 20, fixed: 0");
+
+    }
+
+    private void verifyFindBugs(final Build build) {
+        build.open();
+        AnalysisSummary findbugs = new AnalysisSummary(build, FINDBUGS_ID);
+        assertThat(findbugs).isDisplayed();
+        assertThat(findbugs).hasTitleText("FindBugs: No warnings");
+        assertThat(findbugs).hasNewSize(0);
+        assertThat(findbugs).hasFixedSize(0);
+        assertThat(findbugs).hasReferenceBuild(1);
+        assertThat(findbugs).hasInfoType(InfoType.INFO);
+        assertThat(findbugs).hasDetails("No warnings for 2 builds, i.e. since build 1");
+
+        build.open();
+        assertThat(openInfoView(build, FINDBUGS_ID))
+                .hasNoErrorMessages()
+                .hasInfoMessages("-> found 1 file",
+                        "-> found 0 issues (skipped 0 duplicates)",
+                        "Issues delta (vs. reference build): outstanding: 0, new: 0, fixed: 0");
+    }
+
+    private void verifyPmd(final Build build) {
         build.open();
         AnalysisSummary pmd = new AnalysisSummary(build, PMD_ID);
         assertThat(pmd).isDisplayed();
@@ -185,54 +260,36 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         assertThat(pmdDetails).hasOnlyAvailableTabs(Tab.CATEGORIES, Tab.TYPES, Tab.ISSUES);
 
         build.open();
-        AnalysisSummary findbugs = new AnalysisSummary(build, FINDBUGS_ID);
-        assertThat(findbugs).isDisplayed();
-        assertThat(findbugs).hasTitleText("FindBugs: No warnings");
-        assertThat(findbugs).hasNewSize(0);
-        assertThat(findbugs).hasFixedSize(0);
-        assertThat(findbugs).hasReferenceBuild(1);
-        assertThat(findbugs).hasInfoType(InfoType.INFO);
-        assertThat(findbugs).hasDetails("No warnings for 2 builds, i.e. since build 1");
-
-        build.open();
-        AnalysisSummary cpd = new AnalysisSummary(build, CPD_ID);
-        assertThat(cpd).isDisplayed();
-        assertThat(cpd).hasTitleText("CPD: 20 warnings");
-        assertThat(cpd).hasNewSize(20);
-        assertThat(cpd).hasFixedSize(0);
-        assertThat(cpd).hasReferenceBuild(1);
-        assertThat(cpd).hasInfoType(InfoType.INFO);
-
-        build.open();
-        assertThat(openInfoView(build, CHECKSTYLE_ID))
-                .hasInfoMessages("-> found 1 file",
-                "-> found 3 issues (skipped 0 duplicates)",
-                "Issues delta (vs. reference build): outstanding: 0, new: 3, fixed: 1")
-                .hasErrorMessages("Can't resolve absolute paths for some files:",
-                        "Can't create fingerprints for some files:");
-
-        build.open();
         assertThat(openInfoView(build, PMD_ID))
                 .hasInfoMessages("-> found 1 file",
                         "-> found 2 issues (skipped 0 duplicates)",
                         "Issues delta (vs. reference build): outstanding: 2, new: 0, fixed: 1")
                 .hasErrorMessages("Can't resolve absolute paths for some files:",
                         "Can't create fingerprints for some files:");
+    }
+
+    private void verifyCheckStyle(final Build build) {
+        build.open();
+        AnalysisSummary checkstyle = new AnalysisSummary(build, CHECKSTYLE_ID);
+        assertThat(checkstyle).isDisplayed();
+        assertThat(checkstyle).hasTitleText("CheckStyle: 3 warnings");
+        assertThat(checkstyle).hasNewSize(3);
+        assertThat(checkstyle).hasFixedSize(1);
+        assertThat(checkstyle).hasReferenceBuild(1);
+        assertThat(checkstyle).hasInfoType(InfoType.ERROR);
+
+        AnalysisResult checkstyleDetails = checkstyle.openOverallResult();
+        assertThat(checkstyleDetails).hasActiveTab(Tab.CATEGORIES);
+        assertThat(checkstyleDetails).hasTotal(3);
+        assertThat(checkstyleDetails).hasOnlyAvailableTabs(Tab.CATEGORIES, Tab.TYPES, Tab.ISSUES);
 
         build.open();
-        assertThat(openInfoView(build, FINDBUGS_ID))
-                .hasNoErrorMessages()
+        assertThat(openInfoView(build, CHECKSTYLE_ID))
                 .hasInfoMessages("-> found 1 file",
-                "-> found 0 issues (skipped 0 duplicates)",
-                "Issues delta (vs. reference build): outstanding: 0, new: 0, fixed: 0");
-
-        build.open();
-        assertThat(openInfoView(build, CPD_ID))
-                .hasNoErrorMessages()
-                .hasInfoMessages("-> found 1 file",
-                "-> found 20 issues (skipped 0 duplicates)",
-                "-> 1 copied, 0 not in workspace, 0 not-found, 0 with I/O error",
-                "Issues delta (vs. reference build): outstanding: 0, new: 20, fixed: 0");
+                        "-> found 3 issues (skipped 0 duplicates)",
+                        "Issues delta (vs. reference build): outstanding: 0, new: 3, fixed: 1")
+                .hasErrorMessages("Can't resolve absolute paths for some files:",
+                        "Can't create fingerprints for some files:");
     }
 
     private InfoView openInfoView(final Build build, final String toolId) {
@@ -288,39 +345,6 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         assertThat(result).hasTotal(5);
         assertThat(result).hasOnlyAvailableTabs(
                 Tab.TOOLS, Tab.PACKAGES, Tab.FILES, Tab.CATEGORIES, Tab.TYPES, Tab.ISSUES);
-    }
-
-    /**
-     * Verifies that clicking on the (+) icon within the details column of the issues table will show and hide the
-     * details child row.
-     */
-    @Test
-    public void should_open_and_hide_details_row() {
-        Build build = createAndBuildFreeStyleJob("CPD",
-                cpd -> cpd.setHighThreshold(2).setNormalThreshold(1),
-                CPD_REPORT, CPD_SOURCE_PATH);
-
-        AnalysisResult result = openAnalysisResult(build, CPD_ID);
-        IssuesTable issuesTable = result.openIssuesTable();
-        assertThat(issuesTable).hasSize(10);
-
-        DryIssuesTableRow firstRow = issuesTable.getRowAs(0, DryIssuesTableRow.class);
-        DryIssuesTableRow secondRow = issuesTable.getRowAs(1, DryIssuesTableRow.class);
-
-        firstRow.toggleDetailsRow();
-        assertThat(issuesTable).hasSize(11);
-
-        DetailsTableRow detailsRow = issuesTable.getRowAs(1, DetailsTableRow.class);
-        assertThat(detailsRow).hasDetails(
-                "Found duplicated code.\npublic static void functionOne()\n"
-                        + "  {\n"
-                        + "    System.out.println(\"testfile for redundancy\");");
-
-        assertThat(issuesTable.getRowAs(2, DryIssuesTableRow.class)).isEqualTo(secondRow);
-
-        firstRow.toggleDetailsRow();
-        assertThat(issuesTable).hasSize(10);
-        assertThat(issuesTable.getRowAs(1, DryIssuesTableRow.class)).isEqualTo(secondRow);
     }
 
     /**
@@ -425,7 +449,8 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
             recorder.setTool("CheckStyle");
             recorder.addTool("FindBugs");
             recorder.addTool("PMD");
-            recorder.addTool("CPD");
+            recorder.addTool("CPD",
+                    cpd -> cpd.setHighThreshold(8).setNormalThreshold(3));
             recorder.setEnabledForFailure(true);
         });
     }
