@@ -2,9 +2,6 @@ package org.jenkinsci.test.acceptance.plugins.warnings_ng;
 
 import java.util.function.Consumer;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.support.ui.Select;
-
 import org.jenkinsci.test.acceptance.po.AbstractStep;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
@@ -25,11 +22,13 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
     private Control qualityGatesRepeatable = findRepeatableAddButtonFor("qualityGates");
     private Control advancedButton = control("advanced-button");
     private Control enabledForFailureCheckBox = control("enabledForFailure");
-    private Control ignoreAnalysisResultCheckBox = control("ignoreAnalysisResult");
+    private Control ignoreQualityGate = control("ignoreQualityGate");
     private Control overallResultMustBeSuccessCheckBox = control("overallResultMustBeSuccess");
     private Control referenceJobField = control("referenceJob");
     private Control aggregatingResultsCheckBox = control("aggregatingResults");
     private Control sourceCodeEncoding = control("sourceCodeEncoding");
+
+    public enum QualityGateBuildResult {UNSTABLE, FAILED}
 
     /**
      * Returns the repeatable add button for the specified property.
@@ -55,6 +54,7 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
         super(parent, path);
 
         ScrollerUtil.hideScrollerTabBar(driver);
+        openAdvancedOptions();
     }
 
     /**
@@ -150,9 +150,7 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
      *         the encoding to use when reading source files
      */
     public void setSourceCodeEncoding(final String encoding) {
-        openAdvancedOptions();
-
-        this.sourceCodeEncoding.set(encoding);
+        sourceCodeEncoding.set(encoding);
     }
 
     /**
@@ -181,10 +179,8 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
      * @param isChecked
      *         determines if the checkbox should be checked or not
      */
-    public void setIgnoreAnalysisResult(final boolean isChecked) {
-        openAdvancedOptions();
-
-        ignoreAnalysisResultCheckBox.check(isChecked);
+    public void setIgnoreQualityGate(final boolean isChecked) {
+        ignoreQualityGate.check(isChecked);
     }
 
     /**
@@ -194,8 +190,6 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
      *         determines if the checkbox should be checked or not
      */
     public void setOverallResultMustBeSuccess(final boolean isChecked) {
-        openAdvancedOptions();
-
         overallResultMustBeSuccessCheckBox.check(isChecked);
     }
 
@@ -206,8 +200,6 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
      *         the name of the referenceJob
      */
     public void setReferenceJobField(final String referenceJob) {
-        openAdvancedOptions();
-
         referenceJobField.set(referenceJob);
     }
 
@@ -249,17 +241,15 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
      *         the minimum number of issues that fails the quality gate
      * @param type
      *         the type of the quality gate
-     * @param isUnstable
+     * @param result
      *         determines whether the quality gate sets the build result to Unstable or Failed
      */
-    public void addQualityGateConfiguration(final int threshold, final QualityGateType type, final boolean isUnstable) {
-        openAdvancedOptions();
-
+    public void addQualityGateConfiguration(final int threshold, final QualityGateType type, final QualityGateBuildResult result) {
         String path = createPageArea("qualityGates", () -> qualityGatesRepeatable.click());
         QualityGatePanel qualityGate = new QualityGatePanel(this, path);
         qualityGate.setThreshold(threshold);
         qualityGate.setType(type);
-        qualityGate.setUnstable(isUnstable);
+        qualityGate.setUnstable(result == QualityGateBuildResult.UNSTABLE);
     }
     
     /**
@@ -271,8 +261,6 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
      *         regular expression to apply
      */
     public void addIssueFilter(final String filterName, final String regex) {
-        openAdvancedOptions();
-
         String path = createPageArea("filters", () -> filtersRepeatable.selectDropdownMenu(filterName));
         IssueFilterPanel filter = new IssueFilterPanel(this, path);
         filter.setFilter(regex);
@@ -282,38 +270,23 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
      * Available quality gate types.
      */
     public enum QualityGateType {
-        /** Total number of issues. */
-        TOTAL("Total number of issues (any severity)"),
-        /** Total number of issues (severity Error). */
-        TOTAL_ERROR("Total number of errors"),
-        /** Total number of issues (severity Warning High). */
-        TOTAL_HIGH("Total number of warnings (severity high)"),
-        /** Total number of issues (severity Warning Normal). */
-        TOTAL_NORMAL("Total number of warnings (severity normal)"),
-        /** Total number of issues (severity Warning Low). */
-        TOTAL_LOW("Total number of warnings (severity low)"),
+        TOTAL("Total (any severity)"),
+        TOTAL_ERROR("Total (errors only)"),
+        TOTAL_HIGH("Total (severity high only)"),
+        TOTAL_NORMAL("Total (severity normal only)"),
+        TOTAL_LOW("Total (severity low only)"),
 
-        /** Number of new issues. */
-        NEW("Number of new issues (any severity)"),
-        /** Number of new issues (severity Error). */
-        NEW_ERROR("Number of new errors"),
-        /** Number of new issues (severity Warning High). */
-        NEW_HIGH("Number of new warnings (severity high)"),
-        /** Number of new issues (severity Warning Normal). */
-        NEW_NORMAL("Number of new warnings (severity normal)"),
-        /** Number of new issues (severity Warning Low). */
-        NEW_LOW("Number of new warnings (severity low)"),
+        NEW("New (any severity)"),
+        NEW_ERROR("New (errors only)"),
+        NEW_HIGH("New (severity high only)"),
+        NEW_NORMAL("New (severity normal only)"),
+        NEW_LOW("New (severity low only)"),
 
-        /** Delta current build - reference build. */
         DELTA("Delta (any severity)"),
-        /** Delta current build - reference build (severity Error). */
-        DELTA_ERROR("Delta of errors"),
-        /** Delta current build - reference build (severity Warning High). */
-        DELTA_HIGH("Delta of warnings (severity high)"),
-        /** Delta current build - reference build (severity Warning Normal). */
-        DELTA_NORMAL("Delta of warnings (severity normal)"),
-        /** Delta current build - reference build (severity Warning Low). */
-        DELTA_LOW("Delta of warnings (severity low)");
+        DELTA_ERROR("Delta (errors only)"),
+        DELTA_HIGH("Delta (severity high only)"),
+        DELTA_NORMAL("Delta (severity normal only)"),
+        DELTA_LOW("Delta (severity low only)");
 
         private final String displayName;
 
@@ -379,7 +352,7 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
          *
          * @return this
          */
-        public StaticAnalysisTool setNormalThreshold(int normalThreshold) {
+        public StaticAnalysisTool setNormalThreshold(final int normalThreshold) {
             this.normalThreshold.set(normalThreshold);
 
             return this;
@@ -393,7 +366,7 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
          *
          * @return this
          */
-        public StaticAnalysisTool setHighThreshold(int highThreshold) {
+        public StaticAnalysisTool setHighThreshold(final int highThreshold) {
             this.highThreshold.set(highThreshold);
 
             return this;
@@ -421,7 +394,6 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
     private static class QualityGatePanel extends PageAreaImpl {
         private final Control threshold = control("threshold");
         private final Control type = control("type");
-        private final Control unstable = control("unstable");
 
         QualityGatePanel(final PageArea area, final String path) {
             super(area, path);
@@ -436,7 +408,7 @@ public class IssuesRecorder extends AbstractStep implements PostBuildStep {
         }
 
         public void setUnstable(final boolean isUnstable) {
-            find(by.xpath("//input[@type='radio' and contains(@path,'unstable[" + isUnstable + "]')]")).click();
+            self().findElement(by.xpath(".//input[@type='radio' and contains(@path,'unstable[" + isUnstable + "]')]")).click();
         }
     }
 }

@@ -29,20 +29,19 @@ import org.jenkinsci.test.acceptance.plugins.warnings_ng.AnalysisResult;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.AnalysisResult.Tab;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.AnalysisSummary;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.AnalysisSummary.InfoType;
-import org.jenkinsci.test.acceptance.plugins.warnings_ng.AnalysisSummary.QualityGateResult;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.ConsoleLogView;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.DefaultWarningsTableRow;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.DetailsTableRow;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.DryIssuesTableRow;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.InfoView;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.IssuesRecorder;
+import org.jenkinsci.test.acceptance.plugins.warnings_ng.IssuesRecorder.QualityGateBuildResult;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.IssuesRecorder.QualityGateType;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.IssuesRecorder.StaticAnalysisTool;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.IssuesTable;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.ScrollerUtil;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.SourceView;
 import org.jenkinsci.test.acceptance.po.Build;
-import org.jenkinsci.test.acceptance.po.Build.Result;
 import org.jenkinsci.test.acceptance.po.DumbSlave;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
@@ -66,6 +65,8 @@ import static org.jenkinsci.test.acceptance.plugins.warnings_ng.Assertions.*;
  * @author Arne Schöntag
  * @author Alexandra Wenzel
  * @author Nikolai Wohlgemuth
+ * @author Florian Hageneder
+ * @author Veronika Zwickenpflug
  */
 @WithPlugins("warnings-ng")
 public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
@@ -184,32 +185,58 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         assertThat(pmdDetails).hasOnlyAvailableTabs(Tab.CATEGORIES, Tab.TYPES, Tab.ISSUES);
 
         build.open();
-        AnalysisSummary findBugs = new AnalysisSummary(build, FINDBUGS_ID);
-        assertThat(findBugs).isDisplayed();
-        assertThat(findBugs).hasTitleText("FindBugs: No warnings");
-        assertThat(findBugs).hasNewSize(0);
-        assertThat(findBugs).hasFixedSize(0);
-        assertThat(findBugs).hasReferenceBuild(1);
-        assertThat(findBugs).hasInfoType(InfoType.INFO);
-        assertThat(findBugs).hasDetails("No warnings for 2 builds, i.e. since build 1");
+        AnalysisSummary findbugs = new AnalysisSummary(build, FINDBUGS_ID);
+        assertThat(findbugs).isDisplayed();
+        assertThat(findbugs).hasTitleText("FindBugs: No warnings");
+        assertThat(findbugs).hasNewSize(0);
+        assertThat(findbugs).hasFixedSize(0);
+        assertThat(findbugs).hasReferenceBuild(1);
+        assertThat(findbugs).hasInfoType(InfoType.INFO);
+        assertThat(findbugs).hasDetails("No warnings for 2 builds, i.e. since build 1");
 
         build.open();
-        assertThat(new AnalysisSummary(build, CHECKSTYLE_ID).openInfoView()).hasInfoMessages(
-                "-> found 1 file",
+        AnalysisSummary cpd = new AnalysisSummary(build, CPD_ID);
+        assertThat(cpd).isDisplayed();
+        assertThat(cpd).hasTitleText("CPD: 20 warnings");
+        assertThat(cpd).hasNewSize(20);
+        assertThat(cpd).hasFixedSize(0);
+        assertThat(cpd).hasReferenceBuild(1);
+        assertThat(cpd).hasInfoType(InfoType.INFO);
+
+        build.open();
+        assertThat(openInfoView(build, CHECKSTYLE_ID))
+                .hasInfoMessages("-> found 1 file",
                 "-> found 3 issues (skipped 0 duplicates)",
-                "Issues delta (vs. reference build): outstanding: 0, new: 3, fixed: 1");
+                "Issues delta (vs. reference build): outstanding: 0, new: 3, fixed: 1")
+                .hasErrorMessages("Can't resolve absolute paths for some files:",
+                        "Can't create fingerprints for some files:");
 
         build.open();
-        assertThat(new AnalysisSummary(build, PMD_ID).openInfoView()).hasInfoMessages(
-                "-> found 1 file",
-                "-> found 2 issues (skipped 0 duplicates)",
-                "Issues delta (vs. reference build): outstanding: 2, new: 0, fixed: 1");
+        assertThat(openInfoView(build, PMD_ID))
+                .hasInfoMessages("-> found 1 file",
+                        "-> found 2 issues (skipped 0 duplicates)",
+                        "Issues delta (vs. reference build): outstanding: 2, new: 0, fixed: 1")
+                .hasErrorMessages("Can't resolve absolute paths for some files:",
+                        "Can't create fingerprints for some files:");
 
         build.open();
-        assertThat(new AnalysisSummary(build, FINDBUGS_ID).openInfoView()).hasInfoMessages(
-                "-> found 1 file",
+        assertThat(openInfoView(build, FINDBUGS_ID))
+                .hasNoErrorMessages()
+                .hasInfoMessages("-> found 1 file",
                 "-> found 0 issues (skipped 0 duplicates)",
                 "Issues delta (vs. reference build): outstanding: 0, new: 0, fixed: 0");
+
+        build.open();
+        assertThat(openInfoView(build, CPD_ID))
+                .hasNoErrorMessages()
+                .hasInfoMessages("-> found 1 file",
+                "-> found 20 issues (skipped 0 duplicates)",
+                "-> 1 copied, 0 not in workspace, 0 not-found, 0 with I/O error",
+                "Issues delta (vs. reference build): outstanding: 0, new: 20, fixed: 0");
+    }
+
+    private InfoView openInfoView(final Build build, final String toolId) {
+        return new AnalysisSummary(build, toolId).openInfoView();
     }
 
     /**
@@ -221,9 +248,13 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         FreeStyleJob job = createFreeStyleJob("build_status_test/build_01");
         IssuesRecorder recorder = addRecorderWith3Tools(job);
         recorder.setEnabledForAggregation(true);
+        recorder.addQualityGateConfiguration(4, QualityGateType.TOTAL, QualityGateBuildResult.UNSTABLE);
+        recorder.addQualityGateConfiguration(3, QualityGateType.NEW, QualityGateBuildResult.FAILED);
+        recorder.setIgnoreQualityGate(true);
+
         job.save();
 
-        Build referenceBuild = buildJob(job);
+        Build referenceBuild = buildJob(job).shouldBeUnstable();
         referenceBuild.open();
 
         assertThat(new AnalysisSummary(referenceBuild, CHECKSTYLE_ID)).isNotDisplayed();
@@ -257,30 +288,6 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         assertThat(result).hasTotal(5);
         assertThat(result).hasOnlyAvailableTabs(
                 Tab.TOOLS, Tab.PACKAGES, Tab.FILES, Tab.CATEGORIES, Tab.TYPES, Tab.ISSUES);
-    }
-
-    /**
-     * Verifies that the quality gate is evaluated and changes the result of the build to UNSTABLE or FAILED.
-     */
-    @Test
-    public void should_change_build_result_if_quality_gate_is_not_passed() {
-        runJobWithQualityGate(false);
-        runJobWithQualityGate(true);
-    }
-
-    private void runJobWithQualityGate(final boolean isUnstable) {
-        FreeStyleJob job = createFreeStyleJob("build_status_test/build_01");
-        IssuesRecorder recorder = addRecorderWith3Tools(job);
-        recorder.addQualityGateConfiguration(2, QualityGateType.TOTAL, isUnstable);
-        job.save();
-
-        Build build = buildJob(job).shouldBe(isUnstable ? Result.UNSTABLE : Result.FAILURE);
-        build.open();
-
-        assertThat(new AnalysisSummary(build, CHECKSTYLE_ID)).hasQualityGateResult(QualityGateResult.SUCCESS);
-        assertThat(new AnalysisSummary(build, FINDBUGS_ID)).hasQualityGateResult(QualityGateResult.SUCCESS);
-        assertThat(new AnalysisSummary(build, PMD_ID))
-                .hasQualityGateResult(isUnstable ? QualityGateResult.UNSTABLE : QualityGateResult.FAILED);
     }
 
     /**
@@ -418,6 +425,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
             recorder.setTool("CheckStyle");
             recorder.addTool("FindBugs");
             recorder.addTool("PMD");
+            recorder.addTool("CPD");
             recorder.setEnabledForFailure(true);
         });
     }
@@ -459,8 +467,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     * Runs a freestyle job that publishes checkstyle warnings. Verifies the content of the info and error
-     * log view.
+     * Runs a freestyle job that publishes checkstyle warnings. Verifies the content of the info and error log view.
      */
     @Test
     public void should_show_info_and_error_messages_in_freestyle_job() {
@@ -476,8 +483,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     * Runs a pipeline that publishes checkstyle warnings. Verifies the content of the info and error
-     * log view.
+     * Runs a pipeline that publishes checkstyle warnings. Verifies the content of the info and error log view.
      */
     @Test
     @WithPlugins({"workflow-cps", "pipeline-stage-step", "workflow-durable-task-step", "workflow-basic-steps"})
@@ -522,7 +528,8 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
     /**
      * Creates and builds a maven job and verifies that all warnings are shown in the summary and details views.
      */
-    @Test @WithPlugins("maven-plugin")
+    @Test
+    @WithPlugins("maven-plugin")
     public void should_show_maven_warnings_in_maven_project() {
         MavenModuleSet job = createMavenProject();
         copyResourceFilesToWorkspace(job, SOURCE_VIEW_FOLDER + "pom.xml");
@@ -562,7 +569,8 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
     /**
      * Verifies that package and namespace names are resolved.
      */
-    @Test @WithPlugins("maven-plugin")
+    @Test
+    @WithPlugins("maven-plugin")
     public void should_resolve_packages_and_namespaces() {
         MavenModuleSet job = createMavenProject();
         job.copyDir(job.resource(SOURCE_VIEW_FOLDER));
@@ -612,7 +620,9 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
     /**
      * Verifies that warnings can be parsed on a agent as well.
      */
-    @Test @WithDocker @WithPlugins("ssh-slaves")
+    @Test
+    @WithDocker
+    @WithPlugins("ssh-slaves")
     @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {CREDENTIALS_ID, CREDENTIALS_KEY})
     public void should_parse_warnings_on_agent() {
         DumbSlave dockerAgent = createDockerAgent();
@@ -818,5 +828,6 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         }
         return Paths.get(resource.toURI());
     }
+
 }
 
