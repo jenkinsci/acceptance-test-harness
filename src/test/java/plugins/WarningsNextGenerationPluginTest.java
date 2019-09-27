@@ -115,7 +115,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
         job.sandbox.check();
 
-        createRecordIssuesStep(job, "build_01/checkstyle-result.xml", "build_01/pmd.xml");
+        createRecordIssuesStep(job, 1);
 
         job.save();
 
@@ -125,7 +125,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         assertThat(referenceBuild.getConsole()).contains("[checkstyle=1]");
         assertThat(referenceBuild.getConsole()).contains("[pmd=3]");
 
-        job.configure(() -> createRecordIssuesStep(job, "build_02/checkstyle-result.xml", "build_02/pmd.xml"));
+        job.configure(() -> createRecordIssuesStep(job, 2));
 
         Build build = buildJob(job);
 
@@ -134,12 +134,12 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         assertThat(build.getConsole()).contains("[pmd=2]");
     }
 
-    private void createRecordIssuesStep(final WorkflowJob job, final String... fileNames) {
+    private void createRecordIssuesStep(final WorkflowJob job, final int build) {
+        String[] fileNames = {"checkstyle-result.xml", "pmd.xml", "findbugsXml.xml", "cpd.xml"};
         StringBuilder resourceCopySteps = new StringBuilder();
         for (String fileName : fileNames) {
-            resourceCopySteps.append(
-                    job.copyResourceStep(WARNINGS_PLUGIN_PREFIX + "build_status_test/" + fileName)
-                            .replace("\\", "\\\\"));
+            resourceCopySteps.append(job.copyResourceStep(WARNINGS_PLUGIN_PREFIX
+                    + "build_status_test/build_0" + build + "/" + fileName).replace("\\", "\\\\"));
         }
         job.script.set("node {\n"
                 + resourceCopySteps.toString()
