@@ -78,7 +78,6 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
     private static final String FINDBUGS_ID = "findbugs";
     private static final String MAVEN_ID = "maven-warnings";
 
-    private static final String WARNING_HIGH_PRIORITY = "High";
     private static final String WARNING_LOW_PRIORITY = "Low";
 
     private static final String CHECKSTYLE_XML = "checkstyle-result.xml";
@@ -114,12 +113,36 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
     @WithPlugins({"token-macro", "workflow-cps", "pipeline-stage-step", "workflow-durable-task-step", "workflow-basic-steps"})
     public void should_expand_token() {
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
+        job.sandbox.check();
 
-        String checkstyle = job.copyResourceStep(WARNINGS_PLUGIN_PREFIX + "aggregation/checkstyle1.xml");
-        String pmd = job.copyResourceStep(WARNINGS_PLUGIN_PREFIX + "aggregation/pmd.xml");
+        createRecordIssuesStep(job, "build_01/checkstyle-result.xml", "build_01/pmd.xml");
+
+        job.save();
+
+        Build referenceBuild = buildJob(job);
+
+        assertThat(referenceBuild.getConsole()).contains("[total=4]");
+        assertThat(referenceBuild.getConsole()).contains("[checkstyle=1]");
+        assertThat(referenceBuild.getConsole()).contains("[pmd=3]");
+
+        job.configure(() -> createRecordIssuesStep(job, "build_02/checkstyle-result.xml", "build_02/pmd.xml"));
+
+        Build build = buildJob(job);
+
+        assertThat(build.getConsole()).contains("[total=5]");
+        assertThat(build.getConsole()).contains("[checkstyle=3]");
+        assertThat(build.getConsole()).contains("[pmd=2]");
+    }
+
+    private void createRecordIssuesStep(final WorkflowJob job, final String... fileNames) {
+        StringBuilder resourceCopySteps = new StringBuilder();
+        for (String fileName : fileNames) {
+            resourceCopySteps.append(
+                    job.copyResourceStep(WARNINGS_PLUGIN_PREFIX + "build_status_test/" + fileName)
+                            .replace("\\", "\\\\"));
+        }
         job.script.set("node {\n"
-                + checkstyle.replace("\\", "\\\\")
-                + pmd.replace("\\", "\\\\")
+                + resourceCopySteps.toString()
                 + "recordIssues tool: checkStyle(pattern: '**/checkstyle*')\n"
                 + "recordIssues tool: pmdParser(pattern: '**/pmd*')\n"
                 + "def total = tm('${ANALYSIS_ISSUES_COUNT}')\n"
@@ -129,14 +152,6 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
                 + "def pmd = tm('${ANALYSIS_ISSUES_COUNT, tool=\"pmd\"}')\n"
                 + "echo '[pmd=' + pmd + ']' \n"
                 + "}");
-        job.sandbox.check();
-        job.save();
-
-        Build build = buildJob(job);
-
-        assertThat(build.getConsole()).contains("[total=7]");
-        assertThat(build.getConsole()).contains("[checkstyle=3]");
-        assertThat(build.getConsole()).contains("[pmd=4]");
     }
 
     /**
@@ -211,7 +226,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
 
         for (int i = 0; i < 6; i++) {
             DryIssuesTableRow row = lowSeverityTable.getRowAs(i, DryIssuesTableRow.class);
-            assertThat(row).hasSeverity("Low");
+            assertThat(row).hasSeverity(WARNING_LOW_PRIORITY);
         }
 
         build.open();
