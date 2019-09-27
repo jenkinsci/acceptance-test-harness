@@ -9,7 +9,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
-import java.util.function.Consumer;
 
 import org.junit.Test;
 
@@ -36,7 +35,6 @@ import org.jenkinsci.test.acceptance.plugins.warnings_ng.InfoView;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.IssuesRecorder;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.IssuesRecorder.QualityGateBuildResult;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.IssuesRecorder.QualityGateType;
-import org.jenkinsci.test.acceptance.plugins.warnings_ng.IssuesRecorder.StaticAnalysisTool;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.IssuesTable;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.ScrollerUtil;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.SourceView;
@@ -107,8 +105,8 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
     private DockerContainerHolder<JavaGitContainer> dockerContainer;
 
     /**
-     * Runs a pipeline with all tools two times. Verifies the analysis results in several views. Additionally,
-     * verifies the expansion of tokens with the token-macro plugin.
+     * Runs a pipeline with all tools two times. Verifies the analysis results in several views. Additionally, verifies
+     * the expansion of tokens with the token-macro plugin.
      */
     @Test
     @WithPlugins({"token-macro", "workflow-cps", "pipeline-stage-step", "workflow-durable-task-step", "workflow-basic-steps"})
@@ -122,21 +120,23 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
 
         Build referenceBuild = buildJob(job);
 
-        assertThat(referenceBuild.getConsole()).contains("[total=4]");
-        assertThat(referenceBuild.getConsole()).contains("[new=0]");
-        assertThat(referenceBuild.getConsole()).contains("[fixed=0]");
-        assertThat(referenceBuild.getConsole()).contains("[checkstyle=1]");
-        assertThat(referenceBuild.getConsole()).contains("[pmd=3]");
+        assertThat(referenceBuild.getConsole())
+                .contains("[total=4]")
+                .contains("[new=0]")
+                .contains("[fixed=0]")
+                .contains("[checkstyle=1]")
+                .contains("[pmd=3]");
 
         job.configure(() -> createRecordIssuesStep(job, 2));
 
         Build build = buildJob(job);
 
-        assertThat(build.getConsole()).contains("[total=25]");
-        assertThat(build.getConsole()).contains("[new=23]");
-        assertThat(build.getConsole()).contains("[fixed=2]");
-        assertThat(build.getConsole()).contains("[checkstyle=3]");
-        assertThat(build.getConsole()).contains("[pmd=2]");
+        assertThat(build.getConsole())
+                .contains("[total=25]")
+                .contains("[new=23]")
+                .contains("[fixed=2]")
+                .contains("[checkstyle=3]")
+                .contains("[pmd=2]");
 
         verifyPmd(build);
         verifyFindBugs(build);
@@ -145,14 +145,8 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
     }
 
     private void createRecordIssuesStep(final WorkflowJob job, final int build) {
-        String[] fileNames = {"checkstyle-result.xml", "pmd.xml", "findbugsXml.xml", "cpd.xml", "Main.java"};
-        StringBuilder resourceCopySteps = new StringBuilder();
-        for (String fileName : fileNames) {
-            resourceCopySteps.append(job.copyResourceStep(WARNINGS_PLUGIN_PREFIX
-                    + "build_status_test/build_0" + build + "/" + fileName).replace("\\", "\\\\"));
-        }
         job.script.set("node {\n"
-                + resourceCopySteps.toString()
+                + createReportFilesStep(job, build)
                 + "recordIssues tool: checkStyle(pattern: '**/checkstyle*')\n"
                 + "recordIssues tool: pmdParser(pattern: '**/pmd*')\n"
                 + "recordIssues tools: [cpd(pattern: '**/cpd*', highThreshold:8, normalThreshold:3), findBugs()], aggregatingResults: 'false' \n"
@@ -169,9 +163,18 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
                 + "}");
     }
 
+    private StringBuilder createReportFilesStep(final WorkflowJob job, final int build) {
+        String[] fileNames = {"checkstyle-result.xml", "pmd.xml", "findbugsXml.xml", "cpd.xml", "Main.java"};
+        StringBuilder resourceCopySteps = new StringBuilder();
+        for (String fileName : fileNames) {
+            resourceCopySteps.append(job.copyResourceStep(WARNINGS_PLUGIN_PREFIX
+                    + "build_status_test/build_0" + build + "/" + fileName).replace("\\", "\\\\"));
+        }
+        return resourceCopySteps;
+    }
+
     /**
-     * Tests the build overview page by running two builds with three different tools enabled. Checks the contents of
-     * the result summaries for each tool.
+     * Runs a freestyle job with all tools two times. Verifies the analysis results in several views.
      */
     @Test
     public void should_show_build_summary_and_link_to_details() {
@@ -193,21 +196,20 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
 
     private void verifyCpd(final Build build) {
         build.open();
+
         AnalysisSummary cpd = new AnalysisSummary(build, CPD_ID);
-        assertThat(cpd).isDisplayed();
-        assertThat(cpd).hasTitleText("CPD: 20 warnings");
-        assertThat(cpd).hasNewSize(20);
-        assertThat(cpd).hasFixedSize(0);
-        assertThat(cpd).hasReferenceBuild(1);
-        assertThat(cpd).hasInfoType(InfoType.INFO);
+        assertThat(cpd).isDisplayed()
+                .hasTitleText("CPD: 20 warnings")
+                .hasNewSize(20)
+                .hasFixedSize(0)
+                .hasReferenceBuild(1)
+                .hasInfoType(InfoType.INFO);
 
         AnalysisResult cpdDetails = cpd.openOverallResult();
-        assertThat(cpdDetails).hasActiveTab(Tab.ISSUES);
-        assertThat(cpdDetails).hasOnlyAvailableTabs(Tab.ISSUES);
+        assertThat(cpdDetails).hasActiveTab(Tab.ISSUES).hasOnlyAvailableTabs(Tab.ISSUES);
 
         IssuesTable issuesTable = cpdDetails.openIssuesTable();
-        assertThat(issuesTable).hasSize(10);
-        assertThat(issuesTable).hasTotal(20);
+        assertThat(issuesTable).hasSize(10).hasTotal(20);
 
         DryIssuesTableRow firstRow = issuesTable.getRowAs(0, DryIssuesTableRow.class);
         DryIssuesTableRow secondRow = issuesTable.getRowAs(1, DryIssuesTableRow.class);
@@ -236,8 +238,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
 
         AnalysisResult lowSeverity = firstRow.clickOnSeverityLink();
         IssuesTable lowSeverityTable = lowSeverity.openIssuesTable();
-        assertThat(lowSeverityTable).hasSize(6);
-        assertThat(lowSeverityTable).hasTotal(6);
+        assertThat(lowSeverityTable).hasSize(6).hasTotal(6);
 
         for (int i = 0; i < 6; i++) {
             DryIssuesTableRow row = lowSeverityTable.getRowAs(i, DryIssuesTableRow.class);
@@ -256,14 +257,15 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
 
     private void verifyFindBugs(final Build build) {
         build.open();
+
         AnalysisSummary findbugs = new AnalysisSummary(build, FINDBUGS_ID);
-        assertThat(findbugs).isDisplayed();
-        assertThat(findbugs).hasTitleText("FindBugs: No warnings");
-        assertThat(findbugs).hasNewSize(0);
-        assertThat(findbugs).hasFixedSize(0);
-        assertThat(findbugs).hasReferenceBuild(1);
-        assertThat(findbugs).hasInfoType(InfoType.INFO);
-        assertThat(findbugs).hasDetails("No warnings for 2 builds, i.e. since build 1");
+        assertThat(findbugs).isDisplayed()
+                .hasTitleText("FindBugs: No warnings")
+                .hasNewSize(0)
+                .hasFixedSize(0)
+                .hasReferenceBuild(1)
+                .hasInfoType(InfoType.INFO)
+                .hasDetails("No warnings for 2 builds, i.e. since build 1");
 
         build.open();
         assertThat(openInfoView(build, FINDBUGS_ID))
@@ -276,17 +278,17 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
     private void verifyPmd(final Build build) {
         build.open();
         AnalysisSummary pmd = new AnalysisSummary(build, PMD_ID);
-        assertThat(pmd).isDisplayed();
-        assertThat(pmd).hasTitleText("PMD: 2 warnings");
-        assertThat(pmd).hasNewSize(0);
-        assertThat(pmd).hasFixedSize(1);
-        assertThat(pmd).hasReferenceBuild(1);
-        assertThat(pmd).hasInfoType(InfoType.ERROR);
+        assertThat(pmd).isDisplayed()
+                .hasTitleText("PMD: 2 warnings")
+                .hasNewSize(0)
+                .hasFixedSize(1)
+                .hasReferenceBuild(1)
+                .hasInfoType(InfoType.ERROR);
 
         AnalysisResult pmdDetails = pmd.openOverallResult();
-        assertThat(pmdDetails).hasActiveTab(Tab.CATEGORIES);
-        assertThat(pmdDetails).hasTotal(2);
-        assertThat(pmdDetails).hasOnlyAvailableTabs(Tab.CATEGORIES, Tab.TYPES, Tab.ISSUES);
+        assertThat(pmdDetails).hasActiveTab(Tab.CATEGORIES)
+                .hasTotal(2)
+                .hasOnlyAvailableTabs(Tab.CATEGORIES, Tab.TYPES, Tab.ISSUES);
 
         build.open();
         assertThat(openInfoView(build, PMD_ID))
@@ -300,29 +302,28 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
     private void verifyCheckStyle(final Build build) {
         build.open();
         AnalysisSummary checkstyle = new AnalysisSummary(build, CHECKSTYLE_ID);
-        assertThat(checkstyle).isDisplayed();
-        assertThat(checkstyle).hasTitleText("CheckStyle: 3 warnings");
-        assertThat(checkstyle).hasNewSize(3);
-        assertThat(checkstyle).hasFixedSize(1);
-        assertThat(checkstyle).hasReferenceBuild(1);
-        assertThat(checkstyle).hasInfoType(InfoType.ERROR);
+        assertThat(checkstyle).isDisplayed()
+                .hasTitleText("CheckStyle: 3 warnings")
+                .hasNewSize(3)
+                .hasFixedSize(1)
+                .hasReferenceBuild(1)
+                .hasInfoType(InfoType.ERROR);
 
         AnalysisResult checkstyleDetails = checkstyle.openOverallResult();
-        assertThat(checkstyleDetails).hasActiveTab(Tab.CATEGORIES);
-        assertThat(checkstyleDetails).hasTotal(3);
-        assertThat(checkstyleDetails).hasOnlyAvailableTabs(Tab.CATEGORIES, Tab.TYPES, Tab.ISSUES);
+        assertThat(checkstyleDetails).hasActiveTab(Tab.CATEGORIES)
+                .hasTotal(3)
+                .hasOnlyAvailableTabs(Tab.CATEGORIES, Tab.TYPES, Tab.ISSUES);
 
         IssuesTable issuesTable = checkstyleDetails.openIssuesTable();
-        assertThat(issuesTable).hasSize(3);
-        assertThat(issuesTable).hasTotal(3);
+        assertThat(issuesTable).hasSize(3).hasTotal(3);
 
         DefaultWarningsTableRow tableRow = issuesTable.getRowAs(0, DefaultWarningsTableRow.class);
-        assertThat(tableRow).hasFileName("RemoteLauncher.java");
-        assertThat(tableRow).hasLineNumber(59);
-        assertThat(tableRow).hasCategory("Checks");
-        assertThat(tableRow).hasType("FinalParametersCheck");
-        assertThat(tableRow).hasSeverity("Error");
-        assertThat(tableRow).hasAge(1);
+        assertThat(tableRow).hasFileName("RemoteLauncher.java")
+                .hasLineNumber(59)
+                .hasCategory("Checks")
+                .hasType("FinalParametersCheck")
+                .hasSeverity("Error")
+                .hasAge(1);
 
         build.open();
         assertThat(openInfoView(build, CHECKSTYLE_ID))
@@ -360,12 +361,12 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         assertThat(new AnalysisSummary(referenceBuild, FINDBUGS_ID)).isNotDisplayed();
 
         AnalysisSummary referenceSummary = new AnalysisSummary(referenceBuild, ANALYSIS_ID);
-        assertThat(referenceSummary).isDisplayed();
-        assertThat(referenceSummary).hasTitleText("Static Analysis: 4 warnings");
-        assertThat(referenceSummary).hasAggregation("FindBugs, CPD, CheckStyle, PMD");
-        assertThat(referenceSummary).hasNewSize(0);
-        assertThat(referenceSummary).hasFixedSize(0);
-        assertThat(referenceSummary).hasReferenceBuild(0);
+        assertThat(referenceSummary).isDisplayed()
+                .hasTitleText("Static Analysis: 4 warnings")
+                .hasAggregation("FindBugs, CPD, CheckStyle, PMD")
+                .hasNewSize(0)
+                .hasFixedSize(0)
+                .hasReferenceBuild(0);
 
         reconfigureJobWithResource(job, "build_status_test/build_02");
 
@@ -374,18 +375,27 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         build.open();
 
         AnalysisSummary analysisSummary = new AnalysisSummary(build, ANALYSIS_ID);
-        assertThat(analysisSummary).isDisplayed();
-        assertThat(analysisSummary).hasTitleText("Static Analysis: 25 warnings");
-        assertThat(analysisSummary).hasAggregation("FindBugs, CPD, CheckStyle, PMD");
-        assertThat(analysisSummary).hasNewSize(23);
-        assertThat(analysisSummary).hasFixedSize(2);
-        assertThat(analysisSummary).hasReferenceBuild(1);
+        assertThat(analysisSummary).isDisplayed()
+                .hasTitleText("Static Analysis: 25 warnings")
+                .hasAggregation("FindBugs, CPD, CheckStyle, PMD")
+                .hasNewSize(23)
+                .hasFixedSize(2)
+                .hasReferenceBuild(1);
 
         AnalysisResult result = analysisSummary.openOverallResult();
-        assertThat(result).hasActiveTab(Tab.TOOLS);
-        assertThat(result).hasTotal(25);
-        assertThat(result).hasOnlyAvailableTabs(
-                Tab.TOOLS, Tab.PACKAGES, Tab.FILES, Tab.CATEGORIES, Tab.TYPES, Tab.ISSUES);
+        assertThat(result).hasActiveTab(Tab.TOOLS).hasTotal(25)
+                .hasOnlyAvailableTabs(Tab.TOOLS, Tab.PACKAGES, Tab.FILES, Tab.CATEGORIES, Tab.TYPES, Tab.ISSUES);
+    }
+
+    private IssuesRecorder addRecorder(final FreeStyleJob job) {
+        return job.addPublisher(IssuesRecorder.class, recorder -> {
+            recorder.setTool("CheckStyle");
+            recorder.addTool("FindBugs");
+            recorder.addTool("PMD");
+            recorder.addTool("CPD",
+                    cpd -> cpd.setHighThreshold(8).setNormalThreshold(3));
+            recorder.setEnabledForFailure(true);
+        });
     }
 
     /**
@@ -418,60 +428,6 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         job.configure(() -> job.copyResource(WARNINGS_PLUGIN_PREFIX + fileName));
     }
 
-    private IssuesRecorder addRecorder(final FreeStyleJob job) {
-        return job.addPublisher(IssuesRecorder.class, recorder -> {
-            recorder.setTool("CheckStyle");
-            recorder.addTool("FindBugs");
-            recorder.addTool("PMD");
-            recorder.addTool("CPD",
-                    cpd -> cpd.setHighThreshold(8).setNormalThreshold(3));
-            recorder.setEnabledForFailure(true);
-        });
-    }
-
-    /**
-     * Runs a pipeline that publishes checkstyle warnings. Verifies the content of the info and error log view.
-     */
-    @Test
-    @WithPlugins({"workflow-cps", "pipeline-stage-step", "workflow-durable-task-step", "workflow-basic-steps"})
-    public void should_show_info_and_error_messages_in_pipeline() {
-        WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
-        String resource = job.copyResourceStep(WARNINGS_PLUGIN_PREFIX + CHECKSTYLE_XML);
-        job.script.set("node {\n"
-                + resource.replace("\\", "\\\\")
-                + "recordIssues enabledForFailure: true, tool: checkStyle(), sourceCodeEncoding: 'UTF-8'"
-                + "}");
-
-        job.sandbox.check();
-        job.save();
-
-        Build pipeline = buildJob(job);
-        verifyInfoAndErrorMessages(pipeline);
-    }
-
-    private void verifyInfoAndErrorMessages(final Build build) {
-        InfoView infoView = new InfoView(build, CHECKSTYLE_ID);
-        infoView.open();
-
-        assertThat(infoView.getErrorMessages()).hasSize(1 + 1 + 1 + 11);
-        assertThat(infoView).hasErrorMessages("Can't resolve absolute paths for some files:",
-                "Can't create fingerprints for some files:");
-
-        assertThat(infoView).hasInfoMessages(
-                "-> found 1 file",
-                "-> found 11 issues (skipped 0 duplicates)",
-                "Post processing issues on 'Master' with source code encoding 'UTF-8'",
-                "-> 0 resolved, 1 unresolved, 0 already resolved",
-                "-> 0 copied, 0 not in workspace, 1 not-found, 0 with I/O error",
-                "-> resolved module names for 11 issues",
-                "-> resolved package names of 1 affected files",
-                "-> created fingerprints for 0 issues",
-                "No valid reference build found that meets the criteria (NO_JOB_FAILURE - SUCCESSFUL_QUALITY_GATE)",
-                "All reported issues will be considered outstanding",
-                "No quality gates have been set - skipping",
-                "Health report is disabled - skipping");
-    }
-
     /**
      * Creates and builds a maven job and verifies that all warnings are shown in the summary and details views.
      */
@@ -487,30 +443,30 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         build.open();
 
         AnalysisSummary summary = new AnalysisSummary(build, MAVEN_ID);
-        assertThat(summary).isDisplayed();
-        assertThat(summary).hasTitleText("Maven: 2 warnings");
-        assertThat(summary).hasNewSize(0);
-        assertThat(summary).hasFixedSize(0);
-        assertThat(summary).hasReferenceBuild(0);
+        assertThat(summary).isDisplayed()
+                .hasTitleText("Maven: 2 warnings")
+                .hasNewSize(0)
+                .hasFixedSize(0)
+                .hasReferenceBuild(0);
 
         AnalysisResult mavenDetails = summary.openOverallResult();
-        assertThat(mavenDetails).hasActiveTab(Tab.TYPES);
-        assertThat(mavenDetails).hasTotal(2);
-        assertThat(mavenDetails).hasOnlyAvailableTabs(Tab.TYPES, Tab.ISSUES);
+        assertThat(mavenDetails).hasActiveTab(Tab.TYPES)
+                .hasTotal(2)
+                .hasOnlyAvailableTabs(Tab.TYPES, Tab.ISSUES);
 
         IssuesTable issuesTable = mavenDetails.openIssuesTable();
 
         DefaultWarningsTableRow firstRow = issuesTable.getRowAs(0, DefaultWarningsTableRow.class);
         ConsoleLogView sourceView = firstRow.openConsoleLog();
-        assertThat(sourceView).hasTitle("Console Details");
-        assertThat(sourceView).hasHighlightedText("[WARNING]\n"
-                + "[WARNING] Some problems were encountered while building the effective model for edu.hm.hafner.irrelevant.groupId:random-artifactId:jar:1.0\n"
-                + "[WARNING] 'build.plugins.plugin.version' for org.apache.maven.plugins:maven-compiler-plugin is missing. @ line 13, column 15\n"
-                + "[WARNING]\n"
-                + "[WARNING] It is highly recommended to fix these problems because they threaten the stability of your build.\n"
-                + "[WARNING]\n"
-                + "[WARNING] For this reason, future Maven versions might no longer support building such malformed projects.\n"
-                + "[WARNING]");
+        assertThat(sourceView).hasTitle("Console Details")
+                .hasHighlightedText("[WARNING]\n"
+                        + "[WARNING] Some problems were encountered while building the effective model for edu.hm.hafner.irrelevant.groupId:random-artifactId:jar:1.0\n"
+                        + "[WARNING] 'build.plugins.plugin.version' for org.apache.maven.plugins:maven-compiler-plugin is missing. @ line 13, column 15\n"
+                        + "[WARNING]\n"
+                        + "[WARNING] It is highly recommended to fix these problems because they threaten the stability of your build.\n"
+                        + "[WARNING]\n"
+                        + "[WARNING] For this reason, future Maven versions might no longer support building such malformed projects.\n"
+                        + "[WARNING]");
     }
 
     /**
@@ -529,9 +485,9 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
 
         AnalysisSummary analysisSummary = new AnalysisSummary(build, "eclipse");
         AnalysisResult result = analysisSummary.openOverallResult();
-        assertThat(result).hasActiveTab(Tab.MODULES);
-        assertThat(result).hasTotal(9);
-        assertThat(result).hasOnlyAvailableTabs(Tab.MODULES, Tab.PACKAGES, Tab.FILES, Tab.ISSUES);
+        assertThat(result).hasActiveTab(Tab.MODULES)
+                .hasTotal(9)
+                .hasOnlyAvailableTabs(Tab.MODULES, Tab.PACKAGES, Tab.FILES, Tab.ISSUES);
 
         LinkedHashMap<String, String> filesToPackages = new LinkedHashMap<>();
         filesToPackages.put("NOT_EXISTING_FILE", NO_PACKAGE);
@@ -583,11 +539,11 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         build.open();
 
         AnalysisSummary summary = new AnalysisSummary(build, "checkstyle");
-        assertThat(summary).isDisplayed();
-        assertThat(summary).hasTitleText("CheckStyle: 4 warnings");
-        assertThat(summary).hasNewSize(0);
-        assertThat(summary).hasFixedSize(0);
-        assertThat(summary).hasReferenceBuild(0);
+        assertThat(summary).isDisplayed()
+                .hasTitleText("CheckStyle: 4 warnings")
+                .hasNewSize(0)
+                .hasFixedSize(0)
+                .hasReferenceBuild(0);
     }
 
     private FreeStyleJob createFreeStyleJobForDockerAgent(final Slave dockerAgent, final String... resourcesToCopy) {
@@ -633,46 +589,6 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         assertThat(agent.isOnline()).isTrue();
 
         return agent;
-    }
-
-    /**
-     * Creates and builds a FreestyleJob for a specific static analysis tool.
-     *
-     * @param toolName
-     *         the name of the tool
-     * @param configuration
-     *         the configuration steps for the static analysis tool
-     * @param resourcesToCopy
-     *         the resources which shall be copied to the workspace
-     *
-     * @return the finished build
-     */
-    private Build createAndBuildFreeStyleJob(final String toolName, final Consumer<StaticAnalysisTool> configuration,
-            final String... resourcesToCopy) {
-        FreeStyleJob job = createFreeStyleJob(toolName, configuration, resourcesToCopy);
-
-        return buildJob(job);
-    }
-
-    /**
-     * Creates a FreestyleJob for a specific static analysis tool.
-     *
-     * @param toolName
-     *         the name of the tool
-     * @param configuration
-     *         the configuration steps for the static analysis tool
-     * @param resourcesToCopy
-     *         the resources which shall be copied to the workspace
-     *
-     * @return the created job
-     */
-    private FreeStyleJob createFreeStyleJob(final String toolName, final Consumer<StaticAnalysisTool> configuration,
-            final String... resourcesToCopy) {
-        FreeStyleJob job = createFreeStyleJob(resourcesToCopy);
-        IssuesRecorder recorder = job.addPublisher(IssuesRecorder.class);
-        recorder.setTool(toolName, configuration);
-        job.save();
-        return job;
     }
 
     /**
@@ -775,6 +691,5 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         }
         return Paths.get(resource.toURI());
     }
-
 }
 
