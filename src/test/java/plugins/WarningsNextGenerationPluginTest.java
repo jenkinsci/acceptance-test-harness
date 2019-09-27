@@ -24,7 +24,6 @@ import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.plugins.ssh_slaves.SshSlaveLauncher;
-import org.jenkinsci.test.acceptance.plugins.warnings_ng.AbstractNonDetailsIssuesTableRow;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.AnalysisResult;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.AnalysisResult.Tab;
 import org.jenkinsci.test.acceptance.plugins.warnings_ng.AnalysisSummary;
@@ -156,9 +155,9 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
 
         Build build = buildJob(job);
 
-        verifyCheckStyle(build);
         verifyPmd(build);
         verifyFindBugs(build);
+        verifyCheckStyle(build);
         verifyCpd(build);
     }
 
@@ -283,6 +282,18 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         assertThat(checkstyleDetails).hasTotal(3);
         assertThat(checkstyleDetails).hasOnlyAvailableTabs(Tab.CATEGORIES, Tab.TYPES, Tab.ISSUES);
 
+        IssuesTable issuesTable = checkstyleDetails.openIssuesTable();
+        assertThat(issuesTable).hasSize(3);
+        assertThat(issuesTable).hasTotal(3);
+
+        DefaultWarningsTableRow tableRow = issuesTable.getRowAs(0, DefaultWarningsTableRow.class);
+        assertThat(tableRow).hasFileName("RemoteLauncher.java");
+        assertThat(tableRow).hasLineNumber(59);
+        assertThat(tableRow).hasCategory("Checks");
+        assertThat(tableRow).hasType("FinalParametersCheck");
+        assertThat(tableRow).hasSeverity("Error");
+        assertThat(tableRow).hasAge(1);
+
         build.open();
         assertThat(openInfoView(build, CHECKSTYLE_ID))
                 .hasInfoMessages("-> found 1 file",
@@ -321,7 +332,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         AnalysisSummary referenceSummary = new AnalysisSummary(referenceBuild, ANALYSIS_ID);
         assertThat(referenceSummary).isDisplayed();
         assertThat(referenceSummary).hasTitleText("Static Analysis: 4 warnings");
-        assertThat(referenceSummary).hasAggregation("FindBugs, CheckStyle, PMD");
+        assertThat(referenceSummary).hasAggregation("FindBugs, CPD, CheckStyle, PMD");
         assertThat(referenceSummary).hasNewSize(0);
         assertThat(referenceSummary).hasFixedSize(0);
         assertThat(referenceSummary).hasReferenceBuild(0);
@@ -334,84 +345,17 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
 
         AnalysisSummary analysisSummary = new AnalysisSummary(build, ANALYSIS_ID);
         assertThat(analysisSummary).isDisplayed();
-        assertThat(analysisSummary).hasTitleText("Static Analysis: 5 warnings");
-        assertThat(analysisSummary).hasAggregation("FindBugs, CheckStyle, PMD");
-        assertThat(analysisSummary).hasNewSize(3);
+        assertThat(analysisSummary).hasTitleText("Static Analysis: 25 warnings");
+        assertThat(analysisSummary).hasAggregation("FindBugs, CPD, CheckStyle, PMD");
+        assertThat(analysisSummary).hasNewSize(23);
         assertThat(analysisSummary).hasFixedSize(2);
         assertThat(analysisSummary).hasReferenceBuild(1);
 
         AnalysisResult result = analysisSummary.openOverallResult();
         assertThat(result).hasActiveTab(Tab.TOOLS);
-        assertThat(result).hasTotal(5);
+        assertThat(result).hasTotal(25);
         assertThat(result).hasOnlyAvailableTabs(
                 Tab.TOOLS, Tab.PACKAGES, Tab.FILES, Tab.CATEGORIES, Tab.TYPES, Tab.ISSUES);
-    }
-
-    /**
-     * Verifies that the links to the source code view are working.
-     */
-    @Test
-    public void should_open_source_code_view_from_issues_table() {
-        Build build = createAndBuildFreeStyleJob("CPD",
-                cpd -> cpd.setHighThreshold(2).setNormalThreshold(1),
-                CPD_REPORT, CPD_SOURCE_PATH);
-        AnalysisResult result = openAnalysisResult(build, CPD_ID);
-        IssuesTable issuesTable = result.openIssuesTable();
-
-        SourceView sourceView = issuesTable.getRowAs(0, DryIssuesTableRow.class).openSourceCode();
-        assertThat(sourceView).hasFileName(CPD_SOURCE_NAME);
-
-        String expectedSourceCode = toString(WARNINGS_PLUGIN_PREFIX + CPD_SOURCE_PATH);
-        assertThat(sourceView.getSourceCode()).isEqualToIgnoringWhitespace(expectedSourceCode);
-
-        issuesTable = result.openIssuesTable();
-        DryIssuesTableRow firstRow = issuesTable.getRowAs(0, DryIssuesTableRow.class);
-
-        int expectedAmountOfDuplications = 5;
-        assertThat(firstRow.getDuplicatedIn()).hasSize(expectedAmountOfDuplications);
-
-        for (int i = 0; i < expectedAmountOfDuplications; i++) {
-            issuesTable = result.openIssuesTable();
-            firstRow = issuesTable.getRowAs(0, DryIssuesTableRow.class);
-            sourceView = firstRow.clickOnDuplicatedInLink(i);
-            assertThat(sourceView).hasFileName(CPD_SOURCE_NAME);
-            assertThat(sourceView.getSourceCode()).isEqualToIgnoringWhitespace(expectedSourceCode);
-        }
-    }
-
-    /**
-     * Verifies that the severity links in the issues table filter the results by the selected severity.
-     */
-    @Test
-    public void should_filter_results_by_severity() {
-        Build build = createAndBuildFreeStyleJob("CPD",
-                cpd -> cpd.setHighThreshold(3).setNormalThreshold(2),
-                CPD_REPORT, CPD_SOURCE_PATH);
-
-        AnalysisResult page = openAnalysisResult(build, CPD_ID);
-        IssuesTable issuesTable = page.openIssuesTable();
-
-        DryIssuesTableRow firstRow = issuesTable.getRowAs(0, DryIssuesTableRow.class);
-        assertThat(firstRow).hasSeverity(WARNING_HIGH_PRIORITY);
-
-        AnalysisResult highPriorityPage = firstRow.clickOnSeverityLink();
-        highPriorityPage.openIssuesTable()
-                .getTableRows()
-                .stream()
-                .map(row -> row.getAs(AbstractNonDetailsIssuesTableRow.class))
-                .forEach(row -> assertThat(row).hasSeverity(WARNING_HIGH_PRIORITY));
-
-        issuesTable = page.openIssuesTable();
-
-        DryIssuesTableRow sixthRow = issuesTable.getRowAs(5, DryIssuesTableRow.class);
-        assertThat(sixthRow).hasSeverity(WARNING_LOW_PRIORITY);
-
-        AnalysisResult lowPriorityPage = sixthRow.clickOnSeverityLink();
-        lowPriorityPage.openIssuesTable()
-                .getTableRows()
-                .stream()
-                .map(row -> row.getAs(AbstractNonDetailsIssuesTableRow.class))
-                .forEach(row -> assertThat(row).hasSeverity(WARNING_LOW_PRIORITY));
     }
 
     /**
@@ -453,58 +397,6 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
                     cpd -> cpd.setHighThreshold(8).setNormalThreshold(3));
             recorder.setEnabledForFailure(true);
         });
-    }
-
-    /**
-     * Starts two builds with different configurations and checks the entries of the issues table.
-     */
-    @Test
-    public void should_show_details_in_issues_table() {
-        FreeStyleJob job = createFreeStyleJob("aggregation/checkstyle1.xml", "aggregation/checkstyle2.xml",
-                "aggregation/pmd.xml");
-        job.addPublisher(IssuesRecorder.class, recorder -> {
-            recorder.setTool("CheckStyle", "**/checkstyle1.xml");
-            recorder.addTool("PMD", "**/pmd.xml");
-            recorder.setEnabledForAggregation(true);
-        });
-        job.save();
-
-        buildJob(job);
-
-        job.editPublisher(IssuesRecorder.class, recorder -> recorder.setTool("CheckStyle", "**/checkstyle2.xml"));
-
-        Build build = buildJob(job);
-        build.open();
-
-        AnalysisResult page = openAnalysisResult(build, ANALYSIS_ID);
-
-        IssuesTable issuesTable = page.openIssuesTable();
-        assertThat(issuesTable).hasSize(8);
-
-        DefaultWarningsTableRow tableRow = issuesTable.getRowAs(0, DefaultWarningsTableRow.class);
-        assertThat(tableRow).hasFileName("ChangeSelectionAction.java");
-        assertThat(tableRow).hasLineNumber(14);
-        assertThat(tableRow).hasPackageName("com.avaloq.adt.env.internal.ui.actions.change");
-        assertThat(tableRow).hasCategory("Import Statement Rules");
-        assertThat(tableRow).hasType("UnusedImports");
-        assertThat(tableRow).hasSeverity("Normal");
-        assertThat(tableRow).hasAge(2);
-    }
-
-    /**
-     * Runs a freestyle job that publishes checkstyle warnings. Verifies the content of the info and error log view.
-     */
-    @Test
-    public void should_show_info_and_error_messages_in_freestyle_job() {
-        FreeStyleJob job = createFreeStyleJob(CHECKSTYLE_XML);
-        job.addPublisher(IssuesRecorder.class, recorder -> {
-            recorder.setTool("CheckStyle");
-            recorder.setSourceCodeEncoding("UTF-8");
-        });
-        job.save();
-
-        Build build = buildJob(job);
-        verifyInfoAndErrorMessages(build);
     }
 
     /**
