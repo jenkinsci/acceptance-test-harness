@@ -107,11 +107,12 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
     private DockerContainerHolder<JavaGitContainer> dockerContainer;
 
     /**
-     * Runs a pipeline with checkstyle and pmd. Verifies the expansion of tokens with the token-macro plugin.
+     * Runs a pipeline with all tools two times. Verifies the analysis results in several views. Additionally,
+     * verifies the expansion of tokens with the token-macro plugin.
      */
     @Test
     @WithPlugins({"token-macro", "workflow-cps", "pipeline-stage-step", "workflow-durable-task-step", "workflow-basic-steps"})
-    public void should_expand_token() {
+    public void should_record_issues_in_pipeline_and_expand_tokens() {
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
         job.sandbox.check();
 
@@ -122,6 +123,8 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         Build referenceBuild = buildJob(job);
 
         assertThat(referenceBuild.getConsole()).contains("[total=4]");
+        assertThat(referenceBuild.getConsole()).contains("[new=0]");
+        assertThat(referenceBuild.getConsole()).contains("[fixed=0]");
         assertThat(referenceBuild.getConsole()).contains("[checkstyle=1]");
         assertThat(referenceBuild.getConsole()).contains("[pmd=3]");
 
@@ -129,13 +132,20 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
 
         Build build = buildJob(job);
 
-        assertThat(build.getConsole()).contains("[total=5]");
+        assertThat(build.getConsole()).contains("[total=25]");
+        assertThat(build.getConsole()).contains("[new=23]");
+        assertThat(build.getConsole()).contains("[fixed=2]");
         assertThat(build.getConsole()).contains("[checkstyle=3]");
         assertThat(build.getConsole()).contains("[pmd=2]");
+
+        verifyPmd(build);
+        verifyFindBugs(build);
+        verifyCheckStyle(build);
+        verifyCpd(build);
     }
 
     private void createRecordIssuesStep(final WorkflowJob job, final int build) {
-        String[] fileNames = {"checkstyle-result.xml", "pmd.xml", "findbugsXml.xml", "cpd.xml"};
+        String[] fileNames = {"checkstyle-result.xml", "pmd.xml", "findbugsXml.xml", "cpd.xml", "Main.java"};
         StringBuilder resourceCopySteps = new StringBuilder();
         for (String fileName : fileNames) {
             resourceCopySteps.append(job.copyResourceStep(WARNINGS_PLUGIN_PREFIX
@@ -145,12 +155,17 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
                 + resourceCopySteps.toString()
                 + "recordIssues tool: checkStyle(pattern: '**/checkstyle*')\n"
                 + "recordIssues tool: pmdParser(pattern: '**/pmd*')\n"
+                + "recordIssues tools: [cpd(pattern: '**/cpd*', highThreshold:8, normalThreshold:3), findBugs()], aggregatingResults: 'false' \n"
                 + "def total = tm('${ANALYSIS_ISSUES_COUNT}')\n"
                 + "echo '[total=' + total + ']' \n"
                 + "def checkstyle = tm('${ANALYSIS_ISSUES_COUNT, tool=\"checkstyle\"}')\n"
                 + "echo '[checkstyle=' + checkstyle + ']' \n"
                 + "def pmd = tm('${ANALYSIS_ISSUES_COUNT, tool=\"pmd\"}')\n"
                 + "echo '[pmd=' + pmd + ']' \n"
+                + "def newSize = tm('${ANALYSIS_ISSUES_COUNT, type=\"NEW\"}')\n"
+                + "echo '[new=' + newSize + ']' \n"
+                + "def fixedSize = tm('${ANALYSIS_ISSUES_COUNT, type=\"FIXED\"}')\n"
+                + "echo '[fixed=' + fixedSize + ']' \n"
                 + "}");
     }
 
@@ -161,7 +176,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
     @Test
     public void should_show_build_summary_and_link_to_details() {
         FreeStyleJob job = createFreeStyleJob("build_status_test/build_01");
-        addRecorderWith3Tools(job);
+        addRecorder(job);
         job.save();
 
         buildJob(job);
@@ -329,7 +344,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
     @Test
     public void should_aggregate_tools_into_single_result() {
         FreeStyleJob job = createFreeStyleJob("build_status_test/build_01");
-        IssuesRecorder recorder = addRecorderWith3Tools(job);
+        IssuesRecorder recorder = addRecorder(job);
         recorder.setEnabledForAggregation(true);
         recorder.addQualityGateConfiguration(4, QualityGateType.TOTAL, QualityGateBuildResult.UNSTABLE);
         recorder.addQualityGateConfiguration(3, QualityGateType.NEW, QualityGateBuildResult.FAILED);
@@ -403,7 +418,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         job.configure(() -> job.copyResource(WARNINGS_PLUGIN_PREFIX + fileName));
     }
 
-    private IssuesRecorder addRecorderWith3Tools(final FreeStyleJob job) {
+    private IssuesRecorder addRecorder(final FreeStyleJob job) {
         return job.addPublisher(IssuesRecorder.class, recorder -> {
             recorder.setTool("CheckStyle");
             recorder.addTool("FindBugs");
