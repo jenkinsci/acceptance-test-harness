@@ -7,8 +7,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.LinkedHashMap;
-import java.util.Map.Entry;
 
 import org.junit.Test;
 
@@ -227,7 +225,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         SourceView sourceView = firstRow.openSourceCode();
         assertThat(sourceView).hasFileName(CPD_SOURCE_NAME);
 
-        String expectedSourceCode = toString(WARNINGS_PLUGIN_PREFIX + CPD_SOURCE_PATH);
+        String expectedSourceCode = readFileToString(WARNINGS_PLUGIN_PREFIX + CPD_SOURCE_PATH);
         assertThat(sourceView.getSourceCode()).isEqualToIgnoringWhitespace(expectedSourceCode);
 
         cpdDetails.open();
@@ -416,9 +414,10 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         assertThat(build.getConsole()).contains(
                 "Applying 2 filters on the set of 4 issues (3 issues have been removed, 1 issues will be published)");
 
-        AnalysisResult result = openAnalysisResult(build, "checkstyle");
+        AnalysisResult resultPage = new AnalysisResult(build, "checkstyle");
+        resultPage.open();
 
-        IssuesTable issuesTable = result.openIssuesTable();
+        IssuesTable issuesTable = resultPage.openIssuesTable();
         assertThat(issuesTable).hasSize(1);
     }
 
@@ -434,7 +433,11 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
     public void should_show_maven_warnings_in_maven_project() {
         MavenModuleSet job = createMavenProject();
         copyResourceFilesToWorkspace(job, SOURCE_VIEW_FOLDER + "pom.xml");
-        configureJob(job, "Maven", "");
+
+        IssuesRecorder recorder = job.addPublisher(IssuesRecorder.class);
+        recorder.setToolWithPattern("Maven", "");
+        recorder.setEnabledForFailure(true);
+
         job.save();
 
         Build build = buildFailingJob(job);
@@ -465,57 +468,6 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
                         + "[WARNING]\n"
                         + "[WARNING] For this reason, future Maven versions might no longer support building such malformed projects.\n"
                         + "[WARNING]");
-    }
-
-    /**
-     * Verifies that package and namespace names are resolved.
-     */
-    @Test
-    @WithPlugins("maven-plugin")
-    public void should_resolve_packages_and_namespaces() {
-        MavenModuleSet job = createMavenProject();
-        job.copyDir(job.resource(SOURCE_VIEW_FOLDER));
-        configureJob(job, "Eclipse ECJ", "**/*Classes.txt");
-        job.save();
-
-        Build build = buildFailingJob(job);
-        build.open();
-
-        AnalysisSummary analysisSummary = new AnalysisSummary(build, "eclipse");
-        AnalysisResult result = analysisSummary.openOverallResult();
-        assertThat(result).hasActiveTab(Tab.MODULES)
-                .hasTotal(9)
-                .hasOnlyAvailableTabs(Tab.MODULES, Tab.PACKAGES, Tab.FILES, Tab.ISSUES);
-
-        LinkedHashMap<String, String> filesToPackages = new LinkedHashMap<>();
-        filesToPackages.put("NOT_EXISTING_FILE", NO_PACKAGE);
-        filesToPackages.put("SampleClassWithBrokenPackageNaming.java", NO_PACKAGE);
-        filesToPackages.put("SampleClassWithNamespace.cs", "SampleClassWithNamespace");
-        filesToPackages.put("SampleClassWithNamespaceBetweenCode.cs", "NestedNamespace");
-        filesToPackages.put("SampleClassWithNestedAndNormalNamespace.cs", "SampleClassWithNestedAndNormalNamespace");
-        filesToPackages.put("SampleClassWithoutNamespace.cs", NO_PACKAGE);
-        filesToPackages.put("SampleClassWithoutPackage.java", NO_PACKAGE);
-        filesToPackages.put("SampleClassWithPackage.java", "edu.hm.hafner.analysis._123.int.naming.structure");
-        filesToPackages.put("SampleClassWithUnconventionalPackageNaming.java", NO_PACKAGE);
-
-        int row = 0;
-        for (Entry<String, String> fileToPackage : filesToPackages.entrySet()) {
-            IssuesTable issuesTable = result.openIssuesTable();
-            DefaultWarningsTableRow tableRow = issuesTable.getRowAs(row,
-                    DefaultWarningsTableRow.class); // TODO: create custom assertions
-
-            String actualFileName = fileToPackage.getKey();
-            assertThat(tableRow).as("Row %d", row).hasFileName(actualFileName);
-            assertThat(tableRow).as("Row %d", row).hasPackageName(fileToPackage.getValue());
-
-            if (row != 0) { // first row has no file attached
-                SourceView sourceView = tableRow.openSourceCode();
-                assertThat(sourceView).hasFileName(actualFileName);
-                String expectedSourceCode = toString(SOURCE_VIEW_FOLDER + actualFileName);
-                assertThat(sourceView.getSourceCode()).isEqualToIgnoringWhitespace(expectedSourceCode);
-            }
-            row++;
-        }
     }
 
     /**
@@ -589,22 +541,6 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         return agent;
     }
 
-    /**
-     * Opens the AnalysisResult and returns the corresponding PageObject representing it.
-     *
-     * @param build
-     *         the build
-     * @param id
-     *         the id of the static analysis tool
-     *
-     * @return the PageObject representing the AnalysisResult
-     */
-    private AnalysisResult openAnalysisResult(final Build build, final String id) {
-        AnalysisResult resultPage = new AnalysisResult(build, id);
-        resultPage.open();
-        return resultPage;
-    }
-
     private FreeStyleJob createFreeStyleJob(final String... resourcesToCopy) {
         FreeStyleJob job = jenkins.getJobs().create(FreeStyleJob.class);
         ScrollerUtil.hideScrollerTabBar(driver);
@@ -617,12 +553,6 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
     private MavenModuleSet createMavenProject() {
         MavenInstallation.installSomeMaven(jenkins);
         return jenkins.getJobs().create(MavenModuleSet.class);
-    }
-
-    private void configureJob(final MavenModuleSet job, final String toolName, final String pattern) {
-        IssuesRecorder recorder = job.addPublisher(IssuesRecorder.class);
-        recorder.setToolWithPattern(toolName, pattern);
-        recorder.setEnabledForFailure(true);
     }
 
     private Build buildFailingJob(final Job job) {
@@ -647,7 +577,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
      *
      * @return the content represented as {@link String}
      */
-    private String toString(final String fileName) {
+    private String readFileToString(final String fileName) {
         return new String(readAllBytes(fileName), StandardCharsets.UTF_8);
     }
 
