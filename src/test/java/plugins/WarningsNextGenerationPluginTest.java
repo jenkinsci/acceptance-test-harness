@@ -78,10 +78,8 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
 
     private static final String WARNING_LOW_PRIORITY = "Low";
 
-    private static final String CHECKSTYLE_XML = "checkstyle-result.xml";
     private static final String SOURCE_VIEW_FOLDER = WARNINGS_PLUGIN_PREFIX + "source-view/";
 
-    private static final String CPD_REPORT = "duplicate_code/cpd.xml";
     private static final String CPD_SOURCE_NAME = "Main.java";
     private static final String CPD_SOURCE_PATH = "duplicate_code/Main.java";
 

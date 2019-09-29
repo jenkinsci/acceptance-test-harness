@@ -161,5 +161,8 @@ public class IssuesTable {
         return resultDetailsPage.openFilterLinkOnSite(element);
     }
 
-    public enum IssuesTableRowType {DEFAULT, DRY}
+    public enum IssuesTableRowType {
+        DEFAULT,
+        DRY
+    }
 }
