@@ -107,7 +107,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
      * the expansion of tokens with the token-macro plugin.
      */
     @Test
-    @WithPlugins({"token-macro", "workflow-cps", "pipeline-stage-step", "workflow-durable-task-step", "workflow-basic-steps"})
+    @WithPlugins({"token-macro", "pipeline-stage-step", "workflow-durable-task-step", "workflow-basic-steps"})
     public void should_record_issues_in_pipeline_and_expand_tokens() {
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
         job.sandbox.check();
