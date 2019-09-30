@@ -228,7 +228,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     private boolean isDisplayed(WebElement e) {
         try {
             return e.isDisplayed();
-        } catch (StaleElementReferenceException _) {
+        } catch (StaleElementReferenceException ignored) {
             return false;
         }
     }

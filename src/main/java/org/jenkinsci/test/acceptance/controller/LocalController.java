@@ -355,7 +355,7 @@ public abstract class LocalController extends JenkinsController implements LogLi
         try {
             proc.exitValue();
             return null; // already dead
-        } catch (IllegalThreadStateException _) {
+        } catch (IllegalThreadStateException ignored) {
             // Process alive
         }
 
