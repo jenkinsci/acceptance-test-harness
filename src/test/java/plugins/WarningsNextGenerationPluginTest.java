@@ -81,8 +81,6 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
     private static final String CPD_SOURCE_NAME = "Main.java";
     private static final String CPD_SOURCE_PATH = "duplicate_code/Main.java";
 
-    private static final String NO_PACKAGE = "-";
-
     /**
      * Credentials to access the docker container. The credentials are stored with the specified ID and use the provided
      * SSH key. Use the following annotation on your test case to use the specified docker container as git server or
