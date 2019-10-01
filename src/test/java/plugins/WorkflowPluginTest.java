@@ -26,7 +26,7 @@ package plugins;
 
 import javax.inject.Inject;
 import java.io.File;
-
+import java.io.IOException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
@@ -85,7 +85,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
     @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {CREDENTIALS_ID, KEY_FILENAME})
     @WithPlugins({"workflow-job", "workflow-cps", "workflow-basic-steps", "git"})
     @Test
-    public void hello_world_from_git() {
+    public void hello_world_from_git() throws IOException {
         String gitRepositoryUrl = createGitRepositoryInDockerContainer();
 
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
@@ -95,15 +95,16 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         assertThat(build.getConsole(), containsString("Hello Jenkinsfile in Git"));
     }
 
-    private String createGitRepositoryInDockerContainer() {
-        GitRepo repo = new GitRepo();
-        repo.addFilesIn(getClass().getResource("/pipelines/hello-world"));
-        repo.commit("Initial commit.");
+    private String createGitRepositoryInDockerContainer() throws IOException {
+        try (GitRepo repo = new GitRepo()) {
+            repo.addFilesIn(getClass().getResource("/pipelines/hello-world"));
+            repo.commit("Initial commit.");
 
-        GitContainer container = gitServer.get();
-        repo.transferToDockerContainer(container.host(), container.port());
+            GitContainer container = gitServer.get();
+            repo.transferToDockerContainer(container.host(), container.port());
 
-        return container.getRepoUrl();
+            return container.getRepoUrl();
+        }
     }
 
     @WithPlugins({"workflow-job", "workflow-cps@2.10", "workflow-basic-steps@2.1", "workflow-durable-task-step", "pipeline-input-step", "junit@1.18", "git@2.3"})
@@ -219,45 +220,46 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
     @Issue("JENKINS-27152")
     @Test public void sshGitInsideDocker() throws Exception {
         GitContainer gitContainer = gitServer.get();
-        GitRepo repo = new GitRepo();
-        repo.changeAndCommitFoo("Initial commit");
-        repo.transferToDockerContainer(gitContainer.host(), gitContainer.port());
-        DumbSlave slave = jenkins.slaves.create(DumbSlave.class);
-        slave.setExecutors(1);
-        slave.remoteFS.set("/home/test"); // TODO perhaps should be a constant in SshdContainer
-        SshSlaveLauncher launcher = slave.setLauncher(SshSlaveLauncher.class);
-        Process proc = new ProcessBuilder("stat", "-c", "%g", "/var/run/docker.sock").start();
-        String group = IOUtils.toString(proc.getInputStream()).trim();
-        Assume.assumeThat("docker.sock can be statted", proc.waitFor(), is(0));
-        try {
-            Integer.parseInt(group);
-        } catch (NumberFormatException x) {
-            Assume.assumeNoException("unexpected output from stat on docker.sock", x);
+        try (GitRepo repo = new GitRepo()) {
+            repo.changeAndCommitFoo("Initial commit");
+            repo.transferToDockerContainer(gitContainer.host(), gitContainer.port());
+            DumbSlave slave = jenkins.slaves.create(DumbSlave.class);
+            slave.setExecutors(1);
+            slave.remoteFS.set("/home/test"); // TODO perhaps should be a constant in SshdContainer
+            SshSlaveLauncher launcher = slave.setLauncher(SshSlaveLauncher.class);
+            Process proc = new ProcessBuilder("stat", "-c", "%g", "/var/run/docker.sock").start();
+            String group = IOUtils.toString(proc.getInputStream()).trim();
+            Assume.assumeThat("docker.sock can be statted", proc.waitFor(), is(0));
+            try {
+                Integer.parseInt(group);
+            } catch (NumberFormatException x) {
+                Assume.assumeNoException("unexpected output from stat on docker.sock", x);
+            }
+            // Note that we need to link to the Git container both on the agent, for the benefit of JGit (TODO pending JENKINS-30600), and in the build container, for the benefit of git-pull:
+            DockerAgentContainer agentContainer = agent.starter().withOptions(new CommandBuilder("--volume=/var/run/docker.sock:/var/run/docker.sock", "--env=DOCKER_GROUP=" + group, "--link=" + gitContainer.getCid() + ":git")).start();
+            launcher.host.set(agentContainer.ipBound(22));
+            launcher.port(agentContainer.port(22));
+            launcher.pwdCredentials("test", "test");
+            launcher.setSshHostKeyVerificationStrategy(SshSlaveLauncher.NonVerifyingKeyVerificationStrategy.class);
+            slave.save();
+            { // TODO JENKINS-30600 workaround
+                JGitInstallation.addJGit(jenkins);
+                find(by.button("Save")).click();
+            }
+            WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
+            job.script.set(
+                "node('" + slave.getName() + "') {\n" +
+                "  docker.image('cloudbees/java-build-tools').inside('--link=" + gitContainer.getCid() + ":git') {\n" +
+                // TODO JENKINS-30600: "    git url: '" + gitContainer.getRepoUrlInsideDocker("git") + "', credentialsId: 'gitcreds'\n" +
+                "    checkout([$class: 'GitSCM', userRemoteConfigs: [[url: '" + gitContainer.getRepoUrlInsideDocker("git") + "', credentialsId: 'gitcreds']], gitTool: 'jgit'])\n" +
+                "    sh 'mkdir ~/.ssh && echo StrictHostKeyChecking no > ~/.ssh/config'\n" +
+                "    sshagent(['gitcreds']) {sh 'ls -l $SSH_AUTH_SOCK && git pull origin master'}\n" +
+                "  }\n" +
+                "}");
+            job.sandbox.check();
+            job.save();
+            assertThat(job.startBuild().shouldSucceed().getConsole(), containsString("-> FETCH_HEAD"));
         }
-        // Note that we need to link to the Git container both on the agent, for the benefit of JGit (TODO pending JENKINS-30600), and in the build container, for the benefit of git-pull:
-        DockerAgentContainer agentContainer = agent.starter().withOptions(new CommandBuilder("--volume=/var/run/docker.sock:/var/run/docker.sock", "--env=DOCKER_GROUP=" + group, "--link=" + gitContainer.getCid() + ":git")).start();
-        launcher.host.set(agentContainer.ipBound(22));
-        launcher.port(agentContainer.port(22));
-        launcher.pwdCredentials("test", "test");
-        launcher.setSshHostKeyVerificationStrategy(SshSlaveLauncher.NonVerifyingKeyVerificationStrategy.class);
-        slave.save();
-        { // TODO JENKINS-30600 workaround
-            JGitInstallation.addJGit(jenkins);
-            find(by.button("Save")).click();
-        }
-        WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
-        job.script.set(
-            "node('" + slave.getName() + "') {\n" +
-            "  docker.image('cloudbees/java-build-tools').inside('--link=" + gitContainer.getCid() + ":git') {\n" +
-            // TODO JENKINS-30600: "    git url: '" + gitContainer.getRepoUrlInsideDocker("git") + "', credentialsId: 'gitcreds'\n" +
-            "    checkout([$class: 'GitSCM', userRemoteConfigs: [[url: '" + gitContainer.getRepoUrlInsideDocker("git") + "', credentialsId: 'gitcreds']], gitTool: 'jgit'])\n" +
-            "    sh 'mkdir ~/.ssh && echo StrictHostKeyChecking no > ~/.ssh/config'\n" +
-            "    sshagent(['gitcreds']) {sh 'ls -l $SSH_AUTH_SOCK && git pull origin master'}\n" +
-            "  }\n" +
-            "}");
-        job.sandbox.check();
-        job.save();
-        assertThat(job.startBuild().shouldSucceed().getConsole(), containsString("-> FETCH_HEAD"));
     }
 
     @WithPlugins({"workflow-cps-global-lib@2.3", "workflow-basic-steps@2.1", "workflow-job@2.5"})
