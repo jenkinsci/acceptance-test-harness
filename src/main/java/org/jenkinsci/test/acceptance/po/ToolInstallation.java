@@ -115,7 +115,7 @@ public abstract class ToolInstallation extends PageAreaImpl {
 
     public static ConfigurablePageObject ensureConfigPage(Jenkins jenkins) {
         ConfigurablePageObject configPage = getPageObject(jenkins);
-        boolean onConfigPage = jenkins.getCurrentUrl().equals(configPage.getConfigUrl());
+        boolean onConfigPage = jenkins.getCurrentUrl().equals(configPage.getConfigUrl().toString());
         if (!onConfigPage) {
             configPage.configure();
         }
