@@ -23,9 +23,12 @@
  */
 package org.jenkinsci.test.acceptance.utils.pluginTests;
 
+import java.time.Duration;
+
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.PageObject;
+import org.openqa.selenium.WebElement;
 
 /**
  * Page Object for security (global) configuration page.
@@ -47,7 +50,11 @@ public class SecurityDisabler extends PageObject {
         Control use = control("/useSecurity");
         if(use.resolve().isSelected()) {
             use.click();
-            control("/Submit").click();
+            WebElement submit = control("/Submit").resolve();
+            // Would be better to use Control.clickAndWaitToBecomeStale,
+            // but it's not visible because it's still experimental
+            submit.click();
+            waitFor(submit).until(Control::isStale);
         }
     }
 }
