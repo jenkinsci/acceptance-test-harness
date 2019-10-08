@@ -26,6 +26,7 @@ package org.jenkinsci.test.acceptance.po;
 
 import javax.annotation.Nonnull;
 import java.net.URL;
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 import org.jenkinsci.test.acceptance.junit.Resource;
@@ -104,8 +105,10 @@ public class WorkflowJob extends Job {
 
     public void delete() {
         open();
-        clickLink("Delete Pipeline");
+        WebElement deleteLink = find(by.link("Delete Pipeline"));
+        deleteLink.click();
         confirmAlert(2);
+        waitFor(deleteLink).until(Control::isStale);
     }
 
     /**
