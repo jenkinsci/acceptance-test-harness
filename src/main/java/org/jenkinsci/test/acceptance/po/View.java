@@ -58,7 +58,7 @@ public abstract class View extends ContainerPageObject {
         configure();
         clickLink("Delete View");
         waitFor(by.button("Yes"));
-        clickButton("Yes");
+        control(by.button("Yes")).clickAndWaitToBecomeStale();
     }
 
     @Override
