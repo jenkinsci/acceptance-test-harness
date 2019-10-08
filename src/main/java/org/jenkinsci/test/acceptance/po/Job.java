@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -444,8 +445,10 @@ public class Job extends TopLevelItem {
      */
     public void delete() {
         open();
-        clickLink("Delete Project");
+        WebElement deleteLink = find(by.link("Delete Project"));
+        deleteLink.click();
         confirmAlert(2);
+        waitFor(deleteLink).until(Control::isStale);
     }
 
     public static org.hamcrest.Matcher<WebDriver> disabled() {
