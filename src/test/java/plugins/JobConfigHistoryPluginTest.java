@@ -112,7 +112,7 @@ public class JobConfigHistoryPluginTest extends AbstractJUnitTest {
         assertThat(driver, Matchers.hasContent("Changed"));
 
         action.showLastChange();
-        assertThat(driver, Matchers.hasElement(by.xpath("//td[@class='diff_original']/pre[contains(text(),'" + String.format(COMMAND_NODE, LS_COMMAND) + "')]")));
-        assertThat(driver, Matchers.hasElement(by.xpath("//td[@class='diff_revised']/pre[contains(text(),'" + String.format(COMMAND_NODE, LS_LH_COMMAND) + "')]")));
+        assertThat(driver, Matchers.hasElement(by.xpath("//td[@class='diff_original' and contains(string(.), '" + String.format(COMMAND_NODE, LS_COMMAND) + "')]")));
+        assertThat(driver, Matchers.hasElement(by.xpath("//td[@class='diff_revised' and contains(string(.), '" + String.format(COMMAND_NODE, LS_LH_COMMAND) + "')]")));
     }
 }
