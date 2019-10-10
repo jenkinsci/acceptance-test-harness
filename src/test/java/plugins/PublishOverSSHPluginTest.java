@@ -40,9 +40,9 @@ public class PublishOverSSHPluginTest extends AbstractJUnitTest {
     private final String userName = "test";
     private final String rootDir = "/tmp";
     private final String timeout = "300000";
-    private final String sourceFile = "lorem-ipsum-scp.txt";
-    private final String resourceFilePath = "/scp_plugin/lorem-ipsum-scp.txt";
-    private final String tempCopyFile = "/tmp/lorem-ipsum-scp.txt";
+    private final String sourceFile = "lorem-ipsum.txt";
+    private final String resourceFilePath = "/publish_over_ssh_plugin/lorem-ipsum.txt";
+    private final String tempCopyFile = "/tmp/lorem-ipsum.txt";
     private final String tempPath = "/tmp";
     private final String tempCopyFileEcho = "/tmp/testecho";
 

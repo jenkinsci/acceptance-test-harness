@@ -68,7 +68,7 @@ public class Matchers {
                 try {
                     item.findElement(selector);
                     return true;
-                } catch (NoSuchElementException _) {
+                } catch (NoSuchElementException ignored) {
                     return false;
                 }
             }
@@ -105,7 +105,7 @@ public class Matchers {
                     po.open();
                     po.find(by.xpath("//div[@id='tasks']/div/a[text()='%s']", displayName));
                     return true;
-                } catch (NoSuchElementException _) {
+                } catch (NoSuchElementException ignored) {
                     return false;
                 }
             }
