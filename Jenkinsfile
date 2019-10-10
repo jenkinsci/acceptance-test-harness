@@ -34,7 +34,7 @@ for (int j in [8, 11]) {
                                 eval \$(vnc.sh)
                                 java -version
 
-                                run.sh firefox latest -Dmaven.test.failure.ignore=true -DforkCount=1 -B -Dtest=WarningsNextGenerationPluginTest
+                                run.sh firefox latest -Dmaven.test.failure.ignore=true -DforkCount=1 -B
                             """
                         }
                     }
