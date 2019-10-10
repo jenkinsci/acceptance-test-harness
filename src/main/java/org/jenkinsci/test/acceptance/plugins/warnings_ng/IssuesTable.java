@@ -20,28 +20,31 @@ public class IssuesTable {
     private final List<AbstractIssuesTableRow> tableRows = new ArrayList<>();
     private final List<String> headers;
     private final WebElement tableElement;
+    private final WebElement issuesTab;
     private final IssuesTableRowType type;
 
     /**
      * Creates an IssuesTable of a specific type.
      *
-     * @param element
-     *         the WebElement representing the issues-table
+     * @param issuesTab
+     *         the WebElement containing the issues-tab
      * @param resultDetailsPage
      *         the AnalysisResult on which the issues-table is displayed on
      * @param type
      *         the type of the issues-table (e.g. Default or DRY)
      */
-    public IssuesTable(final WebElement element, final AnalysisResult resultDetailsPage, final IssuesTableRowType type) {
-        headers = element.findElements(By.xpath(".//thead/tr/th"))
+    public IssuesTable(final WebElement issuesTab, final AnalysisResult resultDetailsPage, final IssuesTableRowType type) {
+        this.issuesTab = issuesTab;
+        this.resultDetailsPage = resultDetailsPage;
+        this.type = type;
+
+        tableElement = issuesTab.findElement(By.id("issues"));
+        headers = tableElement.findElements(By.xpath(".//thead/tr/th"))
                 .stream()
                 .map(WebElement::getText)
                 .collect(
                         Collectors.toList());
-        this.type = type;
-        this.tableElement = element;
         updateTableRows();
-        this.resultDetailsPage = resultDetailsPage;
     }
 
     /**
@@ -54,8 +57,14 @@ public class IssuesTable {
      *
      * @return the PageObject representing the target page
      */
-    public <T extends PageObject> T clickLinkOnSite(WebElement link, Class<T> targetPageClass) {
+    public <T extends PageObject> T clickLinkOnSite(final WebElement link, final Class<T> targetPageClass) {
         return resultDetailsPage.openLinkOnSite(link, targetPageClass);
+    }
+
+    public int getTotal() {
+        String tableInfo = issuesTab.findElement(By.id("issues_info")).getText();
+        String total = StringUtils.substringAfter(tableInfo, "of ");
+        return Integer.parseInt(StringUtils.substringBefore(total, " "));
     }
 
     /**
@@ -136,7 +145,7 @@ public class IssuesTable {
      *
      * @return the row
      */
-    public <T extends AbstractIssuesTableRow> T getRowAs(int row, Class<T> expectedClass) {
+    public <T extends AbstractIssuesTableRow> T getRowAs(final int row, final Class<T> expectedClass) {
         return getTableRows().get(row).getAs(expectedClass);
     }
 
@@ -149,8 +158,11 @@ public class IssuesTable {
      * @return the filtered AnalysisResult
      */
     public AnalysisResult clickFilterLinkOnSite(final WebElement element) {
-        return this.resultDetailsPage.openFilterLinkOnSite(element);
+        return resultDetailsPage.openFilterLinkOnSite(element);
     }
 
-    public enum IssuesTableRowType {DEFAULT, DRY}
+    public enum IssuesTableRowType {
+        DEFAULT,
+        DRY
+    }
 }

@@ -23,7 +23,7 @@ import org.jenkinsci.test.acceptance.po.PageObject;
  * @author Ullrich Hafner
  */
 public class AnalysisResult extends PageObject {
-    private static final String[] DRY_TOOLS = new String[] {"cpd", "simian", "dupfinder"};
+    private static final String[] DRY_TOOLS = {"cpd", "simian", "dupfinder"};
 
     private final String id;
 
@@ -132,8 +132,8 @@ public class AnalysisResult extends PageObject {
     public IssuesTable openIssuesTable() {
         openTab(Tab.ISSUES);
 
-        WebElement issuesTable = find(By.id("issues"));
-        return new IssuesTable(issuesTable, this, getIssuesTableType());
+        WebElement issuesTab = find(By.id("issuesContent"));
+        return new IssuesTable(issuesTab, this, getIssuesTableType());
     }
 
     /**

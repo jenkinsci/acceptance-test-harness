@@ -16,8 +16,6 @@ public class DryIssuesTableRow extends AbstractNonDetailsIssuesTableRow {
     private static final String DUPLICATED_IN = "Duplicated In";
     private static final String AMOUNT_OF_LINES = "#Lines";
 
-    private int bla;
-
     /**
      * Creates an instance representing a duplicate code warnings table row.
      *
@@ -78,8 +76,8 @@ public class DryIssuesTableRow extends AbstractNonDetailsIssuesTableRow {
         DryIssuesTableRow that = (DryIssuesTableRow) o;
 
         EqualsBuilder builder = new EqualsBuilder();
-        builder.append(this.getLines(), that.getLines())
-                .append(this.getDuplicatedIn(), that.getDuplicatedIn());
+        builder.append(getLines(), that.getLines())
+                .append(getDuplicatedIn(), that.getDuplicatedIn());
         return builder.isEquals();
     }
 
@@ -87,8 +85,8 @@ public class DryIssuesTableRow extends AbstractNonDetailsIssuesTableRow {
     public int hashCode() {
         HashCodeBuilder builder = new HashCodeBuilder();
 
-        builder.append(this.getLines())
-                .append(this.getDuplicatedIn());
+        builder.append(getLines())
+                .append(getDuplicatedIn());
 
         return Objects.hash(super.hashCode(), builder.toHashCode());
     }

@@ -23,7 +23,7 @@ import org.jenkinsci.test.acceptance.po.PageObject;
  * @author Alexandra Wenzel
  */
 public class AnalysisSummary extends PageObject {
-    private static final Pattern NUMBER = Pattern.compile(".*(\\d)+.*");
+    private static final Pattern NUMBER = Pattern.compile("\\d+");
     private static final String UNDEFINED = "-";
 
     private final WebElement summary;
@@ -140,8 +140,8 @@ public class AnalysisSummary extends PageObject {
 
     private int extractNumber(final String linkText) {
         Matcher matcher = NUMBER.matcher(linkText);
-        if (matcher.matches()) {
-            return Integer.parseInt(matcher.group(1));
+        if (matcher.find()) {
+            return Integer.parseInt(matcher.group(0));
         }
         else if (linkText.startsWith("One")) {
             return 1;
@@ -228,6 +228,36 @@ public class AnalysisSummary extends PageObject {
     }
 
     /**
+     * Gets the Webelement of the reset button.
+     *
+     * @throws org.openqa.selenium.NoSuchElementException
+     *         When there is no quality gate reset button.
+     */
+    public WebElement getQualityGateResetButton() throws org.openqa.selenium.NoSuchElementException {
+        for (WebElement result : results) {
+            if (result.getText().contains("Quality gate")) {
+                return result.findElement(by.id(id + "-resetReference"));
+            }
+        }
+        throw new org.openqa.selenium.NoSuchElementException("Quality gate reset button not found");
+    }
+
+    /**
+     * Checks if the quality gate reset button is present.
+     *
+     * @return True, if quality gate reset button is present.
+     */
+    public boolean hasQualityGateResetButton() {
+        try {
+            if (getQualityGateResetButton() != null) {
+                return true;
+            }
+        } catch (org.openqa.selenium.NoSuchElementException ignored) { }
+
+        return false;
+    }
+
+    /**
      * Returns a clickable WebElement (a-tag), by a part of the elements text.
      *
      * @param namePart
@@ -266,11 +296,11 @@ public class AnalysisSummary extends PageObject {
     }
 
     private WebElement getTitleResultLink() {
-        return summary.findElement(by.href(this.id));
+        return summary.findElement(by.href(id));
     }
 
     private WebElement getTitleResultInfoLink() {
-        return summary.findElement(by.href(this.id + "/info"));
+        return summary.findElement(by.href(id + "/info"));
     }
 
     private WebElement getTitle() {
@@ -307,6 +337,6 @@ public class AnalysisSummary extends PageObject {
      * Determines the quality gate result.
      */
     public enum QualityGateResult {
-        SUCCESS, FAILED, UNSTABLE, INACTIVE;
+        SUCCESS, FAILED, UNSTABLE, INACTIVE
     }
 }
