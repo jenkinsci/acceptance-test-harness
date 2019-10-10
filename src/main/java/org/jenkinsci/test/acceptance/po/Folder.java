@@ -72,7 +72,8 @@ public class Folder extends TopLevelItem implements Container {
     public void delete() {
         open();
         clickLink("Delete Folder");
-        waitFor(by.button("Yes")).click();
+        waitFor(by.button("Yes"));
+        control(by.button("Yes")).clickAndWaitToBecomeStale();
     }
 
     public void setEnvironmentalVariables(final Map<String, String> envVbles) {
