@@ -8,6 +8,7 @@ import org.jenkinsci.test.acceptance.slave.SlaveController;
 
 import com.google.common.base.Joiner;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebElement;
 
 /**
  * A slave page object.
@@ -126,10 +127,12 @@ public class Slave extends Node {
     public void disconnect(String message) {
         if (isOnline()) {
             open();
+            // "Disconnect" reloads the page
             find(by.link("Disconnect")).click();
-            find(by.input("offlineMessage")).clear();
+            waitFor(by.input("offlineMessage")).clear();
             find(by.input("offlineMessage")).sendKeys(message);
-            clickButton("Yes");
+            // "Yes" reloads the page
+            control(by.button("Yes")).clickAndWaitToBecomeStale();
         }
     }
 
@@ -141,7 +144,7 @@ public class Slave extends Node {
             clickLink("Delete Slave");
         }
 
-        clickButton("Yes");
+        control(by.button("Yes")).clickAndWaitToBecomeStale();
     }
 
     /**
