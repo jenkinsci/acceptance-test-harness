@@ -1,6 +1,5 @@
 package plugins;
 
-import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.SvnContainer;
@@ -11,7 +10,6 @@ import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.subversion.SubversionPluginTestException;
 import org.jenkinsci.test.acceptance.plugins.subversion.SubversionScm;
-import org.jenkinsci.test.acceptance.plugins.subversion.SubversionSvmAdvanced;
 import org.jenkinsci.test.acceptance.plugins.subversion.SvnRepositoryBrowserWebSvn;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Changes;
