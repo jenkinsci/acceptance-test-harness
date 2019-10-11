@@ -27,15 +27,33 @@ import hudson.util.VersionNumber;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.po.FormValidation;
 import org.jenkinsci.test.acceptance.po.JenkinsConfig;
+import org.jenkinsci.test.acceptance.po.ListView;
 import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.jenkinsci.test.acceptance.po.FormValidation.*;
 
 public class FormValidationTest extends AbstractJUnitTest {
 
     @Test
     public void validate() {
+        ajaxValidation();
+        jsValidation();
+    }
+
+    private void ajaxValidation() {
+        ListView lv = jenkins.views.create(ListView.class);
+        lv.configure();
+
+        lv.matchJobs(".*");
+        assertThat(lv.includeRegex.getFormValidation(), silent());
+
+        lv.matchJobs("[");
+        assertThat(lv.includeRegex.getFormValidation().getKind(), equalTo(Kind.ERROR));
+    }
+
+    private void jsValidation() {
         JenkinsConfig c = jenkins.getConfigPage();
         c.configure();
         c.numExecutors.set(16);

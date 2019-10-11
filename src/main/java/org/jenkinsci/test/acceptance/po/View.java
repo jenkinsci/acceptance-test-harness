@@ -23,6 +23,7 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
  */
 public abstract class View extends ContainerPageObject {
     private final Control recurseIntoFolder = control("/recurse");
+    public final Control includeRegex = control("/useincluderegex/includeRegex");
 
     public final JobsMixIn jobs;
 
@@ -42,10 +43,12 @@ public abstract class View extends ContainerPageObject {
      * Configures the view to include all jobs.
      */
     public void matchAllJobs() {
+        matchJobs(".*");
+    }
+
+    public void matchJobs(String regex) {
         control("/useincluderegex").check();
-        String matchEverything = ".*";
-        Control regexJobFilter = control("/useincluderegex/includeRegex");
-        regexJobFilter.set(matchEverything);
+        includeRegex.set(regex);
     }
 
     /**
