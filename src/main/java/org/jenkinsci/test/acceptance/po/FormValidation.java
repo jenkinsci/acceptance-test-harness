@@ -27,6 +27,8 @@ import org.hamcrest.Description;
 import org.hamcrest.StringDescription;
 import org.jenkinsci.test.acceptance.Matcher;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
 import javax.annotation.Nonnull;
@@ -51,6 +53,38 @@ public class FormValidation {
     private final WebElement element;
     private final Kind kind;
     private final String message;
+
+    public static FormValidation await(Control control) {
+        WebElement element = control.resolve();
+
+        // Fire validation if it was not already
+        element.sendKeys(Keys.TAB);
+
+        WebElement validationArea;
+
+        // Special handling for validation buttons and their markup
+        if (element.getTagName().equals("button")) {
+            WebElement spinner = element.findElement(control.by.xpath("./../../../following-sibling::div[1]"));
+            // Wait as long as there is some spinner shown on the page
+            control.waitFor().until(() -> !spinner.isDisplayed());
+            validationArea = element.findElement(control.by.xpath("./../../../following-sibling::div[2]"));
+        } else {
+            // Wait for validation area to stop being <div></div>
+            validationArea = control.waitFor().until(() -> {
+                WebElement va = element.findElement(control.by.xpath("./../../following-sibling::tr/td[2]"));
+                try {
+                    String cls = va.findElement(control.by.xpath("./div")).getAttribute("class");
+                    return (cls == null || cls.isEmpty()) ? null : va;
+                } catch (NoSuchElementException noDiv) {
+                    // https://issues.jenkins-ci.org/browse/JENKINS-59605?focusedCommentId=377474&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-377474
+                    // There are known false-negatives in ATH so let's presume this is done and successful until the core is fixed.
+                    return va;
+                }
+            });
+        }
+
+        return new FormValidation(validationArea);
+    }
 
     public FormValidation(WebElement element) {
         List<WebElement> divs = element.findElements(CapybaraPortingLayer.by.tagName("div"));
@@ -103,7 +137,7 @@ public class FormValidation {
     /**
      * When either there is no validation or empty OK was returned (there is no way to tell that apart).
      */
-    public static final Matcher<FormValidation> silent() {
+    public static Matcher<FormValidation> silent() {
         return new Matcher<FormValidation>("No form validation result should be presented") {
             @Override public boolean matchesSafely(FormValidation item) {
                 return item.getKind() == Kind.NONE && item.getMessage() == null;
@@ -115,11 +149,11 @@ public class FormValidation {
         };
     }
 
-    public static final Matcher<FormValidation> reports(final Kind kind, final String message) {
+    public static Matcher<FormValidation> reports(final Kind kind, final String message) {
         return reports(kind, equalTo(message));
     }
 
-    public static final Matcher<FormValidation> reports(final Kind kind, final org.hamcrest.Matcher<String> message) {
+    public static Matcher<FormValidation> reports(final Kind kind, final org.hamcrest.Matcher<String> message) {
         StringDescription sd = new StringDescription();
         message.describeTo(sd);
         return new Matcher<FormValidation>("Validation reporting " + kind + " with message: " + sd.toString()) {

@@ -35,7 +35,7 @@ import static org.jenkinsci.test.acceptance.po.FormValidation.*;
 public class FormValidationTest extends AbstractJUnitTest {
 
     @Test
-    public void validate() throws Exception {
+    public void validate() {
         JenkinsConfig c = jenkins.getConfigPage();
         c.configure();
         c.numExecutors.set(16);
