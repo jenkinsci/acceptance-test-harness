@@ -26,7 +26,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * Tests a multibranch pipeline flow
  */
-@WithPlugins({"git", "javadoc@1.4", "workflow-basic-steps", "workflow-durable-task-step", "workflow-multibranch", "github-branch-source"})
+@WithPlugins({"git", "javadoc@1.4", "workflow-basic-steps", "workflow-durable-task-step", "workflow-multibranch", "github-branch-source@2.5.5"})
 public class WorkflowMultibranchTest extends AbstractJUnitTest {
 
     @Before
@@ -34,9 +34,9 @@ public class WorkflowMultibranchTest extends AbstractJUnitTest {
         MavenInstallation.installMaven(jenkins, "M3", "3.3.9");
     }
 
-    @Ignore("cannot run quickly as anonymous")
+    @Ignore("cannot run quickly as anonymous due to github rate limiting")
     @Test
-    public void testMultibranchPipeline() throws IOException, MessagingException {
+    public void testMultibranchPipeline() {
         final WorkflowMultiBranchJob multibranchJob = jenkins.jobs.create(WorkflowMultiBranchJob.class);
         this.configureJobWithGithubBranchSource(multibranchJob);
         multibranchJob.save();
@@ -59,8 +59,7 @@ public class WorkflowMultibranchTest extends AbstractJUnitTest {
 
     private void configureJobWithGithubBranchSource(final WorkflowMultiBranchJob job) {
         final GithubBranchSource ghBranchSource = job.addBranchSource(GithubBranchSource.class);
-        ghBranchSource.owner("varyvoltest");
-        ghBranchSource.selectRepository("maven-basic");
+        ghBranchSource.repoUrl("https://github.com/varyvoltest/maven-basic.git");
     }
 
     private void assertBranchIndexing(final WorkflowMultiBranchJob job) {

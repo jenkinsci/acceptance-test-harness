@@ -297,7 +297,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         assertTrue(b2.getChanges().hasChanges());
     }
 
-    @WithPlugins({"git@3.0.1", "workflow-job", "workflow-cps", "workflow-basic-steps", "workflow-durable-task-step", "workflow-multibranch", "github-branch-source", "workflow-cps-global-lib"})
+    @WithPlugins({"git@3.0.1", "workflow-job", "workflow-cps", "workflow-basic-steps", "workflow-durable-task-step", "workflow-multibranch", "github-branch-source@2.5.5", "workflow-cps-global-lib"})
     @Test
     public void testSharedLibraryFromGithub() {
         this.configureSharedLibrary();
@@ -316,8 +316,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         sharedLibrary.name.set(SHARED_LIBRARY_NAME);
         final GithubBranchSource source = sharedLibrary.selectSCM();
 
-        source.owner("varyvoltest");
-        source.selectRepository("pipeline-basic-shared-library");
+        source.repoUrl("https://github.com/varyvoltest/pipeline-basic-shared-library.git");
 
         jenkins.save();
     }

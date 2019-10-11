@@ -57,4 +57,10 @@ public class GithubBranchSource extends BranchSource {
         return this;
     }
 
+    /* As of GHBS 2.5.5 */
+    public GithubBranchSource repoUrl(String url) {
+        control("configuredByUrlRadio[true]").check();
+        control("repositoryUrl").set(url);
+        return this;
+    }
 }
