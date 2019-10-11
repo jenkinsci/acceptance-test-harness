@@ -33,6 +33,11 @@ function download() {
     fi
 }
 
+if [ -z "$DISPLAY" ] && [ -z "$BROWSER_DISPLAY" ]; then
+    echo >&2 "Neither DISPLAY nor BROWSER_DISPLAY defined. Is the VNC server running?"
+    exit 1
+fi
+
 browser=$1
 war=$2
 if [ ! -f $war ]; then
