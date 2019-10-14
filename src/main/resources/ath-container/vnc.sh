@@ -7,10 +7,14 @@ if [ ! -z "$1" ]; then
   display=":$1"
 fi
 
+# Use setsid to detach processes that are supposed to keep running (vncserver and vncviewer) from current process group,
+# so ^C sent to any command run afterwards does not kill the vnc. Happens commonly when ATH is paused by INTERACTIVE=true
+# and then killed normally.
+
 vncserver -kill $display > /dev/null
-vncserver $display -geometry 1750x1250 -localhost=no 1>&2
+setsid vncserver $display -geometry 1750x1250 -localhost=no 1>&2
 if command -v vncviewer >/dev/null 2>&1; then
-  vncviewer localhost$display > /dev/null &
+  setsid vncviewer localhost$display > /dev/null &
 fi
 
 echo export BROWSER_DISPLAY=$display
