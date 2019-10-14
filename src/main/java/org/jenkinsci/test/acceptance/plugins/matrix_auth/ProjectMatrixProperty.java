@@ -3,11 +3,6 @@ package org.jenkinsci.test.acceptance.plugins.matrix_auth;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
-import org.openqa.selenium.Alert;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -26,10 +21,10 @@ public class ProjectMatrixProperty extends PageAreaImpl {
      */
     public MatrixRow addUser(String name) {
         this.name.resolve().findElement(by.parent()).findElement(by.button("Add user or group…")).click();
-        WebDriverWait wait = new WebDriverWait(driver, 10);
-        Alert promptAlert = wait.until(ExpectedConditions.alertIsPresent());
-        promptAlert.sendKeys(name);
-        promptAlert.accept();
+        handleAlert(a -> {
+            a.sendKeys(name);
+            a.accept();
+        });
         return getUser(name);
     }
 

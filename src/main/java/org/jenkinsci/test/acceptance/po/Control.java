@@ -314,29 +314,7 @@ public class Control extends CapybaraPortingLayerImpl {
     }
 
     public FormValidation getFormValidation() {
-        WebElement control = resolve();
-
-        // Fire validation if it was not already
-        control.sendKeys(Keys.TAB);
-
-        WebElement validationArea;
-
-        // Special handling for validation buttons and their markup
-        if (control.getTagName().equals("button")) {
-            WebElement spinner = control.findElement(by.xpath("./../../../following-sibling::div[1]"));
-            // Wait as long as there is some spinner shown on the page
-            waitFor().until(() -> !spinner.isDisplayed());
-            validationArea = control.findElement(by.xpath("./../../../following-sibling::div[2]"));
-        } else {
-            // Wait for validation area to stop being <div></div>
-            validationArea = waitFor().until(() -> {
-                WebElement va = control.findElement(by.xpath("./../../following-sibling::tr/td[2]"));
-                String cls = va.findElement(by.xpath("./div")).getAttribute("class");
-                return (cls == null || cls.isEmpty()) ? null : va;
-            });
-        }
-
-        return new FormValidation(validationArea);
+        return FormValidation.await(this);
     }
 
     /**

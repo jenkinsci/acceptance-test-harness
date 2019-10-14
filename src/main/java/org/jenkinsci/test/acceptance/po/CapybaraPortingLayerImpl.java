@@ -6,6 +6,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import org.hamcrest.StringDescription;
 import org.jenkinsci.test.acceptance.junit.Resource;
@@ -20,7 +21,6 @@ import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.google.common.base.Joiner;
 import com.google.inject.Injector;
@@ -109,11 +109,11 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     /**
      * Default waiting object configured with default timing.
      *
-     * @see {@link Wait}
+     * @see Wait
      */
     @Override
     public <T> Wait<T> waitFor(T subject) {
-        return new Wait<T>(subject, time)
+        return new Wait<>(subject, time)
                 .pollingEvery(500, TimeUnit.MILLISECONDS)
                 .withTimeout(120, TimeUnit.SECONDS)
         ;
@@ -121,7 +121,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
 
     @Override
     public Wait<CapybaraPortingLayer> waitFor() {
-        return waitFor((CapybaraPortingLayer) this);
+        return waitFor(this);
     }
 
     /**
@@ -132,22 +132,14 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
         return waitFor(this).withMessage("Element matching %s is present", selector)
                 .withTimeout(timeoutSec, TimeUnit.SECONDS)
                 .ignoring(NoSuchElementException.class)
-                .until(new Callable<WebElement>() {
-                    @Override public WebElement call() {
-                        return find(selector);
-                    }
-        });
+                .until(() -> find(selector));
     }
 
     @Override
     public WebElement waitFor(final By selector) {
         return waitFor(this).withMessage("Element matching %s is present", selector)
                 .ignoring(NoSuchElementException.class)
-                .until(new Callable<WebElement>() {
-                    @Override public WebElement call() {
-                        return find(selector);
-                    }
-        });
+                .until(() -> find(selector));
     }
 
     /**
@@ -185,7 +177,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     public WebElement find(final By selector) {
         try {
             return waitFor().withTimeout(time.seconds(1), TimeUnit.MILLISECONDS).until(new Callable<WebElement>() {
-                @Override public WebElement call() throws Exception {
+                @Override public WebElement call() {
                     for (WebElement element : driver.findElements(selector)) {
                         if (isDisplayed(element)) return element;
                     }
@@ -379,11 +371,25 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
         check(find(by.checkbox(locator)));
     }
 
+    public void handleAlert(Consumer<Alert> action) {
+        String oldWindow = driver.getWindowHandle();
+
+        Wait<WebDriver> wait = new Wait<>(driver, time)
+                .pollingEvery(500, TimeUnit.MILLISECONDS)
+                .withTimeout(10, TimeUnit.SECONDS)
+        ;
+
+        Alert alert = wait.until(ExpectedConditions.alertIsPresent());
+        try {
+            action.accept(alert);
+        } finally {
+            driver.switchTo().window(oldWindow);
+        }
+    }
+
     @Override
     public void confirmAlert(int timeout) {
-        WebDriverWait wait = new WebDriverWait(driver, timeout);
-        Alert promptAlert = wait.until(ExpectedConditions.alertIsPresent());
-        promptAlert.accept();
+        handleAlert(Alert::accept);
     }
 
     /**

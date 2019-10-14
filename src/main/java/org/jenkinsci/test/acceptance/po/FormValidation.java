@@ -27,6 +27,8 @@ import org.hamcrest.Description;
 import org.hamcrest.StringDescription;
 import org.jenkinsci.test.acceptance.Matcher;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
 import javax.annotation.Nonnull;
@@ -45,68 +47,103 @@ import static org.hamcrest.Matchers.*;
  */
 public class FormValidation {
     public enum Kind {
-        OK, WARNING, ERROR, NONE
+        OK, WARNING, ERROR;
+
+        public static Kind get(String cls) {
+            if (cls == null || cls.isEmpty()) { // class can be empty as it is handled differently than other attributes by selenium
+                cls = "ok"; // No class means ok without message
+            }
+            return valueOf(cls.toUpperCase());
+        }
     }
 
-    private final WebElement element;
-    private final Kind kind;
-    private final String message;
+    private final @Nonnull Kind kind;
+    private final @Nonnull String message;
+
+    public static FormValidation await(Control control) {
+        WebElement element = control.resolve();
+
+        WebElement validationArea;
+
+        // Special handling for validation buttons and their markup
+        if (element.getTagName().equals("button")) {
+            WebElement spinner = element.findElement(control.by.xpath("./../../../following-sibling::div[1]"));
+            // Wait as long as there is some spinner shown on the page
+            control.waitFor().until(() -> !spinner.isDisplayed());
+            // Expand details (are there any) before we get the area element as doing so afterwards would stale the element reference
+            for (WebElement elem : element.findElements(By.linkText("(show details)"))) {
+                elem.click();
+            }
+            validationArea = element.findElement(control.by.xpath("./../../../following-sibling::div[2]"));
+        } else {
+            // Fire validation if it was not already
+            element.sendKeys(Keys.TAB);
+
+            // Wait for validation area to stop being <div></div>
+            validationArea = control.waitFor().until(() -> {
+                WebElement va = element.findElement(control.by.xpath("./../../following-sibling::tr/td[2]"));
+                try {
+                    va.findElement(control.by.xpath("./div"));
+                    return va;
+                } catch (NoSuchElementException noDiv) {
+                    // https://issues.jenkins-ci.org/browse/JENKINS-59605?focusedCommentId=377474&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-377474
+                    // There are known false-negatives in ATH so let's presume this is done and successful until the core is fixed.
+                    return va;
+                }
+            });
+        }
+
+        return new FormValidation(validationArea);
+    }
 
     public FormValidation(WebElement element) {
         List<WebElement> divs = element.findElements(CapybaraPortingLayer.by.tagName("div"));
         switch (divs.size()) {
-            case 0:
-                this.element = null;
-                this.kind = Kind.NONE;
-                this.message = null;
+            case 0: // TODO remove after https://issues.jenkins-ci.org/browse/JENKINS-59605
+                this.kind = Kind.OK;
+                this.message = "";
                 break;
             case 1:
-                this.element = divs.get(0);
-                this.kind = extractKind();
-                // Expand details are there any
-                for (WebElement elem : this.element.findElements(By.linkText("(show details)"))) {
-                    elem.click();
-                }
-                this.message = this.element.getText();
+                WebElement outcome = divs.get(0);
+                this.kind = extractKind(outcome);
+                this.message = outcome.getText();
                 break;
             default:
                 throw new RuntimeException("Too many validation elements: " + divs);
         }
     }
 
-    public @Nonnull Kind extractKind() {
+    private @Nonnull Kind extractKind(WebElement element) {
         String kindClass = element.getAttribute("class");
-        switch (kindClass) {
-            case "error":
-                return Kind.ERROR;
-            case "warning":
-                return Kind.WARNING;
-            case "ok":
-                return Kind.OK;
-            default:
-                throw new RuntimeException("Unknown kind class provided '" + kindClass + "' in " + element.getAttribute("outerHTML"));
+        try {
+            return Kind.get(kindClass);
+        } catch (IllegalArgumentException ex) {
+            throw new RuntimeException(
+                    "Unknown kind class provided '" + kindClass + "' in " + element.getAttribute("outerHTML"),
+                    ex
+            );
         }
     }
 
-    public Kind getKind() {
+    public @Nonnull Kind getKind() {
         return kind;
     }
 
-    public String getMessage() {
+    public @Nonnull String getMessage() {
         return message;
     }
 
     @Override public String toString() {
-        return kind + ": " + message;
+        return kind + "(" + message + ")";
     }
 
     /**
      * When either there is no validation or empty OK was returned (there is no way to tell that apart).
      */
-    public static final Matcher<FormValidation> silent() {
+    public static Matcher<FormValidation> silent() {
         return new Matcher<FormValidation>("No form validation result should be presented") {
             @Override public boolean matchesSafely(FormValidation item) {
-                return item.getKind() == Kind.NONE && item.getMessage() == null;
+                return item.getKind() == Kind.OK && item.getMessage().isEmpty();
             }
 
             @Override public void describeMismatchSafely(FormValidation item, Description mismatchDescription) {
@@ -115,11 +152,11 @@ public class FormValidation {
         };
     }
 
-    public static final Matcher<FormValidation> reports(final Kind kind, final String message) {
+    public static Matcher<FormValidation> reports(final Kind kind, final String message) {
         return reports(kind, equalTo(message));
     }
 
-    public static final Matcher<FormValidation> reports(final Kind kind, final org.hamcrest.Matcher<String> message) {
+    public static Matcher<FormValidation> reports(final Kind kind, final org.hamcrest.Matcher<String> message) {
         StringDescription sd = new StringDescription();
         message.describeTo(sd);
         return new Matcher<FormValidation>("Validation reporting " + kind + " with message: " + sd.toString()) {
