@@ -143,9 +143,9 @@ public interface CapybaraPortingLayer {
     void check(String locator);
 
     /**
-     *  Confirms an alert giving it some time to appear
+     * Confirms an alert giving it some time to appear
      *
-     *  @param timeout Maximun time to wait for the alert to appear, in seconds
+     * @param timeout Maximun time to wait for the alert to appear, in seconds
      */
     void confirmAlert(int timeout);
 

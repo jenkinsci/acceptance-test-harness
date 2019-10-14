@@ -30,7 +30,6 @@ import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.jenkinsci.test.acceptance.po.ListView;
 import org.junit.Test;
 import org.openqa.selenium.Alert;
-import org.openqa.selenium.NoAlertPresentException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -41,52 +40,39 @@ public class FormValidationTest extends AbstractJUnitTest {
     @Test
     public void validate() {
         ajaxValidation();
+        navigateAway();
         jsValidation();
     }
 
     private void ajaxValidation() {
-        try {
-            ListView lv = jenkins.views.create(ListView.class);
-            lv.configure();
+        ListView lv = jenkins.views.create(ListView.class);
+        lv.configure();
 
-            lv.matchJobs(".*");
-            assertThat(lv.includeRegex.getFormValidation(), silent());
+        lv.matchJobs(".*");
+        assertThat(lv.includeRegex.getFormValidation(), silent());
 
-            lv.matchJobs("[");
-            assertThat(lv.includeRegex.getFormValidation().getKind(), equalTo(Kind.ERROR));
-        } finally {
-            navigateAway();
-        }
+        lv.matchJobs("[");
+        assertThat(lv.includeRegex.getFormValidation().getKind(), equalTo(Kind.ERROR));
     }
 
     private void jsValidation() {
-        try {
-            JenkinsConfig c = jenkins.getConfigPage();
-            c.configure();
-            c.numExecutors.set(16);
-            FormValidation formValidation = c.numExecutors.getFormValidation();
-            assertThat(formValidation, silent());
+        JenkinsConfig c = jenkins.getConfigPage();
+        c.configure();
+        c.numExecutors.set(16);
+        FormValidation formValidation = c.numExecutors.getFormValidation();
+        assertThat(formValidation, silent());
 
-            c.numExecutors.set(-16);
-            formValidation = c.numExecutors.getFormValidation();
+        c.numExecutors.set(-16);
+        formValidation = c.numExecutors.getFormValidation();
 
-            //support older jenkins versions
-            String errorMessage = jenkins.getVersion().isNewerThan(new VersionNumber("2.104")) ? "Not a non-negative number": "Not an integer";
-            assertThat(formValidation, reports(Kind.ERROR, errorMessage));
-        } finally {
-            navigateAway();
-        }
+        //support older jenkins versions
+        String errorMessage = jenkins.getVersion().isNewerThan(new VersionNumber("2.104")) ? "Not a non-negative number": "Not an integer";
+        assertThat(formValidation, reports(Kind.ERROR, errorMessage));
     }
 
     private void navigateAway() {
         jenkins.open();
-        String oldWindow = driver.getWindowHandle();
-        try {
-            Alert alert = driver.switchTo().alert();
-            alert.accept();
-        } catch (NoAlertPresentException e) {
-        }
-        driver.switchTo().window(oldWindow);
+        jenkins.handleAlert(Alert::accept);
         sleep(1000); // Needed for some reason
     }
 }

@@ -5,6 +5,7 @@ import org.jenkinsci.test.acceptance.po.ConfigurablePageObject;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.View;
+import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
@@ -316,15 +317,11 @@ public class MissionControlView extends View {
      * (Inefficient) alternative: {@code jenkins.restart()}
      */
     public void reloadConfiguration() {
-        try {
-            getJenkins().open();
-            driver.findElement(By.xpath("//a[@class='task-link' and @href='/manage']")).click();
-            driver.findElement(By.xpath("//a[@href='#']")).click();
-            driver.switchTo().alert().accept();
-            getJenkins().waitForLoad(5);
-        } finally {
-            driver.switchTo().defaultContent();
-        }
+        getJenkins().open();
+        driver.findElement(By.xpath("//a[@class='task-link' and @href='/manage']")).click();
+        driver.findElement(By.xpath("//a[@href='#']")).click();
+        handleAlert(Alert::accept);
+        getJenkins().waitForLoad(5);
     }
 
     /**

@@ -24,6 +24,7 @@
 package org.jenkinsci.test.acceptance.po;
 
 import org.jenkinsci.test.acceptance.Matcher;
+import org.openqa.selenium.Alert;
 
 public class Workspace extends PageObject {
 
@@ -34,7 +35,7 @@ public class Workspace extends PageObject {
     public void wipeOut() {
         open();
         clickLink("Wipe Out Current Workspace");
-        driver.switchTo().alert().accept();
+        handleAlert(Alert::accept);
     }
 
     public static Matcher<Job> workspaceContains(final String file) {

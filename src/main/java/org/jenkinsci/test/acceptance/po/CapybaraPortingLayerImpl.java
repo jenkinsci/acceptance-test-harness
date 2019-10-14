@@ -6,11 +6,11 @@ import java.net.URL;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import org.hamcrest.StringDescription;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.junit.Wait;
-import org.jenkinsci.test.acceptance.selenium.SeleniumUtil;
 import org.jenkinsci.test.acceptance.utils.ElasticTime;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
@@ -21,7 +21,6 @@ import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.google.common.base.Joiner;
 import com.google.inject.Injector;
@@ -114,7 +113,10 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
      */
     @Override
     public <T> Wait<T> waitFor(T subject) {
-        return SeleniumUtil.waitFor(subject);
+        return new Wait<>(subject, time)
+                .pollingEvery(500, TimeUnit.MILLISECONDS)
+                .withTimeout(120, TimeUnit.SECONDS)
+        ;
     }
 
     @Override
@@ -369,11 +371,25 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
         check(find(by.checkbox(locator)));
     }
 
+    public void handleAlert(Consumer<Alert> action) {
+        String oldWindow = driver.getWindowHandle();
+
+        Wait<WebDriver> wait = new Wait<>(driver, time)
+                .pollingEvery(500, TimeUnit.MILLISECONDS)
+                .withTimeout(10, TimeUnit.SECONDS)
+        ;
+
+        Alert alert = wait.until(ExpectedConditions.alertIsPresent());
+        try {
+            action.accept(alert);
+        } finally {
+            driver.switchTo().window(oldWindow);
+        }
+    }
+
     @Override
     public void confirmAlert(int timeout) {
-        WebDriverWait wait = new WebDriverWait(driver, timeout);
-        Alert promptAlert = wait.until(ExpectedConditions.alertIsPresent());
-        promptAlert.accept();
+        handleAlert(Alert::accept);
     }
 
     /**
