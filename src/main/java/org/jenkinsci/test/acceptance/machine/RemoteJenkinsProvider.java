@@ -77,7 +77,7 @@ public class RemoteJenkinsProvider extends JenkinsProvider {
         String pluginDir = jenkinsHome +"plugins/";
         String path = JenkinsResolver.JENKINS_TEMP_DIR+"form-element-path.hpi";
 
-        //install form-path-element plugin
+        //install form-element-path plugin
         new PluginDownloader("form-element-path").materialize(machine, path);
         try (Ssh ssh = machine.connect()) {
             ssh.executeRemoteCommand("mkdir -p " + pluginDir);
