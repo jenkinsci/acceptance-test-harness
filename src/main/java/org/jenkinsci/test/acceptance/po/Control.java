@@ -1,13 +1,20 @@
 package org.jenkinsci.test.acceptance.po;
 
-import org.apache.commons.lang3.StringUtils;
-import org.jenkinsci.test.acceptance.junit.Resource;
-import org.openqa.selenium.*;
+import java.time.Duration;
+import javax.annotation.Nullable;
 
-import com.google.inject.Injector;
+import org.apache.commons.lang3.StringUtils;
+import org.jenkinsci.test.acceptance.selenium.Scroller;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 
-import javax.annotation.Nullable;
+import com.google.inject.Injector;
+
+import org.jenkinsci.test.acceptance.junit.Resource;
 
 /**
  * Wraps a specific form element in {@link PageAreaImpl} to provide operations.
@@ -88,9 +95,38 @@ public class Control extends CapybaraPortingLayerImpl {
         check(resolve(), state);
     }
 
+    /**
+     * sends a click on the underlying element.
+     * You should not use this on any page where the click will cause another page to be loaded as it will not
+     * gaurantee that the new page has been loaded.
+     * @see #clickAndWaitToBecomeStale()
+     * @see #clickAndWaitToBecomeStale(Duration)
+     */
     public void click() {
         resolve().click();
     }
+
+
+    /**
+     * like click but will block for up to 30 seconds until the underlying web element has become stale.
+     * see https://blog.codeship.com/get-selenium-to-wait-for-page-load/
+     */
+    /*package*/ void clickAndWaitToBecomeStale() {
+        clickAndWaitToBecomeStale(Duration.ofSeconds(30));
+    }
+
+    /**
+     * like click but will block until the underlying web element has become stale.
+     * see https://blog.codeship.com/get-selenium-to-wait-for-page-load/
+     * @param timeout the amount of time to wait
+     */
+    /*package*/ void clickAndWaitToBecomeStale(Duration timeout) {
+        WebElement webElement = resolve();
+        // webElement.submit() despite advertising it does exactly this just blows up :(
+        webElement.click();
+        waitFor(webElement).withTimeout(timeout).until(Control::isStale);
+    }
+
 
     /**
      * The existing {@link org.jenkinsci.test.acceptance.po.Control#set(String)}
@@ -156,6 +192,7 @@ public class Control extends CapybaraPortingLayerImpl {
 
     public void selectDropdownMenu(String displayName) {
         click();
+        elasticSleep(1000);
         findDropDownMenuItem.find(displayName).click();
         elasticSleep(1000);
     }
@@ -228,6 +265,8 @@ public class Control extends CapybaraPortingLayerImpl {
      */
     public void select(String option) {
         WebElement e = resolve();
+        // Make sure the select is scrolled into view before interacting with its options that has got special handling by scroller.
+        new Scroller().scrollIntoView(e, driver);
         findElement(e, by.option(option)).click();
     }
 
@@ -275,24 +314,7 @@ public class Control extends CapybaraPortingLayerImpl {
     }
 
     public FormValidation getFormValidation() {
-        WebElement control = resolve();
-
-        // Fire validation if it was not already
-        control.sendKeys(Keys.TAB);
-
-        WebElement validationArea;
-
-        // Special handling for validation buttons and their markup
-        if (control.getTagName().equals("button")) {
-            WebElement spinner = control.findElement(by.xpath("./../../../following-sibling::div[1]"));
-            // Wait as long as there is some spinner shown on the page
-            waitFor().until(() -> !spinner.isDisplayed());
-            validationArea = control.findElement(by.xpath("./../../../following-sibling::div[2]"));
-        } else {
-            validationArea = control.findElement(by.xpath("./../../following-sibling::tr/td[2]"));
-        }
-
-        return new FormValidation(validationArea);
+        return FormValidation.await(this);
     }
 
     /**

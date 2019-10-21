@@ -12,6 +12,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
@@ -44,8 +45,7 @@ public class ExistingJenkinsController extends JenkinsController {
     }
 
     private void verifyThatFormPathElementPluginIsInstalled() {
-        try {
-            HttpClient httpclient = new DefaultHttpClient();
+        try (CloseableHttpClient httpclient = new DefaultHttpClient()){
             HttpPost post = new HttpPost(uploadUrl.toExternalForm());
 
             List<NameValuePair> parameters = new ArrayList<NameValuePair>();
@@ -65,7 +65,7 @@ public class ExistingJenkinsController extends JenkinsController {
         }
         catch (IOException exception) {
             throw new AssertionError("Can't check if form-element-path plugin is installed", exception);
-        }
+        } 
     }
 
     private void failTestSuite(final String errorMessage) {

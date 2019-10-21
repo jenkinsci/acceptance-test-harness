@@ -1,12 +1,12 @@
 # Writing JUnit tests
 
-Test classes should be located to either `core` or `plugins` package.
+Test classes should be located in either the `core` or `plugins` package.
 
 `JenkinsAcceptanceTestRule` defines a [JUnit rule](https://github.com/junit-team/junit/wiki/Rules) that sets
 up a test environment by instantiating a specified [JenkinsController](CONTROLLER.md), [WebDriver](BROWSER.md),
 and other peripheral service components.
 
-The run then perform Guice injection on the JUnit test instance, allowing you to access those components.
+The run then performs Guice injection on the JUnit test instance, allowing you to access those components.
 So a minimal test could look something like this:
 
     class HelloWorldTest {
@@ -34,7 +34,7 @@ base class that pulls in various useful pieces by extending/implementing other t
 If your tests depend on specific plugins, put `@WithPlugins` annotation on your test method or class
 to indicate that dependency.
 
-This is preferable over installing plugins via UpdateCenter/PluginManager page objects, because it'll
+This is preferable to installing plugins via UpdateCenter/PluginManager page objects, because it'll
 allow filtering of tests based on plugins.
 
 ## Marking tests for credential dependencies
@@ -51,7 +51,7 @@ username/sshKey:
 
 
 
-## Marking tests to be member of the smoke test group
+## Marking tests to be members of the smoke test group
 
 Since the overall test suite runs a couple of hours you can use the predefined
 set of "Smoke Tests" to get a first impression if everything is still running as expected.
@@ -66,7 +66,7 @@ Testing for recently added feature causes false negatives when older version is 
 to run tests. To avoid that there is a way around this: use `@Since("X.Y")` to
 declare a version of core or `@WithPlugins("plugin@X.Y")` for plugin version.
 
-In code, one can use `Jenkins#getVersion()` or `Plugin.getVersion()` to implement
+In code, one can use `Jenkins.getVersion()` or `Plugin.getVersion()` to implement
 version agnostic page objects.
 
 ## Marking tests for immutablility

@@ -27,15 +27,35 @@ import hudson.util.VersionNumber;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.po.FormValidation;
 import org.jenkinsci.test.acceptance.po.JenkinsConfig;
+import org.jenkinsci.test.acceptance.po.ListView;
 import org.junit.Test;
+import org.openqa.selenium.Alert;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.jenkinsci.test.acceptance.po.FormValidation.*;
 
 public class FormValidationTest extends AbstractJUnitTest {
 
     @Test
-    public void validate() throws Exception {
+    public void validate() {
+        ajaxValidation();
+        navigateAway();
+        jsValidation();
+    }
+
+    private void ajaxValidation() {
+        ListView lv = jenkins.views.create(ListView.class);
+        lv.configure();
+
+        lv.matchJobs(".*");
+        assertThat(lv.includeRegex.getFormValidation(), silent());
+
+        lv.matchJobs("[");
+        assertThat(lv.includeRegex.getFormValidation().getKind(), equalTo(Kind.ERROR));
+    }
+
+    private void jsValidation() {
         JenkinsConfig c = jenkins.getConfigPage();
         c.configure();
         c.numExecutors.set(16);
@@ -46,7 +66,13 @@ public class FormValidationTest extends AbstractJUnitTest {
         formValidation = c.numExecutors.getFormValidation();
 
         //support older jenkins versions
-        String errorMessage = jenkins.getVersion().isNewerThan(new VersionNumber("2.104"))? "Not a non-negative number" : "Not an integer";
+        String errorMessage = jenkins.getVersion().isNewerThan(new VersionNumber("2.104")) ? "Not a non-negative number": "Not an integer";
         assertThat(formValidation, reports(Kind.ERROR, errorMessage));
+    }
+
+    private void navigateAway() {
+        jenkins.open();
+        jenkins.handleAlert(Alert::accept);
+        sleep(1000); // Needed for some reason
     }
 }

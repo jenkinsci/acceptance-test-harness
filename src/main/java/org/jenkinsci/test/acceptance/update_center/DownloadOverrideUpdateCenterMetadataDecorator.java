@@ -15,11 +15,8 @@ public class DownloadOverrideUpdateCenterMetadataDecorator implements UpdateCent
         for (Map.Entry<String,String> e : System.getenv().entrySet()) {
             String key = e.getKey();
             if (key.endsWith(".version")) {
-                System.err.println("Using XXX.version env vars is deprecated. Use " + VARNAME + " instead.");
-                String name = key.substring(0, key.length() - 8);
-                String version = e.getValue();
-
-                override(ucm, name, version);
+                // TODO keep this in for a while and remove it
+                System.err.println("Using XXX.version (" + key + ") env vars for plugin version override is no longer supported. Use " + VARNAME + " instead.");
             }
         }
 

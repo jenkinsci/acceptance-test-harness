@@ -128,11 +128,13 @@ public class MockUpdateCenter implements AutoCleaned {
                         throw new AssertionError(x);
                     }
                 }).collect(Collectors.toList())));
-                // The fingerprints are not going to match after injecting different binary so we need to recalculate.
-                // It is enough to use the strongest cypher
+                // The fingerprints are not going to match after injecting different binary so we need to fix/recalculate
+                //   - For JUT before 2.168, only sha1 is checked if present, so let's simply remove it
+                plugin.remove("sha1");
+                //   - For JUT after 2.168, it is enough to recalculate the strongest cypher
                 if (meta instanceof PluginMetadata.ModifyingMetadata) {
-                    String checksum = ((PluginMetadata.ModifyingMetadata) meta).getSha512Checksum(injector);
-                    plugin.put("sha512", checksum);
+                    String sha512 = ((PluginMetadata.ModifyingMetadata) meta).getSha512Checksum(injector);
+                    plugin.put("sha512", sha512);
                 }
             }
         } catch (JSONException | NoSuchAlgorithmException | IOException x) {

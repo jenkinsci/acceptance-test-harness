@@ -1,6 +1,6 @@
 # Configuring how to run tests
 
-`README.md` discusses how you can change the way tests run and what you test by using several environment variables.
+[README.md](README.md) discusses how you can change the way tests run and what you test by using several environment variables.
 While configuring test runs through environment variables is simple, it only works for simple cases.
 
 For more sophisticated test runs (for example if you want your Jenkins-under-test and slaves to both run on EC2

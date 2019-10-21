@@ -55,7 +55,7 @@ public class DeployPluginTest extends AbstractJUnitTest {
             DeployPublisher d = j.addPublisher(DeployPublisher.class);
             d.war.set("my-webapp/target/*.war");
             d.contextPath.set("test");
-            d.useContainer("Tomcat 7.x");
+            d.useContainer("Tomcat 7.x Remote", "Tomcat 7.x");
             d.setCredentials("tomcat");
             d.url.set(f.getUrl().toExternalForm());
         }

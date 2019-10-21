@@ -41,11 +41,12 @@ public class SHA1Sum {
 
 
     private String convertByteToString(byte[] inByte) {
-        Formatter formatter = new Formatter();
-        for (final byte b : inByte) {
-            formatter.format("%02x", b);
+        try (Formatter formatter = new Formatter()) {
+            for (final byte b : inByte) {
+                formatter.format("%02x", b);
+            }
+            return formatter.toString();
         }
-        return formatter.toString();
     }
 
     private byte[] createSha1(File file) throws NoSuchAlgorithmException, IOException {

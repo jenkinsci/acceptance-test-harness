@@ -110,7 +110,7 @@ public class JenkinsLogWatcher implements LogListenable, Closeable {
         msg += "\nnow = " + new Date();
         try {
             msg += "\n" + FileUtils.readFileToString(logFile);
-        } catch (IOException _) {
+        } catch (IOException ignored) {
             // ignore
         }
         return msg;

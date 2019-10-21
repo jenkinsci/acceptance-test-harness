@@ -1,5 +1,6 @@
 package org.jenkinsci.test.acceptance.plugins.logparser;
 
+import hudson.util.VersionNumber;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
@@ -16,9 +17,21 @@ public class LogParserGlobalConfig extends PageAreaImpl {
      * Repeatable-add Button.
      */
     private final Control addButton = control("repeatable-add");
-    
-    public LogParserGlobalConfig(JenkinsConfig context) {
-        super(context, "/hudson-plugins-logparser-LogParserPublisher/log-parser");
+    private final String rulePrefix;
+
+    public static LogParserGlobalConfig getInstance(JenkinsConfig context) {
+        boolean old = context.jenkins.getPlugin("log-parser").getVersion().isOlderThan(new VersionNumber("2.1"));
+        String path = old
+                ? "/hudson-plugins-logparser-LogParserPublisher/log-parser"
+                : "/hudson-plugins-logparser-LogParserPublisher"
+        ;
+        String rulePrefix = old ? "rule" : "parsingRulesGlobal";
+        return new LogParserGlobalConfig(context, path, rulePrefix);
+    }
+
+    private LogParserGlobalConfig(JenkinsConfig context, String path, String rulePrefix) {
+        super(context, path);
+        this.rulePrefix = rulePrefix;
     }
 
     /**
@@ -27,7 +40,7 @@ public class LogParserGlobalConfig extends PageAreaImpl {
      * @param path The path to the rules file.
      */
     public void addParserConfig(String description, String path) {
-        String rulePath = createPageArea("rule", () -> addButton.click());
+        String rulePath = createPageArea(rulePrefix, addButton::click);
         Rule rule = new Rule(getPage(), rulePath);
         rule.description.set(description);
         rule.path.set(path);
@@ -36,8 +49,8 @@ public class LogParserGlobalConfig extends PageAreaImpl {
     /**
      * PageArea generated after repeatable-add is clicked.
      */
-    private class Rule extends PageAreaImpl {
-        public Rule(PageObject parent, String path) {
+    private static class Rule extends PageAreaImpl {
+        private Rule(PageObject parent, String path) {
             super(parent, path);
         }
 

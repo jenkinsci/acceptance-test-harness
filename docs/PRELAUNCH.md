@@ -8,7 +8,7 @@ This delay is also quite annoying when you are developing a new test. Often you 
 multiple times before you get your test right. And every time you run a test, you end up waiting for JUT to come up.
 
 To help cope with this situation, this project comes with a separate entry point that runs a JUT server.
-JUT server will maintain a fixed number of Jenkins instances booted. There's a corresponding `PooledJenkinsController`
+The JUT server will maintain a fixed number of Jenkins instances booted. There's a corresponding `PooledJenkinsController`
 implementation you'd use when you run a test, which asks the JUT server to hand off a fresh JUT.
 
 This drastically cuts down the wait time until the actual meat of your test starts.
@@ -27,7 +27,7 @@ the environment variable `JUT_SOCKET`:
 
     JENKINS_WAR=/path/to/jenkins.war JUT_SOCKET=/path/to/jenkins.sock ./jut-server.sh
 
-JUT server internally uses to other real `JenkinsController` implementations to launch JUT,
+The JUT server internally uses other real `JenkinsController` implementations to launch JUT,
 and you configure it the same way you configure normal test executions. That is, the above example
 actually uses `WinstoneController` (the default controller type), which recognizes `JENKINS_WAR` environment
 variable. See [this document](CONTROLLER.md) for how to select JenkinsController properly.
@@ -39,7 +39,7 @@ e.g. in order to start 2 instances, run:
 
 ## Selecting PooledJenkinsController
 
-If no controller is explicitly specified, the harness checks the presence of `~/jenkins.sock` and
+If no controller is explicitly specified, the harness checks for the presence of `~/jenkins.sock` and
 it automatically selects `PooledJenkinsController`. If you did change the name of the socket (see section
 [Launching JUT server](#launching-jut-server)) then you also need to specify the name using the 
 `JUT_SOCKET` environment variable when running the tests.

@@ -2,6 +2,7 @@ package org.jenkinsci.test.acceptance.plugins.logparser;
 
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
 import java.util.List;
@@ -39,7 +40,7 @@ public class LogParserOutputPage extends PageObject {
      * @param po The page of the logparser.
      */
     public LogParserOutputPage(PageObject po) {
-        super(po.injector, po.url(""));
+        super(po.injector, po.url("parsed_console"));
     }
 
     /**
@@ -134,8 +135,14 @@ public class LogParserOutputPage extends PageObject {
     public String getColor(String category, int index) throws Exception {
         try {
             switchToFrame(LogParserFrame.CONTENT);
-            WebElement span = driver.findElement(
-                    By.xpath("//a[@name='" + category.toUpperCase() + index + "']/following-sibling::span[1]"));
+            WebElement span;
+            try {
+                String xpath = "//a[@name='" + category.toUpperCase() + index + "']/following-sibling::span[1]";
+                span = find(by.xpath(xpath));
+            } catch (NoSuchElementException ex) {
+                String xpath = "//a[@name='" + category.toUpperCase() + index + "']/parent::p/following-sibling::span[1]";
+                span = find(by.xpath(xpath));
+            }
             Pattern colorPattern = Pattern.compile("color: (\\S*);");
             Matcher match = colorPattern.matcher(span.getAttribute("style"));
             if (match.find()) {

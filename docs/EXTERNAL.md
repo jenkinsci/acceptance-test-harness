@@ -18,7 +18,7 @@ Just create a Maven project (with the default `jar` packaging) depending on the 
   </dependencies>
 ```
 
-You may want to specify Java 7 or even 8 sources:
+You may want to specify Java 8 or even 11 sources:
 
 ```
   <build>
@@ -26,8 +26,8 @@ You may want to specify Java 7 or even 8 sources:
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
-          <source>1.7</source>
-          <target>1.7</target>
+          <source>1.8</source>
+          <target>1.8</target>
         </configuration>
       </plugin>
     </plugins>
@@ -105,7 +105,7 @@ yet output is suppressed when running _all_ tests, when it would be noisy (espec
 
 ## Releasing project versions
 
-If you plan to use `maven-release-plugin` on your own project for some reason, you may add
+If you plan to use `maven-release-plugin` on your own project for some reason, you may add:
 
 ```
   <build>
@@ -120,12 +120,12 @@ If you plan to use `maven-release-plugin` on your own project for some reason, y
   </build>
 ```
 
-since you would not want to run acceptance tests during the release.
+... since you would not want to run acceptance tests during the release.
 (Without some environment variables they would fail anyway.)
 
 ## Selecting the browser and Jenkins WAR from Maven profiles
 
-If you like to activate Maven profiles from `~/.m2/settings.xml` with `-P` to run with specific environments, try
+If you like to activate Maven profiles from `~/.m2/settings.xml` with `-P` to run with specific environments, try:
 
 ```
   <profiles>

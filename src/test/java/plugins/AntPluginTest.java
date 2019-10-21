@@ -18,8 +18,11 @@ import java.util.regex.Pattern;
 @WithPlugins("ant")
 public class AntPluginTest extends AbstractJUnitTest {
 
-    public static final String INSTALL_VERSION_1_8 = "1.8.4";
-    public static final String INSTALL_NAME_1_8 = "ant_" + INSTALL_VERSION_1_8;
+    private static final String INSTALL_VERSION_1_8 = "1.8.4";
+    private static final String INSTALL_NAME_1_8 = "ant_" + INSTALL_VERSION_1_8;
+
+    private static final String INSTALL_VERSION_1_10 = "1.10.5";
+    private static final String INSTALL_NAME_1_10 = "ant_" + INSTALL_VERSION_1_10;
 
     FreeStyleJob job;
 
@@ -39,6 +42,16 @@ public class AntPluginTest extends AbstractJUnitTest {
 
         buildHelloWorld(INSTALL_NAME_1_8).shouldContainsConsoleOutput(
             "Unpacking (http|https)://archive.apache.org/dist/ant/binaries/apache-ant-" + INSTALL_VERSION_1_8 + "-bin.zip"
+        );
+    }
+    
+    @Test
+    public void autoInstallMultipleAnt() {
+        AntInstallation.install(jenkins, INSTALL_NAME_1_8, INSTALL_VERSION_1_8);
+        AntInstallation.install(jenkins, INSTALL_NAME_1_10, INSTALL_VERSION_1_10);
+
+        buildHelloWorld(INSTALL_NAME_1_10).shouldContainsConsoleOutput(
+            "Unpacking (http|https)://archive.apache.org/dist/ant/binaries/apache-ant-" + INSTALL_VERSION_1_10 + "-bin.zip"
         );
     }
 

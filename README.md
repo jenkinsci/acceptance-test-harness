@@ -2,14 +2,14 @@
 
 End to end test suite for Jenkins automation server and its plugins.
 
-The scenarios are described ain form of tests controlling Jenkins under test (JUT) through UI / REST API. Clean instance
-is started for individual tests to isolate the tests. The harness provides convenient docker support so integration tests
+The scenarios are described in the form of tests controlling Jenkins under test (JUT) through UI / REST APIs. Clean instances
+are started for individual tests to isolate the tests. The harness provides convenient docker support so integration tests
 can be written easily.
 
 ## Getting Started
 
-The simplest way to start the harness is calling `BROWSER=firefox JENKINS_VERSION=2.73 mvn test`. Complete test suite
-takes hours to run due to the number of covered components/use-cases, the cost of Jenkins setup and selenium interactions.
+The simplest way to start the harness is calling `BROWSER=firefox JENKINS_VERSION=2.73 mvn test`. The complete test suite
+takes hours to run due to the number of covered components/use-cases, the cost of Jenkins setup, and selenium interactions.
 That can be avoided by selecting a subset of tests to be run - smoke tests for instance.
 
 ## Further Reading
@@ -56,5 +56,5 @@ without author's notice for the sake of suite reliability.
 Areas where acceptance-tests-harness is more suitable then jenkins-test-harness are:
 
 - Installing plugins for cross-plugin integration
-- Running tests in realistic classloader environment
-- Verifying UI behaviour in actual web browser
+- Running tests in a realistic classloader environment
+- Verifying UI behaviour in an actual web browser

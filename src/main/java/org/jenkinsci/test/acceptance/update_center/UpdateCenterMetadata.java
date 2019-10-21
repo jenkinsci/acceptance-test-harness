@@ -40,17 +40,18 @@ public class UpdateCenterMetadata {
      *      .json or .json.html file served from update center.
      */
     public static UpdateCenterMetadata parse(File data) throws IOException {
-        BufferedReader r = new BufferedReader(new FileReader(data));
-        r.readLine();   // the first line is preamble
-        String json = r.readLine(); // the 2nd line is the actual JSON
-        r.readLine();   // the third line is postamble
+        try (BufferedReader r = new BufferedReader(new FileReader(data))) {
+            r.readLine();   // the first line is preamble
+            String json = r.readLine(); // the 2nd line is the actual JSON
+            r.readLine();   // the third line is postamble
 
-        ObjectMapper om = new ObjectMapper();
-        om.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        UpdateCenterMetadata v = om.readValue(json, UpdateCenterMetadata.class);
-        v.originalJSON = json;
-        v.init();
-        return v;
+            ObjectMapper om = new ObjectMapper();
+            om.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+            UpdateCenterMetadata v = om.readValue(json, UpdateCenterMetadata.class);
+            v.originalJSON = json;
+            v.init();
+            return v;
+        }
     }
 
     public static UpdateCenterMetadata get(String id, Map<String,PluginMetadata> plugins) {

@@ -7,11 +7,13 @@ import org.jenkinsci.test.acceptance.plugins.logparser.LogParserPublisher;
 import org.jenkinsci.test.acceptance.po.*;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.Assert;
 import org.openqa.selenium.By;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.openqa.selenium.WebElement;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.*;
@@ -21,7 +23,7 @@ import org.jenkinsci.test.acceptance.plugins.logparser.LogParserOutputPage;
 @WithPlugins("log-parser")
 public class LogParserTest extends AbstractJUnitTest {
 
-    private static final String SUMMARY_XPATH = "//div[@id='main-panel']/table/tbody/tr[3]";
+    private static final String SUMMARY_XPATH = "//div[@id='main-panel']/table/tbody";
 
     private LogParserGlobalConfig config;
 
@@ -29,7 +31,7 @@ public class LogParserTest extends AbstractJUnitTest {
 
     @Before
     public void globalConfig() {
-        config = new LogParserGlobalConfig(jenkins.getConfigPage());
+        config = LogParserGlobalConfig.getInstance(jenkins.getConfigPage());
         parserRules = new HashMap<>();
         // initialize a sample rule for the following test cases
         Resource sampleRule = resource("/logparser_plugin/rules/log-parser-rules-sample");
@@ -48,8 +50,8 @@ public class LogParserTest extends AbstractJUnitTest {
         Build build = job.startBuild().waitUntilFinished();
         build.open();
 
-        driver.findElement(By.partialLinkText("Parsed Console Output")).click();
         LogParserOutputPage outputPage = new LogParserOutputPage(build);
+        outputPage.open();
 
         assertThat(outputPage.getFragmentOfContentFrame("Error", 1), is("ERROR1"));
 
@@ -67,11 +69,12 @@ public class LogParserTest extends AbstractJUnitTest {
 
         build.open();
 
-        WebElement summary = driver.findElement(By.xpath(SUMMARY_XPATH + "/td[2]"));
+        WebElement buildSummary = find(by.xpath(SUMMARY_XPATH));
+        WebElement summary = findLogParserSummary(buildSummary).findElement(By.xpath("td[2]"));
         assertThat(summary.getText(), is("13 errors, 4 warnings"));
 
-        driver.findElement(By.partialLinkText("Parsed Console Output")).click();
         LogParserOutputPage outputPage = new LogParserOutputPage(build);
+        outputPage.open();
 
         assertThat(outputPage.getNumberOfMatches("Error"), is(13));
         assertThat(outputPage.getLinkList("Error"), hasSize(13));
@@ -100,16 +103,30 @@ public class LogParserTest extends AbstractJUnitTest {
 
         // check information on build overview
         build.open();
-        WebElement tableRow = driver.findElement(By.xpath(SUMMARY_XPATH));
-        WebElement icon = tableRow.findElement(By.xpath("td[1]/img"));
+        WebElement tableRow = find(By.xpath(SUMMARY_XPATH));
+        WebElement logParserSummary = findLogParserSummary(tableRow);
+
+        WebElement icon = logParserSummary.findElement(By.xpath("td[1]/img"));
         assertThat(icon.getAttribute("src"), containsString("graph.png"));
-        WebElement text = tableRow.findElement(By.xpath("td[2]"));
+        WebElement text = logParserSummary.findElement(By.xpath("td[2]"));
         assertThat(text.getText(), is("Log parsing has failed"));
 
-        // check information in parsed console output
-        driver.findElement(By.partialLinkText("Parsed Console Output")).click();
-        WebElement output = driver.findElement(By.id("main-panel"));
+        LogParserOutputPage outputPage = new LogParserOutputPage(build);
+        outputPage.open();
+        WebElement output = find(By.id("main-panel"));
         assertThat(output.getText(), containsString("ERROR: Failed to parse console log"));
+    }
+
+
+    private WebElement findLogParserSummary(WebElement buildSummary){
+        for(WebElement element : buildSummary.findElements(By.tagName("tr"))){
+            List<WebElement> icons = element.findElements(By.xpath("td[1]/img"));
+            if(!icons.isEmpty() && icons.get(0).getAttribute("src").contains("graph.png")){
+                return element;
+            }
+        }
+        Assert.fail("Log parser summary was not found");
+        return null;
     }
 
     /**
@@ -132,9 +149,9 @@ public class LogParserTest extends AbstractJUnitTest {
 
         // Check trend is visible
         job.open();
-        WebElement trend = driver.findElement(By.className("test-trend-caption"));
+        WebElement trend = find(By.className("test-trend-caption"));
         assertThat(trend.getText(), containsString("Log Parser Trend"));
-        WebElement img = driver.findElement(By.xpath("//img[@src='logparser/trend']"));
+        WebElement img = find(By.xpath("//img[@src='logparser/trend']"));
         assertThat(img.getAttribute("alt"), containsString("[Log Parser Chart]"));
     }
 

@@ -35,6 +35,7 @@ public class OwnershipPluginTest extends AbstractJUnitTest {
         GlobalSecurityConfig security = new GlobalSecurityConfig(jenkins);
         security.configure();
         JenkinsDatabaseSecurityRealm realm = security.useRealm(JenkinsDatabaseSecurityRealm.class);
+        realm.allowUsersToSignUp(true);
         security.save();
 
         User user = realm.signup("jenkins-acceptance-tests-user");
@@ -56,6 +57,7 @@ public class OwnershipPluginTest extends AbstractJUnitTest {
         GlobalSecurityConfig security = new GlobalSecurityConfig(jenkins);
         security.configure();
         JenkinsDatabaseSecurityRealm realm = security.useRealm(JenkinsDatabaseSecurityRealm.class);
+        realm.allowUsersToSignUp(true);
         security.save();
 
         final JenkinsConfig globalConfig = jenkins.getConfigPage();

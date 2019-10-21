@@ -1,28 +1,27 @@
 package org.jenkinsci.test.acceptance;
 
-import javax.annotation.CheckForNull;
 import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
 import java.util.regex.Pattern;
+import javax.annotation.CheckForNull;
 
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Description;
-import org.jenkinsci.test.acceptance.plugins.analysis_collector.AnalysisPlugin;
-import org.jenkinsci.test.acceptance.po.CapybaraPortingLayerImpl;
-import org.jenkinsci.test.acceptance.po.Jenkins;
-import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.Login;
-import org.jenkinsci.test.acceptance.po.PageObject;
-import org.jenkinsci.test.acceptance.po.User;
-import org.jenkinsci.test.acceptance.utils.IOUtil;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+
+import org.jenkinsci.test.acceptance.po.CapybaraPortingLayerImpl;
+import org.jenkinsci.test.acceptance.po.Jenkins;
+import org.jenkinsci.test.acceptance.po.Login;
+import org.jenkinsci.test.acceptance.po.PageObject;
+import org.jenkinsci.test.acceptance.po.User;
+import org.jenkinsci.test.acceptance.utils.IOUtil;
 import hudson.util.VersionNumber;
 
 /**
@@ -69,7 +68,7 @@ public class Matchers {
                 try {
                     item.findElement(selector);
                     return true;
-                } catch (NoSuchElementException _) {
+                } catch (NoSuchElementException ignored) {
                     return false;
                 }
             }
@@ -106,7 +105,7 @@ public class Matchers {
                     po.open();
                     po.find(by.xpath("//div[@id='tasks']/div/a[text()='%s']", displayName));
                     return true;
-                } catch (NoSuchElementException _) {
+                } catch (NoSuchElementException ignored) {
                     return false;
                 }
             }
@@ -316,26 +315,6 @@ public class Matchers {
             @Override
             public void describeMismatchSafely(final User item, final Description desc) {
                 desc.appendText("mail address of " + item + " is not " + mail + ".");
-            }
-        };
-    }
-
-    public static Matcher<Job> hasAnalysisWarningsFor(final AnalysisPlugin plugin) {
-        return new Matcher<Job>(" shows analysis results for plugin %s", plugin.getName()) {
-            @Override
-            public boolean matchesSafely(final Job job) {
-                job.open();
-                try {
-                    job.find(By.xpath("//h2[text()='Analysis results']/following-sibling::ul/li/img[@title='" + plugin.getName() + "']"));
-                    return true;
-                } catch (NoSuchElementException e) {
-                    return false;
-                }
-            }
-
-            @Override
-            public void describeMismatchSafely(final Job item, final Description desc) {
-                desc.appendText("Job is not showing analysis results for plugin " + plugin.getName());
             }
         };
     }

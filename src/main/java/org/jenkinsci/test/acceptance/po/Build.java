@@ -1,6 +1,5 @@
 package org.jenkinsci.test.acceptance.po;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
@@ -8,7 +7,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
-import org.apache.commons.io.IOUtils;
 import org.hamcrest.Description;
 import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.Matchers;
@@ -319,8 +317,7 @@ public class Build extends ContainerPageObject {
             WebElement stopButton = find(by.href("stop"));
             stopButton.click();
 
-            Alert alt = driver.switchTo().alert();
-            alt.accept();
+            handleAlert(Alert::accept);
         }
     }
 

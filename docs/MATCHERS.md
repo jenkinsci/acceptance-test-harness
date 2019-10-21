@@ -1,6 +1,10 @@
 # Using Hamcrest matchers
 
-Using hamcrest matchers is a preferred way to writing assertions. See [Matchers](https://github.com/jenkinsci/acceptance-test-harness/blob/master/src/main/java/org/jenkinsci/test/acceptance/Matchers.java) class for an inspiration of how those can look like. Note the convenience (typesafe) [Matcher](https://github.com/jenkinsci/acceptance-test-harness/blob/master/src/main/java/org/jenkinsci/test/acceptance/Matcher.java) superclass we use to avoid unnecessary verbosity.
+Using hamcrest matchers is a preferred way to writing assertions.
+See [Matchers](https://github.com/jenkinsci/acceptance-test-harness/blob/master/src/main/java/org/jenkinsci/test/acceptance/Matchers.java)
+class for an inspiration of how those can look like.
+Note the convenience (typesafe) [Matcher](https://github.com/jenkinsci/acceptance-test-harness/blob/master/src/main/java/org/jenkinsci/test/acceptance/Matcher.java)
+superclass we use to avoid unnecessary verbosity:
 
     public static Matcher<WebDriver> hasContent(final Pattern pattern) {
       return new Matcher<WebDriver>("Text matching %s", pattern) {
@@ -23,4 +27,5 @@ Using hamcrest matchers is a preferred way to writing assertions. See [Matchers]
       };
     }
 
-General purpose matchers should be available as static methods of the `Matchers` class. Plugin specific matchers should be defined in JUnit class or in dedicated `*Matcher` class.
+General purpose matchers should be available as static methods of the `Matchers` class.
+Plugin specific matchers should be defined in JUnit class or in dedicated `*Matcher` class.

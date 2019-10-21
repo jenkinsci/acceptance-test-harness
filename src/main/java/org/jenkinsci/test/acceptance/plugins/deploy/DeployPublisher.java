@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.plugins.deploy;
 
 import org.jenkinsci.test.acceptance.po.*;
+import org.openqa.selenium.NoSuchElementException;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -19,7 +20,16 @@ public class DeployPublisher extends AbstractStep implements PostBuildStep {
         control("adapters/credentialsId").select(credentials);
     }
 
-    public void useContainer(String container) {
-        control("hetero-list-add[adapters]").selectDropdownMenu(container);
+    public void useContainer(String... container) {
+        RuntimeException last = new RuntimeException("No container names provided");
+        for (String c : container) {
+            try {
+                control("hetero-list-add[adapters]").selectDropdownMenu(c);
+                return;
+            } catch (NoSuchElementException ex) {
+                last = ex;
+            }
+        }
+        throw last;
     }
 }

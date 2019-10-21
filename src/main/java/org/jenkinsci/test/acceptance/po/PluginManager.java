@@ -32,6 +32,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import static org.apache.http.entity.ContentType.APPLICATION_OCTET_STREAM;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.jenkinsci.test.acceptance.update_center.MockUpdateCenter;
@@ -226,7 +227,7 @@ public class PluginManager extends ContainerPageObject {
 
             // JENKINS-50790 It seems that this page takes too much time to load when running in the new ci.jenkins.io
             try {
-                driver.manage().timeouts().pageLoadTimeout(time.seconds(60), TimeUnit.MILLISECONDS);
+                driver.manage().timeouts().pageLoadTimeout(time.seconds(240), TimeUnit.MILLISECONDS);
                 visit("available");
             } finally {
                 driver.manage().timeouts().pageLoadTimeout(time.seconds(FallbackConfig.PAGE_LOAD_TIMEOUT), TimeUnit.MILLISECONDS);
@@ -295,20 +296,21 @@ public class PluginManager extends ContainerPageObject {
      */
     @Deprecated
     public void installPlugin(File localFile) throws IOException {
-        HttpClient httpclient = new DefaultHttpClient();
+        try (CloseableHttpClient httpclient = new DefaultHttpClient()) {
 
-        HttpPost post = new HttpPost(jenkins.url("pluginManager/uploadPlugin").toExternalForm());
-        HttpEntity e = MultipartEntityBuilder.create()
-                .addBinaryBody("name", localFile, APPLICATION_OCTET_STREAM, "x.jpi")
-                .build();
-        post.setEntity(e);
-
-        HttpResponse response = httpclient.execute(post);
-        if (response.getStatusLine().getStatusCode() >= 400) {
-            throw new IOException("Failed to upload plugin: " + response.getStatusLine() + "\n" +
-                    IOUtils.toString(response.getEntity().getContent()));
-        } else {
-            System.out.format("Plugin %s installed\n", localFile);
+            HttpPost post = new HttpPost(jenkins.url("pluginManager/uploadPlugin").toExternalForm());
+            HttpEntity e = MultipartEntityBuilder.create()
+                    .addBinaryBody("name", localFile, APPLICATION_OCTET_STREAM, "x.jpi")
+                    .build();
+            post.setEntity(e);
+    
+            HttpResponse response = httpclient.execute(post);
+            if (response.getStatusLine().getStatusCode() >= 400) {
+                throw new IOException("Failed to upload plugin: " + response.getStatusLine() + "\n" +
+                        IOUtils.toString(response.getEntity().getContent()));
+            } else {
+                System.out.format("Plugin %s installed\n", localFile);
+            }
         }
     }
 

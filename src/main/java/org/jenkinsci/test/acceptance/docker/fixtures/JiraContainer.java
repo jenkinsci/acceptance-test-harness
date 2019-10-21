@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -43,7 +44,9 @@ public class JiraContainer extends DockerContainer {
                 .withTimeout(2000, TimeUnit.SECONDS) // [INFO] jira started successfully in 1064s
                 .until( () ->  {
                         try {
-                            String s = IOUtils.toString(getURL().openStream());
+                            URLConnection connection = getURL().openConnection();
+                            connection.setConnectTimeout(1000); // Prevent waiting too long for connection to timeout
+                            String s = IOUtils.toString(connection.getInputStream());
                             return s.contains("System Dashboard");
                         } catch (SocketException e) {
                             return null;
