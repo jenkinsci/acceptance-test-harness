@@ -7,7 +7,7 @@ for (int i = 0; i < (BUILD_NUMBER as int); i++) {
 def branches = [:]
 for (int j in [8, 11]) {
     int javaVersion = j
-    def splits = splitTests count(10)
+    def splits = splitTests estimateTestsFromFiles: true, parallelism: count(10)
     for (int i = 0; i < splits.size(); i++) {
         int index = i
         def name = "java-${javaVersion}-split${index}"
