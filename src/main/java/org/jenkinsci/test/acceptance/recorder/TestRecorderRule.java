@@ -10,8 +10,6 @@ import org.monte.media.FormatKeys;
 import org.monte.media.VideoFormatKeys;
 import org.monte.media.math.Rational;
 import org.monte.screenrecorder.ScreenRecorder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.awt.GraphicsEnvironment;
 import java.awt.GraphicsConfiguration;
@@ -20,6 +18,8 @@ import java.awt.AWTException;
 import java.awt.HeadlessException;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.inject.Inject;
 
@@ -30,7 +30,7 @@ import javax.inject.Inject;
 @GlobalRule
 public class TestRecorderRule extends TestWatcher {
 
-    private static final Logger logger = LoggerFactory.getLogger(TestRecorderRule.class);
+    private static final Logger logger = Logger.getLogger(TestRecorderRule.class.getName());
 
     private static final int FRAME_RATE_PER_SEC = 60;
     private static final int BIT_DEPTH = 16;
@@ -86,14 +86,10 @@ public class TestRecorderRule extends TestWatcher {
                             outputFormatForScreenCapture, null, null, diagnostics);
             this.screenRecorder.start();
         } catch (HeadlessException e) {
-            logger.warn("Test recorder does not work with Headless mode");
+            logger.warning("Test recorder does not work with Headless mode");
             this.headless = true;
-        } catch (UnsupportedOperationException e) {
-            logger.warn("Exception starting test recording {}", e);
-        } catch (IOException e) {
-            logger.warn("Exception starting test recording {}", e);
-        } catch (AWTException e) {
-            logger.warn("Exception starting test recording {}", e);
+        } catch (UnsupportedOperationException | IOException | AWTException e) {
+            logger.log(Level.WARNING, "Exception starting test recording", e);
         }
     }
 
@@ -137,10 +133,8 @@ public class TestRecorderRule extends TestWatcher {
                     waitUntilLastFramesAreRecorded();
                 }
                 screenRecorder.stop();
-            } catch (IOException e) {
-                logger.warn("Exception stoping test recording {}.", e);
-            } catch (InterruptedException e) {
-                logger.warn("Exception stoping test recording {}.", e);
+            } catch (IOException | InterruptedException e) {
+                logger.log(Level.WARNING, "Exception stopping test recording", e);
             }
         }
     }

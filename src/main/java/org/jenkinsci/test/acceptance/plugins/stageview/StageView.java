@@ -7,9 +7,7 @@ import org.openqa.selenium.WebElement;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.logging.Logger;
 
 /**
  * Basic container for the stageview implementation. The stageview is the graphical
@@ -20,7 +18,7 @@ import org.slf4j.LoggerFactory;
  */
 public class StageView extends PageAreaImpl {
 
-    private static final Logger LOG = LoggerFactory.getLogger(StageView.class);
+    private static final Logger LOG = Logger.getLogger(StageView.class.getName());
 
     /**
      * Main box for all content
@@ -85,13 +83,13 @@ public class StageView extends PageAreaImpl {
         this.rootElementName = driver.findElement(By.id("pipeline-box")).getText();
 
         for (StageViewHeadline stageViewHeadline : this.stageViewHeadlines) {
-            LOG.debug("StageviewHeadline {} ", stageViewHeadline);
+            LOG.config("StageviewHeadline " + stageViewHeadline);
         }
 
         for (StageViewBuild job : jobs) {
             System.out.println(job);
             for (StageViewStage stageViewStage : job.getAllStageViewItem()) {
-                LOG.debug("StageviewHeadline {} ", stageViewStage);
+                LOG.config("StageviewHeadline "+ stageViewStage);
             }
         }
     }

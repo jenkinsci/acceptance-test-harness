@@ -26,12 +26,11 @@ package org.jenkinsci.test.acceptance.utils.pluginreporter;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Logger;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Exercised Plugin Reporter that logs to text file
@@ -46,7 +45,7 @@ import org.slf4j.LoggerFactory;
 public class TextFileExercisedPluginReporter implements ExercisedPluginsReporter {
 
     private static TextFileExercisedPluginReporter instance = null;
-    private static final Logger LOGGER = LoggerFactory.getLogger(TextFileExercisedPluginReporter.class);
+    private static final Logger LOGGER = Logger.getLogger(TextFileExercisedPluginReporter.class.getName());
     private File file;
 
     private TextFileExercisedPluginReporter() {
@@ -58,9 +57,8 @@ public class TextFileExercisedPluginReporter implements ExercisedPluginsReporter
         try {
             FileUtils.touch(file);
          } catch (IOException e) {
-             LOGGER.error(e.getMessage());
-             return;
-         }
+             LOGGER.severe(e.getMessage());
+        }
 
     }
     public static TextFileExercisedPluginReporter getInstance() {
@@ -72,11 +70,11 @@ public class TextFileExercisedPluginReporter implements ExercisedPluginsReporter
     @Override
     public void log(String testName, String pluginName, String pluginVersion) {
 
-        PropertiesConfiguration config = null;
+        PropertiesConfiguration config;
         try {
            config = new PropertiesConfiguration(file);
         } catch (ConfigurationException e) {
-            LOGGER.error(e.getMessage());
+            LOGGER.severe(e.getMessage());
             return;
         }
 
@@ -84,8 +82,7 @@ public class TextFileExercisedPluginReporter implements ExercisedPluginsReporter
         try {
             config.save();
         } catch (ConfigurationException e) {
-            LOGGER.error(e.getMessage());
-            return;
+            LOGGER.severe(e.getMessage());
         }
     }
 }
