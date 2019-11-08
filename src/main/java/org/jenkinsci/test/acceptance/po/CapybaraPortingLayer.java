@@ -145,9 +145,19 @@ public interface CapybaraPortingLayer {
     /**
      * Confirms an alert giving it some time to appear
      *
-     * @param timeout Maximun time to wait for the alert to appear, in seconds
+     * @param timeout Maximum time to wait for the alert to appear, in seconds
+     * @deprecated Use {@link CapybaraPortingLayer#runThenConfirmAlert(Runnable, int)} and provide the runnable that triggers the alert.
      */
+    @Deprecated
     void confirmAlert(int timeout);
+
+    /**
+     * Do something that triggers an alert then giving it some time to appear
+     *
+     * @param runnable Something that will trigger the alert
+     * @param timeout Maximum time to wait for the alert to appear, in seconds
+     */
+    void runThenConfirmAlert(Runnable runnable, int timeout);
 
     /**
      * Get all text of the page including markup.

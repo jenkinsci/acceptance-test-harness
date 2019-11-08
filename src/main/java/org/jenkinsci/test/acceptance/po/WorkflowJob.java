@@ -104,8 +104,7 @@ public class WorkflowJob extends Job {
 
     public void delete() {
         open();
-        clickLink("Delete Pipeline");
-        confirmAlert(2);
+        runThenConfirmAlert(() -> clickLink("Delete Pipeline"),2);
     }
 
     /**

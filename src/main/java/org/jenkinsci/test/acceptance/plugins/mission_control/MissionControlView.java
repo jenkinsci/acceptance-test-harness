@@ -319,8 +319,7 @@ public class MissionControlView extends View {
     public void reloadConfiguration() {
         getJenkins().open();
         driver.findElement(By.xpath("//a[@class='task-link' and @href='/manage']")).click();
-        driver.findElement(By.xpath("//a[@href='#']")).click();
-        handleAlert(Alert::accept);
+        runThenConfirmAlert(() -> driver.findElement(By.xpath("//a[@href='#']")).click());
         getJenkins().waitForLoad(5);
     }
 
