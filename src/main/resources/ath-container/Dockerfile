@@ -70,6 +70,9 @@ ADD run.sh /usr/bin/
 RUN chmod u+s "$(which update-alternatives)"
 RUN dbus-uuidgen > /etc/machine-id
 
+RUN yum install -y https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm
+RUN wget -O chromedriver.zip https://chromedriver.storage.googleapis.com/78.0.3904.70/chromedriver_linux64.zip && unzip chromedriver.zip && cp chromedriver /usr/local/bin/
+
 # Java 8 by default
 USER ath-user
 RUN set-java.sh 8

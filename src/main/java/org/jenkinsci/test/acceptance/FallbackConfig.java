@@ -124,11 +124,14 @@ public class FallbackConfig extends AbstractModule {
         case "iexplore":
         case "iexplorer":
             return new InternetExplorerDriver();
+        case "google-chrome":
         case "chrome":
             Map<String, String> prefs = new HashMap<String, String>();
             prefs.put(LANGUAGE_SELECTOR, "en");
             ChromeOptions options = new ChromeOptions();
             options.setExperimentalOption("prefs", prefs);
+            // Needed to prevent "unknown error: DevToolsActivePort file doesn't exist" when running inside container
+            options.addArguments("--no-sandbox");
             if (isCaptureHarEnabled()) {
                 options.setProxy(createSeleniumProxy(testName.get()));
             }

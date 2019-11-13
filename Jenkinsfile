@@ -44,7 +44,7 @@ for (int i = 0; i < splits.size(); i++) {
                                 eval \$(vnc.sh)
                                 java -version
 
-                                run.sh firefox latest -Dmaven.test.failure.ignore=true -DforkCount=1 -B
+                                run.sh google-chrome latest -Dmaven.test.failure.ignore=true -DforkCount=1 -B
                             """
                         }
                     }
