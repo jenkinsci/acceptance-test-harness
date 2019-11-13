@@ -34,8 +34,7 @@ public class Workspace extends PageObject {
 
     public void wipeOut() {
         open();
-        clickLink("Wipe Out Current Workspace");
-        handleAlert(Alert::accept);
+        runThenConfirmAlert(() -> clickLink("Wipe Out Current Workspace"));
     }
 
     public static Matcher<Job> workspaceContains(final String file) {
