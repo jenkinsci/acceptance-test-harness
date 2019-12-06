@@ -84,7 +84,7 @@ public class Jenkins extends Node implements Container {
                 );
             }
         } catch (IOException ex) {
-            throw new AssertionError(ex);
+            throw new AssertionError("Caught an IOException, Jenkins URL was " + url, ex);
         }
         int space = text.indexOf(' ');
         if (space != -1) {
