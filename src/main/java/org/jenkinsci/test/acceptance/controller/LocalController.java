@@ -128,12 +128,21 @@ public abstract class LocalController extends JenkinsController implements LogLi
         }
 
         LOGGER.info("Running with given plugins: " + Arrays.toString(pluginDir.list()));
+    }
 
-        try {
-            FileUtils.copyFile(formElementPathPlugin, new File(pluginDir, "path-element.hpi"));
-        } catch (IOException e) {
-            throw new RuntimeException(String.format("Failed to copy form path element file %s to plugin dir %s.",
-                    formElementPathPlugin, pluginDir),e);
+    private void installFormElementPath(File pluginDir) {
+        if (runInstallWizard) {
+            out.println("Skipping installation of form-element-path.jpi");
+        } else {
+            out.println("Installing form-element-path.jpi");
+            try {
+                FileUtils.copyFile(formElementPathPlugin, new File(pluginDir, "form-element-path.jpi"));
+            } catch (IOException e) {
+                String msg = String.format(
+                        "Failed to copy form-element-path file %s to plugin dir %s.", formElementPathPlugin, pluginDir
+                );
+                throw new RuntimeException(msg, e);
+            }
         }
     }
 
@@ -183,8 +192,9 @@ public abstract class LocalController extends JenkinsController implements LogLi
         } catch (Exception e) {
             throw new IOException(e.getMessage(), e);
         }
-    }
 
+        installFormElementPath(new File(jenkinsHome, "plugins"));
+    }
 
     public File getJavaHome() {
         String javaHome = getenv("JENKINS_JAVA_HOME");

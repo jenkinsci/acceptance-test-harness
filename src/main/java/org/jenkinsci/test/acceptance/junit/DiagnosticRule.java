@@ -2,6 +2,7 @@ package org.jenkinsci.test.acceptance.junit;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Logger;
 import javax.inject.Inject;
 import org.apache.commons.io.FileUtils;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
@@ -12,12 +13,10 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @GlobalRule
 public class DiagnosticRule extends TestWatcher {
-    private static final Logger logger = LoggerFactory.getLogger(DiagnosticRule.class);
+    private static final Logger logger = Logger.getLogger(DiagnosticRule.class.getName());
 
     @Inject
     FailureDiagnostics diagnostics;
@@ -49,7 +48,7 @@ public class DiagnosticRule extends TestWatcher {
             FileUtils.copyFile(screenshot, file);
 
         } catch (IOException e) {
-            logger.warn("An error occurred when taking screenshot");
+            logger.warning("An error occurred when taking screenshot");
             throw new Error(e);
         }
     }

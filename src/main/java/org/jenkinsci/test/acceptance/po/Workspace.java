@@ -23,11 +23,7 @@
  */
 package org.jenkinsci.test.acceptance.po;
 
-import java.time.Duration;
-
 import org.jenkinsci.test.acceptance.Matcher;
-import org.openqa.selenium.Alert;
-import org.openqa.selenium.WebElement;
 
 public class Workspace extends PageObject {
 
@@ -37,10 +33,7 @@ public class Workspace extends PageObject {
 
     public void wipeOut() {
         open();
-        WebElement wipeOut = find(by.link("Wipe Out Current Workspace"));
-        wipeOut.click();
-        handleAlert(Alert::accept);
-        waitFor(wipeOut).until(Control::isStale);
+        runThenConfirmAlert(() -> clickLink("Wipe Out Current Workspace"));
     }
 
     public static Matcher<Job> workspaceContains(final String file) {

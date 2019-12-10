@@ -71,8 +71,7 @@ public class FormValidationTest extends AbstractJUnitTest {
     }
 
     private void navigateAway() {
-        jenkins.open();
-        jenkins.handleAlert(Alert::accept);
+        jenkins.runThenConfirmAlert(() -> jenkins.open());
         sleep(1000); // Needed for some reason
     }
 }

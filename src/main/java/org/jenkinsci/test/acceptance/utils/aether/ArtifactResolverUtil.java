@@ -26,6 +26,8 @@ package org.jenkinsci.test.acceptance.utils.aether;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.inject.Inject;
 
@@ -45,8 +47,6 @@ import org.eclipse.aether.resolution.ArtifactRequest;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.util.repository.AuthenticationBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Helper class to resolve artifacts with Aether
@@ -56,7 +56,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ArtifactResolverUtil {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ArtifactResolverUtil.class);
+    private static final Logger LOGGER = Logger.getLogger(ArtifactResolverUtil.class.getName());
     private RepositorySystem repoSystem;
     private RepositorySystemSession repoSystemSession;
 
@@ -83,20 +83,20 @@ public class ArtifactResolverUtil {
         request.setUserSettingsFile(userSettingsFile);
 
         if (userSettingsFile.exists()) {
-            LOGGER.debug("Found maven settings file - " + userSettingsFile.getAbsolutePath());
+            LOGGER.config("Found maven settings file - " + userSettingsFile.getAbsolutePath());
             SettingsBuilder settingsBuilder = new DefaultSettingsBuilderFactory().newInstance();
 
             try {
                 Settings settings = settingsBuilder.build(request).getEffectiveSettings();
                 org.apache.maven.settings.Proxy mavenActiveproxy = settings.getActiveProxy();
                 if (mavenActiveproxy != null) {
-                    LOGGER.debug("Found maven proxy settings. Will use for artifact resolution");
+                    LOGGER.config("Found maven proxy settings. Will use for artifact resolution");
                     repoBuilder.setProxy(asProxy(mavenActiveproxy));
                 } else {
-                    LOGGER.debug("Did not find an active proxy in maven settings xml file");
+                    LOGGER.config("Did not find an active proxy in maven settings xml file");
                 }
             } catch (SettingsBuildingException e) {
-                LOGGER.warn("Could not find or load settings.xml to attempt to user proxy settings.", e);
+                LOGGER.log(Level.WARNING, "Could not find or load settings.xml to attempt to user proxy settings.", e);
             }
         }
 
@@ -107,7 +107,7 @@ public class ArtifactResolverUtil {
         } catch (ArtifactResolutionException e) {
             throw new RuntimeException("Could not resolve " + artifact + " from Maven repository",e);
         }
-        LOGGER.debug("Found " + r);
+        LOGGER.config("Found " + r);
         return r;
     }
 

@@ -105,10 +105,7 @@ public class WorkflowJob extends Job {
 
     public void delete() {
         open();
-        WebElement deleteLink = find(by.link("Delete Pipeline"));
-        deleteLink.click();
-        confirmAlert(2);
-        waitFor(deleteLink).until(Control::isStale);
+        runThenConfirmAlert(() -> clickLink("Delete Pipeline"),2);
     }
 
     /**

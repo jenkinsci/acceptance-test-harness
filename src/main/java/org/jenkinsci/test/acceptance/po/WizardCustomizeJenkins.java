@@ -24,15 +24,16 @@
 
 package org.jenkinsci.test.acceptance.po;
 
-import static org.jenkinsci.test.acceptance.Matchers.hasContent;
-
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
-
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.NoSuchFrameException;
 import org.openqa.selenium.WebElement;
+
+import java.util.concurrent.TimeUnit;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.IsNot.not;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 /**
  * Page object for Wizard Customize Jenkins Page.
@@ -72,6 +73,7 @@ public class WizardCustomizeJenkins extends PageObject {
                         return element != null;
                     } finally {
                         driver.switchTo().defaultContent();
+                        assertThat(driver, not(hasContent("Installation Failures")));
                     }
                 })
         ;

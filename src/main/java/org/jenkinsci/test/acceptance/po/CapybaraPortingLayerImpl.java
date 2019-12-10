@@ -372,13 +372,22 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     }
 
     public void handleAlert(Consumer<Alert> action) {
-        String oldWindow = driver.getWindowHandle();
+        runThenHandleAlert(null, action);
+    }
 
+    public void runThenHandleAlert(Runnable runnable, Consumer<Alert> action) {
+        runThenHandleAlert(runnable, action, 10);
+    }
+
+    public void runThenHandleAlert(Runnable runnable, Consumer<Alert> action, int timeoutSeconds) {
+        String oldWindow = driver.getWindowHandle();
+        if (runnable != null) {
+            runnable.run();
+        }
         Wait<WebDriver> wait = new Wait<>(driver, time)
                 .pollingEvery(500, TimeUnit.MILLISECONDS)
-                .withTimeout(10, TimeUnit.SECONDS)
+                .withTimeout(timeoutSeconds, TimeUnit.SECONDS)
         ;
-
         Alert alert = wait.until(ExpectedConditions.alertIsPresent());
         try {
             action.accept(alert);
@@ -389,7 +398,16 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
 
     @Override
     public void confirmAlert(int timeout) {
-        handleAlert(Alert::accept);
+        runThenHandleAlert(null, Alert::accept, timeout);
+    }
+
+    public void runThenConfirmAlert(Runnable runnable) {
+        runThenHandleAlert(runnable, Alert::accept);
+    }
+
+    @Override
+    public void runThenConfirmAlert(Runnable runnable, int timeout) {
+        runThenHandleAlert(runnable, Alert::accept, timeout);
     }
 
     /**

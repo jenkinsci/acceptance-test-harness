@@ -9,7 +9,7 @@
   </parent>
 
   <artifactId>acceptance-test-harness</artifactId>
-  <version>1.69-SNAPSHOT</version>
+  <version>1.70-SNAPSHOT</version>
 
   <name>Acceptance Test Harness</name>
   <licenses>
@@ -26,13 +26,14 @@
   </scm>
 
   <properties>
+    <java.level>8</java.level>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <trimStackTrace>false</trimStackTrace> <!-- surefire -->
     <java.level>8</java.level>
     <findbugs.skip>true</findbugs.skip>
 
     <selenium.version>3.14.0</selenium.version>
-    <guava.version>25.0-jre</guava.version>
+    <guava.version>25.0-jre</guava.version> <!-- aligned with selenium -->
     <aether.version>0.9.0.v20140226</aether.version>
     <maven.version>3.1.0</maven.version>
     <groovy.version>2.3.1</groovy.version>
@@ -109,11 +110,10 @@
       <version>${maven.version}</version>
     </dependency>
 
-    <dependency><!-- to align the version of Guava that we use between jclouds and Aether -->
-      <groupId>org.sonatype.sisu</groupId>
-      <artifactId>sisu-guice</artifactId>
-      <version>3.2.0</version>
-      <classifier>no_aop</classifier>
+    <dependency>
+      <groupId>com.google.inject</groupId>
+      <artifactId>guice</artifactId>
+      <version>4.0</version>
     </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>
@@ -198,28 +198,6 @@
       <groupId>com.github.stephenc.monte</groupId>
       <artifactId>monte-screen-recorder</artifactId>
       <version>${monte.version}</version>
-    </dependency>
-    <!-- jclouds -->
-    <dependency>
-      <groupId>org.apache.jclouds</groupId>
-      <artifactId>jclouds-all</artifactId>
-      <version>1.7.1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.jclouds.driver</groupId>
-      <artifactId>jclouds-enterprise</artifactId>
-      <version>1.7.1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.jclouds.driver</groupId>
-      <artifactId>jclouds-sshj</artifactId>
-      <version>1.7.1</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.bouncycastle</groupId>
-          <artifactId>bcpkix-jdk15on</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
 
     <!-- Groovy -->
@@ -321,11 +299,6 @@
       <groupId>com.github.jnr</groupId>
       <artifactId>jnr-unixsocket</artifactId>
       <version>0.3</version>
-    </dependency>
-    <dependency>
-      <groupId>com.github.jnr</groupId>
-      <artifactId>jnr-ffi</artifactId>
-      <version>1.0.9</version>
     </dependency>
     <dependency>
       <groupId>org.ini4j</groupId>

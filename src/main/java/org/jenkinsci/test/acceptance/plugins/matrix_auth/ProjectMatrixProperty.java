@@ -20,8 +20,8 @@ public class ProjectMatrixProperty extends PageAreaImpl {
      * Adds a new user/group to this matrix.
      */
     public MatrixRow addUser(String name) {
-        this.name.resolve().findElement(by.parent()).findElement(by.button("Add user or group…")).click();
-        handleAlert(a -> {
+        runThenHandleAlert(() -> this.name.resolve().findElement(by.parent()).findElement(by.button("Add user or group…")).click(),
+                a -> {
             a.sendKeys(name);
             a.accept();
         });
