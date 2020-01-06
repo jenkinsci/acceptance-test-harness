@@ -25,7 +25,7 @@ RUN curl -fsSLO https://github.com/mozilla/geckodriver/releases/download/v0.26.0
 
 # Maven in repo is not new enough for ATH
 ENV MAVEN_VERSION 3.6.3
-RUN curl -ffSLO https://www.apache.org/dist/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz && \
+RUN curl -ffSLO https://archive.apache.org/dist/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz && \
     tar -xvzf apache-maven-$MAVEN_VERSION-bin.tar.gz -C /opt/ && \
     mv /opt/apache-maven-* /opt/maven
 ENV PATH="$PATH:/opt/maven/bin"
