@@ -27,6 +27,7 @@ import java.net.URL;
 
 import org.jenkinsci.test.acceptance.plugins.authorize_project.BuildAccessControl;
 import org.jenkinsci.test.acceptance.plugins.workflow_multibranch.BranchSource;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
 /**
@@ -48,13 +49,21 @@ public class GlobalSecurityConfig extends ContainerPageObject {
     }
 
     public <T extends SecurityRealm> T useRealm(Class<T> type) {
-        control("/useSecurity").check();
+        maybeCheckUseSecurity();
         return selectFromRadioGroup(type);
     }
 
     public <T extends AuthorizationStrategy> T useAuthorizationStrategy(Class<T> type) {
-        control("/useSecurity").check();
+        maybeCheckUseSecurity();
         return selectFromRadioGroup(type);
+    }
+
+    private void maybeCheckUseSecurity() {
+        try {
+            control("/useSecurity").check();
+        } catch (NoSuchElementException x) {
+            // JENKINS-40228, OK
+        }
     }
 
     public <T extends BuildAccessControl> T addBuildAccessControl(final Class<T> type) {
