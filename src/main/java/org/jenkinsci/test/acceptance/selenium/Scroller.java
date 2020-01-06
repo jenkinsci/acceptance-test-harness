@@ -2,7 +2,6 @@ package org.jenkinsci.test.acceptance.selenium;
 
 import java.io.IOException;
 import java.util.Objects;
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
@@ -10,9 +9,9 @@ import org.jenkinsci.test.acceptance.junit.Wait;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.WrapsDriver;
+import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.support.events.AbstractWebDriverEventListener;
-
-import static org.jenkinsci.test.acceptance.Matchers.pageObjectExists;
 
 /**
  * Automatically scrolls the element into view.
@@ -92,6 +91,10 @@ public class Scroller extends AbstractWebDriverEventListener {
      * or tests, there is likely a framework problem to be fixed.
      */
     public void scrollIntoView(WebElement e, WebDriver driver) {
+        if (driver instanceof HtmlUnitDriver || (driver instanceof WrapsDriver && ((WrapsDriver) driver).getWrappedDriver() instanceof HtmlUnitDriver)) {
+            return;
+        }
+
         // Do not scroll select's options into view since they are considered to be on the position where they appear when
         // select is clicked, but aligning some option with the top of the window often causes the select itself gets
         // scrolled above the window causing the very issues we are trying to avoid here...
