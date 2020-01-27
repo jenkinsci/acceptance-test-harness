@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
+import org.jenkinsci.test.acceptance.utils.IOUtil;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.jenkinsci.utils.process.ProcessInputStream;
 
@@ -37,7 +38,7 @@ public class WinstoneController extends LocalController {
     @Inject
     public WinstoneController(Injector i) {
         super(i);
-        httpPort = randomLocalPort();
+        httpPort = IOUtil.randomTcpPort();
     }
 
     @Override

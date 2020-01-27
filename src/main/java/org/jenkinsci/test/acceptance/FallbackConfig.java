@@ -2,9 +2,12 @@ package org.jenkinsci.test.acceptance;
 
 import javax.annotation.CheckForNull;
 import javax.inject.Named;
+import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
@@ -20,10 +23,10 @@ import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.resolution.ArtifactResult;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.JenkinsControllerFactory;
+import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.guice.TestCleaner;
 import org.jenkinsci.test.acceptance.guice.TestName;
 import org.jenkinsci.test.acceptance.guice.TestScope;
-import org.jenkinsci.test.acceptance.junit.FailureDiagnostics;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.recorder.HarRecorder;
 import org.jenkinsci.test.acceptance.selenium.SanityChecker;
@@ -40,9 +43,11 @@ import org.jenkinsci.test.acceptance.utils.pluginreporter.ConsoleExercisedPlugin
 import org.jenkinsci.test.acceptance.utils.pluginreporter.ExercisedPluginsReporter;
 import org.jenkinsci.test.acceptance.utils.pluginreporter.TextFileExercisedPluginReporter;
 import org.jenkinsci.utils.process.CommandBuilder;
+import org.jenkinsci.utils.process.ProcessInputStream;
 import org.junit.runners.model.Statement;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.Dimension;
+import org.openqa.selenium.MutableCapabilities;
 import org.openqa.selenium.Proxy;
 import org.openqa.selenium.UnsupportedCommandException;
 import org.openqa.selenium.WebDriver;
@@ -96,7 +101,7 @@ public class FallbackConfig extends AbstractModule {
         bind(SlaveProvider.class).to(LocalSlaveProvider.class);
     }
 
-    private WebDriver createWebDriver(TestName testName) throws IOException {
+    private WebDriver createWebDriver(TestCleaner cleaner, TestName testName) throws IOException {
         String browser = System.getenv("BROWSER");
         if (browser==null) browser = "firefox";
         browser = browser.toLowerCase(Locale.ENGLISH);
@@ -120,6 +125,10 @@ public class FallbackConfig extends AbstractModule {
             }
             GeckoDriverService service = builder.build();
             return new FirefoxDriver(service, firefoxOptions);
+        case "firefox-container":
+            return createContainerWebDriver(cleaner, "selenium/standalone-firefox-debug:3.14.0", new FirefoxOptions());
+        case "chrome-container":
+            return createContainerWebDriver(cleaner, "selenium/standalone-chrome-debug:3.14.0", new ChromeOptions());
         case "ie":
         case "iexplore":
         case "iexplorer":
@@ -167,10 +176,53 @@ public class FallbackConfig extends AbstractModule {
             }
             return new RemoteWebDriver(
                     new URL(u), //http://192.168.99.100:4444/wd/hub
-                    DesiredCapabilities.firefox());
-
+                    DesiredCapabilities.firefox()
+            );
         default:
             throw new Error("Unrecognized browser type: "+browser);
+        }
+    }
+
+    private WebDriver createContainerWebDriver(TestCleaner cleaner, String image, MutableCapabilities capabilities) throws IOException {
+        try {
+            Path log = Files.createTempFile("ath-docker-browser", "log");
+            System.out.println("Starting selenium container. Logs in " + log);
+
+            if (!IOUtil.isTcpPortFree(4444)) throw new IllegalStateException("Port 4444 is occupied");
+
+            new Docker().cmd("pull", image).popen().verifyOrDieWith("Failed to pull image " + image);
+            // TODO document why host network is needed
+            String[] args = {"run", "-d", /*"-p=4444:4444",*/ "-v", "--shm-size=2g", "--network=host", image};
+
+            ProcessInputStream popen = new Docker().cmd(args).popen();
+            popen.waitFor();
+            String cid = popen.verifyOrDieWith("Failed to run selenium container").trim();
+
+            new ProcessBuilder(new Docker().cmd("logs", "-f", cid).toCommandArray()).redirectErrorStream(true).redirectOutput(log.toFile()).start();
+
+            Closeable cleanContainer = () -> {
+                try {
+                    new Docker().cmd("kill", cid).popen().verifyOrDieWith("Failed to kill " + cid);
+                    new Docker().cmd("rm", cid).popen().verifyOrDieWith("Failed to rm " + cid);
+                } catch (IOException | InterruptedException e) {
+                    throw new Error("Failed removing container", e);
+                }
+            };
+Thread.sleep(5000); // TODO some delay needed but likely not this long
+
+            try {
+                RemoteWebDriver remoteWebDriver = new RemoteWebDriver(new URL("http://127.0.0.1:4444/wd/hub"), capabilities);
+                cleaner.addTask(cleanContainer);
+                return remoteWebDriver;
+            } catch (RuntimeException e) {
+                cleanContainer.close();
+                throw e;
+            } catch (Throwable e) {
+                cleanContainer.close();
+                throw new Error(e);
+            }
+        } catch (InterruptedException e) {
+            throw new Error(e);
         }
     }
 
@@ -221,7 +273,7 @@ public class FallbackConfig extends AbstractModule {
      */
     @Provides @TestScope
     public WebDriver createWebDriver(TestCleaner cleaner, TestName testName, ElasticTime time) throws IOException {
-        WebDriver base = createWebDriver(testName);
+        WebDriver base = createWebDriver(cleaner, testName);
 
         // Make sure the window has minimal resolution set, even when out of the visible screen.
         // Note - not maximizing here any more because that doesn't do anything.

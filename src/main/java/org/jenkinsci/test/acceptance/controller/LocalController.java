@@ -9,7 +9,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Field;
-import java.net.ServerSocket;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
@@ -316,30 +315,6 @@ public abstract class LocalController extends JenkinsController implements LogLi
         return env;
     }
 
-    /**
-     * Gives random available port in the given range.
-     *
-     * @param from if <=0 then default value 49152 is used
-     * @param to   if <=0 then default value 65535 is used
-     */
-    protected int randomLocalPort(int from, int to){
-        from = (from <=0) ? 49152 : from;
-        to = (to <= 0) ? 65535 : to;
-
-
-        while(true){
-            int candidate = (int) ((Math.random() * (to-from)) + from);
-            if(isFreePort(candidate)){
-                return candidate;
-            }
-            LOGGER.info(String.format("Port %s is in use", candidate));
-        }
-    }
-
-    protected int randomLocalPort(){
-        return randomLocalPort(-1,-1);
-    }
-
     private void diagnoseFailedLoad(Exception cause) throws IOException {
         String td = getThreaddump();
         if (td != null) {
@@ -401,16 +376,6 @@ public abstract class LocalController extends JenkinsController implements LogLi
         }
 
         return null;
-    }
-
-    private boolean isFreePort(int port){
-        try {
-            ServerSocket ss = new ServerSocket(port);
-            ss.close();
-            return true;
-        } catch (IOException ex) {
-            return false;
-        }
     }
 
     /**
