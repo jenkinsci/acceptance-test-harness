@@ -190,20 +190,20 @@ public class FallbackConfig extends AbstractModule {
 
             if (!IOUtil.isTcpPortFree(4444)) throw new IllegalStateException("Port 4444 is occupied");
 
-            new Docker().cmd("pull", image).popen().verifyOrDieWith("Failed to pull image " + image);
-            // TODO document why host network is needed
-            String[] args = {"run", "-d", /*"-p=4444:4444",*/ "-v", "--shm-size=2g", "--network=host", image};
+            Docker.cmd("pull", image).popen().verifyOrDieWith("Failed to pull image " + image);
+            // TODO document why host network is needed (proxy UC reachable by browser)
+            String[] args = {"run", "-d", /*"-p=4444:4444",*/ "--shm-size=2g", "--network=host", image};
 
-            ProcessInputStream popen = new Docker().cmd(args).popen();
+            ProcessInputStream popen = Docker.cmd(args).popen();
             popen.waitFor();
             String cid = popen.verifyOrDieWith("Failed to run selenium container").trim();
 
-            new ProcessBuilder(new Docker().cmd("logs", "-f", cid).toCommandArray()).redirectErrorStream(true).redirectOutput(log.toFile()).start();
+            new ProcessBuilder(Docker.cmd("logs", "-f", cid).toCommandArray()).redirectErrorStream(true).redirectOutput(log.toFile()).start();
 
             Closeable cleanContainer = () -> {
                 try {
-                    new Docker().cmd("kill", cid).popen().verifyOrDieWith("Failed to kill " + cid);
-                    new Docker().cmd("rm", cid).popen().verifyOrDieWith("Failed to rm " + cid);
+                    Docker.cmd("kill", cid).popen().verifyOrDieWith("Failed to kill " + cid);
+                    Docker.cmd("rm", cid).popen().verifyOrDieWith("Failed to rm " + cid);
                 } catch (IOException | InterruptedException e) {
                     throw new Error("Failed removing container", e);
                 }
