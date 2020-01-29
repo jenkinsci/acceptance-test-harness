@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 import net.lightbody.bmp.BrowserMobProxy;
 import net.lightbody.bmp.client.ClientUtil;
@@ -82,6 +83,9 @@ import static org.jenkinsci.test.acceptance.recorder.HarRecorder.isCaptureHarEna
  * @author Kohsuke Kawaguchi
  */
 public class FallbackConfig extends AbstractModule {
+
+    private static final Logger LOGGER = Logger.getLogger(FallbackConfig.class.getName());
+
     /** Browser property to set the default locale. */
     private static final String LANGUAGE_SELECTOR = "intl.accept_languages";
 
@@ -186,13 +190,14 @@ public class FallbackConfig extends AbstractModule {
     private WebDriver createContainerWebDriver(TestCleaner cleaner, String image, MutableCapabilities capabilities) throws IOException {
         try {
             Path log = Files.createTempFile("ath-docker-browser", "log");
-            System.out.println("Starting selenium container. Logs in " + log);
+            LOGGER.info("Starting selenium container. Logs in " + log);
 
             if (!IOUtil.isTcpPortFree(4444)) throw new IllegalStateException("Port 4444 is occupied");
 
             Docker.cmd("pull", image).popen().verifyOrDieWith("Failed to pull image " + image);
-            // TODO document why host network is needed (proxy UC reachable by browser)
-            String[] args = {"run", "-d", /*"-p=4444:4444",*/ "--shm-size=2g", "--network=host", image};
+            // While this only needs to expose two ports (4444, 5900), it needs to be able to talk to Jenkins running
+            // out of container so using host networking is the most straightforward way to go.
+            String[] args = {"run", "-d", "--shm-size=2g", "--network=host", image};
 
             ProcessInputStream popen = Docker.cmd(args).popen();
             popen.waitFor();
@@ -208,7 +213,7 @@ public class FallbackConfig extends AbstractModule {
                     throw new Error("Failed removing container", e);
                 }
             };
-Thread.sleep(5000); // TODO some delay needed but likely not this long
+            Thread.sleep(3000); // Give the container and selenium some time to spawn
 
             try {
                 RemoteWebDriver remoteWebDriver = new RemoteWebDriver(new URL("http://127.0.0.1:4444/wd/hub"), capabilities);
@@ -241,7 +246,7 @@ Thread.sleep(5000); // TODO some delay needed but likely not this long
             System.setProperty(property, executable);
         }
         else {
-            System.out.println("Unable to locate " + driverCommand);
+            LOGGER.warning("Unable to locate " + driverCommand);
         }
     }
 
@@ -291,7 +296,7 @@ Thread.sleep(5000); // TODO some delay needed but likely not this long
             d.manage().timeouts().implicitlyWait(time.seconds(IMPLICIT_WAIT_TIMEOUT), TimeUnit.MILLISECONDS);
         } catch (UnsupportedCommandException e) {
             // sauce labs RemoteWebDriver doesn't support this
-            System.out.println(base + " doesn't support page load timeout");
+            LOGGER.info(base + " doesn't support page load timeout");
         }
         cleaner.addTask(new Statement() {
             @Override
@@ -335,11 +340,11 @@ Thread.sleep(5000); // TODO some delay needed but likely not this long
         if (type==null) {
             File socket = getSocket();
             if (socket.exists() && !JenkinsControllerPoolProcess.MAIN) {
-                System.out.println("Found pooled jenkins controller listening on socket " + socket.getAbsolutePath());
+                LOGGER.info("Found pooled jenkins controller listening on socket " + socket.getAbsolutePath());
                 return new PooledJenkinsController(injector, socket);
             }
             else {
-                System.out.println("No pooled jenkins controller listening on socket " + socket.getAbsolutePath());
+                LOGGER.warning("No pooled jenkins controller listening on socket " + socket.getAbsolutePath());
                 type = "winstone";
             }
         }
