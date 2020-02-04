@@ -205,12 +205,18 @@ public class FallbackConfig extends AbstractModule {
 
             new ProcessBuilder(Docker.cmd("logs", "-f", cid).toCommandArray()).redirectErrorStream(true).redirectOutput(log.toFile()).start();
 
-            Closeable cleanContainer = () -> {
-                try {
-                    Docker.cmd("kill", cid).popen().verifyOrDieWith("Failed to kill " + cid);
-                    Docker.cmd("rm", cid).popen().verifyOrDieWith("Failed to rm " + cid);
-                } catch (IOException | InterruptedException e) {
-                    throw new Error("Failed removing container", e);
+            Closeable cleanContainer = new Closeable() {
+                @Override public void close() {
+                    try {
+                        Docker.cmd("kill", cid).popen().verifyOrDieWith("Failed to kill " + cid);
+                        Docker.cmd("rm", cid).popen().verifyOrDieWith("Failed to rm " + cid);
+                    } catch (IOException | InterruptedException e) {
+                        throw new Error("Failed removing container", e);
+                    }
+                }
+
+                @Override public String toString() {
+                    return "Kill and remove selenium container";
                 }
             };
             Thread.sleep(3000); // Give the container and selenium some time to spawn
