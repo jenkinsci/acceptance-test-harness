@@ -31,6 +31,11 @@ public class Cleaner {
             public void evaluate() throws Throwable {
                 r.run();
             }
+
+            @Override
+            public String toString() {
+                return r.toString();
+            }
         });
     }
 
@@ -39,6 +44,11 @@ public class Cleaner {
             @Override
             public void evaluate() throws Throwable {
                 c.close();
+            }
+
+            @Override
+            public String toString() {
+                return c.toString();
             }
         });
     }
@@ -49,9 +59,15 @@ public class Cleaner {
             public void evaluate() throws Throwable {
                 c.call();
             }
+
+            @Override
+            public String toString() {
+                return c.toString();
+            }
         });
     }
     public void performCleanUp() {
+        LOGGER.info("Performing cleanup tasks in order: " + tasks);
         for (Statement task : tasks) {
             try {
                 task.evaluate();
