@@ -16,6 +16,8 @@ The following values are available:
           for example `http://0.0.0.0:32779/wd/hub`
           when using something like
           [selenium/standalone-firefox-debug](https://hub.docker.com/r/selenium/standalone-firefox-debug/))_
+ * `firefox-container` and `chrome-container`
+        Running the browser inside selenium provided per-test container.
 
 For example, to run tests with Safari, you'd execute:
 

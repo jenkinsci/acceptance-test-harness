@@ -29,7 +29,7 @@ Existing tests that do not adhere to these guidelines will be reevaluated and pr
 Test is determined fragile/broken when it is failing despite no defects are present in tested component.
 
 - JIRA issue will be created notifying author of the test or plugin authors.
-  - Test can be fixed or moved away to the sources of the plugin.
+  - Test can be fixed or moved away to the [sources of the plugin](EXTERNAL.md).
 - Test would be `@Ignore`d while the JIRA is open
 - At the end of the time period, the test would be removed from ATH.
   - Test can still be resurrected from history if needed - in ATH or plugin itself.
