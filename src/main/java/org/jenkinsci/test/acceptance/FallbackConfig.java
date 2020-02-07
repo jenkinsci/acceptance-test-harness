@@ -189,16 +189,22 @@ public class FallbackConfig extends AbstractModule {
 
     private WebDriver createContainerWebDriver(TestCleaner cleaner, String image, MutableCapabilities capabilities) throws IOException {
         try {
+            final int controlPort = IOUtil.randomTcpPort();
+            final int vncPort = IOUtil.randomTcpPort(5900, 6000);
+            final int displayNumber = vncPort - 5900;
+
             Path log = Files.createTempFile("ath-docker-browser", "log");
             LOGGER.info("Starting selenium container. Logs in " + log);
 
-            if (!IOUtil.isTcpPortFree(4444)) throw new IllegalStateException("Port 4444 is occupied");
-
             Docker.cmd("pull", image).popen().verifyOrDieWith("Failed to pull image " + image);
-            // While this only needs to expose two ports (4444, 5900), it needs to be able to talk to Jenkins running
+            // While this only needs to expose two ports (controlPort, vncPort), it needs to be able to talk to Jenkins running
             // out of container so using host networking is the most straightforward way to go.
-            String[] args = {"run", "-d", "--shm-size=2g", "--network=host", image};
-
+            String[] args = {
+                    "run", "-d", "--shm-size=2g", "--network=host",
+                    "-e", "SE_OPTS=-port " + controlPort,
+                    "-e", "DISPLAY=:" + displayNumber,
+                    image
+            };
             ProcessInputStream popen = Docker.cmd(args).popen();
             popen.waitFor();
             String cid = popen.verifyOrDieWith("Failed to run selenium container").trim();
@@ -222,7 +228,7 @@ public class FallbackConfig extends AbstractModule {
             Thread.sleep(3000); // Give the container and selenium some time to spawn
 
             try {
-                RemoteWebDriver remoteWebDriver = new RemoteWebDriver(new URL("http://127.0.0.1:4444/wd/hub"), capabilities);
+                RemoteWebDriver remoteWebDriver = new RemoteWebDriver(new URL("http://127.0.0.1:" + controlPort + "/wd/hub"), capabilities);
                 cleaner.addTask(cleanContainer);
                 return remoteWebDriver;
             } catch (RuntimeException e) {
