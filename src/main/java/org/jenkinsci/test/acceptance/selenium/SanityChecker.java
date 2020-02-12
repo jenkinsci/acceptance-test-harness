@@ -63,12 +63,12 @@ public class SanityChecker extends AbstractWebDriverEventListener {
         List<WebElement> elements = driver.findElements(SPECIFIER);
         if (!elements.isEmpty()) {
             String trace = elements.get(0).getText();
-            throw new AssertionError("Jenkins error detected:\n" + trace);
+            throw new Failure("Jenkins error detected at " + driver.getCurrentUrl() + ":\n" + trace);
         }
 
         // POST required
         WebElement postForm = driver.findElement(By.cssSelector("form > input[value='Try POSTing']"));
-        if (postForm != null) throw new AssertionError("Post required at " + driver.getCurrentUrl());
+        if (postForm != null) throw new Failure("Post required at " + driver.getCurrentUrl());
     }
 
     /**
@@ -86,6 +86,15 @@ public class SanityChecker extends AbstractWebDriverEventListener {
             // If alert is expected we can not check sanity and should leave it alone for test to handle. If it is not
             // expected, the code is likely going to fail anyway but it is better to do on less surprising place
             return true;
+        }
+    }
+
+    public static final class Failure extends RuntimeException {
+
+        private static final long serialVersionUID = 4077465978093533078L;
+
+        public Failure(String msg) {
+            super(msg);
         }
     }
 }
