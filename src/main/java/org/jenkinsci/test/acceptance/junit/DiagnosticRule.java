@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import org.apache.commons.io.FileUtils;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.po.CapybaraPortingLayerImpl;
+import org.jenkinsci.test.acceptance.selenium.SanityChecker;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 import org.openqa.selenium.NoSuchElementException;
@@ -29,7 +30,7 @@ public class DiagnosticRule extends TestWatcher {
     protected void failed(Throwable t, Description description) {
         takeScreenshot();
 
-        if (causedBy(t, NoSuchElementException.class)) {
+        if (causedBy(t, NoSuchElementException.class) || causedBy(t, SanityChecker.Failure.class)) {
             writeHtmlPage();
         }
 
