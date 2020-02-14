@@ -26,14 +26,17 @@ package org.jenkinsci.test.acceptance.utils;
 import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.ServerSocket;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.logging.Logger;
 
 import javax.annotation.Nonnull;
 
 public class IOUtil {
 
-    private final static ElasticTime time = new ElasticTime();
+    private static final Logger LOGGER = Logger.getLogger(IOUtil.class.getName());
+    private static final ElasticTime time = new ElasticTime();
 
     /**
      * Get First existing file or directory.
@@ -72,5 +75,42 @@ public class IOUtil {
             sb.append(line).append(newline);
         }
         return sb.toString();
+    }
+
+    /**
+     * Gives random available TCP port in the given range.
+     *
+     * @param from if <=0 then default value 49152 is used
+     * @param to   if <=0 then default value 65535 is used
+     */
+    public static int randomTcpPort(int from, int to){
+        from = (from <=0) ? 49152 : from;
+        to = (to <= 0) ? 65535 : to;
+
+
+        while(true){
+            int candidate = (int) ((Math.random() * (to-from)) + from);
+            if(isTcpPortFree(candidate)){
+                return candidate;
+            }
+            LOGGER.info(String.format("Port %s is in use", candidate));
+        }
+    }
+
+    /**
+     * Gives random available TCP port.
+     */
+    public static int randomTcpPort(){
+        return randomTcpPort(-1,-1);
+    }
+
+    public static boolean isTcpPortFree(int port){
+        try {
+            ServerSocket ss = new ServerSocket(port);
+            ss.close();
+            return true;
+        } catch (IOException ex) {
+            return false;
+        }
     }
 }

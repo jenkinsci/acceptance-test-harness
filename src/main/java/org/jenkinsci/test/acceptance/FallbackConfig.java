@@ -2,14 +2,18 @@ package org.jenkinsci.test.acceptance;
 
 import javax.annotation.CheckForNull;
 import javax.inject.Named;
+import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 import net.lightbody.bmp.BrowserMobProxy;
 import net.lightbody.bmp.client.ClientUtil;
@@ -20,10 +24,10 @@ import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.resolution.ArtifactResult;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.JenkinsControllerFactory;
+import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.guice.TestCleaner;
 import org.jenkinsci.test.acceptance.guice.TestName;
 import org.jenkinsci.test.acceptance.guice.TestScope;
-import org.jenkinsci.test.acceptance.junit.FailureDiagnostics;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.recorder.HarRecorder;
 import org.jenkinsci.test.acceptance.selenium.SanityChecker;
@@ -40,9 +44,11 @@ import org.jenkinsci.test.acceptance.utils.pluginreporter.ConsoleExercisedPlugin
 import org.jenkinsci.test.acceptance.utils.pluginreporter.ExercisedPluginsReporter;
 import org.jenkinsci.test.acceptance.utils.pluginreporter.TextFileExercisedPluginReporter;
 import org.jenkinsci.utils.process.CommandBuilder;
+import org.jenkinsci.utils.process.ProcessInputStream;
 import org.junit.runners.model.Statement;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.Dimension;
+import org.openqa.selenium.MutableCapabilities;
 import org.openqa.selenium.Proxy;
 import org.openqa.selenium.UnsupportedCommandException;
 import org.openqa.selenium.WebDriver;
@@ -77,6 +83,9 @@ import static org.jenkinsci.test.acceptance.recorder.HarRecorder.isCaptureHarEna
  * @author Kohsuke Kawaguchi
  */
 public class FallbackConfig extends AbstractModule {
+
+    private static final Logger LOGGER = Logger.getLogger(FallbackConfig.class.getName());
+
     /** Browser property to set the default locale. */
     private static final String LANGUAGE_SELECTOR = "intl.accept_languages";
 
@@ -96,7 +105,7 @@ public class FallbackConfig extends AbstractModule {
         bind(SlaveProvider.class).to(LocalSlaveProvider.class);
     }
 
-    private WebDriver createWebDriver(TestName testName) throws IOException {
+    private WebDriver createWebDriver(TestCleaner cleaner, TestName testName) throws IOException {
         String browser = System.getenv("BROWSER");
         if (browser==null) browser = "firefox";
         browser = browser.toLowerCase(Locale.ENGLISH);
@@ -120,6 +129,10 @@ public class FallbackConfig extends AbstractModule {
             }
             GeckoDriverService service = builder.build();
             return new FirefoxDriver(service, firefoxOptions);
+        case "firefox-container":
+            return createContainerWebDriver(cleaner, "selenium/standalone-firefox-debug:3.14.0", new FirefoxOptions());
+        case "chrome-container":
+            return createContainerWebDriver(cleaner, "selenium/standalone-chrome-debug:3.14.0", new ChromeOptions());
         case "ie":
         case "iexplore":
         case "iexplorer":
@@ -167,10 +180,66 @@ public class FallbackConfig extends AbstractModule {
             }
             return new RemoteWebDriver(
                     new URL(u), //http://192.168.99.100:4444/wd/hub
-                    DesiredCapabilities.firefox());
-
+                    DesiredCapabilities.firefox()
+            );
         default:
             throw new Error("Unrecognized browser type: "+browser);
+        }
+    }
+
+    private WebDriver createContainerWebDriver(TestCleaner cleaner, String image, MutableCapabilities capabilities) throws IOException {
+        try {
+            final int controlPort = IOUtil.randomTcpPort();
+            final int vncPort = IOUtil.randomTcpPort(5900, 6000);
+            final int displayNumber = vncPort - 5900;
+
+            Path log = Files.createTempFile("ath-docker-browser", "log");
+            LOGGER.info("Starting selenium container. Logs in " + log);
+
+            Docker.cmd("pull", image).popen().verifyOrDieWith("Failed to pull image " + image);
+            // While this only needs to expose two ports (controlPort, vncPort), it needs to be able to talk to Jenkins running
+            // out of container so using host networking is the most straightforward way to go.
+            String[] args = {
+                    "run", "-d", "--shm-size=2g", "--network=host",
+                    "-e", "SE_OPTS=-port " + controlPort,
+                    "-e", "DISPLAY=:" + displayNumber,
+                    image
+            };
+            ProcessInputStream popen = Docker.cmd(args).popen();
+            popen.waitFor();
+            String cid = popen.verifyOrDieWith("Failed to run selenium container").trim();
+
+            new ProcessBuilder(Docker.cmd("logs", "-f", cid).toCommandArray()).redirectErrorStream(true).redirectOutput(log.toFile()).start();
+
+            Closeable cleanContainer = new Closeable() {
+                @Override public void close() {
+                    try {
+                        Docker.cmd("kill", cid).popen().verifyOrDieWith("Failed to kill " + cid);
+                        Docker.cmd("rm", cid).popen().verifyOrDieWith("Failed to rm " + cid);
+                    } catch (IOException | InterruptedException e) {
+                        throw new Error("Failed removing container", e);
+                    }
+                }
+
+                @Override public String toString() {
+                    return "Kill and remove selenium container";
+                }
+            };
+            Thread.sleep(3000); // Give the container and selenium some time to spawn
+
+            try {
+                RemoteWebDriver remoteWebDriver = new RemoteWebDriver(new URL("http://127.0.0.1:" + controlPort + "/wd/hub"), capabilities);
+                cleaner.addTask(cleanContainer);
+                return remoteWebDriver;
+            } catch (RuntimeException e) {
+                cleanContainer.close();
+                throw e;
+            } catch (Throwable e) {
+                cleanContainer.close();
+                throw new Error(e);
+            }
+        } catch (InterruptedException e) {
+            throw new Error(e);
         }
     }
 
@@ -189,7 +258,7 @@ public class FallbackConfig extends AbstractModule {
             System.setProperty(property, executable);
         }
         else {
-            System.out.println("Unable to locate " + driverCommand);
+            LOGGER.warning("Unable to locate " + driverCommand);
         }
     }
 
@@ -221,7 +290,7 @@ public class FallbackConfig extends AbstractModule {
      */
     @Provides @TestScope
     public WebDriver createWebDriver(TestCleaner cleaner, TestName testName, ElasticTime time) throws IOException {
-        WebDriver base = createWebDriver(testName);
+        WebDriver base = createWebDriver(cleaner, testName);
 
         // Make sure the window has minimal resolution set, even when out of the visible screen.
         // Note - not maximizing here any more because that doesn't do anything.
@@ -239,7 +308,7 @@ public class FallbackConfig extends AbstractModule {
             d.manage().timeouts().implicitlyWait(time.seconds(IMPLICIT_WAIT_TIMEOUT), TimeUnit.MILLISECONDS);
         } catch (UnsupportedCommandException e) {
             // sauce labs RemoteWebDriver doesn't support this
-            System.out.println(base + " doesn't support page load timeout");
+            LOGGER.info(base + " doesn't support page load timeout");
         }
         cleaner.addTask(new Statement() {
             @Override
@@ -283,11 +352,11 @@ public class FallbackConfig extends AbstractModule {
         if (type==null) {
             File socket = getSocket();
             if (socket.exists() && !JenkinsControllerPoolProcess.MAIN) {
-                System.out.println("Found pooled jenkins controller listening on socket " + socket.getAbsolutePath());
+                LOGGER.info("Found pooled jenkins controller listening on socket " + socket.getAbsolutePath());
                 return new PooledJenkinsController(injector, socket);
             }
             else {
-                System.out.println("No pooled jenkins controller listening on socket " + socket.getAbsolutePath());
+                LOGGER.warning("No pooled jenkins controller listening on socket " + socket.getAbsolutePath());
                 type = "winstone";
             }
         }

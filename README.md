@@ -12,9 +12,7 @@ The simplest way to start the harness is calling `BROWSER=firefox JENKINS_VERSIO
 takes hours to run due to the number of covered components/use-cases, the cost of Jenkins setup, and selenium interactions.
 That can be avoided by selecting a subset of tests to be run - smoke tests for instance.
 
-## Further Reading
-
-### Running tests
+## Running tests
 
 The harness provides a variety of ways to configure the execution including:
 
@@ -30,7 +28,7 @@ The harness provides a variety of ways to configure the execution including:
 * [Debugging tests in container](docs/DOCKER.md#debugging-tests-in-a-docker-container)
 * Selecting tests based on plugins they cover (TODO)
 
-### Writing tests
+## Creating tests
 
 Given how long it takes for the suite to run, test authors are advised to focus on the most popular plugins and
 use-cases to maximize the value of the test suite. Tests that can or already are written as a part of core/plugin tests
@@ -39,6 +37,7 @@ condition testing, etc.). Individual maintainers are expected to update their te
 well as ensuring the tests does not produce false positives. Tests identified to violate this guideline might be removed
 without author's notice for the sake of suite reliability.
 
+* [Selenium test in plugin repository](docs/EXTERNAL.md)
 * [Docker fixtures](docs/FIXTURES.md)
 * [Page objects](docs/PAGE-OBJECTS.md)
     * [Mix-ins](docs/MIXIN.md)
@@ -48,7 +47,6 @@ without author's notice for the sake of suite reliability.
     * [Writing JUnit test](docs/JUNIT.md)
 * [Testing slaves](docs/SLAVE.md)
 * [Hamcrest matchers](docs/MATCHERS.md)
-* [How to use this from your own module](docs/EXTERNAL.md)
 * [EC2 provider configuration](docs/EC2-CONFIG.md)
 * [Investigation](docs/INVESTIGATION.md)
 
