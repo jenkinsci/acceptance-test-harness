@@ -427,7 +427,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
      * Creates and builds a maven job and verifies that all warnings are shown in the summary and details views.
      */
     @Test
-    @WithPlugins("maven-plugin")
+    @WithPlugins({"maven-plugin", "analysis-model-api@7.0.4"})
     public void should_show_maven_warnings_in_maven_project() {
         MavenModuleSet job = createMavenProject();
         copyResourceFilesToWorkspace(job, SOURCE_VIEW_FOLDER + "pom.xml");
@@ -449,9 +449,9 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
                 .hasReferenceBuild(0);
 
         AnalysisResult mavenDetails = summary.openOverallResult();
-        assertThat(mavenDetails).hasActiveTab(Tab.TYPES)
+        assertThat(mavenDetails).hasActiveTab(Tab.MODULES)
                 .hasTotal(2)
-                .hasOnlyAvailableTabs(Tab.TYPES, Tab.ISSUES);
+                .hasOnlyAvailableTabs(Tab.MODULES, Tab.TYPES, Tab.ISSUES);
 
         IssuesTable issuesTable = mavenDetails.openIssuesTable();
 
