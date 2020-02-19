@@ -441,6 +441,10 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
         Build build = buildFailingJob(job);
         build.open();
 
+        System.out.println("-------------- Console Log ----------------");
+        System.out.println(build.getConsole());
+        System.out.println("-------------------------------------------");
+
         AnalysisSummary summary = new AnalysisSummary(build, MAVEN_ID);
         assertThat(summary).isDisplayed()
                 .hasTitleText("Maven: 2 warnings")
