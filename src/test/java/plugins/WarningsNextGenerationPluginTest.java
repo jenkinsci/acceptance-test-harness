@@ -43,6 +43,7 @@ import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
 
+import static org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation.*;
 import static org.jenkinsci.test.acceptance.plugins.warnings_ng.Assertions.*;
 
 /**
@@ -427,7 +428,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
      * Creates and builds a maven job and verifies that all warnings are shown in the summary and details views.
      */
     @Test
-    @WithPlugins("maven-plugin")
+    @WithPlugins({"maven-plugin", "analysis-model-api@7.0.4"})
     public void should_show_maven_warnings_in_maven_project() {
         MavenModuleSet job = createMavenProject();
         copyResourceFilesToWorkspace(job, SOURCE_VIEW_FOLDER + "pom.xml");
@@ -438,20 +439,25 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
 
         job.save();
 
-        Build build = buildFailingJob(job);
-        build.open();
+        Build build = buildJob(job).shouldSucceed();
 
+        System.out.println("-------------- Console Log ----------------");
+        System.out.println(build.getConsole());
+        System.out.println("-------------------------------------------");
+
+        build.open();
+        
         AnalysisSummary summary = new AnalysisSummary(build, MAVEN_ID);
         assertThat(summary).isDisplayed()
-                .hasTitleText("Maven: 2 warnings")
+                .hasTitleText("Maven: 4 warnings")
                 .hasNewSize(0)
                 .hasFixedSize(0)
                 .hasReferenceBuild(0);
 
         AnalysisResult mavenDetails = summary.openOverallResult();
-        assertThat(mavenDetails).hasActiveTab(Tab.TYPES)
-                .hasTotal(2)
-                .hasOnlyAvailableTabs(Tab.TYPES, Tab.ISSUES);
+        assertThat(mavenDetails).hasActiveTab(Tab.MODULES)
+                .hasTotal(4)
+                .hasOnlyAvailableTabs(Tab.MODULES, Tab.TYPES, Tab.ISSUES);
 
         IssuesTable issuesTable = mavenDetails.openIssuesTable();
 
@@ -549,12 +555,8 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
     }
 
     private MavenModuleSet createMavenProject() {
-        MavenInstallation.installSomeMaven(jenkins);
+        MavenInstallation.installMaven(jenkins, DEFAULT_MAVEN_ID, "3.6.3");
         return jenkins.getJobs().create(MavenModuleSet.class);
-    }
-
-    private Build buildFailingJob(final Job job) {
-        return buildJob(job).shouldFail();
     }
 
     private Build buildJob(final Job job) {
