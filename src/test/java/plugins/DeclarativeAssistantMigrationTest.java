@@ -6,8 +6,12 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.ShellBuildStep;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.junit.Test;
+import org.openqa.selenium.By;
 
 import javax.inject.Inject;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.jenkinsci.test.acceptance.Matchers.hasElement;
 
 //@WithPlugins({"trilead-api@1.0.5","credentials@2.1.16","credentials-binding@1.13","git@4.1.0", // ,"ssh-credentials@1.18.1"
 //                "pipeline-model-api","pipeline-model-definition","scm-api","declarative-pipeline-migration-assistant",
@@ -29,10 +33,11 @@ public class DeclarativeAssistantMigrationTest
         try
         {
             clickLink("To Declarative");
+            assertThat(driver, hasElement(By.className( "rectangle-conversion-success" )));
         }
         finally
         {
-            sleep( 20000 );
+            //sleep( 20000 );
         }
 
     }
