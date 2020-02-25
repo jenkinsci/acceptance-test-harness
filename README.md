@@ -1,5 +1,7 @@
 # Acceptance tests for Jenkins
 
+[![Jenkins](https://ci.jenkins.io/job/Core/job/acceptance-test-harness/job/master/badge/icon)](https://ci.jenkins.io/job/Core/job/acceptance-test-harness/job/master/)
+
 End to end test suite for Jenkins automation server and its plugins.
 
 The scenarios are described in the form of tests controlling Jenkins under test (JUT) through UI / REST APIs. Clean instances
