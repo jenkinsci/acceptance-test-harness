@@ -513,12 +513,10 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.0.0-M1</version>
         <configuration>
-          <properties>
-            <property>
-              <name>listener</name>
-              <value>org.jenkinsci.test.acceptance.junit.JUnitProgressReporter</value>
-            </property>
-          </properties>
+          <systemPropertyVariables>
+            <mavenRepoPath>${settings.localRepository}</mavenRepoPath>
+            <listener>org.jenkinsci.test.acceptance.junit.JUnitProgressReporter</listener>
+          </systemPropertyVariables>
           <!-- SUREFIRE-1588 workaround; too late for systemProperties: -->
           <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
         </configuration>
