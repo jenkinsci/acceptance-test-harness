@@ -281,9 +281,10 @@ public class GitPluginTest extends AbstractJUnitTest {
         Build b = job.startBuild();
         b.shouldSucceed();
 
+        // Git plugin 4.0 switched from <b> to <strong>. Accept either bold or strong.
         assertThat(
                 visit(b.url("git")).getPageSource(),
-                Matchers.containsRegexp("<b>SCM:</b> " + SCM_NAME, Pattern.MULTILINE)
+                Matchers.containsRegexp("<[^>]+>SCM:</[^>]+> " + SCM_NAME, Pattern.MULTILINE)
         );
     }
 
