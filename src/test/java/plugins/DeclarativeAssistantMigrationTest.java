@@ -11,16 +11,14 @@ import org.openqa.selenium.By;
 import javax.inject.Inject;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.jenkinsci.test.acceptance.Matchers.containsString;
 import static org.jenkinsci.test.acceptance.Matchers.hasElement;
 
-//@WithPlugins({"trilead-api@1.0.5","credentials@2.1.16","credentials-binding@1.13","git@4.1.0", // ,"ssh-credentials@1.18.1"
-//                "pipeline-model-api","pipeline-model-definition","scm-api","declarative-pipeline-migration-assistant",
-//                "declarative-pipeline-migration-assistant-api"})
-@WithPlugins({"declarative-pipeline-migration-assistant","declarative-pipeline-migration-assistant-api"})
+@WithPlugins({"declarative-pipeline-migration-assistant@1.0.3","declarative-pipeline-migration-assistant-api@1.0.3"})
 public class DeclarativeAssistantMigrationTest
     extends AbstractJUnitTest {
 
-    @Test @WithPlugins({"trilead-api@1.0.5","git"})
+    @Test //@WithPlugins({"git"})
     public void basicDeclarativeTests() throws Exception {
         FreeStyleJob j = jenkins.jobs.create(FreeStyleJob.class, "simple-job-to-declarative");
         j.configure();
@@ -30,15 +28,15 @@ public class DeclarativeAssistantMigrationTest
         j.apply();
         j.save();
 
-        try
-        {
+        try {
             clickLink("To Declarative");
-            assertThat(driver, hasElement(By.className( "rectangle-conversion-success" )));
-        }
-        finally
-        {
+            assertThat(driver, hasElement(By.className("rectangle-conversion-success")));
+            assertThat(driver, hasElement(By.className("review-converted")));
+            assertThat(driver, hasElement(By.id("jenkinsfile-content")));
+            String jenkinsFile =  driver.findElement(By.id("jenkinsfile-content")).getAttribute("value");
+            assertThat(jenkinsFile, containsString( "echo 1" ));
+        } finally {
             //sleep( 20000 );
         }
-
     }
 }
