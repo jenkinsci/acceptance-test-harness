@@ -17,10 +17,10 @@ import org.eclipse.aether.spi.connector.transport.TransporterFactory;
 import org.eclipse.aether.transfer.TransferEvent;
 import org.eclipse.aether.transport.file.FileTransporterFactory;
 import org.eclipse.aether.transport.http.HttpTransporterFactory;
+import org.jenkinsci.test.acceptance.utils.MavenLocalRepository;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
-import java.io.File;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -47,7 +47,7 @@ public class AetherModule extends AbstractModule implements ExtensionModule {
     public RepositorySystemSession newRepositorySystemSession(RepositorySystem system) {
         DefaultRepositorySystemSession session = MavenRepositorySystemUtils.newSession();
 
-        LocalRepository localRepo = new LocalRepository(new File(System.getProperty("user.home"),".m2/repository"));
+        LocalRepository localRepo = new LocalRepository( MavenLocalRepository.getMavenLocalRepository());
         session.setLocalRepositoryManager(system.newLocalRepositoryManager(session, localRepo));
 
         session.setTransferListener(new ConsoleTransferListener() {

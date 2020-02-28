@@ -5,6 +5,7 @@ import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.util.version.GenericVersionScheme;
 import org.eclipse.aether.version.Version;
 import org.eclipse.aether.version.VersionScheme;
+import org.jenkinsci.test.acceptance.utils.MavenLocalRepository;
 import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -25,7 +26,7 @@ public class LocalOverrideUpdateCenterMetadataDecoratorImpl implements UpdateCen
     public void decorate(UpdateCenterMetadata ucm) {
         if ("true".equals(System.getenv("LOCAL_SNAPSHOTS"))) {
             File userHome = new File(System.getProperty("user.home"));
-            File localRepo = new File(new File(userHome, ".m2"), "repository");
+            File localRepo = MavenLocalRepository.getMavenLocalRepository();
             VersionScheme versionScheme = new GenericVersionScheme();
             for (Iterator<Map.Entry<String, PluginMetadata>> it = ucm.plugins.entrySet().iterator(); it.hasNext();) {
                 Map.Entry<String,PluginMetadata> entry = it.next();
