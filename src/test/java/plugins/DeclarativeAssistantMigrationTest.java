@@ -28,15 +28,11 @@ public class DeclarativeAssistantMigrationTest
         j.apply();
         j.save();
 
-        try {
-            clickLink("To Declarative");
-            assertThat(driver, hasElement(By.className("rectangle-conversion-success")));
-            assertThat(driver, hasElement(By.className("review-converted")));
-            assertThat(driver, hasElement(By.id("jenkinsfile-content")));
-            String jenkinsFile =  driver.findElement(By.id("jenkinsfile-content")).getAttribute("value");
-            assertThat(jenkinsFile, containsString( "echo 1" ));
-        } finally {
-            //sleep( 20000 );
-        }
+        clickLink("To Declarative");
+        assertThat(driver, hasElement(By.className("rectangle-conversion-success")));
+        assertThat(driver, hasElement(By.className("review-converted")));
+        assertThat(driver, hasElement(By.id("jenkinsfile-content")));
+        String jenkinsFile =  driver.findElement(By.id("jenkinsfile-content")).getAttribute("value");
+        assertThat(jenkinsFile, containsString( "echo 1" ));
     }
 }
