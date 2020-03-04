@@ -592,10 +592,29 @@
         <version>1.7</version>
         <executions>
           <execution>
+            <id>tool_installers</id>
             <phase>generate-resources</phase>
             <configuration>
               <target>
                 <zip destfile="target/classes/tool_installers.zip" basedir="${project.basedir}/src/main/tool_installers" />
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+          <!-- Assertions of AssertJ should use compile scope in our case. Otherwise plugins can't use them when depending on ATH. -->
+          <execution>
+            <id>assertions</id>
+            <phase>test-compile</phase>
+            <configuration>
+              <target>
+                <move todir="target/classes/">
+                  <fileset dir="target/test-classes/">
+                    <include name="**/*Assert.class"/>
+                    <include name="**/*Assertions.class"/>
+                  </fileset>
+                </move>
               </target>
             </configuration>
             <goals>
