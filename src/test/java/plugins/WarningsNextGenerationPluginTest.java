@@ -64,7 +64,7 @@ import static org.jenkinsci.test.acceptance.plugins.warnings_ng.Assertions.*;
  * @author Florian Hageneder
  * @author Veronika Zwickenpflug
  */
-@WithPlugins("warnings-ng")
+@WithPlugins("warnings-ng@8.0.0")
 public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
     private static final String WARNINGS_PLUGIN_PREFIX = "/warnings_ng_plugin/";
 
@@ -290,8 +290,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
                 .hasInfoMessages("-> found 1 file",
                         "-> found 2 issues (skipped 0 duplicates)",
                         "Issues delta (vs. reference build): outstanding: 2, new: 0, fixed: 1")
-                .hasErrorMessages("Can't resolve absolute paths for some files:",
-                        "Can't create fingerprints for some files:");
+                .hasErrorMessages("Can't create fingerprints for some files:");
     }
 
     private void verifyCheckStyle(final Build build) {
@@ -325,8 +324,7 @@ public class WarningsNextGenerationPluginTest extends AbstractJUnitTest {
                 .hasInfoMessages("-> found 1 file",
                         "-> found 3 issues (skipped 0 duplicates)",
                         "Issues delta (vs. reference build): outstanding: 0, new: 3, fixed: 1")
-                .hasErrorMessages("Can't resolve absolute paths for some files:",
-                        "Can't create fingerprints for some files:");
+                .hasErrorMessages("Can't create fingerprints for some files:");
     }
 
     private InfoView openInfoView(final Build build, final String toolId) {
