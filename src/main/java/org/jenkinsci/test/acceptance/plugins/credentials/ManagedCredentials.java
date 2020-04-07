@@ -43,7 +43,12 @@ public class ManagedCredentials extends ContainerPageObject {
      * @return
      */
     public Control checkIfCredentialsExist(String name) {
-        return control(by.xpath("//a[@title='"+name+"']"));
+        Control control = control(by.xpath("//a[@title='" + name + "']"));
+        // post credentials-2.3.2
+        if (!control.exists()) {
+            control = control(by.xpath("//td[contains(text(),'" + name + "')]"));
+        }
+        return control;
     }
 
     /**
@@ -52,6 +57,11 @@ public class ManagedCredentials extends ContainerPageObject {
      * @return
      */
     public String credentialById(String name) {
-        return checkIfCredentialsExist(name).resolve().getAttribute("href");
+        Control control = control(by.xpath("//a[@title='" + name + "']"));
+        // post credentials-2.3.2
+        if (!control.exists()) {
+            control = control(by.xpath("//td[contains(text(),'" + name + "')]/parent::tr//a"));
+        }
+        return control.resolve().getAttribute("href");
     }
 }
