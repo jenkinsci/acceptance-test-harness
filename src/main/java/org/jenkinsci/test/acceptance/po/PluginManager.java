@@ -18,7 +18,6 @@ import org.jenkinsci.test.acceptance.update_center.PluginMetadata;
 import org.jenkinsci.test.acceptance.update_center.PluginSpec;
 import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata.UnableToResolveDependencies;
 import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadataProvider;
-import org.jenkinsci.test.acceptance.utils.ElasticTime;
 import org.junit.internal.AssumptionViolatedException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
@@ -257,7 +256,6 @@ public class PluginManager extends ContainerPageObject {
             System.out.println("Plugins to be updated: " + update);
             if (!update.isEmpty()) {
                 visit(""); // Updates tab
-                driver.navigate().refresh();
                 for (PluginSpec n : update) {
                     tickPluginToInstall(n);
                 }
@@ -273,7 +271,7 @@ public class PluginManager extends ContainerPageObject {
 
     private void tickPluginToInstall(PluginSpec spec) {
         String name = spec.getName();
-        check(waitFor(by.xpath("//input[starts-with(@name,'plugin.%s.')]", name), 30));
+        check(find(by.xpath("//input[starts-with(@name,'plugin.%s.')]", name)));
         final VersionNumber requiredVersion = spec.getVersionNumber();
         if (requiredVersion != null) {
             final VersionNumber availableVersion = getAvailableVersionForPlugin(name);
