@@ -18,6 +18,7 @@ import org.jenkinsci.test.acceptance.update_center.PluginMetadata;
 import org.jenkinsci.test.acceptance.update_center.PluginSpec;
 import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata.UnableToResolveDependencies;
 import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadataProvider;
+import org.jenkinsci.test.acceptance.utils.ElasticTime;
 import org.junit.internal.AssumptionViolatedException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
@@ -93,7 +94,6 @@ public class PluginManager extends ContainerPageObject {
         clickButton("Check now");
         // The wait criteria is: we have left the current page and returned to the same one
         waitFor(find(by.button("Check now"))).withTimeout(30, TimeUnit.SECONDS).until(webElement -> {
-            try {
                 try {
                     // We interact with the element just to detect if it is stale
                     webElement.findElement(by.id("it does not matter"));
@@ -103,10 +103,11 @@ public class PluginManager extends ContainerPageObject {
                     if (current.equals(getCurrentUrl())) {
                         return true;
                     }
+                } catch (Exception e) { // Any other exception means no successful check
+                    return false;
                 }
-            } catch(Exception e) {
-            }
-            return true;
+                // This should never happen but the closure needs to return
+                return false;
         });
         updated = true;
     }
@@ -256,6 +257,7 @@ public class PluginManager extends ContainerPageObject {
             System.out.println("Plugins to be updated: " + update);
             if (!update.isEmpty()) {
                 visit(""); // Updates tab
+                driver.navigate().refresh();
                 for (PluginSpec n : update) {
                     tickPluginToInstall(n);
                 }
@@ -271,7 +273,7 @@ public class PluginManager extends ContainerPageObject {
 
     private void tickPluginToInstall(PluginSpec spec) {
         String name = spec.getName();
-        check(find(by.xpath("//input[starts-with(@name,'plugin.%s.')]", name)));
+        check(waitFor(by.xpath("//input[starts-with(@name,'plugin.%s.')]", name), 30));
         final VersionNumber requiredVersion = spec.getVersionNumber();
         if (requiredVersion != null) {
             final VersionNumber availableVersion = getAvailableVersionForPlugin(name);
