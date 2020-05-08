@@ -279,7 +279,7 @@ public class Job extends TopLevelItem {
                     // TODO: Make it work for RemoteJenkinsController like in Unix (below)
                     throw new AssumptionViolatedException("Copying files in Windows is only supported if a LocalController is in use. Test will be skipped.");
                 }
-                addBatchStep("xcopy " + file.getAbsolutePath() + " %cd% /E");
+                addBatchStep("xcopy " + file.getAbsolutePath() + " %cd% /E /Y");
             } else {
                 addShellStep(String.format(
                         "base64 --decode << ENDOFFILE > archive.zip && unzip -o archive.zip \n%s\nENDOFFILE",
