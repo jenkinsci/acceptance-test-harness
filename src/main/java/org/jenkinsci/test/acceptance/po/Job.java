@@ -224,7 +224,7 @@ public class Job extends TopLevelItem {
      */
     public void copyResource(Resource resource, String fileName) {
         if (SystemUtils.IS_OS_WINDOWS) {
-            addBatchStep(copyResourceBatch(resource, fileName));
+            addBatchStep(copyResourceBatch(resource));
         }
         else {
             addShellStep(copyResourceShell(resource, fileName));
@@ -247,13 +247,13 @@ public class Job extends TopLevelItem {
         }
     }
 
-    protected String copyResourceBatch(Resource resource, String fileName) {
+    protected String copyResourceBatch(Resource resource) {
         String path = resource.url.getPath();
         if (path.startsWith("/")) {
             path = path.substring(1);
         }
         path = path.replace("/", "\\");
-        return "xcopy \"" + path + "\" . /E /Y";
+        return xCopy(path, ".");
     }
 
     public void copyResource(Resource resource) {
@@ -279,7 +279,7 @@ public class Job extends TopLevelItem {
                     // TODO: Make it work for RemoteJenkinsController like in Unix (below)
                     throw new AssumptionViolatedException("Copying files in Windows is only supported if a LocalController is in use. Test will be skipped.");
                 }
-                addBatchStep("xcopy " + file.getAbsolutePath() + " %cd% /E");
+                addBatchStep(xCopy(file.getAbsolutePath(), "%cd%"));
             } else {
                 addShellStep(String.format(
                         "base64 --decode << ENDOFFILE > archive.zip && unzip -o archive.zip \n%s\nENDOFFILE",
@@ -454,5 +454,9 @@ public class Job extends TopLevelItem {
                 hasContent("Enable"),
                 hasContent("This project is currently disabled")
         );
+    }
+
+    private String xCopy(final String source, final String destination) {
+        return "xcopy " + source + " " + destination + " /E /Y";
     }
 }
