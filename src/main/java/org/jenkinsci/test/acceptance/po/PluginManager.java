@@ -296,6 +296,9 @@ public class PluginManager extends ContainerPageObject {
 
     /**
      * Installs a plugin by uploading the *.jpi image.
+     * Can be use for corner cases to verify some behavior when very specific plugin versions are needed, for example
+     * to verify that a warning message is displayed when a risky and outdated plugin is installed on Jenkins.
+     *
      * @deprecated Not used when running {@link MockUpdateCenter}.
      */
     @Deprecated
