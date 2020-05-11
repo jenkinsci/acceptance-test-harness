@@ -3,6 +3,9 @@ package org.jenkinsci.test.acceptance.po;
 import javax.inject.Named;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -12,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.methods.HttpGet;
 import org.jenkinsci.test.acceptance.FallbackConfig;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.update_center.PluginMetadata;
@@ -296,9 +300,20 @@ public class PluginManager extends ContainerPageObject {
      */
     @Deprecated
     public void installPlugin(File localFile) throws IOException {
+
         try (CloseableHttpClient httpclient = new DefaultHttpClient()) {
+            HttpGet getCrumb = null;
+            try {
+                getCrumb = new HttpGet(jenkins.url("crumbIssuer/api/xml?xpath=/*/crumb/text()").toURI());
+            } catch (URISyntaxException e) {
+                throw new IOException("CRUMB URI syntax error: " + e.getMessage());
+            }
+
+            HttpResponse responseCrumb = httpclient.execute(getCrumb);
+            String crumbValue = IOUtils.toString(responseCrumb.getEntity().getContent(), StandardCharsets.UTF_8);
 
             HttpPost post = new HttpPost(jenkins.url("pluginManager/uploadPlugin").toExternalForm());
+            post.addHeader("Jenkins-Crumb",crumbValue);
             HttpEntity e = MultipartEntityBuilder.create()
                     .addBinaryBody("name", localFile, APPLICATION_OCTET_STREAM, "x.jpi")
                     .build();
