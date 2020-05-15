@@ -19,6 +19,7 @@ import org.jenkinsci.test.acceptance.update_center.PluginSpec;
 import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata.UnableToResolveDependencies;
 import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadataProvider;
 import org.junit.internal.AssumptionViolatedException;
+import org.openqa.selenium.By;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 
@@ -271,7 +272,10 @@ public class PluginManager extends ContainerPageObject {
 
     private void tickPluginToInstall(PluginSpec spec) {
         String name = spec.getName();
-        check(find(by.xpath("//input[starts-with(@name,'plugin.%s.')]", name)));
+        WebElement filterBox = find(By.id("filter-box"));
+        filterBox.clear();
+        filterBox.sendKeys(name);
+        check(waitFor(by.xpath("//input[starts-with(@name,'plugin.%s.')]", name), 10));
         final VersionNumber requiredVersion = spec.getVersionNumber();
         if (requiredVersion != null) {
             final VersionNumber availableVersion = getAvailableVersionForPlugin(name);
@@ -286,6 +290,9 @@ public class PluginManager extends ContainerPageObject {
 
     private VersionNumber getAvailableVersionForPlugin(String pluginName) {
         // assuming we are on 'available' or 'updates' page
+        WebElement filterBox = find(By.id("filter-box"));
+        filterBox.clear();
+        filterBox.sendKeys(pluginName);
         String v = find(by.xpath("//input[starts-with(@name,'plugin.%s.')]/../../td[3]", pluginName)).getText();
         return new VersionNumber(v);
     }
@@ -336,6 +343,9 @@ public class PluginManager extends ContainerPageObject {
      */
     public void enablePlugin(String pluginName, boolean state) {
         visit("installed");
+        WebElement filterBox = find(By.id("filter-box"));
+        filterBox.clear();
+        filterBox.sendKeys(pluginName);
         check(find(by.url("plugin/" + pluginName)), state);
     }
 }
