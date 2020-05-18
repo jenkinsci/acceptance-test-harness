@@ -9,7 +9,7 @@
   </parent>
 
   <artifactId>acceptance-test-harness</artifactId>
-  <version>1.71-SNAPSHOT</version>
+  <version>1.72-SNAPSHOT</version>
 
   <name>Acceptance Test Harness</name>
   <licenses>
@@ -293,6 +293,18 @@
       <groupId>com.github.jnr</groupId>
       <artifactId>jnr-unixsocket</artifactId>
       <version>0.3</version>
+    </dependency>
+    <!-- dependency use range so we want to avoid weird resolution -->
+    <dependency>
+      <groupId>com.github.jnr</groupId>
+      <artifactId>jffi</artifactId>
+      <version>1.2.23</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.jnr</groupId>
+      <artifactId>jffi</artifactId>
+      <version>1.2.23</version>
+      <classifier>native</classifier>
     </dependency>
     <dependency>
       <groupId>org.ini4j</groupId>
