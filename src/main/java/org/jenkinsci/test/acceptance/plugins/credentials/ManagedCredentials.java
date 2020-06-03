@@ -3,6 +3,7 @@ package org.jenkinsci.test.acceptance.plugins.credentials;
 import org.jenkinsci.test.acceptance.po.ContainerPageObject;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Jenkins;
+import org.openqa.selenium.By;
 
 /**
  * "Manage Credentials" page.
@@ -43,12 +44,12 @@ public class ManagedCredentials extends ContainerPageObject {
      * @return
      */
     public Control checkIfCredentialsExist(String name) {
-        Control control = control(by.xpath("//a[@title='" + name + "']"));
-        // post credentials-2.3.2
-        if (!control.exists()) {
-            control = control(by.xpath("//td[contains(text(),'" + name + "')]"));
+        By xpath = by.xpath("//a[@title='" + name + "']");
+        if (getElement(xpath) == null) {
+            // post credentials-2.3.2
+            xpath = by.xpath("//td[contains(text(),'" + name + "')]");
         }
-        return control;
+        return control(xpath);
     }
 
     /**
@@ -57,11 +58,11 @@ public class ManagedCredentials extends ContainerPageObject {
      * @return
      */
     public String credentialById(String name) {
-        Control control = control(by.xpath("//a[@title='" + name + "']"));
-        // post credentials-2.3.2
-        if (!control.exists()) {
-            control = control(by.xpath("//td[contains(text(),'" + name + "')]/parent::tr//a"));
+        By xpath = by.xpath("//a[@title='" + name + "']");
+        if (getElement(xpath) == null) {
+            // post credentials-2.3.2
+            xpath = by.xpath("//td[contains(text(),'" + name + "')]/parent::tr//a");
         }
-        return control.resolve().getAttribute("href");
+        return control(xpath).resolve().getAttribute("href");
     }
 }
