@@ -99,8 +99,7 @@ public class MockUpdateCenter implements AutoCleaned {
         try {
             ucm = ucmd.get(jenkins);
         } catch (IOException x) {
-            LOGGER.log(Level.WARNING, "cannot load data for mock update center", x);
-            return;
+            throw new Error("cannot load data for mock update center", x);
         }
         JSONObject all;
         try {
