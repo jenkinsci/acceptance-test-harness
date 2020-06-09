@@ -8,7 +8,7 @@ The scenarios are described in the form of tests controlling Jenkins under test 
 are started for individual tests to isolate the tests. The harness provides convenient docker support so integration tests
 can be written easily.
 
-## Contributing acceptance tests  
+## Contributing to acceptance tests  
 
 Follow the [contributing guidelines](docs/CONTRIBUTING.md) if you want to propose new tests for this project.
 
