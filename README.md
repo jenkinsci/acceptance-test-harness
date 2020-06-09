@@ -8,6 +8,10 @@ The scenarios are described in the form of tests controlling Jenkins under test 
 are started for individual tests to isolate the tests. The harness provides convenient docker support so integration tests
 can be written easily.
 
+## Contributing acceptance tests  
+
+Follow the [contributing guidelines](docs/CONTRIBUTING.md) if you want to propose new tests for this project.
+
 ## Getting Started
 
 The simplest way to start the harness is calling `BROWSER=firefox JENKINS_VERSION=2.73 mvn test`. The complete test suite
