@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.HttpGet;
@@ -271,7 +272,10 @@ public class PluginManager extends ContainerPageObject {
         }
 
         // Jenkins will be restarted if necessary
-        new UpdateCenter(jenkins).waitForInstallationToComplete(specs);
+        boolean hasBeenRestarted = new UpdateCenter(jenkins).waitForInstallationToComplete(specs);
+        if (!hasBeenRestarted && specs.length > 0) {
+            jenkins.getLogger("all").waitForLogged(Pattern.compile("Completed installation of .*"), 1000);
+        }
 
         return false;
     }
