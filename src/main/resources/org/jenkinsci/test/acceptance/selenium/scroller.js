@@ -15,5 +15,5 @@ if(sticker == null || !sticker.contains(document.getElementById(id)) || footer.l
 }
 else{
   //it is sticker button and it is moved up (footer does not overlap)
-  return (footer[0].getBoundingClientRect().top > sticker.getBoundingClientRect().bottom)
+  return (footer[0].getBoundingClientRect().top >= sticker.getBoundingClientRect().bottom)
 }
