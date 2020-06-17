@@ -29,11 +29,7 @@ import java.util.concurrent.Callable;
 import com.google.inject.Injector;
 
 import groovy.lang.Closure;
-
-import org.jenkinsci.test.acceptance.utils.ElasticTime;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
-
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
@@ -130,10 +126,8 @@ public abstract class ConfigurablePageObject extends PageObject {
     public abstract URL getConfigUrl();
 
     public void save() {
-        WebElement e = find(by.button("Save"));
-        e.submit();
+        clickButton("Save");
         assertThat(driver, not(hasContent("This page expects a form submission")));
-        
     }
 
     public void apply() {
