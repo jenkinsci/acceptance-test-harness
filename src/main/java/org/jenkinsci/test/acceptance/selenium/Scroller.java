@@ -3,10 +3,13 @@ package org.jenkinsci.test.acceptance.selenium;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.test.acceptance.junit.Wait;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.WrapsDriver;
@@ -66,6 +69,9 @@ import org.openqa.selenium.support.events.AbstractWebDriverEventListener;
  * @author Kohsuke Kawaguchi
  */
 public class Scroller extends AbstractWebDriverEventListener {
+
+    private Logger LOGGER = Logger.getLogger(Scroller.class.getName());
+
     private final String scrollJs;
 
     public Scroller() {
@@ -105,9 +111,15 @@ public class Scroller extends AbstractWebDriverEventListener {
         final String id = e.getAttribute("id");
         final JavascriptExecutor executor = (JavascriptExecutor) driver;
         // Wait until web element is successfully scrolled.
-        new Wait<>(Boolean.TRUE)
-                .withTimeout(5, TimeUnit.SECONDS) // Wall-clock time
-                .until(() -> (Boolean)executor.executeScript(scrollJs, eYCoord, eXCoord, id))
-        ;
+        try {
+            new Wait<>(Boolean.TRUE)
+                    .withTimeout(5, TimeUnit.SECONDS) // Wall-clock time
+                    .until(() -> (Boolean) executor.executeScript(scrollJs, eYCoord, eXCoord, id))
+            ;
+        } catch (TimeoutException ex) {
+            // Scrolling failed, but sometimes the element to click is already visible, let the test continue and eventually fail later
+            // This log message should be sufficient to diagnose the issue
+            LOGGER.log(Level.WARNING, "Scrolling failed, letting the test to continue anyways, but \"Element is not clickable\" error will likely be thrown", ex);
+        }
     }
 }
