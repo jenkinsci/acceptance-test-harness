@@ -1,5 +1,6 @@
 package core;
 
+import hudson.util.VersionNumber;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
@@ -300,8 +301,9 @@ public class FreestyleJobTest extends AbstractJUnitTest {
         trigger.spec.set("not_a_time");
         clickButton("Apply");
 
-        By error = by.css("#error-description pre");
-
+        String errorElementCSS = jenkins.getVersion().isOlderThan(new VersionNumber("2.235")) ? "#error-description pre" : ".validation-error-area .error";
+        By error = by.css(errorElementCSS);
+        
         assertThat(waitFor(error).getText(), containsString("Invalid input: \"not_a_time\""));
         clickLink("Close");
 
