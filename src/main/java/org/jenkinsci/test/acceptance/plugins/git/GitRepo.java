@@ -80,13 +80,13 @@ public class GitRepo implements Closeable {
     /**
      * Sets the identity to be used when committing files.
      *
-     * @param username
+     * @param userName
      *         the name of the user
      * @param userMail
      *         the email of the user
      */
-    public void setIdentity(String username, String userMail) {
-        gitDir(dir, "config", "user.name", username);
+    public void setIdentity(String userName, String userMail) {
+        gitDir(dir, "config", "user.name", userName);
         gitDir(dir, "config", "user.email", userMail);
     }
 
