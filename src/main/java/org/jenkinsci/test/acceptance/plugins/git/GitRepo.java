@@ -156,7 +156,7 @@ public class GitRepo implements Closeable {
     }
 
     /**
-     * Replace the content of the specified file with the given string and commit the file.
+     * Append the specified content at the end of the given file and commit the file.
      *
      * @param fileName
      *         the name of the file
