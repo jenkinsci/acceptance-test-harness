@@ -23,27 +23,32 @@
  */
 package plugins;
 
-import org.jenkinsci.test.acceptance.Matchers;
-import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
-import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
-import org.jenkinsci.test.acceptance.junit.*;
-import org.jenkinsci.test.acceptance.plugins.git.GitRepo;
-import org.jenkinsci.test.acceptance.plugins.git.GitScm;
-import org.jenkinsci.test.acceptance.po.Build;
-import org.jenkinsci.test.acceptance.po.Job;
+import java.net.URL;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.inject.Inject;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.openqa.selenium.By;
 
-import javax.inject.Inject;
-import java.net.URL;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import org.jenkinsci.test.acceptance.Matchers;
+import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
+import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
+import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.DockerTest;
+import org.jenkinsci.test.acceptance.junit.WithCredentials;
+import org.jenkinsci.test.acceptance.junit.WithDocker;
+import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.plugins.git.GitRepo;
+import org.jenkinsci.test.acceptance.plugins.git.GitScm;
+import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.po.Job;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsNot.not;
+import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.core.Is.*;
+import static org.hamcrest.core.IsNot.*;
 
 @WithDocker
 @Category(DockerTest.class)
@@ -328,8 +333,8 @@ public class GitPluginTest extends AbstractJUnitTest {
 
         job.useScm(GitScm.class)
                 .url(repoUrl)
-                .branch("")
                 .credentials(USERNAME)
+                .branch("")
                 .chooseBuildStrategy("Ancestry", 1, sha1);
 
         job.save();
