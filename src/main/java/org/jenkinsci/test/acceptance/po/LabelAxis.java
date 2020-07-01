@@ -6,7 +6,7 @@ import org.openqa.selenium.lift.Matchers;
 /**
  * @author Kohsuke Kawaguchi
  */
-@Describable("Slaves")
+@Describable({"Agents", "Slaves"}) // Agents for Matrix Project Plugin >= 1.15
 public class LabelAxis extends Axis {
     public LabelAxis(PageObject context, String path) {
         super(context, path);
