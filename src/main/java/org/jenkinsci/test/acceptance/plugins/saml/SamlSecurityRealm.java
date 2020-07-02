@@ -47,7 +47,7 @@ public class SamlSecurityRealm extends SecurityRealm {
         adavancedConfig.click();
         // wait a bit for the advanced section to render
         // "Force Authentication" is one of its elements
-        waitFor(by.xpath("//td[.='Force Authentication']"), 2);
+        waitFor(by.xpath("//span[.='Force Authentication']"), 2);
     }
     public void setSpEntityIdAttribute(String value) {
         spEntityId.set(value);
@@ -62,7 +62,7 @@ public class SamlSecurityRealm extends SecurityRealm {
         encryption.click();
         // wait a bit for the encryption section to render
         // "Keystore path" is one of its elements
-        waitFor(by.xpath("//td[.='Keystore path']"), 2);
+        waitFor(by.xpath("//div[.='Keystore path']"), 2);
     }
     public void setKeyStorePath(String value) {
         keyStorePath.set(value);
