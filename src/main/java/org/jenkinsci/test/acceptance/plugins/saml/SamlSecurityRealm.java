@@ -1,6 +1,5 @@
 package org.jenkinsci.test.acceptance.plugins.saml;
 
-import org.codehaus.plexus.util.StringUtils;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
@@ -9,11 +8,11 @@ import org.jenkinsci.test.acceptance.po.SecurityRealm;
 @Describable("SAML 2.0")
 public class SamlSecurityRealm extends SecurityRealm {
     private final Control displayNameAttr = control("displayNameAttributeName");
-    private final Control userNaneAttr = control("usernameAttributeName");
+    private final Control userNameAttr = control("usernameAttributeName");
     private final Control groupsAttr = control("groupsAttributeName");
     private final Control emailAttr = control("emailAttributeName");
 
-    private final Control adavancedConfig = control("advancedConfiguration");
+    private final Control advancedConfig = control("advancedConfiguration");
     private final Control spEntityId = control("advancedConfiguration/spEntityId");
     private final Control IdpMetadataConfiguration = control("idpMetadataConfiguration");
     private final Control xml = control("idpMetadataConfiguration/xml");
@@ -35,7 +34,7 @@ public class SamlSecurityRealm extends SecurityRealm {
         displayNameAttr.set(value);
     }
     public void setUserNameAttribute(String value) {
-        userNaneAttr.set(value);
+        userNameAttr.set(value);
     }
     public void setGroupsAttribute(String value) {
         groupsAttr.set(value);
@@ -44,10 +43,10 @@ public class SamlSecurityRealm extends SecurityRealm {
         emailAttr.set(value);
     }
     public void advancedConfig() {
-        adavancedConfig.click();
+        advancedConfig.click();
         // wait a bit for the advanced section to render
         // "Force Authentication" is one of its elements
-        waitFor(by.xpath("//span[.='Force Authentication']"), 2);
+        waitFor(by.xpath("//span[.='Force Authentication'] | //td[.='Force Authentication']"), 2);
     }
     public void setSpEntityIdAttribute(String value) {
         spEntityId.set(value);
@@ -62,7 +61,7 @@ public class SamlSecurityRealm extends SecurityRealm {
         encryption.click();
         // wait a bit for the encryption section to render
         // "Keystore path" is one of its elements
-        waitFor(by.xpath("//div[.='Keystore path']"), 2);
+        waitFor(by.xpath("//div[.='Keystore path'] | //td[.='Keystore path']"), 2);
     }
     public void setKeyStorePath(String value) {
         keyStorePath.set(value);
