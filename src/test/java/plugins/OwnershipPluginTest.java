@@ -111,7 +111,7 @@ public class OwnershipPluginTest extends AbstractJUnitTest {
     }
 
     private Matcher<ContainerPageObject> ownedBy(final User user) {
-        final Matcher<WebDriver> inner = Matchers.hasContent(Pattern.compile("(Primary owner: |Owner\\n|Primary\n)" + user.id()));
+        final Matcher<WebDriver> inner = Matchers.hasContent(Pattern.compile("(Primary owner: |Owner\\n|Primary\n|\n)" + user.id()));
         return new Matcher<ContainerPageObject>("Item owned by " + user.id()) {
             @Override
             public boolean matchesSafely(ContainerPageObject item) {
