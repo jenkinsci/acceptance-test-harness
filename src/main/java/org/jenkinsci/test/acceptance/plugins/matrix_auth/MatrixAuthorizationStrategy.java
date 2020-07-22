@@ -4,6 +4,7 @@ import org.jenkinsci.test.acceptance.po.AuthorizationStrategy;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
+import org.openqa.selenium.WebElement;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -20,8 +21,13 @@ public class MatrixAuthorizationStrategy extends AuthorizationStrategy {
      * Adds a new user/group to this matrix.
      */
     public MatrixRow addUser(String name) {
-        runThenHandleAlert(() -> this.name.resolve().findElement(by.parent()).findElement(by.button("Add user or group…")).click(),
-                a -> {
+        runThenHandleAlert(() -> {
+            WebElement button = this.name.resolve().findElement(by.parent())
+                                         .findElement(by.button("Add user or group…"));
+            // JENKINS-63159 if the user has just (un)checked a permission then the button click may fail as the button
+            // is obscured by a tooltip
+            button.sendKeys(" "); // because this is reliable and button.click() is not due to the tooltip.
+        }, a -> {
             a.sendKeys(name);
             a.accept();
         });
