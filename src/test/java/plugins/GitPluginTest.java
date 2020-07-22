@@ -23,32 +23,27 @@
  */
 package plugins;
 
-import java.net.URL;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import javax.inject.Inject;
-
+import org.jenkinsci.test.acceptance.Matchers;
+import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
+import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
+import org.jenkinsci.test.acceptance.junit.*;
+import org.jenkinsci.test.acceptance.plugins.git.GitRepo;
+import org.jenkinsci.test.acceptance.plugins.git.GitScm;
+import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.po.Job;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.openqa.selenium.By;
 
-import org.jenkinsci.test.acceptance.Matchers;
-import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
-import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
-import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.junit.DockerTest;
-import org.jenkinsci.test.acceptance.junit.WithCredentials;
-import org.jenkinsci.test.acceptance.junit.WithDocker;
-import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.plugins.git.GitRepo;
-import org.jenkinsci.test.acceptance.plugins.git.GitScm;
-import org.jenkinsci.test.acceptance.po.Build;
-import org.jenkinsci.test.acceptance.po.Job;
+import javax.inject.Inject;
+import java.net.URL;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.core.Is.*;
-import static org.hamcrest.core.IsNot.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNot.not;
 
 @WithDocker
 @Category(DockerTest.class)
