@@ -4,24 +4,31 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.regex.Pattern;
 
+import org.hamcrest.Description;
+import org.junit.Test;
+import org.jvnet.hudson.test.Issue;
+import org.openqa.selenium.WebDriver;
+
 import com.google.inject.Inject;
 
-import org.hamcrest.Description;
 import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jvnet.hudson.test.Issue;
 import org.jenkinsci.test.acceptance.junit.Since;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.ownership.OwnershipAction;
 import org.jenkinsci.test.acceptance.plugins.ownership.OwnershipGlobalConfig;
-import org.jenkinsci.test.acceptance.po.*;
+import org.jenkinsci.test.acceptance.po.ContainerPageObject;
+import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
+import org.jenkinsci.test.acceptance.po.JenkinsConfig;
+import org.jenkinsci.test.acceptance.po.JenkinsDatabaseSecurityRealm;
+import org.jenkinsci.test.acceptance.po.Slave;
+import org.jenkinsci.test.acceptance.po.User;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
-import org.junit.Test;
-import org.openqa.selenium.WebDriver;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.*;
 
 @WithPlugins({"ownership", "cloudbees-folder"})
 public class OwnershipPluginTest extends AbstractJUnitTest {
@@ -111,7 +118,7 @@ public class OwnershipPluginTest extends AbstractJUnitTest {
     }
 
     private Matcher<ContainerPageObject> ownedBy(final User user) {
-        final Matcher<WebDriver> inner = Matchers.hasContent(Pattern.compile("(Primary owner: |Owner\\n|Primary\n)" + user.id()));
+        final Matcher<WebDriver> inner = Matchers.hasContent(Pattern.compile("(Primary owner: |Owner\\n|Primary\n|\n)" + user.id()));
         return new Matcher<ContainerPageObject>("Item owned by " + user.id()) {
             @Override
             public boolean matchesSafely(ContainerPageObject item) {

@@ -318,40 +318,6 @@ public class GitPluginTest extends AbstractJUnitTest {
     }
 
     @Test
-    public void ancestry_strategy_to_choose_build() {
-        final String TEST_BRANCH = "testBranch";
-
-        GitRepo repo = buildGitRepo();
-        repo.createBranch(TEST_BRANCH);
-        repo.changeAndCommitFoo("Commit1 on master");
-        repo.checkout(TEST_BRANCH);
-        repo.changeAndCommitFoo("commit1 on " + TEST_BRANCH);
-        String sha1 = repo.getLastSha1();
-        repo.changeAndCommitFoo("commit2 on " + TEST_BRANCH);
-
-        repo.transferToDockerContainer(host, port);
-
-        job.useScm(GitScm.class)
-                .url(repoUrl)
-                .credentials(USERNAME)
-                .branch("")
-                .chooseBuildStrategy("Ancestry", 1, sha1);
-
-        job.save();
-        Build b = job.startBuild();
-        b.shouldSucceed();
-        // TODO Multiple selected branches create multiple builds, these should also be verified
-
-        assertThat(
-                b.getConsole(),
-                Matchers.containsRegexp(
-                        "Checking out Revision .* \\(origin/"+TEST_BRANCH+"\\)",
-                        Pattern.MULTILINE
-                )
-        );
-    }
-
-    @Test
     public void inverse_strategy_to_choose_build() {
         final String BRANCH_NAME = "secondBranch";
 
