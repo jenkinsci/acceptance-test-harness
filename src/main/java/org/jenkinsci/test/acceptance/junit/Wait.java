@@ -23,6 +23,9 @@
  */
 package org.jenkinsci.test.acceptance.junit;
 
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -31,7 +34,6 @@ import org.hamcrest.StringDescription;
 import org.jenkinsci.test.acceptance.utils.ElasticTime;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.Sleeper;
-import org.openqa.selenium.support.ui.SystemClock;
 
 import com.google.common.base.Function;
 
@@ -44,14 +46,42 @@ import com.google.common.base.Function;
  */
 public class Wait<Subject> extends FluentWait<Subject> {
 
-    private static final class ElasticClock extends SystemClock {
+    private static final class ElasticClock extends Clock {
+
+        private long baseMillis = System.currentTimeMillis();
         private final ElasticTime time;
+        private ZoneId zoneId;
+
         public ElasticClock(ElasticTime time) {
-            this.time = time;
+            this(time, ZoneId.of("Z"));
         }
 
-        @Override public long laterBy(long durationInMillis) {
-            return System.currentTimeMillis() + time.milliseconds(durationInMillis);
+        private ElasticClock(ElasticTime time, ZoneId zoneId) {
+            this.time = time;
+            this.zoneId = zoneId;
+        }
+
+        @Override
+        public ZoneId getZone() {
+            return zoneId;
+        }
+
+        @Override
+        public Clock withZone(ZoneId zone) {
+            return new ElasticClock(time, zone);
+        }
+
+        @Override
+        public Instant instant() {
+            return Instant.ofEpochMilli(millis());
+        }
+
+        @Override
+        public long millis() {
+            long realElapsed = System.currentTimeMillis() - baseMillis;
+            // slow the clock down..
+            long elasticElapsed = Math.round(realElapsed / time.getSlowDownFactor());
+            return baseMillis + elasticElapsed;
         }
     }
 
