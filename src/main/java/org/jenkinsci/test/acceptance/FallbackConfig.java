@@ -129,9 +129,9 @@ public class FallbackConfig extends AbstractModule {
             GeckoDriverService service = builder.build();
             return new FirefoxDriver(service, firefoxOptions);
         case "firefox-container":
-            return createContainerWebDriver(cleaner, "selenium/standalone-firefox-debug:3.14.0", new FirefoxOptions());
+            return createContainerWebDriver(cleaner, "selenium/standalone-firefox-debug:3.141.59", new FirefoxOptions());
         case "chrome-container":
-            return createContainerWebDriver(cleaner, "selenium/standalone-chrome-debug:3.14.0", new ChromeOptions());
+            return createContainerWebDriver(cleaner, "selenium/standalone-chrome-debug:3.141.59", new ChromeOptions());
         case "ie":
         case "iexplore":
         case "iexplorer":
