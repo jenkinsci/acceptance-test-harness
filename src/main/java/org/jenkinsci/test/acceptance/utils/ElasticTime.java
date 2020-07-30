@@ -59,7 +59,16 @@ public class ElasticTime {
     }
 
     public long milliseconds(long ms) {
-        double actualSeconds = concurrency * factor;
+        double actualSeconds = getSlowDownFactor();
         return Math.round(ms * actualSeconds);
+    }
+    
+    /**
+     * Get the factor by which we slow down time.
+     * Default is {@code 1.0} (no difference). Use {@code >1} in case of slower environment, {@<1} in case of faster one.
+     * @return the factor by which we slow down time.
+     */
+    public double getSlowDownFactor() {
+        return concurrency * factor;
     }
 }
