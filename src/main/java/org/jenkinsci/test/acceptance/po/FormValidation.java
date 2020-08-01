@@ -81,7 +81,7 @@ public class FormValidation {
 
             // Wait for validation area to stop being <div></div>
             validationArea = control.waitFor().until(() -> {
-                WebElement va = element.findElement(control.by.xpath("./../../following-sibling::tr/td[2]"));
+                WebElement va = element.findElement(control.by.xpath("./../../following-sibling::tr/td[2] | ./../following-sibling::div"));
                 try {
                     va.findElement(control.by.xpath("./div"));
                     return va;
