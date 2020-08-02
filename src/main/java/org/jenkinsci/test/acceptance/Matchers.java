@@ -103,12 +103,7 @@ public class Matchers {
             public boolean matchesSafely(PageObject po) {
                 try {
                     po.open();
-                    try {
-                        po.find(by.xpath("//div[@id='tasks']/div/span/a/span[text()='%s']", displayName)).getText();
-                    } catch (NoSuchElementException ignored) {
-                        // Jenkins <2.239 compatibility (sidebar rework)
-                        po.find(by.xpath("//div[@id='tasks']/div/a[text()='%s']", displayName));
-                    }
+                    po.find(by.xpath("//div[@id='tasks']/div/span/a/span[text()='%s'] | //div[@id='tasks']/div/a[text()='%s']", displayName, displayName)).getText();
                     return true;
                 } catch (NoSuchElementException ignored) {
                     return false;
