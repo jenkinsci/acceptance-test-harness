@@ -21,9 +21,9 @@ public class SubversionScm extends Scm {
     public final Control url = control("locations/remote");
     public final Control btAdvanced = control(by.xpath("//td[table/tbody/tr/td[@class='setting-main']/input[@name='_.ignoreDirPropChanges']]/div[@class='advancedLink']//button"));
     public final Control local = control("locations/local");
-    public final Control checkoutStrategy = control(by.xpath("//td[@class='setting-name' and text()='%s']/../td[@class='setting-main']/select", "Check-out Strategy"));
+    public final Control checkoutStrategy = control(by.xpath("//td[@class='setting-name' and text()='%s']/../td[@class='setting-main']/select | //div[contains(@class, 'setting-name') and normalize-space(text())='%s']/../div[@class='setting-main']/select", "Check-out Strategy", "Check-out Strategy"));
     public final Control credentials = control("locations/credentialsId");
-    public final Control repositoryBrowser = control(by.xpath("//td[@class='setting-name' and text()='%s']/../td[@class='setting-main']/select", "Repository browser"));
+    public final Control repositoryBrowser = control(by.xpath("//td[@class='setting-name' and text()='%s']/../td[@class='setting-main']/select | //div[contains(@class, 'setting-name') and normalize-space(text())='%s']/../div[@class='setting-main']/select", "Repository browser", "Repository browser"));
 
     /**
      * Opens the SVNPlugin credential page for protected repositories.
