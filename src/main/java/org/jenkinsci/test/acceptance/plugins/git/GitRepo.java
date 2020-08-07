@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
-import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
 import org.zeroturnaround.zip.ZipUtil;
 
 import com.jcraft.jsch.ChannelExec;
@@ -30,6 +29,8 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
+
+import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
 
 import static java.lang.ProcessBuilder.Redirect.*;
 import static java.nio.file.attribute.PosixFilePermission.*;
@@ -73,8 +74,20 @@ public class GitRepo implements Closeable {
      * Configures and identity for the repo, just in case global config is not set.
      */
     private void setIdentity(File dir) {
-        gitDir(dir, "config", "user.name", "Jenkins-ATH");
-        gitDir(dir, "config", "user.email", "jenkins-ath@example.org");
+        setIdentity("Jenkins-ATH", "jenkins-ath@example.org");
+    }
+
+    /**
+     * Sets the identity to be used when committing files.
+     *
+     * @param userName
+     *         the name of the user
+     * @param userMail
+     *         the email of the user
+     */
+    public void setIdentity(String userName, String userMail) {
+        gitDir(dir, "config", "user.name", userName);
+        gitDir(dir, "config", "user.email", userMail);
     }
 
     private File initDir() {
@@ -143,21 +156,34 @@ public class GitRepo implements Closeable {
     }
 
     /**
-     * Appends the string "more" to the file "foo", adds it to the repository and commits it.
+     * Append the specified content at the end of the given file and commit the file.
      *
-     * @param message commit message
+     * @param fileName
+     *         the name of the file
+     * @param fileContent
+     *         the new content of the file
+     * @param message
+     *         the commit message to ue
      */
-    public void changeAndCommitFoo(final String message) {
+    public void changeAndCommitFile(String fileName, String fileContent, String message) {
         try {
-            String fileName = "foo";
             try (FileWriter o = new FileWriter(new File(dir, fileName), true)) {
-                o.write("more");
+                o.write(fileContent);
             }
             git("add", fileName);
             commit(message);
         } catch (IOException e) {
             throw new AssertionError("Can't append line to file foo", e);
         }
+    }
+
+    /**
+     * Appends the string "more" to the file "foo", adds it to the repository and commits it.
+     *
+     * @param message commit message
+     */
+    public void changeAndCommitFoo(final String message) {
+        changeAndCommitFile("foo", "more", message);
     }
 
     /**
