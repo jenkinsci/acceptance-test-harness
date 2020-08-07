@@ -4,6 +4,7 @@ import org.jenkinsci.test.acceptance.plugins.credentials.Credential;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.PageObject;
+import org.jenkinsci.test.acceptance.selenium.Scroller;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
@@ -63,12 +64,8 @@ public class SshCredentialDialog extends PageAreaImpl {
 
         final Actions builder = new Actions(driver);
 
-        // move to element doesn't seem to be working properly
-        ((JavascriptExecutor) driver).executeScript(
-                "arguments[0].scrollIntoView();", addSubmitButton
-        );
-
-        builder.moveToElement(addSubmitButton).click(addSubmitButton);
+        new Scroller().scrollIntoView(addSubmitButton, driver);
+        addSubmitButton.click();
         builder.perform();
     }
 }
