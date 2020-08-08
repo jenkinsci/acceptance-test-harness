@@ -4,13 +4,13 @@ import org.jenkinsci.test.acceptance.plugins.credentials.Credential;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.PageObject;
+import org.jenkinsci.test.acceptance.selenium.Scroller;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -61,7 +61,9 @@ public class SshCredentialDialog extends PageAreaImpl {
         final WebElement addSubmitButton = find(addSubmitButtonLocator);
 
         final Actions builder = new Actions(driver);
-        builder.moveToElement(addSubmitButton).click(addSubmitButton);
+
+        new Scroller().scrollIntoView(addSubmitButton, driver);
+        addSubmitButton.click();
         builder.perform();
     }
 }
