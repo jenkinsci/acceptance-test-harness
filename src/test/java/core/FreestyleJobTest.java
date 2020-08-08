@@ -12,6 +12,7 @@ import org.jenkinsci.test.acceptance.po.BuildWithParameters;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.ListView;
+import org.jenkinsci.test.acceptance.po.PasswordParameter;
 import org.jenkinsci.test.acceptance.po.ShellBuildStep;
 import org.jenkinsci.test.acceptance.po.StringParameter;
 import org.jenkinsci.test.acceptance.po.TimerTrigger;
@@ -154,6 +155,7 @@ public class FreestyleJobTest extends AbstractJUnitTest {
         FreeStyleJob j = jenkins.jobs.create(FreeStyleJob.class);
         j.configure();
         j.addParameter(StringParameter.class).setName("text").setDefault("foo").setDescription("Bar");
+        j.addParameter(PasswordParameter.class).setName("password").setDefault("foopass").setDescription("apass");
         j.addShellStep("echo \">$text<\"");
         j.save();
 
