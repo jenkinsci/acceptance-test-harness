@@ -129,7 +129,7 @@ public class Folder extends TopLevelItem implements Container {
 
         final int lastViewIndex = viewTabs.size() - 1;
 
-        if ("+".equals(viewTabs.get(lastViewIndex).getText())) {
+        if ("+".equals(viewTabs.get(lastViewIndex).getText()) || "New View".equals(viewTabs.get(lastViewIndex).getAttribute("aria-label"))) {
             viewTabs.remove(lastViewIndex);
         }
 
