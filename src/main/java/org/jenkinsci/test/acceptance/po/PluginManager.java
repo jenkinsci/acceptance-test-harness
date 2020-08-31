@@ -273,7 +273,7 @@ public class PluginManager extends ContainerPageObject {
 
         // Jenkins will be restarted if necessary
         boolean hasBeenRestarted = new UpdateCenter(jenkins).waitForInstallationToComplete(specs);
-        if (!hasBeenRestarted && specs.length > 0 && !jenkins.getVersion().isOlderThan(new VersionNumber("2.189"))) {
+        if (!hasBeenRestarted && specs.length > 0 && jenkins.getVersion().isNewerThan(new VersionNumber("2.188"))) {
             jenkins.getLogger("all").waitForLogged(Pattern.compile("Completed installation of .*"), 1000);
         }
 
