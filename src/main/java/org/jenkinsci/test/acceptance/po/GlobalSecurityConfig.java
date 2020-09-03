@@ -111,12 +111,12 @@ public class GlobalSecurityConfig extends ContainerPageObject {
         // this causes a hard to understand "TypeError: a is null"
 
         // we do no know if this will happen or not as it depends what options they may have set so we can not waitFor a eleement to be present.
-        // instead we make sure that there is no element from the intermediary page. 
+        // instead we make sure that there is no element from the intermediary page.
 
         super.save();
 
         // saving security will either cause the page to go back to /manage or to be redirected with some HTML (not a 30x) to a login page...
-        // we know we have a page load here as the submit button is stale - so we need to wait until we are sure 
+        // we know we have a page load here as the submit button is stale - so we need to wait until we are sure
         // we do not have the script redirect page by looking for the absence of a <meta> tag with attribute "http-equiv='refresh'"
         try {
             WebElement metaRefresh = findIfNotVisible(by.xpath("/html/head/meta[@http-equiv='refresh']"));
