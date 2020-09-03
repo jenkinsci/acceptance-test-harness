@@ -26,7 +26,6 @@ package org.jenkinsci.test.acceptance.po;
 import java.net.URL;
 
 import org.jenkinsci.test.acceptance.plugins.authorize_project.BuildAccessControl;
-import org.jenkinsci.test.acceptance.plugins.workflow_multibranch.BranchSource;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
@@ -103,5 +102,28 @@ public class GlobalSecurityConfig extends ContainerPageObject {
      */
     public void setJobDslScriptSecurity(boolean enable) {
         control(by.name("_.useScriptSecurity")).check(enable);
+    }
+
+    @Override
+    public void save() {
+        // saving security will cause the page to go back to /manage however that page may now be access protected so you may get a 403 with a HTML page that does some redirection (not at the HTTP layer)
+        // so the generic save has a race condition as it may be getting the `html` element of the interim page which is then yanked out whilst the `getText` call is made.
+        // this causes a hard to understand "TypeError: a is null"
+
+        // we do no know if this will happen or not as it depends what options they may have set so we can not waitFor a eleement to be present.
+        // instead we make sure that there is no element from the intermediary page. 
+
+        super.save();
+
+        // saving security will either cause the page to go back to /manage or to be redirected with some HTML (not a 30x) to a login page...
+        // we know we have a page load here as the submit button is stale - so we need to wait until we are sure 
+        // we do not have the script redirect page by looking for the absence of a <meta> tag with attribute "http-equiv='refresh'"
+        try {
+            WebElement metaRefresh = findIfNotVisible(by.xpath("/html/head/meta[@http-equiv='refresh']"));
+            // we are in the 403 redirect page so wait until that has reloaded.
+            waitFor(metaRefresh).until(Control::isStale);
+        } catch (NoSuchElementException ignored) {
+            // this is ok the page reload happened quicker that our tests ran, or there was no reload and we are still in /manage
+        }
     }
 }
