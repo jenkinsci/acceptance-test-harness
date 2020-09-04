@@ -15,8 +15,8 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-import net.lightbody.bmp.BrowserMobProxy;
-import net.lightbody.bmp.client.ClientUtil;
+import com.browserup.bup.BrowserUpProxy;
+import com.browserup.bup.client.ClientUtil;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
@@ -142,6 +142,7 @@ public class FallbackConfig extends AbstractModule {
             ChromeOptions options = new ChromeOptions();
             options.setExperimentalOption("prefs", prefs);
             if (isCaptureHarEnabled()) {
+                options.setAcceptInsecureCerts(true);
                 options.setProxy(createSeleniumProxy(testName.get()));
             }
 
@@ -243,9 +244,9 @@ public class FallbackConfig extends AbstractModule {
     }
 
     private Proxy createSeleniumProxy(String testName) {
-        BrowserMobProxy browserMobProxy = HarRecorder.getBrowserMobProxy();
-        browserMobProxy.newHar(testName);
-        return ClientUtil.createSeleniumProxy(browserMobProxy);
+        BrowserUpProxy proxy = HarRecorder.getProxy();
+        proxy.newHar(testName);
+        return ClientUtil.createSeleniumProxy(proxy);
     }
 
     private void setDriverPropertyIfMissing(final String driverCommand, final String property) {
