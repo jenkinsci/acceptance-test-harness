@@ -1,6 +1,6 @@
 package org.jenkinsci.test.acceptance.recorder;
 
-import net.lightbody.bmp.BrowserMobProxy;
+import com.browserup.bup.BrowserUpProxy;
 import org.jenkinsci.test.acceptance.junit.FailureDiagnostics;
 import org.junit.Rule;
 import org.junit.Test;
@@ -22,7 +22,7 @@ public class HarRecorderTest {
         Description desc = description();
         HarRecorder harRecorder = rule(desc);
         HarRecorder.CAPTURE_HAR = HarRecorder.State.FAILURES_ONLY;
-        BrowserMobProxy proxy = HarRecorder.getBrowserMobProxy();
+        BrowserUpProxy proxy = HarRecorder.getProxy();
         proxy.newHar("jenkins");
 
         System.out.println("Good Bye World");

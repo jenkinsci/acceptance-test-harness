@@ -33,14 +33,14 @@
     <findbugs.skip>true</findbugs.skip>
 
     <selenium.version>3.141.59</selenium.version>
-    <guava.version>25.0-jre</guava.version> <!-- aligned with selenium -->
+    <guava.version>28.2-jre</guava.version> <!-- aligned with selenium -->
     <aether.version>0.9.0.v20140226</aether.version>
+    <jackson.version>2.10.3</jackson.version>
     <maven.version>3.1.0</maven.version>
     <groovy.version>2.3.1</groovy.version>
     <monte.version>0.7.7.0</monte.version>
     <mockito.version>1.10.19</mockito.version>
-    <slf4j.version>1.7.25</slf4j.version>
-    <slf4j.version>1.7.25</slf4j.version>
+    <slf4j.version>1.7.30</slf4j.version>
   </properties>
 
   <repositories>
@@ -243,7 +243,7 @@
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
-      <version>2.9.10.4</version>
+      <version>${jackson.version}</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci</groupId>
@@ -360,7 +360,7 @@
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
       <artifactId>jsr305</artifactId>
-      <version>2.0.3</version>
+      <version>3.0.2</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.main</groupId>
@@ -410,9 +410,9 @@
     </dependency>
 
     <dependency>
-      <groupId>net.lightbody.bmp</groupId>
-      <artifactId>browsermob-core</artifactId>
-      <version>2.1.5</version>
+      <groupId>com.browserup</groupId>
+      <artifactId>browserup-proxy-core</artifactId>
+      <version>2.1.1</version>
       <exclusions>
         <exclusion>
           <groupId>org.bouncycastle</groupId>
@@ -441,12 +441,12 @@
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-lang3</artifactId>
-        <version>3.8</version>
+        <version>3.8.1</version>
       </dependency>
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-annotations</artifactId>
-        <version>2.9.10</version>
+        <version>${jackson.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.httpcomponents</groupId>

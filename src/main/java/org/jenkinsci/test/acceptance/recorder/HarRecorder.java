@@ -1,9 +1,9 @@
 package org.jenkinsci.test.acceptance.recorder;
 
-import net.lightbody.bmp.BrowserMobProxy;
-import net.lightbody.bmp.BrowserMobProxyServer;
-import net.lightbody.bmp.core.har.Har;
-import net.lightbody.bmp.proxy.CaptureType;
+import com.browserup.bup.BrowserUpProxy;
+import com.browserup.bup.BrowserUpProxyServer;
+import com.browserup.bup.proxy.CaptureType;
+import com.browserup.harreader.model.Har;
 import org.jenkinsci.test.acceptance.junit.FailureDiagnostics;
 import org.jenkinsci.test.acceptance.junit.GlobalRule;
 import org.jenkinsci.test.acceptance.utils.SystemEnvironmentVariables;
@@ -66,15 +66,20 @@ public class HarRecorder extends TestWatcher {
 
     static State CAPTURE_HAR = value(SystemEnvironmentVariables.getPropertyVariableOrEnvironment("RECORD_BROWSER_TRAFFIC", FAILURES_ONLY.getValue()));
 
-    private static BrowserMobProxy proxy;
+    private static BrowserUpProxy proxy;
 
-    public static BrowserMobProxy getBrowserMobProxy() {
+    public static BrowserUpProxy getProxy() {
         if (proxy == null) {
             // start the proxy
-            proxy = new BrowserMobProxyServer();
-            proxy.start(0);
+            proxy = new BrowserUpProxyServer();
             // enable more detailed HAR capture, if desired (see CaptureType for the complete list)
-            proxy.enableHarCaptureTypes(CaptureType.REQUEST_CONTENT, CaptureType.RESPONSE_CONTENT);
+            proxy.enableHarCaptureTypes(
+                    CaptureType.REQUEST_HEADERS,
+                    CaptureType.REQUEST_CONTENT,
+                    CaptureType.RESPONSE_HEADERS,
+                    CaptureType.RESPONSE_CONTENT
+            );
+            proxy.start();
         }
         return proxy;
     }
@@ -106,6 +111,7 @@ public class HarRecorder extends TestWatcher {
 
     private void recordHar() {
         if (proxy != null) {
+            proxy.stop();
             Har har = proxy.getHar();
             File file = diagnostics.touch("jenkins.har");
             try {
