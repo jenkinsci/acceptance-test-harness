@@ -30,6 +30,7 @@ import org.jenkinsci.test.acceptance.guice.TestName;
 import org.jenkinsci.test.acceptance.guice.TestScope;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.recorder.HarRecorder;
+import org.jenkinsci.test.acceptance.selenium.SanityChecker;
 import org.jenkinsci.test.acceptance.selenium.Scroller;
 import org.jenkinsci.test.acceptance.server.JenkinsControllerPoolProcess;
 import org.jenkinsci.test.acceptance.server.PooledJenkinsController;
@@ -300,6 +301,7 @@ public class FallbackConfig extends AbstractModule {
         }
 
         final EventFiringWebDriver d = new EventFiringWebDriver(base);
+        d.register(new SanityChecker());
         d.register(new Scroller());
 
         try {
