@@ -245,7 +245,8 @@ public class LdapPluginTest extends AbstractJUnitTest {
         // Then
         assertThat(jenkins, hasLoggedInUser("jenkins"));
     }
-    
+
+    @Ignore("TODO https://github.com/jenkinsci/ldap-plugin/pull/49/commits/7c00268c86aafe3985ab5eacedc43c17726777a4")
     @Test
     public void use_environment_varibales() {
         // Given
