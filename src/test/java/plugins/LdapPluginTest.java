@@ -10,7 +10,6 @@ import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
 import org.jenkinsci.test.acceptance.po.LdapSecurityRealm;
 import org.jenkinsci.test.acceptance.po.Login;
 import org.jenkinsci.test.acceptance.po.User;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
@@ -246,12 +245,12 @@ public class LdapPluginTest extends AbstractJUnitTest {
         assertThat(jenkins, hasLoggedInUser("jenkins"));
     }
 
-    @Ignore("TODO https://github.com/jenkinsci/ldap-plugin/pull/49/commits/7c00268c86aafe3985ab5eacedc43c17726777a4")
     @Test
     public void use_environment_varibales() {
         // Given
         LdapDetails details = createDefaultsWithoutManagerCred(ldap.get());
-        details.addEnvironmentVariable(new LdapEnvironmentVariable("java.naming.ldap.typesOnly", "true"));
+        details.addEnvironmentVariable(new LdapEnvironmentVariable("com.sun.jndi.ldap.connect.timeout", "1"));
+        details.addEnvironmentVariable(new LdapEnvironmentVariable("com.sun.jndi.ldap.read.timeout", "1"));
         useLdapAsSecurityRealm(details);
         // When
         Login login = jenkins.login();
