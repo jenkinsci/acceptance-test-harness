@@ -79,6 +79,7 @@ public class HarRecorder extends TestWatcher {
                     CaptureType.RESPONSE_HEADERS,
                     CaptureType.RESPONSE_CONTENT
             );
+            proxy.setTrustAllServers(true);
             proxy.start();
         }
         return proxy;
