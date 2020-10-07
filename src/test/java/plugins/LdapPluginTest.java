@@ -249,8 +249,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
     public void use_environment_varibales() {
         // Given
         LdapDetails details = createDefaultsWithoutManagerCred(ldap.get());
-        details.addEnvironmentVariable(new LdapEnvironmentVariable("com.sun.jndi.ldap.connect.timeout", "1"));
-        details.addEnvironmentVariable(new LdapEnvironmentVariable("com.sun.jndi.ldap.read.timeout", "1"));
+        details.addEnvironmentVariable(new LdapEnvironmentVariable("java.naming.security.protocol", "ssl"));
         useLdapAsSecurityRealm(details);
         // When
         Login login = jenkins.login();
