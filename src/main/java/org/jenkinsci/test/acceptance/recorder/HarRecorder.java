@@ -79,6 +79,7 @@ public class HarRecorder extends TestWatcher {
                     CaptureType.RESPONSE_HEADERS,
                     CaptureType.RESPONSE_CONTENT
             );
+            proxy.setTrustAllServers(true);
             proxy.start();
         }
         return proxy;
@@ -120,6 +121,7 @@ public class HarRecorder extends TestWatcher {
                 System.err.println("Unable to write HAR file to " + file);
                 e.printStackTrace(System.err);
             }
+            proxy = null;
         }
     }
 }
