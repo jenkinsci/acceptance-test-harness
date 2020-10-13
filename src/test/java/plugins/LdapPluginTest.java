@@ -10,7 +10,6 @@ import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
 import org.jenkinsci.test.acceptance.po.LdapSecurityRealm;
 import org.jenkinsci.test.acceptance.po.Login;
 import org.jenkinsci.test.acceptance.po.User;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
@@ -245,12 +244,12 @@ public class LdapPluginTest extends AbstractJUnitTest {
         // Then
         assertThat(jenkins, hasLoggedInUser("jenkins"));
     }
-    
+
     @Test
     public void use_environment_varibales() {
         // Given
         LdapDetails details = createDefaultsWithoutManagerCred(ldap.get());
-        details.addEnvironmentVariable(new LdapEnvironmentVariable("java.naming.ldap.typesOnly", "true"));
+        details.addEnvironmentVariable(new LdapEnvironmentVariable("java.naming.security.protocol", "ssl"));
         useLdapAsSecurityRealm(details);
         // When
         Login login = jenkins.login();
