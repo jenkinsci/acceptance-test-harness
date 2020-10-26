@@ -40,6 +40,9 @@ for (int i = 0; i < splits.size(); i++) {
                                 allowEmptyResults: true
                         ) {
                             sh """
+                                echo --begin excludes.txt --
+                                cat excludes.txt
+                                echo --end excludes.txt --
                                 set-java.sh $javaVersion
                                 eval \$(vnc.sh)
                                 java -version
