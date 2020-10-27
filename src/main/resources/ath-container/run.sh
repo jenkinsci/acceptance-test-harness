@@ -98,4 +98,4 @@ shift 2
 
 set -x
 
-BROWSER=$browser JENKINS_WAR=$war mvn --show-version help:active-profiles "$@"
+BROWSER=$browser JENKINS_WAR=$war mvn --show-version help:active-profiles help:effective-pom "$@"
