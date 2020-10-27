@@ -8,13 +8,13 @@ for (int i = 0; i < (BUILD_NUMBER as int); i++) {
 def branches = [:]
 
 def splits
-if (true /*env.BUILD_NUMBER == '1' */) {
+if (env.BUILD_NUMBER == '1') {
     node() { // When there are no previous build, we need to estimate splits from files which require workspace
         checkout scm
-        splits = splitTests estimateTestsFromFiles: true, parallelism: count(10)
+        splits = splitTests estimateTestsFromFiles: true, parallelism: count(2)
     }
 } else {
-    splits = splitTests count(10)
+    splits = splitTests count(2)
 }
 for (int i = 0; i < splits.size(); i++) {
     int index = i
