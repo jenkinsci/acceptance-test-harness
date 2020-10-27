@@ -55,6 +55,7 @@ import static org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation.inst
 @WithPlugins("maven-plugin")
 @Category(DockerTest.class)
 @WithDocker
+@Since( "2.204.6" )
 public class MavenPluginTest extends AbstractJUnitTest {
 
     private static final String GENERATE = "archetype:generate -DarchetypeGroupId=org.apache.maven.archetypes -DgroupId=com.mycompany.app -DartifactId=my-app -Dversion=1.0 -B";
@@ -64,30 +65,30 @@ public class MavenPluginTest extends AbstractJUnitTest {
 
     @Test
     public void autoinstall_maven_for_freestyle_job() {
-        installMaven(jenkins, "maven_3.0.4", "3.0.4");
+        installMaven(jenkins, "maven_3.6.3", "3.6.3");
 
         FreeStyleJob job = jenkins.jobs.create();
         job.configure();
         MavenBuildStep step = job.addBuildStep(MavenBuildStep.class);
-        step.version.select("maven_3.0.4");
+        step.version.select("maven_3.6.3");
         step.targets.set("-version");
         job.save();
 
-        job.startBuild().shouldSucceed().shouldContainsConsoleOutput("Apache Maven 3.0.4");
+        job.startBuild().shouldSucceed().shouldContainsConsoleOutput("Apache Maven 3.6.3");
     }
 
     @Test
-    public void autoinstall_maven2_for_freestyle_job() {
-        installMaven(jenkins, "maven_2.2.1", "2.2.1");
+    public void autoinstall_maven3_for_freestyle_job() {
+        installMaven(jenkins, "maven_3.6.3", "3.6.3");
 
         FreeStyleJob job = jenkins.jobs.create();
         job.configure();
         MavenBuildStep step = job.addBuildStep(MavenBuildStep.class);
-        step.version.select("maven_2.2.1");
+        step.version.select("maven_3.6.3");
         step.targets.set("-version");
         job.save();
 
-        job.startBuild().shouldSucceed().shouldContainsConsoleOutput("Apache Maven 2.2.1");
+        job.startBuild().shouldSucceed().shouldContainsConsoleOutput("Apache Maven 3.6.3");
     }
 
     @Test
@@ -121,7 +122,6 @@ public class MavenPluginTest extends AbstractJUnitTest {
     @Test
     public void set_global_maven_options() {
         installSomeMaven(jenkins);
-
         jenkins.configure();
         new MavenProjectConfig(jenkins.getConfigPage()).opts.set("-showversion");
         jenkins.save();
@@ -183,6 +183,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
 
     @Test @Issue({"JENKINS-20209", "JENKINS-21045"})
     public void send_mail() throws Exception {
+        installSomeMaven(jenkins);
         MailhogContainer mailhog = mailhogProvider.get();
 
         MavenModuleSet job = jenkins.jobs.create(MavenModuleSet.class);
