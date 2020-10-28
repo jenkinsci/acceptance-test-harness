@@ -8,7 +8,7 @@ for (int i = 0; i < (BUILD_NUMBER as int); i++) {
 def branches = [:]
 
 def splits
-if (env.BUILD_NUMBER == '1') {
+if (currentBuild.previousNotFailedBuild != null) {
     node() { // When there are no previous build, we need to estimate splits from files which require workspace
         checkout scm
         splits = splitTests estimateTestsFromFiles: true, parallelism: count(10)
