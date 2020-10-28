@@ -14,7 +14,7 @@ if (currentBuild.previousNotFailedBuild == null) {
         splits = splitTests estimateTestsFromFiles: true, parallelism: count(10)
     }
 } else {
-    echo "reference build should be : ${currentBuild.previousNotFailedBuild}"
+    echo "reference build should be : ${currentBuild.previousNotFailedBuild.projectName}:${currentBuild.previousNotFailedBuild.number}, with state ${currentBuild.previousNotFailedBuild.result}"
     splits = splitTests count(10)
 }
 for (int i = 0; i < splits.size(); i++) {
