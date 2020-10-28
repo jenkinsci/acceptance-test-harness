@@ -12,7 +12,7 @@ def needSplittingFromWorkspace = true
 for (build = currentBuild.previousCompletedBuild; build != null; build = build.previousCompletedBuild) {
     if (build.resultIsBetterOrEqualTo("UNSTABLE")) {
         // we have a reference build
-        echo "not splitting from workkspace, reference build should be : ${build.previousNotFailedBuild.projectName}:${build.previousNotFailedBuild.number}, with state ${build.previousNotFailedBuild.result}"
+        echo "not splitting from workspace, reference build should be : ${build.projectName}:${build.number}, with state ${build.result}"
         needSplittingFromWorkspace = false
         break
     }
