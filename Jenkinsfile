@@ -6,15 +6,24 @@ for (int i = 0; i < (BUILD_NUMBER as int); i++) {
 }
 
 def branches = [:]
-
 def splits
-if (currentBuild.previousNotFailedBuild == null) {
+def needSplittingFromWorkspace = true
+
+for (build = currentBuild.previousCompletedBuild; build != null; build = build.previousCompletedBuild) {
+    if (build.resultIsBetterOrEqualTo("UNSTABLE")) {
+        // we have a reference build
+        echo "not splitting from workkspace, reference build should be : ${currentBuild.previousNotFailedBuild.projectName}:${currentBuild.previousNotFailedBuild.number}, with state ${currentBuild.previousNotFailedBuild.result}"
+        needSplittingFromWorkspace = false
+        break
+    }
+}
+
+if (needSplittingFromWorkspace) {
     node() { // When there are no previous build, we need to estimate splits from files which require workspace
         checkout scm
         splits = splitTests estimateTestsFromFiles: true, parallelism: count(10)
     }
 } else {
-    echo "reference build should be : ${currentBuild.previousNotFailedBuild.projectName}:${currentBuild.previousNotFailedBuild.number}, with state ${currentBuild.previousNotFailedBuild.result}"
     splits = splitTests count(10)
 }
 for (int i = 0; i < splits.size(); i++) {
