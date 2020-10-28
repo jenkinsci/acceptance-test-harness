@@ -16,6 +16,7 @@ if (env.BUILD_NUMBER == '1') {
 } else {
     splits = splitTests count(2)
 }
+
 for (int i = 0; i < splits.size(); i++) {
     int index = i
     for (int j in [8, 11]) {
