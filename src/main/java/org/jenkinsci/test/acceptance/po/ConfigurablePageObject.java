@@ -30,6 +30,8 @@ import com.google.inject.Injector;
 
 import groovy.lang.Closure;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
@@ -126,8 +128,9 @@ public abstract class ConfigurablePageObject extends PageObject {
     public abstract URL getConfigUrl();
 
     public void save() {
-        clickButton("Save");
-        assertThat(driver, not(hasContent("This page expects a form submission")));
+        WebElement e = find(by.button("Save"));
+        e.click();
+        waitFor(e).until(CapybaraPortingLayerImpl::isStale);
     }
 
     public void apply() {
