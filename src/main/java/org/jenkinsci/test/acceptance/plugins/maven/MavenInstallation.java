@@ -35,7 +35,7 @@ public class MavenInstallation extends ToolInstallation {
     public static final String DEFAULT_MAVEN_ID = "default_maven";
 
     public static void installSomeMaven(Jenkins jenkins) {
-        installMaven(jenkins, DEFAULT_MAVEN_ID, "3.0.5");
+        installMaven(jenkins, DEFAULT_MAVEN_ID, "3.6.3");
     }
 
     /**
