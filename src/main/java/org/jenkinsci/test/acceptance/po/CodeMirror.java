@@ -24,6 +24,7 @@
 package org.jenkinsci.test.acceptance.po;
 
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.NoSuchElementException;
 
 /**
  * Encapsulate CodeMirror wizardry.
@@ -47,7 +48,8 @@ public class CodeMirror extends PageAreaImpl {
         }
 
         // can't use find() because it wants a visible element
-        driver.findElement(by.xpath("//*[@path='%s']", getPath()));    // wait until the element in question appears in DOM
+        // wait until the element in question appears in DOM as it is added by JavaScript
+        waitFor().ignoring(NoSuchElementException.class).until(() -> driver.findElement(by.xpath("//*[@path='%s']", getPath())));
 
         executeScript(scriptSet, String.format("//*[@path='%s']/following-sibling::div", getPath()), content);
     }
