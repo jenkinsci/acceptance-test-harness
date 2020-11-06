@@ -195,15 +195,18 @@ public class Control extends CapybaraPortingLayerImpl {
      */
     public void selectDropdownMenu(Class type) {
         click();
-        findCaption(type,findDropDownMenuItem).click();
-        elasticSleep(1000);
+        WebElement we = findCaption(type,findDropDownMenuItem);
+        we.click();
+        // wait until the menu is hidden
+        waitFor(we).pollingEvery(100L, TimeUnit.MILLISECONDS).withTimeout(time.milliseconds(1000), TimeUnit.MILLISECONDS).until(() -> !we.isDisplayed());
     }
 
     public void selectDropdownMenu(String displayName) {
         click();
-        elasticSleep(1000);
-        findDropDownMenuItem.find(displayName).click();
-        elasticSleep(1000);
+        WebElement we = findDropDownMenuItem.find(displayName);
+        we.click();
+        // wait until the menu is hidden
+        waitFor(we).pollingEvery(100L, TimeUnit.MILLISECONDS).withTimeout(time.milliseconds(1000), TimeUnit.MILLISECONDS).until(() -> !we.isDisplayed());
     }
 
     /**
@@ -227,8 +230,13 @@ public class Control extends CapybaraPortingLayerImpl {
                             "    }" +
                             ");"
             );
+            // we can not use `Select` as these are YUI menus and we need to wait for it to be visible
+            WebElement context = waitFor(menuButton).
+                    pollingEvery(100, TimeUnit.MILLISECONDS).
+                    withTimeout(time.milliseconds(1000), TimeUnit.MILLISECONDS).
+                    ignoring(NoSuchElementException.class).
+                    until((me) -> findElement(me, by.xpath("ancestor::*[contains(@class,'yui-menu-button')]/..")));
 
-            WebElement context = findElement(menuButton, by.xpath("ancestor::*[contains(@class,'yui-menu-button')]/.."));
             WebElement e = findElement(context, by.link(caption));
             return e;
         }
