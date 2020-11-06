@@ -1,13 +1,15 @@
 package org.jenkinsci.test.acceptance.po;
 
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
+
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.test.acceptance.selenium.Scroller;
 import org.openqa.selenium.By;
+import org.openqa.selenium.ElementClickInterceptedException;
 import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
@@ -103,7 +105,14 @@ public class Control extends CapybaraPortingLayerImpl {
      * @see #clickAndWaitToBecomeStale(Duration)
      */
     public void click() {
-        resolve().click();
+        WebElement we = resolve();
+        // button may be obscured by say the "Save Apply" screen so we wait as Selenium will do a scroll but the CSS 
+        // can take a while to update the layout \o/
+        waitFor(we).
+               withTimeout(time.seconds(1), TimeUnit.MILLISECONDS).
+               pollingEvery(time.milliseconds(100), TimeUnit.MILLISECONDS).
+               ignoring(ElementClickInterceptedException.class).
+               until(() -> {we.click(); return true;});
     }
 
 
