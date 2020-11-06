@@ -109,8 +109,8 @@ public class Control extends CapybaraPortingLayerImpl {
         // button may be obscured by say the "Save Apply" screen so we wait as Selenium will do a scroll but the CSS 
         // can take a while to update the layout \o/
         waitFor(we).
-               withTimeout(time.seconds(1), TimeUnit.MILLISECONDS).
-               pollingEvery(time.milliseconds(100), TimeUnit.MILLISECONDS).
+               withTimeout(1, TimeUnit.SECONDS).
+               pollingEvery(100, TimeUnit.MILLISECONDS).
                ignoring(ElementClickInterceptedException.class).
                until(() -> {we.click(); return true;});
     }
@@ -193,24 +193,24 @@ public class Control extends CapybaraPortingLayerImpl {
      * @param type
      *      Class with {@link Describable} annotation.
      */
-    public void selectDropdownMenu(Class type) {
+    public void selectDropdownMenu(Class<?> type) {
         click();
         WebElement we = findCaption(type,findDropDownMenuItem);
         // the element may not yet be visible so wait for it to become shown after the click above
-        waitFor(we).pollingEvery(100L, TimeUnit.MILLISECONDS).withTimeout(time.milliseconds(1000), TimeUnit.MILLISECONDS).until(() -> we.isDisplayed());
+        waitFor(we).pollingEvery(100L, TimeUnit.MILLISECONDS).withTimeout(1, TimeUnit.SECONDS).until(() -> we.isDisplayed());
         we.click();
         // wait until the menu is hidden
-        waitFor(we).pollingEvery(100L, TimeUnit.MILLISECONDS).withTimeout(time.milliseconds(1000), TimeUnit.MILLISECONDS).until(() -> !we.isDisplayed());
+        waitFor(we).pollingEvery(100L, TimeUnit.MILLISECONDS).withTimeout(1, TimeUnit.SECONDS).until(() -> !we.isDisplayed());
     }
 
     public void selectDropdownMenu(String displayName) {
         click();
         WebElement we = findDropDownMenuItem.find(displayName);
         // the element may not yet be visible so wait for it to become shown after the click above
-        waitFor(we).pollingEvery(100L, TimeUnit.MILLISECONDS).withTimeout(time.milliseconds(1000), TimeUnit.MILLISECONDS).until(() -> we.isDisplayed());
+        waitFor(we).pollingEvery(100L, TimeUnit.MILLISECONDS).withTimeout(1, TimeUnit.SECONDS).until(() -> we.isDisplayed());
         we.click();
         // wait until the menu is hidden
-        waitFor(we).pollingEvery(100L, TimeUnit.MILLISECONDS).withTimeout(time.milliseconds(1000), TimeUnit.MILLISECONDS).until(() -> !we.isDisplayed());
+        waitFor(we).pollingEvery(100L, TimeUnit.MILLISECONDS).withTimeout(1, TimeUnit.SECONDS).until(() -> !we.isDisplayed());
     }
 
     /**
@@ -245,7 +245,7 @@ public class Control extends CapybaraPortingLayerImpl {
      * For alternative use when the 'yui-menu-button' doesn't exist.
      * @param type
      */
-    public void selectDropdownMenuAlt(Class type) {
+    public void selectDropdownMenuAlt(Class<?> type) {
         findCaption(type,findDropDownMenuItemBySelector);
         elasticSleep(1000);
     }
