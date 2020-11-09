@@ -1,13 +1,15 @@
 package org.jenkinsci.test.acceptance.po;
 
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
+
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.test.acceptance.selenium.Scroller;
 import org.openqa.selenium.By;
+import org.openqa.selenium.ElementClickInterceptedException;
 import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
@@ -103,7 +105,14 @@ public class Control extends CapybaraPortingLayerImpl {
      * @see #clickAndWaitToBecomeStale(Duration)
      */
     public void click() {
-        resolve().click();
+        WebElement we = resolve();
+        // button may be obscured by say the "Save Apply" screen so we wait as Selenium will do a scroll but the CSS 
+        // can take a while to update the layout \o/
+        waitFor(we).
+               withTimeout(1, TimeUnit.SECONDS).
+               pollingEvery(100, TimeUnit.MILLISECONDS).
+               ignoring(ElementClickInterceptedException.class).
+               until(() -> {we.click(); return true;});
     }
 
 
@@ -184,17 +193,24 @@ public class Control extends CapybaraPortingLayerImpl {
      * @param type
      *      Class with {@link Describable} annotation.
      */
-    public void selectDropdownMenu(Class type) {
+    public void selectDropdownMenu(Class<?> type) {
         click();
-        findCaption(type,findDropDownMenuItem).click();
-        elasticSleep(1000);
+        WebElement we = findCaption(type,findDropDownMenuItem);
+        // the element may not yet be visible so wait for it to become shown after the click above
+        waitFor(we).pollingEvery(100L, TimeUnit.MILLISECONDS).withTimeout(1, TimeUnit.SECONDS).until(() -> we.isDisplayed());
+        we.click();
+        // wait until the menu is hidden
+        waitFor(we).pollingEvery(100L, TimeUnit.MILLISECONDS).withTimeout(1, TimeUnit.SECONDS).until(() -> !we.isDisplayed());
     }
 
     public void selectDropdownMenu(String displayName) {
         click();
-        elasticSleep(1000);
-        findDropDownMenuItem.find(displayName).click();
-        elasticSleep(1000);
+        WebElement we = findDropDownMenuItem.find(displayName);
+        // the element may not yet be visible so wait for it to become shown after the click above
+        waitFor(we).pollingEvery(100L, TimeUnit.MILLISECONDS).withTimeout(1, TimeUnit.SECONDS).until(() -> we.isDisplayed());
+        we.click();
+        // wait until the menu is hidden
+        waitFor(we).pollingEvery(100L, TimeUnit.MILLISECONDS).withTimeout(1, TimeUnit.SECONDS).until(() -> !we.isDisplayed());
     }
 
     /**
@@ -218,9 +234,9 @@ public class Control extends CapybaraPortingLayerImpl {
                             "    }" +
                             ");"
             );
-
-            WebElement context = findElement(menuButton, by.xpath("ancestor::*[contains(@class,'yui-menu-button')]/.."));
-            WebElement e = findElement(context, by.link(caption));
+            // we can not use `Select` as these are YUI menus and we need to wait for it to be visible
+            WebElement menu = findElement(menuButton, by.xpath("ancestor::*[contains(@class,'yui-menu-button')]/.."));
+            WebElement e = findElement(menu, by.link(caption));
             return e;
         }
     };
@@ -229,7 +245,7 @@ public class Control extends CapybaraPortingLayerImpl {
      * For alternative use when the 'yui-menu-button' doesn't exist.
      * @param type
      */
-    public void selectDropdownMenuAlt(Class type) {
+    public void selectDropdownMenuAlt(Class<?> type) {
         findCaption(type,findDropDownMenuItemBySelector);
         elasticSleep(1000);
     }
