@@ -47,6 +47,7 @@ public class StageViewTest extends AbstractJUnitTest {
      * aka Pagination
      */
     @Test
+    @WithPlugins("pipeline-stage-view@2.18")
     public void multiBuildJobShouldContainCorrectNumberOfJobsBuilt() {
         WorkflowJob job = this.createPipelineFromFile(SINGLE_JOB);
         Build build = null;
@@ -65,7 +66,7 @@ public class StageViewTest extends AbstractJUnitTest {
         assertThat(build, notNullValue());
         job.open();
         stageView = new StageView(job, JOB_PATH);
-        assertThat(stageView.getAllStageViewJobs(), hasSize(11));//max diplay is 11
+        assertThat(stageView.getAllStageViewJobs(), hasSize(10));//max diplay is 10
     }
 
     /**
@@ -73,6 +74,7 @@ public class StageViewTest extends AbstractJUnitTest {
      * to new stages with future builds.
      */
     @Test
+    @WithPlugins("pipeline-stage-view@2.18")
     public void multiBuildJobShouldContainCorrectNumberOfJobsHeadline() {
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
         String pre = "node {\n";
@@ -94,7 +96,7 @@ public class StageViewTest extends AbstractJUnitTest {
         assertThat(build, notNullValue());
         job.open();
         StageView stageView = new StageView(job, JOB_PATH);
-        assertThat(stageView.getAllStageViewJobs(), hasSize(11));
+        assertThat(stageView.getAllStageViewJobs(), hasSize(10));
         assertThat(stageView.getStageViewHeadlines(), hasSize(10));
 
     }
