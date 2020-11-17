@@ -14,4 +14,9 @@ public class PluginManagerTest extends AbstractJUnitTest {
         final File plugin = new File(getClass().getResource("ant-1.0.hpi").toURI());
         jenkins.getPluginManager().installPlugin(plugin);
     }
+
+    @Test
+    public void checkForUpdate() {
+        jenkins.getPluginManager().checkForUpdates();
+    }
 }
