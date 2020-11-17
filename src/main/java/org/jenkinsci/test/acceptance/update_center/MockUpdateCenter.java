@@ -198,8 +198,7 @@ public class MockUpdateCenter implements AutoCleaned {
         // TODO figure out how to deal with Docker-based controllers which would need to have an IP address for the host
         String override = "http://" + server.getInetAddress().getHostAddress() + ":" + server.getLocalPort() + "/update-center.json";
         LOGGER.log(Level.INFO, "replacing update site {0} with {1}", new Object[] {original, override});
-        jenkins.runScript("DownloadService.signatureCheck = false; Jenkins.instance.updateCenter.sites.replaceBy"
-                           + "([new UpdateSite(UpdateCenter.ID_DEFAULT, '%s')])", override);
+        jenkins.runScript("DownloadService.signatureCheck = false; Jenkins.instance.updateCenter.sites.replaceBy([new UpdateSite(UpdateCenter.ID_DEFAULT, '%s')])", override);
     }
 
     private ExceptionLogger serverExceptionHandler() {
