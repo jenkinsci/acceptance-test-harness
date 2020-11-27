@@ -23,6 +23,8 @@
  */
 package org.jenkinsci.test.acceptance.po;
 
+import java.time.Duration;
+
 import org.openqa.selenium.NoSuchElementException;
 import hudson.util.VersionNumber;
 
@@ -81,7 +83,7 @@ public class JenkinsDatabaseSecurityRealm extends SecurityRealm {
 
         public User signup(String name) {
             control(by.input("username")).set(name);
-            control(by.name("Submit")).click();
+            control(by.name("Submit")).clickAndWaitToBecomeStale(Duration.ofSeconds(120));
 
             return new User(getJenkins(), name);
         }
