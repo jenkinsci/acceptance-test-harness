@@ -344,6 +344,8 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
             return false;
         } catch (StaleElementReferenceException expected) {
             return true;
+        } catch (NoSuchElementException expected) {
+            return true;
         }
     }
 
