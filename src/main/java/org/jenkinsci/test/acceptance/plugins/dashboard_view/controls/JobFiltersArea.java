@@ -12,9 +12,13 @@ import org.jenkinsci.test.acceptance.po.PageObject;
  */
 public class JobFiltersArea extends PageAreaImpl {
     /**
+     * Button to add a new status filter
+     */
+    private final Control addStatusFilter = control("/hetero-list-add[jobFilters]");
+    /**
      * Dropdown to select the type of {@link StatusFilter}.
      */
-    private final Control statusFilter = control("/statusFilter");
+    private final Control statusFilter = control("/jobFilters/statusFilter");
     /**
      * Checkbox to enable recursion in subfolders.
      */
@@ -44,8 +48,8 @@ public class JobFiltersArea extends PageAreaImpl {
      * @param statusFilter the filter type to use
      */
     public void setStatusFilter(StatusFilter statusFilter) {
+        this.addStatusFilter.selectDropdownMenu("Status Filter");
         this.statusFilter.select(statusFilter.getCaption());
-
     }
 
     /**
@@ -74,10 +78,6 @@ public class JobFiltersArea extends PageAreaImpl {
      * @author peter-mueller
      */
     public static enum StatusFilter {
-        /**
-         * Present all jobs in the dashboard.
-         */
-        ALL("All selected jobs"),
         /**
          * Only show enabled jobs.
          */
