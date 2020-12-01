@@ -26,7 +26,7 @@ package org.jenkinsci.test.acceptance.plugins.post_build_script;
 import org.jenkinsci.test.acceptance.po.*;
 import org.openqa.selenium.By;
 
-@Describable({"Execute Scripts", "Execute a set of scripts", "[PostBuildScript] - Execute a set of scripts"})
+@Describable({"Execute scripts", "Execute Scripts", "Execute a set of scripts", "[PostBuildScript] - Execute a set of scripts"})
 public class PostBuildScript extends AbstractStep implements PostBuildStep {
     private final Control buildResult = control("buildSteps/results");
 
