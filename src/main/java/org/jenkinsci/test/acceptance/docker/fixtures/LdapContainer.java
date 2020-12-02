@@ -34,8 +34,11 @@ public class LdapContainer extends DockerContainer {
         return "jenkins";
     }
 
+    /**
+     * @return default ldap connection details from current running docker LdapContainer.
+     */
     public LdapDetails createDefault() {
-        return new LdapDetails(getHost(), getPort(), getManagerDn(),getManagerPassword(), getRootDn());
+        return new LdapDetails(getHost(), getPort(), getManagerDn(), getManagerPassword(), getRootDn());
     }
 
 }
