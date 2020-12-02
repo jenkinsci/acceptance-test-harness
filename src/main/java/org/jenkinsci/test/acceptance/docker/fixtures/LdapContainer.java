@@ -2,6 +2,7 @@ package org.jenkinsci.test.acceptance.docker.fixtures;
 
 import org.jenkinsci.test.acceptance.docker.DockerContainer;
 import org.jenkinsci.test.acceptance.docker.DockerFixture;
+import org.jenkinsci.test.acceptance.plugins.ldap.LdapDetails;
 
 /**
  * openLDAP (slapd) Container with a small user directory.
@@ -31,6 +32,13 @@ public class LdapContainer extends DockerContainer {
 
     public String getManagerPassword() {
         return "jenkins";
+    }
+
+    /**
+     * @return default ldap connection details from current running docker LdapContainer.
+     */
+    public LdapDetails createDefault() {
+        return new LdapDetails(getHost(), getPort(), getManagerDn(), getManagerPassword(), getRootDn());
     }
 
 }
