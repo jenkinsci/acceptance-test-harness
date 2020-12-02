@@ -81,7 +81,7 @@ public class JenkinsDatabaseSecurityRealm extends SecurityRealm {
 
         public User signup(String name) {
             control(by.input("username")).set(name);
-            control(by.name("Submit")).click();
+            control(by.name("Submit")).clickAndWaitToBecomeStale();
 
             return new User(getJenkins(), name);
         }
