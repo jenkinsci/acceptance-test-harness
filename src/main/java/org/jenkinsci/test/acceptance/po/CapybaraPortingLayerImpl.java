@@ -345,6 +345,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
         } catch (StaleElementReferenceException expected) {
             return true;
         } catch (NoSuchElementException expected) {
+            // work around https://github.com/SeleniumHQ/selenium/issues/8929
             return true;
         }
     }
