@@ -56,7 +56,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
      * @return default ldap connection details
      */
     private LdapDetails createDefaults(LdapContainer ldapContainer) {
-        return new LdapDetails(ldapContainer.getHost(), ldapContainer.getPort(), ldapContainer.getManagerDn(), ldapContainer.getManagerPassword(), ldapContainer.getRootDn());
+        return ldapContainer.createDefault();
     }
     
     /**
