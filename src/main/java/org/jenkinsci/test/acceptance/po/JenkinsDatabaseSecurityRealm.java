@@ -23,8 +23,6 @@
  */
 package org.jenkinsci.test.acceptance.po;
 
-import java.time.Duration;
-
 import org.openqa.selenium.NoSuchElementException;
 import hudson.util.VersionNumber;
 
