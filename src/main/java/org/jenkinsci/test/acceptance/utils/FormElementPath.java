@@ -48,14 +48,14 @@ public class FormElementPath {
             }
             if (!isFormPathElementPluginInstalled(url)) {
                 LOGGER.info("Installing form-element-path plugin from " + formElementPathPlugin);
-                uploadPlugin(url, credentials, formElementPathPlugin);
+                uploadPlugin(url, formElementPathPlugin);
             }
         } catch (IOException e) {
             throw new AssertionError("Can't check if form-element-path plugin is installed", e);
         }
     }
 
-    private static void uploadPlugin(URL url, Credentials credentials, File file) throws IOException {
+    private void uploadPlugin(URL url, File file) throws IOException {
         try (CloseableHttpClient httpClient = HttpClientBuilder.create().build()) {
             HttpPost post = new HttpPost(new URL(url, "pluginManager/uploadPlugin").toExternalForm());
             FileBody fileBody = new FileBody(file, ContentType.DEFAULT_BINARY);
