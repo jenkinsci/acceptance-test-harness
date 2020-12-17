@@ -45,7 +45,7 @@ public class AccessTokenGenerator {
                 tokenCache.put(key, new UsernamePasswordCredentials(name, apiTokenResponse.data.tokenValue));
             }
         }
-        return tokenCache.get(url);
+        return tokenCache.get(key);
     }
 
     private ApiTokenResponse generateApiToken(@Nonnull URL url, @Nonnull Credentials credentials, CloseableHttpClient httpClient, Crumb crumb) throws IOException {
