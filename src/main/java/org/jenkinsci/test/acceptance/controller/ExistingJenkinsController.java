@@ -1,24 +1,15 @@
 package org.jenkinsci.test.acceptance.controller;
 
+import javax.annotation.CheckForNull;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
 
 import com.cloudbees.sdk.extensibility.Extension;
 import com.google.inject.Injector;
+import org.apache.http.auth.Credentials;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.jenkinsci.test.acceptance.utils.FormElementPath;
 
 /**
  * Run test against existing Jenkins instance.
@@ -26,14 +17,25 @@ import com.google.inject.Injector;
  * @author Kohsuke Kawaguchi
  */
 public class ExistingJenkinsController extends JenkinsController {
-    private final URL uploadUrl;
     private final URL url;
+    private boolean skipCheck;
+
+    @CheckForNull
+    private Credentials credentials;
+
+    @Inject
+    private FormElementPath formElementPath;
 
     public ExistingJenkinsController(Injector i, String url) {
+        this(i, url, null, false);
+    }
+
+    public ExistingJenkinsController(Injector i, String url, @CheckForNull Credentials credentials, boolean skipCheck) {
         super(i);
         try {
             this.url = new URL(url);
-            this.uploadUrl = new URL(url + "/pluginManager/api/xml");
+            this.credentials = credentials;
+            this.skipCheck = skipCheck;
         } catch (IOException e) {
             throw new AssertionError("Invalid URL: "+url,e);
         }
@@ -41,35 +43,9 @@ public class ExistingJenkinsController extends JenkinsController {
 
     @Override
     public void startNow() {
-        verifyThatFormPathElementPluginIsInstalled();
-    }
-
-    private void verifyThatFormPathElementPluginIsInstalled() {
-        try (CloseableHttpClient httpclient = new DefaultHttpClient()){
-            HttpPost post = new HttpPost(uploadUrl.toExternalForm());
-
-            List<NameValuePair> parameters = new ArrayList<NameValuePair>();
-            parameters.add(new BasicNameValuePair("depth", "1"));
-            parameters.add(new BasicNameValuePair("xpath", "/*/*/shortName|/*/*/version"));
-            parameters.add(new BasicNameValuePair("wrapper", "plugins"));
-            UrlEncodedFormEntity entity = new UrlEncodedFormEntity(parameters, "UTF-8");
-            post.setEntity(entity);
-
-            HttpResponse response = httpclient.execute(post);
-            HttpEntity resEntity = response.getEntity();
-            String responseBody = EntityUtils.toString(resEntity);
-
-            if (!responseBody.contains("form-element-path")) {
-                failTestSuite(response.toString());
-            }
+        if (!skipCheck) {
+            formElementPath.ensure(url, credentials);
         }
-        catch (IOException exception) {
-            throw new AssertionError("Can't check if form-element-path plugin is installed", exception);
-        } 
-    }
-
-    private void failTestSuite(final String errorMessage) {
-        throw new RuntimeException("Test suite requires in pre-installed Jenkins plugin https://wiki.jenkins-ci.org/display/JENKINS/Form+Element+Path+Plugin\n" + errorMessage);
     }
 
     @Override
@@ -85,6 +61,12 @@ public class ExistingJenkinsController extends JenkinsController {
     @Override
     public URL getUrl() {
         return url;
+    }
+
+    @CheckForNull
+    @Override
+    public Credentials getCredentials() {
+        return credentials;
     }
 
     @Override
@@ -103,9 +85,15 @@ public class ExistingJenkinsController extends JenkinsController {
         @Override
         public JenkinsController create() {
             String url = System.getenv("JENKINS_URL");
+            String username = System.getenv("JENKINS_USERNAME");
+            String password = System.getenv("JENKINS_PASSWORD");
+            UsernamePasswordCredentials credentials = null;
+            if (username != null && password != null) {
+                credentials = new UsernamePasswordCredentials(username, password);
+            }
             if (url==null)  url = "http://localhost:8080/";
 
-            return new ExistingJenkinsController(i, url);
+            return new ExistingJenkinsController(i, url, credentials, false);
         }
     }
 }
