@@ -25,7 +25,8 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * Takes static credentials and generates access tokens. Handles caching so that
+ * Takes static credentials and generates access tokens.
+ * Handles caching per Jenkins instance and user.
  */
 public class AccessTokenGenerator {
     private ObjectMapper om;
