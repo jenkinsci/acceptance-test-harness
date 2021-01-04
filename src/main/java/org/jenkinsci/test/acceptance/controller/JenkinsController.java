@@ -166,7 +166,7 @@ public abstract class JenkinsController implements IJenkinsController, AutoClean
     public abstract URL getUrl();
 
     @CheckForNull
-    public Credentials getCredentials() {
+    public Credentials getInitialCredentials() {
         return null;
     }
 

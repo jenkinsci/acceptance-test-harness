@@ -20,8 +20,11 @@ public class ExistingJenkinsController extends JenkinsController {
     private final URL url;
     private boolean skipCheck;
 
+    /**
+     * Credentials before any {@link org.jenkinsci.test.acceptance.po.SecurityRealm} is applied by a test.
+     */
     @CheckForNull
-    private Credentials credentials;
+    private Credentials initialCredentials;
 
     @Inject
     private FormElementPath formElementPath;
@@ -30,11 +33,11 @@ public class ExistingJenkinsController extends JenkinsController {
         this(i, url, null, false);
     }
 
-    public ExistingJenkinsController(Injector i, String url, @CheckForNull Credentials credentials, boolean skipCheck) {
+    public ExistingJenkinsController(Injector i, String url, @CheckForNull Credentials initialCredentials, boolean skipCheck) {
         super(i);
         try {
             this.url = new URL(url);
-            this.credentials = credentials;
+            this.initialCredentials = initialCredentials;
             this.skipCheck = skipCheck;
         } catch (IOException e) {
             throw new AssertionError("Invalid URL: "+url,e);
@@ -44,7 +47,7 @@ public class ExistingJenkinsController extends JenkinsController {
     @Override
     public void startNow() {
         if (!skipCheck) {
-            formElementPath.ensure(url, credentials);
+            formElementPath.ensure(url, initialCredentials);
         }
     }
 
@@ -65,8 +68,8 @@ public class ExistingJenkinsController extends JenkinsController {
 
     @CheckForNull
     @Override
-    public Credentials getCredentials() {
-        return credentials;
+    public Credentials getInitialCredentials() {
+        return initialCredentials;
     }
 
     @Override
@@ -87,13 +90,13 @@ public class ExistingJenkinsController extends JenkinsController {
             String url = System.getenv("JENKINS_URL");
             String username = System.getenv("JENKINS_USERNAME");
             String password = System.getenv("JENKINS_PASSWORD");
-            UsernamePasswordCredentials credentials = null;
+            UsernamePasswordCredentials initialCredentials = null;
             if (username != null && password != null) {
-                credentials = new UsernamePasswordCredentials(username, password);
+                initialCredentials = new UsernamePasswordCredentials(username, password);
             }
             if (url==null)  url = "http://localhost:8080/";
 
-            return new ExistingJenkinsController(i, url, credentials, false);
+            return new ExistingJenkinsController(i, url, initialCredentials, false);
         }
     }
 }
