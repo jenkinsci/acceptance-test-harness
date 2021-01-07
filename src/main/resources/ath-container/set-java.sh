@@ -5,9 +5,9 @@ trap 's=$?; echo >&2 "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
 
 # The selection used by update-alternatives for each java version
 if [ "$1" == "11" ]; then
-    selection="java-11-openjdk.x86_64"
+    selection="java-11-openjdk.$(arch)"
 elif [ "$1" == "8" ]; then
-    selection="java-1.8.0-openjdk.x86_64"
+    selection="java-1.8.0-openjdk.$(arch)"
 else
     echo >&2 "Unsupported java version '${1}'"
     exit 1
