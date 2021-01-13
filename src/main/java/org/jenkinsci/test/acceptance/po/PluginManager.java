@@ -92,7 +92,7 @@ public class PluginManager extends ContainerPageObject {
      * Force update the plugin update center metadata.
      */
     public void checkForUpdates() {
-        mockUpdateCenter.ensureRunning();
+        mockUpdateCenter.ensureRunning(jenkins);
         visit("advanced");
         final String current = getCurrentUrl();
         // The check now button is a form submit (POST) with a redirect to the same page only if the check is successful.

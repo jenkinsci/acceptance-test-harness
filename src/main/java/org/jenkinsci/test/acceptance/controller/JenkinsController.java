@@ -1,18 +1,16 @@
 package org.jenkinsci.test.acceptance.controller;
 
+import javax.annotation.CheckForNull;
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
-import org.codehaus.plexus.util.FileUtils;
+import org.apache.http.auth.Credentials;
 import org.jenkinsci.test.acceptance.guice.AutoCleaned;
 import org.jenkinsci.test.acceptance.log.LogListener;
 import org.jenkinsci.test.acceptance.log.LogPrinter;
@@ -53,7 +51,10 @@ public abstract class JenkinsController implements IJenkinsController, AutoClean
 
     private boolean isRunning;
 
+    public Injector injector;
+
     protected JenkinsController(Injector i) {
+        this.injector = i;
         i.injectMembers(this);
 
         if (isQuite) {
@@ -163,6 +164,11 @@ public abstract class JenkinsController implements IJenkinsController, AutoClean
      */
     @Override
     public abstract URL getUrl();
+
+    @CheckForNull
+    public Credentials getInitialCredentials() {
+        return null;
+    }
 
     /**
      * Returns the short ID used to prefix log output from the process into the test.
