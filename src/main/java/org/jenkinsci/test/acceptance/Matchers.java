@@ -201,7 +201,8 @@ public class Matchers {
             @Override
             public boolean matchesSafely(final Jenkins jenkins) {
                 final User currentUser = jenkins.getCurrentUser();
-                return currentUser != null && currentUser.id().equals(user);
+                // if the user is not logged, currentUser can be not null with a null id
+                return currentUser != null && currentUser.id() != null && currentUser.id().equals(user);
             }
 
             @Override
@@ -216,7 +217,8 @@ public class Matchers {
             @Override
             public boolean matchesSafely(final Login login) {
                 final User currentUser = login.getJenkins().getCurrentUser();
-                return currentUser != null && currentUser.id().equals(user);
+                // if the user is not logged, currentUser can be not null with a null id
+                return currentUser != null && currentUser.id() != null && currentUser.id().equals(user);
             }
 
             @Override
