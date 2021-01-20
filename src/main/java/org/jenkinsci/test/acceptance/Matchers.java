@@ -200,12 +200,9 @@ public class Matchers {
         return new Matcher<Jenkins>("has logged in user %s", user) {
             @Override
             public boolean matchesSafely(final Jenkins jenkins) {
-                try {
-                    jenkins.find(by.href("/user/" + user));
-                    return true;
-                } catch (NoSuchElementException e) {
-                    return false;
-                }
+                final User currentUser = jenkins.getCurrentUser();
+                // if the user is not logged, currentUser can be not null with a null id
+                return currentUser != null && currentUser.id() != null && currentUser.id().equals(user);
             }
 
             @Override
@@ -219,12 +216,9 @@ public class Matchers {
         return new Matcher<Login>("has logged in user %s", user) {
             @Override
             public boolean matchesSafely(final Login login) {
-                try {
-                    login.find(by.href("/user/" + user));
-                    return true;
-                } catch (NoSuchElementException e) {
-                    return false;
-                }
+                final User currentUser = login.getJenkins().getCurrentUser();
+                // if the user is not logged, currentUser can be not null with a null id
+                return currentUser != null && currentUser.id() != null && currentUser.id().equals(user);
             }
 
             @Override
