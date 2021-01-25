@@ -20,7 +20,7 @@ public class Login extends PageObject {
     private Control cLogin = control(by.name("Submit"));
 
     public Login(Jenkins jenkins) {
-        super(jenkins.injector, jenkins.url("login"));
+        super(jenkins, jenkins.url("login"));
     }
 
     /**
