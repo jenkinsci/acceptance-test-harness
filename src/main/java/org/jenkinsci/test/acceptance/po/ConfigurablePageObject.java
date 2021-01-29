@@ -26,11 +26,12 @@ package org.jenkinsci.test.acceptance.po;
 import java.net.URL;
 import java.util.concurrent.Callable;
 
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+
 import com.google.inject.Injector;
 
 import groovy.lang.Closure;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.*;
@@ -130,7 +131,6 @@ public abstract class ConfigurablePageObject extends PageObject {
     public void save() {
         WebElement e = find(by.button("Save"));
         e.click();
-        waitFor(e).until(CapybaraPortingLayerImpl::isStale);
     }
 
     public void apply() {
