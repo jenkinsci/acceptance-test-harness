@@ -6,6 +6,7 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -17,6 +18,8 @@ import java.util.logging.Logger;
 
 import com.browserup.bup.BrowserUpProxy;
 import com.browserup.bup.client.ClientUtil;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
@@ -55,6 +58,7 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeDriverService;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxDriverLogLevel;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.firefox.GeckoDriverService;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
@@ -129,7 +133,9 @@ public class FallbackConfig extends AbstractModule {
             GeckoDriverService service = builder.build();
             return new FirefoxDriver(service, firefoxOptions);
         case "firefox-container":
-            return createContainerWebDriver(cleaner, "selenium/standalone-firefox-debug:3.141.59", new FirefoxOptions());
+            FirefoxOptions ffOpt = new FirefoxOptions();
+            ffOpt.setLogLevel(FirefoxDriverLogLevel.TRACE);
+            return createContainerWebDriver(cleaner, "selenium/standalone-firefox-debug:3.141.59", ffOpt);
         case "chrome-container":
             return createContainerWebDriver(cleaner, "selenium/standalone-chrome-debug:3.141.59", new ChromeOptions());
         case "ie":
@@ -178,9 +184,11 @@ public class FallbackConfig extends AbstractModule {
             if (StringUtils.isBlank(u)) {
                 throw new Error("remote-webdriver-firefox requires REMOTE_WEBDRIVER_URL to be set");
             }
+            FirefoxOptions ffOpt2 = new FirefoxOptions();
+            ffOpt2.setLogLevel(FirefoxDriverLogLevel.TRACE);
             return new RemoteWebDriver(
                     new URL(u), //http://192.168.99.100:4444/wd/hub
-                    DesiredCapabilities.firefox()
+                    DesiredCapabilities.firefox().merge(ffOpt2)
             );
         default:
             throw new Error("Unrecognized browser type: "+browser);
@@ -193,7 +201,7 @@ public class FallbackConfig extends AbstractModule {
             final int vncPort = IOUtil.randomTcpPort(5900, 6000);
             final int displayNumber = vncPort - 5900;
 
-            Path log = Files.createTempFile("ath-docker-browser", "log");
+            final Path log = Files.createTempFile("ath-docker-browser", "log");
             LOGGER.info("Starting selenium container. Logs in " + log);
 
             Docker.cmd("pull", image).popen().verifyOrDieWith("Failed to pull image " + image);
@@ -214,6 +222,9 @@ public class FallbackConfig extends AbstractModule {
             Closeable cleanContainer = new Closeable() {
                 @Override public void close() {
                     try {
+                        System.out.println("--- Begin dumping docker trace logs ---");
+                        System.out.println(FileUtils.readFileToString(log.toFile(), StandardCharsets.UTF_8));
+                        System.out.println("--- End dumping docker trace logs ---");
                         Docker.cmd("kill", cid).popen().verifyOrDieWith("Failed to kill " + cid);
                         Docker.cmd("rm", cid).popen().verifyOrDieWith("Failed to rm " + cid);
                     } catch (IOException | InterruptedException e) {
