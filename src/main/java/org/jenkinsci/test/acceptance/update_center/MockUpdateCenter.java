@@ -24,6 +24,7 @@
 
 package org.jenkinsci.test.acceptance.update_center;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import org.apache.commons.io.IOUtils;
@@ -78,7 +79,7 @@ public class MockUpdateCenter implements AutoCleaned {
     @Inject
     private UpdateCenterMetadataProvider ucmd;
 
-    /** Original default site ID; note that this may not match {@link CachedUpdateCenterMetadataLoader#url}. */
+    /** Original default site URL; note that this may not match {@link CachedUpdateCenterMetadataLoader#url}. */
     private String original;
 
     private HttpServer server;
@@ -87,10 +88,15 @@ public class MockUpdateCenter implements AutoCleaned {
         if (original != null) {
             return;
         }
-        List<String> sites = new UpdateCenter(jenkins).getJson("tree=sites[url]").findValuesAsText("url");
+        JsonNode ucNode = new UpdateCenter(jenkins).getJson("tree=sites[url,id]");
+        List<String> sites = ucNode.findValuesAsText("url");
+        List<String> ids = ucNode.findValuesAsText("id");
         if (sites.size() != 1) {
             // TODO ideally it would rather delegate to all of them, but that implies deprecating CachedUpdateCenterMetadataLoader.url and using whatever site(s) Jenkins itself specifies
             LOGGER.log(Level.WARNING, "found an unexpected number of update sites: {0}", sites);
+            return;
+        } else if (!"default".equals(ids.get(0))) {
+            LOGGER.log(Level.WARNING, "the default update site has been replaced by a site with id: {0}. Will not setup the mock update center", ids.get(0));
             return;
         }
         UpdateCenterMetadata ucm;
