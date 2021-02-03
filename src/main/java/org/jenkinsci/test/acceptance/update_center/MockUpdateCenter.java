@@ -96,7 +96,7 @@ public class MockUpdateCenter implements AutoCleaned {
             LOGGER.log(Level.WARNING, "found an unexpected number of update sites: {0}", sites);
             return;
         } else if (!"default".equals(ids.get(0))) {
-            LOGGER.log(Level.WARNING, "found an unexpected default update site id: {0}", ids.get(0));
+            LOGGER.log(Level.WARNING, "the default update site has been replaced by a site with id: {0}. Will not setup the mock update center", ids.get(0));
             return;
         }
         UpdateCenterMetadata ucm;
