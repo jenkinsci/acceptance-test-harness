@@ -1,6 +1,33 @@
 package org.jenkinsci.test.acceptance.po;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Function;
+import com.google.inject.Injector;
+import hudson.util.VersionNumber;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.impl.client.BasicCookieStore;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.cookie.BasicClientCookie;
+import org.apache.http.protocol.HttpContext;
+import org.apache.http.util.EntityUtils;
+import org.jenkinsci.test.acceptance.controller.JenkinsController;
+import org.jenkinsci.test.acceptance.utils.IOUtil;
+import org.jenkinsci.test.acceptance.utils.SupportBundleRequest;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -8,20 +35,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
-
-import com.google.common.base.Throwables;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.ObjectUtils;
-import org.jenkinsci.test.acceptance.controller.JenkinsController;
-import org.jenkinsci.test.acceptance.utils.IOUtil;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.WebDriver;
-
-import com.google.common.base.Function;
-import com.google.inject.Injector;
-
-import hudson.util.VersionNumber;
-import org.openqa.selenium.WebDriverException;
 
 /**
  * Top-level object that acts as an entry point to various systems.
@@ -216,5 +229,82 @@ public class Jenkins extends Node implements Container {
     @Override
     public ViewsMixIn getViews() {
         return views;
+    }
+
+    public void generateSupportBundle(SupportBundleRequest supportBundleRequest) {
+        URL url = url("support/generateAllBundles");
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
+            HttpPost httpPost = new HttpPost(new URIBuilder()
+                    .setScheme(url.getProtocol())
+                    .setHost(url.getHost())
+                    .setPort(url.getPort())
+                    .setPath(url.getPath())
+                    .setParameter("json", supportBundleRequest.getJsonParameter())
+                    .build());
+            Crumb crumb = getCrumb(client);
+            httpPost.setHeader(crumb.getCrumbRequestField(), crumb.getCrumb());
+            try (CloseableHttpResponse response = client.execute(httpPost, buildHttpClientContext())) {
+                int statusCode = response.getStatusLine().getStatusCode();
+                if (statusCode == 200) {
+                    HttpEntity entity = response.getEntity();
+                    if (entity != null) {
+                        try (FileOutputStream os = new FileOutputStream(supportBundleRequest.getOutputFile())) {
+                            entity.writeTo(os);
+                        }
+                    }
+                } else {
+                    throw new IOException("Got status code " + statusCode + " while getting support bundle for " + url);
+                }
+            }
+        } catch (IOException | URISyntaxException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private Crumb getCrumb(CloseableHttpClient httpClient) throws IOException {
+        HttpGet get = new HttpGet(url("crumbIssuer/api/json").toExternalForm());
+        CloseableHttpResponse getResponse = httpClient.execute(get, buildHttpClientContext());
+        int statusCode = getResponse.getStatusLine().getStatusCode();
+        if (statusCode == 200) {
+            return new ObjectMapper().readValue(getResponse.getEntity().getContent(), Crumb.class);
+        } else {
+            throw new IOException("Got status code " + statusCode + " while getting a crumb: " + EntityUtils.toString(getResponse.getEntity()));
+        }
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    private static class Crumb {
+        private String crumb;
+        private String crumbRequestField;
+
+        public String getCrumb() {
+            return crumb;
+        }
+
+        public void setCrumb(String crumb) {
+            this.crumb = crumb;
+        }
+
+        public String getCrumbRequestField() {
+            return crumbRequestField;
+        }
+
+        public void setCrumbRequestField(String crumbRequestField) {
+            this.crumbRequestField = crumbRequestField;
+        }
+    }
+
+    private HttpContext buildHttpClientContext() {
+        HttpClientContext context = HttpClientContext.create();
+        BasicCookieStore cookieStore = new BasicCookieStore();
+        for (org.openqa.selenium.Cookie cookie : driver.manage().getCookies()) {
+            BasicClientCookie c = new BasicClientCookie(cookie.getName(), cookie.getValue());
+            c.setPath(cookie.getPath());
+            c.setExpiryDate(cookie.getExpiry());
+            c.setDomain(cookie.getDomain());
+            cookieStore.addCookie(c);
+        }
+        context.setCookieStore(cookieStore);
+        return context;
     }
 }

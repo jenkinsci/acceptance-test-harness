@@ -2,11 +2,14 @@ package org.jenkinsci.test.acceptance.junit;
 
 import org.jenkinsci.test.acceptance.po.CapybaraPortingLayerImpl;
 import org.jenkinsci.test.acceptance.po.Jenkins;
+import org.jenkinsci.test.acceptance.utils.SupportBundleRequest;
+import org.junit.After;
 import org.junit.Rule;
 import org.openqa.selenium.WebDriver;
 
 import javax.inject.Inject;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 
@@ -28,6 +31,9 @@ public class AbstractJUnitTest extends CapybaraPortingLayerImpl {
      */
     @Inject
     public Jenkins jenkins;
+
+    @Inject
+    private FailureDiagnostics diagnostics;
 
     /**
      * This field receives a valid web driver object you can use to talk to Jenkins.
@@ -55,5 +61,11 @@ public class AbstractJUnitTest extends CapybaraPortingLayerImpl {
 
     protected void interrupt() {
         throw new RuntimeException("INTERACTIVE debugging");
+    }
+
+    @After
+    public void captureSupportBundle() {
+        File file = diagnostics.touch("support-bundle.zip");
+        jenkins.generateSupportBundle(SupportBundleRequest.builder().includeDefaultComponents().setOutputFile(file).build());
     }
 }
