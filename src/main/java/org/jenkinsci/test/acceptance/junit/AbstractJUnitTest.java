@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.util.logging.Logger;
 
 /**
  * Convenience base class to derive your plain-old JUnit tests from.
@@ -22,6 +23,7 @@ import java.net.ServerSocket;
  * @author Kohsuke Kawaguchi
  */
 public class AbstractJUnitTest extends CapybaraPortingLayerImpl {
+    private static final Logger LOGGER = Logger.getLogger(AbstractJUnitTest.class.getName());
 
     @Rule
     public JenkinsAcceptanceTestRule rules = new JenkinsAcceptanceTestRule();
@@ -65,7 +67,13 @@ public class AbstractJUnitTest extends CapybaraPortingLayerImpl {
 
     @After
     public void captureSupportBundle() {
-        File file = diagnostics.touch("support-bundle.zip");
-        jenkins.generateSupportBundle(SupportBundleRequest.builder().includeDefaultComponents().setOutputFile(file).build());
+        try {
+            jenkins.getPlugin("support-core");
+            File file = diagnostics.touch("support-bundle.zip");
+            jenkins.generateSupportBundle(SupportBundleRequest.builder().includeDefaultComponents().setOutputFile(file).build());
+        } catch (IllegalArgumentException e) {
+            LOGGER.info("support-core plugin not installed, skipping support bundle");
+        }
+
     }
 }
