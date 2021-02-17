@@ -2,7 +2,7 @@ package org.jenkinsci.test.acceptance.junit;
 
 import org.jenkinsci.test.acceptance.po.CapybaraPortingLayerImpl;
 import org.jenkinsci.test.acceptance.po.Jenkins;
-import org.jenkinsci.test.acceptance.utils.SupportBundleRequest;
+import org.jenkinsci.test.acceptance.recorder.SupportBundle;
 import org.junit.After;
 import org.junit.Rule;
 import org.openqa.selenium.WebDriver;
@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.util.Collections;
 import java.util.logging.Logger;
 
 /**
@@ -36,6 +37,9 @@ public class AbstractJUnitTest extends CapybaraPortingLayerImpl {
 
     @Inject
     private FailureDiagnostics diagnostics;
+
+    @Rule(order = 0) // enclosed by JenkinsAcceptanceTestRule so that we have a valid Jenkins + webdriver
+    public SupportBundle supportBundle = new SupportBundle();
 
     /**
      * This field receives a valid web driver object you can use to talk to Jenkins.
@@ -66,14 +70,7 @@ public class AbstractJUnitTest extends CapybaraPortingLayerImpl {
     }
 
     @After
-    public void captureSupportBundle() {
-        try {
-            jenkins.getPlugin("support-core");
-            File file = diagnostics.touch("support-bundle.zip");
-            jenkins.generateSupportBundle(SupportBundleRequest.builder().includeDefaultComponents().setOutputFile(file).build());
-        } catch (IllegalArgumentException e) {
-            LOGGER.info("support-core plugin not installed, skipping support bundle");
-        }
-
+    public void injectSpec() {
+        supportBundle.setSpec(Collections.singletonMap("support-bundle.zip", jenkins));
     }
 }
