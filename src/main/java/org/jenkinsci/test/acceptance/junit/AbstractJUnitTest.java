@@ -3,6 +3,7 @@ package org.jenkinsci.test.acceptance.junit;
 import org.jenkinsci.test.acceptance.po.CapybaraPortingLayerImpl;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.recorder.SupportBundle;
+import org.jenkinsci.test.acceptance.utils.SupportBundleRequest;
 import org.junit.After;
 import org.junit.Rule;
 import org.openqa.selenium.WebDriver;
@@ -71,6 +72,6 @@ public class AbstractJUnitTest extends CapybaraPortingLayerImpl {
 
     @After
     public void injectSpec() {
-        supportBundle.setSpec(Collections.singletonMap("support-bundle.zip", jenkins));
+        supportBundle.addSpec(jenkins, SupportBundleRequest.builder().includeDefaultComponents().setOutputFile(diagnostics.touch("support-bundle.zip")).build());
     }
 }
