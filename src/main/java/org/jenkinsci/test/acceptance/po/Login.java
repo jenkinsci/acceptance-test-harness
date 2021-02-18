@@ -1,12 +1,14 @@
 package org.jenkinsci.test.acceptance.po;
 
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
-import org.junit.Assert;
 import org.openqa.selenium.WebElement;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.jenkinsci.test.acceptance.Matchers.hasInvalidLoginInformation;
 import static org.jenkinsci.test.acceptance.Matchers.loggedInAs;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Page object for login page.
@@ -33,6 +35,12 @@ public class Login extends PageObject {
         cPassword.set(password);
         // for some reason submit it just bogus...
         cLogin.clickAndWaitToBecomeStale();
+        // Wait for the redirect to root page.
+        waitFor().withTimeout(30, TimeUnit.SECONDS).ignoring(AssertionError.class).until(() -> {
+            assertEquals(getJenkins().url.toExternalForm(), driver.getCurrentUrl());
+            return true;
+        });
+
         return this;
     }
 
@@ -64,7 +72,7 @@ public class Login extends PageObject {
 
     public Login doSuccessfulLogin(String user, String password) {
         this.doLogin(user, password);
-        Assert.assertThat(this, loggedInAs(user));
+        assertThat(this, loggedInAs(user));
         return this;
     }
 
@@ -78,7 +86,7 @@ public class Login extends PageObject {
 
     public Login doFailedLogin(String user, String password) {
         this.doLogin(user, password);
-        Assert.assertThat(this, hasInvalidLoginInformation());
+        assertThat(this, hasInvalidLoginInformation());
         return this;
     }
 
