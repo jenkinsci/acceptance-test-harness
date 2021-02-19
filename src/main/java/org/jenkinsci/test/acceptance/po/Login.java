@@ -1,6 +1,5 @@
 package org.jenkinsci.test.acceptance.po;
 
-import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -34,7 +33,7 @@ public class Login extends PageObject {
         // for some reason submit it just bogus...
         cLogin.clickAndWaitToBecomeStale();
         // Wait for the redirect to happen
-        new WebDriverWait(driver, 30).until(ExpectedConditions.visibilityOfElementLocated(By.id("jenkins")));
+        new WebDriverWait(driver, 30).until(ExpectedConditions.visibilityOfElementLocated(by.id("jenkins")));
         return this;
     }
 
