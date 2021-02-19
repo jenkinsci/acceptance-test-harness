@@ -39,8 +39,7 @@ public class Login extends PageObject {
         // for some reason submit it just bogus...
         cLogin.clickAndWaitToBecomeStale();
         // Wait for the redirect to happen
-        WebDriverWait wait = new WebDriverWait(driver, 30); // seconds
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("jenkins")));
+        new WebDriverWait(driver, 30).until(ExpectedConditions.visibilityOfElementLocated(By.id("jenkins")));
         return this;
     }
 
@@ -49,14 +48,9 @@ public class Login extends PageObject {
      * Paths are usually unavailable when using the "existing" Jenkins controller.<br>
      * (Unavailable despite pre-installed form-element-path plugin.)
      */
+    @Deprecated
     public Login doLoginDespiteNoPaths(String user, String password){
-        driver.findElement(by.name("j_username")).sendKeys(user);
-        driver.findElement(by.name("j_password")).sendKeys(password);
-        WebElement we = driver.findElement(by.name("Submit"));
-        // for some reason submit() is bogus
-        we.click();
-        cUser.waitFor(we).withTimeout(Duration.ofSeconds(30)).until(CapybaraPortingLayerImpl::isStale);
-        return this;
+        return doLogin(user, password);
     }
 
     /**
