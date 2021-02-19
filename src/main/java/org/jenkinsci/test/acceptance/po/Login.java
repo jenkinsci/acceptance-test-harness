@@ -44,9 +44,7 @@ public class Login extends PageObject {
     }
 
     /**
-     * Login assuming "path" form element unavailability.<br>
-     * Paths are usually unavailable when using the "existing" Jenkins controller.<br>
-     * (Unavailable despite pre-installed form-element-path plugin.)
+     * @deprecated use {@link #doLogin(String, String)} instead. It doesn't require form-element-path.
      */
     @Deprecated
     public Login doLoginDespiteNoPaths(String user, String password){
