@@ -263,7 +263,6 @@ public class FallbackConfig extends AbstractModule {
         }
     }
 
-    // TODO: add Windows support
     private String locateDriver(final String name) {
         String command = OS.isFamilyWindows() ? "where": "which";
         try (ProcessInputStream pis = new CommandBuilder(command, name).popen()) {
@@ -484,4 +483,3 @@ public class FallbackConfig extends AbstractModule {
          }
      }
 }
-
