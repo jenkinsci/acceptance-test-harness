@@ -1,8 +1,10 @@
 package org.jenkinsci.test.acceptance.po;
 
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.util.concurrent.TimeUnit;
+
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.jenkinsci.test.acceptance.Matchers.hasInvalidLoginInformation;
 import static org.jenkinsci.test.acceptance.Matchers.loggedInAs;
@@ -32,8 +34,6 @@ public class Login extends PageObject {
         cPassword.set(password);
         // for some reason submit it just bogus...
         cLogin.clickAndWaitToBecomeStale();
-        // Wait for the redirect to happen
-        new WebDriverWait(driver, 30).until(ExpectedConditions.visibilityOfElementLocated(by.id("jenkins")));
         return this;
     }
 
@@ -58,6 +58,10 @@ public class Login extends PageObject {
 
     public Login doSuccessfulLogin(String user, String password) {
         this.doLogin(user, password);
+        waitFor().withTimeout(30, TimeUnit.SECONDS).until(() -> {
+            assertThat(this, not(hasInvalidLoginInformation())); // login hasn't failed
+            return ExpectedConditions.visibilityOfElementLocated(by.id("jenkins")); // redirect has happened
+        });
         assertThat(this, loggedInAs(user));
         return this;
     }
