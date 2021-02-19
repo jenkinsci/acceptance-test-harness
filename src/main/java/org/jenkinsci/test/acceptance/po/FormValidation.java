@@ -30,11 +30,11 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
-
 import javax.annotation.Nonnull;
 import java.util.List;
 
 import static org.hamcrest.Matchers.*;
+import static org.jenkinsci.test.acceptance.po.CapybaraPortingLayer.by;
 
 /**
  * Result of form field validation.
@@ -67,23 +67,24 @@ public class FormValidation {
 
         // Special handling for validation buttons and their markup
         if (element.getTagName().equals("button")) {
-            WebElement spinner = element.findElement(control.by.xpath("./../../../following-sibling::div[1]"));
+            WebElement spinner = element.findElement(by.xpath("./../../../following-sibling::div[1]"));
             // Wait as long as there is some spinner shown on the page
             control.waitFor().until(() -> !spinner.isDisplayed());
             // Expand details (are there any) before we get the area element as doing so afterwards would stale the element reference
             for (WebElement elem : element.findElements(By.linkText("(show details)"))) {
                 elem.click();
             }
-            validationArea = element.findElement(control.by.xpath("./../../../following-sibling::div[2]"));
+            validationArea = element.findElement(by.xpath("./../../../following-sibling::div[2]"));
         } else {
             // Fire validation if it was not already
             element.sendKeys(Keys.TAB);
 
             // Wait for validation area to stop being <div></div>
             validationArea = control.waitFor().until(() -> {
-                WebElement va = element.findElement(control.by.xpath("./../../following-sibling::tr/td[2] | ./../following-sibling::div"));
+                // path to validation area is ../validation-error-area tr
+                WebElement va = element.findElement(by.xpath("../../div[contains(@class,'validation-error-area')]"));
                 try {
-                    va.findElement(control.by.xpath("./div"));
+                    va.findElement(by.xpath("./div[2]"));
                     return va;
                 } catch (NoSuchElementException noDiv) {
                     // https://issues.jenkins-ci.org/browse/JENKINS-59605?focusedCommentId=377474&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-377474
@@ -97,7 +98,7 @@ public class FormValidation {
     }
 
     public FormValidation(WebElement element) {
-        List<WebElement> divs = element.findElements(CapybaraPortingLayer.by.tagName("div"));
+        List<WebElement> divs = element.findElements(By.xpath("div[2]/div"));
         switch (divs.size()) {
             case 0: // TODO remove after https://issues.jenkins-ci.org/browse/JENKINS-59605
                 this.kind = Kind.OK;
