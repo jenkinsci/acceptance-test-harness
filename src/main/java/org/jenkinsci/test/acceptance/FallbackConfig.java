@@ -17,6 +17,7 @@ import java.util.logging.Logger;
 
 import com.browserup.bup.BrowserUpProxy;
 import com.browserup.bup.client.ClientUtil;
+import org.apache.commons.exec.OS;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
@@ -264,8 +265,9 @@ public class FallbackConfig extends AbstractModule {
 
     // TODO: add Windows support
     private String locateDriver(final String name) {
-        try {
-            return new CommandBuilder("which", name).popen().asText().trim();
+        String command = OS.isFamilyWindows() ? "where": "which";
+        try (ProcessInputStream pis = new CommandBuilder(command, name).popen()) {
+            return pis.asText().trim();
         }
         catch (IOException | InterruptedException exception) {
             return StringUtils.EMPTY;
