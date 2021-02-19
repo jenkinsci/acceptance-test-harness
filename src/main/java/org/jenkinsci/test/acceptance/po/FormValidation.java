@@ -98,7 +98,7 @@ public class FormValidation {
     }
 
     public FormValidation(WebElement element) {
-        List<WebElement> divs = element.findElements(By.xpath("div[2]/div"));
+        List<WebElement> divs = element.findElements(by.xpath("div[2]/div"));
         switch (divs.size()) {
             case 0: // TODO remove after https://issues.jenkins-ci.org/browse/JENKINS-59605
                 this.kind = Kind.OK;
