@@ -81,7 +81,7 @@ public class FormValidation {
 
             // Wait for validation area to stop being <div></div>
             validationArea = control.waitFor().until(() -> {
-                // path to validation area is ../validation-error-area tr
+                // path to validation area is the parents sibling with class `validation-error-area`
                 WebElement va = element.findElement(by.xpath("../../div[contains(@class,'validation-error-area')]"));
                 try {
                     va.findElement(by.xpath("./div[2]"));
