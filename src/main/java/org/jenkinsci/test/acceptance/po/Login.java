@@ -1,14 +1,17 @@
 package org.jenkinsci.test.acceptance.po;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.time.Duration;
-import java.util.concurrent.TimeUnit;
 
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.jenkinsci.test.acceptance.Matchers.hasInvalidLoginInformation;
 import static org.jenkinsci.test.acceptance.Matchers.loggedInAs;
-import static org.junit.Assert.assertEquals;
 
 /**
  * Page object for login page.
@@ -35,12 +38,9 @@ public class Login extends PageObject {
         cPassword.set(password);
         // for some reason submit it just bogus...
         cLogin.clickAndWaitToBecomeStale();
-        // Wait for the redirect to root page.
-        waitFor().withTimeout(30, TimeUnit.SECONDS).ignoring(AssertionError.class).until(() -> {
-            assertEquals(getJenkins().url.toExternalForm(), driver.getCurrentUrl());
-            return true;
-        });
-
+        // Wait for the redirect to happen
+        WebDriverWait wait = new WebDriverWait(driver, 30); // seconds
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("jenkins")));
         return this;
     }
 
