@@ -2,6 +2,7 @@ package org.jenkinsci.test.acceptance.recorder;
 
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.utils.SupportBundleRequest;
+import org.jenkinsci.test.acceptance.utils.SystemEnvironmentVariables;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 
@@ -11,6 +12,8 @@ import java.util.logging.Logger;
 
 public class SupportBundle extends TestWatcher {
     private static final Logger LOGGER = Logger.getLogger(SupportBundle.class.getName());
+
+    private static Boolean CAPTURE_SUPPORT_BUNDLE = Boolean.parseBoolean(SystemEnvironmentVariables.getPropertyVariableOrEnvironment("CAPTURE_SUPPORT_BUNDLE", "true"));
 
     private static class SupportBundleSpec {
         private Jenkins instance;
@@ -32,13 +35,17 @@ public class SupportBundle extends TestWatcher {
 
     @Override
     protected void failed(Throwable e, Description description) {
-        for (SupportBundleSpec spec : specs) {
-            try {
-                spec.instance.getPlugin("support-core");
-                spec.instance.generateSupportBundle(spec.request);
-            } catch (IllegalArgumentException _) {
-                LOGGER.info("support-core plugin not installed, skipping support bundle");
+        if (CAPTURE_SUPPORT_BUNDLE) {
+            for (SupportBundleSpec spec : specs) {
+                try {
+                    spec.instance.getPlugin("support-core");
+                    spec.instance.generateSupportBundle(spec.request);
+                } catch (IllegalArgumentException _) {
+                    LOGGER.info("support-core plugin not installed, skipping support bundle");
+                }
             }
+        } else {
+            LOGGER.info("Support bundle collection disabled.");
         }
     }
 }
