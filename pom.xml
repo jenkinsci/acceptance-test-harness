@@ -9,7 +9,7 @@
   </parent>
 
   <artifactId>acceptance-test-harness</artifactId>
-  <version>1.86-SNAPSHOT</version>
+  <version>1.86</version>
 
   <name>Acceptance Test Harness</name>
   <licenses>
@@ -22,7 +22,7 @@
   <scm>
     <connection>scm:git:git://github.com/jenkinsci/${project.artifactId}.git</connection>
     <developerConnection>scm:git:git@github.com:jenkinsci/${project.artifactId}.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>acceptance-test-harness-1.86</tag>
   </scm>
 
   <properties>
