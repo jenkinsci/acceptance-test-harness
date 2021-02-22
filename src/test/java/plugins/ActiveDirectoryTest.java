@@ -88,11 +88,11 @@ public class ActiveDirectoryTest extends AbstractJUnitTest {
         String userWannabe = ENV.getUser() + "-wannabe";
         GlobalSecurityConfig security = saveSecurityConfig(userWannabe);
         jenkins.logout();
-        jenkins.login().doLoginDespiteNoPaths(userWannabe,
+        jenkins.login().doLogin(userWannabe,
                 ENV.getPassword());
         security.configure();
         assertThat(getElement(by.name("_.domain")), is(nullValue()));
-        jenkins.login().doLoginDespiteNoPaths(ENV.getUser(),
+        jenkins.login().doLogin(ENV.getUser(),
                 ENV.getPassword());
     }
 
@@ -103,7 +103,7 @@ public class ActiveDirectoryTest extends AbstractJUnitTest {
 
     private void userCanLoginToJenkinsAsAdmin(String userOrGroupToAddAsAdmin) {
         GlobalSecurityConfig security = saveSecurityConfig(userOrGroupToAddAsAdmin);
-        jenkins.login().doLoginDespiteNoPaths(ENV.getUser(),
+        jenkins.login().doLogin(ENV.getUser(),
                 ENV.getPassword());
         security.configure();
         WebElement domain = getElement(by.name("_.domain"));

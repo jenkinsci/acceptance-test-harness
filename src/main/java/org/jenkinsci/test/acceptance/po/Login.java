@@ -1,10 +1,11 @@
 package org.jenkinsci.test.acceptance.po;
 
-import java.time.Duration;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 
-import org.junit.Assert;
-import org.openqa.selenium.WebElement;
+import java.util.concurrent.TimeUnit;
 
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.jenkinsci.test.acceptance.Matchers.hasInvalidLoginInformation;
 import static org.jenkinsci.test.acceptance.Matchers.loggedInAs;
 
@@ -37,18 +38,11 @@ public class Login extends PageObject {
     }
 
     /**
-     * Login assuming "path" form element unavailability.<br>
-     * Paths are usually unavailable when using the "existing" Jenkins controller.<br>
-     * (Unavailable despite pre-installed form-element-path plugin.)
+     * @deprecated use {@link #doLogin(String, String)} instead. It doesn't require form-element-path.
      */
+    @Deprecated
     public Login doLoginDespiteNoPaths(String user, String password){
-        driver.findElement(by.name("j_username")).sendKeys(user);
-        driver.findElement(by.name("j_password")).sendKeys(password);
-        WebElement we = driver.findElement(by.name("Submit"));
-        // for some reason submit() is bogus
-        we.click();
-        cUser.waitFor(we).withTimeout(Duration.ofSeconds(30)).until(CapybaraPortingLayerImpl::isStale);
-        return this;
+        return doLogin(user, password);
     }
 
     /**
@@ -64,7 +58,11 @@ public class Login extends PageObject {
 
     public Login doSuccessfulLogin(String user, String password) {
         this.doLogin(user, password);
-        Assert.assertThat(this, loggedInAs(user));
+        waitFor().withTimeout(30, TimeUnit.SECONDS).until(() -> {
+            assertThat(this, not(hasInvalidLoginInformation())); // login hasn't failed
+            return ExpectedConditions.visibilityOfElementLocated(by.id("jenkins")); // redirect has happened
+        });
+        assertThat(this, loggedInAs(user));
         return this;
     }
 
@@ -78,7 +76,7 @@ public class Login extends PageObject {
 
     public Login doFailedLogin(String user, String password) {
         this.doLogin(user, password);
-        Assert.assertThat(this, hasInvalidLoginInformation());
+        assertThat(this, hasInvalidLoginInformation());
         return this;
     }
 
