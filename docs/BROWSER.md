@@ -16,6 +16,11 @@ The following values are available:
           for example `http://0.0.0.0:32779/wd/hub`
           when using something like
           [selenium/standalone-firefox-debug](https://hub.docker.com/r/selenium/standalone-firefox-debug/))_
+ * `remote-webdriver-chrome`
+        _(Requires `REMOTE_WEBDRIVER_URL` to be set to the url of the remote,
+          for example `http://0.0.0.0:32779/wd/hub`
+          when using something like
+          [selenium/standalone-chrome-debug](https://hub.docker.com/r/selenium/standalone-chrome-debug/))_
  * `firefox-container` and `chrome-container`
         Running the browser inside selenium provided per-test container.
 
