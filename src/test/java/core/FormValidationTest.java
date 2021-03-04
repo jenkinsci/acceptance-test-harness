@@ -80,7 +80,7 @@ public class FormValidationTest extends AbstractJUnitTest {
                 HasCapabilities caps = (HasCapabilities) driver;
                 String browser = caps.getCapabilities().getBrowserName();
                 if (browser.contains("firefox")) {
-                    System.err.println("Ignoring lack of confirmation promot firefox due to https://bugzilla.mozilla.org/show_bug.cgi?id=1693857");
+                    System.err.println("Ignoring lack of confirmation prompt in Firefox due to https://bugzilla.mozilla.org/show_bug.cgi?id=1693857");
                     tex.printStackTrace();
                     return;
                 }
