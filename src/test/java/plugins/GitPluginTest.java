@@ -47,7 +47,7 @@ import static org.hamcrest.core.IsNot.not;
 
 @WithDocker
 @Category(DockerTest.class)
-@WithPlugins("git")
+@WithPlugins({"git", "trilead-api"})
 @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {"gitplugin", "/org/jenkinsci/test/acceptance/docker/fixtures/GitContainer/unsafe"})
 public class GitPluginTest extends AbstractJUnitTest {
 
