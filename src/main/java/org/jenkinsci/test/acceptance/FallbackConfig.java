@@ -186,6 +186,15 @@ public class FallbackConfig extends AbstractModule {
                     new URL(u), //http://192.168.99.100:4444/wd/hub
                     DesiredCapabilities.firefox()
             );
+        case "remote-webdriver-chrome":
+            u = System.getenv("REMOTE_WEBDRIVER_URL");
+            if (StringUtils.isBlank(u)) {
+                throw new Error("remote-webdriver-chrome requires REMOTE_WEBDRIVER_URL to be set");
+            }
+            return new RemoteWebDriver(
+                    new URL(u), //http://192.168.99.100:4444/wd/hub
+                    DesiredCapabilities.chrome()
+            );
         default:
             throw new Error("Unrecognized browser type: "+browser);
         }
