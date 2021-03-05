@@ -2,13 +2,19 @@ package org.jenkinsci.test.acceptance.junit;
 
 import org.jenkinsci.test.acceptance.po.CapybaraPortingLayerImpl;
 import org.jenkinsci.test.acceptance.po.Jenkins;
+import org.jenkinsci.test.acceptance.recorder.SupportBundle;
+import org.jenkinsci.test.acceptance.utils.SupportBundleRequest;
+import org.junit.After;
 import org.junit.Rule;
 import org.openqa.selenium.WebDriver;
 
 import javax.inject.Inject;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.util.Collections;
+import java.util.logging.Logger;
 
 /**
  * Convenience base class to derive your plain-old JUnit tests from.
@@ -19,6 +25,7 @@ import java.net.ServerSocket;
  * @author Kohsuke Kawaguchi
  */
 public class AbstractJUnitTest extends CapybaraPortingLayerImpl {
+    private static final Logger LOGGER = Logger.getLogger(AbstractJUnitTest.class.getName());
 
     @Rule
     public JenkinsAcceptanceTestRule rules = new JenkinsAcceptanceTestRule();
@@ -28,6 +35,12 @@ public class AbstractJUnitTest extends CapybaraPortingLayerImpl {
      */
     @Inject
     public Jenkins jenkins;
+
+    @Inject
+    private FailureDiagnostics diagnostics;
+
+    @Rule(order = 0) // enclosed by JenkinsAcceptanceTestRule so that we have a valid Jenkins + webdriver
+    public SupportBundle supportBundle = new SupportBundle();
 
     /**
      * This field receives a valid web driver object you can use to talk to Jenkins.
@@ -55,5 +68,10 @@ public class AbstractJUnitTest extends CapybaraPortingLayerImpl {
 
     protected void interrupt() {
         throw new RuntimeException("INTERACTIVE debugging");
+    }
+
+    @After
+    public void injectSpec() {
+        supportBundle.addSpec(jenkins, SupportBundleRequest.builder().includeDefaultComponents().setOutputFile(diagnostics.touch("support-bundle.zip")).build());
     }
 }
