@@ -29,7 +29,8 @@ import org.jenkinsci.test.acceptance.po.FormValidation;
 import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.jenkinsci.test.acceptance.po.ListView;
 import org.junit.Test;
-import org.openqa.selenium.Alert;
+import org.openqa.selenium.HasCapabilities;
+import org.openqa.selenium.TimeoutException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -71,7 +72,21 @@ public class FormValidationTest extends AbstractJUnitTest {
     }
 
     private void navigateAway() {
-        jenkins.runThenConfirmAlert(() -> jenkins.open());
+        try {
+            jenkins.runThenConfirmAlert(() -> jenkins.open());
+        } catch (TimeoutException tex) {
+            // https://issues.jenkins.io/browse/JENKINS-65016
+            if (driver instanceof HasCapabilities) {
+                HasCapabilities caps = (HasCapabilities) driver;
+                String browser = caps.getCapabilities().getBrowserName();
+                if (browser.contains("firefox")) {
+                    System.err.println("Ignoring lack of confirmation prompt in Firefox due to https://bugzilla.mozilla.org/show_bug.cgi?id=1693857");
+                    tex.printStackTrace();
+                    return;
+                }
+            }
+            throw tex;
+        }
         sleep(1000); // Needed for some reason
     }
 }
