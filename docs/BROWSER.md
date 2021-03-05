@@ -5,6 +5,7 @@ The person who runs tests can select which browser to use by using the `BROWSER`
 The following values are available:
 
  * `firefox` (default)
+        _(if set the binary at `FIREFOX_BIN` will be used to launch firefox)_
  * `ie`
  * `chrome`
  * `safari`

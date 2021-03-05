@@ -122,6 +122,9 @@ public class FallbackConfig extends AbstractModule {
                 firefoxOptions.setProxy(createSeleniumProxy(testName.get()));
             }
             setDriverPropertyIfMissing("geckodriver", GeckoDriverService.GECKO_DRIVER_EXE_PROPERTY);
+            if (System.getenv("FIREFOX_BIN") != null) {
+                firefoxOptions.setBinary(System.getenv("FIREFOX_BIN"));
+            }
 
             GeckoDriverService.Builder builder = new GeckoDriverService.Builder();
             if (display != null) {
