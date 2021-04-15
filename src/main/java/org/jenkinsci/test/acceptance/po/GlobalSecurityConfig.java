@@ -49,12 +49,12 @@ public class GlobalSecurityConfig extends ContainerPageObject {
 
     public <T extends SecurityRealm> T useRealm(Class<T> type) {
         maybeCheckUseSecurity();
-        return selectFromRadioGroup(type);
+        return selectFromDropdownOrRadioGroup(type, "securityRealm");
     }
 
     public <T extends AuthorizationStrategy> T useAuthorizationStrategy(Class<T> type) {
         maybeCheckUseSecurity();
-        return selectFromRadioGroup(type);
+        return selectFromDropdownOrRadioGroup(type, "authorizationStrategy");
     }
 
     private void maybeCheckUseSecurity() {
@@ -83,16 +83,16 @@ public class GlobalSecurityConfig extends ContainerPageObject {
         find(by.option(formatter)).click();
     }
 
-    private <T> T selectFromRadioGroup(Class<T> type) {
-        WebElement radio = findCaption(type, new Finder<WebElement>() {
-            @Override protected WebElement find(String caption) {
-                return getElement(by.radioButton(caption));
-            }
-        });
-
-        radio.click();
-
-        return newInstance(type, this, radio.getAttribute("path"));
+    private <T> T selectFromDropdownOrRadioGroup(Class<T> type, String field) {
+        try {
+            WebElement option = findCaption(type, caption -> getElement(by.option(caption)));
+            option.click();
+            return newInstance(type, this, "/" + field);
+        } catch (NoSuchElementException x) { // prior to https://github.com/jenkinsci/jenkins/pull/5417
+            WebElement radio = findCaption(type, caption -> getElement(by.radioButton(caption)));
+            radio.click();
+            return newInstance(type, this, radio.getAttribute("path"));
+        }
     }
 
     /**
