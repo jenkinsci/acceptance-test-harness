@@ -67,3 +67,7 @@ It's best explained with an example:
    ![Debugging ATH tests from IntelliJ IDEA](img/debuging-ath-containerized-from-idea.png)
 
 1. After that, the tests will continue. You can set breakpoints and debug as usual.
+
+# Using a custom docker network
+
+If you are using a custom network for the container that executes the testing you may instruct the docker-fixtures to use the same one by setting the env variable `DOCKER_FIXTURES_NETWORK`to specify the network you want your fixtures to connect to. 
