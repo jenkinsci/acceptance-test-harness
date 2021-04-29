@@ -285,14 +285,19 @@ public class PluginManager extends ContainerPageObject {
         WebElement filterBox = find(By.id("filter-box"));
         filterBox.clear();
         filterBox.sendKeys(name);
-        WebElement pluginEntry = waitFor(by.xpath("//input[starts-with(@name,'plugin.%s.')]", name), 10);
-        // sometimes the web element gets stale because of the dynamic JS behaviour of the plugin manager UI
-        if (Control.isStale(pluginEntry)) {
-            // wait 1 second, re-try and give up if it fails again
-            sleep(1000);
-            pluginEntry = waitFor(by.xpath("//input[starts-with(@name,'plugin.%s.')]", name), 10);
-        }
-        check(pluginEntry);
+
+        // the target plugin web element becomes stale due to the dynamic behaviour of the plugin
+        // manager UI which ends up with StaleElementReferenceException.
+        // This is re-trying until the element can be properly checked.
+        waitFor().withTimeout(10, TimeUnit.SECONDS).until(() -> {
+            try {
+                check(find(by.xpath("//input[starts-with(@name,'plugin.%s.')]", name)));
+            } catch (NoSuchElementException | StaleElementReferenceException e) {
+                return false;
+            }
+            return true;
+        });
+
         final VersionNumber requiredVersion = spec.getVersionNumber();
         if (requiredVersion != null) {
             final VersionNumber availableVersion = getAvailableVersionForPlugin(name);
