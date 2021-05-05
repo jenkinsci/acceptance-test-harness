@@ -242,7 +242,9 @@ public class Jenkins extends Node implements Container {
                     .setParameter("json", supportBundleRequest.getJsonParameter())
                     .build());
             Crumb crumb = getCrumb(client);
-            httpPost.setHeader(crumb.getCrumbRequestField(), crumb.getCrumb());
+            if (crumb != null) {
+                httpPost.setHeader(crumb.getCrumbRequestField(), crumb.getCrumb());
+            }
             try (CloseableHttpResponse response = client.execute(httpPost, buildHttpClientContext())) {
                 int statusCode = response.getStatusLine().getStatusCode();
                 if (statusCode == 200) {
@@ -267,6 +269,9 @@ public class Jenkins extends Node implements Container {
         int statusCode = getResponse.getStatusLine().getStatusCode();
         if (statusCode == 200) {
             return new ObjectMapper().readValue(getResponse.getEntity().getContent(), Crumb.class);
+        } else if (statusCode == 404) {
+            // Crumb issuer is disabled
+            return null;
         } else {
             throw new IOException("Got status code " + statusCode + " while getting a crumb: " + EntityUtils.toString(getResponse.getEntity()));
         }
