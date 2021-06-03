@@ -1,75 +1,59 @@
 # Sets up
-FROM ubuntu:precise
-RUN apt-get update && apt-get install -y wget
+FROM debian:buster
 
-# Install Subversion 1.8 and Apache
-RUN echo 'deb http://archive.ubuntu.com/ubuntu precise main universe' >> /etc/apt/sources.list
-RUN sh -c 'echo "deb http://opensource.wandisco.com/ubuntu precise svn18" >> /etc/apt/sources.list.d/WANdisco.list'
-RUN wget -q http://opensource.wandisco.com/wandisco-debian.gpg -O- | apt-key add -
-RUN apt-get update -y
-RUN apt-get install -y subversion apache2 libapache2-svn
-
+RUN apt-get update && apt-get install -yq apache2 libapache2-mod-svn subversion viewvc && apt-get clean
 
 # Create a repo
-RUN svnadmin create /home/svn
-ADD ./config/svnserve.conf /home/svn/conf/svnserve.conf
-ADD ./config/passwd /home/svn/conf/passwd
+# Debain defaults subversion repos to /var/lib/svn
+RUN mkdir -p /var/lib/svn/
+RUN svnadmin create /var/lib/svn/myrepo
+ADD ./config/svnserve.conf /var/lib/svn/myrepo/conf/svnserve.conf
+ADD ./config/passwd /var/lib/svn/myrepo/conf/passwd
 
-# Set permissions
+# configure the permissions on it
 RUN addgroup subversion && \
-    usermod -a -G subversion www-data && \
-    chown -R www-data:subversion /home/svn && \
-    chmod -R g+rws /home/svn
+     usermod -a -G subversion www-data && \
+     chown -R www-data:subversion /var/lib/svn && \
+     chmod -R g+rws /var/lib/svn
 
 
-#install websvn
-RUN export DEBIAN_FRONTEND=noninteractive && apt-get -y install websvn
-RUN cp -r /usr/share/websvn/ /var/www/
-ADD ./config/config.php /etc/websvn/config.php
 
-# Configure Apache to serve up Subversion
-RUN /usr/sbin/a2enmod auth_digest && \
-    rm /etc/apache2/mods-available/dav_svn.conf
+# Configure /viewvc and subversion in apache
+RUN /usr/sbin/a2enmod cgi
 ADD ./config/dav_svn.conf /etc/apache2/mods-available/dav_svn.conf
-
-# Create password files. Pre-created with "svnUser"/"test" username and password.
-RUN mkdir -p /etc/subversion
+# password files. Pre-created with "svnUser"/"test" username and password.
 ADD ./config/passwd.htpasswd /etc/subversion/passwd.htpasswd
+ADD ./config/viewvc.conf /etc/viewvc/viewvc.conf
 
 
-#install ssh
-RUN apt-get install -y openssh-server
+# Apache needs its directories creating which the apachectl script will do (as well as validating our config!)
+RUN apachectl configtest
+
+# SSHd needs a directory for privaledge separation
+RUN apt-get update && apt-get install -yq ssh && apt-get clean
 RUN mkdir -p /var/run/sshd
-# create a test user
+
+# Create a user for testing svn+SSH
 RUN useradd svnUser -d /home/svnUser && \
-    mkdir -p /home/svnUser/.ssh && \
-    chown svnUser /home/svnUser && \
-    echo "svnUser:test" | chpasswd && \
-    echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDzpxmTW9mH87DMkMSqBrSecoSHVCkKbW5IOO+4unak8M8cyn+b0iX07xkBn4hUJRfKA7ezUG8EX9ru5VinteqMOJOPknCuzmUS2Xj/WJdcq3BukBxuyiIRoUOXsCZzilR/DOyNqpjjI3iNb4los5//4aoKPCmLInFnQ3Y42VaimH1298ckEr4tRxsoipsEAANPXZ3p48gGwOf1hp56bTFImvATNwxMViPpqyKcyVaA7tXCBnEk/GEwb6MiroyHbS0VvBz9cZOpJv+8yQnyLndGdibk+hPbGp5iVAIsm28FEF+4FvlYlpBwq9OYuhOCREJvH9CxDMhbOXgwKPno9GyN kohsuke@atlas' > /home/svnUser/.ssh/authorized_keys
-RUN locale-gen en_US.UTF-8
+     mkdir -p /home/svnUser/.ssh && \
+     chown svnUser /home/svnUser && \
+     echo "svnUser:test" | chpasswd && \
+     echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDzpxmTW9mH87DMkMSqBrSecoSHVCkKbW5IOO+4unak8M8cyn+b0iX07xkBn4hUJRfKA7ezUG8EX9ru5VinteqMOJOPknCuzmUS2Xj/WJdcq3BukBxuyiIRoUOXsCZzilR/DOyNqpjjI3iNb4los5//4aoKPCmLInFnQ3Y42VaimH1298ckEr4tRxsoipsEAANPXZ3p48gGwOf1hp56bTFImvATNwxMViPpqyKcyVaA7tXCBnEk/GEwb6MiroyHbS0VvBz9cZOpJv+8yQnyLndGdibk+hPbGp5iVAIsm28FEF+4FvlYlpBwq9OYuhOCREJvH9CxDMhbOXgwKPno9GyN kohsuke@atlas' > /home/svnUser/.ssh/authorized_keys
+# RUN apt-get update && apt-get install -yq locales && apt-get clean locale-gen en_US.UTF-8
 
-#Install Supervisor to manage the processes
-RUN apt-get install -y supervisor
-RUN mkdir -p /var/log/supervisor
-#Add supervisor config containing the commands to execute
-ADD ./config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-
-ENV APACHE_RUN_USER    www-data
-ENV APACHE_RUN_GROUP   www-data
-ENV APACHE_PID_FILE    /var/run/apache2.pid
-ENV APACHE_RUN_DIR     /var/run/apache2
-ENV APACHE_LOCK_DIR    /var/lock/apache2
-ENV APACHE_LOG_DIR     /var/log/apache2
-
-#upload SVN data
+# Create some dummy data in the repo
 RUN mkdir -p /svnRepo
 ADD ./svnRepo /svnRepo
-RUN /usr/sbin/apache2 && svn checkout http://127.0.0.1/svn /svnRepo && svn add /svnRepo/* && svn commit -m 'init' /svnRepo/* && echo 'newRev' >> /svnRepo/testOne.txt && svn commit -m 'Rev with changes' /svnRepo/*
+RUN . /etc/apache2/envvars && /usr/sbin/apache2 && svn checkout http://127.0.0.1/svn/myrepo /svnRepo && svn add /svnRepo/* && svn commit -m 'init' /svnRepo/* && echo 'newRev' >> /svnRepo/testOne.txt && svn commit -m 'Rev with changes' /svnRepo/*
+RUN rm -fr /svnRepo
 
 
+# Install & Configure Supervisor to manage the processes
+RUN apt-get update && apt-get install -yq supervisor && apt-get clean
+ADD ./config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-#Start supervisor --> starts apache2Server, svnServer, sshServer
-CMD ["/usr/bin/supervisord"]
+# Start supervisor --> starts apache2, svnserve, and SSH
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
 
 EXPOSE 22
 EXPOSE 80

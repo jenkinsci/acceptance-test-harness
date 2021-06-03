@@ -36,7 +36,7 @@ public class SubversionPluginTest extends AbstractJUnitTest {
     public void run_basic_subversion_build() throws SubversionPluginTestException {
         final SvnContainer svnContainer = svn.get();
         final FreeStyleJob f = jenkins.jobs.create();
-        f.useScm(SubversionScm.class).url.set(svnContainer.getUrlUnsaveRepo());
+        f.useScm(SubversionScm.class).url.set(svnContainer.getUrlUnauthenticatedRepo());
         f.addShellStep("test -d .svn");
         f.save();
 
@@ -62,14 +62,14 @@ public class SubversionPluginTest extends AbstractJUnitTest {
         final FreeStyleJob f = jenkins.jobs.create();
 
         final SubversionScm subversionScm = f.useScm(SubversionScm.class);
-        subversionScm.url.set(svnContainer.getUrlUnsaveRepo());
+        subversionScm.url.set(svnContainer.getUrlUnauthenticatedRepo());
         subversionScm.checkoutStrategy.select(SubversionScm.ALWAYS_FRESH_COPY);
         f.save();
 
         f.startBuild().shouldSucceed();
 
         Build b = f.startBuild().shouldSucceed();
-        assertThat(b.getConsole(), Matchers.containsString("Checking out " + svnContainer.getUrlUnsaveRepo()));
+        assertThat(b.getConsole(), Matchers.containsString("Checking out " + svnContainer.getUrlUnauthenticatedRepo()));
     }
 
     @Test
@@ -110,7 +110,7 @@ public class SubversionPluginTest extends AbstractJUnitTest {
         final SvnContainer svnContainer = svn.get();
         final FreeStyleJob f = jenkins.jobs.create();
         final SubversionScm subversionScm = f.useScm(SubversionScm.class);
-        subversionScm.url.set(svnContainer.getUrlUnsaveRepo());
+        subversionScm.url.set(svnContainer.getUrlUnauthenticatedRepo());
         subversionScm.checkoutStrategy.select(SubversionScm.CLEAN_CHECKOUT);
 
         f.addShellStep("echo test > unversioned.txt");
@@ -147,7 +147,7 @@ public class SubversionPluginTest extends AbstractJUnitTest {
         final SvnContainer svnContainer = svn.get();
         final FreeStyleJob f = jenkins.jobs.create();
         final SubversionScm subversionScm = f.useScm(SubversionScm.class);
-        subversionScm.url.set(svnContainer.getUrlUnsaveRepo());
+        subversionScm.url.set(svnContainer.getUrlUnauthenticatedRepo());
 
         f.save();
         f.startBuild();
@@ -162,7 +162,7 @@ public class SubversionPluginTest extends AbstractJUnitTest {
         final SubversionScm subversionScm = f.useScm(SubversionScm.class);
         subversionScm.url.set(svnContainer.getUrlUnsaveRepoAtRevision(1));
         final SvnRepositoryBrowserWebSvn repositoryBrowserWebSvn = subversionScm.useRepositoryBrowser(SvnRepositoryBrowserWebSvn.class);
-        repositoryBrowserWebSvn.url.set(svnContainer.getUrlWebSVN());
+        repositoryBrowserWebSvn.url.set(svnContainer.getUrlViewVC());
         f.save();
         f.startBuild().shouldSucceed();
 
