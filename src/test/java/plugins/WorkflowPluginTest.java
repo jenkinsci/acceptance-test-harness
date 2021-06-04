@@ -287,11 +287,11 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
     @Test public void subversion() throws Exception {
         final SvnContainer svnContainer = svn.get();
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
-        job.script.set("node {svn '" + svnContainer.getUrlUnsaveRepoAtRevision(1) + "'}");
+        job.script.set("node {svn '" + svnContainer.getUrlUnauthenticatedRepoAtRevision(1) + "'}");
         job.save();
         job.startBuild().shouldSucceed();
         job.configure();
-        job.script.set("node {svn '" + svnContainer.getUrlUnsaveRepoAtRevision(2) + "'}");
+        job.script.set("node {svn '" + svnContainer.getUrlUnauthenticatedRepoAtRevision(2) + "'}");
         job.save();
         Build b2 = job.startBuild().shouldSucceed();
         assertTrue(b2.getChanges().hasChanges());
