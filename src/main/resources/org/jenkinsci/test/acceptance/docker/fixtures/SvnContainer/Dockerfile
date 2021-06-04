@@ -44,7 +44,13 @@ RUN useradd svnUser -d /home/svnUser && \
 # Create some dummy data in the repo
 RUN mkdir -p /svnRepo
 ADD ./svnRepo /svnRepo
-RUN . /etc/apache2/envvars && /usr/sbin/apache2 && svn checkout http://127.0.0.1/svn/myrepo /svnRepo && svn add /svnRepo/* && svn commit -m 'init' /svnRepo/* && echo 'newRev' >> /svnRepo/testOne.txt && svn commit -m 'Rev with changes' /svnRepo/*
+RUN /usr/sbin/apache2ctl start && \
+    svn checkout http://127.0.0.1/svn/myrepo /svnRepo && \
+    svn add /svnRepo/* && svn commit -m 'init' /svnRepo/* && \
+    echo 'newRev' >> /svnRepo/testOne.txt && \
+    svn commit -m 'Rev with changes' /svnRepo/* && \
+# apache2ctl stop returns before the pid files and other things have been cleaned up so wait for the process to actually exit
+    PID=`cat /var/run/apache2/apache2.pid` && apache2ctl stop && while test -d /proc/$PID; do echo waiting for apache2 to terminate; sleep 0.2; done
 RUN rm -fr /svnRepo
 
 
