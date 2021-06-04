@@ -23,7 +23,7 @@ public class SvnContainer extends DockerContainer {
     private static final String PROTOCOL_HTTP = "http://";
     private static final String PROTOCOL_SVN = "svn://";
     private static final String UNAUTHENTICATED_REPO_PATH = "/svn/myrepo";
-    private static final String User_PWD_SAVE_REPO = "/svn_pwd/myrepo";
+    private static final String AUTHENTICATED_REPO_PATH = "/svn_pwd/myrepo";
     private static final String VIEWVC_PATH = "/viewvc/myrepo/";
 
     /**
@@ -65,7 +65,7 @@ public class SvnContainer extends DockerContainer {
      * @return URL
      * @throws SubversionPluginTestException e
      */
-    public URL getUrlUnsaveRepoAtRevision(int revision) throws SubversionPluginTestException {
+    public URL getUrlUnauthenticatedRepoAtRevision(int revision) throws SubversionPluginTestException {
         String url = getUrlUnauthenticatedRepo().toString() + "@" + revision;
         return createUrl(url);
     }
@@ -76,8 +76,8 @@ public class SvnContainer extends DockerContainer {
      * @return URL
      * @throws SubversionPluginTestException e
      */
-    public URL getUrlUserPwdSaveRepo() throws SubversionPluginTestException {
-        String url = getHttpUrl().toString() + User_PWD_SAVE_REPO;
+    public URL getUrlAuthenticatedRepo() throws SubversionPluginTestException {
+        String url = getHttpUrl().toString() + AUTHENTICATED_REPO_PATH;
         return createUrl(url);
     }
 
