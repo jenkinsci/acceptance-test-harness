@@ -107,6 +107,7 @@ public class SshSlaveLauncher extends ComputerLauncher {
         final SshCredentialDialog dia = this.addCredential();
         final SshPrivateKeyCredential cred = dia.select(SshPrivateKeyCredential.class);
         cred.username.set(username);
+        cred.description.set(username);
         if (passphrase != null) {
             cred.passphrase.set(passphrase);
         }

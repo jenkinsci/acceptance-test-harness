@@ -108,7 +108,7 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
             }
             f.add();
 
-            l.credentialsId.select(String.format("%s (%s)", username, description));
+            l.credentialsId.select(description);
         }
         s.save();
     }
@@ -147,7 +147,7 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
         SshSlaveLauncher l = s.setLauncher(SshSlaveLauncher.class);
         l.host.set("127.0.0.1");
 
-        l.credentialsId.select(String.format("%s (%s)", username, description));
+        l.credentialsId.select(description);
     }
 
     private void verifyValueForCredential(CredentialsPage cp, Control element, String expected) {
