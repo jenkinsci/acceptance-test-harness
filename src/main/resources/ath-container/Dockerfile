@@ -33,9 +33,9 @@ ENV PATH="$PATH:/opt/maven/bin"
 ENV SHARED_DOCKER_SERVICE true
 
 # Allow injecting uid and git to match directory ownership
-ARG uid=1000
+ARG uid=1001
 ENV uid $uid
-ARG gid=1000
+ARG gid=1001
 ENV gid $gid
 
 EXPOSE 5942
