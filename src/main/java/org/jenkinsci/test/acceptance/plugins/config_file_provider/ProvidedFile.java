@@ -59,12 +59,12 @@ public abstract class ProvidedFile extends PageObject {
     }
 
     public void remove() {
+        // From config-file-provider 3.7.1 on, the remove element is not an anchor anymore.
         // Use the direct link with versions without the security improvement, otherwise go to the url via GET
         
-        //add all the versions
-        boolean useNew = getJenkins().getPlugin("config-file-provider").getVersion().isOlderThan(new VersionNumber("3.7.0"));
+        boolean useOldAnchor = getJenkins().getPlugin("config-file-provider").getVersion().isOlderThan(new VersionNumber("3.7.1"));
 
-        if (useNew) {
+        if (useOldAnchor) {
             WebElement e = find(by.xpath("//a[contains(@onclick, 'removeConfig?id=" + this.fileId + "')]"));
             e.click();    
         } else {
