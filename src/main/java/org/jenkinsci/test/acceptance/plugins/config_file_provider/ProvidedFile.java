@@ -23,8 +23,10 @@
  */
 package org.jenkinsci.test.acceptance.plugins.config_file_provider;
 
+import hudson.util.VersionNumber;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.PageObject;
+import org.openqa.selenium.WebElement;
 
 /**
  * Abstract class for files provided by {@link ConfigFileProvider}.
@@ -57,7 +59,17 @@ public abstract class ProvidedFile extends PageObject {
     }
 
     public void remove() {
-        visit(url("removeConfig?id=" + this.fileId));
+        // Use the direct link with versions without the security improvement, otherwise go to the url via GET
+        
+        //add all the versions
+        boolean useNew = getJenkins().getPlugin("config-file-provider").getVersion().isOlderThan(new VersionNumber("3.7.0"));
+
+        if (useNew) {
+            WebElement e = find(by.xpath("//a[contains(@onclick, 'removeConfig?id=" + this.fileId + "')]"));
+            e.click();    
+        } else {
+            visit(url("removeConfig?id=" + this.fileId));
+        }
     }
 
     public abstract void content(String content);
