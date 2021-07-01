@@ -67,7 +67,7 @@ public class FormValidationTest extends AbstractJUnitTest {
         formValidation = c.numExecutors.getFormValidation();
 
         //support older jenkins versions
-        String errorMessage = jenkins.getVersion().isNewerThan(new VersionNumber("2.104")) ? "Not a non-negative number": "Not an integer";
+        String errorMessage = jenkins.getVersion().isNewerThan(new VersionNumber("2.295")) ? "Not a non-negative integer": "Not a non-negative number";
         assertThat(formValidation, reports(Kind.ERROR, errorMessage));
     }
 
