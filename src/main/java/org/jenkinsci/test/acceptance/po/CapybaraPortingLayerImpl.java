@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.hamcrest.StringDescription;
 import org.jenkinsci.test.acceptance.junit.Resource;
@@ -451,6 +452,14 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
         } catch (ReflectiveOperationException e) {
             throw new AssertionError("Failed to invoke a constructor of " + type, e);
         }
+    }
+
+    protected <T> T findCaption(Class<?> type, Function<String, T> finder) {
+        return findCaption(type, new Finder<T>() {
+            @Override protected T find(String caption) {
+                return finder.apply(caption);
+            }
+        });
     }
 
     protected <T> T findCaption(Class<?> type, Finder<T> call) {
