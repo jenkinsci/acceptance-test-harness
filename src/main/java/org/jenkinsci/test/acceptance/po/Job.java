@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.io.IOUtils;
@@ -360,9 +362,7 @@ public class Job extends TopLevelItem {
     public <T extends Parameter> T addParameter(Class<T> type) {
         ensureConfigPage();
 
-        control("/properties/hudson-model-ParametersDefinitionProperty/specified",
-                "/properties/hudson-model-ParametersDefinitionProperty/parameterized" // 1.636-
-        ).check();
+        control("/properties/hudson-model-ParametersDefinitionProperty/specified").check();
 
         control(by.xpath("//button[text()='Add Parameter']")).selectDropdownMenu(type);
 
@@ -371,8 +371,15 @@ public class Job extends TopLevelItem {
 
         elasticSleep(500);
 
-        // 1.636-: …/parameter (or …/parameter[1] etc.); 1.637+: …/parameterDefinitions
-        String path = last(by.xpath("//div[starts-with(@path,'/properties/hudson-model-ParametersDefinitionProperty/parameter')]")).getAttribute("path");
+        // /properties/hudson-model-ParametersDefinitionProperty/parameterDefinitions  for the first
+        // /properties/hudson-model-ParametersDefinitionProperty/parameterDefinitions[n] for subsequent ones
+        // if we have another descriptor inside the descriptor inside the parameterDefinition we select the that instead of the actual parameter. (e.g NodeParameter)
+        // as all browsers do not support matches in xpath 2.0 we need to do this ourselves (find the last match and then extract the correct part even if we match the wrong thing originally
+        String path = last(by.xpath("//div[starts-with(@path,'/properties/hudson-model-ParametersDefinitionProperty/parameterDefinitions')]")).getAttribute("path");
+
+        Pattern pattern = Pattern.compile("^(/properties/hudson-model-ParametersDefinitionProperty/parameterDefinitions([^/]*))(/.*)?$");
+        Matcher m = pattern.matcher(path);
+        path = m.group(1);
 
         T p = newInstance(type, this, path);
         parameters.add(p);
