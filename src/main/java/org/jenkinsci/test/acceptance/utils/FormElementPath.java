@@ -32,6 +32,15 @@ import java.util.logging.Logger;
 public class FormElementPath {
     private static final Logger LOGGER = Logger.getLogger(FormElementPath.class.getName());
 
+    /**
+     * Set to true if plugin check should be skipped. Useful when running tests against
+     * Jenkins instance where the user doesn't have Overall/Administer access.
+     * Warning! By setting to true, you will have to ensure that form-element-path
+     * plugin is installed by other means.
+     */
+    public static boolean SKIP_PLUGIN_CHECK = Boolean.getBoolean(
+            FormElementPath.class.getName() + ".SKIP_PLUGIN_CHECK");
+
     private Credentials credentials;
 
     @Inject
@@ -42,6 +51,9 @@ public class FormElementPath {
     private AccessTokenGenerator accessToken;
 
     public void ensure(@Nonnull URL url, @CheckForNull Credentials credentials) {
+        if (SKIP_PLUGIN_CHECK) {
+            return;
+        }
         try {
             if (credentials != null) {
                 this.credentials = accessToken.generate(url, credentials);
