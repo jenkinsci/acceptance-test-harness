@@ -5,11 +5,13 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.test.acceptance.utils.IOUtil;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.jenkinsci.utils.process.ProcessInputStream;
@@ -26,11 +28,21 @@ public class WinstoneController extends LocalController {
 
     private static final List<String> JENKINS_JAVA_OPTS = envVarOpts("JENKINS_JAVA_OPTS");
     private static final List<String> JENKINS_OPTS = envVarOpts("JENKINS_OPTS");
+    private static final List<String> SYSTEM_PROPERTIES = new ArrayList<>();
 
     private static List<String> envVarOpts(String jenkins_opts) {
         String getenv = System.getenv(jenkins_opts);
         if (getenv == null) return Collections.emptyList();
         return Arrays.asList(getenv.split("\\s+"));
+    }
+
+    public void addSystemProperty(String systemProperty) {
+        if (StringUtils.isNotBlank(systemProperty)) {
+            if (!systemProperty.startsWith("-D")) {
+                systemProperty = "-D" + systemProperty;
+            }
+            SYSTEM_PROPERTIES.add(systemProperty);
+        }
     }
 
     private final int httpPort;
@@ -47,6 +59,7 @@ public class WinstoneController extends LocalController {
         String java = javaHome == null ? "java" : String.format("%s/bin/java",javaHome.getAbsolutePath());
         CommandBuilder cb = new CommandBuilder(java);
         cb.addAll(JENKINS_JAVA_OPTS);
+        cb.add(SYSTEM_PROPERTIES.toArray(new String[0]));
         cb.add(
                 "-Duser.language=en",
                 "-jar", war,
