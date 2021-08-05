@@ -37,9 +37,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @RuleAnnotation(value = WithSystemProperties.RuleImpl.class, priority = -10)
 public @interface WithSystemProperties {
 
-    /**
-     * See {@link PluginSpec} for the syntax.
-     */
     String[] value();
 
     public class RuleImpl implements TestRule {
