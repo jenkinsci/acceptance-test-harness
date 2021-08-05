@@ -285,7 +285,7 @@ public abstract class LocalController extends JenkinsController implements LogLi
     public void tearDown(){
         try {
             if (jenkinsHome.exists()) {
-                FileUtils.forceDelete(jenkinsHome);
+                FileUtils.deleteDirectory(jenkinsHome);
             }
         } catch (IOException e) {
             LOGGER.log(Level.WARNING, "Cleaning up temporary JENKINS_HOME failed, retrying in 5 sec.", e);
@@ -293,7 +293,7 @@ public abstract class LocalController extends JenkinsController implements LogLi
             try {
                 Thread.sleep(5000);
                 if (jenkinsHome.exists()) {
-                    FileUtils.forceDelete(jenkinsHome);
+                    FileUtils.deleteDirectory(jenkinsHome);
                 }
             } catch (InterruptedException | IOException e1) {
                 LOGGER.log(Level.WARNING, "Cleaning up temporary JENKINS_HOME failed again, giving up.");
