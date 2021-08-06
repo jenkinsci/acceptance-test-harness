@@ -28,7 +28,7 @@ public class WinstoneController extends LocalController {
 
     private static final List<String> JENKINS_JAVA_OPTS = envVarOpts("JENKINS_JAVA_OPTS");
     private static final List<String> JENKINS_OPTS = envVarOpts("JENKINS_OPTS");
-    private static final List<String> SYSTEM_PROPERTIES = new ArrayList<>();
+    private final List<String> SYSTEM_PROPERTIES = new ArrayList<>();
 
     private static List<String> envVarOpts(String jenkins_opts) {
         String getenv = System.getenv(jenkins_opts);
