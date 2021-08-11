@@ -28,7 +28,7 @@ public class WinstoneController extends LocalController {
 
     private static final List<String> JENKINS_JAVA_OPTS = envVarOpts("JENKINS_JAVA_OPTS");
     private static final List<String> JENKINS_OPTS = envVarOpts("JENKINS_OPTS");
-    private final List<String> SYSTEM_PROPERTIES = new ArrayList<>();
+    private final List<String> JAVA_OPTS = new ArrayList<>();
 
     private static List<String> envVarOpts(String jenkins_opts) {
         String getenv = System.getenv(jenkins_opts);
@@ -36,12 +36,9 @@ public class WinstoneController extends LocalController {
         return Arrays.asList(getenv.split("\\s+"));
     }
 
-    public void addSystemProperty(String systemProperty) {
-        if (StringUtils.isNotBlank(systemProperty)) {
-            if (!systemProperty.startsWith("-D")) {
-                systemProperty = "-D" + systemProperty;
-            }
-            SYSTEM_PROPERTIES.add(systemProperty);
+    public void addJavaOpt(String javaOpt) {
+        if (StringUtils.isNotBlank(javaOpt)) {
+            JAVA_OPTS.add(javaOpt);
         }
     }
 
@@ -59,7 +56,7 @@ public class WinstoneController extends LocalController {
         String java = javaHome == null ? "java" : String.format("%s/bin/java",javaHome.getAbsolutePath());
         CommandBuilder cb = new CommandBuilder(java);
         cb.addAll(JENKINS_JAVA_OPTS);
-        cb.add(SYSTEM_PROPERTIES.toArray(new String[0]));
+        cb.addAll(JAVA_OPTS);
         cb.add(
                 "-Duser.language=en",
                 "-jar", war,

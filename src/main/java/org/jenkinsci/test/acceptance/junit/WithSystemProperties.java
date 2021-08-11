@@ -4,7 +4,6 @@ import com.google.inject.Inject;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.WinstoneController;
-import org.jenkinsci.test.acceptance.update_center.PluginSpec;
 import org.junit.internal.AssumptionViolatedException;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
@@ -50,20 +49,20 @@ public @interface WithSystemProperties {
                 @Override
                 public void evaluate() throws Throwable {
                     if (!(controller instanceof WinstoneController)) {
-                        throw new AssumptionViolatedException("Test skipped. WithSystemProperties should be used with a local controller.");
+                        throw new AssumptionViolatedException("Test skipped. WithSystemProperties should be used with a winstone controller.");
                     }
 
                     Class<?> testSuite = d.getTestClass();
                     final String[] fromClass = getProperties(d.getAnnotation(WithSystemProperties.class));
                     if (fromClass != null) {
                         for (String property : fromClass) {
-                            ((WinstoneController) controller).addSystemProperty(property);
+                            ((WinstoneController) controller).addJavaOpt(property);
                         }
                     }
                     final String[] fromMethod = getProperties(testSuite.getAnnotation(WithSystemProperties.class));
                     if (fromMethod != null) {
                         for (String property : fromMethod) {
-                            ((WinstoneController) controller).addSystemProperty(property);
+                            ((WinstoneController) controller).addJavaOpt(property);
                         }
                     }
 
@@ -83,16 +82,7 @@ public @interface WithSystemProperties {
                 return null;
             }
 
-            List<String> systemProperties = new ArrayList<>();
-            for (String property : properties) {
-                if (StringUtils.isNotBlank(property)) {
-                    if (!property.startsWith("-D")) {
-                        property = "-D" + property;
-                    }
-                    systemProperties.add(property);
-                }
-            }
-            return systemProperties.toArray(new String[0]);
+            return properties;
         }
     }
 }
