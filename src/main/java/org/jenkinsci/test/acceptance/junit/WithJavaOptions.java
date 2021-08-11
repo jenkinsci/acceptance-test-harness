@@ -1,7 +1,6 @@
 package org.jenkinsci.test.acceptance.junit;
 
 import com.google.inject.Inject;
-import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.WinstoneController;
 import org.junit.internal.AssumptionViolatedException;
@@ -13,8 +12,6 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-import java.util.ArrayList;
-import java.util.List;
 
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
@@ -23,18 +20,18 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 /**
  * 
  * Indicates that the test and Jenkins instance will run with the specified
- * system properties. These properties are set as an array of pairs <i>property=vale</i>.
+ * java options. These options are set as an array of pairs <i>property=vale</i>.
  * 
  * <p>
- * The system properties can be set only when the test are being run with a {@link WinstoneController}.
+ * The options can be set only when the test are being run with a {@link WinstoneController}.
  * This annotation is a way to extend JENKINS_JAVA_OPTS and JENKINS_OPTS at test level
  */
 @Retention(RUNTIME)
 @Target({METHOD, TYPE})
 @Inherited
 @Documented
-@RuleAnnotation(value = WithSystemProperties.RuleImpl.class, priority = -10)
-public @interface WithSystemProperties {
+@RuleAnnotation(value = WithJavaOptions.RuleImpl.class, priority = -10)
+public @interface WithJavaOptions {
 
     String[] value();
 
@@ -53,13 +50,13 @@ public @interface WithSystemProperties {
                     }
 
                     Class<?> testSuite = d.getTestClass();
-                    final String[] fromClass = getProperties(d.getAnnotation(WithSystemProperties.class));
+                    final String[] fromClass = getOptions(d.getAnnotation(WithJavaOptions.class));
                     if (fromClass != null) {
                         for (String property : fromClass) {
                             ((WinstoneController) controller).addJavaOpt(property);
                         }
                     }
-                    final String[] fromMethod = getProperties(testSuite.getAnnotation(WithSystemProperties.class));
+                    final String[] fromMethod = getOptions(testSuite.getAnnotation(WithJavaOptions.class));
                     if (fromMethod != null) {
                         for (String property : fromMethod) {
                             ((WinstoneController) controller).addJavaOpt(property);
@@ -72,12 +69,12 @@ public @interface WithSystemProperties {
         }
 
         // Visible for testing
-        static String[] getProperties(WithSystemProperties withSystemProperties) {
-            if (withSystemProperties == null) {
+        static String[] getOptions(WithJavaOptions withJavaOptions) {
+            if (withJavaOptions == null) {
                 return null;
             }
 
-            String[] properties = withSystemProperties.value();
+            String[] properties = withJavaOptions.value();
             if (properties == null || properties.length == 0) {
                 return null;
             }
