@@ -96,6 +96,7 @@ public class FallbackConfig extends AbstractModule {
 
     public static final String DOM_MAX_SCRIPT_RUN_TIME = "dom.max_script_run_time";
     public static final String DOM_MAX_CHROME_SCRIPT_RUN_TIME = "dom.max_chrome_script_run_time";
+    public static final String DOM_DISABLE_BEFOREUNLOAD = "dom.disable_beforeunload";
     public static final int PAGE_LOAD_TIMEOUT = 30;
     public static final int IMPLICIT_WAIT_TIMEOUT = 1;
 
@@ -118,7 +119,7 @@ public class FallbackConfig extends AbstractModule {
             // Config screen with many plugins can cause FF to complain JS takes too long to complete - set longer timeout
             firefoxOptions.addPreference(DOM_MAX_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
             firefoxOptions.addPreference(DOM_MAX_CHROME_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
-            firefoxOptions.addPreference("dom.disable_beforeunload", false);
+            firefoxOptions.addPreference(DOM_DISABLE_BEFOREUNLOAD, false);
             if (isCaptureHarEnabled()) {
                 firefoxOptions.setProxy(createSeleniumProxy(testName.get()));
             }

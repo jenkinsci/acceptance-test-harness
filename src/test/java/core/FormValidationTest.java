@@ -42,6 +42,7 @@ public class FormValidationTest extends AbstractJUnitTest {
         ajaxValidation();
         navigateAway();
         jsValidation();
+        navigateAway();
     }
 
     private void ajaxValidation() {
