@@ -118,6 +118,7 @@ public class FallbackConfig extends AbstractModule {
             // Config screen with many plugins can cause FF to complain JS takes too long to complete - set longer timeout
             firefoxOptions.addPreference(DOM_MAX_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
             firefoxOptions.addPreference(DOM_MAX_CHROME_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
+            firefoxOptions.addPreference("dom.disable_beforeunload", false);
             if (isCaptureHarEnabled()) {
                 firefoxOptions.setProxy(createSeleniumProxy(testName.get()));
             }
@@ -182,9 +183,11 @@ public class FallbackConfig extends AbstractModule {
             if (StringUtils.isBlank(u)) {
                 throw new Error("remote-webdriver-firefox requires REMOTE_WEBDRIVER_URL to be set");
             }
+            DesiredCapabilities capabilitiesFirefox = DesiredCapabilities.firefox();
+            capabilitiesFirefox.setCapability("dom.disable_beforeunload", false);
             return new RemoteWebDriver(
                     new URL(u), //http://192.168.99.100:4444/wd/hub
-                    DesiredCapabilities.firefox()
+                    capabilitiesFirefox
             );
         case "remote-webdriver-chrome":
             u = System.getenv("REMOTE_WEBDRIVER_URL");
