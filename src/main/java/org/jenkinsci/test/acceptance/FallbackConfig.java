@@ -185,7 +185,7 @@ public class FallbackConfig extends AbstractModule {
                 throw new Error("remote-webdriver-firefox requires REMOTE_WEBDRIVER_URL to be set");
             }
             DesiredCapabilities capabilitiesFirefox = DesiredCapabilities.firefox();
-            capabilitiesFirefox.setCapability("dom.disable_beforeunload", false);
+            capabilitiesFirefox.setCapability(DOM_DISABLE_BEFOREUNLOAD, false);
             return new RemoteWebDriver(
                     new URL(u), //http://192.168.99.100:4444/wd/hub
                     capabilitiesFirefox
