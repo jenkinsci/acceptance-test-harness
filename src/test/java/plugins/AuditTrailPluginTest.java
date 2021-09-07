@@ -4,6 +4,7 @@ import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.audit_trail.AuditTrailLogger;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.slave.LocalSlaveController;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,15 +30,15 @@ public class AuditTrailPluginTest extends AbstractJUnitTest {
     }
 
     @Test
-    public void trail_should_contain_logged_events() {
-        jenkins.jobs.create(FreeStyleJob.class);
+    public void trail_should_contain_logged_events() throws Exception {
+        FreeStyleJob freeStyleJob = jenkins.jobs.create(FreeStyleJob.class);
 
         // purpose of this is to just go through the motion of creating a new slave,
         // so this one can bypass SlaveController.
-        new LocalSlaveController().install(jenkins);
+        Slave slave = new LocalSlaveController().install(jenkins).get();
 
         List<String> events = auditTrail.getEvents();
-        assertThat(events, hasItem("/createItem"));
-        assertThat(events, hasItem("/computer/createItem"));
+        assertThat(events, hasItem("/createItem (" + freeStyleJob.name + ")"));
+        assertThat(events, hasItem("/computer/createItem (" + slave.getName() + ")"));
     }
 }
