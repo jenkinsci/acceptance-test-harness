@@ -14,6 +14,7 @@ import org.jenkinsci.test.acceptance.junit.Wait;
 import org.jenkinsci.test.acceptance.utils.ElasticTime;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
+import org.openqa.selenium.ElementClickInterceptedException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -260,7 +261,12 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     @Override
     public void check(WebElement e, boolean state) {
         if (e.isSelected() != state) {
-            e.click();
+            try {
+                e.click();
+            } catch (ElementClickInterceptedException ex) {
+                // tooltip can make an element not clickable.
+                executeScript("arguments[0].click();", e);
+            }
         }
         // It seems like Selenium sometimes has issues when trying to click elements that are out of view.
         // We use the following javascript as a workaround if the previous click failed.
