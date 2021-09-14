@@ -66,6 +66,8 @@ public abstract class LocalController extends JenkinsController implements LogLi
 
     private final File logFile;
 
+    private File javaHome;
+
     @Inject @Named("form-element-path.hpi")
     private File formElementPathPlugin;
 
@@ -96,6 +98,10 @@ public abstract class LocalController extends JenkinsController implements LogLi
         this.logFile = new File(this.jenkinsHome.getParentFile(), this.jenkinsHome.getName()+".log");
     }
 
+    protected LocalController(Injector i, File javaHome) {
+        this(i);
+        this.javaHome = javaHome;
+    }
     @Override
     public void postConstruct(Injector injector) {
         super.postConstruct(injector);
@@ -197,6 +203,9 @@ public abstract class LocalController extends JenkinsController implements LogLi
     }
 
     public File getJavaHome() {
+        if (javaHome != null && javaHome.isDirectory()) {
+            return javaHome;
+        }
         String javaHome = getenv("JENKINS_JAVA_HOME");
         File home = StringUtils.isBlank(javaHome) ? null : new File(javaHome);
         if (home != null && home.isDirectory()) {

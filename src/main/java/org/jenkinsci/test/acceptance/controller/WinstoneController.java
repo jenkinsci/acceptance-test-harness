@@ -51,6 +51,12 @@ public class WinstoneController extends LocalController {
         httpPort = IOUtil.randomTcpPort();
     }
 
+    @Inject
+    public WinstoneController(Injector i, File javaHome) {
+        super(i, javaHome);
+        httpPort = IOUtil.randomTcpPort();
+    }
+
     @Override
     public ProcessInputStream startProcess() throws IOException{
         File javaHome = getJavaHome();
