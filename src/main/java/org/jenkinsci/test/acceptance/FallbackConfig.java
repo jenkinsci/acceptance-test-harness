@@ -114,28 +114,15 @@ public class FallbackConfig extends AbstractModule {
         String display = getBrowserDisplay();
         switch (browser) {
         case "firefox":
-            FirefoxOptions firefoxOptions = new FirefoxOptions();
-            firefoxOptions.addPreference(LANGUAGE_SELECTOR, "en");
-            // Config screen with many plugins can cause FF to complain JS takes too long to complete - set longer timeout
-            firefoxOptions.addPreference(DOM_MAX_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
-            firefoxOptions.addPreference(DOM_MAX_CHROME_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
-            firefoxOptions.addPreference(DOM_DISABLE_BEFOREUNLOAD, false);
-            if (isCaptureHarEnabled()) {
-                firefoxOptions.setProxy(createSeleniumProxy(testName.get()));
-            }
             setDriverPropertyIfMissing("geckodriver", GeckoDriverService.GECKO_DRIVER_EXE_PROPERTY);
-            if (System.getenv("FIREFOX_BIN") != null) {
-                firefoxOptions.setBinary(System.getenv("FIREFOX_BIN"));
-            }
-
             GeckoDriverService.Builder builder = new GeckoDriverService.Builder();
             if (display != null) {
                 builder.withEnvironment(Collections.singletonMap("DISPLAY", display));
             }
             GeckoDriverService service = builder.build();
-            return new FirefoxDriver(service, firefoxOptions);
+            return new FirefoxDriver(service, buildFirefoxOptions(testName));
         case "firefox-container":
-            return createContainerWebDriver(cleaner, "selenium/standalone-firefox-debug:3.141.59", new FirefoxOptions());
+            return createContainerWebDriver(cleaner, "selenium/standalone-firefox-debug:3.141.59", buildFirefoxOptions(testName));
         case "chrome-container":
             return createContainerWebDriver(cleaner, "selenium/standalone-chrome-debug:3.141.59", new ChromeOptions());
         case "ie":
@@ -184,11 +171,9 @@ public class FallbackConfig extends AbstractModule {
             if (StringUtils.isBlank(u)) {
                 throw new Error("remote-webdriver-firefox requires REMOTE_WEBDRIVER_URL to be set");
             }
-            DesiredCapabilities capabilitiesFirefox = DesiredCapabilities.firefox();
-            capabilitiesFirefox.setCapability(DOM_DISABLE_BEFOREUNLOAD, false);
             return new RemoteWebDriver(
                     new URL(u), //http://192.168.99.100:4444/wd/hub
-                    capabilitiesFirefox
+                    buildFirefoxOptions(testName)
             );
         case "remote-webdriver-chrome":
             u = System.getenv("REMOTE_WEBDRIVER_URL");
@@ -202,6 +187,22 @@ public class FallbackConfig extends AbstractModule {
         default:
             throw new Error("Unrecognized browser type: "+browser);
         }
+    }
+
+    private FirefoxOptions buildFirefoxOptions(TestName testName) {
+        FirefoxOptions firefoxOptions = new FirefoxOptions();
+        firefoxOptions.addPreference(LANGUAGE_SELECTOR, "en");
+        // Config screen with many plugins can cause FF to complain JS takes too long to complete - set longer timeout
+        firefoxOptions.addPreference(DOM_MAX_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
+        firefoxOptions.addPreference(DOM_MAX_CHROME_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
+        firefoxOptions.addPreference(DOM_DISABLE_BEFOREUNLOAD, false);
+        if (isCaptureHarEnabled()) {
+            firefoxOptions.setProxy(createSeleniumProxy(testName.get()));
+        }
+        if (System.getenv("FIREFOX_BIN") != null) {
+            firefoxOptions.setBinary(System.getenv("FIREFOX_BIN"));
+        }
+        return firefoxOptions;
     }
 
     private WebDriver createContainerWebDriver(TestCleaner cleaner, String image, MutableCapabilities capabilities) throws IOException {
