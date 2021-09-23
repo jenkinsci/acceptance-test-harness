@@ -148,6 +148,7 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
         l.host.set("127.0.0.1");
 
         l.credentialsId.select(String.format("%s (%s)", username, description));
+        s.save();
     }
 
     private void verifyValueForCredential(CredentialsPage cp, Control element, String expected) {

@@ -41,6 +41,7 @@ public class MailerPluginTest extends AbstractJUnitTest {
                 Pattern.compile("Test email #1"),
                 "admin@example.com",
                 Pattern.compile("This is test email #1 sent from Jenkins"));
+        jenkins.save();
     }
 
     @Test
