@@ -59,5 +59,6 @@ public class PublisherOrderTest extends AbstractJUnitTest {
         archiver.includes("another.txt");
         JUnitPublisher junit = upstream.addPublisher(JUnitPublisher.class);
         fingerprint.targets.set("yetanother");
+        upstream.save();
     }
 }
