@@ -29,6 +29,7 @@ import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.guice.TestCleaner;
 import org.jenkinsci.test.acceptance.guice.TestName;
 import org.jenkinsci.test.acceptance.guice.TestScope;
+import org.jenkinsci.test.acceptance.junit.Wait;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.recorder.HarRecorder;
 import org.jenkinsci.test.acceptance.selenium.Scroller;
@@ -107,9 +108,7 @@ public class FallbackConfig extends AbstractModule {
     }
 
     private WebDriver createWebDriver(TestCleaner cleaner, TestName testName) throws IOException {
-        String browser = System.getenv("BROWSER");
-        if (browser==null) browser = "firefox";
-        browser = browser.toLowerCase(Locale.ENGLISH);
+        String browser = getBrowser();
 
         String display = getBrowserDisplay();
         switch (browser) {
@@ -187,6 +186,13 @@ public class FallbackConfig extends AbstractModule {
         default:
             throw new Error("Unrecognized browser type: "+browser);
         }
+    }
+
+    private String getBrowser() {
+        String browser = System.getenv("BROWSER");
+        if (browser==null) browser = "firefox";
+        browser = browser.toLowerCase(Locale.ENGLISH);
+        return browser;
     }
 
     private FirefoxOptions buildFirefoxOptions(TestName testName) {
@@ -330,19 +336,29 @@ public class FallbackConfig extends AbstractModule {
         cleaner.addTask(new Statement() {
             @Override
             public void evaluate() {
-                String browser = System.getenv("BROWSER");
-                if(browser == null || browser.equals("firefox")) {
-                    //https://github.com/mozilla/geckodriver/issues/1151
-                    //https://bugzilla.mozilla.org/show_bug.cgi?id=1264259
-                    //https://bugzilla.mozilla.org/show_bug.cgi?id=1434872
-                    d.navigate().to("about:mozilla");
-                    Alert alert = ExpectedConditions.alertIsPresent().apply(d);
-                    if (alert != null) {
-                        alert.accept();
-                        d.navigate().refresh();
-                    }
-                }
+                switch(getBrowser()) {
+                    case "firefox":
+                    case "saucelabs-firefox":
+                    case "remote-webdriver-firefox":
+                        //https://github.com/mozilla/geckodriver/issues/1151
+                        //https://bugzilla.mozilla.org/show_bug.cgi?id=1264259
+                        //https://bugzilla.mozilla.org/show_bug.cgi?id=1434872
+                        d.navigate().to("about:mozilla");
 
+                        String oldWindow = d.getWindowHandle();
+                        Wait<EventFiringWebDriver> wait = new Wait<>(d, time)
+                                .pollingEvery(500, TimeUnit.MILLISECONDS)
+                                .withTimeout(10, TimeUnit.SECONDS);
+                        Alert alert = wait.until(ExpectedConditions.alertIsPresent());
+                        if (alert != null) {
+                            try {
+                                alert.accept();
+                                d.navigate().refresh();
+                            } finally {
+                                d.switchTo().window(oldWindow);
+                            }
+                        }
+                }
                 d.quit();
             }
 
