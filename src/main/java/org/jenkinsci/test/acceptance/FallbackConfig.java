@@ -344,19 +344,10 @@ public class FallbackConfig extends AbstractModule {
                         //https://bugzilla.mozilla.org/show_bug.cgi?id=1264259
                         //https://bugzilla.mozilla.org/show_bug.cgi?id=1434872
                         d.navigate().to("about:mozilla");
-
-                        String oldWindow = d.getWindowHandle();
-                        Wait<EventFiringWebDriver> wait = new Wait<>(d, time)
-                                .pollingEvery(500, TimeUnit.MILLISECONDS)
-                                .withTimeout(10, TimeUnit.SECONDS);
-                        Alert alert = wait.until(ExpectedConditions.alertIsPresent());
+                        Alert alert = ExpectedConditions.alertIsPresent().apply(d);
                         if (alert != null) {
-                            try {
-                                alert.accept();
-                                d.navigate().refresh();
-                            } finally {
-                                d.switchTo().window(oldWindow);
-                            }
+                            alert.accept();
+                            d.navigate().refresh();
                         }
                 }
                 d.quit();
