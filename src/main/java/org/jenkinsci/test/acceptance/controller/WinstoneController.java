@@ -31,7 +31,7 @@ public class WinstoneController extends LocalController {
     // options to the JVM that can be added on a testcase basis in code
     private final List<String> JAVA_OPTS = new ArrayList<>();
 
-    private static List<String> envVarOpts(String jenkins_opts) {
+    protected static List<String> envVarOpts(String jenkins_opts) {
         String getenv = System.getenv(jenkins_opts);
         if (getenv == null) return Collections.emptyList();
         return Arrays.asList(getenv.split("\\s+"));
