@@ -1,7 +1,9 @@
 package plugins;
 
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.regex.Pattern;
 
 import com.google.inject.Inject;
@@ -102,8 +104,8 @@ public class OwnershipPluginTest extends AbstractJUnitTest {
         assertThat(currentUrl(), equalTo(job.url));
     }
 
-    private URL currentUrl() throws MalformedURLException {
-        return new URL(driver.getCurrentUrl());
+    private URL currentUrl() throws MalformedURLException, UnsupportedEncodingException {
+        return new URL(URLDecoder.decode(driver.getCurrentUrl(), "UTF-8"));
     }
 
     private void own(ContainerPageObject item, User user) {
