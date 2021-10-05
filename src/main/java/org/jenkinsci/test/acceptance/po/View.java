@@ -137,7 +137,7 @@ public abstract class View extends ContainerPageObject {
     }
 
     public static Matcher<View> containsImage(String imageName) {
-        return new Matcher<View>("Contains ToolTip " + imageName) {
+        return new Matcher<View>("Contains image " + imageName) {
             @Override
             public boolean matchesSafely(View item) {
                 WebElement webElement = item.getElement(By.xpath("//img[contains(@src, '" + imageName + "')]"));
