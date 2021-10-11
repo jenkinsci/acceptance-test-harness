@@ -43,7 +43,7 @@ public class WinstoneController extends LocalController {
         }
     }
 
-    private final int httpPort;
+    protected final int httpPort;
 
     @Inject
     public WinstoneController(Injector i) {
