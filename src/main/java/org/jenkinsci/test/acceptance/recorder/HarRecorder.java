@@ -13,7 +13,7 @@ import org.junit.runner.Description;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
-
+import java.net.InetAddress;
 import static org.jenkinsci.test.acceptance.recorder.HarRecorder.State.*;
 
 /**
@@ -68,7 +68,11 @@ public class HarRecorder extends TestWatcher {
 
     private static BrowserUpProxy proxy;
 
-    public static BrowserUpProxy getProxy() {
+    /**
+     * Create a proxy to record the HAR listening on the specified address
+     * @param listenAddress the specific address to bind to, or {@code null} to bind on all addresses
+     */
+    public static BrowserUpProxy getProxy(InetAddress networkAddress) {
         if (proxy == null) {
             // start the proxy
             proxy = new BrowserUpProxyServer();
@@ -80,7 +84,7 @@ public class HarRecorder extends TestWatcher {
                     CaptureType.RESPONSE_CONTENT
             );
             proxy.setTrustAllServers(true);
-            proxy.start();
+            proxy.start(0, networkAddress);
         }
         return proxy;
     }

@@ -5,7 +5,9 @@ import javax.inject.Named;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -195,7 +197,7 @@ public class FallbackConfig extends AbstractModule {
         return browser;
     }
 
-    private FirefoxOptions buildFirefoxOptions(TestName testName) {
+    private FirefoxOptions buildFirefoxOptions(TestName testName) throws IOException {
         FirefoxOptions firefoxOptions = new FirefoxOptions();
         firefoxOptions.addPreference(LANGUAGE_SELECTOR, "en");
         // Config screen with many plugins can cause FF to complain JS takes too long to complete - set longer timeout
@@ -267,10 +269,17 @@ public class FallbackConfig extends AbstractModule {
         }
     }
 
-    private Proxy createSeleniumProxy(String testName) {
-        BrowserUpProxy proxy = HarRecorder.getProxy();
+    private Proxy createSeleniumProxy(String testName) throws UnknownHostException {
+        // if we are running maven locally but the browser elsewhere (e.g. docker) using the "127.0.0.1"
+        // address will not work for the browser
+        String name = System.getenv("SELENIUM_PROXY_HOSTNAME");
+        InetAddress proxyAddr = null;
+        if (name != null) {
+            proxyAddr = InetAddress.getByName(name);
+        }
+        BrowserUpProxy proxy = HarRecorder.getProxy(proxyAddr);
         proxy.newHar(testName);
-        return ClientUtil.createSeleniumProxy(proxy);
+        return ClientUtil.createSeleniumProxy(proxy, proxyAddr);
     }
 
     private void setDriverPropertyIfMissing(final String driverCommand, final String property) {
