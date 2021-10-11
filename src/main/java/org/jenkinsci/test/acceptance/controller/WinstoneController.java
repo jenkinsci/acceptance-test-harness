@@ -47,8 +47,12 @@ public class WinstoneController extends LocalController {
 
     @Inject
     public WinstoneController(Injector i) {
+        this(i, IOUtil.randomTcpPort());
+    }
+
+    public WinstoneController(Injector i, int httpPort) {
         super(i);
-        httpPort = IOUtil.randomTcpPort();
+        this.httpPort = httpPort;
     }
 
     @Override
