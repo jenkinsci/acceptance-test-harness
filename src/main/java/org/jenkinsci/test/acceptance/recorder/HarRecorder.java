@@ -84,6 +84,7 @@ public class HarRecorder extends TestWatcher {
                     CaptureType.RESPONSE_CONTENT
             );
             proxy.setTrustAllServers(true);
+            proxy.setMitmDisabled(true);
             proxy.start(0, networkAddress);
         }
         return proxy;
