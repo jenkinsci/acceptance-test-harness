@@ -68,6 +68,11 @@ It can also be set to save results even on success using
 
     RECORD_BROWSER_TRAFFIC=always mvn install
 
+If the host running maven is different to the host running Selenium (e.g. `remote-webdriver-selenium`) then you may have to specify the network address to use for the proxy (by default it will bind to 127.0.0.1 which would not be reachable for the browser).
+If this is the case you can specify the address to use using:
+    `SELENIUM_PROXY_HOSTNAME=ip.address.of.host mvn install`
+**Important**: this could exposed the proxy wider beyond your machine and expose other internal services, so this should only be used on private or internal networks to prevent any information leak.
+
 ## Avoid focus steal with Xvnc on Linux
 If you select a real GUI browser, such as Firefox,
 a browser window will pop up left and right during tests,

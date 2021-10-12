@@ -74,7 +74,7 @@ public class ArtifactResolverUtil {
     public ArtifactResult resolve(DefaultArtifact artifact) {
         Builder repoBuilder = new RemoteRepository.Builder(
                 "repo.jenkins-ci.org", "default",
-                "http://repo.jenkins-ci.org/public/");
+                "https://repo.jenkins-ci.org/public/");
 
         DefaultSettingsBuildingRequest request = new DefaultSettingsBuildingRequest();
 

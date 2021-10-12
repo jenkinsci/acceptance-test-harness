@@ -40,5 +40,5 @@ public class XUnitPluginTest extends AbstractJUnitTest {
         find(TEST_RESULT_TREND_CHART);
     }
 
-    public static final By TEST_RESULT_TREND_CHART = by.xpath("//img[@alt='[Test result trend chart]']");
+    public static final By TEST_RESULT_TREND_CHART = by.css(".test-trend-caption");
 }

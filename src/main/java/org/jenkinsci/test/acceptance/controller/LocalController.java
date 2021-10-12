@@ -1,5 +1,6 @@
 package org.jenkinsci.test.acceptance.controller;
 
+import java.util.logging.Level;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -283,15 +284,19 @@ public abstract class LocalController extends JenkinsController implements LogLi
     @Override
     public void tearDown(){
         try {
-            FileUtils.forceDelete(jenkinsHome);
+            if (jenkinsHome.exists()) {
+                FileUtils.forceDelete(jenkinsHome);
+            }
         } catch (IOException e) {
-            System.out.println("Cleaning up temporary JENKINS_HOME failed, retrying in 5 sec.");
+            LOGGER.log(Level.WARNING, "Cleaning up temporary JENKINS_HOME failed, retrying in 5 sec.", e);
             //maybe process is shutting down, wait for a sec then try again
             try {
                 Thread.sleep(5000);
-                FileUtils.forceDelete(jenkinsHome);
+                if (jenkinsHome.exists()) {
+                    FileUtils.forceDelete(jenkinsHome);
+                }
             } catch (InterruptedException | IOException e1) {
-                System.out.println("Cleaning up temporary JENKINS_HOME failed again, giving up.");
+                LOGGER.log(Level.WARNING, "Cleaning up temporary JENKINS_HOME failed again, giving up.");
                 throw new RuntimeException(e);
             }
         }

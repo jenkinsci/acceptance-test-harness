@@ -24,7 +24,7 @@ RUN curl -fsSLO https://github.com/mozilla/geckodriver/releases/download/v0.26.0
     tar -xvzf geckodriver-v0.26.0-linux64.tar.gz -C /usr/local/bin
 
 # Maven in repo is not new enough for ATH
-ENV MAVEN_VERSION 3.6.3
+ENV MAVEN_VERSION 3.8.3
 RUN curl -ffSLO https://archive.apache.org/dist/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz && \
     tar -xvzf apache-maven-$MAVEN_VERSION-bin.tar.gz -C /opt/ && \
     mv /opt/apache-maven-* /opt/maven
@@ -33,9 +33,9 @@ ENV PATH="$PATH:/opt/maven/bin"
 ENV SHARED_DOCKER_SERVICE true
 
 # Allow injecting uid and git to match directory ownership
-ARG uid=1000
+ARG uid=1001
 ENV uid $uid
-ARG gid=1000
+ARG gid=1001
 ENV gid $gid
 
 EXPOSE 5942

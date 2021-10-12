@@ -29,8 +29,7 @@ import org.jenkinsci.test.acceptance.po.FormValidation;
 import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.jenkinsci.test.acceptance.po.ListView;
 import org.junit.Test;
-import org.openqa.selenium.HasCapabilities;
-import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.Alert;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -43,6 +42,7 @@ public class FormValidationTest extends AbstractJUnitTest {
         ajaxValidation();
         navigateAway();
         jsValidation();
+        navigateAway();
     }
 
     private void ajaxValidation() {
@@ -67,26 +67,12 @@ public class FormValidationTest extends AbstractJUnitTest {
         formValidation = c.numExecutors.getFormValidation();
 
         //support older jenkins versions
-        String errorMessage = jenkins.getVersion().isNewerThan(new VersionNumber("2.104")) ? "Not a non-negative number": "Not an integer";
+        String errorMessage = jenkins.getVersion().isNewerThan(new VersionNumber("2.295")) ? "Not a non-negative integer": "Not a non-negative number";
         assertThat(formValidation, reports(Kind.ERROR, errorMessage));
     }
 
     private void navigateAway() {
-        try {
-            jenkins.runThenConfirmAlert(() -> jenkins.open());
-        } catch (TimeoutException tex) {
-            // https://issues.jenkins.io/browse/JENKINS-65016
-            if (driver instanceof HasCapabilities) {
-                HasCapabilities caps = (HasCapabilities) driver;
-                String browser = caps.getCapabilities().getBrowserName();
-                if (browser.contains("firefox")) {
-                    System.err.println("Ignoring lack of confirmation prompt in Firefox due to https://bugzilla.mozilla.org/show_bug.cgi?id=1693857");
-                    tex.printStackTrace();
-                    return;
-                }
-            }
-            throw tex;
-        }
+        jenkins.runThenConfirmAlert(() -> jenkins.open());
         sleep(1000); // Needed for some reason
     }
 }

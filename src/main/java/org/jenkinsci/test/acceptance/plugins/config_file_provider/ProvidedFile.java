@@ -23,8 +23,10 @@
  */
 package org.jenkinsci.test.acceptance.plugins.config_file_provider;
 
+import hudson.util.VersionNumber;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.PageObject;
+import org.openqa.selenium.WebElement;
 
 /**
  * Abstract class for files provided by {@link ConfigFileProvider}.
@@ -56,10 +58,5 @@ public abstract class ProvidedFile extends PageObject {
         clickButton("Submit");
     }
 
-    public void remove() {
-        visit(url("removeConfig?id=" + this.fileId));
-    }
-
     public abstract void content(String content);
-
 }

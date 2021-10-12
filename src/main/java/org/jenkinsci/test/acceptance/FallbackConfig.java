@@ -5,7 +5,9 @@ import javax.inject.Named;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -29,6 +31,7 @@ import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.guice.TestCleaner;
 import org.jenkinsci.test.acceptance.guice.TestName;
 import org.jenkinsci.test.acceptance.guice.TestScope;
+import org.jenkinsci.test.acceptance.junit.Wait;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.recorder.HarRecorder;
 import org.jenkinsci.test.acceptance.selenium.Scroller;
@@ -96,6 +99,7 @@ public class FallbackConfig extends AbstractModule {
 
     public static final String DOM_MAX_SCRIPT_RUN_TIME = "dom.max_script_run_time";
     public static final String DOM_MAX_CHROME_SCRIPT_RUN_TIME = "dom.max_chrome_script_run_time";
+    public static final String DOM_DISABLE_BEFOREUNLOAD = "dom.disable_beforeunload";
     public static final int PAGE_LOAD_TIMEOUT = 30;
     public static final int IMPLICIT_WAIT_TIMEOUT = 1;
 
@@ -106,34 +110,20 @@ public class FallbackConfig extends AbstractModule {
     }
 
     private WebDriver createWebDriver(TestCleaner cleaner, TestName testName) throws IOException {
-        String browser = System.getenv("BROWSER");
-        if (browser==null) browser = "firefox";
-        browser = browser.toLowerCase(Locale.ENGLISH);
+        String browser = getBrowser();
 
         String display = getBrowserDisplay();
         switch (browser) {
         case "firefox":
-            FirefoxOptions firefoxOptions = new FirefoxOptions();
-            firefoxOptions.addPreference(LANGUAGE_SELECTOR, "en");
-            // Config screen with many plugins can cause FF to complain JS takes too long to complete - set longer timeout
-            firefoxOptions.addPreference(DOM_MAX_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
-            firefoxOptions.addPreference(DOM_MAX_CHROME_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
-            if (isCaptureHarEnabled()) {
-                firefoxOptions.setProxy(createSeleniumProxy(testName.get()));
-            }
             setDriverPropertyIfMissing("geckodriver", GeckoDriverService.GECKO_DRIVER_EXE_PROPERTY);
-            if (System.getenv("FIREFOX_BIN") != null) {
-                firefoxOptions.setBinary(System.getenv("FIREFOX_BIN"));
-            }
-
             GeckoDriverService.Builder builder = new GeckoDriverService.Builder();
             if (display != null) {
                 builder.withEnvironment(Collections.singletonMap("DISPLAY", display));
             }
             GeckoDriverService service = builder.build();
-            return new FirefoxDriver(service, firefoxOptions);
+            return new FirefoxDriver(service, buildFirefoxOptions(testName));
         case "firefox-container":
-            return createContainerWebDriver(cleaner, "selenium/standalone-firefox-debug:3.141.59", new FirefoxOptions());
+            return createContainerWebDriver(cleaner, "selenium/standalone-firefox-debug:3.141.59", buildFirefoxOptions(testName));
         case "chrome-container":
             return createContainerWebDriver(cleaner, "selenium/standalone-chrome-debug:3.141.59", new ChromeOptions());
         case "ie":
@@ -184,7 +174,7 @@ public class FallbackConfig extends AbstractModule {
             }
             return new RemoteWebDriver(
                     new URL(u), //http://192.168.99.100:4444/wd/hub
-                    DesiredCapabilities.firefox()
+                    buildFirefoxOptions(testName)
             );
         case "remote-webdriver-chrome":
             u = System.getenv("REMOTE_WEBDRIVER_URL");
@@ -198,6 +188,29 @@ public class FallbackConfig extends AbstractModule {
         default:
             throw new Error("Unrecognized browser type: "+browser);
         }
+    }
+
+    private String getBrowser() {
+        String browser = System.getenv("BROWSER");
+        if (browser==null) browser = "firefox";
+        browser = browser.toLowerCase(Locale.ENGLISH);
+        return browser;
+    }
+
+    private FirefoxOptions buildFirefoxOptions(TestName testName) throws IOException {
+        FirefoxOptions firefoxOptions = new FirefoxOptions();
+        firefoxOptions.addPreference(LANGUAGE_SELECTOR, "en");
+        // Config screen with many plugins can cause FF to complain JS takes too long to complete - set longer timeout
+        firefoxOptions.addPreference(DOM_MAX_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
+        firefoxOptions.addPreference(DOM_MAX_CHROME_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
+        firefoxOptions.addPreference(DOM_DISABLE_BEFOREUNLOAD, false);
+        if (isCaptureHarEnabled()) {
+            firefoxOptions.setProxy(createSeleniumProxy(testName.get()));
+        }
+        if (System.getenv("FIREFOX_BIN") != null) {
+            firefoxOptions.setBinary(System.getenv("FIREFOX_BIN"));
+        }
+        return firefoxOptions;
     }
 
     private WebDriver createContainerWebDriver(TestCleaner cleaner, String image, MutableCapabilities capabilities) throws IOException {
@@ -256,10 +269,17 @@ public class FallbackConfig extends AbstractModule {
         }
     }
 
-    private Proxy createSeleniumProxy(String testName) {
-        BrowserUpProxy proxy = HarRecorder.getProxy();
+    private Proxy createSeleniumProxy(String testName) throws UnknownHostException {
+        // if we are running maven locally but the browser elsewhere (e.g. docker) using the "127.0.0.1"
+        // address will not work for the browser
+        String name = System.getenv("SELENIUM_PROXY_HOSTNAME");
+        InetAddress proxyAddr = null;
+        if (name != null) {
+            proxyAddr = InetAddress.getByName(name);
+        }
+        BrowserUpProxy proxy = HarRecorder.getProxy(proxyAddr);
         proxy.newHar(testName);
-        return ClientUtil.createSeleniumProxy(proxy);
+        return ClientUtil.createSeleniumProxy(proxy, proxyAddr);
     }
 
     private void setDriverPropertyIfMissing(final String driverCommand, final String property) {
@@ -325,19 +345,20 @@ public class FallbackConfig extends AbstractModule {
         cleaner.addTask(new Statement() {
             @Override
             public void evaluate() {
-                String browser = System.getenv("BROWSER");
-                if(browser == null || browser.equals("firefox")) {
-                    //https://github.com/mozilla/geckodriver/issues/1151
-                    //https://bugzilla.mozilla.org/show_bug.cgi?id=1264259
-                    //https://bugzilla.mozilla.org/show_bug.cgi?id=1434872
-                    d.navigate().to("about:mozilla");
-                    Alert alert = ExpectedConditions.alertIsPresent().apply(d);
-                    if (alert != null) {
-                        alert.accept();
-                        d.navigate().refresh();
-                    }
+                switch(getBrowser()) {
+                    case "firefox":
+                    case "saucelabs-firefox":
+                    case "remote-webdriver-firefox":
+                        //https://github.com/mozilla/geckodriver/issues/1151
+                        //https://bugzilla.mozilla.org/show_bug.cgi?id=1264259
+                        //https://bugzilla.mozilla.org/show_bug.cgi?id=1434872
+                        d.navigate().to("about:mozilla");
+                        Alert alert = ExpectedConditions.alertIsPresent().apply(d);
+                        if (alert != null) {
+                            alert.accept();
+                            d.navigate().refresh();
+                        }
                 }
-
                 d.quit();
             }
 

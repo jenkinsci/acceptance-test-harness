@@ -35,7 +35,7 @@ for (int i = 0; i < splits.size(); i++) {
             stage(name) {
                 node('docker && highmem') {
                     checkout scm
-                    def image = docker.build('jenkins/ath', "src/main/resources/ath-container")
+                    def image = docker.build('jenkins/ath', '--build-arg uid="$(id -u)" --build-arg gid="$(id -g)" ./src/main/resources/ath-container/')
                     image.inside('-v /var/run/docker.sock:/var/run/docker.sock --shm-size 2g') {
                         def exclusions = splits.get(index).join("\n")
                         writeFile file: 'excludes.txt', text: exclusions

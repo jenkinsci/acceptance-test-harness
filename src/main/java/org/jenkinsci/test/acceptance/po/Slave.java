@@ -76,8 +76,8 @@ public class Slave extends Node {
 
                 StringBuilder sb = new StringBuilder(".*");
                 for (Job j: jobs) {
-                    sb.insert(0, j.name);
-                    sb.insert(0, ".*");
+                    sb.append(j.name);
+                    sb.append(".*");
                 }
 
                 return Pattern.compile(sb.toString(), Pattern.DOTALL)
