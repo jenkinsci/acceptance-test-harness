@@ -45,7 +45,7 @@ public class NodeParameter extends Parameter {
 
     public List<String> applicableNodes() {
         List<String> nodes = new ArrayList<>();
-        for (WebElement slave: control("labels").resolve().findElements(by.tagName("option"))) {
+        for (WebElement slave: control("value").resolve().findElements(by.tagName("option"))) {
             nodes.add(slave.getText());
         }
         return nodes;

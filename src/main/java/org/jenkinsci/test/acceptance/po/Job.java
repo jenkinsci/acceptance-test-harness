@@ -366,9 +366,7 @@ public class Job extends TopLevelItem {
 
         control(by.xpath("//button[text()='Add Parameter']")).selectDropdownMenu(type);
 
-//        find(xpath("//button[text()='Add Parameter']")).click();
-//        find(xpath("//a[text()='%s']",displayName)).click();
-
+        // TODO selectDropdownMenu should not need this sleep - try and remove it
         elasticSleep(500);
 
         // /properties/hudson-model-ParametersDefinitionProperty/parameterDefinitions  for the first
@@ -379,6 +377,11 @@ public class Job extends TopLevelItem {
 
         Pattern pattern = Pattern.compile("^(/properties/hudson-model-ParametersDefinitionProperty/parameterDefinitions([^/]*))(/.*)?$");
         Matcher m = pattern.matcher(path);
+        // for some as yet unknown reason the matcher sometimes failed to match throwing an illegalStateException with no information to help diagnose
+        // after I added this I never reproduced the issue - but still having what failed to match will at least help in the future
+        if (!m.matches()) {
+            throw new IllegalStateException("No match for path in regexp : " + path);
+        }
         path = m.group(1);
 
         T p = newInstance(type, this, path);
