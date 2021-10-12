@@ -1,9 +1,7 @@
 // For ci.jenkins.io
 // https://github.com/jenkins-infra/documentation/blob/master/ci.adoc
 
-for (int i = 0; i < (BUILD_NUMBER as int); i++) {
-    milestone()
-}
+milestone label: 'build it', ordinal: BUILD_NUMBER
 
 def branches = [:]
 def splits
