@@ -1,7 +1,11 @@
 // For ci.jenkins.io
 // https://github.com/jenkins-infra/documentation/blob/master/ci.adoc
 
-milestone label: 'build it', ordinal: BUILD_NUMBER
+def buildNumber = BUILD_NUMBER as int
+if (buildNumber > 1) {
+    milestone ordinal: (buildNumber - 1)
+}
+milestone ordinal: buildNumber
 
 def branches = [:]
 def splits
