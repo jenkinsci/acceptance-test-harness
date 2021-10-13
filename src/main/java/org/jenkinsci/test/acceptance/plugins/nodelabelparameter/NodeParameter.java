@@ -7,6 +7,7 @@ import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.Parameter;
+
 import org.openqa.selenium.WebElement;
 
 /**
@@ -14,6 +15,7 @@ import org.openqa.selenium.WebElement;
  */
 @Describable("Node")
 public class NodeParameter extends Parameter {
+
     public final Control runIfSuccess = control("triggerIfResult[success]");
     public final Control runIfUnstable = control("triggerIfResult[unstable]");
     public final Control runAllCases = control("triggerIfResult[allCases]");
@@ -37,13 +39,13 @@ public class NodeParameter extends Parameter {
     @Override
     public void fillWith(Object v) {
         for (String l : v.toString().split(",[ ]?")) {
-            control("labels").select(l);
+            control("value").select(l);
         }
     }
 
     public List<String> applicableNodes() {
         List<String> nodes = new ArrayList<>();
-        for (WebElement slave: control("labels").resolve().findElements(by.tagName("option"))) {
+        for (WebElement slave: control("value").resolve().findElements(by.tagName("option"))) {
             nodes.add(slave.getText());
         }
         return nodes;

@@ -28,6 +28,10 @@ public class BuildHistory extends PageObject {
     public Set<Build> getBuilds() {
         open();
 
+        // build history is progressively rendered so wait until that is complete
+        WebElement progressiveRendering = findIfNotVisible(by.xpath("//table[@title='Computation in progress.']"));
+        waitFor(progressiveRendering).until(we -> !we.isDisplayed());
+
         LinkedHashSet<Build> builds = new LinkedHashSet<Build>();
         for (WebElement element: all(by.xpath("//a[@href][img/@alt = 'Console output']"))) {
             String href = element.getAttribute("href");
@@ -45,8 +49,6 @@ public class BuildHistory extends PageObject {
     }
 
     public Set<Build> getBuildsOf(Job... _jobs) {
-        open();
-
         List<Job> jobs = Arrays.asList(_jobs);
         LinkedHashSet<Build> builds = new LinkedHashSet<Build>();
         for (Build b: getBuilds()) {
