@@ -49,8 +49,6 @@ public class BuildHistory extends PageObject {
     }
 
     public Set<Build> getBuildsOf(Job... _jobs) {
-        open();
-
         List<Job> jobs = Arrays.asList(_jobs);
         LinkedHashSet<Build> builds = new LinkedHashSet<Build>();
         for (Build b: getBuilds()) {
