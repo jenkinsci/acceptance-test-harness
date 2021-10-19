@@ -31,7 +31,7 @@ for (int i = 0; i < splits.size(); i++) {
         def name = "java-${javaVersion}-split${index}"
         branches[name] = {
             stage(name) {
-                node('docker && highmem') {
+                node('docker-highmem') {
                     checkout scm
                     def image = docker.build('jenkins/ath', '--build-arg uid="$(id -u)" --build-arg gid="$(id -g)" ./src/main/resources/ath-container/')
                     image.inside('-v /var/run/docker.sock:/var/run/docker.sock --shm-size 2g') {
