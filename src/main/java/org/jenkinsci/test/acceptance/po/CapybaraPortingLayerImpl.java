@@ -191,7 +191,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
             });
         } catch (NoSuchElementException|TimeoutException x) {
             // this is often the best place to set a breakpoint
-            // Page url is not resent in otherwise verbose message
+            // Page url is not present in otherwise verbose message
             String msg = String.format("Unable to locate %s in %s", selector, driver.getCurrentUrl());
             throw new NoSuchElementException(msg, x);
         }

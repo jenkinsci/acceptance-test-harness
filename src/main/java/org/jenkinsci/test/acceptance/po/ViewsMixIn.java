@@ -1,5 +1,6 @@
 package org.jenkinsci.test.acceptance.po;
 
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
 import java.util.concurrent.Callable;
@@ -30,18 +31,20 @@ public class ViewsMixIn extends MixIn {
 
         // Views contributed by plugins might need some extra time to appear
         WebElement typeRadio = waitFor().withTimeout(5, TimeUnit.SECONDS)
-                .until(new Callable<WebElement>() {
-                    @Override public WebElement call() throws Exception {
-                        visit("newView");
-                        return findCaption(type, finder);
-                    }
-        });
+                .until(() -> {
+                    visit("newView");
+                    return findCaption(type, finder);
+                });
 
         typeRadio.click();
 
         fillIn("name", name);
 
-        clickButton("OK");
+        try {
+            clickButton("Create");
+        } catch (NoSuchElementException e) {
+            clickButton("OK");
+        }
 
         return newInstance(type, injector, url("view/%s/", name));
     }
