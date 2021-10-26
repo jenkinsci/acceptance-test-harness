@@ -26,6 +26,7 @@ package org.jenkinsci.test.acceptance.po;
 import java.net.URL;
 
 import org.jenkinsci.test.acceptance.plugins.authorize_project.BuildAccessControl;
+import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
@@ -92,7 +93,13 @@ public class GlobalSecurityConfig extends ContainerPageObject {
 
         radio.click();
 
-        return newInstance(type, this, radio.getAttribute("path"));
+        try {
+            // from radio label get input contained inside it
+            String path = radio.findElement(By.tagName("input")).getAttribute("path");
+            return newInstance(type, this, path);
+        } catch (NoSuchElementException e) {
+            return newInstance(type, this, radio.getAttribute("path"));
+        }
     }
 
     /**
