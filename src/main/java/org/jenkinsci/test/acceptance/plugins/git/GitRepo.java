@@ -57,7 +57,8 @@ public class GitRepo implements Closeable {
 
     public GitRepo() {
         dir = initDir();
-        git("init", "--initial-branch=master");
+        git("config", "--global", "init.defaultBranch", "master");
+        git("init");
         setIdentity(dir);
     }
 
