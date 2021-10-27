@@ -26,11 +26,11 @@ public class JobDslBuildStep extends AbstractStep implements BuildStep {
     private final Control removedViewAction = control("removedViewAction");
     private final Control removedConfigFilesAction = control("removedConfigFilesAction");
 
-    private final Control advanced = control(by.xpath("//td[table[@class='advancedBody']/tbody/tr/td[@class='setting-main']/select[@name='_.lookupStrategy']]/div[@class='advancedLink']//button"));
+    private final Control advanced = control(by.xpath("//div[div[@class='advancedBody']/div/div/div[@class='setting-main']/select[@name='_.lookupStrategy']]/div[@class='advancedLink']//button"));
 
     private final Control lookupStrategy = control("lookupStrategy");
     private final Control additionalClasspath = control("additionalClasspath");
-    private final Control expandClasspathArea = control(by.xpath("//tr[td/input[@id='textarea._.additionalClasspath' and @name='_.additionalClasspath']]//input[@type='button']"));
+    private final Control expandClasspathArea = control(by.xpath("//div[div/input[@id='textarea._.additionalClasspath' and @name='_.additionalClasspath']]//input[@type='button']"));
 
     private final Control failOnMissingPlugin = control("failOnMissingPlugin");
     private final Control unstableOnDeprecation = control("unstableOnDeprecation");

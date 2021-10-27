@@ -107,7 +107,7 @@ public class LogParserTest extends AbstractJUnitTest {
         WebElement logParserSummary = findLogParserSummary(tableRow);
 
         WebElement icon = logParserSummary.findElement(By.xpath("td[1]/img"));
-        assertThat(icon.getAttribute("src"), containsString("graph.png"));
+        assertThat(icon.getAttribute("src"), containsString("graph"));
         WebElement text = logParserSummary.findElement(By.xpath("td[2]"));
         assertThat(text.getText(), is("Log parsing has failed"));
 
@@ -121,7 +121,7 @@ public class LogParserTest extends AbstractJUnitTest {
     private WebElement findLogParserSummary(WebElement buildSummary){
         for(WebElement element : buildSummary.findElements(By.tagName("tr"))){
             List<WebElement> icons = element.findElements(By.xpath("td[1]/img"));
-            if(!icons.isEmpty() && icons.get(0).getAttribute("src").contains("graph.png")){
+            if(!icons.isEmpty() && icons.get(0).getAttribute("src").contains("graph")){
                 return element;
             }
         }
