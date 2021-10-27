@@ -2,6 +2,7 @@ package org.jenkinsci.test.acceptance.plugins.job_dsl;
 
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.test.acceptance.po.*;
+import org.openqa.selenium.By;
 
 /**
  * Encapsulates the PageArea of the Job DSL plugin.
@@ -16,7 +17,7 @@ public class JobDslBuildStep extends AbstractStep implements BuildStep {
     private final Control lookOnFilesystem = control(by.radioButton("Look on Filesystem"));
 
     private final Control targets = control("targets");
-    private final Control expandTargetsArea = control(by.xpath("//tr[td/input[@id='textarea._.targets' and @name='_.targets']]//input[@type='button']"));
+    private final Control expandTargetsArea = control(by.xpath("//div[div/input[@id='textarea._.targets' and @name='_.targets']]//input[@type='button']"));
     private final Control ignoreMissingFiles = control("ignoreMissingFiles");
 
     private final Control useSandbox = control("sandbox");
@@ -86,7 +87,7 @@ public class JobDslBuildStep extends AbstractStep implements BuildStep {
      * @return TRUE if radiobutton useScriptText is selected
      */
     public boolean isUseScriptText() {
-        return useScriptText.resolve().isSelected();
+        return useScriptText.resolve().findElement(by.tagName("input")).isSelected();
     }
 
     /**
@@ -101,7 +102,7 @@ public class JobDslBuildStep extends AbstractStep implements BuildStep {
      * @return TRUE if radiobutton lookOnFilesystem is selected
      */
     public boolean isLookOnFilesystem() {
-        return lookOnFilesystem.resolve().isSelected();
+        return lookOnFilesystem.resolve().findElement(by.tagName("input")).isSelected();
     }
 
     /**
