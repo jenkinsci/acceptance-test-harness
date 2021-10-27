@@ -3,6 +3,7 @@ package org.jenkinsci.test.acceptance.po;
 import org.jenkinsci.test.acceptance.plugins.ldap.LdapDetails;
 import org.jenkinsci.test.acceptance.plugins.ldap.LdapEnvironmentVariable;
 import org.jenkinsci.test.acceptance.plugins.ldap.LdapGroupMembershipStrategy;
+import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
@@ -72,7 +73,14 @@ public class LdapSecurityRealm<T extends LdapGroupMembershipStrategy> extends Se
             }
         });
         radio.click();
-        return newInstance(type, this.context, radio.getAttribute("path"));
+
+        try {
+            // from radio label get input contained inside it
+            String path = radio.findElement(By.tagName("input")).getAttribute("path");
+            return newInstance(type, this.context, path);
+        } catch (NoSuchElementException e) {
+            return newInstance(type, this.context, radio.getAttribute("path"));
+        }
     }
 
     /**

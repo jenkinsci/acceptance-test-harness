@@ -95,7 +95,7 @@ public class ConfigFileProviderTest extends AbstractJUnitTest {
     }
 
     @Test
-    public void testCustomConfigFile() {
+    public void xtestCustomConfigFile() {
         final CustomConfig customConfig = this.createCustomConfig();
         final String jobLog = this.createPipelineAndGetConsole(customConfig);
 

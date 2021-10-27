@@ -172,7 +172,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         }
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
         job.script.set(
-            "node('master') {\n" +
+            "node('built-in || master') {\n" +
             // TODO could be switched to multibranch, in which case this initial `node` is unnecessary, and each branch can just `checkout scm`
             "  git 'https://github.com/jenkinsci/parallel-test-executor-plugin-sample.git'\n" +
             "  stash 'sources'\n" +
