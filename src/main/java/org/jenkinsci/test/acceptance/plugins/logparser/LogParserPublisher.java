@@ -13,7 +13,7 @@ public class LogParserPublisher extends AbstractStep implements PostBuildStep {
 
     // The available types of rules of the log-parser
     public enum RuleType {
-        PROJECT("true"), GLOBAL("false");
+        PROJECT("Use project rule"), GLOBAL("Use global rule");
         private final String projecttype;
 
         RuleType(String projecttype) {

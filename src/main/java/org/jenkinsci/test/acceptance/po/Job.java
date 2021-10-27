@@ -26,6 +26,7 @@ import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.LocalController;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.junit.internal.AssumptionViolatedException;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.zeroturnaround.zip.ZipUtil;
@@ -81,7 +82,13 @@ public class Job extends TopLevelItem {
 
         check(radio);
 
-        return newInstance(type, this, radio.getAttribute("path"));
+        try {
+            // from radio label get input contained inside it
+            String path = radio.findElement(By.tagName("input")).getAttribute("path");
+            return newInstance(type, this, path);
+        } catch (NoSuchElementException e) {
+            return newInstance(type, this, radio.getAttribute("path"));
+        }
     }
 
     public <T extends BuildStep> T addPreBuildStep(Class<T> type) {
