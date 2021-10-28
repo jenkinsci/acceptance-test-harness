@@ -146,7 +146,7 @@ public class GitRepo implements Closeable {
 
             int r = p.waitFor();
             if (r != 0) {
-                throw new AssertionError(errorMessage);
+                throw new AssertionError(errorMessage + " " + builder);
             }
 
             return builder.toString();
