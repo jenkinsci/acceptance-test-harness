@@ -2,6 +2,7 @@ package org.jenkinsci.test.acceptance.plugins.job_dsl;
 
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.test.acceptance.po.*;
+import org.openqa.selenium.By;
 
 /**
  * Encapsulates the PageArea of the Job DSL plugin.
@@ -16,7 +17,7 @@ public class JobDslBuildStep extends AbstractStep implements BuildStep {
     private final Control lookOnFilesystem = control(by.radioButton("Look on Filesystem"));
 
     private final Control targets = control("targets");
-    private final Control expandTargetsArea = control(by.xpath("//tr[td/input[@id='textarea._.targets' and @name='_.targets']]//input[@type='button']"));
+    private final Control expandTargetsArea = control(by.xpath("//div[div/input[@id='textarea._.targets' and @name='_.targets']]//input[@type='button']"));
     private final Control ignoreMissingFiles = control("ignoreMissingFiles");
 
     private final Control useSandbox = control("sandbox");
@@ -26,11 +27,11 @@ public class JobDslBuildStep extends AbstractStep implements BuildStep {
     private final Control removedViewAction = control("removedViewAction");
     private final Control removedConfigFilesAction = control("removedConfigFilesAction");
 
-    private final Control advanced = control(by.xpath("//td[table[@class='advancedBody']/tbody/tr/td[@class='setting-main']/select[@name='_.lookupStrategy']]/div[@class='advancedLink']//button"));
+    private final Control advanced = control(by.xpath("//div[div[@class='advancedBody']/div/div/div[@class='setting-main']/select[@name='_.lookupStrategy']]/div[@class='advancedLink']//button"));
 
     private final Control lookupStrategy = control("lookupStrategy");
     private final Control additionalClasspath = control("additionalClasspath");
-    private final Control expandClasspathArea = control(by.xpath("//tr[td/input[@id='textarea._.additionalClasspath' and @name='_.additionalClasspath']]//input[@type='button']"));
+    private final Control expandClasspathArea = control(by.xpath("//div[div/input[@id='textarea._.additionalClasspath' and @name='_.additionalClasspath']]//input[@type='button']"));
 
     private final Control failOnMissingPlugin = control("failOnMissingPlugin");
     private final Control unstableOnDeprecation = control("unstableOnDeprecation");
@@ -86,7 +87,7 @@ public class JobDslBuildStep extends AbstractStep implements BuildStep {
      * @return TRUE if radiobutton useScriptText is selected
      */
     public boolean isUseScriptText() {
-        return useScriptText.resolve().isSelected();
+        return useScriptText.resolve().findElement(by.tagName("input")).isSelected();
     }
 
     /**
@@ -101,7 +102,7 @@ public class JobDslBuildStep extends AbstractStep implements BuildStep {
      * @return TRUE if radiobutton lookOnFilesystem is selected
      */
     public boolean isLookOnFilesystem() {
-        return lookOnFilesystem.resolve().isSelected();
+        return lookOnFilesystem.resolve().findElement(by.tagName("input")).isSelected();
     }
 
     /**

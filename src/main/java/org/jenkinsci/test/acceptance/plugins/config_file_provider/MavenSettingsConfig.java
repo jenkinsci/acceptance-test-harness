@@ -7,7 +7,7 @@ import org.jenkinsci.test.acceptance.po.Describable;
 /**
  * Class for Maven Settings files.
  */
-@Describable("org.jenkinsci.plugins.configfiles.maven.MavenSettingsConfig")
+@Describable("Maven settings.xml")
 public class MavenSettingsConfig extends ProvidedFile {
 
     public final Control replaceAll = control("/config/isReplaceAll");

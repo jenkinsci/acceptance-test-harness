@@ -7,7 +7,7 @@ import org.jenkinsci.test.acceptance.po.Describable;
 /**
  * Class for custom config files.
  */
-@Describable("org.jenkinsci.plugins.configfiles.custom.CustomConfig")
+@Describable("Custom file")
 public class CustomConfig extends ProvidedFile {
 
     public CustomConfig(ConfigFileProvider context, String id) {
