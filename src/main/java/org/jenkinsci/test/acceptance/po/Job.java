@@ -371,7 +371,7 @@ public class Job extends TopLevelItem {
 
         control("/properties/hudson-model-ParametersDefinitionProperty/specified").check();
 
-        control(by.xpath("//button[text()='Add Parameter']")).selectDropdownMenu(type);
+        control(by.xpath("//button[normalize-space(.)='Add Parameter']")).selectDropdownMenu(type);
 
         // TODO selectDropdownMenu should not need this sleep - try and remove it
         elasticSleep(500);

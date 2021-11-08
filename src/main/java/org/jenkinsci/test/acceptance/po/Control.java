@@ -235,7 +235,9 @@ public class Control extends CapybaraPortingLayerImpl {
                             ");"
             );
             // we can not use `Select` as these are YUI menus and we need to wait for it to be visible
-            WebElement menu = findElement(menuButton, by.xpath("ancestor::*[contains(@class,'yui-menu-button')]/.."));
+            WebElement menu = findElement(menuButton,
+                    by.xpath("ancestor::*[contains(@class,'jenkins-yui-compat-menu-button')]/.. " +
+                            "| ancestor::*[contains(@class,'yui-menu-button')]/.."));
             WebElement e = findElement(menu, by.link(caption));
             return e;
         }
