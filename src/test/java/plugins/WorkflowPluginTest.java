@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.LocalController;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
@@ -247,11 +248,14 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
                 find(by.button("Save")).click();
             }
             WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
+            String networkOptions = StringUtils.isNotBlank(System.getenv("DOCKER_FIXTURES_NETWORK")) ? " --network=" + System.getenv("DOCKER_FIXTURES_NETWORK") : "";
+            String options = "--link=" + gitContainer.getCid() + ":git" + networkOptions;
+            String repoUrl = StringUtils.isNotBlank(System.getenv("DOCKER_FIXTURES_NETWORK")) ? gitContainer.getRepoUrlInsideDocker() : gitContainer.getRepoUrlInsideDocker("git");
             job.script.set(
                 "node('" + slave.getName() + "') {\n" +
-                "  docker.image('cloudbees/java-build-tools').inside('--link=" + gitContainer.getCid() + ":git') {\n" +
+                "  docker.image('cloudbees/java-build-tools').inside('" + options + "') {\n" +
                 // TODO JENKINS-30600: "    git url: '" + gitContainer.getRepoUrlInsideDocker("git") + "', credentialsId: 'gitcreds'\n" +
-                "    checkout([$class: 'GitSCM', userRemoteConfigs: [[url: '" + gitContainer.getRepoUrlInsideDocker("git") + "', credentialsId: 'gitcreds']], gitTool: 'jgit'])\n" +
+                "    checkout([$class: 'GitSCM', userRemoteConfigs: [[url: '" + repoUrl + "', credentialsId: 'gitcreds']], gitTool: 'jgit'])\n" +
                 "    sh 'mkdir ~/.ssh && echo StrictHostKeyChecking no > ~/.ssh/config'\n" +
                 "    sshagent(['gitcreds']) {sh 'ls -l $SSH_AUTH_SOCK && git pull origin master'}\n" +
                 "  }\n" +
