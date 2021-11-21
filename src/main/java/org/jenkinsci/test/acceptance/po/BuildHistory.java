@@ -33,7 +33,8 @@ public class BuildHistory extends PageObject {
         waitFor(progressiveRendering).until(we -> !we.isDisplayed());
 
         LinkedHashSet<Build> builds = new LinkedHashSet<Build>();
-        for (WebElement element: all(by.xpath("//a[@href][img/@alt = 'Console output']"))) {
+        for (WebElement element: all(by.xpath("//a[@href]/span[text() = 'Console output']/.. | " +
+                "//a[@href][img/@alt = 'Console output']"))) {
             String href = element.getAttribute("href");
             java.util.regex.Matcher matcher = CONSOLE_LINK_PATTERN.matcher(href);
             if (!matcher.find()) throw new RuntimeException(
