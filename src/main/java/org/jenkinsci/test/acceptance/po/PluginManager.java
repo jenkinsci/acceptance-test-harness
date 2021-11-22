@@ -330,7 +330,7 @@ public class PluginManager extends ContainerPageObject {
     public void installPlugin(File localFile) throws IOException {
 
         try (CloseableHttpClient httpclient = new DefaultHttpClient()) {
-            HttpGet getCrumb = null;
+            HttpGet getCrumb;
             try {
                 getCrumb = new HttpGet(jenkins.url("crumbIssuer/api/xml?xpath=/*/crumb/text()").toURI());
             } catch (URISyntaxException e) {
@@ -344,6 +344,7 @@ public class PluginManager extends ContainerPageObject {
             post.addHeader("Jenkins-Crumb",crumbValue);
             HttpEntity e = MultipartEntityBuilder.create()
                     .addBinaryBody("name", localFile, APPLICATION_OCTET_STREAM, "x.jpi")
+                    .addTextBody("pluginUrl", "")
                     .build();
             post.setEntity(e);
 
