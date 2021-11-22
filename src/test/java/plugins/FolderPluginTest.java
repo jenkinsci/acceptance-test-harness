@@ -36,11 +36,12 @@ import org.junit.Test;
 
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalToIgnoringCase;
 import static org.jenkinsci.test.acceptance.Matchers.containsRegexp;
 import static org.jenkinsci.test.acceptance.Matchers.pageObjectDoesNotExist;
 import static org.jenkinsci.test.acceptance.Matchers.pageObjectExists;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -69,7 +70,7 @@ public class FolderPluginTest extends AbstractJUnitTest {
      */
     private void checkFolder(Folder folder, String name) {
         folder.open();
-        MatcherAssert.assertThat(driver, Matchers.hasContent(name));
+        assertThat(driver, Matchers.hasContent(name));
     }
     
     /**
@@ -173,12 +174,12 @@ public class FolderPluginTest extends AbstractJUnitTest {
             assertEquals(expectedExistingViews.length, viewNames.size());
 
             for (final String expectedView : expectedExistingViews) {
-                assertTrue(viewNames.contains(expectedView));
+                assertTrue(viewNames.stream().anyMatch(expectedView::equalsIgnoreCase));
             }
         }
 
         final String activeView = f.getActiveViewName();
-        assertEquals(expectedActiveView, activeView);
+        assertThat(activeView, equalToIgnoringCase(expectedActiveView));
     }
 
     private void createCredentials(final Folder f) {
