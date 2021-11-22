@@ -145,4 +145,16 @@ public abstract class View extends ContainerPageObject {
             }
         };
     }
+
+    public static Matcher<View> containsSvgWithText(String text) {
+        return new Matcher<View>("Contains svg with text " + text) {
+            @Override
+            public boolean matchesSafely(View item) {
+                WebElement webElement = item.getElement(
+                        By.xpath(String.format("//span[@class = 'jenkins-visually-hidden'][text() = '%s']", text))
+                );
+                return webElement != null;
+            }
+        };
+    }
 }

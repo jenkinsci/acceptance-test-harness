@@ -4,22 +4,16 @@ import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.BuildStatisticsPortlet;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.BuildStatisticsPortlet.JobType;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
-import org.jenkinsci.test.acceptance.plugins.dashboard_view.JobsGridPortlet;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.LatestBuildsPortlet;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.TestStatisticsChartPortlet;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.UnstableJobsPortlet;
-import org.jenkinsci.test.acceptance.plugins.dashboard_view.controls.ColumnsArea;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.controls.JobFiltersArea;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.JUnitPublisher;
 import org.jenkinsci.test.acceptance.po.Node;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
-import org.junit.Ignore;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.openqa.selenium.NoSuchElementException;
 
 import javax.inject.Inject;
 import java.awt.image.BufferedImage;
@@ -31,10 +25,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 
 @WithPlugins("dashboard-view")
 public class DashboardViewPluginTest extends AbstractJobRelatedTest {
@@ -346,7 +340,7 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
         assertThat(nameCrumb, is(name));
 
 
-        assertThat(v.mainPanel.getTabName(), is(name));
+        assertThat(v.mainPanel.getTabName(), equalToIgnoringCase(name));
         assertThat(v.mainPanel.getDescription(), is(description));
     }
 

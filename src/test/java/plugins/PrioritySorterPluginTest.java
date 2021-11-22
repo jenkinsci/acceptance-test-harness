@@ -36,8 +36,8 @@ public class PrioritySorterPluginTest extends AbstractJUnitTest {
 
     @Before
     public void setUp() throws Exception {
-        assumeTrue("This test requires a restartable Jenkins", jenkins.canRestart());
-        jenkins.restart(); // Priority sorter plugin needs this
+//        assumeTrue("This test requires a restartable Jenkins", jenkins.canRestart());
+//        jenkins.restart(); // Priority sorter plugin needs this
         slave = slaves.install(jenkins).get();
     }
 
