@@ -72,7 +72,8 @@ public class Slave extends Node {
                 slave.visit("builds");
                 //Jobs table may take a little to be populated, give it some time
                 slave.elasticSleep(2000);
-                String list = slave.find(by.id("projectStatus")).getText();
+                String list = slave.find(by.id("projectStatus")).getText()
+                        .replaceAll("\n", "");
 
                 StringBuilder sb = new StringBuilder(".*");
                 for (Job j: jobs) {
