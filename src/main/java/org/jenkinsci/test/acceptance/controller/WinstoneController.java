@@ -90,6 +90,7 @@ public class WinstoneController extends LocalController {
     @Override
     public ProcessInputStream startProcess() throws IOException{
         portFile = File.createTempFile("jenkins-port", ".txt");
+        portFile.deleteOnExit();
         File javaHome = getJavaHome();
         String java = javaHome == null ? "java" : String.format("%s/bin/java",javaHome.getAbsolutePath());
         CommandBuilder cb = new CommandBuilder(java);
