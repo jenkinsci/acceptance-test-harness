@@ -84,6 +84,24 @@ public class FormElementPath {
     }
 
     private boolean isFormPathElementPluginInstalled(URL url) throws IOException {
-        return true;
+        try (CloseableHttpClient httpClient = HttpClientBuilder.create().build()) {
+            HttpPost post = new HttpPost(new URL(url, "pluginManager/api/json").toExternalForm());
+
+            List<NameValuePair> parameters = new ArrayList<>();
+            parameters.add(new BasicNameValuePair("depth", "1"));
+            parameters.add(new BasicNameValuePair("tree", "plugins[shortName,version]"));
+            UrlEncodedFormEntity entity = new UrlEncodedFormEntity(parameters, "UTF-8");
+            post.setEntity(entity);
+
+            HttpResponse response = httpClient.execute(post, HttpUtils.buildHttpClientContext(url, credentials));
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode != 200) {
+                throw new IOException("Could not check for form-element-path presence, received " + statusCode + ": " + EntityUtils.toString(response.getEntity()));
+            }
+            HttpEntity resEntity = response.getEntity();
+            String responseBody = EntityUtils.toString(resEntity);
+
+            return responseBody.contains("form-element-path");
+        }
     }
 }
