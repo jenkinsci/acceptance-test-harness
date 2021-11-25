@@ -131,19 +131,7 @@ public abstract class LocalController extends JenkinsController implements LogLi
     }
 
     private void installFormElementPath(File pluginDir) {
-        if (runInstallWizard) {
-            out.println("Skipping installation of form-element-path.jpi");
-        } else {
-            out.println("Installing form-element-path.jpi");
-            try {
-                FileUtils.copyFile(formElementPathPlugin, new File(pluginDir, "form-element-path.jpi"));
-            } catch (IOException e) {
-                String msg = String.format(
-                        "Failed to copy form-element-path file %s to plugin dir %s.", formElementPathPlugin, pluginDir
-                );
-                throw new RuntimeException(msg, e);
-            }
-        }
+        out.println("Skipping installation of form-element-path.jpi");
     }
 
     @Override
