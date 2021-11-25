@@ -67,6 +67,7 @@ public class WinstoneDockerController extends LocalController {
             CommandBuilder cmds = new CommandBuilder();
             cmds.add("java");
             cmds.add("-DJENKINS_HOME=/work");
+            cmds.add("-Djenkins.formelementpath.FormElementPathPageDecorator.enabled=true");
             cmds.add("-jar", "/war/" + war.getName());
             cmds.add("--ajp13Port=-1","--controlPort=8081","--httpPort=8080");
             return container.popen(cmds);

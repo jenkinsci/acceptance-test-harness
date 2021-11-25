@@ -64,6 +64,7 @@ public class WinstoneController extends LocalController {
         cb.addAll(JAVA_OPTS);
         cb.add(
                 "-Duser.language=en",
+                "-Djenkins.formelementpath.FormElementPathPageDecorator.enabled=true",
                 "-jar", war,
                 "--ajp13Port=-1",
                 "--httpPort=" + httpPort
