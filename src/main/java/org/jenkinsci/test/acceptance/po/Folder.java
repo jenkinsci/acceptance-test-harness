@@ -107,7 +107,7 @@ public class Folder extends TopLevelItem implements Container {
         int i = 0;
 
         for (final WebElement tab : viewTabs) {
-            if (tab.getText().equals(viewName)) {
+            if (tab.getText().equalsIgnoreCase(viewName)) {
                 tab.click();
 
                 if (i == 0) {

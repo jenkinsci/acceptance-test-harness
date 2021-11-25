@@ -99,6 +99,7 @@ public class WinstoneController extends LocalController {
         cb.add(
                 "-Duser.language=en",
                 "-Dwinstone.portFileName=" + portFile.getAbsolutePath(),
+                "-Djenkins.formelementpath.FormElementPathPageDecorator.enabled=true",
                 "-jar", war,
                 "--ajp13Port=-1",
                 "--httpPort=" + httpPort
