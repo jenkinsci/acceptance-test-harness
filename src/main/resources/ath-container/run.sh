@@ -45,7 +45,7 @@ if [ ! -f $war ]; then
     case "$war" in
         "latest")
             war=jenkins-latest.war
-            url=https://repo.jenkins-ci.org/snapshots/org/jenkins-ci/main/jenkins-war/2.323-SNAPSHOT/jenkins-war-2.323-20211125.141013-1.war
+            url=https://ci.jenkins.io/job/Core/job/jenkins/job/PR-5897/29/artifact/org/jenkins-ci/main/jenkins-war/2.323-rc31806.ba89f9adf136/jenkins-war-2.323-rc31806.ba89f9adf136.war
         ;;
         "latest-rc")
             war=jenkins-latest-rc.war
