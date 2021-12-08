@@ -141,7 +141,7 @@ public class ByFactory {
      *      Text, id, title.
      */
     public By checkbox(String locator) {
-        return xpath(fieldXPath("input[@type='checkbox']",locator));
+        return xpath(String.format(".//label[contains(normalize-space(.), '%1$s')]", locator));
     }
 
     /**
