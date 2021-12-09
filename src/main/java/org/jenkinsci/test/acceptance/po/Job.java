@@ -397,7 +397,7 @@ public class Job extends TopLevelItem {
     }
 
     public void disable() {
-        check("disable");
+        check("Disable this project");
     }
 
     public int getNextBuildNumber() {
