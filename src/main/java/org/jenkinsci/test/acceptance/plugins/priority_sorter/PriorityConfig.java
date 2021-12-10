@@ -66,7 +66,7 @@ public class PriorityConfig extends Action {
             control("").select("Jobs included in a View");
             control("jobGroupStrategy/viewName").select("All");
             control("jobGroupStrategy/jobFilter").check();
-            control("jobGroupStrategy/jobPattern").set(pattern);
+            control("jobGroupStrategy/jobFilter/jobPattern", "jobGroupStrategy/jobPattern").set(pattern);
         }
 
         public void byView(String name) {

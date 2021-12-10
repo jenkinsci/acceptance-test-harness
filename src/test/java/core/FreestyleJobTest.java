@@ -2,7 +2,6 @@ package core;
 
 import hudson.util.VersionNumber;
 import org.apache.commons.io.IOUtils;
-import org.hamcrest.CoreMatchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.Wait;
