@@ -268,11 +268,6 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
                 executeScript("arguments[0].click();", e);
             }
         }
-        // It seems like Selenium sometimes has issues when trying to click elements that are out of view.
-        // We use the following javascript as a workaround if the previous click failed.
-        if (e.isSelected() != state) {
-            executeScript("arguments[0].click();", e);
-        }
     }
 
     /** {@inheritDoc} */
