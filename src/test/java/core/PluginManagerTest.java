@@ -50,7 +50,6 @@ public class PluginManagerTest extends AbstractJUnitTest {
     public void uninstall_plugin() throws InterruptedException, ExecutionException {
         assumeTrue("This test requires a restartable Jenkins", jenkins.canRestart());
         jenkins.getPluginManager().visit("installed");
-        check(find(by.url("plugin/gerrit-trigger")), false);
         WebElement form = find(by.action("plugin/gerrit-trigger/uninstall"));
         form.submit();
         clickButton("Yes");
