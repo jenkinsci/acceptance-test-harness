@@ -138,7 +138,7 @@ public class ByFactory {
      * Finds checkbox.
      *
      * @param locator
-     *      Text, id, title.
+     *      Text
      */
     public By checkbox(String locator) {
         return xpath(String.format(".//label[contains(normalize-space(.), '%1$s')]", locator));
