@@ -93,7 +93,7 @@ public class PluginManager extends ContainerPageObject {
      */
     public void checkForUpdates() {
         mockUpdateCenter.ensureRunning(jenkins);
-        visit("advanced");
+        visit("index");
         final String current = getCurrentUrl();
         // The check now button is a form submit (POST) with a redirect to the same page only if the check is successful.
         // We use the button itself to detect when the page has changed, which happens after the refresh has been done
