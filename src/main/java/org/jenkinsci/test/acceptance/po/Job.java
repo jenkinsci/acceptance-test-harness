@@ -221,7 +221,9 @@ public class Job extends TopLevelItem {
     public <T extends Trigger> T addTrigger(Class<T> type) {
         ensureConfigPage();
         T trigger = newInstance(type, this);
-        trigger.enabled.check();
+        WebElement checkbox = trigger.enabled.resolve();
+        WebElement label = checkbox.findElement(by.xpath("../label"));
+        label.click();
         return trigger;
     }
 
@@ -369,7 +371,7 @@ public class Job extends TopLevelItem {
     public <T extends Parameter> T addParameter(Class<T> type) {
         ensureConfigPage();
 
-        control("/properties/hudson-model-ParametersDefinitionProperty/specified").check();
+        control(by.checkbox("This project is parameterized")).check();
 
         control(by.xpath("//button[text()='Add Parameter']")).selectDropdownMenu(type);
 
