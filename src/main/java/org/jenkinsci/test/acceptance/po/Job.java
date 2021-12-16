@@ -223,7 +223,7 @@ public class Job extends TopLevelItem {
         T trigger = newInstance(type, this);
         WebElement checkbox = trigger.enabled.resolve();
         WebElement label = checkbox.findElement(by.xpath("../label"));
-        label.click();
+        check(label);
         return trigger;
     }
 

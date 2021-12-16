@@ -268,7 +268,10 @@ public class Control extends CapybaraPortingLayerImpl {
                     ");"
             );
 
-            Select context = new Select(findElement(menuButton, by.xpath("ancestor-or-self::*[contains(@class,'setting-input dropdownList')]")));
+            Select context = new Select(findElement(menuButton, by.xpath(
+                    "ancestor-or-self::*[contains(@class,'setting-input dropdownList')] | " +
+                            "ancestor-or-self::*[contains(@class,'jenkins-select__input dropdownList')]"
+            )));
             context.selectByVisibleText(caption);
             WebElement e = context.getFirstSelectedOption();
             return e;
