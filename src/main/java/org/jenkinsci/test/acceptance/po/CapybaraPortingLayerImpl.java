@@ -263,7 +263,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
         // we click the label but need to check the input's status
         WebElement input = e;
         if (e.getTagName().equals("label")) {
-            input = e.findElement(By.xpath("../input"));
+            input = e.findElement(By.xpath("../input | ../../div/input"));
         }
 
         if (input.isSelected() != state) {

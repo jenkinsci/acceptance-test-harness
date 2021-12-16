@@ -109,7 +109,7 @@ public class MavenModuleSet extends Job {
 
         WebElement input = checkbox;
         if (checkbox.getTagName().equals("label")) {
-            input = checkbox.findElement(By.xpath("../input"));
+            input = checkbox.findElement(By.xpath("../input | ../../div/input"));
         }
 
         T bs = newInstance(type, this, requireNonNull(input.getAttribute("path")));
