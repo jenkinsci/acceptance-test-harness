@@ -33,6 +33,7 @@ import org.zeroturnaround.zip.ZipUtil;
 
 import com.google.inject.Injector;
 
+import static java.util.Objects.requireNonNull;
 import static org.hamcrest.CoreMatchers.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 import static org.junit.Assert.*;
@@ -84,8 +85,8 @@ public class Job extends TopLevelItem {
 
         try {
             // from radio label get input contained inside it
-            String path = radio.findElement(By.tagName("input")).getAttribute("path");
-            return newInstance(type, this, path);
+            String path = radio.findElement(By.xpath("input | ../input")).getAttribute("path");
+            return newInstance(type, this, requireNonNull(path));
         } catch (NoSuchElementException e) {
             return newInstance(type, this, radio.getAttribute("path"));
         }
