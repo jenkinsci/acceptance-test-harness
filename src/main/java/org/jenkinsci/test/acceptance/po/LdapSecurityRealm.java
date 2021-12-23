@@ -7,6 +7,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * SecurityRealm for ldap plugin.
  *
@@ -76,8 +78,8 @@ public class LdapSecurityRealm<T extends LdapGroupMembershipStrategy> extends Se
 
         try {
             // from radio label get input contained inside it
-            String path = radio.findElement(By.tagName("input")).getAttribute("path");
-            return newInstance(type, this.context, path);
+            String path = radio.findElement(By.xpath("input | ../input")).getAttribute("path");
+            return newInstance(type, this.context, requireNonNull(path));
         } catch (NoSuchElementException e) {
             return newInstance(type, this.context, radio.getAttribute("path"));
         }

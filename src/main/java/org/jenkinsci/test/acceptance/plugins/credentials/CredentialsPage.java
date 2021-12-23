@@ -11,7 +11,8 @@ import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 import org.openqa.selenium.WebDriver;
 
 public class CredentialsPage extends ConfigurablePageObject {
-    public final Control addButton = control(by.xpath("//select[contains(@class, 'setting-input dropdownList')]"));
+    public final Control addButton = control(by.xpath("//select[contains(@class, 'setting-input dropdownList')] | " +
+            "//select[contains(@class, 'jenkins-select__input dropdownList')]"));
     private URL configUrl;
     private URL deleteUrl;
 

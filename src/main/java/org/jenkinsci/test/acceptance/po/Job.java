@@ -33,6 +33,7 @@ import org.zeroturnaround.zip.ZipUtil;
 
 import com.google.inject.Injector;
 
+import static java.util.Objects.requireNonNull;
 import static org.hamcrest.CoreMatchers.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 import static org.junit.Assert.*;
@@ -84,8 +85,8 @@ public class Job extends TopLevelItem {
 
         try {
             // from radio label get input contained inside it
-            String path = radio.findElement(By.tagName("input")).getAttribute("path");
-            return newInstance(type, this, path);
+            String path = radio.findElement(By.xpath("input | ../input")).getAttribute("path");
+            return newInstance(type, this, requireNonNull(path));
         } catch (NoSuchElementException e) {
             return newInstance(type, this, radio.getAttribute("path"));
         }
@@ -221,7 +222,9 @@ public class Job extends TopLevelItem {
     public <T extends Trigger> T addTrigger(Class<T> type) {
         ensureConfigPage();
         T trigger = newInstance(type, this);
-        trigger.enabled.check();
+        WebElement checkbox = trigger.enabled.resolve();
+        WebElement label = checkbox.findElement(by.xpath("../label"));
+        check(label);
         return trigger;
     }
 
@@ -369,7 +372,7 @@ public class Job extends TopLevelItem {
     public <T extends Parameter> T addParameter(Class<T> type) {
         ensureConfigPage();
 
-        control("/properties/hudson-model-ParametersDefinitionProperty/specified").check();
+        control(by.checkbox("This project is parameterized")).check();
 
         control(by.xpath("//button[text()='Add Parameter']")).selectDropdownMenu(type);
 
