@@ -30,6 +30,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * Global security configuration UI.
  */
@@ -95,8 +97,8 @@ public class GlobalSecurityConfig extends ContainerPageObject {
 
         try {
             // from radio label get input contained inside it
-            String path = radio.findElement(By.tagName("input")).getAttribute("path");
-            return newInstance(type, this, path);
+            String path = radio.findElement(By.xpath("input | ../input")).getAttribute("path");
+            return newInstance(type, this, requireNonNull(path));
         } catch (NoSuchElementException e) {
             return newInstance(type, this, radio.getAttribute("path"));
         }
