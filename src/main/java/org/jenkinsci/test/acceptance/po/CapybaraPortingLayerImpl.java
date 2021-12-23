@@ -15,6 +15,7 @@ import org.jenkinsci.test.acceptance.utils.ElasticTime;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.ElementClickInterceptedException;
+import org.openqa.selenium.ElementNotInteractableException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -269,8 +270,9 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
         if (input.isSelected() != state) {
             try {
                 e.click();
-            } catch (ElementClickInterceptedException ex) {
+            } catch (ElementNotInteractableException ex) {
                 // tooltip can make an element not clickable.
+                // or if an input doesn't have a label (which we normally click) like in matrix-auth
                 executeScript("arguments[0].click();", e);
             }
         }
