@@ -16,12 +16,12 @@ import org.openqa.selenium.WebElement;
 @Describable("Node")
 public class NodeParameter extends Parameter {
 
-    public final Control runIfSuccess = control("triggerIfResult[success]");
-    public final Control runIfUnstable = control("triggerIfResult[unstable]");
-    public final Control runAllCases = control("triggerIfResult[allCases]");
+    public final Control runIfSuccess = control(by.checkbox("Run next build only if build succeeds"));
+    public final Control runIfUnstable = control(by.checkbox("Run next build only if build succeeds or is unstable"));
+    public final Control runAllCases = control(by.checkbox("Run next build regardless of build result"));
 
-    public final Control allowMultiple = control("triggerIfResult[allowMultiSelectionForConcurrentBuilds]");
-    public final Control disallowMultiple = control("triggerIfResult[multiSelectionDisallowed]");
+    public final Control allowMultiple = control(by.checkbox("Allow multi node selection for concurrent builds"));
+    public final Control disallowMultiple = control(by.checkbox("Disallow multi node selection when triggering build manually"));
 
     public final Control defaultNodes = control("defaultSlaves");
     public final Control allowedNodes = control("allowedSlaves");
