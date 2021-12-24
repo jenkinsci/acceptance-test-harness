@@ -1,5 +1,6 @@
 package org.jenkinsci.test.acceptance.plugins.batch_task;
 
+import org.jenkinsci.test.acceptance.po.CapybaraPortingLayerImpl;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.openqa.selenium.WebElement;
@@ -14,14 +15,15 @@ public class BatchTaskDeclaration extends PageAreaImpl {
     private final Job job;
 
     public static BatchTaskDeclaration add(final Job job, String name) {
-        String path = job.createPageArea(PREFIX + "/t", new Runnable() {
-            @Override public void run() {
-                WebElement checkbox = job.find(by.path(PREFIX));
-                if (!checkbox.isSelected()) {
-                    checkbox.click();
-                } else {
-                    job.clickButton("Add another task...");
-                }
+        String path = job.createPageArea(PREFIX + "/t", () -> {
+            WebElement checkbox = job.find(by.checkbox("Batch tasks"));
+
+            WebElement input = checkbox.findElement(by.xpath(CapybaraPortingLayerImpl.LABEL_TO_INPUT_XPATH));
+
+            if (!input.isSelected()) {
+                checkbox.click();
+            } else {
+                job.clickButton("Add another task...");
             }
         });
 
