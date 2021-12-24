@@ -32,14 +32,9 @@ public class GradleStep extends AbstractStep implements BuildStep {
     private final Control dir = control("rootBuildScriptDir");
     private final Control switches = control("switches");
     private final Control tasks = control("tasks");
-    private final Control useWrapper = control("useWrapper[true]");
     private final Control wrapperLocation = control("wrapperLocation");
-    private final Control makeWrapperExecutable = control("makeExecutable");
     private final Control projectProperties = control("projectProperties");
-    private final Control passAllAsProjectProperties = control("passAllAsProjectProperties");
     private final Control systemProperties = control("systemProperties");
-    private final Control passAllAsSystemProperties = control("passAllAsSystemProperties");
-    private final Control forceGradleHomeToUseWorkspace = control("useWorkspaceAsHome");
 
     public GradleStep(Job parent, String path) {
         super(parent, path);
@@ -49,6 +44,11 @@ public class GradleStep extends AbstractStep implements BuildStep {
         Control advancedButton = control("advanced-button");
         if(advancedButton.exists()) {
             advancedButton.click();
+
+            // Sticky footer obscures this, trying another click seems to work better
+            if (advancedButton.exists()) {
+                advancedButton.click();
+            }
         }
     }
 
@@ -83,7 +83,7 @@ public class GradleStep extends AbstractStep implements BuildStep {
 
     public void setUseWrapper(){
         ensureAdvancedOptionsOpen();
-        this.useWrapper.click();
+        control("").resolve().findElement(by.checkbox("Use Gradle Wrapper")).click();
     }
 
     public void setWrapperLocation(final String wrapperLocation){
@@ -93,7 +93,7 @@ public class GradleStep extends AbstractStep implements BuildStep {
 
     public void setMakeWrapperExecutable(){
         ensureAdvancedOptionsOpen();
-        this.makeWrapperExecutable.click();
+        control("").resolve().findElement(by.checkbox("Make gradlew executable")).click();
     }
 
     public void setProjectProperties(final String projectProperties){
@@ -103,7 +103,7 @@ public class GradleStep extends AbstractStep implements BuildStep {
 
     public void setPassAllAsProjectProperties(){
         ensureAdvancedOptionsOpen();
-        this.passAllAsProjectProperties.click();
+        control("").resolve().findElement(by.checkbox("Pass all job parameters as Project properties")).click();
     }
 
     public void setSystemProperties(final String systemProperties){
@@ -113,12 +113,12 @@ public class GradleStep extends AbstractStep implements BuildStep {
 
     public void setPassAllAsSystemProperties(){
         ensureAdvancedOptionsOpen();
-        this.passAllAsSystemProperties.click();
+        control("").resolve().findElement(by.checkbox("Pass all job parameters as System properties")).click();
     }
 
     public void setForceGradleHomeToUseWorkspace(){
         ensureAdvancedOptionsOpen();
-        this.forceGradleHomeToUseWorkspace.click();
+        control("").resolve().findElement(by.checkbox("Force GRADLE_USER_HOME to use workspace")).click();
     }
 
 }

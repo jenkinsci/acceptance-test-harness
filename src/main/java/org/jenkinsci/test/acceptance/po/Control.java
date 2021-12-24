@@ -284,8 +284,6 @@ public class Control extends CapybaraPortingLayerImpl {
      */
     public void select(String option) {
         WebElement e = resolve();
-        // Make sure the select is scrolled into view before interacting with its options that has got special handling by scroller.
-        new Scroller().scrollIntoView(e, driver);
         findElement(e, by.option(option)).click();
     }
 

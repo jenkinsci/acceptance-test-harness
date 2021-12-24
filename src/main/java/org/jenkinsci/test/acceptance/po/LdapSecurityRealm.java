@@ -77,8 +77,7 @@ public class LdapSecurityRealm<T extends LdapGroupMembershipStrategy> extends Se
         radio.click();
 
         try {
-            // from radio label get input contained inside it
-            String path = radio.findElement(By.xpath("input | ../input")).getAttribute("path");
+            String path = radio.findElement(By.xpath(CapybaraPortingLayerImpl.LABEL_TO_INPUT_XPATH)).getAttribute("path");
             return newInstance(type, this.context, requireNonNull(path));
         } catch (NoSuchElementException e) {
             return newInstance(type, this.context, radio.getAttribute("path"));
