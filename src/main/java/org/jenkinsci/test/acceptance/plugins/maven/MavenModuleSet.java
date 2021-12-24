@@ -28,6 +28,7 @@ import java.util.function.Consumer;
 
 import org.jenkinsci.test.acceptance.po.BatchCommandBuildStep;
 import org.jenkinsci.test.acceptance.po.BuildStep;
+import org.jenkinsci.test.acceptance.po.CapybaraPortingLayerImpl;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Jenkins;
@@ -109,7 +110,7 @@ public class MavenModuleSet extends Job {
 
         WebElement input = checkbox;
         if (checkbox.getTagName().equals("label")) {
-            input = checkbox.findElement(By.xpath("../input | ../../div/input"));
+            input = checkbox.findElement(By.xpath(CapybaraPortingLayerImpl.LABEL_TO_INPUT_XPATH));
         }
 
         T bs = newInstance(type, this, requireNonNull(input.getAttribute("path")));

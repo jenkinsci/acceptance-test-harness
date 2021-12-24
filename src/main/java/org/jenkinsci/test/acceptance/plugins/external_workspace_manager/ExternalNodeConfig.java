@@ -16,7 +16,7 @@ public class ExternalNodeConfig extends PageAreaImpl {
 
     public void setConfig(String diskPoolId, String diskOneId, String diskTwoId, String fakeMountingPoint) {
         // set disk pool
-        control("").click();
+        control(by.checkbox("External Workspace")).click();
         control("repeatable-add").click();
         control("nodeDiskPools/diskPoolRefId").set(diskPoolId);
 

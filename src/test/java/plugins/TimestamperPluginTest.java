@@ -22,7 +22,7 @@ public class TimestamperPluginTest extends AbstractJUnitTest {
     public void setUp() {
         job = jenkins.jobs.create();
         job.configure();
-        job.find(by.path("/hudson-plugins-timestamper-TimestamperBuildWrapper")).click();
+        job.find(by.checkbox("Add timestamps to the Console Output")).click();
         job.save();
     }
 

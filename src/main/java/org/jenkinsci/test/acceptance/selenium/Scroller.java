@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.test.acceptance.junit.Wait;
+import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
@@ -101,14 +102,14 @@ public class Scroller extends AbstractWebDriverEventListener {
             return;
         }
 
-        // Do not scroll select's options into view since they are considered to be on the position where they appear when
-        // select is clicked, but aligning some option with the top of the window often causes the select itself gets
-        // scrolled above the window causing the very issues we are trying to avoid here...
-        if (Objects.equals(e.getTagName(), "option")) return;
+        WebElement element = e;
+        if (Objects.equals(element.getTagName(), "option")) {
+            element = e.findElement(By.xpath("..")); // scroll select into view not option
+        }
 
-        final int eYCoord = e.getLocation().getY();
-        final int eXCoord = e.getLocation().getX();
-        final String id = e.getAttribute("id");
+        final int eYCoord = element.getLocation().getY();
+        final int eXCoord = element.getLocation().getX();
+        final String id = element.getAttribute("id");
         final JavascriptExecutor executor = (JavascriptExecutor) driver;
         // Wait until web element is successfully scrolled.
         try {

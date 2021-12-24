@@ -36,7 +36,7 @@ public class OnlineStatusNotification extends PageAreaImpl {
 
     public OnlineStatusNotification(Slave context) {
         super(context, "/nodeProperties/org-jenkinsci-plugins-mailwatcher-WatcherNodeProperty");
-        control("").click();
+        control(by.checkbox("Notify when Node online status changes")).click();
     }
 
     public void onOnline(String addresses) {

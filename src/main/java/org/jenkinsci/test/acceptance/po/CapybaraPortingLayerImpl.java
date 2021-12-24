@@ -36,6 +36,7 @@ import static java.util.Arrays.*;
  */
 @SuppressWarnings("CdiManagedBeanInconsistencyInspection")
 public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
+    public static final String LABEL_TO_INPUT_XPATH = "input | ../input | ../../div/input | ../../input";
     /**
      * {@link org.openqa.selenium.WebDriver} that subtypes use to talk to the server.
      */
@@ -264,7 +265,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
         // we click the label but need to check the input's status
         WebElement input = e;
         if (e.getTagName().equals("label")) {
-            input = e.findElement(By.xpath("input | ../input | ../../div/input | ../../input"));
+            input = e.findElement(By.xpath(LABEL_TO_INPUT_XPATH));
         }
 
         if (input.isSelected() != state) {
