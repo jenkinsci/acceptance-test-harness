@@ -2,6 +2,7 @@ package org.jenkinsci.test.acceptance.plugins.job_dsl;
 
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.test.acceptance.po.*;
+import org.jenkinsci.test.acceptance.selenium.Scroller;
 import org.openqa.selenium.By;
 
 /**
@@ -27,7 +28,9 @@ public class JobDslBuildStep extends AbstractStep implements BuildStep {
     private final Control removedViewAction = control("removedViewAction");
     private final Control removedConfigFilesAction = control("removedConfigFilesAction");
 
-    private final Control advanced = control(by.path("/builder/advanced-button"));
+    private final Control advanced = control(by.xpath(
+            "//div[div[@class='advancedBody']/div/div/div[@class='setting-main']/select[@name='_.lookupStrategy']]/div[@class='advancedLink']//button | " +
+                    "//div[@class='jenkins-select']/select[@name='_.lookupStrategy']/ancestor::div[@class='advancedBody']/preceding-sibling::div//button"));
 
     private final Control lookupStrategy = control("lookupStrategy");
     private final Control additionalClasspath = control("additionalClasspath");
