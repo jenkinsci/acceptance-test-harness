@@ -46,7 +46,7 @@ if [ ! -f $war ]; then
         "latest")
             war=jenkins-latest.war
             # TODO https://github.com/jenkinsci/jenkins/pull/5923
-            url=https://repo.jenkins-ci.org/snapshots/org/jenkins-ci/main/jenkins-war/2.327-SNAPSHOT/jenkins-war-2.327-20211223.192222-1.war
+            url=https://ci.jenkins.io/job/Core/job/jenkins/job/PR-5923/73/artifact/org/jenkins-ci/main/jenkins-war/2.327-rc32059.2906b148d4b9/jenkins-war-2.327-rc32059.2906b148d4b9.war
         ;;
         "latest-rc")
             war=jenkins-latest-rc.war
