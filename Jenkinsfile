@@ -26,7 +26,7 @@ if (needSplittingFromWorkspace) {
 }
 for (int i = 0; i < splits.size(); i++) {
     int index = i
-    for (int j in [8, 11]) {
+    for (int j in [11]) {
         int javaVersion = j
         def name = "java-${javaVersion}-split${index}"
         branches[name] = {
