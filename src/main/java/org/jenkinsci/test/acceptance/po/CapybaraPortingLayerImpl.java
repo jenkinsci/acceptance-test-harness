@@ -36,7 +36,7 @@ import static java.util.Arrays.*;
  */
 @SuppressWarnings("CdiManagedBeanInconsistencyInspection")
 public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
-    public static final String LABEL_TO_INPUT_XPATH = "input | ../input | ../../div/input | ../../input";
+    public static final String LABEL_TO_INPUT_XPATH = "input | ../input | ../../div/input | ../../input | preceding-sibling::div/input";
     /**
      * {@link org.openqa.selenium.WebDriver} that subtypes use to talk to the server.
      */
