@@ -20,7 +20,10 @@ import org.junit.experimental.categories.Category;
 
 import com.google.inject.Inject;
 
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 
 /**
  * @author Matthias Karl
